@@ -1,0 +1,25 @@
+/* Table Styling */
+.table th, .table td {
+    vertical-align: middle;
+}
+
+.table thead th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f1f3f5;
+}
+
+/* Card Header */
+.card-header {
+    background-color: #ffffff;
+    border-bottom: 1px solid #e9ecef;
+}
+
+/* Badge Styling */
+.badge {
+    font-size: 0.875rem;
+    padding: 0.5em 0.75em;
+}

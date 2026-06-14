@@ -1,0 +1,318 @@
+<?php
+
+namespace App\Http\Controllers\User;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use App\Models\RentalBooking;
+use App\Models\GasOrder;
+use App\Models\ManualReport;
+use App\Models\Barang;
+use App\Models\Gas;
+use App\Models\BumdesMember;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+
+class BerandaController extends Controller
+{
+    public function index(Request $request)
+    {
+        // $year = date('Y'); // Removed, moved to logic below
+        $search = $request->input('search');
+        $searchResults = [];
+
+        // Handle Search
+        if ($search) {
+            // Search Rental Items
+            $rentalResults = \App\Models\Barang::where('nama_barang', 'LIKE', "%{$search}%")
+                ->orWhere('kategori', 'LIKE', "%{$search}%")
+                ->get()
+                ->map(function ($item) {
+                    return (object) [
+                        'id' => $item->id,
+                        'name' => $item->nama_barang,
+                        'image' => $item->foto,
+                        'price' => $item->harga_sewa,
+                        'price_formatted' => 'Rp ' . number_format($item->harga_sewa, 0, ',', '.'),
+                        'stock' => $item->stok,
+                        'type' => 'rental',
+                        'category' => 'Unit Penyewaan Alat', // Or actual category: $item->kategori
+                        'real_category' => $item->kategori,
+                        'unit' => $item->satuan ?? 'unit',
+                        'link' => route('rental.equipment.show', $item->id)
+                    ];
+                });
+
+            // Search Gas Items
+            $gasResults = \App\Models\Gas::where('jenis_gas', 'LIKE', "%{$search}%")
+                ->get()
+                ->map(function ($item) {
+                    return (object) [
+                        'id' => $item->id,
+                        'name' => $item->jenis_gas,
+                        'image' => $item->foto,
+                        'price' => $item->harga_satuan,
+                        'price_formatted' => 'Rp ' . number_format($item->harga_satuan, 0, ',', '.'),
+                        'stock' => $item->stok,
+                        'type' => 'gas',
+                        'category' => 'Unit Penjualan Gas',
+                        'real_category' => 'Gas',
+                        'unit' => 'tabung',
+                        'link' => route('gas.sales.show', $item->id)
+                    ];
+                });
+
+            // Search BUMDes Members (Struktur Organisasi)
+            $bumdesResults = \App\Models\BumdesMember::where('name', 'LIKE', "%{$search}%")
+                ->orWhere('position', 'LIKE', "%{$search}%")
+                ->get()
+                ->map(function ($item) {
+                    // Fix: Don't add 'storage/' here because the view adds it automatically for non-static paths
+                    $photoUrl = $item->photo ? $item->photo : 'Admin/img/avatars/default.png';
+                    
+                    return (object) [
+                        'id' => $item->id,
+                        'name' => $item->name,
+                        'image' => $photoUrl, // Already relative path or URL
+                        'price' => 0,
+                        'price_formatted' => $item->position, // Display Position as "Price"
+                        'stock' => 0,
+                        'type' => 'profile',
+                        'category' => 'Profil BUMDes',
+                        'real_category' => 'Personil',
+                        'unit' => '',
+                        'link' => route('bumdes.detail') // Link to BUMDes profile page
+                    ];
+                });
+
+            // Search Static Developers (Profil iSewa)
+            $developers = [
+                [
+                    'name' => 'M.Wahid Riono',
+                    'image' => 'User/img/avatars/wahid1.jpg',
+                    'position' => 'Pengembang iSewa',
+                    'link' => route('isewa.profile')
+                ],
+                [
+                    'name' => 'Mushlihul Arif',
+                    'image' => 'User/img/avatars/ayep123.jpg',
+                    'position' => 'Pengembang iSewa',
+                    'link' => route('isewa.profile')
+                ],
+                [
+                    'name' => 'Safika',
+                    'image' => 'User/img/avatars/wanita.png',
+                    'position' => 'Pengembang iSewa',
+                    'link' => route('isewa.profile')
+                ]
+            ];
+
+            $developerResults = collect($developers)->filter(function ($dev) use ($search) {
+                return stripos($dev['name'], $search) !== false || stripos($dev['position'], $search) !== false;
+            })->map(function ($dev) {
+                return (object) [
+                    'id' => 'dev_' . Str::slug($dev['name']),
+                    'name' => $dev['name'],
+                    'image' => $dev['image'],
+                    'price' => 0,
+                    'price_formatted' => $dev['position'],
+                    'stock' => 0,
+                    'type' => 'profile',
+                    'category' => 'Pengembang',
+                    'real_category' => 'Developer',
+                    'unit' => '',
+                    'link' => $dev['link']
+                ];
+            });
+
+            $searchResults = $rentalResults->concat($gasResults)
+                            ->concat($bumdesResults)
+                            ->concat($developerResults);
+        }
+        
+        // Dapatkan tahun yang dipilih (default ke tahun sekarang)
+        $yearRequest = $request->input('year', now()->year);
+        $year = (int)$yearRequest; // Strict integer cast
+
+        // Ambil daftar tahun yang tersedia dari database (Strict Integer)
+        $rentalYears = RentalBooking::withTrashed()
+            ->selectRaw('YEAR(created_at) as year')
+            ->distinct()
+            ->pluck('year')
+            ->map(fn($y) => (int)$y)
+            ->toArray();
+            
+        $gasYears = GasOrder::withTrashed()
+            ->selectRaw('YEAR(created_at) as year')
+            ->distinct()
+            ->pluck('year')
+            ->map(fn($y) => (int)$y)
+            ->toArray();
+        
+        // Gabungkan dengan tahun sekarang secara eksplisit (Hard Merge)
+        $allYears = array_unique(array_merge($rentalYears, $gasYears, [(int)now()->year]));
+        $availableYears = array_values($allYears);
+        rsort($availableYears);
+
+        // Get Kinerja BUMDes data (monthly revenue)
+        $kinerjaData = $this->getKinerjaData($year);
+        
+        // Get Unit Populer data (rental vs gas comparison)
+        $unitPopulerData = $this->getUnitPopulerData($year);
+        
+        // Get Popular Products (Filtered by Year)
+        $popularProducts = $this->getPopularProducts($year);
+        
+        return view('beranda.index', compact(
+            'kinerjaData',
+            'unitPopulerData',
+            'year',
+            'availableYears', // Pass available years
+            'popularProducts',
+            'searchResults',
+            'search'
+        ));
+    }
+
+    /**
+     * Get Popular Products (Top 4 most rented/sold items)
+     */
+    private function getPopularProducts($year = null)
+    {
+        $year = $year ?? (int)date('Y');
+
+        // 1. Get Rental Scores
+        $rentalPopularity = RentalBooking::withTrashed()
+            ->select('barang_id', DB::raw('SUM(quantity) as total_sold'))
+            ->whereYear('created_at', $year) // Filter by Year
+            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
+            ->whereNotNull('barang_id')
+            ->groupBy('barang_id')
+            ->with('barang')
+            ->get();
+
+        // 2. Map Rental to common format
+        $products = $rentalPopularity->map(function ($item) {
+            if (!$item->barang) return null;
+            return (object) [
+                'id' => $item->barang->id,
+                'name' => $item->barang->nama_barang,
+                'image' => $item->barang->foto,
+                'price' => $item->barang->harga_sewa,
+                'price_formatted' => 'Rp ' . number_format($item->barang->harga_sewa, 0, ',', '.'),
+                'stock' => $item->barang->stok,
+                'sold' => $item->total_sold,
+                'type' => 'rental',
+                'category' => 'Unit Penyewaan Alat',
+                'unit' => $item->barang->satuan ?? 'unit',
+                'link' => route('rental.equipment.show', $item->barang->id)
+            ];
+        })->filter();
+
+        // 3. Get Gas Scores
+        $gasPopularity = GasOrder::withTrashed()
+            ->select('gas_id', DB::raw('SUM(quantity) as total_sold'))
+            ->whereYear('created_at', $year) // Filter by Year
+            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
+            ->whereNotNull('gas_id')
+            ->groupBy('gas_id')
+            ->with('gas')
+            ->get();
+
+        // 4. Map Gas to common format
+        $gasProducts = $gasPopularity->map(function ($item) {
+            if (!$item->gas) return null;
+            return (object) [
+                'id' => $item->gas->id,
+                'name' => $item->gas->jenis_gas,
+                'image' => $item->gas->foto,
+                'price' => $item->gas->harga_satuan,
+                'price_formatted' => 'Rp ' . number_format($item->gas->harga_satuan, 0, ',', '.'),
+                'stock' => $item->gas->stok,
+                'sold' => $item->total_sold,
+                'type' => 'gas',
+                'category' => 'Unit Penjualan Gas',
+                'unit' => 'tabung',
+                'link' => route('gas.sales.show', $item->gas->id)
+            ];
+        })->filter();
+
+        // 5. Merge, Sort, Take 2 (Only Hot)
+        return $products->concat($gasProducts)->sortByDesc('sold')->take(2);
+    }
+    
+    /**
+     * Get Kinerja BUMDes data - Monthly revenue from both rental and gas + Manual Reports
+     */
+    private function getKinerjaData($year)
+    {
+        $months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+        $monthlyData = [];
+        
+        for ($month = 1; $month <= 12; $month++) {
+            // Get rental revenue for this month (excluding cancelled)
+            $rentalRevenue = RentalBooking::withTrashed()
+                ->whereYear('created_at', $year)
+                ->whereMonth('created_at', $month)
+                ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
+                ->sum('total_amount');
+            
+            // Get gas revenue for this month (excluding cancelled)
+            $gasRevenue = GasOrder::withTrashed()
+                ->whereYear('created_at', $year)
+                ->whereMonth('created_at', $month)
+                ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
+                ->sum(DB::raw('price * quantity'));
+
+            // Get Manual Report revenue for this month
+            $manualRevenue = ManualReport::whereYear('transaction_date', $year)
+                ->whereMonth('transaction_date', $month)
+                ->sum(DB::raw('amount * quantity'));
+            
+            // Total revenue in millions
+            $totalRevenue = ($rentalRevenue + $gasRevenue + $manualRevenue) / 1000000;
+            
+            $monthlyData[] = round($totalRevenue, 1);
+        }
+        
+        return [
+            'categories' => $months,
+            'data' => $monthlyData
+        ];
+    }
+    
+    /**
+     * Get Unit Populer data - Comparison between rental and gas sales
+     */
+    private function getUnitPopulerData($year)
+    {
+        $months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+        $rentalData = [];
+        $gasData = [];
+        
+        for ($month = 1; $month <= 12; $month++) {
+            // Count rental orders
+            $rentalCount = RentalBooking::withTrashed()
+                ->whereYear('created_at', $year)
+                ->whereMonth('created_at', $month)
+                ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
+                ->count();
+            
+            // Count gas orders
+            $gasCount = GasOrder::withTrashed()
+                ->whereYear('created_at', $year)
+                ->whereMonth('created_at', $month)
+                ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
+                ->count();
+            
+            $rentalData[] = $rentalCount;
+            $gasData[] = $gasCount;
+        }
+        
+        return [
+            'categories' => $months,
+            'rental' => $rentalData,
+            'gas' => $gasData
+        ];
+    }
+}

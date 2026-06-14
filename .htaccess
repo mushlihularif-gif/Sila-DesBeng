@@ -1,0 +1,34 @@
+# ==========================================
+# iSewaProject - Root .htaccess Protection
+# Blokir akses langsung ke file sensitif
+# ==========================================
+
+# Blokir akses ke .env (asli maupun backup)
+<FilesMatch "^\.env">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Blokir akses ke file konfigurasi dan sensitif
+<FilesMatch "\.(env|log|sql|sqlite|bak|conf|ini|sh|bash|key|pem)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Blokir akses ke folder tersembunyi (.git, .env, dll)
+<DirectoryMatch "^\.|\/\.">
+    Order allow,deny
+    Deny from all
+</DirectoryMatch>
+
+# Blokir akses ke folder security/
+<DirectoryMatch "security">
+    Order allow,deny
+    Deny from all
+</DirectoryMatch>
+
+# Redirect semua traffic ke folder public/
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>

@@ -1,0 +1,157 @@
+@extends('layouts.user')
+
+@section('page')
+<main class="flex-grow relative w-full">
+    <section class="relative z-10 min-h-screen pt-32 pb-16">
+        <!-- Elemen Dekoratif Latar Belakang -->
+        <div class="absolute inset-0 pointer-events-none overflow-hidden">
+            <!-- Top Left Blue Wave -->
+            <svg class="absolute top-0 left-0 w-[500px] h-[400px] opacity-30" style="transform: translate(-20%, -10%);">
+                <defs>
+                    <linearGradient id="blueWave1" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#60a5fa;stop-opacity:0.6" />
+                        <stop offset="100%" style="stop-color:#93c5fd;stop-opacity:0.3" />
+                    </linearGradient>
+                </defs>
+                <path d="M0,100 Q150,50 300,100 T600,100 L600,0 L0,0 Z" fill="url(#blueWave1)" />
+            </svg>
+
+            <!-- Top Right Geometric Shape -->
+            <div class="absolute top-20 right-0" style="transform: translateX(30%) rotate(15deg);">
+                <svg width="300" height="300" viewBox="0 0 300 300" class="opacity-20">
+                    <rect x="50" y="50" width="80" height="80" fill="#60a5fa" transform="rotate(45 90 90)" opacity="0.4"/>
+                    <rect x="150" y="80" width="60" height="60" fill="#93c5fd" transform="rotate(30 180 110)" opacity="0.3"/>
+                </svg>
+            </div>
+
+            <!-- Bottom Left Yellow Wave -->
+            <svg class="absolute bottom-0 left-0 w-[600px] h-[400px] opacity-40" style="transform: translate(-15%, 20%);">
+                <defs>
+                    <linearGradient id="yellowWave" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#fbbf24;stop-opacity:0.5" />
+                        <stop offset="100%" style="stop-color:#fde68a;stop-opacity:0.2" />
+                    </linearGradient>
+                </defs>
+                <path d="M0,200 Q200,150 400,200 T800,200 L800,400 L0,400 Z" fill="url(#yellowWave)" />
+            </svg>
+
+            <!-- Bottom Right Blue Wave -->
+            <svg class="absolute bottom-0 right-0 w-[500px] h-[350px] opacity-35" style="transform: translate(20%, 15%);">
+                <defs>
+                    <linearGradient id="blueWave2" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:0.4" />
+                        <stop offset="100%" style="stop-color:#60a5fa;stop-opacity:0.2" />
+                    </linearGradient>
+                </defs>
+                <path d="M0,150 Q150,100 300,150 T600,150 L600,400 L0,400 Z" fill="url(#blueWave2)" />
+            </svg>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-6 relative z-10">
+            <!-- Header Section -->
+            <div class="text-center mb-20 mt-12">
+                <h1 class="text-3xl md:text-4xl font-bold mb-4">
+                    <span class="text-gray-800">Unit </span>
+                    <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Penjualan Gas</span>
+                </h1>
+            </div>
+
+            <!-- Grid Kartu Produk -->
+            @if($items->count() > 0)
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16 max-w-6xl mx-auto">
+                    @foreach($items as $item)
+                    <a href="{{ route('gas.sales.show', $item->id) }}" class="block">
+                        <div class="product-card bg-white rounded-[2rem] p-6 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 mx-auto w-full max-w-[380px]">
+                            <!-- Gambar Produk -->
+                            <div class="product-image-wrapper mb-6 relative aspect-[4/3] overflow-hidden rounded-2xl">
+                                <img src="{{ asset('storage/' . $item->foto) }}" 
+                                     alt="{{ $item->jenis_gas }}"
+                                     loading="lazy"
+                                     class="product-image w-full h-full object-cover">
+                            </div>
+
+                            <!-- Nama Produk Saja -->
+                            <div class="product-info text-center">
+                                <h3 class="product-name text-sm font-bold text-gray-800 mb-2">
+                                    {{ $item->jenis_gas }}
+                                </h3>
+                            </div>
+                        </div>
+                    </a>
+                    @endforeach
+                </div>
+            @else
+                <!-- Kondisi Kosong -->
+                <div class="text-center py-20">
+                    <svg class="w-24 h-24 mx-auto mb-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                    </svg>
+                    <h3 class="text-xl font-semibold text-gray-700 mb-2">Belum Ada Produk Gas Tersedia</h3>
+                    <p class="text-gray-500">Produk gas akan segera ditambahkan.</p>
+                </div>
+            @endif
+        </div>
+    </section>
+</main>
+@endsection
+
+@push('styles')
+<style>
+    * {
+        font-family: 'Inter', sans-serif;
+    }
+
+    /* Card Hover Effects */
+    .product-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .product-card:hover {
+        transform: translateY(-8px);
+    }
+
+    /* Image Hover Effect */
+    .product-image {
+        transition: transform 0.3s ease;
+    }
+
+    .product-card:hover .product-image {
+        transform: scale(1.05);
+    }
+
+    /* Product Name Styling */
+    .product-name {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #1f2937;
+        line-height: 1.4;
+    }
+
+    /* Gradient Text Animation */
+    @keyframes gradientShift {
+        0% {
+            background-position: 0% 50%;
+        }
+        50% {
+            background-position: 100% 50%;
+        }
+        100% {
+            background-position: 0% 50%;
+        }
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+        .product-card {
+            max-width: 100%;
+        }
+    }
+</style>
+@endpush
+
+@push('scripts')
+<script>
+    // Gulir halus ke atas saat halaman dimuat
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+</script>
+@endpush

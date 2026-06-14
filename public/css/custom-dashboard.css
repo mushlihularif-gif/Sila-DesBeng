@@ -1,0 +1,65 @@
+/* Custom Styles for iSewa Dashboard */
+
+.credit-card-widget {
+    background: linear-gradient(135deg, #6e45e2, #88d3ce);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.credit-card {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 15px;
+    backdrop-filter: blur(10px);
+}
+
+.credit-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.credit-card-logo svg {
+    width: 40px;
+    height: 40px;
+    fill: white;
+}
+
+.credit-card-body {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.credit-card-body h5 {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.credit-card-body small {
+    font-size: 0.8rem;
+}
+
+/* Styling for Product Cards */
+.product-card {
+    transition: transform 0.2s ease;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+}
+
+.product-image {
+    width: 50px;
+    height: 50px;
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+    .col-lg-4 {
+        width: 100%;
+    }
+}
