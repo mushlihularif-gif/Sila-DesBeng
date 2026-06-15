@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>iSewa</title>
+    <title>SDesBeng</title>
 
     {{-- GOOGLE FONTS + FAVICON --}}
     <link rel="dns-prefetch" href="https://fonts.googleapis.com">
@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="icon" type="image/x-icon" href="{{ asset('User/img/favicon/iSewa.ico') }}" />
+    <link rel="icon" type="image/png" href="{{ asset('Admin/img/illustrations/logodomain.png') }}?v={{ time() }}" />
 
     {{-- Vite Tailwind--}}
     @vite('resources/css/app.css')
