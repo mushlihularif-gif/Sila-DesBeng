@@ -3,137 +3,226 @@
 {{-- ================================================ --}}
 @push('styles')
     <style>
-        /* Mobile & Tablet: Fixed (Follows scroll) */
-        .navbar-responsive-pos {
-            position: fixed;
+        /* ============ SILA DESBENG NAVBAR ============ */
+        .sd-navbar {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+            background: rgba(255, 255, 255, 0.1) !important;
+            backdrop-filter: blur(8px) !important;
+            -webkit-backdrop-filter: blur(8px) !important;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05) !important;
+            padding: 0 !important; transition: transform 0.3s ease-in-out;
         }
-
-        /* Desktop (>= 1024px): Absolute (Does not follow) */
-        @media (min-width: 1024px) {
-            .navbar-responsive-pos {
-                position: absolute !important;
-            }
+        .sd-navbar.hidden-nav {
+            transform: translateY(-100%);
+        }
+        .sd-navbar-toggle {
+            position: absolute; bottom: -28px; right: 32px;
+            width: 40px; height: 28px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            color: #38bdf8; z-index: 51;
+            transition: all 0.3s;
+        }
+        .sd-navbar-toggle:hover { color: #0284c7; }
+        .sd-navbar-toggle svg { width: 32px; height: 32px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); }
+        
+        .sd-nav-container {
+            max-width: 1536px; margin: 0 auto; padding: 0 20px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .sd-nav-logo img { height: 80px; width: auto; object-fit: contain; padding: 8px 0; }
+        @media (min-width: 640px) { .sd-nav-logo img { height: 96px; } }
+        
+        .sd-nav-links { display: flex; align-items: center; gap: 32px; margin-left: auto; margin-right: 32px; }
+        .sd-nav-link {
+            font-size: 15px; font-weight: 500; color: #111827;
+            text-decoration: none; transition: color 0.2s;
+        }
+        .sd-nav-link:hover { color: #2563eb; }
+        .sd-nav-link.active { border-bottom: 2px solid #3b82f6; padding-bottom: 2px; color: #2563eb; }
+        
+        .sd-nav-auth { display: flex; align-items: center; gap: 12px; }
+        
+        /* Auth Buttons */
+        .sd-btn-login-wrapper { position: relative; display: inline-block; }
+        .sd-btn-login-wrapper::before {
+            content: ""; position: absolute; inset: -2px;
+            background: linear-gradient(to right, #60a5fa, #f59e0b);
+            border-radius: 9999px; opacity: 0.8; filter: blur(2px);
+            transition: all 0.3s; z-index: -1;
+        }
+        .sd-btn-login-wrapper:hover::before { opacity: 1; filter: blur(3px); }
+        .sd-btn-login {
+            position: relative; display: inline-block; padding: 10px 40px;
+            color: #2563eb; border-radius: 9999px; font-size: 15px; font-weight: 500;
+            background: #ffffff; text-decoration: none; transition: all 0.3s; border: none; outline: none; cursor: pointer;
+        }
+        .sd-btn-login:hover { box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        .sd-btn-register {
+            display: inline-block; padding: 12px 40px; color: #ffffff;
+            border-radius: 9999px; font-size: 15px; font-weight: 500;
+            text-decoration: none; transition: all 0.3s; border: none; outline: none; cursor: pointer;
+            background: linear-gradient(to right, #7dc8f0 0%, #45aaf2 100%);
+        }
+        .sd-btn-register:hover { box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        
+        .sd-nav-mobile { display: none; }
+        @media (max-width: 1023px) {
+            .sd-nav-links, .sd-nav-auth { display: none !important; }
+            .sd-nav-mobile { display: block !important; }
         }
     </style>
 @endpush
 
-<nav class="navbar-responsive-pos top-0 left-0 w-full z-50 bg-white/10 backdrop-blur-sm shadow-sm">
-    <div class="max-w-screen-2xl mx-auto px-4 sm:px-5 py-0">
-        <div class="flex items-center justify-between">
-            <div class="flex-shrink-0">
-                <a href="{{ route('beranda') }}">
-                    <img src="{{ asset('User/img/logo/iSewa.png') }}" alt="iSewa Logo" class="h-16 sm:h-20 md:h-24 lg:h-30 w-auto object-contain">
+<!-- ==================== SILA DESBENG NAVBAR ==================== -->
+<nav class="sd-navbar" id="master-navbar">
+    <div class="sd-nav-container">
+        <!-- Logo -->
+        <a href="{{ route('beranda') }}" class="sd-nav-logo">
+            <img src="{{ asset('User/img/logo/iSewa.png') }}" alt="iSewa Logo">
+        </a>
+
+        <!-- Menu Desktop -->
+        <div class="sd-nav-links">
+            <a href="{{ route('beranda') }}" class="sd-nav-link {{ request()->routeIs('beranda') ? 'active' : '' }}">Beranda</a>
+            <a href="{{ route('pelayanan') }}" class="sd-nav-link {{ request()->routeIs('pelayanan') ? 'active' : '' }}">Pelayanan</a>
+            
+            <!-- BUMDes Dropdown -->
+            <div class="relative group">
+                <a href="{{ route('bumdes.profil') }}" class="sd-nav-link {{ request()->routeIs('bumdes.*') ? 'active' : '' }}">
+                    BUMDes
                 </a>
+                <div class="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-52 bg-white rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.08)] border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 overflow-hidden">
+                    <div class="py-1">
+                        <a href="{{ route('bumdes.profil') }}" class="block px-5 py-3 text-gray-700 hover:bg-blue-50 hover:border-l-[3px] hover:border-l-blue-500 text-[14px] font-medium transition-all duration-150">
+                            Profil dan Layanan
+                        </a>
+                        <div class="h-px bg-gray-100 mx-3"></div>
+                        <a href="{{ route('bumdes.laporan') }}" class="block px-5 py-3 text-gray-700 hover:bg-blue-50 hover:border-l-[3px] hover:border-l-blue-500 text-[14px] font-medium transition-all duration-150">
+                            Laporan
+                        </a>
+                    </div>
+                </div>
             </div>
 
-            {{-- Desktop Navigation --}}
-            <div class="hidden md:flex items-center space-x-8 ml-auto">
-                <a href="{{ route('beranda') }}"
-                    class="text-gray-900 hover:text-blue-600 text-[15px] font-medium transition-colors duration-200 {{ request()->routeIs('beranda') ? 'border-b-2 border-blue-500 pb-0.5' : '' }}">
-                    Beranda
-                </a>
-                <a href="{{ route('pelayanan') }}"
-                    class="text-gray-900 hover:text-blue-600 text-[15px] font-medium transition-colors duration-200 {{ request()->routeIs('pelayanan') ? 'border-b-2 border-blue-500 pb-0.5' : '' }}">
-                    Pelayanan
-                </a>
+            <a href="{{ route('isewa.profile') }}" class="sd-nav-link {{ request()->routeIs('isewa.profile') ? 'active' : '' }}">Profil SDesBeng</a>
+        </div>
 
-                <!-- BUMDes Dropdown -->
+        <!-- Auth Buttons / User Profile -->
+        <div class="sd-nav-auth">
+            @auth
                 <div class="relative group">
-                    <a href="{{ route('bumdes.profil') }}"
-                        class="text-gray-900 hover:text-blue-600 text-[15px] font-medium transition-colors duration-200 {{ request()->routeIs('bumdes.*') ? 'text-blue-600 border-b-2 border-blue-500 pb-0.5' : '' }}">
-                        BUMDes
-                    </a>
+                    <button class="flex items-center gap-2.5 hover:opacity-90 transition bg-transparent border-none outline-none cursor-pointer">
+                        <span class="text-gray-900 font-bold text-[15px] group-hover:border-b-2 group-hover:border-blue-500 pb-0.5">{{ auth()->user()->name }}</span>
+                        <div class="w-11 h-11 rounded-full overflow-hidden bg-[#D1D5DB] flex-shrink-0 shadow-md">
+                            @if (auth()->user()->file)
+                                <img src="{{ auth()->user()->file->file_stream }}" alt="Avatar" class="w-full h-full object-cover">
+                            @else
+                                <div class="w-full h-full flex items-center justify-center">
+                                    <svg class="w-7 h-7 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                                </div>
+                            @endif
+                        </div>
+                    </button>
 
-                    <div
-                        class="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-52 bg-white rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.08)] border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 overflow-hidden">
-                        <div class="py-1">
-                            <a href="{{ route('bumdes.profil') }}"
-                                class="block px-5 py-3 text-gray-700 hover:bg-blue-50 hover:border-l-[3px] hover:border-l-blue-500 text-[14px] font-medium transition-all duration-150">
-                                Profil dan Layanan
+                    <div class="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-48 bg-white rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.1)] border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 overflow-hidden">
+                        <div class="py-1.5">
+                            <a href="{{ route('profile') }}" class="block px-4 py-2.5 text-gray-800 hover:bg-blue-50 hover:border-l-[3px] hover:border-l-blue-500 transition-all duration-150">
+                                <span class="text-[15px] font-normal text-center block">Profil</span>
                             </a>
                             <div class="h-px bg-gray-100 mx-3"></div>
-                            <a href="{{ route('bumdes.laporan') }}"
-                                class="block px-5 py-3 text-gray-700 hover:bg-blue-50 hover:border-l-[3px] hover:border-l-blue-500 text-[14px] font-medium transition-all duration-150">
-                                Laporan
+                            <a href="{{ route('user.activity') }}" class="block px-4 py-2.5 text-gray-800 hover:bg-blue-50 hover:border-l-[3px] hover:border-l-blue-500 transition-all duration-150">
+                                <span class="text-[15px] font-normal text-center block">Aktivitas</span>
                             </a>
+                            <a href="{{ route('user.notifications') }}" class="block px-4 py-2.5 text-gray-800 hover:bg-blue-50 hover:border-l-[3px] hover:border-l-blue-500 transition-all duration-150">
+                                <span class="text-[15px] font-normal text-center block">Notifikasi</span>
+                            </a>
+                            <div class="h-px bg-gray-200 my-1"></div>
+                            <form action="{{ route('auth.logout') }}" method="POST">
+                                @csrf
+                                <button type="submit" class="block w-full px-4 py-2.5 text-red-600 hover:bg-red-50 hover:border-l-[3px] hover:border-l-red-500 transition-all duration-150 bg-transparent border-none outline-none cursor-pointer">
+                                    <span class="text-[15px] font-normal text-center block">Keluar</span>
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>
+            @else
+                <div class="sd-btn-login-wrapper">
+                    <button id="btn-open-login" type="button" class="sd-btn-login">Masuk</button>
+                </div>
+                <button id="btn-open-register" type="button" class="sd-btn-register">Daftar</button>
+            @endauth
+        </div>
 
-                <a href="{{ route('isewa.profile') }}"
-                    class="text-gray-900 hover:text-blue-600 text-[15px] font-medium transition-colors duration-200 {{ request()->routeIs('isewa.profile') ? 'border-b-2 border-blue-500 pb-0.5' : '' }}">
-                    Profil iSewa
-                </a>
-
-                @auth
-                    <div class="relative group">
-                        <button class="flex items-center gap-2.5 hover:opacity-90 transition">
-                            <span class="text-gray-900 font-bold text-base group-hover:border-b-2 group-hover:border-blue-500 pb-0.5">{{ auth()->user()->name }}</span>
-                            <div class="w-11 h-11 rounded-full overflow-hidden bg-[#D1D5DB] flex-shrink-0 shadow-md">
-                                @if (auth()->user()->file)
-                                    <img src="{{ auth()->user()->file->file_stream }}" alt="Avatar" class="w-full h-full object-cover">
-                                @else
-                                    <div class="w-full h-full flex items-center justify-center">
-                                        <svg class="w-7 h-7 text-white" viewBox="0 0 24 24" fill="currentColor">
-                                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                                        </svg>
-                                    </div>
-                                @endif
-                            </div>
-                        </button>
-
-                        <div class="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-48 bg-white rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.1)] border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 overflow-hidden">
-                            <div class="py-1.5">
-                                <a href="{{ route('profile') }}" class="block px-4 py-2.5 text-gray-800 hover:bg-blue-50 hover:border-l-[3px] hover:border-l-blue-500 transition-all duration-150">
-                                    <span class="text-[15px] font-normal text-center block">Profil</span>
-                                </a>
-                                <div class="h-px bg-gray-100 mx-3"></div>
-                                <a href="{{ route('user.activity') }}" class="block px-4 py-2.5 text-gray-800 hover:bg-blue-50 hover:border-l-[3px] hover:border-l-blue-500 transition-all duration-150">
-                                    <span class="text-[15px] font-normal text-center block">Aktivitas</span>
-                                </a>
-                                <a href="{{ route('user.notifications') }}" class="block px-4 py-2.5 text-gray-800 hover:bg-blue-50 hover:border-l-[3px] hover:border-l-blue-500 transition-all duration-150">
-                                    <span class="text-[15px] font-normal text-center block">Notifikasi</span>
-                                </a>
-                                <div class="h-px bg-gray-200 my-1"></div>
-                                <form action="{{ route('auth.logout') }}" method="POST">
-                                    @csrf
-                                    <button type="submit" class="block w-full px-4 py-2.5 text-red-600 hover:bg-red-50 hover:border-l-[3px] hover:border-l-red-500 transition-all duration-150">
-                                        <span class="text-[15px] font-normal text-center block">Keluar</span>
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                @else
-                    <div class="flex items-center gap-3">
-                        <div class="relative inline-block group">
-                            <div class="absolute -inset-0.5 bg-gradient-to-r from-blue-400 to-amber-500 rounded-full opacity-70 group-hover:opacity-100 group-hover:blur-[2px] transition-all duration-300"></div>
-                            <button id="btn-open-login" type="button" class="relative inline-block px-10 py-2.5 text-blue-600 rounded-full text-[15px] font-medium bg-white hover:shadow-lg transition-all duration-300">
-                                Masuk
-                            </button>
-                        </div>
-                        <button id="btn-open-register" type="button"
-                            class="inline-block px-10 py-3 text-white rounded-full text-[15px] font-medium hover:shadow-lg transition-all duration-300"
-                            style="background: linear-gradient(to right, #7dc8f0 0%, #78c7f0 3%, #73c6f0 6%, #6ec5f0 9%, #69c4f0 12%, #64c3f0 15%, #5fc2f0 18%, #5ac1f0 21%, #55c0f0 24%, #50bff0 27%, #4bbef0 30%, #4abdf1 33%, #49bcf1 36%, #48bbf1 39%, #47baf1 42%, #46b9f1 45%, #45b8f2 48%, #45b7f2 51%, #45b6f2 54%, #45b5f2 57%, #45b4f2 60%, #45b3f2 63%, #45b2f2 66%, #45b1f2 69%, #45b0f2 72%, #45aff2 75%, #45aef2 78%, #45adf2 81%, #45acf2 84%, #45abf2 87%, #45aaf2 90%, #45aaf2 93%, #45aaf2 96%, #45aaf2 100%);">
-                            Daftar
-                        </button>
-                    </div>
-                @endauth
-            </div>
-
-            {{-- Hamburger Button - Mobile Only --}}
-            <div class="md:hidden relative z-50">
-                <button id="mobile-menu-btn" type="button"
-                    class="p-2 text-gray-700 hover:text-blue-600 focus:outline-none transition-all duration-200 active:bg-gray-100 rounded-lg active:scale-95">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                            d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
-                </button>
-            </div>
+        {{-- Hamburger Button - Mobile Only --}}
+        <div class="sd-nav-mobile relative z-50">
+            <button id="mobile-menu-btn" type="button" class="p-2 text-gray-700 hover:text-blue-600 focus:outline-none transition-all duration-200 active:bg-gray-100 rounded-lg active:scale-95 bg-transparent border-none cursor-pointer">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
         </div>
     </div>
+    
+    <!-- Toggle Button -->
+    <div class="sd-navbar-toggle" id="master-navbar-toggle">
+        <svg id="master-icon-up" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 8l-6 6h12l-6-6z"/>
+        </svg>
+        <svg id="master-icon-down" viewBox="0 0 24 24" fill="currentColor" style="display: none;">
+            <path d="M12 16l6-6H6l6 6z"/>
+        </svg>
+    </div>
 </nav>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const masterNavbar = document.getElementById('master-navbar');
+        const masterToggle = document.getElementById('master-navbar-toggle');
+        const masterIconUp = document.getElementById('master-icon-up');
+        const masterIconDown = document.getElementById('master-icon-down');
+
+        if(masterToggle) {
+            masterToggle.addEventListener('click', () => {
+                masterNavbar.classList.toggle('hidden-nav');
+                if(masterNavbar.classList.contains('hidden-nav')) {
+                    masterIconUp.style.display = 'none';
+                    masterIconDown.style.display = 'block';
+                } else {
+                    masterIconUp.style.display = 'block';
+                    masterIconDown.style.display = 'none';
+                }
+            });
+        }
+
+        // Auto-hide navbar on scroll down
+        let lastScrollY = window.scrollY;
+        window.addEventListener('scroll', () => {
+            const currentScrollY = window.scrollY;
+            
+            if (currentScrollY > lastScrollY && currentScrollY > 50) {
+                // Scroll down: Hide navbar
+                if (!masterNavbar.classList.contains('hidden-nav')) {
+                    masterNavbar.classList.add('hidden-nav');
+                    if(masterIconUp && masterIconDown) {
+                        masterIconUp.style.display = 'none';
+                        masterIconDown.style.display = 'block';
+                    }
+                }
+            } else if (currentScrollY < lastScrollY) {
+                // Scroll up: Show navbar
+                if (masterNavbar.classList.contains('hidden-nav')) {
+                    masterNavbar.classList.remove('hidden-nav');
+                    if(masterIconUp && masterIconDown) {
+                        masterIconUp.style.display = 'block';
+                        masterIconDown.style.display = 'none';
+                    }
+                }
+            }
+            lastScrollY = currentScrollY;
+        });
+    });
+</script>
 
 {{-- ================================================ --}}
 {{-- OVERLAY - z-[998] agar di bawah sidebar z-[999] --}}

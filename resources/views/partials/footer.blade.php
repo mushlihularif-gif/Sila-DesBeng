@@ -5,11 +5,11 @@
 
             {{-- Column 1: Logo - responsive --}}
             <div class="flex flex-col items-center md:items-start -mt-8 md:-mt-20">
-                <img src="{{ asset('User/img/logo/iSewaF.png') }}" alt="iSewa Logo"
-                    class="h-32 sm:h-48 md:h-65 w-auto object-contain relative z-10">
+                <img src="{{ asset('User/img/logo/iSewaF.png') }}?v={{ time() }}" alt="iSewa Logo"
+                    class="h-32 sm:h-48 md:h-48 w-auto object-contain relative z-10" style="transform: scale(1.3); transform-origin: center center;">
 
-                <img src="{{ asset('User/img/logo/bklss.png') }}" alt="Bengkalis Bermasa"
-                    class="h-32 sm:h-48 md:h-65 w-auto object-contain -mt-4 sm:-mt-8 md:-mt-12 relative z-0">
+                <img src="{{ asset('User/img/logo/bklss.png') }}?v={{ time() }}" alt="Bengkalis Bermasa"
+                    class="h-32 sm:h-48 md:h-48 w-auto object-contain -mt-4 sm:-mt-8 md:-mt-12 relative z-0" style="transform: scale(2.4); transform-origin: center center; margin-top: 35px;">
             </div>
 
             {{-- Column 2: Navigation --}}
@@ -27,8 +27,9 @@
                         class="text-base sm:text-lg font-medium hover:text-blue-300 transition-colors duration-200">
                         BUMDes
                     </a>
-                    <a href="{{ route('isewa.profile') }}" class="text-base sm:text-lg font-medium hover:text-blue-300 transition-colors duration-200">
-                        Profil iSewa
+                    <a href="{{ route('isewa.profile') }}"
+                        class="text-base sm:text-lg font-medium hover:text-blue-300 transition-colors duration-200">
+                        Profil SDesBeng
                     </a>
                 </div>
             </div>
@@ -57,8 +58,8 @@
                                 d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
                     </div>
-                    <a href="mailto:iSewa.digital@gmail.com"
-                        class="text-sm sm:text-[15px] hover:text-blue-300 transition-colors">iSewa.digital@gmail.com</a>
+                    <a href="mailto:sdesbengdigital@gmail.com"
+                        class="text-sm sm:text-[15px] hover:text-blue-300 transition-colors">sdesbengdigital@gmail.com</a>
                 </div>
 
                 {{-- Phone --}}
@@ -110,7 +111,7 @@
         <div class="border-t border-white/20 mb-6 sm:mb-8"></div>
 
         <div class="text-center text-xs sm:text-sm text-gray-100 font-medium tracking-wide px-2">
-            <p>&copy; 2025 SISTEM PENYEWAAN ALAT DAN PROMOSI USAHA BUMDES BERBASIS DIGITAL</p>
+            <p>&copy; 2026 Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis</p>
         </div>
     </div>
 </footer>

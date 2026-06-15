@@ -76,12 +76,15 @@
                                 <img src="{{ asset('User/img/elemen/F2.png') }}" alt="Gas">
                             </div>
 
-                            <div class="unit-card" data-index="2" data-name="Unit Penyewaan Alat">
-                                <img src="{{ asset('User/img/elemen/F1.png') }}" alt="Alat">
+                            <div class="unit-card" data-index="2" data-name="Unit Penyewaan Mobil">
+                                <img src="{{ asset('User/img/elemen/mobil.png') }}" alt="Mobil">
                             </div>
 
-                            <div class="unit-card" data-index="3" data-name="Unit Penjualan Gas">
-                                <img src="{{ asset('User/img/elemen/F2.png') }}" alt="Gas">
+                            <div class="unit-card" data-index="3" data-name="Unit Peminjaman Fasilitas Umum">
+                                <img src="{{ asset('User/img/elemen/fasilitas.png') }}" alt="Fasilitas">
+                            </div>
+                            <div class="unit-card" data-index="4" data-name="Pengumuman dan Event">
+                                <img src="{{ asset('User/img/elemen/event.png') }}" alt="Event">
                             </div>
                         </div>
 
@@ -215,6 +218,21 @@
         filter: grayscale(30%);
     }
 
+    .state-4 {
+        left: 0% !important;
+        transform: translate(-50%, -50%) scale(0.5) !important;
+        opacity: 0.6;
+        z-index: 10;
+        filter: grayscale(30%);
+    }
+
+    .state-5 {
+        left: -20% !important;
+        transform: translate(-50%, -50%) scale(0.5) !important;
+        opacity: 0;
+        z-index: 5;
+    }
+
     /* Member Card Styles */
     .member-card {
         position: relative;
@@ -315,8 +333,8 @@
             const nextBtn = document.getElementById('unit-next');
             const prevBtn = document.getElementById('unit-prev');
 
-            const stateClasses = ['state-0', 'state-1', 'state-2', 'state-3'];
-            let positions = [1, 2, 3, 0];
+            const stateClasses = ['state-0', 'state-1', 'state-2', 'state-3', 'state-4', 'state-5'];
+            let positions = [1, 2, 3, 4, 5, 0];
 
             let autoSlideInterval;
             const autoSlideDelay = 3000;
@@ -338,12 +356,12 @@
             };
 
             const handleNext = () => {
-                positions = positions.map(pos => (pos - 1 < 0 ? 3 : pos - 1));
+                positions = positions.map(pos => (pos - 1 < 0 ? 5 : pos - 1));
                 updateCarousel();
             };
 
             const handlePrev = () => {
-                positions = positions.map(pos => (pos + 1 > 3 ? 0 : pos + 1));
+                positions = positions.map(pos => (pos + 1 > 5 ? 0 : pos + 1));
                 updateCarousel();
             };
 

@@ -50,9 +50,12 @@ class User extends Authenticatable
         'password',
         'phone',
         'address',
+        'rt',
+        'rw',
         'gender',
         'avatar',
         'position',
+        'role',
         'google_id',
     ];
 
@@ -102,5 +105,34 @@ class User extends Authenticatable
     public function gasTransactions()
     {
         return $this->hasMany(GasOrder::class, 'user_id');
+    }
+
+    // ===================================
+    // RELASI DARI I_VILAGGE
+    // ===================================
+    
+    public function laporans()
+    {
+        return $this->hasMany(Laporan::class);
+    }
+
+    public function ratings()
+    {
+        return $this->hasMany(Rating::class);
+    }
+
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class);
+    }
+
+    public function handledLaporans()
+    {
+        return $this->hasMany(Laporan::class, 'admin_id');
+    }
+
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
     }
 }

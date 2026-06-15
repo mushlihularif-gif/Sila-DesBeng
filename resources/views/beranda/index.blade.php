@@ -225,13 +225,22 @@
                                 <img src="{{ asset('User/img/elemen/F2.png') }}" alt="Gas" loading="lazy">
                             </div>
 
-                            <div class="unit-card" data-index="2" data-name="Unit Penyewaan Alat">
-                                <img src="{{ asset('User/img/elemen/F1.png') }}" alt="Alat" loading="lazy">
+                            <div class="unit-card" data-index="2" data-name="Unit Penyewaan Mobil">
+                                <img src="{{ asset('User/img/elemen/mobil.png') }}" alt="Mobil">
                             </div>
 
-                            <div class="unit-card" data-index="3" data-name="Unit Penjualan Gas">
-                                <img src="{{ asset('User/img/elemen/F2.png') }}" alt="Gas" loading="lazy">
+                            <div class="unit-card" data-index="3" data-name="Unit Peminjaman Fasilitas Umum">
+                                <img src="{{ asset('User/img/elemen/fasilitas.png') }}" alt="Fasilitas">
                             </div>
+
+                            <div class="unit-card" data-index="4" data-name="Pelaporan Warga">
+                                <img src="{{ asset('User/img/elemen/lapor.png') }}" alt="Event">
+                            </div>
+
+                            <div class="unit-card" data-index="5" data-name="Pengumuman dan Event">
+                                <img src="{{ asset('User/img/elemen/event.png') }}" alt="Event">
+                            </div>
+                            
                         </div>
 
                         <div
@@ -606,6 +615,23 @@
             filter: grayscale(30%);
         }
 
+        /* POSISI 4: KIRI UJUNG */
+        .state-4 {
+            left: 0% !important;
+            transform: translate(-50%, -50%) scale(0.5) !important;
+            opacity: 0.6;
+            z-index: 10;
+            filter: grayscale(30%);
+        }
+
+        /* POSISI 5: TERSEMBUNYI */
+        .state-5 {
+            left: -20% !important;
+            transform: translate(-50%, -50%) scale(0.5) !important;
+            opacity: 0;
+            z-index: 5;
+        }
+
         /* RESPONSIVE MOBILE - 3 COLUMN LAYOUT (CENTER FOCUS) */
         @media (max-width: 768px) {
             .unit-card {
@@ -972,8 +998,8 @@
                 const nextBtn = document.getElementById('unit-next');
                 const prevBtn = document.getElementById('unit-prev');
 
-                const stateClasses = ['state-0', 'state-1', 'state-2', 'state-3'];
-                let positions = [1, 2, 3, 0];
+                const stateClasses = ['state-0', 'state-1', 'state-2', 'state-3', 'state-4', 'state-5'];
+                let positions = [1, 2, 3, 4, 5, 0];
 
                 let autoSlideInterval;
                 const autoSlideDelay = 3000; // 3 seconds delay
@@ -995,12 +1021,12 @@
                 };
 
                 const handleNext = () => {
-                    positions = positions.map(pos => (pos - 1 < 0 ? 3 : pos - 1));
+                    positions = positions.map(pos => (pos - 1 < 0 ? 5 : pos - 1));
                     updateCarousel();
                 };
 
                 const handlePrev = () => {
-                    positions = positions.map(pos => (pos + 1 > 3 ? 0 : pos + 1));
+                    positions = positions.map(pos => (pos + 1 > 5 ? 0 : pos + 1));
                     updateCarousel();
                 };
 
@@ -1059,6 +1085,15 @@
                     card.style.cursor = 'pointer';
                     card.addEventListener('click', () => {
                         window.location.href = "{{ route('gas.sales') }}";
+                    });
+                });
+
+                // Add click handler for Pelaporan Warga
+                const laporanCards = document.querySelectorAll('.unit-card[data-name="Pelaporan Warga"]');
+                laporanCards.forEach(card => {
+                    card.style.cursor = 'pointer';
+                    card.addEventListener('click', () => {
+                        window.location.href = "{{ route('pelaporan.landing') }}";
                     });
                 });
             },

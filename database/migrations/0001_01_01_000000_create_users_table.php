@@ -13,16 +13,18 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('username')->unique(); // Dari form
+            $table->string('username')->unique()->nullable(); // Dari form, nullable untuk Google Login
             $table->string('name');               // Nama Lengkap
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
+            $table->string('password')->nullable(); // Nullable untuk Google Login
             $table->string('phone')->nullable();  // No Telepon
             $table->text('address')->nullable();  // Alamat
+            $table->string('rt')->nullable();     // Tambahan dari i_vilagge
+            $table->string('rw')->nullable();     // Tambahan dari i_vilagge
             $table->enum('gender', ['laki-laki', 'perempuan'])->nullable(); // Jenis Kelamin
             $table->enum('status', ['aktif', 'non_aktif'])->default('aktif'); // Status akun
-            $table->enum('role', ['admin', 'user'])->default('user');
+            $table->enum('role', ['admin', 'lurah', 'user'])->default('user'); // Tambah lurah
             $table->string('otp_code', 4)->nullable();
             $table->timestamp('otp_expires_at')->nullable();
             $table->rememberToken();

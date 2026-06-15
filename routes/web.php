@@ -304,3 +304,61 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
         Route::post('/bumdes/update-whatsapp', [\App\Http\Controllers\Admin\BumdesController::class, 'updateWhatsapp'])->name('admin.isewa.bumdes.update.whatsapp');
     });
 });
+
+// ==========================================
+// ROUTES PELAPORAN WARGA (I_VILAGGE MERGE)
+// ==========================================
+
+Route::post('/kritik-saran', [\App\Http\Controllers\KritikSaranController::class, 'store'])->name('kritik-saran.store');
+
+// Landing Page Pelaporan Warga (Tidak perlu login)
+Route::view('/pelaporan-warga', 'user.laporan.landing')->name('pelaporan.landing');
+
+Route::middleware(['auth', 'role:user'])->group(function () {
+    Route::prefix('user/laporan')->name('user.laporan.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\LaporanController::class, 'index'])->name('index');
+        Route::get('/create', [\App\Http\Controllers\LaporanController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\LaporanController::class, 'store'])->name('store');
+        Route::get('/export/{id}', [\App\Http\Controllers\LaporanController::class, 'exportPdf'])->name('export');
+        Route::get('/{laporan}', [\App\Http\Controllers\LaporanController::class, 'show'])->name('show');
+        Route::get('/{laporan}/edit', [\App\Http\Controllers\LaporanController::class, 'edit'])->name('edit');
+        Route::put('/{laporan}', [\App\Http\Controllers\LaporanController::class, 'update'])->name('update');
+        Route::delete('/{laporan}', [\App\Http\Controllers\LaporanController::class, 'destroy'])->name('destroy');
+    });
+
+    Route::post('/laporan/{laporan}/rating', [\App\Http\Controllers\RatingController::class, 'store'])->name('laporan.rating.store');
+    Route::put('/laporan/{laporan}/rating', [\App\Http\Controllers\RatingController::class, 'update'])->name('laporan.rating.update');
+
+    Route::prefix('help-center')->name('help-center.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\HelpCenterController::class, 'index'])->name('index');
+        Route::get('/tickets', [\App\Http\Controllers\HelpCenterController::class, 'myTickets'])->name('my-tickets');
+        Route::get('/create', [\App\Http\Controllers\HelpCenterController::class, 'create'])->name('create');
+        Route::post('/store', [\App\Http\Controllers\HelpCenterController::class, 'store'])->name('store');
+        Route::get('/tickets/{id}', [\App\Http\Controllers\HelpCenterController::class, 'show'])->name('show');
+        Route::post('/tickets/{id}/close', [\App\Http\Controllers\HelpCenterController::class, 'close'])->name('close');
+    });
+    
+    // Notifikasi pelaporan dipisah pathnya
+    Route::prefix('laporan-notifications')->name('laporan-notifications.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\NotificationController::class, 'index'])->name('index');
+        Route::match(['get', 'post', 'patch'], '/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('mark-as-read');
+        Route::post('/mark-all-read', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('mark-all-read');
+        Route::delete('/{id}', [\App\Http\Controllers\NotificationController::class, 'destroy'])->name('destroy');
+        Route::delete('/clear/read', [\App\Http\Controllers\NotificationController::class, 'clearRead'])->name('clear-read');
+    });
+});
+
+Route::middleware(['auth', 'role:lurah'])->prefix('lurah')->name('lurah.')->group(function () {
+    Route::get('/dashboard', [\App\Http\Controllers\LurahController::class, 'dashboard'])->name('dashboard');
+    Route::prefix('laporan')->name('laporan.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\LurahController::class, 'indexLaporan'])->name('index');
+        Route::get('/export-pdf', [\App\Http\Controllers\LurahController::class, 'exportPdf'])->name('export.dashboard');
+        Route::get('/export/{id}', [\App\Http\Controllers\LurahController::class, 'exportDetailPdf'])->name('export.detail');
+        Route::post('/{id}/status', [\App\Http\Controllers\LurahController::class, 'updateStatus'])->name('updateStatus');
+        Route::get('/{id}', [\App\Http\Controllers\LurahController::class, 'showLaporan'])->name('show');
+    });
+    Route::get('/statistik', [\App\Http\Controllers\LurahController::class, 'statistik'])->name('statistik');
+    Route::get('/settings', [\App\Http\Controllers\LurahController::class, 'settings'])->name('settings');
+    Route::put('/profile/update', [\App\Http\Controllers\LurahController::class, 'updateProfile'])->name('profile.update');
+    Route::put('/profile/password', [\App\Http\Controllers\LurahController::class, 'updatePassword'])->name('profile.password');
+});
