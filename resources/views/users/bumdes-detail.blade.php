@@ -4,48 +4,8 @@
 <main class="flex-grow relative w-full">
     <section class="relative z-10 min-h-screen pt-40 pb-16">
         <!-- Decorative Background Elements -->
-        <div class="absolute inset-0 pointer-events-none overflow-hidden">
-            <!-- Top Left Blue Gradient Oval -->
-            <svg class="absolute top-0 left-0 w-[600px] h-[600px] opacity-40" style="transform: translate(-30%, -20%);">
-                <defs>
-                    <linearGradient id="blueGradient1" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" style="stop-color:#7dd3fc;stop-opacity:0.6" />
-                        <stop offset="100%" style="stop-color:#bae6fd;stop-opacity:0.3" />
-                    </linearGradient>
-                </defs>
-                <ellipse cx="300" cy="300" rx="280" ry="320" fill="url(#blueGradient1)" />
-            </svg>
-
-            <!-- Top Right Geometric Shapes -->
-            <div class="absolute top-20 right-0" style="transform: translateX(20%);">
-                <svg width="400" height="400" viewBox="0 0 400 400" class="opacity-30">
-                    <rect x="50" y="50" width="100" height="100" fill="#3b82f6" transform="rotate(45 100 100)" opacity="0.3"/>
-                    <rect x="200" y="100" width="80" height="80" fill="#60a5fa" transform="rotate(30 240 140)" opacity="0.4"/>
-                    <rect x="280" y="200" width="60" height="60" fill="#93c5fd" transform="rotate(60 310 230)" opacity="0.3"/>
-                </svg>
-            </div>
-
-            <!-- Bottom Yellow Gradient Oval -->
-            <svg class="absolute bottom-0 left-0 w-[500px] h-[500px] opacity-50" style="transform: translate(-20%, 30%);">
-                <defs>
-                    <linearGradient id="yellowGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" style="stop-color:#fbbf24;stop-opacity:0.5" />
-                        <stop offset="100%" style="stop-color:#fde68a;stop-opacity:0.2" />
-                    </linearGradient>
-                </defs>
-                <ellipse cx="250" cy="250" rx="240" ry="280" fill="url(#yellowGradient)" />
-            </svg>
-
-            <!-- Bottom Right Blue Wave -->
-            <svg class="absolute bottom-0 right-0 w-[450px] h-[450px] opacity-35" style="transform: translate(25%, 25%) rotate(15deg);">
-                <defs>
-                    <linearGradient id="blueGradient2" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" style="stop-color:#60a5fa;stop-opacity:0.4" />
-                        <stop offset="100%" style="stop-color:#93c5fd;stop-opacity:0.2" />
-                    </linearGradient>
-                </defs>
-                <ellipse cx="225" cy="225" rx="200" ry="240" fill="url(#blueGradient2)" />
-            </svg>
+        <div class="absolute inset-0 z-0 pointer-events-none">
+            <img src="{{ asset('Admin/img/elements/background.png') }}" class="w-full h-full object-cover" alt="Background">
         </div>
 
         <div class="max-w-7xl mx-auto px-6 relative z-10">
@@ -68,24 +28,67 @@
 
                     <div class="relative h-[400px] w-full flex justify-center items-center">
                         <div class="relative w-full max-w-6xl mx-auto h-full">
-                            <div class="unit-card" data-index="0" data-name="Unit Penyewaan Alat">
+                            @php
+                                $isServiceActive = function($name) use ($activeServices, $region) {
+                                    // Jika tidak ada region spesifik (misal diakses manual), tampilkan semua
+                                    if (!$region) return true; 
+                                    
+                                    // Mapping nama tampilan ke nama layanan di database
+                                    $map = [
+                                        'Unit Penyewaan Alat' => 'Penyewaan Alat',
+                                        'Unit Penjualan Gas' => 'Penjualan Gas',
+                                        'Unit Penyewaan Mobil' => 'Penyewaan Mobil',
+                                        'Unit Peminjaman Fasilitas Umum' => 'Peminjaman Fasilitas Umum',
+                                        'Pelaporan Warga' => 'Pelaporan Warga',
+                                        'Pengumuman dan Event' => 'Pengumuman dan Event'
+                                    ];
+                                    
+                                    $dbName = $map[$name] ?? $name;
+                                    
+                                    // Pengecualian: Mungkin 'Pengumuman dan Event' selalu aktif untuk semua desa
+                                    if ($dbName === 'Pengumuman dan Event') return true;
+                                    
+                                    return in_array($dbName, $activeServices);
+                                };
+
+                                $index = 0;
+                            @endphp
+
+                            @if($isServiceActive('Unit Penyewaan Alat'))
+                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="{{ $index++ }}" data-name="Unit Penyewaan Alat" onclick="window.location.href='{{ route('rental.equipment') }}'">
                                 <img src="{{ asset('User/img/elemen/F1.png') }}" alt="Alat">
                             </div>
+                            @endif
 
-                            <div class="unit-card" data-index="1" data-name="Unit Penjualan Gas">
+                            @if($isServiceActive('Unit Penjualan Gas'))
+                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="{{ $index++ }}" data-name="Unit Penjualan Gas" onclick="window.location.href='{{ route('gas.sales') }}'">
                                 <img src="{{ asset('User/img/elemen/F2.png') }}" alt="Gas">
                             </div>
+                            @endif
 
-                            <div class="unit-card" data-index="2" data-name="Unit Penyewaan Mobil">
+                            @if($isServiceActive('Unit Penyewaan Mobil'))
+                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="{{ $index++ }}" data-name="Unit Penyewaan Mobil" onclick="window.location.href='{{ route('pelayanan') }}'">
                                 <img src="{{ asset('User/img/elemen/mobil.png') }}" alt="Mobil">
                             </div>
+                            @endif
 
-                            <div class="unit-card" data-index="3" data-name="Unit Peminjaman Fasilitas Umum">
+                            @if($isServiceActive('Unit Peminjaman Fasilitas Umum'))
+                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="{{ $index++ }}" data-name="Unit Peminjaman Fasilitas Umum" onclick="window.location.href='{{ route('pelayanan') }}'">
                                 <img src="{{ asset('User/img/elemen/fasilitas.png') }}" alt="Fasilitas">
                             </div>
-                            <div class="unit-card" data-index="4" data-name="Pengumuman dan Event">
+                            @endif
+                            
+                            @if($isServiceActive('Pelaporan Warga'))
+                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="{{ $index++ }}" data-name="Pelaporan Warga" onclick="window.location.href='{{ route('pelaporan.landing') }}'">
+                                <img src="{{ asset('User/img/elemen/lapor.png') }}" alt="Lapor">
+                            </div>
+                            @endif
+
+                            @if($isServiceActive('Pengumuman dan Event'))
+                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="{{ $index++ }}" data-name="Pengumuman dan Event" onclick="window.location.href='{{ route('announcements.index') }}'">
                                 <img src="{{ asset('User/img/elemen/event.png') }}" alt="Event">
                             </div>
+                            @endif
                         </div>
 
                         <div class="absolute -bottom-6 left-0 right-0 flex items-center justify-center gap-4 md:gap-12 z-[60]">
@@ -334,7 +337,26 @@
             const prevBtn = document.getElementById('unit-prev');
 
             const stateClasses = ['state-0', 'state-1', 'state-2', 'state-3', 'state-4', 'state-5'];
-            let positions = [1, 2, 3, 4, 5, 0];
+            
+            // Inisialisasi posisi secara dinamis sesuai jumlah cards
+            let positions = [];
+            const n = cards.length;
+            
+            if (n === 1) {
+                positions = [1];
+            } else if (n === 2) {
+                positions = [1, 2];
+            } else if (n === 3) {
+                positions = [1, 2, 0];
+            } else {
+                // Untuk n >= 4
+                positions = Array.from({length: n}, (_, i) => {
+                    if (i === 0) return 1;
+                    if (i === 1) return 2;
+                    if (i === n - 1) return 0;
+                    return 3; // sisanya hidden
+                });
+            }
 
             let autoSlideInterval;
             const autoSlideDelay = 3000;
@@ -343,7 +365,7 @@
                 cards.forEach((card, index) => {
                     card.classList.remove(...stateClasses);
                     const currentPos = positions[index];
-                    card.classList.add(stateClasses[currentPos]);
+                    card.classList.add(stateClasses[currentPos] || 'state-3');
 
                     if (currentPos === 1 && titleElement) {
                         titleElement.style.opacity = '0';
@@ -356,21 +378,30 @@
             };
 
             const handleNext = () => {
-                positions = positions.map(pos => (pos - 1 < 0 ? 5 : pos - 1));
+                if (n === 1) return;
+                
+                // Shift positions array to the right cyclically
+                // example for n=3: [1, 2, 0] -> [0, 1, 2] -> [2, 0, 1]
+                positions.unshift(positions.pop());
                 updateCarousel();
             };
 
             const handlePrev = () => {
-                positions = positions.map(pos => (pos + 1 > 5 ? 0 : pos + 1));
+                if (n === 1) return;
+                
+                // Shift positions array to the left cyclically
+                positions.push(positions.shift());
                 updateCarousel();
             };
 
             const startAutoSlide = () => {
+                if (n <= 1) return;
                 clearInterval(autoSlideInterval);
                 autoSlideInterval = setInterval(handleNext, autoSlideDelay);
             };
 
             const resetAutoSlide = () => {
+                if (n <= 1) return;
                 clearInterval(autoSlideInterval);
                 startAutoSlide();
             };

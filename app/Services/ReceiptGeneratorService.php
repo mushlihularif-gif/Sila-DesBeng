@@ -187,7 +187,7 @@ class ReceiptGeneratorService
         $y += $lineHeight;
         $this->addText($image, 'Hormat Kami', 130, $y, $normalSize, $black, $fontPath);
         
-        $y += 420; // Ruang untuk tanda tangan (Lebih besar karena teks SidesBeng dihapus sesuai edit pengguna, tapi butuh ruang)
+        $y += 420; // Ruang untuk tanda tangan (Lebih besar karena teks SiladesBeng dihapus sesuai edit pengguna, tapi butuh ruang)
          
         // Simpan bukti transaksi
         $filename = 'receipt_rental_' . $booking->order_number . '_' . time() . '.png';
@@ -379,7 +379,7 @@ class ReceiptGeneratorService
         $y += $lineHeight;
         $this->addText($image, 'Hormat Kami', 130, $y, $normalSize, $black, $fontPath);
         
-        $y += 420; // Ruang untuk tanda tangan (Lebih besar karena teks SidesBeng dihapus sesuai edit pengguna, tapi butuh ruang)
+        $y += 420; // Ruang untuk tanda tangan (Lebih besar karena teks SiladesBeng dihapus sesuai edit pengguna, tapi butuh ruang)
         
         // Simpan bukti transaksi
         $filename = 'receipt_gas_' . $order->order_number . '_' . time() . '.png';

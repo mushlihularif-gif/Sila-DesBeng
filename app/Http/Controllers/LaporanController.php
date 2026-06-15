@@ -35,6 +35,7 @@ class LaporanController extends Controller
             'deskripsi' => 'required|string|min:20',
             'kategori' => 'required|string',
             'lokasi' => 'nullable|string|max:255',
+            'tujuan_laporan' => 'required|in:rt,rw,desa',
             'bukti' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
@@ -47,11 +48,13 @@ class LaporanController extends Controller
             'deskripsi' => $validated['deskripsi'],
             'kategori' => $validated['kategori'],
             'lokasi' => $validated['lokasi'] ?? null,
+            'tujuan_laporan' => $validated['tujuan_laporan'],
             'status' => 'Pending',
             'rw' => $user->rw,
             'rt' => $user->rt,
             'rw_number' => $user->rw,
             'rt_number' => $user->rt,
+            'region_id' => $user->region_id,
         ];
 
         // Upload bukti SETELAH validasi
@@ -89,9 +92,19 @@ $data['bukti'] = 'laporan/' . $filename;
             'bukti_value' => $data['bukti'] ?? 'null',
         ]);
 
-        // Kirim notifikasi
+        // Kirim notifikasi berjenjang
         try {
-            $admins = User::where('role', 'admin')->where('rw', $user->rw)->get();
+            $regionIds = [];
+            $currentRegion = \App\Models\Region::find($user->region_id);
+            $regionName = $currentRegion ? $currentRegion->name : 'Unknown';
+            while ($currentRegion) {
+                $regionIds[] = $currentRegion->id;
+                $currentRegion = $currentRegion->parent;
+            }
+
+            $admins = User::whereIn('role', ['admin', 'super_admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'lurah'])
+                ->whereIn('region_id', $regionIds)
+                ->get();
 
             foreach ($admins as $admin) {
                 Notification::create([
@@ -99,7 +112,7 @@ $data['bukti'] = 'laporan/' . $filename;
                     'laporan_id' => $laporan->id,
                     'type' => 'laporan_baru',
                     'title' => '📋 Laporan Baru Masuk',
-                    'message' => "Laporan baru dari {$user->name} (RW {$user->rw}/RT {$user->rt}): {$laporan->nama}",
+                    'message' => "User {$user->name} telah melakukan pelaporan dari {$regionName}. Kategori: {$laporan->kategori}",
                     'link' => '/admin/laporan/' . $laporan->id,
                     'icon' => '📋',
                 ]);

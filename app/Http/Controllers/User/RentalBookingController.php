@@ -19,6 +19,11 @@ class RentalBookingController extends Controller
     {
         // Ambil item penyewaan
         $item = Barang::findOrFail($itemId);
+
+        // Validasi: Warga hanya bisa memesan layanan di wilayahnya sendiri
+        if (Auth::user()->region_id != $item->region_id) {
+            return redirect()->back()->with('error', 'Anda Tidak Bisa Melanjutkan karena desa/wilayah ini hanya menyediakan layanan untuk warganya sendiri. Silakan sesuaikan dengan wilayah Anda.');
+        }
         
         // Ambil pengaturan sistem untuk rekening bank dan lokasi
         $setting = SystemSetting::first();

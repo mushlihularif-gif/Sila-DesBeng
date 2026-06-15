@@ -23,16 +23,23 @@
             <div class="flex items-center justify-between mb-6 relative z-20">
                 <h1 class="text-2xl font-bold text-yellow-400">📋 Detail Laporan #{{ $laporan->id }}</h1>
                 <div class="flex gap-2">
-                    {{-- ✅ CORRECT: Gunakan route lurah, bukan admin --}}
-<a href="{{ route('lurah.laporan.export.detail', $laporan->id) }}"
-   class="inline-flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-bold">
-    <span>📄</span>
-    <span>Export PDF</span>
-</a>
+                    {{-- ✅ Tambahan: Tombol Buat Event / Gotong Royong --}}
+                    @if($laporan->status != 'Ditolak')
+                    <a href="{{ route('admin.announcements.create', ['laporan_id' => $laporan->id]) }}"
+                        class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg font-bold border-2 border-emerald-300">
+                         <span>📢</span>
+                         <span>Tindak Lanjuti: Buat Event</span>
+                    </a>
+                    @endif
 
+                    <a href="{{ route('lurah.laporan.export.detail', $laporan->id) }}"
+                        class="inline-flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-bold border-2 border-red-300">
+                        <span>📄</span>
+                        <span>Export PDF</span>
+                    </a>
 
                     <a href="{{ route('lurah.dashboard') }}"
-                        class="inline-flex items-center gap-2 px-4 py-2 bg-[#004635] text-yellow-400 rounded-lg hover:bg-[#003026] transition font-bold">
+                        class="inline-flex items-center gap-2 px-4 py-2 bg-[#004635] text-yellow-400 rounded-lg hover:bg-[#003026] transition font-bold border-2 border-yellow-400/50">
                         <span>←</span>
                         <span>Kembali</span>
                     </a>

@@ -498,7 +498,7 @@
                 <h2 class="text-2xl font-bold text-gray-900 mb-6">Selamat Datang</h2>
 
                 <div class="flex justify-center mb-6">
-                    <img src="{{ asset('User/img/logo/iSewaT.png') }}" alt="SidesBeng Logo"
+                    <img src="{{ asset('User/img/logo/iSewaT.png') }}" alt="SiladesBeng Logo"
                         class="h-32">
                 </div>
 
@@ -528,7 +528,7 @@
             </div>
 
             <div class="flex justify-center mb-8">
-                <img src="{{ asset('User/img/logo/iSewaT.png') }}" alt="SidesBeng Logo" class="h-32">
+                <img src="{{ asset('User/img/logo/iSewaT.png') }}" alt="SiladesBeng Logo" class="h-32">
             </div>
 
             <form action="{{ route('auth.forgot-password') }}" method="POST" class="space-y-6">

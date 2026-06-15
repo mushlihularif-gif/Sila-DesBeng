@@ -37,7 +37,8 @@ class CheckRole
             }
 
             // Custom handle for Guest accessing Admin routes
-            if (in_array('admin', $roles)) {
+            $adminRoles = ['admin', 'super_admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'lurah'];
+            if (count(array_intersect($adminRoles, $roles)) > 0) {
                 Log::warning('SECURITY: Unauthorized access attempt', [
                     'ip' => $request->ip(),
                     'path' => $request->path(),
@@ -88,7 +89,12 @@ class CheckRole
         }
         
         foreach ($requiredRoles as $role) {
-            if ($user->role === $role) {
+            if ($role === 'admin' || $role === 'lurah') {
+                // 'admin' or 'lurah' pseudo-role matches any of the new admin hierarchy
+                if (in_array($user->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'admin', 'lurah'])) {
+                    return $next($request);
+                }
+            } else if ($user->role === $role) {
                 return $next($request);
             }
         }
@@ -102,7 +108,8 @@ class CheckRole
         ]);
 
         // Special case: If admin tries to access user-only pages, redirect to admin dashboard
-        if ($user->role === 'admin' && (in_array('user', $requiredRoles) || $allowGuest)) {
+        $isAdminUser = in_array($user->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'admin', 'lurah']);
+        if ($isAdminUser && (in_array('user', $requiredRoles) || $allowGuest)) {
             // Handle AJAX request
             if ($request->expectsJson() || $request->ajax()) {
                 return response()->json([

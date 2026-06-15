@@ -10,9 +10,9 @@
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
                     <h4 class="fw-bold mb-1">
-                        <span class="text-muted fw-light">Profil SidesBeng / Anggota BUMDes /</span> Edit Anggota
+                        <span class="text-muted fw-light">Profil SiladesBeng / Anggota BUMDes /</span> Edit Anggota
                     </h4>
-                    <p class="text-muted mb-0">Perbarui informasi anggota yang ditampilkan di halaman Profil SidesBeng</p>
+                    <p class="text-muted mb-0">Perbarui informasi anggota yang ditampilkan di halaman Profil SiladesBeng</p>
                 </div>
                 <a href="{{ route('admin.isewa.bumdes.index') }}" class="btn btn-outline-secondary">
                     <i class="bx bx-arrow-left me-1"></i> Kembali
@@ -118,8 +118,8 @@
                                             <i class="bx bx-info-circle fs-4 me-2"></i>
                                             <div class="small">
                                                 <strong>Informasi:</strong><br>
-                                                Data anggota yang ditambahkan akan ditampilkan di halaman <strong>Profil SidesBeng</strong> 
-                                                pada bagian <strong>Struktur Pengembang SidesBeng</strong>.
+                                                Data anggota yang ditambahkan akan ditampilkan di halaman <strong>Profil SiladesBeng</strong> 
+                                                pada bagian <strong>Struktur Pengembang SiladesBeng</strong>.
                                             </div>
                                         </div>
                                     </div>

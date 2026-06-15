@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kode Verifikasi OTP - SidesBeng</title>
+    <title>Kode Verifikasi OTP - SiladesBeng</title>
     <style>
         body {
             margin: 0;
@@ -82,7 +82,7 @@
         </div>
         <div class="content">
             <p>Halo,</p>
-            <p>Anda menerima email ini karena ada permintaan verifikasi untuk akun SidesBeng Anda.</p>
+            <p>Anda menerima email ini karena ada permintaan verifikasi untuk akun SiladesBeng Anda.</p>
             <p>Gunakan kode OTP berikut untuk melanjutkan:</p>
             
             <div class="otp-box">
@@ -93,13 +93,13 @@
             
             <div class="warning">
                 <p><strong>⚠️ Perhatian:</strong></p>
-                <p>Jangan bagikan kode ini kepada siapa pun. Tim SidesBeng tidak akan pernah meminta kode OTP Anda.</p>
+                <p>Jangan bagikan kode ini kepada siapa pun. Tim SiladesBeng tidak akan pernah meminta kode OTP Anda.</p>
             </div>
             
             <p style="margin-top: 30px;">Jika Anda tidak melakukan permintaan ini, abaikan email ini.</p>
         </div>
         <div class="footer">
-            <p><strong>SidesBeng</strong></p>
+            <p><strong>SiladesBeng</strong></p>
             <p>Sistem Informasi Sewa Alat Desa</p>
             <p style="color: #adb5bd; font-size: 12px;">Email ini dikirim secara otomatis, mohon tidak membalas.</p>
         </div>

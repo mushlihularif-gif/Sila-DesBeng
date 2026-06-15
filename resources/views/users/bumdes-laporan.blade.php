@@ -2,11 +2,15 @@
 
 @section('page')
 <main class="flex-grow relative w-full">
-    <section class="relative z-10 min-h-screen pt-40 pb-16 bg-cover bg-center bg-no-repeat" 
-             style="background-image: url('{{ asset('Admin/img/elements/background1.png') }}');">
-        
-        <!-- White Overlay -->
-        <div class="absolute inset-0 bg-white/25 pointer-events-none"></div>
+    <section class="relative z-10 min-h-screen pt-40 pb-16">
+        <!-- Animated Background Wrapper -->
+        <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+            <div id="animated-bg" class="absolute inset-0 bg-cover bg-top bg-no-repeat opacity-0 scale-105 transition-all duration-1000 ease-out" 
+                 style="background-image: url('{{ asset('Admin/img/elements/background1.png') }}');">
+            </div>
+            <!-- White Overlay -->
+            <div class="absolute inset-0 bg-white/25"></div>
+        </div>
 
         <div class="max-w-6xl mx-auto px-6 relative z-20">
             
@@ -220,12 +224,21 @@
 <script src="https://cdn.jsdelivr.net/npm/apexcharts@latest/dist/apexcharts.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Animate background
+        const bg = document.getElementById('animated-bg');
+        if (bg) {
+            setTimeout(() => {
+                bg.classList.remove('opacity-0', 'scale-110');
+                bg.classList.add('opacity-100', 'scale-100');
+            }, 50);
+        }
+
         // Animate sections on load
         const sections = document.querySelectorAll('.animate-section');
         sections.forEach((section, index) => {
             setTimeout(() => {
                 section.classList.add('show');
-            }, index * 100);
+            }, index * 100 + 300); // Wait for background animation
         });
 
         // Initialize charts

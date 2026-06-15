@@ -25,6 +25,14 @@ Route::get('/beranda', [App\Http\Controllers\User\BerandaController::class, 'ind
     ->name('beranda')
     ->middleware('role:user,guest');
 
+// Kabar Daerah / Pengumuman
+Route::get('/kabar-daerah', [App\Http\Controllers\User\AnnouncementController::class, 'index'])
+    ->name('announcements.index')
+    ->middleware('role:user,guest');
+Route::get('/kabar-daerah/{id}', [App\Http\Controllers\User\AnnouncementController::class, 'show'])
+    ->name('announcements.show')
+    ->middleware('role:user,guest');
+
 
 Route::get('/pelayanan', function () {
     return view('users.pelayanan');
@@ -32,10 +40,13 @@ Route::get('/pelayanan', function () {
   ->middleware('role:user,guest');
 
 
-Route::get('/bumdes/profil-layanan', function () {
-    return view('users.bumdes-profil');
-})->name('bumdes.profil')
-  ->middleware('role:user,guest');
+Route::get('/bumdes/profil-layanan', [App\Http\Controllers\User\RegionDirectoryController::class, 'index'])
+    ->name('bumdes.profil')
+    ->middleware('role:user,guest');
+
+Route::get('/bumdes/profil-layanan/kecamatan/{id}', [App\Http\Controllers\User\RegionDirectoryController::class, 'showDesa'])
+    ->name('bumdes.profil.desa')
+    ->middleware('role:user,guest');
 
 Route::get('/bumdes/desa-pematang-duku-timur', [App\Http\Controllers\User\BumdesUserController::class, 'show'])
     ->name('bumdes.detail')
@@ -49,6 +60,13 @@ Route::get('/bumdes/laporan', [App\Http\Controllers\User\BumdesLaporanController
 Route::get('/profil-iSewa', [App\Http\Controllers\User\IsewaProfileController::class, 'index'])
     ->name('isewa.profile')
     ->middleware('role:user,guest');
+
+Route::get('/kemitraan/gabung', [App\Http\Controllers\PartnerApplicationController::class, 'create'])
+    ->name('kemitraan.create')
+    ->middleware('auth');
+Route::post('/kemitraan/gabung', [App\Http\Controllers\PartnerApplicationController::class, 'store'])
+    ->name('kemitraan.store')
+    ->middleware('auth');
 
 
 
@@ -65,6 +83,19 @@ Route::get('/unit-penyewaan-alat/{id}/booking', [App\Http\Controllers\User\Renta
     ->middleware('auth');
 Route::post('/rental/booking', [App\Http\Controllers\User\RentalBookingController::class, 'store'])
     ->name('rental.booking.store')
+    ->middleware('auth');
+
+Route::get('/unit-penyewaan-mobil', [App\Http\Controllers\User\MobilRentalUserController::class, 'index'])
+    ->name('mobil.rental.equipment')
+    ->middleware('role:user,guest');
+Route::get('/unit-penyewaan-mobil/{id}', [App\Http\Controllers\User\MobilRentalUserController::class, 'show'])
+    ->name('mobil.rental.show')
+    ->middleware('role:user,guest');
+Route::get('/unit-penyewaan-mobil/{id}/booking', [App\Http\Controllers\User\MobilBookingController::class, 'create'])
+    ->name('mobil.rental.booking')
+    ->middleware('auth');
+Route::post('/mobil-rental/booking', [App\Http\Controllers\User\MobilBookingController::class, 'store'])
+    ->name('mobil.rental.booking.store')
     ->middleware('auth');
 
 
@@ -188,12 +219,38 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
 
     Route::get('/search', [DashboardController::class, 'globalSearch'])->name('admin.search');
     
+    // Manajemen Kemitraan Daerah
+    Route::get('/kemitraan', [\App\Http\Controllers\Admin\PartnerApplicationController::class, 'index'])->name('admin.kemitraan.index');
+    Route::post('/kemitraan/{id}/approve', [\App\Http\Controllers\Admin\PartnerApplicationController::class, 'approve'])->name('admin.kemitraan.approve');
+    Route::post('/kemitraan/{id}/reject', [\App\Http\Controllers\Admin\PartnerApplicationController::class, 'reject'])->name('admin.kemitraan.reject');
+    
     // Pengaturan
     Route::get('/settings', [SettingController::class, 'index'])->name('admin.settings');
     Route::post('/settings', [SettingController::class, 'update'])->name('admin.settings.update');
     Route::get('/settings/connections', [DashboardController::class, 'connections'])->name('admin.settings.connections');
     Route::get('/settings/notifications', [DashboardController::class, 'notifications'])->name('admin.settings.notifications');
     Route::post('/settings/notifications', [DashboardController::class, 'notificationsUpdate'])->name('admin.settings.notifications.update');
+    
+    // Pengaturan Wilayah & Layanan (Kas Independen)
+    Route::get('/region-settings', [\App\Http\Controllers\Admin\RegionSettingController::class, 'index'])->name('admin.region-settings.index');
+    Route::post('/region-settings', [\App\Http\Controllers\Admin\RegionSettingController::class, 'update'])->name('admin.region-settings.update');
+    
+    // Manajemen Banner / Iklan
+    Route::get('/banners', [\App\Http\Controllers\Admin\BannerController::class, 'index'])->name('admin.banners.index');
+    Route::post('/banners', [\App\Http\Controllers\Admin\BannerController::class, 'store'])->name('admin.banners.store');
+    Route::put('/banners/{id}', [\App\Http\Controllers\Admin\BannerController::class, 'update'])->name('admin.banners.update');
+    Route::delete('/banners/{id}', [\App\Http\Controllers\Admin\BannerController::class, 'destroy'])->name('admin.banners.destroy');
+    
+    // Manajemen Pengumuman & Event
+    Route::resource('announcements', \App\Http\Controllers\Admin\AnnouncementController::class)->names([
+        'index' => 'admin.announcements.index',
+        'create' => 'admin.announcements.create',
+        'store' => 'admin.announcements.store',
+        'show' => 'admin.announcements.show',
+        'edit' => 'admin.announcements.edit',
+        'update' => 'admin.announcements.update',
+        'destroy' => 'admin.announcements.destroy',
+    ]);
     
     // Route untuk Profil Admin (menggunakan ProfileController)
     Route::get('/profile', [ProfileController::class, 'index'])->name('admin.profile');
@@ -233,6 +290,17 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
             'edit' => 'admin.unit.penyewaan.edit',
             'update' => 'admin.unit.penyewaan.update',
             'destroy' => 'admin.unit.penyewaan.destroy',
+        ]);
+
+        // Penyewaan Mobil
+        Route::resource('mobil', \App\Http\Controllers\Admin\UnitPenyewaanMobilController::class)->names([
+            'index' => 'admin.unit.mobil.index',
+            'create' => 'admin.unit.mobil.create',
+            'store' => 'admin.unit.mobil.store',
+            'show' => 'admin.unit.mobil.show',
+            'edit' => 'admin.unit.mobil.edit',
+            'update' => 'admin.unit.mobil.update',
+            'destroy' => 'admin.unit.mobil.destroy',
         ]);
 
         // Penjualan Gas
@@ -348,7 +416,7 @@ Route::middleware(['auth', 'role:user'])->group(function () {
     });
 });
 
-Route::middleware(['auth', 'role:lurah'])->prefix('lurah')->name('lurah.')->group(function () {
+Route::middleware(['auth', 'role:super_admin,admin_kecamatan,admin_desa,lurah'])->prefix('lurah')->name('lurah.')->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\LurahController::class, 'dashboard'])->name('dashboard');
     Route::prefix('laporan')->name('laporan.')->group(function () {
         Route::get('/', [\App\Http\Controllers\LurahController::class, 'indexLaporan'])->name('index');

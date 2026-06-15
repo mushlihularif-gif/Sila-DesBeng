@@ -13,39 +13,37 @@
                 <div class="relative overflow-hidden group">
                     <!-- Wadah Slide -->
                     <div id="carousel-slides" class="flex transition-transform duration-500 ease-out">
-                        <!-- Slide 1 -->
-                        <div class="carousel-slide min-w-full flex-shrink-0">
-                            <!-- Mobile Image -->
-                            <img src="{{ asset('User/img/elemen/entrance-mobile.png') }}" alt="Slide 1 Mobile"
-                                fetchpriority="high"
-                                class="block md:hidden w-full h-[400px] object-cover">
-                            <!-- Desktop Image -->
-                            <img src="{{ asset('User/img/elemen/entrance.png') }}" alt="Slide 1"
-                                fetchpriority="high"
-                                class="hidden md:block w-full md:h-[40vw] lg:h-[45vw] object-cover">
-                        </div>
-                        <!-- Slide 2 -->
-                        <div class="carousel-slide min-w-full flex-shrink-0">
-                            <!-- Mobile Image -->
-                            <img src="{{ asset('User/img/elemen/biru-mobile.png') }}" alt="Slide 2 Mobile"
-                                loading="lazy"
-                                class="block md:hidden w-full h-[400px] object-cover">
-                            <!-- Desktop Image -->
-                            <img src="{{ asset('User/img/elemen/biru.png') }}" alt="Slide 2"
-                                loading="lazy"
-                                class="hidden md:block w-full md:h-[40vw] lg:h-[45vw] object-cover">
-                        </div>
-                        <!--Slide 3-->
-                        <div class="carousel-slide min-w-full flex-shrink-0">
-                            <!-- Mobile Image -->
-                            <img src="{{ asset('User/img/elemen/ppq-mobile.png') }}" alt="Slide 3 Mobile"
-                                loading="lazy"
-                                class="block md:hidden w-full h-[400px] object-cover">
-                            <!-- Desktop Image -->
-                            <img src="{{ asset('User/img/elemen/ppq.png') }}" alt="Slide 3"
-                                loading="lazy"
-                                class="hidden md:block w-full md:h-[40vw] lg:h-[45vw] object-fill">
-                        </div>
+                        @if(isset($activeBanners) && $activeBanners->count() > 0)
+                            @foreach($activeBanners as $index => $banner)
+                            <div class="carousel-slide min-w-full flex-shrink-0 relative">
+                                <!-- Banner Image -->
+                                @if($banner->target_url)
+                                <a href="{{ $banner->target_url }}" target="_blank">
+                                @endif
+                                    <img src="{{ Storage::url($banner->image_path) }}" alt="{{ $banner->title ?? 'Banner ' . ($index + 1) }}"
+                                        loading="{{ $index == 0 ? 'eager' : 'lazy' }}"
+                                        fetchpriority="{{ $index == 0 ? 'high' : 'auto' }}"
+                                        class="w-full h-[400px] md:h-[40vw] lg:h-[45vw] object-cover">
+                                @if($banner->target_url)
+                                </a>
+                                @endif
+                            </div>
+                            @endforeach
+                        @else
+                            <!-- Default Fallback Slides -->
+                            <div class="carousel-slide min-w-full flex-shrink-0">
+                                <img src="{{ asset('User/img/elemen/entrance-mobile.png') }}" class="block md:hidden w-full h-[400px] object-cover">
+                                <img src="{{ asset('User/img/elemen/entrance.png') }}" class="hidden md:block w-full md:h-[40vw] lg:h-[45vw] object-cover">
+                            </div>
+                            <div class="carousel-slide min-w-full flex-shrink-0">
+                                <img src="{{ asset('User/img/elemen/biru-mobile.png') }}" class="block md:hidden w-full h-[400px] object-cover">
+                                <img src="{{ asset('User/img/elemen/biru.png') }}" class="hidden md:block w-full md:h-[40vw] lg:h-[45vw] object-cover">
+                            </div>
+                            <div class="carousel-slide min-w-full flex-shrink-0">
+                                <img src="{{ asset('User/img/elemen/ppq-mobile.png') }}" class="block md:hidden w-full h-[400px] object-cover">
+                                <img src="{{ asset('User/img/elemen/ppq.png') }}" class="hidden md:block w-full md:h-[40vw] lg:h-[45vw] object-cover">
+                            </div>
+                        @endif
                     </div>
 
                     <!-- Navigation Buttons -->
@@ -63,17 +61,16 @@
                         </svg>
                     </button>
 
-                    <!-- Indicators - 3 Dots Only -->
+                    <!-- Indicators -->
                     <div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2.5 z-10">
+                        @php
+                            $slideCount = (isset($activeBanners) && $activeBanners->count() > 0) ? $activeBanners->count() : 3;
+                        @endphp
+                        @for($i = 0; $i < $slideCount; $i++)
                         <button
-                            class="carousel-indicator w-8 h-2.5 rounded-full bg-white shadow-md transition-all duration-300"
-                            data-slide="0"></button>
-                        <button
-                            class="carousel-indicator w-2.5 h-2.5 rounded-full bg-white/50 hover:bg-white/75 shadow-md transition-all duration-300"
-                            data-slide="1"></button>
-                        <button
-                            class="carousel-indicator w-2.5 h-2.5 rounded-full bg-white/50 hover:bg-white/75 shadow-md transition-all duration-300"
-                            data-slide="2"></button>
+                            class="carousel-indicator {{ $i == 0 ? 'w-8 h-2.5 bg-white' : 'w-2.5 h-2.5 bg-white/50 hover:bg-white/75' }} rounded-full shadow-md transition-all duration-300"
+                            data-slide="{{ $i }}"></button>
+                        @endfor
                     </div>
                 </div>
             </div>
@@ -201,6 +198,73 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- Section Pengumuman Terbaru -->
+            @if(isset($recentAnnouncements) && $recentAnnouncements->count() > 0)
+            <div class="max-w-7xl mx-auto px-6 py-12 relative">
+                <!-- Decorative background elements -->
+                <div class="absolute top-0 right-0 w-64 h-64 bg-yellow-400/5 rounded-full filter blur-3xl"></div>
+                <div class="absolute bottom-0 left-0 w-80 h-80 bg-[#115789]/5 rounded-full filter blur-3xl"></div>
+                
+                <div class="max-w-7xl mx-auto relative z-10">
+                    <div class="flex justify-between items-end mb-8">
+                        <div>
+                            <h2 class="text-3xl font-bold bg-gradient-to-r from-[#115789] to-blue-300 bg-clip-text text-transparent drop-shadow-sm mb-2">
+                                Kabar Daerah
+                            </h2>
+                            <p class="text-gray-500">Pengumuman dan agenda terbaru</p>
+                        </div>
+                        <a href="{{ route('announcements.index') }}" class="hidden md:flex items-center gap-2 text-[#115789] font-semibold hover:text-blue-500 transition-colors">
+                            Lihat Semua <span class="text-xl">→</span>
+                        </a>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        @foreach($recentAnnouncements as $item)
+                        <a href="{{ route('announcements.show', $item->id) }}" class="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col h-full transform hover:-translate-y-1">
+                            <div class="h-40 relative overflow-hidden bg-gray-50">
+                                @if($item->image_path)
+                                    <img src="{{ Storage::url($item->image_path) }}" alt="{{ $item->title }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                                @else
+                                    <div class="w-full h-full flex items-center justify-center text-4xl bg-gradient-to-br from-[#115789]/10 to-blue-500/10">
+                                        @if($item->type == 'Pengumuman') 📢 
+                                        @elseif($item->type == 'Event') 🎉
+                                        @else 🤝
+                                        @endif
+                                    </div>
+                                @endif
+                                
+                                <div class="absolute top-3 left-3 flex gap-2">
+                                    @if($item->type == 'Gotong Royong')
+                                        <span class="px-2.5 py-1 bg-emerald-500 text-white rounded-md text-xs font-bold shadow-sm">Gotong Royong</span>
+                                    @elseif($item->type == 'Event')
+                                        <span class="px-2.5 py-1 bg-purple-500 text-white rounded-md text-xs font-bold shadow-sm">Event</span>
+                                    @else
+                                        <span class="px-2.5 py-1 bg-blue-500 text-white rounded-md text-xs font-bold shadow-sm">Pengumuman</span>
+                                    @endif
+                                </div>
+                            </div>
+                            
+                            <div class="p-5 flex flex-col flex-1">
+                                <div class="text-xs text-gray-500 mb-2 flex items-center justify-between">
+                                    <span>📅 {{ $item->created_at->format('d M Y') }}</span>
+                                    <span class="font-medium text-[#115789]">{{ $item->region->name ?? 'Pusat' }}</span>
+                                </div>
+                                <h3 class="font-bold text-gray-800 text-lg mb-2 line-clamp-2 group-hover:text-[#115789] transition-colors">{{ $item->title }}</h3>
+                                <p class="text-gray-500 text-sm line-clamp-2 mt-auto">{{ \Illuminate\Support\Str::limit(strip_tags($item->description), 80) }}</p>
+                            </div>
+                        </a>
+                        @endforeach
+                    </div>
+                    
+                    <div class="mt-6 text-center md:hidden">
+                        <a href="{{ route('announcements.index') }}" class="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-gray-50 hover:bg-gray-100 text-[#115789] font-semibold rounded-xl transition-colors border border-gray-200 w-full">
+                            Lihat Semua Kabar
+                        </a>
+                    </div>
+                </div>
+            </div>
+            @endif
 
             <!-- Section Unit Pelayanan -->
             <div id="unit-carousel-container" class="max-w-7xl mx-auto px-6 py-16 overflow-hidden">
@@ -217,27 +281,27 @@
 
                         <div class="relative w-full max-w-6xl mx-auto h-full">
 
-                            <div class="unit-card" data-index="0" data-name="Unit Penyewaan Alat">
+                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="0" data-name="Unit Penyewaan Alat" onclick="window.location.href='{{ route('rental.equipment') }}'">
                                 <img src="{{ asset('User/img/elemen/F1.png') }}" alt="Alat" loading="lazy">
                             </div>
 
-                            <div class="unit-card" data-index="1" data-name="Unit Penjualan Gas">
+                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="1" data-name="Unit Penjualan Gas" onclick="window.location.href='{{ route('gas.sales') }}'">
                                 <img src="{{ asset('User/img/elemen/F2.png') }}" alt="Gas" loading="lazy">
                             </div>
 
-                            <div class="unit-card" data-index="2" data-name="Unit Penyewaan Mobil">
+                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="2" data-name="Unit Penyewaan Mobil" onclick="window.location.href='{{ route('mobil.rental.equipment') }}'">
                                 <img src="{{ asset('User/img/elemen/mobil.png') }}" alt="Mobil">
                             </div>
 
-                            <div class="unit-card" data-index="3" data-name="Unit Peminjaman Fasilitas Umum">
+                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="3" data-name="Unit Peminjaman Fasilitas Umum" onclick="window.location.href='{{ route('pelayanan') }}'">
                                 <img src="{{ asset('User/img/elemen/fasilitas.png') }}" alt="Fasilitas">
                             </div>
 
-                            <div class="unit-card" data-index="4" data-name="Pelaporan Warga">
+                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="4" data-name="Pelaporan Warga" onclick="window.location.href='{{ route('pelaporan.landing') }}'">
                                 <img src="{{ asset('User/img/elemen/lapor.png') }}" alt="Event">
                             </div>
 
-                            <div class="unit-card" data-index="5" data-name="Pengumuman dan Event">
+                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="5" data-name="Pengumuman dan Event" onclick="window.location.href='{{ route('announcements.index') }}'">
                                 <img src="{{ asset('User/img/elemen/event.png') }}" alt="Event">
                             </div>
                             
@@ -384,18 +448,18 @@
                         <div class="backdrop-blur-sm bg-white/60 rounded-3xl p-8 md:p-12 border border-white/70 shadow-xl">
                             <div class="space-y-5 text-gray-700 text-base leading-relaxed text-justify">
                                 <p>
-                                    <span class="font-semibold text-gray-800">SidesBeng</span> merupakan platform digital
+                                    <span class="font-semibold text-gray-800">SiladesBeng</span> merupakan platform digital
                                     terpadu yang dirancang untuk mendukung kegiatan operasional dan pelayanan BUMDes secara
                                     modern dan efisien. Sistem ini hadir sebagai solusi inovatif untuk mengelola berbagai
                                     unit usaha desa seperti penyewaan alat, dan layanan pembelian gas.
-                                    Melalui SidesBeng, proses administrasi dan transaksi menjadi lebih cepat, transparan, dan
+                                    Melalui SiladesBeng, proses administrasi dan transaksi menjadi lebih cepat, transparan, dan
                                     mudah dijangkau oleh masyarakat.
                                 </p>
                                 <p>
-                                    Dengan mengedepankan kemudahan akses dan efisiensi layanan, SidesBeng membantu BUMDes dalam
+                                    Dengan mengedepankan kemudahan akses dan efisiensi layanan, SiladesBeng membantu BUMDes dalam
                                     meningkatkan produktivitas, memperluas jangkauan usaha, serta memperkuat perekonomian
                                     desa secara berkelanjutan. Kami percaya bahwa digitalisasi layanan desa merupakan
-                                    langkah penting menuju kemandirian ekonomi masyarakat, dan SidesBeng hadir untuk mewujudkan
+                                    langkah penting menuju kemandirian ekonomi masyarakat, dan SiladesBeng hadir untuk mewujudkan
                                     hal tersebut dengan sistem yang modern, aman, dan berorientasi pada kemajuan desa.
                                 </p>
                             </div>

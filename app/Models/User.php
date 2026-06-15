@@ -56,6 +56,7 @@ class User extends Authenticatable
         'avatar',
         'position',
         'role',
+        'region_id',
         'google_id',
     ];
 
@@ -133,6 +134,11 @@ class User extends Authenticatable
 
     public function isAdmin()
     {
-        return $this->role === 'admin';
+        return in_array($this->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin', 'lurah']);
+    }
+
+    public function region()
+    {
+        return $this->belongsTo(Region::class);
     }
 }

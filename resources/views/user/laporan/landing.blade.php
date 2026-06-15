@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
@@ -130,6 +130,8 @@
 
         /* ============ HERO SECTION ============ */
         .hero {
+            z-index: 10;
+            z-index: 10;
             position: relative; padding: 120px 0 100px; overflow: hidden;
         }
         .hero-bg {
@@ -220,16 +222,17 @@
             display: inline-flex; align-items: center; justify-content: center;
             padding: 20px 40px; font-size: 1.25rem; font-weight: 700;
             color: #2563eb; background: transparent;
-            border: 3px solid #2563eb; border-radius: 16px;
+            border: 3px solid #2563eb; border-radius: 9999px;
             cursor: pointer; transition: all 0.5s ease;
             position: relative; overflow: hidden;
+            text-decoration: none;
         }
         .btn-outline::before {
             content: ''; position: absolute; inset: 0;
             background: #2563eb; transform: translateY(100%);
             transition: transform 0.5s ease;
         }
-        .btn-outline:hover { color: #fff; }
+        .btn-outline:hover { color: #fff !important; }
         .btn-outline:hover::before { transform: translateY(0); }
         .btn-outline span { position: relative; z-index: 1; display: flex; align-items: center; gap: 8px; }
 
@@ -247,7 +250,9 @@
         @keyframes bounce-slow { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
 
         /* ============ SECTIONS ============ */
-        .section { padding: 96px 0; position: relative; }
+        .section {
+            z-index: 10;
+            z-index: 10; padding: 96px 0; position: relative; }
         .section-stats { /* transparent - background.png terlihat */ }
         .section-kategori { /* transparent - background.png terlihat */ }
         .section-cara { /* transparent - background.png terlihat */ }
@@ -416,6 +421,7 @@
 
         /* ============ FOOTER (SILA DESBENG) ============ */
         .footer {
+            position: relative; z-index: 10;
             background: #115789;
             color: #fff;
             padding: 40px 0 24px;
@@ -474,9 +480,28 @@
             text-align: center; font-size: 0.875rem; color: #e5e7eb;
             font-weight: 500; letter-spacing: 0.025em;
         }
+            .btn-gradient-wrapper {
+            position: relative; display: inline-block; padding: 3px;
+            border-radius: 9999px; background: linear-gradient(to right, #60a5fa, #f59e0b);
+            transition: all 0.3s ease;
+        }
+        .btn-gradient-wrapper:hover { box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2); }
+        .btn-gradient {
+            display: inline-flex; align-items: center; justify-content: center;
+            border-radius: 9999px; font-weight: 700;
+            color: #2563eb !important; background: #fff !important; text-decoration: none !important;
+            transition: all 0.3s ease; border: none; outline: none; cursor: pointer;
+        }
+        .btn-gradient:hover { opacity: 0.95; }
     </style>
 </head>
 <body>
+
+<!-- ==================== BACKGROUND CANVAS ==================== -->
+<div id="premium-bg" style="position: fixed; inset: 0; z-index: 0; pointer-events: none;">
+    <canvas id="abstract-canvas" style="width: 100%; height: 100%; position: absolute; inset: 0;"></canvas>
+</div>
+
 
 <!-- ==================== SILA DESBENG NAVBAR ==================== -->
 <nav class="sd-navbar" id="sdNavbar">
@@ -489,8 +514,8 @@
         <!-- Menu Desktop -->
         <div class="sd-nav-links">
             <a href="{{ route('beranda') }}" class="sd-nav-link">Beranda</a>
-            <a href="{{ route('pelayanan') }}" class="sd-nav-link">Pelayanan</a>
-            <a href="{{ route('bumdes.profil') }}" class="sd-nav-link">BUMDes</a>
+            <a href="{{ route('pelayanan') }}" class="sd-nav-link">Profil dan Layanan</a>
+            <a href="{{ route('bumdes.profil') }}" class="sd-nav-link">Tentang Layanan</a>
             <a href="{{ route('isewa.profile') }}" class="sd-nav-link">Profil SidesBeng</a>
         </div>
 
@@ -537,13 +562,7 @@
         <div class="particle"></div>
     </div>
     <div class="hero-content container text-center">
-        <div class="mb-6 inline-block">
-            <span class="hero-badge">
-                <span style="font-size:1.25rem" class="animate-pulse-emoji">🌺</span>
-                Adat Bersendang, Syarak Bersendeng
-                <span style="font-size:1.25rem" class="animate-pulse-emoji">🌺</span>
-            </span>
-        </div>
+        
 
         <h1 class="hero-title">
             <span class="hero-title-gold">Sampaikan Aspirasi</span>
@@ -557,18 +576,22 @@
 
         <div class="hero-buttons">
             @guest
-                <a href="{{ url('/auth') }}" class="btn-primary">
-                    <span class="icon">📝</span>
-                    <span>Laporkan Keluhan</span>
-                </a>
+                <div class="btn-gradient-wrapper">
+                    <a href="{{ url('/auth') }}" class="btn-gradient" style="padding: 20px 40px; font-size: 1.25rem;">
+                        <span class="icon" style="margin-right: 12px; font-size: 1.5rem;">📝</span>
+                        <span>Laporkan Keluhan</span>
+                    </a>
+                </div>
                 <a href="{{ url('/auth') }}" class="btn-outline">
-                    <span>Daftar Sekarang →</span>
+                    <span>Daftar Sekarang &rarr;</span>
                 </a>
             @else
-                <a href="{{ route('user.laporan.index') }}" class="btn-primary" style="padding: 24px 48px; font-size: 1.5rem;">
-                    <span class="icon" style="font-size: 1.875rem;">📝</span>
-                    <span>Buat Laporan Sekarang</span>
-                </a>
+                <div class="btn-gradient-wrapper">
+                    <a href="{{ route('user.laporan.index') }}" class="btn-gradient" style="padding: 24px 48px; font-size: 1.5rem;">
+                        <span class="icon" style="margin-right: 16px; font-size: 1.875rem;">📝</span>
+                        <span>Buat Laporan Sekarang</span>
+                    </a>
+                </div>
             @endguest
         </div>
 
@@ -709,14 +732,20 @@
         </p>
         <div class="hero-buttons">
             @guest
-                <a href="{{ route('user.laporan.index') }}" class="btn-primary">
-                    <span class="icon">🚀</span><span>Mulai Sekarang</span>
-                </a>
+                <div class="btn-gradient-wrapper">
+                    <a href="{{ route('user.laporan.index') }}" class="btn-gradient" style="padding: 20px 40px; font-size: 1.25rem;">
+                        <span class="icon" style="margin-right: 12px; font-size: 1.5rem;">🚀</span>
+                        <span>Mulai Sekarang</span>
+                    </a>
+                </div>
                 <a href="{{ url('/auth') }}" class="btn-outline"><span>Login</span></a>
             @else
-                <a href="{{ route('user.laporan.index') }}" class="btn-primary" style="padding:24px 48px;font-size:1.5rem;">
-                    <span class="icon" style="font-size:1.875rem">📝</span><span>Buat Laporan Sekarang</span>
-                </a>
+                <div class="btn-gradient-wrapper">
+                    <a href="{{ route('user.laporan.index') }}" class="btn-gradient" style="padding: 24px 48px; font-size: 1.5rem;">
+                        <span class="icon" style="margin-right: 16px; font-size: 1.875rem;">📝</span>
+                        <span>Buat Laporan Sekarang</span>
+                    </a>
+                </div>
             @endguest
         </div>
         <p class="cta-quote">"adat bersendi, syarak bersendi. Syarak mengata, adat memakai."</p>
@@ -736,8 +765,8 @@
             <!-- Kolom 2: Navigasi -->
             <div class="footer-col-nav">
                 <a href="{{ route('beranda') }}">Beranda</a>
-                <a href="{{ route('pelayanan') }}">Pelayanan</a>
-                <a href="{{ route('bumdes.profil') }}">BUMDes</a>
+                <a href="{{ route('pelayanan') }}">Profil dan Layanan</a>
+                <a href="{{ route('bumdes.profil') }}">Tentang Layanan</a>
                 <a href="{{ route('isewa.profile') }}">Profil SidesBeng</a>
             </div>
 
@@ -869,5 +898,223 @@ document.addEventListener('DOMContentLoaded', function() {
     fadeEls.forEach(el => fadeObserver.observe(el));
 });
 </script>
+
+<script>
+    // Canvas Vector Abstract Background Script
+    document.addEventListener('DOMContentLoaded', () => {
+        const canvas = document.getElementById('abstract-canvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        
+        let width, height;
+        let mouse = { x: -1000, y: -1000 };
+        let targetMouse = { x: -1000, y: -1000 };
+
+        function resize() {
+            if (width !== window.innerWidth || height !== window.innerHeight) {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                canvas.width = width;
+                canvas.height = height;
+                initWaves();
+            }
+        }
+
+        window.addEventListener('resize', resize);
+
+        window.addEventListener('mousemove', (e) => {
+            targetMouse.x = e.clientX;
+            targetMouse.y = e.clientY;
+        });
+        window.addEventListener('mouseout', () => {
+            targetMouse.x = -1000;
+            targetMouse.y = -1000;
+        });
+
+        let scrollY = window.scrollY;
+        window.addEventListener('scroll', () => {
+            scrollY = window.scrollY;
+        });
+
+        class Wave {
+            constructor(getGradient, yOffset, amplitude, speed, wavelength) {
+                this.getGradient = getGradient;
+                this.yOffset = yOffset; 
+                this.amplitude = amplitude; 
+                this.speed = speed; 
+                this.wavelength = wavelength; 
+                this.points = [];
+                this.time = Math.random() * 100;
+            }
+
+            init() {
+                this.points = [];
+                let numPoints = Math.ceil(width / 25) + 2; // Resolusi tinggi agar kursor presisi
+                for(let i = 0; i < numPoints; i++) {
+                    let startX = (i - 1) * 25;
+                    let startBaseY = height * this.yOffset;
+                    let startY = startBaseY + Math.sin(this.time + startX / this.wavelength) * this.amplitude;
+                    this.points.push({
+                        x: startX,
+                        baseY: startBaseY,
+                        y: startY,
+                        vy: 0,
+                        spring: 0.05, 
+                        friction: 0.90 
+                    });
+                }
+            }
+
+            update() {
+                this.time += this.speed;
+                for(let i = 0; i < this.points.length; i++) {
+                    let pt = this.points[i];
+                    
+                    // Gerakan gelombang natural
+                    let targetY = pt.baseY + Math.sin(this.time + pt.x / this.wavelength) * this.amplitude;
+                    
+                    // Interaksi Kursor: Menyebar saat disentuh
+                    let dx = mouse.x - pt.x;
+                    let dy = mouse.y - targetY;
+                    let distance = Math.sqrt(dx*dx + dy*dy);
+                    
+                    if (distance < 200) {
+                        let force = Math.pow((200 - distance) / 200, 2); 
+                        let pushDir = (dy > 0) ? -1 : 1; 
+                        targetY += pushDir * force * 60; // Dorongan diperhalus agar tidak terlalu liar
+                    }
+                    
+                    let forceY = (targetY - pt.y) * pt.spring;
+                    pt.vy += forceY;
+                    pt.vy *= pt.friction;
+                    pt.y += pt.vy;
+                }
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.moveTo(this.points[0].x, this.points[0].y);
+                
+                for(let i = 0; i < this.points.length - 1; i++) {
+                    let cx = (this.points[i].x + this.points[i+1].x) / 2;
+                    let cy = (this.points[i].y + this.points[i+1].y) / 2;
+                    ctx.quadraticCurveTo(this.points[i].x, this.points[i].y, cx, cy);
+                }
+                
+                let last = this.points[this.points.length - 1];
+                ctx.lineTo(last.x, last.y);
+                // Gambar ekstra jauh ke bawah agar saat di-scroll ke atas tidak terpotong bolong
+                ctx.lineTo(width, height * 2 + scrollY);
+                ctx.lineTo(0, height * 2 + scrollY);
+                ctx.closePath();
+                
+                ctx.fillStyle = this.getGradient(ctx, width, height);
+                ctx.fill();
+            }
+        }
+
+        let waves = [];
+
+        function initWaves() {
+            waves = [
+                // 1. Biru Muda (Diturunkan dan diperlambat agar lebih tenang)
+                new Wave((ctx, w, h) => {
+                    let grad = ctx.createLinearGradient(0, h*0.5, 0, h*1.2);
+                    grad.addColorStop(0, 'rgba(140, 190, 250, 0.7)');
+                    grad.addColorStop(1, 'rgba(180, 215, 255, 0.1)');
+                    return grad;
+                }, 0.65, 40, 0.005, 600),
+
+                // 2. Putih Solid (Pemisah)
+                new Wave((ctx, w, h) => {
+                    let grad = ctx.createLinearGradient(0, h*0.6, 0, h*1.2);
+                    grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
+                    grad.addColorStop(1, 'rgba(245, 250, 255, 0.5)');
+                    return grad;
+                }, 0.75, 30, 0.003, 500),
+
+                // 3. Kuning Amber (Lebih pudar dan gradasi halus ke putih transparan)
+                new Wave((ctx, w, h) => {
+                    let grad = ctx.createLinearGradient(0, h*0.7, 0, h*1.1);
+                    grad.addColorStop(0, 'rgba(245, 225, 130, 0.5)'); // Agak pudar di puncak
+                    grad.addColorStop(1, 'rgba(255, 255, 255, 0)'); // Pudar sempurna ke transparan
+                    return grad;
+                }, 0.85, 45, 0.007, 700)
+            ];
+            waves.forEach(w => w.init());
+        }
+
+        function animate() {
+            // Lerp mouse
+            mouse.x += (targetMouse.x - mouse.x) * 0.1;
+            mouse.y += (targetMouse.y - mouse.y) * 0.1;
+
+            // Background layer solid (agar saat parallax tidak bolong)
+            ctx.fillStyle = '#e8eff5'; 
+            ctx.fillRect(0, 0, width, height);
+
+            ctx.save();
+            // Terapkan Parallax Scrolling (Background bergerak 40% kecepatan scroll content)
+            ctx.translate(0, -scrollY * 0.4); 
+
+            // Cahaya Matahari Halus (Kiri) - Diperhalus
+            let glowX = width * 0.15;
+            let glowY = height * 0.4;
+            let gradGlow = ctx.createRadialGradient(glowX, glowY, 0, glowX, glowY, width * 0.3);
+            gradGlow.addColorStop(0, 'rgba(245, 235, 150, 0.15)'); // Opasitas diturunkan
+            gradGlow.addColorStop(1, 'rgba(245, 235, 150, 0)');
+            ctx.fillStyle = gradGlow;
+            ctx.beginPath();
+            ctx.arc(glowX, glowY, width * 0.3, 0, Math.PI*2);
+            ctx.fill();
+
+            // Gambar ombak-ombak
+            waves.forEach(w => {
+                w.update();
+                w.draw();
+            });
+
+            // Ikon Wajik (Kanan Atas) - Dibuat lebih kecil & pudar agar tidak mendominasi
+            ctx.save();
+            ctx.translate(width * 0.9, height * 0.08);
+            
+            // Parallax menjauh dari kursor
+            let dxD = mouse.x - (width * 0.9);
+            let dyD = mouse.y - (height * 0.08);
+            let distD = Math.sqrt(dxD*dxD + dyD*dyD);
+            if(distD < 300) {
+                let f = (300 - distD)/300;
+                ctx.translate(-(dxD/distD)*f*20, -(dyD/distD)*f*20);
+            }
+
+            ctx.rotate(Math.PI / 4);
+            
+            ctx.fillStyle = 'rgba(74, 144, 226, 0.4)';
+            ctx.fillRect(-15, -15, 30, 30);
+            
+            ctx.fillStyle = 'rgba(120, 175, 240, 0.3)';
+            ctx.fillRect(5, 5, 25, 25);
+            
+            ctx.strokeStyle = 'rgba(150, 190, 250, 0.4)';
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(20, 20, 15, 15);
+
+            ctx.restore(); // Restore efek rotasi wajik
+            ctx.restore(); // Restore efek Parallax Scroll
+
+            requestAnimationFrame(animate);
+        }
+
+        resize();
+        animate();
+    });
+</script>
 </body>
 </html>
+
+
+
+
+
+
+

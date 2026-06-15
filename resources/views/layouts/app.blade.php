@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SidesBeng</title>
+    <title>SiladesBeng</title>
 
     {{-- GOOGLE FONTS + FAVICON --}}
     <link rel="dns-prefetch" href="https://fonts.googleapis.com">
@@ -13,13 +13,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="{{ asset('Admin/img/illustrations/logodomain.png') }}?v={{ time() }}" />
 
+    {{-- Alpine.js --}}
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
     {{-- Vite Tailwind--}}
     @vite('resources/css/app.css')
 
     {{-- Page-specific styles --}}
     @stack('styles')
 </head>
-<body class="antialiased text-gray-900 bg-white min-h-screen overflow-x-hidden">
+<body class="antialiased text-gray-900 bg-white min-h-screen flex flex-col overflow-x-hidden">
 
     {{-- Main content --}}
     @yield('content')

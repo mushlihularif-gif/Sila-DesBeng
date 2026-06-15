@@ -615,7 +615,7 @@
     <div id="confirmation-modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50" style="display: none;">
         <div class="bg-white rounded-3xl p-8 max-w-md w-full mx-4 shadow-2xl transform transition-all">
             <div class="text-center">
-                <img src="{{ asset('Admin/img/illustrations/isewalogo.png') }}" alt="SidesBeng Logo" class="w-40 mx-auto mb-6">
+                <img src="{{ asset('Admin/img/illustrations/isewalogo.png') }}" alt="SiladesBeng Logo" class="w-40 mx-auto mb-6">
                 <h2 class="text-2xl font-bold text-gray-800 mb-2">Anda akan Melakukan Penyewaan</h2>
                 <p class="text-gray-600 mb-2">Pesanan Anda Akan Diproses</p>
                 <p class="text-gray-500 text-sm mb-6">Apakah anda yakin?</p>

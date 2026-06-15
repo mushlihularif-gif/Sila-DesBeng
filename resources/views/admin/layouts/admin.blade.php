@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
-    <title>Dashboard - SidesBeng Admin</title>
+    <title>Dashboard - SiladesBeng Admin</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="description" content="" />
     <link rel="icon" type="image/x-icon" href="{{ asset('Admin/img/favicon/logoisewa.png') }}" />
@@ -409,7 +409,7 @@
 
                     <!-- Unit Layanan -->
                     <li
-                        class="menu-item {{ request()->is('admin/unit/penyewaan*') || request()->is('admin/unit/gas*') ? 'open active show' : '' }}">
+                        class="menu-item {{ request()->is('admin/unit/penyewaan*') || request()->is('admin/unit/gas*') || request()->is('admin/unit/mobil*') ? 'open active show' : '' }}">
                         <a href="javascript:void(0);" class="menu-link menu-toggle">
                             <i class="menu-icon tf-icons bx bx-collection"></i>
                             <div data-i18n="Unit Layanan">Unit Layanan</div>
@@ -423,6 +423,11 @@
                             <li class="menu-item {{ request()->is('admin/unit/gas*') ? 'active' : '' }}">
                                 <a href="{{ route('admin.unit.penjualan_gas.index') }}" class="menu-link">
                                     <div data-i18n="Penjualan Gas">Penjualan Gas</div>
+                                </a>
+                            </li>
+                            <li class="menu-item {{ request()->is('admin/unit/mobil*') ? 'active' : '' }}">
+                                <a href="{{ route('admin.unit.mobil.index') }}" class="menu-link">
+                                    <div data-i18n="Penyewaan Mobil">Penyewaan Mobil</div>
                                 </a>
                             </li>
                     </li>
@@ -481,6 +486,27 @@
                         <div>Pengaturan Sistem</div>
                     </a>
                 </li>
+                <!-- Pengaturan Wilayah -->
+                <li class="menu-item {{ request()->routeIs('admin.region-settings.*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.region-settings.index') }}" class="menu-link">
+                        <i class="menu-icon tf-icons bx bx-map"></i>
+                        <div>Pengaturan Wilayah</div>
+                    </a>
+                </li>
+                <!-- Manajemen Banner -->
+                <li class="menu-item {{ request()->routeIs('admin.banners.*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.banners.index') }}" class="menu-link">
+                        <i class="menu-icon tf-icons bx bx-image"></i>
+                        <div>Manajemen Banner</div>
+                    </a>
+                </li>
+                <!-- Persetujuan Kemitraan -->
+                <li class="menu-item {{ request()->routeIs('admin.kemitraan.*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.kemitraan.index') }}" class="menu-link">
+                        <i class="menu-icon tf-icons bx bx-group"></i>
+                        <div>Persetujuan Mitra</div>
+                    </a>
+                </li>
                 <!-- Manajemen Pengguna -->
                 <li class="menu-item {{ request()->routeIs('admin.manajemen-pengguna.*') ? 'active' : '' }}">
                     <a href="{{ route('admin.manajemen-pengguna.index') }}" class="menu-link">
@@ -495,11 +521,11 @@
                         <div data-i18n="Notifikasi">Notifikasi</div>
                     </a>
                 </li>
-                <!-- Profil SidesBeng -->
+                <!-- Profil SiladesBeng -->
                 <li class="menu-item {{ request()->is('admin/isewa/profile*') || request()->is('admin/isewa/developer*') ? 'active' : '' }}">
                     <a href="{{ route('admin.isewa.profile') }}" class="menu-link">
                         <i class="menu-icon tf-icons bx bx-info-circle"></i>
-                        <div data-i18n="Profil SidesBeng">Profil SidesBeng</div>
+                        <div data-i18n="Profil SiladesBeng">Profil SiladesBeng</div>
                     </a>
                 </li>
                 <!-- Profil BUMDes -->

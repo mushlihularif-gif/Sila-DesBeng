@@ -72,6 +72,21 @@
                     @enderror
                 </div>
 
+                <!-- Tujuan Laporan -->
+                <div>
+                    <label class="block font-semibold mb-2">Tujuan Pelaporan <span class="text-red-400">*</span></label>
+                    <select name="tujuan_laporan" required
+                        class="w-full p-3 rounded-lg bg-[#004635] border border-yellow-400 focus:ring-2 focus:ring-yellow-300 text-white @error('tujuan_laporan') border-red-500 @enderror">
+                        <option value="" disabled {{ old('tujuan_laporan') ? '' : 'selected' }}>Pilih tujuan laporan</option>
+                        <option value="rt" {{ old('tujuan_laporan') == 'rt' ? 'selected' : '' }}>Laporkan kepada RT dan Pemerintah Desa</option>
+                        <option value="rw" {{ old('tujuan_laporan') == 'rw' ? 'selected' : '' }}>Laporkan kepada RW dan Pemerintah Desa</option>
+                        <option value="desa" {{ old('tujuan_laporan') == 'desa' ? 'selected' : '' }}>Laporkan kepada Pemerintah Desa Saja</option>
+                    </select>
+                    @error('tujuan_laporan')
+                        <p class="text-red-400 text-sm mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
                 <!-- Lokasi -->
                 <div>
                     <label class="block font-semibold mb-2">Lokasi Kejadian <span class="text-red-400">*</span></label>

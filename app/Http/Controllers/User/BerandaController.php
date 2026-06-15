@@ -85,24 +85,24 @@ class BerandaController extends Controller
                     ];
                 });
 
-            // Search Static Developers (Profil SidesBeng)
+            // Search Static Developers (Profil SiladesBeng)
             $developers = [
                 [
                     'name' => 'M.Wahid Riono',
                     'image' => 'User/img/avatars/wahid1.jpg',
-                    'position' => 'Pengembang SidesBeng',
+                    'position' => 'Pengembang SiladesBeng',
                     'link' => route('isewa.profile')
                 ],
                 [
                     'name' => 'Mushlihul Arif',
                     'image' => 'User/img/avatars/ayep123.jpg',
-                    'position' => 'Pengembang SidesBeng',
+                    'position' => 'Pengembang SiladesBeng',
                     'link' => route('isewa.profile')
                 ],
                 [
                     'name' => 'Safika',
                     'image' => 'User/img/avatars/wanita.png',
-                    'position' => 'Pengembang SidesBeng',
+                    'position' => 'Pengembang SiladesBeng',
                     'link' => route('isewa.profile')
                 ]
             ];
@@ -162,6 +162,18 @@ class BerandaController extends Controller
         
         // Get Popular Products (Filtered by Year)
         $popularProducts = $this->getPopularProducts($year);
+
+        // Get Active Banners
+        $activeBanners = \App\Models\Banner::where('is_active', true)
+                                           ->orderBy('sort_order', 'asc')
+                                           ->get();
+                                           
+        // Get Recent Announcements
+        $recentAnnouncements = \App\Models\Announcement::with(['region'])
+            ->where('is_active', true)
+            ->orderBy('created_at', 'desc')
+            ->take(3)
+            ->get();
         
         return view('beranda.index', compact(
             'kinerjaData',
@@ -170,7 +182,9 @@ class BerandaController extends Controller
             'availableYears', // Pass available years
             'popularProducts',
             'searchResults',
-            'search'
+            'search',
+            'activeBanners',
+            'recentAnnouncements'
         ));
     }
 

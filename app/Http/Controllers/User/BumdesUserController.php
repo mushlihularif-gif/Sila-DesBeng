@@ -8,7 +8,7 @@ use App\Models\SystemSetting;
 
 class BumdesUserController extends Controller
 {
-    public function show()
+    public function show(\Illuminate\Http\Request $request)
     {
         // Fetch organizational structure ordered by position
         $members = BumdesMember::orderBy('order')->get();
@@ -21,6 +21,21 @@ class BumdesUserController extends Controller
         $cleanNumber = preg_replace('/[^0-9+]/', '', $whatsappNumber);
         $whatsappLink = 'https://wa.me/' . ltrim($cleanNumber, '+');
         
-        return view('users.bumdes-detail', compact('members', 'whatsappLink', 'whatsappNumber'));
+        // Fetch region and its active services if id is provided
+        $regionId = $request->query('id');
+        $region = null;
+        $activeServices = [];
+        
+        if ($regionId) {
+            $region = \App\Models\Region::with(['services' => function($q) {
+                $q->where('is_active', true);
+            }])->find($regionId);
+            
+            if ($region) {
+                $activeServices = $region->services->pluck('name')->toArray();
+            }
+        }
+        
+        return view('users.bumdes-detail', compact('members', 'whatsappLink', 'whatsappNumber', 'region', 'activeServices'));
     }
 }

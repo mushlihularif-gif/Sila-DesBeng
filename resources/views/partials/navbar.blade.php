@@ -78,33 +78,41 @@
     <div class="sd-nav-container">
         <!-- Logo -->
         <a href="{{ route('beranda') }}" class="sd-nav-logo">
-            <img src="{{ asset('User/img/logo/iSewa.png') }}" alt="SidesBeng Logo">
+            <img src="{{ asset('User/img/logo/iSewa.png') }}" alt="SiladesBeng Logo">
         </a>
 
         <!-- Menu Desktop -->
         <div class="sd-nav-links">
             <a href="{{ route('beranda') }}" class="sd-nav-link {{ request()->routeIs('beranda') ? 'active' : '' }}">Beranda</a>
-            <a href="{{ route('pelayanan') }}" class="sd-nav-link {{ request()->routeIs('pelayanan') ? 'active' : '' }}">Pelayanan</a>
-            
-            <!-- BUMDes Dropdown -->
             <div class="relative group">
-                <a href="{{ route('bumdes.profil') }}" class="sd-nav-link {{ request()->routeIs('bumdes.*') ? 'active' : '' }}">
-                    BUMDes
-                </a>
-                <div class="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-52 bg-white rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.08)] border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 overflow-hidden">
-                    <div class="py-1">
-                        <a href="{{ route('bumdes.profil') }}" class="block px-5 py-3 text-gray-700 hover:bg-blue-50 hover:border-l-[3px] hover:border-l-blue-500 text-[14px] font-medium transition-all duration-150">
-                            Profil dan Layanan
-                        </a>
-                        <div class="h-px bg-gray-100 mx-3"></div>
-                        <a href="{{ route('bumdes.laporan') }}" class="block px-5 py-3 text-gray-700 hover:bg-blue-50 hover:border-l-[3px] hover:border-l-blue-500 text-[14px] font-medium transition-all duration-150">
-                            Laporan
-                        </a>
+                <button class="sd-nav-link flex items-center gap-1 bg-transparent border-none outline-none cursor-pointer pb-1 {{ request()->routeIs('pelayanan') || request()->routeIs('bumdes.profil') || request()->routeIs('bumdes.laporan') ? 'active' : '' }}">
+                    Layanan
+                    <svg class="w-4 h-4 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                
+                <!-- Wrapper padding transparan untuk jembatan hover agar tidak hilang -->
+                <div class="absolute top-full left-1/2 -translate-x-1/2 pt-2 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
+                    <div class="min-w-[220px] rounded-xl shadow-[0_8px_30px_rgba(0,0,0,0.12)] border border-gray-200 overflow-hidden" style="background-color: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px);">
+                        <div class="py-2">
+                            <a href="{{ route('bumdes.profil') }}" class="block px-5 py-2.5 text-gray-800 hover:bg-gray-100/50 hover:text-blue-600 transition-all duration-200 whitespace-nowrap {{ request()->routeIs('bumdes.profil') ? 'bg-blue-50/80 text-blue-600 font-semibold border-l-4 border-l-blue-500' : 'border-l-4 border-l-transparent hover:border-l-blue-400' }}">
+                                <span class="text-[14.5px] block text-left">Profil dan Layanan</span>
+                            </a>
+                            <div class="h-px bg-gray-200 mx-4 my-1"></div>
+                            <a href="{{ route('pelayanan') }}" class="block px-5 py-2.5 text-gray-800 hover:bg-gray-100/50 hover:text-blue-600 transition-all duration-200 whitespace-nowrap {{ request()->routeIs('pelayanan') ? 'bg-blue-50/80 text-blue-600 font-semibold border-l-4 border-l-blue-500' : 'border-l-4 border-l-transparent hover:border-l-blue-400' }}">
+                                <span class="text-[14.5px] block text-left">Tentang Layanan</span>
+                            </a>
+                            <div class="h-px bg-gray-200 mx-4 my-1"></div>
+                            <a href="{{ route('bumdes.laporan') }}" class="block px-5 py-2.5 text-gray-800 hover:bg-gray-100/50 hover:text-blue-600 transition-all duration-200 whitespace-nowrap {{ request()->routeIs('bumdes.laporan') ? 'bg-blue-50/80 text-blue-600 font-semibold border-l-4 border-l-blue-500' : 'border-l-4 border-l-transparent hover:border-l-blue-400' }}">
+                                <span class="text-[14.5px] block text-left">Grafik Layanan</span>
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
-
-            <a href="{{ route('isewa.profile') }}" class="sd-nav-link {{ request()->routeIs('isewa.profile') ? 'active' : '' }}">Profil SidesBeng</a>
+            
+            <a href="{{ route('announcements.index') }}" class="sd-nav-link {{ request()->routeIs('announcements.*') ? 'active' : '' }}">Kabar Daerah</a>
+            <a href="{{ route('isewa.profile') }}" class="sd-nav-link {{ request()->routeIs('isewa.profile') ? 'active' : '' }}">Profil SiladesBeng</a>
+            <a href="{{ route('kemitraan.create') }}" class="sd-nav-link {{ request()->routeIs('kemitraan.*') ? 'active' : '' }}">Gabung Kemitraan</a>
         </div>
 
         <!-- Auth Buttons / User Profile -->
@@ -236,7 +244,7 @@
     
     {{-- Header Sidebar --}}
     <div class="py-5 px-5 flex items-center justify-between border-b bg-white">
-        <img src="{{ asset('User/img/logo/iSewa.png') }}" class="h-10" alt="SidesBeng">
+        <img src="{{ asset('User/img/logo/iSewa.png') }}" class="h-10" alt="SiladesBeng">
         <button id="sidebar-close" type="button" class="p-2 hover:bg-gray-100 rounded-lg transition">
             <svg class="w-6 h-6 text-gray-600" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -249,24 +257,21 @@
         <a href="{{ route('beranda') }}" class="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium transition {{ request()->routeIs('beranda') ? 'text-blue-600 bg-blue-50 border-l-4 border-blue-500' : '' }}">
             Beranda
         </a>
-        <a href="{{ route('pelayanan') }}" class="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium transition {{ request()->routeIs('pelayanan') ? 'text-blue-600 bg-blue-50 border-l-4 border-blue-500' : '' }}">
-            Pelayanan
+        <div class="px-6 py-3 text-gray-700 font-bold bg-gray-50 border-y text-sm">Layanan</div>
+        <a href="{{ route('bumdes.profil') }}" class="block pl-10 pr-6 py-2.5 text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition {{ request()->routeIs('bumdes.profil') ? 'text-blue-600 font-medium border-l-4 border-blue-500' : '' }}">
+            Profil dan Layanan
         </a>
-
-        {{-- BUMDes Dropdown --}}
-        <button id="bumdes-toggle" type="button" class="w-full text-left px-6 py-3 flex items-center justify-between text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium transition">
-            BUMDes
-            <svg id="bumdes-arrow" class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-            </svg>
-        </button>
-        <div id="bumdes-sub" class="hidden bg-gray-50">
-            <a href="{{ route('bumdes.profil') }}" class="block px-10 py-2.5 text-gray-600 hover:text-blue-600 transition">Profil & Layanan</a>
-            <a href="{{ route('bumdes.laporan') }}" class="block px-10 py-2.5 text-gray-600 hover:text-blue-600 transition">Laporan</a>
-        </div>
-
+        <a href="{{ route('pelayanan') }}" class="block pl-10 pr-6 py-2.5 text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition {{ request()->routeIs('pelayanan') ? 'text-blue-600 font-medium border-l-4 border-blue-500' : '' }}">
+            Tentang Layanan
+        </a>
+        <a href="{{ route('bumdes.laporan') }}" class="block pl-10 pr-6 py-2.5 text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition {{ request()->routeIs('bumdes.laporan') ? 'text-blue-600 font-medium border-l-4 border-blue-500' : '' }}">
+            Grafik Layanan
+        </a>
         <a href="{{ route('isewa.profile') }}" class="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium transition {{ request()->routeIs('isewa.profile') ? 'text-blue-600 bg-blue-50 border-l-4 border-blue-500' : '' }}">
-            Profil SidesBeng
+            Profil SiladesBeng
+        </a>
+        <a href="{{ route('kemitraan.create') }}" class="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium transition {{ request()->routeIs('kemitraan.*') ? 'text-blue-600 bg-blue-50 border-l-4 border-blue-500' : '' }}">
+            Gabung Kemitraan
         </a>
     </nav>
 

@@ -88,7 +88,7 @@
                         <div class="flex-1">
                             <h3 class="text-2xl font-bold text-gray-900 mb-4">Penjualan Gas Desa</h3>
                             <p class="text-gray-700 leading-relaxed text-justify">
-                                Warga dapat membeli tabung gas seperti gas LPG 3 kg secara digital melalui sistem SidesBeng.
+                                Warga dapat membeli tabung gas seperti gas LPG 3 kg secara digital melalui sistem SiladesBeng.
                                 Proses pencatatan transaksi, validasi pembayaran, dan laporan penjualan dilakukan otomatis
                                 oleh sistem untuk menjamin transparansi dan keakuratan data
                             </p>

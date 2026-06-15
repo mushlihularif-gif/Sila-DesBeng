@@ -2,11 +2,15 @@
 
 @section('page')
 <main class="flex-grow relative w-full">
-    <section class="relative z-10 min-h-screen pt-40 pb-16 bg-cover bg-center bg-no-repeat" 
-             style="background-image: url('{{ asset('Admin/img/elements/background1.png') }}');">
-        
-        <!-- White Overlay -->
-        <div class="absolute inset-0 bg-white/25 pointer-events-none"></div>
+    <section class="relative z-10 min-h-screen pt-40 pb-16">
+        <!-- Animated Background Wrapper -->
+        <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+            <div id="animated-bg" class="absolute inset-0 bg-cover bg-top bg-no-repeat opacity-0 scale-105 transition-all duration-1000 ease-out" 
+                 style="background-image: url('{{ asset('Admin/img/elements/background1.png') }}');">
+            </div>
+            <!-- White Overlay -->
+            <div class="absolute inset-0 bg-white/25"></div>
+        </div>
 
         <div class="max-w-6xl mx-auto px-6 relative z-20">
             
@@ -21,10 +25,10 @@
                             Memberikan Solusi Digital untuk Kemajuan Desa
                         </p>
                         <p class="text-gray-700 leading-relaxed mb-4">
-                            SidesBeng merupakan platform digital terpadu yang dirancang untuk mendukung kegiatan operasional dan pelayanan BUMDes secara modern dan efisien. Sistem ini hadir sebagai solusi inovatif untuk mengelola berbagai unit usaha desa, seperti penyewaan alat dan layanan pembelian gas.
+                            SiladesBeng merupakan platform digital terpadu yang dirancang untuk mendukung kegiatan operasional dan pelayanan BUMDes secara modern dan efisien. Sistem ini hadir sebagai solusi inovatif untuk mengelola berbagai unit usaha desa, seperti penyewaan alat dan layanan pembelian gas.
                         </p>
                         <p class="text-gray-700 leading-relaxed">
-                            Melalui SidesBeng, proses administrasi dan transaksi menjadi lebih cepat, transparan, dan mudah dijangkau oleh masyarakat desa. Dengan berbasis sistem terintegrasi, seluruh data penyewaan, transaksi, dan laporan dapat dikelola secara otomatis dan terdokumentasi dengan baik. Dengan mengedepankan kemudahan akses dan efisiensi layanan, SidesBeng membantu BUMDes dalam meningkatkan produktivitas, serta memperkuat perekonomian desa secara berkelanjutan.
+                            Melalui SiladesBeng, proses administrasi dan transaksi menjadi lebih cepat, transparan, dan mudah dijangkau oleh masyarakat desa. Dengan berbasis sistem terintegrasi, seluruh data penyewaan, transaksi, dan laporan dapat dikelola secara otomatis dan terdokumentasi dengan baik. Dengan mengedepankan kemudahan akses dan efisiensi layanan, SiladesBeng membantu BUMDes dalam meningkatkan produktivitas, serta memperkuat perekonomian desa secara berkelanjutan.
                         </p>
                     </div>
                     
@@ -32,7 +36,7 @@
                     <div class="relative flex-shrink-0 hidden md:block">
                         <div class="relative">
                             <img src="{{ asset('Admin/img/avatars/sewais.png') }}" 
-                                 alt="SidesBeng Logo" 
+                                 alt="SiladesBeng Logo" 
                                  class="w-48 h-48 object-contain">
                             <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-white/60"></div>
                         </div>
@@ -166,10 +170,10 @@
                 </div>
             </div>
 
-            <!-- Struktur Pengembang SidesBeng Section -->
+            <!-- Struktur Pengembang SiladesBeng Section -->
             <div class="mb-16 animate-section">
                 <h2 class="text-3xl md:text-4xl font-bold mb-12 text-center bg-gradient-to-r from-[#1a1a1a] via-[#0099ff] to-[#33b5ff] bg-clip-text text-transparent">
-                    Struktur Pengembang SidesBeng
+                    Struktur Pengembang SiladesBeng
                 </h2>
                 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
@@ -281,6 +285,15 @@
 @push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Animate background
+        const bg = document.getElementById('animated-bg');
+        if (bg) {
+            setTimeout(() => {
+                bg.classList.remove('opacity-0', 'scale-110');
+                bg.classList.add('opacity-100', 'scale-100');
+            }, 50);
+        }
+
         // Get all sections to animate
         const sections = document.querySelectorAll('.animate-section');
         
@@ -288,7 +301,7 @@
         sections.forEach((section, index) => {
             setTimeout(() => {
                 section.classList.add('show');
-            }, index * 100); // Stagger by 100ms
+            }, index * 100 + 300); // Stagger by 100ms, wait for bg animation
         });
     });
 </script>

@@ -42,6 +42,14 @@ class LurahController extends Controller
     $query = Laporan::with(['user'])
         ->orderBy('created_at', 'desc');
 
+    // Menerapkan Filter Region Hierarchy
+    $user = auth()->user();
+    if ($user->role !== 'super_admin') {
+        $allowedRegionIds = \App\Models\Region::getDescendantIds($user->region_id);
+        $allowedRegionIds[] = $user->region_id;
+        $query->whereIn('region_id', $allowedRegionIds);
+    }
+
     // Filter RW
     if ($request->filled('rw')) {
         $query->where('rw', $request->rw);
@@ -118,6 +126,14 @@ class LurahController extends Controller
         // Query Laporan dengan Filter
         $query = Laporan::with(['user'])
             ->orderBy('created_at', 'desc');
+
+        // Menerapkan Filter Region Hierarchy
+        $user = auth()->user();
+        if ($user->role !== 'super_admin') {
+            $allowedRegionIds = \App\Models\Region::getDescendantIds($user->region_id);
+            $allowedRegionIds[] = $user->region_id;
+            $query->whereIn('region_id', $allowedRegionIds);
+        }
 
         // Filter RW
         if ($request->filled('rw')) {
@@ -258,6 +274,14 @@ class LurahController extends Controller
 
         $query = Laporan::with('user');
 
+        // Menerapkan Filter Region Hierarchy
+        $user = auth()->user();
+        if ($user->role !== 'super_admin') {
+            $allowedRegionIds = \App\Models\Region::getDescendantIds($user->region_id);
+            $allowedRegionIds[] = $user->region_id;
+            $query->whereIn('region_id', $allowedRegionIds);
+        }
+
         // Apply filters dari request
         if ($request->filled('rw')) {
             $query->where('rw', $request->rw);
@@ -323,6 +347,14 @@ class LurahController extends Controller
 public function exportPdf(Request $request)
 {
     $query = Laporan::with('user');
+
+    // Menerapkan Filter Region Hierarchy
+    $user = auth()->user();
+    if ($user->role !== 'super_admin') {
+        $allowedRegionIds = \App\Models\Region::getDescendantIds($user->region_id);
+        $allowedRegionIds[] = $user->region_id;
+        $query->whereIn('region_id', $allowedRegionIds);
+    }
 
     // Apply filters
     if ($request->filled('rw')) {
