@@ -384,18 +384,18 @@
                         <div class="backdrop-blur-sm bg-white/60 rounded-3xl p-8 md:p-12 border border-white/70 shadow-xl">
                             <div class="space-y-5 text-gray-700 text-base leading-relaxed text-justify">
                                 <p>
-                                    <span class="font-semibold text-gray-800">iSewa</span> merupakan platform digital
+                                    <span class="font-semibold text-gray-800">SidesBeng</span> merupakan platform digital
                                     terpadu yang dirancang untuk mendukung kegiatan operasional dan pelayanan BUMDes secara
                                     modern dan efisien. Sistem ini hadir sebagai solusi inovatif untuk mengelola berbagai
                                     unit usaha desa seperti penyewaan alat, dan layanan pembelian gas.
-                                    Melalui iSewa, proses administrasi dan transaksi menjadi lebih cepat, transparan, dan
+                                    Melalui SidesBeng, proses administrasi dan transaksi menjadi lebih cepat, transparan, dan
                                     mudah dijangkau oleh masyarakat.
                                 </p>
                                 <p>
-                                    Dengan mengedepankan kemudahan akses dan efisiensi layanan, iSewa membantu BUMDes dalam
+                                    Dengan mengedepankan kemudahan akses dan efisiensi layanan, SidesBeng membantu BUMDes dalam
                                     meningkatkan produktivitas, memperluas jangkauan usaha, serta memperkuat perekonomian
                                     desa secara berkelanjutan. Kami percaya bahwa digitalisasi layanan desa merupakan
-                                    langkah penting menuju kemandirian ekonomi masyarakat, dan iSewa hadir untuk mewujudkan
+                                    langkah penting menuju kemandirian ekonomi masyarakat, dan SidesBeng hadir untuk mewujudkan
                                     hal tersebut dengan sistem yang modern, aman, dan berorientasi pada kemajuan desa.
                                 </p>
                             </div>

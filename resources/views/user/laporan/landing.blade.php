@@ -483,7 +483,7 @@
     <div class="sd-nav-container">
         <!-- Logo -->
         <a href="{{ route('beranda') }}" class="sd-nav-logo">
-            <img src="{{ asset('User/img/logo/iSewa.png') }}" alt="iSewa Logo">
+            <img src="{{ asset('User/img/logo/iSewa.png') }}" alt="SidesBeng Logo">
         </a>
 
         <!-- Menu Desktop -->
@@ -491,7 +491,7 @@
             <a href="{{ route('beranda') }}" class="sd-nav-link">Beranda</a>
             <a href="{{ route('pelayanan') }}" class="sd-nav-link">Pelayanan</a>
             <a href="{{ route('bumdes.profil') }}" class="sd-nav-link">BUMDes</a>
-            <a href="{{ route('isewa.profile') }}" class="sd-nav-link">Profil SDesBeng</a>
+            <a href="{{ route('isewa.profile') }}" class="sd-nav-link">Profil SidesBeng</a>
         </div>
 
         <!-- Auth Buttons / User Profile -->
@@ -729,7 +729,7 @@
         <div class="footer-grid">
             <!-- Kolom 1: Logo -->
             <div class="footer-col-logo">
-                <img src="{{ asset('User/img/logo/iSewaF.png') }}?v={{ time() }}" alt="iSewa Logo" style="transform: scale(1.3); transform-origin: center center;">
+                <img src="{{ asset('User/img/logo/iSewaF.png') }}?v={{ time() }}" alt="SidesBeng Logo" style="transform: scale(1.3); transform-origin: center center;">
                 <img src="{{ asset('User/img/logo/bklss.png') }}?v={{ time() }}" alt="Bengkalis Bermasa" style="transform: scale(2.4); transform-origin: center center; margin-top: 40px;">
             </div>
 
@@ -738,7 +738,7 @@
                 <a href="{{ route('beranda') }}">Beranda</a>
                 <a href="{{ route('pelayanan') }}">Pelayanan</a>
                 <a href="{{ route('bumdes.profil') }}">BUMDes</a>
-                <a href="{{ route('isewa.profile') }}">Profil SDesBeng</a>
+                <a href="{{ route('isewa.profile') }}">Profil SidesBeng</a>
             </div>
 
             <!-- Kolom 3: Kontak -->

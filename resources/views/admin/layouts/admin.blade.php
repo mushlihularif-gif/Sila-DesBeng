@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
-    <title>Dashboard - iSewa Admin</title>
+    <title>Dashboard - SidesBeng Admin</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="description" content="" />
     <link rel="icon" type="image/x-icon" href="{{ asset('Admin/img/favicon/logoisewa.png') }}" />
@@ -495,11 +495,11 @@
                         <div data-i18n="Notifikasi">Notifikasi</div>
                     </a>
                 </li>
-                <!-- Profil iSewa -->
+                <!-- Profil SidesBeng -->
                 <li class="menu-item {{ request()->is('admin/isewa/profile*') || request()->is('admin/isewa/developer*') ? 'active' : '' }}">
                     <a href="{{ route('admin.isewa.profile') }}" class="menu-link">
                         <i class="menu-icon tf-icons bx bx-info-circle"></i>
-                        <div data-i18n="Profil iSewa">Profil iSewa</div>
+                        <div data-i18n="Profil SidesBeng">Profil SidesBeng</div>
                     </a>
                 </li>
                 <!-- Profil BUMDes -->

@@ -78,7 +78,7 @@
     <div class="sd-nav-container">
         <!-- Logo -->
         <a href="{{ route('beranda') }}" class="sd-nav-logo">
-            <img src="{{ asset('User/img/logo/iSewa.png') }}" alt="iSewa Logo">
+            <img src="{{ asset('User/img/logo/iSewa.png') }}" alt="SidesBeng Logo">
         </a>
 
         <!-- Menu Desktop -->
@@ -104,7 +104,7 @@
                 </div>
             </div>
 
-            <a href="{{ route('isewa.profile') }}" class="sd-nav-link {{ request()->routeIs('isewa.profile') ? 'active' : '' }}">Profil SDesBeng</a>
+            <a href="{{ route('isewa.profile') }}" class="sd-nav-link {{ request()->routeIs('isewa.profile') ? 'active' : '' }}">Profil SidesBeng</a>
         </div>
 
         <!-- Auth Buttons / User Profile -->
@@ -236,7 +236,7 @@
     
     {{-- Header Sidebar --}}
     <div class="py-5 px-5 flex items-center justify-between border-b bg-white">
-        <img src="{{ asset('User/img/logo/iSewa.png') }}" class="h-10" alt="iSewa">
+        <img src="{{ asset('User/img/logo/iSewa.png') }}" class="h-10" alt="SidesBeng">
         <button id="sidebar-close" type="button" class="p-2 hover:bg-gray-100 rounded-lg transition">
             <svg class="w-6 h-6 text-gray-600" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -266,7 +266,7 @@
         </div>
 
         <a href="{{ route('isewa.profile') }}" class="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium transition {{ request()->routeIs('isewa.profile') ? 'text-blue-600 bg-blue-50 border-l-4 border-blue-500' : '' }}">
-            Profil iSewa
+            Profil SidesBeng
         </a>
     </nav>
 

@@ -5,7 +5,7 @@
 
             {{-- Column 1: Logo - responsive --}}
             <div class="flex flex-col items-center md:items-start -mt-8 md:-mt-20">
-                <img src="{{ asset('User/img/logo/iSewaF.png') }}?v={{ time() }}" alt="iSewa Logo"
+                <img src="{{ asset('User/img/logo/iSewaF.png') }}?v={{ time() }}" alt="SidesBeng Logo"
                     class="h-32 sm:h-48 md:h-48 w-auto object-contain relative z-10" style="transform: scale(1.3); transform-origin: center center;">
 
                 <img src="{{ asset('User/img/logo/bklss.png') }}?v={{ time() }}" alt="Bengkalis Bermasa"
@@ -29,7 +29,7 @@
                     </a>
                     <a href="{{ route('isewa.profile') }}"
                         class="text-base sm:text-lg font-medium hover:text-blue-300 transition-colors duration-200">
-                        Profil SDesBeng
+                        Profil SidesBeng
                     </a>
                 </div>
             </div>

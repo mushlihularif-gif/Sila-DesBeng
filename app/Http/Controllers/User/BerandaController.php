@@ -85,24 +85,24 @@ class BerandaController extends Controller
                     ];
                 });
 
-            // Search Static Developers (Profil iSewa)
+            // Search Static Developers (Profil SidesBeng)
             $developers = [
                 [
                     'name' => 'M.Wahid Riono',
                     'image' => 'User/img/avatars/wahid1.jpg',
-                    'position' => 'Pengembang iSewa',
+                    'position' => 'Pengembang SidesBeng',
                     'link' => route('isewa.profile')
                 ],
                 [
                     'name' => 'Mushlihul Arif',
                     'image' => 'User/img/avatars/ayep123.jpg',
-                    'position' => 'Pengembang iSewa',
+                    'position' => 'Pengembang SidesBeng',
                     'link' => route('isewa.profile')
                 ],
                 [
                     'name' => 'Safika',
                     'image' => 'User/img/avatars/wanita.png',
-                    'position' => 'Pengembang iSewa',
+                    'position' => 'Pengembang SidesBeng',
                     'link' => route('isewa.profile')
                 ]
             ];

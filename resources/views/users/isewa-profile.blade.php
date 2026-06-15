@@ -21,10 +21,10 @@
                             Memberikan Solusi Digital untuk Kemajuan Desa
                         </p>
                         <p class="text-gray-700 leading-relaxed mb-4">
-                            iSewa merupakan platform digital terpadu yang dirancang untuk mendukung kegiatan operasional dan pelayanan BUMDes secara modern dan efisien. Sistem ini hadir sebagai solusi inovatif untuk mengelola berbagai unit usaha desa, seperti penyewaan alat dan layanan pembelian gas.
+                            SidesBeng merupakan platform digital terpadu yang dirancang untuk mendukung kegiatan operasional dan pelayanan BUMDes secara modern dan efisien. Sistem ini hadir sebagai solusi inovatif untuk mengelola berbagai unit usaha desa, seperti penyewaan alat dan layanan pembelian gas.
                         </p>
                         <p class="text-gray-700 leading-relaxed">
-                            Melalui iSewa, proses administrasi dan transaksi menjadi lebih cepat, transparan, dan mudah dijangkau oleh masyarakat desa. Dengan berbasis sistem terintegrasi, seluruh data penyewaan, transaksi, dan laporan dapat dikelola secara otomatis dan terdokumentasi dengan baik. Dengan mengedepankan kemudahan akses dan efisiensi layanan, iSewa membantu BUMDes dalam meningkatkan produktivitas, serta memperkuat perekonomian desa secara berkelanjutan.
+                            Melalui SidesBeng, proses administrasi dan transaksi menjadi lebih cepat, transparan, dan mudah dijangkau oleh masyarakat desa. Dengan berbasis sistem terintegrasi, seluruh data penyewaan, transaksi, dan laporan dapat dikelola secara otomatis dan terdokumentasi dengan baik. Dengan mengedepankan kemudahan akses dan efisiensi layanan, SidesBeng membantu BUMDes dalam meningkatkan produktivitas, serta memperkuat perekonomian desa secara berkelanjutan.
                         </p>
                     </div>
                     
@@ -32,7 +32,7 @@
                     <div class="relative flex-shrink-0 hidden md:block">
                         <div class="relative">
                             <img src="{{ asset('Admin/img/avatars/sewais.png') }}" 
-                                 alt="iSewa Logo" 
+                                 alt="SidesBeng Logo" 
                                  class="w-48 h-48 object-contain">
                             <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-white/60"></div>
                         </div>
@@ -166,10 +166,10 @@
                 </div>
             </div>
 
-            <!-- Struktur Pengembang iSewa Section -->
+            <!-- Struktur Pengembang SidesBeng Section -->
             <div class="mb-16 animate-section">
                 <h2 class="text-3xl md:text-4xl font-bold mb-12 text-center bg-gradient-to-r from-[#1a1a1a] via-[#0099ff] to-[#33b5ff] bg-clip-text text-transparent">
-                    Struktur Pengembang iSewa
+                    Struktur Pengembang SidesBeng
                 </h2>
                 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">

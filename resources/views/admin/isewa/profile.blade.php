@@ -1,6 +1,6 @@
 @extends('admin.layouts.admin')
 
-@section('title', 'Profil iSewa')
+@section('title', 'Profil SidesBeng')
 
 @section('content')
 <link rel="stylesheet" href="{{ asset('css/isewa-profile.css') }}">
@@ -87,10 +87,10 @@
 
                 <div class="hero-paragraphs">
                     <p>
-                        iSewa merupakan platform digital terpadu yang dirancang untuk mendukung kegiatan operasional dan pelayanan BUMDes secara modern dan efisien. Sistem ini hadir sebagai solusi inovatif untuk mengelola berbagai unit usaha desa, seperti penyewaan alat dan layanan pembelian gas.
+                        SidesBeng merupakan platform digital terpadu yang dirancang untuk mendukung kegiatan operasional dan pelayanan BUMDes secara modern dan efisien. Sistem ini hadir sebagai solusi inovatif untuk mengelola berbagai unit usaha desa, seperti penyewaan alat dan layanan pembelian gas.
                     </p>
                     <p>
-                        Melalui iSewa, proses administrasi dan transaksi menjadi lebih cepat, transparan, dan mudah dijangkau oleh masyarakat desa. Dengan berbasis sistem terintegrasi, seluruh data penyewaan, transaksi, dan laporan dapat dikelola secara otomatis dan terdokumentasi dengan baik. Dengan mengedepankan kemudahan akses dan efisiensi layanan, iSewa membantu BUMDes dalam meningkatkan produktivitas, serta memperkuat perekonomian desa secara berkelanjutan.
+                        Melalui SidesBeng, proses administrasi dan transaksi menjadi lebih cepat, transparan, dan mudah dijangkau oleh masyarakat desa. Dengan berbasis sistem terintegrasi, seluruh data penyewaan, transaksi, dan laporan dapat dikelola secara otomatis dan terdokumentasi dengan baik. Dengan mengedepankan kemudahan akses dan efisiensi layanan, SidesBeng membantu BUMDes dalam meningkatkan produktivitas, serta memperkuat perekonomian desa secara berkelanjutan.
                     </p>
                 </div>
             </div>
@@ -98,7 +98,7 @@
             <!-- RIGHT LOGO -->
             <div class="hero-right">
                 <div class="logo-wrap">
-                    <img src="{{ asset('Admin/img/avatars/sewais.png') }}" alt="Logo iSewa">
+                    <img src="{{ asset('Admin/img/avatars/sewais.png') }}" alt="Logo SidesBeng">
                 </div>
             </div>
         </div>
@@ -242,7 +242,7 @@
 
     <!-- STRUKTUR PENGEMBANG -->
     <section class="section pengembang container-xxl">
-        <h2 class="section-title">Struktur <span class="accent">Pengembang iSewa</span></h2>
+        <h2 class="section-title">Struktur <span class="accent">Pengembang SidesBeng</span></h2>
 
         <div class="pengembang-row">
 

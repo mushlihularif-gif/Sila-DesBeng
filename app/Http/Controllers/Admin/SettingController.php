@@ -31,7 +31,7 @@ class SettingController extends Controller
     }
 
     /**
-     * Menampilkan halaman Profil iSewa (profil sistem)
+     * Menampilkan halaman Profil SidesBeng (profil sistem)
      */
     public function showIsewaProfile(Request $request)
     {

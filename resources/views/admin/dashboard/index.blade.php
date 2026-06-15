@@ -10,7 +10,7 @@
                         <div class="d-flex align-items-end row">
                             <div class="col-sm-10">
                                 <div class="card-body p-3">
-                                    <h5 class="card-title text-primary fw-bold">Selamat Datang di iSewa 🏛️</h5>
+                                    <h5 class="card-title text-primary fw-bold">Selamat Datang di SidesBeng 🏛️</h5>
                                     <p class="mb-2">Sistem Penyewaan Alat dan Promosi Usaha BUMDes berbasis Digital <span
                                             class="fw-bold">Desa Pematang Duku Timur</span></p>
                                     <a href="{{ route('admin.isewa.profile-bumdes') }}"
@@ -613,7 +613,7 @@
                             document.write(new Date().getFullYear());
                         </script>
                         , made with by
-                        <a href="https://themeselection.com" target="_blank" class="footer-link fw-bolder">iSewa Project
+                        <a href="https://themeselection.com" target="_blank" class="footer-link fw-bolder">SidesBeng Project
                             Team 😎</a>
                     </div>
                 </div>
