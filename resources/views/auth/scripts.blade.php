@@ -386,6 +386,81 @@
             }
         });
 
+        // ========================================
+        // REGISTER FORM - VALIDASI CLIENT-SIDE
+        // ========================================
+        document.getElementById('form-register')?.addEventListener('submit', function(e) {
+            const form = this;
+            clearErrors(form);
+
+            const passwordInput = document.getElementById('register-password');
+            const confirmInput  = document.getElementById('register-password-confirm');
+            const password      = passwordInput ? passwordInput.value : '';
+            const confirm       = confirmInput  ? confirmInput.value  : '';
+
+            let hasError = false;
+
+            // Cek panjang password
+            if (password.length > 0 && password.length < 8) {
+                showError(form, 'password', '⚠️ Kata sandi minimal 8 karakter (saat ini ' + password.length + ' karakter)');
+                hasError = true;
+            } else if (password.length === 0) {
+                showError(form, 'password', '⚠️ Kata sandi wajib diisi');
+                hasError = true;
+            }
+
+            // Cek konfirmasi password
+            if (confirm.length === 0) {
+                showError(form, 'password_confirmation', '⚠️ Konfirmasi kata sandi wajib diisi');
+                hasError = true;
+            } else if (password !== confirm) {
+                showError(form, 'password_confirmation', '⚠️ Konfirmasi kata sandi tidak cocok');
+                hasError = true;
+            }
+
+            if (hasError) {
+                e.preventDefault();
+                // Scroll ke field password agar peringatan terlihat
+                if (passwordInput) {
+                    passwordInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                return false;
+            }
+        });
+
+        // Real-time: peringatan saat ketik password kurang dari 8 karakter
+        document.getElementById('register-password')?.addEventListener('input', function() {
+            const form = document.getElementById('form-register');
+            if (!form) return;
+            const errSpan = form.querySelector('[data-error="password"]');
+            if (this.value.length > 0 && this.value.length < 8) {
+                showError(form, 'password', '⚠️ Kata sandi minimal 8 karakter');
+            } else {
+                if (errSpan) {
+                    errSpan.textContent = '';
+                    errSpan.classList.add('hidden');
+                }
+            }
+        });
+
+        // Real-time: cek konfirmasi cocok saat ketik
+        document.getElementById('register-password-confirm')?.addEventListener('input', function() {
+            const form = document.getElementById('form-register');
+            if (!form) return;
+            const password = document.getElementById('register-password')?.value || '';
+            const errSpan = form.querySelector('[data-error="password_confirmation"]');
+            if (this.value.length > 0 && this.value !== password) {
+                showError(form, 'password_confirmation', '⚠️ Konfirmasi kata sandi tidak cocok');
+            } else {
+                if (errSpan) {
+                    errSpan.textContent = '';
+                    errSpan.classList.add('hidden');
+                }
+            }
+        });
+
+
+
         // Lupa Kata Sandi Trigger from Login Modal
         document.getElementById('btn-open-forgot-password')?.addEventListener('click', () => {
             const modalForgotPassword = document.getElementById('modal-forgot-password');

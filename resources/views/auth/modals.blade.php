@@ -255,7 +255,7 @@
             </div>
 
             {{-- Form Register --}}
-            <form action="{{ route('auth.register') }}" method="POST" class="space-y-3 max-h-96 overflow-y-auto pr-2">
+            <form id="form-register" action="{{ route('auth.register') }}" method="POST" class="space-y-3 max-h-96 overflow-y-auto pr-2">
                 @csrf
                 <div class="grid grid-cols-2 gap-3">
                     <div>
