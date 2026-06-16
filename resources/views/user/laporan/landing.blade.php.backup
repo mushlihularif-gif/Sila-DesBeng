@@ -616,7 +616,7 @@
     <div class="blur-orb blur-orb-br"></div>
     <div class="container relative" style="z-index:10">
         <div class="text-center mb-16">
-            <h2 class="section-title">📊 Statistik Real-Time</h2>
+            <h2 class="section-title">Statistik Real-Time</h2>
             <p class="section-subtitle">Transparansi data pengaduan warga</p>
         </div>
         <div class="grid grid-4">
@@ -674,7 +674,7 @@
 <section id="kategori" class="section section-kategori">
     <div class="container">
         <div class="text-center mb-16">
-            <h2 class="section-title">📂 Kategori Pengaduan</h2>
+            <h2 class="section-title">Kategori Pengaduan</h2>
             <p class="section-subtitle">Pilih kategori sesuai keluhan Anda</p>
         </div>
         <div class="grid grid-4">
@@ -694,7 +694,7 @@
 <section id="cara" class="section section-cara">
     <div class="container">
         <div class="text-center mb-16">
-            <h2 class="section-title">📖 Cara Membuat Laporan</h2>
+            <h2 class="section-title">Cara Membuat Laporan</h2>
             <p class="section-subtitle">Proses mudah dalam 4 langkah sederhana</p>
         </div>
         <div class="grid grid-4 steps-wrapper">

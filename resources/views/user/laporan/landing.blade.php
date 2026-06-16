@@ -18,6 +18,15 @@
 
         @media (max-width: 768px) { .hero-buttons { flex-direction: column; } }
 
+                @keyframes fade-in-up {
+            0% { opacity: 0; transform: translateY(30px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in-up { animation: fade-in-up 0.8s ease-out forwards; opacity: 0; }
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        .delay-300 { animation-delay: 300ms; }
+
         /* ============ HERO SECTION ============ */
         .hero {
             z-index: 10;
@@ -352,20 +361,19 @@
     <div class="hero-content container mx-auto px-4 md:px-6 text-center">
         
 
-        <h1 class="hero-title">
+        <h1 class="hero-title animate-fade-in-up">
             <span class="hero-title-gold">Sampaikan Aspirasi</span>
             <span class="hero-subtitle">Dengan Hormat dan Sopan</span>
         </h1>
 
-        <p class="hero-desc">
+        <p class="hero-desc animate-fade-in-up delay-100">
             <span class="highlight">Suara Anda</span> adalah kunci kemajuan lingkungan kita bersama.
         </p>
 
-        <div class="hero-buttons">
+        <div class="hero-buttons animate-fade-in-up delay-200">
             @guest
                 <div class="btn-gradient-wrapper">
                     <a href="{{ url('/auth') }}" class="btn-gradient" style="padding: 20px 40px; font-size: 1.25rem;">
-                        <span class="icon" style="margin-right: 12px; font-size: 1.5rem;">📝</span>
                         <span>Laporkan Keluhan</span>
                     </a>
                 </div>
@@ -375,7 +383,6 @@
             @else
                 <div class="btn-gradient-wrapper">
                     <a href="{{ route('user.laporan.index') }}" class="btn-gradient" style="padding: 24px 48px; font-size: 1.5rem;">
-                        <span class="icon" style="margin-right: 16px; font-size: 1.875rem;">📝</span>
                         <span>Buat Laporan Sekarang</span>
                     </a>
                 </div>
@@ -383,7 +390,7 @@
         </div>
 
         @guest
-            <p class="hero-register">
+            <p class="hero-register animate-fade-in-up delay-300">
                 Belum punya akun? <a href="{{ url('/auth') }}">Daftar sekarang</a>
             </p>
         @endguest
@@ -403,7 +410,7 @@
     <div class="blur-orb blur-orb-br"></div>
     <div class="container mx-auto px-4 md:px-6 relative" style="z-index:10">
         <div class="text-center mb-16">
-            <h2 class="section-title">📊 Statistik Real-Time</h2>
+            <h2 class="section-title">Statistik Real-Time</h2>
             <p class="section-subtitle">Transparansi data pengaduan warga</p>
         </div>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
@@ -417,7 +424,7 @@
             <div class="stat-card">
                 <div class="stat-icon-wrap">
                     <div class="stat-icon-glow" style="background: linear-gradient(to right,#60a5fa,#2563eb)"></div>
-                    <div class="stat-icon blue">📋</div>
+                    <div class="stat-icon blue"><img src="{{ asset('User/img/pelaporanicon/laporkankeluhan.png') }}" alt="Icon" class="w-12 h-12 object-contain"></div>
                 </div>
                 <div class="stat-value blue counter" data-target="{{ $totalLaporan }}">0</div>
                 <div class="stat-label">Total Laporan</div>
@@ -427,7 +434,7 @@
             <div class="stat-card">
                 <div class="stat-icon-wrap">
                     <div class="stat-icon-glow" style="background: linear-gradient(to right,#facc15,#f97316)"></div>
-                    <div class="stat-icon yellow">⏳</div>
+                    <div class="stat-icon yellow"><img src="{{ asset('User/img/pelaporanicon/menunggu1.png') }}" alt="Icon" class="w-12 h-12 object-contain"></div>
                 </div>
                 <div class="stat-value yellow counter" data-target="{{ $menunggu }}">0</div>
                 <div class="stat-label">Menunggu</div>
@@ -437,7 +444,7 @@
             <div class="stat-card">
                 <div class="stat-icon-wrap">
                     <div class="stat-icon-glow" style="background: linear-gradient(to right,#c084fc,#ec4899)"></div>
-                    <div class="stat-icon purple">🔄</div>
+                    <div class="stat-icon purple"><img src="{{ asset('User/img/pelaporanicon/dalamproses1.png') }}" alt="Icon" class="w-12 h-12 object-contain"></div>
                 </div>
                 <div class="stat-value purple counter" data-target="{{ $proses }}">0</div>
                 <div class="stat-label">Dalam Proses</div>
@@ -447,7 +454,7 @@
             <div class="stat-card">
                 <div class="stat-icon-wrap">
                     <div class="stat-icon-glow" style="background: linear-gradient(to right,#4ade80,#059669)"></div>
-                    <div class="stat-icon green">✅</div>
+                    <div class="stat-icon green"><img src="{{ asset('User/img/pelaporanicon/selesai.png') }}" alt="Icon" class="w-12 h-12 object-contain"></div>
                 </div>
                 <div class="stat-value green counter" data-target="{{ $selesai }}">0</div>
                 <div class="stat-label">Selesai</div>
@@ -461,18 +468,17 @@
 <section id="kategori" class="section section-kategori">
     <div class="container mx-auto px-4 md:px-6">
         <div class="text-center mb-16">
-            <h2 class="section-title">📂 Kategori Pengaduan</h2>
+            <h2 class="section-title">Kategori Pengaduan</h2>
             <p class="section-subtitle">Pilih kategori sesuai keluhan Anda</p>
         </div>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <div class="cat-card"><div class="cat-icon">🧹</div><div class="cat-name">Kebersihan</div><div class="cat-desc">Sampah, parit, kebersihan</div></div>
-            <div class="cat-card"><div class="cat-icon">🚨</div><div class="cat-name">Keselamatan</div><div class="cat-desc">Kemalangan, jenayah</div></div>
-            <div class="cat-card"><div class="cat-icon">🏗️</div><div class="cat-name">Infrastruktur</div><div class="cat-desc">Jalan, lampu, bangunan</div></div>
-            <div class="cat-card"><div class="cat-icon">🏥</div><div class="cat-name">Kesehatan</div><div class="cat-desc">Layanan medis, sanitasi</div></div>
-            <div class="cat-card"><div class="cat-icon">🌳</div><div class="cat-name">Lingkungan</div><div class="cat-desc">Pencemaran, banjir</div></div>
-            <div class="cat-card"><div class="cat-icon">🏢</div><div class="cat-name">Fasilitas</div><div class="cat-desc">Balai, taman, masjid</div></div>
-            <div class="cat-card"><div class="cat-icon">📝</div><div class="cat-name">Administrasi</div><div class="cat-desc">Dokumen, surat</div></div>
-            <div class="cat-card"><div class="cat-icon">📦</div><div class="cat-name">Lainnya</div><div class="cat-desc">Pengaduan umum</div></div>
+            <div class="cat-card"><div class="cat-icon"><img src="{{ asset('User/img/pelaporanicon/kebersihan.png') }}" alt="Kebersihan" class="h-20 w-auto object-contain mx-auto inline-block"></div><div class="cat-name">Kebersihan</div><div class="cat-desc">Sampah, Parit, Kebersihan</div></div>
+            <div class="cat-card"><div class="cat-icon"><img src="{{ asset('User/img/pelaporanicon/keselamatan.png') }}" alt="Keselamatan" class="h-20 w-auto object-contain mx-auto inline-block"></div><div class="cat-name">Keselamatan</div><div class="cat-desc">Kemalangan, Jenayah</div></div>
+            <div class="cat-card"><div class="cat-icon"><img src="{{ asset('User/img/pelaporanicon/infrastruktur.png') }}" alt="Infrastruktur" class="h-20 w-auto object-contain mx-auto inline-block"></div><div class="cat-name">Infrastruktur</div><div class="cat-desc">Jalan, Lampu, Bangunan</div></div>
+            <div class="cat-card"><div class="cat-icon"><img src="{{ asset('User/img/pelaporanicon/kesehatan.png') }}" alt="Kesehatan" class="h-20 w-auto object-contain mx-auto inline-block"></div><div class="cat-name">Kesehatan</div><div class="cat-desc">Layanan Medis, Sanitasi</div></div>
+            <div class="cat-card"><div class="cat-icon"><img src="{{ asset('User/img/pelaporanicon/lingkungan.png') }}" alt="Lingkungan" class="h-20 w-auto object-contain mx-auto inline-block"></div><div class="cat-name">Lingkungan</div><div class="cat-desc">Pencemaran, Banjir</div></div>
+            <div class="cat-card"><div class="cat-icon"><img src="{{ asset('User/img/pelaporanicon/fasilitas.png') }}" alt="Fasilitas" class="h-20 w-auto object-contain mx-auto inline-block"></div><div class="cat-name">Fasilitas</div><div class="cat-desc">Balai, Taman, Rumah Ibadah</div></div>
+            <div class="cat-card"><div class="cat-icon"><img src="{{ asset('User/img/pelaporanicon/lainnya.png') }}" alt="Lainnya" class="h-20 w-auto object-contain mx-auto inline-block"></div><div class="cat-name">Lainnya</div><div class="cat-desc">Pengaduan Umum</div></div>
         </div>
     </div>
 </section>
@@ -481,26 +487,26 @@
 <section id="cara" class="section section-cara">
     <div class="container mx-auto px-4 md:px-6">
         <div class="text-center mb-16">
-            <h2 class="section-title">📖 Cara Membuat Laporan</h2>
+            <h2 class="section-title">Cara Membuat Laporan</h2>
             <p class="section-subtitle">Proses mudah dalam 4 langkah sederhana</p>
         </div>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-6 steps-wrapper">
             <div class="steps-line"></div>
             <div><div class="step-card">
                 <div class="step-num-wrap"><div class="step-num-glow" style="background:linear-gradient(to right,#60a5fa,#06b6d4)"></div><div class="step-num blue">1</div></div>
-                <div class="step-icon">👤</div><h3 class="step-title">Daftar / Masuk</h3><p class="step-desc">Buat akun atau login ke sistem kami</p>
+                <h3 class="step-title">Daftar / Masuk</h3><p class="step-desc">Buat akun atau login ke sistem kami</p>
             </div></div>
             <div><div class="step-card">
                 <div class="step-num-wrap"><div class="step-num-glow" style="background:linear-gradient(to right,#c084fc,#ec4899)"></div><div class="step-num pink">2</div></div>
-                <div class="step-icon">📝</div><h3 class="step-title">Isi Formulir</h3><p class="step-desc">Lengkapi detail pengaduan dengan jelas</p>
+                <h3 class="step-title">Isi Formulir</h3><p class="step-desc">Lengkapi detail pengaduan dengan jelas</p>
             </div></div>
             <div><div class="step-card">
                 <div class="step-num-wrap"><div class="step-num-glow" style="background:linear-gradient(to right,#fb923c,#ef4444)"></div><div class="step-num orange">3</div></div>
-                <div class="step-icon">📸</div><h3 class="step-title">Upload Bukti</h3><p class="step-desc">Lampirkan foto atau dokumen pendukung</p>
+                <h3 class="step-title">Upload Bukti</h3><p class="step-desc">Lampirkan foto atau dokumen pendukung</p>
             </div></div>
             <div><div class="step-card">
                 <div class="step-num-wrap"><div class="step-num-glow" style="background:linear-gradient(to right,#4ade80,#10b981)"></div><div class="step-num green-step">4</div></div>
-                <div class="step-icon">✅</div><h3 class="step-title">Submit</h3><p class="step-desc">Kirim dan pantau status laporan Anda</p>
+                <h3 class="step-title">Submit</h3><p class="step-desc">Kirim dan pantau status laporan Anda</p>
             </div></div>
         </div>
     </div>
@@ -511,16 +517,15 @@
     <div class="cta-orb cta-orb-tl"></div>
     <div class="cta-orb cta-orb-br"></div>
     <div class="container mx-auto px-4 md:px-6 text-center relative" style="z-index:10">
-        <div class="cta-house">🏡</div>
+        <div class="cta-house"><img src="{{ asset('User/img/pelaporanicon/17.png') }}" alt="Icon" class="h-20 w-auto object-contain mx-auto inline-block"></div>
         <h2 class="cta-title">Mari Bersama Membangun<br>Lingkungan yang Lebih Baik</h2>
         <p class="cta-desc">
             Suara Anda adalah kunci kemajuan. Bersama kita wujudkan.
         </p>
-        <div class="hero-buttons">
+        <div class="hero-buttons animate-fade-in-up delay-200">
             @guest
                 <div class="btn-gradient-wrapper">
                     <a href="{{ route('user.laporan.index') }}" class="btn-gradient" style="padding: 20px 40px; font-size: 1.25rem;">
-                        <span class="icon" style="margin-right: 12px; font-size: 1.5rem;">🚀</span>
                         <span>Mulai Sekarang</span>
                     </a>
                 </div>
@@ -528,7 +533,6 @@
             @else
                 <div class="btn-gradient-wrapper">
                     <a href="{{ route('user.laporan.index') }}" class="btn-gradient" style="padding: 24px 48px; font-size: 1.5rem;">
-                        <span class="icon" style="margin-right: 16px; font-size: 1.875rem;">📝</span>
                         <span>Buat Laporan Sekarang</span>
                     </a>
                 </div>
@@ -800,6 +804,33 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 </script>
 @endpush
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
