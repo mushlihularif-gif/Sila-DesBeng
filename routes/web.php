@@ -98,6 +98,19 @@ Route::post('/mobil-rental/booking', [App\Http\Controllers\User\MobilBookingCont
     ->name('mobil.rental.booking.store')
     ->middleware('auth');
 
+Route::get('/unit-peminjaman-fasilitas-umum', [App\Http\Controllers\User\FasilitasUmumUserController::class, 'index'])
+    ->name('user.fasilitas-umum.equipment')
+    ->middleware('role:user,guest');
+Route::get('/unit-peminjaman-fasilitas-umum/{id}', [App\Http\Controllers\User\FasilitasUmumUserController::class, 'show'])
+    ->name('user.fasilitas-umum.show')
+    ->middleware('role:user,guest');
+Route::get('/unit-peminjaman-fasilitas-umum/{id}/booking', [App\Http\Controllers\User\FasilitasUmumBookingController::class, 'create'])
+    ->name('user.fasilitas-umum.book')
+    ->middleware('auth');
+Route::post('/fasilitas-umum/booking', [App\Http\Controllers\User\FasilitasUmumBookingController::class, 'store'])
+    ->name('user.fasilitas-umum.book.store')
+    ->middleware('auth');
+
 
 Route::get('/unit-penjualan-gas', [App\Http\Controllers\User\GasSalesUserController::class, 'index'])
     ->name('gas.sales')

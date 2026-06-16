@@ -153,10 +153,10 @@
                     {{ $announcements->links() }}
                 </div>
             @else
-                <div class="backdrop-blur-sm bg-white/70 rounded-3xl p-16 text-center border border-white/80 shadow-lg animate-section">
-                    <div class="text-6xl mb-4">📭</div>
-                    <h3 class="text-2xl font-bold text-gray-800 mb-2">Belum Ada Kabar</h3>
-                    <p class="text-gray-600">Belum ada pengumuman atau event yang diterbitkan saat ini.</p>
+                <div class="backdrop-blur-sm bg-white/70 rounded-3xl text-center border border-white/80 shadow-lg animate-section" style="padding-top: 5rem; padding-bottom: 5rem; padding-left: 2rem; padding-right: 2rem;">
+                    <img src="{{ asset('User/img/kabar/yeee.png') }}" alt="Belum Ada Kabar" class="w-32 h-auto mx-auto" style="margin-bottom: 2rem;">
+                    <h3 class="text-2xl font-bold text-gray-800" style="margin-bottom: 1rem;">Belum Ada Kabar</h3>
+                    <p class="text-gray-600 mb-0">Belum ada pengumuman atau event yang diterbitkan saat ini.</p>
                 </div>
             @endif
             </div>
