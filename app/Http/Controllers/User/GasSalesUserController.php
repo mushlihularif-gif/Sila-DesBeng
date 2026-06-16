@@ -4,17 +4,34 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Models\Gas;
+use App\Models\GasOrder;
 
 class GasSalesUserController extends Controller
 {
     public function index()
     {
-        $items = Gas::where('status', '!=', 'rusak')
-                    ->orderBy('created_at', 'desc')
-                    ->get();
-        
-        return view('users.gas-sales', compact('items'));
+        $kategori = request('kategori', '');
+
+        $query = Gas::where('status', '!=', 'rusak');
+
+        if ($kategori) {
+            $query->where('kategori', $kategori);
+        }
+
+        $items = $query->orderBy('created_at', 'desc')->get();
+
+        // Statistik
+        $stats = [
+            'total_produk'   => Gas::where('status', '!=', 'rusak')->count(),
+            'total_stok'     => Gas::where('status', '!=', 'rusak')->sum('stok'),
+            'total_transaksi'=> GasOrder::count(),
+            'selesai'        => GasOrder::where('status', 'completed')->orWhere('status', 'selesai')->count(),
+        ];
+
+        return view('users.gas-sales', compact('items', 'kategori', 'stats'));
     }
+
+
 
     public function show($id)
     {
