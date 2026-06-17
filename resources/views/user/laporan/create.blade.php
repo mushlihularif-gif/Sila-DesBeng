@@ -102,13 +102,27 @@
                         @enderror
                     </div>
 
-                    <!-- Lokasi -->
+                    {{-- Lokasi + Peta --}}
                     <div>
-                        <label class="block font-semibold text-[#1e3a5f] mb-2">Lokasi Kejadian <span class="text-red-500">*</span></label>
-                        <input type="text" name="lokasi" required value="{{ old('lokasi') }}"
-                            class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 transition-all shadow-sm @error('lokasi') border-red-500 @enderror"
-                            placeholder="Contoh: Jalan Mawar RT 21/RW 6">
-                        @error('lokasi')
+                        <label class="block font-semibold text-[#1e3a5f] mb-1">Lokasi Kejadian <span class="text-red-500">*</span></label>
+                        <p class="text-sm text-gray-500 mb-3"> Klik pada peta untuk menentukan lokasi kejadian secara tepat.</p>
+
+                        <div style="position:relative; z-index:0;">
+                            <div id="map" style="height:420px; width:100%; border-radius:12px; border:2px solid #e5e7eb; z-index: 1;"></div>
+                        </div>
+
+                        <input type="hidden" name="latitude"    id="latitude">
+                        <input type="hidden" name="longitude"   id="longitude">
+                        <input type="hidden" name="nama_lokasi" id="nama_lokasi">
+
+                        {{-- Tampilan nama lokasi hasil klik --}}
+                        <div class="mt-3 p-4 rounded-xl bg-gray-50 border border-gray-200 min-h-[52px] flex items-center gap-3 transition-colors" id="lokasi-display">
+                            <div>
+                                <p id="lokasi-nama" class="text-gray-400 text-sm italic">Belum ada lokasi dipilih. Klik peta di atas.</p>
+                                <p id="lokasi-coords" class="text-gray-500 text-xs mt-0.5 hidden"></p>
+                            </div>
+                        </div>
+                        @error('nama_lokasi')
                             <p class="text-red-500 text-xs mt-1 font-medium">{{ $message }}</p>
                         @enderror
                     </div>
@@ -187,6 +201,139 @@
             </div>
         </div>
     </div>
+
+    {{-- ===== MODAL KONFIRMASI LOKASI ===== --}}
+    <div id="location-modal"
+        class="fixed inset-0 flex items-center justify-center z-[9999] hidden"
+        style="background: rgba(0,0,0,0.5); backdrop-filter: blur(5px);">
+        <div class="bg-white border border-gray-100 rounded-2xl shadow-2xl p-6 max-w-sm w-full mx-4">
+            <div class="flex items-center gap-2 mb-1">
+                <span class="text-2xl">📍</span>
+                <h3 class="text-[#1e3a5f] font-bold text-lg">Konfirmasi Lokasi</h3>
+            </div>
+            <p class="text-gray-500 text-sm mb-4">Apakah ini lokasi kejadian yang Anda maksud?</p>
+
+            <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-5">
+                <p id="modal-address" class="text-gray-800 font-semibold text-sm leading-relaxed"></p>
+                <p id="modal-coords"  class="text-gray-500 text-xs mt-1"></p>
+            </div>
+
+            <div class="flex gap-3">
+                <button type="button" id="btn-confirm"
+                    class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition text-sm shadow-sm">
+                    ✅ Ya, Benar
+                </button>
+                <button type="button" id="btn-cancel"
+                    class="flex-1 py-2.5 bg-white border border-gray-300 hover:bg-gray-50 hover:text-red-500 text-gray-700 font-semibold rounded-xl transition text-sm">
+                    ❌ Pilih Ulang
+                </button>
+            </div>
+        </div>
+    </div>
+
+    {{-- ===== SCRIPT PETA (GOOGLE MAPS) ===== --}}
+    <script>
+    let map, marker, geocoder;
+    let pendingLat = null, pendingLng = null, pendingAddress = null;
+
+    function initMap() {
+        const pakning = { lat: 1.0916, lng: 102.0724 };
+
+        geocoder = new google.maps.Geocoder();
+
+        map = new google.maps.Map(document.getElementById("map"), {
+            zoom: 15,
+            center: pakning,
+            mapTypeId: "roadmap",
+            mapTypeControl: true,
+            streetViewControl: false,
+            fullscreenControl: true,
+        });
+
+        marker = new google.maps.Marker({
+            position: pakning,
+            map: map,
+            draggable: true,
+            animation: google.maps.Animation.DROP,
+            title: "Geser atau klik peta untuk mengubah lokasi",
+            icon: { url: "https://maps.google.com/mapfiles/ms/icons/red-dot.png" }
+        });
+
+        map.addListener("click", function(event) {
+            showLocationModal(event.latLng.lat(), event.latLng.lng());
+        });
+
+        marker.addListener("dragend", function(event) {
+            showLocationModal(event.latLng.lat(), event.latLng.lng());
+        });
+
+        document.getElementById("btn-confirm").addEventListener("click", confirmLocation);
+        document.getElementById("btn-cancel").addEventListener("click", cancelLocation);
+
+        document.getElementById("location-modal").addEventListener("click", function(e) {
+            if (e.target === this) cancelLocation();
+        });
+    }
+
+    function showLocationModal(lat, lng) {
+        pendingLat = lat;
+        pendingLng = lng;
+
+        geocoder.geocode({ location: { lat: lat, lng: lng } }, function(results, status) {
+            let address = "Lokasi tidak dikenali";
+            if (status === "OK" && results[0]) {
+                address = results[0].formatted_address;
+            }
+            pendingAddress = address;
+
+            document.getElementById("modal-address").innerText = address;
+            document.getElementById("modal-coords").innerText  =
+                "Lat: " + lat.toFixed(6) + "  •  Lng: " + lng.toFixed(6);
+
+            marker.setPosition({ lat: lat, lng: lng });
+            marker.setAnimation(google.maps.Animation.BOUNCE);
+            setTimeout(() => marker.setAnimation(null), 700);
+
+            document.getElementById("location-modal").classList.remove("hidden");
+        });
+    }
+
+    function confirmLocation() {
+        document.getElementById("latitude").value    = pendingLat;
+        document.getElementById("longitude").value   = pendingLng;
+        document.getElementById("nama_lokasi").value = pendingAddress;
+
+        document.getElementById("lokasi-nama").innerText = pendingAddress;
+        document.getElementById("lokasi-nama").classList.remove("italic", "text-gray-400");
+        document.getElementById("lokasi-nama").classList.add("text-gray-800", "font-semibold");
+
+        document.getElementById("lokasi-coords").innerText =
+            "Lat: " + pendingLat.toFixed(6) + "  •  Lng: " + pendingLng.toFixed(6);
+        document.getElementById("lokasi-coords").classList.remove("hidden");
+
+        document.getElementById("lokasi-display").classList.remove("border-gray-200", "bg-gray-50");
+        document.getElementById("lokasi-display").classList.add("border-blue-400", "bg-blue-50");
+
+        document.getElementById("location-modal").classList.add("hidden");
+    }
+
+    function cancelLocation() {
+        pendingLat = null;
+        pendingLng = null;
+        pendingAddress = null;
+        document.getElementById("location-modal").classList.add("hidden");
+
+        const confirmedLat = document.getElementById("latitude").value;
+        const confirmedLng = document.getElementById("longitude").value;
+        if (confirmedLat && confirmedLng) {
+            marker.setPosition({ lat: parseFloat(confirmedLat), lng: parseFloat(confirmedLng) });
+        }
+    }
+    </script>
+
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyATPFj6VvZ7OcbENlh-m8gd5t7EbZ_1f8M">
+    </script>
 
     <script>
         const inputBukti = document.getElementById('bukti');
