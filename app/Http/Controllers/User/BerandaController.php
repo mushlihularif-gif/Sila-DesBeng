@@ -9,6 +9,8 @@ use App\Models\GasOrder;
 use App\Models\ManualReport;
 use App\Models\Barang;
 use App\Models\Gas;
+use App\Models\Mobil;
+use App\Models\FasilitasUmum;
 use App\Models\BumdesMember;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -62,6 +64,46 @@ class BerandaController extends Controller
                     ];
                 });
 
+            // Search Mobil Items
+            $mobilResults = \App\Models\Mobil::where('nama_mobil', 'LIKE', "%{$search}%")
+                ->orWhere('kategori', 'LIKE', "%{$search}%")
+                ->get()
+                ->map(function ($item) {
+                    return (object) [
+                        'id' => $item->id,
+                        'name' => $item->nama_mobil,
+                        'image' => $item->foto,
+                        'price' => $item->harga_sewa,
+                        'price_formatted' => 'Rp ' . number_format($item->harga_sewa, 0, ',', '.'),
+                        'stock' => $item->stok,
+                        'type' => 'mobil',
+                        'category' => 'Unit Penyewaan Mobil',
+                        'real_category' => $item->kategori,
+                        'unit' => $item->satuan ?? 'hari',
+                        'link' => route('mobil.rental.show', $item->id)
+                    ];
+                });
+
+            // Search Fasilitas Umum Items
+            $fasilitasResults = \App\Models\FasilitasUmum::where('nama_fasilitas', 'LIKE', "%{$search}%")
+                ->orWhere('kategori', 'LIKE', "%{$search}%")
+                ->get()
+                ->map(function ($item) {
+                    return (object) [
+                        'id' => $item->id,
+                        'name' => $item->nama_fasilitas,
+                        'image' => $item->foto,
+                        'price' => 0, // Fasilitas Umum might be free or negotiated, set 0 for display
+                        'price_formatted' => 'Peminjaman',
+                        'stock' => $item->stok,
+                        'type' => 'fasilitas',
+                        'category' => 'Fasilitas Umum',
+                        'real_category' => $item->kategori,
+                        'unit' => 'kegiatan',
+                        'link' => route('fasilitas.show', $item->id)
+                    ];
+                });
+
             // Search BUMDes Members (Struktur Organisasi)
             $bumdesResults = \App\Models\BumdesMember::where('name', 'LIKE', "%{$search}%")
                 ->orWhere('position', 'LIKE', "%{$search}%")
@@ -88,8 +130,8 @@ class BerandaController extends Controller
             // Search Static Developers (Profil SiladesBeng)
             $developers = [
                 [
-                    'name' => 'M.Wahid Riono',
-                    'image' => 'User/img/avatars/wahid1.jpg',
+                    'name' => 'Rizqy Hamadi Ken',
+                    'image' => 'User/img/avatars/ken.png',
                     'position' => 'Pengembang SiladesBeng',
                     'link' => route('isewa.profile')
                 ],
@@ -100,8 +142,8 @@ class BerandaController extends Controller
                     'link' => route('isewa.profile')
                 ],
                 [
-                    'name' => 'Safika',
-                    'image' => 'User/img/avatars/wanita.png',
+                    'name' => 'Dicki Wahyudi',
+                    'image' => 'User/img/avatars/dicki.png',
                     'position' => 'Pengembang SiladesBeng',
                     'link' => route('isewa.profile')
                 ]
@@ -126,6 +168,8 @@ class BerandaController extends Controller
             });
 
             $searchResults = $rentalResults->concat($gasResults)
+                            ->concat($mobilResults)
+                            ->concat($fasilitasResults)
                             ->concat($bumdesResults)
                             ->concat($developerResults);
         }

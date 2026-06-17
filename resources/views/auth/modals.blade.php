@@ -115,105 +115,43 @@
             </button>
 
             <div class="text-center mb-6">
-                <h2 class="text-2xl font-bold text-gray-900 mb-2">Lengkapi Profil</h2>
+                <h2 class="text-2xl font-bold text-gray-900 mb-2">Mohon Isi Terlebih Dahulu</h2>
                 <div class="flex items-center justify-center gap-2 text-sm text-gray-600 mb-4">
                     <img src="https://www.google.com/favicon.ico" class="w-4 h-4" alt="Google">
                     <span>Melanjutkan pendaftaran dengan Google</span>
                 </div>
-                
-                {{-- Avatar Preview --}}
-                <div class="relative inline-block mb-4 group">
-                    <img id="google-avatar-preview" 
-                         src="{{ session('google_register_data.avatar') }}" 
-                         class="w-24 h-24 rounded-full object-cover border-4 border-blue-50 shadow-md" 
-                         alt="Avatar">
-                    <label for="google-avatar-input" 
-                           class="absolute bottom-0 right-0 bg-blue-600 text-white rounded-full p-2 cursor-pointer hover:bg-blue-700 transition shadow-sm transform group-hover:scale-110">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                        </svg>
-                    </label>
-                </div>
             </div>
 
-            <form id="form-google-register" class="space-y-3 max-h-96 overflow-y-auto pr-2">
-                <input type="file" id="google-avatar-input" name="avatar" class="hidden" accept="image/*">
-                
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-500 mb-1">Username</label>
-                        <input type="text" name="username" placeholder="Username Unik" required
-                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm">
-                        <span class="text-red-500 text-xs hidden block mt-1" data-error="username"></span>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-500 mb-1">Email (Google)</label>
-                        <input type="email" name="email" value="{{ session('google_register_data.email') }}" readonly
-                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-gray-100 text-gray-500 cursor-not-allowed outline-none transition text-sm">
-                    </div>
-                </div>
-
+            <form id="form-google-register" class="space-y-3">
+                @csrf
                 <div>
-                    <label class="block text-xs font-semibold text-gray-500 mb-1">Nama Lengkap</label>
-                    <input type="text" name="name" value="{{ session('google_register_data.name') }}" required
-                        class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm">
-                    <span class="text-red-500 text-xs hidden block mt-1" data-error="name"></span>
+                    <select name="kabupaten" id="google-reg-kabupaten" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-gray-100 text-gray-700 outline-none transition text-sm cursor-not-allowed">
+                        <option value="">Memuat Kabupaten...</option>
+                    </select>
                 </div>
-
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-semibold text-gray-500 mb-1">No. Handphone</label>
-                        <input type="tel" name="phone" placeholder="08xxxxxxxxxx" required
-                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm">
-                        <span class="text-red-500 text-xs hidden block mt-1" data-error="phone"></span>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-500 mb-1">Jenis Kelamin</label>
-                        <select name="gender" required
-                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm">
-                            <option value="">Pilih...</option>
-                            <option value="laki-laki">Laki-laki</option>
-                            <option value="perempuan">Perempuan</option>
+                        <select name="kecamatan" id="google-reg-kecamatan" required disabled class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm disabled:bg-gray-100 disabled:cursor-not-allowed">
+                            <option value="">Pilih Kecamatan</option>
                         </select>
-                        <span class="text-red-500 text-xs hidden block mt-1" data-error="gender"></span>
+                    </div>
+                    <div>
+                        <select name="region_id" id="google-reg-desa" required disabled class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm disabled:bg-gray-100 disabled:cursor-not-allowed">
+                            <option value="">Pilih Desa/Kelurahan</option>
+                        </select>
+                        <span class="text-red-500 text-xs hidden block mt-1" data-error="region_id"></span>
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-gray-500 mb-1">Alamat</label>
-                    <textarea name="address" placeholder="Alamat Lengkap" required rows="2"
+                    <textarea name="address" placeholder="Alamat Detail" required rows="2"
                         class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm resize-none"></textarea>
                     <span class="text-red-500 text-xs hidden block mt-1" data-error="address"></span>
                 </div>
 
-                {{-- Password Section --}}
-                <div class="bg-blue-50 p-3 rounded-lg border border-blue-100 mb-2">
-                    <div class="flex items-start gap-2">
-                        <svg class="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <p class="text-xs text-blue-700">Opsional: Buat kata sandi agar bisa login tanpa Google.</p>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="relative">
-                        <input type="password" name="password" id="google-password" placeholder="Kata Sandi (Opsional)"
-                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm pr-12">
-                        <button type="button" class="toggle-password absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600" data-target="google-password">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                        </button>
-                    </div>
-                    <div class="relative">
-                        <input type="password" name="password_confirmation" id="google-password-confirm" placeholder="Konfirmasi"
-                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm pr-12">
-                    </div>
-                </div>
-                <span class="text-red-500 text-xs hidden block mt-1" data-error="password"></span>
-
                 <button type="submit"
                     class="w-full py-3 bg-blue-500 text-white rounded-full font-semibold hover:bg-blue-600 transition disabled:opacity-50 disabled:cursor-not-allowed mt-4">
-                    <span class="btn-text">Selesaikan Pendaftaran</span>
+                    <span class="btn-text">Lanjutkan</span>
                     <span class="btn-loading hidden">
                         <svg class="animate-spin h-5 w-5 mx-auto" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -281,19 +219,49 @@
                 </div>
 
                 <div>
-                    <textarea name="address" placeholder="Alamat" required rows="2"
+                    <select name="kabupaten" id="reg-kabupaten" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-gray-100 text-gray-700 outline-none transition text-sm cursor-not-allowed">
+                        <option value="">Memuat Kabupaten...</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <select name="kecamatan" id="reg-kecamatan" required disabled class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm disabled:bg-gray-100 disabled:cursor-not-allowed">
+                            <option value="">Pilih Kecamatan</option>
+                        </select>
+                    </div>
+                    <div>
+                        <select name="region_id" id="reg-desa" disabled required class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm disabled:bg-gray-100 disabled:cursor-not-allowed">
+                            <option value="">Pilih Desa/Kelurahan</option>
+                        </select>
+                        <span class="text-red-500 text-xs hidden block mt-1" data-error="region_id"></span>
+                    </div>
+                </div>
+
+                <div>
+                    <textarea name="address" placeholder="Alamat Detail" required rows="2"
                         class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm resize-none"></textarea>
                     <span class="text-red-500 text-xs hidden block mt-1" data-error="address"></span>
                 </div>
 
-                <div>
-                    <select name="gender" required
-                        class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm">
-                        <option value="">Jenis Kelamin</option>
-                        <option value="laki-laki">Laki-laki</option>
-                        <option value="perempuan">Perempuan</option>
-                    </select>
-                    <span class="text-red-500 text-xs hidden block mt-1" data-error="gender"></span>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <select name="gender" required
+                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm">
+                            <option value="">Jenis Kelamin</option>
+                            <option value="laki-laki">Laki-laki</option>
+                            <option value="perempuan">Perempuan</option>
+                        </select>
+                        <span class="text-red-500 text-xs hidden block mt-1" data-error="gender"></span>
+                    </div>
+                    <div>
+                        <select name="otp_method" required
+                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm">
+                            <option value="">Metode OTP</option>
+                            <option value="email">Via Email</option>
+                            <option value="sms">Via SMS</option>
+                        </select>
+                        <span class="text-red-500 text-xs hidden block mt-1" data-error="otp_method"></span>
+                    </div>
                 </div>
 
                 <div class="relative">
@@ -353,6 +321,26 @@
                     </span>
                 </button>
             </form>
+
+            <div class="mt-6 text-center text-gray-500 text-sm">atau</div>
+
+            {{-- Social Register --}}
+            <div class="mt-4 space-y-3 flex flex-col gap-3">
+                <a href="{{ route('auth.google') }}"
+                    class="w-full py-3 border border-gray-300 rounded-full flex items-center justify-center gap-3 hover:bg-gray-50 transition text-decoration-none">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24">
+                        <path fill="#4285F4"
+                            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                        <path fill="#34A853"
+                            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                        <path fill="#FBBC05"
+                            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                        <path fill="#EA4335"
+                            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                    </svg>
+                    <span class="font-medium text-gray-700">Daftar dengan Google</span>
+                </a>
+            </div>
         </div>
 
         {{-- MODAL OTP --}}
@@ -531,9 +519,18 @@
             <form action="{{ route('auth.forgot-password') }}" method="POST" class="space-y-6">
                 @csrf
                 <div>
-                    <input type="email" name="email" placeholder="Email" required
+                    <input type="text" name="email_or_phone" placeholder="Email / Nomor Telepon" required
                         class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition">
-                    <span class="text-red-500 text-sm hidden block mt-1" data-error="email"></span>
+                    <span class="text-red-500 text-sm hidden block mt-1" data-error="email_or_phone"></span>
+                </div>
+                <div>
+                    <select name="otp_method" required
+                        class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition">
+                        <option value="">Metode Pengiriman OTP</option>
+                        <option value="email">Kirim via Email</option>
+                        <option value="sms">Kirim via SMS</option>
+                    </select>
+                    <span class="text-red-500 text-sm hidden block mt-1" data-error="otp_method"></span>
                 </div>
 
                 <button type="submit"

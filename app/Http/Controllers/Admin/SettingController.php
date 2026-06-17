@@ -38,12 +38,12 @@ class SettingController extends Controller
         $search = $request->get('search');
         
         $developers = [
-            'wahid' => [
-                'name' => 'Wahid Riono',
+            'ken' => [
+                'name' => 'Rizqy Hamadi Ken',
                 'prodi' => 'D4 Information System Security',
                 'jurusan' => 'Teknik Informatika',
                 'kampus' => 'Politeknik Negeri Bengkalis',
-                'image' => 'wahid.jpg'
+                'image' => 'ken.png'
             ],
             'mushlihul' => [
                 'name' => 'Mushlihul Arif',
@@ -53,11 +53,11 @@ class SettingController extends Controller
                 'image' => 'mushlihul.jpg'
             ],
             'safika' => [
-                'name' => 'Safika',
+                'name' => 'Dicki Wahyudi',
                 'prodi' => 'D4 Information System Security',
                 'jurusan' => 'Teknik Informatika',
                 'kampus' => 'Politeknik Negeri Bengkalis',
-                'image' => 'safika.jpg'
+                'image' => 'dicki.png'
             ]
         ];
         
@@ -77,12 +77,12 @@ class SettingController extends Controller
     public function showDeveloperProfile($name)
     {
         $developers = [
-            'wahid' => [
-                'name' => 'Wahid Riono',
+            'ken' => [
+                'name' => 'Rizqy Hamadi Ken',
                 'prodi' => 'D4 Information System Security',
                 'jurusan' => 'Teknik Informatika',
                 'kampus' => 'Politeknik Negeri Bengkalis',
-                'image' => 'wahid.jpg'
+                'image' => 'ken.png'
             ],
             'mushlihul' => [
                 'name' => 'Mushlihul Arif',
@@ -91,12 +91,12 @@ class SettingController extends Controller
                 'kampus' => 'Politeknik Negeri Bengkalis',
                 'image' => 'mushlihul.jpg'
             ],
-            'safika' => [
-                'name' => 'Safika',
+            'dicki' => [
+                'name' => 'Dicki Wahyudi',
                 'prodi' => 'D4 Information System Security',
                 'jurusan' => 'Teknik Informatika',
                 'kampus' => 'Politeknik Negeri Bengkalis',
-                'image' => 'safika.jpg'
+                'image' => 'dicki.png'
             ]
         ];
 

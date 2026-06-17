@@ -28,16 +28,16 @@
                             Perjalanan <span class="font-semibold text-gray-800">SiladesBeng</span> (Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis) bermula dari sebuah visi besar untuk mendorong percepatan digitalisasi pelayanan publik di wilayah Kabupaten Bengkalis. Gagasan ini lahir sebagai solusi inovatif untuk memutus kendala jarak dan mengoptimalkan potensi desa melalui pemanfaatan teknologi. Mimpi utama kami adalah menghubungkan seluruh jaringan kecamatan hingga ke pelosok desa ke dalam satu ekosistem digital yang canggih, terpadu, dan mudah diakses oleh seluruh lapisan masyarakat.
                         </p>
                         <p class="text-gray-700 leading-relaxed">
-                            Sebagai wujud nyata dari visi tersebut, SilaDesBeng hadir mengintegrasikan berbagai pilar layanan esensial BUMDes, mulai dari sarana mobilitas (kendaraan), pemanfaatan fasilitas umum, hingga penyewaan alat dan pendistribusian gas. Lebih jauh lagi, kami juga menghadirkan ruang interaksi inklusif melalui fitur Pelaporan Warga dan Informasi Pengumuman. Cerita SilaDesBeng adalah cerita tentang inovasi dan kolaborasi—bagaimana sentuhan teknologi mentransformasi cara masyarakat dan aparatur berinteraksi demi mewujudkan tata kelola Bengkalis yang mandiri, produktif, dan berkelanjutan.
+                            Sebagai wujud nyata dari visi tersebut, SilaDesBeng hadir mengintegrasikan berbagai pilar layanan publik esensial, mulai dari sarana mobilitas (kendaraan), pemanfaatan fasilitas umum, hingga penyewaan alat dan pendistribusian gas. Lebih jauh lagi, kami juga menghadirkan ruang interaksi inklusif melalui fitur Pelaporan Warga dan Informasi Pengumuman. Cerita SilaDesBeng adalah cerita tentang inovasi dan kolaborasi—bagaimana sentuhan teknologi mentransformasi cara masyarakat dan aparatur berinteraksi demi mewujudkan tata kelola Bengkalis yang mandiri, produktif, dan berkelanjutan.
                         </p>
                     </div>
                     
                     <!-- Logo with Shadow Overlay -->
                     <div class="relative flex-shrink-0 hidden md:block">
                         <div class="relative">
-                            <img src="{{ asset('Admin/img/avatars/sewais.png') }}" 
+                            <img src="{{ asset('User/img/avatars/logodomain.png') }}" 
                                  alt="SiladesBeng Logo" 
-                                 class="w-48 h-48 object-contain">
+                                 class="w-64 h-64 object-contain">
                             <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-white/60"></div>
                         </div>
                     </div>
@@ -54,36 +54,36 @@
                         <div class="flex items-start gap-4">
                             <div class="w-3 h-3 rounded-full bg-blue-500 mt-2 flex-shrink-0"></div>
                             <div>
+                                <h3 class="font-bold text-lg text-gray-900">Sinergi</h3>
+                                <p class="text-gray-600">Membangun kolaborasi yang erat antara masyarakat luas, dan pemerintahan se-Kabupaten Bengkalis dalam satu ekosistem terpadu</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="w-3 h-3 rounded-full bg-blue-500 mt-2 flex-shrink-0"></div>
+                            <div>
                                 <h3 class="font-bold text-lg text-gray-900">Inovatif</h3>
-                                <p class="text-gray-600">Selalu berinovasi untuk memberikan solusi terbaik yang sesuai dengan kebutuhan desa</p>
+                                <p class="text-gray-600">Terus beradaptasi menghadirkan fitur-fitur cerdas yang relevan dengan kebutuhan modernisasi layanan publik daerah</p>
                             </div>
                         </div>
                         <div class="flex items-start gap-4">
                             <div class="w-3 h-3 rounded-full bg-blue-500 mt-2 flex-shrink-0"></div>
                             <div>
-                                <h3 class="font-bold text-lg text-gray-900">Efisien</h3>
-                                <p class="text-gray-600">Mengoptimalkan proses manual menjadi digital untuk penghematan waktu dan sumber daya</p>
+                                <h3 class="font-bold text-lg text-gray-900">Transparan</h3>
+                                <p class="text-gray-600">Mewujudkan tata kelola layanan serta penanganan pelaporan warga yang akuntabel dan dapat dipantau secara <i>real-time</i></p>
                             </div>
                         </div>
                         <div class="flex items-start gap-4">
                             <div class="w-3 h-3 rounded-full bg-blue-500 mt-2 flex-shrink-0"></div>
                             <div>
-                                <h3 class="font-bold text-lg text-gray-900">Terpercaya</h3>
-                                <p class="text-gray-600">Menjaga integritas data dengan sistem keamanan yang handal dan terpercaya</p>
-                            </div>
-                        </div>
-                        <div class="flex items-start gap-4">
-                            <div class="w-3 h-3 rounded-full bg-blue-500 mt-2 flex-shrink-0"></div>
-                            <div>
-                                <h3 class="font-bold text-lg text-gray-900">Kemudahan</h3>
-                                <p class="text-gray-600">Menyediakan antarmuka yang intuitif dan mudah digunakan untuk semua kalangan</p>
+                                <h3 class="font-bold text-lg text-gray-900">Inklusif</h3>
+                                <p class="text-gray-600">Menyediakan antarmuka digital yang ramah pengguna serta merangkul partisipasi aktif seluruh lapisan masyarakat tanpa batas</p>
                             </div>
                         </div>
                         <div class="flex items-start gap-4">
                             <div class="w-3 h-3 rounded-full bg-blue-500 mt-2 flex-shrink-0"></div>
                             <div>
                                 <h3 class="font-bold text-lg text-gray-900">Aksesibilitas</h3>
-                                <p class="text-gray-600">Dapat diakses kapan saja dan dimana saja melalui perangkat apapun</p>
+                                <p class="text-gray-600">Menghadirkan kemudahan jangkauan beragam fasilitas operasional dan informasi publik secara instan kapan saja dan di mana saja</p>
                             </div>
                         </div>
                     </div>
@@ -103,8 +103,8 @@
                                 <path d="M8 12.5L10.5 15L16 9" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
                             <div>
-                                <h3 class="font-bold text-lg text-gray-900">Digitalisasi Penyewaan Alat Desa</h3>
-                                <p class="text-gray-600">Menyediakan layanan pemesanan alat (tenda, kursi, meja, sound system, diesel) secara online dengan pencatatan otomatis</p>
+                                <h3 class="font-bold text-lg text-gray-900">Digitalisasi Layanan Publik</h3>
+                                <p class="text-gray-600">Menyediakan platform pemesanan online untuk berbagai fasilitas mulai dari penyewaan alat, mobilitas kendaraan, hingga penggunaan fasilitas umum</p>
                             </div>
                         </div>
                         <div class="flex items-start gap-4">
@@ -113,8 +113,8 @@
                                 <path d="M8 12.5L10.5 15L16 9" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
                             <div>
-                                <h3 class="font-bold text-lg text-gray-900">Pengelolaan Unit Usaha</h3>
-                                <p class="text-gray-600">Mengelola proses penyewaan alat dan pembelian gas dengan sistem yang terintegrasi</p>
+                                <h3 class="font-bold text-lg text-gray-900">Manajemen Operasional Terpadu</h3>
+                                <p class="text-gray-600">Mengoptimalkan manajemen operasional dan distribusi layanan masyarakat dengan sistem yang terintegrasi penuh</p>
                             </div>
                         </div>
                         <div class="flex items-start gap-4">
@@ -123,8 +123,8 @@
                                 <path d="M8 12.5L10.5 15L16 9" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
                             <div>
-                                <h3 class="font-bold text-lg text-gray-900">Pelaporan dan Monitoring</h3>
-                                <p class="text-gray-600">Menyediakan laporan penyewaan, transaksi, dan keuangan yang dapat diakses oleh BUMDes dan Pemerintah Desa</p>
+                                <h3 class="font-bold text-lg text-gray-900">Pelaporan dan Keterbukaan Informasi</h3>
+                                <p class="text-gray-600">Menyediakan instrumen laporan kinerja, transaksi, serta pengaduan masyarakat yang dapat diakses secara transparan</p>
                             </div>
                         </div>
                     </div>
@@ -143,28 +143,28 @@
                                 <circle cx="12" cy="12" r="10" fill="#10B981"/>
                                 <path d="M8 12.5L10.5 15L16 9" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
-                            <p class="text-gray-700 leading-relaxed">Meningkatkan efisiensi dan profesionalitas pengelolaan unit usaha desa</p>
+                            <p class="text-gray-700 leading-relaxed">Meningkatkan efisiensi dan profesionalitas tata kelola layanan publik se-Kabupaten Bengkalis</p>
                         </div>
                         <div class="flex items-start gap-4">
                             <svg class="w-6 h-6 flex-shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <circle cx="12" cy="12" r="10" fill="#10B981"/>
                                 <path d="M8 12.5L10.5 15L16 9" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
-                            <p class="text-gray-700 leading-relaxed">Menyediakan layanan digital yang mudah diakses oleh masyarakat dan pelaku usaha desa</p>
+                            <p class="text-gray-700 leading-relaxed">Menyediakan platform digital yang inklusif dan mudah diakses oleh seluruh lapisan masyarakat</p>
                         </div>
                         <div class="flex items-start gap-4">
                             <svg class="w-6 h-6 flex-shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <circle cx="12" cy="12" r="10" fill="#10B981"/>
                                 <path d="M8 12.5L10.5 15L16 9" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
-                            <p class="text-gray-700 leading-relaxed">Membangun kepercayaan masyarakat melalui transparansi data digital</p>
+                            <p class="text-gray-700 leading-relaxed">Membangun kepercayaan publik melalui keterbukaan informasi dan transparansi data digital</p>
                         </div>
                         <div class="flex items-start gap-4">
                             <svg class="w-6 h-6 flex-shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <circle cx="12" cy="12" r="10" fill="#10B981"/>
                                 <path d="M8 12.5L10.5 15L16 9" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
-                            <p class="text-gray-700 leading-relaxed">Mendorong digitalisasi desa menuju tata kelola ekonomi mandiri & modern</p>
+                            <p class="text-gray-700 leading-relaxed">Mendorong digitalisasi birokrasi daerah menuju ekosistem masyarakat yang mandiri & modern</p>
                         </div>
                     </div>
                 </div>
@@ -177,7 +177,7 @@
                 </h2>
                 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-                    <!-- Card 1: Wahid Riono -->
+                    <!-- Card 1: Rizqy Hamadi Ayabaristo Ken -->
                     <div class="group">
                         <div class="relative rounded-3xl overflow-hidden shadow-lg hover:shadow-xl hover:-translate-y-3 transition-all duration-300 bg-white/70 backdrop-blur-sm p-8">
                             <div class="flex flex-col items-center text-center">
@@ -185,13 +185,13 @@
                                 <div class="relative mb-4">
                                     <div class="p-1 rounded-full" style="background: linear-gradient(135deg, #3B82F6 0%, #60a5fa 50%, #FCD34D 100%);">
                                         <div class="w-32 h-32 rounded-full overflow-hidden bg-white p-1">
-                                            <img src="{{ asset('User/img/avatars/wahid1.jpg') }}" 
-                                                 alt="M.Wahid Riono" 
+                                            <img src="{{ asset('User/img/avatars/ken2.png') }}" 
+                                                 alt="Rizqy Hamadi Ken" 
                                                  class="w-full h-full object-cover rounded-full">
                                         </div>
                                     </div>
                                 </div>
-                                <h3 class="text-xl font-bold text-gray-900">M.Wahid Riono</h3>
+                                <h3 class="text-xl font-bold text-gray-900">Rizqy Hamadi Ken</h3>
                                 <p class="text-gray-600 text-sm font-medium mt-1">Full Stack Developer</p>
                             </div>
                         </div>
@@ -217,7 +217,7 @@
                         </div>
                     </div>
 
-                    <!-- Card 3: Safika -->
+                    <!-- Card 3: Dicki Wahyudi -->
                     <div class="group">
                         <div class="relative rounded-3xl overflow-hidden shadow-lg hover:shadow-xl hover:-translate-y-3 transition-all duration-300 bg-white/70 backdrop-blur-sm p-8">
                             <div class="flex flex-col items-center text-center">
@@ -225,13 +225,13 @@
                                 <div class="relative mb-4">
                                     <div class="p-1 rounded-full" style="background: linear-gradient(135deg, #3B82F6 0%, #60a5fa 50%, #FCD34D 100%);">
                                         <div class="w-32 h-32 rounded-full overflow-hidden bg-white p-1">
-                                            <img src="{{ asset('User/img/avatars/safika1.png') }}" 
-                                                 alt="Safika" 
+                                            <img src="{{ asset('User/img/avatars/diki.png') }}" 
+                                                 alt="Dicki Wahyudi" 
                                                  class="w-full h-full object-cover rounded-full">
                                         </div>
                                     </div>
                                 </div>
-                                <h3 class="text-xl font-bold text-gray-900">Safika</h3>
+                                <h3 class="text-xl font-bold text-gray-900">Dicki Wahyudi</h3>
                                 <p class="text-gray-600 text-sm font-medium mt-1">Project Manager</p>
                             </div>
                         </div>

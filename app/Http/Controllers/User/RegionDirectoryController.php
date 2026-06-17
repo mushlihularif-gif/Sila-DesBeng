@@ -15,7 +15,12 @@ class RegionDirectoryController extends Controller
     {
         $kecamatans = Region::where('type', 'kecamatan')->orderBy('name')->get();
 
-        return view('users.region-directory', compact('kecamatans'));
+        $settings = \App\Models\SystemSetting::first();
+        $whatsappNumber = $settings->whatsapp_number ?? '+6281234567890';
+        $cleanNumber = preg_replace('/[^0-9+]/', '', $whatsappNumber);
+        $whatsappLink = 'https://wa.me/' . ltrim($cleanNumber, '+');
+
+        return view('users.region-directory', compact('kecamatans', 'whatsappLink'));
     }
 
     /**
@@ -26,6 +31,11 @@ class RegionDirectoryController extends Controller
         $kecamatan = Region::where('type', 'kecamatan')->with('children')->findOrFail($id);
         $desas = $kecamatan->children()->orderBy('name')->get();
 
-        return view('users.region-directory-desa', compact('kecamatan', 'desas'));
+        $settings = \App\Models\SystemSetting::first();
+        $whatsappNumber = $settings->whatsapp_number ?? '+6281234567890';
+        $cleanNumber = preg_replace('/[^0-9+]/', '', $whatsappNumber);
+        $whatsappLink = 'https://wa.me/' . ltrim($cleanNumber, '+');
+
+        return view('users.region-directory-desa', compact('kecamatan', 'desas', 'whatsappLink'));
     }
 }

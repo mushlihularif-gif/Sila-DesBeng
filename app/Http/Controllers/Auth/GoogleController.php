@@ -55,49 +55,83 @@ class GoogleController extends Controller
                 return redirect()->intended($findUser->role === 'admin' ? route('admin.dashboard') : route('beranda'));
 
             } else {
-                // User Baru - Auto Register Langsung Masuk
-                // Generate unique username
-                $baseUsername = strtolower(str_replace(' ', '', $socialUser->name));
-                $username = $baseUsername;
-                $counter = 1;
-                while (User::where('username', $username)->exists()) {
-                    $username = $baseUsername . $counter;
-                    $counter++;
-                }
-
-                // Create User with safe fields only (no role/status via mass assignment)
-                $newUser = User::create([
+                // User Baru - Tampilkan Form Lengkapi Profil Google
+                session(['google_register_data' => [
+                    'id' => $socialUser->id,
                     'name' => $socialUser->name,
                     'email' => $socialUser->email,
-                    'username' => $username,
-                    'password' => Hash::make(uniqid()), // Random password
-                    'phone' => '-', // Placeholder, user can update later
-                    'address' => '-', // Placeholder
-                    'gender' => 'laki-laki', // Default placeholder
-                ]);
+                    'avatar' => $socialUser->avatar,
+                ]]);
 
-                // Explicitly set sensitive fields to prevent mass assignment injection
-                $newUser->role = 'user';
-                $newUser->status = 'aktif';
-                $newUser->email_verified_at = now();
-                $newUser->google_id = $socialUser->id;
-                $newUser->save();
-
-                Auth::login($newUser);
-                request()->session()->regenerate();
-
-                \App\Models\ActivityLog::create([
-                    'user_id' => $newUser->id,
-                    'action' => 'Register',
-                    'description' => 'Register Otomatis via Google Berhasil',
-                    'ip_address' => request()->ip()
-                ]);
-
-                return redirect()->route('beranda')->with('success', 'Login Berhasil! Silakan lengkapi profil Anda.');
+                return redirect()->route('beranda')->with('show_google_register', true);
             }
 
         } catch (\Exception $e) {
             return redirect()->route('beranda')->with('error', 'Login Google gagal: ' . $e->getMessage());
         }
+    }
+
+    // Complete Google Registration via AJAX
+    public function completeRegistration(Request $request)
+    {
+        $request->validate([
+            'region_id' => 'required|exists:regions,id',
+            'address' => 'required|string',
+        ]);
+
+        $googleData = session('google_register_data');
+        if (!$googleData) {
+            return response()->json(['success' => false, 'message' => 'Sesi pendaftaran Google telah kedaluwarsa. Silakan ulangi.'], 400);
+        }
+
+        // Generate unique username
+        $baseUsername = strtolower(str_replace(' ', '', $googleData['name']));
+        $username = $baseUsername;
+        $counter = 1;
+        while (User::where('username', $username)->exists()) {
+            $username = $baseUsername . $counter;
+            $counter++;
+        }
+
+        // Create User
+        $newUser = User::create([
+            'name' => $googleData['name'],
+            'email' => $googleData['email'],
+            'username' => $username,
+            'password' => Hash::make(uniqid()), // Random password
+            'phone' => '-', // Placeholder, user can update later
+            'address' => $request->address,
+            'gender' => 'laki-laki', // Default placeholder
+            'region_id' => $request->region_id,
+        ]);
+
+        // Set explicit safe fields
+        $newUser->role = 'user';
+        $newUser->status = 'belum verifikasi'; // Require OTP Verification
+        $newUser->google_id = $googleData['id'];
+        // Note: For Google accounts, email is inherently verified, but we'll use email_verified_at for OTP later if needed, or set it now.
+        $newUser->email_verified_at = now(); 
+        $newUser->save();
+
+        // Clear google session
+        session()->forget('google_register_data');
+
+        \App\Models\ActivityLog::create([
+            'user_id' => $newUser->id,
+            'action' => 'Register',
+            'description' => 'Register via Google (Menunggu OTP)',
+            'ip_address' => request()->ip()
+        ]);
+
+        // Generate OTP
+        $otp = sprintf("%06d", mt_rand(1, 999999));
+        session(['otp_email' => $newUser->email, 'otp_code' => $otp]);
+
+        return response()->json([
+            'success' => true,
+            'require_otp' => true,
+            'message' => 'Silakan verifikasi OTP.'
+        ]);
+    }
     }
 }

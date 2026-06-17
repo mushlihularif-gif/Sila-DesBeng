@@ -281,27 +281,27 @@
 
                         <div class="relative w-full max-w-6xl mx-auto h-full">
 
-                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="0" data-name="Unit Penyewaan Alat" onclick="window.location.href='{{ route('rental.equipment') }}'">
+                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="0" data-name="Unit Penyewaan Alat" onclick="window.location.href='{{ auth()->check() ? route('rental.equipment') : route('bumdes.profil') . '?redirect=rental.equipment' }}'">
                                 <img src="{{ asset('User/img/elemen/F1.png') }}" alt="Alat" loading="lazy">
                             </div>
 
-                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="1" data-name="Unit Penjualan Gas" onclick="window.location.href='{{ route('gas.sales') }}'">
+                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="1" data-name="Unit Penjualan Gas" onclick="window.location.href='{{ auth()->check() ? route('gas.sales') : route('bumdes.profil') . '?redirect=gas.sales' }}'">
                                 <img src="{{ asset('User/img/elemen/F2.png') }}" alt="Gas" loading="lazy">
                             </div>
 
-                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="2" data-name="Unit Penyewaan Mobil" onclick="window.location.href='{{ route('mobil.rental.equipment') }}'">
+                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="2" data-name="Unit Penyewaan Mobil" onclick="window.location.href='{{ auth()->check() ? route('mobil.rental.equipment') : route('bumdes.profil') . '?redirect=mobil.rental.equipment' }}'">
                                 <img src="{{ asset('User/img/elemen/mobil.png') }}" alt="Mobil">
                             </div>
 
-                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="3" data-name="Unit Peminjaman Fasilitas Umum" onclick="window.location.href='{{ route('user.fasilitas-umum.equipment') }}'">
+                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="3" data-name="Unit Peminjaman Fasilitas Umum" onclick="window.location.href='{{ auth()->check() ? route('user.fasilitas-umum.equipment') : route('bumdes.profil') . '?redirect=user.fasilitas-umum.equipment' }}'">
                                 <img src="{{ asset('User/img/elemen/fasilitas.png') }}" alt="Fasilitas">
                             </div>
 
-                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="4" data-name="Pelaporan Warga" onclick="window.location.href='{{ route('pelaporan.landing') }}'">
+                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="4" data-name="Pelaporan Warga" onclick="window.location.href='{{ auth()->check() ? route('pelaporan.landing') : route('bumdes.profil') . '?redirect=pelaporan.landing' }}'">
                                 <img src="{{ asset('User/img/elemen/lapor.png') }}" alt="Event">
                             </div>
 
-                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="5" data-name="Pengumuman dan Event" onclick="window.location.href='{{ route('announcements.index') }}'">
+                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="5" data-name="Pengumuman dan Event" onclick="window.location.href='{{ auth()->check() ? route('announcements.index') : route('bumdes.profil') . '?redirect=announcements.index' }}'">
                                 <img src="{{ asset('User/img/elemen/event.png') }}" alt="Event">
                             </div>
                             
@@ -364,7 +364,7 @@
                         </div>
                     </div>
 
-                    <div class="relative inline-block" style="min-width: 200px;">
+                    <div class="relative inline-block" style="min-width: 240px;">
                         <select id="desaSelect" class="w-full appearance-none px-4 py-3 pr-10 text-sm border border-gray-300 rounded-xl bg-white/80 backdrop-blur-md text-gray-800 font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 hover:bg-white transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm" {{ $kecamatanId == 'all' ? 'disabled' : '' }}>
                             <option value="all">Semua Kelurahan/Desa</option>
                             @foreach($desas as $desa)
@@ -377,7 +377,7 @@
                     </div>
 
                     <div class="relative inline-block" style="min-width: 120px;">
-                        <select id="globalYearSelect" class="w-full appearance-none px-4 py-3 pr-10 text-sm border border-gray-300 rounded-xl bg-white/80 backdrop-blur-md text-gray-800 font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 hover:bg-white transition-all shadow-sm">
+                        <select id="globalYearSelect" translate="no" class="w-full appearance-none px-4 py-3 pr-10 text-sm border border-gray-300 rounded-xl bg-white/80 backdrop-blur-md text-gray-800 font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 hover:bg-white transition-all shadow-sm">
                             @foreach($availableYears as $optYear)
                                 <option value="{{ $optYear }}" {{ $optYear == $year ? 'selected' : '' }}>{{ $optYear }}</option>
                             @endforeach
@@ -1280,32 +1280,7 @@
                 updateCarousel();
                 startAutoSlide();
 
-                // Add click handler for rental equipment cards
-                const rentalCards = document.querySelectorAll('.unit-card[data-name="Unit Penyewaan Alat"]');
-                rentalCards.forEach(card => {
-                    card.style.cursor = 'pointer';
-                    card.addEventListener('click', () => {
-                        window.location.href = "{{ route('rental.equipment') }}";
-                    });
-                });
-
-                // Add click handler for gas sales cards
-                const gasCards = document.querySelectorAll('.unit-card[data-name="Unit Penjualan Gas"]');
-                gasCards.forEach(card => {
-                    card.style.cursor = 'pointer';
-                    card.addEventListener('click', () => {
-                        window.location.href = "{{ route('gas.sales') }}";
-                    });
-                });
-
-                // Add click handler for Pelaporan Warga
-                const laporanCards = document.querySelectorAll('.unit-card[data-name="Pelaporan Warga"]');
-                laporanCards.forEach(card => {
-                    card.style.cursor = 'pointer';
-                    card.addEventListener('click', () => {
-                        window.location.href = "{{ route('pelaporan.landing') }}";
-                    });
-                });
+                // Click handlers are managed via inline onclick attributes in HTML
             },
         };
         // Initialize

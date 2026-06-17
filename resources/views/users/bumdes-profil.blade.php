@@ -122,7 +122,7 @@
 <script>
     function selectBumdes() {
         // Redirect to BUMDes detail page
-        window.location.href = "{{ route('bumdes.detail') }}";
+        window.location.href = "{{ route('bumdes.detail', ['slug' => 'desa-pematang-duku-timur']) }}";
     }
 </script>
 @endpush

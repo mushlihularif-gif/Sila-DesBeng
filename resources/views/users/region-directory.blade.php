@@ -46,7 +46,7 @@
                     <div class="backdrop-blur-sm bg-white/70 rounded-2xl p-6 border border-white/80 shadow-lg hover:shadow-xl transition-all duration-300">
                         <div class="flex items-center justify-between">
                             <h3 class="text-xl font-bold text-gray-800">{{ $kecamatan->name }}</h3>
-                            <a href="{{ route('bumdes.profil.desa', $kecamatan->id) }}"
+                            <a href="{{ route('bumdes.profil.desa', $kecamatan->id) }}{{ request()->has('redirect') ? '?redirect=' . request('redirect') : '' }}"
                                class="px-8 py-2.5 bg-white text-[#0099ff] font-semibold rounded-full border-2 border-gray-300 hover:bg-gray-50 hover:shadow-lg transition-all duration-300">
                                 Pilih
                             </a>
@@ -64,7 +64,7 @@
             {{-- Tampilkan / Sembunyikan --}}
             @if($kecamatans->count() > 3)
             <div class="text-center mb-16 animate-section">
-                <button id="toggleBtn" onclick="toggleCards()" class="inline-flex items-center gap-1.5 text-gray-600 font-semibold hover:text-blue-600 text-sm transition-colors">
+                <button id="toggleBtn" onclick="toggleCards()" translate="no" class="inline-flex items-center gap-1.5 text-gray-600 font-semibold hover:text-blue-600 text-sm transition-colors">
                     <span id="toggleText">Tampilkan</span>
                     <svg id="toggleArrowDown" class="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
@@ -76,18 +76,42 @@
             </div>
             @endif
 
+            <!-- Pemerintahan Section -->
+            <div class="mb-16 mt-16 animate-section">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl md:text-4xl font-bold">
+                        <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Pemerintah Kabupaten Bengkalis</span>
+                    </h2>
+                </div>
+
+                <!-- WhatsApp Contact Button -->
+                <div class="text-center mb-16">
+                    <a href="{{ $whatsappLink }}" 
+                       target="_blank"
+                       class="inline-flex items-center gap-3 px-8 py-4 bg-[#25D366] text-white font-semibold rounded-full hover:bg-[#20BA5A] hover:shadow-lg transition-all duration-300 transform hover:scale-105">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                        </svg>
+                        <span>Halo Layanan</span>
+                    </a>
+                </div>
+            </div>
+
             {{-- BUMDes Description Section --}}
             <div class="mb-16 animate-section">
                 <div class="text-left mb-8">
                     <h2 class="text-3xl md:text-4xl font-bold">
-                        <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">BUMDes</span>
+                        <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Kabupaten Bengkalis</span>
                     </h2>
                 </div>
 
                 <div class="backdrop-blur-sm bg-white/70 rounded-3xl p-8 md:p-12 border border-white/80 shadow-xl">
                     <div class="text-gray-700 text-base leading-relaxed text-justify space-y-4">
                         <p>
-                            BUMDes (Badan Usaha Milik Desa) merupakan lembaga ekonomi desa yang dibentuk oleh pemerintah desa untuk mengelola potensi dan aset yang dimiliki desa guna meningkatkan kesejahteraan masyarakat. Melalui BUMDes, berbagai kegiatan usaha dapat dijalankan secara mandiri oleh desa, seperti penyewaan alat, perdagangan hasil pertanian, simpan pinjam, hingga penyediaan layanan publik berbasis desa. Kehadiran BUMDes menjadi sarana penting dalam memperkuat ekonomi desa, mengurangi ketergantungan terhadap pihak luar, serta membuka peluang usaha dan lapangan kerja bagi masyarakat desa. Dengan sistem yang terkelola secara transparan, BUMDes menjadi motor penggerak ekonomi yang mendorong kemandirian desa menuju pembangunan yang berkelanjutan.
+                            Kabupaten Bengkalis adalah salah satu kabupaten yang terletak di Provinsi Riau, Indonesia. Daerah ini dikenal dengan kekayaan alamnya serta posisinya yang strategis di pesisir timur Pulau Sumatera. Seiring dengan pesatnya perkembangan teknologi informasi untuk memajukan kesejahteraan masyarakat, kini hadir inovasi digitalisasi daerah Kabupaten Bengkalis melalui aplikasi website bernama <strong>SiladesBeng</strong> (Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis).
+                        </p>
+                        <p>
+                            Kehadiran platform digital <strong>SiladesBeng</strong> bertujuan untuk memudahkan masyarakat dalam mengakses berbagai layanan daerah yang dikelola oleh berbagai entitas masyarakat dan unit usaha, seperti penyewaan alat, penjualan gas, peminjaman fasilitas umum, hingga pelaporan warga secara transparan dan efisien. Melalui inisiatif inovatif ini, diharapkan dapat terwujud tata kelola layanan daerah yang modern, mandiri, dan terintegrasi secara digital menuju pembangunan daerah yang berkelanjutan.
                         </p>
                     </div>
                 </div>

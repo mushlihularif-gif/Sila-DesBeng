@@ -40,25 +40,25 @@ Route::get('/pelayanan', function () {
   ->middleware('role:user,guest');
 
 
-Route::get('/bumdes/profil-layanan', [App\Http\Controllers\User\RegionDirectoryController::class, 'index'])
+Route::get('/layanandaerah/profil-layanan', [App\Http\Controllers\User\RegionDirectoryController::class, 'index'])
     ->name('bumdes.profil')
     ->middleware('role:user,guest');
 
-Route::get('/bumdes/profil-layanan/kecamatan/{id}', [App\Http\Controllers\User\RegionDirectoryController::class, 'showDesa'])
+Route::get('/layanandaerah/profil-layanan/kecamatan/{id}', [App\Http\Controllers\User\RegionDirectoryController::class, 'showDesa'])
     ->name('bumdes.profil.desa')
     ->middleware('role:user,guest');
 
-Route::get('/bumdes/desa-pematang-duku-timur', [App\Http\Controllers\User\BumdesUserController::class, 'show'])
+Route::get('/layanandaerah/{slug}', [App\Http\Controllers\User\BumdesUserController::class, 'show'])
     ->name('bumdes.detail')
     ->middleware('role:user,guest');
 
-Route::get('/bumdes/laporan', [App\Http\Controllers\User\BumdesLaporanController::class, 'index'])
+Route::get('/layanandaerah/laporan', [App\Http\Controllers\User\BumdesLaporanController::class, 'index'])
     ->name('bumdes.laporan')
     ->middleware('role:user,guest');
 
 
-Route::get('/profil-iSewa', [App\Http\Controllers\User\IsewaProfileController::class, 'index'])
-    ->name('isewa.profile')
+Route::get('/profil-siladesbeng', [App\Http\Controllers\User\IsewaProfileController::class, 'index'])
+    ->name('siladesbeng.profile')
     ->middleware('role:user,guest');
 
 Route::get('/kemitraan/gabung', [App\Http\Controllers\PartnerApplicationController::class, 'create'])
@@ -442,4 +442,9 @@ Route::middleware(['auth', 'role:super_admin,admin_kecamatan,admin_desa,lurah'])
     Route::get('/settings', [\App\Http\Controllers\LurahController::class, 'settings'])->name('settings');
     Route::put('/profile/update', [\App\Http\Controllers\LurahController::class, 'updateProfile'])->name('profile.update');
     Route::put('/profile/password', [\App\Http\Controllers\LurahController::class, 'updatePassword'])->name('profile.password');
+});
+
+// API Routes for Regions
+Route::get('/api/regions', function () {
+    return response()->json(\App\Models\Region::all());
 });

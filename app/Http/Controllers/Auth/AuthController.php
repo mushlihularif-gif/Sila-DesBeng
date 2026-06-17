@@ -24,11 +24,14 @@ class AuthController extends Controller
                 'address' => 'required|string',
                 'gender' => 'required|in:laki-laki,perempuan',
                 'password' => 'required|string|min:8|confirmed',
+                'region_id' => 'required|exists:regions,id',
+                'otp_method' => 'required|in:email,sms',
             ], [
                 'username.unique' => 'Username sudah digunakan',
                 'email.unique' => 'Email sudah terdaftar',
                 'password.min' => 'Password minimal 8 karakter',
                 'password.confirmed' => 'Konfirmasi password tidak cocok',
+                'otp_method.required' => 'Metode OTP harus dipilih',
             ]);
 
             $otpCode = str_pad(rand(0, 9999), 4, '0', STR_PAD_LEFT);
@@ -44,22 +47,29 @@ class AuthController extends Controller
                     'address' => $validated['address'],
                     'gender' => $validated['gender'],
                     'password' => Hash::make($validated['password']),
+                    'region_id' => $validated['region_id'],
                     'otp_code' => $otpCode,
                     'otp_expires_at' => now()->addMinutes(5),
+                    'otp_method' => $validated['otp_method'],
                 ]
             ]);
 
             // # ===================================================================
             // # MODE SANDBOX UNTUK MASS-TESTING DEMO
             // # ===================================================================
-            // Mail::to($validated['email'])->send(new OtpMail($otpCode));
+            // if ($validated['otp_method'] === 'email') {
+            //     Mail::to($validated['email'])->send(new OtpMail($otpCode));
+            // } else {
+            //     // Implement SMS API logic here
+            // }
             // # ===================================================================
 
             session()->flash('otp_demo_sandbox_code', $otpCode);
             session()->flash('trigger_open_otp_tab', true);
 
+            $methodText = $validated['otp_method'] === 'sms' ? 'nomor telepon' : 'email';
             return redirect()->route('beranda')->with('open_otp_modal', true)
-                ->with('success', 'Kode OTP telah dikirim ke email Anda');
+                ->with('success', 'Kode OTP telah dikirim ke ' . $methodText . ' Anda');
         } catch (\Illuminate\Validation\ValidationException $e) {
             return redirect()->back()->withErrors($e->errors())->withInput()->with('open_register_modal', true);
         } catch (\Exception $e) {
@@ -79,10 +89,18 @@ class AuthController extends Controller
     public function showSandboxOtp()
     {
         $otpCode = '1234'; // Default fallback
+        $method = 'Email';
+
         if (session('temp_registration')) {
             $otpCode = session('temp_registration')['otp_code'] ?? '1234';
+            if (isset(session('temp_registration')['otp_method']) && session('temp_registration')['otp_method'] === 'sms') {
+                $method = 'SMS';
+            }
         } elseif (session('forgot_password_data')) {
             $otpCode = session('forgot_password_data')['otp_code'] ?? '1234';
+            if (isset(session('forgot_password_data')['otp_method']) && session('forgot_password_data')['otp_method'] === 'sms') {
+                $method = 'SMS';
+            }
         }
         
         return response("
@@ -91,7 +109,7 @@ class AuthController extends Controller
             <body style='background: #1e1e2e; color: #a6e3a1; font-family: monospace; padding: 50px; text-align: center;'>
                 <div style='border: 2px dashed #a6e3a1; padding: 30px; display: inline-block; border-radius: 10px; background: #252538;'>
                     <h2 style='color: #cdd6f4; margin-top: 0;'>🔑 [SANDBOX LAB MODE]</h2>
-                    <p style='color: #bac2de; font-size: 1.1rem;'>Sistem mendeteksi request OTP dari Localhost. Log Email dialihkan ke layar ini:</p>
+                    <p style='color: #bac2de; font-size: 1.1rem;'>Sistem mendeteksi request OTP dari Localhost. Log $method dialihkan ke layar ini:</p>
                     <hr style='border: 1px dashed #45475a;'>
                     <h1 style='font-size: 3rem; letter-spacing: 5px; margin: 20px 0;'>$otpCode</h1>
                     <hr style='border: 1px dashed #45475a;'>
@@ -132,6 +150,7 @@ class AuthController extends Controller
                 'address' => $tempData['address'],
                 'gender' => $tempData['gender'],
                 'password' => $tempData['password'],
+                'region_id' => $tempData['region_id'],
             ]);
 
             // Explicitly set sensitive fields to prevent mass assignment injection
@@ -168,13 +187,18 @@ class AuthController extends Controller
             session(['temp_registration' => $tempData]);
 
             // # MODE SANDBOX UNTUK MASS-TESTING DEMO
-            // Mail::to($tempData['email'])->send(new OtpMail($newOtpCode));
+            // if (isset($tempData['otp_method']) && $tempData['otp_method'] === 'sms') {
+            //     // Implement SMS resend logic
+            // } else {
+            //     // Mail::to($tempData['email'])->send(new OtpMail($newOtpCode));
+            // }
 
             session()->flash('otp_demo_sandbox_code', $newOtpCode);
             session()->flash('trigger_open_otp_tab', true);
 
-            return redirect()->back()
-                ->with('success', 'Kode OTP baru telah dikirim ke email Anda.')
+            $methodText = (isset($tempData['otp_method']) && $tempData['otp_method'] === 'sms') ? 'nomor telepon' : 'email';
+            return redirect()->route('beranda')
+                ->with('success', 'Kode OTP baru telah dikirim ke ' . $methodText . ' Anda.')
                 ->with('open_otp_modal', true);
         } catch (\Exception $e) {
             Log::error('Resend OTP error: ' . $e->getMessage());
@@ -285,14 +309,20 @@ class AuthController extends Controller
     {
         try {
             $validated = $request->validate([
-                'email' => 'required|email|exists:users,email',
+                'email_or_phone' => 'required|string',
+                'otp_method' => 'required|in:email,sms',
             ], [
-                'email.required' => 'Email harus diisi',
-                'email.email' => 'Format email tidak valid',
-                'email.exists' => 'Email tidak terdaftar',
+                'email_or_phone.required' => 'Email atau Nomor Telepon harus diisi',
+                'otp_method.required' => 'Metode OTP harus dipilih',
             ]);
 
-            $user = User::where('email', $validated['email'])->first();
+            $user = User::where('email', $validated['email_or_phone'])
+                        ->orWhere('phone', $validated['email_or_phone'])
+                        ->first();
+
+            if (!$user) {
+                return redirect()->route('beranda')->with('error', 'Email atau Nomor Telepon tidak terdaftar')->with('open_forgot_password_modal', true);
+            }
 
             // Generate 4 digit OTP
             $otpCode = str_pad(rand(0, 9999), 4, '0', STR_PAD_LEFT);
@@ -304,17 +334,21 @@ class AuthController extends Controller
                     'email' => $user->email,
                     'otp_code' => $otpCode,
                     'otp_expires_at' => now()->addMinutes(5),
+                    'otp_method' => $validated['otp_method'],
                 ]
             ]);
 
             // # MODE SANDBOX UNTUK MASS-TESTING DEMO
-            // Mail::to($user->email)->send(new OtpMail($otpCode));
+            // if ($validated['otp_method'] === 'email') {
+            //     Mail::to($user->email)->send(new OtpMail($otpCode));
+            // }
 
             session()->flash('otp_demo_sandbox_code', $otpCode);
             session()->flash('trigger_open_otp_tab', true);
 
+            $methodText = $validated['otp_method'] === 'sms' ? 'nomor telepon' : 'email';
             return redirect()->route('beranda')->with('open_forgot_otp_modal', true)
-                ->with('success', 'Kode OTP telah dikirim ke email Anda');
+                ->with('success', 'Kode OTP telah dikirim ke ' . $methodText . ' Anda');
         } catch (\Illuminate\Validation\ValidationException $e) {
             return redirect()->back()->withErrors($e->errors())->withInput()->with('open_forgot_modal', true);
         } catch (\Exception $e) {
@@ -438,13 +472,18 @@ class AuthController extends Controller
             session(['forgot_password_data' => $sessionData]);
 
             // # MODE SANDBOX UNTUK MASS-TESTING DEMO
-            // Mail::to($sessionData['email'])->send(new OtpMail($newOtpCode));
+            // if (isset($sessionData['otp_method']) && $sessionData['otp_method'] === 'sms') {
+            //     // Implement SMS resend logic
+            // } else {
+            //     // Mail::to($sessionData['email'])->send(new OtpMail($newOtpCode));
+            // }
 
             session()->flash('otp_demo_sandbox_code', $newOtpCode);
             session()->flash('trigger_open_otp_tab', true);
 
-            return redirect()->back()
-                ->with('success', 'Kode OTP baru telah dikirim ke email Anda.')
+            $methodText = (isset($sessionData['otp_method']) && $sessionData['otp_method'] === 'sms') ? 'nomor telepon' : 'email';
+            return redirect()->route('beranda')
+                ->with('success', 'Kode OTP baru telah dikirim ke ' . $methodText . ' Anda.')
                 ->with('open_forgot_otp_modal', true);
         } catch (\Exception $e) {
             \Log::error('Resend forgot password OTP error: ' . $e->getMessage());

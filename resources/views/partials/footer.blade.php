@@ -38,7 +38,7 @@
                         class="text-base sm:text-lg font-medium hover:text-blue-300 transition-colors duration-200">
                         Tentang Layanan
                     </a>
-                    <a href="{{ route('isewa.profile') }}"
+                    <a href="{{ route('siladesbeng.profile') }}"
                         class="text-base sm:text-lg font-medium hover:text-blue-300 transition-colors duration-200">
                         Profil SiladesBeng
                     </a>

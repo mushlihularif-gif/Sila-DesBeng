@@ -173,15 +173,6 @@
 
             const formData = new FormData(this);
             const submitBtn = this.querySelector('button[type="submit"]');
-            
-            // Password Validation (if filled)
-            const password = document.getElementById('google-password').value;
-            const passwordConfirm = document.getElementById('google-password-confirm').value;
-
-            if (password && password !== passwordConfirm) {
-                showError(this, 'password', 'Konfirmasi password tidak cocok');
-                return;
-            }
 
             setButtonLoading(submitBtn, true);
 
@@ -198,9 +189,15 @@
                 const data = await response.json();
 
                 if (response.ok) {
-                    showToast(data.message, 'success');
-                    closeModal();
-                    setTimeout(() => window.location.href = data.redirect, 1000);
+                    if (data.require_otp) {
+                        switchModal(modalGoogleRegister, modalOtp);
+                        startOtpTimer();
+                        showToast(data.message, 'success');
+                    } else {
+                        showToast(data.message, 'success');
+                        closeModal();
+                        setTimeout(() => window.location.href = data.redirect || '{{ route("beranda") }}', 1000);
+                    }
                 } else {
                     if (data.errors) {
                         Object.keys(data.errors).forEach(field => {
@@ -480,4 +477,65 @@
             closeModal();
             setTimeout(() => window.location.href = '{{ route('beranda') }}', 300);
         });
+
+        // ========================================
+        // REGION DROPDOWN LOGIC
+        // ========================================
+        function initRegionDropdowns(kabId, kecId, desaId) {
+            const regKab = document.getElementById(kabId);
+            const regKec = document.getElementById(kecId);
+            const regDesa = document.getElementById(desaId);
+            
+            if (!regKab || !regKec || !regDesa) return;
+
+            if (allRegions.length > 0) {
+                populateRegions(regKab, regKec, regDesa);
+            } else {
+                fetch('/api/regions')
+                    .then(res => res.json())
+                    .then(data => {
+                        allRegions = data;
+                        populateRegions(regKab, regKec, regDesa);
+                    })
+                    .catch(err => {
+                        console.error('Failed to load regions:', err);
+                        regKab.innerHTML = '<option value="">Gagal memuat data wilayah</option>';
+                    });
+            }
+
+            // Handle Kecamatan change
+            regKec.addEventListener('change', function() {
+                const kecVal = parseInt(this.value);
+                regDesa.innerHTML = '<option value="">Pilih Desa/Kelurahan</option>';
+                regDesa.disabled = true;
+
+                if (kecVal) {
+                    const desas = allRegions.filter(r => r.type === 'desa' && r.parent_id === kecVal);
+                    desas.sort((a,b) => a.name.localeCompare(b.name)).forEach(d => {
+                        regDesa.innerHTML += `<option value="${d.id}">${d.name}</option>`;
+                    });
+                    regDesa.disabled = false;
+                }
+            });
+        }
+
+        function populateRegions(regKab, regKec, regDesa) {
+            const kabupaten = allRegions.find(r => r.type === 'kabupaten' && r.name === 'Kabupaten Bengkalis');
+            if (kabupaten) {
+                regKab.innerHTML = `<option value="${kabupaten.id}">${kabupaten.name}</option>`;
+                regKab.value = kabupaten.id;
+                
+                // Populate Kecamatan
+                const kecamatans = allRegions.filter(r => r.type === 'kecamatan' && r.parent_id === kabupaten.id);
+                regKec.innerHTML = '<option value="">Pilih Kecamatan</option>';
+                kecamatans.sort((a,b) => a.name.localeCompare(b.name)).forEach(k => {
+                    regKec.innerHTML += `<option value="${k.id}">${k.name.replace('Kecamatan ', '')}</option>`;
+                });
+                regKec.disabled = false;
+            }
+        }
+
+        let allRegions = [];
+        initRegionDropdowns('reg-kabupaten', 'reg-kecamatan', 'reg-desa');
+        initRegionDropdowns('google-reg-kabupaten', 'google-reg-kecamatan', 'google-reg-desa');
 </script>

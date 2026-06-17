@@ -47,7 +47,7 @@
                                 Masyarakat dapat melakukan pemesanan sewa alat seperti tenda, kursi, meja, sound system, dan
                                 diesel secara online. Sistem menampilkan ketersediaan alat secara real-time, harga sewa yang
                                 transparan, serta bukti transaksi digital. Hal ini membantu menghindari bentrok jadwal dan
-                                mempercepat pelayanan warga tanpa harus datang langsung ke kantor BUMDes
+                                mempercepat pelayanan warga tanpa harus datang langsung ke lokasi.
                             </p>
                         </div>
                     </div>
@@ -69,7 +69,7 @@
                                 Laporan keuangan, laporan transaksi, serta kinerja unit usaha secara otomatis dan real-time.
                                 Sistem ini membantu meningkatkan akuntabilitas dan mempermudah evaluasi pengelolaan dana
                                 desa
-                                dengan laporan digital yang rapi dan terintegrasi
+                                dengan laporan digital yang rapi dan terintegrasi.
                             </p>
                         </div>
                     </div>
@@ -90,7 +90,87 @@
                             <p class="text-gray-700 leading-relaxed text-justify">
                                 Warga dapat membeli tabung gas seperti gas LPG 3 kg secara digital melalui sistem SiladesBeng.
                                 Proses pencatatan transaksi, validasi pembayaran, dan laporan penjualan dilakukan otomatis
-                                oleh sistem untuk menjamin transparansi dan keakuratan data
+                                oleh sistem untuk menjamin transparansi dan keakuratan data.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Service 4: Unit Penyewaan Mobil --}}
+                <div
+                    class="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-md hover:shadow-xl transition-all duration-300 border border-white/50 animate-section">
+                    <div class="flex flex-col md:flex-row gap-8 items-start">
+                        <div class="flex-shrink-0">
+                            <div class="w-32 h-32 flex items-center justify-center">
+                                <img src="{{ asset('User/img/elemen/mobil.png') }}" alt="Unit Penyewaan Mobil"
+                                    class="w-full h-full object-contain drop-shadow-md">
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-2xl font-bold text-gray-900 mb-4">Unit Penyewaan Mobil</h3>
+                            <p class="text-gray-700 leading-relaxed text-justify">
+                                Memfasilitasi masyarakat dalam penyewaan kendaraan roda empat untuk berbagai keperluan. 
+                                Sistem memungkinkan pengecekan jadwal ketersediaan armada, harga sewa transparan, dan pemesanan secara langsung secara digital.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Service 5: Unit Peminjaman Fasilitas Umum --}}
+                <div
+                    class="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-md hover:shadow-xl transition-all duration-300 border border-white/50 animate-section">
+                    <div class="flex flex-col md:flex-row gap-8 items-start">
+                        <div class="flex-shrink-0">
+                            <div class="w-32 h-32 flex items-center justify-center">
+                                <img src="{{ asset('User/img/elemen/fasilitas.png') }}" alt="Unit Peminjaman Fasilitas Umum"
+                                    class="w-full h-full object-contain drop-shadow-md">
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-2xl font-bold text-gray-900 mb-4">Unit Peminjaman Fasilitas Umum</h3>
+                            <p class="text-gray-700 leading-relaxed text-justify">
+                                Masyarakat dapat memesan dan menggunakan fasilitas daerah, seperti gedung aula atau sarana olahraga, melalui sistem.
+                                Jadwal penggunaan akan tercatat rapi, mencegah terjadinya bentrok waktu antar warga yang ingin meminjam sarana yang sama.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Service 6: Pelaporan Warga --}}
+                <div
+                    class="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-md hover:shadow-xl transition-all duration-300 border border-white/50 animate-section">
+                    <div class="flex flex-col md:flex-row gap-8 items-start">
+                        <div class="flex-shrink-0">
+                            <div class="w-32 h-32 flex items-center justify-center">
+                                <img src="{{ asset('User/img/elemen/lapor.png') }}" alt="Pelaporan Warga"
+                                    class="w-full h-full object-contain drop-shadow-md">
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-2xl font-bold text-gray-900 mb-4">Pelaporan Warga</h3>
+                            <p class="text-gray-700 leading-relaxed text-justify">
+                                Wadah digital bagi masyarakat untuk menyampaikan laporan, kritik, masukan, atau keluhan terkait daerah secara langsung ke pemerintah daerah.
+                                Setiap pelaporan dapat dipantau status tindak lanjutnya sehingga komunikasi menjadi lebih dua arah dan cepat.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Service 7: Pengumuman dan Event --}}
+                <div
+                    class="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-md hover:shadow-xl transition-all duration-300 border border-white/50 animate-section">
+                    <div class="flex flex-col md:flex-row gap-8 items-start">
+                        <div class="flex-shrink-0">
+                            <div class="w-32 h-32 flex items-center justify-center">
+                                <img src="{{ asset('User/img/elemen/event.png') }}" alt="Pengumuman dan Event"
+                                    class="w-full h-full object-contain drop-shadow-md">
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-2xl font-bold text-gray-900 mb-4">Pengumuman dan Event</h3>
+                            <p class="text-gray-700 leading-relaxed text-justify">
+                                Pusat informasi terkini seputar kegiatan, gotong royong, berita, dan acara penting lainnya yang diadakan di daerah.
+                                Memastikan seluruh elemen warga mendapatkan informasi resmi dan terbaru dengan mudah melalui platform aplikasi web.
                             </p>
                         </div>
                     </div>
@@ -149,6 +229,10 @@
         .animate-section:nth-child(2) { animation-delay: 0.2s; }
         .animate-section:nth-child(3) { animation-delay: 0.3s; }
         .animate-section:nth-child(4) { animation-delay: 0.4s; }
+        .animate-section:nth-child(5) { animation-delay: 0.5s; }
+        .animate-section:nth-child(6) { animation-delay: 0.6s; }
+        .animate-section:nth-child(7) { animation-delay: 0.7s; }
+        .animate-section:nth-child(8) { animation-delay: 0.8s; }
     </style>
 @endpush
 

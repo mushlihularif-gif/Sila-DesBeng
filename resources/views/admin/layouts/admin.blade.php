@@ -305,7 +305,7 @@
             font-weight: bold;
         }
 
-        /* Gaya tombol Laporan BUMDes */
+        /* Gaya tombol Laporan Layanan Daerah */
         .laporan-bumdes-btn {
             margin-top: 1rem;
         }
