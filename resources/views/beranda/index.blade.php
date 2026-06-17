@@ -337,14 +337,57 @@
             </div>
 
             <!-- Section Grafik Umum -->
-            <div class="max-w-6xl mx-auto px-6 py-16">
+            <div id="grafik-umum" class="max-w-6xl mx-auto px-6 py-16">
                 <!-- Title dengan gradient -->
-                <div class="text-center mb-12">
+                <div class="text-center mb-6">
                     <h2
                         class="text-3xl font-bold bg-gradient-to-r from-[#115789] to-blue-300 bg-clip-text text-transparent relative inline-block drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]">
                         Grafik Umum
                     </h2>
                 </div>
+
+                <!-- Global Filters -->
+                <div class="max-w-5xl mx-auto mb-12 flex flex-col md:flex-row justify-center items-center gap-4 bg-white/40 backdrop-blur-md p-4 rounded-2xl border border-white/50 shadow-lg">
+                    <div class="px-4 py-3 text-sm border border-gray-300 rounded-xl bg-white/80 backdrop-blur-md text-gray-800 font-bold flex items-center justify-center cursor-not-allowed shadow-sm" style="min-width: 200px;">
+                        Kabupaten Bengkalis
+                    </div>
+                    
+                    <div class="relative inline-block" style="min-width: 250px;">
+                        <select id="kecamatanSelect" class="w-full appearance-none px-4 py-3 pr-10 text-sm border border-gray-300 rounded-xl bg-white/80 backdrop-blur-md text-gray-800 font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 hover:bg-white transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm">
+                            <option value="all">Semua Kecamatan</option>
+                            @foreach($kecamatans as $kec)
+                                <option value="{{ $kec->id }}" {{ $kecamatanId == $kec->id ? 'selected' : '' }}>{{ $kec->name }}</option>
+                            @endforeach
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-600">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                    </div>
+
+                    <div class="relative inline-block" style="min-width: 200px;">
+                        <select id="desaSelect" class="w-full appearance-none px-4 py-3 pr-10 text-sm border border-gray-300 rounded-xl bg-white/80 backdrop-blur-md text-gray-800 font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 hover:bg-white transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm" {{ $kecamatanId == 'all' ? 'disabled' : '' }}>
+                            <option value="all">Semua Kelurahan/Desa</option>
+                            @foreach($desas as $desa)
+                                <option value="{{ $desa->id }}" {{ $desaId == $desa->id ? 'selected' : '' }}>{{ $desa->name }}</option>
+                            @endforeach
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-600">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                    </div>
+
+                    <div class="relative inline-block" style="min-width: 120px;">
+                        <select id="globalYearSelect" class="w-full appearance-none px-4 py-3 pr-10 text-sm border border-gray-300 rounded-xl bg-white/80 backdrop-blur-md text-gray-800 font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 hover:bg-white transition-all shadow-sm">
+                            @foreach($availableYears as $optYear)
+                                <option value="{{ $optYear }}" {{ $optYear == $year ? 'selected' : '' }}>{{ $optYear }}</option>
+                            @endforeach
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-600">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="max-w-5xl mx-auto space-y-12">
                     <!-- Grafik Kinerja BUMDES -->
                     <div>
@@ -352,21 +395,9 @@
                             class="relative rounded-3xl p-6 backdrop-blur-md bg-white/20 border border-white/30 shadow-[0_8px_32px_0_rgba(31,38,135,0.15)]">
                             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-5">
                                 <h3 class="text-xl font-bold text-gray-800 mb-3 md:mb-0">Kinerja BUMDES</h3>
-                                <div class="flex flex-col sm:flex-row gap-2">
-                                    <select
-                                        class="px-4 py-2 text-sm border border-white/40 rounded-lg bg-white/60 backdrop-blur-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:bg-white/80 transition-all">
-                                        <option>Desa Pematang Duku Timur</option>
-                                    </select>
-                                    <select id="kinerjaYearSelect"
-                                        class="px-4 py-2 text-sm border border-white/40 rounded-lg bg-white/60 backdrop-blur-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:bg-white/80 transition-all">
-                                        @foreach($availableYears as $optYear)
-                                            <option value="{{ $optYear }}" {{ $optYear == $year ? 'selected' : '' }}>{{ $optYear }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
                             </div>
                             <div class="bg-white/30 backdrop-blur-sm rounded-2xl p-5 border border-white/20">
-                                <div id="kinerjaChart"></div>
+                                <div id="kinerjaChart" class="w-full min-h-[300px]" data-chart='@json($kinerjaData)'></div>
                             </div>
                         </div>
                     </div>
@@ -376,25 +407,35 @@
                             class="relative rounded-3xl p-6 backdrop-blur-md bg-white/20 border border-white/30 shadow-[0_8px_32px_0_rgba(31,38,135,0.15)]">
                             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-5">
                                 <h3 class="text-xl font-bold text-gray-800 mb-3 md:mb-0">Unit Populer</h3>
-                                <select id="populerYearSelect"
-                                    class="px-4 py-2 text-sm border border-white/40 rounded-lg bg-white/60 backdrop-blur-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:bg-white/80 transition-all">
-                                    @foreach($availableYears as $optYear)
-                                        <option value="{{ $optYear }}" {{ $optYear == $year ? 'selected' : '' }}>{{ $optYear }}</option>
-                                    @endforeach
-                                </select>
                             </div>
                             <div class="bg-white/30 backdrop-blur-sm rounded-2xl p-5 mb-5 border border-white/20">
-                                <div id="unitChart"></div>
+                                <div id="unitChart" class="w-full min-h-[300px]" data-chart='@json($unitPopulerData)'></div>
                             </div>
-                            <!-- Legend - Compact (2 unit saja) -->
-                            <div class="flex flex-wrap justify-center gap-6 text-sm">
+                            <!-- Legend - 6 Units -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-8 text-sm w-fit mx-auto">
                                 <div class="flex items-center gap-2">
-                                    <div class="w-3 h-3 bg-[#f59e0b] rounded"></div>
-                                    <span class="text-gray-700 font-medium">Unit Penyewaan Alat</span>
+                                    <div class="w-3 h-3 rounded-sm" style="background-color: #f59e0b;"></div>
+                                    <span class="text-gray-600 font-medium">Unit Penyewaan Alat</span>
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    <div class="w-3 h-3 bg-[#3b82f6] rounded"></div>
-                                    <span class="text-gray-700 font-medium">Unit Penjualan Gas</span>
+                                    <div class="w-3 h-3 rounded-sm" style="background-color: #3b82f6;"></div>
+                                    <span class="text-gray-600 font-medium">Unit Penjualan Gas</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-3 h-3 rounded-sm" style="background-color: #10b981;"></div>
+                                    <span class="text-gray-600 font-medium">Unit Peminjaman Mobil</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-3 h-3 rounded-sm" style="background-color: #8b5cf6;"></div>
+                                    <span class="text-gray-600 font-medium">Unit Fasilitas Umum</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-3 h-3 rounded-sm" style="background-color: #ef4444;"></div>
+                                    <span class="text-gray-600 font-medium">Pelaporan Warga</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-3 h-3 rounded-sm" style="background-color: #06b6d4;"></div>
+                                    <span class="text-gray-600 font-medium">Pengumuman & Event</span>
                                 </div>
                             </div>
                         </div>
@@ -448,19 +489,10 @@
                         <div class="backdrop-blur-sm bg-white/60 rounded-3xl p-8 md:p-12 border border-white/70 shadow-xl">
                             <div class="space-y-5 text-gray-700 text-base leading-relaxed text-justify">
                                 <p>
-                                    <span class="font-semibold text-gray-800">SiladesBeng</span> merupakan platform digital
-                                    terpadu yang dirancang untuk mendukung kegiatan operasional dan pelayanan BUMDes secara
-                                    modern dan efisien. Sistem ini hadir sebagai solusi inovatif untuk mengelola berbagai
-                                    unit usaha desa seperti penyewaan alat, dan layanan pembelian gas.
-                                    Melalui SiladesBeng, proses administrasi dan transaksi menjadi lebih cepat, transparan, dan
-                                    mudah dijangkau oleh masyarakat.
+                                    <span class="font-semibold text-gray-800">SiladesBeng</span> (Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis) merupakan platform digital terpadu berskala kabupaten yang dirancang khusus untuk memodernisasi tata kelola administrasi dan pelayanan publik di seluruh jaringan kecamatan hingga tingkat desa se-Kabupaten Bengkalis. Platform ini mengintegrasikan berbagai pilar layanan esensial masyarakat dan operasional BUMDes dalam satu pintu.
                                 </p>
                                 <p>
-                                    Dengan mengedepankan kemudahan akses dan efisiensi layanan, SiladesBeng membantu BUMDes dalam
-                                    meningkatkan produktivitas, memperluas jangkauan usaha, serta memperkuat perekonomian
-                                    desa secara berkelanjutan. Kami percaya bahwa digitalisasi layanan desa merupakan
-                                    langkah penting menuju kemandirian ekonomi masyarakat, dan SiladesBeng hadir untuk mewujudkan
-                                    hal tersebut dengan sistem yang modern, aman, dan berorientasi pada kemajuan desa.
+                                    Melalui SiladesBeng, masyarakat Kabupaten Bengkalis dapat dengan mudah mengakses beragam unit layanan, mulai dari penyewaan alat, pendistribusian gas, peminjaman mobilitas (kendaraan), hingga pemanfaatan fasilitas umum. Di samping itu, sistem ini juga mewadahi fitur <span class="font-medium text-gray-800">Pelaporan Warga</span> serta pusat informasi <span class="font-medium text-gray-800">Pengumuman & Event</span> secara <i>real-time</i>. Kami percaya bahwa ekosistem digital yang transparan dan terukur dari jenjang kabupaten hingga pelosok desa ini merupakan kunci utama untuk mewujudkan pelayanan publik yang prima, memajukan perekonomian daerah, dan membangun kemandirian masyarakat Bengkalis yang berkelanjutan.
                                 </p>
                             </div>
                         </div>
@@ -512,7 +544,29 @@
 
 
 @push('styles')
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <style>
+        /* Select2 Custom Styling for Glassmorphism */
+        .select2-container--default .select2-selection--single {
+            background-color: rgba(255, 255, 255, 0.6) !important;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.4) !important;
+            border-radius: 0.5rem !important;
+            height: 38px !important;
+            display: flex;
+            align-items: center;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 36px !important;
+        }
+        .select2-dropdown {
+            background-color: rgba(255, 255, 255, 0.95) !important;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.4) !important;
+            border-radius: 0.5rem !important;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+        }
+
         * {
             font-family: 'Inter', sans-serif;
         }
@@ -741,36 +795,96 @@
 @endpush
 
 @push('scripts')
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     {{-- ApexCharts Library - Minified Version --}}
     <script src="https://cdn.jsdelivr.net/npm/apexcharts@latest/dist/apexcharts.min.js"></script>
     <script>
         const BerandaPage = {
             // Initialize all components
             init() {
+                this.initYearSelectors(); // Call this FIRST to ensure filters always work
                 this.initCarousel();
-                this.initCharts();
+                try {
+                    this.initCharts();
+                } catch (e) {
+                    console.error("Charts failed to initialize:", e);
+                }
                 this.initUnitCarousel();
-                this.initYearSelectors();
             },
 
-            // Initialize Year Selectors
+            // Initialize Year & Region Selectors
             initYearSelectors() {
-                const handleYearChange = function() {
-                    const selectedYear = this.value;
+                const kecamatanSelect = document.getElementById('kecamatanSelect');
+                const desaSelect = document.getElementById('desaSelect');
+                const globalYearSelect = document.getElementById('globalYearSelect');
+
+                if (!kecamatanSelect || !desaSelect || !globalYearSelect) return;
+
+                // Handle cascading changes
+                const redirectWithFilters = async () => {
                     const url = new URL(window.location.href);
-                    url.searchParams.set('year', selectedYear);
-                    window.location.href = url.toString();
+                    url.searchParams.set('kecamatan_id', kecamatanSelect.value || 'all');
+                    url.searchParams.set('desa_id', desaSelect.value || 'all');
+                    url.searchParams.set('year', globalYearSelect.value || new Date().getFullYear());
+                    
+                    // Show subtle loading state on the whole main content
+                    const mainContent = document.getElementById('main-content');
+                    if (mainContent) {
+                        mainContent.style.transition = 'opacity 0.3s ease';
+                        mainContent.style.opacity = '0.5';
+                        mainContent.style.pointerEvents = 'none';
+                    }
+
+                    try {
+                        // Push state without reloading
+                        window.history.pushState({}, '', url.toString());
+
+                        const response = await fetch(url.toString(), {
+                            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                        });
+                        
+                        if (!response.ok) throw new Error('Network response was not ok');
+                        
+                        const htmlString = await response.text();
+                        
+                        const parser = new DOMParser();
+                        const newDoc = parser.parseFromString(htmlString, 'text/html');
+                        
+                        const newMainContent = newDoc.getElementById('main-content');
+                        
+                        if (newMainContent && mainContent) {
+                            mainContent.innerHTML = newMainContent.innerHTML;
+                            
+                            // Re-initialize EVERYTHING for the newly injected HTML
+                            try {
+                                BerandaPage.init();
+                            } catch (e) {
+                                console.error("Components failed to re-initialize:", e);
+                            }
+                        } else {
+                            window.location.reload();
+                        }
+                    } catch (error) {
+                        console.error('AJAX failed, falling back to reload:', error);
+                        window.location.reload();
+                    } finally {
+                        if (mainContent) {
+                            mainContent.style.opacity = '1';
+                            mainContent.style.pointerEvents = 'auto';
+                        }
+                    }
                 };
 
-                const kinerjaSelect = document.getElementById('kinerjaYearSelect');
-                if (kinerjaSelect) {
-                    kinerjaSelect.addEventListener('change', handleYearChange);
-                }
+                // When Kecamatan changes, reset Desa
+                kecamatanSelect.addEventListener('change', function() {
+                    desaSelect.value = 'all';
+                    redirectWithFilters();
+                });
 
-                const populerSelect = document.getElementById('populerYearSelect');
-                if (populerSelect) {
-                    populerSelect.addEventListener('change', handleYearChange);
-                }
+                // When Desa or Year changes, just submit
+                desaSelect.addEventListener('change', redirectWithFilters);
+                globalYearSelect.addEventListener('change', redirectWithFilters);
             },
 
             // Carousel initialization
@@ -869,11 +983,19 @@
                 if (!container) return;
 
                 container.innerHTML = '';
+                
+                let kinerjaData;
+                try {
+                    kinerjaData = JSON.parse(container.getAttribute('data-chart'));
+                } catch(e) {
+                    console.error("Failed to parse kinerja data", e);
+                    return;
+                }
 
                 const options = {
                     series: [{
                         name: 'Kinerja (Juta Rupiah)',
-                        data: @json($kinerjaData['data'])
+                        data: kinerjaData.data
                     }],
                     chart: {
                         type: 'area',
@@ -910,7 +1032,7 @@
                         }
                     },
                     xaxis: {
-                        categories: @json($kinerjaData['categories']),
+                        categories: kinerjaData.categories,
                         labels: {
                             style: {
                                 colors: '#374151',
@@ -972,15 +1094,39 @@
                 if (!container) return;
 
                 container.innerHTML = '';
+                
+                let unitPopulerData;
+                try {
+                    unitPopulerData = JSON.parse(container.getAttribute('data-chart'));
+                } catch(e) {
+                    console.error("Failed to parse unit data", e);
+                    return;
+                }
 
                 const options = {
                     series: [{
                             name: 'Unit Penyewaan Alat',
-                            data: @json($unitPopulerData['rental'])
+                            data: unitPopulerData.rental
                         },
                         {
                             name: 'Unit Penjualan Gas',
-                            data: @json($unitPopulerData['gas'])
+                            data: unitPopulerData.gas
+                        },
+                        {
+                            name: 'Unit Peminjaman Mobil',
+                            data: unitPopulerData.mobil
+                        },
+                        {
+                            name: 'Unit Fasilitas Umum',
+                            data: unitPopulerData.fasilitas
+                        },
+                        {
+                            name: 'Pelaporan Warga',
+                            data: unitPopulerData.laporan
+                        },
+                        {
+                            name: 'Pengumuman & Event',
+                            data: unitPopulerData.pengumuman
                         }
                     ],
                     chart: {
@@ -992,7 +1138,7 @@
                         stacked: false,
                         background: 'transparent'
                     },
-                    colors: ['#f59e0b', '#3b82f6'],
+                    colors: ['#f59e0b', '#3b82f6', '#10b981', '#8b5cf6', '#ef4444', '#06b6d4'],
                     plotOptions: {
                         bar: {
                             horizontal: false,
@@ -1007,7 +1153,7 @@
                         enabled: false
                     },
                     xaxis: {
-                        categories: @json($unitPopulerData['categories']),
+                        categories: unitPopulerData.categories,
                         labels: {
                             style: {
                                 colors: '#374151',
@@ -1163,21 +1309,17 @@
             },
         };
         // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            BerandaPage.init();
-        });
+        BerandaPage.init();
 
         // Check if user just logged out and show login modal
         @if(session('logout_success'))
-            document.addEventListener('DOMContentLoaded', function() {
-                // Wait a bit for the page to fully load
-                setTimeout(function() {
-                    const loginButton = document.getElementById('btn-open-login');
-                    if (loginButton) {
-                        loginButton.click();
-                    }
-                }, 300);
-            });
+            // Wait a bit for the page to fully load
+            setTimeout(function() {
+                const loginButton = document.getElementById('btn-open-login');
+                if (loginButton) {
+                    loginButton.click();
+                }
+            }, 300);
         @endif
     </script>
 @endpush

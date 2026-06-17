@@ -154,7 +154,7 @@
                 </div>
             @else
                 <div class="backdrop-blur-sm bg-white/70 rounded-3xl text-center border border-white/80 shadow-lg animate-section" style="padding-top: 5rem; padding-bottom: 5rem; padding-left: 2rem; padding-right: 2rem;">
-                    <img src="{{ asset('User/img/kabar/yeee.png') }}" alt="Belum Ada Kabar" class="w-32 h-auto mx-auto" style="margin-bottom: 2rem;">
+                    <img src="{{ asset('User/img/kabar/yeee.png') }}" alt="Belum Ada Kabar" class="w-32 h-auto mx-auto" style="margin-bottom: 2rem; opacity: 0.35;">
                     <h3 class="text-2xl font-bold text-gray-800" style="margin-bottom: 1rem;">Belum Ada Kabar</h3>
                     <p class="text-gray-600 mb-0">Belum ada pengumuman atau event yang diterbitkan saat ini.</p>
                 </div>

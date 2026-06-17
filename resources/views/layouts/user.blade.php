@@ -68,7 +68,7 @@
     {{-- NAVBAR PENGGUNA --}}
     @include('partials.navbar')
 
-    <main class="flex-grow relative w-full">
+    <main id="main-content" class="flex-grow relative w-full">
         @yield('page')
     </main>
 
@@ -218,49 +218,43 @@
             }
         };
 
-        // Initialize Navbar saat DOM ready
-        document.addEventListener('DOMContentLoaded', function() {
-            Navbar.init();
-        });
+        // Initialize Navbar
+        Navbar.init();
     </script>
 
     {{-- Picu Modal Login jika Sesi Ada --}}
     @if(session('open_login_modal'))
         <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                setTimeout(() => {
-                    const overlay = document.getElementById('auth-modal-overlay');
-                    const modalLogin = document.getElementById('modal-login');
-                    
-                    if (overlay && modalLogin) {
-                        document.querySelectorAll('.modal-content').forEach(m => {
-                            m.classList.add('hidden');
-                            m.classList.remove('scale-100', 'opacity-100');
-                        });
+            setTimeout(() => {
+                const overlay = document.getElementById('auth-modal-overlay');
+                const modalLogin = document.getElementById('modal-login');
+                
+                if (overlay && modalLogin) {
+                    document.querySelectorAll('.modal-content').forEach(m => {
+                        m.classList.add('hidden');
+                        m.classList.remove('scale-100', 'opacity-100');
+                    });
 
-                        overlay.classList.remove('hidden');
+                    overlay.classList.remove('hidden');
+                    setTimeout(() => {
+                        overlay.classList.add('show');
+                        modalLogin.classList.remove('hidden');
                         setTimeout(() => {
-                            overlay.classList.add('show');
-                            modalLogin.classList.remove('hidden');
-                            setTimeout(() => {
-                                modalLogin.classList.add('scale-100', 'opacity-100');
-                            }, 50);
-                        }, 10);
-                    }
-                }, 300);
-            });
+                            modalLogin.classList.add('scale-100', 'opacity-100');
+                        }, 50);
+                    }, 10);
+                }
+            }, 300);
         </script>
     @endif
 
     {{-- Pemicu Animasi Global --}}
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const sections = document.querySelectorAll('.animate-section');
-            sections.forEach((section, index) => {
-                setTimeout(() => {
-                    section.classList.add('show');
-                }, index * 100);
-            });
+        const sections = document.querySelectorAll('.animate-section');
+        sections.forEach((section, index) => {
+            setTimeout(() => {
+                section.classList.add('show');
+            }, index * 100);
         });
     </script>
 

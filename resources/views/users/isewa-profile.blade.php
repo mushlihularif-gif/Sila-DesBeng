@@ -22,13 +22,13 @@
                             Cerita Kami
                         </h2>
                         <p class="text-lg font-bold text-gray-800 mb-4">
-                            Memberikan Solusi Digital untuk Kemajuan Desa
+                            Langkah Awal Mewujudkan Digitalisasi Bengkalis
                         </p>
                         <p class="text-gray-700 leading-relaxed mb-4">
-                            SiladesBeng merupakan platform digital terpadu yang dirancang untuk mendukung kegiatan operasional dan pelayanan BUMDes secara modern dan efisien. Sistem ini hadir sebagai solusi inovatif untuk mengelola berbagai unit usaha desa, seperti penyewaan alat dan layanan pembelian gas.
+                            Perjalanan <span class="font-semibold text-gray-800">SiladesBeng</span> (Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis) bermula dari sebuah visi besar untuk mendorong percepatan digitalisasi pelayanan publik di wilayah Kabupaten Bengkalis. Gagasan ini lahir sebagai solusi inovatif untuk memutus kendala jarak dan mengoptimalkan potensi desa melalui pemanfaatan teknologi. Mimpi utama kami adalah menghubungkan seluruh jaringan kecamatan hingga ke pelosok desa ke dalam satu ekosistem digital yang canggih, terpadu, dan mudah diakses oleh seluruh lapisan masyarakat.
                         </p>
                         <p class="text-gray-700 leading-relaxed">
-                            Melalui SiladesBeng, proses administrasi dan transaksi menjadi lebih cepat, transparan, dan mudah dijangkau oleh masyarakat desa. Dengan berbasis sistem terintegrasi, seluruh data penyewaan, transaksi, dan laporan dapat dikelola secara otomatis dan terdokumentasi dengan baik. Dengan mengedepankan kemudahan akses dan efisiensi layanan, SiladesBeng membantu BUMDes dalam meningkatkan produktivitas, serta memperkuat perekonomian desa secara berkelanjutan.
+                            Sebagai wujud nyata dari visi tersebut, SilaDesBeng hadir mengintegrasikan berbagai pilar layanan esensial BUMDes, mulai dari sarana mobilitas (kendaraan), pemanfaatan fasilitas umum, hingga penyewaan alat dan pendistribusian gas. Lebih jauh lagi, kami juga menghadirkan ruang interaksi inklusif melalui fitur Pelaporan Warga dan Informasi Pengumuman. Cerita SilaDesBeng adalah cerita tentang inovasi dan kolaborasi—bagaimana sentuhan teknologi mentransformasi cara masyarakat dan aparatur berinteraksi demi mewujudkan tata kelola Bengkalis yang mandiri, produktif, dan berkelanjutan.
                         </p>
                     </div>
                     

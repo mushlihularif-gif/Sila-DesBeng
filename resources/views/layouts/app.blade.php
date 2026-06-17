@@ -16,6 +16,15 @@
     {{-- Alpine.js --}}
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
+    {{-- Hotwire Turbo for SPA Navigation --}}
+    <script type="module" src="https://cdn.skypack.dev/@hotwired/turbo"></script>
+    <style>
+        .turbo-progress-bar {
+            height: 4px;
+            background-color: #45aaf2;
+        }
+    </style>
+
     {{-- Vite Tailwind--}}
     @vite('resources/css/app.css')
 

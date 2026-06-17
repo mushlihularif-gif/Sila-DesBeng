@@ -154,14 +154,39 @@ class BerandaController extends Controller
         $availableYears = array_values($allYears);
         rsort($availableYears);
 
+        // Handle Cascading Region Selection
+        $kabupatenId = 1; // Hardcode Kabupaten Bengkalis
+        $kecamatanId = $request->input('kecamatan_id', 'all');
+        $desaId = $request->input('desa_id', 'all');
+        
+        // Determine the effective regionId for data fetching
+        $regionId = $kabupatenId;
+        if ($desaId !== 'all' && !empty($desaId)) {
+            $regionId = (int)$desaId;
+        } elseif ($kecamatanId !== 'all' && !empty($kecamatanId)) {
+            $regionId = (int)$kecamatanId;
+        }
+
+        // Prepare Region Data for Dropdowns
+        $kecamatans = \App\Models\Region::where('parent_id', $kabupatenId)
+            ->where('type', 'kecamatan')
+            ->get();
+        
+        $desas = collect([]);
+        if ($kecamatanId !== 'all' && !empty($kecamatanId)) {
+            $desas = \App\Models\Region::where('parent_id', $kecamatanId)
+                ->where('type', 'desa')
+                ->get();
+        }
+
         // Get Kinerja BUMDes data (monthly revenue)
-        $kinerjaData = $this->getKinerjaData($year);
+        $kinerjaData = $this->getKinerjaData($year, $regionId);
         
         // Get Unit Populer data (rental vs gas comparison)
-        $unitPopulerData = $this->getUnitPopulerData($year);
+        $unitPopulerData = $this->getUnitPopulerData($year, $regionId);
         
-        // Get Popular Products (Filtered by Year)
-        $popularProducts = $this->getPopularProducts($year);
+        // Get Popular Products (Filtered by Year and Region)
+        $popularProducts = $this->getPopularProducts($year, $regionId);
 
         // Get Active Banners
         $activeBanners = \App\Models\Banner::where('is_active', true)
@@ -184,21 +209,27 @@ class BerandaController extends Controller
             'searchResults',
             'search',
             'activeBanners',
-            'recentAnnouncements'
+            'recentAnnouncements',
+            'kecamatans',
+            'desas',
+            'kecamatanId',
+            'desaId'
         ));
     }
 
     /**
      * Get Popular Products (Top 4 most rented/sold items)
      */
-    private function getPopularProducts($year = null)
+    private function getPopularProducts($year = null, $regionId = 1)
     {
         $year = $year ?? (int)date('Y');
+        $regionIds = array_merge([$regionId], \App\Models\Region::getDescendantIds($regionId));
 
         // 1. Get Rental Scores
         $rentalPopularity = RentalBooking::withTrashed()
             ->select('barang_id', DB::raw('SUM(quantity) as total_sold'))
             ->whereYear('created_at', $year) // Filter by Year
+            ->whereIn('region_id', $regionIds) // Filter by Region
             ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
             ->whereNotNull('barang_id')
             ->groupBy('barang_id')
@@ -227,6 +258,7 @@ class BerandaController extends Controller
         $gasPopularity = GasOrder::withTrashed()
             ->select('gas_id', DB::raw('SUM(quantity) as total_sold'))
             ->whereYear('created_at', $year) // Filter by Year
+            ->whereIn('region_id', $regionIds) // Filter by Region
             ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
             ->whereNotNull('gas_id')
             ->groupBy('gas_id')
@@ -258,16 +290,18 @@ class BerandaController extends Controller
     /**
      * Get Kinerja BUMDes data - Monthly revenue from both rental and gas + Manual Reports
      */
-    private function getKinerjaData($year)
+    private function getKinerjaData($year, $regionId = 1)
     {
         $months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
         $monthlyData = [];
+        $regionIds = array_merge([$regionId], \App\Models\Region::getDescendantIds($regionId));
         
         for ($month = 1; $month <= 12; $month++) {
             // Get rental revenue for this month (excluding cancelled)
             $rentalRevenue = RentalBooking::withTrashed()
                 ->whereYear('created_at', $year)
                 ->whereMonth('created_at', $month)
+                ->whereIn('region_id', $regionIds)
                 ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
                 ->sum('total_amount');
             
@@ -275,12 +309,14 @@ class BerandaController extends Controller
             $gasRevenue = GasOrder::withTrashed()
                 ->whereYear('created_at', $year)
                 ->whereMonth('created_at', $month)
+                ->whereIn('region_id', $regionIds)
                 ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
                 ->sum(DB::raw('price * quantity'));
 
             // Get Manual Report revenue for this month
             $manualRevenue = ManualReport::whereYear('transaction_date', $year)
                 ->whereMonth('transaction_date', $month)
+                ->whereIn('region_id', $regionIds)
                 ->sum(DB::raw('amount * quantity'));
             
             // Total revenue in millions
@@ -298,35 +334,81 @@ class BerandaController extends Controller
     /**
      * Get Unit Populer data - Comparison between rental and gas sales
      */
-    private function getUnitPopulerData($year)
+    private function getUnitPopulerData($year, $regionId = 1)
     {
         $months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
         $rentalData = [];
         $gasData = [];
+        $mobilData = [];
+        $fasilitasData = [];
+        $laporanData = [];
+        $pengumumanData = [];
+        
+        $regionIds = array_merge([$regionId], \App\Models\Region::getDescendantIds($regionId));
         
         for ($month = 1; $month <= 12; $month++) {
             // Count rental orders
             $rentalCount = RentalBooking::withTrashed()
                 ->whereYear('created_at', $year)
                 ->whereMonth('created_at', $month)
+                ->whereIn('region_id', $regionIds)
                 ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
                 ->count();
             
             // Count gas orders
-            $gasCount = GasOrder::withTrashed()
+            $gasCount = \App\Models\GasOrder::withTrashed()
                 ->whereYear('created_at', $year)
                 ->whereMonth('created_at', $month)
+                ->whereIn('region_id', $regionIds)
                 ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
+                ->count();
+                
+            // Count mobil orders
+            $mobilCount = \App\Models\MobilBooking::withTrashed()
+                ->whereYear('created_at', $year)
+                ->whereMonth('created_at', $month)
+                ->whereIn('region_id', $regionIds)
+                ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
+                ->count();
+                
+            // Count fasilitas umum orders
+            $fasilitasCount = \App\Models\FasilitasUmumBooking::withTrashed()
+                ->whereYear('created_at', $year)
+                ->whereMonth('created_at', $month)
+                ->whereIn('region_id', $regionIds)
+                ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
+                ->count();
+                
+            // Count laporan
+            $laporanCount = \App\Models\Laporan::whereYear('created_at', $year)
+                ->whereMonth('created_at', $month)
+                ->whereHas('user', function($q) use ($regionIds) {
+                    $q->whereIn('region_id', $regionIds);
+                })
+                ->count();
+                
+            // Count announcements
+            $pengumumanCount = \App\Models\Announcement::whereYear('created_at', $year)
+                ->whereMonth('created_at', $month)
+                ->whereIn('region_id', $regionIds)
                 ->count();
             
             $rentalData[] = $rentalCount;
             $gasData[] = $gasCount;
+            $mobilData[] = $mobilCount;
+            $fasilitasData[] = $fasilitasCount;
+            $laporanData[] = $laporanCount;
+            $pengumumanData[] = $pengumumanCount;
         }
         
         return [
             'categories' => $months,
             'rental' => $rentalData,
-            'gas' => $gasData
+            'gas' => $gasData,
+            'mobil' => $mobilData,
+            'fasilitas' => $fasilitasData,
+            'laporan' => $laporanData,
+            'pengumuman' => $pengumumanData
         ];
     }
 }

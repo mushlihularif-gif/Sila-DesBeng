@@ -1,6 +1,6 @@
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const overlay = document.getElementById('auth-modal-overlay');
+    // Execute immediately since it's at the end of the body
+    const overlay = document.getElementById('auth-modal-overlay');
         const modalLogin = document.getElementById('modal-login');
         const modalRegister = document.getElementById('modal-register');
         const modalOtp = document.getElementById('modal-otp');
@@ -480,5 +480,4 @@
             closeModal();
             setTimeout(() => window.location.href = '{{ route('beranda') }}', 300);
         });
-    });
 </script>
