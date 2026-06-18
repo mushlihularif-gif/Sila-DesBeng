@@ -55,37 +55,37 @@
                             @endphp
 
                             @if($isServiceActive('Unit Penyewaan Alat'))
-                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="{{ $index++ }}" data-name="Unit Penyewaan Alat" onclick="window.location.href='{{ route('rental.equipment') }}'">
+                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="{{ $index++ }}" data-name="Unit Penyewaan Alat" onclick="window.location.href='{{ route('rental.equipment') . '?region_id=' . $region->id }}'">
                                 <img src="{{ asset('User/img/elemen/F1.png') }}" alt="Alat">
                             </div>
                             @endif
 
                             @if($isServiceActive('Unit Penjualan Gas'))
-                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="{{ $index++ }}" data-name="Unit Penjualan Gas" onclick="window.location.href='{{ route('gas.sales') }}'">
+                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="{{ $index++ }}" data-name="Unit Penjualan Gas" onclick="window.location.href='{{ route('gas.sales') . '?region_id=' . $region->id }}'">
                                 <img src="{{ asset('User/img/elemen/F2.png') }}" alt="Gas">
                             </div>
                             @endif
 
                             @if($isServiceActive('Unit Penyewaan Mobil'))
-                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="{{ $index++ }}" data-name="Unit Penyewaan Mobil" onclick="window.location.href='{{ route('pelayanan') }}'">
+                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="{{ $index++ }}" data-name="Unit Penyewaan Mobil" onclick="window.location.href='{{ route('mobil.rental.equipment') . '?region_id=' . $region->id }}'">
                                 <img src="{{ asset('User/img/elemen/mobil.png') }}" alt="Mobil">
                             </div>
                             @endif
 
                             @if($isServiceActive('Unit Peminjaman Fasilitas Umum'))
-                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="{{ $index++ }}" data-name="Unit Peminjaman Fasilitas Umum" onclick="window.location.href='{{ route('pelayanan') }}'">
+                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="{{ $index++ }}" data-name="Unit Peminjaman Fasilitas Umum" onclick="window.location.href='{{ route('user.fasilitas-umum.equipment') . '?region_id=' . $region->id }}'">
                                 <img src="{{ asset('User/img/elemen/fasilitas.png') }}" alt="Fasilitas">
                             </div>
                             @endif
                             
                             @if($isServiceActive('Pelaporan Warga'))
-                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="{{ $index++ }}" data-name="Pelaporan Warga" onclick="window.location.href='{{ route('pelaporan.landing') }}'">
+                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="{{ $index++ }}" data-name="Pelaporan Warga" onclick="window.location.href='{{ route('pelaporan.landing') . '?region_id=' . $region->id }}'">
                                 <img src="{{ asset('User/img/elemen/lapor.png') }}" alt="Lapor">
                             </div>
                             @endif
 
                             @if($isServiceActive('Pengumuman dan Event'))
-                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="{{ $index++ }}" data-name="Pengumuman dan Event" onclick="window.location.href='{{ route('announcements.index') }}'">
+                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="{{ $index++ }}" data-name="Pengumuman dan Event" onclick="window.location.href='{{ route('announcements.index') . '?region_id=' . $region->id }}'">
                                 <img src="{{ asset('User/img/elemen/event.png') }}" alt="Event">
                             </div>
                             @endif
@@ -431,23 +431,6 @@
             updateCarousel();
             startAutoSlide();
 
-            // Add click handler for rental equipment cards
-            const rentalCards = document.querySelectorAll('.unit-card[data-name="Unit Penyewaan Alat"]');
-            rentalCards.forEach(card => {
-                card.style.cursor = 'pointer';
-                card.addEventListener('click', () => {
-                    window.location.href = "{{ route('rental.equipment') }}";
-                });
-            });
-
-            // Add click handler for gas sales cards
-            const gasCards = document.querySelectorAll('.unit-card[data-name="Unit Penjualan Gas"]');
-            gasCards.forEach(card => {
-                card.style.cursor = 'pointer';
-                card.addEventListener('click', () => {
-                    window.location.href = "{{ route('gas.sales') }}";
-                });
-            });
         },
     };
     // Initialize

@@ -5,6 +5,7 @@
     <style>
         /* ============ SILA DESBENG NAVBAR ============ */
         .sd-navbar {
+            font-family: 'Inter', sans-serif;
             position: fixed; top: 0; left: 0; right: 0; z-index: 50;
             background: rgba(255, 255, 255, 0.1) !important;
             backdrop-filter: blur(8px) !important;

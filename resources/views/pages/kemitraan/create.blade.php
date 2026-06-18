@@ -1,132 +1,656 @@
 @extends('layouts.user')
 
+@section('title', 'Gabung Kemitraan - SilaDesBeng')
+
+@push('styles')
+<style>
+    .btn-outline {
+        display: inline-flex; align-items: center; justify-content: center;
+        padding: 20px 40px; font-size: 1.25rem; font-weight: 700;
+        color: #2563eb; background: transparent;
+        border: 3px solid #2563eb; border-radius: 9999px;
+        cursor: pointer; transition: all 0.5s ease;
+        position: relative; overflow: hidden;
+        text-decoration: none;
+    }
+    .btn-outline::before {
+        content: ''; position: absolute; inset: 0;
+        background: #2563eb; transform: translateY(100%);
+        transition: transform 0.5s ease;
+    }
+    .btn-outline:hover { color: #fff !important; }
+    .btn-outline:hover::before { transform: translateY(0); }
+    .btn-outline span { position: relative; z-index: 1; display: flex; align-items: center; gap: 8px; }
+</style>
+@endpush
+
 @section('page')
-<main class="flex-grow relative w-full overflow-x-hidden min-h-screen bg-gray-50 pt-24 pb-12">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
-            <div class="p-8 sm:p-12">
-                <div class="text-center mb-10">
-                    <h2 class="text-3xl font-extrabold text-gray-900 sm:text-4xl">
-                        Gabung Kemitraan Daerah
+<main class="flex-grow relative w-full">
+    {{-- Custom Vector Abstract Background --}}
+    <div class="fixed inset-0 overflow-hidden z-0 pointer-events-none" id="premium-bg">
+        <canvas id="abstract-canvas" class="w-full h-full absolute inset-0"></canvas>
+    </div>
+
+
+    {{-- Hero Section --}}
+    <section class="relative z-10" style="padding-top: 12rem; padding-bottom: 8rem;">
+        <div class="max-w-7xl mx-auto px-6 text-center animate-section">
+            <h1 class="hero-title animate-fade-in-up">
+                <span class="hero-title-gold">Peta Kemitraan SiladesBeng</span>
+            </h1>
+            <p class="text-gray-700 text-lg max-w-2xl mx-auto mb-10 animate-fade-in-up" style="animation-delay: 100ms;">
+                Desa / Kelurahan Anda belum bergabung? Daftarkan sekarang!
+            </p>
+            
+            <div class="animate-fade-in-up" style="animation-delay: 200ms;">
+                @guest
+                    <button onclick="showToast('Anda harus login atau mendaftar terlebih dahulu!', 'error'); document.getElementById('btn-open-login').click();" class="btn-outline shadow-sm hover:shadow-lg">
+                        <span>Daftarkan Desa / Kelurahan Anda</span>
+                    </button>
+                @else
+                    <button onclick="openModal()" class="btn-outline shadow-sm hover:shadow-lg">
+                        <span>Daftarkan Desa / Kelurahan Anda</span>
+                    </button>
+                @endguest
+            </div>
+        </div>
+    </section>
+
+    {{-- Session Alerts --}}
+    <div class="max-w-7xl mx-auto px-6 relative z-10">
+        @if(session('success'))
+            <div class="mb-8 p-4 bg-green-50 border-l-4 border-green-500 rounded-r-lg shadow-sm">
+                <div class="flex items-center">
+                    <svg class="w-6 h-6 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <p class="text-green-700 font-medium">{{ session('success') }}</p>
+                </div>
+            </div>
+        @endif
+
+        @if($errors->any())
+            <div class="mb-8 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-lg shadow-sm">
+                <div class="flex">
+                    <svg class="w-6 h-6 text-red-500 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <ul class="text-red-700 list-disc pl-5">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+        @endif
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const selector = document.getElementById('kecamatan-selector');
+        const badgeDesktop = document.getElementById('kecamatan-badge');
+        const badgeMobile = document.getElementById('kecamatan-badge-mobile');
+        const panels = document.querySelectorAll('.kecamatan-panel');
+
+        function updateKecamatan(id) {
+            panels.forEach(panel => {
+                if (panel.id === 'kecamatan-content-' + id) {
+                    panel.classList.remove('hidden', 'opacity-0');
+                    panel.classList.add('block', 'opacity-100');
+                    
+                    const joinedCount = panel.getAttribute('data-joined');
+                    if(badgeDesktop) badgeDesktop.textContent = joinedCount;
+                    if(badgeMobile) badgeMobile.textContent = joinedCount;
+                } else {
+                    panel.classList.remove('block', 'opacity-100');
+                    panel.classList.add('hidden', 'opacity-0');
+                }
+            });
+        }
+
+        if (selector) {
+            selector.addEventListener('change', function() {
+                updateKecamatan(this.value);
+            });
+            // Init first state
+            updateKecamatan(selector.value);
+        }
+    });
+
+    // Handle scroll for animation on cards
+    const observerOptions = {
+        root: null,
+        rootMargin: '0px',
+        threshold: 0.1
+    };
+    </script>
+
+    {{-- Direktori Section --}}
+    <section class="relative z-10 pt-10 pb-32" style="margin-top: 1rem; margin-bottom: 5rem;">
+        <div class="max-w-7xl mx-auto px-6">
+            @php
+                $totalJoined = 0;
+                foreach($kecamatans as $kecamatan) {
+                    $totalJoined += $kecamatan->children->filter(function($desa) {
+                        return $desa->services->count() > 0;
+                    })->count();
+                }
+            @endphp
+            
+            {{-- Statistik Total Kabupaten --}}
+            <div class="mb-8 bg-white/60 backdrop-blur-md rounded-2xl border border-gray-100 p-6 flex flex-row items-center justify-between animate-section shadow-sm">
+                <div class="flex flex-col justify-center">
+                    <h2 class="text-2xl font-bold text-black mb-2" style="font-family: 'Poppins', sans-serif;">
+                        Kabupaten Bengkalis
                     </h2>
-                    <p class="mt-4 text-lg text-gray-600">
-                        Daftarkan wilayah Anda (Kecamatan, Desa, RW, atau RT) untuk menjadi bagian dari sistem SilaDesBeng dan nikmati kemudahan layanannya.
+                    <p class="text-black text-sm font-semibold">
+                        Total Desa / Kelurahan Bergabung
                     </p>
                 </div>
+                
+                <div class="bg-white/60 backdrop-blur-sm px-6 py-3 rounded-lg border shadow-sm flex items-center justify-center" style="border-color: #bfdbfe;">
+                    <span class="text-3xl font-bold text-blue-600" style="font-family: 'Poppins', sans-serif;">
+                        {{ $totalJoined }}
+                    </span>
+                </div>
+            </div>
 
-                @if(session('success'))
-                    <div class="mb-8 p-4 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
-                        <div class="flex">
-                            <div class="flex-shrink-0">
-                                <i class="fas fa-check-circle text-green-500"></i>
-                            </div>
-                            <div class="ml-3">
-                                <p class="text-sm text-green-700 font-medium">
-                                    {{ session('success') }}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                @endif
-
-                @if($errors->any())
-                    <div class="mb-8 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-lg">
-                        <div class="flex">
-                            <div class="flex-shrink-0">
-                                <i class="fas fa-exclamation-circle text-red-500"></i>
-                            </div>
-                            <div class="ml-3">
-                                <ul class="text-sm text-red-700 font-medium list-disc pl-5">
-                                    @foreach($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                @endif
-
-                <form action="{{ route('kemitraan.store') }}" method="POST" class="space-y-8">
-                    @csrf
-                    
-                    <div class="grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-8">
-                        <div class="sm:col-span-2">
-                            <label for="applicant_name" class="block text-sm font-medium text-gray-700">Nama Pendaftar / Perwakilan</label>
-                            <div class="mt-1">
-                                <input type="text" name="applicant_name" id="applicant_name" value="{{ old('applicant_name') }}" class="py-3 px-4 block w-full shadow-sm focus:ring-blue-500 focus:border-blue-500 border-gray-300 rounded-md" required>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label for="contact_email" class="block text-sm font-medium text-gray-700">Email Kontak</label>
-                            <div class="mt-1">
-                                <input type="email" name="contact_email" id="contact_email" value="{{ old('contact_email') }}" class="py-3 px-4 block w-full shadow-sm focus:ring-blue-500 focus:border-blue-500 border-gray-300 rounded-md" required>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label for="contact_phone" class="block text-sm font-medium text-gray-700">Nomor Telepon / WA</label>
-                            <div class="mt-1">
-                                <input type="text" name="contact_phone" id="contact_phone" value="{{ old('contact_phone') }}" class="py-3 px-4 block w-full shadow-sm focus:ring-blue-500 focus:border-blue-500 border-gray-300 rounded-md" required>
-                            </div>
-                        </div>
-
-                        <div class="sm:col-span-2">
-                            <hr class="my-4 border-gray-200">
-                            <h3 class="text-lg font-medium text-gray-900 mb-4">Informasi Wilayah</h3>
-                        </div>
-
-                        <div>
-                            <label for="region_type" class="block text-sm font-medium text-gray-700">Tingkat Wilayah</label>
-                            <div class="mt-1">
-                                <select id="region_type" name="region_type" class="py-3 px-4 block w-full shadow-sm focus:ring-blue-500 focus:border-blue-500 border-gray-300 rounded-md" required>
-                                    <option value="" disabled selected>Pilih Tingkat Wilayah</option>
-                                    <option value="kecamatan" {{ old('region_type') == 'kecamatan' ? 'selected' : '' }}>Kecamatan</option>
-                                    <option value="desa" {{ old('region_type') == 'desa' ? 'selected' : '' }}>Desa / Kelurahan</option>
-                                    <option value="rw" {{ old('region_type') == 'rw' ? 'selected' : '' }}>RW</option>
-                                    <option value="rt" {{ old('region_type') == 'rt' ? 'selected' : '' }}>RT</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label for="region_name" class="block text-sm font-medium text-gray-700">Nama Wilayah (Contoh: Desa Suka Maju)</label>
-                            <div class="mt-1">
-                                <input type="text" name="region_name" id="region_name" value="{{ old('region_name') }}" class="py-3 px-4 block w-full shadow-sm focus:ring-blue-500 focus:border-blue-500 border-gray-300 rounded-md" required>
-                            </div>
-                        </div>
-
-                        <div class="sm:col-span-2">
-                            <label for="parent_region_id" class="block text-sm font-medium text-gray-700">Menginduk ke Wilayah Mana?</label>
-                            <p class="text-xs text-gray-500 mb-2">Pilih wilayah di atas Anda yang sudah terdaftar di sistem.</p>
-                            <div class="mt-1">
-                                <select id="parent_region_id" name="parent_region_id" class="py-3 px-4 block w-full shadow-sm focus:ring-blue-500 focus:border-blue-500 border-gray-300 rounded-md" required>
-                                    <option value="" disabled selected>Pilih Wilayah Induk</option>
-                                    @foreach($regions as $region)
-                                        <option value="{{ $region->id }}" {{ old('parent_region_id') == $region->id ? 'selected' : '' }}>
-                                            [{{ strtoupper($region->type) }}] {{ $region->name }}
-                                        </option>
+            <div class="space-y-12">
+                <div class="bg-white/60 backdrop-blur-md rounded-2xl shadow-sm border border-gray-100 overflow-hidden animate-section">
+                    {{-- Header with Dropdown --}}
+                    <div class="bg-gradient-to-r from-gray-50 to-white px-6 py-4 border-b border-gray-100 flex flex-wrap justify-between items-center relative gap-4">
+                        <div class="flex items-center flex-1 min-w-0 max-w-lg">
+                            <svg class="w-7 h-7 text-blue-600 shrink-0" style="margin-right: 1.5rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                            <div class="relative w-full">
+                                <select id="kecamatan-selector" class="block w-full pl-6 pr-10 py-3 text-base md:text-lg font-bold text-gray-800 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#115789] focus:border-[#115789] cursor-pointer transition-colors" style="appearance: none; background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%234B5563%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right 0.75rem top 50%; background-size: 0.75rem auto; padding-left: 1.5rem;">
+                                    @foreach($kecamatans as $kecamatan)
+                                        <option value="{{ $kecamatan->id }}" class="text-gray-900 font-medium py-1">{{ $kecamatan->name }}</option>
                                     @endforeach
                                 </select>
                             </div>
                         </div>
-
-                        <div class="sm:col-span-2">
-                            <label for="reason" class="block text-sm font-medium text-gray-700">Alasan Bergabung / Pesan Tambahan</label>
-                            <div class="mt-1">
-                                <textarea id="reason" name="reason" rows="4" class="py-3 px-4 block w-full shadow-sm focus:ring-blue-500 focus:border-blue-500 border-gray-300 rounded-md" required>{{ old('reason') }}</textarea>
+                        
+                        <div class="flex items-center shrink-0">
+                            <div class="text-sm font-medium px-4 py-1.5 rounded-full bg-blue-50 text-blue-700 border border-blue-100 shadow-sm">
+                                <span id="kecamatan-badge" class="font-bold text-base">0</span> Bergabung
                             </div>
                         </div>
                     </div>
 
-                    <div class="sm:col-span-2 pt-5">
-                        <button type="submit" class="w-full inline-flex items-center justify-center px-6 py-4 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
-                            Kirim Permohonan Kemitraan
-                        </button>
+                    <div class="p-6 relative min-h-[300px]">
+                        @foreach($kecamatans as $index => $kecamatan)
+                            @php
+                                $joinedCount = $kecamatan->children->filter(function($desa) {
+                                    return $desa->services->count() > 0;
+                                })->count();
+                            @endphp
+                            <div id="kecamatan-content-{{ $kecamatan->id }}" class="kecamatan-panel transition-opacity duration-300 {{ $index === 0 ? 'block opacity-100' : 'hidden opacity-0' }}" data-joined="{{ $joinedCount }}">
+                        @if($kecamatan->children->count() > 0)
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" style="gap: 2rem;">
+                                @foreach($kecamatan->children as $desa)
+                                @php
+                                    // Desa is considered active if it has at least 1 active service
+                                    $hasServices = $desa->services->count() > 0;
+                                @endphp
+                                <div class="bg-white/40 backdrop-blur-sm border border-gray-100 shadow-sm rounded-xl p-5 hover:shadow-md transition-all">
+                                    <div class="flex justify-between items-start mb-4">
+                                        <h3 class="font-bold text-gray-800">{{ $desa->name }}</h3>
+                                        @if($hasServices)
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                Bergabung
+                                            </span>
+                                        @else
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                                Belum
+                                            </span>
+                                        @endif
+                                    </div>
+                                    
+                                    @if($hasServices)
+                                        <div class="flex flex-col gap-3 mt-4">
+                                            @foreach($desa->services as $service)
+                                                @php
+                                                    $nameLower = strtolower($service->name);
+                                                    $iconColor = 'color: #6b7280;';
+                                                    $bgColor = 'background-color: #f9fafb;';
+                                                    
+                                                    if (strpos($nameLower, 'alat') !== false) {
+                                                        $iconColor = 'color: #f97316;';
+                                                        $bgColor = 'background-color: #fff7ed;';
+                                                    } elseif (strpos($nameLower, 'gas') !== false) {
+                                                        $iconColor = 'color: #3b82f6;';
+                                                        $bgColor = 'background-color: #eff6ff;';
+                                                    } elseif (strpos($nameLower, 'mobil') !== false) {
+                                                        $iconColor = 'color: #10b981;';
+                                                        $bgColor = 'background-color: #ecfdf5;';
+                                                    } elseif (strpos($nameLower, 'fasilitas') !== false) {
+                                                        $iconColor = 'color: #a855f7;';
+                                                        $bgColor = 'background-color: #faf5ff;';
+                                                    } elseif (strpos($nameLower, 'lapor') !== false) {
+                                                        $iconColor = 'color: #ef4444;';
+                                                        $bgColor = 'background-color: #fef2f2;';
+                                                    } elseif (strpos($nameLower, 'pengumuman') !== false || strpos($nameLower, 'event') !== false) {
+                                                        $iconColor = 'color: #06b6d4;';
+                                                        $bgColor = 'background-color: #ecfeff;';
+                                                    }
+                                                @endphp
+                                                <div class="flex items-center gap-3">
+                                                    <div class="flex items-center justify-center w-8 h-8 rounded-full shrink-0" style="{{ $bgColor }} {{ $iconColor }}">
+                                                        @if(strpos($nameLower, 'alat') !== false)
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                                        @elseif(strpos($nameLower, 'gas') !== false)
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"></path></svg>
+                                                        @elseif(strpos($nameLower, 'mobil') !== false)
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                                                        @elseif(strpos($nameLower, 'fasilitas') !== false)
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                                                        @elseif(strpos($nameLower, 'lapor') !== false)
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"></path></svg>
+                                                        @else
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                                        @endif
+                                                    </div>
+                                                    <span class="text-sm font-semibold text-gray-800">{{ $service->name }}</span>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @else
+                                        <div class="mt-3 text-sm text-gray-500 italic">
+                                            Belum ada layanan aktif.
+                                        </div>
+                                    @endif
+                                </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <div class="text-center py-12 bg-gray-50 rounded-xl border border-gray-100 border-dashed">
+                                <svg class="mx-auto h-12 w-12 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
+                                <p class="text-gray-500 font-medium">Belum ada data desa untuk kecamatan ini.</p>
+                            </div>
+                        @endif
+                            </div>
+                        @endforeach
                     </div>
-                </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {{-- Modal Form Pengajuan --}}
+    <div id="application-modal" class="fixed inset-0 z-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-gray-900 bg-opacity-75 backdrop-blur-sm transition-opacity" onclick="closeModal()"></div>
+
+        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+            <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+                <div class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-2xl">
+                    <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                        <div class="flex justify-between items-center mb-5 pb-4 border-b">
+                            <h3 class="text-2xl font-bold leading-6 text-gray-900" id="modal-title">Form Pengajuan Kemitraan</h3>
+                            <button type="button" onclick="closeModal()" class="text-gray-400 hover:text-gray-500 focus:outline-none">
+                                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                            </button>
+                        </div>
+                        
+                        <form action="{{ route('kemitraan.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+                            @csrf
+                            
+                            <div class="grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-6">
+                                <div class="sm:col-span-2">
+                                    <label for="applicant_name" class="block text-sm font-medium text-gray-700">Nama Lengkap Pendaftar</label>
+                                    <input type="text" name="applicant_name" id="applicant_name" value="{{ old('applicant_name') }}" class="mt-1 py-2.5 px-3 block w-full shadow-sm focus:ring-[#115789] focus:border-[#115789] border-gray-300 rounded-md bg-gray-50" required placeholder="Budi Santoso">
+                                </div>
+
+                                <div>
+                                    <label for="contact_phone" class="block text-sm font-medium text-gray-700">Nomor WhatsApp</label>
+                                    <input type="text" name="contact_phone" id="contact_phone" value="{{ old('contact_phone') }}" class="mt-1 py-2.5 px-3 block w-full shadow-sm focus:ring-[#115789] focus:border-[#115789] border-gray-300 rounded-md bg-gray-50" required placeholder="08123456789">
+                                </div>
+
+                                <div>
+                                    <label for="contact_email" class="block text-sm font-medium text-gray-700">Email Kontak</label>
+                                    <input type="email" name="contact_email" id="contact_email" value="{{ old('contact_email') }}" class="mt-1 py-2.5 px-3 block w-full shadow-sm focus:ring-[#115789] focus:border-[#115789] border-gray-300 rounded-md bg-gray-50" required placeholder="email@desa.id">
+                                </div>
+
+                                <div class="sm:col-span-2">
+                                    <h4 class="font-semibold text-gray-800 mb-2 border-b pb-2">Informasi Wilayah</h4>
+                                </div>
+
+                                <div>
+                                    <label for="region_type" class="block text-sm font-medium text-gray-700">Tingkat Wilayah</label>
+                                    <select id="region_type" name="region_type" class="mt-1 py-2.5 px-3 block w-full shadow-sm focus:ring-[#115789] focus:border-[#115789] border-gray-300 rounded-md bg-gray-50" required>
+                                        <option value="" disabled selected>Pilih Tingkat</option>
+                                        <option value="desa" {{ old('region_type') == 'desa' ? 'selected' : '' }}>Desa / Kelurahan</option>
+                                        <option value="kecamatan" {{ old('region_type') == 'kecamatan' ? 'selected' : '' }}>Kecamatan</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label for="region_name" class="block text-sm font-medium text-gray-700">Nama Wilayah</label>
+                                    <input type="text" name="region_name" id="region_name" value="{{ old('region_name') }}" class="mt-1 py-2.5 px-3 block w-full shadow-sm focus:ring-[#115789] focus:border-[#115789] border-gray-300 rounded-md bg-gray-50" required placeholder="Pematang Duku Timur">
+                                </div>
+
+                                <div class="sm:col-span-2">
+                                    <label for="parent_region_id" class="block text-sm font-medium text-gray-700">Menginduk ke Wilayah Mana?</label>
+                                    <select id="parent_region_id" name="parent_region_id" class="mt-1 py-2.5 px-3 block w-full shadow-sm focus:ring-[#115789] focus:border-[#115789] border-gray-300 rounded-md bg-gray-50" required>
+                                        <option value="" disabled selected>Pilih Wilayah Induk</option>
+                                        @foreach($regions as $region)
+                                            <option value="{{ $region->id }}" {{ old('parent_region_id') == $region->id ? 'selected' : '' }}>
+                                                [{{ strtoupper($region->type) }}] {{ $region->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                
+                                <div class="sm:col-span-2">
+                                    <label for="document" class="block text-sm font-medium text-gray-700">Unggah SK/Surat Tugas (Max 5MB)</label>
+                                    <div class="mt-1 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-6 bg-gray-50 hover:bg-gray-100 transition-colors">
+                                        <div class="text-center">
+                                            <svg class="mx-auto h-12 w-12 text-gray-300" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                                <path fill-rule="evenodd" d="M1.5 6a2.25 2.25 0 012.25-2.25h16.5A2.25 2.25 0 0122.5 6v12a2.25 2.25 0 01-2.25 2.25H3.75A2.25 2.25 0 011.5 18V6zM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0021 18v-1.94l-2.69-2.689a1.5 1.5 0 00-2.12 0l-.88.879.97.97a.75.75 0 11-1.06 1.06l-5.16-5.159a1.5 1.5 0 00-2.12 0L3 16.061zm10.125-7.81a1.125 1.125 0 112.25 0 1.125 1.125 0 01-2.25 0z" clip-rule="evenodd" />
+                                            </svg>
+                                            <div class="mt-4 flex text-sm leading-6 text-gray-600 justify-center">
+                                                <label for="document" class="relative cursor-pointer rounded-md bg-white font-semibold text-[#115789] focus-within:outline-none focus-within:ring-2 focus-within:ring-[#115789] focus-within:ring-offset-2 hover:text-blue-500">
+                                                    <span>Upload file</span>
+                                                    <input id="document" name="document" type="file" class="sr-only" required accept=".pdf,.jpg,.jpeg,.png">
+                                                </label>
+                                                <p class="pl-1">or drag and drop</p>
+                                            </div>
+                                            <p class="text-xs leading-5 text-gray-500" id="file-name-display">PDF, PNG, JPG up to 5MB</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="sm:col-span-2">
+                                    <label for="reason" class="block text-sm font-medium text-gray-700">Pesan Tambahan</label>
+                                    <textarea id="reason" name="reason" rows="3" class="mt-1 py-2.5 px-3 block w-full shadow-sm focus:ring-[#115789] focus:border-[#115789] border-gray-300 rounded-md bg-gray-50" required placeholder="Alasan mengapa desa Anda ingin bergabung...">{{ old('reason') }}</textarea>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-6 sm:flex sm:flex-row-reverse border-t pt-4">
+                                <button type="submit" class="inline-flex w-full justify-center rounded-md bg-[#115789] px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-800 sm:ml-3 sm:w-auto transition-colors">Kirim Pengajuan</button>
+                                <button type="button" onclick="closeModal()" class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-6 py-3 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto transition-colors">Batal</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </main>
+
+@push('styles')
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+    @keyframes fade-in-up {
+        0% { opacity: 0; transform: translateY(30px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in-up { animation: fade-in-up 0.8s ease-out forwards; opacity: 0; }
+
+    .hero-title {
+        font-family: 'Inter', sans-serif;
+        font-size: clamp(2rem, 4vw, 3.5rem); 
+        font-weight: 800;
+        line-height: 1.2; 
+        margin-bottom: 24px;
+    }
+    .hero-title-gold {
+        background: linear-gradient(to right, #1e3a5f, #2563eb, #1e3a5f);
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        background-clip: text;
+        background-size: 200% 200%; animation: gradient-anim 3s ease infinite;
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+    }
+    @keyframes gradient-anim { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+
+    /* Button Styling */
+    .btn-gradient-wrapper {
+        position: relative; display: inline-block;
+    }
+    .btn-gradient-wrapper::before {
+        content: ""; position: absolute; inset: -3px;
+        background: linear-gradient(to right, #60a5fa, #f59e0b);
+        border-radius: 9999px; opacity: 0.8; filter: blur(3px);
+        transition: all 0.3s ease; z-index: -1;
+    }
+    .btn-gradient-wrapper:hover::before { opacity: 1; filter: blur(4px); inset: -4px; }
+    .btn-gradient {
+        position: relative; display: inline-flex; align-items: center; justify-content: center;
+        border-radius: 9999px; font-weight: 700;
+        color: #2563eb !important; background: #fff !important; text-decoration: none !important;
+        transition: all 0.3s ease; border: none; outline: none; cursor: pointer;
+    }
+    .btn-gradient:hover { box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+</style>
+@endpush
+
+<script>
+    // Modal logic
+    function openModal() {
+        document.getElementById('application-modal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    }
+    
+    function closeModal() {
+        document.getElementById('application-modal').classList.add('hidden');
+        document.body.style.overflow = 'auto';
+    }
+
+    // File name display logic
+    document.getElementById('document').addEventListener('change', function(e) {
+        var fileName = e.target.files[0].name;
+        document.getElementById('file-name-display').textContent = 'File terpilih: ' + fileName;
+        document.getElementById('file-name-display').classList.add('text-[#115789]', 'font-medium');
+    });
+
+</script>
+
+<script>
+    // Canvas Vector Abstract Background Script
+    document.addEventListener('DOMContentLoaded', () => {
+        const canvas = document.getElementById('abstract-canvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        
+        let width, height;
+        let mouse = { x: -1000, y: -1000 };
+        let targetMouse = { x: -1000, y: -1000 };
+
+        function resize() {
+            if (width !== window.innerWidth || height !== window.innerHeight) {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                canvas.width = width;
+                canvas.height = height;
+                initWaves();
+            }
+        }
+
+        window.addEventListener('resize', resize);
+
+        window.addEventListener('mousemove', (e) => {
+            targetMouse.x = e.clientX;
+            targetMouse.y = e.clientY;
+        });
+        window.addEventListener('mouseout', () => {
+            targetMouse.x = -1000;
+            targetMouse.y = -1000;
+        });
+
+        let scrollY = window.scrollY;
+        window.addEventListener('scroll', () => {
+            scrollY = window.scrollY;
+        });
+
+        class Wave {
+            constructor(getGradient, yOffset, amplitude, speed, wavelength) {
+                this.getGradient = getGradient;
+                this.yOffset = yOffset; 
+                this.amplitude = amplitude; 
+                this.speed = speed; 
+                this.wavelength = wavelength; 
+                this.points = [];
+                this.time = Math.random() * 100;
+            }
+
+            init() {
+                this.points = [];
+                let numPoints = Math.ceil(width / 25) + 2; // Resolusi tinggi agar kursor presisi
+                for(let i = 0; i < numPoints; i++) {
+                    let startX = (i - 1) * 25;
+                    let startBaseY = height * this.yOffset;
+                    let startY = startBaseY + Math.sin(this.time + startX / this.wavelength) * this.amplitude;
+                    this.points.push({
+                        x: startX,
+                        baseY: startBaseY,
+                        y: startY,
+                        vy: 0,
+                        spring: 0.05, 
+                        friction: 0.90 
+                    });
+                }
+            }
+
+            update() {
+                this.time += this.speed;
+                for(let i = 0; i < this.points.length; i++) {
+                    let pt = this.points[i];
+                    
+                    // Gerakan gelombang natural
+                    let targetY = pt.baseY + Math.sin(this.time + pt.x / this.wavelength) * this.amplitude;
+                    
+                    // Interaksi Kursor: Menyebar saat disentuh
+                    let dx = mouse.x - pt.x;
+                    let dy = mouse.y - targetY;
+                    let distance = Math.sqrt(dx*dx + dy*dy);
+                    
+                    if (distance < 200) {
+                        let force = Math.pow((200 - distance) / 200, 2); 
+                        let pushDir = (dy > 0) ? -1 : 1; 
+                        targetY += pushDir * force * 60; // Dorongan diperhalus agar tidak terlalu liar
+                    }
+                    
+                    let forceY = (targetY - pt.y) * pt.spring;
+                    pt.vy += forceY;
+                    pt.vy *= pt.friction;
+                    pt.y += pt.vy;
+                }
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.moveTo(this.points[0].x, this.points[0].y);
+                
+                for(let i = 0; i < this.points.length - 1; i++) {
+                    let cx = (this.points[i].x + this.points[i+1].x) / 2;
+                    let cy = (this.points[i].y + this.points[i+1].y) / 2;
+                    ctx.quadraticCurveTo(this.points[i].x, this.points[i].y, cx, cy);
+                }
+                
+                let last = this.points[this.points.length - 1];
+                ctx.lineTo(last.x, last.y);
+                // Gambar ekstra jauh ke bawah agar saat di-scroll ke atas tidak terpotong bolong
+                ctx.lineTo(width, height * 2 + scrollY);
+                ctx.lineTo(0, height * 2 + scrollY);
+                ctx.closePath();
+                
+                ctx.fillStyle = this.getGradient(ctx, width, height);
+                ctx.fill();
+            }
+        }
+
+        let waves = [];
+
+        function initWaves() {
+            waves = [
+                // 1. Biru Muda (Diturunkan dan diperlambat agar lebih tenang)
+                new Wave((ctx, w, h) => {
+                    let grad = ctx.createLinearGradient(0, h*0.5, 0, h*1.2);
+                    grad.addColorStop(0, 'rgba(140, 190, 250, 0.7)');
+                    grad.addColorStop(1, 'rgba(180, 215, 255, 0.1)');
+                    return grad;
+                }, 0.65, 40, 0.005, 600),
+
+                // 2. Putih Solid (Pemisah)
+                new Wave((ctx, w, h) => {
+                    let grad = ctx.createLinearGradient(0, h*0.6, 0, h*1.2);
+                    grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
+                    grad.addColorStop(1, 'rgba(245, 250, 255, 0.5)');
+                    return grad;
+                }, 0.75, 30, 0.003, 500),
+
+                // 3. Kuning Amber (Lebih pudar dan gradasi halus ke putih transparan)
+                new Wave((ctx, w, h) => {
+                    let grad = ctx.createLinearGradient(0, h*0.7, 0, h*1.1);
+                    grad.addColorStop(0, 'rgba(245, 225, 130, 0.5)'); // Agak pudar di puncak
+                    grad.addColorStop(1, 'rgba(255, 255, 255, 0)'); // Pudar sempurna ke transparan
+                    return grad;
+                }, 0.85, 45, 0.007, 700)
+            ];
+            waves.forEach(w => w.init());
+        }
+
+        function animate() {
+            // Lerp mouse
+            mouse.x += (targetMouse.x - mouse.x) * 0.1;
+            mouse.y += (targetMouse.y - mouse.y) * 0.1;
+
+            // Background layer solid (agar saat parallax tidak bolong)
+            ctx.fillStyle = '#e8eff5'; 
+            ctx.fillRect(0, 0, width, height);
+
+            ctx.save();
+            // Terapkan Parallax Scrolling (Background bergerak 40% kecepatan scroll content)
+            ctx.translate(0, -scrollY * 0.4); 
+
+            // Cahaya Matahari Halus (Kiri) - Diperhalus
+            let glowX = width * 0.15;
+            let glowY = height * 0.4;
+            let gradGlow = ctx.createRadialGradient(glowX, glowY, 0, glowX, glowY, width * 0.3);
+            gradGlow.addColorStop(0, 'rgba(245, 235, 150, 0.15)'); // Opasitas diturunkan
+            gradGlow.addColorStop(1, 'rgba(245, 235, 150, 0)');
+            ctx.fillStyle = gradGlow;
+            ctx.beginPath();
+            ctx.arc(glowX, glowY, width * 0.3, 0, Math.PI*2);
+            ctx.fill();
+
+            // Gambar ombak-ombak
+            waves.forEach(w => {
+                w.update();
+                w.draw();
+            });
+
+            // Ikon Wajik (Kanan Atas) - Dibuat lebih kecil & pudar agar tidak mendominasi
+            ctx.save();
+            ctx.translate(width * 0.9, height * 0.08);
+            
+            // Parallax menjauh dari kursor
+            let dxD = mouse.x - (width * 0.9);
+            let dyD = mouse.y - (height * 0.08);
+            let distD = Math.sqrt(dxD*dxD + dyD*dyD);
+            if(distD < 300) {
+                let f = (300 - distD)/300;
+                ctx.translate(-(dxD/distD)*f*20, -(dyD/distD)*f*20);
+            }
+
+            ctx.rotate(Math.PI / 4);
+            
+            ctx.fillStyle = 'rgba(74, 144, 226, 0.4)';
+            ctx.fillRect(-15, -15, 30, 30);
+            
+            ctx.fillStyle = 'rgba(120, 175, 240, 0.3)';
+            ctx.fillRect(5, 5, 25, 25);
+            
+            ctx.strokeStyle = 'rgba(150, 190, 250, 0.4)';
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(20, 20, 15, 15);
+
+            ctx.restore(); // Restore efek rotasi wajik
+            ctx.restore(); // Restore efek Parallax Scroll
+
+            requestAnimationFrame(animate);
+        }
+
+        resize();
+        animate();
+    });
+</script>
+
+</style>
 @endsection

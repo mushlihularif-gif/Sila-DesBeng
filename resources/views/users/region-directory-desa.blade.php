@@ -13,7 +13,7 @@
             <div class="text-center mb-16 animate-section">
                 <h1 class="text-4xl md:text-5xl font-bold mb-4">
                     <span class="bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">Pilih Layanan </span>
-                    <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Desa di Kecamatan {{ $kecamatan->name }}</span>
+                    <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Desa di {{ $kecamatan->name }}</span>
                 </h1>
                 <p class="text-gray-700 text-lg mt-2">
                     Ayo Pilih Daerah mu, Dukung dan Gunakan Unit Layanannya!

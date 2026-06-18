@@ -281,27 +281,27 @@
 
                         <div class="relative w-full max-w-6xl mx-auto h-full">
 
-                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="0" data-name="Unit Penyewaan Alat" onclick="window.location.href='{{ auth()->check() ? route('rental.equipment') : route('bumdes.profil') . '?redirect=rental.equipment' }}'">
+                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="0" data-name="Unit Penyewaan Alat" onclick="window.location.href='{{ route('bumdes.profil') . '?redirect=rental.equipment' }}'">
                                 <img src="{{ asset('User/img/elemen/F1.png') }}" alt="Alat" loading="lazy">
                             </div>
 
-                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="1" data-name="Unit Penjualan Gas" onclick="window.location.href='{{ auth()->check() ? route('gas.sales') : route('bumdes.profil') . '?redirect=gas.sales' }}'">
+                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="1" data-name="Unit Penjualan Gas" onclick="window.location.href='{{ route('bumdes.profil') . '?redirect=gas.sales' }}'">
                                 <img src="{{ asset('User/img/elemen/F2.png') }}" alt="Gas" loading="lazy">
                             </div>
 
-                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="2" data-name="Unit Penyewaan Mobil" onclick="window.location.href='{{ auth()->check() ? route('mobil.rental.equipment') : route('bumdes.profil') . '?redirect=mobil.rental.equipment' }}'">
+                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="2" data-name="Unit Penyewaan Mobil" onclick="window.location.href='{{ route('bumdes.profil') . '?redirect=mobil.rental.equipment' }}'">
                                 <img src="{{ asset('User/img/elemen/mobil.png') }}" alt="Mobil">
                             </div>
 
-                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="3" data-name="Unit Peminjaman Fasilitas Umum" onclick="window.location.href='{{ auth()->check() ? route('user.fasilitas-umum.equipment') : route('bumdes.profil') . '?redirect=user.fasilitas-umum.equipment' }}'">
+                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="3" data-name="Unit Peminjaman Fasilitas Umum" onclick="window.location.href='{{ route('bumdes.profil') . '?redirect=user.fasilitas-umum.equipment' }}'">
                                 <img src="{{ asset('User/img/elemen/fasilitas.png') }}" alt="Fasilitas">
                             </div>
 
-                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="4" data-name="Pelaporan Warga" onclick="window.location.href='{{ auth()->check() ? route('pelaporan.landing') : route('bumdes.profil') . '?redirect=pelaporan.landing' }}'">
+                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="4" data-name="Pelaporan Warga" onclick="window.location.href='{{ route('bumdes.profil') . '?redirect=pelaporan.landing' }}'">
                                 <img src="{{ asset('User/img/elemen/lapor.png') }}" alt="Event">
                             </div>
 
-                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="5" data-name="Pengumuman dan Event" onclick="window.location.href='{{ auth()->check() ? route('announcements.index') : route('bumdes.profil') . '?redirect=announcements.index' }}'">
+                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="5" data-name="Pengumuman dan Event" onclick="window.location.href='{{ route('bumdes.profil') . '?redirect=announcements.index' }}'">
                                 <img src="{{ asset('User/img/elemen/event.png') }}" alt="Event">
                             </div>
                             

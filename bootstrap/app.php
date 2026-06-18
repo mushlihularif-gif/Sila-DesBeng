@@ -21,6 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'auth' => \App\Http\Middleware\CheckRole::class,
             'role' => \App\Http\Middleware\CheckRole::class,
             'admin' => \App\Http\Middleware\CheckRole::class, // For backward compatibility
+            'region.service' => \App\Http\Middleware\CheckRegionService::class,
         ]);
 
         // Global rate limiting for all web routes (Skenario 21: DoS defense)

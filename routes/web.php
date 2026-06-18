@@ -63,16 +63,16 @@ Route::get('/profil-siladesbeng', [App\Http\Controllers\User\IsewaProfileControl
 
 Route::get('/kemitraan/gabung', [App\Http\Controllers\PartnerApplicationController::class, 'create'])
     ->name('kemitraan.create')
-    ->middleware('auth');
+    ->middleware('role:user,guest');
 Route::post('/kemitraan/gabung', [App\Http\Controllers\PartnerApplicationController::class, 'store'])
     ->name('kemitraan.store')
-    ->middleware('auth');
+    ->middleware('role:user,guest');
 
 
 
 Route::get('/unit-penyewaan-alat', [App\Http\Controllers\User\RentalUserController::class, 'index'])
     ->name('rental.equipment')
-    ->middleware('role:user,guest');
+    ->middleware(['role:user,guest', 'region.service:penyewaan-alat']);
 Route::get('/unit-penyewaan-alat/{id}', [App\Http\Controllers\User\RentalUserController::class, 'show'])
     ->name('rental.equipment.show')
     ->middleware('role:user,guest');
@@ -87,7 +87,7 @@ Route::post('/rental/booking', [App\Http\Controllers\User\RentalBookingControlle
 
 Route::get('/unit-penyewaan-mobil', [App\Http\Controllers\User\MobilRentalUserController::class, 'index'])
     ->name('mobil.rental.equipment')
-    ->middleware('role:user,guest');
+    ->middleware(['role:user,guest', 'region.service:penyewaan-mobil']);
 Route::get('/unit-penyewaan-mobil/{id}', [App\Http\Controllers\User\MobilRentalUserController::class, 'show'])
     ->name('mobil.rental.show')
     ->middleware('role:user,guest');
@@ -100,7 +100,7 @@ Route::post('/mobil-rental/booking', [App\Http\Controllers\User\MobilBookingCont
 
 Route::get('/unit-peminjaman-fasilitas-umum', [App\Http\Controllers\User\FasilitasUmumUserController::class, 'index'])
     ->name('user.fasilitas-umum.equipment')
-    ->middleware('role:user,guest');
+    ->middleware(['role:user,guest', 'region.service:peminjaman-fasilitas-umum']);
 Route::get('/unit-peminjaman-fasilitas-umum/{id}', [App\Http\Controllers\User\FasilitasUmumUserController::class, 'show'])
     ->name('user.fasilitas-umum.show')
     ->middleware('role:user,guest');
@@ -114,7 +114,7 @@ Route::post('/fasilitas-umum/booking', [App\Http\Controllers\User\FasilitasUmumB
 
 Route::get('/unit-penjualan-gas', [App\Http\Controllers\User\GasSalesUserController::class, 'index'])
     ->name('gas.sales')
-    ->middleware('role:user,guest');
+    ->middleware(['role:user,guest', 'region.service:penjualan-gas']);
 Route::get('/unit-penjualan-gas/{id}', [App\Http\Controllers\User\GasSalesUserController::class, 'show'])
     ->name('gas.sales.show')
     ->middleware('role:user,guest');
@@ -393,7 +393,9 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
 Route::post('/kritik-saran', [\App\Http\Controllers\KritikSaranController::class, 'store'])->name('kritik-saran.store');
 
 // Landing Page Pelaporan Warga (Tidak perlu login)
-Route::view('/pelaporan-warga', 'user.laporan.landing')->name('pelaporan.landing');
+Route::get('/pelaporan-warga', function () {
+    return view('user.laporan.landing');
+})->name('pelaporan.landing')->middleware('region.service:pelaporan-warga');
 
 Route::middleware(['auth', 'role:user'])->group(function () {
     Route::prefix('user/laporan')->name('user.laporan.')->group(function () {

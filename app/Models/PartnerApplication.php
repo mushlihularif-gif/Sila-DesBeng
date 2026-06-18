@@ -11,7 +11,7 @@ class PartnerApplication extends Model
 
     protected $fillable = [
         'applicant_name', 'region_type', 'region_name', 'parent_region_id', 
-        'reason', 'contact_email', 'contact_phone', 'status', 'user_id'
+        'reason', 'contact_email', 'contact_phone', 'status', 'user_id', 'document_path'
     ];
 
     public function parentRegion()

@@ -134,5 +134,4 @@ class GoogleController extends Controller
             'message' => 'Silakan verifikasi OTP.'
         ]);
     }
-    }
 }
