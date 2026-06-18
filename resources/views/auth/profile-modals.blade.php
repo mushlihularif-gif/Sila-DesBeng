@@ -135,12 +135,17 @@
                 </button>
 
                 <div class="text-center">
-                    <p class="text-sm text-gray-600">
+                    <p class="text-sm text-gray-600 mb-2">
                         Belum Terima Kode? 
                         <button type="button" id="btn-resend-profile-otp" class="text-blue-500 hover:text-blue-600 hover:underline font-bold transition">
                             Kirim Ulang Kode
                         </button>
                     </p>
+                    <div class="mt-3">
+                        <button type="button" id="btn-switch-profile-otp" class="text-sm font-medium text-gray-500 hover:text-blue-500 transition underline">
+                            Kirim OTP melalui No. Telepon
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>

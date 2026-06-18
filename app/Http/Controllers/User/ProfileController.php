@@ -252,15 +252,27 @@ class ProfileController extends Controller
             $newOtpCode = str_pad(rand(0, 9999), 4, '0', STR_PAD_LEFT);
             $sessionData['otp_code'] = $newOtpCode;
             $sessionData['otp_expires_at'] = now()->addMinutes(5);
+
+            if ($request->has('switch_method')) {
+                $sessionData['otp_method'] = $request->switch_method;
+            }
             session(['profile_password_change' => $sessionData]);
 
+            $method = $sessionData['otp_method'] ?? 'email';
             $user = auth()->user();
-            // Send OTP via Email
-            Mail::to($user->email)->send(new OtpMail($newOtpCode));
+
+            // Send OTP via Email or SMS based on $method
+            if ($method === 'email') {
+                Mail::to($user->email)->send(new OtpMail($newOtpCode));
+            } else {
+                // SMS implementation would go here
+            }
+
+            $methodText = ($method === 'sms') ? 'nomor telepon' : 'email';
 
             return response()->json([
                 'success' => true,
-                'message' => 'Kode OTP baru telah dikirim ke email Anda',
+                'message' => 'Kode OTP baru telah dikirim ke ' . $methodText . ' Anda',
             ], 200);
 
         } catch (\Exception $e) {

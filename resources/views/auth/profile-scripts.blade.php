@@ -298,16 +298,35 @@ document.addEventListener('DOMContentLoaded', function() {
     // RESEND OTP
     // ========================================
     const btnResendProfileOtp = document.getElementById('btn-resend-profile-otp');
-    btnResendProfileOtp?.addEventListener('click', async function() {
-        this.disabled = true;
+    btnResendProfileOtp?.addEventListener('click', function() {
+        resendProfileOtp();
+    });
+
+    const btnSwitchProfileOtp = document.getElementById('btn-switch-profile-otp');
+    let currentProfileOtpMethod = 'email';
+    btnSwitchProfileOtp?.addEventListener('click', function() {
+        const switchMethod = currentProfileOtpMethod === 'email' ? 'sms' : 'email';
+        resendProfileOtp(switchMethod);
+    });
+
+    async function resendProfileOtp(switchMethod = null) {
+        if (btnResendProfileOtp) btnResendProfileOtp.disabled = true;
+        if (btnSwitchProfileOtp) btnSwitchProfileOtp.disabled = true;
 
         try {
+            const bodyData = {};
+            if (switchMethod) {
+                bodyData.switch_method = switchMethod;
+            }
+
             const response = await fetch('{{ route('profile.resend-otp') }}', {
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': '{{ csrf_token() }}',
                     'Accept': 'application/json',
-                }
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(bodyData)
             });
 
             const data = await response.json();
@@ -316,16 +335,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 showToast(data.message, 'success');
                 profileOtpInputs.forEach(input => input.value = '');
                 profileOtpInputs[0].focus();
+                
+                if (switchMethod) {
+                    currentProfileOtpMethod = switchMethod;
+                    if (btnSwitchProfileOtp) {
+                        btnSwitchProfileOtp.textContent = 'Kirim OTP melalui ' + (currentProfileOtpMethod === 'email' ? 'No. Telepon' : 'Email');
+                    }
+                }
             } else {
                 showToast(data.message || 'Gagal kirim OTP', 'error');
             }
         } catch (error) {
-            console.error('Resend OTP error:', error);
-            showToast('Terjadi kesalahan', 'error');
+            console.error('Error:', error);
+            showToast('Terjadi kesalahan sistem', 'error');
         } finally {
-            setTimeout(() => this.disabled = false, 30000); // 30 seconds cooldown
+            setTimeout(() => {
+                if (btnResendProfileOtp) btnResendProfileOtp.disabled = false;
+                if (btnSwitchProfileOtp) btnSwitchProfileOtp.disabled = false;
+            }, 30000);
         }
-    });
+    }
 
     // ========================================
     // SUCCESS CONFIRMATION

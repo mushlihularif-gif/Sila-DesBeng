@@ -77,6 +77,7 @@ class GoogleController extends Controller
         $request->validate([
             'region_id' => 'required|exists:regions,id',
             'address' => 'required|string',
+            'phone' => 'required|string|max:20',
         ]);
 
         $googleData = session('google_register_data');
@@ -99,7 +100,7 @@ class GoogleController extends Controller
             'email' => $googleData['email'],
             'username' => $username,
             'password' => Hash::make(uniqid()), // Random password
-            'phone' => '-', // Placeholder, user can update later
+            'phone' => $request->phone,
             'address' => $request->address,
             'gender' => 'laki-laki', // Default placeholder
             'region_id' => $request->region_id,

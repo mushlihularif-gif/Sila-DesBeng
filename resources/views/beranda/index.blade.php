@@ -898,7 +898,7 @@
                 let indicators = document.querySelectorAll('.carousel-indicator');
 
                 let currentSlide = 0;
-                const totalSlides = 3;
+                const totalSlides = {{ isset($activeBanners) && $activeBanners->count() > 0 ? $activeBanners->count() : 3 }};
                 let autoSlideInterval;
                 const autoSlideDelay = 7000; // 7 Seconds
 

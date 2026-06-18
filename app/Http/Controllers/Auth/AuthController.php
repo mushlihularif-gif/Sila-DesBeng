@@ -130,6 +130,25 @@ class AuthController extends Controller
             $tempData = session('temp_registration');
 
             if (!$tempData) {
+                // FALLBACK FOR GOOGLE REGISTRATION
+                $otpEmail = session('otp_email');
+                $otpCode = session('otp_code');
+                if ($otpEmail && $otpCode) {
+                    if (session('otp_code') !== $validated['otp_code']) {
+                        return redirect()->back()->with('error', 'Kode OTP Salah!')->with('open_otp_modal', true);
+                    }
+                    
+                    $user = User::where('email', $otpEmail)->first();
+                    if ($user) {
+                        $user->status = 'aktif';
+                        $user->email_verified_at = now();
+                        $user->save();
+                        session()->forget(['otp_email', 'otp_code', 'google_otp_method']);
+                        Auth::login($user);
+                        $request->session()->regenerate();
+                        return redirect()->route('beranda')->with('success', 'Verifikasi Akun Google Berhasil!');
+                    }
+                }
                 return redirect()->route('beranda')->with('error', 'Session tidak valid atau sudah berakhir.');
             }
 
@@ -176,27 +195,34 @@ class AuthController extends Controller
     {
         try {
             $tempData = session('temp_registration');
+            $otpEmail = session('otp_email');
 
-            if (!$tempData) {
+            if (!$tempData && !$otpEmail) {
                 return redirect()->route('beranda')->with('error', 'Session tidak valid atau sudah berakhir.');
             }
 
             $newOtpCode = str_pad(rand(0, 9999), 4, '0', STR_PAD_LEFT);
-            $tempData['otp_code'] = $newOtpCode;
-            $tempData['otp_expires_at'] = now()->addMinutes(5);
-            session(['temp_registration' => $tempData]);
 
-            // # MODE SANDBOX UNTUK MASS-TESTING DEMO
-            // if (isset($tempData['otp_method']) && $tempData['otp_method'] === 'sms') {
-            //     // Implement SMS resend logic
-            // } else {
-            //     // Mail::to($tempData['email'])->send(new OtpMail($newOtpCode));
-            // }
+            if ($tempData) {
+                $tempData['otp_code'] = $newOtpCode;
+                $tempData['otp_expires_at'] = now()->addMinutes(5);
+                if ($request->has('switch_method')) {
+                    $tempData['otp_method'] = $request->switch_method;
+                }
+                session(['temp_registration' => $tempData]);
+                $method = $tempData['otp_method'] ?? 'email';
+            } else {
+                session(['otp_code' => $newOtpCode]);
+                if ($request->has('switch_method')) {
+                    session(['google_otp_method' => $request->switch_method]);
+                }
+                $method = session('google_otp_method', 'email');
+            }
 
             session()->flash('otp_demo_sandbox_code', $newOtpCode);
             session()->flash('trigger_open_otp_tab', true);
 
-            $methodText = (isset($tempData['otp_method']) && $tempData['otp_method'] === 'sms') ? 'nomor telepon' : 'email';
+            $methodText = ($method === 'sms') ? 'nomor telepon' : 'email';
             return redirect()->route('beranda')
                 ->with('success', 'Kode OTP baru telah dikirim ke ' . $methodText . ' Anda.')
                 ->with('open_otp_modal', true);
@@ -469,19 +495,17 @@ class AuthController extends Controller
             // Update session
             $sessionData['otp_code'] = $newOtpCode;
             $sessionData['otp_expires_at'] = now()->addMinutes(5);
+            if ($request->has('switch_method')) {
+                session(['forgot_password_otp_method' => $request->switch_method]);
+            }
             session(['forgot_password_data' => $sessionData]);
 
-            // # MODE SANDBOX UNTUK MASS-TESTING DEMO
-            // if (isset($sessionData['otp_method']) && $sessionData['otp_method'] === 'sms') {
-            //     // Implement SMS resend logic
-            // } else {
-            //     // Mail::to($sessionData['email'])->send(new OtpMail($newOtpCode));
-            // }
+            $method = session('forgot_password_otp_method', 'email');
 
             session()->flash('otp_demo_sandbox_code', $newOtpCode);
             session()->flash('trigger_open_otp_tab', true);
 
-            $methodText = (isset($sessionData['otp_method']) && $sessionData['otp_method'] === 'sms') ? 'nomor telepon' : 'email';
+            $methodText = ($method === 'sms') ? 'nomor telepon' : 'email';
             return redirect()->route('beranda')
                 ->with('success', 'Kode OTP baru telah dikirim ke ' . $methodText . ' Anda.')
                 ->with('open_forgot_otp_modal', true);

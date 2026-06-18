@@ -144,6 +144,12 @@
                 </div>
 
                 <div>
+                    <input type="tel" name="phone" placeholder="No Telepon" required
+                        class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm">
+                    <span class="text-red-500 text-xs hidden block mt-1" data-error="phone"></span>
+                </div>
+
+                <div>
                     <textarea name="address" placeholder="Alamat Detail" required rows="2"
                         class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm resize-none"></textarea>
                     <span class="text-red-500 text-xs hidden block mt-1" data-error="address"></span>
@@ -243,25 +249,14 @@
                     <span class="text-red-500 text-xs hidden block mt-1" data-error="address"></span>
                 </div>
 
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <select name="gender" required
-                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm">
-                            <option value="">Jenis Kelamin</option>
-                            <option value="laki-laki">Laki-laki</option>
-                            <option value="perempuan">Perempuan</option>
-                        </select>
-                        <span class="text-red-500 text-xs hidden block mt-1" data-error="gender"></span>
-                    </div>
-                    <div>
-                        <select name="otp_method" required
-                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm">
-                            <option value="">Metode OTP</option>
-                            <option value="email">Via Email</option>
-                            <option value="sms">Via SMS</option>
-                        </select>
-                        <span class="text-red-500 text-xs hidden block mt-1" data-error="otp_method"></span>
-                    </div>
+                <div>
+                    <select name="gender" required
+                        class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm">
+                        <option value="">Jenis Kelamin</option>
+                        <option value="laki-laki">Laki-laki</option>
+                        <option value="perempuan">Perempuan</option>
+                    </select>
+                    <span class="text-red-500 text-xs hidden block mt-1" data-error="gender"></span>
                 </div>
 
                 <div class="relative">
@@ -409,11 +404,21 @@
 
             <form action="{{ route('auth.resend-otp') }}" method="POST" class="mt-6 text-center">
                 @csrf
-                <p class="text-sm text-gray-600">Belum Terima Kode? 
+                <p class="text-sm text-gray-600 mb-2">Belum Terima Kode? 
                     <button type="submit" class="font-medium text-blue-500 hover:text-blue-600 hover:underline">
                         Kirim Ulang Kode
                     </button>
                 </p>
+                <div class="mt-3">
+                    @php
+                        $currentMethod = session('temp_registration.otp_method') ?? session('otp_method') ?? 'email';
+                        $switchMethod = $currentMethod === 'email' ? 'sms' : 'email';
+                        $switchText = $currentMethod === 'email' ? 'Kirim OTP melalui No. Telepon' : 'Kirim OTP melalui Email';
+                    @endphp
+                    <button type="submit" name="switch_method" value="{{ $switchMethod }}" class="text-sm font-medium text-gray-500 hover:text-blue-500 transition underline">
+                        {{ $switchText }}
+                    </button>
+                </div>
             </form>
         </div>
 
@@ -468,11 +473,21 @@
 
             <form action="{{ route('auth.forgot-password.resend-otp') }}" method="POST" class="mt-6 text-center">
                 @csrf
-                <p class="text-sm text-gray-600">Belum Terima Kode? 
+                <p class="text-sm text-gray-600 mb-2">Belum Terima Kode? 
                     <button type="submit" class="font-medium text-blue-500 hover:text-blue-600 hover:underline">
                         Kirim Ulang Kode
                     </button>
                 </p>
+                <div class="mt-3">
+                    @php
+                        $currentMethod = session('forgot_password_otp_method') ?? 'email';
+                        $switchMethod = $currentMethod === 'email' ? 'sms' : 'email';
+                        $switchText = $currentMethod === 'email' ? 'Kirim OTP melalui No. Telepon' : 'Kirim OTP melalui Email';
+                    @endphp
+                    <button type="submit" name="switch_method" value="{{ $switchMethod }}" class="text-sm font-medium text-gray-500 hover:text-blue-500 transition underline">
+                        {{ $switchText }}
+                    </button>
+                </div>
             </form>
         </div>
 
@@ -523,15 +538,7 @@
                         class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition">
                     <span class="text-red-500 text-sm hidden block mt-1" data-error="email_or_phone"></span>
                 </div>
-                <div>
-                    <select name="otp_method" required
-                        class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition">
-                        <option value="">Metode Pengiriman OTP</option>
-                        <option value="email">Kirim via Email</option>
-                        <option value="sms">Kirim via SMS</option>
-                    </select>
-                    <span class="text-red-500 text-sm hidden block mt-1" data-error="otp_method"></span>
-                </div>
+
 
                 <button type="submit"
                     class="w-full py-3 bg-blue-500 text-white rounded-full font-semibold hover:bg-blue-600 transition disabled:opacity-50 disabled:cursor-not-allowed">
