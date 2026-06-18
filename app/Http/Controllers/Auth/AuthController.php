@@ -250,8 +250,14 @@ class AuthController extends Controller
             // CEK: Apakah IP ini ATAU Akun ini sudah menyentuh batas 5 kali gagal?
             if (\Illuminate\Support\Facades\RateLimiter::tooManyAttempts($throttleKey, 5) || 
                 \Illuminate\Support\Facades\RateLimiter::tooManyAttempts($accountThrottleKey, 5)) {
-                // HACKER TRAP: Jangan lempar 429! Lempar balik seolah-olah password salah.
-                return redirect()->back()->with('error', 'Username atau Password yang Anda masukkan salah.')->with('open_login_modal', true)->withInput();
+                
+                $seconds = max(
+                    \Illuminate\Support\Facades\RateLimiter::availableIn($throttleKey),
+                    \Illuminate\Support\Facades\RateLimiter::availableIn($accountThrottleKey)
+                );
+                $minutes = ceil($seconds / 60);
+
+                return redirect()->back()->with('error', "Terlalu banyak percobaan gagal. Silahkan coba login kembali setelah $minutes menit.")->with('open_login_modal', true)->withInput();
             }
 
             $loginField = $validated['email_or_phone'];

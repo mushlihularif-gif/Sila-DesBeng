@@ -143,6 +143,26 @@
             showToast("{{ session('error') }}", 'error');
         @endif
 
+        // ⭐ INJECT SERVER-SIDE VALIDATION ERRORS
+        @if($errors->any())
+            const serverErrors = @json($errors->toArray());
+            
+            let activeForm = null;
+            @if(session('open_register_modal'))
+                activeForm = document.getElementById('form-register');
+            @elseif(session('open_login_modal'))
+                activeForm = document.querySelector('#modal-login form');
+            @elseif(session('open_forgot_modal'))
+                activeForm = document.querySelector('#modal-forgot-password form');
+            @endif
+
+            if (activeForm) {
+                Object.keys(serverErrors).forEach(field => {
+                    showError(activeForm, field, serverErrors[field][0]);
+                });
+            }
+        @endif
+
         // ========================================
         // GOOGLE REGISTER HANDLING
         // ========================================

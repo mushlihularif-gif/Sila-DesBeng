@@ -48,12 +48,12 @@ Route::get('/layanandaerah/profil-layanan/kecamatan/{id}', [App\Http\Controllers
     ->name('bumdes.profil.desa')
     ->middleware('role:user,guest');
 
-Route::get('/layanandaerah/{slug}', [App\Http\Controllers\User\BumdesUserController::class, 'show'])
-    ->name('bumdes.detail')
-    ->middleware('role:user,guest');
-
 Route::get('/layanandaerah/laporan', [App\Http\Controllers\User\BumdesLaporanController::class, 'index'])
     ->name('bumdes.laporan')
+    ->middleware('role:user,guest');
+
+Route::get('/layanandaerah/{slug}', [App\Http\Controllers\User\BumdesUserController::class, 'show'])
+    ->name('bumdes.detail')
     ->middleware('role:user,guest');
 
 

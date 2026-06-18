@@ -124,6 +124,7 @@
 
             <form id="form-google-register" class="space-y-3">
                 @csrf
+                <input type="hidden" name="otp_method" value="email">
                 <div>
                     <select name="kabupaten" id="google-reg-kabupaten" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-gray-100 text-gray-700 outline-none transition text-sm cursor-not-allowed">
                         <option value="">Memuat Kabupaten...</option>
@@ -198,6 +199,7 @@
             {{-- Form Register --}}
             <form id="form-register" action="{{ route('auth.register') }}" method="POST" class="space-y-3 max-h-96 overflow-y-auto pr-2">
                 @csrf
+                <input type="hidden" name="otp_method" value="email">
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <input type="text" name="username" placeholder="Username" required
