@@ -389,12 +389,12 @@
                 </div>
 
                 <div class="max-w-5xl mx-auto space-y-12">
-                    <!-- Grafik Kinerja BUMDES -->
+                    <!-- Grafik Kinerja Layanan -->
                     <div>
                         <div
                             class="relative rounded-3xl p-6 backdrop-blur-md bg-white/20 border border-white/30 shadow-[0_8px_32px_0_rgba(31,38,135,0.15)]">
                             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-5">
-                                <h3 class="text-xl font-bold text-gray-800 mb-3 md:mb-0">Kinerja BUMDES</h3>
+                                <h3 class="text-xl font-bold text-gray-800 mb-3 md:mb-0">Kinerja Layanan</h3>
                             </div>
                             <div class="bg-white/30 backdrop-blur-sm rounded-2xl p-5 border border-white/20">
                                 <div id="kinerjaChart" class="w-full min-h-[300px]" data-chart='@json($kinerjaData)'></div>
@@ -977,7 +977,7 @@
                 this.initUnitChart();
             },
 
-            // Kinerja BUMDES Chart
+            // Kinerja Layanan Chart
             initKinerjaChart() {
                 const container = document.querySelector("#kinerjaChart");
                 if (!container) return;

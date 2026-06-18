@@ -24,7 +24,26 @@ class ProfileController extends Controller
         }
 
         $user = auth()->user();
-        return view('users.profile', compact('user'));
+        
+        $kecamatan_name = 'Belum ditentukan';
+        $desa_name = 'Belum ditentukan';
+        
+        if ($user->region_id) {
+            $userRegion = \App\Models\Region::find($user->region_id);
+            if ($userRegion) {
+                if ($userRegion->type == 'desa') {
+                    $desa_name = $userRegion->name;
+                    $parent = \App\Models\Region::find($userRegion->parent_id);
+                    if ($parent) {
+                        $kecamatan_name = $parent->name;
+                    }
+                } else if ($userRegion->type == 'kecamatan') {
+                    $kecamatan_name = $userRegion->name;
+                }
+            }
+        }
+
+        return view('users.profile', compact('user', 'kecamatan_name', 'desa_name'));
     }
 
     /**
@@ -46,12 +65,21 @@ class ProfileController extends Controller
             'gender' => 'nullable|in:laki-laki,perempuan',
             'profile' => 'nullable|image|mimes:jpg,jpeg,png|max:8192',
         ], [
-            'username.required' => 'Username harus diisi',
-            'name.required' => 'Nama harus diisi',
-            'profile.image' => 'File harus berupa gambar',
-            'profile.mimes' => 'Format file harus JPG, JPEG, atau PNG',
-            'profile.max' => 'Ukuran file maksimal 8MB',
+            'username.required' => 'Username wajib diisi.',
+            'username.unique' => 'Username sudah digunakan oleh orang lain.',
+            'name.required' => 'Nama lengkap wajib diisi.',
+            'profile.image' => 'File harus berupa gambar.',
+            'profile.mimes' => 'Format gambar harus JPG, JPEG, atau PNG.',
+            'profile.max' => 'Ukuran foto profil tidak boleh lebih dari 8MB.',
         ]);
+
+        // Cek silent error upload karena php.ini (upload_max_filesize)
+        if ($request->has('profile') && !$request->hasFile('profile')) {
+            $file = $request->file('profile');
+            if ($file && !$file->isValid()) {
+                return back()->withErrors(['profile' => 'Gagal mengunggah: Ukuran foto Anda terlalu besar (melebihi batas maksimal server). Silakan kompres atau gunakan foto lain yang lebih kecil.']);
+            }
+        }
 
         $user->update([
             'username' => $validated['username'],

@@ -92,8 +92,10 @@
                                 JPG, PNG (Max 8MB)
                             </p>
 
+                            <p id="client-error-profile" class="mt-2 text-sm text-red-600 text-center font-medium hidden"></p>
+
                             @error('profile')
-                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                            <p class="mt-2 text-sm text-red-600 text-center font-medium">{{ $message }}</p>
                             @enderror
                             
                             {{-- Flag tersembunyi untuk penghapusan yang ditunda --}}
@@ -173,6 +175,20 @@
                                 @enderror
                             </div>
 
+                            {{-- Kecamatan --}}
+                            <div>
+                                <label class="block text-sm font-bold text-gray-800 mb-2">Kecamatan</label>
+                                <input type="text" value="{{ $kecamatan_name }}" disabled 
+                                       class="w-full px-4 py-2.5 bg-white/60 border border-white/40 rounded-xl text-gray-700 cursor-not-allowed glass-input text-sm">
+                            </div>
+
+                            {{-- Desa / Kelurahan --}}
+                            <div>
+                                <label class="block text-sm font-bold text-gray-800 mb-2">Desa / Kelurahan</label>
+                                <input type="text" value="{{ $desa_name }}" disabled 
+                                       class="w-full px-4 py-2.5 bg-white/60 border border-white/40 rounded-xl text-gray-700 cursor-not-allowed glass-input text-sm">
+                            </div>
+
                             {{-- Kata Sandi --}}
                             <div>
                                 <label class="block text-sm font-bold text-gray-800 mb-2">Kata Sandi</label>
@@ -231,6 +247,8 @@
             }, 5000);
         }
 
+        }
+
         // Fungsionalitas Pratinjau Avatar
         const profileInput = document.getElementById('profile-input');
         const avatarPreview = document.getElementById('avatar-preview');
@@ -242,7 +260,29 @@
         if (profileInput) {
             profileInput.addEventListener('change', function(e) {
                 const file = e.target.files[0];
+                const clientErrorProfile = document.getElementById('client-error-profile');
+
                 if (file) {
+                    // Validasi ukuran di sisi klien (Maks 8MB)
+                    if (file.size > 8 * 1024 * 1024) {
+                        if (clientErrorProfile) {
+                            clientErrorProfile.textContent = 'Ukuran foto Anda ' + (file.size / 1024 / 1024).toFixed(2) + ' MB. Maksimal 8 MB.';
+                            clientErrorProfile.classList.remove('hidden');
+                        }
+                        this.value = ''; // Reset input agar tidak terkirim
+
+                        // Kembalikan ke tampilan awal/sebelumnya
+                        if (avatarPreview) {
+                            avatarPreview.src = '';
+                            avatarPreview.classList.add('hidden');
+                        }
+                        if (avatarPlaceholder) avatarPlaceholder.classList.remove('hidden');
+                        if (deletePhotoBtn) deletePhotoBtn.style.display = 'none';
+                        return; // Berhenti memproses gambar
+                    } else {
+                        if (clientErrorProfile) clientErrorProfile.classList.add('hidden');
+                    }
+
                     // Reset flag hapus (kita mengganti, bukan hanya menghapus)
                     if(deleteAvatarInput) deleteAvatarInput.value = '0';
 
