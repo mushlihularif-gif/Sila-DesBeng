@@ -12,7 +12,7 @@
             <div class="absolute inset-0 bg-white/25"></div>
         </div>
 
-        <div class="max-w-6xl mx-auto px-6 relative z-20">
+        <div id="main-content" class="max-w-6xl mx-auto px-6 relative z-20">
             
             <!-- Header Section -->
             <div class="text-center mb-16 animate-section">
