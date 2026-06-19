@@ -332,7 +332,7 @@
     </script>
 
     <script async defer
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyATPFj6VvZ7OcbENlh-m8gd5t7EbZ_1f8M&callback=initMap&loading=async">
+        src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google_maps.api_key') }}&callback=initMap&loading=async">
     </script>
 
     <script>
