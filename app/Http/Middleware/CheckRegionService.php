@@ -20,11 +20,11 @@ class CheckRegionService
     {
         $regionId = null;
 
-        // Tentukan Region ID berdasarkan status login
-        if (auth()->check()) {
+        $regionId = $request->query('region_id');
+
+        // Jika tidak ada region_id di URL, cek apakah user login dan punya region_id
+        if (!$regionId && auth()->check()) {
             $regionId = auth()->user()->region_id;
-        } else {
-            $regionId = $request->query('region_id');
         }
 
         // Jika tidak ada region ID sama sekali, lemparkan ke halaman direktori untuk memilih desa

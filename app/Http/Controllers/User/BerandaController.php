@@ -244,6 +244,18 @@ class BerandaController extends Controller
             ->take(3)
             ->get();
         
+        // Ambil Active Services jika user login dan punya region
+        $activeServices = [];
+        if (auth()->check() && auth()->user()->region_id) {
+            $userRegion = \App\Models\Region::with(['services' => function($q) {
+                $q->where('is_active', true);
+            }])->find(auth()->user()->region_id);
+            
+            if ($userRegion) {
+                $activeServices = $userRegion->services->pluck('name')->toArray();
+            }
+        }
+        
         return view('beranda.index', compact(
             'kinerjaData',
             'unitPopulerData',
@@ -252,6 +264,7 @@ class BerandaController extends Controller
             'popularProducts',
             'searchResults',
             'search',
+            'activeServices',
             'activeBanners',
             'recentAnnouncements',
             'kecamatans',

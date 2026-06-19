@@ -280,30 +280,61 @@
                     <div class="relative h-[400px] w-full flex justify-center items-center">
 
                         <div class="relative w-full max-w-6xl mx-auto h-full">
+                            @php
+                                $isLoggedInWithRegion = auth()->check() && auth()->user()->region_id;
+                                $userRegionId = $isLoggedInWithRegion ? auth()->user()->region_id : null;
+                                
+                                $isServiceActive = function($unitName) use ($isLoggedInWithRegion, $activeServices) {
+                                    if (!$isLoggedInWithRegion) return true;
+                                    
+                                    $map = [
+                                        'Unit Penyewaan Alat' => 'Penyewaan Alat',
+                                        'Unit Penjualan Gas' => 'Penjualan Gas',
+                                        'Unit Penyewaan Mobil' => 'Penyewaan Mobil',
+                                        'Unit Peminjaman Fasilitas Umum' => 'Peminjaman Fasilitas Umum',
+                                        'Pelaporan Warga' => 'Pelaporan Warga',
+                                        'Pengumuman dan Event' => 'Pengumuman dan Event'
+                                    ];
+                                    
+                                    return in_array($map[$unitName] ?? $unitName, $activeServices ?? []);
+                                };
+                            @endphp
 
-                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="0" data-name="Unit Penyewaan Alat" onclick="window.location.href='{{ route('bumdes.profil') . '?redirect=rental.equipment' }}'">
+                            @if($isServiceActive('Unit Penyewaan Alat'))
+                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="0" data-name="Unit Penyewaan Alat" onclick="window.location.href='{{ $isLoggedInWithRegion ? route('rental.equipment') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=rental.equipment' }}'">
                                 <img src="{{ asset('User/img/elemen/F1.png') }}" alt="Alat" loading="lazy">
                             </div>
+                            @endif
 
-                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="1" data-name="Unit Penjualan Gas" onclick="window.location.href='{{ route('bumdes.profil') . '?redirect=gas.sales' }}'">
+                            @if($isServiceActive('Unit Penjualan Gas'))
+                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="1" data-name="Unit Penjualan Gas" onclick="window.location.href='{{ $isLoggedInWithRegion ? route('gas.sales') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=gas.sales' }}'">
                                 <img src="{{ asset('User/img/elemen/F2.png') }}" alt="Gas" loading="lazy">
                             </div>
+                            @endif
 
-                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="2" data-name="Unit Penyewaan Mobil" onclick="window.location.href='{{ route('bumdes.profil') . '?redirect=mobil.rental.equipment' }}'">
-                                <img src="{{ asset('User/img/elemen/mobil.png') }}" alt="Mobil">
+                            @if($isServiceActive('Unit Penyewaan Mobil'))
+                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="2" data-name="Unit Penyewaan Mobil" onclick="window.location.href='{{ $isLoggedInWithRegion ? route('mobil.rental.equipment') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=mobil.rental.equipment' }}'">
+                                <img src="{{ asset('User/img/elemen/mobil.png') }}" alt="Mobil" loading="lazy">
                             </div>
+                            @endif
 
-                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="3" data-name="Unit Peminjaman Fasilitas Umum" onclick="window.location.href='{{ route('bumdes.profil') . '?redirect=user.fasilitas-umum.equipment' }}'">
-                                <img src="{{ asset('User/img/elemen/fasilitas.png') }}" alt="Fasilitas">
+                            @if($isServiceActive('Unit Peminjaman Fasilitas Umum'))
+                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="3" data-name="Unit Peminjaman Fasilitas Umum" onclick="window.location.href='{{ $isLoggedInWithRegion ? route('user.fasilitas-umum.equipment') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=user.fasilitas-umum.equipment' }}'">
+                                <img src="{{ asset('User/img/elemen/fasilitas.png') }}" alt="Fasilitas" loading="lazy">
                             </div>
+                            @endif
 
-                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="4" data-name="Pelaporan Warga" onclick="window.location.href='{{ route('bumdes.profil') . '?redirect=pelaporan.landing' }}'">
-                                <img src="{{ asset('User/img/elemen/lapor.png') }}" alt="Event">
+                            @if($isServiceActive('Pelaporan Warga'))
+                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="4" data-name="Pelaporan Warga" onclick="window.location.href='{{ $isLoggedInWithRegion ? route('pelaporan.landing') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=pelaporan.landing' }}'">
+                                <img src="{{ asset('User/img/elemen/lapor.png') }}" alt="Lapor" loading="lazy">
                             </div>
+                            @endif
 
-                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="5" data-name="Pengumuman dan Event" onclick="window.location.href='{{ route('bumdes.profil') . '?redirect=announcements.index' }}'">
-                                <img src="{{ asset('User/img/elemen/event.png') }}" alt="Event">
+                            @if($isServiceActive('Pengumuman dan Event'))
+                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="5" data-name="Pengumuman dan Event" onclick="window.location.href='{{ $isLoggedInWithRegion ? route('announcements.index') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=announcements.index' }}'">
+                                <img src="{{ asset('User/img/elemen/event.png') }}" alt="Event" loading="lazy">
                             </div>
+                            @endif
                             
                         </div>
 
@@ -1209,7 +1240,26 @@
                 const prevBtn = document.getElementById('unit-prev');
 
                 const stateClasses = ['state-0', 'state-1', 'state-2', 'state-3', 'state-4', 'state-5'];
-                let positions = [1, 2, 3, 4, 5, 0];
+                
+                // Inisialisasi posisi secara dinamis sesuai jumlah cards
+                let positions = [];
+                const n = cards.length;
+                
+                if (n === 1) {
+                    positions = [1];
+                } else if (n === 2) {
+                    positions = [1, 2];
+                } else if (n === 3) {
+                    positions = [1, 2, 0];
+                } else {
+                    // Untuk n >= 4
+                    positions = Array.from({length: n}, (_, i) => {
+                        if (i === 0) return 1;
+                        if (i === 1) return 2;
+                        if (i === n - 1) return 0;
+                        return 3; // sisanya hidden
+                    });
+                }
 
                 let autoSlideInterval;
                 const autoSlideDelay = 3000; // 3 seconds delay
@@ -1218,7 +1268,7 @@
                     cards.forEach((card, index) => {
                         card.classList.remove(...stateClasses);
                         const currentPos = positions[index];
-                        card.classList.add(stateClasses[currentPos]);
+                        card.classList.add(stateClasses[currentPos] || 'state-3');
 
                         if (currentPos === 1 && titleElement) {
                             titleElement.style.opacity = '0';
@@ -1231,21 +1281,25 @@
                 };
 
                 const handleNext = () => {
-                    positions = positions.map(pos => (pos - 1 < 0 ? 5 : pos - 1));
+                    if (n <= 1) return;
+                    positions.unshift(positions.pop());
                     updateCarousel();
                 };
 
                 const handlePrev = () => {
-                    positions = positions.map(pos => (pos + 1 > 5 ? 0 : pos + 1));
+                    if (n <= 1) return;
+                    positions.push(positions.shift());
                     updateCarousel();
                 };
 
                 const startAutoSlide = () => {
+                    if (n <= 1) return;
                     clearInterval(autoSlideInterval);
                     autoSlideInterval = setInterval(handleNext, autoSlideDelay);
                 };
 
                 const resetAutoSlide = () => {
+                    if (n <= 1) return;
                     clearInterval(autoSlideInterval);
                     startAutoSlide();
                 };
