@@ -204,8 +204,8 @@
 
     {{-- ===== MODAL KONFIRMASI LOKASI ===== --}}
     <div id="location-modal"
-        class="fixed inset-0 flex items-center justify-center z-[9999] hidden"
-        style="background: rgba(0,0,0,0.5); backdrop-filter: blur(5px);">
+        class="fixed inset-0 flex items-center justify-center hidden"
+        style="z-index: 99999; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px);">
         <div class="bg-white border border-gray-100 rounded-2xl shadow-2xl p-6 max-w-sm w-full mx-4">
             <div class="flex items-center gap-2 mb-1">
                 <span class="text-2xl">📍</span>
@@ -332,7 +332,7 @@
     </script>
 
     <script async defer
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyATPFj6VvZ7OcbENlh-m8gd5t7EbZ_1f8M">
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyATPFj6VvZ7OcbENlh-m8gd5t7EbZ_1f8M&callback=initMap&loading=async">
     </script>
 
     <script>

@@ -17,7 +17,7 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     {{-- Hotwire Turbo for SPA Navigation --}}
-    <script type="module" src="https://cdn.skypack.dev/@hotwired/turbo"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@hotwired/turbo/+esm"></script>
     <style>
         .turbo-progress-bar {
             height: 4px;
