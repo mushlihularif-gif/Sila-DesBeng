@@ -754,31 +754,31 @@
             filter: grayscale(10%);
         }
 
-        /* POSISI 3: KANAN UJUNG*/
+        /* POSISI 3: KANAN UJUNG (HIDDEN) */
         .state-3 {
             left: 100% !important;
-            /* Benar-benar di ujung kanan */
             transform: translate(-50%, -50%) scale(0.5) !important;
-            opacity: 0.6;
+            opacity: 0;
             z-index: 10;
-            filter: grayscale(30%);
+            pointer-events: none;
         }
 
-        /* POSISI 4: KIRI UJUNG */
+        /* POSISI 4: KIRI UJUNG (HIDDEN) */
         .state-4 {
             left: 0% !important;
             transform: translate(-50%, -50%) scale(0.5) !important;
-            opacity: 0.6;
+            opacity: 0;
             z-index: 10;
-            filter: grayscale(30%);
+            pointer-events: none;
         }
 
         /* POSISI 5: TERSEMBUNYI */
         .state-5 {
-            left: -20% !important;
-            transform: translate(-50%, -50%) scale(0.5) !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) scale(0.1) !important;
             opacity: 0;
             z-index: 5;
+            pointer-events: none;
         }
 
         /* RESPONSIVE MOBILE - 3 COLUMN LAYOUT (CENTER FOCUS) */
@@ -1239,38 +1239,42 @@
                 const nextBtn = document.getElementById('unit-next');
                 const prevBtn = document.getElementById('unit-prev');
 
-                const stateClasses = ['state-0', 'state-1', 'state-2', 'state-3', 'state-4', 'state-5'];
-                
-                // Inisialisasi posisi secara dinamis sesuai jumlah cards
-                let positions = [];
                 const n = cards.length;
-                
-                if (n === 1) {
-                    positions = [1];
-                } else if (n === 2) {
-                    positions = [1, 2];
-                } else if (n === 3) {
-                    positions = [1, 2, 0];
-                } else {
-                    // Untuk n >= 4
-                    positions = Array.from({length: n}, (_, i) => {
-                        if (i === 0) return 1;
-                        if (i === 1) return 2;
-                        if (i === n - 1) return 0;
-                        return 3; // sisanya hidden
-                    });
-                }
-
+                let currentIndex = 0;
                 let autoSlideInterval;
-                const autoSlideDelay = 3000; // 3 seconds delay
+                const autoSlideDelay = 3000;
 
                 const updateCarousel = () => {
                     cards.forEach((card, index) => {
-                        card.classList.remove(...stateClasses);
-                        const currentPos = positions[index];
-                        card.classList.add(stateClasses[currentPos] || 'state-3');
+                        // Remove all state classes
+                        card.className = card.className.replace(/\bstate-\d\b/g, '').trim();
+                        
+                        let diff = (index - currentIndex) % n;
+                        if (diff < 0) diff += n;
+                        
+                        let state = 5; // Default Hidden
+                        
+                        if (n === 1) {
+                            if (diff === 0) state = 1;
+                        } else if (n === 2) {
+                            if (diff === 0) state = 1;
+                            if (diff === 1) state = 2;
+                        } else if (n === 3) {
+                            if (diff === 0) state = 1;
+                            if (diff === 1) state = 2;
+                            if (diff === 2) state = 0;
+                        } else {
+                            if (diff === 0) state = 1; // Center
+                            else if (diff === 1) state = 2; // Right
+                            else if (diff === 2) state = 3; // Far Right (Hidden, fading out)
+                            else if (diff === n - 2) state = 4; // Far Left (Hidden, fading in)
+                            else if (diff === n - 1) state = 0; // Left
+                            else state = 5; // Deep Hidden
+                        }
+                        
+                        card.classList.add(`state-${state}`);
 
-                        if (currentPos === 1 && titleElement) {
+                        if (diff === 0 && titleElement) {
                             titleElement.style.opacity = '0';
                             setTimeout(() => {
                                 titleElement.textContent = card.getAttribute('data-name');
@@ -1282,13 +1286,13 @@
 
                 const handleNext = () => {
                     if (n <= 1) return;
-                    positions.unshift(positions.pop());
+                    currentIndex = (currentIndex + 1) % n;
                     updateCarousel();
                 };
 
                 const handlePrev = () => {
                     if (n <= 1) return;
-                    positions.push(positions.shift());
+                    currentIndex = (currentIndex - 1 + n) % n;
                     updateCarousel();
                 };
 
@@ -1311,7 +1315,6 @@
                         handleNext();
                         resetAutoSlide();
                     });
-                    // Fix: Ensure z-index is high enough
                     newNext.parentElement.classList.remove('z-60');
                     newNext.parentElement.classList.add('z-[60]');
                 }
