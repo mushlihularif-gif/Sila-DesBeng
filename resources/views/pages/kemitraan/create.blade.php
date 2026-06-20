@@ -82,43 +82,51 @@
     </div>
 
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const selector = document.getElementById('kecamatan-selector');
-        const badgeDesktop = document.getElementById('kecamatan-badge');
-        const badgeMobile = document.getElementById('kecamatan-badge-mobile');
-        const panels = document.querySelectorAll('.kecamatan-panel');
+    (() => {
+        const initKecamatan = function() {
+            const selector = document.getElementById('kecamatan-selector');
+            const badgeDesktop = document.getElementById('kecamatan-badge');
+            const badgeMobile = document.getElementById('kecamatan-badge-mobile');
+            const panels = document.querySelectorAll('.kecamatan-panel');
 
-        function updateKecamatan(id) {
-            panels.forEach(panel => {
-                if (panel.id === 'kecamatan-content-' + id) {
-                    panel.classList.remove('hidden', 'opacity-0');
-                    panel.classList.add('block', 'opacity-100');
-                    
-                    const joinedCount = panel.getAttribute('data-joined');
-                    if(badgeDesktop) badgeDesktop.textContent = joinedCount;
-                    if(badgeMobile) badgeMobile.textContent = joinedCount;
-                } else {
-                    panel.classList.remove('block', 'opacity-100');
-                    panel.classList.add('hidden', 'opacity-0');
-                }
-            });
+            function updateKecamatan(id) {
+                panels.forEach(panel => {
+                    if (panel.id === 'kecamatan-content-' + id) {
+                        panel.classList.remove('hidden', 'opacity-0');
+                        panel.classList.add('block', 'opacity-100');
+                        
+                        const joinedCount = panel.getAttribute('data-joined');
+                        if(badgeDesktop) badgeDesktop.textContent = joinedCount;
+                        if(badgeMobile) badgeMobile.textContent = joinedCount;
+                    } else {
+                        panel.classList.remove('block', 'opacity-100');
+                        panel.classList.add('hidden', 'opacity-0');
+                    }
+                });
+            }
+
+            if (selector) {
+                selector.addEventListener('change', function() {
+                    updateKecamatan(this.value);
+                });
+                // Init first state
+                updateKecamatan(selector.value);
+            }
+        };
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initKecamatan);
+        } else {
+            initKecamatan();
         }
 
-        if (selector) {
-            selector.addEventListener('change', function() {
-                updateKecamatan(this.value);
-            });
-            // Init first state
-            updateKecamatan(selector.value);
-        }
-    });
-
-    // Handle scroll for animation on cards
-    const observerOptions = {
-        root: null,
-        rootMargin: '0px',
-        threshold: 0.1
-    };
+        // Handle scroll for animation on cards
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.1
+        };
+    })();
     </script>
 
     {{-- Direktori Section --}}
@@ -181,87 +189,79 @@
                                 })->count();
                             @endphp
                             <div id="kecamatan-content-{{ $kecamatan->id }}" class="kecamatan-panel transition-opacity duration-300 {{ $index === 0 ? 'block opacity-100' : 'hidden opacity-0' }}" data-joined="{{ $joinedCount }}">
-                        @if($kecamatan->children->count() > 0)
+                        @if($joinedCount > 0)
                             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" style="gap: 2rem;">
                                 @foreach($kecamatan->children as $desa)
                                 @php
                                     // Desa is considered active if it has at least 1 active service
                                     $hasServices = $desa->services->count() > 0;
                                 @endphp
-                                <div class="bg-white/40 backdrop-blur-sm border border-gray-100 shadow-sm rounded-xl p-5 hover:shadow-md transition-all">
+                                @if($hasServices)
+                                <div class="bg-white/40 backdrop-blur-sm border border-gray-100 shadow-sm rounded-xl p-5 hover:shadow-md transition-all animate-section">
                                     <div class="flex justify-between items-start mb-4">
                                         <h3 class="font-bold text-gray-800">{{ $desa->name }}</h3>
-                                        @if($hasServices)
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                Bergabung
-                                            </span>
-                                        @else
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-                                                Belum
-                                            </span>
-                                        @endif
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                            Bergabung
+                                        </span>
                                     </div>
                                     
-                                    @if($hasServices)
-                                        <div class="flex flex-col gap-3 mt-4">
-                                            @foreach($desa->services as $service)
-                                                @php
-                                                    $nameLower = strtolower($service->name);
-                                                    $iconColor = 'color: #6b7280;';
-                                                    $bgColor = 'background-color: #f9fafb;';
-                                                    
-                                                    if (strpos($nameLower, 'alat') !== false) {
-                                                        $iconColor = 'color: #f97316;';
-                                                        $bgColor = 'background-color: #fff7ed;';
-                                                    } elseif (strpos($nameLower, 'gas') !== false) {
-                                                        $iconColor = 'color: #3b82f6;';
-                                                        $bgColor = 'background-color: #eff6ff;';
-                                                    } elseif (strpos($nameLower, 'mobil') !== false) {
-                                                        $iconColor = 'color: #10b981;';
-                                                        $bgColor = 'background-color: #ecfdf5;';
-                                                    } elseif (strpos($nameLower, 'fasilitas') !== false) {
-                                                        $iconColor = 'color: #a855f7;';
-                                                        $bgColor = 'background-color: #faf5ff;';
-                                                    } elseif (strpos($nameLower, 'lapor') !== false) {
-                                                        $iconColor = 'color: #ef4444;';
-                                                        $bgColor = 'background-color: #fef2f2;';
-                                                    } elseif (strpos($nameLower, 'pengumuman') !== false || strpos($nameLower, 'event') !== false) {
-                                                        $iconColor = 'color: #06b6d4;';
-                                                        $bgColor = 'background-color: #ecfeff;';
-                                                    }
-                                                @endphp
-                                                <div class="flex items-center gap-3">
-                                                    <div class="flex items-center justify-center w-8 h-8 rounded-full shrink-0" style="{{ $bgColor }} {{ $iconColor }}">
-                                                        @if(strpos($nameLower, 'alat') !== false)
-                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                                        @elseif(strpos($nameLower, 'gas') !== false)
-                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"></path></svg>
-                                                        @elseif(strpos($nameLower, 'mobil') !== false)
-                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
-                                                        @elseif(strpos($nameLower, 'fasilitas') !== false)
-                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
-                                                        @elseif(strpos($nameLower, 'lapor') !== false)
-                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"></path></svg>
-                                                        @else
-                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                                        @endif
-                                                    </div>
-                                                    <span class="text-sm font-semibold text-gray-800">{{ $service->name }}</span>
+                                    <div class="flex flex-col gap-3 mt-4">
+                                        @foreach($desa->services as $service)
+                                            @php
+                                                $nameLower = strtolower($service->name);
+                                                $iconColor = 'color: #6b7280;';
+                                                $bgColor = 'background-color: #f9fafb;';
+                                                
+                                                if (strpos($nameLower, 'alat') !== false) {
+                                                    $iconColor = 'color: #f97316;';
+                                                    $bgColor = 'background-color: #fff7ed;';
+                                                } elseif (strpos($nameLower, 'gas') !== false) {
+                                                    $iconColor = 'color: #3b82f6;';
+                                                    $bgColor = 'background-color: #eff6ff;';
+                                                } elseif (strpos($nameLower, 'mobil') !== false || strpos($nameLower, 'kendaraan') !== false) {
+                                                    $iconColor = 'color: #10b981;';
+                                                    $bgColor = 'background-color: #ecfdf5;';
+                                                } elseif (strpos($nameLower, 'fasilitas') !== false) {
+                                                    $iconColor = 'color: #a855f7;';
+                                                    $bgColor = 'background-color: #faf5ff;';
+                                                } elseif (strpos($nameLower, 'lapor') !== false) {
+                                                    $iconColor = 'color: #ef4444;';
+                                                    $bgColor = 'background-color: #fef2f2;';
+                                                } elseif (strpos($nameLower, 'pengumuman') !== false || strpos($nameLower, 'event') !== false) {
+                                                    $iconColor = 'color: #06b6d4;';
+                                                    $bgColor = 'background-color: #ecfeff;';
+                                                }
+                                            @endphp
+                                            <div class="flex items-center gap-3">
+                                                <div class="flex items-center justify-center w-8 h-8 rounded-full shrink-0" style="{{ $bgColor }} {{ $iconColor }}">
+                                                    @if(strpos($nameLower, 'alat') !== false)
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                                    @elseif(strpos($nameLower, 'gas') !== false)
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"></path></svg>
+                                                    @elseif(strpos($nameLower, 'mobil') !== false || strpos($nameLower, 'kendaraan') !== false)
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                                                    @elseif(strpos($nameLower, 'fasilitas') !== false)
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                                                    @elseif(strpos($nameLower, 'lapor') !== false)
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"></path></svg>
+                                                    @else
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                                    @endif
                                                 </div>
-                                            @endforeach
-                                        </div>
-                                    @else
-                                        <div class="mt-3 text-sm text-gray-500 italic">
-                                            Belum ada layanan aktif.
-                                        </div>
-                                    @endif
+                                                <span class="text-sm font-semibold text-gray-800">{{ $service->name }}</span>
+                                            </div>
+                                        @endforeach
+                                    </div>
                                 </div>
+                                @endif
                                 @endforeach
                             </div>
                         @else
-                            <div class="text-center py-12 bg-gray-50 rounded-xl border border-gray-100 border-dashed">
-                                <svg class="mx-auto h-12 w-12 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
-                                <p class="text-gray-500 font-medium">Belum ada data desa untuk kecamatan ini.</p>
+                            <div class="text-center py-12 bg-white/40 backdrop-blur-sm border border-gray-100 shadow-sm rounded-xl animate-section">
+                                <div class="mx-auto w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+                                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                                </div>
+                                <p class="text-gray-500 font-medium">Belum ada desa yang bergabung di kecamatan ini.</p>
                             </div>
                         @endif
                             </div>
@@ -443,7 +443,8 @@
 
 <script>
     // Canvas Vector Abstract Background Script
-    document.addEventListener('DOMContentLoaded', () => {
+    (() => {
+        const initCanvas = () => {
         const canvas = document.getElementById('abstract-canvas');
         if (!canvas) return;
         const ctx = canvas.getContext('2d');
@@ -649,7 +650,14 @@
 
         resize();
         animate();
-    });
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initCanvas);
+    } else {
+        initCanvas();
+    }
+})();
 </script>
 
 </style>

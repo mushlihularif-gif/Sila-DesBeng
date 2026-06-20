@@ -295,14 +295,16 @@
         }
 
         // Get all sections to animate
-        const sections = document.querySelectorAll('.animate-section');
-        
-        // Add show class to trigger animations
-        sections.forEach((section, index) => {
-            setTimeout(() => {
-                section.classList.add('show');
-            }, index * 100 + 300); // Stagger by 100ms, wait for bg animation
-        });
+        (() => {
+            const sections = document.querySelectorAll('.animate-section');
+            
+            // Add show class to trigger animations
+            sections.forEach((section, index) => {
+                setTimeout(() => {
+                    section.classList.add('show');
+                }, index * 100 + 300); // Stagger by 100ms, wait for bg animation
+            });
+        })();
     });
 </script>
 @endpush

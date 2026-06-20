@@ -197,66 +197,91 @@
 
 @push('scripts')
 <script>
-    document.addEventListener('alpine:init', () => {
-        Alpine.data('kabarDaerah', () => ({
-            type: '{{ request('type', '') }}',
-            search: '{{ request('search', '') }}',
-            loading: false,
+    (() => {
+        const registerKabarDaerah = () => {
+            if (!window.Alpine) return;
+            // Only register if not already registered (Alpine doesn't natively expose a check, but we can safely call data)
+            window.Alpine.data('kabarDaerah', () => ({
+                type: '{{ request('type', '') }}',
+                search: '{{ request('search', '') }}',
+                loading: false,
 
-            init() {
-                // Intercept pagination clicks inside the container
-                document.getElementById('kabar-list-container').addEventListener('click', (e) => {
-                    let link = e.target.closest('a');
-                    // Check if it's a pagination link by seeing if href contains 'page='
-                    if (link && link.href && link.href.includes('page=')) {
-                        e.preventDefault();
-                        this.fetchData(link.href);
-                        window.scrollTo({ top: 100, behavior: 'smooth' });
+                init() {
+                    // Intercept pagination clicks inside the container
+                    const container = document.getElementById('kabar-list-container');
+                    if (container) {
+                        container.addEventListener('click', (e) => {
+                            let link = e.target.closest('a');
+                            // Check if it's a pagination link by seeing if href contains 'page='
+                            if (link && link.href && link.href.includes('page=')) {
+                                e.preventDefault();
+                                this.fetchData(link.href);
+                                window.scrollTo({ top: 100, behavior: 'smooth' });
+                            }
+                        });
                     }
-                });
-            },
+                },
 
-            updateFilter(newType) {
-                this.type = newType;
-                this.fetchData();
-            },
+                updateFilter(newType) {
+                    this.type = newType;
+                    this.fetchData();
+                },
 
-            fetchData(urlOverride = null) {
-                this.loading = true;
-                
-                let url;
-                if (urlOverride) {
-                    url = new URL(urlOverride);
-                } else {
-                    url = new URL(window.location.origin + window.location.pathname);
-                    if (this.type) url.searchParams.append('type', this.type);
-                    if (this.search) url.searchParams.append('search', this.search);
+                fetchData(urlOverride = null) {
+                    this.loading = true;
+                    
+                    let url;
+                    if (urlOverride) {
+                        url = new URL(urlOverride);
+                    } else {
+                        url = new URL(window.location.origin + window.location.pathname);
+                        if (this.type) url.searchParams.append('type', this.type);
+                        if (this.search) url.searchParams.append('search', this.search);
+                    }
+
+                    fetch(url, {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    })
+                    .then(res => res.text())
+                    .then(html => {
+                        let parser = new DOMParser();
+                        let doc = parser.parseFromString(html, 'text/html');
+                        
+                        let newContainer = doc.querySelector('#kabar-list-container');
+                        if (newContainer) {
+                            document.querySelector('#kabar-list-container').innerHTML = newContainer.innerHTML;
+                        }
+                        
+                        window.history.pushState({}, '', url);
+                        this.loading = false;
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        this.loading = false;
+                    });
                 }
+            }));
+        };
 
-                fetch(url, {
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                })
-                .then(res => res.text())
-                .then(html => {
-                    let parser = new DOMParser();
-                    let doc = parser.parseFromString(html, 'text/html');
-                    
-                    let newContent = doc.querySelector('#kabar-list-container').innerHTML;
-                    document.querySelector('#kabar-list-container').innerHTML = newContent;
-                    
-                    window.history.pushState({}, '', url);
-                    this.loading = false;
-                })
-                .catch(err => {
-                    console.error(err);
-                    this.loading = false;
-                });
+        // If Alpine is already initialized, register immediately
+        if (window.Alpine) {
+            registerKabarDaerah();
+        } else {
+            // Otherwise wait for init
+            document.addEventListener('alpine:init', registerKabarDaerah);
+        }
+
+        // Re-register on Livewire navigation
+        document.addEventListener('livewire:navigated', () => {
+            if (window.Alpine) {
+                registerKabarDaerah();
             }
-        }));
-    });
+        });
+    })();
 
     // Canvas Vector Abstract Background Script
-    document.addEventListener('DOMContentLoaded', () => {
+    (() => {
+        const initCanvas = () => {
         const canvas = document.getElementById('abstract-canvas');
         if (!canvas) return;
         const ctx = canvas.getContext('2d');
@@ -462,6 +487,13 @@
 
         resize();
         animate();
-    });
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initCanvas);
+    } else {
+        initCanvas();
+    }
+})();
 </script>
 @endpush

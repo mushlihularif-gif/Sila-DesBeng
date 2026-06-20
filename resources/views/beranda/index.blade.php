@@ -300,41 +300,29 @@
                                 };
                             @endphp
 
-                            @if($isServiceActive('Unit Penyewaan Alat'))
                             <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="0" data-name="Unit Penyewaan Alat" onclick="window.location.href='{{ $isLoggedInWithRegion ? route('rental.equipment') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=rental.equipment' }}'">
                                 <img src="{{ asset('User/img/elemen/F1.png') }}" alt="Alat" loading="lazy">
                             </div>
-                            @endif
 
-                            @if($isServiceActive('Unit Penjualan Gas'))
                             <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="1" data-name="Unit Penjualan Gas" onclick="window.location.href='{{ $isLoggedInWithRegion ? route('gas.sales') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=gas.sales' }}'">
                                 <img src="{{ asset('User/img/elemen/F2.png') }}" alt="Gas" loading="lazy">
                             </div>
-                            @endif
 
-                            @if($isServiceActive('Unit Penyewaan Mobil'))
                             <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="2" data-name="Unit Penyewaan Mobil" onclick="window.location.href='{{ $isLoggedInWithRegion ? route('mobil.rental.equipment') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=mobil.rental.equipment' }}'">
                                 <img src="{{ asset('User/img/elemen/mobil.png') }}" alt="Mobil" loading="lazy">
                             </div>
-                            @endif
 
-                            @if($isServiceActive('Unit Peminjaman Fasilitas Umum'))
                             <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="3" data-name="Unit Peminjaman Fasilitas Umum" onclick="window.location.href='{{ $isLoggedInWithRegion ? route('user.fasilitas-umum.equipment') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=user.fasilitas-umum.equipment' }}'">
                                 <img src="{{ asset('User/img/elemen/fasilitas.png') }}" alt="Fasilitas" loading="lazy">
                             </div>
-                            @endif
 
-                            @if($isServiceActive('Pelaporan Warga'))
                             <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="4" data-name="Pelaporan Warga" onclick="window.location.href='{{ $isLoggedInWithRegion ? route('pelaporan.landing') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=pelaporan.landing' }}'">
                                 <img src="{{ asset('User/img/elemen/lapor.png') }}" alt="Lapor" loading="lazy">
                             </div>
-                            @endif
 
-                            @if($isServiceActive('Pengumuman dan Event'))
                             <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="5" data-name="Pengumuman dan Event" onclick="window.location.href='{{ $isLoggedInWithRegion ? route('announcements.index') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=announcements.index' }}'">
                                 <img src="{{ asset('User/img/elemen/event.png') }}" alt="Event" loading="lazy">
                             </div>
-                            @endif
                             
                         </div>
 
@@ -831,7 +819,8 @@
     {{-- ApexCharts Library - Minified Version --}}
     <script src="https://cdn.jsdelivr.net/npm/apexcharts@latest/dist/apexcharts.min.js"></script>
     <script>
-        const BerandaPage = {
+        (() => {
+            const BerandaPage = {
             // Initialize all components
             init() {
                 this.initYearSelectors(); // Call this FIRST to ensure filters always work
@@ -1002,10 +991,19 @@
 
             // Charts initialization
             initCharts() {
-                // if (typeof ApexCharts === 'undefined') return; // Removed to allow init even if lib loads late
-
-                this.initKinerjaChart();
-                this.initUnitChart();
+                let attempts = 0;
+                const checkAndInit = () => {
+                    if (typeof ApexCharts !== 'undefined') {
+                        this.initKinerjaChart();
+                        this.initUnitChart();
+                    } else if (attempts < 50) { // Try for 5 seconds
+                        attempts++;
+                        setTimeout(checkAndInit, 100);
+                    } else {
+                        console.error('ApexCharts failed to load after 5 seconds.');
+                    }
+                };
+                checkAndInit();
             },
 
             // Kinerja Layanan Chart
@@ -1353,5 +1351,6 @@
                 }
             }, 300);
         @endif
+        })();
     </script>
 @endpush

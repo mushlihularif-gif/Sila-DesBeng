@@ -289,7 +289,8 @@
 {{-- ApexCharts Library - Minified Version --}}
 <script src="https://cdn.jsdelivr.net/npm/apexcharts@latest/dist/apexcharts.min.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    (() => {
+        const initLaporan = function() {
         // Animate background
         const bg = document.getElementById('animated-bg');
         if (bg) {
@@ -299,13 +300,15 @@
             }, 50);
         }
 
-        // Animate sections on load
-        const sections = document.querySelectorAll('.animate-section');
-        sections.forEach((section, index) => {
-            setTimeout(() => {
-                section.classList.add('show');
-            }, index * 100 + 300); // Wait for background animation
-        });
+        // Animate sections
+        (() => {
+            const sections = document.querySelectorAll('.animate-section');
+            sections.forEach((section, index) => {
+                setTimeout(() => {
+                    section.classList.add('show');
+                }, index * 100 + 300); // Wait for background animation
+            });
+        })();
 
         // Initialize charts
         initKinerjaChart();
@@ -420,7 +423,14 @@
             });
         }
         if (desaSelect) desaSelect.addEventListener('change', redirectWithFilters);
-    });
+        };
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initLaporan);
+        } else {
+            initLaporan();
+        }
+    })();
 
     // Kinerja BUMDes Chart
     function initKinerjaChart() {

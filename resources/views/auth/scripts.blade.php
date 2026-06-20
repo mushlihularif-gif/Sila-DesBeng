@@ -1,6 +1,7 @@
 <script>
-    // Execute immediately since it's at the end of the body
-    const overlay = document.getElementById('auth-modal-overlay');
+    (() => {
+        // Execute immediately since it's at the end of the body
+        const overlay = document.getElementById('auth-modal-overlay');
         const modalLogin = document.getElementById('modal-login');
         const modalRegister = document.getElementById('modal-register');
         const modalOtp = document.getElementById('modal-otp');
@@ -558,4 +559,5 @@
         let allRegions = [];
         initRegionDropdowns('reg-kabupaten', 'reg-kecamatan', 'reg-desa');
         initRegionDropdowns('google-reg-kabupaten', 'google-reg-kecamatan', 'google-reg-desa');
+    })();
 </script>

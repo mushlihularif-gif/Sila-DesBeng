@@ -45,11 +45,11 @@ class SecurityHeaders
         // Content Security Policy - Mengontrol sumber daya yang boleh dimuat
         $csp = implode('; ', [
             "default-src 'self'",
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://maps.googleapis.com https://accounts.google.com https://cdn.skypack.dev",
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://maps.googleapis.com https://accounts.google.com https://cdn.skypack.dev https://code.jquery.com",
             "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com",
             "img-src 'self' data: blob: https://*.googleapis.com https://*.gstatic.com https://lh3.googleusercontent.com https://www.google.com storage:",
             "font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com",
-            "connect-src 'self' https://maps.googleapis.com",
+            "connect-src 'self' https://maps.googleapis.com https://cdn.jsdelivr.net",
             "frame-src https://accounts.google.com",
             "object-src 'none'",
             "base-uri 'self'",
