@@ -9,7 +9,7 @@
     <title>Dashboard - SiladesBeng Admin</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="description" content="" />
-    <link rel="icon" type="image/x-icon" href="{{ asset('Admin/img/favicon/logoisewa.png') }}" />
+    <link rel="icon" type="image/png" href="{{ asset('Admin/img/illustrations/logodomain.png') }}?v={{ time() }}" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -388,9 +388,10 @@
                 <div class="app-brand demo">
                     <a href="{{ route('admin.dashboard') }}" class="app-brand-link">
                         <span class="app-brand-logo demo">
-                            <img src="{{ asset('Admin/img/illustrations/isewalogo.png') }}" alt="Logo"
-                                width="130" height="130">
+                            <img src="{{ asset('Admin/img/illustrations/logodomain.png') }}" alt="Logo"
+                                style="max-height: 40px; width: auto; object-fit: contain;">
                         </span>
+                        <span class="app-brand-text demo menu-text fw-bolder ms-2 fs-4" style="text-transform: capitalize;">Administrator</span>
                     </a>
                     <a href="javascript:void(0);"
                         class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
@@ -409,7 +410,7 @@
 
                     <!-- Unit Layanan -->
                     <li
-                        class="menu-item {{ request()->is('admin/unit/penyewaan*') || request()->is('admin/unit/gas*') || request()->is('admin/unit/mobil*') ? 'open active show' : '' }}">
+                        class="menu-item {{ request()->is('admin/unit/penyewaan*') || request()->is('admin/unit/gas*') || request()->is('admin/unit/mobil*') || request()->is('admin/unit/fasilitas_umum*') ? 'open active show' : '' }}">
                         <a href="javascript:void(0);" class="menu-link menu-toggle">
                             <i class="menu-icon tf-icons bx bx-collection"></i>
                             <div data-i18n="Unit Layanan">Unit Layanan</div>
@@ -430,9 +431,14 @@
                                     <div data-i18n="Penyewaan Mobil">Penyewaan Mobil</div>
                                 </a>
                             </li>
+                            <li class="menu-item {{ request()->is('admin/unit/fasilitas_umum*') ? 'active' : '' }}">
+                                <a href="{{ route('admin.unit.fasilitas_umum.index') }}" class="menu-link">
+                                    <div data-i18n="Fasilitas Umum">Fasilitas Umum</div>
+                                </a>
+                            </li>
+                        </ul>
                     </li>
-                </ul>
-                </li>
+
                 <!-- Aktivitas -->
                 <li
                     class="menu-item {{ request()->is('admin/aktivitas/permintaan-pengajuan*') || request()->is('admin/aktivitas/bukti-transaksi*') ? 'open active show' : '' }}">
@@ -500,6 +506,20 @@
                         <div>Manajemen Banner</div>
                     </a>
                 </li>
+                <!-- Manajemen Pengumuman -->
+                <li class="menu-item {{ request()->routeIs('admin.announcements.*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.announcements.index') }}" class="menu-link">
+                        <i class="menu-icon tf-icons bx bx-bell"></i>
+                        <div>Manajemen Pengumuman</div>
+                    </a>
+                </li>
+                <!-- Pelaporan Warga -->
+                <li class="menu-item {{ request()->routeIs('lurah.laporan.*') ? 'active' : '' }}">
+                    <a href="{{ route('lurah.laporan.index') }}" class="menu-link">
+                        <i class="menu-icon tf-icons bx bx-message-error"></i>
+                        <div>Pelaporan Warga</div>
+                    </a>
+                </li>
                 <!-- Persetujuan Kemitraan -->
                 <li class="menu-item {{ request()->routeIs('admin.kemitraan.*') ? 'active' : '' }}">
                     <a href="{{ route('admin.kemitraan.index') }}" class="menu-link">
@@ -528,12 +548,11 @@
                         <div data-i18n="Profil SiladesBeng">Profil SiladesBeng</div>
                     </a>
                 </li>
-                <!-- Profil BUMDes -->
-                <!-- Profil BUMDes -->
+                <!-- Profil Pemerintah Desa -->
                 <li class="menu-item {{ request()->routeIs('admin.isewa.profile-bumdes') || request()->routeIs('admin.isewa.bumdes.*') ? 'active' : '' }}">
                     <a href="{{ route('admin.isewa.profile-bumdes') }}" class="menu-link">
                         <i class="menu-icon tf-icons bx bx-buildings"></i>
-                        <div data-i18n="Profil BUMDes">Profil BUMDes</div>
+                        <div data-i18n="Profil Pemerintah Desa">Profil Pemerintah Desa</div>
                     </a>
                 </li>
                 </ul>

@@ -12,11 +12,31 @@ class RegionSettingController extends Controller
     public function index()
     {
         $user = auth()->user();
+
+        // Bootstrapping initial admin region if not connected
+        if (empty($user->region_id)) {
+            $kabupaten = Region::firstOrCreate(
+                ['name' => 'Bengkalis', 'type' => 'kabupaten'],
+                ['profile_text' => 'Kabupaten Bengkalis']
+            );
+            $kecamatan = Region::firstOrCreate(
+                ['name' => 'Bengkalis', 'type' => 'kecamatan', 'parent_id' => $kabupaten->id],
+                ['profile_text' => 'Kecamatan Bengkalis']
+            );
+            $desa = Region::firstOrCreate(
+                ['name' => 'Pematang Duku Timur', 'type' => 'desa', 'parent_id' => $kecamatan->id],
+                ['profile_text' => 'Pemerintahan Desa Pematang Duku Timur, Kecamatan Bengkalis, Kabupaten Bengkalis.']
+            );
+            
+            $user->region_id = $desa->id;
+            $user->save();
+        }
+
         if ($user->role === 'super_admin') {
             // Super Admin can select a region to manage, for now just show their own or top-level.
-            $region = Region::with('services')->find($user->region_id);
+            $region = Region::with(['services', 'parent.parent'])->find($user->region_id);
         } else {
-            $region = Region::with('services')->find($user->region_id);
+            $region = Region::with(['services', 'parent.parent'])->find($user->region_id);
         }
 
         if (!$region) {

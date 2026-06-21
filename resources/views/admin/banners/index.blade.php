@@ -13,9 +13,24 @@
         </div>
     @endif
 
+    @if($errors->any())
+        <div class="alert alert-danger alert-dismissible" role="alert">
+            <h6 class="alert-heading d-flex align-items-center fw-bold mb-1"><i class="bx bx-error-circle me-2"></i>Terjadi Kesalahan!</h6>
+            <ul class="mb-0 ps-3">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Daftar Banner</h5>
+            <div>
+                <h5 class="mb-1"><i class="bx bx-image me-2"></i> Daftar Banner</h5>
+                <small class="text-muted"><i class="bx bx-info-circle"></i> Maksimal ukuran file <b>5MB</b>. Rekomendasi dimensi: <b>1774 x 887 piksel</b>.</small>
+            </div>
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addBannerModal">
                 <i class="bx bx-plus me-1"></i> Tambah Banner
             </button>
@@ -25,8 +40,6 @@
                 <thead>
                     <tr>
                         <th>Gambar</th>
-                        <th>Judul</th>
-                        <th>Target URL</th>
                         <th>Status</th>
                         <th>Urutan</th>
                         <th>Aksi</th>
@@ -38,8 +51,6 @@
                         <td>
                             <img src="{{ Storage::url($banner->image_path) }}" alt="Banner" class="rounded" style="max-height: 50px; max-width: 100px; object-fit: cover;">
                         </td>
-                        <td>{{ $banner->title ?? '-' }}</td>
-                        <td>{{ $banner->target_url ? \Illuminate\Support\Str::limit($banner->target_url, 30) : '-' }}</td>
                         <td>
                             <span class="badge bg-label-{{ $banner->is_active ? 'success' : 'secondary' }}">
                                 {{ $banner->is_active ? 'Aktif' : 'Nonaktif' }}
@@ -75,18 +86,9 @@
                                         <div class="mb-3">
                                             <label class="form-label">Ganti Gambar (Opsional)</label>
                                             <input type="file" name="image" class="form-control" accept="image/*">
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-label">Judul</label>
-                                            <input type="text" name="title" class="form-control" value="{{ $banner->title }}">
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-label">Deskripsi</label>
-                                            <textarea name="description" class="form-control" rows="2">{{ $banner->description }}</textarea>
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-label">Target URL (Tautan)</label>
-                                            <input type="url" name="target_url" class="form-control" value="{{ $banner->target_url }}" placeholder="https://...">
+                                            <small class="text-muted d-block mt-1">
+                                                <i class="bx bx-info-circle"></i> Maksimal ukuran file <b>5MB</b>. Rekomendasi dimensi: <b>1774 x 887 piksel</b>.
+                                            </small>
                                         </div>
                                         <div class="mb-3">
                                             <label class="form-label">Urutan Tampil</label>
@@ -107,7 +109,7 @@
                     </div>
                     @empty
                     <tr>
-                        <td colspan="6" class="text-center">Belum ada banner iklan.</td>
+                        <td colspan="4" class="text-center">Belum ada banner iklan.</td>
                     </tr>
                     @endforelse
                 </tbody>
@@ -130,18 +132,9 @@
                     <div class="mb-3">
                         <label class="form-label">Gambar Banner <span class="text-danger">*</span></label>
                         <input type="file" name="image" class="form-control" accept="image/*" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Judul</label>
-                        <input type="text" name="title" class="form-control">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Deskripsi</label>
-                        <textarea name="description" class="form-control" rows="2"></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Target URL (Tautan)</label>
-                        <input type="url" name="target_url" class="form-control" placeholder="https://...">
+                        <small class="text-muted d-block mt-1">
+                            <i class="bx bx-info-circle"></i> Maksimal ukuran file <b>5MB</b>. Rekomendasi dimensi: <b>1774 x 887 piksel</b>.
+                        </small>
                     </div>
                     <div class="mb-3 form-check form-switch">
                         <input class="form-check-input" type="checkbox" name="is_active" id="isActiveNew" checked>

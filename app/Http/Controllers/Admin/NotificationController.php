@@ -14,9 +14,8 @@ class NotificationController extends Controller
         $search = $request->get('search');
         
         // Ambil semua notifikasi untuk admin, diurutkan dari yang terbaru
-        // Ambil semua notifikasi untuk admin, diurutkan dari yang terbaru (termasuk yang dihapus user)
+        // Ambil semua notifikasi untuk admin, diurutkan dari yang terbaru
         $notifications = Notification::with(['user', 'admin'])
-            ->withTrashed() // Tampilkan juga yang di-soft delete oleh user
             ->when($search, function ($query, $search) {
                 return $query->where('title', 'LIKE', "%{$search}%")
                            ->orWhere('message', 'LIKE', "%{$search}%")

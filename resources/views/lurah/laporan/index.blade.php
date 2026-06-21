@@ -1,244 +1,253 @@
-@extends('layouts.lurah')
+@extends('admin.layouts.admin')
 
 @section('title', 'Kelola Laporan')
-@section('page-title', 'Kelola Semua Laporan')
 
 @section('content')
-<div class="space-y-6">
-    
-    {{-- Header --}}
-    <div class="bg-gradient-to-r from-[#004635] to-[#003026] rounded-2xl p-6 shadow-2xl border-2 border-yellow-400/40" data-aos="fade-down">
-        <div class="flex items-center gap-3 mb-2">
-            <span class="text-4xl">📋</span>
-            <h2 class="text-3xl font-bold text-yellow-400">Kelola Semua Laporan</h2>
-        </div>
-        <p class="text-gray-300 text-lg">Monitoring dan manajemen laporan dari semua RW</p>
-    </div>
+<div class="container-fluid py-4">
 
-    {{-- Quick Stats --}}
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        <div class="bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl p-4 shadow-xl" data-aos="fade-up">
-            <p class="text-white/80 text-xs mb-1">Total</p>
-            <p class="text-3xl font-bold text-white">{{ $stats['total_laporan'] }}</p>
-        </div>
-        <div class="bg-gradient-to-br from-orange-500 to-orange-700 rounded-xl p-4 shadow-xl" data-aos="fade-up" data-aos-delay="50">
-            <p class="text-white/80 text-xs mb-1">Pending</p>
-            <p class="text-3xl font-bold text-white">{{ $stats['pending'] }}</p>
-        </div>
-        <div class="bg-gradient-to-br from-cyan-500 to-cyan-700 rounded-xl p-4 shadow-xl" data-aos="fade-up" data-aos-delay="100">
-            <p class="text-white/80 text-xs mb-1">Proses</p>
-            <p class="text-3xl font-bold text-white">{{ $stats['proses'] }}</p>
-        </div>
-        <div class="bg-gradient-to-br from-green-500 to-green-700 rounded-xl p-4 shadow-xl" data-aos="fade-up" data-aos-delay="150">
-            <p class="text-white/80 text-xs mb-1">Selesai</p>
-            <p class="text-3xl font-bold text-white">{{ $stats['selesai'] }}</p>
-        </div>
-        <div class="bg-gradient-to-br from-purple-500 to-purple-700 rounded-xl p-4 shadow-xl">
-    <p class="text-white/80 text-xs mb-1">Diteruskan</p>
-    <p class="text-3xl font-bold text-white">{{ $stats['proses'] }}</p>
-</div>
-        <div class="bg-gradient-to-br from-red-500 to-red-700 rounded-xl p-4 shadow-xl" data-aos="fade-up" data-aos-delay="250">
-            <p class="text-white/80 text-xs mb-1">Ditolak</p>
-            <p class="text-3xl font-bold text-white">{{ $stats['ditolak'] }}</p>
-        </div>
-    </div>
-
-    {{-- Filter & Search --}}
-<div class="bg-gradient-to-br from-[#004635]/80 to-[#003026]/80 backdrop-blur-xl rounded-2xl p-6 shadow-2xl border-2 border-yellow-400/30" data-aos="fade-up">
-    <div class="flex items-center gap-3 mb-5">
-        <span class="text-3xl">🔍</span>
-        <h3 class="text-yellow-400 font-bold text-xl">Filter & Pencarian</h3>
-    </div>
-    
-    <form method="GET" action="{{ route('lurah.laporan.index') }}" class="grid grid-cols-1 md:grid-cols-6 gap-4">
-
-        {{-- Filter RW --}}
+    <!-- Judul Header Halaman -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <label class="text-white text-sm mb-2 block font-semibold">RW</label>
-            <select name="rw"
-                class="w-full bg-[#003026] border-2 border-yellow-400/40 rounded-xl px-3 py-2
-                       text-white focus:border-yellow-400 focus:outline-none
-                       transition-all appearance-none">
-                <option value="">Semua RW</option>
-                @foreach($rwList as $rw)
-                    <option value="{{ $rw->rw }}" {{ request('rw') == $rw->rw ? 'selected' : '' }}>
-                        RW {{ $rw->rw }}
-                    </option>
-                @endforeach
-            </select>
+            <h4 class="fw-bold fs-3 mb-1 text-primary">Kelola Semua Laporan</h4>
+            <p class="text-muted mb-0">Pemantauan dan manajemen laporan warga dari seluruh RW</p>
         </div>
-
-        {{-- Filter Status --}}
-        <div>
-            <label class="text-white text-sm mb-2 block font-semibold">Status</label>
-            <select name="status"
-                class="w-full bg-[#003026] border-2 border-yellow-400/40 rounded-xl px-3 py-2
-                       text-white focus:border-yellow-400 focus:outline-none
-                       transition-all appearance-none">
-                <option value="">Semua Status</option>
-                <option value="Pending" {{ request('status') == 'Pending' ? 'selected' : '' }}>Pending</option>
-                <option value="Proses" {{ request('status') == 'Proses' ? 'selected' : '' }}>Proses</option>
-                <option value="Selesai" {{ request('status') == 'Selesai' ? 'selected' : '' }}>Selesai</option>
-                <option value="Proses" {{ request('status') == 'Proses' ? 'selected' : '' }}>
-    Diteruskan
-</option>
-
-                <option value="Ditolak" {{ request('status') == 'Ditolak' ? 'selected' : '' }}>Ditolak</option>
-            </select>
-        </div>
-
-        {{-- Filter Kategori --}}
-        <div>
-            <label class="text-white text-sm mb-2 block font-semibold">Kategori</label>
-            <select name="kategori"
-                class="w-full bg-[#003026] border-2 border-yellow-400/40 rounded-xl px-3 py-2
-                       text-white focus:border-yellow-400 focus:outline-none
-                       transition-all appearance-none">
-                <option value="">Semua Kategori</option>
-                @foreach($kategoriList as $kat)
-                    <option value="{{ $kat->kategori }}" {{ request('kategori') == $kat->kategori ? 'selected' : '' }}>
-                        {{ $kat->kategori }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
-
-        {{-- Search --}}
-        <div class="md:col-span-2">
-            <label class="text-white text-sm mb-2 block font-semibold">Pencarian</label>
-            <input type="text" name="search" value="{{ request('search') }}"
-                   placeholder="Cari laporan..."
-                   class="w-full bg-[#003026] border-2 border-yellow-400/40 rounded-xl px-3 py-2
-                          text-white placeholder-gray-400 focus:border-yellow-400
-                          focus:outline-none transition-all">
-        </div>
-
-        {{-- Buttons --}}
-        <div class="flex items-end gap-2">
-            <button type="submit"
-                class="flex-1 bg-gradient-to-r from-yellow-400 to-yellow-600
-                       text-[#004635] font-bold py-2 px-4 rounded-xl
-                       hover:scale-105 transition-all">
-                Filter
-            </button>
-            <a href="{{ route('lurah.laporan.index') }}"
-               class="bg-gradient-to-r from-gray-600 to-gray-700
-                      text-white font-bold py-2 px-3 rounded-xl
-                      hover:scale-105 transition-all"
-               title="Reset">
-                ↻
+        <div class="d-flex gap-2">
+            <a href="{{ route('lurah.laporan.index') }}" class="btn btn-white border shadow-sm rounded-pill px-4">
+                <i class="bx bx-refresh me-2"></i>Refresh
             </a>
         </div>
+    </div>
 
-    </form>
-</div>
-
-
-    {{-- Tabel Laporan --}}
-    <div class="bg-white/10 backdrop-blur-xl rounded-2xl p-6 shadow-2xl border-2 border-yellow-400/20" data-aos="fade-up">
-        <div class="flex items-center justify-between mb-6">
-            <h3 class="text-yellow-400 font-bold text-2xl flex items-center gap-2">
-                <span class="text-3xl">📋</span>
-                Daftar Laporan
-            </h3>
-            <span class="px-4 py-2 bg-yellow-400/20 text-yellow-300 rounded-xl text-sm font-bold">
-                {{ $laporans->total() }} Laporan
-            </span>
-        </div>
-
-        <div class="overflow-x-auto">
-            <table class="w-full">
-                <thead>
-                    <tr class="border-b-2 border-yellow-400/30">
-                        <th class="text-left text-yellow-400 font-bold py-4 px-4 text-sm">ID</th>
-                        <th class="text-left text-yellow-400 font-bold py-4 px-4 text-sm">Laporan</th>
-                        <th class="text-left text-yellow-400 font-bold py-4 px-4 text-sm">Pelapor</th>
-                        <th class="text-left text-yellow-400 font-bold py-4 px-4 text-sm">RT/RW</th>
-                        <th class="text-left text-yellow-400 font-bold py-4 px-4 text-sm">Kategori</th>
-                        <th class="text-left text-yellow-400 font-bold py-4 px-4 text-sm">Status</th>
-                        <th class="text-left text-yellow-400 font-bold py-4 px-4 text-sm">Tanggal</th>
-                        <th class="text-center text-yellow-400 font-bold py-4 px-4 text-sm">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($laporans as $laporan)
-                        <tr class="border-b border-gray-700/30 hover:bg-white/5 transition-all">
-                            <td class="py-4 px-4">
-                                <span class="text-white font-bold">#{{ $laporan->id }}</span>
-                            </td>
-                            <td class="py-4 px-4">
-                                <div class="text-white font-semibold mb-1">{{ Str::limit($laporan->nama, 40) }}</div>
-                                <div class="text-gray-400 text-xs">{{ Str::limit($laporan->deskripsi, 50) }}</div>
-                            </td>
-                            <td class="py-4 px-4">
-                                <div class="text-white text-sm font-semibold">{{ $laporan->user->name ?? 'N/A' }}</div>
-                                <div class="text-gray-400 text-xs">{{ $laporan->user->email ?? '-' }}</div>
-                            </td>
-                            <td class="py-4 px-4">
-                                <div class="text-white font-semibold">RT {{ $laporan->rt ?? '-' }}</div>
-                                <div class="text-yellow-400 text-xs font-bold">RW {{ $laporan->rw ?? '-' }}</div>
-                            </td>
-                            <td class="py-4 px-4">
-                                <span class="px-3 py-1 bg-blue-500/30 text-blue-300 rounded-lg text-xs font-semibold">
-                                    {{ $laporan->kategori }}
-                                </span>
-                            </td>
-                            <td class="py-4 px-4">
-                                @php
-                                    $statusConfig = [
-                                        'Pending' => ['bg' => 'bg-orange-500/30', 'text' => 'text-orange-300', 'icon' => '⏳'],
-                                        'Proses' => ['bg' => 'bg-cyan-500/30', 'text' => 'text-cyan-300', 'icon' => '⚙️'],
-                                        'Selesai' => ['bg' => 'bg-green-500/30', 'text' => 'text-green-300', 'icon' => '✅'],
-                                        'Proses' => [
-    'bg' => 'bg-purple-500/30',
-    'text' => 'text-purple-300',
-    'icon' => '📤',
-    'label' => 'Diteruskan'
-],
-
-                                        'Ditolak' => ['bg' => 'bg-red-500/30', 'text' => 'text-red-300', 'icon' => '❌']
-                                    ];
-                                    $config = $statusConfig[$laporan->status] ?? ['bg' => 'bg-gray-500/30', 'text' => 'text-gray-300', 'icon' => '❓'];
-                                @endphp
-                                <span class="px-3 py-1 rounded-lg text-xs font-bold {{ $config['bg'] }} {{ $config['text'] }} inline-flex items-center gap-1">
-                                    <span>{{ $config['icon'] }}</span>
-                                    {{ $laporan->status }}
-                                </span>
-                            </td>
-                            <td class="py-4 px-4">
-                                <div class="text-white text-sm font-semibold">{{ $laporan->created_at->format('d/m/Y') }}</div>
-                                <div class="text-gray-400 text-xs">{{ $laporan->created_at->format('H:i') }} WIB</div>
-                            </td>
-                            <td class="py-4 px-4 text-center">
-                                <a href="{{ route('lurah.laporan.show', $laporan->id) }}" 
-                                   class="inline-flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-yellow-600 text-[#004635] font-bold py-2 px-4 rounded-xl hover:scale-105 hover:shadow-2xl transition-all text-sm">
-                                    <span>👁️</span>
-                                    Detail
-                                </a>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="8" class="text-center py-16">
-                                <div class="text-7xl mb-4">📭</div>
-                                <p class="text-gray-400 text-xl font-semibold">Tidak ada laporan</p>
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-
-        {{-- Pagination --}}
-        @if($laporans->hasPages())
-        <div class="mt-6 flex items-center justify-between border-t border-yellow-400/20 pt-6">
-            <div class="text-gray-300 text-sm">
-                Menampilkan <span class="font-bold text-yellow-400">{{ $laporans->firstItem() }}</span> - 
-                <span class="font-bold text-yellow-400">{{ $laporans->lastItem() }}</span> dari 
-                <span class="font-bold text-yellow-400">{{ $laporans->total() }}</span> laporan
+    <!-- Statistik Laporan -->
+    <div class="row g-3 mb-4 row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-6">
+        <!-- Total -->
+        <div class="col">
+            <div class="card border-0 shadow-sm h-100 rounded-4">
+                <div class="card-body p-3 d-flex flex-column align-items-center justify-content-center text-center">
+                    <div class="avatar avatar-md bg-primary-subtle text-primary rounded-circle p-2 mb-2">
+                        <i class="bx bx-clipboard fs-3"></i>
+                    </div>
+                    <small class="text-muted text-uppercase fw-bold ls-1 mb-1" style="font-size: 0.65rem;">Total Laporan</small>
+                    <h3 class="fw-bold mb-0 text-dark">{{ $stats['total_laporan'] }}</h3>
+                </div>
             </div>
+        </div>
+        <!-- Tertunda -->
+        <div class="col">
+            <div class="card border-0 shadow-sm h-100 rounded-4">
+                <div class="card-body p-3 d-flex flex-column align-items-center justify-content-center text-center">
+                    <div class="avatar avatar-md bg-warning-subtle text-warning rounded-circle p-2 mb-2">
+                        <i class="bx bx-time fs-3"></i>
+                    </div>
+                    <small class="text-muted text-uppercase fw-bold ls-1 mb-1" style="font-size: 0.65rem;">Tertunda</small>
+                    <h3 class="fw-bold mb-0 text-dark">{{ $stats['pending'] }}</h3>
+                </div>
+            </div>
+        </div>
+        <!-- Proses -->
+        <div class="col">
+            <div class="card border-0 shadow-sm h-100 rounded-4">
+                <div class="card-body p-3 d-flex flex-column align-items-center justify-content-center text-center">
+                    <div class="avatar avatar-md bg-info-subtle text-info rounded-circle p-2 mb-2">
+                        <i class="bx bx-loader-circle fs-3"></i>
+                    </div>
+                    <small class="text-muted text-uppercase fw-bold ls-1 mb-1" style="font-size: 0.65rem;">Proses</small>
+                    <h3 class="fw-bold mb-0 text-dark">{{ $stats['proses'] }}</h3>
+                </div>
+            </div>
+        </div>
+        <!-- Selesai -->
+        <div class="col">
+            <div class="card border-0 shadow-sm h-100 rounded-4">
+                <div class="card-body p-3 d-flex flex-column align-items-center justify-content-center text-center">
+                    <div class="avatar avatar-md bg-success-subtle text-success rounded-circle p-2 mb-2">
+                        <i class="bx bx-check-circle fs-3"></i>
+                    </div>
+                    <small class="text-muted text-uppercase fw-bold ls-1 mb-1" style="font-size: 0.65rem;">Selesai</small>
+                    <h3 class="fw-bold mb-0 text-dark">{{ $stats['selesai'] }}</h3>
+                </div>
+            </div>
+        </div>
+        <!-- Diteruskan -->
+        <div class="col">
+            <div class="card border-0 shadow-sm h-100 rounded-4">
+                <div class="card-body p-3 d-flex flex-column align-items-center justify-content-center text-center">
+                    <div class="avatar avatar-md bg-secondary-subtle text-secondary rounded-circle p-2 mb-2">
+                        <i class="bx bx-share fs-3"></i>
+                    </div>
+                    <small class="text-muted text-uppercase fw-bold ls-1 mb-1" style="font-size: 0.65rem;">Diteruskan</small>
+                    <h3 class="fw-bold mb-0 text-dark">{{ $stats['diteruskan'] ?? 0 }}</h3>
+                </div>
+            </div>
+        </div>
+        <!-- Ditolak -->
+        <div class="col">
+            <div class="card border-0 shadow-sm h-100 rounded-4">
+                <div class="card-body p-3 d-flex flex-column align-items-center justify-content-center text-center">
+                    <div class="avatar avatar-md bg-danger-subtle text-danger rounded-circle p-2 mb-2">
+                        <i class="bx bx-x-circle fs-3"></i>
+                    </div>
+                    <small class="text-muted text-uppercase fw-bold ls-1 mb-1" style="font-size: 0.65rem;">Ditolak</small>
+                    <h3 class="fw-bold mb-0 text-dark">{{ $stats['ditolak'] }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Status Pills -->
+    <div class="d-flex gap-2 mb-4 overflow-auto pb-2">
+        <a href="{{ route('lurah.laporan.index') }}" 
+           class="btn btn-sm rounded-pill px-3 {{ !request('status') ? 'btn-dark' : 'btn-outline-dark border-0 bg-white shadow-sm' }}">
+            Semua
+        </a>
+        <a href="{{ route('lurah.laporan.index', ['status' => 'Pending'] + request()->except('status')) }}" 
+           class="btn btn-sm rounded-pill px-3 {{ request('status') == 'Pending' ? 'btn-warning text-white' : 'btn-outline-secondary border-0 bg-white shadow-sm' }}">
+            Tertunda
+        </a>
+        <a href="{{ route('lurah.laporan.index', ['status' => 'Proses'] + request()->except('status')) }}" 
+           class="btn btn-sm rounded-pill px-3 {{ request('status') == 'Proses' ? 'btn-info text-white' : 'btn-outline-secondary border-0 bg-white shadow-sm' }}">
+            Proses
+        </a>
+        <a href="{{ route('lurah.laporan.index', ['status' => 'Selesai'] + request()->except('status')) }}" 
+           class="btn btn-sm rounded-pill px-3 {{ request('status') == 'Selesai' ? 'btn-success text-white' : 'btn-outline-secondary border-0 bg-white shadow-sm' }}">
+            Selesai
+        </a>
+        <a href="{{ route('lurah.laporan.index', ['status' => 'Diteruskan'] + request()->except('status')) }}" 
+           class="btn btn-sm rounded-pill px-3 {{ request('status') == 'Diteruskan' ? 'btn-secondary text-white' : 'btn-outline-secondary border-0 bg-white shadow-sm' }}">
+            Diteruskan
+        </a>
+        <a href="{{ route('lurah.laporan.index', ['status' => 'Ditolak'] + request()->except('status')) }}" 
+           class="btn btn-sm rounded-pill px-3 {{ request('status') == 'Ditolak' ? 'btn-danger text-white' : 'btn-outline-secondary border-0 bg-white shadow-sm' }}">
+            Ditolak
+        </a>
+    </div>
+
+    <!-- Card Utama Tabel -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="card-header bg-white border-bottom py-3 px-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-2">
+                <i class="bx bx-list-ul fs-4 text-primary"></i>
+                <h5 class="mb-0 fw-bold">Daftar Laporan</h5>
+                <span class="badge bg-primary-subtle text-primary ms-2 shadow-sm">{{ $laporans->total() }}</span>
+            </div>
+
+            <!-- Search & Filter -->
+            <form method="GET" action="{{ route('lurah.laporan.index') }}" class="d-flex gap-2 align-items-center flex-wrap">
+                @if(request('status'))
+                    <input type="hidden" name="status" value="{{ request('status') }}">
+                @endif
+                <select name="rw" class="form-select form-select-sm rounded-pill border shadow-sm" style="width: auto; min-width: 110px;">
+                    <option value="">Semua RW</option>
+                    @foreach($rwList as $rw)
+                        <option value="{{ $rw->rw }}" {{ request('rw') == $rw->rw ? 'selected' : '' }}>RW {{ $rw->rw }}</option>
+                    @endforeach
+                </select>
+                <select name="kategori" class="form-select form-select-sm rounded-pill border shadow-sm" style="width: auto; min-width: 140px;">
+                    <option value="">Semua Kategori</option>
+                    @foreach($kategoriList as $kat)
+                        <option value="{{ $kat->kategori }}" {{ request('kategori') == $kat->kategori ? 'selected' : '' }}>{{ $kat->kategori }}</option>
+                    @endforeach
+                </select>
+                <div class="input-group input-group-sm" style="width: 220px;">
+                    <input type="text" name="search" class="form-control rounded-start-pill border shadow-sm" placeholder="Cari laporan..." value="{{ request('search') }}">
+                    <button type="submit" class="btn btn-primary rounded-end-pill px-3 shadow-sm">
+                        <i class="bx bx-search"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="card-body p-0">
+            @if($laporans->isEmpty())
+                <div class="text-center py-5">
+                    <div class="mb-3"><i class="bx bx-folder-open fs-1 text-muted opacity-25"></i></div>
+                    <h6 class="text-muted fw-bold">Belum ada laporan masuk</h6>
+                    <p class="text-muted small mb-0">Data laporan akan tampil di sini ketika warga mengirimkan laporan.</p>
+                </div>
+            @else
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-4 py-3 text-secondary text-uppercase small fw-bold">Pelapor</th>
+                                <th class="py-3 text-secondary text-uppercase small fw-bold">Laporan</th>
+                                <th class="py-3 text-secondary text-uppercase small fw-bold">RT/RW</th>
+                                <th class="py-3 text-secondary text-uppercase small fw-bold">Kategori</th>
+                                <th class="py-3 text-secondary text-uppercase small fw-bold">Status</th>
+                                <th class="py-3 text-secondary text-uppercase small fw-bold">Tanggal</th>
+                                <th class="text-end pe-4 py-3 text-secondary text-uppercase small fw-bold">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($laporans as $laporan)
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar avatar-sm border rounded-circle p-1 me-3">
+                                            <span class="avatar-initial rounded-circle bg-primary-subtle text-primary fw-bold">
+                                                {{ strtoupper(substr($laporan->user->name ?? 'N', 0, 1)) }}
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0 fw-semibold text-dark">{{ $laporan->user->name ?? 'N/A' }}</h6>
+                                            <small class="text-muted">{{ $laporan->user->email ?? '-' }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="fw-medium text-dark">{{ Str::limit($laporan->nama, 35) }}</div>
+                                    <small class="text-muted">{{ Str::limit($laporan->deskripsi, 45) }}</small>
+                                </td>
+                                <td>
+                                    <div class="d-flex flex-column">
+                                        <span class="fw-medium text-dark">RT {{ $laporan->rt ?? '-' }} / RW {{ $laporan->rw ?? '-' }}</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-secondary border rounded-pill px-3 py-1">{{ $laporan->kategori }}</span>
+                                </td>
+                                <td>
+                                    @php
+                                        $statusMap = [
+                                            'Pending'    => ['class' => 'bg-warning-subtle text-warning', 'icon' => 'bx-time'],
+                                            'Proses'     => ['class' => 'bg-info-subtle text-info', 'icon' => 'bx-loader-circle'],
+                                            'Selesai'    => ['class' => 'bg-success-subtle text-success', 'icon' => 'bx-check-circle'],
+                                            'Diteruskan' => ['class' => 'bg-secondary-subtle text-secondary', 'icon' => 'bx-share'],
+                                            'Ditolak'    => ['class' => 'bg-danger-subtle text-danger', 'icon' => 'bx-x-circle'],
+                                        ];
+                                        $sc = $statusMap[$laporan->status] ?? $statusMap['Pending'];
+                                    @endphp
+                                    <span class="badge {{ $sc['class'] }} rounded-pill px-3 py-2 fw-semibold">
+                                        <i class="bx {{ $sc['icon'] }} me-1"></i>{{ $laporan->status }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="d-flex flex-column">
+                                        <span class="fw-medium text-dark">{{ $laporan->created_at->format('d M Y') }}</span>
+                                        <small class="text-muted">{{ $laporan->created_at->format('H:i') }} WIB</small>
+                                    </div>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <a href="{{ route('lurah.laporan.show', $laporan->id) }}" 
+                                       class="btn btn-sm btn-outline-primary shadow-sm rounded-pill px-3">
+                                        <i class="bx bx-show me-1"></i>Detail
+                                    </a>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
+        </div>
+
+        @if($laporans->hasPages())
+        <div class="card-footer bg-white border-top py-3 px-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <small class="text-muted">
+                Menampilkan <strong>{{ $laporans->firstItem() }}</strong> – <strong>{{ $laporans->lastItem() }}</strong> dari <strong>{{ $laporans->total() }}</strong> laporan
+            </small>
             <div>
-                {{ $laporans->links() }}
+                {{ $laporans->links('pagination::bootstrap-5') }}
             </div>
         </div>
         @endif

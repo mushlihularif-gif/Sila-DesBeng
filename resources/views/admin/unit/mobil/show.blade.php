@@ -73,9 +73,30 @@
                                                 <td>{{ $mobil->kategori }}</td>
                                             </tr>
                                             <tr>
-                                                <td class="fw-bold text-uppercase text-muted">Harga Sewa</td>
+                                                <td class="fw-bold text-uppercase text-muted align-top">Rincian Tarif Sewa (Borongan)</td>
                                                 <td>
-                                                    <h3 class="text-primary fw-bold mb-0">Rp. {{ number_format($mobil->harga_sewa, 0, ',', '.') }} <span class="fs-6 text-muted fw-normal">/ {{ $mobil->satuan }}</span></h3>
+                                                    <div class="d-flex flex-column gap-2">
+                                                        <div class="d-flex justify-content-between border-bottom pb-2">
+                                                            <span class="text-primary fw-semibold"><i class="bx bx-home me-1"></i>Dalam Desa (0 - {{ $mobil->batas_km_dalam_desa ?? 5 }} Km)</span>
+                                                            <span class="fw-bold">Rp. {{ number_format($mobil->harga_dalam_desa ?? 100000, 0, ',', '.') }}</span>
+                                                        </div>
+                                                        <div class="d-flex justify-content-between border-bottom pb-2">
+                                                            <span class="text-warning fw-semibold"><i class="bx bx-map me-1"></i>Luar Desa ({{ ($mobil->batas_km_dalam_desa ?? 5) + 1 }} - {{ $mobil->batas_km_luar_desa ?? 50 }} Km)</span>
+                                                            <span class="fw-bold">Rp. {{ number_format($mobil->harga_luar_desa ?? 200000, 0, ',', '.') }}</span>
+                                                        </div>
+                                                        <div class="d-flex justify-content-between border-bottom pb-2">
+                                                            <span class="text-danger fw-semibold"><i class="bx bx-building-house me-1"></i>Luar Kota (> {{ $mobil->batas_km_luar_desa ?? 50 }} Km)</span>
+                                                            <span class="fw-bold">Rp. {{ number_format($mobil->harga_luar_kota ?? 400000, 0, ',', '.') }}</span>
+                                                        </div>
+                                                        <div class="mt-2 p-2 bg-light rounded text-center">
+                                                            <small class="fw-bold text-muted d-block mb-1">Kebijakan Bahan Bakar (BBM)</small>
+                                                            @if(isset($mobil->bbm_ditanggung) && $mobil->bbm_ditanggung == 'Pemerintah Desa')
+                                                                <span class="badge bg-success"><i class="bx bx-gas-pump me-1"></i>Gratis (Ditanggung Pemerintah Desa)</span>
+                                                            @else
+                                                                <span class="badge bg-secondary"><i class="bx bx-gas-pump me-1"></i>Ditanggung Penyewa (Isi Sendiri)</span>
+                                                            @endif
+                                                        </div>
+                                                    </div>
                                                 </td>
                                             </tr>
                                             <tr>

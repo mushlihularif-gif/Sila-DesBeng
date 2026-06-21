@@ -21,6 +21,7 @@ Route::get('/media/profile/{filename}', [MediaController::class, 'userProfile'])
 Route::get('/', function () {
     return redirect('beranda');
 });
+
 Route::get('/beranda', [App\Http\Controllers\User\BerandaController::class, 'index'])
     ->name('beranda')
     ->middleware('role:user,guest');
@@ -326,6 +327,17 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
             'update' => 'admin.unit.penjualan_gas.update',
             'destroy' => 'admin.unit.penjualan_gas.destroy',
         ]);
+
+        // Fasilitas Umum
+        Route::resource('fasilitas_umum', \App\Http\Controllers\Admin\UnitFasilitasUmumController::class)->names([
+            'index' => 'admin.unit.fasilitas_umum.index',
+            'create' => 'admin.unit.fasilitas_umum.create',
+            'store' => 'admin.unit.fasilitas_umum.store',
+            'show' => 'admin.unit.fasilitas_umum.show',
+            'edit' => 'admin.unit.fasilitas_umum.edit',
+            'update' => 'admin.unit.fasilitas_umum.update',
+            'destroy' => 'admin.unit.fasilitas_umum.destroy',
+        ]);
     });
     
     // Route Aktivitas
@@ -373,8 +385,8 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
         Route::get('/profile', [\App\Http\Controllers\Admin\SettingController::class, 'showIsewaProfile'])->name('admin.isewa.profile');
         Route::get('/developer/{name}', [\App\Http\Controllers\Admin\SettingController::class, 'showDeveloperProfile'])->name('admin.isewa.developer.profile');
         
-        Route::get('/profil-bumdes', [\App\Http\Controllers\Admin\BumdesController::class, 'index'])->name('admin.isewa.profile-bumdes');
-        Route::prefix('bumdes')->group(function () {
+        Route::get('/profil-pemerintah-desa', [\App\Http\Controllers\Admin\BumdesController::class, 'index'])->name('admin.isewa.profile-bumdes');
+        Route::prefix('pemerintah-desa')->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\BumdesController::class, 'index'])->name('admin.isewa.bumdes.index');
             Route::get('/create', [\App\Http\Controllers\Admin\BumdesController::class, 'create'])->name('admin.isewa.bumdes.create');
             Route::post('/', [\App\Http\Controllers\Admin\BumdesController::class, 'store'])->name('admin.isewa.bumdes.store');
@@ -449,4 +461,25 @@ Route::middleware(['auth', 'role:super_admin,admin_kecamatan,admin_desa,lurah'])
 // API Routes for Regions
 Route::get('/api/regions', function () {
     return response()->json(\App\Models\Region::all());
+});
+
+Route::get('/dev/setup-region', function () {
+    $user = \App\Models\User::first();
+    if (!$user) return 'No user found';
+
+    // Check if region exists
+    $region = \App\Models\Region::where('name', 'Pematang Duku Timur')->first();
+    if (!$region) {
+        $region = \App\Models\Region::create([
+            'name' => 'Pematang Duku Timur',
+            'type' => 'desa',
+            'profile_text' => 'Pemerintahan Desa Pematang Duku Timur, Kecamatan Bengkalis, Kabupaten Bengkalis.',
+        ]);
+    }
+    
+    // Assign to user
+    $user->region_id = $region->id;
+    $user->save();
+
+    return 'Assigned Region ID: ' . $region->id . ' to User: ' . $user->email;
 });

@@ -4,36 +4,57 @@
         <div class="container-xxl flex-grow-1 container-p-y">
 
             <!-- Kartu Selamat Datang & Grafik Kinerja -->
-            <div class="row mb-2">
-                <div class="col-lg-5">
-                <div class="card">
-                        <div class="d-flex align-items-end row">
-                            <div class="col-sm-10">
-                                <div class="card-body p-3">
+            <div class="row mb-2 align-items-stretch">
+                <div class="col-lg-5 mb-4 mb-lg-0">
+                    <div class="card h-100">
+                        <div class="d-flex flex-column h-100">
+                            <div class="col-12">
+                                <div class="card-body p-4">
                                     <h5 class="card-title text-primary fw-bold">Selamat Datang di SiladesBeng 🏛️</h5>
-                                    <p class="mb-2">Sistem Penyewaan Alat dan Promosi Usaha BUMDes berbasis Digital <span
-                                            class="fw-bold">Desa Pematang Duku Timur</span></p>
+                                    <p class="mb-3 text-muted">Sistem Pelayanan Terpadu berbasis Digital <span
+                                            class="fw-bold text-dark">Pemerintahan Desa Pematang Duku Timur</span></p>
                                     <a href="{{ route('admin.isewa.profile-bumdes') }}"
-                                        class="btn btn-outline-primary">Profil BUMDes</a>
+                                        class="btn btn-outline-primary">Profil Pemerintah Desa</a>
                                 </div>
                             </div>
-                            <div class="col-sm-45 text-center text-sm-left">
-                                <div class="card-body pb-0 px-0 px-md-3">
-                                    <img src="{{ asset('Admin/img/illustrations/bermasab.png') }}" height="255"
-                                        alt="View Badge User" data-app-dark-img="illustrations/man-with-laptop-dark.png"
-                                        data-app-light-img="illustrations/man-with-laptop-light.png" />
+                            <div class="col-12 mt-auto">
+                                <div class="px-3 pb-3">
+                                    <div id="dashboardBannerCarousel" class="carousel slide" data-bs-ride="carousel">
+                                        <div class="carousel-inner rounded-3 shadow-sm">
+                                            @php
+                                                $banners = \App\Models\Banner::where('is_active', true)->latest()->get();
+                                            @endphp
+                                            @if($banners->count() > 0)
+                                                @foreach($banners as $index => $banner)
+                                                    <div class="carousel-item {{ $index == 0 ? 'active' : '' }}">
+                                                        <img src="{{ Storage::url($banner->image_path) }}" class="d-block w-100 rounded-3" style="object-fit: cover;" alt="Banner {{ $index + 1 }}">
+                                                    </div>
+                                                @endforeach
+                                            @else
+                                                <div class="carousel-item active">
+                                                    <img src="{{ asset('User/img/elemen/entrance.png') }}" class="d-block w-100 rounded-3" style="object-fit: cover;" alt="Slide 1">
+                                                </div>
+                                                <div class="carousel-item">
+                                                    <img src="{{ asset('User/img/elemen/biru.png') }}" class="d-block w-100 rounded-3" style="object-fit: cover;" alt="Slide 2">
+                                                </div>
+                                                <div class="carousel-item">
+                                                    <img src="{{ asset('User/img/elemen/ppq.png') }}" class="d-block w-100 rounded-3" style="object-fit: cover;" alt="Slide 3">
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-7">
-                    <div class="card">
-                        <div class="card-body">
+                <div class="col-lg-7 mb-4 mb-lg-0">
+                    <div class="card h-100">
+                        <div class="card-body d-flex flex-column">
                             <div
                                 class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-4">
                                 <div>
-                                    <h5 class="card-title fw-bold mb-2">Kinerja BUMDES</h5>
+                                    <h5 class="card-title fw-bold mb-2">Kinerja Pemerintah Desa</h5>
                                     <span class="badge bg-label-warning rounded-pill">Tahun {{ $selectedYear }}</span>
                                 </div>
                                 <div class="d-flex flex-column flex-sm-row gap-2 mt-3 mt-sm-0">
@@ -52,7 +73,9 @@
                                     </script>
                                 </div>
                             </div>
-                            <div id="kinerjaChart" style="min-height: 300px;"></div>
+                            <div class="flex-grow-1 d-flex flex-column justify-content-center">
+                                <div id="kinerjaChart" style="min-height: 300px; width: 100%;"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -61,41 +84,82 @@
 
             <!-- Kartu Unit - Lebar Penuh -->
             <div class="row mb-4">
-                <div class="col-md-6 mb-3">
-                    <div class="card unit-card warning hover-lift"
-                        onclick="window.location='{{ route('admin.unit.penyewaan.index') }}'">
-                        <div class="card-body p-4">
-                            <div class="d-flex align-items-center">
-                                <div class="avatar flex-shrink-0 me-3" style="width: 70px; height: 70px;">
-                                    <img src="{{ asset('Admin/img/5.png') }}" alt="" class="rounded w-100" />
+                @php
+                    $laporanPendingCount = 0;
+                    if(class_exists('\App\Models\Laporan')) {
+                        $laporanPendingCount = \App\Models\Laporan::where('status', 'Pending')->count() ?? 0;
+                    }
+                    $unitConfigs = [
+                        'Penyewaan Alat' => [
+                            'title' => 'Unit Penyewaan Alat',
+                            'count' => ($unitPenyewaan ?? \App\Models\Barang::count() ?? 0) . ' Item',
+                            'route' => route('admin.unit.penyewaan.index'),
+                            'image' => asset('User/img/elemen/F1.png'),
+                            'color' => 'warning'
+                        ],
+                        'Penjualan Gas' => [
+                            'title' => 'Unit Penjualan Gas',
+                            'count' => ($unitGas ?? \App\Models\Gas::count() ?? 0) . ' Jenis Tabung',
+                            'route' => route('admin.unit.penjualan_gas.index'),
+                            'image' => asset('User/img/elemen/F2.png'),
+                            'color' => 'danger'
+                        ],
+                        'Penyewaan Mobil' => [
+                            'title' => 'Unit Penyewaan Mobil',
+                            'count' => (\App\Models\Mobil::count() ?? 0) . ' Kendaraan',
+                            'route' => route('admin.unit.mobil.index'),
+                            'image' => asset('User/img/elemen/mobil.png'),
+                            'color' => 'info'
+                        ],
+                        'Peminjaman Fasilitas Umum' => [
+                            'title' => 'Unit Peminjaman Fasilitas Umum',
+                            'count' => (\App\Models\FasilitasUmum::count() ?? 0) . ' Fasilitas',
+                            'route' => route('admin.unit.fasilitas_umum.index'),
+                            'image' => asset('User/img/elemen/fasilitas.png'),
+                            'color' => 'success'
+                        ],
+                        'Pelaporan Warga' => [
+                            'title' => 'Pelaporan Warga',
+                            'count' => $laporanPendingCount . ' Pending',
+                            'route' => route('lurah.laporan.index'),
+                            'image' => asset('User/img/elemen/lapor.png'),
+                            'color' => 'primary'
+                        ],
+                        'Pengumuman dan Event' => [
+                            'title' => 'Pengumuman & Event',
+                            'count' => (\App\Models\Announcement::count() ?? 0) . ' Info',
+                            'route' => route('admin.announcements.index'),
+                            'image' => asset('User/img/elemen/event.png'),
+                            'color' => 'secondary'
+                        ]
+                    ];
+
+                    $activeServicesList = isset($activeServices) && count($activeServices) > 0 ? $activeServices : ['Penyewaan Alat', 'Penjualan Gas'];
+                @endphp
+
+                @foreach($activeServicesList as $serviceName)
+                    @if(isset($unitConfigs[$serviceName]))
+                        @php $config = $unitConfigs[$serviceName]; @endphp
+                        <div class="col-md-6 mb-3">
+                            <div class="card unit-card {{ $config['color'] }} hover-lift"
+                                onclick="window.location='{{ $config['route'] }}'">
+                                <div class="card-body p-4">
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar flex-shrink-0 me-3" style="width: 70px; height: 70px;">
+                                            <img src="{{ $config['image'] }}" alt="{{ $config['title'] }}" class="rounded w-100" />
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <span class="fw-semibold d-block mb-2 text-muted">{{ $config['title'] }}</span>
+                                            <h3 class="card-title mb-0">{{ $config['count'] }}</h3>
+                                        </div>
+                                        <i class="bx bx-chevron-right bx-lg text-{{ $config['color'] }}"></i>
+                                    </div>
                                 </div>
-                                <div class="flex-grow-1">
-                                    <span class="fw-semibold d-block mb-2 text-muted">Unit Penyewaan Alat</span>
-                                    <h3 class="card-title mb-0">{{ $unitPenyewaan ?? 9 }} Item</h3>
-                                </div>
-                                <i class="bx bx-chevron-right bx-lg text-warning"></i>
                             </div>
                         </div>
-                    </div>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <div class="card unit-card danger hover-lift"
-                        onclick="window.location='{{ route('admin.unit.penjualan_gas.index') }}'">
-                        <div class="card-body p-4">
-                            <div class="d-flex align-items-center">
-                                <div class="avatar flex-shrink-0 me-3" style="width: 70px; height: 70px;">
-                                    <img src="{{ asset('Admin/img/icons/unicons/6.png') }}" alt=""
-                                        class="rounded w-100" />
-                                </div>
-                                <div class="flex-grow-1">
-                                    <span class="fw-semibold d-block mb-2 text-muted">Unit Penjualan Gas</span>
-                                    <h3 class="card-title mb-0">{{ $unitGas ?? 2 }} Jenis Tabung</h3>
-                                </div>
-                                <i class="bx bx-chevron-right bx-lg text-danger"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                    @endif
+                @endforeach
+            </div>
 
                 <!-- Bagian Notifikasi -->
                 <div class="row mb-4">
@@ -416,29 +480,25 @@
                                 <div class="row h-100 align-items-center">
                                     <!-- Data List -->
                                     <div class="col-md-7">
-                                        <!-- Rental -->
-                                        <div class="mb-4">
-                                            <div class="d-flex justify-content-between mb-1">
-                                                <span class="fw-medium">Unit Penyewaan Alat</span>
-                                                <span class="fw-bold">Rp {{ number_format($totalPendapatanData['rental']['revenue'] ?? 0, 0, ',', '.') }}</span>
+                                        @php
+                                            $revenueServices = ['Penyewaan Alat', 'Penjualan Gas', 'Penyewaan Mobil'];
+                                            $activeRevenueServices = array_intersect($activeServicesList, $revenueServices);
+                                        @endphp
+                                        @foreach($activeRevenueServices as $serviceName)
+                                            @php
+                                                $dataItem = $totalPendapatanData[$serviceName] ?? ['revenue' => 0, 'transactions' => 0, 'percentage' => 0, 'color' => 'secondary'];
+                                            @endphp
+                                            <div class="mb-4">
+                                                <div class="d-flex justify-content-between mb-1">
+                                                    <span class="fw-medium">Unit {{ $serviceName }}</span>
+                                                    <span class="fw-bold">Rp {{ number_format($dataItem['revenue'], 0, ',', '.') }}</span>
+                                                </div>
+                                                <div class="progress" style="height: 8px;">
+                                                    <div class="progress-bar bg-{{ $dataItem['color'] }}" role="progressbar" style="width: {{ $dataItem['percentage'] }}%"></div>
+                                                </div>
+                                                <small class="text-muted">{{ $dataItem['transactions'] }} Transaksi</small>
                                             </div>
-                                            <div class="progress" style="height: 8px;">
-                                                <div class="progress-bar bg-warning" role="progressbar" style="width: {{ $totalPendapatanData['rental']['percentage'] ?? 0 }}%"></div>
-                                            </div>
-                                            <small class="text-muted">{{ $totalPendapatanData['rental']['transactions'] ?? 0 }} Transaksi</small>
-                                        </div>
-
-                                        <!-- Gas -->
-                                        <div class="mb-4">
-                                            <div class="d-flex justify-content-between mb-1">
-                                                <span class="fw-medium">Unit Penjualan Gas</span>
-                                                <span class="fw-bold">Rp {{ number_format($totalPendapatanData['gas']['revenue'] ?? 0, 0, ',', '.') }}</span>
-                                            </div>
-                                            <div class="progress" style="height: 8px;">
-                                                <div class="progress-bar bg-primary" role="progressbar" style="width: {{ $totalPendapatanData['gas']['percentage'] ?? 0 }}%"></div>
-                                            </div>
-                                            <small class="text-muted">{{ $totalPendapatanData['gas']['transactions'] ?? 0 }} Transaksi</small>
-                                        </div>
+                                        @endforeach
 
                                         <!-- Total -->
                                         <div class="pt-3 border-top">
@@ -513,7 +573,7 @@
                                                 <!-- Product Info -->
                                                 <div class="p-3">
                                                     <div class="mb-2">
-                                                        <span class="badge bg-label-{{ $item->type == 'rental' ? 'warning' : 'primary' }} text-uppercase"
+                                                        <span class="badge bg-label-{{ $item->type == 'rental' ? 'warning' : ($item->type == 'mobil' ? 'info' : 'primary') }} text-uppercase"
                                                             style="font-size: 0.7rem; font-weight: 600;">
                                                             {{ $item->category }}
                                                         </span>
@@ -525,6 +585,8 @@
                                                             <small class="text-muted d-block">
                                                                 @if($item->type == 'rental')
                                                                     Per 24 jam
+                                                                @elseif($item->type == 'mobil')
+                                                                    Sewa Harian
                                                                 @else
                                                                     Per tabung
                                                                 @endif
@@ -534,7 +596,7 @@
                                                     <div class="mt-3 pt-3 border-top">
                                                         <div class="d-flex justify-content-between text-muted small">
                                                             <span><i class="bx bx-check-circle me-1"></i>Stok: {{ $item->stock }}</span>
-                                                            <span><i class="bx bx-time me-1"></i>{{ $item->sold }} {{ $item->type == 'rental' ? 'Booking' : 'Terjual' }}</span>
+                                                            <span><i class="bx bx-time me-1"></i>{{ $item->sold }} {{ $item->type == 'gas' ? 'Terjual' : 'Booking' }}</span>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -747,17 +809,35 @@
                 // ========================================
                 const pieContainer = document.querySelector("#pendapatanPieChart");
                 if (pieContainer) {
-                    const rentalPercentage = {{ $totalPendapatanData['rental']['percentage'] ?? 0 }};
-                    const gasPercentage = {{ $totalPendapatanData['gas']['percentage'] ?? 0 }};
+                    @php
+                        $pieSeries = [];
+                        $pieLabels = [];
+                        $pieColors = [];
+                        $hexColors = [
+                            'warning' => '#ffc107',
+                            'primary' => '#696cff',
+                            'info' => '#0dcaf0',
+                            'success' => '#198754',
+                            'danger' => '#dc3545',
+                            'secondary' => '#8592a3'
+                        ];
+                        foreach($activeRevenueServices as $serviceName) {
+                            $dataItem = $totalPendapatanData[$serviceName] ?? ['percentage' => 0, 'color' => 'secondary'];
+                            $pieSeries[] = $dataItem['percentage'];
+                            $pieLabels[] = $serviceName;
+                            $pieColors[] = $hexColors[$dataItem['color']] ?? '#8592a3';
+                        }
+                    @endphp
 
                     const pieOptions = {
-                        series: [rentalPercentage, gasPercentage],
+                        series: {!! json_encode($pieSeries) !!},
                         chart: {
                             type: 'pie',
                             height: 250 // slightly smaller to fit
                         },
-                        labels: ['Penyewaan', 'Penjualan'],
-                        colors: ['#ffc107', '#696cff'], // Warning (Yellow) & Primary (Blue)
+                        labels: {!! json_encode($pieLabels) !!},
+                        colors: {!! json_encode($pieColors) !!},
+
                         legend: {
                             show: false
                         },
@@ -807,8 +887,28 @@
                 // Donut Chart untuk Transaksi (Large centered chart)
                 const orderChartElement = document.querySelector("#transactionDonutChart");
                 if (orderChartElement) {
+                    @php
+                        $donutSeries = [];
+                        $donutLabels = [];
+                        $donutColors = [];
+                        $totalDonut = 0;
+                        
+                        $countMap = [
+                            'Penyewaan Alat' => ['count' => $rentalCount ?? 0, 'color' => '#ffc107'],
+                            'Penjualan Gas' => ['count' => $gasCount ?? 0, 'color' => '#696cff'],
+                            'Penyewaan Mobil' => ['count' => $mobilCount ?? 0, 'color' => '#0dcaf0']
+                        ];
+                        
+                        foreach($activeRevenueServices as $serviceName) {
+                            $c = $countMap[$serviceName]['count'] ?? 0;
+                            $donutSeries[] = $c;
+                            $donutLabels[] = $serviceName . " " . $c . " Transaksi";
+                            $donutColors[] = $countMap[$serviceName]['color'] ?? '#8592a3';
+                            $totalDonut += $c;
+                        }
+                    @endphp
                     var optionsOrder = {
-                        series: [{{ $rentalCount ?? 0 }}, {{ $gasCount ?? 0 }}],
+                        series: {!! json_encode($donutSeries) !!},
                         chart: {
                             type: "donut",
                             width: "100%",
@@ -819,8 +919,8 @@
                                 }
                             }
                         },
-                        labels: ["Unit Penyewaan Alat {{ $rentalCount ?? 0 }} Transaksi", "Gas {{ $gasCount ?? 0 }} Transaksi"],
-                        colors: ["#FFC107", "#EA5455"],
+                        labels: {!! json_encode($donutLabels) !!},
+                        colors: {!! json_encode($donutColors) !!},
                         legend: {
                             show: true,
                             position: 'bottom',
@@ -856,7 +956,7 @@
                                             color: "#5e5873",
                                             offsetY: 5,
                                             formatter: function() {
-                                                return "{{ ($rentalCount ?? 0) + ($gasCount ?? 0) }}";
+                                                return "{{ $totalDonut }}";
                                             },
                                         },
                                         total: {

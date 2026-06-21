@@ -81,12 +81,15 @@ public function index(Request $request)
     $completedOrders = $completedRentals + $completedGas;
 
     // Hitung statistik untuk Donut Chart (Total Transaksi per Kategori) - Filter Tahun Ini & Tidak Cancel
-    // Hitung statistik untuk Donut Chart (Total Transaksi per Kategori)
     $rentalCount = RentalBooking::withTrashed()->whereYear('created_at', $selectedYear)
         ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
         ->count();
 
     $gasCount = GasOrder::withTrashed()->whereYear('created_at', $selectedYear)
+        ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
+        ->count();
+
+    $mobilCount = \App\Models\MobilBooking::withTrashed()->whereYear('created_at', $selectedYear)
         ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
         ->count();
 
@@ -182,6 +185,7 @@ public function index(Request $request)
         'totalPending' => $totalPending,
         'rentalCount' => $rentalCount,
         'gasCount' => $gasCount,
+        'mobilCount' => $mobilCount,
         'selectedYear' => $selectedYear,
         'availableYears' => $availableYears,
         // Data nyata untuk grafik
@@ -202,6 +206,20 @@ public function index(Request $request)
     
     // Ambil Produk Populer (pass selectedYear)
     $data['popularProducts'] = $this->getPopularProducts($selectedYear);
+
+    // Ambil Active Services jika user login dan punya region
+    $activeServices = [];
+    $user = auth()->user();
+    if ($user && $user->region_id) {
+        $userRegion = \App\Models\Region::with(['services' => function($q) {
+            $q->where('is_active', true);
+        }])->find($user->region_id);
+        
+        if ($userRegion) {
+            $activeServices = $userRegion->services->pluck('name')->toArray();
+        }
+    }
+    $data['activeServices'] = $activeServices;
 
     Log::info('DashboardController: All data prepared. Rendering view.');
     return view('admin.dashboard.index', $data);
@@ -239,6 +257,16 @@ public function index(Request $request)
             ->whereMonth('created_at', $month)
             ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
             ->count();
+        // Pendapatan Penyewaan Mobil
+        $mobilRevenue = \App\Models\MobilBooking::withTrashed()->whereYear('created_at', $year)
+            ->whereMonth('created_at', $month)
+            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
+            ->sum('total_amount');
+        
+        $mobilTransactions = \App\Models\MobilBooking::withTrashed()->whereYear('created_at', $year)
+            ->whereMonth('created_at', $month)
+            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
+            ->count();
     
         // Pendapatan Laporan Manual
         $manualRevenue = ManualReport::whereYear('transaction_date', $year)
@@ -249,19 +277,27 @@ public function index(Request $request)
             ->whereMonth('transaction_date', $month)
             ->count();
         
-        $totalRevenue = $rentalRevenue + $gasRevenue + $manualRevenue;
-        $totalTransactions = $rentalTransactions + $gasTransactions + $manualTransactions;
+        $totalRevenue = $rentalRevenue + $gasRevenue + $mobilRevenue + $manualRevenue;
+        $totalTransactions = $rentalTransactions + $gasTransactions + $mobilTransactions + $manualTransactions;
         
         return [
-            'rental' => [
+            'Penyewaan Alat' => [
                 'revenue' => $rentalRevenue,
                 'transactions' => $rentalTransactions,
-                'percentage' => $totalRevenue > 0 ? round(($rentalRevenue / $totalRevenue) * 100, 1) : 0
+                'percentage' => $totalRevenue > 0 ? round(($rentalRevenue / $totalRevenue) * 100, 1) : 0,
+                'color' => 'warning'
             ],
-            'gas' => [
+            'Penjualan Gas' => [
                 'revenue' => $gasRevenue,
                 'transactions' => $gasTransactions,
-                'percentage' => $totalRevenue > 0 ? round(($gasRevenue / $totalRevenue) * 100, 1) : 0
+                'percentage' => $totalRevenue > 0 ? round(($gasRevenue / $totalRevenue) * 100, 1) : 0,
+                'color' => 'primary'
+            ],
+            'Penyewaan Mobil' => [
+                'revenue' => $mobilRevenue,
+                'transactions' => $mobilTransactions,
+                'percentage' => $totalRevenue > 0 ? round(($mobilRevenue / $totalRevenue) * 100, 1) : 0,
+                'color' => 'info'
             ],
             'total' => [
                 'revenue' => $totalRevenue,
@@ -685,8 +721,35 @@ public function index(Request $request)
             ];
         })->filter();
 
-        // 5. Gabungkan, Urutkan, Ambil 4
-        return $products->concat($gasProducts)->sortByDesc('sold')->take(4);
+        // 5. Ambil Skor Mobil
+        $mobilPopularity = \App\Models\MobilBooking::withTrashed()->select('mobil_id', DB::raw('SUM(quantity) as total_sold'))
+            ->whereYear('created_at', $year)
+            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
+            ->whereNotNull('mobil_id')
+            ->groupBy('mobil_id')
+            ->with('mobil')
+            ->get();
+
+        // 6. Petakan Mobil ke format umum
+        $mobilProducts = $mobilPopularity->map(function ($item) {
+            if (!$item->mobil) return null;
+            return (object) [
+                'id' => $item->mobil->id,
+                'name' => $item->mobil->nama_mobil,
+                'image' => $item->mobil->foto,
+                'price' => $item->mobil->harga_sewa,
+                'price_formatted' => 'Rp ' . number_format($item->mobil->harga_sewa, 0, ',', '.'),
+                'stock' => $item->mobil->stok,
+                'sold' => $item->total_sold,
+                'type' => 'mobil',
+                'category' => 'Unit Penyewaan Mobil',
+                'unit' => $item->mobil->satuan ?? 'unit',
+                'link' => route('admin.unit.mobil.show', $item->mobil->id)
+            ];
+        })->filter();
+
+        // 7. Gabungkan semua, Urutkan, Ambil 4 teratas
+        return $products->concat($gasProducts)->concat($mobilProducts)->sortByDesc('sold')->take(4);
     }
 
     /**

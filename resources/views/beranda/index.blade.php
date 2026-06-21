@@ -8,6 +8,9 @@
 
     {{-- UTAMA --}}<main class="flex-grow relative w-full overflow-x-hidden">
 
+        <!-- Layer khusus untuk efek blur di belakang navbar -->
+        <div id="navbar-blur-bg"></div>
+
         {{-- BAGIAN BERANDA --}}<section id="beranda" class="relative z-10">
             <div class="w-full mx-auto">
                 <div class="relative overflow-hidden group">
@@ -630,6 +633,23 @@
             margin-top: 1rem;
         }
 
+        /* Styling untuk layer buram di belakang navbar */
+        #navbar-blur-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 40; /* Di bawah navbar (z-index 50) tapi di atas main content */
+            background-size: cover;
+            background-position: top center;
+            filter: blur(10px) brightness(0.95);
+            transform: scale(1.05); /* Menghindari batas putih efek blur */
+            transition: background-image 0.5s ease, height 0.3s ease;
+        }
+        
+        #beranda {
+            transition: padding-top 0.3s ease;
+        }
 
         /* Area Carousel/Hero - TIDAK PAKAI BACKGROUND */
 
@@ -831,6 +851,7 @@
                     console.error("Charts failed to initialize:", e);
                 }
                 this.initUnitCarousel();
+                this.initNavbarBlurSync();
             },
 
             // Initialize Year & Region Selectors
@@ -925,6 +946,10 @@
                 const goToSlide = (slideIndex) => {
                     currentSlide = slideIndex;
                     carouselSlides.style.transform = `translateX(-${slideIndex * 100}%)`;
+                    
+                    if(window.syncNavbarBlurImage) {
+                        window.syncNavbarBlurImage(slideIndex);
+                    }
 
                     // indicators variable now points to the LIVE elements in DOM
                     indicators.forEach((indicator, index) => {
@@ -987,6 +1012,62 @@
                 indicators = newIndicatorsList; // Update reference to new nodes
 
                 startAutoSlide();
+            },
+
+            // Sinkronisasi background blur navbar dengan gambar slider
+            initNavbarBlurSync() {
+                const navbar = document.getElementById('master-navbar');
+                const blurLayer = document.getElementById('navbar-blur-bg');
+                const berandaSection = document.getElementById('beranda');
+
+                if (!navbar || !blurLayer || !berandaSection) return;
+
+                const syncHeightAndMargin = () => {
+                    // Hanya set height navbar (offsetHeight), lalu kita push beranda ke bawah
+                    const navHeight = navbar.offsetHeight;
+                    
+                    if (navbar.classList.contains('hidden-nav')) {
+                        blurLayer.style.height = '0px';
+                        berandaSection.style.paddingTop = '0px';
+                    } else {
+                        blurLayer.style.height = navHeight + 'px';
+                        berandaSection.style.paddingTop = navHeight + 'px';
+                    }
+                };
+
+                // Panggil sekarang
+                syncHeightAndMargin();
+                window.addEventListener('resize', syncHeightAndMargin);
+
+                // Buat global agar bisa dipanggil dari initCarousel saat gambar berganti
+                window.syncNavbarBlurImage = (slideIndex) => {
+                    // Cari semua elemen carousel-slide
+                    const slideContainers = document.querySelectorAll('.carousel-slide');
+                    if(slideContainers[slideIndex]) {
+                        // Ambil img di dalam slide container itu
+                        const img = slideContainers[slideIndex].querySelector('img');
+                        if (img) {
+                            const imgSrc = img.getAttribute('src');
+                            blurLayer.style.backgroundImage = `url('${imgSrc}')`;
+                        }
+                    }
+                };
+
+                // Set gambar pertama saat init (memberi sedikit delay agar DOM gambar ready)
+                setTimeout(() => { window.syncNavbarBlurImage(0); }, 50);
+
+                // Sinkron saat toggle menu
+                const masterToggle = document.getElementById('master-navbar-toggle');
+                if (masterToggle) {
+                    masterToggle.addEventListener('click', () => {
+                        setTimeout(syncHeightAndMargin, 10);
+                    });
+                }
+                
+                // Saat scroll, navbar bisa hide/show
+                window.addEventListener('scroll', () => {
+                    syncHeightAndMargin();
+                });
             },
 
             // Charts initialization

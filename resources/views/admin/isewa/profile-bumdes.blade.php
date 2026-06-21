@@ -1,6 +1,6 @@
 @extends('admin.layouts.admin')
 
-@section('title', 'Profil BUMDes')
+@section('title', 'Profil Pemerintah Desa')
 
 @section('content')
 <div class="container-fluid py-4">
@@ -8,7 +8,7 @@
         <div class="col-12 col-lg-10">
             <!-- HEADER -->
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2 class="text-primary fw-bold mb-0">Struktur <span class="text-info">Pemerintahan dan BUMDes</span></h2>
+                <h2 class="text-primary fw-bold mb-0">Struktur <span class="text-info">Pemerintah {{ auth()->user()->region->name ?? 'Desa' }}</span></h2>
                 <a href="{{ route('admin.isewa.bumdes.create') }}" class="btn btn-primary px-4 py-2 fw-bold">
                     <i class="bi bi-plus"></i> Tambah Anggota
                 </a>
