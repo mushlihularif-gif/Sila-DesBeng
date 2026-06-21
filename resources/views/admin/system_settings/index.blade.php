@@ -88,12 +88,47 @@
                                                             placeholder="Keterangan Pembayaran Tunai">
                                                         <label for="cash_payment_description">Info Pembayaran Tunai (Contoh: Bayar ke Bendahara)</label>
                                                     </div>
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <h6 class="fw-bold mt-4 mb-3"><i class="bx bxs-bank me-2"></i>Rekening Bank BUMDes</h6>
+                                                            <div class="form-floating mb-3">
+                                                                <input type="text" class="form-control" id="bank_name" name="bank_name" value="{{ old('bank_name', $setting->bank_name) }}" placeholder="Contoh: BSI, Mandiri, BCA">
+                                                                <label for="bank_name">Nama Bank</label>
+                                                            </div>
+                                                            <div class="form-floating mb-3">
+                                                                <input type="text" class="form-control" id="bank_account_number" name="bank_account_number" value="{{ old('bank_account_number', $setting->bank_account_number) }}" placeholder="Nomor Rekening">
+                                                                <label for="bank_account_number">Nomor Rekening</label>
+                                                            </div>
+                                                            <div class="form-floating mb-3">
+                                                                <input type="text" class="form-control" id="bank_account_holder" name="bank_account_holder" value="{{ old('bank_account_holder', $setting->bank_account_holder) }}" placeholder="Atas Nama">
+                                                                <label for="bank_account_holder">Atas Nama Rekening</label>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div class="col-md-6">
+                                                            <h6 class="fw-bold mt-4 mb-3"><i class="bx bx-wallet me-2"></i>E-Wallet BUMDes (Opsional)</h6>
+                                                            <div class="form-floating mb-3">
+                                                                <input type="text" class="form-control" id="ewallet_name" name="ewallet_name" value="{{ old('ewallet_name', $setting->ewallet_name) }}" placeholder="Contoh: DANA, OVO, Gopay">
+                                                                <label for="ewallet_name">Nama E-Wallet</label>
+                                                            </div>
+                                                            <div class="form-floating mb-3">
+                                                                <input type="text" class="form-control" id="ewallet_number" name="ewallet_number" value="{{ old('ewallet_number', $setting->ewallet_number) }}" placeholder="Nomor E-Wallet">
+                                                                <label for="ewallet_number">Nomor E-Wallet</label>
+                                                            </div>
+                                                            <div class="form-floating mb-3">
+                                                                <input type="text" class="form-control" id="ewallet_account_holder" name="ewallet_account_holder" value="{{ old('ewallet_account_holder', $setting->ewallet_account_holder) }}" placeholder="Atas Nama E-Wallet">
+                                                                <label for="ewallet_account_holder">Atas Nama E-Wallet</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
                                                     <input type="hidden" name="payment_methods[]" value="tunai">
-                                                    <div class="alert alert-info d-flex align-items-center"
+                                                    <input type="hidden" name="payment_methods[]" value="transfer">
+                                                    <div class="alert alert-info d-flex align-items-center mt-3"
                                                         role="alert">
                                                         <i class="bx bx-info-circle me-2 fs-4"></i>
                                                         <div class="small">
-                                                            Masukkan alamat lengkap BUMDes yang akan ditampilkan kepada pengguna saat melakukan pemesanan.
+                                                            Masukkan rekening bank dan e-wallet yang akan ditampilkan kepada pengguna saat melakukan pemesanan.
                                                         </div>
                                                     </div>
                                                 </div>

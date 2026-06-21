@@ -1,4 +1,4 @@
-﻿@extends('layouts.user')
+@extends('layouts.user')
 @section('title', 'Pengaduan Warga - Kelurahan Sungai Pakning')
 @push('styles')
 <style>
@@ -554,22 +554,26 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Counter Animation
+    // Counter animation
     const counters = document.querySelectorAll('.counter');
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                const counter = entry.target;
-                const target = +counter.dataset.target;
-                const increment = target / 200;
-                let count = 0;
-                const update = () => {
-                    count += increment;
-                    if (count < target) { counter.innerText = Math.ceil(count); requestAnimationFrame(update); }
-                    else { counter.innerText = target; }
-                };
-                update();
-                observer.unobserve(counter);
+                const el = entry.target;
+                const target = parseInt(el.getAttribute('data-target')) || 0;
+                let current = 0;
+                const step = Math.max(1, Math.ceil(target / 50));
+                
+                const timer = setInterval(() => {
+                    current += step;
+                    if (current >= target) {
+                        current = target;
+                        clearInterval(timer);
+                    }
+                    el.textContent = current.toLocaleString('id-ID');
+                }, 30);
+                
+                observer.unobserve(el);
             }
         });
     }, { threshold: 0.5 });

@@ -3,63 +3,15 @@
 @section('page')
 <main class="flex-grow relative w-full">
     <section class="relative z-10 min-h-screen pt-32 pb-16">
-        <!-- Decorative Background Elements -->
-        <div class="absolute inset-0 pointer-events-none overflow-hidden">
-            <!-- Top Left Blue Wave -->
-            <svg class="absolute top-0 left-0 w-[500px] h-[400px] opacity-30" style="transform: translate(-20%, -10%);">
-                <defs>
-                    <linearGradient id="blueWave1" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" style="stop-color:#60a5fa;stop-opacity:0.6" />
-                        <stop offset="100%" style="stop-color:#93c5fd;stop-opacity:0.3" />
-                    </linearGradient>
-                </defs>
-                <path d="M0,100 Q150,50 300,100 T600,100 L600,0 L0,0 Z" fill="url(#blueWave1)" />
-            </svg>
-
-            <!-- Top Right Geometric Shape -->
-            <div class="absolute top-20 right-0" style="transform: translateX(30%) rotate(15deg);">
-                <svg width="300" height="300" viewBox="0 0 300 300" class="opacity-20">
-                    <rect x="50" y="50" width="80" height="80" fill="#60a5fa" transform="rotate(45 90 90)" opacity="0.4"/>
-                    <rect x="150" y="80" width="60" height="60" fill="#93c5fd" transform="rotate(30 180 110)" opacity="0.3"/>
-                </svg>
-            </div>
-
-            <!-- Bottom Left Yellow Wave -->
-            <svg class="absolute bottom-0 left-0 w-[600px] h-[400px] opacity-40" style="transform: translate(-15%, 20%);">
-                <defs>
-                    <linearGradient id="yellowWave" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" style="stop-color:#fbbf24;stop-opacity:0.5" />
-                        <stop offset="100%" style="stop-color:#fde68a;stop-opacity:0.2" />
-                    </linearGradient>
-                </defs>
-                <path d="M0,200 Q200,150 400,200 T800,200 L800,400 L0,400 Z" fill="url(#yellowWave)" />
-            </svg>
-
-            <!-- Bottom Right Blue Wave -->
-            <svg class="absolute bottom-0 right-0 w-[500px] h-[350px] opacity-35" style="transform: translate(20%, 15%);">
-                <defs>
-                    <linearGradient id="blueWave2" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:0.4" />
-                        <stop offset="100%" style="stop-color:#60a5fa;stop-opacity:0.2" />
-                    </linearGradient>
-                </defs>
-                <path d="M0,150 Q150,100 300,150 T600,150 L600,400 L0,400 Z" fill="url(#blueWave2)" />
-            </svg>
-        </div>
+        <!-- Animated Canvas Background -->
+        <canvas id="gas-canvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none;"></canvas>
 
         <div class="max-w-6xl mx-auto px-6 relative z-10">
-            <!-- Header Section with Gradient Text - LEFT ALIGNED -->
-            <div class="mb-12 mt-12">
-                <h1 class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">
-                    Detail
-                </h1>
-            </div>
-
-            <!-- Detail Card - HORIZONTAL LAYOUT -->
-            <div class="bg-white rounded-3xl shadow-2xl p-8 md:p-10">
-                <div class="flex flex-col lg:flex-row gap-8">
+            <!-- Detail Card - CLEAN & MINIMAL LAYOUT -->
+            <div class="bg-white rounded-3xl shadow-xl p-6 md:p-10 border border-gray-100">
+                <div class="flex flex-col lg:flex-row gap-8 md:gap-16">
                     <!-- Left Side: Product Image + Location -->
-                    <div class="lg:w-5/12 flex-shrink-0">
+                    <div class="lg:w-5/12 flex-shrink-0 w-full mx-auto max-w-[320px] sm:max-w-[400px] lg:max-w-none">
                         <!-- Product Image Carousel -->
                         <div class="relative aspect-square overflow-hidden rounded-2xl shadow-lg mb-6 group w-full">
                             @php
@@ -68,12 +20,12 @@
                             @endphp
 
                             <!-- Images Container -->
-                            <div id="product-carousel" class="flex w-full h-full transition-transform duration-500 ease-out">
+                            <div id="product-carousel" class="flex w-full h-full bg-gray-50/50 transition-transform duration-500 ease-out">
                                 @foreach($images as $index => $image)
-                                <div class="w-full h-full flex-shrink-0 flex-grow-0">
+                                <div class="w-full h-full flex-shrink-0 flex-grow-0 p-8">
                                     <img src="{{ asset('storage/' . $image) }}" 
                                          alt="{{ $item->jenis_gas }} - Image {{ $index + 1 }}"
-                                         class="w-full h-full object-cover product-image">
+                                         class="w-full h-full object-contain drop-shadow-xl product-image">
                                 </div>
                                 @endforeach
                             </div>
@@ -110,62 +62,65 @@
                         @if($setting && $setting->latitude && $setting->longitude)
                         <a href="https://www.google.com/maps?q={{ $setting->latitude }},{{ $setting->longitude }}" 
                            target="_blank"
-                           class="flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-colors">
-                            <svg class="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
-                            </svg>
-                            <span class="font-medium text-base">{{ $setting->location_name ?? 'Desa Pematang Duku Timur' }}</span>
+                           class="flex items-center justify-center lg:justify-start gap-2 text-gray-700 hover:text-blue-600 transition-colors mt-2">
+                            <div class="bg-red-50 p-2 rounded-full text-red-600">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                            <span class="font-medium text-sm sm:text-base">{{ $setting->location_name ?? 'Desa Pematang Duku Timur' }}</span>
                         </a>
                         @endif
                     </div>
 
                     <!-- Right Side: Product Information -->
-                    <div class="lg:w-7/12 flex flex-col">
+                    <div class="lg:w-7/12 flex flex-col w-full mt-4 lg:mt-0">
                         <!-- Product Name -->
-                        <h2 class="text-3xl font-bold text-gray-800 mb-4">{{ $item->jenis_gas }}</h2>
+                        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-5 leading-tight text-center lg:text-left">{{ $item->jenis_gas }}</h2>
 
                         <!-- Description -->
-                        <p class="text-gray-600 text-justify mb-6 leading-relaxed text-sm">
+                        <p class="text-gray-600 text-justify mb-8 leading-relaxed text-sm md:text-base">
                             {{ $item->deskripsi }}
                         </p>
 
                         <!-- Product Details Grid -->
-                        <div class="space-y-2 mb-6">
+                        <div class="mb-8 border-y border-gray-100 py-6 space-y-4">
                             <!-- Stock -->
                             <div class="flex justify-between items-center">
-                                <span class="text-gray-600 font-medium text-sm">Stok Tersedia</span>
-                                <span class="text-gray-800 font-semibold text-sm">{{ $item->stok }} {{ $item->satuan }}</span>
+                                <span class="text-gray-500 font-medium text-sm">Stok Tersedia</span>
+                                <span class="text-gray-900 font-semibold text-base">{{ $item->stok }} {{ $item->satuan }}</span>
                             </div>
 
                             <!-- Status -->
                             <div class="flex justify-between items-center">
-                                <span class="text-gray-600 font-medium text-sm">Status</span>
+                                <span class="text-gray-500 font-medium text-sm">Status</span>
                                 <span class="px-3 py-1 rounded-full text-xs font-semibold 
-                                    {{ $item->status == 'tersedia' ? 'bg-green-100 text-green-700' : 
-                                       ($item->status == 'dipesan' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700') }}">
+                                    {{ $item->status == 'tersedia' ? 'bg-green-50 text-green-700' : 
+                                       ($item->status == 'dipesan' ? 'bg-yellow-50 text-yellow-700' : 'bg-red-50 text-red-700') }}">
                                     {{ ucfirst($item->status) }}
                                 </span>
                             </div>
 
                             <!-- Category -->
                             <div class="flex justify-between items-center">
-                                <span class="text-gray-600 font-medium text-sm">Kategori</span>
-                                <span class="text-gray-800 font-semibold text-sm">{{ $item->kategori }}</span>
+                                <span class="text-gray-500 font-medium text-sm">Kategori</span>
+                                <span class="text-gray-900 font-semibold text-base">{{ $item->kategori }}</span>
                             </div>
                         </div>
 
                         <!-- Price -->
-                        <div class="mb-6">
-                            <p class="text-3xl font-bold text-red-600">Rp. {{ number_format($item->harga_satuan, 0, ',', '.') }}</p>
+                        <div class="mb-8 text-left">
+                            <p class="text-sm text-gray-500 mb-1">Harga Satuan</p>
+                            <p class="text-3xl font-bold text-gray-800">Rp {{ number_format($item->harga_satuan, 0, ',', '.') }}</p>
                         </div>
 
-                        <!-- Quantity Selector + Order Button - SIDE BY SIDE -->
-                        <div class="flex items-center gap-4 mt-auto">
+                        <!-- Quantity Selector + Order Button -->
+                        <div class="flex flex-wrap items-center gap-4 mt-auto">
                             <!-- Quantity Selector -->
-                            <div class="flex items-center gap-3 border-2 border-gray-300 rounded-full px-4 py-2">
+                            <div class="flex items-center gap-4 border border-gray-300 bg-white rounded-xl px-4 py-2.5">
                                 <button type="button" 
-                                        id="decrease-qty"
-                                        class="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-gray-800 transition-colors">
+                                        onclick="let q = document.getElementById('quantity'); let v = parseInt(q.value) || 1; if(v > 1) q.value = v - 1;"
+                                        class="w-8 h-8 flex items-center justify-center rounded text-gray-500 hover:text-blue-600 hover:bg-blue-50 transition-colors">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
                                     </svg>
@@ -176,11 +131,11 @@
                                        value="1" 
                                        min="1" 
                                        max="{{ $item->stok }}"
-                                       class="w-12 text-center text-lg font-semibold border-0 focus:outline-none focus:ring-0">
+                                       class="w-12 text-center text-lg font-semibold border-0 focus:outline-none focus:ring-0 p-0 bg-transparent text-gray-900">
                                 
                                 <button type="button" 
-                                        id="increase-qty"
-                                        class="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-gray-800 transition-colors">
+                                        onclick="let q = document.getElementById('quantity'); let v = parseInt(q.value) || 1; let max = {{ $item->stok ?? 0 }}; if(v < max) q.value = v + 1;"
+                                        class="w-8 h-8 flex items-center justify-center rounded text-gray-500 hover:text-blue-600 hover:bg-blue-50 transition-colors">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                     </svg>
@@ -189,8 +144,8 @@
 
                             <!-- Order Button -->
                             <button type="button" 
-                                    id="order-btn"
-                                    class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-full transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                                    onclick="window.location.href='{{ route('gas.booking', ['id' => $item->id]) }}?quantity=' + (document.getElementById('quantity').value || 1)"
+                                    class="flex-1 min-w-[200px] bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 text-base shadow-sm">
                                 Pesan
                             </button>
                         </div>
@@ -254,28 +209,11 @@
 
 @push('scripts')
 <script>
-    // Quantity Selector
+(() => {
+    // Prevent manual input outside range
     const qtyInput = document.getElementById('quantity');
-    const decreaseBtn = document.getElementById('decrease-qty');
-    const increaseBtn = document.getElementById('increase-qty');
-    const maxStock = {{ $item->stok }};
-
-    if (qtyInput && decreaseBtn && increaseBtn) {
-        decreaseBtn.addEventListener('click', () => {
-            let currentValue = parseInt(qtyInput.value) || 1;
-            if (currentValue > 1) {
-                qtyInput.value = currentValue - 1;
-            }
-        });
-
-        increaseBtn.addEventListener('click', () => {
-            let currentValue = parseInt(qtyInput.value) || 1;
-            if (currentValue < maxStock) {
-                qtyInput.value = currentValue + 1;
-            }
-        });
-
-        // Prevent manual input outside range
+    const maxStock = {{ $item->stok ?? 0 }};
+    if (qtyInput) {
         qtyInput.addEventListener('change', () => {
             let value = parseInt(qtyInput.value) || 1;
             if (value < 1) qtyInput.value = 1;
@@ -365,17 +303,134 @@
         }
     }
 
-    // Order Button - Redirect to Booking Page
-    const orderBtn = document.getElementById('order-btn');
-    if (orderBtn && qtyInput) {
-        orderBtn.addEventListener('click', () => {
-            const quantity = qtyInput.value || 1;
-            window.location.href = '{{ route("gas.booking", ["id" => $item->id]) }}?quantity=' + quantity;
-        });
-    }
+    // Order logic is now handled via inline onclick in the button html
 
     // Smooth scroll to top on page load
     window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // Animated Canvas Background
+    const initCanvas = () => {
+        const canvas = document.getElementById('gas-canvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+
+        let width, height;
+        let mouse = { x: -1000, y: -1000 };
+        let targetMouse = { x: -1000, y: -1000 };
+
+        function resize() {
+            if (width !== window.innerWidth || height !== window.innerHeight) {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                canvas.width = width;
+                canvas.height = height;
+                initWaves();
+            }
+        }
+
+        window.addEventListener('resize', resize);
+        window.addEventListener('mousemove', (e) => { targetMouse.x = e.clientX; targetMouse.y = e.clientY; });
+        window.addEventListener('mouseout', () => { targetMouse.x = -1000; targetMouse.y = -1000; });
+
+        let scrollY = window.scrollY;
+        window.addEventListener('scroll', () => { scrollY = window.scrollY; });
+
+        class Wave {
+            constructor(getGradient, yOffset, amplitude, speed, wavelength) {
+                this.getGradient = getGradient;
+                this.yOffset = yOffset; this.amplitude = amplitude;
+                this.speed = speed; this.wavelength = wavelength;
+                this.points = []; this.time = Math.random() * 100;
+            }
+            init() {
+                this.points = [];
+                let n = Math.ceil(width / 25) + 2;
+                for (let i = 0; i < n; i++) {
+                    let x = (i - 1) * 25;
+                    let baseY = height * this.yOffset;
+                    this.points.push({ x, baseY, y: baseY + Math.sin(this.time + x / this.wavelength) * this.amplitude, vy: 0, spring: 0.05, friction: 0.90 });
+                }
+            }
+            update() {
+                this.time += this.speed;
+                for (let p of this.points) {
+                    let tY = p.baseY + Math.sin(this.time + p.x / this.wavelength) * this.amplitude;
+                    let dx = mouse.x - p.x, dy = mouse.y - tY;
+                    let dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < 200) { let f = Math.pow((200 - dist) / 200, 2); tY += (dy > 0 ? -1 : 1) * f * 60; }
+                    p.vy += (tY - p.y) * p.spring; p.vy *= p.friction; p.y += p.vy;
+                }
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.moveTo(this.points[0].x, this.points[0].y);
+                for (let i = 0; i < this.points.length - 1; i++) {
+                    let cx = (this.points[i].x + this.points[i+1].x) / 2;
+                    let cy = (this.points[i].y + this.points[i+1].y) / 2;
+                    ctx.quadraticCurveTo(this.points[i].x, this.points[i].y, cx, cy);
+                }
+                let last = this.points[this.points.length - 1];
+                ctx.lineTo(last.x, last.y);
+                ctx.lineTo(width, height * 2 + scrollY);
+                ctx.lineTo(0, height * 2 + scrollY);
+                ctx.closePath();
+                ctx.fillStyle = this.getGradient(ctx, width, height);
+                ctx.fill();
+            }
+        }
+
+        let waves = [];
+        function initWaves() {
+            waves = [
+                new Wave((ctx,w,h) => { let g = ctx.createLinearGradient(0,h*.5,0,h*1.2); g.addColorStop(0,'rgba(140,190,250,0.7)'); g.addColorStop(1,'rgba(180,215,255,0.1)'); return g; }, 0.65, 40, 0.005, 600),
+                new Wave((ctx,w,h) => { let g = ctx.createLinearGradient(0,h*.6,0,h*1.2); g.addColorStop(0,'rgba(255,255,255,1)'); g.addColorStop(1,'rgba(245,250,255,0.5)'); return g; }, 0.75, 30, 0.003, 500),
+                new Wave((ctx,w,h) => { let g = ctx.createLinearGradient(0,h*.7,0,h*1.1); g.addColorStop(0,'rgba(245,225,130,0.5)'); g.addColorStop(1,'rgba(255,255,255,0)'); return g; }, 0.85, 45, 0.007, 700),
+            ];
+            waves.forEach(w => w.init());
+        }
+
+        function animate() {
+            mouse.x += (targetMouse.x - mouse.x) * 0.1;
+            mouse.y += (targetMouse.y - mouse.y) * 0.1;
+
+            ctx.fillStyle = '#e8eff5';
+            ctx.fillRect(0, 0, width, height);
+            ctx.save();
+            ctx.translate(0, -scrollY * 0.4);
+
+            let gx = width * 0.15, gy = height * 0.4;
+            let grad = ctx.createRadialGradient(gx, gy, 0, gx, gy, width * 0.3);
+            grad.addColorStop(0, 'rgba(245,235,150,0.15)');
+            grad.addColorStop(1, 'rgba(245,235,150,0)');
+            ctx.fillStyle = grad;
+            ctx.beginPath(); ctx.arc(gx, gy, width * 0.3, 0, Math.PI * 2); ctx.fill();
+
+            waves.forEach(w => { w.update(); w.draw(); });
+
+            ctx.save();
+            ctx.translate(width * 0.9, height * 0.08);
+            let dxD = mouse.x - width * 0.9, dyD = mouse.y - height * 0.08;
+            let distD = Math.sqrt(dxD*dxD + dyD*dyD);
+            if (distD < 300) { let f = (300-distD)/300; ctx.translate(-dxD/distD*f*20, -dyD/distD*f*20); }
+            ctx.rotate(Math.PI / 4);
+            ctx.fillStyle = 'rgba(74,144,226,0.4)'; ctx.fillRect(-15,-15,30,30);
+            ctx.fillStyle = 'rgba(120,175,240,0.3)'; ctx.fillRect(5,5,25,25);
+            ctx.restore();
+            ctx.restore();
+
+            requestAnimationFrame(animate);
+        }
+
+        resize();
+        animate();
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initCanvas);
+    } else {
+        initCanvas();
+    }
+})();
 </script>
 @endpush
 ```
