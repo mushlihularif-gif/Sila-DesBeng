@@ -129,15 +129,7 @@
                                             Perempuan</option>
                                     </select>
                                 </div>
-                                <div class="col-md-6">
-                                    <label for="position" class="form-label fw-semibold">
-                                        <i class="bx bx-briefcase me-1"></i>Jabatan
-                                    </label>
-                                    <input type="text" class="form-control form-control-lg" id="position" name="position"
-                                        value="{{ old('position', $user->position ?? '') }}" 
-                                        placeholder="Contoh: Direktur BUMDES" />
-                                    <small class="text-muted">Anda dapat mengubah jabatan sesuai posisi Anda</small>
-                                </div>
+                                <input type="hidden" id="deleteAvatarInput" name="delete_avatar" value="0">
                             </div>
                             <div class="mt-4 d-flex gap-2">
                                 <button type="submit" class="btn btn-primary btn-lg">

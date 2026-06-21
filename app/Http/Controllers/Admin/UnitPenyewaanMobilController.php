@@ -43,11 +43,21 @@ class UnitPenyewaanMobilController extends Controller
             'foto_utama' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
             'foto_2' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
             'foto_3' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
+            'harga_dalam_desa' => 'required|string',
+            'batas_km_dalam_desa' => 'required|integer',
+            'harga_luar_desa' => 'required|string',
+            'batas_km_luar_desa' => 'required|integer',
+            'harga_luar_kota' => 'required|string',
+            'bbm_ditanggung' => 'required|string|in:Pemerintah Desa,Penyewa',
         ]);
 
         $hargaBersih = (int) preg_replace('/[^0-9]/', '', $request->harga_sewa);
-        if ($hargaBersih <= 0) {
-            return back()->withErrors(['harga_sewa' => 'Harga sewa harus angka valid dan lebih dari 0.'])->withInput();
+        $hargaDalamDesa = (int) preg_replace('/[^0-9]/', '', $request->harga_dalam_desa);
+        $hargaLuarDesa = (int) preg_replace('/[^0-9]/', '', $request->harga_luar_desa);
+        $hargaLuarKota = (int) preg_replace('/[^0-9]/', '', $request->harga_luar_kota);
+
+        if ($hargaDalamDesa <= 0) {
+            return back()->withErrors(['harga_dalam_desa' => 'Harga sewa harus angka valid dan lebih dari 0.'])->withInput();
         }
 
         $data = [
@@ -59,6 +69,12 @@ class UnitPenyewaanMobilController extends Controller
             'kategori' => $request->kategori,
             'lokasi' => $request->lokasi,
             'satuan' => $request->satuan,
+            'harga_dalam_desa' => $hargaDalamDesa,
+            'batas_km_dalam_desa' => $request->batas_km_dalam_desa,
+            'harga_luar_desa' => $hargaLuarDesa,
+            'batas_km_luar_desa' => $request->batas_km_luar_desa,
+            'harga_luar_kota' => $hargaLuarKota,
+            'bbm_ditanggung' => $request->bbm_ditanggung,
         ];
 
         if ($request->hasFile('foto_utama')) { 
@@ -115,11 +131,21 @@ class UnitPenyewaanMobilController extends Controller
             'foto_utama' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'foto_2' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'foto_3' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'harga_dalam_desa' => 'required|string',
+            'batas_km_dalam_desa' => 'required|integer',
+            'harga_luar_desa' => 'required|string',
+            'batas_km_luar_desa' => 'required|integer',
+            'harga_luar_kota' => 'required|string',
+            'bbm_ditanggung' => 'required|string|in:Pemerintah Desa,Penyewa',
         ]);
 
         $hargaBersih = (int) preg_replace('/[^0-9]/', '', $request->harga_sewa);
-        if ($hargaBersih <= 0) {
-            return back()->withErrors(['harga_sewa' => 'Harga sewa harus angka valid dan lebih dari 0.'])->withInput();
+        $hargaDalamDesa = (int) preg_replace('/[^0-9]/', '', $request->harga_dalam_desa);
+        $hargaLuarDesa = (int) preg_replace('/[^0-9]/', '', $request->harga_luar_desa);
+        $hargaLuarKota = (int) preg_replace('/[^0-9]/', '', $request->harga_luar_kota);
+
+        if ($hargaDalamDesa <= 0) {
+            return back()->withErrors(['harga_dalam_desa' => 'Harga sewa harus angka valid dan lebih dari 0.'])->withInput();
         }
 
         $mobil = Mobil::findOrFail($id);
@@ -133,6 +159,12 @@ class UnitPenyewaanMobilController extends Controller
             'kategori' => $request->kategori,
             'lokasi' => $request->lokasi,
             'satuan' => $request->satuan,
+            'harga_dalam_desa' => $hargaDalamDesa,
+            'batas_km_dalam_desa' => $request->batas_km_dalam_desa,
+            'harga_luar_desa' => $hargaLuarDesa,
+            'batas_km_luar_desa' => $request->batas_km_luar_desa,
+            'harga_luar_kota' => $hargaLuarKota,
+            'bbm_ditanggung' => $request->bbm_ditanggung,
         ];
 
         if ($request->hasFile('foto_utama')) {

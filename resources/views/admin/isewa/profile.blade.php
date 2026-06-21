@@ -87,10 +87,10 @@
 
                 <div class="hero-paragraphs">
                     <p>
-                        SiladesBeng merupakan platform digital terpadu yang dirancang untuk mendukung kegiatan operasional dan pelayanan BUMDes secara modern dan efisien. Sistem ini hadir sebagai solusi inovatif untuk mengelola berbagai unit usaha desa, seperti penyewaan alat dan layanan pembelian gas.
+                        SiladesBeng merupakan platform digital terpadu yang dirancang untuk mendukung kegiatan operasional dan pelayanan Pemerintahan Desa secara modern dan efisien. Sistem ini hadir sebagai solusi inovatif untuk mengelola berbagai unit usaha desa, seperti penyewaan alat dan layanan pembelian gas.
                     </p>
                     <p>
-                        Melalui SiladesBeng, proses administrasi dan transaksi menjadi lebih cepat, transparan, dan mudah dijangkau oleh masyarakat desa. Dengan berbasis sistem terintegrasi, seluruh data penyewaan, transaksi, dan laporan dapat dikelola secara otomatis dan terdokumentasi dengan baik. Dengan mengedepankan kemudahan akses dan efisiensi layanan, SiladesBeng membantu BUMDes dalam meningkatkan produktivitas, serta memperkuat perekonomian desa secara berkelanjutan.
+                        Melalui SiladesBeng, proses administrasi dan transaksi menjadi lebih cepat, transparan, dan mudah dijangkau oleh masyarakat desa. Dengan berbasis sistem terintegrasi, seluruh data penyewaan, transaksi, dan laporan dapat dikelola secara otomatis dan terdokumentasi dengan baik. Dengan mengedepankan kemudahan akses dan efisiensi layanan, SiladesBeng membantu Pemerintah Desa dalam meningkatkan produktivitas, serta memperkuat perekonomian desa secara berkelanjutan.
                     </p>
                 </div>
             </div>
@@ -199,7 +199,7 @@
                         </div>
                     </div>
                     <h4 style="font-weight: 700; color: #1f2937; margin-bottom: 0.5rem; font-size: 1.1rem;">Pelaporan dan Monitoring</h4>
-                    <p style="color: #6b7280; font-size: 0.95rem; line-height: 1.5;">Menyediakan laporan penyewaan, transaksi, dan keuangan yang dapat diakses oleh BUMDes dan Pemerintah Desa</p>
+                    <p style="color: #6b7280; font-size: 0.95rem; line-height: 1.5;">Menyediakan laporan penyewaan, transaksi, dan keuangan yang dapat diakses oleh aparatur Pemerintah Desa</p>
                 </div>
 
             </div>

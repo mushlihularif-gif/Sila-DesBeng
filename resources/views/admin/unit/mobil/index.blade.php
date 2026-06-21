@@ -52,8 +52,8 @@
                                 <h5 class="card-title">{{ $mobil->nama_mobil }}</h5>
                                 <p class="card-text">{{ Str::limit($mobil->deskripsi, 100) }}</p>
                                 <div class="d-flex justify-content-between align-items-center">
-                                    <span class="badge bg-primary">Rp.
-                                        {{ number_format($mobil->harga_sewa, 0, ',', '.') }}</span>
+                                    <span class="badge bg-primary">Mulai Rp.
+                                        {{ number_format($mobil->harga_dalam_desa ?? 0, 0, ',', '.') }}</span>
                                     <span class="badge bg-success">{{ $mobil->stok }} {{ $mobil->satuan }}</span>
                                 </div>
                                 <div class="mt-3 d-flex gap-2">

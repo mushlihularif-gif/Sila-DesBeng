@@ -20,11 +20,20 @@ class Mobil extends Model
         'foto_3',
         'lokasi',
         'satuan',
-        'region_id'
+        'region_id',
+        'harga_dalam_desa',
+        'batas_km_dalam_desa',
+        'harga_luar_desa',
+        'batas_km_luar_desa',
+        'harga_luar_kota',
+        'bbm_ditanggung'
     ];
 
     protected $casts = [
         'harga_sewa' => 'decimal:2',
+        'harga_dalam_desa' => 'decimal:2',
+        'harga_luar_desa' => 'decimal:2',
+        'harga_luar_kota' => 'decimal:2',
     ];
 
     public function bookings()

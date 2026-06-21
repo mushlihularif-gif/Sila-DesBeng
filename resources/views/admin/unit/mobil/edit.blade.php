@@ -89,31 +89,94 @@
                                 </div>
                             </div>
 
-                            <!-- Section: Harga & Stok -->
+                            <!-- Section: Harga & Jarak (Sistem Zona Borongan) -->
                             <div class="form-section mb-4">
                                 <h6 class="section-title mb-3">
-                                    <i class='bx bx-money me-2'></i>Harga & Stok
+                                    <i class='bx bx-money me-2'></i>Pengaturan Harga Berdasarkan Zona Jarak
                                 </h6>
+                                <p class="text-muted small mb-3">Tentukan harga borongan (paket sewa) berdasarkan jarak tempuh tujuan penyewa. Biarkan batas Km tetap 0 jika tidak ada batasan.</p>
+                                
+                                <div class="row g-3 mb-4">
+                                    <!-- Dalam Desa -->
+                                    <div class="col-md-4">
+                                        <div class="p-3 border rounded bg-white">
+                                            <label class="form-label fw-bold text-primary"><i class="bx bx-home me-1"></i>Zona 1: Dalam Desa</label>
+                                            <div class="mb-2">
+                                                <small class="text-muted d-block mb-1">Maksimal Jarak (Km)</small>
+                                                <div class="input-group input-group-sm">
+                                                    <input type="number" class="form-control" name="batas_km_dalam_desa" value="{{ old('batas_km_dalam_desa', $mobil->batas_km_dalam_desa ?? 5) }}" required>
+                                                    <span class="input-group-text">Km</span>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <small class="text-muted d-block mb-1">Harga Sewa</small>
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text">Rp</span>
+                                                    <input type="text" class="form-control" name="harga_dalam_desa" value="{{ old('harga_dalam_desa', isset($mobil->harga_dalam_desa) ? number_format($mobil->harga_dalam_desa, 0, ',', '.') : '100.000') }}" required oninput="formatRupiah(this)">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Luar Desa -->
+                                    <div class="col-md-4">
+                                        <div class="p-3 border rounded bg-white">
+                                            <label class="form-label fw-bold text-warning"><i class="bx bx-map me-1"></i>Zona 2: Luar Desa</label>
+                                            <div class="mb-2">
+                                                <small class="text-muted d-block mb-1">Maksimal Jarak (Km)</small>
+                                                <div class="input-group input-group-sm">
+                                                    <input type="number" class="form-control" name="batas_km_luar_desa" value="{{ old('batas_km_luar_desa', $mobil->batas_km_luar_desa ?? 50) }}" required>
+                                                    <span class="input-group-text">Km</span>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <small class="text-muted d-block mb-1">Harga Sewa</small>
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text">Rp</span>
+                                                    <input type="text" class="form-control" name="harga_luar_desa" value="{{ old('harga_luar_desa', isset($mobil->harga_luar_desa) ? number_format($mobil->harga_luar_desa, 0, ',', '.') : '200.000') }}" required oninput="formatRupiah(this)">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Luar Kota -->
+                                    <div class="col-md-4">
+                                        <div class="p-3 border rounded bg-white">
+                                            <label class="form-label fw-bold text-danger"><i class="bx bx-building-house me-1"></i>Zona 3: Luar Kota</label>
+                                            <div class="mb-2">
+                                                <small class="text-muted d-block mb-1">Syarat Jarak</small>
+                                                <div class="input-group input-group-sm">
+                                                    <input type="text" class="form-control" value="> Batas Luar Desa" readonly disabled>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <small class="text-muted d-block mb-1">Harga Sewa</small>
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text">Rp</span>
+                                                    <input type="text" class="form-control" name="harga_luar_kota" value="{{ old('harga_luar_kota', isset($mobil->harga_luar_kota) ? number_format($mobil->harga_luar_kota, 0, ',', '.') : '400.000') }}" required oninput="formatRupiah(this)">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
                                 <div class="row g-3">
                                     <div class="col-md-4">
-                                        <label class="form-label fw-semibold" for="harga_sewa">
-                                            Harga Sewa (per pakai) <span class="text-danger">*</span>
+                                        <label class="form-label fw-semibold" for="bbm_ditanggung">
+                                            Bahan Bakar (BBM) <span class="text-danger">*</span>
                                         </label>
-                                        <div class="input-group">
-                                            <span class="input-group-text modern-input-addon">Rp</span>
-                                            <input type="text" class="form-control modern-input" id="harga_sewa" 
-                                                   name="harga_sewa" value="{{ old('harga_sewa', number_format($mobil->harga_sewa, 0, ',', '.')) }}" 
-                                                   placeholder="150.000" required oninput="formatRupiah(this)" />
-                                        </div>
-                                        <small class="form-text text-muted">Masukkan angka tanpa titik atau koma</small>
+                                        <select class="form-select modern-input" id="bbm_ditanggung" name="bbm_ditanggung" required>
+                                            <option value="Penyewa" {{ old('bbm_ditanggung', $mobil->bbm_ditanggung ?? '') == 'Penyewa' ? 'selected' : '' }}>Ditanggung Penyewa (Isi Sendiri)</option>
+                                            <option value="Pemerintah Desa" {{ old('bbm_ditanggung', $mobil->bbm_ditanggung ?? '') == 'Pemerintah Desa' ? 'selected' : '' }}>Ditanggung Pemerintah Desa (Gratis BBM)</option>
+                                        </select>
                                     </div>
                                     <div class="col-md-4">
                                         <label class="form-label fw-semibold" for="stok">
-                                            Stok Tersedia <span class="text-danger">*</span>
+                                            Stok Mobil Tersedia <span class="text-danger">*</span>
                                         </label>
                                         <input type="number" class="form-control modern-input" id="stok" 
                                                name="stok" value="{{ old('stok', $mobil->stok) }}" 
-                                               placeholder="10" min="0" required />
+                                               placeholder="1" min="0" required />
                                     </div>
                                     <div class="col-md-4">
                                         <label class="form-label fw-semibold" for="satuan">
@@ -121,15 +184,8 @@
                                         </label>
                                         <div class="input-group">
                                             <select class="form-select modern-input" id="satuan" name="satuan" required>
-                                                <option value="" disabled>Pilih Satuan</option>
-                                                <option value="Unit" {{ old('satuan', $mobil->satuan) == 'Unit' ? 'selected' : '' }}>Unit</option>
-                                                <option value="Paket" {{ old('satuan', $mobil->satuan) == 'Paket' ? 'selected' : '' }}>Paket</option>
-                                                <option value="Set" {{ old('satuan', $mobil->satuan) == 'Set' ? 'selected' : '' }}>Set</option>
+                                                <option value="Unit" selected>Unit</option>
                                             </select>
-                                            <button type="button" class="btn btn-outline-primary modern-btn-outline" 
-                                                    data-bs-toggle="modal" data-bs-target="#addSatuanModal">
-                                                <i class="bx bx-plus"></i>
-                                            </button>
                                         </div>
                                     </div>
                                 </div>
