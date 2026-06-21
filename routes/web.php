@@ -126,6 +126,25 @@ Route::post('/gas/booking', [App\Http\Controllers\User\GasBookingController::cla
     ->name('gas.booking.store')
     ->middleware('auth');
 
+Route::get('/gas/payment/{id}', [App\Http\Controllers\User\GasBookingController::class, 'payment'])
+    ->name('user.gas.payment')
+    ->middleware('auth');
+
+Route::get('/gas/booking/{id}/pending', [App\Http\Controllers\User\GasBookingController::class, 'paymentPending'])
+    ->name('user.gas.payment.pending')
+    ->middleware('auth');
+
+Route::post('/gas/payment/{id}/simulate', [App\Http\Controllers\User\GasBookingController::class, 'simulatePayment'])
+    ->name('user.gas.payment.simulate')
+    ->middleware('auth');
+
+Route::post('/gas/payment/{id}/cancel', [App\Http\Controllers\User\GasBookingController::class, 'cancelPayment'])
+    ->name('user.gas.payment.cancel')
+    ->middleware('auth');
+
+Route::post('/gas/payment/{id}/change-method', [App\Http\Controllers\User\GasBookingController::class, 'changePaymentMethod'])
+    ->name('user.gas.payment.change_method')
+    ->middleware('auth');
 
 Route::get('/aktivitas', [App\Http\Controllers\User\ActivityController::class, 'index'])
     ->name('user.activity')
