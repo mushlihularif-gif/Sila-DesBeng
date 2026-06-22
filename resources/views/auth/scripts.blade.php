@@ -10,8 +10,15 @@
         // ========================================
         // UTILITY FUNCTIONS
         // ========================================
+        function getScrollbarWidth() {
+            return window.innerWidth - document.documentElement.clientWidth;
+        }
+
         function openModal(modal) {
             if (!modal) return;
+
+            const scrollbarWidth = getScrollbarWidth();
+            document.body.style.paddingRight = `${scrollbarWidth}px`;
 
             // 1. Reset semua modal content lain agar hidden
             document.querySelectorAll('.modal-content').forEach(m => {
@@ -58,6 +65,7 @@
                     m.classList.add('hidden');
                 });
                 document.body.style.overflow = ''; // Restore scroll
+                document.body.style.paddingRight = ''; // Restore padding
             }, 300); // Sesuaikan dengan duration-300
         }
 
@@ -406,6 +414,14 @@
                 e.preventDefault();
                 showToast('Silahkan lengkapi 4 digit kode OTP', 'error');
             }
+        });
+
+        // ========================================
+        // LOGIN FORM - LOADING STATE
+        // ========================================
+        document.getElementById('form-login')?.addEventListener('submit', function() {
+            const submitBtn = this.querySelector('button[type="submit"]');
+            if (submitBtn) setButtonLoading(submitBtn, true);
         });
 
         // ========================================

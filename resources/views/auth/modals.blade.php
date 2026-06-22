@@ -32,7 +32,7 @@
             </div>
 
             {{-- Form Login --}}
-            <form action="{{ route('auth.login') }}" method="POST" class="space-y-4">
+            <form id="form-login" action="{{ route('auth.login') }}" method="POST" class="space-y-4">
                 @csrf
                 <div>
                     <input type="text" name="email_or_phone" placeholder="Email / Username / No Telepon" required

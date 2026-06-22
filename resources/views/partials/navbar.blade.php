@@ -41,9 +41,16 @@
         .sd-nav-link {
             font-size: 15px; font-weight: 500; color: #111827;
             text-decoration: none; transition: color 0.2s;
+            display: flex; align-items: center; justify-content: center;
+            height: 100%; position: relative;
         }
         .sd-nav-link:hover { color: #2563eb; }
-        .sd-nav-link.active { border-bottom: 2px solid #3b82f6; padding-bottom: 2px; color: #2563eb; }
+        .sd-nav-link.active { color: #2563eb; }
+        .sd-nav-link.active::after {
+            content: ''; position: absolute; bottom: -4px; left: 0;
+            width: 100%; height: 2px; background-color: #3b82f6;
+            border-radius: 2px;
+        }
         
         .sd-nav-auth { display: flex; align-items: center; gap: 12px; }
         
@@ -89,8 +96,8 @@
         <!-- Menu Desktop -->
         <div class="sd-nav-links">
             <a href="{{ route('beranda') }}" class="sd-nav-link {{ request()->routeIs('beranda') ? 'active' : '' }}">Beranda</a>
-            <div class="relative group">
-                <button class="sd-nav-link flex items-center gap-1 bg-transparent border-none outline-none cursor-pointer pb-1 {{ request()->routeIs('pelayanan') || request()->routeIs('bumdes.profil') || request()->routeIs('bumdes.laporan') ? 'active' : '' }}">
+            <div class="relative group flex items-center">
+                <button class="sd-nav-link gap-1 p-0 bg-transparent border-none outline-none cursor-pointer {{ request()->routeIs('pelayanan') || request()->routeIs('bumdes.profil') || request()->routeIs('bumdes.laporan') ? 'active' : '' }}">
                     Layanan
                     <svg class="w-4 h-4 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                 </button>
@@ -217,31 +224,42 @@
         if (!window.masterNavbarScrollInitialized) {
             window.masterNavbarScrollInitialized = true;
             let lastScrollY = window.scrollY;
+            let ticking = false;
+
             window.addEventListener('scroll', () => {
-                const navbar = document.getElementById('master-navbar');
-                const iconUp = document.getElementById('master-icon-up');
-                const iconDown = document.getElementById('master-icon-down');
-                
-                if (!navbar) return;
-                
-                const currentScrollY = window.scrollY;
-                
-                if (currentScrollY > lastScrollY && currentScrollY > 50) {
-                    // Scroll down: Hide navbar
-                    if (!navbar.classList.contains('hidden-nav')) {
-                        navbar.classList.add('hidden-nav');
-                        if(iconUp) iconUp.style.display = 'none';
-                        if(iconDown) iconDown.style.display = 'block';
-                    }
-                } else if (currentScrollY < lastScrollY) {
-                    // Scroll up: Show navbar
-                    if (navbar.classList.contains('hidden-nav')) {
-                        navbar.classList.remove('hidden-nav');
-                        if(iconUp) iconUp.style.display = 'block';
-                        if(iconDown) iconDown.style.display = 'none';
-                    }
+                if (!ticking) {
+                    window.requestAnimationFrame(() => {
+                        const navbar = document.getElementById('master-navbar');
+                        const iconUp = document.getElementById('master-icon-up');
+                        const iconDown = document.getElementById('master-icon-down');
+                        
+                        if (!navbar) {
+                            ticking = false;
+                            return;
+                        }
+                        
+                        const currentScrollY = window.scrollY;
+                        
+                        if (currentScrollY > lastScrollY && currentScrollY > 50) {
+                            // Scroll down: Hide navbar
+                            if (!navbar.classList.contains('hidden-nav')) {
+                                navbar.classList.add('hidden-nav');
+                                if(iconUp) iconUp.style.display = 'none';
+                                if(iconDown) iconDown.style.display = 'block';
+                            }
+                        } else if (currentScrollY < lastScrollY) {
+                            // Scroll up: Show navbar
+                            if (navbar.classList.contains('hidden-nav')) {
+                                navbar.classList.remove('hidden-nav');
+                                if(iconUp) iconUp.style.display = 'block';
+                                if(iconDown) iconDown.style.display = 'none';
+                            }
+                        }
+                        lastScrollY = currentScrollY;
+                        ticking = false;
+                    });
+                    ticking = true;
                 }
-                lastScrollY = currentScrollY;
             });
         }
     };

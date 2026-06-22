@@ -153,18 +153,33 @@
                 // Efek Scroll Navbar
                 initScrollEffect() {
                     if (!window.userNavbarScrollHandler) {
+                        let ticking = false;
+                        let isScrolled = false;
+                        
                         window.userNavbarScrollHandler = () => {
                             const navbar = document.querySelector('.sd-navbar');
                             if (!navbar) return;
                             
-                            if (window.scrollY > 10) {
-                                navbar.classList.add('scrolled');
-                            } else {
-                                navbar.classList.remove('scrolled');
+                            const shouldBeScrolled = window.scrollY > 10;
+                            if (isScrolled !== shouldBeScrolled) {
+                                if (shouldBeScrolled) {
+                                    navbar.classList.add('scrolled');
+                                } else {
+                                    navbar.classList.remove('scrolled');
+                                }
+                                isScrolled = shouldBeScrolled;
                             }
                         };
 
-                        window.addEventListener('scroll', window.userNavbarScrollHandler);
+                        window.addEventListener('scroll', () => {
+                            if (!ticking) {
+                                window.requestAnimationFrame(() => {
+                                    window.userNavbarScrollHandler();
+                                    ticking = false;
+                                });
+                                ticking = true;
+                            }
+                        });
                         window.addEventListener('resize', window.userNavbarScrollHandler);
                     }
                     

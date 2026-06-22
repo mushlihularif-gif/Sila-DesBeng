@@ -880,23 +880,35 @@
 
                 if (!navbar || !berandaSection) return;
 
+                let cachedNavHeight = navbar.offsetHeight;
+                let lastNavState = null;
+                let lastScrollState = null;
+                let ticking = false;
+
                 const syncHeightAndMargin = () => {
-                    const navHeight = navbar.offsetHeight;
+                    const isHidden = navbar.classList.contains('hidden-nav');
                     
-                    if (navbar.classList.contains('hidden-nav')) {
-                        berandaSection.style.paddingTop = '0px';
-                        if (blurLayer) blurLayer.style.height = '0px';
-                    } else {
-                        berandaSection.style.paddingTop = navHeight + 'px';
-                        if (blurLayer) blurLayer.style.height = navHeight + 'px';
+                    if (lastNavState !== isHidden) {
+                        if (isHidden) {
+                            berandaSection.style.paddingTop = '0px';
+                            if (blurLayer) blurLayer.style.height = '0px';
+                        } else {
+                            berandaSection.style.paddingTop = cachedNavHeight + 'px';
+                            if (blurLayer) blurLayer.style.height = cachedNavHeight + 'px';
+                        }
+                        lastNavState = isHidden;
                     }
                     
                     // Fade out fake blur when scrolled down
                     if (blurLayer) {
-                        if (window.scrollY > 10) {
-                            blurLayer.classList.add('hidden-blur');
-                        } else {
-                            blurLayer.classList.remove('hidden-blur');
+                        const isScrolled = window.scrollY > 10;
+                        if (lastScrollState !== isScrolled) {
+                            if (isScrolled) {
+                                blurLayer.classList.add('hidden-blur');
+                            } else {
+                                blurLayer.classList.remove('hidden-blur');
+                            }
+                            lastScrollState = isScrolled;
                         }
                     }
                 };
@@ -917,7 +929,11 @@
                 }
 
                 syncHeightAndMargin();
-                window.addEventListener('resize', syncHeightAndMargin);
+                window.addEventListener('resize', () => {
+                    cachedNavHeight = navbar.offsetHeight;
+                    lastNavState = null; // force update
+                    syncHeightAndMargin();
+                });
 
                 const masterToggle = document.getElementById('master-navbar-toggle');
                 if (masterToggle) {
@@ -927,7 +943,13 @@
                 }
                 
                 window.addEventListener('scroll', () => {
-                    syncHeightAndMargin();
+                    if (!ticking) {
+                        window.requestAnimationFrame(() => {
+                            syncHeightAndMargin();
+                            ticking = false;
+                        });
+                        ticking = true;
+                    }
                 });
             },
 
