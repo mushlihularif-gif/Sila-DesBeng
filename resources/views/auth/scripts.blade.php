@@ -124,7 +124,11 @@
             else if (type === 'warning') bgClass = 'bg-yellow-500';
             else if (type === 'info') bgClass = 'bg-blue-500';
 
-            toast.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg text-white z-[60] transform transition-all duration-300 translate-x-full ${bgClass}`;
+            toast.className = `px-6 py-3 rounded-lg shadow-lg text-white transform transition-all duration-300 translate-x-full ${bgClass}`;
+            toast.style.position = 'fixed';
+            toast.style.top = '24px';
+            toast.style.right = '30px';
+            toast.style.zIndex = '9999';
             toast.textContent = message;
             document.body.appendChild(toast);
 
