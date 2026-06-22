@@ -93,13 +93,22 @@
                         @foreach($allServices as $service)
                             <div class="col-md-4">
                                 <label class="card border {{ in_array($service->id, $activeServices) ? 'border-primary bg-label-primary' : 'border-secondary' }} h-100 cursor-pointer" style="cursor: pointer;">
-                                    <div class="card-body d-flex align-items-center p-3">
-                                        <div class="form-check mb-0 me-3">
-                                            <input type="checkbox" name="services[]" value="{{ $service->id }}" class="form-check-input" style="width: 1.2em; height: 1.2em;" {{ in_array($service->id, $activeServices) ? 'checked' : '' }}>
+                                    <div class="card-body p-3 d-flex flex-column justify-content-between">
+                                        <div class="d-flex align-items-center w-100">
+                                            <div class="form-check mb-0 me-3">
+                                                <input type="checkbox" name="services[]" value="{{ $service->id }}" class="form-check-input" style="width: 1.2em; height: 1.2em;" {{ in_array($service->id, $activeServices) ? 'checked' : '' }}>
+                                            </div>
+                                            <div>
+                                                <span class="fw-bold d-block text-dark">{{ $service->name }}</span>
+                                                <small class="text-muted">Aktifkan modul {{ strtolower($service->name) }}</small>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <span class="fw-bold d-block text-dark">{{ $service->name }}</span>
-                                            <small class="text-muted">Aktifkan modul {{ strtolower($service->name) }}</small>
+                                        
+                                        <div class="mt-3 pt-2 border-top w-100">
+                                            <div class="form-check form-switch mb-0" onclick="event.stopPropagation();">
+                                                <input class="form-check-input" type="checkbox" name="exclusive_services[]" value="{{ $service->id }}" id="exclusive_{{ $service->id }}" {{ in_array($service->id, $exclusiveServices ?? []) ? 'checked' : '' }}>
+                                                <label class="form-check-label text-muted" style="font-size: 0.8rem;" for="exclusive_{{ $service->id }}">Khusus Warga Lokal</label>
+                                            </div>
                                         </div>
                                     </div>
                                 </label>

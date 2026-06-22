@@ -45,8 +45,9 @@ class RegionSettingController extends Controller
 
         $allServices = Service::all();
         $activeServices = $region->services->pluck('id')->toArray();
+        $exclusiveServices = $region->services->where('pivot.is_exclusive', true)->pluck('id')->toArray();
 
-        return view('admin.region_settings.index', compact('region', 'allServices', 'activeServices'));
+        return view('admin.region_settings.index', compact('region', 'allServices', 'activeServices', 'exclusiveServices'));
     }
 
     public function update(Request $request)
@@ -86,8 +87,12 @@ class RegionSettingController extends Controller
         // Sync services
         $syncData = [];
         if ($request->has('services')) {
+            $exclusives = $request->input('exclusive_services', []);
             foreach ($request->services as $serviceId) {
-                $syncData[$serviceId] = ['is_active' => true];
+                $syncData[$serviceId] = [
+                    'is_active' => true,
+                    'is_exclusive' => in_array($serviceId, $exclusives)
+                ];
             }
         }
         $region->services()->sync($syncData);

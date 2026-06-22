@@ -253,11 +253,22 @@ class BerandaController extends Controller
                                            ->get();
                                            
         // Get Recent Announcements
-        $recentAnnouncements = \App\Models\Announcement::with(['region'])
+        $announcementQuery = \App\Models\Announcement::with(['region'])
             ->where('is_active', true)
-            ->orderBy('created_at', 'desc')
-            ->take(3)
-            ->get();
+            ->orderBy('created_at', 'desc');
+
+        if (auth()->check() && auth()->user()->region_id) {
+            $userRegionId = auth()->user()->region_id;
+            $ancestorIds = \App\Models\Region::getAncestorIds($userRegionId);
+            $relevantRegionIds = array_merge([$userRegionId], $ancestorIds);
+            
+            $announcementQuery->where(function($q) use ($relevantRegionIds) {
+                $q->whereIn('region_id', $relevantRegionIds)
+                  ->orWhereNull('region_id');
+            });
+        }
+
+        $recentAnnouncements = $announcementQuery->take(3)->get();
         
         // Ambil Active Services jika user login dan punya region
         $activeServices = [];

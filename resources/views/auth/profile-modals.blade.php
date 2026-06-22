@@ -6,7 +6,7 @@
 ======================================== --}}
 
 {{-- Modal Overlay --}}
-<div id="profile-modal-overlay" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden opacity-0 transition-opacity duration-300">
+<div id="profile-modal-overlay" class="fixed inset-0 bg-black/40 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300" style="z-index: 9999;">
     <div class="flex items-center justify-center min-h-screen p-4">
 
         {{-- ================================
