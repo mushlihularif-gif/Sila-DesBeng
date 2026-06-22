@@ -14,7 +14,7 @@
             padding: 0 !important; transition: background-color 0.3s, backdrop-filter 0.3s, transform 0.3s ease-in-out;
         }
         .sd-navbar.scrolled {
-            background: rgba(255, 255, 255, 0.85) !important;
+            background: rgba(255, 255, 255, 0.2) !important;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
         }
         .sd-navbar.hidden-nav {
