@@ -912,7 +912,15 @@
                     window.syncNavbarBlurImage = (slideIndex) => {
                         const slideContainers = document.querySelectorAll('.carousel-slide');
                         if(slideContainers[slideIndex]) {
-                            const img = slideContainers[slideIndex].querySelector('img');
+                            const desktopImg = slideContainers[slideIndex].querySelector('img.md\\:block, img.hidden.md\\:block');
+                            const mobileImg = slideContainers[slideIndex].querySelector('img.md\\:hidden, img.block.md\\:hidden');
+                            
+                            let img = slideContainers[slideIndex].querySelector('img');
+                            
+                            if (desktopImg && mobileImg) {
+                                img = window.innerWidth >= 768 ? desktopImg : mobileImg;
+                            }
+                            
                             if (img) {
                                 const imgSrc = img.getAttribute('src');
                                 blurLayer.style.backgroundImage = `url('${imgSrc}')`;
