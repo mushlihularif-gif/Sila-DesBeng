@@ -113,7 +113,7 @@ class GasOrder extends Model
      */
     public function canBeCancelled()
     {
-        return !in_array($this->status, ['completed', 'cancelled']) && !$this->hasCancellationRequest();
+        return $this->status === 'pending' && !$this->hasCancellationRequest();
     }
     /**
      * Get the badge class for the status.

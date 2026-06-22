@@ -73,6 +73,9 @@ class SystemSettingController extends Controller
             'bank_name' => 'nullable|string|max:255',
             'bank_account_number' => 'nullable|string|max:255',
             'bank_account_holder' => 'nullable|string|max:255',
+            'ewallet_name' => 'nullable|string|max:255',
+            'ewallet_number' => 'nullable|string|max:255',
+            'ewallet_account_holder' => 'nullable|string|max:255',
             'card_background_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'card_background_type' => 'nullable|in:gradient,image',
             'card_gradient_style' => 'nullable|string|max:50',
@@ -95,6 +98,9 @@ class SystemSettingController extends Controller
         $setting->bank_name = $request->input('bank_name');
         $setting->bank_account_number = $request->input('bank_account_number');
         $setting->bank_account_holder = $request->input('bank_account_holder');
+        $setting->ewallet_name = $request->input('ewallet_name');
+        $setting->ewallet_number = $request->input('ewallet_number');
+        $setting->ewallet_account_holder = $request->input('ewallet_account_holder');
         $setting->card_background_type = $request->input('card_background_type', 'gradient');
         $setting->card_gradient_style = $request->input('card_gradient_style', 'blue');
         $setting->cash_payment_description = $request->input('cash_payment_description');

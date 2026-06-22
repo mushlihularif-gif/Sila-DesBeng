@@ -17,6 +17,9 @@ class SystemSetting extends Model
         'bank_name',
         'bank_account_number',
         'bank_account_holder',
+        'ewallet_name',
+        'ewallet_number',
+        'ewallet_account_holder',
         'payment_methods',
         'card_background_image',
         'card_background_type',
@@ -31,5 +34,7 @@ class SystemSetting extends Model
         'payment_methods' => 'array',
         'bank_account_number' => 'encrypted',
         'bank_account_holder' => 'encrypted',
+        'ewallet_number' => 'encrypted',
+        'ewallet_account_holder' => 'encrypted',
     ];
 }

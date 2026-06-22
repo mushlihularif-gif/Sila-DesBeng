@@ -26,6 +26,10 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Global rate limiting for all web routes (Skenario 21: DoS defense)
         // $middleware->throttleWithRedis = false; // Use default cache
+
+        $middleware->validateCsrfTokens(except: [
+            'payment/callback',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

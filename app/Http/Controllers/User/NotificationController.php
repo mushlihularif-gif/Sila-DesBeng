@@ -13,7 +13,7 @@ class NotificationController extends Controller
         // Ambil semua notifikasi untuk pengguna yang diautentikasi, diurutkan dari yang terbaru
         $notifications = Notification::where('user_id', auth()->id())
             ->orWhereNull('user_id') // Sertakan notifikasi siaran
-            ->with(['admin', 'user'])
+            ->with('user')
             ->orderByDesc('created_at')
             ->get();
 

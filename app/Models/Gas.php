@@ -23,6 +23,7 @@ class Gas extends Model
         'foto_3',
         'lokasi',
         'satuan', // Tambahkan jika ingin seperti penyewaan
+        'region_id',
     ];
 
     protected $casts = [

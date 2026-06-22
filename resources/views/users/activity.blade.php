@@ -69,6 +69,7 @@
                 </div>
             </div>
 
+<<<<<<< HEAD
             <!-- Clear History Buttons (Moved to Top) -->
             <div class="flex justify-center mt-4 mb-8">
                 <button type="button" 
@@ -102,12 +103,20 @@
                         data-type="laporan">
                     <i class="fas fa-trash-alt mr-2"></i>Bersihkan Riwayat Laporan Warga
                 </button>
+=======
+            <div class="flex flex-wrap justify-center gap-2 lg:gap-3 mt-2 mb-6" id="status-filters">
+                <button class="filter-btn active bg-blue-50 text-blue-700 border border-blue-500 px-4 py-1.5 rounded-lg font-bold shadow-md transition-all text-sm" data-filter="all">Semua</button>
+                <button class="filter-btn bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-900 px-4 py-1.5 rounded-lg font-semibold transition-all text-sm shadow-sm" data-filter="pending">Menunggu</button>
+                <button class="filter-btn bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-900 px-4 py-1.5 rounded-lg font-semibold transition-all text-sm shadow-sm" data-filter="confirmed">Dikonfirmasi</button>
+                <button class="filter-btn bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-900 px-4 py-1.5 rounded-lg font-semibold transition-all text-sm shadow-sm" data-filter="completed">Selesai</button>
+                <button class="filter-btn bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-900 px-4 py-1.5 rounded-lg font-semibold transition-all text-sm shadow-sm" data-filter="cancelled">Batal</button>
+>>>>>>> b542fba61b53895ab5bd75255171e712c75e209e
             </div>
 
             <!-- Bagian Pesanan Sewa -->
             <div id="rental-section" class="activity-section space-y-6">
                 @forelse($rentalBookings as $booking)
-                <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+                <div class="transaction-card bg-white rounded-2xl shadow-lg overflow-hidden" data-status="{{ $booking->status }}">
                     <!-- Konten Kartu Utama -->
                     <div class="p-6">
                         <div class="flex gap-6">
@@ -159,7 +168,7 @@
                                         $statusConfig = [
                                             'completed' => ['text' => 'Selesai', 'color' => 'text-green-600', 'dot' => 'bg-green-600'],
                                             'resolved' => ['text' => 'Selesai', 'color' => 'text-green-600', 'dot' => 'bg-green-600'],
-                                            'pending' => ['text' => 'Di Proses', 'color' => 'text-yellow-600', 'dot' => 'bg-yellow-600'],
+                                            'pending' => ['text' => 'Menunggu Konfirmasi', 'color' => 'text-yellow-600', 'dot' => 'bg-yellow-600'],
                                             'paid' => ['text' => 'Sudah Bayar', 'color' => 'text-blue-600', 'dot' => 'bg-blue-600'],
                                             'confirmed' => ['text' => 'Dikonfirmasi', 'color' => 'text-blue-600', 'dot' => 'bg-blue-600'],
                                             'approved' => ['text' => 'Disetujui', 'color' => 'text-blue-600', 'dot' => 'bg-blue-600'],
@@ -426,7 +435,7 @@
             <!-- Gas Orders Section -->
             <div id="gas-section" class="activity-section space-y-6 hidden">
                 @forelse($gasOrders as $order)
-                <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+                <div class="transaction-card bg-white rounded-2xl shadow-lg overflow-hidden" data-status="{{ $order->status }}">
                     <!-- Main Card Content -->
                     <div class="p-6">
                         <div class="flex flex-col sm:flex-row gap-6">
@@ -478,7 +487,7 @@
                                         $statusConfig = [
                                             'completed' => ['text' => 'Selesai', 'color' => 'text-green-600', 'dot' => 'bg-green-600'],
                                             'resolved' => ['text' => 'Selesai', 'color' => 'text-green-600', 'dot' => 'bg-green-600'],
-                                            'pending' => ['text' => 'Di Proses', 'color' => 'text-yellow-600', 'dot' => 'bg-yellow-600'],
+                                            'pending' => ['text' => 'Menunggu Konfirmasi', 'color' => 'text-yellow-600', 'dot' => 'bg-yellow-600'],
                                             'paid' => ['text' => 'Sudah Bayar', 'color' => 'text-blue-600', 'dot' => 'bg-blue-600'],
                                             'confirmed' => ['text' => 'Dikonfirmasi', 'color' => 'text-blue-600', 'dot' => 'bg-blue-600'],
                                             'approved' => ['text' => 'Disetujui', 'color' => 'text-blue-600', 'dot' => 'bg-blue-600'],
@@ -606,6 +615,7 @@
                                                 </svg>
                                                 Lihat Bukti
                                             </a>
+                                            @if($order->status !== 'pending')
                                             <a href="{{ route('receipt.gas.download', $order->id) }}" 
                                                class="px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg text-sm font-semibold hover:from-green-600 hover:to-green-700 transition-all shadow-md hover:shadow-lg">
                                                 <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -613,6 +623,7 @@
                                                 </svg>
                                                 Unduh Bukti
                                             </a>
+                                            @endif
                                         </div>
                                         @else
                                         <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
@@ -625,6 +636,20 @@
                                         </div>
                                         @endif
                                     </div>
+
+                                    <!-- Pending Payment Actions -->
+                                    @if($order->status === 'pending' && strtolower($order->payment_method) !== 'tunai')
+                                    <div class="pt-4 border-t border-gray-200 mb-2 space-y-2">
+                                        <a href="{{ route('user.gas.payment', $order->id) }}" class="block w-full px-4 py-2 bg-orange-500 text-white text-center rounded-lg text-sm font-semibold hover:bg-orange-600 transition-colors shadow-sm">
+                                            Bayar Sekarang
+                                        </a>
+                                        <button type="button" 
+                                                class="w-full px-4 py-2 border border-blue-500 text-blue-500 rounded-lg text-sm font-semibold hover:bg-blue-50 transition-colors"
+                                                onclick="openChangeMethodModal({{ $order->id }}, '{{ $order->payment_channel }}')">
+                                            <i class="fas fa-exchange-alt mr-1"></i>Ubah Metode Pembayaran
+                                        </button>
+                                    </div>
+                                    @endif
 
                                     <!-- Cancellation Request -->
                                     @if($order->canBeCancelled())
@@ -667,6 +692,7 @@
                 </div>
                 @endforelse
             </div>
+<<<<<<< HEAD
 
             <!-- Mobil Orders Section -->
             <div id="mobil-section" class="activity-section space-y-6 hidden">
@@ -784,6 +810,10 @@
                 @endforelse
             </div>
 
+=======
+        </div>
+    </section>
+>>>>>>> b542fba61b53895ab5bd75255171e712c75e209e
 </main>
 @endsection
 
@@ -816,6 +846,7 @@
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+<<<<<<< HEAD
     (() => {
         const initActivityPage = function() {
             'use strict';
@@ -868,6 +899,182 @@
                     if (targetClearBtn) {
                         targetClearBtn.classList.remove('hidden');
                         targetClearBtn.style.display = 'block';
+=======
+    document.addEventListener('turbo:load', function() {
+        'use strict';
+
+        // Activity Menu Toggle
+        const menuCards = document.querySelectorAll('.activity-menu-card');
+        const rentalSection = document.getElementById('rental-section');
+        const gasSection = document.getElementById('gas-section');
+        const clearRentalBtn = document.getElementById('clear-rental-btn');
+        const clearGasBtn = document.getElementById('clear-gas-btn');
+        const filterBtns = document.querySelectorAll('.filter-btn');
+
+        // Apply filters function
+        function applyFilter(filterValue) {
+            const activeTab = document.querySelector('.activity-menu-card.active').dataset.type;
+            const activeSection = document.getElementById(`${activeTab}-section`);
+            const cards = activeSection.querySelectorAll('.transaction-card');
+            
+            cards.forEach(card => {
+                if (filterValue === 'all') {
+                    card.style.display = 'block';
+                } else {
+                    const status = card.dataset.status;
+                    // Map statuses slightly for the filters
+                    let mappedStatus = status;
+                    if (status === 'in_delivery') mappedStatus = 'confirmed';
+                    if (status === 'rejected') mappedStatus = 'cancelled';
+                    
+                    if (mappedStatus === filterValue) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                }
+            });
+        }
+
+        // Filter button clicks
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Update active button styling
+                filterBtns.forEach(b => {
+                    // Reset all buttons to inactive premium style (rounded-lg)
+                    b.className = "filter-btn bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-900 px-4 py-1.5 rounded-lg font-semibold transition-all text-sm shadow-sm";
+                });
+                
+                // Set the clicked button to active premium style (matching e-wallet selection)
+                this.className = "filter-btn active bg-blue-50 text-blue-700 border border-blue-500 px-4 py-1.5 rounded-lg font-bold shadow-md transition-all text-sm";
+                
+                applyFilter(this.dataset.filter);
+            });
+        });
+
+        // Restore active tab from localStorage if exists
+        const savedTab = localStorage.getItem('active_activity_tab');
+        if (savedTab) {
+            menuCards.forEach(c => c.classList.remove('active'));
+            const targetCard = Array.from(menuCards).find(c => c.dataset.type === savedTab);
+            if (targetCard) targetCard.classList.add('active');
+        }
+
+        // Initial State
+        const activeCard = document.querySelector('.activity-menu-card.active');
+        if (activeCard && activeCard.dataset.type === 'gas') {
+             rentalSection.classList.add('hidden');
+             gasSection.classList.remove('hidden');
+             if(clearRentalBtn) {
+                 clearRentalBtn.classList.add('hidden');
+                 clearRentalBtn.style.display = 'none';
+             }
+             if(clearGasBtn) {
+                 clearGasBtn.classList.remove('hidden');
+                 clearGasBtn.style.display = 'block';
+             }
+        }
+
+        menuCards.forEach(card => {
+            card.addEventListener('click', () => {
+                const type = card.dataset.type;
+                
+                // Save to localStorage
+                localStorage.setItem('active_activity_tab', type);
+                
+                // Update active state
+                menuCards.forEach(c => c.classList.remove('active'));
+                card.classList.add('active');
+                
+                // Toggle sections & buttons
+                if (type === 'rental') {
+                    rentalSection.classList.remove('hidden');
+                    gasSection.classList.add('hidden');
+                    if(clearRentalBtn) {
+                        clearRentalBtn.classList.remove('hidden');
+                        clearRentalBtn.style.display = 'block';
+                    }
+                    if(clearGasBtn) {
+                        clearGasBtn.classList.add('hidden');
+                        clearGasBtn.style.display = 'none';
+                    }
+                } else {
+                    rentalSection.classList.add('hidden');
+                    gasSection.classList.remove('hidden');
+                    if(clearRentalBtn) {
+                        clearRentalBtn.classList.add('hidden');
+                        clearRentalBtn.style.display = 'none';
+                    }
+                    if(clearGasBtn) {
+                        clearGasBtn.classList.remove('hidden');
+                        clearGasBtn.style.display = 'block';
+                    }
+                }
+                
+                // Re-apply current filter for the newly active section
+                const activeFilterBtn = document.querySelector('.filter-btn.active');
+                if (activeFilterBtn) {
+                    applyFilter(activeFilterBtn.dataset.filter);
+                }
+            });
+        });
+
+        // Toggle Detail Dropdown
+        const toggleButtons = document.querySelectorAll('.toggle-detail-btn');
+        
+        toggleButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const targetId = button.dataset.target;
+                const detailSection = document.getElementById(targetId);
+                
+                if (detailSection.classList.contains('hidden')) {
+                    // Show detail
+                    detailSection.classList.remove('hidden');
+                    setTimeout(() => {
+                        detailSection.classList.add('show');
+                    }, 10);
+                    button.textContent = 'Tutup';
+                } else {
+                    // Hide detail
+                    detailSection.classList.remove('show');
+                    setTimeout(() => {
+                        detailSection.classList.add('hidden');
+                    }, 300);
+                    button.textContent = 'Lihat Selengkapnya';
+                }
+            });
+        });
+
+        // Cancel Order
+        const cancelButtons = document.querySelectorAll('.cancel-order-btn');
+        
+        cancelButtons.forEach(button => {
+            button.addEventListener('click', async () => {
+                const type = button.dataset.type;
+                const id = button.dataset.id;
+                
+                const { value: reason } = await Swal.fire({
+                    title: 'Batalkan Pesanan',
+                    html: '<p class="mb-3">Berikan alasan pembatalan pesanan:</p>',
+                    input: 'textarea',
+                    inputPlaceholder: 'Masukkan alasan pembatalan...',
+                    inputAttributes: {
+                        'aria-label': 'Alasan pembatalan',
+                        'rows': 4
+                    },
+                    showCancelButton: true,
+                    confirmButtonText: 'Kirim Permintaan',
+                    cancelButtonText: 'Batal',
+                    confirmButtonColor: '#ef4444',
+                    cancelButtonColor: '#6b7280',
+                    inputValidator: (value) => {
+                        if (!value) {
+                            return 'Alasan pembatalan harus diisi!';
+                        }
+                        if (value.length < 10) {
+                            return 'Alasan minimal 10 karakter!';
+                        }
+>>>>>>> b542fba61b53895ab5bd75255171e712c75e209e
                     }
                 });
             });
@@ -1056,6 +1263,7 @@
                     }
                 });
             });
+<<<<<<< HEAD
 
             // Clear All History (New Feature)
             const clearHistoryButtons = document.querySelectorAll('.clear-history-btn');
@@ -1138,5 +1346,103 @@
             initActivityPage();
         }
     })();
+=======
+        });
+    });
+
+    // Change Payment Method Logic
+    // Change Payment Method Logic
+    async function openChangeMethodModal(orderId, currentMethod) {
+        const banks = [
+            { id: 'bank_transfer_bca', name: 'BCA Virtual Account', img: '{{ asset('admin/img/banks/bca.png') }}' },
+            { id: 'bank_transfer_mandiri', name: 'Mandiri Virtual Account', img: '{{ asset('admin/img/banks/mandiri.png') }}' },
+            { id: 'bank_transfer_bni', name: 'BNI Virtual Account', img: '{{ asset('admin/img/banks/bni.png') }}' },
+            { id: 'bank_transfer_bri', name: 'BRI Virtual Account', img: '{{ asset('admin/img/banks/bri.png') }}' },
+            { id: 'qris', name: 'QRIS (All E-Wallet)', img: '{{ asset('admin/img/banks/qris.svg') }}', fallback: '{{ asset('admin/img/banks/dana.png') }}' }
+        ];
+
+        let optionsHtml = `
+        <style>
+            .swal-pm-input:checked + .swal-pm-card {
+                border-color: #3b82f6 !important;
+                background-color: #eff6ff !important;
+            }
+            .swal-pm-input:checked + .swal-pm-card .swal-pm-circle {
+                border-color: #3b82f6 !important;
+            }
+            .swal-pm-input:checked + .swal-pm-card .swal-pm-dot {
+                opacity: 1 !important;
+            }
+            .swal-pm-input:disabled + .swal-pm-card {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+        </style>
+        <div class="flex flex-col gap-3 mt-4 text-left max-h-[60vh] overflow-y-auto px-1">`;
+        
+        banks.forEach(bank => {
+            const isCurrent = currentMethod === bank.id;
+            const imgHtml = bank.fallback 
+                ? `<img src="${bank.img}" onerror="this.src='${bank.fallback}'" class="h-6 object-contain w-14">`
+                : `<img src="${bank.img}" class="h-6 object-contain w-14">`;
+            
+            optionsHtml += `
+                <label class="cursor-pointer group relative block">
+                    <input type="radio" name="swal_payment_method" value="${bank.id}" class="swal-pm-input absolute opacity-0 w-0 h-0" ${isCurrent ? 'disabled' : ''}>
+                    <div class="swal-pm-card flex items-center gap-4 p-4 border-2 border-gray-100 rounded-2xl group-hover:bg-gray-50 transition-all">
+                        <div class="swal-pm-circle w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center bg-white group-hover:border-blue-400">
+                            <div class="swal-pm-dot w-2.5 h-2.5 rounded-full bg-blue-500 opacity-0 transition-opacity"></div>
+                        </div>
+                        ${imgHtml}
+                        <span class="font-semibold text-gray-800">${bank.name} ${isCurrent ? '<span class="text-xs text-blue-500 font-bold ml-1">(Saat Ini)</span>' : ''}</span>
+                    </div>
+                </label>
+            `;
+        });
+        optionsHtml += '</div>';
+
+        const { value: paymentMethod } = await Swal.fire({
+            title: 'Ubah Metode Pembayaran',
+            icon: 'question',
+            html: optionsHtml,
+            showCancelButton: true,
+            confirmButtonText: 'Simpan Perubahan',
+            cancelButtonText: 'Batal',
+            confirmButtonColor: '#2563eb',
+            cancelButtonColor: '#9ca3af',
+            preConfirm: () => {
+                const selected = document.querySelector('input[name="swal_payment_method"]:checked');
+                if (!selected) {
+                    Swal.showValidationMessage('Silakan pilih metode pembayaran baru');
+                    return false;
+                }
+                return selected.value;
+            }
+        });
+
+        if (paymentMethod) {
+            // Create and submit a form programmatically
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/gas/payment/${orderId}/change-method`;
+            
+            const csrfToken = document.createElement('input');
+            csrfToken.type = 'hidden';
+            csrfToken.name = '_token';
+            csrfToken.value = '{{ csrf_token() }}';
+            
+            const methodInput = document.createElement('input');
+            methodInput.type = 'hidden';
+            methodInput.name = 'payment_method';
+            methodInput.value = paymentMethod;
+            
+            form.appendChild(csrfToken);
+            form.appendChild(methodInput);
+            document.body.appendChild(form);
+            
+            form.submit();
+        }
+    }
+>>>>>>> b542fba61b53895ab5bd75255171e712c75e209e
 </script>
 @endpush
