@@ -100,20 +100,24 @@ public function index(Request $request)
     // ========================================
     
     // Hitung performa bulanan (total transaksi per bulan)
-    $monthlyPerformance = [];
+    $monthlyPerformance = array_fill(0, 12, 0);
     
+    $rentalCounts = RentalBooking::withTrashed()
+        ->selectRaw('MONTH(created_at) as month, COUNT(*) as count')
+        ->whereYear('created_at', $selectedYear)
+        ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
+        ->groupBy('month')
+        ->pluck('count', 'month');
+
+    $gasCounts = GasOrder::withTrashed()
+        ->selectRaw('MONTH(created_at) as month, COUNT(*) as count')
+        ->whereYear('created_at', $selectedYear)
+        ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
+        ->groupBy('month')
+        ->pluck('count', 'month');
+
     for ($month = 1; $month <= 12; $month++) {
-        $rentalMonthCount = RentalBooking::withTrashed()->whereMonth('created_at', $month)
-            ->whereYear('created_at', $selectedYear)
-            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-            ->count();
-        
-        $gasMonthCount = GasOrder::withTrashed()->whereMonth('created_at', $month)
-            ->whereYear('created_at', $selectedYear)
-            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-            ->count();
-        
-        $monthlyPerformance[] = $rentalMonthCount + $gasMonthCount;
+        $monthlyPerformance[$month - 1] = ($rentalCounts[$month] ?? 0) + ($gasCounts[$month] ?? 0);
     }
     
     // Hitung pendapatan dan pengeluaran bulanan (SAMA SEPERTI ReportController)

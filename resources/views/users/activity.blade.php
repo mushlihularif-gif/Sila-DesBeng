@@ -37,6 +37,36 @@
                         <p class="font-bold text-lg text-gray-800">Pesanan Gas</p>
                     </div>
                 </div>
+
+                <!-- Penyewaan Mobil Card -->
+                <div class="activity-menu-card cursor-pointer" data-type="mobil">
+                    <div class="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 w-48 text-center border-4 border-transparent">
+                        <div class="mb-3 flex justify-center">
+                            <img src="{{ asset('User/img/elemen/mobil.png') }}" alt="Sewa Mobil" class="w-16 h-16 object-contain">
+                        </div>
+                        <p class="font-bold text-lg text-gray-800">Sewa Mobil</p>
+                    </div>
+                </div>
+
+                <!-- Fasilitas Umum Card -->
+                <div class="activity-menu-card cursor-pointer" data-type="fasilitas">
+                    <div class="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 w-48 text-center border-4 border-transparent">
+                        <div class="mb-3 flex justify-center">
+                            <img src="{{ asset('User/img/elemen/fasilitas.png') }}" alt="Fasilitas Umum" class="w-16 h-16 object-contain">
+                        </div>
+                        <p class="font-bold text-lg text-gray-800">Fasilitas Umum</p>
+                    </div>
+                </div>
+
+                <!-- Pelaporan Warga Card -->
+                <div class="activity-menu-card cursor-pointer" data-type="laporan">
+                    <div class="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 w-48 text-center border-4 border-transparent">
+                        <div class="mb-3 flex justify-center">
+                            <img src="{{ asset('User/img/elemen/lapor.png') }}" alt="Laporan Warga" class="w-16 h-16 object-contain">
+                        </div>
+                        <p class="font-bold text-lg text-gray-800">Laporan Warga</p>
+                    </div>
+                </div>
             </div>
 
             <!-- Clear History Buttons (Moved to Top) -->
@@ -53,6 +83,24 @@
                         id="clear-gas-btn"
                         data-type="gas">
                     <i class="fas fa-trash-alt mr-2"></i>Bersihkan Riwayat Pesanan Gas
+                </button>
+                <button type="button" 
+                        class="clear-history-btn bg-red-100 text-red-600 px-6 py-2 rounded-full font-semibold hover:bg-red-200 transition-colors hidden"
+                        id="clear-mobil-btn"
+                        data-type="mobil">
+                    <i class="fas fa-trash-alt mr-2"></i>Bersihkan Riwayat Sewa Mobil
+                </button>
+                <button type="button" 
+                        class="clear-history-btn bg-red-100 text-red-600 px-6 py-2 rounded-full font-semibold hover:bg-red-200 transition-colors hidden"
+                        id="clear-fasilitas-btn"
+                        data-type="fasilitas">
+                    <i class="fas fa-trash-alt mr-2"></i>Bersihkan Riwayat Fasilitas Umum
+                </button>
+                <button type="button" 
+                        class="clear-history-btn bg-red-100 text-red-600 px-6 py-2 rounded-full font-semibold hover:bg-red-200 transition-colors hidden"
+                        id="clear-laporan-btn"
+                        data-type="laporan">
+                    <i class="fas fa-trash-alt mr-2"></i>Bersihkan Riwayat Laporan Warga
                 </button>
             </div>
 
@@ -620,6 +668,122 @@
                 @endforelse
             </div>
 
+            <!-- Mobil Orders Section -->
+            <div id="mobil-section" class="activity-section space-y-6 hidden">
+                @forelse($mobilBookings as $booking)
+                <div class="bg-white rounded-2xl shadow-lg overflow-hidden activity-item" id="activity-mobil-{{ $booking->id }}">
+                    <div class="p-6">
+                        <div class="flex flex-col sm:flex-row gap-6">
+                            <div class="w-full sm:w-32 h-48 sm:h-32 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                @if($booking->mobil && $booking->mobil->foto)
+                                <img src="{{ asset('storage/' . $booking->mobil->foto) }}" class="w-full h-full object-cover rounded-lg">
+                                @else
+                                <i class="fas fa-car text-4xl text-gray-400"></i>
+                                @endif
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="text-xl font-bold text-gray-800 mb-2">{{ $booking->mobil->nama_mobil ?? 'Sewa Mobil' }}</h3>
+                                <p class="text-sm text-gray-600 mb-2">
+                                    {{ \Carbon\Carbon::parse($booking->created_at)->locale('id')->isoFormat('dddd, DD MMMM YYYY HH:mm') }} WIB
+                                </p>
+                                <p class="text-sm text-gray-600 mb-2">Tanggal Mulai: {{ \Carbon\Carbon::parse($booking->start_date)->format('d M Y') }}</p>
+                            </div>
+                            <div class="text-left sm:text-right mt-4 sm:mt-0">
+                                <p class="text-lg font-bold text-gray-800 mb-2">{{ ucfirst($booking->status) }}</p>
+                                @if(in_array($booking->status, ['completed', 'cancelled', 'rejected']))
+                                <button type="button" class="delete-order-btn px-4 py-2 bg-red-50 text-red-500 rounded-lg text-sm font-semibold hover:bg-red-100 transition-colors" data-type="mobil" data-id="{{ $booking->id }}">
+                                    Hapus Riwayat
+                                </button>
+                                @elseif($booking->canBeCancelled && $booking->canBeCancelled())
+                                <button type="button" class="cancel-order-btn px-4 py-2 bg-yellow-50 text-yellow-600 rounded-lg text-sm font-semibold hover:bg-yellow-100 transition-colors" data-type="mobil" data-id="{{ $booking->id }}">
+                                    Batalkan
+                                </button>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @empty
+                <div class="bg-white rounded-2xl shadow-lg p-8 text-center">
+                    <p class="text-gray-500">Belum ada riwayat penyewaan mobil</p>
+                </div>
+                @endforelse
+            </div>
+
+            <!-- Fasilitas Umum Orders Section -->
+            <div id="fasilitas-section" class="activity-section space-y-6 hidden">
+                @forelse($fasilitasBookings as $booking)
+                <div class="bg-white rounded-2xl shadow-lg overflow-hidden activity-item" id="activity-fasilitas-{{ $booking->id }}">
+                    <div class="p-6">
+                        <div class="flex flex-col sm:flex-row gap-6">
+                            <div class="w-full sm:w-32 h-48 sm:h-32 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                @if($booking->fasilitas && $booking->fasilitas->foto)
+                                <img src="{{ asset('storage/' . $booking->fasilitas->foto) }}" class="w-full h-full object-cover rounded-lg">
+                                @else
+                                <i class="fas fa-building text-4xl text-gray-400"></i>
+                                @endif
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="text-xl font-bold text-gray-800 mb-2">{{ $booking->fasilitas->nama_fasilitas ?? 'Peminjaman Fasilitas' }}</h3>
+                                <p class="text-sm text-gray-600 mb-2">
+                                    {{ \Carbon\Carbon::parse($booking->created_at)->locale('id')->isoFormat('dddd, DD MMMM YYYY HH:mm') }} WIB
+                                </p>
+                                <p class="text-sm text-gray-600 mb-2">Tanggal Mulai: {{ \Carbon\Carbon::parse($booking->start_date)->format('d M Y') }}</p>
+                            </div>
+                            <div class="text-left sm:text-right mt-4 sm:mt-0">
+                                <p class="text-lg font-bold text-gray-800 mb-2">{{ ucfirst($booking->status) }}</p>
+                                @if(in_array($booking->status, ['completed', 'cancelled', 'rejected']))
+                                <button type="button" class="delete-order-btn px-4 py-2 bg-red-50 text-red-500 rounded-lg text-sm font-semibold hover:bg-red-100 transition-colors" data-type="fasilitas" data-id="{{ $booking->id }}">
+                                    Hapus Riwayat
+                                </button>
+                                @elseif($booking->canBeCancelled && $booking->canBeCancelled())
+                                <button type="button" class="cancel-order-btn px-4 py-2 bg-yellow-50 text-yellow-600 rounded-lg text-sm font-semibold hover:bg-yellow-100 transition-colors" data-type="fasilitas" data-id="{{ $booking->id }}">
+                                    Batalkan
+                                </button>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @empty
+                <div class="bg-white rounded-2xl shadow-lg p-8 text-center">
+                    <p class="text-gray-500">Belum ada riwayat peminjaman fasilitas umum</p>
+                </div>
+                @endforelse
+            </div>
+
+            <!-- Laporan Warga Section -->
+            <div id="laporan-section" class="activity-section space-y-6 hidden">
+                @forelse($laporans as $laporan)
+                <div class="bg-white rounded-2xl shadow-lg overflow-hidden activity-item" id="activity-laporan-{{ $laporan->id }}">
+                    <div class="p-6">
+                        <div class="flex flex-col sm:flex-row gap-6">
+                            <div class="w-full sm:w-32 h-48 sm:h-32 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-bullhorn text-4xl text-gray-400"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="text-xl font-bold text-gray-800 mb-2">{{ $laporan->kategori }}</h3>
+                                <p class="text-sm text-gray-600 mb-2">
+                                    {{ \Carbon\Carbon::parse($laporan->created_at)->locale('id')->isoFormat('dddd, DD MMMM YYYY HH:mm') }} WIB
+                                </p>
+                                <p class="text-sm text-gray-600 mb-2 line-clamp-2">{{ $laporan->deskripsi }}</p>
+                            </div>
+                            <div class="text-left sm:text-right mt-4 sm:mt-0">
+                                <p class="text-lg font-bold text-gray-800 mb-2">{{ ucfirst($laporan->status) }}</p>
+                                <button type="button" class="delete-order-btn px-4 py-2 bg-red-50 text-red-500 rounded-lg text-sm font-semibold hover:bg-red-100 transition-colors" data-type="laporan" data-id="{{ $laporan->id }}">
+                                    Hapus Riwayat
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @empty
+                <div class="bg-white rounded-2xl shadow-lg p-8 text-center">
+                    <p class="text-gray-500">Belum ada riwayat laporan warga</p>
+                </div>
+                @endforelse
+            </div>
+
 </main>
 @endsection
 
@@ -652,309 +816,327 @@
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        'use strict';
+    (() => {
+        const initActivityPage = function() {
+            'use strict';
 
-        // Activity Menu Toggle
-        const menuCards = document.querySelectorAll('.activity-menu-card');
-        const rentalSection = document.getElementById('rental-section');
-        const gasSection = document.getElementById('gas-section');
-        const clearRentalBtn = document.getElementById('clear-rental-btn');
-        const clearGasBtn = document.getElementById('clear-gas-btn');
+            // Activity Menu Toggle
+            const menuCards = document.querySelectorAll('.activity-menu-card');
+            const rentalSection = document.getElementById('rental-section');
+            const gasSection = document.getElementById('gas-section');
+            const clearRentalBtn = document.getElementById('clear-rental-btn');
+            const clearGasBtn = document.getElementById('clear-gas-btn');
 
-        // Initial State
-        const activeCard = document.querySelector('.activity-menu-card.active');
-        // No complex logic needed here because HTML sets default state correctly (Rental visible, Gas hidden)
-        // Just verify if we are on Gas tab (edge case)
-        if (activeCard && activeCard.dataset.type === 'gas') {
-             if(clearRentalBtn) {
-                 clearRentalBtn.classList.add('hidden');
-                 clearRentalBtn.style.display = 'none'; // Override inline style
-             }
-             if(clearGasBtn) {
-                 clearGasBtn.classList.remove('hidden');
-                 clearGasBtn.style.display = 'block';
-             }
-        }
+            // Initial State
+            const activeCard = document.querySelector('.activity-menu-card.active');
+            // No complex logic needed here because HTML sets default state correctly (Rental visible, Gas hidden)
+            // Just verify if we are on Gas tab (edge case)
+            if (activeCard && activeCard.dataset.type === 'gas') {
+                 if(clearRentalBtn) {
+                     clearRentalBtn.classList.add('hidden');
+                     clearRentalBtn.style.display = 'none'; // Override inline style
+                 }
+                 if(clearGasBtn) {
+                     clearGasBtn.classList.remove('hidden');
+                     clearGasBtn.style.display = 'block';
+                 }
+            }
 
-        menuCards.forEach(card => {
-            card.addEventListener('click', () => {
-                const type = card.dataset.type;
-                
-                // Update active state
-                menuCards.forEach(c => c.classList.remove('active'));
-                card.classList.add('active');
-                
-                // Toggle sections & buttons
-                if (type === 'rental') {
-                    rentalSection.classList.remove('hidden');
-                    gasSection.classList.add('hidden');
-                    if(clearRentalBtn) {
-                        clearRentalBtn.classList.remove('hidden');
-                        clearRentalBtn.style.display = 'block';
-                    }
-                    if(clearGasBtn) {
-                        clearGasBtn.classList.add('hidden');
-                        clearGasBtn.style.display = 'none';
-                    }
-                } else {
-                    rentalSection.classList.add('hidden');
-                    gasSection.classList.remove('hidden');
-                    if(clearRentalBtn) {
-                        clearRentalBtn.classList.add('hidden');
-                        clearRentalBtn.style.display = 'none';
-                    }
-                    if(clearGasBtn) {
-                        clearGasBtn.classList.remove('hidden');
-                        clearGasBtn.style.display = 'block';
-                    }
-                }
-            });
-        });
-
-        // Toggle Detail Dropdown
-        const toggleButtons = document.querySelectorAll('.toggle-detail-btn');
-        
-        toggleButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const targetId = button.dataset.target;
-                const detailSection = document.getElementById(targetId);
-                
-                if (detailSection.classList.contains('hidden')) {
-                    // Show detail
-                    detailSection.classList.remove('hidden');
-                    setTimeout(() => {
-                        detailSection.classList.add('show');
-                    }, 10);
-                    button.textContent = 'Tutup';
-                } else {
-                    // Hide detail
-                    detailSection.classList.remove('show');
-                    setTimeout(() => {
-                        detailSection.classList.add('hidden');
-                    }, 300);
-                    button.textContent = 'Lihat Selengkapnya';
-                }
-            });
-        });
-
-        // Cancel Order
-        const cancelButtons = document.querySelectorAll('.cancel-order-btn');
-        
-        cancelButtons.forEach(button => {
-            button.addEventListener('click', async () => {
-                const type = button.dataset.type;
-                const id = button.dataset.id;
-                
-                const { value: reason } = await Swal.fire({
-                    title: 'Batalkan Pesanan',
-                    html: '<p class="mb-3">Berikan alasan pembatalan pesanan:</p>',
-                    input: 'textarea',
-                    inputPlaceholder: 'Masukkan alasan pembatalan...',
-                    inputAttributes: {
-                        'aria-label': 'Alasan pembatalan',
-                        'rows': 4
-                    },
-                    showCancelButton: true,
-                    confirmButtonText: 'Kirim Permintaan',
-                    cancelButtonText: 'Batal',
-                    confirmButtonColor: '#ef4444',
-                    cancelButtonColor: '#6b7280',
-                    inputValidator: (value) => {
-                        if (!value) {
-                            return 'Alasan pembatalan harus diisi!';
-                        }
-                        if (value.length < 10) {
-                            return 'Alasan minimal 10 karakter!';
-                        }
+            menuCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    const type = card.dataset.type;
+                    
+                    // Update active state
+                    menuCards.forEach(c => c.classList.remove('active'));
+                    card.classList.add('active');
+                    
+                    // Hide all sections
+                    document.querySelectorAll('.activity-section').forEach(s => s.classList.add('hidden'));
+                    
+                    // Show target section
+                    const targetSection = document.getElementById(`${type}-section`);
+                    if (targetSection) targetSection.classList.remove('hidden');
+                    
+                    // Hide all clear buttons
+                    document.querySelectorAll('.clear-history-btn').forEach(btn => {
+                        btn.classList.add('hidden');
+                        btn.style.display = 'none';
+                    });
+                    
+                    // Show target clear button
+                    const targetClearBtn = document.getElementById(`clear-${type}-btn`);
+                    if (targetClearBtn) {
+                        targetClearBtn.classList.remove('hidden');
+                        targetClearBtn.style.display = 'block';
                     }
                 });
+            });
 
-                if (reason) {
-                    // Show Loading
-                    Swal.fire({
-                        title: 'Sedang Memproses...',
-                        allowOutsideClick: false,
-                        showConfirmButton: false,
-                        didOpen: () => {
-                             Swal.showLoading();
+            // Toggle Detail Dropdown
+            const toggleButtons = document.querySelectorAll('.toggle-detail-btn');
+            
+            toggleButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const targetId = button.dataset.target;
+                    const detailSection = document.getElementById(targetId);
+                    if (!detailSection) return;
+                    
+                    if (detailSection.classList.contains('hidden')) {
+                        // Show detail
+                        detailSection.classList.remove('hidden');
+                        setTimeout(() => {
+                            detailSection.classList.add('show');
+                        }, 10);
+                        button.textContent = 'Tutup';
+                    } else {
+                        // Hide detail
+                        detailSection.classList.remove('show');
+                        setTimeout(() => {
+                            detailSection.classList.add('hidden');
+                        }, 300);
+                        button.textContent = 'Lihat Selengkapnya';
+                    }
+                });
+            });
+
+            // Cancel Order
+            const cancelButtons = document.querySelectorAll('.cancel-order-btn');
+            
+            cancelButtons.forEach(button => {
+                button.addEventListener('click', async () => {
+                    const type = button.dataset.type;
+                    const id = button.dataset.id;
+                    
+                    const { value: reason } = await Swal.fire({
+                        title: 'Batalkan Pesanan',
+                        html: '<p class="mb-3">Berikan alasan pembatalan pesanan:</p>',
+                        input: 'textarea',
+                        inputPlaceholder: 'Masukkan alasan pembatalan...',
+                        inputAttributes: {
+                            'aria-label': 'Alasan pembatalan',
+                            'rows': 4
+                        },
+                        showCancelButton: true,
+                        confirmButtonText: 'Kirim Permintaan',
+                        cancelButtonText: 'Batal',
+                        confirmButtonColor: '#ef4444',
+                        cancelButtonColor: '#6b7280',
+                        inputValidator: (value) => {
+                            if (!value) {
+                                return 'Alasan pembatalan harus diisi!';
+                            }
+                            if (value.length < 10) {
+                                return 'Alasan minimal 10 karakter!';
+                            }
                         }
                     });
 
-                    try {
-                        const response = await fetch(`/aktivitas/${type}/${id}/cancel`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                            },
-                            body: JSON.stringify({ reason })
-                        });
-
-                        const data = await response.json();
-
-                        if (data.success) {
-                            await Swal.fire({
-                                icon: 'success',
-                                title: 'Berhasil!',
-                                text: data.message,
-                                confirmButtonColor: '#3b82f6'
-                            });
-                            location.reload();
-                        } else {
-                            await Swal.fire({
-                                icon: 'error',
-                                title: 'Gagal!',
-                                text: data.message,
-                                confirmButtonColor: '#ef4444'
-                            });
-                        }
-                    } catch (error) {
-                        await Swal.fire({
-                            icon: 'error',
-                            title: 'Error!',
-                            text: 'Terjadi kesalahan. Silakan coba lagi.',
-                            confirmButtonColor: '#ef4444'
-                        });
-                    }
-                }
-            });
-        });
-
-        // Delete Single Order History (Existing)
-        const deleteButtons = document.querySelectorAll('.delete-order-btn');
-        deleteButtons.forEach(button => {
-             button.addEventListener('click', async () => {
-                const type = button.dataset.type;
-                const id = button.dataset.id;
-                
-                const result = await Swal.fire({
-                    title: 'Hapus Riwayat?',
-                    text: "Riwayat pesanan ini akan dihapus dari daftar.",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'Ya, Hapus',
-                    cancelButtonText: 'Batal',
-                    confirmButtonColor: '#ef4444',
-                    cancelButtonColor: '#6b7280'
-                });
-
-                if (result.isConfirmed) {
-                    // Show Loading
-                    Swal.fire({
-                        title: 'Sedang Menghapus...',
-                        allowOutsideClick: false,
-                        showConfirmButton: false,
-                        didOpen: () => {
-                            Swal.showLoading();
-                        }
-                    });
-
-                    try {
-                        const response = await fetch(`/aktivitas/${type}/${id}`, {
-                            method: 'DELETE',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    if (reason) {
+                        // Show Loading
+                        Swal.fire({
+                            title: 'Sedang Memproses...',
+                            allowOutsideClick: false,
+                            showConfirmButton: false,
+                            didOpen: () => {
+                                 Swal.showLoading();
                             }
                         });
 
-                        const data = await response.json();
-
-                        if (data.success) {
-                            await Swal.fire({
-                                icon: 'success',
-                                title: 'Berhasil!',
-                                text: data.message,
-                                confirmButtonColor: '#3b82f6'
+                        try {
+                            const response = await fetch(`/aktivitas/${type}/${id}/cancel`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                                },
+                                body: JSON.stringify({ reason })
                             });
-                            location.reload();
-                        } else {
+
+                            const data = await response.json();
+
+                            if (data.success) {
+                                await Swal.fire({
+                                    icon: 'success',
+                                    title: 'Berhasil!',
+                                    text: data.message,
+                                    confirmButtonColor: '#3b82f6'
+                                });
+                                const btn = document.querySelector(`.cancel-order-btn[data-id="${id}"][data-type="${type}"]`);
+                                if(btn) {
+                                    btn.outerHTML = '<div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3"><p class="text-sm font-semibold text-yellow-800 mb-1">Permintaan Pembatalan Diajukan</p><p class="text-xs text-yellow-700">Menunggu konfirmasi admin</p></div>';
+                                }
+                            } else {
+                                await Swal.fire({
+                                    icon: 'error',
+                                    title: 'Gagal!',
+                                    text: data.message,
+                                    confirmButtonColor: '#ef4444'
+                                });
+                            }
+                        } catch (error) {
                             await Swal.fire({
                                 icon: 'error',
-                                title: 'Gagal!',
-                                text: data.message,
+                                title: 'Error!',
+                                text: 'Terjadi kesalahan. Silakan coba lagi.',
                                 confirmButtonColor: '#ef4444'
                             });
                         }
-                    } catch (error) {
-                         await Swal.fire({
-                            icon: 'error',
-                            title: 'Error!',
-                            text: 'Terjadi kesalahan saat menghapus.',
-                            confirmButtonColor: '#ef4444'
-                        });
                     }
-                }
-            });
-        });
-
-        // Clear All History (New Feature)
-        const clearHistoryButtons = document.querySelectorAll('.clear-history-btn');
-        clearHistoryButtons.forEach(button => {
-            button.addEventListener('click', async () => {
-                const type = button.dataset.type;
-                const typeText = type === 'rental' ? 'Penyewaan' : 'Gas';
-
-                const result = await Swal.fire({
-                    title: `Bersihkan Riwayat ${typeText}?`,
-                    text: "Semua riwayat dengan status Selesai, Dibatalkan, atau Ditolak akan dihapus.",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'Ya, Bersihkan',
-                    cancelButtonText: 'Batal',
-                    confirmButtonColor: '#ef4444',
-                    cancelButtonColor: '#6b7280'
                 });
+            });
 
-                if (result.isConfirmed) {
-                     Swal.fire({
-                        title: 'Sedang Membersihkan...',
-                        allowOutsideClick: false,
-                        showConfirmButton: false,
-                        didOpen: () => {
-                            Swal.showLoading();
-                        }
+            // Delete Single Order History (Existing)
+            const deleteButtons = document.querySelectorAll('.delete-order-btn');
+            deleteButtons.forEach(button => {
+                 button.addEventListener('click', async () => {
+                    const type = button.dataset.type;
+                    const id = button.dataset.id;
+                    
+                    const result = await Swal.fire({
+                        title: 'Hapus Riwayat?',
+                        text: "Riwayat pesanan ini akan dihapus dari daftar.",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Ya, Hapus',
+                        cancelButtonText: 'Batal',
+                        confirmButtonColor: '#ef4444',
+                        cancelButtonColor: '#6b7280'
                     });
 
-                    try {
-                        const response = await fetch(`/aktivitas/clear-all/${type}`, {
-                            method: 'DELETE',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    if (result.isConfirmed) {
+                        // Show Loading
+                        Swal.fire({
+                            title: 'Sedang Menghapus...',
+                            allowOutsideClick: false,
+                            showConfirmButton: false,
+                            didOpen: () => {
+                                Swal.showLoading();
                             }
                         });
 
-                        const data = await response.json();
-
-                        if (data.success) {
-                            await Swal.fire({
-                                icon: 'success',
-                                title: 'Berhasil!',
-                                text: data.message,
-                                confirmButtonColor: '#3b82f6'
+                        try {
+                            const response = await fetch(`/aktivitas/${type}/${id}`, {
+                                method: 'DELETE',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                                }
                             });
-                            location.reload();
-                        } else {
+
+                            const data = await response.json();
+
+                            if (data.success) {
+                                await Swal.fire({
+                                    icon: 'success',
+                                    title: 'Berhasil!',
+                                    text: data.message,
+                                    confirmButtonColor: '#3b82f6'
+                                });
+                                const btn = document.querySelector(`.delete-order-btn[data-id="${id}"][data-type="${type}"]`);
+                                if(btn) {
+                                    const card = btn.closest('.bg-white.rounded-2xl.shadow-lg.overflow-hidden');
+                                    if(card) card.remove();
+                                }
+                            } else {
+                                await Swal.fire({
+                                    icon: 'error',
+                                    title: 'Gagal!',
+                                    text: data.message,
+                                    confirmButtonColor: '#ef4444'
+                                });
+                            }
+                        } catch (error) {
                              await Swal.fire({
-                                icon: 'info',
-                                title: 'Info',
-                                text: data.message,
-                                confirmButtonColor: '#3b82f6'
+                                icon: 'error',
+                                title: 'Error!',
+                                text: 'Terjadi kesalahan saat menghapus.',
+                                confirmButtonColor: '#ef4444'
                             });
                         }
-                    } catch (error) {
-                        await Swal.fire({
-                            icon: 'error',
-                            title: 'Error!',
-                            text: 'Terjadi kesalahan saat membersihkan riwayat.',
-                            confirmButtonColor: '#ef4444'
-                        });
                     }
-                }
+                });
             });
-        });
-    });
+
+            // Clear All History (New Feature)
+            const clearHistoryButtons = document.querySelectorAll('.clear-history-btn');
+            clearHistoryButtons.forEach(button => {
+                button.addEventListener('click', async () => {
+                    const type = button.dataset.type;
+                    let typeText = 'Penyewaan';
+                    if(type === 'gas') typeText = 'Pesanan Gas';
+                    else if(type === 'mobil') typeText = 'Sewa Mobil';
+                    else if(type === 'fasilitas') typeText = 'Fasilitas Umum';
+                    else if(type === 'laporan') typeText = 'Laporan Warga';
+
+                    const result = await Swal.fire({
+                        title: `Bersihkan Riwayat ${typeText}?`,
+                        text: "Semua riwayat dengan status Selesai, Dibatalkan, atau Ditolak akan dihapus.",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Ya, Bersihkan',
+                        cancelButtonText: 'Batal',
+                        confirmButtonColor: '#ef4444',
+                        cancelButtonColor: '#6b7280'
+                    });
+
+                    if (result.isConfirmed) {
+                         Swal.fire({
+                            title: 'Sedang Membersihkan...',
+                            allowOutsideClick: false,
+                            showConfirmButton: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+
+                        try {
+                            const response = await fetch(`/aktivitas/clear-all/${type}`, {
+                                method: 'DELETE',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                                }
+                            });
+
+                            const data = await response.json();
+
+                            if (data.success) {
+                                await Swal.fire({
+                                    icon: 'success',
+                                    title: 'Berhasil!',
+                                    text: data.message,
+                                    confirmButtonColor: '#3b82f6'
+                                });
+                                const section = document.getElementById(`${type}-section`);
+                                if(section) {
+                                    section.innerHTML = '<div class="bg-white rounded-2xl shadow-lg p-8 text-center"><p class="text-gray-500">Belum ada riwayat aktivitas</p></div>';
+                                }
+                            } else {
+                                 await Swal.fire({
+                                    icon: 'info',
+                                    title: 'Info',
+                                    text: data.message,
+                                    confirmButtonColor: '#3b82f6'
+                                });
+                            }
+                        } catch (error) {
+                            await Swal.fire({
+                                icon: 'error',
+                                title: 'Error!',
+                                text: 'Terjadi kesalahan saat membersihkan riwayat.',
+                                confirmButtonColor: '#ef4444'
+                            });
+                        }
+                    }
+                });
+            });
+        };
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initActivityPage);
+        } else {
+            initActivityPage();
+        }
+    })();
 </script>
 @endpush

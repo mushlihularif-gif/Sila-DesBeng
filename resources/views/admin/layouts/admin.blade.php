@@ -378,6 +378,7 @@
 
     <script src="{{ asset('Admin/vendor/js/helpers.js') }}"></script>
     <script src="{{ asset('Admin/js/config.js') }}"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body>
@@ -559,10 +560,7 @@
             </aside>
             <!-- Layout page -->
             <div class="layout-page">
-                <!-- SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
-    <!-- Helpers -->
+                <!-- Helpers -->
                 <!-- Navbar -->
                 <nav class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme"
                     id="layout-navbar">

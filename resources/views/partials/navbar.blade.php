@@ -6,12 +6,16 @@
         /* ============ SILA DESBENG NAVBAR ============ */
         .sd-navbar {
             font-family: 'Inter', sans-serif;
-            position: fixed; top: 0; left: 0; right: 0; z-index: 50;
-            background: rgba(255, 255, 255, 0.1) !important;
-            backdrop-filter: blur(8px) !important;
-            -webkit-backdrop-filter: blur(8px) !important;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05) !important;
-            padding: 0 !important; transition: transform 0.3s ease-in-out;
+            position: fixed; top: 0; left: 0; right: 0; z-index: 997;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            padding: 0 !important; transition: background-color 0.3s, backdrop-filter 0.3s, transform 0.3s ease-in-out;
+        }
+        .sd-navbar.scrolled {
+            background: rgba(255, 255, 255, 0.85) !important;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
         }
         .sd-navbar.hidden-nav {
             transform: translateY(-100%);
@@ -92,19 +96,19 @@
                 </button>
                 
                 <!-- Wrapper padding transparan untuk jembatan hover agar tidak hilang -->
-                <div class="absolute top-full left-1/2 -translate-x-1/2 pt-2 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
-                    <div class="min-w-[220px] rounded-xl shadow-[0_8px_30px_rgba(0,0,0,0.12)] border border-gray-200 overflow-hidden" style="background-color: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px);">
-                        <div class="py-2">
-                            <a href="{{ route('bumdes.profil') }}" class="block px-5 py-2.5 text-gray-800 hover:bg-gray-100/50 hover:text-blue-600 transition-all duration-200 whitespace-nowrap {{ request()->routeIs('bumdes.profil') ? 'bg-blue-50/80 text-blue-600 font-semibold border-l-4 border-l-blue-500' : 'border-l-4 border-l-transparent hover:border-l-blue-400' }}">
-                                <span class="text-[14.5px] block text-left">Profil dan Layanan</span>
+                <div class="absolute top-full left-1/2 -translate-x-1/2 pt-2 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                    <div class="min-w-[200px] bg-white rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.1)] border border-gray-200 overflow-hidden">
+                        <div class="py-1.5">
+                            <a href="{{ route('bumdes.profil') }}" class="block px-4 py-2.5 text-gray-800 hover:bg-blue-50 hover:border-l-[3px] hover:border-l-blue-500 transition-all duration-150 whitespace-nowrap {{ request()->routeIs('bumdes.profil') ? 'bg-blue-50 border-l-[3px] border-l-blue-500 font-medium' : 'border-l-[3px] border-l-transparent' }}">
+                                <span class="text-[15px] font-normal text-center block">Profil dan Layanan</span>
                             </a>
-                            <div class="h-px bg-gray-200 mx-4 my-1"></div>
-                            <a href="{{ route('pelayanan') }}" class="block px-5 py-2.5 text-gray-800 hover:bg-gray-100/50 hover:text-blue-600 transition-all duration-200 whitespace-nowrap {{ request()->routeIs('pelayanan') ? 'bg-blue-50/80 text-blue-600 font-semibold border-l-4 border-l-blue-500' : 'border-l-4 border-l-transparent hover:border-l-blue-400' }}">
-                                <span class="text-[14.5px] block text-left">Tentang Layanan</span>
+                            <div class="h-px bg-gray-100 mx-3 my-1"></div>
+                            <a href="{{ route('pelayanan') }}" class="block px-4 py-2.5 text-gray-800 hover:bg-blue-50 hover:border-l-[3px] hover:border-l-blue-500 transition-all duration-150 whitespace-nowrap {{ request()->routeIs('pelayanan') ? 'bg-blue-50 border-l-[3px] border-l-blue-500 font-medium' : 'border-l-[3px] border-l-transparent' }}">
+                                <span class="text-[15px] font-normal text-center block">Tentang Layanan</span>
                             </a>
-                            <div class="h-px bg-gray-200 mx-4 my-1"></div>
-                            <a href="{{ route('bumdes.laporan') }}" class="block px-5 py-2.5 text-gray-800 hover:bg-gray-100/50 hover:text-blue-600 transition-all duration-200 whitespace-nowrap {{ request()->routeIs('bumdes.laporan') ? 'bg-blue-50/80 text-blue-600 font-semibold border-l-4 border-l-blue-500' : 'border-l-4 border-l-transparent hover:border-l-blue-400' }}">
-                                <span class="text-[14.5px] block text-left">Grafik Layanan</span>
+                            <div class="h-px bg-gray-100 mx-3 my-1"></div>
+                            <a href="{{ route('bumdes.laporan') }}" class="block px-4 py-2.5 text-gray-800 hover:bg-blue-50 hover:border-l-[3px] hover:border-l-blue-500 transition-all duration-150 whitespace-nowrap {{ request()->routeIs('bumdes.laporan') ? 'bg-blue-50 border-l-[3px] border-l-blue-500 font-medium' : 'border-l-[3px] border-l-transparent' }}">
+                                <span class="text-[15px] font-normal text-center block">Grafik Layanan</span>
                             </a>
                         </div>
                     </div>
@@ -133,25 +137,28 @@
                         </div>
                     </button>
 
-                    <div class="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-48 bg-white rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.1)] border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 overflow-hidden">
-                        <div class="py-1.5">
-                            <a href="{{ route('profile') }}" class="block px-4 py-2.5 text-gray-800 hover:bg-blue-50 hover:border-l-[3px] hover:border-l-blue-500 transition-all duration-150">
-                                <span class="text-[15px] font-normal text-center block">Profil</span>
-                            </a>
-                            <div class="h-px bg-gray-100 mx-3"></div>
-                            <a href="{{ route('user.activity') }}" class="block px-4 py-2.5 text-gray-800 hover:bg-blue-50 hover:border-l-[3px] hover:border-l-blue-500 transition-all duration-150">
-                                <span class="text-[15px] font-normal text-center block">Aktivitas</span>
-                            </a>
-                            <a href="{{ route('user.notifications') }}" class="block px-4 py-2.5 text-gray-800 hover:bg-blue-50 hover:border-l-[3px] hover:border-l-blue-500 transition-all duration-150">
-                                <span class="text-[15px] font-normal text-center block">Notifikasi</span>
-                            </a>
-                            <div class="h-px bg-gray-200 my-1"></div>
-                            <form action="{{ route('auth.logout') }}" method="POST">
-                                @csrf
-                                <button type="submit" class="block w-full px-4 py-2.5 text-red-600 hover:bg-red-50 hover:border-l-[3px] hover:border-l-red-500 transition-all duration-150 bg-transparent border-none outline-none cursor-pointer">
-                                    <span class="text-[15px] font-normal text-center block">Keluar</span>
-                                </button>
-                            </form>
+                    <!-- Wrapper padding transparan untuk jembatan hover agar tidak hilang -->
+                    <div class="absolute top-full left-1/2 -translate-x-1/2 pt-2 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                        <div class="w-48 bg-white rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.1)] border border-gray-200 overflow-hidden">
+                            <div class="py-1.5">
+                                <a href="{{ route('profile') }}" class="block px-4 py-2.5 text-gray-800 hover:bg-blue-50 hover:border-l-[3px] hover:border-l-blue-500 transition-all duration-150 border-l-[3px] border-l-transparent">
+                                    <span class="text-[15px] font-normal text-center block">Profil</span>
+                                </a>
+                                <div class="h-px bg-gray-100 mx-3 my-1"></div>
+                                <a href="{{ route('user.activity') }}" class="block px-4 py-2.5 text-gray-800 hover:bg-blue-50 hover:border-l-[3px] hover:border-l-blue-500 transition-all duration-150 border-l-[3px] border-l-transparent">
+                                    <span class="text-[15px] font-normal text-center block">Aktivitas</span>
+                                </a>
+                                <a href="{{ route('user.notifications') }}" class="block px-4 py-2.5 text-gray-800 hover:bg-blue-50 hover:border-l-[3px] hover:border-l-blue-500 transition-all duration-150 border-l-[3px] border-l-transparent">
+                                    <span class="text-[15px] font-normal text-center block">Notifikasi</span>
+                                </a>
+                                <div class="h-px bg-gray-100 mx-3 my-1"></div>
+                                <form action="{{ route('auth.logout') }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="block w-full px-4 py-2.5 text-red-600 hover:bg-red-50 hover:border-l-[3px] hover:border-l-red-500 transition-all duration-150 bg-transparent border-none outline-none cursor-pointer border-l-[3px] border-l-transparent">
+                                        <span class="text-[15px] font-normal text-center block">Keluar</span>
+                                    </button>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -185,52 +192,62 @@
 </nav>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const masterNavbar = document.getElementById('master-navbar');
+    const initMasterNavbar = function() {
         const masterToggle = document.getElementById('master-navbar-toggle');
-        const masterIconUp = document.getElementById('master-icon-up');
-        const masterIconDown = document.getElementById('master-icon-down');
 
-        if(masterToggle) {
+        if(masterToggle && !masterToggle.dataset.initialized) {
+            masterToggle.dataset.initialized = 'true';
             masterToggle.addEventListener('click', () => {
-                masterNavbar.classList.toggle('hidden-nav');
-                if(masterNavbar.classList.contains('hidden-nav')) {
-                    masterIconUp.style.display = 'none';
-                    masterIconDown.style.display = 'block';
+                const navbar = document.getElementById('master-navbar');
+                const iconUp = document.getElementById('master-icon-up');
+                const iconDown = document.getElementById('master-icon-down');
+                
+                if(!navbar) return;
+                navbar.classList.toggle('hidden-nav');
+                if(navbar.classList.contains('hidden-nav')) {
+                    if(iconUp) iconUp.style.display = 'none';
+                    if(iconDown) iconDown.style.display = 'block';
                 } else {
-                    masterIconUp.style.display = 'block';
-                    masterIconDown.style.display = 'none';
+                    if(iconUp) iconUp.style.display = 'block';
+                    if(iconDown) iconDown.style.display = 'none';
                 }
             });
         }
 
-        // Auto-hide navbar on scroll down
-        let lastScrollY = window.scrollY;
-        window.addEventListener('scroll', () => {
-            const currentScrollY = window.scrollY;
-            
-            if (currentScrollY > lastScrollY && currentScrollY > 50) {
-                // Scroll down: Hide navbar
-                if (!masterNavbar.classList.contains('hidden-nav')) {
-                    masterNavbar.classList.add('hidden-nav');
-                    if(masterIconUp && masterIconDown) {
-                        masterIconUp.style.display = 'none';
-                        masterIconDown.style.display = 'block';
+        if (!window.masterNavbarScrollInitialized) {
+            window.masterNavbarScrollInitialized = true;
+            let lastScrollY = window.scrollY;
+            window.addEventListener('scroll', () => {
+                const navbar = document.getElementById('master-navbar');
+                const iconUp = document.getElementById('master-icon-up');
+                const iconDown = document.getElementById('master-icon-down');
+                
+                if (!navbar) return;
+                
+                const currentScrollY = window.scrollY;
+                
+                if (currentScrollY > lastScrollY && currentScrollY > 50) {
+                    // Scroll down: Hide navbar
+                    if (!navbar.classList.contains('hidden-nav')) {
+                        navbar.classList.add('hidden-nav');
+                        if(iconUp) iconUp.style.display = 'none';
+                        if(iconDown) iconDown.style.display = 'block';
+                    }
+                } else if (currentScrollY < lastScrollY) {
+                    // Scroll up: Show navbar
+                    if (navbar.classList.contains('hidden-nav')) {
+                        navbar.classList.remove('hidden-nav');
+                        if(iconUp) iconUp.style.display = 'block';
+                        if(iconDown) iconDown.style.display = 'none';
                     }
                 }
-            } else if (currentScrollY < lastScrollY) {
-                // Scroll up: Show navbar
-                if (masterNavbar.classList.contains('hidden-nav')) {
-                    masterNavbar.classList.remove('hidden-nav');
-                    if(masterIconUp && masterIconDown) {
-                        masterIconUp.style.display = 'block';
-                        masterIconDown.style.display = 'none';
-                    }
-                }
-            }
-            lastScrollY = currentScrollY;
-        });
-    });
+                lastScrollY = currentScrollY;
+            });
+        }
+    };
+    
+    document.addEventListener('DOMContentLoaded', initMasterNavbar);
+    document.addEventListener('turbo:load', initMasterNavbar);
 </script>
 
 {{-- ================================================ --}}

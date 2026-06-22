@@ -19,20 +19,44 @@ class ActivityController extends Controller
         
         // Fetch user's rental bookings with product details
         $rentalBookings = RentalBooking::where('user_id', $user->id)
-            ->with('barang') // Assuming relationship exists
+            ->with('barang')
             ->orderBy('created_at', 'desc')
             ->get();
         
         // Fetch user's gas orders with gas details
         $gasOrders = GasOrder::where('user_id', $user->id)
-            ->with('gas') // Load gas relationship
+            ->with('gas')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // Fetch user's mobil bookings
+        $mobilBookings = \App\Models\MobilBooking::where('user_id', $user->id)
+            ->with('mobil')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // Fetch user's fasilitas umum bookings
+        $fasilitasBookings = \App\Models\FasilitasUmumBooking::where('user_id', $user->id)
+            ->with('fasilitas')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // Fetch user's laporan (Pelaporan Warga)
+        $laporans = \App\Models\Laporan::where('user_id', $user->id)
             ->orderBy('created_at', 'desc')
             ->get();
         
         // Fetch system settings for location
         $setting = SystemSetting::first();
         
-        return view('users.activity', compact('rentalBookings', 'gasOrders', 'setting'));
+        return view('users.activity', compact(
+            'rentalBookings', 
+            'gasOrders', 
+            'mobilBookings', 
+            'fasilitasBookings', 
+            'laporans', 
+            'setting'
+        ));
     }
 
     public function requestCancellation(Request $request, $type, $id)
@@ -42,42 +66,33 @@ class ActivityController extends Controller
         ]);
 
         if ($type === 'rental') {
-            $order = RentalBooking::where('id', $id)
-                ->where('user_id', Auth::id())
-                ->firstOrFail();
-            abort_if($order->user_id !== Auth::id(), 403, 'Unauthorized access');
-            
-            if (!$order->canBeCancelled()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Pesanan tidak dapat dibatalkan'
-                ], 400);
-            }
-
-            $order->update([
-                'cancellation_reason' => $request->reason,
-                'cancellation_requested_at' => now(),
-                'cancellation_status' => 'pending',
-            ]);
+            $order = RentalBooking::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
+            $reasonField = 'cancellation_reason';
+        } elseif ($type === 'gas') {
+            $order = GasOrder::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
+            $reasonField = 'cancellation_reason_user';
+        } elseif ($type === 'mobil') {
+            $order = \App\Models\MobilBooking::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
+            $reasonField = 'cancellation_reason';
+        } elseif ($type === 'fasilitas') {
+            $order = \App\Models\FasilitasUmumBooking::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
+            $reasonField = 'cancellation_reason';
         } else {
-            $order = GasOrder::where('id', $id)
-                ->where('user_id', Auth::id())
-                ->firstOrFail();
-            abort_if($order->user_id !== Auth::id(), 403, 'Unauthorized access');
-            
-            if (!$order->canBeCancelled()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Pesanan tidak dapat dibatalkan'
-                ], 400);
-            }
-
-            $order->update([
-                'cancellation_reason_user' => $request->reason,
-                'cancellation_requested_at' => now(),
-                'cancellation_status' => 'pending',
-            ]);
+            return response()->json(['success' => false, 'message' => 'Tipe tidak valid'], 400);
         }
+            
+        if (!$order->canBeCancelled()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Pesanan tidak dapat dibatalkan'
+            ], 400);
+        }
+
+        $order->update([
+            $reasonField => $request->reason,
+            'cancellation_requested_at' => now(),
+            'cancellation_status' => 'pending',
+        ]);
 
         // Create notification for admin
         Notification::create([
@@ -97,15 +112,19 @@ class ActivityController extends Controller
     public function destroy($type, $id)
     {
         if ($type === 'rental') {
-            $order = RentalBooking::where('id', $id)
-                ->where('user_id', Auth::id())
-                ->firstOrFail();
-            abort_if($order->user_id !== Auth::id(), 403, 'Unauthorized access');
+            $order = RentalBooking::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
+        } elseif ($type === 'gas') {
+            $order = GasOrder::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
+        } elseif ($type === 'mobil') {
+            $order = \App\Models\MobilBooking::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
+        } elseif ($type === 'fasilitas') {
+            $order = \App\Models\FasilitasUmumBooking::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
+        } elseif ($type === 'laporan') {
+            $order = \App\Models\Laporan::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
+            $order->delete();
+            return response()->json(['success' => true, 'message' => 'Riwayat berhasil dihapus']);
         } else {
-            $order = GasOrder::where('id', $id)
-                ->where('user_id', Auth::id())
-                ->firstOrFail();
-            abort_if($order->user_id !== Auth::id(), 403, 'Unauthorized access');
+            return response()->json(['success' => false, 'message' => 'Tipe tidak valid'], 400);
         }
 
         // Only allow deleting if status is completed, cancelled or rejected (Independent status)
@@ -128,9 +147,26 @@ class ActivityController extends Controller
         try {
             \Illuminate\Support\Facades\Log::info("Attempting to clear history for type: {$type}, User ID: " . Auth::id());
 
-            $query = ($type === 'rental') 
-                ? RentalBooking::where('user_id', Auth::id())
-                : GasOrder::where('user_id', Auth::id());
+            if ($type === 'rental') {
+                $query = RentalBooking::where('user_id', Auth::id());
+            } elseif ($type === 'gas') {
+                $query = GasOrder::where('user_id', Auth::id());
+            } elseif ($type === 'mobil') {
+                $query = \App\Models\MobilBooking::where('user_id', Auth::id());
+            } elseif ($type === 'fasilitas') {
+                $query = \App\Models\FasilitasUmumBooking::where('user_id', Auth::id());
+            } elseif ($type === 'laporan') {
+                $query = \App\Models\Laporan::where('user_id', Auth::id());
+                // For laporan, we can delete all
+                $orders = $query->get();
+                $count = $orders->count();
+                foreach ($orders as $order) {
+                    $order->delete();
+                }
+                return response()->json(['success' => true, 'message' => "Berhasil menghapus {$count} riwayat aktivitas."]);
+            } else {
+                return response()->json(['success' => false, 'message' => 'Tipe tidak valid'], 400);
+            }
 
             $orders = $query->whereIn('status', ['completed', 'cancelled', 'rejected'])->get();
             $count = $orders->count();

@@ -8,7 +8,7 @@
 
     {{-- UTAMA --}}<main class="flex-grow relative w-full overflow-x-hidden">
 
-        <!-- Layer khusus untuk efek blur di belakang navbar -->
+        <!-- Layer khusus untuk efek blur di belakang navbar (hanya di paling atas) -->
         <div id="navbar-blur-bg"></div>
 
         {{-- BAGIAN BERANDA --}}<section id="beranda" class="relative z-10">
@@ -107,7 +107,7 @@
 
             <!-- Search Results Section (Only visible if searching) -->
             @if(isset($search) && $search)
-            <div class="max-w-7xl mx-auto px-6 py-4">
+            <div id="search-results-section" class="max-w-7xl mx-auto px-6 py-4">
                 <div class="max-w-7xl mx-auto">
                     <div class="text-center mb-8 relative">
                         <h2 class="text-2xl font-bold text-gray-800">
@@ -159,7 +159,7 @@
             @endif
 
             <!-- Section Populer -->
-            <div class="max-w-7xl mx-auto px-6 py-12">
+            <div id="populer-section" class="max-w-7xl mx-auto px-6 py-12">
                 <div class="max-w-7xl mx-auto">
                     <!-- Judul Populer -->
                     <div class="text-center mb-8 relative">
@@ -204,7 +204,7 @@
             
             <!-- Section Pengumuman Terbaru -->
             @if(isset($recentAnnouncements) && $recentAnnouncements->count() > 0)
-            <div class="max-w-7xl mx-auto px-6 py-12 relative">
+            <div id="kabar-daerah-section" class="max-w-7xl mx-auto px-6 py-12 relative">
                 <!-- Decorative background elements -->
                 <div class="absolute top-0 right-0 w-64 h-64 bg-yellow-400/5 rounded-full filter blur-3xl"></div>
                 <div class="absolute bottom-0 left-0 w-80 h-80 bg-[#115789]/5 rounded-full filter blur-3xl"></div>
@@ -410,7 +410,7 @@
                     </div>
                 </div>
 
-                <div class="max-w-5xl mx-auto space-y-12">
+                <div id="charts-section" class="max-w-5xl mx-auto space-y-12">
                     <!-- Grafik Kinerja Layanan -->
                     <div>
                         <div
@@ -644,7 +644,13 @@
             background-position: top center;
             filter: blur(10px) brightness(0.95);
             transform: scale(1.05); /* Menghindari batas putih efek blur */
-            transition: background-image 0.5s ease, height 0.3s ease;
+            transition: background-image 0.5s ease, height 0.3s ease, opacity 0.3s ease;
+            opacity: 1; /* Default visible */
+        }
+        
+        #navbar-blur-bg.hidden-blur {
+            opacity: 0;
+            pointer-events: none;
         }
         
         #beranda {
@@ -851,7 +857,66 @@
                     console.error("Charts failed to initialize:", e);
                 }
                 this.initUnitCarousel();
-                this.initNavbarBlurSync();
+                this.initNavbarMarginSync();
+            },
+
+            // Sinkronisasi margin beranda dengan navbar dan fake blur
+            initNavbarMarginSync() {
+                const navbar = document.getElementById('master-navbar');
+                const berandaSection = document.getElementById('beranda');
+                const blurLayer = document.getElementById('navbar-blur-bg');
+
+                if (!navbar || !berandaSection) return;
+
+                const syncHeightAndMargin = () => {
+                    const navHeight = navbar.offsetHeight;
+                    
+                    if (navbar.classList.contains('hidden-nav')) {
+                        berandaSection.style.paddingTop = '0px';
+                        if (blurLayer) blurLayer.style.height = '0px';
+                    } else {
+                        berandaSection.style.paddingTop = navHeight + 'px';
+                        if (blurLayer) blurLayer.style.height = navHeight + 'px';
+                    }
+                    
+                    // Fade out fake blur when scrolled down
+                    if (blurLayer) {
+                        if (window.scrollY > 10) {
+                            blurLayer.classList.add('hidden-blur');
+                        } else {
+                            blurLayer.classList.remove('hidden-blur');
+                        }
+                    }
+                };
+
+                // Setup image sync for fake blur
+                if (blurLayer) {
+                    window.syncNavbarBlurImage = (slideIndex) => {
+                        const slideContainers = document.querySelectorAll('.carousel-slide');
+                        if(slideContainers[slideIndex]) {
+                            const img = slideContainers[slideIndex].querySelector('img');
+                            if (img) {
+                                const imgSrc = img.getAttribute('src');
+                                blurLayer.style.backgroundImage = `url('${imgSrc}')`;
+                            }
+                        }
+                    };
+                    setTimeout(() => { if (window.syncNavbarBlurImage) window.syncNavbarBlurImage(0); }, 50);
+                }
+
+                syncHeightAndMargin();
+                window.addEventListener('resize', syncHeightAndMargin);
+
+                const masterToggle = document.getElementById('master-navbar-toggle');
+                if (masterToggle) {
+                    masterToggle.addEventListener('click', () => {
+                        setTimeout(syncHeightAndMargin, 10);
+                    });
+                }
+                
+                window.addEventListener('scroll', () => {
+                    syncHeightAndMargin();
+                });
             },
 
             // Initialize Year & Region Selectors
@@ -869,13 +934,16 @@
                     url.searchParams.set('desa_id', desaSelect.value || 'all');
                     url.searchParams.set('year', globalYearSelect.value || new Date().getFullYear());
                     
-                    // Show subtle loading state on the whole main content
-                    const mainContent = document.getElementById('main-content');
-                    if (mainContent) {
-                        mainContent.style.transition = 'opacity 0.3s ease';
-                        mainContent.style.opacity = '0.5';
-                        mainContent.style.pointerEvents = 'none';
-                    }
+                    // Identify sections to update
+                    const sectionIds = ['search-results-section', 'populer-section', 'kabar-daerah-section', 'charts-section'];
+                    const elementsToDim = sectionIds.map(id => document.getElementById(id)).filter(Boolean);
+
+                    // Show subtle loading state only on affected sections
+                    elementsToDim.forEach(el => {
+                        el.style.transition = 'opacity 0.3s ease';
+                        el.style.opacity = '0.5';
+                        el.style.pointerEvents = 'none';
+                    });
 
                     try {
                         // Push state without reloading
@@ -892,28 +960,45 @@
                         const parser = new DOMParser();
                         const newDoc = parser.parseFromString(htmlString, 'text/html');
                         
-                        const newMainContent = newDoc.getElementById('main-content');
+                        let updatedAny = false;
                         
-                        if (newMainContent && mainContent) {
-                            mainContent.innerHTML = newMainContent.innerHTML;
-                            
-                            // Re-initialize EVERYTHING for the newly injected HTML
-                            try {
-                                BerandaPage.init();
-                            } catch (e) {
-                                console.error("Components failed to re-initialize:", e);
+                        // Replace only the specific sections
+                        sectionIds.forEach(id => {
+                            const oldEl = document.getElementById(id);
+                            const newEl = newDoc.getElementById(id);
+                            if (oldEl && newEl) {
+                                oldEl.innerHTML = newEl.innerHTML;
+                                updatedAny = true;
+                            } else if (oldEl && !newEl) {
+                                oldEl.innerHTML = ''; // Clear if removed
+                                updatedAny = true;
                             }
-                        } else {
+                        });
+                        
+                        // If we didn't find specific sections, fallback to full reload just in case
+                        if (!updatedAny) {
                             window.location.reload();
+                        } else {
+                            // Only re-initialize charts if charts-section was updated
+                            try {
+                                BerandaPage.initCharts();
+                            } catch (e) {
+                                console.error("Charts failed to re-initialize:", e);
+                            }
+                            
+                            // Re-init any other specific components inside those sections if needed
+                            // Note: We don't call BerandaPage.init() to avoid destroying select2 and carousel
                         }
                     } catch (error) {
                         console.error('AJAX failed, falling back to reload:', error);
                         window.location.reload();
                     } finally {
-                        if (mainContent) {
-                            mainContent.style.opacity = '1';
-                            mainContent.style.pointerEvents = 'auto';
-                        }
+                        // Restore opacity
+                        const elementsToRestore = sectionIds.map(id => document.getElementById(id)).filter(Boolean);
+                        elementsToRestore.forEach(el => {
+                            el.style.opacity = '1';
+                            el.style.pointerEvents = 'auto';
+                        });
                     }
                 };
 
@@ -1014,61 +1099,7 @@
                 startAutoSlide();
             },
 
-            // Sinkronisasi background blur navbar dengan gambar slider
-            initNavbarBlurSync() {
-                const navbar = document.getElementById('master-navbar');
-                const blurLayer = document.getElementById('navbar-blur-bg');
-                const berandaSection = document.getElementById('beranda');
-
-                if (!navbar || !blurLayer || !berandaSection) return;
-
-                const syncHeightAndMargin = () => {
-                    // Hanya set height navbar (offsetHeight), lalu kita push beranda ke bawah
-                    const navHeight = navbar.offsetHeight;
-                    
-                    if (navbar.classList.contains('hidden-nav')) {
-                        blurLayer.style.height = '0px';
-                        berandaSection.style.paddingTop = '0px';
-                    } else {
-                        blurLayer.style.height = navHeight + 'px';
-                        berandaSection.style.paddingTop = navHeight + 'px';
-                    }
-                };
-
-                // Panggil sekarang
-                syncHeightAndMargin();
-                window.addEventListener('resize', syncHeightAndMargin);
-
-                // Buat global agar bisa dipanggil dari initCarousel saat gambar berganti
-                window.syncNavbarBlurImage = (slideIndex) => {
-                    // Cari semua elemen carousel-slide
-                    const slideContainers = document.querySelectorAll('.carousel-slide');
-                    if(slideContainers[slideIndex]) {
-                        // Ambil img di dalam slide container itu
-                        const img = slideContainers[slideIndex].querySelector('img');
-                        if (img) {
-                            const imgSrc = img.getAttribute('src');
-                            blurLayer.style.backgroundImage = `url('${imgSrc}')`;
-                        }
-                    }
-                };
-
-                // Set gambar pertama saat init (memberi sedikit delay agar DOM gambar ready)
-                setTimeout(() => { window.syncNavbarBlurImage(0); }, 50);
-
-                // Sinkron saat toggle menu
-                const masterToggle = document.getElementById('master-navbar-toggle');
-                if (masterToggle) {
-                    masterToggle.addEventListener('click', () => {
-                        setTimeout(syncHeightAndMargin, 10);
-                    });
-                }
-                
-                // Saat scroll, navbar bisa hide/show
-                window.addEventListener('scroll', () => {
-                    syncHeightAndMargin();
-                });
-            },
+            // Sinkronisasi background blur navbar dihilangkan, sekarang menggunakan CSS native
 
             // Charts initialization
             initCharts() {

@@ -42,15 +42,23 @@ class PartnerApplicationController extends Controller
             return back()->with('error', 'Anda tidak memiliki akses untuk menyetujui aplikasi ini.');
         }
 
-        // Create Region
-        $region = Region::create([
-            'name' => $application->region_name,
-            'type' => $application->region_type,
-            'parent_id' => $application->parent_region_id,
-            'profile_text' => 'Profil ' . $application->region_name,
-            'contact_phone' => $application->contact_phone,
-            'contact_email' => $application->contact_email,
-        ]);
+        // Create or Find Region to prevent duplicates
+        $regionName = $application->region_type === 'desa' && !str_starts_with(strtolower($application->region_name), 'desa') && !str_starts_with(strtolower($application->region_name), 'kelurahan') 
+            ? 'Desa ' . $application->region_name 
+            : $application->region_name;
+
+        if ($application->region_type === 'kecamatan' && !str_starts_with(strtolower($application->region_name), 'kecamatan')) {
+            $regionName = 'Kecamatan ' . $application->region_name;
+        }
+
+        $region = Region::firstOrCreate(
+            ['name' => $regionName, 'type' => $application->region_type, 'parent_id' => $application->parent_region_id],
+            [
+                'profile_text' => 'Profil ' . $regionName,
+                'contact_phone' => $application->contact_phone,
+                'contact_email' => $application->contact_email,
+            ]
+        );
 
         // If Desa/Kelurahan, auto-activate services (Penyewaan, Gas, Pelaporan)
         if ($application->region_type === 'desa') {

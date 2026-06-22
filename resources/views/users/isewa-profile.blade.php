@@ -5,11 +5,11 @@
     <section class="relative z-10 min-h-screen pt-40 pb-16">
         <!-- Animated Background Wrapper -->
         <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-            <div id="animated-bg" class="absolute inset-0 bg-cover bg-top bg-no-repeat opacity-0 scale-105 transition-all duration-1000 ease-out" 
-                 style="background-image: url('{{ asset('Admin/img/elements/background1.png') }}');">
+            <div id="animated-bg" class="absolute inset-0 bg-cover bg-top bg-no-repeat transition-all duration-1000 ease-out" 
+                 style="background-image: url('{{ asset('Admin/img/elements/background.png') }}');">
             </div>
             <!-- White Overlay -->
-            <div class="absolute inset-0 bg-white/25"></div>
+            <div class="absolute inset-0 bg-white/10"></div>
         </div>
 
         <div class="max-w-6xl mx-auto px-6 relative z-20">
@@ -28,7 +28,7 @@
                             Perjalanan <span class="font-semibold text-gray-800">SiladesBeng</span> (Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis) bermula dari sebuah visi besar untuk mendorong percepatan digitalisasi pelayanan publik di wilayah Kabupaten Bengkalis. Gagasan ini lahir sebagai solusi inovatif untuk memutus kendala jarak dan mengoptimalkan potensi desa melalui pemanfaatan teknologi. Mimpi utama kami adalah menghubungkan seluruh jaringan kecamatan hingga ke pelosok desa ke dalam satu ekosistem digital yang canggih, terpadu, dan mudah diakses oleh seluruh lapisan masyarakat.
                         </p>
                         <p class="text-gray-700 leading-relaxed">
-                            Sebagai wujud nyata dari visi tersebut, SilaDesBeng hadir mengintegrasikan berbagai pilar layanan publik esensial, mulai dari sarana mobilitas (kendaraan), pemanfaatan fasilitas umum, hingga penyewaan alat dan pendistribusian gas. Lebih jauh lagi, kami juga menghadirkan ruang interaksi inklusif melalui fitur Pelaporan Warga dan Informasi Pengumuman. Cerita SilaDesBeng adalah cerita tentang inovasi dan kolaborasi—bagaimana sentuhan teknologi mentransformasi cara masyarakat dan aparatur berinteraksi demi mewujudkan tata kelola Bengkalis yang mandiri, produktif, dan berkelanjutan.
+                            Sebagai wujud nyata dari visi tersebut, SilaDesBeng hadir mengintegrasikan berbagai pilar layanan publik esensial, mulai dari sarana mobilitas (kendaraan), pemanfaatan fasilitas umum, hingga penyewaan alat dan pendistribusian gas. Lebih jauh lagi, kami juga menghadirkan ruang interaksi inklusif melalui fitur Pelaporan Warga dan Informasi Pengumuman. Cerita SilaDesBeng adalah cerita tentang inovasi dan kolaborasi bagaimana sentuhan teknologi mentransformasi cara masyarakat dan aparatur berinteraksi demi mewujudkan tata kelola Bengkalis yang mandiri, produktif, dan berkelanjutan.
                         </p>
                     </div>
                     
@@ -289,8 +289,7 @@
         const bg = document.getElementById('animated-bg');
         if (bg) {
             setTimeout(() => {
-                bg.classList.remove('opacity-0', 'scale-110');
-                bg.classList.add('opacity-100', 'scale-100');
+                bg.classList.add('scale-105');
             }, 50);
         }
 

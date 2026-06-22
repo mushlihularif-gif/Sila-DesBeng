@@ -152,29 +152,26 @@
 
                 // Efek Scroll Navbar
                 initScrollEffect() {
-                    const navbar = document.querySelector('nav');
-                    if (!navbar) return;
+                    if (!window.userNavbarScrollHandler) {
+                        window.userNavbarScrollHandler = () => {
+                            const navbar = document.querySelector('.sd-navbar');
+                            if (!navbar) return;
+                            
+                            if (window.scrollY > 10) {
+                                navbar.classList.add('scrolled');
+                            } else {
+                                navbar.classList.remove('scrolled');
+                            }
+                        };
 
-                    const handleScroll = () => {
-                        // Cek jika width desktop (>= 1024px), jangan ubah background
-                        if (window.innerWidth >= 1024) {
-                            navbar.classList.remove('bg-white/90', 'backdrop-blur-md', 'shadow-sm');
-                            navbar.classList.add('bg-white/10');
-                            return;
-                        }
-                        
-                        if (window.scrollY > 10) {
-                            navbar.classList.add('bg-white/90', 'backdrop-blur-md', 'shadow-sm');
-                            navbar.classList.remove('bg-white/10');
-                        } else {
-                            navbar.classList.remove('bg-white/90', 'backdrop-blur-md', 'shadow-sm');
-                            navbar.classList.add('bg-white/10');
-                        }
-                    };
-
-                    window.addEventListener('scroll', handleScroll);
-                    // Listen to resize to reset if switching modes
-                    window.addEventListener('resize', handleScroll);
+                        window.addEventListener('scroll', window.userNavbarScrollHandler);
+                        window.addEventListener('resize', window.userNavbarScrollHandler);
+                    }
+                    
+                    // Trigger once on init
+                    if(window.userNavbarScrollHandler) {
+                        window.userNavbarScrollHandler();
+                    }
                 },
 
                 // Handler untuk tombol auth di mobile

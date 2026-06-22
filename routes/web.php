@@ -483,3 +483,63 @@ Route::get('/dev/setup-region', function () {
 
     return 'Assigned Region ID: ' . $region->id . ' to User: ' . $user->email;
 });
+
+Route::get('/dev/fix-duplicates', function () {
+    try {
+        $correctKecamatan = \App\Models\Region::where('name', 'Kecamatan Bengkalis')->first();
+        $correctDesa = \App\Models\Region::where('name', 'Desa Pematang Duku Timur')->first();
+        
+        $messages = [];
+
+        if ($correctKecamatan && $correctDesa) {
+            // Fix ALL Duplicate Kecamatan Bengkalis
+            $duplicateKecamatans = \App\Models\Region::whereIn('name', ['Bengkalis', 'Kecamatan Bengkalis'])
+                ->where('type', 'kecamatan')
+                ->where('id', '!=', $correctKecamatan->id)
+                ->get();
+                
+            foreach ($duplicateKecamatans as $dupKec) {
+                // Move children
+                \App\Models\Region::where('parent_id', $dupKec->id)->update(['parent_id' => $correctKecamatan->id]);
+                // Move users
+                \App\Models\User::where('region_id', $dupKec->id)->update(['region_id' => $correctKecamatan->id]);
+                $dupKec->delete();
+                $messages[] = 'Duplicate Kecamatan Bengkalis fixed (ID: ' . $dupKec->id . ').';
+            }
+
+            // Fix ALL Duplicate Desa Pematang Duku Timur
+            $duplicates = \App\Models\Region::whereIn('name', ['Pematang Duku Timur', 'Desa Pematang Duku Timur'])
+                ->where('type', 'desa')
+                ->where('id', '!=', $correctDesa->id)
+                ->get();
+            
+            foreach ($duplicates as $dup) {
+                \App\Models\User::where('region_id', $dup->id)->update(['region_id' => $correctDesa->id]);
+                // Move any child data (like services)
+                foreach($dup->services as $service) {
+                    $correctDesa->services()->syncWithoutDetaching([$service->id => ['is_active' => true]]);
+                }
+                $dup->delete();
+                $messages[] = 'Duplicate Desa Pematang Duku Timur fixed (ID: ' . $dup->id . ').';
+            }
+            
+            // Re-check how many desas are actually under correct kecamatan
+            $totalDesa = \App\Models\Region::where('parent_id', $correctKecamatan->id)->where('type', 'desa')->count();
+            $messages[] = "Total Desa under Kecamatan Bengkalis is now: " . $totalDesa;
+        }
+        
+        return count($messages) > 0 ? implode('<br>', $messages) : 'No duplicates found or missing correct regions.';
+    } catch (\Exception $e) {
+        return 'Error: ' . $e->getMessage();
+    }
+});
+
+Route::get('/dev/check-regions', function () {
+    $regions = \App\Models\Region::orderBy('type')->orderBy('name')->get();
+    $html = '<table border="1" cellpadding="5"><tr><th>ID</th><th>Name</th><th>Type</th><th>Parent ID</th></tr>';
+    foreach ($regions as $r) {
+        $html .= "<tr><td>{$r->id}</td><td>{$r->name}</td><td>{$r->type}</td><td>{$r->parent_id}</td></tr>";
+    }
+    $html .= '</table>';
+    return $html;
+});

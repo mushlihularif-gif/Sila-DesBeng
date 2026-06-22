@@ -209,6 +209,21 @@ class BerandaController extends Controller
             $regionId = (int)$desaId;
         } elseif ($kecamatanId !== 'all' && !empty($kecamatanId)) {
             $regionId = (int)$kecamatanId;
+        } else {
+            // Default to user's region if logged in and no filter is explicitly applied
+            if (auth()->check() && auth()->user()->region_id) {
+                $userRegion = \App\Models\Region::find(auth()->user()->region_id);
+                if ($userRegion) {
+                    if ($userRegion->type === 'desa' || $userRegion->type === 'kelurahan') {
+                        $desaId = $userRegion->id;
+                        $kecamatanId = $userRegion->parent_id ?? 'all';
+                        $regionId = $userRegion->id;
+                    } elseif ($userRegion->type === 'kecamatan') {
+                        $kecamatanId = $userRegion->id;
+                        $regionId = $userRegion->id;
+                    }
+                }
+            }
         }
 
         // Prepare Region Data for Dropdowns

@@ -85,7 +85,7 @@
                             <span class="bg-gradient-to-r from-[#1a1a1a] via-[#0099ff] to-[#33b5ff] bg-clip-text text-transparent">Layanan</span>
                         </h3>
                     </div>
-                    <div class="bg-white/50 backdrop-blur-sm rounded-2xl p-5 border border-gray-100">
+                    <div class="bg-white/50 backdrop-blur-sm rounded-2xl p-5 border border-gray-100" style="min-height: 340px;">
                         <div id="kinerjaChart" data-chart='@json($kinerjaData)'></div>
                     </div>
                     <p class="text-sm text-gray-600 mt-4 leading-relaxed">
@@ -103,7 +103,7 @@
                             <span class="bg-gradient-to-r from-[#1a1a1a] via-[#0099ff] to-[#33b5ff] bg-clip-text text-transparent">Populer</span>
                         </h3>
                     </div>
-                    <div class="bg-white/50 backdrop-blur-sm rounded-2xl p-5 mb-5 border border-gray-100">
+                    <div class="bg-white/50 backdrop-blur-sm rounded-2xl p-5 mb-5 border border-gray-100" style="min-height: 340px;">
                         <div id="unitChart" data-chart='@json($unitPopulerData)'></div>
                     </div>
                     <!-- Legend - 6 Units -->
@@ -215,7 +215,7 @@
                         </div>
 
                         <!-- Right: Pie Chart -->
-                        <div class="flex items-center justify-center">
+                        <div class="flex items-center justify-center" style="min-height: 280px;">
                             <div id="pendapatanPieChart" class="w-full max-w-sm" data-chart='@json($totalPendapatanData)'></div>
                         </div>
                     </div>
@@ -357,6 +357,7 @@
                 const newMainContent = newDoc.getElementById('main-content');
                 
                 if (newMainContent && mainContent) {
+                    const scrollPos = window.scrollY; // Save scroll position
                     mainContent.innerHTML = newMainContent.innerHTML;
                     
                     // Re-bind events to new DOM elements
@@ -399,6 +400,9 @@
                             bg.classList.add('opacity-100', 'scale-100');
                         }, 50);
                     }
+                    
+                    // Restore scroll position
+                    window.scrollTo(0, scrollPos);
                 } else {
                     window.location.reload();
                 }
