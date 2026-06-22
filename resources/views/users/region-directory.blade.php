@@ -4,7 +4,7 @@
 <main class="flex-grow relative w-full">
     <section class="relative z-10 min-h-screen pt-40 pb-16">
         {{-- Background Image --}}
-        <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <div class="fixed inset-0 pointer-events-none overflow-hidden z-0" style="will-change: transform; transform: translateZ(0);">
             <img src="{{ asset('Admin/img/elements/background.png') }}" class="w-full h-full object-cover" alt="">
         </div>
 

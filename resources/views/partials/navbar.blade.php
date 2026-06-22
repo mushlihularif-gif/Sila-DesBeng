@@ -11,14 +11,17 @@
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-            padding: 0 !important; transition: background-color 0.3s, backdrop-filter 0.3s, transform 0.3s ease-in-out;
+            padding: 0 !important; 
+            transition: background-color 0.3s, backdrop-filter 0.3s, transform 0.3s ease-in-out;
+            will-change: transform, backdrop-filter, background-color;
+            transform: translateZ(0);
         }
         .sd-navbar.scrolled {
             background: rgba(255, 255, 255, 0.2) !important;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
         }
         .sd-navbar.hidden-nav {
-            transform: translateY(-100%);
+            transform: translateY(-100%) translateZ(0);
         }
         .sd-navbar-toggle {
             position: absolute; bottom: -28px; right: 32px;

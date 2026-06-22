@@ -6,7 +6,7 @@
     <!-- Bagian Carousel -->
 
 
-    {{-- UTAMA --}}<main class="flex-grow relative w-full overflow-x-hidden">
+    {{-- UTAMA --}}<main class="flex-grow relative w-full overflow-x-clip">
 
         <!-- Layer khusus untuk efek blur di belakang navbar (hanya di paling atas) -->
         <div id="navbar-blur-bg"></div>
@@ -655,16 +655,16 @@
             background-size: cover;
             background-position: top center;
             filter: blur(10px) brightness(0.95);
-            transform: scale(1.05); /* Menghindari batas putih efek blur */
-            transition: background-image 0.5s ease, height 0.3s ease, opacity 0.3s ease;
+            transform: translateZ(0) scale(1.05); /* HW acceleration */
+            transition: height 0.3s ease, opacity 0.3s ease;
             opacity: 1; /* Default visible */
+            pointer-events: none; /* Cegah intersep scroll */
+            will-change: transform, opacity, height;
         }
         
         #navbar-blur-bg.hidden-blur {
             opacity: 0;
-            pointer-events: none;
-        }
-        
+        }        
         #beranda {
             transition: padding-top 0.3s ease;
         }
@@ -877,44 +877,38 @@
                 const navbar = document.getElementById('master-navbar');
                 const berandaSection = document.getElementById('beranda');
                 const blurLayer = document.getElementById('navbar-blur-bg');
-
+                
                 if (!navbar || !berandaSection) return;
 
-                let cachedNavHeight = navbar.offsetHeight;
-                let lastNavState = null;
                 let lastScrollState = null;
-                let ticking = false;
+                let cachedNavHeight = navbar.offsetHeight;
 
                 const syncHeightAndMargin = () => {
-                    const isHidden = navbar.classList.contains('hidden-nav');
+                    const currentScrollY = window.scrollY;
+                    const isScrolled = currentScrollY > 10;
                     
-                    if (lastNavState !== isHidden) {
-                        if (isHidden) {
-                            berandaSection.style.paddingTop = '0px';
-                            if (blurLayer) blurLayer.style.height = '0px';
+                    // Handle blur fade out naturally
+                    if (blurLayer && lastScrollState !== isScrolled) {
+                        if (isScrolled) {
+                            blurLayer.classList.add('hidden-blur');
                         } else {
-                            berandaSection.style.paddingTop = cachedNavHeight + 'px';
-                            if (blurLayer) blurLayer.style.height = cachedNavHeight + 'px';
+                            blurLayer.classList.remove('hidden-blur');
                         }
-                        lastNavState = isHidden;
+                        lastScrollState = isScrolled;
                     }
-                    
-                    // Fade out fake blur when scrolled down
-                    if (blurLayer) {
-                        const isScrolled = window.scrollY > 10;
-                        if (lastScrollState !== isScrolled) {
-                            if (isScrolled) {
-                                blurLayer.classList.add('hidden-blur');
-                            } else {
-                                blurLayer.classList.remove('hidden-blur');
-                            }
-                            lastScrollState = isScrolled;
-                        }
+
+                    // Reset padding to normal if we reach the absolute top and navbar is shown
+                    if (currentScrollY <= 10 && !navbar.classList.contains('hidden-nav')) {
+                        berandaSection.style.paddingTop = cachedNavHeight + 'px';
+                        if (blurLayer) blurLayer.style.height = cachedNavHeight + 'px';
                     }
                 };
 
                 // Setup image sync for fake blur
                 if (blurLayer) {
+                    if (window.syncNavbarBlurImage) {
+                        window.syncNavbarBlurImage(0);
+                    }
                     window.syncNavbarBlurImage = (slideIndex) => {
                         const slideContainers = document.querySelectorAll('.carousel-slide');
                         if(slideContainers[slideIndex]) {
@@ -928,21 +922,14 @@
                     setTimeout(() => { if (window.syncNavbarBlurImage) window.syncNavbarBlurImage(0); }, 50);
                 }
 
-                syncHeightAndMargin();
-                window.addEventListener('resize', () => {
-                    cachedNavHeight = navbar.offsetHeight;
-                    lastNavState = null; // force update
-                    syncHeightAndMargin();
-                });
-
-                const masterToggle = document.getElementById('master-navbar-toggle');
-                if (masterToggle) {
-                    masterToggle.addEventListener('click', () => {
-                        setTimeout(syncHeightAndMargin, 10);
-                    });
+                // Clear previous listeners if any (Turbo Drive support)
+                if (window.berandaScrollHandler) {
+                    window.removeEventListener('scroll', window.berandaScrollHandler);
+                    window.removeEventListener('resize', window.berandaResizeHandler);
                 }
-                
-                window.addEventListener('scroll', () => {
+
+                let ticking = false;
+                window.berandaScrollHandler = () => {
                     if (!ticking) {
                         window.requestAnimationFrame(() => {
                             syncHeightAndMargin();
@@ -950,7 +937,31 @@
                         });
                         ticking = true;
                     }
-                });
+                };
+
+                window.berandaResizeHandler = () => {
+                    cachedNavHeight = navbar.offsetHeight;
+                    lastNavState = null; // force update
+                    syncHeightAndMargin();
+                };
+
+                syncHeightAndMargin();
+
+                window.addEventListener('resize', window.berandaResizeHandler);
+                window.addEventListener('scroll', window.berandaScrollHandler);
+
+                const masterToggle = document.getElementById('master-navbar-toggle');
+                if (masterToggle && !masterToggle.dataset.berandaToggle) {
+                    masterToggle.dataset.berandaToggle = 'true';
+                    masterToggle.addEventListener('click', () => {
+                        // KUNCI PERBAIKAN: Hanya ubah padding saat tombol toggle DITEKAN secara manual!
+                        setTimeout(() => {
+                            const isHidden = navbar.classList.contains('hidden-nav');
+                            berandaSection.style.paddingTop = isHidden ? '0px' : cachedNavHeight + 'px';
+                            if (blurLayer) blurLayer.style.height = isHidden ? '0px' : cachedNavHeight + 'px';
+                        }, 10);
+                    });
+                }
             },
 
             // Initialize Year & Region Selectors

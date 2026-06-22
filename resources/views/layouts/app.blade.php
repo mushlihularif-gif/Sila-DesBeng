@@ -34,7 +34,7 @@
     {{-- Page-specific styles --}}
     @stack('styles')
 </head>
-<body class="antialiased text-gray-900 bg-white min-h-screen flex flex-col overflow-x-hidden">
+<body class="antialiased text-gray-900 bg-white min-h-screen flex flex-col overflow-x-clip">
 
     {{-- Main content --}}
     @yield('content')

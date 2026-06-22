@@ -95,11 +95,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function showToast(message, type = 'success') {
         const toast = document.createElement('div');
-        toast.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg text-white z-[60] transform transition-all duration-300 translate-x-full ${
+        toast.className = `sd-toast fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg text-white z-[60] transform transition-all duration-300 translate-x-full ${
             type === 'success' ? 'bg-green-500' : 'bg-red-500'
         }`;
         toast.textContent = message;
         document.body.appendChild(toast);
+
+        if (!window.toastProfileCacheHandlerAdded) {
+            document.addEventListener('turbo:before-cache', () => {
+                document.querySelectorAll('.sd-toast').forEach(t => t.remove());
+            });
+            window.toastProfileCacheHandlerAdded = true;
+        }
 
         setTimeout(() => toast.classList.remove('translate-x-full'), 100);
         setTimeout(() => {
