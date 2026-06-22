@@ -2,11 +2,15 @@
 
 @section('page')
 <main class="flex-grow relative w-full">
-    <section class="relative z-10 min-h-screen pt-32 pb-16 bg-cover bg-center bg-no-repeat bg-fixed" 
-             style="background-image: url('{{ asset('Admin/img/elements/background1.png') }}');">
-        
-        <!-- White Overlay -->
-        <div class="absolute inset-0 bg-white/25 pointer-events-none"></div>
+    <section class="relative z-10 min-h-screen pt-32 pb-16">
+        <!-- Static Background Wrapper -->
+        <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+            <div class="absolute inset-0 bg-cover bg-top bg-no-repeat" 
+                 style="background-image: url('{{ asset('Admin/img/elements/background1.png') }}');">
+            </div>
+            <!-- White Overlay -->
+            <div class="absolute inset-0 bg-white/25"></div>
+        </div>
 
         <div class="max-w-5xl mx-auto px-6 relative z-20">
             <!-- Header with Gradient Text (Centered) -->

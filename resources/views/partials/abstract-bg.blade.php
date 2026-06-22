@@ -6,14 +6,38 @@
 <script>
     // Canvas Vector Abstract Background Script
     (() => {
+        // Hentikan animasi sebelumnya jika ada (Mencegah Lag pada Turbolinks/Turbo)
+        if (window.abstractBgAnimationId) {
+            cancelAnimationFrame(window.abstractBgAnimationId);
+        }
+
         const initCanvas = () => {
         const canvas = document.getElementById('abstract-canvas');
         if (!canvas) return;
         const ctx = canvas.getContext('2d');
         
         let width, height;
+        // Gunakan state global agar event listener tidak bertumpuk
+        if (!window.abstractBgState) {
+            window.abstractBgState = {
+                targetMouse: { x: -1000, y: -1000 },
+                scrollY: window.scrollY
+            };
+
+            window.addEventListener('mousemove', (e) => {
+                window.abstractBgState.targetMouse.x = e.clientX;
+                window.abstractBgState.targetMouse.y = e.clientY;
+            });
+            window.addEventListener('mouseout', () => {
+                window.abstractBgState.targetMouse.x = -1000;
+                window.abstractBgState.targetMouse.y = -1000;
+            });
+            window.addEventListener('scroll', () => {
+                window.abstractBgState.scrollY = window.scrollY;
+            });
+        }
+
         let mouse = { x: -1000, y: -1000 };
-        let targetMouse = { x: -1000, y: -1000 };
 
         function resize() {
             if (width !== window.innerWidth || height !== window.innerHeight) {
@@ -25,21 +49,12 @@
             }
         }
 
-        window.addEventListener('resize', resize);
-
-        window.addEventListener('mousemove', (e) => {
-            targetMouse.x = e.clientX;
-            targetMouse.y = e.clientY;
-        });
-        window.addEventListener('mouseout', () => {
-            targetMouse.x = -1000;
-            targetMouse.y = -1000;
-        });
-
-        let scrollY = window.scrollY;
-        window.addEventListener('scroll', () => {
-            scrollY = window.scrollY;
-        });
+        // Hapus listener resize lama jika ada
+        if (window.abstractBgResize) {
+            window.removeEventListener('resize', window.abstractBgResize);
+        }
+        window.abstractBgResize = resize;
+        window.addEventListener('resize', window.abstractBgResize);
 
         class Wave {
             constructor(getGradient, yOffset, amplitude, speed, wavelength) {
@@ -151,8 +166,8 @@
 
         function animate() {
             // Lerp mouse
-            mouse.x += (targetMouse.x - mouse.x) * 0.1;
-            mouse.y += (targetMouse.y - mouse.y) * 0.1;
+            mouse.x += (window.abstractBgState.targetMouse.x - mouse.x) * 0.1;
+            mouse.y += (window.abstractBgState.targetMouse.y - mouse.y) * 0.1;
 
             // Background layer solid (agar saat parallax tidak bolong)
             ctx.fillStyle = '#e8eff5'; 
@@ -160,7 +175,7 @@
 
             ctx.save();
             // Terapkan Parallax Scrolling (Background bergerak 40% kecepatan scroll content)
-            ctx.translate(0, -scrollY * 0.4); 
+            ctx.translate(0, -window.abstractBgState.scrollY * 0.4); 
 
             // Cahaya Matahari Halus (Kiri) - Diperhalus
             let glowX = width * 0.15;
@@ -207,7 +222,7 @@
             ctx.restore(); // Restore efek rotasi wajik
             ctx.restore(); // Restore efek Parallax Scroll
 
-            requestAnimationFrame(animate);
+            window.abstractBgAnimationId = requestAnimationFrame(animate);
         }
 
         resize();

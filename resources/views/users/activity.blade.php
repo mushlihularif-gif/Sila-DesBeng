@@ -2,11 +2,15 @@
 
 @section('page')
 <main class="flex-grow relative w-full">
-    <section class="relative z-10 min-h-screen pt-32 pb-16 bg-cover bg-center bg-no-repeat bg-fixed" 
-             style="background-image: url('{{ asset('Admin/img/elements/background1.png') }}');">
-        
-        <!-- White Overlay -->
-        <div class="absolute inset-0 bg-white/25 pointer-events-none"></div>
+    <section class="relative z-10 min-h-screen pt-32 pb-16">
+        <!-- Static Background Wrapper -->
+        <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+            <div class="absolute inset-0 bg-cover bg-top bg-no-repeat" 
+                 style="background-image: url('{{ asset('Admin/img/elements/background1.png') }}');">
+            </div>
+            <!-- White Overlay -->
+            <div class="absolute inset-0 bg-white/25"></div>
+        </div>
 
         <div class="max-w-5xl mx-auto px-6 relative z-20">
             <!-- Header dengan Teks Gradien (Tengah) -->
@@ -69,7 +73,6 @@
                 </div>
             </div>
 
-<<<<<<< HEAD
             <!-- Clear History Buttons (Moved to Top) -->
             <div class="flex justify-center mt-4 mb-8">
                 <button type="button" 
@@ -103,14 +106,14 @@
                         data-type="laporan">
                     <i class="fas fa-trash-alt mr-2"></i>Bersihkan Riwayat Laporan Warga
                 </button>
-=======
+            </div>
+
             <div class="flex flex-wrap justify-center gap-2 lg:gap-3 mt-2 mb-6" id="status-filters">
                 <button class="filter-btn active bg-blue-50 text-blue-700 border border-blue-500 px-4 py-1.5 rounded-lg font-bold shadow-md transition-all text-sm" data-filter="all">Semua</button>
                 <button class="filter-btn bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-900 px-4 py-1.5 rounded-lg font-semibold transition-all text-sm shadow-sm" data-filter="pending">Menunggu</button>
                 <button class="filter-btn bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-900 px-4 py-1.5 rounded-lg font-semibold transition-all text-sm shadow-sm" data-filter="confirmed">Dikonfirmasi</button>
                 <button class="filter-btn bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-900 px-4 py-1.5 rounded-lg font-semibold transition-all text-sm shadow-sm" data-filter="completed">Selesai</button>
                 <button class="filter-btn bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-900 px-4 py-1.5 rounded-lg font-semibold transition-all text-sm shadow-sm" data-filter="cancelled">Batal</button>
->>>>>>> b542fba61b53895ab5bd75255171e712c75e209e
             </div>
 
             <!-- Bagian Pesanan Sewa -->
@@ -692,12 +695,11 @@
                 </div>
                 @endforelse
             </div>
-<<<<<<< HEAD
 
             <!-- Mobil Orders Section -->
             <div id="mobil-section" class="activity-section space-y-6 hidden">
                 @forelse($mobilBookings as $booking)
-                <div class="bg-white rounded-2xl shadow-lg overflow-hidden activity-item" id="activity-mobil-{{ $booking->id }}">
+                <div class="bg-white rounded-2xl shadow-lg overflow-hidden activity-item" id="activity-mobil-{{ $booking->id }}" data-status="{{ strtolower($booking->status) }}">
                     <div class="p-6">
                         <div class="flex flex-col sm:flex-row gap-6">
                             <div class="w-full sm:w-32 h-48 sm:h-32 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -739,7 +741,7 @@
             <!-- Fasilitas Umum Orders Section -->
             <div id="fasilitas-section" class="activity-section space-y-6 hidden">
                 @forelse($fasilitasBookings as $booking)
-                <div class="bg-white rounded-2xl shadow-lg overflow-hidden activity-item" id="activity-fasilitas-{{ $booking->id }}">
+                <div class="bg-white rounded-2xl shadow-lg overflow-hidden activity-item" id="activity-fasilitas-{{ $booking->id }}" data-status="{{ strtolower($booking->status) }}">
                     <div class="p-6">
                         <div class="flex flex-col sm:flex-row gap-6">
                             <div class="w-full sm:w-32 h-48 sm:h-32 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -781,7 +783,7 @@
             <!-- Laporan Warga Section -->
             <div id="laporan-section" class="activity-section space-y-6 hidden">
                 @forelse($laporans as $laporan)
-                <div class="bg-white rounded-2xl shadow-lg overflow-hidden activity-item" id="activity-laporan-{{ $laporan->id }}">
+                <div class="bg-white rounded-2xl shadow-lg overflow-hidden activity-item" id="activity-laporan-{{ $laporan->id }}" data-status="{{ strtolower($laporan->status) }}">
                     <div class="p-6">
                         <div class="flex flex-col sm:flex-row gap-6">
                             <div class="w-full sm:w-32 h-48 sm:h-32 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -810,10 +812,8 @@
                 @endforelse
             </div>
 
-=======
         </div>
     </section>
->>>>>>> b542fba61b53895ab5bd75255171e712c75e209e
 </main>
 @endsection
 
@@ -846,7 +846,6 @@
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-<<<<<<< HEAD
     (() => {
         const initActivityPage = function() {
             'use strict';
@@ -857,25 +856,92 @@
             const gasSection = document.getElementById('gas-section');
             const clearRentalBtn = document.getElementById('clear-rental-btn');
             const clearGasBtn = document.getElementById('clear-gas-btn');
+            const filterBtns = document.querySelectorAll('.filter-btn');
+
+            // Apply filters function
+            function applyFilter(filterValue) {
+                const activeCard = document.querySelector('.activity-menu-card.active');
+                if(!activeCard) return;
+                const activeTab = activeCard.dataset.type;
+                const activeSection = document.getElementById(`${activeTab}-section`);
+                if(!activeSection) return;
+                const cards = activeSection.querySelectorAll('.transaction-card, .activity-item');
+                
+                cards.forEach(card => {
+                    if (filterValue === 'all') {
+                        card.style.display = 'block';
+                    } else {
+                        const rawStatus = (card.dataset.status || '').toLowerCase();
+                        let mappedStatus = rawStatus;
+                        
+                        // Map statuses to the main filter categories
+                        if (['pending', 'proses', 'dilanjutkan'].includes(rawStatus)) {
+                            mappedStatus = 'pending';
+                        } else if (['confirmed', 'in_delivery', 'process', 'delivering', 'arrived', 'disewa', 'approved'].includes(rawStatus)) {
+                            mappedStatus = 'confirmed';
+                        } else if (['completed', 'selesai', 'resolved', 'returned', 'lunas', 'paid'].includes(rawStatus)) {
+                            mappedStatus = 'completed';
+                        } else if (['cancelled', 'rejected', 'ditolak', 'macet'].includes(rawStatus)) {
+                            mappedStatus = 'cancelled';
+                        }
+                        
+                        if (mappedStatus === filterValue) {
+                            card.style.display = 'block';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    }
+                });
+            }
+
+            // Filter button clicks
+            if(filterBtns) {
+                filterBtns.forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        // Update active button styling
+                        filterBtns.forEach(b => {
+                            b.className = "filter-btn bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-900 px-4 py-1.5 rounded-lg font-semibold transition-all text-sm shadow-sm";
+                        });
+                        
+                        this.className = "filter-btn active bg-blue-50 text-blue-700 border border-blue-500 px-4 py-1.5 rounded-lg font-bold shadow-md transition-all text-sm";
+                        
+                        applyFilter(this.dataset.filter);
+                    });
+                });
+            }
+
+            // Restore active tab from localStorage if exists
+            const savedTab = localStorage.getItem('active_activity_tab');
+            if (savedTab) {
+                menuCards.forEach(c => c.classList.remove('active'));
+                const targetCard = Array.from(menuCards).find(c => c.dataset.type === savedTab);
+                if (targetCard) targetCard.classList.add('active');
+            }
 
             // Initial State
             const activeCard = document.querySelector('.activity-menu-card.active');
-            // No complex logic needed here because HTML sets default state correctly (Rental visible, Gas hidden)
-            // Just verify if we are on Gas tab (edge case)
             if (activeCard && activeCard.dataset.type === 'gas') {
+                 if(rentalSection) rentalSection.classList.add('hidden');
+                 if(gasSection) gasSection.classList.remove('hidden');
                  if(clearRentalBtn) {
                      clearRentalBtn.classList.add('hidden');
-                     clearRentalBtn.style.display = 'none'; // Override inline style
+                     clearRentalBtn.style.display = 'none';
                  }
                  if(clearGasBtn) {
                      clearGasBtn.classList.remove('hidden');
                      clearGasBtn.style.display = 'block';
                  }
+            } else {
+                 if(rentalSection) rentalSection.classList.remove('hidden');
+                 if(gasSection) gasSection.classList.add('hidden');
             }
 
             menuCards.forEach(card => {
                 card.addEventListener('click', () => {
                     const type = card.dataset.type;
+                    
+                    // Save to localStorage
+                    localStorage.setItem('active_activity_tab', type);
                     
                     // Update active state
                     menuCards.forEach(c => c.classList.remove('active'));
@@ -899,189 +965,18 @@
                     if (targetClearBtn) {
                         targetClearBtn.classList.remove('hidden');
                         targetClearBtn.style.display = 'block';
-=======
-    document.addEventListener('turbo:load', function() {
-        'use strict';
-
-        // Activity Menu Toggle
-        const menuCards = document.querySelectorAll('.activity-menu-card');
-        const rentalSection = document.getElementById('rental-section');
-        const gasSection = document.getElementById('gas-section');
-        const clearRentalBtn = document.getElementById('clear-rental-btn');
-        const clearGasBtn = document.getElementById('clear-gas-btn');
-        const filterBtns = document.querySelectorAll('.filter-btn');
-
-        // Apply filters function
-        function applyFilter(filterValue) {
-            const activeTab = document.querySelector('.activity-menu-card.active').dataset.type;
-            const activeSection = document.getElementById(`${activeTab}-section`);
-            const cards = activeSection.querySelectorAll('.transaction-card');
-            
-            cards.forEach(card => {
-                if (filterValue === 'all') {
-                    card.style.display = 'block';
-                } else {
-                    const status = card.dataset.status;
-                    // Map statuses slightly for the filters
-                    let mappedStatus = status;
-                    if (status === 'in_delivery') mappedStatus = 'confirmed';
-                    if (status === 'rejected') mappedStatus = 'cancelled';
+                    }
                     
-                    if (mappedStatus === filterValue) {
-                        card.style.display = 'block';
-                    } else {
-                        card.style.display = 'none';
-                    }
-                }
-            });
-        }
-
-        // Filter button clicks
-        filterBtns.forEach(btn => {
-            btn.addEventListener('click', function() {
-                // Update active button styling
-                filterBtns.forEach(b => {
-                    // Reset all buttons to inactive premium style (rounded-lg)
-                    b.className = "filter-btn bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-900 px-4 py-1.5 rounded-lg font-semibold transition-all text-sm shadow-sm";
-                });
-                
-                // Set the clicked button to active premium style (matching e-wallet selection)
-                this.className = "filter-btn active bg-blue-50 text-blue-700 border border-blue-500 px-4 py-1.5 rounded-lg font-bold shadow-md transition-all text-sm";
-                
-                applyFilter(this.dataset.filter);
-            });
-        });
-
-        // Restore active tab from localStorage if exists
-        const savedTab = localStorage.getItem('active_activity_tab');
-        if (savedTab) {
-            menuCards.forEach(c => c.classList.remove('active'));
-            const targetCard = Array.from(menuCards).find(c => c.dataset.type === savedTab);
-            if (targetCard) targetCard.classList.add('active');
-        }
-
-        // Initial State
-        const activeCard = document.querySelector('.activity-menu-card.active');
-        if (activeCard && activeCard.dataset.type === 'gas') {
-             rentalSection.classList.add('hidden');
-             gasSection.classList.remove('hidden');
-             if(clearRentalBtn) {
-                 clearRentalBtn.classList.add('hidden');
-                 clearRentalBtn.style.display = 'none';
-             }
-             if(clearGasBtn) {
-                 clearGasBtn.classList.remove('hidden');
-                 clearGasBtn.style.display = 'block';
-             }
-        }
-
-        menuCards.forEach(card => {
-            card.addEventListener('click', () => {
-                const type = card.dataset.type;
-                
-                // Save to localStorage
-                localStorage.setItem('active_activity_tab', type);
-                
-                // Update active state
-                menuCards.forEach(c => c.classList.remove('active'));
-                card.classList.add('active');
-                
-                // Toggle sections & buttons
-                if (type === 'rental') {
-                    rentalSection.classList.remove('hidden');
-                    gasSection.classList.add('hidden');
-                    if(clearRentalBtn) {
-                        clearRentalBtn.classList.remove('hidden');
-                        clearRentalBtn.style.display = 'block';
-                    }
-                    if(clearGasBtn) {
-                        clearGasBtn.classList.add('hidden');
-                        clearGasBtn.style.display = 'none';
-                    }
-                } else {
-                    rentalSection.classList.add('hidden');
-                    gasSection.classList.remove('hidden');
-                    if(clearRentalBtn) {
-                        clearRentalBtn.classList.add('hidden');
-                        clearRentalBtn.style.display = 'none';
-                    }
-                    if(clearGasBtn) {
-                        clearGasBtn.classList.remove('hidden');
-                        clearGasBtn.style.display = 'block';
-                    }
-                }
-                
-                // Re-apply current filter for the newly active section
-                const activeFilterBtn = document.querySelector('.filter-btn.active');
-                if (activeFilterBtn) {
-                    applyFilter(activeFilterBtn.dataset.filter);
-                }
-            });
-        });
-
-        // Toggle Detail Dropdown
-        const toggleButtons = document.querySelectorAll('.toggle-detail-btn');
-        
-        toggleButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const targetId = button.dataset.target;
-                const detailSection = document.getElementById(targetId);
-                
-                if (detailSection.classList.contains('hidden')) {
-                    // Show detail
-                    detailSection.classList.remove('hidden');
-                    setTimeout(() => {
-                        detailSection.classList.add('show');
-                    }, 10);
-                    button.textContent = 'Tutup';
-                } else {
-                    // Hide detail
-                    detailSection.classList.remove('show');
-                    setTimeout(() => {
-                        detailSection.classList.add('hidden');
-                    }, 300);
-                    button.textContent = 'Lihat Selengkapnya';
-                }
-            });
-        });
-
-        // Cancel Order
-        const cancelButtons = document.querySelectorAll('.cancel-order-btn');
-        
-        cancelButtons.forEach(button => {
-            button.addEventListener('click', async () => {
-                const type = button.dataset.type;
-                const id = button.dataset.id;
-                
-                const { value: reason } = await Swal.fire({
-                    title: 'Batalkan Pesanan',
-                    html: '<p class="mb-3">Berikan alasan pembatalan pesanan:</p>',
-                    input: 'textarea',
-                    inputPlaceholder: 'Masukkan alasan pembatalan...',
-                    inputAttributes: {
-                        'aria-label': 'Alasan pembatalan',
-                        'rows': 4
-                    },
-                    showCancelButton: true,
-                    confirmButtonText: 'Kirim Permintaan',
-                    cancelButtonText: 'Batal',
-                    confirmButtonColor: '#ef4444',
-                    cancelButtonColor: '#6b7280',
-                    inputValidator: (value) => {
-                        if (!value) {
-                            return 'Alasan pembatalan harus diisi!';
-                        }
-                        if (value.length < 10) {
-                            return 'Alasan minimal 10 karakter!';
-                        }
->>>>>>> b542fba61b53895ab5bd75255171e712c75e209e
+                    // Re-apply current filter for the newly active section
+                    const activeFilterBtn = document.querySelector('.filter-btn.active');
+                    if (activeFilterBtn) {
+                        applyFilter(activeFilterBtn.dataset.filter);
                     }
                 });
             });
 
             // Toggle Detail Dropdown
             const toggleButtons = document.querySelectorAll('.toggle-detail-btn');
-            
             toggleButtons.forEach(button => {
                 button.addEventListener('click', () => {
                     const targetId = button.dataset.target;
@@ -1108,7 +1003,6 @@
 
             // Cancel Order
             const cancelButtons = document.querySelectorAll('.cancel-order-btn');
-            
             cancelButtons.forEach(button => {
                 button.addEventListener('click', async () => {
                     const type = button.dataset.type;
@@ -1192,7 +1086,7 @@
                 });
             });
 
-            // Delete Single Order History (Existing)
+            // Delete Single Order History
             const deleteButtons = document.querySelectorAll('.delete-order-btn');
             deleteButtons.forEach(button => {
                  button.addEventListener('click', async () => {
@@ -1211,7 +1105,6 @@
                     });
 
                     if (result.isConfirmed) {
-                        // Show Loading
                         Swal.fire({
                             title: 'Sedang Menghapus...',
                             allowOutsideClick: false,
@@ -1263,9 +1156,8 @@
                     }
                 });
             });
-<<<<<<< HEAD
 
-            // Clear All History (New Feature)
+            // Clear All History
             const clearHistoryButtons = document.querySelectorAll('.clear-history-btn');
             clearHistoryButtons.forEach(button => {
                 button.addEventListener('click', async () => {
@@ -1340,17 +1232,20 @@
             });
         };
 
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initActivityPage);
-        } else {
+        if (!window.activityTurboBound) {
+            window.activityTurboBound = true;
+            document.addEventListener('turbo:load', initActivityPage);
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initActivityPage);
+            }
+        }
+        
+        // Execute immediately if document is already loaded (handles direct navigation & turbo injected script)
+        if (document.readyState !== 'loading') {
             initActivityPage();
         }
     })();
-=======
-        });
-    });
 
-    // Change Payment Method Logic
     // Change Payment Method Logic
     async function openChangeMethodModal(orderId, currentMethod) {
         const banks = [
@@ -1443,6 +1338,5 @@
             form.submit();
         }
     }
->>>>>>> b542fba61b53895ab5bd75255171e712c75e209e
 </script>
 @endpush
