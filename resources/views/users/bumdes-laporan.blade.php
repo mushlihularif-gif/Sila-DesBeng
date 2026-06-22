@@ -310,10 +310,28 @@
             });
         })();
 
-        // Initialize charts
-        initKinerjaChart();
-        initUnitChart();
-        initPendapatanPieChart();
+        // Initialize charts safely
+        const initChartsSafely = () => {
+            if (typeof window.ApexCharts !== 'undefined') {
+                initKinerjaChart();
+                initUnitChart();
+                initPendapatanPieChart();
+            } else {
+                let retries = 0;
+                const interval = setInterval(() => {
+                    if (typeof window.ApexCharts !== 'undefined') {
+                        clearInterval(interval);
+                        initKinerjaChart();
+                        initUnitChart();
+                        initPendapatanPieChart();
+                    } else {
+                        retries++;
+                        if (retries > 20) clearInterval(interval); // give it 10 seconds
+                    }
+                }, 500);
+            }
+        };
+        initChartsSafely();
 
         // Elements
         const globalYearSelect = document.getElementById('globalYearSelect');
@@ -380,9 +398,7 @@
                     if (newDesa) newDesa.addEventListener('change', redirectWithFilters);
 
                     // Re-initialize charts
-                    initKinerjaChart();
-                    initUnitChart();
-                    initPendapatanPieChart();
+                    initChartsSafely();
 
                     // Re-animate sections
                     const newSections = mainContent.querySelectorAll('.animate-section');
