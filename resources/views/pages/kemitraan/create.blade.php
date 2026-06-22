@@ -46,13 +46,14 @@
                 @guest
                     <button onclick="
                         const t = document.createElement('div');
-                        t.style.zIndex = '2147483647';
-                        t.className = 'fixed top-28 right-8 px-5 py-3.5 rounded-xl shadow-2xl flex items-center gap-3 transform transition-all duration-500 translate-x-[150%] opacity-0 bg-red-500 text-white font-medium';
+                        t.style.position = 'fixed'; t.style.top = '24px'; t.style.right = '30px'; t.style.zIndex = '2147483647';
+                        t.style.transform = 'translateX(150%)'; t.style.opacity = '0'; t.style.transition = 'all 0.5s ease';
+                        t.className = 'px-5 py-3.5 rounded-xl shadow-2xl flex items-center gap-3 bg-red-500 text-white font-medium';
                         t.innerHTML = `<svg class='w-6 h-6 flex-shrink-0' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'></path></svg><span>Anda harus login atau mendaftar terlebih dahulu!</span>`;
                         document.body.appendChild(t);
                         t.offsetHeight;
-                        t.classList.remove('translate-x-[150%]', 'opacity-0');
-                        setTimeout(() => { t.classList.add('translate-x-[150%]', 'opacity-0'); setTimeout(() => t.remove(), 500); }, 3000);
+                        t.style.transform = 'translateX(0)'; t.style.opacity = '1';
+                        setTimeout(() => { t.style.transform = 'translateX(150%)'; t.style.opacity = '0'; setTimeout(() => t.remove(), 500); }, 3000);
 
                         if(document.getElementById('btn-open-login')) { 
                             document.getElementById('btn-open-login').click(); 
