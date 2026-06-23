@@ -162,12 +162,9 @@
                                     <span class="text-[15px] font-normal text-center block">Notifikasi</span>
                                 </a>
                                 <div class="h-px bg-gray-100 mx-3 my-1"></div>
-                                <form action="{{ route('auth.logout') }}" method="POST">
-                                    @csrf
-                                    <button type="submit" class="block w-full px-4 py-2.5 text-red-600 hover:bg-red-50 hover:border-l-[3px] hover:border-l-red-500 transition-all duration-150 bg-transparent border-none outline-none cursor-pointer border-l-[3px] border-l-transparent">
-                                        <span class="text-[15px] font-normal text-center block">Keluar</span>
-                                    </button>
-                                </form>
+                                <button type="button" id="btn-open-logout" class="block w-full px-4 py-2.5 text-red-600 hover:bg-red-50 hover:border-l-[3px] hover:border-l-red-500 transition-all duration-150 bg-transparent border-none outline-none cursor-pointer border-l-[3px] border-l-transparent">
+                                    <span class="text-[15px] font-normal text-center block">Keluar</span>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -341,12 +338,9 @@
                 <a href="{{ route('user.activity') }}" class="block w-full text-center px-4 py-2.5 rounded-lg font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition">
                     Aktivitas
                 </a>
-                <form action="{{ route('auth.logout') }}" method="POST">
-                    @csrf
-                    <button type="submit" class="block w-full text-center px-4 py-2.5 rounded-lg font-medium bg-red-50 text-red-600 hover:bg-red-100 transition">
-                        Keluar
-                    </button>
-                </form>
+                <button type="button" id="btn-open-logout-mobile" class="block w-full text-center px-4 py-2.5 rounded-lg font-medium bg-red-50 text-red-600 hover:bg-red-100 transition border-none outline-none cursor-pointer">
+                    Keluar
+                </button>
             </div>
         @else
             {{-- Tombol Masuk/Daftar sama seperti desktop --}}

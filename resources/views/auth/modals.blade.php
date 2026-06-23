@@ -645,6 +645,41 @@
             </form>
         </div>
 
+        {{-- MODAL LOGOUT CONFIRMATION --}}
+        <div id="modal-logout"
+            class="modal-content bg-white rounded-3xl shadow-2xl max-w-sm w-full p-8 transform scale-95 opacity-0 transition-all duration-300 hidden relative">
+            <button type="button"
+                class="modal-close absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+
+            <div class="text-center mb-8">
+                <div class="flex justify-center mb-6">
+                    <div class="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center">
+                        <svg class="w-10 h-10 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                    </div>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-2">Keluar Akun?</h2>
+                <p class="text-sm text-gray-500">Apakah Anda yakin ingin keluar dari Sila-DesBeng?</p>
+            </div>
+
+            <div class="flex gap-3">
+                <button type="button" class="modal-close flex-1 py-3 bg-gray-100 text-gray-700 rounded-full font-semibold hover:bg-gray-200 transition">
+                    Batal
+                </button>
+                <form action="{{ route('auth.logout') }}" method="POST" class="flex-1">
+                    @csrf
+                    <button type="submit" class="w-full py-3 bg-red-500 text-white rounded-full font-semibold hover:bg-red-600 transition shadow-sm hover:shadow-md">
+                        Ya, Keluar
+                    </button>
+                </form>
+            </div>
+        </div>
+
     </div>
 </div>
 
