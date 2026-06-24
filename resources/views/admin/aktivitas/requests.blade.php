@@ -32,7 +32,7 @@
             <h4 class="fw-bold fs-3 mb-1 text-primary">Permintaan Pengajuan</h4>
             <p class="text-muted mb-0">Kelola dan pantau seluruh aktivitas pesanan masuk</p>
         </div>
-        <div class="d-flex gap-2">
+        <div class="d-flex gap-2 position-relative" style="z-index: 1050;">
             <button class="btn btn-white border shadow-sm rounded-pill px-4" onclick="location.reload()">
                 <i class="bx bx-refresh me-2"></i>Refresh
             </button>

@@ -52,7 +52,7 @@ class BumdesController extends Controller
 
         $member->save();
 
-        return redirect()->route('admin.isewa.bumdes.index')->with('success', 'Anggota BUMDes berhasil ditambahkan.');
+        return redirect()->route('admin.siladesbeng.bumdes.index')->with('success', 'Anggota BUMDes berhasil ditambahkan.');
     }
 
     public function edit($id)
@@ -88,7 +88,7 @@ class BumdesController extends Controller
 
         $member->save();
 
-        return redirect()->route('admin.isewa.bumdes.index')->with('success', 'Anggota BUMDes berhasil diperbarui.');
+        return redirect()->route('admin.siladesbeng.bumdes.index')->with('success', 'Anggota BUMDes berhasil diperbarui.');
     }
 
     public function destroy($id)
@@ -99,6 +99,6 @@ class BumdesController extends Controller
         }
         $member->delete();
 
-        return redirect()->route('admin.isewa.bumdes.index')->with('success', 'Anggota BUMDes berhasil dihapus.');
+        return redirect()->route('admin.siladesbeng.bumdes.index')->with('success', 'Anggota BUMDes berhasil dihapus.');
     }
 }

@@ -5,20 +5,14 @@
 @section('content')
 <div class="container-fluid py-4">
     
-    <!-- Header -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <h4 class="fw-bold fs-3 mb-1 text-primary">
-                Notifikasi
-            </h4>
-            <p class="text-muted mb-0">Kelola dan kirim notifikasi ke pengguna</p>
-        </div>
-    </div>
-
-    <!-- Action Buttons -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex gap-2 justify-content-end">
+    <!-- Notifications List -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
+        <div class="card-header bg-white border-bottom p-4 d-flex justify-content-between align-items-end flex-wrap gap-3">
+            <div>
+                <h4 class="fw-bold fs-3 mb-1 text-primary">Notifikasi</h4>
+                <p class="text-muted mb-0">Kelola dan kirim notifikasi ke pengguna</p>
+            </div>
+            <div class="d-flex gap-2">
                 <a href="{{ route('admin.notifications.create') }}" class="btn btn-primary rounded-pill px-4 shadow-sm">
                     <i class="bx bx-plus me-1"></i> Buat Notifikasi Baru
                 </a>
@@ -31,10 +25,6 @@
                 </form>
             </div>
         </div>
-    </div>
-
-    <!-- Notifications List -->
-    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
         <div class="card-body p-0">
             @if($notifications->isEmpty())
                 <div class="text-center py-5">

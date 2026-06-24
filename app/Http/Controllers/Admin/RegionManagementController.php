@@ -136,8 +136,11 @@ class RegionManagementController extends Controller
 
         $region = Region::findOrFail($id);
         
+        $user = auth()->user();
+        $isSuperAdmin = in_array($user->role, ['super_admin', 'admin']);
+
         // Verifikasi bahwa region ini benar anak dari region admin
-        if ($region->parent_id !== auth()->user()->region_id) {
+        if (!$isSuperAdmin && $region->parent_id !== $user->region_id) {
             return back()->with('error', 'Akses ditolak.');
         }
 
@@ -155,7 +158,10 @@ class RegionManagementController extends Controller
     {
         $region = Region::findOrFail($id);
         
-        if ($region->parent_id !== auth()->user()->region_id) {
+        $user = auth()->user();
+        $isSuperAdmin = in_array($user->role, ['super_admin', 'admin']);
+        
+        if (!$isSuperAdmin && $region->parent_id !== $user->region_id) {
             return back()->with('error', 'Akses ditolak.');
         }
 
@@ -187,7 +193,10 @@ class RegionManagementController extends Controller
 
         $region = Region::findOrFail($region_id);
         
-        if ($region->parent_id !== auth()->user()->region_id) {
+        $user = auth()->user();
+        $isSuperAdmin = in_array($user->role, ['super_admin', 'admin']);
+        
+        if (!$isSuperAdmin && $region->parent_id !== $user->region_id) {
             return back()->with('error', 'Akses ditolak.');
         }
 

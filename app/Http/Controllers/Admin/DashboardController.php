@@ -23,6 +23,7 @@ class DashboardController extends Controller
  */
 public function index(Request $request)
 {
+    Log::info('DashboardController index accessed');
     // Ambil pemesanan penyewaan yang tertunda atau minta batal
     $selectedYear = $request->input('year', now()->year);
     Log::info('DashboardController: Starting index. Selected Year: ' . $selectedYear);

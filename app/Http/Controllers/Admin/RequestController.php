@@ -88,41 +88,53 @@ class RequestController extends Controller
             }
         }
 
+        // Urutan prioritas status:
+        // 1. Menunggu / Proses (pending, confirmed, approved, process, delivering, dll)
+        // 2. Lainnya
+        // 3. Selesai (completed, resolved, returned)
+        // 4. Batal/Ditolak (cancelled, rejected)
+        // Setelah diurutkan berdasarkan status, urutkan berdasarkan waktu terbaru (created_at DESC)
+        $statusOrder = "
+            CASE 
+                WHEN status IN ('pending', 'confirmed', 'approved', 'process', 'delivering', 'arrived', 'ongoing', 'being_prepared', 'in_delivery') THEN 1
+                WHEN status IN ('completed', 'resolved', 'returned') THEN 3
+                WHEN status IN ('cancelled', 'rejected') THEN 4
+                ELSE 2
+            END ASC, created_at DESC
+        ";
+
         // Ambil hasil berdasarkan filter kategori
         if ($category === 'rental') {
-            $rentalRequests = $rentalQuery->orderByDesc('created_at')->get();
+            $rentalRequests = $rentalQuery->orderByRaw($statusOrder)->get();
             $gasOrders = collect();
             $mobilRequests = collect();
             $fasilitasRequests = collect();
         } elseif ($category === 'gas') {
             $rentalRequests = collect();
-            $gasOrders = $gasQuery->orderByDesc('created_at')->get();
+            $gasOrders = $gasQuery->orderByRaw($statusOrder)->get();
             $mobilRequests = collect();
             $fasilitasRequests = collect();
         } elseif ($category === 'mobil') {
             $rentalRequests = collect();
             $gasOrders = collect();
-            $mobilRequests = $mobilQuery->orderByDesc('created_at')->get();
+            $mobilRequests = $mobilQuery->orderByRaw($statusOrder)->get();
             $fasilitasRequests = collect();
         } elseif ($category === 'fasilitas') {
             $rentalRequests = collect();
             $gasOrders = collect();
             $mobilRequests = collect();
-            $fasilitasRequests = $fasilitasQuery->orderByDesc('created_at')->get();
-        } elseif ($category === 'gas') {
-            $rentalRequests = collect();
-            $gasOrders = $gasQuery->orderByDesc('created_at')->get();
+            $fasilitasRequests = $fasilitasQuery->orderByRaw($statusOrder)->get();
         } elseif ($category === 'latest') {
             // Filter terbaru (7 hari terakhir)
-            $rentalRequests = $rentalQuery->where('created_at', '>=', now()->subDays(7))->orderByDesc('created_at')->get();
-            $gasOrders = $gasQuery->where('created_at', '>=', now()->subDays(7))->orderByDesc('created_at')->get();
-            $mobilRequests = $mobilQuery->where('created_at', '>=', now()->subDays(7))->orderByDesc('created_at')->get();
-            $fasilitasRequests = $fasilitasQuery->where('created_at', '>=', now()->subDays(7))->orderByDesc('created_at')->get();
+            $rentalRequests = $rentalQuery->where('created_at', '>=', now()->subDays(7))->orderByRaw($statusOrder)->get();
+            $gasOrders = $gasQuery->where('created_at', '>=', now()->subDays(7))->orderByRaw($statusOrder)->get();
+            $mobilRequests = $mobilQuery->where('created_at', '>=', now()->subDays(7))->orderByRaw($statusOrder)->get();
+            $fasilitasRequests = $fasilitasQuery->where('created_at', '>=', now()->subDays(7))->orderByRaw($statusOrder)->get();
         } else {
-            $rentalRequests = $rentalQuery->orderByDesc('created_at')->get();
-            $gasOrders = $gasQuery->orderByDesc('created_at')->get();
-            $mobilRequests = $mobilQuery->orderByDesc('created_at')->get();
-            $fasilitasRequests = $fasilitasQuery->orderByDesc('created_at')->get();
+            $rentalRequests = $rentalQuery->orderByRaw($statusOrder)->get();
+            $gasOrders = $gasQuery->orderByRaw($statusOrder)->get();
+            $mobilRequests = $mobilQuery->orderByRaw($statusOrder)->get();
+            $fasilitasRequests = $fasilitasQuery->orderByRaw($statusOrder)->get();
         }
 
         // Hitung statistik

@@ -5,6 +5,10 @@ use Illuminate\Http\Request;
 
 define('LARAVEL_START', microtime(true));
 
+if (php_sapi_name() === 'cli-server') {
+    $_SERVER['SCRIPT_NAME'] = '/index.php';
+}
+
 // Determine if the application is in maintenance mode...
 if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php')) {
     require $maintenance;

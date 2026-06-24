@@ -68,7 +68,7 @@ class NotificationController extends Controller
 
     public function markAsRead($id)
     {
-        $notification = Notification::withTrashed()->findOrFail($id);
+        $notification = Notification::findOrFail($id);
         $notification->is_read = true;
         $notification->read_at = now();
         $notification->save();
@@ -80,9 +80,8 @@ class NotificationController extends Controller
 
     public function markAllAsRead()
     {
-        // Tandai semua notifikasi milik admin sebagai dibaca
-        Notification::where('admin_id', auth()->id())
-            ->where('is_read', false)
+        // Tandai semua notifikasi yang belum dibaca sebagai sudah dibaca
+        Notification::where('is_read', false)
             ->update([
                 'is_read' => true,
                 'read_at' => now(),
@@ -94,10 +93,10 @@ class NotificationController extends Controller
     public function destroy($id)
     {
         try {
-            $notification = Notification::withTrashed()->findOrFail($id);
-            $notification->forceDelete(); // Hard Delete
+            $notification = Notification::findOrFail($id);
+            $notification->delete();
 
-            return redirect()->back()->with('success', 'Notifikasi berhasil dihapus permanen.');
+            return redirect()->back()->with('success', 'Notifikasi berhasil dihapus.');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Gagal menghapus notifikasi: ' . $e->getMessage());
         }

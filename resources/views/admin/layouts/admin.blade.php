@@ -412,8 +412,6 @@
     <!-- Croppie CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/croppie/2.6.5/croppie.min.css" />
 
-    <script src="{{ asset('Admin/vendor/js/helpers.js') }}"></script>
-    <script src="{{ asset('Admin/js/config.js') }}"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- Custom Page Styles -->
     @yield('styles')
@@ -644,6 +642,19 @@
                     <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
                         <div class="navbar-nav align-items-center">
                             <div class="nav-item d-flex align-items-center position-relative">
+                                @if(!request()->routeIs(
+                                    'admin.laporan.log',
+                                    'admin.siladesbeng.*',
+                                    'admin.kemitraan.*',
+                                    'admin.manajemen-pengguna.*',
+                                    'lurah.laporan.*',
+                                    'admin.system-settings.*',
+                                    'admin.region-settings.*',
+                                    'admin.notifications.*',
+                                    'admin.kelola-wilayah.*',
+                                    'admin.banners.*',
+                                    'admin.announcements.*'
+                                ))
                                 <form action="{{ route('admin.search') }}" method="GET" class="d-flex align-items-center w-100" id="headerSearchForm">
                                     <i class="bx bx-search fs-4 lh-0"></i>
                                     <input type="text" 
@@ -662,6 +673,7 @@
                                         </a>
                                     @endif
                                 </form>
+                                @endif
                             </div>
                         </div>
                         <ul class="navbar-nav flex-row align-items-center ms-auto">
@@ -675,7 +687,7 @@
                                     data-bs-toggle="dropdown">
                                     @if(Auth::user() && Auth::user()->file)
                                         <img src="{{ route('media.avatar', ['filename' => basename(Auth::user()->file->path)]) }}" alt="Avatar"
-                                            class="w-px-40 h-auto rounded-circle" />
+                                            class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;" />
                                     @else
                                         <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: #D1D5DB;">
                                             <svg viewBox="0 0 24 24" fill="currentColor" style="width: 24px; height: 24px; color: white;">
@@ -763,7 +775,6 @@
             <script src="{{ asset('Admin/vendor/libs/apex-charts/apexcharts.js') }}"></script>
             <script src="{{ asset('Admin/js/main.js') }}"></script>
             <script src="{{ asset('Admin/js/dashboards-analytics.js') }}"></script>
-            <script async defer src="https://buttons.github.io/buttons.js"></script>
             <!-- Skrip untuk animasi dan fungsionalitas -->
             <script>
                 // Fungsi notifikasi sekarang didefinisikan di dashboard/index.blade.php

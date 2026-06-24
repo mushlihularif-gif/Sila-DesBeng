@@ -19,20 +19,20 @@
                                         <div class="carousel-item active">
                                             <img src="{{ asset('storage/' . $gas->foto) }}" class="card-img-top"
                                                 alt="{{ $gas->jenis_gas }}"
-                                                style="height: 300px; object-fit: cover; object-position: center;">
+                                                style="height: 300px; object-fit: contain; object-position: center; padding: 10px;">
                                         </div>
                                         @if ($gas->foto_2)
                                             <div class="carousel-item">
                                                 <img src="{{ asset('storage/' . $gas->foto_2) }}" class="card-img-top"
                                                     alt="{{ $gas->jenis_gas }}"
-                                                    style="height: 300px; object-fit: cover; object-position: center;">
+                                                    style="height: 300px; object-fit: contain; object-position: center; padding: 10px;">
                                             </div>
                                         @endif
                                         @if ($gas->foto_3)
                                             <div class="carousel-item">
                                                 <img src="{{ asset('storage/' . $gas->foto_3) }}" class="card-img-top"
                                                     alt="{{ $gas->jenis_gas }}"
-                                                    style="height: 300px; object-fit: cover; object-position: center;">
+                                                    style="height: 300px; object-fit: contain; object-position: center; padding: 10px;">
                                             </div>
                                         @endif
                                     </div>

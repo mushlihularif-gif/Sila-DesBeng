@@ -5,30 +5,29 @@
 @section('content')
 <div class="container-fluid py-4">
     
-    <!-- Page Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h4 class="fw-bold fs-3 mb-1 text-primary">Log Aktivitas</h4>
-            <p class="text-muted mb-0">Riwayat lengkap aktivitas pengguna dan sistem</p>
-        </div>
-        <div class="d-flex gap-2">
-            <!-- Feature to be implemented -->
-            <!-- Feature to be implemented -->
-            <button class="btn btn-outline-danger shadow-sm rounded-pill px-4" onclick="confirmClearLogs()">
-                <i class="bx bx-trash me-2"></i>Bersihkan Log
-            </button>
-            <form id="clear-logs-form" action="{{ route('admin.laporan.log.clear') }}" method="POST" style="display: none;">
-                @csrf
-            </form>
-            <button class="btn btn-white border shadow-sm rounded-pill px-4" onclick="location.reload()">
-                <i class="bx bx-refresh me-2"></i>Refresh
-            </button>
-        </div>
-    </div>
-
     <!-- Filter & Search -->
     <div class="card border-0 shadow-sm rounded-4 mb-4">
         <div class="card-body p-4">
+            <!-- Header & Action Buttons Row -->
+            <div class="d-flex justify-content-between align-items-end flex-wrap gap-3 mb-3">
+                <div>
+                    <h4 class="fw-bold fs-3 mb-1 text-primary">Log Aktivitas</h4>
+                    <p class="text-muted mb-0">Riwayat lengkap aktivitas pengguna dan sistem</p>
+                </div>
+                <div class="d-flex gap-2 position-relative" style="z-index: 1050;">
+                    <button type="button" class="btn btn-outline-danger shadow-sm rounded-pill px-4" onclick="confirmClearLogs()">
+                        <i class="bx bx-trash me-2"></i>Bersihkan Log
+                    </button>
+                    <form id="clear-logs-form" action="{{ route('admin.laporan.log.clear') }}" method="POST" style="display: none;">
+                        @csrf
+                    </form>
+                    <a href="{{ route('admin.laporan.log') }}" class="btn btn-white border shadow-sm rounded-pill px-4">
+                        <i class="bx bx-refresh me-2"></i>Refresh
+                    </a>
+                </div>
+            </div>
+            <hr class="mt-0 mb-3">
+            <!-- Filter Fields -->
             <form action="{{ route('admin.laporan.log') }}" method="GET" class="row g-3 align-items-end">
                 <div class="col-md-4">
                     <label class="form-label fw-semibold text-muted small text-uppercase">Cari Aktivitas</label>
@@ -172,16 +171,37 @@
     function confirmClearLogs() {
         Swal.fire({
             title: 'Bersihkan Log?',
-            text: "Seluruh riwayat akan dibersihkan.",
+            text: "Masukkan password Anda untuk konfirmasi.",
             icon: 'warning',
+            input: 'password',
+            inputPlaceholder: 'Masukkan password...',
+            inputAttributes: {
+                autocapitalize: 'off',
+                autocorrect: 'off'
+            },
             showCancelButton: true,
             confirmButtonColor: '#dc3545',
             cancelButtonColor: '#6c757d',
             confirmButtonText: 'Ya, Bersihkan',
-            cancelButtonText: 'Batal'
+            cancelButtonText: 'Batal',
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'Password wajib diisi!'
+                }
+            }
         }).then((result) => {
             if (result.isConfirmed) {
-                document.getElementById('clear-logs-form').submit();
+                const form = document.getElementById('clear-logs-form');
+                // Add password input to form
+                let passwordInput = form.querySelector('input[name="password"]');
+                if (!passwordInput) {
+                    passwordInput = document.createElement('input');
+                    passwordInput.type = 'hidden';
+                    passwordInput.name = 'password';
+                    form.appendChild(passwordInput);
+                }
+                passwordInput.value = result.value;
+                form.submit();
             }
         });
     }

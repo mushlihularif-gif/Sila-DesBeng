@@ -17,6 +17,9 @@ class Notification extends Model
         'message',
         'link',
         'icon',
+        'image',
+        'admin_id',
+        'sent_at',
         'is_read',
         'read_at'
     ];
@@ -35,6 +38,11 @@ class Notification extends Model
     public function laporan()
     {
         return $this->belongsTo(Laporan::class);
+    }
+
+    public function admin()
+    {
+        return $this->belongsTo(User::class, 'admin_id');
     }
 
     // Scope

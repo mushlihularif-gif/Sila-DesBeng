@@ -23,6 +23,10 @@ Route::get('/', function () {
     return redirect('beranda');
 });
 
+Route::get('/test-route-123', function() {
+    return response('Test Route 123 Works', 200);
+});
+
 Route::get('/beranda', [App\Http\Controllers\User\BerandaController::class, 'index'])
     ->name('beranda')
     ->middleware('role:user,guest');

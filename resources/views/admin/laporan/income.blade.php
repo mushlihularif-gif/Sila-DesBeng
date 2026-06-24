@@ -314,7 +314,7 @@
                                 </td>
                                 <td>
                                      @if($report->proof_image)
-                                        <button class="btn btn-sm btn-light border rounded-pill px-3" onclick="viewProof('{{ asset($report->proof_image) }}', '{{ $report->name }}')">
+                                        <button class="btn btn-sm btn-light border rounded-pill px-3" onclick="viewProof('{{ asset('storage/' . $report->proof_image) }}', '{{ $report->name }}')">
                                             <i class="bx bx-image-alt me-1"></i>Lihat
                                         </button>
                                     @else
@@ -323,13 +323,13 @@
                                 </td>
                                 <td class="text-end pe-4">
                                     <div class="dropdown">
-                                        <button class="btn btn-sm btn-icon btn-light" type="button" data-bs-toggle="dropdown">
+                                        <button class="btn btn-sm btn-icon btn-light" type="button" data-bs-toggle="dropdown" data-bs-boundary="window">
                                             <i class="bx bx-dots-vertical-rounded"></i>
                                         </button>
                                         <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm rounded-3">
                                             <li>
                                                 <a class="dropdown-item" href="javascript:void(0)" onclick="editManualTransaction({{ $report->id }})">
-                                                    <i class="bx bx-edit me-2"></i>Edit
+                                                    <i class="bx bx-edit me-2 text-warning"></i>Edit
                                                 </a>
                                             </li>
                                             <li><hr class="dropdown-divider my-1"></li>
@@ -472,6 +472,16 @@
     .border-dashed-hover:hover { border-style: dashed !important; border-color: #696cff !important; }
     .input-group-merge .form-control:focus, .input-group-merge .form-select:focus { border-color: #696cff; box-shadow: none; }
     .input-group-merge .input-group-text { border-color: #d9dee3; color: #697a8d; }
+    
+    /* Fix for dropdown getting clipped in table-responsive */
+    .table-responsive {
+        min-height: 150px;
+    }
+    @media (min-width: 768px) {
+        .table-responsive {
+            overflow: visible;
+        }
+    }
 </style>
 
 <!-- Scripts for Charts & Logic -->
