@@ -225,7 +225,7 @@
                                 </button>
                                 
                                 {{-- Keluar - Button Border Putih --}}
-                                <button type="button" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" 
+                                <button type="button" id="btn-open-logout-profile"
                                         class="button-interactive py-3.5 bg-white/70 backdrop-blur-sm text-red-500 rounded-full font-semibold text-base transition-all duration-300 shadow-md border border-white/80 hover:bg-white/90 hover:shadow-lg hover:scale-105 active:scale-95">
                                     Keluar
                                 </button>

@@ -188,7 +188,7 @@
         // ========================================
         const modalGoogleRegister = document.getElementById('modal-google-register');
         
-        @if(session('open_google_register_modal'))
+        @if(session('show_google_register'))
             setTimeout(() => {
                 openModal(modalGoogleRegister);
             }, 500);
@@ -271,6 +271,17 @@
         // ========================================
         document.getElementById('btn-open-login')?.addEventListener('click', () => openModal(modalLogin));
         document.getElementById('btn-open-register')?.addEventListener('click', () => openModal(modalRegister));
+        
+        // Modal Logout
+        const modalLogout = document.getElementById('modal-logout');
+        document.getElementById('btn-open-logout')?.addEventListener('click', () => openModal(modalLogout));
+        document.getElementById('btn-open-logout-profile')?.addEventListener('click', () => openModal(modalLogout));
+        document.getElementById('btn-open-logout-mobile')?.addEventListener('click', () => {
+            openModal(modalLogout);
+            if (typeof window.closeMobileSidebar === 'function') {
+                window.closeMobileSidebar();
+            }
+        });
 
         document.getElementById('btn-open-login-mobile')?.addEventListener('click', () => {
              // 1. Open Modal Immediately (Overlay z-60 covers Sidebar z-51)
