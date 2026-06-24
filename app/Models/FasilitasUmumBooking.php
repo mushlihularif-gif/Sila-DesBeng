@@ -29,7 +29,9 @@ class FasilitasUmumBooking extends Model
         'confirmed_at',
         'return_time',
         'completion_time',
-        'region_id'
+        'region_id',
+        'dengan_supir',
+        'delivery_method'
     ];
 
     protected $casts = [

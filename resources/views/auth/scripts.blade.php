@@ -529,12 +529,14 @@
         // ========================================
         // REGION DROPDOWN LOGIC
         // ========================================
-        function initRegionDropdowns(kabId, kecId, desaId) {
+        function initRegionDropdowns(kabId, kecId, desaId, rwId, rtId) {
             const regKab = document.getElementById(kabId);
             const regKec = document.getElementById(kecId);
             const regDesa = document.getElementById(desaId);
+            const regRw = document.getElementById(rwId);
+            const regRt = document.getElementById(rtId);
             
-            if (!regKab || !regKec || !regDesa) return;
+            if (!regKab || !regKec || !regDesa || !regRw || !regRt) return;
 
             if (allRegions.length > 0) {
                 populateRegions(regKab, regKec, regDesa);
@@ -556,6 +558,10 @@
                 const kecVal = parseInt(this.value);
                 regDesa.innerHTML = '<option value="">Pilih Desa/Kelurahan</option>';
                 regDesa.disabled = true;
+                regRw.innerHTML = '<option value="">Pilih RW</option>';
+                regRw.disabled = true;
+                regRt.innerHTML = '<option value="">Pilih RT</option>';
+                regRt.disabled = true;
 
                 if (kecVal) {
                     const desas = allRegions.filter(r => r.type === 'desa' && r.parent_id === kecVal);
@@ -563,6 +569,38 @@
                         regDesa.innerHTML += `<option value="${d.id}">${d.name}</option>`;
                     });
                     regDesa.disabled = false;
+                }
+            });
+
+            // Handle Desa change
+            regDesa.addEventListener('change', function() {
+                const desaVal = parseInt(this.value);
+                regRw.innerHTML = '<option value="">Pilih RW</option>';
+                regRw.disabled = true;
+                regRt.innerHTML = '<option value="">Pilih RT</option>';
+                regRt.disabled = true;
+
+                if (desaVal) {
+                    const rws = allRegions.filter(r => r.type === 'rw' && r.parent_id === desaVal);
+                    rws.sort((a,b) => a.name.localeCompare(b.name)).forEach(r => {
+                        regRw.innerHTML += `<option value="${r.id}">${r.name}</option>`;
+                    });
+                    regRw.disabled = false;
+                }
+            });
+
+            // Handle RW change
+            regRw.addEventListener('change', function() {
+                const rwVal = parseInt(this.value);
+                regRt.innerHTML = '<option value="">Pilih RT</option>';
+                regRt.disabled = true;
+
+                if (rwVal) {
+                    const rts = allRegions.filter(r => r.type === 'rt' && r.parent_id === rwVal);
+                    rts.sort((a,b) => a.name.localeCompare(b.name)).forEach(r => {
+                        regRt.innerHTML += `<option value="${r.id}">${r.name}</option>`;
+                    });
+                    regRt.disabled = false;
                 }
             });
         }
@@ -584,7 +622,7 @@
         }
 
         let allRegions = [];
-        initRegionDropdowns('reg-kabupaten', 'reg-kecamatan', 'reg-desa');
-        initRegionDropdowns('google-reg-kabupaten', 'google-reg-kecamatan', 'google-reg-desa');
+        initRegionDropdowns('reg-kabupaten', 'reg-kecamatan', 'reg-desa', 'reg-rw', 'reg-rt');
+        initRegionDropdowns('google-reg-kabupaten', 'google-reg-kecamatan', 'google-reg-desa', 'google-reg-rw', 'google-reg-rt');
     })();
 </script>

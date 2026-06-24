@@ -3,6 +3,24 @@
 @section('title', 'Laporan Transaksi')
 
 @section('content')
+<style>
+    .nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+        background-color: #0095ff !important;
+        color: #fff !important;
+        box-shadow: 0 4px 10px rgba(0, 149, 255, 0.3) !important;
+    }
+    .nav-pills .nav-link {
+        color: #64748b;
+        transition: all 0.3s ease;
+    }
+    .nav-pills .nav-link:hover {
+        background-color: #eff6ff !important;
+        color: #0095ff !important;
+    }
+    .nav-pills .nav-link.active .badge.bg-white {
+        color: #0095ff !important;
+    }
+</style>
 <div class="container-fluid py-4">
     
     <!-- Page Header -->
@@ -23,7 +41,7 @@
 
     <!-- Summary Statistics -->
     <div class="row g-3 mb-4">
-        <div class="col-md-3 col-6">
+        <div class="col-md-4 col-6">
             <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden position-relative">
                 <div class="card-body p-3">
                     <div class="d-flex align-items-center mb-2">
@@ -32,13 +50,13 @@
                         </div>
                         <div>
                             <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Total Transaksi</small>
-                            <h4 class="fw-bold mb-0 text-dark">{{ $rentalRequests->count() + $gasOrders->count() }}</h4>
+                            <h4 class="fw-bold mb-0 text-dark">{{ $rentalRequests->count() + $gasOrders->count() + $mobilBookings->count() + $fasilitasBookings->count() }}</h4>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-3 col-6">
+        <div class="col-md-4 col-6">
             <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden position-relative">
                 <div class="card-body p-3">
                     <div class="d-flex align-items-center mb-2">
@@ -47,13 +65,13 @@
                         </div>
                         <div>
                             <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Selesai</small>
-                            <h4 class="fw-bold mb-0 text-dark">{{ $rentalRequests->where('status', 'completed')->count() + $gasOrders->where('status', 'completed')->count() }}</h4>
+                            <h4 class="fw-bold mb-0 text-dark">{{ $rentalRequests->where('status', 'completed')->count() + $gasOrders->where('status', 'completed')->count() + $mobilBookings->where('status', 'completed')->count() + $fasilitasBookings->where('status', 'completed')->count() }}</h4>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-3 col-6">
+        <div class="col-md-4 col-6">
             <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden position-relative">
                 <div class="card-body p-3">
                     <div class="d-flex align-items-center mb-2">
@@ -68,7 +86,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3 col-6">
+        <div class="col-md-4 col-6">
              <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden position-relative">
                 <div class="card-body p-3">
                     <div class="d-flex align-items-center mb-2">
@@ -78,6 +96,36 @@
                         <div>
                             <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Gas</small>
                             <h4 class="fw-bold mb-0 text-dark">{{ $gasOrders->count() }}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 col-6">
+             <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden position-relative">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-center mb-2">
+                         <div class="avatar avatar-md bg-danger-subtle text-danger rounded-3 p-2 me-3">
+                            <i class="bx bx-car fs-3"></i>
+                        </div>
+                        <div>
+                            <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Sewa Mobil</small>
+                            <h4 class="fw-bold mb-0 text-dark">{{ $mobilBookings->count() }}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 col-6">
+             <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden position-relative">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-center mb-2">
+                         <div class="avatar avatar-md bg-secondary-subtle text-secondary rounded-3 p-2 me-3">
+                            <i class="bx bx-building fs-3"></i>
+                        </div>
+                        <div>
+                            <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Fasilitas Umum</small>
+                            <h4 class="fw-bold mb-0 text-dark">{{ $fasilitasBookings->count() }}</h4>
                         </div>
                     </div>
                 </div>
@@ -99,6 +147,18 @@
                     <button class="nav-link rounded-pill px-4 fw-semibold" id="gas-tab" data-bs-toggle="tab" data-bs-target="#gas-pane" type="button" role="tab">
                         <i class="bx bxs-gas-pump me-2"></i>Pembelian Gas
                         <span class="badge bg-white text-primary ms-2 shadow-sm">{{ $gasOrders->count() }}</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link rounded-pill px-4 fw-semibold" id="mobil-tab" data-bs-toggle="tab" data-bs-target="#mobil-pane" type="button" role="tab">
+                        <i class="bx bx-car me-2"></i>Sewa Mobil
+                        <span class="badge bg-white text-primary ms-2 shadow-sm">{{ $mobilBookings->count() }}</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link rounded-pill px-4 fw-semibold" id="fasilitas-tab" data-bs-toggle="tab" data-bs-target="#fasilitas-pane" type="button" role="tab">
+                        <i class="bx bx-building me-2"></i>Fasilitas Umum
+                        <span class="badge bg-white text-primary ms-2 shadow-sm">{{ $fasilitasBookings->count() }}</span>
                     </button>
                 </li>
             </ul>
@@ -216,6 +276,121 @@
                                         </td>
                                         <td class="text-end pe-4">
                                             <a href="{{ route('admin.aktivitas.permintaan-pengajuan.show', [$order->id, 'gas']) }}" class="btn btn-sm btn-light border shadow-sm rounded-pill px-3 text-primary">
+                                                <i class="bx bx-show me-1"></i>Detail
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
+                </div>
+                <!-- MOBIL RESULTS -->
+                <div class="tab-pane fade" id="mobil-pane" role="tabpanel">
+                    @if($mobilBookings->isEmpty())
+                        <div class="text-center py-5">
+                            <div class="mb-3"><i class="bx bx-bar-chart-alt-2 fs-1 text-muted opacity-25"></i></div>
+                            <h6 class="text-muted fw-bold">Tidak ada data transaksi sewa mobil</h6>
+                        </div>
+                    @else
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th class="ps-4 py-3 text-secondary text-uppercase small fw-bold">ID & Tanggal</th>
+                                        <th class="py-3 text-secondary text-uppercase small fw-bold">Penyewa</th>
+                                        <th class="py-3 text-secondary text-uppercase small fw-bold">Mobil</th>
+                                        <th class="py-3 text-secondary text-uppercase small fw-bold">Total</th>
+                                        <th class="py-3 text-secondary text-uppercase small fw-bold">Status</th>
+                                        <th class="text-end pe-4 py-3 text-secondary text-uppercase small fw-bold">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($mobilBookings as $order)
+                                    <tr>
+                                        <td class="ps-4">
+                                            <div class="fw-bold text-dark">#{{ $order->order_number ?? $order->id }}</div>
+                                            <small class="text-muted">{{ $order->created_at->format('d/m/Y H:i') }}</small>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                 <div class="avatar avatar-sm border rounded-circle p-1 me-2">
+                                                    <span class="avatar-initial rounded-circle bg-danger-subtle text-danger fw-bold">
+                                                        {{ strtoupper(substr($order->recipient_name ?? $order->user->name ?? 'U', 0, 1)) }}
+                                                    </span>
+                                                </div>
+                                                <span class="fw-medium text-dark">{{ $order->recipient_name ?? $order->user->name }}</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="text-dark">{{ $order->mobil->nama_mobil ?? 'Sewa Mobil' }}</div>
+                                            <small class="text-muted">{{ $order->lama_sewa }} Hari</small>
+                                        </td>
+                                        <td>
+                                            <span class="fw-bold text-primary">Rp {{ number_format($order->total_amount ?? 0, 0, ',', '.') }}</span>
+                                        </td>
+                                        <td>
+                                            @include('admin.partials.status-badge', ['status' => $order->status])
+                                        </td>
+                                        <td class="text-end pe-4">
+                                            <a href="{{ route('admin.aktivitas.permintaan-pengajuan.show', [$order->id, 'mobil']) }}" class="btn btn-sm btn-light border shadow-sm rounded-pill px-3 text-primary">
+                                                <i class="bx bx-show me-1"></i>Detail
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
+                </div>
+
+                <!-- FASILITAS RESULTS -->
+                <div class="tab-pane fade" id="fasilitas-pane" role="tabpanel">
+                    @if($fasilitasBookings->isEmpty())
+                        <div class="text-center py-5">
+                            <div class="mb-3"><i class="bx bx-bar-chart-alt-2 fs-1 text-muted opacity-25"></i></div>
+                            <h6 class="text-muted fw-bold">Tidak ada data transaksi fasilitas umum</h6>
+                        </div>
+                    @else
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th class="ps-4 py-3 text-secondary text-uppercase small fw-bold">ID & Tanggal</th>
+                                        <th class="py-3 text-secondary text-uppercase small fw-bold">Peminjam</th>
+                                        <th class="py-3 text-secondary text-uppercase small fw-bold">Fasilitas</th>
+                                        <th class="py-3 text-secondary text-uppercase small fw-bold">Status</th>
+                                        <th class="text-end pe-4 py-3 text-secondary text-uppercase small fw-bold">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($fasilitasBookings as $order)
+                                    <tr>
+                                        <td class="ps-4">
+                                            <div class="fw-bold text-dark">#{{ $order->order_number ?? $order->id }}</div>
+                                            <small class="text-muted">{{ $order->created_at->format('d/m/Y H:i') }}</small>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                 <div class="avatar avatar-sm border rounded-circle p-1 me-2">
+                                                    <span class="avatar-initial rounded-circle bg-secondary-subtle text-secondary fw-bold">
+                                                        {{ strtoupper(substr($order->recipient_name ?? $order->user->name ?? 'U', 0, 1)) }}
+                                                    </span>
+                                                </div>
+                                                <span class="fw-medium text-dark">{{ $order->recipient_name ?? $order->user->name }}</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="text-dark">{{ $order->fasilitas->nama_fasilitas ?? 'Fasilitas Umum' }}</div>
+                                            <small class="text-muted">{{ $order->lama_sewa }} Hari</small>
+                                        </td>
+                                        <td>
+                                            @include('admin.partials.status-badge', ['status' => $order->status])
+                                        </td>
+                                        <td class="text-end pe-4">
+                                            <a href="{{ route('admin.aktivitas.permintaan-pengajuan.show', [$order->id, 'fasilitas']) }}" class="btn btn-sm btn-light border shadow-sm rounded-pill px-3 text-primary">
                                                 <i class="bx bx-show me-1"></i>Detail
                                             </a>
                                         </td>

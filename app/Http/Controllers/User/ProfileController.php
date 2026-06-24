@@ -27,23 +27,32 @@ class ProfileController extends Controller
         
         $kecamatan_name = 'Belum ditentukan';
         $desa_name = 'Belum ditentukan';
+        $rw_name = 'Belum ditentukan';
+        $rt_name = 'Belum ditentukan';
         
         if ($user->region_id) {
-            $userRegion = \App\Models\Region::find($user->region_id);
-            if ($userRegion) {
-                if ($userRegion->type == 'desa') {
-                    $desa_name = $userRegion->name;
-                    $parent = \App\Models\Region::find($userRegion->parent_id);
-                    if ($parent) {
-                        $kecamatan_name = $parent->name;
-                    }
-                } else if ($userRegion->type == 'kecamatan') {
-                    $kecamatan_name = $userRegion->name;
+            $currentRegion = \App\Models\Region::find($user->region_id);
+            
+            while ($currentRegion) {
+                if ($currentRegion->type == 'rt') {
+                    $rt_name = $currentRegion->name;
+                } elseif ($currentRegion->type == 'rw') {
+                    $rw_name = $currentRegion->name;
+                } elseif ($currentRegion->type == 'desa') {
+                    $desa_name = $currentRegion->name;
+                } elseif ($currentRegion->type == 'kecamatan') {
+                    $kecamatan_name = $currentRegion->name;
+                }
+                
+                if ($currentRegion->parent_id) {
+                    $currentRegion = \App\Models\Region::find($currentRegion->parent_id);
+                } else {
+                    $currentRegion = null;
                 }
             }
         }
 
-        return view('users.profile', compact('user', 'kecamatan_name', 'desa_name'));
+        return view('users.profile', compact('user', 'kecamatan_name', 'desa_name', 'rw_name', 'rt_name'));
     }
 
     /**

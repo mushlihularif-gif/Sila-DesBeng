@@ -101,11 +101,11 @@
                                 </td>
                                 <td>
                                     <div class="d-flex align-items-center">
-                                        <div class="avatar avatar-sm border rounded-circle p-1 me-2">
-                                            @if($log->user && $log->user->avatar)
-                                                <img src="{{ asset('storage/' . $log->user->avatar) }}" class="rounded-circle w-100 h-100 object-fit-cover">
+                                        <div class="avatar avatar-sm border rounded-circle me-2 d-flex justify-content-center align-items-center" style="width: 32px; height: 32px; overflow: hidden;">
+                                            @if($log->user && $log->user->file)
+                                                <img src="{{ route('media.avatar', ['filename' => basename($log->user->file->path)]) }}" class="w-100 h-100 object-fit-cover" alt="Avatar">
                                             @else
-                                                <span class="avatar-initial rounded-circle bg-secondary-subtle text-secondary fw-bold">
+                                                <span class="w-100 h-100 bg-secondary d-flex justify-content-center align-items-center text-white fw-bold" style="font-size: 14px;">
                                                     {{ strtoupper(substr($log->user->name ?? 'S', 0, 1)) }}
                                                 </span>
                                             @endif

@@ -385,8 +385,8 @@ public function index(Request $request)
                     'subtitle' => $item->position,
                     'description' => 'Anggota Struktur BUMDes',
                     'image' => $item->photo,
-                    'link' => route('admin.isewa.bumdes.index'),
-                    'badge' => 'Profil BUMDes',
+                    'link' => route('admin.siladesbeng.bumdes.index'),
+                    'badge' => 'Profil Pemerintah Daerah',
                     'badge_color' => 'info'
                 ];
             });

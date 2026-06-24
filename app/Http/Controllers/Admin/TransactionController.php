@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Models\RentalBooking;
 use App\Models\GasOrder;
+use App\Models\MobilBooking;
+use App\Models\FasilitasUmumBooking;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\Controller;
@@ -34,6 +36,15 @@ class TransactionController extends Controller
               ->orWhereIn('status', $activeStatuses);
         });
 
+        $mobilQuery = MobilBooking::withTrashed()->with(['user', 'mobil'])->where(function($q) use ($activeStatuses) {
+            $q->whereNotNull('payment_proof')
+              ->orWhereIn('status', $activeStatuses);
+        });
+
+        $fasilitasQuery = FasilitasUmumBooking::withTrashed()->with(['user', 'fasilitas'])->where(function($q) use ($activeStatuses) {
+            $q->whereIn('status', $activeStatuses);
+        });
+
         // Filter by search
         if ($search) {
             $rentalQuery->where(function($q) use ($search) {
@@ -49,24 +60,56 @@ class TransactionController extends Controller
                       $userQuery->where('name', 'LIKE', "%{$search}%");
                   });
             });
+
+            $mobilQuery->where(function($q) use ($search) {
+                $q->where('status', 'LIKE', "%{$search}%")
+                  ->orWhereHas('user', function($userQuery) use ($search) {
+                      $userQuery->where('name', 'LIKE', "%{$search}%");
+                  });
+            });
+
+            $fasilitasQuery->where(function($q) use ($search) {
+                $q->where('status', 'LIKE', "%{$search}%")
+                  ->orWhereHas('user', function($userQuery) use ($search) {
+                      $userQuery->where('name', 'LIKE', "%{$search}%");
+                  });
+            });
         }
 
         // Filter by payment method
         if ($paymentMethod !== 'all') {
             $rentalQuery->where('payment_method', $paymentMethod);
             $gasQuery->where('payment_method', $paymentMethod);
+            $mobilQuery->where('payment_method', $paymentMethod);
+            $fasilitasQuery->where('payment_method', $paymentMethod);
         }
 
         // Get results based on category filter
         if ($category === 'rental') {
             $rentalPayments = $rentalQuery->orderByDesc('updated_at')->get();
             $gasPayments = collect();
+            $mobilPayments = collect();
+            $fasilitasPayments = collect();
         } elseif ($category === 'gas') {
             $rentalPayments = collect();
             $gasPayments = $gasQuery->orderByDesc('updated_at')->get();
+            $mobilPayments = collect();
+            $fasilitasPayments = collect();
+        } elseif ($category === 'mobil') {
+            $rentalPayments = collect();
+            $gasPayments = collect();
+            $mobilPayments = $mobilQuery->orderByDesc('updated_at')->get();
+            $fasilitasPayments = collect();
+        } elseif ($category === 'fasilitas') {
+            $rentalPayments = collect();
+            $gasPayments = collect();
+            $mobilPayments = collect();
+            $fasilitasPayments = $fasilitasQuery->orderByDesc('updated_at')->get();
         } else {
             $rentalPayments = $rentalQuery->orderByDesc('updated_at')->get();
             $gasPayments = $gasQuery->orderByDesc('updated_at')->get();
+            $mobilPayments = $mobilQuery->orderByDesc('updated_at')->get();
+            $fasilitasPayments = $fasilitasQuery->orderByDesc('updated_at')->get();
         }
 
         // Count statistics
@@ -80,15 +123,26 @@ class TransactionController extends Controller
               ->orWhereIn('status', $activeStatuses);
         })->count();
 
+        $mobilCount = MobilBooking::withTrashed()->where(function($q) use ($activeStatuses) {
+            $q->whereNotNull('payment_proof')
+              ->orWhereIn('status', $activeStatuses);
+        })->count();
+
+        $fasilitasCount = FasilitasUmumBooking::withTrashed()->where(function($q) use ($activeStatuses) {
+            $q->whereIn('status', $activeStatuses);
+        })->count();
+
         $stats = [
-            'total' => $rentalCount + $gasCount,
+            'total' => $rentalCount + $gasCount + $mobilCount + $fasilitasCount,
             'rental_total' => $rentalCount,
             'gas_total' => $gasCount,
+            'mobil_total' => $mobilCount,
+            'fasilitas_total' => $fasilitasCount,
             'transfer_total' => 0, // Transfer is disabled for now
-            'cash_total' => $rentalCount + $gasCount, // All valid transactions are essentially verified/cash/system
+            'cash_total' => $rentalCount + $gasCount + $mobilCount + $fasilitasCount, // All valid transactions are essentially verified/cash/system
         ];
 
-        return view('admin.aktivitas.transactions', compact('rentalPayments', 'gasPayments', 'stats', 'category', 'paymentMethod', 'search'));
+        return view('admin.aktivitas.transactions', compact('rentalPayments', 'gasPayments', 'mobilPayments', 'fasilitasPayments', 'stats', 'category', 'paymentMethod', 'search'));
     }
 
     public function verify(Request $request, $id, $type)
@@ -97,6 +151,10 @@ class TransactionController extends Controller
 
         if ($type === 'rental') {
             $model = RentalBooking::withTrashed()->findOrFail($id);
+        } elseif ($type === 'mobil') {
+            $model = MobilBooking::withTrashed()->findOrFail($id);
+        } elseif ($type === 'fasilitas') {
+            $model = FasilitasUmumBooking::withTrashed()->findOrFail($id);
         } else {
             $model = GasOrder::withTrashed()->findOrFail($id);
         }
@@ -104,13 +162,18 @@ class TransactionController extends Controller
         $oldStatus = $model->status;
         $model->update(['status' => 'completed']);
 
-        // FIX: Kembalikan stok barang jika tipe adalah rental dan status sebelumnya belum selesai
+        // Kembalikan stok barang jika status sebelumnya belum selesai
         if ($type === 'rental' && $oldStatus !== 'completed') {
-            if (!$model->relationLoaded('barang')) {
-                $model->load('barang');
-            }
-            if ($model->barang) {
-                $model->barang->increaseStock($model->quantity);
+            if (!$model->relationLoaded('barang')) $model->load('barang');
+            if ($model->barang) $model->barang->increaseStock($model->quantity);
+        } elseif ($type === 'mobil' && $oldStatus !== 'completed') {
+            if (!$model->relationLoaded('mobil')) $model->load('mobil');
+            if ($model->mobil) $model->mobil->update(['status' => 'tersedia']);
+        } elseif ($type === 'fasilitas' && $oldStatus !== 'completed') {
+            if (!$model->relationLoaded('fasilitas')) $model->load('fasilitas');
+            if ($model->fasilitas) {
+                $model->fasilitas->increment('stok');
+                $model->fasilitas->update(['status' => 'tersedia']);
             }
         }
 
@@ -146,6 +209,10 @@ class TransactionController extends Controller
 
         if ($type === 'rental') {
             $model = RentalBooking::withTrashed()->findOrFail($id);
+        } elseif ($type === 'mobil') {
+            $model = MobilBooking::withTrashed()->findOrFail($id);
+        } elseif ($type === 'fasilitas') {
+            $model = FasilitasUmumBooking::withTrashed()->findOrFail($id);
         } else {
             $model = GasOrder::withTrashed()->findOrFail($id);
         }
@@ -192,6 +259,10 @@ class TransactionController extends Controller
             $model = RentalBooking::withTrashed()->findOrFail($id); // Model RentalBooking
         } elseif ($type === 'gas') {
             $model = GasOrder::withTrashed()->findOrFail($id); // Model GasOrder
+        } elseif ($type === 'mobil') {
+            $model = MobilBooking::withTrashed()->findOrFail($id);
+        } elseif ($type === 'fasilitas') {
+            $model = FasilitasUmumBooking::withTrashed()->findOrFail($id);
         } else {
              return redirect()->back()->with('error', 'Tipe transaksi tidak valid.');
         }
@@ -245,12 +316,16 @@ class TransactionController extends Controller
     {
         if ($type === 'rental') {
             $model = RentalBooking::withTrashed()->findOrFail($id);
+        } elseif ($type === 'mobil') {
+            $model = MobilBooking::withTrashed()->findOrFail($id);
+        } elseif ($type === 'fasilitas') {
+            $model = FasilitasUmumBooking::withTrashed()->findOrFail($id);
         } else {
             $model = GasOrder::withTrashed()->findOrFail($id);
         }
 
         // Determine proof column
-        $proofColumn = ($type === 'rental') ? 'payment_proof' : 'proof_of_payment';
+        $proofColumn = ($type === 'gas') ? 'proof_of_payment' : 'payment_proof';
 
         if (!$model->$proofColumn) {
             abort(404, 'Bukti pembayaran tidak ditemukan.');

@@ -48,6 +48,119 @@
                             @csrf
                             @method('PUT')
                             
+                            <!-- Section: Foto Produk -->
+                            <div class="form-section mb-4">
+                                <h6 class="section-title mb-3">
+                                    <i class='bx bx-image me-2'></i>Foto Produk
+                                </h6>
+                                <div class="row g-3">
+                                    <!-- Foto Utama -->
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-semibold" for="foto">Foto Utama</label>
+                                        <div class="upload-box" onclick="document.getElementById('foto').click()">
+                                            @if($mobil->foto)
+                                                <div id="preview_foto" class="preview-container">
+                                                    <img src="{{ asset('storage/' . $mobil->foto) }}" alt="{{ $mobil->nama_mobil }}" class="preview-image" />
+                                                    <button type="button" class="btn-remove-image" onclick="event.stopPropagation(); clearFile('foto', 'preview_foto')">
+                                                        <i class='bx bx-x'></i>
+                                                    </button>
+                                                </div>
+                                                <div id="placeholder_foto" class="upload-placeholder" style="display:none;">
+                                                    <i class='bx bx-cloud-upload' style="font-size: 48px;"></i>
+                                                    <p class="mb-0 mt-2">Klik untuk upload</p>
+                                                    <small class="text-muted">JPG, PNG (Max 8MB)</small>
+                                                </div>
+                                            @else
+                                                <div id="preview_foto" class="preview-container" style="display:none;">
+                                                    <img src="#" alt="Preview" class="preview-image" />
+                                                    <button type="button" class="btn-remove-image" onclick="event.stopPropagation(); clearFile('foto', 'preview_foto')">
+                                                        <i class='bx bx-x'></i>
+                                                    </button>
+                                                </div>
+                                                <div id="placeholder_foto" class="upload-placeholder">
+                                                    <i class='bx bx-cloud-upload' style="font-size: 48px;"></i>
+                                                    <p class="mb-0 mt-2">Klik untuk upload</p>
+                                                    <small class="text-muted">JPG, PNG (Max 8MB)</small>
+                                                </div>
+                                            @endif
+                                        </div>
+                                        <input type="file" class="d-none" id="foto" name="foto_utama" 
+                                               accept="image/*" onchange="previewFile(this, 'preview_foto', 'placeholder_foto')" />
+                                        <input type="hidden" name="delete_foto" id="delete_foto" value="0">
+                                    </div>
+
+                                    <!-- Foto Tambahan 1 -->
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-semibold" for="foto_2">Foto Tambahan 1</label>
+                                        <div class="upload-box" onclick="document.getElementById('foto_2').click()">
+                                            @if($mobil->foto_2)
+                                                <div id="preview_foto_2" class="preview-container">
+                                                    <img src="{{ asset('storage/' . $mobil->foto_2) }}" alt="{{ $mobil->nama_mobil }}" class="preview-image" />
+                                                    <button type="button" class="btn-remove-image" onclick="event.stopPropagation(); clearFile('foto_2', 'preview_foto_2')">
+                                                        <i class='bx bx-x'></i>
+                                                    </button>
+                                                </div>
+                                                <div id="placeholder_foto_2" class="upload-placeholder" style="display:none;">
+                                                    <i class='bx bx-cloud-upload' style="font-size: 48px;"></i>
+                                                    <p class="mb-0 mt-2">Klik untuk upload</p>
+                                                    <small class="text-muted">JPG, PNG (Max 8MB)</small>
+                                                </div>
+                                            @else
+                                                <div id="preview_foto_2" class="preview-container" style="display:none;">
+                                                    <img src="#" alt="Preview" class="preview-image" />
+                                                    <button type="button" class="btn-remove-image" onclick="event.stopPropagation(); clearFile('foto_2', 'preview_foto_2')">
+                                                        <i class='bx bx-x'></i>
+                                                    </button>
+                                                </div>
+                                                <div id="placeholder_foto_2" class="upload-placeholder">
+                                                    <i class='bx bx-cloud-upload' style="font-size: 48px;"></i>
+                                                    <p class="mb-0 mt-2">Klik untuk upload</p>
+                                                    <small class="text-muted">JPG, PNG (Max 8MB)</small>
+                                                </div>
+                                            @endif
+                                        </div>
+                                        <input type="file" class="d-none" id="foto_2" name="foto_2" 
+                                               accept="image/*" onchange="previewFile(this, 'preview_foto_2', 'placeholder_foto_2')" />
+                                        <input type="hidden" name="delete_foto_2" id="delete_foto_2" value="0">
+                                    </div>
+
+                                    <!-- Foto Tambahan 2 -->
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-semibold" for="foto_3">Foto Tambahan 2</label>
+                                        <div class="upload-box" onclick="document.getElementById('foto_3').click()">
+                                            @if($mobil->foto_3)
+                                                <div id="preview_foto_3" class="preview-container">
+                                                    <img src="{{ asset('storage/' . $mobil->foto_3) }}" alt="{{ $mobil->nama_mobil }}" class="preview-image" />
+                                                    <button type="button" class="btn-remove-image" onclick="event.stopPropagation(); clearFile('foto_3', 'preview_foto_3')">
+                                                        <i class='bx bx-x'></i>
+                                                    </button>
+                                                </div>
+                                                <div id="placeholder_foto_3" class="upload-placeholder" style="display:none;">
+                                                    <i class='bx bx-cloud-upload' style="font-size: 48px;"></i>
+                                                    <p class="mb-0 mt-2">Klik untuk upload</p>
+                                                    <small class="text-muted">JPG, PNG (Max 8MB)</small>
+                                                </div>
+                                            @else
+                                                <div id="preview_foto_3" class="preview-container" style="display:none;">
+                                                    <img src="#" alt="Preview" class="preview-image" />
+                                                    <button type="button" class="btn-remove-image" onclick="event.stopPropagation(); clearFile('foto_3', 'preview_foto_3')">
+                                                        <i class='bx bx-x'></i>
+                                                    </button>
+                                                </div>
+                                                <div id="placeholder_foto_3" class="upload-placeholder">
+                                                    <i class='bx bx-cloud-upload' style="font-size: 48px;"></i>
+                                                    <p class="mb-0 mt-2">Klik untuk upload</p>
+                                                    <small class="text-muted">JPG, PNG (Max 8MB)</small>
+                                                </div>
+                                            @endif
+                                        </div>
+                                        <input type="file" class="d-none" id="foto_3" name="foto_3" 
+                                               accept="image/*" onchange="previewFile(this, 'preview_foto_3', 'placeholder_foto_3')" />
+                                        <input type="hidden" name="delete_foto_3" id="delete_foto_3" value="0">
+                                    </div>
+                                </div>
+                            </div>
+                            
                             <!-- Section: Informasi Dasar -->
                             <div class="form-section mb-4">
                                 <h6 class="section-title mb-3">
@@ -171,6 +284,16 @@
                                         </select>
                                     </div>
                                     <div class="col-md-4">
+                                        <label class="form-label fw-semibold" for="opsi_supir">
+                                            Opsi Supir <span class="text-danger">*</span>
+                                        </label>
+                                        <select class="form-select modern-input" id="opsi_supir" name="opsi_supir" required>
+                                            <option value="Lepas Kunci" {{ old('opsi_supir', $mobil->opsi_supir ?? '') == 'Lepas Kunci' ? 'selected' : '' }}>Lepas Kunci (Tanpa Supir)</option>
+                                            <option value="Dengan Supir" {{ old('opsi_supir', $mobil->opsi_supir ?? '') == 'Dengan Supir' ? 'selected' : '' }}>Dengan Supir (Disediakan Pemdes)</option>
+                                            <option value="Bebas Pilih" {{ old('opsi_supir', $mobil->opsi_supir ?? '') == 'Bebas Pilih' ? 'selected' : '' }}>Bebas Pilih</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
                                         <label class="form-label fw-semibold" for="stok">
                                             Stok Mobil Tersedia <span class="text-danger">*</span>
                                         </label>
@@ -217,118 +340,7 @@
                                 </div>
                             </div>
 
-                            <!-- Section: Foto Produk -->
-                            <div class="form-section mb-4">
-                                <h6 class="section-title mb-3">
-                                    <i class='bx bx-image me-2'></i>Foto Produk
-                                </h6>
-                                <div class="row g-3">
-                                    <!-- Foto Utama -->
-                                    <div class="col-md-4">
-                                        <label class="form-label fw-semibold" for="foto">Foto Utama</label>
-                                        <div class="upload-box" onclick="document.getElementById('foto').click()">
-                                            @if($mobil->foto)
-                                                <div id="preview_foto" class="preview-container">
-                                                    <img src="{{ asset('storage/' . $mobil->foto) }}" alt="{{ $mobil->nama_mobil }}" class="preview-image" />
-                                                    <button type="button" class="btn-remove-image" onclick="event.stopPropagation(); clearFile('foto', 'preview_foto')">
-                                                        <i class='bx bx-x'></i>
-                                                    </button>
-                                                </div>
-                                                <div id="placeholder_foto" class="upload-placeholder" style="display:none;">
-                                                    <i class='bx bx-cloud-upload' style="font-size: 48px;"></i>
-                                                    <p class="mb-0 mt-2">Klik untuk upload</p>
-                                                    <small class="text-muted">JPG, PNG (Max 8MB)</small>
-                                                </div>
-                                            @else
-                                                <div id="preview_foto" class="preview-container" style="display:none;">
-                                                    <img src="#" alt="Preview" class="preview-image" />
-                                                    <button type="button" class="btn-remove-image" onclick="event.stopPropagation(); clearFile('foto', 'preview_foto')">
-                                                        <i class='bx bx-x'></i>
-                                                    </button>
-                                                </div>
-                                                <div id="placeholder_foto" class="upload-placeholder">
-                                                    <i class='bx bx-cloud-upload' style="font-size: 48px;"></i>
-                                                    <p class="mb-0 mt-2">Klik untuk upload</p>
-                                                    <small class="text-muted">JPG, PNG (Max 8MB)</small>
-                                                </div>
-                                            @endif
-                                        </div>
-                                        <input type="file" class="d-none" id="foto" name="foto_utama" 
-                                               accept="image/*" onchange="previewFile(this, 'preview_foto', 'placeholder_foto')" />
-                                        <input type="hidden" name="delete_foto" id="delete_foto" value="0">
-                                    </div>
 
-                                    <!-- Foto Tambahan 1 -->
-                                    <div class="col-md-4">
-                                        <label class="form-label fw-semibold" for="foto_2">Foto Tambahan 1</label>
-                                        <div class="upload-box" onclick="document.getElementById('foto_2').click()">
-                                            @if($mobil->foto_2)
-                                                <div id="preview_foto_2" class="preview-container">
-                                                    <img src="{{ asset('storage/' . $mobil->foto_2) }}" alt="{{ $mobil->nama_mobil }}" class="preview-image" />
-                                                    <button type="button" class="btn-remove-image" onclick="event.stopPropagation(); clearFile('foto_2', 'preview_foto_2')">
-                                                        <i class='bx bx-x'></i>
-                                                    </button>
-                                                </div>
-                                                <div id="placeholder_foto_2" class="upload-placeholder" style="display:none;">
-                                                    <i class='bx bx-cloud-upload' style="font-size: 48px;"></i>
-                                                    <p class="mb-0 mt-2">Klik untuk upload</p>
-                                                    <small class="text-muted">JPG, PNG (Max 8MB)</small>
-                                                </div>
-                                            @else
-                                                <div id="preview_foto_2" class="preview-container" style="display:none;">
-                                                    <img src="#" alt="Preview" class="preview-image" />
-                                                    <button type="button" class="btn-remove-image" onclick="event.stopPropagation(); clearFile('foto_2', 'preview_foto_2')">
-                                                        <i class='bx bx-x'></i>
-                                                    </button>
-                                                </div>
-                                                <div id="placeholder_foto_2" class="upload-placeholder">
-                                                    <i class='bx bx-cloud-upload' style="font-size: 48px;"></i>
-                                                    <p class="mb-0 mt-2">Klik untuk upload</p>
-                                                    <small class="text-muted">JPG, PNG (Max 8MB)</small>
-                                                </div>
-                                            @endif
-                                        </div>
-                                        <input type="file" class="d-none" id="foto_2" name="foto_2" 
-                                               accept="image/*" onchange="previewFile(this, 'preview_foto_2', 'placeholder_foto_2')" />
-                                        <input type="hidden" name="delete_foto_2" id="delete_foto_2" value="0">
-                                    </div>
-
-                                    <!-- Foto Tambahan 2 -->
-                                    <div class="col-md-4">
-                                        <label class="form-label fw-semibold" for="foto_3">Foto Tambahan 2</label>
-                                        <div class="upload-box" onclick="document.getElementById('foto_3').click()">
-                                            @if($mobil->foto_3)
-                                                <div id="preview_foto_3" class="preview-container">
-                                                    <img src="{{ asset('storage/' . $mobil->foto_3) }}" alt="{{ $mobil->nama_mobil }}" class="preview-image" />
-                                                    <button type="button" class="btn-remove-image" onclick="event.stopPropagation(); clearFile('foto_3', 'preview_foto_3')">
-                                                        <i class='bx bx-x'></i>
-                                                    </button>
-                                                </div>
-                                                <div id="placeholder_foto_3" class="upload-placeholder" style="display:none;">
-                                                    <i class='bx bx-cloud-upload' style="font-size: 48px;"></i>
-                                                    <p class="mb-0 mt-2">Klik untuk upload</p>
-                                                    <small class="text-muted">JPG, PNG (Max 8MB)</small>
-                                                </div>
-                                            @else
-                                                <div id="preview_foto_3" class="preview-container" style="display:none;">
-                                                    <img src="#" alt="Preview" class="preview-image" />
-                                                    <button type="button" class="btn-remove-image" onclick="event.stopPropagation(); clearFile('foto_3', 'preview_foto_3')">
-                                                        <i class='bx bx-x'></i>
-                                                    </button>
-                                                </div>
-                                                <div id="placeholder_foto_3" class="upload-placeholder">
-                                                    <i class='bx bx-cloud-upload' style="font-size: 48px;"></i>
-                                                    <p class="mb-0 mt-2">Klik untuk upload</p>
-                                                    <small class="text-muted">JPG, PNG (Max 8MB)</small>
-                                                </div>
-                                            @endif
-                                        </div>
-                                        <input type="file" class="d-none" id="foto_3" name="foto_3" 
-                                               accept="image/*" onchange="previewFile(this, 'preview_foto_3', 'placeholder_foto_3')" />
-                                        <input type="hidden" name="delete_foto_3" id="delete_foto_3" value="0">
-                                    </div>
-                                </div>
-                            </div>
 
                             <!-- Action Buttons -->
                             <div class="d-flex justify-content-end gap-3 pt-3 border-top">
@@ -401,16 +413,26 @@
     </div>
 
     <style>
-        /* Modern Card Styling */
+        :root {
+            --primary-color: #3b82f6; /* Smooth Blue */
+            --primary-dark: #2563eb;
+            --primary-light: #eff6ff;
+            --primary-soft: #e0f2fe;
+            --border-color: #e2e8f0;
+            --bg-soft: #f8fafc;
+        }
+
+        /* Card Styling */
         .modern-card {
             border: none;
-            border-radius: 12px;
-            overflow: hidden;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
             transition: all 0.3s ease;
+            background: #ffffff;
         }
 
         .modern-card:hover {
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08) !important;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
         }
 
         /* Icon Wrapper */
@@ -426,10 +448,20 @@
 
         /* Form Sections */
         .form-section {
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            border-left: 4px solid #0d6efd;
+            padding: 24px;
+            background: var(--bg-soft);
+            border-radius: 12px;
+            border-left: 4px solid var(--primary-color);
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+            border-top: 1px solid var(--border-color);
+            border-right: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .form-section:hover {
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+            border-left-width: 6px;
         }
 
         .section-title {
@@ -442,18 +474,20 @@
 
         /* Modern Inputs */
         .modern-input {
-            border: 1.5px solid #e0e6ed;
-            border-radius: 8px;
-            padding: 10px 14px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 10px;
+            padding: 12px 16px;
             font-size: 14px;
             transition: all 0.3s ease;
-            background: white;
+            background: #ffffff;
+            color: #334155;
         }
 
         .modern-input:focus {
-            border-color: #0d6efd;
-            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
-            background: white;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+            background: #ffffff;
+            outline: none;
         }
 
         .modern-input-addon {
@@ -467,19 +501,24 @@
 
         /* Modern Buttons */
         .modern-btn-primary {
-            background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+            background: var(--primary-color);
             border: none;
-            border-radius: 8px;
-            padding: 10px 24px;
-            font-weight: 500;
+            border-radius: 10px;
+            padding: 12px 28px;
+            font-weight: 600;
+            color: #ffffff;
             transition: all 0.3s ease;
-            box-shadow: 0 2px 8px rgba(13, 110, 253, 0.2);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .modern-btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
-            background: linear-gradient(135deg, #0a58ca 0%, #084298 100%);
+            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.35);
+            background: var(--primary-dark);
+            color: #ffffff;
         }
 
         .modern-btn-secondary {
@@ -513,14 +552,15 @@
 
         /* Upload Box */
         .upload-box {
-            border: 2px dashed #cbd5e0;
-            border-radius: 10px;
-            padding: 20px;
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
-            background: #f8f9fa;
-            min-height: 200px;
+            background: #ffffff;
+            aspect-ratio: 4/3;
+            min-height: 220px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -528,8 +568,8 @@
         }
 
         .upload-box:hover {
-            border-color: #0d6efd;
-            background: #e7f1ff;
+            border-color: var(--primary-color);
+            background: var(--primary-light);
         }
 
         .upload-placeholder {
@@ -537,13 +577,13 @@
         }
 
         .upload-placeholder i {
-            color: #cbd5e0;
+            color: #94a3b8;
             transition: all 0.3s ease;
         }
 
         .upload-box:hover .upload-placeholder i {
-            color: #0d6efd;
-            transform: translateY(-5px);
+            color: var(--primary-color);
+            transform: translateY(-5px) scale(1.05);
         }
 
         .preview-container {
@@ -554,7 +594,8 @@
 
         .preview-image {
             width: 100%;
-            height: 180px;
+            height: 100%;
+            aspect-ratio: 4/3;
             object-fit: cover;
             border-radius: 8px;
         }

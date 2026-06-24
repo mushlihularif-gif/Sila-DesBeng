@@ -41,7 +41,8 @@ class MobilBooking extends Model
         'arrival_time',
         'return_time',
         'completion_time',
-        'region_id'
+        'region_id',
+        'dengan_supir'
     ];
 
     protected $casts = [

@@ -13,35 +13,59 @@
                                     <h5 class="card-title text-primary fw-bold">Selamat Datang di SiladesBeng 🏛️</h5>
                                     <p class="mb-3 text-muted">Sistem Pelayanan Terpadu berbasis Digital <span
                                             class="fw-bold text-dark">Pemerintahan Desa Pematang Duku Timur</span></p>
-                                    <a href="{{ route('admin.isewa.profile-bumdes') }}"
+                                    <a href="{{ route('admin.siladesbeng.profile-bumdes') }}"
                                         class="btn btn-outline-primary">Profil Pemerintah Desa</a>
                                 </div>
                             </div>
                             <div class="col-12 mt-auto">
                                 <div class="px-3 pb-3">
                                     <div id="dashboardBannerCarousel" class="carousel slide" data-bs-ride="carousel">
-                                        <div class="carousel-inner rounded-3 shadow-sm">
-                                            @php
-                                                $banners = \App\Models\Banner::where('is_active', true)->latest()->get();
-                                            @endphp
+                                        @php
+                                            $banners = \App\Models\Banner::where('is_active', true)->latest()->get();
+                                        @endphp
+                                        
+                                        <!-- Indicators -->
+                                        <div class="carousel-indicators">
                                             @if($banners->count() > 0)
                                                 @foreach($banners as $index => $banner)
-                                                    <div class="carousel-item {{ $index == 0 ? 'active' : '' }}">
-                                                        <img src="{{ Storage::url($banner->image_path) }}" class="d-block w-100 rounded-3" style="object-fit: cover;" alt="Banner {{ $index + 1 }}">
+                                                    <button type="button" data-bs-target="#dashboardBannerCarousel" data-bs-slide-to="{{ $index }}" class="{{ $index == 0 ? 'active' : '' }}" aria-current="{{ $index == 0 ? 'true' : 'false' }}" aria-label="Slide {{ $index + 1 }}"></button>
+                                                @endforeach
+                                            @else
+                                                <button type="button" data-bs-target="#dashboardBannerCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+                                                <button type="button" data-bs-target="#dashboardBannerCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+                                                <button type="button" data-bs-target="#dashboardBannerCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
+                                            @endif
+                                        </div>
+
+                                        <div class="carousel-inner rounded-3 shadow-sm">
+                                            @if($banners->count() > 0)
+                                                @foreach($banners as $index => $banner)
+                                                    <div class="carousel-item {{ $index == 0 ? 'active' : '' }}" data-bs-interval="3000">
+                                                        <img src="{{ Storage::url($banner->image_path) }}" class="d-block w-100 rounded-3" style="object-fit: cover; aspect-ratio: 16/9;" alt="Banner {{ $index + 1 }}">
                                                     </div>
                                                 @endforeach
                                             @else
-                                                <div class="carousel-item active">
-                                                    <img src="{{ asset('User/img/elemen/entrance.png') }}" class="d-block w-100 rounded-3" style="object-fit: cover;" alt="Slide 1">
+                                                <div class="carousel-item active" data-bs-interval="3000">
+                                                    <img src="{{ asset('User/img/elemen/entrance.png') }}" class="d-block w-100 rounded-3" style="object-fit: cover; aspect-ratio: 16/9;" alt="Slide 1">
                                                 </div>
-                                                <div class="carousel-item">
-                                                    <img src="{{ asset('User/img/elemen/biru.png') }}" class="d-block w-100 rounded-3" style="object-fit: cover;" alt="Slide 2">
+                                                <div class="carousel-item" data-bs-interval="3000">
+                                                    <img src="{{ asset('User/img/elemen/biru.png') }}" class="d-block w-100 rounded-3" style="object-fit: cover; aspect-ratio: 16/9;" alt="Slide 2">
                                                 </div>
-                                                <div class="carousel-item">
-                                                    <img src="{{ asset('User/img/elemen/ppq.png') }}" class="d-block w-100 rounded-3" style="object-fit: cover;" alt="Slide 3">
+                                                <div class="carousel-item" data-bs-interval="3000">
+                                                    <img src="{{ asset('User/img/elemen/ppq.png') }}" class="d-block w-100 rounded-3" style="object-fit: cover; aspect-ratio: 16/9;" alt="Slide 3">
                                                 </div>
                                             @endif
                                         </div>
+
+                                        <!-- Controls -->
+                                        <button class="carousel-control-prev" type="button" data-bs-target="#dashboardBannerCarousel" data-bs-slide="prev">
+                                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                            <span class="visually-hidden">Previous</span>
+                                        </button>
+                                        <button class="carousel-control-next" type="button" data-bs-target="#dashboardBannerCarousel" data-bs-slide="next">
+                                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                            <span class="visually-hidden">Next</span>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -140,19 +164,19 @@
                 @foreach($activeServicesList as $serviceName)
                     @if(isset($unitConfigs[$serviceName]))
                         @php $config = $unitConfigs[$serviceName]; @endphp
-                        <div class="col-md-6 mb-3">
-                            <div class="card unit-card {{ $config['color'] }} hover-lift"
+                        <div class="col-md-6 mb-4">
+                            <div class="card unit-card h-100 {{ $config['color'] }} hover-lift"
                                 onclick="window.location='{{ $config['route'] }}'">
-                                <div class="card-body p-4">
-                                    <div class="d-flex align-items-center">
-                                        <div class="avatar flex-shrink-0 me-3" style="width: 70px; height: 70px;">
-                                            <img src="{{ $config['image'] }}" alt="{{ $config['title'] }}" class="rounded w-100" />
-                                        </div>
-                                        <div class="flex-grow-1">
-                                            <span class="fw-semibold d-block mb-2 text-muted">{{ $config['title'] }}</span>
-                                            <h3 class="card-title mb-0">{{ $config['count'] }}</h3>
-                                        </div>
-                                        <i class="bx bx-chevron-right bx-lg text-{{ $config['color'] }}"></i>
+                                <div class="card-body p-4 d-flex align-items-center">
+                                    <div class="avatar flex-shrink-0 me-3" style="width: 65px; height: 65px;">
+                                        <img src="{{ $config['image'] }}" alt="{{ $config['title'] }}" class="rounded w-100" />
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <span class="fw-semibold d-block mb-1 text-muted">{{ $config['title'] }}</span>
+                                        <h4 class="card-title mb-0">{{ $config['count'] }}</h4>
+                                    </div>
+                                    <div class="d-flex align-items-center justify-content-center bg-label-{{ $config['color'] }} rounded ms-3 flex-shrink-0" style="width: 36px; height: 36px;">
+                                        <i class="bx bx-chevron-right text-{{ $config['color'] }}"></i>
                                     </div>
                                 </div>
                             </div>

@@ -133,6 +133,32 @@
         <!-- Auth Buttons / User Profile -->
         <div class="sd-nav-auth">
             @auth
+                @if(in_array(auth()->user()->role, ['admin_rt', 'admin_rw']))
+                    <div class="relative group mr-2">
+                        <button class="sd-nav-link gap-1 p-0 bg-transparent border-none outline-none cursor-pointer {{ request()->routeIs('wilayah.*') ? 'active' : '' }}">
+                            <span class="whitespace-nowrap">Kelola Layanan Wilayah</span>
+                            <svg class="w-4 h-4 flex-shrink-0 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div class="absolute top-full right-0 pt-2 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                            <div class="min-w-[200px] bg-white rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.1)] border border-gray-200 overflow-hidden">
+                                <div class="py-1.5">
+                                    <a href="{{ route('wilayah.laporan.index') }}" class="block px-4 py-2.5 text-gray-800 hover:bg-blue-50 hover:border-l-[3px] hover:border-l-blue-500 transition-all duration-150 whitespace-nowrap {{ request()->routeIs('wilayah.laporan.*') ? 'bg-blue-50 border-l-[3px] border-l-blue-500 font-medium' : 'border-l-[3px] border-l-transparent' }}">
+                                        <span class="text-[15px] font-normal text-center block">Kelola Laporan Warga</span>
+                                    </a>
+                                    <div class="h-px bg-gray-100 mx-3 my-1"></div>
+                                    <a href="{{ route('wilayah.pengumuman.index') }}" class="block px-4 py-2.5 text-gray-800 hover:bg-blue-50 hover:border-l-[3px] hover:border-l-blue-500 transition-all duration-150 whitespace-nowrap {{ request()->routeIs('wilayah.pengumuman.*') ? 'bg-blue-50 border-l-[3px] border-l-blue-500 font-medium' : 'border-l-[3px] border-l-transparent' }}">
+                                        <span class="text-[15px] font-normal text-center block">Kelola Pengumuman</span>
+                                    </a>
+                                    <div class="h-px bg-gray-100 mx-3 my-1"></div>
+                                    <a href="{{ route('wilayah.warga.index') }}" class="block px-4 py-2.5 text-gray-800 hover:bg-blue-50 hover:border-l-[3px] hover:border-l-blue-500 transition-all duration-150 whitespace-nowrap {{ request()->routeIs('wilayah.warga.*') ? 'bg-blue-50 border-l-[3px] border-l-blue-500 font-medium' : 'border-l-[3px] border-l-transparent' }}">
+                                        <span class="text-[15px] font-normal text-center block">Daftar Warga</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
                 <div class="relative group">
                     <button class="flex items-center gap-2.5 hover:opacity-90 transition bg-transparent border-none outline-none cursor-pointer">
                         <span class="text-gray-900 font-bold text-[15px] group-hover:border-b-2 group-hover:border-blue-500 pb-0.5">{{ auth()->user()->name }}</span>
@@ -148,7 +174,7 @@
                     </button>
 
                     <!-- Wrapper padding transparan untuk jembatan hover agar tidak hilang -->
-                    <div class="absolute top-full left-1/2 -translate-x-1/2 pt-2 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                    <div class="absolute top-full right-0 pt-2 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                         <div class="w-48 bg-white rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.1)] border border-gray-200 overflow-hidden">
                             <div class="py-1.5">
                                 <a href="{{ route('profile') }}" class="block px-4 py-2.5 text-gray-800 hover:bg-blue-50 hover:border-l-[3px] hover:border-l-blue-500 transition-all duration-150 border-l-[3px] border-l-transparent">

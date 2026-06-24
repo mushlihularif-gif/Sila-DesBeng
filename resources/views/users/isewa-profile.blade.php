@@ -25,10 +25,10 @@
                             Langkah Awal Mewujudkan Digitalisasi Bengkalis
                         </p>
                         <p class="text-gray-700 leading-relaxed mb-4">
-                            Perjalanan <span class="font-semibold text-gray-800">SiladesBeng</span> (Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis) bermula dari sebuah visi besar untuk mendorong percepatan digitalisasi pelayanan publik di wilayah Kabupaten Bengkalis. Gagasan ini lahir sebagai solusi inovatif untuk memutus kendala jarak dan mengoptimalkan potensi desa melalui pemanfaatan teknologi. Mimpi utama kami adalah menghubungkan seluruh jaringan kecamatan hingga pelosok desa ke dalam satu ekosistem digital yang canggih, terpadu, dan mudah diakses oleh seluruh lapisan masyarakat.
+                            Perjalanan <span class="font-semibold text-gray-800">SiladesBeng</span> (Sistem Sinergi Layanan dan Aspirasi Daerah di Kabupaten Bengkalis) bermula dari sebuah visi besar untuk mendorong percepatan digitalisasi pelayanan publik di wilayah Kabupaten Bengkalis. Gagasan ini lahir sebagai solusi inovatif untuk memutus kendala jarak dan mengoptimalkan potensi daerah melalui pemanfaatan teknologi. Mimpi utama kami adalah menghubungkan seluruh jaringan kecamatan hingga pelosok daerah ke dalam satu ekosistem digital yang canggih, terpadu, dan mudah diakses oleh seluruh lapisan masyarakat.
                         </p>
                         <p class="text-gray-700 leading-relaxed">
-                            Sebagai wujud nyata dari visi tersebut, SilaDesBeng hadir mengintegrasikan berbagai pilar layanan esensial BUMDes, mulai dari sarana mobilitas (kendaraan), pemanfaatan fasilitas umum, hingga penyewaan alat dan pendistribusian gas. Lebih jauh lagi, kami juga menghadirkan ruang interaksi inklusif melalui fitur Pelaporan Warga dan Informasi Pengumuman. Cerita SilaDesBeng adalah cerita tentang inovasi dan kolaborasi bagaimana sentuhan teknologi mentransformasi cara dan masyarakat aparatur berinteraksi demi mewujudkan tata kelola Bengkalis yang mandiri, produktif, dan berkelanjutan.
+                            Sebagai wujud nyata dari visi tersebut, SilaDesBeng hadir mengintegrasikan berbagai pilar layanan esensial daerah, mulai dari sarana mobilitas (kendaraan), pemanfaatan fasilitas umum, hingga penyewaan alat dan pendistribusian gas. Lebih jauh lagi, kami juga menghadirkan ruang interaksi inklusif melalui fitur Pelaporan Warga dan Informasi Pengumuman. Cerita SilaDesBeng adalah cerita tentang inovasi dan kolaborasi bagaimana sentuhan teknologi mentransformasi cara dan masyarakat aparatur berinteraksi demi mewujudkan tata kelola Bengkalis yang mandiri, produktif, dan berkelanjutan.
                         </p>
                     </div>
                     
@@ -55,7 +55,7 @@
                             <div class="w-3 h-3 rounded-full bg-blue-500 mt-2 flex-shrink-0"></div>
                             <div>
                                 <h3 class="font-bold text-lg text-gray-900">Inovatif</h3>
-                                <p class="text-gray-600">Selalu berinovasi untuk memberikan solusi terbaik yang sesuai dengan kebutuhan desa</p>
+                                <p class="text-gray-600">Selalu berinovasi untuk memberikan solusi terbaik yang sesuai dengan kebutuhan daerah</p>
                             </div>
                         </div>
                         <div class="flex items-start gap-4">
@@ -97,34 +97,70 @@
                 </h2>
                 <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-lg p-8 border border-gray-200 hover:-translate-y-2 transition-all duration-300">
                     <div class="space-y-4">
+                        <!-- Service 1: Sarana Mobilitas -->
                         <div class="flex items-start gap-4">
                             <svg class="w-6 h-6 flex-shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <circle cx="12" cy="12" r="10" fill="#10B981"/>
                                 <path d="M8 12.5L10.5 15L16 9" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
                             <div>
-                                <h3 class="font-bold text-lg text-gray-900">Digitalisasi Penyewaan Alat Desa</h3>
-                                <p class="text-gray-600">Menyediakan layanan pemesanan alat (tenda, kursi, meja, sound system, diesel) secara online dengan pencatatan otomatis</p>
+                                <h3 class="font-bold text-lg text-gray-900">Sarana Mobilitas</h3>
+                                <p class="text-gray-600">Fasilitas penyediaan sarana transportasi terpadu guna mendukung efisiensi pergerakan operasional instansi dan kemudahan mobilitas masyarakat di berbagai wilayah kabupaten.</p>
                             </div>
                         </div>
+                        <!-- Service 2: Fasilitas Umum -->
                         <div class="flex items-start gap-4">
                             <svg class="w-6 h-6 flex-shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <circle cx="12" cy="12" r="10" fill="#10B981"/>
                                 <path d="M8 12.5L10.5 15L16 9" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
                             <div>
-                                <h3 class="font-bold text-lg text-gray-900">Pengelolaan Unit Usaha</h3>
-                                <p class="text-gray-600">Mengelola proses penyewaan alat dan pembelian gas dengan sistem yang terintegrasi</p>
+                                <h3 class="font-bold text-lg text-gray-900">Pemanfaatan Fasilitas Umum</h3>
+                                <p class="text-gray-600">Sistem reservasi digital terpadu untuk penggunaan fasilitas umum seperti gedung pertemuan, lapangan, dan ruang publik lainnya.</p>
                             </div>
                         </div>
+                        <!-- Service 3: Penyewaan Alat -->
                         <div class="flex items-start gap-4">
                             <svg class="w-6 h-6 flex-shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <circle cx="12" cy="12" r="10" fill="#10B981"/>
                                 <path d="M8 12.5L10.5 15L16 9" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
                             <div>
-                                <h3 class="font-bold text-lg text-gray-900">Pelaporan dan Monitoring</h3>
-                                <p class="text-gray-600">Menyediakan laporan penyewaan, transaksi, dan keuangan yang dapat diakses oleh BUMDes dan Pemerintah Desa</p>
+                                <h3 class="font-bold text-lg text-gray-900">Penyewaan Alat</h3>
+                                <p class="text-gray-600">Layanan peminjaman dan penyewaan peralatan pendukung acara dengan sistem inventarisasi dan pencatatan yang akurat.</p>
+                            </div>
+                        </div>
+                        <!-- Service 4: Pendistribusian Gas -->
+                        <div class="flex items-start gap-4">
+                            <svg class="w-6 h-6 flex-shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="12" cy="12" r="10" fill="#10B981"/>
+                                <path d="M8 12.5L10.5 15L16 9" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <div>
+                                <h3 class="font-bold text-lg text-gray-900">Pendistribusian Gas</h3>
+                                <p class="text-gray-600">Manajemen terintegrasi untuk memantau proses ketersediaan dan pendistribusian gas secara merata dan transparan.</p>
+                            </div>
+                        </div>
+                        <!-- Service 5: Pelaporan Warga -->
+                        <div class="flex items-start gap-4">
+                            <svg class="w-6 h-6 flex-shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="12" cy="12" r="10" fill="#10B981"/>
+                                <path d="M8 12.5L10.5 15L16 9" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <div>
+                                <h3 class="font-bold text-lg text-gray-900">Pelaporan Warga</h3>
+                                <p class="text-gray-600">Wadah interaktif bagi masyarakat untuk menyampaikan aspirasi, aduan, dan masukan langsung kepada instansi daerah dengan respons cepat.</p>
+                            </div>
+                        </div>
+                        <!-- Service 6: Informasi Pengumuman -->
+                        <div class="flex items-start gap-4">
+                            <svg class="w-6 h-6 flex-shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="12" cy="12" r="10" fill="#10B981"/>
+                                <path d="M8 12.5L10.5 15L16 9" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <div>
+                                <h3 class="font-bold text-lg text-gray-900">Informasi Pengumuman</h3>
+                                <p class="text-gray-600">Pusat penyebaran informasi resmi, berita terkini, dan pengumuman penting dari pemerintah daerah untuk seluruh lapisan masyarakat.</p>
                             </div>
                         </div>
                     </div>
@@ -143,14 +179,14 @@
                                 <circle cx="12" cy="12" r="10" fill="#10B981"/>
                                 <path d="M8 12.5L10.5 15L16 9" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
-                            <p class="text-gray-700 leading-relaxed">Meningkatkan efisiensi dan profesionalitas pengelolaan unit usaha desa</p>
+                            <p class="text-gray-700 leading-relaxed">Meningkatkan efisiensi dan profesionalitas pengelolaan unit usaha daerah</p>
                         </div>
                         <div class="flex items-start gap-4">
                             <svg class="w-6 h-6 flex-shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <circle cx="12" cy="12" r="10" fill="#10B981"/>
                                 <path d="M8 12.5L10.5 15L16 9" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
-                            <p class="text-gray-700 leading-relaxed">Menyediakan layanan digital yang mudah diakses oleh masyarakat dan pelaku usaha desa</p>
+                            <p class="text-gray-700 leading-relaxed">Menyediakan layanan digital yang mudah diakses oleh masyarakat dan pelaku usaha daerah</p>
                         </div>
                         <div class="flex items-start gap-4">
                             <svg class="w-6 h-6 flex-shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -164,7 +200,7 @@
                                 <circle cx="12" cy="12" r="10" fill="#10B981"/>
                                 <path d="M8 12.5L10.5 15L16 9" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
-                            <p class="text-gray-700 leading-relaxed">Mendorong digitalisasi desa menuju tata kelola ekonomi mandiri & modern</p>
+                            <p class="text-gray-700 leading-relaxed">Mendorong digitalisasi daerah menuju tata kelola ekonomi mandiri & modern</p>
                         </div>
                     </div>
                 </div>

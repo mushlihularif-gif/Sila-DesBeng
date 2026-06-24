@@ -6,6 +6,8 @@ use App\Models\RentalBooking;
 use App\Models\GasOrder;
 use App\Models\Gas;
 use App\Models\Barang;
+use App\Models\MobilBooking;
+use App\Models\FasilitasUmumBooking;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
@@ -54,10 +56,59 @@ class RequestController extends Controller
             }
         }
 
+        // Buat query untuk mobil
+        $mobilQuery = MobilBooking::withTrashed()->with(['user', 'mobil']);
+        if ($status !== 'all') {
+            if ($status === 'cancellation_pending') {
+                $mobilQuery->where('cancellation_status', 'pending');
+            } elseif ($status === 'in_process') {
+                $mobilQuery->whereIn('status', ['confirmed', 'approved', 'process', 'delivering', 'arrived']);
+            } elseif ($status === 'completed') {
+                $mobilQuery->whereIn('status', ['completed', 'resolved']);
+            } elseif ($status === 'rejected') {
+                $mobilQuery->whereIn('status', ['cancelled', 'rejected']);
+            } else {
+                $mobilQuery->where('status', $status);
+            }
+        }
+
+        // Buat query untuk fasilitas umum
+        $fasilitasQuery = FasilitasUmumBooking::withTrashed()->with(['user', 'fasilitas']);
+        if ($status !== 'all') {
+            if ($status === 'cancellation_pending') {
+                $fasilitasQuery->where('cancellation_status', 'pending');
+            } elseif ($status === 'in_process') {
+                $fasilitasQuery->whereIn('status', ['confirmed', 'approved', 'ongoing', 'delivering', 'arrived']);
+            } elseif ($status === 'completed') {
+                $fasilitasQuery->whereIn('status', ['completed', 'resolved']);
+            } elseif ($status === 'rejected') {
+                $fasilitasQuery->whereIn('status', ['cancelled', 'rejected']);
+            } else {
+                $fasilitasQuery->where('status', $status);
+            }
+        }
+
         // Ambil hasil berdasarkan filter kategori
         if ($category === 'rental') {
             $rentalRequests = $rentalQuery->orderByDesc('created_at')->get();
             $gasOrders = collect();
+            $mobilRequests = collect();
+            $fasilitasRequests = collect();
+        } elseif ($category === 'gas') {
+            $rentalRequests = collect();
+            $gasOrders = $gasQuery->orderByDesc('created_at')->get();
+            $mobilRequests = collect();
+            $fasilitasRequests = collect();
+        } elseif ($category === 'mobil') {
+            $rentalRequests = collect();
+            $gasOrders = collect();
+            $mobilRequests = $mobilQuery->orderByDesc('created_at')->get();
+            $fasilitasRequests = collect();
+        } elseif ($category === 'fasilitas') {
+            $rentalRequests = collect();
+            $gasOrders = collect();
+            $mobilRequests = collect();
+            $fasilitasRequests = $fasilitasQuery->orderByDesc('created_at')->get();
         } elseif ($category === 'gas') {
             $rentalRequests = collect();
             $gasOrders = $gasQuery->orderByDesc('created_at')->get();
@@ -65,21 +116,27 @@ class RequestController extends Controller
             // Filter terbaru (7 hari terakhir)
             $rentalRequests = $rentalQuery->where('created_at', '>=', now()->subDays(7))->orderByDesc('created_at')->get();
             $gasOrders = $gasQuery->where('created_at', '>=', now()->subDays(7))->orderByDesc('created_at')->get();
+            $mobilRequests = $mobilQuery->where('created_at', '>=', now()->subDays(7))->orderByDesc('created_at')->get();
+            $fasilitasRequests = $fasilitasQuery->where('created_at', '>=', now()->subDays(7))->orderByDesc('created_at')->get();
         } else {
             $rentalRequests = $rentalQuery->orderByDesc('created_at')->get();
             $gasOrders = $gasQuery->orderByDesc('created_at')->get();
+            $mobilRequests = $mobilQuery->orderByDesc('created_at')->get();
+            $fasilitasRequests = $fasilitasQuery->orderByDesc('created_at')->get();
         }
 
         // Hitung statistik
         // Hitung statistik (Include deleted for history functionality)
         $stats = [
-            'total' => RentalBooking::withTrashed()->count() + GasOrder::withTrashed()->count(),
-            'pending' => RentalBooking::where('status', 'pending')->count() + GasOrder::where('status', 'pending')->count(),
-            'approved' => RentalBooking::where('status', 'approved')->count() + GasOrder::where('status', 'approved')->count(),
-            'rejected' => RentalBooking::withTrashed()->whereIn('status', ['cancelled', 'rejected'])->count() + GasOrder::withTrashed()->whereIn('status', ['cancelled', 'rejected'])->count(),
-            'cancellation_pending' => RentalBooking::where('cancellation_status', 'pending')->count() + GasOrder::where('cancellation_status', 'pending')->count(),
+            'total' => RentalBooking::withTrashed()->count() + GasOrder::withTrashed()->count() + MobilBooking::withTrashed()->count() + FasilitasUmumBooking::withTrashed()->count(),
+            'pending' => RentalBooking::where('status', 'pending')->count() + GasOrder::where('status', 'pending')->count() + MobilBooking::where('status', 'pending')->count() + FasilitasUmumBooking::where('status', 'pending')->count(),
+            'approved' => RentalBooking::where('status', 'approved')->count() + GasOrder::where('status', 'approved')->count() + MobilBooking::where('status', 'approved')->count() + FasilitasUmumBooking::where('status', 'approved')->count(),
+            'rejected' => RentalBooking::withTrashed()->whereIn('status', ['cancelled', 'rejected'])->count() + GasOrder::withTrashed()->whereIn('status', ['cancelled', 'rejected'])->count() + MobilBooking::withTrashed()->whereIn('status', ['cancelled', 'rejected'])->count() + FasilitasUmumBooking::withTrashed()->whereIn('status', ['cancelled', 'rejected'])->count(),
+            'cancellation_pending' => RentalBooking::where('cancellation_status', 'pending')->count() + GasOrder::where('cancellation_status', 'pending')->count() + MobilBooking::where('cancellation_status', 'pending')->count() + FasilitasUmumBooking::where('cancellation_status', 'pending')->count(),
             'rental_total' => RentalBooking::withTrashed()->count(),
             'gas_total' => GasOrder::withTrashed()->count(),
+            'mobil_total' => MobilBooking::withTrashed()->count(),
+            'fasilitas_total' => FasilitasUmumBooking::withTrashed()->count(),
             'active_rental_count' => RentalBooking::whereIn('status', ['confirmed', 'being_prepared', 'in_delivery', 'arrived'])->sum('quantity'),
         ];
 
@@ -95,10 +152,20 @@ class RequestController extends Controller
                 'cancellation' => GasOrder::where('cancellation_status', 'pending')->count(),
                 'total' => GasOrder::where('status', 'pending')->orWhere('cancellation_status', 'pending')->count()
             ],
+            'mobil' => [
+                'pending' => MobilBooking::where('status', 'pending')->count(),
+                'cancellation' => MobilBooking::where('cancellation_status', 'pending')->count(),
+                'total' => MobilBooking::where('status', 'pending')->orWhere('cancellation_status', 'pending')->count()
+            ],
+            'fasilitas' => [
+                'pending' => FasilitasUmumBooking::where('status', 'pending')->count(),
+                'cancellation' => FasilitasUmumBooking::where('cancellation_status', 'pending')->count(),
+                'total' => FasilitasUmumBooking::where('status', 'pending')->orWhere('cancellation_status', 'pending')->count()
+            ],
         ];
 
         return response()
-            ->view('admin.aktivitas.requests', compact('rentalRequests', 'gasOrders', 'stats', 'status', 'category', 'notificationCounts'))
+            ->view('admin.aktivitas.requests', compact('rentalRequests', 'gasOrders', 'mobilRequests', 'fasilitasRequests', 'stats', 'status', 'category', 'notificationCounts'))
             ->withHeaders([
                 'Cache-Control' => 'no-cache, no-store, must-revalidate',
                 'Pragma' => 'no-cache',
@@ -119,6 +186,16 @@ class RequestController extends Controller
                 'cancellation' => GasOrder::where('cancellation_status', 'pending')->count(),
                 'total' => GasOrder::where('status', 'pending')->orWhere('cancellation_status', 'pending')->count()
             ],
+            'mobil' => [
+                'pending' => MobilBooking::where('status', 'pending')->count(),
+                'cancellation' => MobilBooking::where('cancellation_status', 'pending')->count(),
+                'total' => MobilBooking::where('status', 'pending')->orWhere('cancellation_status', 'pending')->count()
+            ],
+            'fasilitas' => [
+                'pending' => FasilitasUmumBooking::where('status', 'pending')->count(),
+                'cancellation' => FasilitasUmumBooking::where('cancellation_status', 'pending')->count(),
+                'total' => FasilitasUmumBooking::where('status', 'pending')->orWhere('cancellation_status', 'pending')->count()
+            ],
         ];
 
         return response()->json($counts);
@@ -128,6 +205,10 @@ class RequestController extends Controller
     {
         if ($type === 'rental') {
             $request = RentalBooking::withTrashed()->with(['user', 'barang'])->findOrFail($id);
+        } elseif ($type === 'mobil') {
+            $request = MobilBooking::withTrashed()->with(['user', 'mobil'])->findOrFail($id);
+        } elseif ($type === 'fasilitas') {
+            $request = FasilitasUmumBooking::withTrashed()->with(['user', 'fasilitas'])->findOrFail($id);
         } else {
             $request = GasOrder::withTrashed()->with('user')->findOrFail($id);
         }
@@ -188,6 +269,35 @@ class RequestController extends Controller
                     $updateData['order_number'] = \App\Models\RentalBooking::generateOrderNumber();
                 }
                 
+                $model->update($updateData);
+
+            } elseif ($type === 'mobil') {
+                $model = MobilBooking::with('mobil')->findOrFail($id);
+                if ($model->status !== 'pending') throw new \Exception("Permintaan sudah diproses sebelumnya.");
+
+                $mobil = $model->mobil;
+                if ($mobil->status !== 'tersedia') throw new \Exception("Mobil sedang tidak tersedia.");
+                
+                $mobil->update(['status' => 'disewa']);
+
+                $newStatus = 'confirmed';
+                $updateData = ['status' => $newStatus, 'confirmed_at' => now()];
+                $model->update($updateData);
+
+            } elseif ($type === 'fasilitas') {
+                $model = FasilitasUmumBooking::with('fasilitas')->findOrFail($id);
+                if ($model->status !== 'pending') throw new \Exception("Permintaan sudah diproses sebelumnya.");
+
+                $fasilitas = $model->fasilitas;
+                if ($fasilitas->stok < 1) throw new \Exception("Fasilitas sedang tidak tersedia.");
+                
+                $fasilitas->decrement('stok');
+                if ($fasilitas->stok == 0) {
+                    $fasilitas->update(['status' => 'disewa']);
+                }
+
+                $newStatus = 'confirmed';
+                $updateData = ['status' => $newStatus, 'confirmed_at' => now()];
                 $model->update($updateData);
 
             } else {
@@ -302,6 +412,24 @@ class RequestController extends Controller
                 // Pastikan cancellation_status tidak 'pending' untuk menghindari kebingungan
                 'cancellation_status' => null 
             ]);
+        } elseif ($type === 'mobil') {
+            $model = MobilBooking::findOrFail($id);
+            $newStatus = 'rejected';
+            $model->update([
+                'status' => $newStatus,
+                'admin_notes' => "Ditolak: " . $request->reason,
+                'cancellation_reason' => "Ditolak Admin: " . $request->reason,
+                'cancellation_status' => null 
+            ]);
+        } elseif ($type === 'fasilitas') {
+            $model = FasilitasUmumBooking::findOrFail($id);
+            $newStatus = 'rejected';
+            $model->update([
+                'status' => $newStatus,
+                'admin_notes' => "Ditolak: " . $request->reason,
+                'cancellation_reason' => "Ditolak Admin: " . $request->reason,
+                'cancellation_status' => null 
+            ]);
         } else {
             $model = GasOrder::findOrFail($id);
             // GasOrder menggunakan status string, kemungkinan mendukung 'rejected'
@@ -349,6 +477,10 @@ class RequestController extends Controller
 
         if ($type === 'rental') {
             $order = \App\Models\RentalBooking::with('barang')->findOrFail($id);
+        } elseif ($type === 'mobil') {
+            $order = MobilBooking::findOrFail($id);
+        } elseif ($type === 'fasilitas') {
+            $order = FasilitasUmumBooking::findOrFail($id);
         } else {
             $order = GasOrder::findOrFail($id);
         }
@@ -425,6 +557,17 @@ class RequestController extends Controller
                             if ($order->barang->stok < 5 && $order->barang->stok > 0) {
                                 $notificationService->notifyLowStock($order->barang, 'barang', $order->barang->stok);
                             }
+                        }
+                    } elseif ($type === 'mobil' && $oldStatus !== 'completed') {
+                        if (!$order->relationLoaded('mobil')) $order->load('mobil');
+                        if ($order->mobil) {
+                            $order->mobil->update(['status' => 'tersedia']);
+                        }
+                    } elseif ($type === 'fasilitas' && $oldStatus !== 'completed') {
+                        if (!$order->relationLoaded('fasilitas')) $order->load('fasilitas');
+                        if ($order->fasilitas) {
+                            $order->fasilitas->increment('stok');
+                            $order->fasilitas->update(['status' => 'tersedia']);
                         }
                     }
                     break;

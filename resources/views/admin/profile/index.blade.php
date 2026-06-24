@@ -25,7 +25,7 @@
                             <i class="bx bx-user-circle me-2"></i>Detail Profil
                         </h5>
                         <!-- Account -->
-                        <div class="card-body">
+                        <div class="card-body p-4 p-md-5">
                             <div class="d-flex align-items-start align-items-sm-center gap-4 mb-4">
                                 <div class="avatar-wrapper position-relative">
                                     @if($user && $user->file)
@@ -61,43 +61,47 @@
                                 </div>
                             </div>
                             
-                            <hr class="my-4" />
+                            <hr class="my-5" />
                             
-                            <div class="row g-3">
+                            <div class="row g-4">
                                 <div class="col-md-6">
-                                    <label for="username" class="form-label fw-semibold">
+                                    <label for="username" class="form-label fw-semibold mb-2">
                                         <i class="bx bx-user me-1"></i>Username
                                     </label>
                                     <input class="form-control form-control-lg" type="text" id="username" name="username"
-                                        value="{{ $user->username ?? 'admin_user' }}" disabled />
-                                    <small class="text-muted">Username tidak dapat diubah</small>
+                                        value="{{ $user->username ?? 'admin_user' }}" disabled style="background-color: #f3f4f6;" />
+                                    <small class="text-muted mt-2 d-block">Username tidak dapat diubah</small>
                                 </div>
                                 <div class="col-md-6">
-                                    <label for="email" class="form-label fw-semibold">
+                                    <label for="email" class="form-label fw-semibold mb-2">
                                         <i class="bx bx-envelope me-1"></i>E-mail
                                     </label>
                                     <input class="form-control form-control-lg" type="email" id="email" name="email"
                                         value="{{ old('email', $user->email ?? 'admin@example.com') }}"
-                                        placeholder="admin@example.com" readonly style="background-color: #e9ecef;" />
-                                    <small class="text-muted">Email tidak dapat diubah</small>
+                                        placeholder="admin@example.com" readonly style="background-color: #f3f4f6;" />
+                                    <small class="text-muted mt-2 d-block">Email tidak dapat diubah</small>
                                 </div>
                                 <div class="col-md-6">
-                                    <label for="firstName" class="form-label fw-semibold">
+                                    <label for="firstName" class="form-label fw-semibold mb-2">
                                         <i class="bx bx-id-card me-1"></i>Nama Lengkap
                                     </label>
                                     <input class="form-control form-control-lg" type="text" id="firstName" name="name"
                                         value="{{ old('name', $user->name ?? 'Admin Nama') }}" autofocus />
                                 </div>
+                                
+                                @if($user && $user->region)
                                 <div class="col-md-6">
-                                    <label for="organization" class="form-label fw-semibold">
-                                        <i class="bx bx-buildings me-1"></i>Perusahaan / Organisasi
+                                    <label for="region" class="form-label fw-semibold mb-2">
+                                        <i class="bx bx-map-pin me-1"></i>Wilayah Tugas ({{ ucfirst($user->region->type) }})
                                     </label>
-                                    <input type="text" class="form-control form-control-lg" id="organization" name="organization"
-                                        value="BUMDes Pematang Duku Timur" disabled />
-                                    <small class="text-muted">Organisasi tidak dapat diubah</small>
+                                    <input type="text" class="form-control form-control-lg" id="region" name="region"
+                                        value="{{ $user->region->full_path }}" disabled style="background-color: #f3f4f6;" />
+                                    <small class="text-muted mt-2 d-block">Wilayah tugas sesuai penempatan akun</small>
                                 </div>
+                                @endif
+
                                 <div class="col-md-6">
-                                    <label class="form-label fw-semibold" for="phoneNumber">
+                                    <label class="form-label fw-semibold mb-2" for="phoneNumber">
                                         <i class="bx bx-phone me-1"></i>Nomor Telepon
                                     </label>
                                     <div class="input-group input-group-lg">
@@ -108,7 +112,7 @@
                                     </div>
                                 </div>
                                 <div class="col-md-6">
-                                    <label for="address" class="form-label fw-semibold">
+                                    <label for="address" class="form-label fw-semibold mb-2">
                                         <i class="bx bx-map me-1"></i>Alamat
                                     </label>
                                     <input type="text" class="form-control form-control-lg" id="address" name="address"
@@ -116,7 +120,7 @@
                                         placeholder="Alamat Lengkap" />
                                 </div>
                                 <div class="col-md-6">
-                                    <label for="state" class="form-label fw-semibold">
+                                    <label for="state" class="form-label fw-semibold mb-2">
                                         <i class="bx bx-male-female me-1"></i>Jenis Kelamin
                                     </label>
                                     <select id="state" class="form-select form-select-lg" name="gender">
@@ -147,8 +151,8 @@
                         <h5 class="card-header bg-gradient-warning text-white">
                             <i class="bx bx-shield me-2"></i>Keamanan Akun
                         </h5>
-                        <div class="card-body">
-                            <div class="alert alert-warning border-warning mb-3">
+                        <div class="card-body p-4 p-md-5">
+                            <div class="alert alert-warning border-warning mb-4">
                                 <h6 class="alert-heading fw-bold mb-2">
                                     <i class="bx bx-info-circle me-1"></i>Apakah Anda ingin mengubah kata sandi?
                                 </h6>

@@ -5,9 +5,9 @@
         <!-- Breadcrumb -->
         <div class="mb-4">
             <h4 class="fw-bold mb-1">
-                <span class="text-muted fw-light">Unit Layanan / Peminjaman Fasilitas Umum /</span> Tambah Alat
+                <span class="text-muted fw-light">Unit Layanan / Peminjaman Fasilitas Umum /</span> Tambah Fasilitas
             </h4>
-            <p class="text-muted mb-0">Lengkapi formulir di bawah untuk menambahkan alat baru</p>
+            <p class="text-muted mb-0">Lengkapi formulir di bawah untuk menambahkan fasilitas baru</p>
         </div>
 
         <!-- Form Card -->
@@ -20,8 +20,8 @@
                                 <i class='bx bx-package text-primary' style="font-size: 24px;"></i>
                             </div>
                             <div>
-                                <h5 class="mb-0 fw-bold">Form Tambah Alat Sewa</h5>
-                                <small class="text-muted">Masukkan detail alat yang akan disewakan</small>
+                                <h5 class="mb-0 fw-bold">Form Tambah Fasilitas Umum</h5>
+                                <small class="text-muted">Masukkan detail fasilitas yang dapat dipinjam</small>
                             </div>
                         </div>
                     </div>
@@ -44,113 +44,13 @@
                             </div>
                         @endif
 
-                        <form action="{{ route('admin.unit.Fasilitas Umum.store') }}" method="POST" enctype="multipart/form-data">
+                        <form action="{{ route('admin.unit.fasilitas_umum.store') }}" method="POST" enctype="multipart/form-data">
                             @csrf
-                            
-                            <!-- Section: Informasi Dasar -->
+
+                            <!-- Section: Foto Fasilitas -->
                             <div class="form-section mb-4">
                                 <h6 class="section-title mb-3">
-                                    <i class='bx bx-info-circle me-2'></i>Informasi Dasar
-                                </h6>
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-semibold" for="nama_fasilitas">
-                                            Nama Barang <span class="text-danger">*</span>
-                                        </label>
-                                        <input type="text" class="form-control modern-input" id="nama_fasilitas" 
-                                               name="nama_fasilitas" placeholder="Contoh: Tenda Pesta 5x5m" required />
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-semibold" for="kategori">
-                                            Kategori <span class="text-danger">*</span>
-                                        </label>
-                                        <div class="input-group">
-                                            <select class="form-select modern-input" id="kategori" name="kategori" required>
-                                                <option value="" disabled selected>Pilih Kategori</option>
-                                                <option value="Perlengkapan Acara">Perlengkapan Acara</option>
-                                                <option value="Tenda Acara">Tenda Acara</option>
-                                                <option value="Dekorasi">Dekorasi</option>
-                                            </select>
-                                            <button type="button" class="btn btn-outline-primary modern-btn-outline" 
-                                                    data-bs-toggle="modal" data-bs-target="#addCategoryModal">
-                                                <i class="bx bx-plus"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div class="col-12">
-                                        <label class="form-label fw-semibold" for="deskripsi">
-                                            Deskripsi <span class="text-danger">*</span>
-                                        </label>
-                                        <textarea class="form-control modern-input" id="deskripsi" name="deskripsi" 
-                                                  rows="4" placeholder="Jelaskan detail alat, kondisi, dan spesifikasi..." required></textarea>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Section: Harga & Stok -->
-                            <div class="form-section mb-4">
-                                <h6 class="section-title mb-3">
-                                    <i class='bx bx-money me-2'></i>Harga & Stok
-                                </h6>
-                                <div class="row g-3">
-
-                                    <div class="col-md-4">
-                                        <label class="form-label fw-semibold" for="stok">
-                                            Stok Tersedia <span class="text-danger">*</span>
-                                        </label>
-                                        <input type="number" class="form-control modern-input" id="stok" 
-                                               name="stok" placeholder="10" min="0" required />
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label fw-semibold" for="satuan">
-                                            Satuan <span class="text-danger">*</span>
-                                        </label>
-                                        <div class="input-group">
-                                            <select class="form-select modern-input" id="satuan" name="satuan" required>
-                                                <option value="" disabled selected>Pilih Satuan</option>
-                                                <option value="Unit">Unit</option>
-                                                <option value="Paket">Paket</option>
-                                                <option value="Set">Set</option>
-                                            </select>
-                                            <button type="button" class="btn btn-outline-primary modern-btn-outline" 
-                                                    data-bs-toggle="modal" data-bs-target="#addSatuanModal">
-                                                <i class="bx bx-plus"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Section: Status & Lokasi -->
-                            <div class="form-section mb-4">
-                                <h6 class="section-title mb-3">
-                                    <i class='bx bx-map me-2'></i>Status & Lokasi
-                                </h6>
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-semibold" for="status">
-                                            Status <span class="text-danger">*</span>
-                                        </label>
-                                        <select class="form-select modern-input" id="status" name="status" required>
-                                            <option value="tersedia" selected>Tersedia</option>
-                                            <option value="disewa">Disewa</option>
-                                            <option value="rusak">Rusak</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-semibold" for="lokasi">
-                                            Lokasi <span class="text-danger">*</span>
-                                        </label>
-                                        <input type="text" class="form-control modern-input" id="lokasi" 
-                                               name="lokasi" value="Desa Pematang Duku Timur" required />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Section: Foto Produk -->
-                            <div class="form-section mb-4">
-                                <h6 class="section-title mb-3">
-                                    <i class='bx bx-image me-2'></i>Foto Produk
+                                    <i class='bx bx-image me-2'></i>Foto Fasilitas
                                 </h6>
                                 <div class="row g-3">
                                     <!-- Foto Utama -->
@@ -214,10 +114,135 @@
                                     </div>
                                 </div>
                             </div>
+                            
+                            <!-- Section: Informasi Dasar -->
+                            <div class="form-section mb-4">
+                                <h6 class="section-title mb-3">
+                                    <i class='bx bx-info-circle me-2'></i>Informasi Dasar
+                                </h6>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold" for="nama_fasilitas">
+                                            Nama Barang <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="text" class="form-control modern-input" id="nama_fasilitas" 
+                                               name="nama_fasilitas" placeholder="Contoh: Tenda Pesta 5x5m" required />
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold" for="kategori">
+                                            Kategori <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <select class="form-select modern-input" id="kategori" name="kategori" required>
+                                                <option value="" disabled selected>Pilih Kategori</option>
+                                                <option value="Kendaraan">Kendaraan (Mobil, Ambulan, dll)</option>
+                                                <option value="Gedung">Gedung / Ruangan</option>
+                                                <option value="Lapangan">Lapangan Olahraga</option>
+                                                <option value="Perlengkapan Acara">Perlengkapan Acara</option>
+                                                <option value="Tenda Acara">Tenda Acara</option>
+                                                <option value="Dekorasi">Dekorasi</option>
+                                            </select>
+                                            <button type="button" class="btn btn-outline-primary modern-btn-outline" 
+                                                    data-bs-toggle="modal" data-bs-target="#addCategoryModal">
+                                                <i class="bx bx-plus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label fw-semibold" for="deskripsi">
+                                            Deskripsi <span class="text-danger">*</span>
+                                        </label>
+                                        <textarea class="form-control modern-input" id="deskripsi" name="deskripsi" 
+                                                  rows="4" placeholder="Jelaskan detail fasilitas, lokasi, dan daya tampung..." required></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Section: Kapasitas & Satuan -->
+                            <div class="form-section mb-4">
+                                <h6 class="section-title mb-3">
+                                    <i class='bx bx-list-ol me-2'></i>Kapasitas & Satuan
+                                </h6>
+                                <div class="row g-3">
+
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold" for="stok">
+                                            Stok Tersedia <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="number" class="form-control modern-input" id="stok" 
+                                               name="stok" placeholder="10" min="0" required />
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold" for="satuan">
+                                            Satuan <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <select class="form-select modern-input" id="satuan" name="satuan" required>
+                                                <option value="" disabled selected>Pilih Satuan</option>
+                                                <option value="Unit">Unit</option>
+                                                <option value="Paket">Paket</option>
+                                                <option value="Set">Satu Set</option>
+                                            </select>
+                                            <button type="button" class="btn btn-outline-primary modern-btn-outline" 
+                                                    data-bs-toggle="modal" data-bs-target="#addSatuanModal">
+                                                <i class="bx bx-plus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Section: Status & Lokasi -->
+                            <div class="form-section mb-4">
+                                <h6 class="section-title mb-3">
+                                    <i class='bx bx-map me-2'></i>Status & Lokasi
+                                </h6>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold" for="status">
+                                            Status <span class="text-danger">*</span>
+                                        </label>
+                                        <select class="form-select modern-input" id="status" name="status" required>
+                                            <option value="tersedia" selected>Tersedia</option>
+                                            <option value="disewa">Disewa</option>
+                                            <option value="rusak">Rusak</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold" for="lokasi">
+                                            Lokasi <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="text" class="form-control modern-input" id="lokasi" 
+                                               name="lokasi" value="Desa Pematang Duku Timur" required />
+                                    </div>
+                                    <div class="col-md-6 kendaraan-options">
+                                        <label class="form-label fw-semibold" for="opsi_supir">
+                                            Opsi Supir (Hanya untuk Kendaraan)
+                                        </label>
+                                        <select class="form-select modern-input" id="opsi_supir" name="opsi_supir">
+                                            <option value="" selected>Tidak Ada (Bukan Kendaraan)</option>
+                                            <option value="Lepas Kunci">Lepas Kunci (Tanpa Supir)</option>
+                                            <option value="Dengan Supir">Dengan Supir (Disediakan Pemdes)</option>
+                                            <option value="Bebas Pilih">Bebas Pilih</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 kendaraan-options">
+                                        <label class="form-label fw-semibold" for="bbm_ditanggung">
+                                            Bahan Bakar (Hanya untuk Kendaraan)
+                                        </label>
+                                        <select class="form-select modern-input" id="bbm_ditanggung" name="bbm_ditanggung">
+                                            <option value="" selected>Tidak Ada (Bukan Kendaraan)</option>
+                                            <option value="Penyewa">Ditanggung Penyewa (Isi Sendiri)</option>
+                                            <option value="Pemerintah Desa">Ditanggung Pemerintah Desa (Gratis BBM)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
 
                             <!-- Action Buttons -->
                             <div class="d-flex justify-content-end gap-3 pt-3 border-top">
-                                <a href="{{ route('admin.unit.Fasilitas Umum.index') }}" class="btn btn-light modern-btn-secondary px-4">
+                                <a href="{{ route('admin.unit.fasilitas_umum.index') }}" class="btn btn-light modern-btn-secondary px-4">
                                     <i class='bx bx-x me-1'></i> Batal
                                 </a>
                                 <button type="submit" class="btn btn-primary modern-btn-primary px-4">
@@ -286,16 +311,26 @@
     </div>
 
     <style>
-        /* Modern Card Styling */
+        :root {
+            --primary-color: #3b82f6; /* Smooth Blue */
+            --primary-dark: #2563eb;
+            --primary-light: #eff6ff;
+            --primary-soft: #e0f2fe;
+            --border-color: #e2e8f0;
+            --bg-soft: #f8fafc;
+        }
+
+        /* Card Styling */
         .modern-card {
             border: none;
-            border-radius: 12px;
-            overflow: hidden;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
             transition: all 0.3s ease;
+            background: #ffffff;
         }
 
         .modern-card:hover {
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08) !important;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
         }
 
         /* Icon Wrapper */
@@ -312,10 +347,20 @@
 
         /* Form Sections */
         .form-section {
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            border-left: 4px solid #0d6efd;
+            padding: 24px;
+            background: var(--bg-soft);
+            border-radius: 12px;
+            border-left: 4px solid var(--primary-color);
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+            border-top: 1px solid var(--border-color);
+            border-right: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .form-section:hover {
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+            border-left-width: 6px;
         }
 
         .section-title {
@@ -328,18 +373,20 @@
 
         /* Modern Inputs */
         .modern-input {
-            border: 1.5px solid #e0e6ed;
-            border-radius: 8px;
-            padding: 10px 14px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 10px;
+            padding: 12px 16px;
             font-size: 14px;
             transition: all 0.3s ease;
-            background: white;
+            background: #ffffff;
+            color: #334155;
         }
 
         .modern-input:focus {
-            border-color: #0d6efd;
-            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
-            background: white;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+            background: #ffffff;
+            outline: none;
         }
 
         .modern-input-addon {
@@ -353,19 +400,24 @@
 
         /* Modern Buttons */
         .modern-btn-primary {
-            background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+            background: var(--primary-color);
             border: none;
-            border-radius: 8px;
-            padding: 10px 24px;
-            font-weight: 500;
+            border-radius: 10px;
+            padding: 12px 28px;
+            font-weight: 600;
+            color: #ffffff;
             transition: all 0.3s ease;
-            box-shadow: 0 2px 8px rgba(13, 110, 253, 0.2);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .modern-btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
-            background: linear-gradient(135deg, #0a58ca 0%, #084298 100%);
+            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.35);
+            background: var(--primary-dark);
+            color: #ffffff;
         }
 
         .modern-btn-secondary {
@@ -399,14 +451,15 @@
 
         /* Upload Box */
         .upload-box {
-            border: 2px dashed #cbd5e0;
-            border-radius: 10px;
-            padding: 20px;
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
-            background: #f8f9fa;
-            min-height: 200px;
+            background: #ffffff;
+            aspect-ratio: 4/3;
+            min-height: 220px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -414,8 +467,8 @@
         }
 
         .upload-box:hover {
-            border-color: #0d6efd;
-            background: #e7f1ff;
+            border-color: var(--primary-color);
+            background: var(--primary-light);
         }
 
         .upload-placeholder {
@@ -423,13 +476,13 @@
         }
 
         .upload-placeholder i {
-            color: #cbd5e0;
+            color: #94a3b8;
             transition: all 0.3s ease;
         }
 
         .upload-box:hover .upload-placeholder i {
-            color: #0d6efd;
-            transform: translateY(-5px);
+            color: var(--primary-color);
+            transform: translateY(-5px) scale(1.05);
         }
 
         .preview-container {
@@ -440,7 +493,8 @@
 
         .preview-image {
             width: 100%;
-            height: 180px;
+            height: 100%;
+            aspect-ratio: 4/3;
             object-fit: cover;
             border-radius: 8px;
         }
@@ -568,6 +622,28 @@
             alert('Silakan masukkan nama satuan.');
         }
     });
+
+    // Script untuk memunculkan Opsi Supir & BBM hanya jika kategori = Kendaraan
+    function toggleKendaraanOptions() {
+        const kategori = document.getElementById('kategori').value;
+        const vehicleOptions = document.querySelectorAll('.kendaraan-options');
+        
+        vehicleOptions.forEach(function(el) {
+            if(kategori && kategori.toLowerCase().includes('kendaraan')) {
+                el.style.display = 'block';
+            } else {
+                el.style.display = 'none';
+                // Reset value saat disembunyikan
+                const select = el.querySelector('select');
+                if(select) select.value = '';
+            }
+        });
+    }
+
+    document.getElementById('kategori').addEventListener('change', toggleKendaraanOptions);
+    // Jalankan saat pertama dimuat
+    document.addEventListener('DOMContentLoaded', toggleKendaraanOptions);
+
     </script>
 @endsection
 

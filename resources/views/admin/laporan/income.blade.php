@@ -31,7 +31,7 @@
 
     <!-- Summary Statistics -->
     <div class="row g-3 mb-4">
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden position-relative">
                 <div class="card-body p-4">
                     <div class="d-flex align-items-center mb-3">
@@ -40,7 +40,7 @@
                         </div>
                         <div>
                             <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Total Pendapatan</small>
-                            <h3 class="fw-bold mb-0 text-dark">Rp {{ number_format($totalPendapatan, 0, ',', '.') }}</h3>
+                            <h3 class="fw-bold mb-0 text-dark" style="font-size: 1.25rem;">Rp {{ number_format($totalPendapatan, 0, ',', '.') }}</h3>
                         </div>
                     </div>
                     <div class="d-flex align-items-center small text-muted">
@@ -54,12 +54,12 @@
                             <i class="bx bx-minus text-secondary me-1"></i>
                             <span class="text-secondary fw-semibold me-2">0%</span>
                         @endif
-                        dari bulan lalu
+                        dari tahun lalu
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden position-relative">
                 <div class="card-body p-4">
                     <div class="d-flex align-items-center mb-3">
@@ -68,7 +68,7 @@
                         </div>
                         <div>
                             <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Unit Penyewaan</small>
-                            <h3 class="fw-bold mb-0 text-dark">Rp {{ number_format($totalPenyewaan, 0, ',', '.') }}</h3>
+                            <h3 class="fw-bold mb-0 text-dark" style="font-size: 1.25rem;">Rp {{ number_format($totalPenyewaan, 0, ',', '.') }}</h3>
                         </div>
                     </div>
                     <div class="d-flex align-items-center small text-muted">
@@ -82,12 +82,12 @@
                             <i class="bx bx-minus text-secondary me-1"></i>
                             <span class="text-secondary fw-semibold me-2">0%</span>
                         @endif
-                        dari bulan lalu
+                        dari tahun lalu
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden position-relative">
                 <div class="card-body p-4">
                     <div class="d-flex align-items-center mb-3">
@@ -96,7 +96,7 @@
                         </div>
                         <div>
                             <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Unit Gas</small>
-                            <h3 class="fw-bold mb-0 text-dark">Rp {{ number_format($totalGas, 0, ',', '.') }}</h3>
+                            <h3 class="fw-bold mb-0 text-dark" style="font-size: 1.25rem;">Rp {{ number_format($totalGas, 0, ',', '.') }}</h3>
                         </div>
                     </div>
                      <div class="d-flex align-items-center small text-muted">
@@ -110,7 +110,35 @@
                             <i class="bx bx-minus text-secondary me-1"></i>
                             <span class="text-secondary fw-semibold me-2">0%</span>
                         @endif
-                        dari bulan lalu
+                        dari tahun lalu
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden position-relative">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="avatar avatar-md bg-danger-subtle text-danger rounded-3 p-2 me-3">
+                            <i class="bx bx-car fs-3"></i>
+                        </div>
+                        <div>
+                            <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Unit Sewa Mobil</small>
+                            <h3 class="fw-bold mb-0 text-dark" style="font-size: 1.25rem;">Rp {{ number_format($totalMobil ?? 0, 0, ',', '.') }}</h3>
+                        </div>
+                    </div>
+                     <div class="d-flex align-items-center small text-muted">
+                        @if($growth['mobil'] > 0)
+                            <i class="bx bx-trending-up text-success me-1"></i>
+                            <span class="text-success fw-semibold me-2">+{{ $growth['mobil'] }}%</span>
+                        @elseif($growth['mobil'] < 0)
+                            <i class="bx bx-trending-down text-danger me-1"></i>
+                            <span class="text-danger fw-semibold me-2">{{ $growth['mobil'] }}%</span>
+                        @else
+                            <i class="bx bx-minus text-secondary me-1"></i>
+                            <span class="text-secondary fw-semibold me-2">0%</span>
+                        @endif
+                        dari tahun lalu
                     </div>
                 </div>
             </div>
@@ -189,6 +217,26 @@
                              <div class="d-flex justify-content-between text-muted small">
                                 <span>{{ $totalPendapatanData['gas']['transactions'] ?? 0 }} Transaksi</span>
                                 <span>{{ $totalPendapatanData['gas']['percentage'] ?? 0 }}% dari Total</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mobil Item -->
+                    <div class="d-flex align-items-center p-3 rounded-3 hover-bg-light transition-all border border-dashed-hover">
+                         <div class="avatar avatar-md bg-danger-subtle text-danger rounded-3 p-2 me-3">
+                            <i class="bx bx-car fs-3"></i>
+                        </div>
+                         <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <h6 class="fw-bold text-dark mb-0">Unit Sewa Mobil</h6>
+                                <span class="fw-bold text-dark">Rp {{ number_format($totalPendapatanData['mobil']['revenue'] ?? 0, 0, ',', '.') }}</span>
+                            </div>
+                            <div class="progress mb-2" style="height: 6px;">
+                                <div class="progress-bar bg-danger" role="progressbar" style="width: {{ $totalPendapatanData['mobil']['percentage'] ?? 0 }}%"></div>
+                            </div>
+                             <div class="d-flex justify-content-between text-muted small">
+                                <span>{{ $totalPendapatanData['mobil']['transactions'] ?? 0 }} Transaksi</span>
+                                <span>{{ $totalPendapatanData['mobil']['percentage'] ?? 0 }}% dari Total</span>
                             </div>
                         </div>
                     </div>
@@ -301,20 +349,18 @@
              @endif
         </div>
     </div>
-</div>
-
-<!-- Manual Transaction Modal -->
+</div><!-- Manual Transaction Modal -->
 <div class="modal fade" id="manualTransactionModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
     <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+        <div class="modal-content border-0 shadow-lg rounded-4">
             <div class="modal-header border-bottom py-3 px-4 bg-white">
                 <div class="d-flex align-items-center">
-                    <div class="avatar avatar-sm bg-primary-subtle text-primary rounded-circle me-3 d-flex align-items-center justify-content-center">
-                        <i class="bx bx-edit-alt fs-4"></i>
+                    <div class="avatar avatar-md bg-primary-subtle text-primary rounded-circle me-3 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                        <i class="bx bx-edit-alt fs-3"></i>
                     </div>
                     <div>
-                        <h5 class="modal-title fw-bold text-dark" id="modalTitle">Catat Transaksi Manual</h5>
-                        <p class="text-muted small mb-0">Input data pendapatan di luar sistem otomatis</p>
+                        <h5 class="modal-title fw-bold text-dark mb-1" id="modalTitle">Catat Transaksi Manual</h5>
+                        <p class="text-muted small mb-0">Input data pendapatan secara manual di luar sistem otomatis</p>
                     </div>
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -325,84 +371,85 @@
                     
                     <div class="row g-0">
                         <!-- Left Panel: Transaction Info -->
-                        <div class="col-md-7 border-end p-4">
-                            <h6 class="text-uppercase fw-bold text-muted small mb-3">
-                                <i class="bx bx-file me-1"></i> Informasi Transaksi
+                        <div class="col-md-7 border-end p-4 p-md-5">
+                            <h6 class="text-uppercase fw-bold text-primary small mb-4 d-flex align-items-center">
+                                <i class="bx bx-file me-2 fs-5"></i> Informasi Transaksi
                             </h6>
                             
-                            <div class="row g-3">
-                                <div class="col-6">
-                                    <label class="form-label fw-semibold text-dark small">Tanggal Transaksi</label>
-                                    <div class="input-group input-group-merge">
-                                        <span class="input-group-text bg-light border-end-0"><i class="bx bx-calendar"></i></span>
-                                        <input type="date" class="form-control bg-light border-start-0 ps-1" id="transaction_date" name="transaction_date" required>
+                            <div class="row g-4">
+                                <div class="col-12 col-sm-6">
+                                    <label class="form-label fw-semibold text-dark">Tanggal Transaksi</label>
+                                    <div class="input-group input-group-merge shadow-sm rounded-3">
+                                        <span class="input-group-text bg-white border-end-0 text-primary"><i class="bx bx-calendar"></i></span>
+                                        <input type="date" class="form-control bg-white border-start-0 ps-0" id="transaction_date" name="transaction_date" required>
                                     </div>
                                 </div>
-                                <div class="col-6">
-                                    <label class="form-label fw-semibold text-dark small">Kategori</label>
-                                    <div class="input-group input-group-merge">
-                                        <span class="input-group-text bg-light border-end-0"><i class="bx bx-category"></i></span>
-                                        <select class="form-select bg-light border-start-0 ps-1" id="category" name="category" required>
-                                            <option value="">Pilih...</option>
+                                <div class="col-12 col-sm-6">
+                                    <label class="form-label fw-semibold text-dark">Kategori</label>
+                                    <div class="input-group input-group-merge shadow-sm rounded-3">
+                                        <span class="input-group-text bg-white border-end-0 text-primary"><i class="bx bx-category"></i></span>
+                                        <select class="form-select bg-white border-start-0 ps-0" id="category" name="category" required>
+                                            <option value="">Pilih Kategori...</option>
                                             <option value="penyewaan">Penyewaan Alat</option>
                                             <option value="gas">Penjualan Gas</option>
-                                            <option value="lainnya">Lainnya</option>
+                                            <option value="mobil">Penyewaan Mobil</option>
+                                            <option value="lainnya">Pendapatan Lainnya</option>
                                         </select>
                                     </div>
                                 </div>
                                 <div class="col-12">
-                                    <label class="form-label fw-semibold text-dark small">Nama Item / Keterangan</label>
-                                    <input type="text" class="form-control bg-light" id="name" name="name" placeholder="Contoh: Sewa Tenda Tambahan" required>
+                                    <label class="form-label fw-semibold text-dark">Nama Barang / Keterangan <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control shadow-sm rounded-3 p-2 px-3" id="name" name="name" placeholder="Contoh: Sewa Tenda Tambahan" required>
                                 </div>
                                 <div class="col-12">
-                                    <label class="form-label fw-semibold text-dark small">Deskripsi (Opsional)</label>
-                                    <textarea class="form-control bg-light" id="description" name="description" rows="3" placeholder="Catatan tambahan..."></textarea>
+                                    <label class="form-label fw-semibold text-dark">Deskripsi (Opsional)</label>
+                                    <textarea class="form-control shadow-sm rounded-3 p-3" id="description" name="description" rows="3" placeholder="Tambahkan catatan khusus di sini..."></textarea>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Right Panel: Financials -->
-                        <div class="col-md-5 bg-light bg-opacity-50 p-4">
-                            <h6 class="text-uppercase fw-bold text-muted small mb-3">
-                                <i class="bx bx-money me-1"></i> Detail Keuangan
+                        <div class="col-md-5 bg-light p-4 p-md-5">
+                            <h6 class="text-uppercase fw-bold text-primary small mb-4 d-flex align-items-center">
+                                <i class="bx bx-money me-2 fs-5"></i> Rincian Keuangan
                             </h6>
 
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold text-dark small">Jumlah (Qty)</label>
-                                <input type="number" class="form-control" id="quantity" name="quantity" min="1" value="1" oninput="calculateTotal()" required>
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold text-dark">Jumlah (Qty) <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control shadow-sm rounded-3 p-2 px-3" id="quantity" name="quantity" min="1" value="1" oninput="calculateTotal()" required>
                             </div>
 
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold text-dark small">Harga Satuan</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-white">Rp</span>
-                                    <input type="number" class="form-control" id="amount" name="amount" placeholder="0" oninput="calculateTotal()" required>
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold text-dark">Harga Satuan <span class="text-danger">*</span></label>
+                                <div class="input-group shadow-sm rounded-3">
+                                    <span class="input-group-text bg-white text-dark fw-bold border-end-0">Rp</span>
+                                    <input type="number" class="form-control border-start-0 ps-0" id="amount" name="amount" placeholder="0" oninput="calculateTotal()" required>
                                 </div>
                             </div>
 
-                            <div class="card bg-white border shadow-sm mb-3">
-                                <div class="card-body p-3 text-center">
-                                    <small class="text-muted d-block mb-1">Total Estimasi</small>
-                                    <h4 class="fw-bold text-primary mb-0" id="displayTotal">Rp 0</h4>
+                            <div class="card bg-white border-0 shadow-sm rounded-4 mb-4">
+                                <div class="card-body p-4 text-center">
+                                    <p class="text-muted small fw-semibold mb-1 text-uppercase">Estimasi Total</p>
+                                    <h3 class="fw-bolder text-primary mb-0" id="displayTotal">Rp 0</h3>
                                 </div>
                             </div>
 
                             <div class="mb-0">
-                                <label class="form-label fw-semibold text-dark small">Bukti (Struk/Foto)</label>
-                                <input type="file" class="form-control form-control-sm" id="proof_image" name="proof_image" accept="image/*">
+                                <label class="form-label fw-semibold text-dark">Bukti (Struk/Foto) <span class="text-muted fw-normal small">(Opsional)</span></label>
+                                <input type="file" class="form-control form-control-sm shadow-sm rounded-3" id="proof_image" name="proof_image" accept="image/*">
                             </div>
                             
                             <input type="hidden" name="payment_method" value="tunai">
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer border-top bg-white p-3">
-                    <button type="button" class="btn btn-label-secondary rounded-pill px-4" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary rounded-pill px-4" id="submitBtn">
-                        <i class="bx bx-save me-1"></i> Simpan Data
+                <div class="modal-footer border-top-0 bg-white p-4">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-4 fw-semibold" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-5 fw-semibold shadow-sm" id="submitBtn">
+                        <i class="bx bx-save me-2"></i> Simpan Data Transaksi
                     </button>
                 </div>
-             </form>
+            </form>
         </div>
     </div>
 </div>
@@ -464,10 +511,10 @@
         const pieEl = document.querySelector("#pendapatanPieChart");
         if (pieEl) {
              new ApexCharts(pieEl, {
-                series: [{{ $totalPendapatanData['rental']['revenue'] ?? 0 }}, {{ $totalPendapatanData['gas']['revenue'] ?? 0 }}],
+                series: [{{ $totalPendapatanData['rental']['revenue'] ?? 0 }}, {{ $totalPendapatanData['gas']['revenue'] ?? 0 }}, {{ $totalPendapatanData['mobil']['revenue'] ?? 0 }}],
                 chart: { type: 'donut', height: 250 },
-                labels: ['Penyewaan', 'Gas'],
-                colors: ['#ffab00', '#03c3ec'], // Warning & Info
+                labels: ['Penyewaan', 'Gas', 'Sewa Mobil'],
+                colors: ['#ffab00', '#03c3ec', '#ff3e1d'], // Warning, Info, Danger
                 dataLabels: { enabled: false },
                 plotOptions: {
                     pie: { donut: { size: '70%', labels: { show: true, total: { show: true, showAlways: true, label: 'Total', fontSize: '14px', color: '#a1acb8' } } } }

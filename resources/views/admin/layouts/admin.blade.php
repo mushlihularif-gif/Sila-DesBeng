@@ -364,6 +364,42 @@
         .swal2-container {
             z-index: 100000 !important;
         }
+        
+        /* Efek Preloader Baru */
+        .page-preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.4); /* Putih transparan */
+            backdrop-filter: blur(5px); /* Efek blur halus */
+            z-index: 999999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        
+        .page-preloader.loaded {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .preloader-logo {
+            width: 2.5rem;
+            height: auto;
+            z-index: 10;
+            animation: pulse-logo 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse-logo {
+            0% { transform: scale(0.85); opacity: 0.8; }
+            50% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(0.85); opacity: 0.8; }
+        }
     </style>
     <script src="{{ asset('Admin/vendor/js/helpers.js') }}"></script>
     <script src="{{ asset('Admin/js/config.js') }}"></script>
@@ -379,9 +415,22 @@
     <script src="{{ asset('Admin/vendor/js/helpers.js') }}"></script>
     <script src="{{ asset('Admin/js/config.js') }}"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Custom Page Styles -->
+    @yield('styles')
 </head>
 
 <body>
+    <!-- Preloader Overlay -->
+    <div id="page-preloader" class="page-preloader">
+        <div class="position-relative d-flex align-items-center justify-content-center">
+            <!-- Spinner berputar di luar -->
+            <div class="spinner-border text-primary shadow-sm position-absolute" style="width: 5rem; height: 5rem; border-width: 0.25em;" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <!-- Logo berdenyut di tengah -->
+            <img src="{{ asset('Admin/img/illustrations/logodomain.png') }}" alt="Logo" class="preloader-logo">
+        </div>
+    </div>
     <div class="layout-wrapper layout-content-navbar">
         <div class="layout-container">
             <!-- Sidebar -->
@@ -487,17 +536,31 @@
                     </ul>
                 </li>
                 <!-- Pengaturan Sistem -->
-                <li class="menu-item {{ request()->routeIs('admin.system-settings.*') ? 'active' : '' }}">
+                <li class="menu-item {{ request()->routeIs('admin.system-settings.index') ? 'active' : '' }}">
                     <a href="{{ route('admin.system-settings.index') }}" class="menu-link">
                         <i class="menu-icon tf-icons bx bx-cog"></i>
-                        <div>Pengaturan Sistem</div>
+                        <div>Pengaturan Layanan</div>
+                    </a>
+                </li>
+                <!-- Pengaturan Pembayaran Pusat -->
+                <li class="menu-item {{ request()->routeIs('admin.system-settings.payment') ? 'active' : '' }}">
+                    <a href="{{ route('admin.system-settings.payment') }}" class="menu-link">
+                        <i class="menu-icon tf-icons bx bx-credit-card-front"></i>
+                        <div>Pengaturan Pembayaran</div>
                     </a>
                 </li>
                 <!-- Pengaturan Wilayah -->
-                <li class="menu-item {{ request()->routeIs('admin.region-settings.*') ? 'active' : '' }}">
+                <li class="menu-item {{ request()->routeIs('admin.region-settings.index') ? 'active' : '' }}">
                     <a href="{{ route('admin.region-settings.index') }}" class="menu-link">
                         <i class="menu-icon tf-icons bx bx-map"></i>
-                        <div>Pengaturan Wilayah</div>
+                        <div>Pengaturan Layanan</div>
+                    </a>
+                </li>
+                <!-- Pengaturan Pembayaran Wilayah -->
+                <li class="menu-item {{ request()->routeIs('admin.region-settings.payment') ? 'active' : '' }}">
+                    <a href="{{ route('admin.region-settings.payment') }}" class="menu-link">
+                        <i class="menu-icon tf-icons bx bx-credit-card-front"></i>
+                        <div>Pengaturan Pembayaran</div>
                     </a>
                 </li>
                 <!-- Manajemen Banner -->
@@ -525,7 +588,7 @@
                 <li class="menu-item {{ request()->routeIs('admin.kemitraan.*') ? 'active' : '' }}">
                     <a href="{{ route('admin.kemitraan.index') }}" class="menu-link">
                         <i class="menu-icon tf-icons bx bx-group"></i>
-                        <div>Persetujuan Mitra</div>
+                        <div class="notranslate" translate="no">Persetujuan Mitra</div>
                     </a>
                 </li>
                 <!-- Manajemen Pengguna -->
@@ -535,6 +598,15 @@
                         <div data-i18n="Manajemen Pengguna">Manajemen Pengguna</div>
                     </a>
                 </li>
+                @if(in_array(auth()->user()->role, ['admin_desa', 'lurah', 'admin_rw', 'super_admin', 'admin']))
+                <!-- Kelola Hierarki Wilayah (RT/RW) -->
+                <li class="menu-item {{ request()->routeIs('admin.kelola-wilayah.*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.kelola-wilayah.index') }}" class="menu-link">
+                        <i class="menu-icon tf-icons bx bx-network-chart"></i>
+                        <div>Kelola Wilayah</div>
+                    </a>
+                </li>
+                @endif
                 <!-- Notifikasi -->
                 <li class="menu-item {{ request()->routeIs('admin.notifications.*') ? 'active' : '' }}">
                     <a href="{{ route('admin.notifications.index') }}" class="menu-link">
@@ -543,15 +615,15 @@
                     </a>
                 </li>
                 <!-- Profil SiladesBeng -->
-                <li class="menu-item {{ request()->is('admin/isewa/profile*') || request()->is('admin/isewa/developer*') ? 'active' : '' }}">
-                    <a href="{{ route('admin.isewa.profile') }}" class="menu-link">
+                <li class="menu-item {{ request()->is('admin/siladesbeng/profile*') || request()->is('admin/siladesbeng/developer*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.siladesbeng.profile') }}" class="menu-link">
                         <i class="menu-icon tf-icons bx bx-info-circle"></i>
                         <div data-i18n="Profil SiladesBeng">Profil SiladesBeng</div>
                     </a>
                 </li>
                 <!-- Profil Pemerintah Desa -->
-                <li class="menu-item {{ request()->routeIs('admin.isewa.profile-bumdes') || request()->routeIs('admin.isewa.bumdes.*') ? 'active' : '' }}">
-                    <a href="{{ route('admin.isewa.profile-bumdes') }}" class="menu-link">
+                <li class="menu-item {{ request()->routeIs('admin.siladesbeng.profile-bumdes') || request()->routeIs('admin.siladesbeng.bumdes.*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.siladesbeng.profile-bumdes') }}" class="menu-link">
                         <i class="menu-icon tf-icons bx bx-buildings"></i>
                         <div data-i18n="Profil Pemerintah Desa">Profil Pemerintah Desa</div>
                     </a>
@@ -672,6 +744,7 @@
                     <footer class="content-footer footer bg-footer-theme">
                         <div class="container-xxl d-flex flex-wrap justify-content-between py-2 flex-md-row flex-column">
                             <div class="mb-2 mb-md-0">
+                                © 2026 Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis
                             </div>
                         </div>
                     </footer>
@@ -780,6 +853,51 @@
                 @if(session('warning'))
                     showToast('warning', "{{ session('warning') }}");
                 @endif
+
+                // Eksekusi Efek Preloader saat pertama dimuat
+                setTimeout(() => {
+                    const preloader = document.getElementById('page-preloader');
+                    if (preloader) preloader.classList.add('loaded');
+                }, 100);
+
+                // Tangani masalah saat user menekan tombol 'Back' atau 'Forward' di browser (BFCache)
+                window.addEventListener('pageshow', function (event) {
+                    // event.persisted bernilai true jika halaman dimuat dari cache browser
+                    if (event.persisted) {
+                        const preloader = document.getElementById('page-preloader');
+                        if (preloader) preloader.classList.add('loaded');
+                    }
+                });
+
+                // Tangkap event klik pada link untuk memunculkan preloader
+                const links = document.querySelectorAll('a');
+                links.forEach(link => {
+                    link.addEventListener('click', function(e) {
+                        // Pastikan ini link valid internal (bukan anchor, js, atau tab baru)
+                        const href = this.getAttribute('href');
+                        if (
+                            href && 
+                            this.target !== '_blank' && 
+                            !href.startsWith('#') && 
+                            !href.startsWith('javascript:') && 
+                            !this.hasAttribute('onclick') &&
+                            this.hostname === window.location.hostname &&
+                            !e.ctrlKey && !e.shiftKey && !e.metaKey
+                        ) {
+                            e.preventDefault();
+                            const targetUrl = this.href;
+                            
+                            // Munculkan preloader (kaca blur)
+                            const preloader = document.getElementById('page-preloader');
+                            if (preloader) preloader.classList.remove('loaded');
+                            
+                            // Pindah halaman
+                            setTimeout(() => {
+                                window.location.href = targetUrl;
+                            }, 150);
+                        }
+                    });
+                });
             });
             </script>
             @yield('scripts')

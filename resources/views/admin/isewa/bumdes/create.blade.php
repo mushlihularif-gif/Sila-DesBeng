@@ -1,6 +1,6 @@
 @extends('admin.layouts.admin')
 
-@section('title', 'Tambah Anggota BUMDes')
+@section('title', 'Tambah Pemerintah Daerah')
 
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
@@ -10,11 +10,11 @@
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
                     <h4 class="fw-bold mb-1">
-                        <span class="text-muted fw-light">Profil SiladesBeng / Anggota BUMDes /</span> Tambah Anggota
+                        <span class="text-muted fw-light">Profil SiladesBeng / Pemerintah Daerah /</span> Tambah Anggota
                     </h4>
                     <p class="text-muted mb-0">Tambahkan anggota baru untuk ditampilkan di halaman Profil SiladesBeng</p>
                 </div>
-                <a href="{{ route('admin.isewa.bumdes.index') }}" class="btn btn-outline-secondary">
+                <a href="{{ route('admin.siladesbeng.bumdes.index') }}" class="btn btn-outline-secondary">
                     <i class="bx bx-arrow-left me-1"></i> Kembali
                 </a>
             </div>
@@ -22,7 +22,7 @@
             <!-- Main Card -->
             <div class="card border-0 shadow-sm">
                 <div class="card-body p-4">
-                    <form action="{{ route('admin.isewa.bumdes.store') }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('admin.siladesbeng.bumdes.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
 
                         <div class="row">
@@ -31,13 +31,14 @@
                                 <div class="text-center">
                                     <!-- Photo Preview Circle -->
                                     <div class="position-relative d-inline-block mb-3">
-                                        <div id="preview-container" class="rounded-circle overflow-hidden border border-3 border-light shadow-lg" 
+                                        <div id="preview-container" class="rounded-circle overflow-hidden border border-3 border-light shadow-lg d-flex justify-content-center align-items-center" 
                                              style="width: 180px; height: 180px; background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); cursor: pointer;"
                                              onclick="document.getElementById('photo-input').click()">
+                                            <i id="preview-icon" class="bx bxs-user" style="font-size: 80px; color: #90caf9;"></i>
                                             <img id="preview-image" 
-                                                 src="{{ asset('Admin/img/avatars/default.png') }}" 
-                                                 alt="Preview" 
-                                                 class="w-100 h-100"
+                                                 src="#" 
+                                                 alt="" 
+                                                 class="w-100 h-100 d-none"
                                                  style="object-fit: cover; object-position: center;">
                                         </div>
                                         <!-- Camera Icon Overlay -->
@@ -86,7 +87,7 @@
                                         </label>
                                         <input type="text" 
                                                name="name" 
-                                               class="form-control form-control-lg @error('name') is-invalid @enderror" 
+                                               class="form-control modern-input @error('name') is-invalid @enderror" 
                                                placeholder="Contoh: Muhammad Mawardi" 
                                                value="{{ old('name') }}"
                                                required>
@@ -102,7 +103,7 @@
                                         </label>
                                         <input type="text" 
                                                name="position" 
-                                               class="form-control form-control-lg @error('position') is-invalid @enderror" 
+                                               class="form-control modern-input @error('position') is-invalid @enderror" 
                                                placeholder="Contoh: Sekretaris Desa" 
                                                value="{{ old('position') }}"
                                                required>
@@ -113,8 +114,8 @@
 
                                     <!-- Info Box -->
                                     <div class="col-12">
-                                        <div class="alert alert-info border-0 d-flex align-items-start" role="alert">
-                                            <i class="bx bx-info-circle fs-4 me-2"></i>
+                                        <div class="alert alert-info border-0 modern-alert d-flex align-items-start" role="alert">
+                                            <i class="bx bx-info-circle fs-4 me-2 mt-1"></i>
                                             <div class="small">
                                                 <strong>Informasi:</strong><br>
                                                 Data anggota yang ditambahkan akan ditampilkan di halaman <strong>Profil SiladesBeng</strong> 
@@ -126,11 +127,11 @@
                                     <!-- Action Buttons -->
                                     <div class="col-12">
                                         <div class="d-flex gap-2 justify-content-end pt-3 border-top">
-                                            <a href="{{ route('admin.isewa.bumdes.index') }}" 
-                                               class="btn btn-outline-secondary px-4">
+                                            <a href="{{ route('admin.siladesbeng.bumdes.index') }}" 
+                                               class="btn btn-light modern-btn-secondary px-4">
                                                 <i class="bx bx-x me-1"></i> Batal
                                             </a>
-                                            <button type="submit" class="btn btn-primary px-4">
+                                            <button type="submit" class="btn btn-primary modern-btn-primary px-4">
                                                 <i class="bx bx-check me-1"></i> Simpan Anggota
                                             </button>
                                         </div>
@@ -150,49 +151,70 @@
     .card {
         transition: all 0.3s ease;
         border-radius: 1rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.03) !important;
+        border: none !important;
     }
 
-    /* Form Control Enhancements */
-    .form-control:focus {
-        border-color: #0099ff;
-        box-shadow: 0 0 0 0.2rem rgba(0, 153, 255, 0.25);
-    }
-
-    .form-control-lg {
-        padding: 0.75rem 1rem;
-        font-size: 1rem;
-        border-radius: 0.5rem;
-    }
-
-    /* Button Enhancements */
-    .btn {
+    /* Modern Input Enhancements */
+    .modern-input {
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.75rem;
+        padding: 0.75rem 1.25rem;
+        font-size: 0.95rem;
+        color: #334155;
         transition: all 0.3s ease;
-        border-radius: 0.5rem;
+    }
+
+    .modern-input:focus {
+        background-color: #ffffff;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        transform: translateY(-1px);
+    }
+
+    /* Modern Button Enhancements */
+    .modern-btn-primary {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        border: none;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        transition: all 0.3s ease;
+        border-radius: 0.75rem;
+        padding: 0.75rem 1.5rem;
         font-weight: 500;
     }
 
-    .btn:hover {
+    .modern-btn-primary:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 6px 15px rgba(37, 99, 235, 0.3);
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
     }
 
-    .btn-primary {
-        background: linear-gradient(135deg, #0099ff 0%, #0077cc 100%);
-        border: none;
+    .modern-btn-secondary {
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        color: #475569;
+        transition: all 0.3s ease;
+        border-radius: 0.75rem;
+        padding: 0.75rem 1.5rem;
+        font-weight: 500;
     }
 
-    .btn-primary:hover {
-        background: linear-gradient(135deg, #0088ee 0%, #0066bb 100%);
+    .modern-btn-secondary:hover {
+        background: #e2e8f0;
+        color: #1e293b;
+        transform: translateY(-2px);
     }
 
     /* Photo Preview Enhancements */
     #preview-container {
         transition: all 0.3s ease;
+        box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15) !important;
     }
 
     #preview-container:hover {
-        transform: scale(1.05);
-        box-shadow: 0 8px 25px rgba(0, 153, 255, 0.3) !important;
+        transform: scale(1.03);
+        box-shadow: 0 12px 30px rgba(59, 130, 246, 0.25) !important;
     }
 
     #preview-image {
@@ -200,31 +222,30 @@
     }
 
     /* Alert Enhancements */
-    .alert {
+    .modern-alert {
         border-radius: 0.75rem;
+        background-color: #eff6ff;
+        border: 1px solid #bfdbfe !important;
+        color: #1e3a8a;
     }
 
-    .alert-info {
-        background-color: #e3f2fd;
-        color: #0277bd;
+    .modern-alert i {
+        color: #3b82f6;
     }
 
     /* Label Enhancements */
     .form-label {
-        color: #495057;
+        color: #475569;
         margin-bottom: 0.5rem;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
 
     /* Animation for photo upload */
     @keyframes photoUpload {
-        0% {
-            opacity: 0;
-            transform: scale(0.8);
-        }
-        100% {
-            opacity: 1;
-            transform: scale(1);
-        }
+        0% { opacity: 0; transform: scale(0.8); }
+        100% { opacity: 1; transform: scale(1); }
     }
 
     .photo-uploaded {
@@ -258,7 +279,9 @@ function previewImage(event) {
         const reader = new FileReader();
         reader.onload = function(e) {
             preview.src = e.target.result;
+            preview.classList.remove('d-none');
             preview.classList.add('photo-uploaded');
+            document.getElementById('preview-icon').style.display = 'none';
             container.style.background = 'transparent';
             clearBtn.style.display = 'inline-block';
             
@@ -278,7 +301,9 @@ function clearPhoto() {
     const clearBtn = document.getElementById('clear-photo-btn');
 
     input.value = '';
-    preview.src = '{{ asset('Admin/img/avatars/default.png') }}';
+    preview.src = '#';
+    preview.classList.add('d-none');
+    document.getElementById('preview-icon').style.display = 'block';
     container.style.background = 'linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)';
     clearBtn.style.display = 'none';
 }

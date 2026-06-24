@@ -30,12 +30,30 @@
     @include('partials.abstract-bg')
 
 
+    @php
+        $isJoined = false;
+        if (auth()->check() && auth()->user()->region) {
+            $userRegionIds = array_merge([auth()->user()->region_id], \App\Models\Region::getAncestorIds(auth()->user()->region_id));
+            foreach($kecamatans as $kecamatan) {
+                foreach($kecamatan->children as $desa) {
+                    if(in_array($desa->id, $userRegionIds) && $desa->services->count() > 0) {
+                        $isJoined = true;
+                        break 2;
+                    }
+                }
+            }
+        }
+    @endphp
+
     {{-- Hero Section --}}
-    <section class="relative z-10" style="padding-top: 12rem; padding-bottom: 8rem;">
+    <section class="relative z-10" style="padding-top: 12rem; padding-bottom: {{ $isJoined ? '2rem' : '8rem' }};">
         <div class="max-w-7xl mx-auto px-6 text-center animate-section">
-            <h1 class="hero-title animate-fade-in-up">
-                <span class="hero-title-gold">Peta Kemitraan SiladesBeng</span>
+            <h1 class="text-4xl md:text-5xl font-bold mb-4 animate-fade-in-up">
+                <span class="bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">Peta Kemitraan </span>
+                <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">SiladesBeng</span>
             </h1>
+
+            @if(!$isJoined)
             <p class="text-gray-700 text-lg max-w-2xl mx-auto mb-10 animate-fade-in-up" style="animation-delay: 100ms;">
                 Desa / Kelurahan Anda belum bergabung? Daftarkan sekarang!
             </p>
@@ -66,6 +84,7 @@
                     </button>
                 @endguest
             </div>
+            @endif
         </div>
     </section>
 

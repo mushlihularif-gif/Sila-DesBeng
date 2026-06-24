@@ -63,19 +63,16 @@ class RegionSettingController extends Controller
             'profile_text' => 'nullable|string',
             'contact_phone' => 'nullable|string',
             'contact_email' => 'nullable|email',
-            'bank_name' => 'nullable|string',
-            'account_number' => 'nullable|string',
-            'account_name' => 'nullable|string',
             'services' => 'nullable|array',
             'services.*' => 'exists:services,id'
         ]);
 
-        // Update payment_info as JSON
-        $paymentInfo = [
-            'bank_name' => $request->bank_name,
-            'account_number' => $request->account_number,
-            'account_name' => $request->account_name,
-        ];
+        // Update whatsapp_name inside payment_info JSON
+        $paymentInfo = $region->payment_info ?? [];
+        if ($request->has('whatsapp_name')) {
+            $paymentInfo['whatsapp_name'] = $request->whatsapp_name;
+        }
+        $paymentInfo['whatsapp_active'] = $request->has('whatsapp_active');
 
         $region->update([
             'profile_text' => $request->profile_text,
@@ -97,6 +94,56 @@ class RegionSettingController extends Controller
         }
         $region->services()->sync($syncData);
 
-        return redirect()->back()->with('success', 'Pengaturan wilayah dan layanan berhasil diperbarui.');
+        return redirect()->back()->with('success', 'Pengaturan Wilayah berhasil diperbarui.');
+    }
+
+    public function paymentIndex()
+    {
+        $user = auth()->user();
+        $region = Region::find($user->region_id);
+        
+        if (!$region) {
+            return redirect()->route('admin.dashboard')->with('error', 'Anda tidak terhubung dengan wilayah mana pun.');
+        }
+
+        return view('admin.region_settings.payment', compact('region'));
+    }
+
+    public function paymentUpdate(Request $request)
+    {
+        $user = auth()->user();
+        $region = Region::find($user->region_id);
+
+        if (!$region) {
+            return redirect()->back()->with('error', 'Region tidak ditemukan.');
+        }
+
+        $paymentInfo = $region->payment_info ?? [];
+        $paymentInfo['bank_name'] = $request->bank_name;
+        $paymentInfo['account_number'] = $request->account_number;
+        $paymentInfo['account_name'] = $request->account_name;
+        $paymentInfo['bank_active'] = $request->has('bank_active');
+        
+        $paymentInfo['ewallet_name'] = $request->ewallet_name;
+        $paymentInfo['ewallet_number'] = $request->ewallet_number;
+        $paymentInfo['ewallet_account_name'] = $request->ewallet_account_name;
+        $paymentInfo['ewallet_active'] = $request->has('ewallet_active');
+        
+        if ($request->has('payment_gateway_active')) {
+            if (empty($request->midtrans_server_key) || empty($request->midtrans_client_key)) {
+                return redirect()->back()->with('error', 'Gagal: Kunci API Midtrans (Server Key & Client Key) wajib diisi jika Anda mengaktifkan Payment Gateway Otomatis. Silakan daftar akun bisnis di midtrans.com terlebih dahulu.')->withInput();
+            }
+        }
+        $paymentInfo['card_theme'] = $request->card_theme;
+        $paymentInfo['cash_only_active'] = $request->has('cash_only_active');
+        $paymentInfo['payment_gateway_active'] = $request->has('payment_gateway_active');
+        $paymentInfo['midtrans_server_key'] = $request->midtrans_server_key;
+        $paymentInfo['midtrans_client_key'] = $request->midtrans_client_key;
+
+        $region->update([
+            'payment_info' => $paymentInfo,
+        ]);
+
+        return redirect()->back()->with('success', 'Pengaturan Pembayaran Wilayah berhasil diperbarui.');
     }
 }

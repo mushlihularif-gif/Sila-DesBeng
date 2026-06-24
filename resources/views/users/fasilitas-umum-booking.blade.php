@@ -32,10 +32,43 @@
                     </div>
 
                     <!-- Keterangan / Tujuan Penyewaan -->
+                    @if($item->kategori == 'Kendaraan')
+                    <div class="mb-6 bg-blue-50 border border-blue-200 p-5 rounded-xl">
+                        <h4 class="font-bold text-gray-800 mb-3 flex items-center">
+                            <svg class="w-5 h-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                            Detail Tujuan Kendaraan
+                        </h4>
+                        
+                        <div class="mb-4">
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Jangkauan Lokasi <span class="text-red-500">*</span></label>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                <label class="border border-gray-300 rounded-lg p-3 cursor-pointer bg-white hover:bg-blue-50 hover:border-blue-300 flex items-center gap-2 transition-colors">
+                                    <input type="radio" name="zona_kendaraan" value="Dalam Desa" class="w-4 h-4 text-blue-600 focus:ring-blue-500" required>
+                                    <span class="text-sm font-semibold text-gray-700">Dalam Desa</span>
+                                </label>
+                                <label class="border border-gray-300 rounded-lg p-3 cursor-pointer bg-white hover:bg-blue-50 hover:border-blue-300 flex items-center gap-2 transition-colors">
+                                    <input type="radio" name="zona_kendaraan" value="Luar Desa" class="w-4 h-4 text-blue-600 focus:ring-blue-500">
+                                    <span class="text-sm font-semibold text-gray-700">Luar Desa</span>
+                                </label>
+                                <label class="border border-gray-300 rounded-lg p-3 cursor-pointer bg-white hover:bg-blue-50 hover:border-blue-300 flex items-center gap-2 transition-colors">
+                                    <input type="radio" name="zona_kendaraan" value="Luar Kota" class="w-4 h-4 text-blue-600 focus:ring-blue-500">
+                                    <span class="text-sm font-semibold text-gray-700">Luar Kota</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="mb-2">
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Lokasi Spesifik & Keperluan <span class="text-red-500">*</span></label>
+                            <textarea id="keperluan_kendaraan" rows="3" placeholder="Contoh: Ke RSUD Kabupaten untuk mengantarkan warga yang sakit..." class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required></textarea>
+                            <input type="hidden" name="rental_purpose" id="rental-purpose">
+                        </div>
+                    </div>
+                    @else
                     <div class="mb-6">
                         <label class="block text-sm font-bold text-gray-700 mb-2">Keterangan / Tujuan Peminjaman <span class="text-red-500">*</span></label>
                         <textarea name="rental_purpose" id="rental-purpose" rows="3" placeholder="Contoh: Untuk acara RT, rapat desa, dll." class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required></textarea>
                     </div>
+                    @endif
 
                     <!-- Jumlah -->
                     <div class="mb-6">
@@ -191,11 +224,24 @@
 
         confirmBtns.forEach(btn => {
             btn.addEventListener('click', () => {
-                const purpose = document.getElementById('rental-purpose').value;
+                let purposeVal = '';
+                if (document.getElementById('keperluan_kendaraan')) {
+                    const zona = document.querySelector('input[name="zona_kendaraan"]:checked');
+                    const detail = document.getElementById('keperluan_kendaraan').value;
+                    if (!zona || !detail) {
+                        Swal.fire({ icon: 'warning', title: 'Data Belum Lengkap', text: 'Mohon pilih Jangkauan Lokasi dan isi Lokasi Spesifik.' });
+                        return;
+                    }
+                    purposeVal = `[Tujuan: ${zona.value}] ${detail}`;
+                    document.getElementById('rental-purpose').value = purposeVal;
+                } else {
+                    purposeVal = document.getElementById('rental-purpose').value;
+                }
+
                 const startDate = document.getElementById('start-date').value;
                 const endDate = document.getElementById('end-date').value;
                 
-                if (!purpose || !startDate || !endDate) {
+                if (!purposeVal || !startDate || !endDate) {
                     Swal.fire({ icon: 'warning', title: 'Data Belum Lengkap', text: 'Mohon lengkapi Tujuan, Tanggal Mulai dan Tanggal Selesai.' });
                     return;
                 }

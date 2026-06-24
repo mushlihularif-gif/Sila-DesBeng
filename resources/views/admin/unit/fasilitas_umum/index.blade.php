@@ -4,7 +4,7 @@
     <div class="container-xxl flex-grow-1 container-p-y">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Unit Layanan /</span> Peminjaman Fasilitas Umum</h4>
-            <a href="{{ route('admin.unit.Fasilitas Umum.create') }}" class="btn btn-primary">Tambah Alat</a>
+            <a href="{{ route('admin.unit.fasilitas_umum.create') }}" class="btn btn-primary">Tambah Fasilitas</a>
         </div>
 
         <!-- Products Grid -->
@@ -56,12 +56,12 @@
                                     <span class="badge bg-success">{{ $fasilitas->stok }} {{ $fasilitas->satuan }}</span>
                                 </div>
                                 <div class="mt-3 d-flex gap-2">
-                                    <a href="{{ route('admin.unit.Fasilitas Umum.show', $fasilitas->id) }}"
+                                    <a href="{{ route('admin.unit.fasilitas_umum.show', $fasilitas->id) }}"
                                         class="btn btn-sm btn-outline-info">Detail</a>
-                                    <a href="{{ route('admin.unit.Fasilitas Umum.edit', $fasilitas->id) }}"
+                                    <a href="{{ route('admin.unit.fasilitas_umum.edit', $fasilitas->id) }}"
                                         class="btn btn-sm btn-outline-warning">Ubah</a>
-                                    <form action="{{ route('admin.unit.Fasilitas Umum.destroy', $fasilitas->id) }}" method="POST"
-                                        onsubmit="return confirm('Apakah Anda yakin ingin menghapus alat ini?');">
+                                    <form action="{{ route('admin.unit.fasilitas_umum.destroy', $fasilitas->id) }}" method="POST"
+                                        onsubmit="return confirm('Apakah Anda yakin ingin menghapus fasilitas ini?');">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-sm btn-outline-danger">Hapus</button>
@@ -85,23 +85,24 @@
                                 </div>
                                 <h3 class="fw-bold text-muted mb-3">Tidak Ditemukan</h3>
                                 <p class="text-muted mb-4" style="max-width: 500px; margin: 0 auto;">
-                                    Tidak ada alat yang cocok dengan pencarian "<strong>{{ $search }}</strong>". 
-                                    Coba gunakan kata kunci lain atau hapus filter pencarian.
+                                    Tidak ada fasilitas yang cocok dengan pencarian "<strong>{{ $search }}</strong>". 
                                 </p>
-                                <a href="{{ route('admin.unit.Fasilitas Umum.index') }}" class="btn btn-outline-primary btn-lg">
-                                    <i class="bx bx-refresh me-2"></i>Tampilkan Semua Alat
-                                </a>
+                                <div class="mt-3">
+                                    <a href="{{ route('admin.unit.fasilitas_umum.index') }}" class="btn btn-outline-secondary">
+                                    <i class="bx bx-refresh me-2"></i>Tampilkan Semua Fasilitas
+                                    </a>
+                                </div>
                             @else
                                 <!-- No Products -->
                                 <div class="empty-state-icon mb-4">
                                     <i class="bx bx-package" style="font-size: 120px; color: #d1d5db;"></i>
                                 </div>
-                                <h3 class="fw-bold text-muted mb-3">Belum Ada Alat Penyewaan</h3>
+                                <h3 class="fw-bold text-muted mb-3">Belum Ada Fasilitas Umum</h3>
                                 <p class="text-muted mb-4" style="max-width: 500px; margin: 0 auto;">
-                                    Anda belum menambahkan alat penyewaan apapun. Mulai tambahkan alat seperti tenda, sound system, atau perlengkapan acara lainnya untuk ditampilkan kepada pengguna.
+                                    Anda belum menambahkan fasilitas umum apapun. Mulai tambahkan fasilitas seperti balai desa, lapangan olahraga, atau gedung serbaguna untuk ditampilkan kepada pengguna.
                                 </p>
-                                <a href="{{ route('admin.unit.Fasilitas Umum.create') }}" class="btn btn-primary btn-lg">
-                                    <i class="bx bx-plus-circle me-2"></i>Tambah Alat Pertama
+                                <a href="{{ route('admin.unit.fasilitas_umum.create') }}" class="btn btn-primary btn-lg rounded-pill px-4 shadow-sm">
+                                    <i class="bx bx-plus-circle me-2"></i>Tambah Fasilitas Pertama
                                 </a>
                             @endif
                         </div>

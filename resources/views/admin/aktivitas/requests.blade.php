@@ -3,6 +3,24 @@
 @section('title', 'Permintaan Pengajuan')
 
 @section('content')
+<style>
+    .nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+        background-color: #0095ff !important;
+        color: #fff !important;
+        box-shadow: 0 4px 10px rgba(0, 149, 255, 0.3) !important;
+    }
+    .nav-pills .nav-link {
+        color: #64748b;
+        transition: all 0.3s ease;
+    }
+    .nav-pills .nav-link:hover {
+        background-color: #eff6ff !important;
+        color: #0095ff !important;
+    }
+    .nav-pills .nav-link.active .badge.bg-white {
+        color: #0095ff !important;
+    }
+</style>
 <div class="container-fluid py-4">
     @php
         $activeTab = request('tab', 'rental');
@@ -89,27 +107,27 @@
     <!-- Filter Status -->
     <div class="d-flex gap-2 mb-4 overflow-auto pb-2">
         <a href="{{ route('admin.aktivitas.permintaan-pengajuan.index', ['status' => 'all'] + request()->except('status')) }}" 
-           class="btn btn-sm rounded-pill px-3 {{ request('status', 'all') == 'all' ? 'btn-dark' : 'btn-outline-dark border-0 bg-white shadow-sm' }}">
+           class="btn btn-sm rounded-pill px-3 {{ request('status', 'all') == 'all' ? 'btn-dark' : 'bg-white text-secondary border shadow-sm' }}">
             Semua
         </a>
         <a href="{{ route('admin.aktivitas.permintaan-pengajuan.index', ['status' => 'pending'] + request()->except('status')) }}" 
-           class="btn btn-sm rounded-pill px-3 {{ request('status') == 'pending' ? 'btn-warning text-white' : 'btn-outline-secondary border-0 bg-white shadow-sm' }}">
+           class="btn btn-sm rounded-pill px-3 {{ request('status') == 'pending' ? 'btn-warning text-white' : 'bg-white text-secondary border shadow-sm' }}">
             Menunggu
         </a>
         <a href="{{ route('admin.aktivitas.permintaan-pengajuan.index', ['status' => 'in_process'] + request()->except('status')) }}" 
-           class="btn btn-sm rounded-pill px-3 {{ request('status') == 'in_process' ? 'btn-info text-white' : 'btn-outline-secondary border-0 bg-white shadow-sm' }}">
+           class="btn btn-sm rounded-pill px-3 {{ request('status') == 'in_process' ? 'btn-info text-white' : 'bg-white text-secondary border shadow-sm' }}">
             Sedang Proses
         </a>
         <a href="{{ route('admin.aktivitas.permintaan-pengajuan.index', ['status' => 'completed'] + request()->except('status')) }}" 
-           class="btn btn-sm rounded-pill px-3 {{ request('status') == 'completed' ? 'btn-success text-white' : 'btn-outline-secondary border-0 bg-white shadow-sm' }}">
+           class="btn btn-sm rounded-pill px-3 {{ request('status') == 'completed' ? 'btn-success text-white' : 'bg-white text-secondary border shadow-sm' }}">
             Selesai
         </a>
         <a href="{{ route('admin.aktivitas.permintaan-pengajuan.index', ['status' => 'rejected'] + request()->except('status')) }}" 
-           class="btn btn-sm rounded-pill px-3 {{ request('status') == 'rejected' ? 'btn-secondary text-white' : 'btn-outline-secondary border-0 bg-white shadow-sm' }}">
+           class="btn btn-sm rounded-pill px-3 {{ request('status') == 'rejected' ? 'btn-secondary text-white' : 'bg-white text-secondary border shadow-sm' }}">
             Ditolak
         </a>
         <a href="{{ route('admin.aktivitas.permintaan-pengajuan.index', ['status' => 'cancellation_pending'] + request()->except('status')) }}" 
-           class="btn btn-sm rounded-pill px-3 {{ request('status') == 'cancellation_pending' ? 'btn-danger text-white' : 'btn-outline-secondary border-0 bg-white shadow-sm' }}">
+           class="btn btn-sm rounded-pill px-3 {{ request('status') == 'cancellation_pending' ? 'btn-danger text-white' : 'bg-white text-secondary border shadow-sm' }}">
             Minta Batal
         </a>
     </div>
@@ -142,6 +160,30 @@
                         </span>
                     </button>
                 </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link {{ $activeTab == 'mobil' ? 'active' : '' }} rounded-pill px-4 fw-semibold" id="mobil-tab" data-bs-toggle="tab" data-bs-target="#mobil-pane" type="button" role="tab">
+                        <i class="bx bx-car me-2"></i>Penyewaan Mobil
+                        @php $mobilTotal = $notificationCounts['mobil']['total'] ?? 0; @endphp
+                        @php $mobilCount = $mobilTotal > 0 ? $mobilTotal : $mobilRequests->count(); @endphp
+                        <span id="mobil-badge" 
+                              class="badge {{ $mobilTotal > 0 ? 'bg-danger text-white' : 'bg-white text-primary' }} ms-2 shadow-sm"
+                              data-default-count="{{ $mobilRequests->count() }}">
+                            {{ $mobilCount }}
+                        </span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link {{ $activeTab == 'fasilitas' ? 'active' : '' }} rounded-pill px-4 fw-semibold" id="fasilitas-tab" data-bs-toggle="tab" data-bs-target="#fasilitas-pane" type="button" role="tab">
+                        <i class="bx bx-building-house me-2"></i>Fasilitas Umum
+                        @php $fasilitasTotal = $notificationCounts['fasilitas']['total'] ?? 0; @endphp
+                        @php $fasilitasCount = $fasilitasTotal > 0 ? $fasilitasTotal : $fasilitasRequests->count(); @endphp
+                        <span id="fasilitas-badge" 
+                              class="badge {{ $fasilitasTotal > 0 ? 'bg-danger text-white' : 'bg-white text-primary' }} ms-2 shadow-sm"
+                              data-default-count="{{ $fasilitasRequests->count() }}">
+                            {{ $fasilitasCount }}
+                        </span>
+                    </button>
+                </li>
             </ul>
 
             {{-- Area Teks Notifikasi --}}
@@ -155,6 +197,12 @@
                     // Gas
                     if($notificationCounts['gas']['pending'] > 0) $messages[] = $notificationCounts['gas']['pending'] . " Pesanan Gas Baru";
                     if($notificationCounts['gas']['cancellation'] > 0) $messages[] = $notificationCounts['gas']['cancellation'] . " Pembatalan Gas";
+                    // Mobil
+                    if($notificationCounts['mobil']['pending'] > 0) $messages[] = $notificationCounts['mobil']['pending'] . " Pesanan Mobil Baru";
+                    if($notificationCounts['mobil']['cancellation'] > 0) $messages[] = $notificationCounts['mobil']['cancellation'] . " Pembatalan Mobil";
+                    // Fasilitas
+                    if($notificationCounts['fasilitas']['pending'] > 0) $messages[] = $notificationCounts['fasilitas']['pending'] . " Pesanan Fasilitas Baru";
+                    if($notificationCounts['fasilitas']['cancellation'] > 0) $messages[] = $notificationCounts['fasilitas']['cancellation'] . " Pembatalan Fasilitas";
 
                     $finalMessage = !empty($messages) ? '<i class="bx bx-bell bx-tada me-2"></i>Anda memiliki: ' . implode(', ', $messages) : '';
                 @endphp
@@ -399,6 +447,240 @@
                                                             data-bs-toggle="tooltip" title="Tolak">
                                                         <i class="bx bx-x"></i>
                                                     </button>
+                                                @endif
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
+                </div>
+
+                <!-- MOBIL TAB -->
+                <div class="tab-pane fade {{ $activeTab == 'mobil' ? 'show active' : '' }}" id="mobil-pane" role="tabpanel">
+                    @if($mobilRequests->isEmpty())
+                        <div class="text-center py-5">
+                            <div class="mb-3"><i class="bx bx-car fs-1 text-muted opacity-25"></i></div>
+                            <h6 class="text-muted fw-bold">Belum ada permintaan penyewaan mobil</h6>
+                        </div>
+                    @else
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th class="ps-4 py-3 text-secondary text-uppercase small fw-bold">Penyewa</th>
+                                        <th class="py-3 text-secondary text-uppercase small fw-bold">Mobil & Opsi</th>
+                                        <th class="py-3 text-secondary text-uppercase small fw-bold">Waktu Sewa</th>
+                                        <th class="py-3 text-secondary text-uppercase small fw-bold">Status</th>
+                                        <th class="text-end pe-4 py-3 text-secondary text-uppercase small fw-bold">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($mobilRequests as $req)
+                                    <tr>
+                                        <td class="ps-4">
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar avatar-sm border rounded-circle p-1 me-3">
+                                                    <span class="avatar-initial rounded-circle bg-primary-subtle text-primary fw-bold">
+                                                        {{ strtoupper(substr($req->recipient_name ?? $req->user->name, 0, 1)) }}
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-0 fw-semibold text-dark">{{ $req->recipient_name ?? $req->user->name }}</h6>
+                                                    <small class="text-muted">{{ $req->user->phone ?? '-' }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="fw-medium text-dark">{{ $req->mobil->nama_mobil ?? 'Unknown' }}</div>
+                                            <small class="text-muted">Supir: {{ $req->dengan_supir ? 'Ya' : 'Tidak' }} | BBM: {{ $req->mobil->bbm_ditanggung ?? '-' }}</small>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex flex-column">
+                                                <span class="fw-medium text-dark">{{ \Carbon\Carbon::parse($req->start_date)->format('d M') }} - {{ \Carbon\Carbon::parse($req->end_date)->format('d M Y') }}</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            @include('admin.partials.status-badge', ['status' => $req->status, 'cancelStatus' => $req->cancellation_status])
+                                        </td>
+                                        <td class="text-end pe-4">
+                                            <div class="d-flex gap-2 justify-content-end">
+                                                @if($req->status != 'pending' && $req->cancellation_status != 'pending')
+                                                    @if($req->dengan_supir)
+                                                        @if($req->status == 'confirmed')
+                                                            <form action="{{ route('admin.aktivitas.update-status', ['type' => 'mobil', 'id' => $req->id]) }}" method="POST" class="d-inline">
+                                                                @csrf
+                                                                <input type="hidden" name="status" value="process">
+                                                                <button type="submit" class="btn btn-sm btn-outline-warning shadow-sm rounded-pill px-3" onclick="return confirm('Mulai siapkan mobil ini?')">
+                                                                    <i class="bx bx-package me-1"></i>Proses
+                                                                </button>
+                                                            </form>
+                                                        @elseif($req->status == 'process')
+                                                            <form action="{{ route('admin.aktivitas.update-status', ['type' => 'mobil', 'id' => $req->id]) }}" method="POST" class="d-inline">
+                                                                @csrf
+                                                                <input type="hidden" name="status" value="delivering">
+                                                                <button type="submit" class="btn btn-sm btn-outline-info shadow-sm rounded-pill px-3" onclick="return confirm('Mulai jalan / kirim mobil?')">
+                                                                    <i class="bx bx-car me-1"></i>Kirim
+                                                                </button>
+                                                            </form>
+                                                        @elseif($req->status == 'delivering')
+                                                            <form action="{{ route('admin.aktivitas.update-status', ['type' => 'mobil', 'id' => $req->id]) }}" method="POST" class="d-inline">
+                                                                @csrf
+                                                                <input type="hidden" name="status" value="arrived">
+                                                                <button type="submit" class="btn btn-sm btn-outline-primary shadow-sm rounded-pill px-3" onclick="return confirm('Konfirmasi tiba?')">
+                                                                    <i class="bx bx-check me-1"></i>Tiba
+                                                                </button>
+                                                            </form>
+                                                        @elseif($req->status == 'arrived')
+                                                            <form action="{{ route('admin.aktivitas.update-status', ['type' => 'mobil', 'id' => $req->id]) }}" method="POST" class="d-inline">
+                                                                @csrf
+                                                                <input type="hidden" name="status" value="completed">
+                                                                <button type="submit" class="btn btn-sm btn-outline-success shadow-sm rounded-pill px-3" onclick="return confirm('Selesaikan penyewaan ini?')">
+                                                                    <i class="bx bx-check-circle me-1"></i>Selesai
+                                                                </button>
+                                                            </form>
+                                                        @endif
+                                                    @else
+                                                        @if($req->status == 'confirmed')
+                                                            <form action="{{ route('admin.aktivitas.update-status', ['type' => 'mobil', 'id' => $req->id]) }}" method="POST" class="d-inline">
+                                                                @csrf
+                                                                <input type="hidden" name="status" value="completed">
+                                                                <button type="submit" class="btn btn-sm btn-outline-success shadow-sm rounded-pill px-3" onclick="return confirm('Serahkan Kunci / Selesaikan penyewaan ini?')">
+                                                                    <i class="bx bx-key me-1"></i>Serahkan & Selesai
+                                                                </button>
+                                                            </form>
+                                                        @endif
+                                                    @endif
+                                                @endif
+
+                                                <a href="{{ route('admin.aktivitas.permintaan-pengajuan.show', [$req->id, 'mobil']) }}" 
+                                                   class="btn btn-sm btn-icon btn-outline-primary" 
+                                                   data-bs-toggle="tooltip" title="Lihat Detail">
+                                                    <i class="bx bx-show"></i>
+                                                </a>
+                                                
+                                                @if($req->cancellation_status == 'pending')
+                                                    <button type="button" class="btn btn-sm btn-icon btn-outline-success" onclick="handleCancellation({{ $req->id }}, 'mobil', 'approve')"><i class="bx bx-check-double"></i></button>
+                                                    <button type="button" class="btn btn-sm btn-icon btn-outline-danger" onclick="handleCancellation({{ $req->id }}, 'mobil', 'reject')"><i class="bx bx-x-circle"></i></button>
+                                                @elseif($req->status == 'pending')
+                                                    <button type="button" class="btn btn-sm btn-icon btn-outline-success" onclick="approveRequest({{ $req->id }}, 'mobil')"><i class="bx bx-check"></i></button>
+                                                    <button type="button" class="btn btn-sm btn-icon btn-outline-danger" onclick="rejectRequest({{ $req->id }}, 'mobil')"><i class="bx bx-x"></i></button>
+                                                @endif
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
+                </div>
+
+                <!-- FASILITAS UMUM TAB -->
+                <div class="tab-pane fade {{ $activeTab == 'fasilitas' ? 'show active' : '' }}" id="fasilitas-pane" role="tabpanel">
+                    @if($fasilitasRequests->isEmpty())
+                        <div class="text-center py-5">
+                            <div class="mb-3"><i class="bx bx-building-house fs-1 text-muted opacity-25"></i></div>
+                            <h6 class="text-muted fw-bold">Belum ada permintaan fasilitas umum</h6>
+                        </div>
+                    @else
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th class="ps-4 py-3 text-secondary text-uppercase small fw-bold">Penyewa</th>
+                                        <th class="py-3 text-secondary text-uppercase small fw-bold">Fasilitas & Opsi</th>
+                                        <th class="py-3 text-secondary text-uppercase small fw-bold">Waktu Sewa</th>
+                                        <th class="py-3 text-secondary text-uppercase small fw-bold">Status</th>
+                                        <th class="text-end pe-4 py-3 text-secondary text-uppercase small fw-bold">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($fasilitasRequests as $req)
+                                    <tr>
+                                        <td class="ps-4">
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar avatar-sm border rounded-circle p-1 me-3">
+                                                    <span class="avatar-initial rounded-circle bg-primary-subtle text-primary fw-bold">
+                                                        {{ strtoupper(substr($req->recipient_name ?? $req->user->name, 0, 1)) }}
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-0 fw-semibold text-dark">{{ $req->recipient_name ?? $req->user->name }}</h6>
+                                                    <small class="text-muted">{{ $req->user->phone ?? '-' }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="fw-medium text-dark">{{ $req->fasilitas->nama_fasilitas ?? 'Unknown' }}</div>
+                                            @if($req->fasilitas->kategori == 'Kendaraan' || $req->fasilitas->opsi_supir)
+                                                <small class="text-muted">Supir: {{ $req->dengan_supir ? 'Ya' : 'Tidak' }}</small>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            <div class="d-flex flex-column">
+                                                <span class="fw-medium text-dark">{{ \Carbon\Carbon::parse($req->start_date)->format('d M') }} - {{ \Carbon\Carbon::parse($req->end_date)->format('d M Y') }}</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            @include('admin.partials.status-badge', ['status' => $req->status, 'cancelStatus' => $req->cancellation_status])
+                                        </td>
+                                        <td class="text-end pe-4">
+                                            <div class="d-flex gap-2 justify-content-end">
+                                                @if($req->status != 'pending' && $req->cancellation_status != 'pending')
+                                                    @if($req->delivery_method == 'antar' || $req->dengan_supir)
+                                                        @if($req->status == 'confirmed' || $req->status == 'approved')
+                                                            <form action="{{ route('admin.aktivitas.update-status', ['type' => 'fasilitas', 'id' => $req->id]) }}" method="POST" class="d-inline">
+                                                                @csrf
+                                                                <input type="hidden" name="status" value="delivering">
+                                                                <button type="submit" class="btn btn-sm btn-outline-info shadow-sm rounded-pill px-3" onclick="return confirm('Mulai jalan / kirim?')">
+                                                                    <i class="bx bx-truck me-1"></i>Kirim/Berangkat
+                                                                </button>
+                                                            </form>
+                                                        @elseif($req->status == 'delivering')
+                                                            <form action="{{ route('admin.aktivitas.update-status', ['type' => 'fasilitas', 'id' => $req->id]) }}" method="POST" class="d-inline">
+                                                                @csrf
+                                                                <input type="hidden" name="status" value="arrived">
+                                                                <button type="submit" class="btn btn-sm btn-outline-primary shadow-sm rounded-pill px-3" onclick="return confirm('Konfirmasi tiba/digunakan?')">
+                                                                    <i class="bx bx-check me-1"></i>Tiba
+                                                                </button>
+                                                            </form>
+                                                        @elseif($req->status == 'arrived' || $req->status == 'ongoing')
+                                                            <form action="{{ route('admin.aktivitas.update-status', ['type' => 'fasilitas', 'id' => $req->id]) }}" method="POST" class="d-inline">
+                                                                @csrf
+                                                                <input type="hidden" name="status" value="completed">
+                                                                <button type="submit" class="btn btn-sm btn-outline-success shadow-sm rounded-pill px-3" onclick="return confirm('Selesaikan penyewaan ini?')">
+                                                                    <i class="bx bx-check-circle me-1"></i>Selesai
+                                                                </button>
+                                                            </form>
+                                                        @endif
+                                                    @else
+                                                        @if($req->status == 'confirmed' || $req->status == 'approved')
+                                                            <form action="{{ route('admin.aktivitas.update-status', ['type' => 'fasilitas', 'id' => $req->id]) }}" method="POST" class="d-inline">
+                                                                @csrf
+                                                                <input type="hidden" name="status" value="completed">
+                                                                <button type="submit" class="btn btn-sm btn-outline-success shadow-sm rounded-pill px-3" onclick="return confirm('Selesaikan peminjaman ini?')">
+                                                                    <i class="bx bx-check-circle me-1"></i>Selesai
+                                                                </button>
+                                                            </form>
+                                                        @endif
+                                                    @endif
+                                                @endif
+
+                                                <a href="{{ route('admin.aktivitas.permintaan-pengajuan.show', [$req->id, 'fasilitas']) }}" 
+                                                   class="btn btn-sm btn-icon btn-outline-primary" 
+                                                   data-bs-toggle="tooltip" title="Lihat Detail">
+                                                    <i class="bx bx-show"></i>
+                                                </a>
+                                                
+                                                @if($req->cancellation_status == 'pending')
+                                                    <button type="button" class="btn btn-sm btn-icon btn-outline-success" onclick="handleCancellation({{ $req->id }}, 'fasilitas', 'approve')"><i class="bx bx-check-double"></i></button>
+                                                    <button type="button" class="btn btn-sm btn-icon btn-outline-danger" onclick="handleCancellation({{ $req->id }}, 'fasilitas', 'reject')"><i class="bx bx-x-circle"></i></button>
+                                                @elseif($req->status == 'pending')
+                                                    <button type="button" class="btn btn-sm btn-icon btn-outline-success" onclick="approveRequest({{ $req->id }}, 'fasilitas')"><i class="bx bx-check"></i></button>
+                                                    <button type="button" class="btn btn-sm btn-icon btn-outline-danger" onclick="rejectRequest({{ $req->id }}, 'fasilitas')"><i class="bx bx-x"></i></button>
                                                 @endif
                                             </div>
                                         </td>

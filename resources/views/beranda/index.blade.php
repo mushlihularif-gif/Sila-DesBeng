@@ -1081,12 +1081,16 @@
                 let autoSlideInterval;
                 const autoSlideDelay = 7000; // 7 Seconds
 
+                let blurTimeout;
                 const goToSlide = (slideIndex) => {
                     currentSlide = slideIndex;
                     carouselSlides.style.transform = `translateX(-${slideIndex * 100}%)`;
                     
                     if(window.syncNavbarBlurImage) {
-                        window.syncNavbarBlurImage(slideIndex);
+                        clearTimeout(blurTimeout);
+                        blurTimeout = setTimeout(() => {
+                            window.syncNavbarBlurImage(slideIndex);
+                        }, 400); // Sinkronkan dengan durasi transisi slide (duration-500)
                     }
 
                     // indicators variable now points to the LIVE elements in DOM

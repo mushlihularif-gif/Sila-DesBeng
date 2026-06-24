@@ -17,6 +17,7 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     {{-- Hotwire Turbo for SPA Navigation --}}
+    <meta name="turbo-cache-control" content="no-cache">
     <script type="module" src="https://cdn.jsdelivr.net/npm/@hotwired/turbo/+esm"></script>
     <style>
         .turbo-progress-bar {
@@ -34,7 +35,7 @@
     {{-- Page-specific styles --}}
     @stack('styles')
 </head>
-<body class="antialiased text-gray-900 bg-white min-h-screen flex flex-col overflow-x-clip">
+<body class="antialiased text-gray-900 bg-white min-h-screen flex flex-col overflow-x-hidden">
 
     {{-- Main content --}}
     @yield('content')
@@ -87,6 +88,45 @@
         document.addEventListener('turbo:load', initModal);
         initModal();
     </script>
+    @endif
+    {{-- Global Modern Toast Notification --}}
+    @if(session('error') || session('success'))
+    <div x-data="{ show: true }" 
+         x-init="setTimeout(() => show = false, 5000)" 
+         x-show="show" 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 transform -translate-y-4"
+         x-transition:enter-end="opacity-100 transform translate-y-0"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100 transform translate-y-0"
+         x-transition:leave-end="opacity-0 transform -translate-y-4"
+         class="fixed top-24 right-6 z-[10000] flex items-center p-4 rounded-xl shadow-2xl border-l-4 {{ session('error') ? 'bg-white border-red-500' : 'bg-white border-green-500' }} max-w-sm w-full">
+        <div class="flex-shrink-0">
+            @if(session('error'))
+            <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            @else
+            <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            @endif
+        </div>
+        <div class="ml-3">
+            <p class="text-sm font-semibold text-gray-900">
+                {{ session('error') ? 'Peringatan' : 'Berhasil' }}
+            </p>
+            <p class="text-sm text-gray-600 mt-1">
+                {{ session('error') ?? session('success') }}
+            </p>
+        </div>
+        <button @click="show = false" class="ml-auto -mx-1.5 -my-1.5 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex h-8 w-8 text-gray-500">
+            <span class="sr-only">Close</span>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
+    </div>
     @endif
 </body>
 </html>

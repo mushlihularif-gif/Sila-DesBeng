@@ -33,19 +33,16 @@
                         <!-- Recipient -->
                         <div class="mb-4">
                             <label for="user_id" class="form-label fw-semibold">Penerima Pesan <span class="text-danger">*</span></label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light border-end-0"><i class='bx bx-user'></i></span>
-                                <select class="form-select border-start-0 ps-0 @error('user_id') is-invalid @enderror" id="user_id" name="user_id">
-                                    <option value="" selected class="fw-bold">📢 Kirim ke Semua Pengguna (Broadcast)</option>
-                                    <optgroup label="Pengguna Spesifik">
-                                        @foreach($users as $user)
-                                            <option value="{{ $user->id }}" {{ old('user_id') == $user->id ? 'selected' : '' }}>
-                                                👤 {{ $user->name }} &mdash; {{ $user->email }}
-                                            </option>
-                                        @endforeach
-                                    </optgroup>
-                                </select>
-                            </div>
+                            <select class="form-select select2 @error('user_id') is-invalid @enderror" id="user_id" name="user_id" style="width: 100%;">
+                                <option value="" selected class="fw-bold" data-icon="bx-broadcast">Kirim ke Semua Pengguna (Broadcast)</option>
+                                <optgroup label="Pengguna Spesifik">
+                                    @foreach($users as $user)
+                                        <option value="{{ $user->id }}" {{ old('user_id') == $user->id ? 'selected' : '' }} data-icon="bx-user" data-subtext="{{ $user->email }}">
+                                            {{ $user->name }}
+                                        </option>
+                                    @endforeach
+                                </optgroup>
+                            </select>
                             <div class="form-text text-muted small mt-1">
                                 <i class='bx bx-info-circle me-1'></i>Pilih "Semua Pengguna" untuk mengirim pengumuman umum.
                             </div>
@@ -158,6 +155,8 @@
 @endsection
 
 @section('styles')
+<!-- Select2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <style>
     /* Custom clean styling */
     .form-control:focus, .form-select:focus {
@@ -197,11 +196,123 @@
         color: #8592a3;
         background-color: #dde1e5;
     }
+
+    /* Override Select2 Styling to match Sneat Template */
+    .select2-container .select2-selection--single {
+        height: 40px !important;
+        border: 1px solid #d9dee3 !important;
+        border-radius: 0.375rem !important;
+        padding: 0.375rem 0.75rem !important;
+        background-color: #fff !important;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+    .select2-container--open .select2-selection--single {
+        border-color: #696cff !important;
+        box-shadow: 0 0 0 0.25rem rgba(105, 108, 255, 0.1) !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 24px !important;
+        color: #697a8d !important;
+        padding-left: 0 !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 38px !important;
+        right: 8px !important;
+    }
+    .select2-container--default .select2-results__option--highlighted[aria-selected] {
+        background-color: rgba(105, 108, 255, 0.08) !important;
+        color: #696cff !important;
+    }
+    .select2-dropdown {
+        border: 1px solid #d9dee3 !important;
+        border-radius: 0.375rem !important;
+        box-shadow: 0 0.25rem 1rem rgba(161, 172, 184, 0.45) !important;
+        padding: 0.5rem 0;
+    }
+    .select2-search__field {
+        border: 1px solid #d9dee3 !important;
+        border-radius: 0.375rem !important;
+        padding: 0.4rem 0.8rem !important;
+    }
+    .select2-search__field:focus {
+        border-color: #696cff !important;
+        outline: none !important;
+        box-shadow: 0 0 0 0.25rem rgba(105, 108, 255, 0.1) !important;
+    }
+    .select2-results__group {
+        font-weight: 700 !important;
+        color: #a1acb8 !important;
+        background-color: transparent !important;
+        padding: 0.5rem 1rem !important;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 1px;
+    }
+    .select2-results__option {
+        padding: 0.5rem 1rem !important;
+    }
+    /* Hide the search icon if needed */
+    .input-group > .select2-container {
+        flex: 1 1 auto;
+        width: 1% !important;
+    }
 </style>
 @endsection
 
 @section('scripts')
+<!-- Select2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
+    $(document).ready(function() {
+        // Initialize Select2
+        function formatUser (option) {
+            if (!option.id && !option.element) {
+                return option.text;
+            }
+            
+            var el = option.element;
+            if (!el) return option.text;
+
+            var icon = el.getAttribute('data-icon');
+            var subtext = el.getAttribute('data-subtext');
+            var color = icon === 'bx-broadcast' ? 'text-primary' : 'text-secondary';
+            
+            if (icon) {
+                return '<div class="d-flex align-items-center">' +
+                       '<i class="bx ' + icon + ' ' + color + ' me-2 fs-5"></i>' +
+                       '<div>' +
+                       '<div class="fw-medium text-dark">' + option.text + '</div>' +
+                       (subtext ? '<small class="text-muted">' + subtext + '</small>' : '') +
+                       '</div></div>';
+            }
+            return option.text;
+        }
+
+        function formatUserSelection (option) {
+            if (!option.id && !option.element) {
+                return option.text;
+            }
+            
+            var el = option.element;
+            if (!el) return option.text;
+
+            var icon = el.getAttribute('data-icon');
+            var color = icon === 'bx-broadcast' ? 'text-primary' : 'text-secondary';
+            
+            if (icon) {
+                return '<i class="bx ' + icon + ' ' + color + ' me-2"></i><span class="fw-medium">' + option.text + '</span>';
+            }
+            return option.text;
+        }
+
+        $('#user_id').select2({
+            templateResult: formatUser,
+            templateSelection: formatUserSelection,
+            escapeMarkup: function(m) { return m; },
+            width: '100%'
+        });
+    });
+
     // Character Counter
     const messageInput = document.getElementById('message');
     const charCount = document.getElementById('charCount');

@@ -49,6 +49,7 @@ class UnitPenyewaanMobilController extends Controller
             'batas_km_luar_desa' => 'required|integer',
             'harga_luar_kota' => 'required|string',
             'bbm_ditanggung' => 'required|string|in:Pemerintah Desa,Penyewa',
+            'opsi_supir' => 'required|string|in:Lepas Kunci,Dengan Supir,Bebas Pilih',
         ]);
 
         $hargaBersih = (int) preg_replace('/[^0-9]/', '', $request->harga_sewa);
@@ -75,6 +76,7 @@ class UnitPenyewaanMobilController extends Controller
             'batas_km_luar_desa' => $request->batas_km_luar_desa,
             'harga_luar_kota' => $hargaLuarKota,
             'bbm_ditanggung' => $request->bbm_ditanggung,
+            'opsi_supir' => $request->opsi_supir,
         ];
 
         if ($request->hasFile('foto_utama')) { 
@@ -137,6 +139,7 @@ class UnitPenyewaanMobilController extends Controller
             'batas_km_luar_desa' => 'required|integer',
             'harga_luar_kota' => 'required|string',
             'bbm_ditanggung' => 'required|string|in:Pemerintah Desa,Penyewa',
+            'opsi_supir' => 'required|string|in:Lepas Kunci,Dengan Supir,Bebas Pilih',
         ]);
 
         $hargaBersih = (int) preg_replace('/[^0-9]/', '', $request->harga_sewa);
@@ -165,6 +168,7 @@ class UnitPenyewaanMobilController extends Controller
             'batas_km_luar_desa' => $request->batas_km_luar_desa,
             'harga_luar_kota' => $hargaLuarKota,
             'bbm_ditanggung' => $request->bbm_ditanggung,
+            'opsi_supir' => $request->opsi_supir,
         ];
 
         if ($request->hasFile('foto_utama')) {

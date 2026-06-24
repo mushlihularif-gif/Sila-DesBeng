@@ -14,7 +14,7 @@ class ReceiptGeneratorService
     public function generateRentalReceipt(RentalBooking $booking)
     {
         // Muat template latar belakang
-        $backgroundPath = public_path('Admin/img/transaksi/bukti-penyewaan-alat.png');
+        $backgroundPath = public_path('Admin/img/buktitransaksi/bukti sewa alat.png');
         
         if (!file_exists($backgroundPath)) {
             throw new \Exception('Background template not found: ' . $backgroundPath);
@@ -214,7 +214,7 @@ class ReceiptGeneratorService
     public function generateGasReceipt(GasOrder $order)
     {
         // Muat template latar belakang
-        $backgroundPath = public_path('Admin/img/transaksi/bukti-gas.png');
+        $backgroundPath = public_path('Admin/img/buktitransaksi/bukti beli gas.png');
         
         if (!file_exists($backgroundPath)) {
             throw new \Exception('Background template not found: ' . $backgroundPath);
@@ -384,6 +384,318 @@ class ReceiptGeneratorService
         // Simpan bukti transaksi
         $filename = 'receipt_gas_' . $order->order_number . '_' . time() . '.png';
         $path = 'receipts/gas/' . $filename;
+        
+        $fullPath = storage_path('app/public/' . dirname($path));
+        if (!file_exists($fullPath)) {
+            mkdir($fullPath, 0755, true);
+        }
+        
+        ob_start();
+        imagepng($image);
+        $imageData = ob_get_clean();
+        Storage::disk('public')->put($path, $imageData);
+        
+        imagedestroy($image);
+        
+        return $path;
+    }
+    
+    /**
+     * Buat bukti transaksi untuk penyewaan mobil
+     */
+    public function generateMobilReceipt(\App\Models\MobilBooking $booking)
+    {
+        // Muat template latar belakang
+        $backgroundPath = public_path('Admin/img/buktitransaksi/bukti sewa mobil.png');
+        
+        if (!file_exists($backgroundPath)) {
+            throw new \Exception('Background template not found: ' . $backgroundPath);
+        }
+
+        $image = imagecreatefrompng($backgroundPath);
+        $imageWidth = imagesx($image);
+        $imageHeight = imagesy($image);
+        
+        $black = imagecolorallocate($image, 0, 0, 0);
+        $red = imagecolorallocate($image, 255, 0, 0);
+        $green = imagecolorallocate($image, 0, 170, 0);
+        
+        $fontPath = public_path('fonts/arial.ttf');
+        $normalSize = 24;
+        $headerSize = 28;
+        
+        $startY = 400;
+        $lineHeight = 55;
+        $labelX = 130;
+        $valueX = 500;
+        
+        // No. Pesanan
+        $y = $startY;
+        $this->addText($image, 'No. Pesanan', $labelX, $y, $normalSize, $black, $fontPath, true);
+        $this->addText($image, ': ' . $booking->order_number, $valueX, $y, $normalSize, $black, $fontPath);
+        
+        // Waktu Pemesanan
+        $y += $lineHeight;
+        $this->addText($image, 'Waktu Pemesanan', $labelX, $y, $normalSize, $black, $fontPath, true);
+        $this->addText($image, ': ' . $booking->created_at->locale('id')->isoFormat('dddd, DD MMMM YYYY  HH:mm') . ' WIB', $valueX, $y, $normalSize, $black, $fontPath);
+        
+        // Nama Pemesan
+        $y += $lineHeight;
+        $this->addText($image, 'Nama Akun Pemesan', $labelX, $y, $normalSize, $black, $fontPath, true);
+        $this->addText($image, ': ' . $booking->user->name, $valueX, $y, $normalSize, $black, $fontPath);
+        
+        // Email
+        $y += $lineHeight;
+        $this->addText($image, 'Email Akun Pemesan', $labelX, $y, $normalSize, $black, $fontPath, true);
+        $this->addText($image, ': ' . $booking->user->email, $valueX, $y, $normalSize, $black, $fontPath);
+
+        // Pemisah
+        $y += 60;
+        $this->drawLine($image, 130, $y, $imageWidth - 130, $y, $black);
+        
+        // Header: Informasi Sewa Mobil
+        $y += 70;
+        $this->addText($image, 'Informasi Sewa Mobil', $labelX, $y, $headerSize, $black, $fontPath, true);
+
+        $y += 85;
+        $this->addText($image, 'Nama Lengkap', $labelX, $y, $normalSize, $black, $fontPath, true);
+        $this->addText($image, ': ' . ($booking->recipient_name ?? '-'), $valueX, $y, $normalSize, $black, $fontPath);
+
+        $y += $lineHeight;
+        $this->addText($image, 'Opsi Pengambilan', $labelX, $y, $normalSize, $black, $fontPath, true);
+        $this->addText($image, ': ' . ucfirst($booking->delivery_method ?? '-'), $valueX, $y, $normalSize, $black, $fontPath);
+
+        $y += $lineHeight;
+        $this->addText($image, 'Opsi Supir', $labelX, $y, $normalSize, $black, $fontPath, true);
+        $this->addText($image, ': ' . ($booking->dengan_supir ? 'Dengan Supir' : 'Supir Sendiri'), $valueX, $y, $normalSize, $black, $fontPath);
+        
+        // Pemisah
+        $y += 60;
+        $this->drawLine($image, 130, $y, $imageWidth - 130, $y, $black);
+        
+        // Header: Informasi Pembayaran
+        $y += 70;
+        $this->addText($image, 'Informasi Pembayaran', $labelX, $y, $headerSize, $black, $fontPath, true);
+        
+        $y += 85;
+        $this->addText($image, 'Waktu Pembayaran', $labelX, $y, $normalSize, $black, $fontPath, true);
+        $this->addText($image, ': ' . ($booking->confirmed_at ? $booking->confirmed_at->locale('id')->isoFormat('dddd, DD MMMM YYYY  HH:mm') . ' WIB' : '-'), $valueX, $y, $normalSize, $black, $fontPath);
+        
+        $y += $lineHeight;
+        $this->addText($image, 'Metode Pembayaran', $labelX, $y, $normalSize, $black, $fontPath, true);
+        $this->addText($image, ': ' . $this->getPaymentMethodLabel($booking->payment_method), $valueX, $y, $normalSize, $black, $fontPath);
+        
+        $y += $lineHeight;
+        $this->addText($image, 'Total Pembayaran', $labelX, $y, $normalSize, $black, $fontPath, true);
+        $this->addText($image, ': Rp. ' . number_format($booking->total_harga ?? 0, 0, ',', '.'), $valueX, $y, $normalSize, $black, $fontPath);
+        
+        $y += $lineHeight;
+        $this->addText($image, 'Status', $labelX, $y, $normalSize, $black, $fontPath, true);
+        $statusText = $this->determineStatusLabel($booking);
+        
+        $statusColor = $black;
+        if (in_array($booking->status, ['completed', 'approved', 'confirmed', 'paid', 'arrived', 'returned'])) {
+            $statusColor = $green;
+        } elseif (in_array($booking->status, ['cancelled', 'rejected']) || ($booking->cancellation_status ?? '') === 'pending') {
+            $statusColor = $red;
+        }
+
+        $this->addText($image, ': ' . $statusText, $valueX, $y, $normalSize, $statusColor, $fontPath);
+        
+        // Pemisah
+        $y += 60;
+        $this->drawLine($image, 130, $y, $imageWidth - 130, $y, $black);
+        
+        // Header: Detail Pembayaran
+        $y += 70;
+        $this->addText($image, 'Detail Pembayaran', $labelX, $y, $headerSize, $black, $fontPath, true);
+        
+        // Header Tabel
+        $y += 85;
+        $col1 = 130;
+        $col2 = 530;
+        $col3 = 730;
+        $col4 = 980;
+        
+        $this->addText($image, 'Keterangan', $col1, $y, $normalSize, $black, $fontPath, true);
+        $this->addText($image, 'Durasi', $col2, $y, $normalSize, $black, $fontPath, true);
+        $this->addText($image, 'Harga/Hari', $col3, $y, $normalSize, $black, $fontPath, true);
+        $this->addText($image, 'Total', $col4, $y, $normalSize, $black, $fontPath, true);
+        
+        $y += 15;
+        $this->drawLine($image, 130, $y, $imageWidth - 130, $y, $black);
+        
+        $y += 60;
+        $itemName = $booking->mobil->nama_mobil ?? 'Sewa Mobil';
+        $quantity = $booking->lama_sewa . ' Hari';
+        $unitPrice = 'Rp. ' . number_format($booking->mobil->harga_sewa ?? 0, 0, ',', '.');
+        $total = 'Rp. ' . number_format($booking->total_harga ?? 0, 0, ',', '.');
+        
+        $this->addText($image, substr($itemName, 0, 20), $col1, $y, $normalSize, $black, $fontPath);
+        $this->addText($image, $quantity, $col2, $y, $normalSize, $black, $fontPath);
+        $this->addText($image, $unitPrice, $col3, $y, $normalSize, $black, $fontPath);
+        $this->addText($image, $total, $col4, $y, $normalSize, $black, $fontPath);
+        
+        $y += 60;
+        $this->drawLine($image, 530, $y, $imageWidth - 130, $y, $black);
+        
+        $y += 60;
+        $this->addText($image, 'Total Pemesanan', 530, $y, $normalSize, $black, $fontPath);
+        $this->addText($image, 'Rp. ' . number_format($booking->total_harga ?? 0, 0, ',', '.'), 980, $y, $normalSize, $black, $fontPath);
+        
+        $y += $lineHeight;
+        $this->addText($image, 'Total Dibayar', 530, $y, $headerSize, $black, $fontPath, true);
+        $this->addText($image, 'Rp. ' . number_format($booking->total_harga ?? 0, 0, ',', '.'), 980, $y, $headerSize, $black, $fontPath, true);
+        
+        $y += 150;
+        $location = 'Bengkalis';
+        $date = $booking->created_at->locale('id')->isoFormat('DD MMMM YYYY');
+        $this->addText($image, $location . ', ' . $date, 130, $y, $normalSize, $black, $fontPath, true);
+        $y += $lineHeight;
+        $this->addText($image, 'Hormat Kami', 130, $y, $normalSize, $black, $fontPath);
+        
+        $y += 420;
+        
+        $filename = 'receipt_mobil_' . $booking->order_number . '_' . time() . '.png';
+        $path = 'receipts/mobil/' . $filename;
+        
+        $fullPath = storage_path('app/public/' . dirname($path));
+        if (!file_exists($fullPath)) {
+            mkdir($fullPath, 0755, true);
+        }
+        
+        ob_start();
+        imagepng($image);
+        $imageData = ob_get_clean();
+        Storage::disk('public')->put($path, $imageData);
+        
+        imagedestroy($image);
+        
+        return $path;
+    }
+
+    /**
+     * Buat bukti transaksi untuk peminjaman fasilitas umum
+     */
+    public function generateFasilitasReceipt(\App\Models\FasilitasUmumBooking $booking)
+    {
+        // Muat template latar belakang
+        $backgroundPath = public_path('Admin/img/buktitransaksi/bukti pinjam fasilitas umum.png');
+        
+        if (!file_exists($backgroundPath)) {
+            throw new \Exception('Background template not found: ' . $backgroundPath);
+        }
+
+        $image = imagecreatefrompng($backgroundPath);
+        $imageWidth = imagesx($image);
+        $imageHeight = imagesy($image);
+        
+        $black = imagecolorallocate($image, 0, 0, 0);
+        $red = imagecolorallocate($image, 255, 0, 0);
+        $green = imagecolorallocate($image, 0, 170, 0);
+        
+        $fontPath = public_path('fonts/arial.ttf');
+        $normalSize = 24;
+        $headerSize = 28;
+        
+        $startY = 400;
+        $lineHeight = 55;
+        $labelX = 130;
+        $valueX = 500;
+        
+        // No. Pesanan
+        $y = $startY;
+        $this->addText($image, 'No. Pesanan', $labelX, $y, $normalSize, $black, $fontPath, true);
+        $this->addText($image, ': ' . $booking->order_number, $valueX, $y, $normalSize, $black, $fontPath);
+        
+        // Waktu Pemesanan
+        $y += $lineHeight;
+        $this->addText($image, 'Waktu Pemesanan', $labelX, $y, $normalSize, $black, $fontPath, true);
+        $this->addText($image, ': ' . $booking->created_at->locale('id')->isoFormat('dddd, DD MMMM YYYY  HH:mm') . ' WIB', $valueX, $y, $normalSize, $black, $fontPath);
+        
+        // Nama Pemesan
+        $y += $lineHeight;
+        $this->addText($image, 'Nama Akun Pemesan', $labelX, $y, $normalSize, $black, $fontPath, true);
+        $this->addText($image, ': ' . $booking->user->name, $valueX, $y, $normalSize, $black, $fontPath);
+        
+        // Email
+        $y += $lineHeight;
+        $this->addText($image, 'Email Akun Pemesan', $labelX, $y, $normalSize, $black, $fontPath, true);
+        $this->addText($image, ': ' . $booking->user->email, $valueX, $y, $normalSize, $black, $fontPath);
+
+        // Pemisah
+        $y += 60;
+        $this->drawLine($image, 130, $y, $imageWidth - 130, $y, $black);
+        
+        // Header: Informasi Peminjaman
+        $y += 70;
+        $this->addText($image, 'Informasi Peminjaman', $labelX, $y, $headerSize, $black, $fontPath, true);
+
+        $y += 85;
+        $this->addText($image, 'Nama Lengkap', $labelX, $y, $normalSize, $black, $fontPath, true);
+        $this->addText($image, ': ' . ($booking->recipient_name ?? '-'), $valueX, $y, $normalSize, $black, $fontPath);
+
+        $y += $lineHeight;
+        $this->addText($image, 'Tujuan Peminjaman', $labelX, $y, $normalSize, $black, $fontPath, true);
+        $this->addText($image, ': ' . ($booking->rental_purpose ?? '-'), $valueX, $y, $normalSize, $black, $fontPath);
+
+        $y += $lineHeight;
+        $this->addText($image, 'Status', $labelX, $y, $normalSize, $black, $fontPath, true);
+        $statusText = $this->determineStatusLabel($booking);
+        
+        $statusColor = $black;
+        if (in_array($booking->status, ['completed', 'approved', 'confirmed', 'paid', 'arrived', 'returned'])) {
+            $statusColor = $green;
+        } elseif (in_array($booking->status, ['cancelled', 'rejected']) || ($booking->cancellation_status ?? '') === 'pending') {
+            $statusColor = $red;
+        }
+
+        $this->addText($image, ': ' . $statusText, $valueX, $y, $normalSize, $statusColor, $fontPath);
+        
+        // Pemisah
+        $y += 60;
+        $this->drawLine($image, 130, $y, $imageWidth - 130, $y, $black);
+        
+        // Header: Detail Peminjaman
+        $y += 70;
+        $this->addText($image, 'Detail Peminjaman', $labelX, $y, $headerSize, $black, $fontPath, true);
+        
+        // Header Tabel
+        $y += 85;
+        $col1 = 130;
+        $col2 = 530;
+        $col3 = 730;
+        
+        $this->addText($image, 'Fasilitas Umum', $col1, $y, $normalSize, $black, $fontPath, true);
+        $this->addText($image, 'Durasi', $col2, $y, $normalSize, $black, $fontPath, true);
+        $this->addText($image, 'Keterangan', $col3, $y, $normalSize, $black, $fontPath, true);
+        
+        $y += 15;
+        $this->drawLine($image, 130, $y, $imageWidth - 130, $y, $black);
+        
+        $y += 60;
+        $itemName = $booking->fasilitas->nama_fasilitas ?? 'Fasilitas Umum';
+        $quantity = $booking->lama_sewa . ' Hari';
+        $keterangan = 'Gratis';
+        
+        $this->addText($image, substr($itemName, 0, 20), $col1, $y, $normalSize, $black, $fontPath);
+        $this->addText($image, $quantity, $col2, $y, $normalSize, $black, $fontPath);
+        $this->addText($image, $keterangan, $col3, $y, $normalSize, $black, $fontPath);
+        
+        $y += 60;
+        $this->drawLine($image, 130, $y, $imageWidth - 130, $y, $black);
+        
+        $y += 150;
+        $location = 'Bengkalis';
+        $date = $booking->created_at->locale('id')->isoFormat('DD MMMM YYYY');
+        $this->addText($image, $location . ', ' . $date, 130, $y, $normalSize, $black, $fontPath, true);
+        $y += $lineHeight;
+        $this->addText($image, 'Hormat Kami', 130, $y, $normalSize, $black, $fontPath);
+        
+        $y += 420;
+        
+        $filename = 'receipt_fasilitas_' . $booking->order_number . '_' . time() . '.png';
+        $path = 'receipts/fasilitas/' . $filename;
         
         $fullPath = storage_path('app/public/' . dirname($path));
         if (!file_exists($fullPath)) {

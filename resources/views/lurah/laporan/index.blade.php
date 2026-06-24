@@ -97,27 +97,27 @@
     <!-- Filter Status Pills -->
     <div class="d-flex gap-2 mb-4 overflow-auto pb-2">
         <a href="{{ route('lurah.laporan.index') }}" 
-           class="btn btn-sm rounded-pill px-3 {{ !request('status') ? 'btn-dark' : 'btn-outline-dark border-0 bg-white shadow-sm' }}">
+           class="btn btn-sm rounded-pill px-3 {{ !request('status') ? 'btn-dark' : 'bg-white text-secondary border shadow-sm' }}">
             Semua
         </a>
         <a href="{{ route('lurah.laporan.index', ['status' => 'Pending'] + request()->except('status')) }}" 
-           class="btn btn-sm rounded-pill px-3 {{ request('status') == 'Pending' ? 'btn-warning text-white' : 'btn-outline-secondary border-0 bg-white shadow-sm' }}">
+           class="btn btn-sm rounded-pill px-3 {{ request('status') == 'Pending' ? 'btn-warning text-white' : 'bg-white text-secondary border shadow-sm' }}">
             Tertunda
         </a>
         <a href="{{ route('lurah.laporan.index', ['status' => 'Proses'] + request()->except('status')) }}" 
-           class="btn btn-sm rounded-pill px-3 {{ request('status') == 'Proses' ? 'btn-info text-white' : 'btn-outline-secondary border-0 bg-white shadow-sm' }}">
+           class="btn btn-sm rounded-pill px-3 {{ request('status') == 'Proses' ? 'btn-info text-white' : 'bg-white text-secondary border shadow-sm' }}">
             Proses
         </a>
         <a href="{{ route('lurah.laporan.index', ['status' => 'Selesai'] + request()->except('status')) }}" 
-           class="btn btn-sm rounded-pill px-3 {{ request('status') == 'Selesai' ? 'btn-success text-white' : 'btn-outline-secondary border-0 bg-white shadow-sm' }}">
+           class="btn btn-sm rounded-pill px-3 {{ request('status') == 'Selesai' ? 'btn-success text-white' : 'bg-white text-secondary border shadow-sm' }}">
             Selesai
         </a>
         <a href="{{ route('lurah.laporan.index', ['status' => 'Diteruskan'] + request()->except('status')) }}" 
-           class="btn btn-sm rounded-pill px-3 {{ request('status') == 'Diteruskan' ? 'btn-secondary text-white' : 'btn-outline-secondary border-0 bg-white shadow-sm' }}">
+           class="btn btn-sm rounded-pill px-3 {{ request('status') == 'Diteruskan' ? 'btn-secondary text-white' : 'bg-white text-secondary border shadow-sm' }}">
             Diteruskan
         </a>
         <a href="{{ route('lurah.laporan.index', ['status' => 'Ditolak'] + request()->except('status')) }}" 
-           class="btn btn-sm rounded-pill px-3 {{ request('status') == 'Ditolak' ? 'btn-danger text-white' : 'btn-outline-secondary border-0 bg-white shadow-sm' }}">
+           class="btn btn-sm rounded-pill px-3 {{ request('status') == 'Ditolak' ? 'btn-danger text-white' : 'bg-white text-secondary border shadow-sm' }}">
             Ditolak
         </a>
     </div>

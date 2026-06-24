@@ -1,6 +1,6 @@
 @extends('admin.layouts.admin')
 
-@section('title', 'Edit Anggota BUMDes')
+@section('title', 'Edit Pemerintah Daerah')
 
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
@@ -10,11 +10,11 @@
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
                     <h4 class="fw-bold mb-1">
-                        <span class="text-muted fw-light">Profil SiladesBeng / Anggota BUMDes /</span> Edit Anggota
+                        <span class="text-muted fw-light">Profil SiladesBeng / Pemerintah Daerah /</span> Edit Anggota
                     </h4>
                     <p class="text-muted mb-0">Perbarui informasi anggota yang ditampilkan di halaman Profil SiladesBeng</p>
                 </div>
-                <a href="{{ route('admin.isewa.bumdes.index') }}" class="btn btn-outline-secondary">
+                <a href="{{ route('admin.siladesbeng.bumdes.index') }}" class="btn btn-outline-secondary">
                     <i class="bx bx-arrow-left me-1"></i> Kembali
                 </a>
             </div>
@@ -22,7 +22,7 @@
             <!-- Main Card -->
             <div class="card border-0 shadow-sm">
                 <div class="card-body p-4">
-                    <form action="{{ route('admin.isewa.bumdes.update', $member->id) }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('admin.siladesbeng.bumdes.update', $member->id) }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
 
@@ -32,13 +32,14 @@
                                 <div class="text-center">
                                     <!-- Photo Preview Circle -->
                                     <div class="position-relative d-inline-block mb-3">
-                                        <div id="preview-container" class="rounded-circle overflow-hidden border border-3 border-light shadow-lg" 
-                                             style="width: 180px; height: 180px; background: transparent; cursor: pointer;"
+                                        <div id="preview-container" class="rounded-circle overflow-hidden border border-3 border-light shadow-lg d-flex justify-content-center align-items-center" 
+                                             style="width: 180px; height: 180px; background: {{ $member->photo ? 'transparent' : 'linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)' }}; cursor: pointer;"
                                              onclick="document.getElementById('photo-input').click()">
+                                            <i id="preview-icon" class="bx bxs-user" style="font-size: 80px; color: #90caf9; display: {{ $member->photo ? 'none' : 'block' }};"></i>
                                             <img id="preview-image" 
                                                  src="{{ $member->photo_url }}" 
-                                                 alt="Preview" 
-                                                 class="w-100 h-100"
+                                                 alt="" 
+                                                 class="w-100 h-100 {{ $member->photo ? '' : 'd-none' }}"
                                                  style="object-fit: cover; object-position: center;">
                                         </div>
                                         <!-- Camera Icon Overlay -->
@@ -127,7 +128,7 @@
                                     <!-- Action Buttons -->
                                     <div class="col-12">
                                         <div class="d-flex gap-2 justify-content-end pt-3 border-top">
-                                            <a href="{{ route('admin.isewa.bumdes.index') }}" 
+                                            <a href="{{ route('admin.siladesbeng.bumdes.index') }}" 
                                                class="btn btn-outline-secondary px-4">
                                                 <i class="bx bx-x me-1"></i> Batal
                                             </a>
@@ -259,7 +260,10 @@ function previewImage(event) {
         const reader = new FileReader();
         reader.onload = function(e) {
             preview.src = e.target.result;
+            preview.classList.remove('d-none');
             preview.classList.add('photo-uploaded');
+            const icon = document.getElementById('preview-icon');
+            if(icon) icon.style.display = 'none';
             container.style.background = 'transparent';
             
             // Remove animation class after animation completes
@@ -283,14 +287,11 @@ function clearPhoto() {
     const deleteInput = document.getElementById('delete_photo');
 
     input.value = '';
-    preview.src = '{{ $member->photo_url }}'; // Kembali ke foto asli atau default jika null
-    // Catatan: Jika ingin preview hilang completely saat clear, ganti src jadi '#' dan sembunyikan container.
-    // Tapi di sini behaviornya sepertinya reset ke awal. 
-    // TAPI user ingin MENGHAPUS. Jadi harusnya kita buat jadi blank/placeholder.
-    
-    // Perbaikan logika: Jika tombol "Hapus Foto" ditekan, berarti user tidak ingin ada foto.
-    preview.src = 'https://via.placeholder.com/200x200?text=No+Photo'; // Placeholder
-    container.style.background = '#f8f9fa';
+    preview.src = '#'; 
+    preview.classList.add('d-none');
+    const icon = document.getElementById('preview-icon');
+    if(icon) icon.style.display = 'block';
+    container.style.background = 'linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)';
     
     if (deleteInput) {
         deleteInput.value = '1';

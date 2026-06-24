@@ -18,7 +18,9 @@ class FasilitasUmum extends Model
         'foto_2',
         'foto_3',
         'lokasi',
-        'region_id'
+        'region_id',
+        'opsi_supir',
+        'bbm_ditanggung'
     ];
 
     public function bookings()

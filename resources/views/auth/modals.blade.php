@@ -32,7 +32,7 @@
             </div>
 
             {{-- Form Login --}}
-            <form id="form-login" action="{{ route('auth.login') }}" method="POST" class="space-y-4">
+            <form id="form-login" action="{{ route('auth.login') }}" method="POST" data-turbo="false" class="space-y-4">
                 @csrf
                 <div>
                     <input type="text" name="email_or_phone" placeholder="Email / Username / No Telepon" required
@@ -137,8 +137,20 @@
                         </select>
                     </div>
                     <div>
-                        <select name="region_id" id="google-reg-desa" required disabled class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm disabled:bg-gray-100 disabled:cursor-not-allowed">
+                        <select name="desa_id" id="google-reg-desa" required disabled class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm disabled:bg-gray-100 disabled:cursor-not-allowed">
                             <option value="">Pilih Desa/Kelurahan</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <select name="rw_id" id="google-reg-rw" required disabled class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm disabled:bg-gray-100 disabled:cursor-not-allowed">
+                            <option value="">Pilih RW</option>
+                        </select>
+                    </div>
+                    <div>
+                        <select name="region_id" id="google-reg-rt" required disabled class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm disabled:bg-gray-100 disabled:cursor-not-allowed">
+                            <option value="">Pilih RT</option>
                         </select>
                         <span class="text-red-500 text-xs hidden block mt-1" data-error="region_id"></span>
                     </div>
@@ -238,8 +250,20 @@
                         </select>
                     </div>
                     <div>
-                        <select name="region_id" id="reg-desa" disabled required class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm disabled:bg-gray-100 disabled:cursor-not-allowed">
+                        <select name="desa_id" id="reg-desa" disabled required class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm disabled:bg-gray-100 disabled:cursor-not-allowed">
                             <option value="">Pilih Desa/Kelurahan</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <select name="rw_id" id="reg-rw" required disabled class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm disabled:bg-gray-100 disabled:cursor-not-allowed">
+                            <option value="">Pilih RW</option>
+                        </select>
+                    </div>
+                    <div>
+                        <select name="region_id" id="reg-rt" disabled required class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm disabled:bg-gray-100 disabled:cursor-not-allowed">
+                            <option value="">Pilih RT</option>
                         </select>
                         <span class="text-red-500 text-xs hidden block mt-1" data-error="region_id"></span>
                     </div>

@@ -41,6 +41,8 @@ class UnitFasilitasUmumController extends Controller
             'foto_utama' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
             'foto_2' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
             'foto_3' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
+            'opsi_supir' => 'nullable|string|in:Lepas Kunci,Dengan Supir,Bebas Pilih',
+            'bbm_ditanggung' => 'nullable|string|in:Pemerintah Desa,Penyewa',
         ]);
 
         $data = [
@@ -50,6 +52,8 @@ class UnitFasilitasUmumController extends Controller
             'status' => $request->status,
             'kategori' => $request->kategori,
             'lokasi' => $request->lokasi,
+            'opsi_supir' => $request->opsi_supir,
+            'bbm_ditanggung' => $request->bbm_ditanggung,
         ];
 
         if ($request->hasFile('foto_utama')) { 
@@ -104,6 +108,8 @@ class UnitFasilitasUmumController extends Controller
             'foto_utama' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'foto_2' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'foto_3' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'opsi_supir' => 'nullable|string|in:Lepas Kunci,Dengan Supir,Bebas Pilih',
+            'bbm_ditanggung' => 'nullable|string|in:Pemerintah Desa,Penyewa',
         ]);
 
         $fasilitas = FasilitasUmum::findOrFail($id);
@@ -115,6 +121,8 @@ class UnitFasilitasUmumController extends Controller
             'status' => $request->status,
             'kategori' => $request->kategori,
             'lokasi' => $request->lokasi,
+            'opsi_supir' => $request->opsi_supir,
+            'bbm_ditanggung' => $request->bbm_ditanggung,
         ];
 
         if ($request->hasFile('foto_utama')) {

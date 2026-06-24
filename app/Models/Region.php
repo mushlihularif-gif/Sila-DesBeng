@@ -30,7 +30,7 @@ class Region extends Model
     public function services()
     {
         return $this->belongsToMany(Service::class, 'region_services')
-                    ->withPivot('is_active')
+                    ->withPivot('is_active', 'is_exclusive')
                     ->withTimestamps();
     }
 
@@ -59,5 +59,16 @@ class Region extends Model
             $ids = array_merge($ids, self::getAncestorIds($region->parent_id));
         }
         return $ids;
+    }
+
+    public function getFullPathAttribute()
+    {
+        $path = $this->name;
+        $parent = $this->parent;
+        while ($parent) {
+            $path .= ', ' . $parent->name;
+            $parent = $parent->parent;
+        }
+        return $path;
     }
 }

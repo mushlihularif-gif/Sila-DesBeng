@@ -4,7 +4,7 @@
     <div class="container-xxl flex-grow-1 container-p-y">
         <!-- Breadcrumb -->
         <h4 class="fw-bold py-3 mb-4">
-            <span class="text-muted fw-light">Unit Layanan / Peminjaman Fasilitas Umum /</span> Detail Alat
+            <span class="text-muted fw-light">Unit Layanan / Peminjaman Fasilitas Umum /</span> Detail Fasilitas
         </h4>
 
         <div class="row">
@@ -55,7 +55,7 @@
                             <!-- Informasi Detail -->
                             <div class="flex-grow-1">
                                 <div class="d-flex justify-content-between align-items-start mb-3">
-                                    <h4 class="fw-bold mb-0 text-dark">Informasi Alat</h4>
+                                    <h4 class="fw-bold mb-0 text-dark">Informasi Fasilitas</h4>
                                     <span class="badge {{ $fasilitas->status == 'tersedia' ? 'bg-success' : ($fasilitas->status == 'disewa' ? 'bg-warning' : 'bg-danger') }} fs-6 px-3 py-2 rounded-pill">
                                         {{ Str::upper($fasilitas->status) }}
                                     </span>
@@ -65,7 +65,7 @@
                                     <table class="table table-borderless">
                                         <tbody>
                                             <tr>
-                                                <td class="fw-bold text-uppercase text-muted" style="width: 140px;">Nama Alat</td>
+                                                <td class="fw-bold text-uppercase text-muted" style="width: 140px;">Nama Fasilitas</td>
                                                 <td class="fw-semibold text-dark">{{ $fasilitas->nama_fasilitas }}</td>
                                             </tr>
                                             <tr>
@@ -92,18 +92,18 @@
                                 <hr class="my-4">
 
                                 <div class="d-flex gap-2">
-                                    <a href="{{ route('admin.unit.Fasilitas Umum.edit', $fasilitas->id) }}" class="btn btn-warning px-4">
+                                    <a href="{{ route('admin.unit.fasilitas_umum.edit', $fasilitas->id) }}" class="btn btn-warning px-4">
                                         <i class="bx bx-edit-alt me-1"></i> Ubah
                                     </a>
-                                    <form action="{{ route('admin.unit.Fasilitas Umum.destroy', $fasilitas->id) }}" method="POST"
-                                        onsubmit="return confirm('Apakah Anda yakin ingin menghapus alat ini?');">
+                                    <form action="{{ route('admin.unit.fasilitas_umum.destroy', $fasilitas->id) }}" method="POST"
+                                        onsubmit="return confirm('Apakah Anda yakin ingin menghapus fasilitas ini?');">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-danger px-4">
                                             <i class="bx bx-trash me-1"></i> Hapus
                                         </button>
                                     </form>
-                                    <a href="{{ route('admin.unit.Fasilitas Umum.index') }}" class="btn btn-outline-secondary px-4">
+                                    <a href="{{ route('admin.unit.fasilitas_umum.index') }}" class="btn btn-outline-secondary px-4">
                                         <i class="bx bx-arrow-back me-1"></i> Kembali
                                     </a>
                                 </div>

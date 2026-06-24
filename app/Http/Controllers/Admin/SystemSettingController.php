@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\SystemSetting;
+use App\Models\Region;
+use App\Models\Service;
 use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -12,133 +14,126 @@ class SystemSettingController extends Controller
 {
     public function index()
     {
-        // Ambil setting pertama (atau buat baru jika belum ada)
-        $setting = SystemSetting::first();
-        if (!$setting) {
-            $setting = SystemSetting::create([
-                'location_name' => 'BUMDes Desa Pematang Duku Timur',
-                'latitude' => -0.5000000,
-                'longitude' => 101.0000000,
-                'address' => 'Jl. Raya No. 123, Desa Pematang Duku Timur',
-                'bank_name' => 'Bank Syariah Indonesia',
-                'bank_account_number' => '12345678989',
-                'bank_account_holder' => 'BUMDes Desa Pematang Duku Timur',
-                'payment_methods' => ['transfer', 'tunai'],
-                'card_background_type' => 'gradient',
-                'card_gradient_style' => 'blue',
-                'whatsapp_number' => '+6281234567890',
-                'office_address' => 'Jl. Kantor BUMDes, Desa Pematang Duku Timur',
-                'operating_hours' => 'Senin - Sabtu, 08:00 - 17:00',
-            ]);
+        $user = auth()->user();
+        
+        // Admin Pusat mengelola Region tingkat teratas (Kabupaten) atau Region miliknya sendiri
+        $region = Region::with(['services', 'parent.parent'])->find($user->region_id);
+        
+        if (!$region) {
+            // Fallback: ambil Region pertama jika belum punya
+            $region = Region::first();
         }
 
-        return view('admin.system_settings.index', compact('setting'));
+        $allServices = Service::all();
+        $activeServices = $region ? $region->services->pluck('id')->toArray() : [];
+        $exclusiveServices = $region ? $region->services->where('pivot.is_exclusive', true)->pluck('id')->toArray() : [];
+
+        return view('admin.system_settings.index', compact('region', 'allServices', 'activeServices', 'exclusiveServices'));
     }
 
     public function update(Request $request)
     {
-        // Check if sensitive fields are being changed (Sudo Mode)
-        $sensitiveFields = ['whatsapp_number', 'bank_account_number', 'bank_account_holder', 'bank_name'];
-        $changingSensitive = false;
-        foreach ($sensitiveFields as $field) {
-            if ($request->has($field)) {
-                $changingSensitive = true;
-                break;
-            }
+        $user = auth()->user();
+        $region = Region::find($user->region_id);
+
+        if (!$region) {
+            $region = Region::first();
         }
 
-        if ($changingSensitive) {
-            $request->validate([
-                'admin_password' => 'required',
-            ]);
-
-            if (!Hash::check($request->admin_password, auth()->user()->password)) {
-                return back()->with('error', 'Password admin tidak valid. Perubahan data sensitif dibatalkan.');
-            }
-
-            // Log sensitive change
-            ActivityLog::create([
-                'action' => 'update_sensitive_settings',
-                'description' => 'Admin updated sensitive system settings (bank/WhatsApp)',
-                'user_id' => auth()->id(),
-                'ip_address' => $request->ip(),
-            ]);
+        if (!$region) {
+            return redirect()->back()->with('error', 'Region tidak ditemukan.');
         }
 
         $request->validate([
-            'location_name' => 'nullable|string|max:255',
-            'latitude' => 'nullable|numeric',
-            'longitude' => 'nullable|numeric',
-            'address' => 'nullable|string',
-            'bank_name' => 'nullable|string|max:255',
-            'bank_account_number' => 'nullable|string|max:255',
-            'bank_account_holder' => 'nullable|string|max:255',
-            'ewallet_name' => 'nullable|string|max:255',
-            'ewallet_number' => 'nullable|string|max:255',
-            'ewallet_account_holder' => 'nullable|string|max:255',
-            'card_background_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            'card_background_type' => 'nullable|in:gradient,image',
-            'card_gradient_style' => 'nullable|string|max:50',
-            'cash_payment_description' => 'nullable|string|max:255',
-            'whatsapp_number' => 'nullable|string|max:20',
-            'office_address' => 'nullable|string',
-            'operating_hours' => 'nullable|string',
+            'profile_text' => 'nullable|string',
+            'contact_phone' => 'nullable|string',
+            'contact_email' => 'nullable|email',
+            'services' => 'nullable|array',
+            'services.*' => 'exists:services,id'
         ]);
 
-        $setting = SystemSetting::first();
-        if (!$setting) {
-            $setting = new SystemSetting();
+        // Update whatsapp_name inside payment_info JSON
+        $paymentInfo = $region->payment_info ?? [];
+        if ($request->has('whatsapp_name')) {
+            $paymentInfo['whatsapp_name'] = $request->whatsapp_name;
         }
+        $paymentInfo['whatsapp_active'] = $request->has('whatsapp_active');
 
-        // Update basic fields
-        $setting->location_name = $request->input('location_name');
-        $setting->latitude = $request->input('latitude');
-        $setting->longitude = $request->input('longitude');
-        $setting->address = $request->input('address');
-        $setting->bank_name = $request->input('bank_name');
-        $setting->bank_account_number = $request->input('bank_account_number');
-        $setting->bank_account_holder = $request->input('bank_account_holder');
-        $setting->ewallet_name = $request->input('ewallet_name');
-        $setting->ewallet_number = $request->input('ewallet_number');
-        $setting->ewallet_account_holder = $request->input('ewallet_account_holder');
-        $setting->card_background_type = $request->input('card_background_type', 'gradient');
-        $setting->card_gradient_style = $request->input('card_gradient_style', 'blue');
-        $setting->cash_payment_description = $request->input('cash_payment_description');
-        $setting->whatsapp_number = $request->input('whatsapp_number');
-        $setting->office_address = $request->input('office_address');
-        $setting->operating_hours = $request->input('operating_hours');
+        $region->update([
+            'profile_text' => $request->profile_text,
+            'contact_phone' => $request->contact_phone,
+            'contact_email' => $request->contact_email,
+            'payment_info' => $paymentInfo,
+        ]);
 
-        // Handle payment methods (checkbox array)
-        $setting->payment_methods = $request->input('payment_methods', []);
-
-        // Handle card background image upload
-        if ($request->hasFile('card_background_image')) {
-            // Delete old image if exists
-            if ($setting->card_background_image && \Storage::disk('public')->exists($setting->card_background_image)) {
-                \Storage::disk('public')->delete($setting->card_background_image);
+        // Sync services
+        $syncData = [];
+        if ($request->has('services')) {
+            $exclusives = $request->input('exclusive_services', []);
+            foreach ($request->services as $serviceId) {
+                $syncData[$serviceId] = [
+                    'is_active' => true,
+                    'is_exclusive' => in_array($serviceId, $exclusives)
+                ];
             }
-            
-            // Store new image
-            $path = $request->file('card_background_image')->store('system', 'public');
-            $setting->card_background_image = $path;
         }
+        $region->services()->sync($syncData);
 
-        $setting->save();
-
-        return redirect()->back()->with('success', 'Pengaturan sistem berhasil disimpan.');
+        return redirect()->back()->with('success', 'Pengaturan Pemerintah Kabupaten berhasil diperbarui.');
     }
 
     public function reset()
     {
-        $setting = SystemSetting::first();
-        if ($setting) {
-            // Delete card background image if exists
-            if ($setting->card_background_image && \Storage::disk('public')->exists($setting->card_background_image)) {
-                \Storage::disk('public')->delete($setting->card_background_image);
-            }
-            $setting->delete();
+        // Fitur reset dihilangkan karena Region tidak boleh direset sembarangan
+        return redirect()->route('admin.system-settings.index')->with('success', 'Reset dinonaktifkan untuk data Region.');
+    }
+
+    public function paymentIndex()
+    {
+        $user = auth()->user();
+        $region = Region::find($user->region_id);
+        
+        if (!$region) {
+            $region = Region::first();
         }
 
-        return redirect()->route('admin.system-settings.index')->with('success', 'Pengaturan sistem berhasil direset.');
+        return view('admin.system_settings.payment', compact('region'));
+    }
+
+    public function paymentUpdate(Request $request)
+    {
+        $user = auth()->user();
+        $region = Region::find($user->region_id);
+
+        if (!$region) {
+            $region = Region::first();
+        }
+
+        $paymentInfo = $region->payment_info ?? [];
+        $paymentInfo['bank_name'] = $request->bank_name;
+        $paymentInfo['account_number'] = $request->account_number;
+        $paymentInfo['account_name'] = $request->account_name;
+        $paymentInfo['bank_active'] = $request->has('bank_active');
+        $paymentInfo['ewallet_name'] = $request->ewallet_name;
+        $paymentInfo['ewallet_number'] = $request->ewallet_number;
+        $paymentInfo['ewallet_account_name'] = $request->ewallet_account_name;
+        $paymentInfo['ewallet_active'] = $request->has('ewallet_active');
+        if ($request->has('payment_gateway_active')) {
+            if (empty($request->midtrans_server_key) || empty($request->midtrans_client_key)) {
+                return redirect()->back()->with('error', 'Gagal: Kunci API Midtrans (Server Key & Client Key) wajib diisi jika Anda mengaktifkan Payment Gateway Otomatis. Silakan daftar akun bisnis di midtrans.com terlebih dahulu.')->withInput();
+            }
+        }
+
+        $paymentInfo['card_theme'] = $request->card_theme;
+        $paymentInfo['cash_only_active'] = $request->has('cash_only_active');
+        $paymentInfo['payment_gateway_active'] = $request->has('payment_gateway_active');
+        $paymentInfo['midtrans_server_key'] = $request->midtrans_server_key;
+        $paymentInfo['midtrans_client_key'] = $request->midtrans_client_key;
+
+        $region->update([
+            'payment_info' => $paymentInfo,
+        ]);
+
+        return redirect()->back()->with('success', 'Pengaturan Pembayaran Pusat berhasil diperbarui.');
     }
 }

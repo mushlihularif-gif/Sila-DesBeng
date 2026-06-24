@@ -189,6 +189,20 @@
                                        class="w-full px-4 py-2.5 bg-white/60 border border-white/40 rounded-xl text-gray-700 cursor-not-allowed glass-input text-sm">
                             </div>
 
+                            {{-- RW --}}
+                            <div>
+                                <label class="block text-sm font-bold text-gray-800 mb-2">RW</label>
+                                <input type="text" value="{{ $rw_name }}" disabled 
+                                       class="w-full px-4 py-2.5 bg-white/60 border border-white/40 rounded-xl text-gray-700 cursor-not-allowed glass-input text-sm">
+                            </div>
+
+                            {{-- RT --}}
+                            <div>
+                                <label class="block text-sm font-bold text-gray-800 mb-2">RT</label>
+                                <input type="text" value="{{ $rt_name }}" disabled 
+                                       class="w-full px-4 py-2.5 bg-white/60 border border-white/40 rounded-xl text-gray-700 cursor-not-allowed glass-input text-sm">
+                            </div>
+
                             {{-- Kata Sandi --}}
                             <div>
                                 <label class="block text-sm font-bold text-gray-800 mb-2">Kata Sandi</label>
@@ -245,8 +259,6 @@
                 alert.style.opacity = '0';
                 setTimeout(() => alert.remove(), 300);
             }, 5000);
-        }
-
         }
 
         // Fungsionalitas Pratinjau Avatar

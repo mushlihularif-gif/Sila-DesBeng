@@ -86,15 +86,27 @@
         <div class="card-header bg-white border-bottom py-3 px-4">
              <ul class="nav nav-pills card-header-pills gap-2" id="proofTabs" role="tablist">
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link active rounded-pill px-4 fw-semibold" id="rental-tab" data-bs-toggle="tab" data-bs-target="#rental-pane" type="button" role="tab">
+                    <button class="nav-link {{ $category == 'rental' || $category == 'all' ? 'active' : '' }} rounded-pill px-4 fw-semibold" id="rental-tab" data-bs-toggle="tab" data-bs-target="#rental-pane" type="button" role="tab">
                         <i class="bx bx-wrench me-2"></i>Penyewaan Alat
-                        <span class="badge bg-white text-primary ms-2 shadow-sm">{{ $rentalPayments->count() }}</span>
+                        <span class="badge {{ $category == 'rental' || $category == 'all' ? 'bg-white text-primary' : 'bg-primary text-white' }} ms-2 shadow-sm">{{ $rentalPayments->count() }}</span>
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link rounded-pill px-4 fw-semibold" id="gas-tab" data-bs-toggle="tab" data-bs-target="#gas-pane" type="button" role="tab">
+                    <button class="nav-link {{ $category == 'gas' ? 'active' : '' }} rounded-pill px-4 fw-semibold" id="gas-tab" data-bs-toggle="tab" data-bs-target="#gas-pane" type="button" role="tab">
                         <i class="bx bxs-gas-pump me-2"></i>Pembelian Gas
-                        <span class="badge bg-white text-primary ms-2 shadow-sm">{{ $gasPayments->count() }}</span>
+                        <span class="badge {{ $category == 'gas' ? 'bg-white text-primary' : 'bg-primary text-white' }} ms-2 shadow-sm">{{ $gasPayments->count() }}</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link {{ $category == 'mobil' ? 'active' : '' }} rounded-pill px-4 fw-semibold" id="mobil-tab" data-bs-toggle="tab" data-bs-target="#mobil-pane" type="button" role="tab">
+                        <i class="bx bx-car me-2"></i>Penyewaan Mobil
+                        <span class="badge {{ $category == 'mobil' ? 'bg-white text-primary' : 'bg-primary text-white' }} ms-2 shadow-sm">{{ $mobilPayments->count() }}</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link {{ $category == 'fasilitas' ? 'active' : '' }} rounded-pill px-4 fw-semibold" id="fasilitas-tab" data-bs-toggle="tab" data-bs-target="#fasilitas-pane" type="button" role="tab">
+                        <i class="bx bx-building-house me-2"></i>Fasilitas Umum
+                        <span class="badge {{ $category == 'fasilitas' ? 'bg-white text-primary' : 'bg-primary text-white' }} ms-2 shadow-sm">{{ $fasilitasPayments->count() }}</span>
                     </button>
                 </li>
             </ul>
@@ -270,6 +282,174 @@
                                                     </a>
                                                 @endif
                                                 
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
+                </div>
+
+                <!-- MOBIL TAB -->
+                <div class="tab-pane fade" id="mobil-pane" role="tabpanel">
+                      @if($mobilPayments->isEmpty())
+                        <div class="text-center py-5">
+                            <div class="mb-3"><i class="bx bx-receipt fs-1 text-muted opacity-25"></i></div>
+                            <h6 class="text-muted fw-bold">Belum ada bukti pembayaran penyewaan mobil</h6>
+                        </div>
+                    @else
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th class="ps-4 py-3 text-secondary text-uppercase small fw-bold">Penyewa</th>
+                                        <th class="py-3 text-secondary text-uppercase small fw-bold">Mobil Sewa</th>
+                                        <th class="py-3 text-secondary text-uppercase small fw-bold">Total Bayar</th>
+                                        <th class="py-3 text-secondary text-uppercase small fw-bold">Metode</th>
+                                        <th class="py-3 text-secondary text-uppercase small fw-bold">Status</th>
+                                        <th class="text-end pe-4 py-3 text-secondary text-uppercase small fw-bold">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($mobilPayments as $payment)
+                                    <tr>
+                                        <td class="ps-4">
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar avatar-sm border rounded-circle p-1 me-3">
+                                                    @if($payment->user && $payment->user->avatar)
+                                                        <img src="{{ asset('storage/' . $payment->user->avatar) }}" alt="Av" class="rounded-circle w-100 h-100 object-fit-cover">
+                                                    @else
+                                                        <span class="avatar-initial rounded-circle bg-primary-subtle text-primary fw-bold">
+                                                            {{ strtoupper(substr($payment->user->name ?? 'U', 0, 1)) }}
+                                                        </span>
+                                                    @endif
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-0 fw-semibold text-dark">{{ $payment->user->name }}</h6>
+                                                    <small class="text-muted">{{ $payment->user->email ?? '-' }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="fw-medium text-dark">{{ $payment->mobil->nama_mobil ?? 'Mobil' }}</div>
+                                            <small class="text-muted">{{ $payment->lama_sewa }} Hari</small>
+                                        </td>
+                                        <td>
+                                            <span class="fw-bold text-dark">Rp {{ number_format($payment->total_harga ?? 0, 0, ',', '.') }}</span>
+                                        </td>
+                                        <td>
+                                            @if($payment->payment_method == 'tunai')
+                                                <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3">Tunai</span>
+                                            @elseif($payment->payment_method == 'transfer')
+                                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3">Transfer</span>
+                                            @else
+                                                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill px-3">{{ ucfirst($payment->payment_method ?? 'tunai') }}</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @include('admin.partials.status-badge', ['status' => $payment->status])
+                                        </td>
+                                        <td class="text-end pe-4">
+                                            <div class="d-flex justify-content-end gap-2">
+                                                @if($payment->payment_proof)
+                                                    <a href="{{ route('admin.aktivitas.bukti-transaksi.download', [$payment->id, 'mobil']) }}" 
+                                                       class="btn btn-sm btn-light border shadow-sm rounded-circle p-2 text-primary hover-primary" 
+                                                       title="Lihat Bukti" target="_blank">
+                                                        <i class="bx bx-image fs-5"></i>
+                                                    </a>
+                                                @else
+                                                    <a href="{{ route('receipt.mobil.view', $payment->id) }}" 
+                                                       class="btn btn-sm btn-light border shadow-sm rounded-circle p-2 text-info hover-primary" 
+                                                       title="Lihat Struk System" target="_blank">
+                                                        <i class="bx bx-receipt fs-5"></i>
+                                                    </a>
+                                                @endif
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
+                </div>
+
+                <!-- FASILITAS TAB -->
+                <div class="tab-pane fade" id="fasilitas-pane" role="tabpanel">
+                      @if($fasilitasPayments->isEmpty())
+                        <div class="text-center py-5">
+                            <div class="mb-3"><i class="bx bx-receipt fs-1 text-muted opacity-25"></i></div>
+                            <h6 class="text-muted fw-bold">Belum ada bukti pembayaran fasilitas umum</h6>
+                        </div>
+                    @else
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th class="ps-4 py-3 text-secondary text-uppercase small fw-bold">Penyewa</th>
+                                        <th class="py-3 text-secondary text-uppercase small fw-bold">Fasilitas</th>
+                                        <th class="py-3 text-secondary text-uppercase small fw-bold">Total Bayar</th>
+                                        <th class="py-3 text-secondary text-uppercase small fw-bold">Metode</th>
+                                        <th class="py-3 text-secondary text-uppercase small fw-bold">Status</th>
+                                        <th class="text-end pe-4 py-3 text-secondary text-uppercase small fw-bold">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($fasilitasPayments as $payment)
+                                    <tr>
+                                        <td class="ps-4">
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar avatar-sm border rounded-circle p-1 me-3">
+                                                    @if($payment->user && $payment->user->avatar)
+                                                        <img src="{{ asset('storage/' . $payment->user->avatar) }}" alt="Av" class="rounded-circle w-100 h-100 object-fit-cover">
+                                                    @else
+                                                        <span class="avatar-initial rounded-circle bg-primary-subtle text-primary fw-bold">
+                                                            {{ strtoupper(substr($payment->user->name ?? 'U', 0, 1)) }}
+                                                        </span>
+                                                    @endif
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-0 fw-semibold text-dark">{{ $payment->user->name }}</h6>
+                                                    <small class="text-muted">{{ $payment->user->email ?? '-' }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="fw-medium text-dark">{{ $payment->fasilitas->nama_fasilitas ?? 'Fasilitas' }}</div>
+                                            <small class="text-muted">{{ $payment->lama_sewa }} Hari</small>
+                                        </td>
+                                        <td>
+                                            <span class="fw-bold text-dark">Rp {{ number_format($payment->total_harga ?? 0, 0, ',', '.') }}</span>
+                                        </td>
+                                        <td>
+                                            @if($payment->payment_method == 'tunai')
+                                                <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3">Tunai</span>
+                                            @elseif($payment->payment_method == 'transfer')
+                                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3">Transfer</span>
+                                            @else
+                                                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill px-3">{{ ucfirst($payment->payment_method ?? 'tunai') }}</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @include('admin.partials.status-badge', ['status' => $payment->status])
+                                        </td>
+                                        <td class="text-end pe-4">
+                                            <div class="d-flex justify-content-end gap-2">
+                                                @if($payment->payment_proof)
+                                                    <a href="{{ route('admin.aktivitas.bukti-transaksi.download', [$payment->id, 'fasilitas']) }}" 
+                                                       class="btn btn-sm btn-light border shadow-sm rounded-circle p-2 text-primary hover-primary" 
+                                                       title="Lihat Bukti" target="_blank">
+                                                        <i class="bx bx-image fs-5"></i>
+                                                    </a>
+                                                @else
+                                                    <a href="{{ route('receipt.fasilitas.view', $payment->id) }}" 
+                                                       class="btn btn-sm btn-light border shadow-sm rounded-circle p-2 text-info hover-primary" 
+                                                       title="Lihat Struk System" target="_blank">
+                                                        <i class="bx bx-receipt fs-5"></i>
+                                                    </a>
+                                                @endif
                                             </div>
                                         </td>
                                     </tr>

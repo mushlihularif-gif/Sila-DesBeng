@@ -11,8 +11,8 @@
     <div class="row">
         <div class="col-xl-8">
             <div class="card mb-4">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Formulir {{ isset($announcement) ? 'Edit' : 'Buat' }}</h5>
+                <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold text-primary"><i class="bx bx-edit-alt me-2"></i>Formulir {{ isset($announcement) ? 'Edit' : 'Buat' }}</h5>
                 </div>
                 <div class="card-body">
                     
@@ -38,90 +38,172 @@
                             <input type="hidden" name="laporan_id" value="{{ $laporan->id }}">
                         @endif
 
-                        <div class="mb-3">
-                            <label class="form-label">Tipe <span class="text-danger">*</span></label>
-                            <select name="type" class="form-select" required>
-                                <option value="Pengumuman" {{ (isset($announcement) && $announcement->type == 'Pengumuman') ? 'selected' : '' }}>Pengumuman Biasa</option>
-                                <option value="Event" {{ (isset($announcement) && $announcement->type == 'Event') ? 'selected' : '' }}>Acara / Event</option>
-                                <option value="Gotong Royong" {{ (isset($announcement) && $announcement->type == 'Gotong Royong') || isset($laporan) ? 'selected' : '' }}>Gotong Royong</option>
-                            </select>
+                        <!-- Upload Gambar di Atas -->
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold text-dark">Gambar / Poster (Opsional)</label>
+                            <div class="text-center w-100">
+                                <div class="position-relative d-inline-block rounded-3 border border-2 border-primary border-dashed bg-light" 
+                                     style="width: 100%; border-style: dashed !important; cursor: pointer; overflow: hidden; transition: all 0.3s ease;" 
+                                     onclick="document.getElementById('imageInput').click()"
+                                     onmouseover="this.style.borderColor='#696cff'; this.style.backgroundColor='#e7e7ff';"
+                                     onmouseout="this.style.borderColor='#696cff'; this.style.backgroundColor='#f8f9fa';">
+                                    
+                                    <img id="imagePreview" 
+                                        src="{{ isset($announcement) && $announcement->image_path ? Storage::url($announcement->image_path) : '' }}" 
+                                        alt="Preview Gambar" 
+                                        class="img-fluid w-100" 
+                                        style="object-fit: cover; max-height: 350px; {{ (isset($announcement) && $announcement->image_path) ? '' : 'display: none;' }}">
+                                    
+                                    <div id="uploadPlaceholder" class="p-5" style="{{ (isset($announcement) && $announcement->image_path) ? 'display: none;' : '' }}">
+                                        <div class="avatar avatar-xl bg-primary-subtle text-primary rounded-circle mb-3 mx-auto d-flex align-items-center justify-content-center">
+                                            <i class="bx bx-cloud-upload" style="font-size: 2.5rem;"></i>
+                                        </div>
+                                        <h6 class="fw-bold mb-1">Klik untuk memilih gambar poster</h6>
+                                        <small class="text-muted">Format: JPG, PNG, GIF. Ukuran maksimal 2MB.</small>
+                                    </div>
+
+                                    <!-- Hover Overlay -->
+                                    <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-dark bg-opacity-50 opacity-0 transition-all" 
+                                         style="opacity: 0; transition: 0.3s;" 
+                                         onmouseover="this.style.opacity=1" 
+                                         onmouseout="this.style.opacity=0">
+                                        <span class="text-white fw-bold fs-5"><i class="bx bx-edit me-2"></i>Ubah Gambar</span>
+                                    </div>
+                                </div>
+                                <input type="file" name="image" id="imageInput" class="d-none" accept="image/*" onchange="previewImage(this)">
+                            </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Target Wilayah (Siapa yang bisa melihat?) <span class="text-danger">*</span></label>
-                            <select name="target_region_id" class="form-select" required>
-                                <option value="">-- Pilih Target Wilayah --</option>
-                                @foreach($regions as $region)
-                                    <option value="{{ $region->id }}" {{ (isset($announcement) && $announcement->region_id == $region->id) || (!isset($announcement) && auth()->user()->region_id == $region->id) ? 'selected' : '' }}>
-                                        {{ $region->name }} ({{ ucfirst($region->type) }})
-                                        @if(auth()->user()->region_id == $region->id) - Wilayah Anda @endif
-                                    </option>
-                                @endforeach
-                            </select>
-                            <div class="form-text">Pengumuman akan tampil di wilayah yang dipilih beserta seluruh wilayah di bawahnya.</div>
+                        <hr class="my-4">
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold"><i class="bx bx-category me-1"></i>Tipe Pengumuman <span class="text-danger">*</span></label>
+                                <select name="type" class="form-select border-primary" required>
+                                    <option value="Pengumuman" {{ (isset($announcement) && $announcement->type == 'Pengumuman') ? 'selected' : '' }}>Pengumuman Biasa</option>
+                                    <option value="Event" {{ (isset($announcement) && $announcement->type == 'Event') ? 'selected' : '' }}>Acara / Event</option>
+                                    <option value="Gotong Royong" {{ (isset($announcement) && $announcement->type == 'Gotong Royong') || isset($laporan) ? 'selected' : '' }}>Gotong Royong</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold"><i class="bx bx-map-alt me-1"></i>Target Wilayah <span class="text-danger">*</span></label>
+                                <select name="target_region_id" class="form-select border-primary" required>
+                                    <option value="">-- Pilih Target Wilayah --</option>
+                                    @foreach($regions as $region)
+                                        <option value="{{ $region->id }}" {{ (isset($announcement) && $announcement->region_id == $region->id) || (!isset($announcement) && auth()->user()->region_id == $region->id) ? 'selected' : '' }}>
+                                            {{ $region->name }} ({{ ucfirst($region->type) }})
+                                            @if(auth()->user()->region_id == $region->id) - Wilayah Anda @endif
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <div class="form-text small">Tampil di wilayah ini dan jajarannya.</div>
+                            </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Judul <span class="text-danger">*</span></label>
-                            <input type="text" name="title" class="form-control" required 
+
+
+                        <div class="mb-3 mt-3">
+                            <label class="form-label fw-semibold">Judul Pengumuman <span class="text-danger">*</span></label>
+                            <input type="text" name="title" class="form-control form-control-lg border-primary" required 
                                 value="{{ old('title', $announcement->title ?? (isset($laporan) ? 'Gotong Royong: Menindaklanjuti ' . $laporan->nama : '')) }}"
                                 placeholder="Contoh: Gotong Royong Pembersihan Selokan">
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Deskripsi Lengkap <span class="text-danger">*</span></label>
-                            <textarea name="description" class="form-control" rows="5" required placeholder="Jelaskan detail pengumuman atau acara...">{!! old('description', $announcement->description ?? (isset($laporan) ? "Mari bersama-sama kita melakukan gotong royong untuk mengatasi masalah:\n\n" . $laporan->deskripsi : '')) !!}</textarea>
+                            <label class="form-label fw-semibold">Deskripsi Lengkap <span class="text-danger">*</span></label>
+                            <textarea name="description" class="form-control border-primary" rows="6" required placeholder="Tuliskan detail pengumuman, agenda acara, atau deskripsi kegiatan di sini...">{!! old('description', $announcement->description ?? (isset($laporan) ? "Mari bersama-sama kita melakukan gotong royong untuk mengatasi masalah:\n\n" . $laporan->deskripsi : '')) !!}</textarea>
                         </div>
 
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Tanggal & Waktu Acara (Opsional)</label>
-                                <input type="datetime-local" name="event_date" class="form-control" 
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Tanggal & Waktu Acara (Opsional)</label>
+                                <input type="datetime-local" name="event_date" class="form-control border-primary" 
                                     value="{{ old('event_date', isset($announcement->event_date) ? $announcement->event_date->format('Y-m-d\TH:i') : '') }}">
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Lokasi (Opsional)</label>
-                                <input type="text" name="location" class="form-control" 
-                                    value="{{ old('location', $announcement->location ?? (isset($laporan) ? $laporan->lokasi : '')) }}">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Lokasi Acara (Opsional)</label>
+                                <div class="input-group input-group-merge">
+                                    <span class="input-group-text border-primary"><i class="bx bx-map"></i></span>
+                                    <input type="text" name="location" class="form-control border-primary" 
+                                        value="{{ old('location', $announcement->location ?? (isset($laporan) ? $laporan->lokasi : '')) }}" placeholder="Contoh: Balai Desa">
+                                </div>
                             </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Gambar/Poster (Opsional)</label>
-                            @if(isset($announcement) && $announcement->image_path)
-                                <div class="mb-2">
-                                    <img src="{{ Storage::url($announcement->image_path) }}" alt="Poster" class="img-thumbnail" style="max-height: 200px;">
-                                </div>
-                            @endif
-                            <input type="file" name="image" class="form-control" accept="image/*">
-                            <div class="form-text">Format: JPG, PNG, GIF. Maksimal 2MB.</div>
+                        <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                            <div class="form-check form-switch mb-0">
+                                <input class="form-check-input" type="checkbox" name="is_active" id="isActive" {{ old('is_active', $announcement->is_active ?? true) ? 'checked' : '' }} style="width: 2.5em; height: 1.25em; cursor: pointer;">
+                                <label class="form-check-label fw-bold text-dark ms-2 mt-1" for="isActive" style="cursor: pointer;">Publikasikan Langsung</label>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <a href="{{ route('admin.announcements.index') }}" class="btn btn-outline-secondary px-4 rounded-pill">Batal</a>
+                                <button type="submit" class="btn btn-primary px-4 rounded-pill shadow-sm"><i class="bx bx-save me-1"></i> Simpan Pengumuman</button>
+                            </div>
                         </div>
-
-                        <div class="mb-4 form-check form-switch">
-                            <input class="form-check-input" type="checkbox" name="is_active" id="isActive" {{ old('is_active', $announcement->is_active ?? true) ? 'checked' : '' }}>
-                            <label class="form-check-label" for="isActive">Publikasikan Langsung</label>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary">Simpan</button>
-                        <a href="{{ route('admin.announcements.index') }}" class="btn btn-outline-secondary">Batal</a>
                     </form>
                 </div>
             </div>
         </div>
         
+        <script>
+            function previewImage(input) {
+                if (input.files && input.files[0]) {
+                    var reader = new FileReader();
+                    
+                    reader.onload = function(e) {
+                        document.getElementById('imagePreview').src = e.target.result;
+                        document.getElementById('imagePreview').style.display = 'block';
+                        document.getElementById('uploadPlaceholder').style.display = 'none';
+                    }
+                    
+                    reader.readAsDataURL(input.files[0]);
+                }
+            }
+        </script>
+        
         <div class="col-xl-4">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">Informasi</h5>
+            <div class="card bg-warning-subtle border-0 mb-4 shadow-sm rounded-4">
+                <div class="card-header bg-transparent border-bottom-0 pb-0 pt-4 px-4">
+                    <h5 class="mb-0 fw-bold text-warning-emphasis"><i class="bx bx-info-circle me-2"></i>Panduan Modul</h5>
                 </div>
-                <div class="card-body">
-                    <p>Modul ini digunakan untuk membuat Pengumuman, Event, atau Ajakan Gotong Royong.</p>
-                    <ul>
-                        <li><strong>Pengumuman:</strong> Informasi umum untuk warga.</li>
-                        <li><strong>Event:</strong> Acara desa/wilayah.</li>
-                        <li><strong>Gotong Royong:</strong> Ajakan aksi bersama yang biasanya menindaklanjuti laporan masalah lingkungan dari warga.</li>
-                    </ul>
-                    <p class="text-muted"><small>Pengumuman yang dibuat hanya akan ditampilkan kepada warga di lingkup wilayah Anda.</small></p>
+                <div class="card-body p-4 text-warning-emphasis">
+                    <p class="mb-4">Modul ini memfasilitasi Anda untuk menyebarkan informasi penting kepada warga secara efektif.</p>
+                    
+                    <div class="d-flex align-items-start mb-3">
+                        <div class="avatar avatar-sm bg-warning text-white rounded-circle me-3 flex-shrink-0 d-flex align-items-center justify-content-center shadow-sm" style="width: 35px; height: 35px;">
+                            <i class="bx bx-news"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-1 fw-bold text-warning-emphasis">Pengumuman Biasa</h6>
+                            <p class="mb-0 small opacity-75">Informasi umum atau imbauan satu arah untuk seluruh warga.</p>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-start mb-3">
+                        <div class="avatar avatar-sm bg-warning text-white rounded-circle me-3 flex-shrink-0 d-flex align-items-center justify-content-center shadow-sm" style="width: 35px; height: 35px;">
+                            <i class="bx bx-calendar-event"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-1 fw-bold text-warning-emphasis">Acara / Event</h6>
+                            <p class="mb-0 small opacity-75">Kegiatan desa atau wilayah yang memiliki tanggal dan lokasi pelaksanaan.</p>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-start mb-4">
+                        <div class="avatar avatar-sm bg-warning text-white rounded-circle me-3 flex-shrink-0 d-flex align-items-center justify-content-center shadow-sm" style="width: 35px; height: 35px;">
+                            <i class="bx bx-group"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-1 fw-bold text-warning-emphasis">Gotong Royong</h6>
+                            <p class="mb-0 small opacity-75">Ajakan aksi kebersihan bersama (bisa digunakan untuk menindaklanjuti laporan masalah dari warga).</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white bg-opacity-50 text-warning-emphasis d-flex align-items-center p-3 mb-0 shadow-sm rounded-3">
+                        <i class="bx bx-broadcast fs-3 me-3 text-warning"></i>
+                        <small class="fw-semibold lh-sm">Pengumuman hanya akan masuk ke notifikasi warga di lingkup wilayah target yang Anda pilih.</small>
+                    </div>
                 </div>
             </div>
         </div>

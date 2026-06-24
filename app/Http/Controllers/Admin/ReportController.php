@@ -26,26 +26,40 @@ class ReportController extends Controller
         // Query Gas
         $gasQuery = GasOrder::withTrashed()->with('user')->orderByDesc('created_at');
 
+        // Query Mobil
+        $mobilQuery = \App\Models\MobilBooking::withTrashed()->with(['user', 'mobil'])->orderByDesc('created_at');
+
+        // Query Fasilitas Umum
+        $fasilitasQuery = \App\Models\FasilitasUmumBooking::withTrashed()->with(['user', 'fasilitas'])->orderByDesc('created_at');
+
         // Terapkan Filter
         if ($status && $status !== 'all') {
             $rentalQuery->where('status', $status);
             $gasQuery->where('status', $status);
+            $mobilQuery->where('status', $status);
+            $fasilitasQuery->where('status', $status);
         }
 
         if ($startDate) {
             $rentalQuery->whereDate('created_at', '>=', $startDate);
             $gasQuery->whereDate('created_at', '>=', $startDate);
+            $mobilQuery->whereDate('created_at', '>=', $startDate);
+            $fasilitasQuery->whereDate('created_at', '>=', $startDate);
         }
 
         if ($endDate) {
             $rentalQuery->whereDate('created_at', '<=', $endDate);
             $gasQuery->whereDate('created_at', '<=', $endDate);
+            $mobilQuery->whereDate('created_at', '<=', $endDate);
+            $fasilitasQuery->whereDate('created_at', '<=', $endDate);
         }
 
         $rentalRequests = $rentalQuery->get();
         $gasOrders = $gasQuery->get();
+        $mobilBookings = $mobilQuery->get();
+        $fasilitasBookings = $fasilitasQuery->get();
 
-        return view('admin.laporan.transactions', compact('rentalRequests', 'gasOrders', 'status', 'startDate', 'endDate'));
+        return view('admin.laporan.transactions', compact('rentalRequests', 'gasOrders', 'mobilBookings', 'fasilitasBookings', 'status', 'startDate', 'endDate'));
     }
 
     public function income(Request $request)
@@ -68,9 +82,16 @@ class ReportController extends Controller
             ->pluck('year')
             ->map(fn($y) => (int)$y)
             ->toArray();
+            
+        $mobilYears = \App\Models\MobilBooking::withTrashed()
+            ->selectRaw('YEAR(created_at) as year')
+            ->distinct()
+            ->pluck('year')
+            ->map(fn($y) => (int)$y)
+            ->toArray();
         
         // Gabungkan dengan tahun sekarang secara eksplisit (Hard Merge)
-        $allYears = array_unique(array_merge($rentalYears, $gasYears, [(int)now()->year]));
+        $allYears = array_unique(array_merge($rentalYears, $gasYears, $mobilYears, [(int)now()->year]));
         $availableYears = array_values($allYears);
         rsort($availableYears);
 
@@ -83,6 +104,10 @@ class ReportController extends Controller
             ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
             ->selectRaw('SUM(price * quantity) as total')
             ->value('total') ?? 0;
+            
+        $totalMobil = \App\Models\MobilBooking::withTrashed()->whereYear('created_at', $year)
+            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
+            ->sum('total_amount');
         
         // Hitung total dari laporan manual (Filter Tahunan)
         $manualPenyewaan = ManualReport::whereYear('transaction_date', $year)
@@ -100,7 +125,7 @@ class ReportController extends Controller
         // Total keseluruhan
         $totalPenyewaan += $manualPenyewaan;
         $totalGas += $manualGas;
-        $totalPendapatan = $totalPenyewaan + $totalGas + $manualLainnya;
+        $totalPendapatan = $totalPenyewaan + $totalGas + $totalMobil + $manualLainnya;
 
         // Hitung pendapatan per bulan
         $months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
@@ -125,6 +150,17 @@ class ReportController extends Controller
             ->pluck('total', 'month');
 
         foreach ($gasMonthly as $month => $amount) {
+            $monthlyIncome[self::getMonthName($month)] += $amount;
+        }
+
+        // Pendapatan dari sistem (MobilBooking)
+        $mobilMonthly = \App\Models\MobilBooking::withTrashed()->selectRaw('SUM(total_amount) as total, MONTH(created_at) as month')
+            ->whereYear('created_at', $year)
+            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
+            ->groupBy('month')
+            ->pluck('total', 'month');
+
+        foreach ($mobilMonthly as $month => $amount) {
             $monthlyIncome[self::getMonthName($month)] += $amount;
         }
         
@@ -163,21 +199,44 @@ class ReportController extends Controller
             ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
             ->count();
             
-        // Ambil Bulan Terpilih (untuk Tampilan Detail & Perhitungan Pertumbuhan)
-        $selectedMonth = $request->input('month', date('m'));
-        $selectedYear = $year; // Use the selected year context
+        $mobilCount = \App\Models\MobilBooking::withTrashed()->whereYear('created_at', $year)
+            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
+            ->count();
+            
+        // Ambil Data Tahun Saat Ini (Yearly Total)
+        $currentYearData = [
+            'rental' => $totalPenyewaan,
+            'gas' => $totalGas,
+            'mobil' => $totalMobil,
+            'total' => $totalPendapatan
+        ];
 
-        // Ambil Data Bulan Saat Ini
-        $currentMonthData = $this->getTotalPendapatanData($selectedMonth, $selectedYear);
-
-        // Ambil Data Bulan Sebelumnya
-        $prevMonth = $selectedMonth - 1;
-        $prevYear = $selectedYear;
-        if ($prevMonth == 0) {
-            $prevMonth = 12;
-            $prevYear--;
-        }
-        $prevMonthData = $this->getTotalPendapatanData($prevMonth, $prevYear);
+        // Ambil Data Tahun Sebelumnya
+        $prevYear = $year - 1;
+        
+        $prevTotalPenyewaan = RentalBooking::withTrashed()->whereYear('created_at', $prevYear)
+            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
+            ->sum('total_amount');
+            
+        $prevTotalGas = GasOrder::withTrashed()->whereYear('created_at', $prevYear)
+            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
+            ->sum(\DB::raw('price * quantity'));
+            
+        $prevTotalMobil = \App\Models\MobilBooking::withTrashed()->whereYear('created_at', $prevYear)
+            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
+            ->sum('total_amount');
+            
+        $prevManualRevenue = ManualReport::whereYear('transaction_date', $prevYear)
+            ->sum(\DB::raw('amount * quantity'));
+            
+        $prevTotalPendapatan = $prevTotalPenyewaan + $prevTotalGas + $prevTotalMobil + $prevManualRevenue;
+        
+        $prevYearData = [
+            'rental' => $prevTotalPenyewaan,
+            'gas' => $prevTotalGas,
+            'mobil' => $prevTotalMobil,
+            'total' => $prevTotalPendapatan
+        ];
 
         // Hitung Fungsi Pertumbuhan
         $calculateGrowth = function($current, $previous) {
@@ -187,10 +246,15 @@ class ReportController extends Controller
             return round((($current - $previous) / $previous) * 100, 1);
         };
 
+        // Ambil Bulan Terpilih (untuk Tampilan Detail Chart)
+        $selectedMonth = $request->input('month', date('m'));
+        $currentMonthData = $this->getTotalPendapatanData($selectedMonth, $year);
+
         $growth = [
-            'total' => $calculateGrowth($currentMonthData['total']['revenue'], $prevMonthData['total']['revenue']),
-            'rental' => $calculateGrowth($currentMonthData['rental']['revenue'], $prevMonthData['rental']['revenue']),
-            'gas' => $calculateGrowth($currentMonthData['gas']['revenue'], $prevMonthData['gas']['revenue']),
+            'total' => $calculateGrowth($currentYearData['total'], $prevYearData['total']),
+            'rental' => $calculateGrowth($currentYearData['rental'], $prevYearData['rental']),
+            'gas' => $calculateGrowth($currentYearData['gas'], $prevYearData['gas']),
+            'mobil' => $calculateGrowth($currentYearData['mobil'], $prevYearData['mobil']),
         ];
 
         // Teruskan Data Total Pendapatan (untuk Tampilan Detail) - sama seperti currentMonthData
@@ -202,6 +266,7 @@ class ReportController extends Controller
         return view('admin.laporan.income', compact(
             'totalPenyewaan',
             'totalGas',
+            'totalMobil',
             'totalPendapatan',
             'monthlyIncome',
             'dataPoints',
@@ -211,6 +276,7 @@ class ReportController extends Controller
             'manualLainnya',
             'rentalCount',
             'gasCount',
+            'mobilCount',
             'year',
             'totalPendapatanData',
             'unitPopulerData',
@@ -227,6 +293,7 @@ class ReportController extends Controller
         $months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
         $rentalData = [];
         $gasData = [];
+        $mobilData = [];
         
         for ($month = 1; $month <= 12; $month++) {
             // Hitung pesanan penyewaan
@@ -240,15 +307,23 @@ class ReportController extends Controller
                 ->whereMonth('created_at', $month)
                 ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
                 ->count();
+                
+            // Hitung pesanan mobil
+            $mobilCount = \App\Models\MobilBooking::withTrashed()->whereYear('created_at', $year)
+                ->whereMonth('created_at', $month)
+                ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
+                ->count();
             
             $rentalData[] = $rentalCount;
             $gasData[] = $gasCount;
+            $mobilData[] = $mobilCount;
         }
         
         return [
             'categories' => $months,
             'rental' => $rentalData,
-            'gas' => $gasData
+            'gas' => $gasData,
+            'mobil' => $mobilData
         ];
     }
 
@@ -278,6 +353,17 @@ class ReportController extends Controller
             ->whereMonth('created_at', $month)
             ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
             ->count();
+            
+        // Pendapatan Sewa Mobil
+        $mobilRevenue = \App\Models\MobilBooking::withTrashed()->whereYear('created_at', $year)
+            ->whereMonth('created_at', $month)
+            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
+            ->sum('total_amount');
+        
+        $mobilTransactions = \App\Models\MobilBooking::withTrashed()->whereYear('created_at', $year)
+            ->whereMonth('created_at', $month)
+            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
+            ->count();
 
         // Pendapatan Laporan Manual
         $manualRevenue = ManualReport::whereYear('transaction_date', $year)
@@ -288,8 +374,8 @@ class ReportController extends Controller
             ->whereMonth('transaction_date', $month)
             ->count();
         
-        $totalRevenue = $rentalRevenue + $gasRevenue + $manualRevenue;
-        $totalTransactions = $rentalTransactions + $gasTransactions + $manualTransactions;
+        $totalRevenue = $rentalRevenue + $gasRevenue + $mobilRevenue + $manualRevenue;
+        $totalTransactions = $rentalTransactions + $gasTransactions + $mobilTransactions + $manualTransactions;
         
         return [
             'rental' => [
@@ -301,6 +387,11 @@ class ReportController extends Controller
                 'revenue' => $gasRevenue,
                 'transactions' => $gasTransactions,
                 'percentage' => $totalRevenue > 0 ? round(($gasRevenue / $totalRevenue) * 100, 1) : 0
+            ],
+            'mobil' => [
+                'revenue' => $mobilRevenue,
+                'transactions' => $mobilTransactions,
+                'percentage' => $totalRevenue > 0 ? round(($mobilRevenue / $totalRevenue) * 100, 1) : 0
             ],
             'total' => [
                 'revenue' => $totalRevenue,

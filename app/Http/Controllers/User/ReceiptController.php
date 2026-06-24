@@ -128,4 +128,103 @@ class ReceiptController extends Controller
             'Bukti_Transaksi_Gas_' . $order->order_number . '.png'
         );
     }
+    /**
+     * Lihat bukti transaksi mobil
+     */
+    public function viewMobilReceipt($id)
+    {
+        $booking = \App\Models\MobilBooking::withTrashed()->findOrFail($id);
+        
+        if ((int)$booking->user_id !== (int)auth()->id() && auth()->user()->role !== 'admin') {
+            abort(403, 'Unauthorized access');
+        }
+        
+        $path = $this->receiptService->generateMobilReceipt($booking);
+        
+        if ($booking->receipt_path !== $path) {
+            $booking->receipt_path = $path;
+            $booking->save();
+        }
+        
+        $fullPath = Storage::disk('public')->path($path);
+        
+        return Response::file($fullPath, [
+            'Content-Type' => 'image/png',
+            'Content-Disposition' => 'inline; filename="Bukti_Transaksi_' . $booking->order_number . '.png"'
+        ]);
+    }
+    
+    /**
+     * Unduh bukti transaksi mobil
+     */
+    public function downloadMobilReceipt($id)
+    {
+        $booking = \App\Models\MobilBooking::withTrashed()->findOrFail($id);
+        
+        if ((int)$booking->user_id !== (int)auth()->id() && auth()->user()->role !== 'admin') {
+            abort(403, 'Unauthorized access');
+        }
+        
+        $path = $this->receiptService->generateMobilReceipt($booking);
+        
+        if ($booking->receipt_path !== $path) {
+            $booking->receipt_path = $path;
+            $booking->save();
+        }
+        
+        return Storage::disk('public')->download(
+            $path,
+            'Bukti_Transaksi_Mobil_' . $booking->order_number . '.png'
+        );
+    }
+
+    /**
+     * Lihat bukti transaksi fasilitas
+     */
+    public function viewFasilitasReceipt($id)
+    {
+        $booking = \App\Models\FasilitasUmumBooking::withTrashed()->findOrFail($id);
+        
+        if ((int)$booking->user_id !== (int)auth()->id() && auth()->user()->role !== 'admin') {
+            abort(403, 'Unauthorized access');
+        }
+        
+        $path = $this->receiptService->generateFasilitasReceipt($booking);
+        
+        if ($booking->receipt_path !== $path) {
+            $booking->receipt_path = $path;
+            $booking->save();
+        }
+        
+        $fullPath = Storage::disk('public')->path($path);
+        
+        return Response::file($fullPath, [
+            'Content-Type' => 'image/png',
+            'Content-Disposition' => 'inline; filename="Bukti_Transaksi_' . $booking->order_number . '.png"'
+        ]);
+    }
+    
+    /**
+     * Unduh bukti transaksi fasilitas
+     */
+    public function downloadFasilitasReceipt($id)
+    {
+        $booking = \App\Models\FasilitasUmumBooking::withTrashed()->findOrFail($id);
+        
+        if ((int)$booking->user_id !== (int)auth()->id() && auth()->user()->role !== 'admin') {
+            abort(403, 'Unauthorized access');
+        }
+        
+        $path = $this->receiptService->generateFasilitasReceipt($booking);
+        
+        if ($booking->receipt_path !== $path) {
+            $booking->receipt_path = $path;
+            $booking->save();
+        }
+        
+        return Storage::disk('public')->download(
+            $path,
+            'Bukti_Transaksi_Fasilitas_' . $booking->order_number . '.png'
+        );
+    }
 }

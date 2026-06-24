@@ -62,13 +62,13 @@ class CheckRole
             if ($request->expectsJson() || $request->ajax()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Anda harus login terlebih dahulu'
+                    'message' => 'Sesi Anda telah berakhir. Silakan login kembali.'
                 ], 401);
             }
             
             // Handle web request - redirect to beranda with login modal trigger
             Log::info('CheckRole: User not logged in, redirecting to beranda from ' . $request->path());
-            return redirect()->route('beranda')->with('open_login_modal', true)->with('error', 'Anda harus login terlebih dahulu.');
+            return redirect()->route('beranda')->with('open_login_modal', true)->with('error', 'Sesi Anda telah berakhir karena tidak ada aktivitas, atau Anda belum login. Silakan login kembali.');
         }
 
         // User is authenticated
@@ -94,6 +94,11 @@ class CheckRole
                 if (in_array($user->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'admin', 'lurah'])) {
                     return $next($request);
                 }
+            } else if ($role === 'user') {
+                // 'user' pseudo-role also matches admin_rw and admin_rt since they use frontend
+                if (in_array($user->role, ['user', 'admin_rw', 'admin_rt'])) {
+                    return $next($request);
+                }
             } else if ($user->role === $role) {
                 return $next($request);
             }
@@ -108,7 +113,8 @@ class CheckRole
         ]);
 
         // Special case: If admin tries to access user-only pages, redirect to admin dashboard
-        $isAdminUser = in_array($user->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'admin', 'lurah']);
+        // Pengecualian: admin_rw dan admin_rt diizinkan mengakses halaman frontend user
+        $isAdminUser = in_array($user->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin', 'lurah']);
         if ($isAdminUser && (in_array('user', $requiredRoles) || $allowGuest)) {
             // Handle AJAX request
             if ($request->expectsJson() || $request->ajax()) {

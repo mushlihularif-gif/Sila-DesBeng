@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 
+// ... (routing lainnya)
 
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
@@ -188,6 +189,20 @@ Route::get('/receipt/gas/{id}/download', [App\Http\Controllers\User\ReceiptContr
     ->name('receipt.gas.download')
     ->middleware('role:user,admin');
 
+Route::get('/receipt/mobil/{id}/view', [App\Http\Controllers\User\ReceiptController::class, 'viewMobilReceipt'])
+    ->name('receipt.mobil.view')
+    ->middleware('role:user,admin');
+Route::get('/receipt/mobil/{id}/download', [App\Http\Controllers\User\ReceiptController::class, 'downloadMobilReceipt'])
+    ->name('receipt.mobil.download')
+    ->middleware('role:user,admin');
+
+Route::get('/receipt/fasilitas/{id}/view', [App\Http\Controllers\User\ReceiptController::class, 'viewFasilitasReceipt'])
+    ->name('receipt.fasilitas.view')
+    ->middleware('role:user,admin');
+Route::get('/receipt/fasilitas/{id}/download', [App\Http\Controllers\User\ReceiptController::class, 'downloadFasilitasReceipt'])
+    ->name('receipt.fasilitas.download')
+    ->middleware('role:user,admin');
+
 
 
 Route::post('/auth/register', [AuthController::class, 'register'])->name('auth.register')->middleware('throttle:100,1');
@@ -267,6 +282,8 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
     // Pengaturan Wilayah & Layanan (Kas Independen)
     Route::get('/region-settings', [\App\Http\Controllers\Admin\RegionSettingController::class, 'index'])->name('admin.region-settings.index');
     Route::post('/region-settings', [\App\Http\Controllers\Admin\RegionSettingController::class, 'update'])->name('admin.region-settings.update');
+    Route::get('/pengaturan-pembayaran-wilayah', [\App\Http\Controllers\Admin\RegionSettingController::class, 'paymentIndex'])->name('admin.region-settings.payment');
+    Route::put('/pengaturan-pembayaran-wilayah', [\App\Http\Controllers\Admin\RegionSettingController::class, 'paymentUpdate'])->name('admin.region-settings.payment.update');
     
     // Manajemen Banner / Iklan
     Route::get('/banners', [\App\Http\Controllers\Admin\BannerController::class, 'index'])->name('admin.banners.index');
@@ -297,6 +314,7 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
     Route::get('/manajemen-pengguna', [UserManagementController::class, 'index'])->name('admin.manajemen-pengguna.index');
     Route::get('/manajemen-pengguna/{user}', [UserManagementController::class, 'show'])->name('admin.manajemen-pengguna.show');
     Route::put('/manajemen-pengguna/{user}/toggle-status', [UserManagementController::class, 'toggleStatus'])->name('admin.manajemen-pengguna.toggle-status');
+    Route::put('/manajemen-pengguna/{user}/kick', [UserManagementController::class, 'kick'])->name('admin.manajemen-pengguna.kick');
 
     // Route untuk Notifikasi
     Route::get('/notifications', [NotificationController::class, 'index'])->name('admin.notifications.index');
@@ -311,6 +329,8 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
     Route::get('/pengaturan-sistem', [SystemSettingController::class, 'index'])->name('admin.system-settings.index');
     Route::put('/pengaturan-sistem', [SystemSettingController::class, 'update'])->name('admin.system-settings.update');
     Route::delete('/pengaturan-sistem/reset', [SystemSettingController::class, 'reset'])->name('admin.system-settings.reset');
+    Route::get('/pengaturan-pembayaran-pusat', [SystemSettingController::class, 'paymentIndex'])->name('admin.system-settings.payment');
+    Route::put('/pengaturan-pembayaran-pusat', [SystemSettingController::class, 'paymentUpdate'])->name('admin.system-settings.payment.update');
     
     // Route Unit
     Route::prefix('unit')->group(function () {
@@ -399,21 +419,31 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
         Route::delete('/manual-transaction/{id}', [\App\Http\Controllers\Admin\ReportController::class, 'destroyManualTransaction'])->name('admin.laporan.manual.destroy');
     });
     
-    // Route iSewa
-    Route::prefix('isewa')->group(function () {
-        Route::get('/profile', [\App\Http\Controllers\Admin\SettingController::class, 'showIsewaProfile'])->name('admin.isewa.profile');
-        Route::get('/developer/{name}', [\App\Http\Controllers\Admin\SettingController::class, 'showDeveloperProfile'])->name('admin.isewa.developer.profile');
+    // Route SiladesBeng
+    Route::prefix('siladesbeng')->group(function () {
+        Route::get('/profile', [\App\Http\Controllers\Admin\SettingController::class, 'showIsewaProfile'])->name('admin.siladesbeng.profile');
+        Route::get('/developer/{name}', [\App\Http\Controllers\Admin\SettingController::class, 'showDeveloperProfile'])->name('admin.siladesbeng.developer.profile');
         
-        Route::get('/profil-pemerintah-desa', [\App\Http\Controllers\Admin\BumdesController::class, 'index'])->name('admin.isewa.profile-bumdes');
+        Route::get('/profil-pemerintah-desa', [\App\Http\Controllers\Admin\BumdesController::class, 'index'])->name('admin.siladesbeng.profile-bumdes');
         Route::prefix('pemerintah-desa')->group(function () {
-            Route::get('/', [\App\Http\Controllers\Admin\BumdesController::class, 'index'])->name('admin.isewa.bumdes.index');
-            Route::get('/create', [\App\Http\Controllers\Admin\BumdesController::class, 'create'])->name('admin.isewa.bumdes.create');
-            Route::post('/', [\App\Http\Controllers\Admin\BumdesController::class, 'store'])->name('admin.isewa.bumdes.store');
-            Route::get('/{id}/edit', [\App\Http\Controllers\Admin\BumdesController::class, 'edit'])->name('admin.isewa.bumdes.edit');
-            Route::put('/{id}', [\App\Http\Controllers\Admin\BumdesController::class, 'update'])->name('admin.isewa.bumdes.update');
-            Route::delete('/{id}', [\App\Http\Controllers\Admin\BumdesController::class, 'destroy'])->name('admin.isewa.bumdes.destroy');
+            Route::get('/', [\App\Http\Controllers\Admin\BumdesController::class, 'index'])->name('admin.siladesbeng.bumdes.index');
+            Route::get('/create', [\App\Http\Controllers\Admin\BumdesController::class, 'create'])->name('admin.siladesbeng.bumdes.create');
+            Route::post('/', [\App\Http\Controllers\Admin\BumdesController::class, 'store'])->name('admin.siladesbeng.bumdes.store');
+            Route::get('/{id}/edit', [\App\Http\Controllers\Admin\BumdesController::class, 'edit'])->name('admin.siladesbeng.bumdes.edit');
+            Route::put('/{id}', [\App\Http\Controllers\Admin\BumdesController::class, 'update'])->name('admin.siladesbeng.bumdes.update');
+            Route::delete('/{id}', [\App\Http\Controllers\Admin\BumdesController::class, 'destroy'])->name('admin.siladesbeng.bumdes.destroy');
         });
-        Route::post('/bumdes/update-whatsapp', [\App\Http\Controllers\Admin\BumdesController::class, 'updateWhatsapp'])->name('admin.isewa.bumdes.update.whatsapp');
+        Route::post('/bumdes/update-whatsapp', [\App\Http\Controllers\Admin\BumdesController::class, 'updateWhatsapp'])->name('admin.siladesbeng.bumdes.update.whatsapp');
+    });
+
+    // Route Kelola Wilayah (RT/RW)
+    Route::prefix('kelola-wilayah')->group(function () {
+        Route::get('/{region_id?}', [\App\Http\Controllers\Admin\RegionManagementController::class, 'index'])->name('admin.kelola-wilayah.index');
+        Route::post('/', [\App\Http\Controllers\Admin\RegionManagementController::class, 'store'])->name('admin.kelola-wilayah.store');
+        Route::put('/{id}', [\App\Http\Controllers\Admin\RegionManagementController::class, 'update'])->name('admin.kelola-wilayah.update');
+        Route::delete('/{id}', [\App\Http\Controllers\Admin\RegionManagementController::class, 'destroy'])->name('admin.kelola-wilayah.destroy');
+        Route::post('/{id}/generate-admin', [\App\Http\Controllers\Admin\RegionManagementController::class, 'generateAdmin'])->name('admin.kelola-wilayah.generate-admin');
+        Route::delete('/admin/{user_id}', [\App\Http\Controllers\Admin\RegionManagementController::class, 'destroyAdmin'])->name('admin.kelola-wilayah.destroy-admin');
     });
 });
 
@@ -459,6 +489,14 @@ Route::middleware(['auth', 'role:user'])->group(function () {
         Route::post('/mark-all-read', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('mark-all-read');
         Route::delete('/{id}', [\App\Http\Controllers\NotificationController::class, 'destroy'])->name('destroy');
         Route::delete('/clear/read', [\App\Http\Controllers\NotificationController::class, 'clearRead'])->name('clear-read');
+    });
+
+    // Fitur Khusus Admin RT/RW di Frontend
+    Route::prefix('wilayah')->name('wilayah.')->middleware('role:admin_rt,admin_rw')->group(function () {
+        Route::get('/laporan', [\App\Http\Controllers\User\WilayahAdminController::class, 'indexLaporan'])->name('laporan.index');
+        Route::get('/pengumuman', [\App\Http\Controllers\User\WilayahAdminController::class, 'indexPengumuman'])->name('pengumuman.index');
+        Route::post('/pengumuman', [\App\Http\Controllers\User\WilayahAdminController::class, 'storePengumuman'])->name('pengumuman.store');
+        Route::get('/warga', [\App\Http\Controllers\User\WilayahAdminController::class, 'indexWarga'])->name('warga.index');
     });
 });
 
@@ -561,4 +599,54 @@ Route::get('/dev/check-regions', function () {
     }
     $html .= '</table>';
     return $html;
+});
+
+Route::get('/dev/create-test-rtrw', function () {
+    // Buat Region RW dan RT jika belum ada
+    $desa = \App\Models\Region::where('type', 'desa')->first();
+    if (!$desa) return "Harap buat data desa terlebih dahulu.";
+
+    $rw = \App\Models\Region::firstOrCreate([
+        'name' => 'RW 01',
+        'type' => 'rw',
+        'parent_id' => $desa->id
+    ]);
+
+    $rt = \App\Models\Region::firstOrCreate([
+        'name' => 'RT 01',
+        'type' => 'rt',
+        'parent_id' => $rw->id
+    ]);
+
+    // Buat User Admin RW
+    $adminRw = \App\Models\User::firstOrCreate(
+        ['email' => 'admin.rw@siladesbeng.com'],
+        [
+            'name' => 'Bapak Admin RW 01',
+            'username' => 'admin_rw01',
+            'password' => \Illuminate\Support\Facades\Hash::make('password123'),
+            'role' => 'admin_rw',
+            'region_id' => $rw->id,
+            'status' => 'aktif',
+            'phone' => '081234567891',
+            'address' => 'Jl. RW 01'
+        ]
+    );
+
+    // Buat User Admin RT
+    $adminRt = \App\Models\User::firstOrCreate(
+        ['email' => 'admin.rt@siladesbeng.com'],
+        [
+            'name' => 'Bapak Admin RT 01',
+            'username' => 'admin_rt01',
+            'password' => \Illuminate\Support\Facades\Hash::make('password123'),
+            'role' => 'admin_rt',
+            'region_id' => $rt->id,
+            'status' => 'aktif',
+            'phone' => '081234567892',
+            'address' => 'Jl. RT 01'
+        ]
+    );
+
+    return "Berhasil membuat akun uji coba:<br><br><b>Admin RW:</b><br>Email: admin.rw@siladesbeng.com<br>Password: password123<br><br><b>Admin RT:</b><br>Email: admin.rt@siladesbeng.com<br>Password: password123";
 });
