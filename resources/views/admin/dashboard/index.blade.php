@@ -9,15 +9,31 @@
                     <div class="card h-100">
                         <div class="d-flex flex-column h-100">
                             <div class="col-12">
-                                <div class="card-body p-4">
-                                    <h5 class="card-title text-primary fw-bold">Selamat Datang di SiladesBeng 🏛️</h5>
-                                    <p class="mb-3 text-muted">Sistem Pelayanan Terpadu berbasis Digital <span
-                                            class="fw-bold text-dark">Pemerintahan Desa Pematang Duku Timur</span></p>
-                                    <a href="{{ route('admin.siladesbeng.profile-bumdes') }}"
-                                        class="btn btn-outline-primary">Profil Pemerintah Desa</a>
+                                <div class="card-body p-4 pb-0">
+                                    @php
+                                        $hour = date('H');
+                                        if ($hour >= 5 && $hour < 11) {
+                                            $greeting = 'Selamat Pagi';
+                                            $icon = '<i class="bx bx-sun text-warning fs-4 ms-1" style="vertical-align: middle;"></i>';
+                                        } elseif ($hour >= 11 && $hour < 15) {
+                                            $greeting = 'Selamat Siang';
+                                            $icon = '<i class="bx bxs-sun text-warning fs-4 ms-1" style="vertical-align: middle;"></i>';
+                                        } elseif ($hour >= 15 && $hour < 18) {
+                                            $greeting = 'Selamat Sore';
+                                            $icon = '<i class="bx bx-cloud text-secondary fs-4 ms-1" style="vertical-align: middle;"></i>';
+                                        } else {
+                                            $greeting = 'Selamat Malam';
+                                            $icon = '<i class="bx bx-moon text-info fs-4 ms-1" style="vertical-align: middle;"></i>';
+                                        }
+                                    @endphp
+                                    <h5 class="card-title text-primary fw-bold mb-0">{{ $greeting }}, {{ explode(' ', Auth::user()->name ?? 'Administrator')[0] }} {!! $icon !!}</h5>
                                 </div>
                             </div>
                             <div class="col-12 mt-auto">
+                                <div class="px-4 pb-2">
+                                    <p class="mb-3 text-muted">Sistem Pelayanan Terpadu berbasis Digital <br><span class="fw-bold text-dark">Pemerintahan Desa Pematang Duku Timur</span></p>
+                                    <a href="{{ route('admin.siladesbeng.profile-bumdes') }}" class="btn btn-outline-primary">Profil Pemerintah Desa</a>
+                                </div>
                                 <div class="px-3 pb-3">
                                     <div id="dashboardBannerCarousel" class="carousel slide" data-bs-ride="carousel">
                                         @php
@@ -98,7 +114,7 @@
                                 </div>
                             </div>
                             <div class="flex-grow-1 d-flex flex-column justify-content-center">
-                                <div id="kinerjaChart" style="min-height: 300px; width: 100%;"></div>
+                                <div id="kinerjaChart" style="min-height: 240px; width: 100%;"></div>
                             </div>
                         </div>
                     </div>
@@ -116,42 +132,48 @@
                     $unitConfigs = [
                         'Penyewaan Alat' => [
                             'title' => 'Unit Penyewaan Alat',
-                            'count' => ($unitPenyewaan ?? \App\Models\Barang::count() ?? 0) . ' Item',
+                            'count' => ($unitPenyewaan ?? \App\Models\Barang::count() ?? 0),
+                            'label' => 'Item',
                             'route' => route('admin.unit.penyewaan.index'),
                             'image' => asset('User/img/elemen/F1.png'),
                             'color' => 'warning'
                         ],
                         'Penjualan Gas' => [
                             'title' => 'Unit Penjualan Gas',
-                            'count' => ($unitGas ?? \App\Models\Gas::count() ?? 0) . ' Jenis Tabung',
+                            'count' => ($unitGas ?? \App\Models\Gas::count() ?? 0),
+                            'label' => 'Jenis Tabung',
                             'route' => route('admin.unit.penjualan_gas.index'),
                             'image' => asset('User/img/elemen/F2.png'),
                             'color' => 'danger'
                         ],
                         'Penyewaan Mobil' => [
                             'title' => 'Unit Penyewaan Mobil',
-                            'count' => (\App\Models\Mobil::count() ?? 0) . ' Kendaraan',
+                            'count' => (\App\Models\Mobil::count() ?? 0),
+                            'label' => 'Kendaraan',
                             'route' => route('admin.unit.mobil.index'),
                             'image' => asset('User/img/elemen/mobil.png'),
                             'color' => 'info'
                         ],
                         'Peminjaman Fasilitas Umum' => [
                             'title' => 'Unit Peminjaman Fasilitas Umum',
-                            'count' => (\App\Models\FasilitasUmum::count() ?? 0) . ' Fasilitas',
+                            'count' => (\App\Models\FasilitasUmum::count() ?? 0),
+                            'label' => 'Fasilitas',
                             'route' => route('admin.unit.fasilitas_umum.index'),
                             'image' => asset('User/img/elemen/fasilitas.png'),
                             'color' => 'success'
                         ],
                         'Pelaporan Warga' => [
                             'title' => 'Pelaporan Warga',
-                            'count' => $laporanPendingCount . ' Pending',
+                            'count' => $laporanPendingCount,
+                            'label' => 'Pending',
                             'route' => route('lurah.laporan.index'),
                             'image' => asset('User/img/elemen/lapor.png'),
                             'color' => 'primary'
                         ],
                         'Pengumuman dan Event' => [
                             'title' => 'Pengumuman & Event',
-                            'count' => (\App\Models\Announcement::count() ?? 0) . ' Info',
+                            'count' => (\App\Models\Announcement::count() ?? 0),
+                            'label' => 'Info',
                             'route' => route('admin.announcements.index'),
                             'image' => asset('User/img/elemen/event.png'),
                             'color' => 'secondary'
@@ -173,7 +195,7 @@
                                     </div>
                                     <div class="flex-grow-1">
                                         <span class="fw-semibold d-block mb-1 text-muted">{{ $config['title'] }}</span>
-                                        <h4 class="card-title mb-0">{{ $config['count'] }}</h4>
+                                        <h4 class="card-title mb-0"><span class="count-up" data-value="{{ $config['count'] }}">0</span> {{ $config['label'] }}</h4>
                                     </div>
                                     <div class="d-flex align-items-center justify-content-center bg-label-{{ $config['color'] }} rounded ms-3 flex-shrink-0" style="width: 36px; height: 36px;">
                                         <i class="bx bx-chevron-right text-{{ $config['color'] }}"></i>
@@ -471,6 +493,10 @@
                     function rejectRequest(id, type) {
                         const modalEl = document.getElementById('rejectModal');
                         if(modalEl) {
+                            // Pindahkan modal ke body untuk menghindari masalah z-index/backdrop
+                            if(modalEl.parentNode !== document.body) {
+                                document.body.appendChild(modalEl);
+                            }
                             const modal = new bootstrap.Modal(modalEl);
                             document.getElementById('rejectForm').action = `{{ url('admin/aktivitas/permintaan-pengajuan') }}/${id}/${type}/reject`;
                             modal.show();
@@ -515,12 +541,12 @@
                                             <div class="mb-4">
                                                 <div class="d-flex justify-content-between mb-1">
                                                     <span class="fw-medium">Unit {{ $serviceName }}</span>
-                                                    <span class="fw-bold">Rp {{ number_format($dataItem['revenue'], 0, ',', '.') }}</span>
+                                                    <span class="fw-bold">Rp <span class="count-up-rupiah" data-value="{{ $dataItem['revenue'] }}">0</span></span>
                                                 </div>
                                                 <div class="progress" style="height: 8px;">
                                                     <div class="progress-bar bg-{{ $dataItem['color'] }}" role="progressbar" style="width: {{ $dataItem['percentage'] }}%"></div>
                                                 </div>
-                                                <small class="text-muted">{{ $dataItem['transactions'] }} Transaksi</small>
+                                                <small class="text-muted"><span class="count-up" data-value="{{ $dataItem['transactions'] }}">0</span> Transaksi</small>
                                             </div>
                                         @endforeach
 
@@ -528,9 +554,9 @@
                                         <div class="pt-3 border-top">
                                             <div class="d-flex justify-content-between align-items-center">
                                                 <h6 class="mb-0">Total Keseluruhan</h6>
-                                                <h6 class="mb-0 fw-bold">Rp {{ number_format($totalPendapatanData['total']['revenue'] ?? 0, 0, ',', '.') }}</h6>
+                                                <h6 class="mb-0 fw-bold">Rp <span class="count-up-rupiah" data-value="{{ $totalPendapatanData['total']['revenue'] ?? 0 }}">0</span></h6>
                                             </div>
-                                            <small class="text-muted">{{ $totalPendapatanData['total']['transactions'] ?? 0 }} Transaksi</small>
+                                            <small class="text-muted"><span class="count-up" data-value="{{ $totalPendapatanData['total']['transactions'] ?? 0 }}">0</span> Transaksi</small>
                                         </div>
                                     </div>
 
@@ -690,19 +716,7 @@
                     }
                 </style>
 
-            <!-- Footer -->
-            <footer class="content-footer footer bg-footer-theme">
-                <div class="container-xxl d-flex flex-wrap justify-content-between py-2 flex-md-row flex-column">
-                    <div class="mb-2 mb-md-0">
-                        ©
-                        {{ date('Y') }}
-                        , made with by
-                        <a href="https://themeselection.com" target="_blank" class="footer-link fw-bolder">SiladesBeng Project
-                            Team 😎</a>
-                    </div>
-                </div>
-            </footer>
-            <div class="content-backdrop fade"></div>
+
 
         <!-- SCRIPT LANGSUNG DI SINI -->
         <script>
@@ -731,7 +745,7 @@
                     }],
                     chart: {
                         type: 'area',
-                        height: 300,
+                        height: 240,
                         toolbar: {
                             show: false
                         },

@@ -3,14 +3,14 @@
 @section('title', 'Profil Pemerintah Daerah')
 
 @section('content')
-<div class="container-fluid py-4">
-    <div class="row justify-content-center">
-        <div class="col-12 col-lg-10">
+<div class="container-xxl flex-grow-1 container-p-y">
+    <div class="row">
+        <div class="col-12">
             <!-- HEADER -->
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2 class="text-primary fw-bold mb-0">Struktur <span class="text-info">Pemerintah {{ auth()->user()->region->name ?? 'Daerah' }}</span></h2>
-                <a href="{{ route('admin.siladesbeng.bumdes.create') }}" class="btn btn-primary px-4 py-2 fw-bold">
-                    <i class="bi bi-plus"></i> Tambah Anggota
+                <h4 class="text-primary fw-bold mb-0">Struktur <span class="text-info">Pemerintah {{ auth()->user()->region->name ?? 'Daerah' }}</span></h4>
+                <a href="{{ route('admin.siladesbeng.bumdes.create') }}" class="btn btn-primary">
+                    <i class="bx bx-plus me-1"></i> Tambah Anggota
                 </a>
             </div>
 

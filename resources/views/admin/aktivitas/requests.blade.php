@@ -50,7 +50,7 @@
                         <i class="bx bx-shopping-bag fs-3"></i>
                     </div>
                     <small class="text-muted text-uppercase fw-bold ls-1 mb-1" style="font-size: 0.65rem;">Total Pesanan</small>
-                    <h3 class="fw-bold mb-0 text-dark">{{ $stats['total'] }}</h3>
+                    <h3 class="fw-bold mb-0 text-dark"><span class="count-up" data-value="{{ $stats['total'] }}">0</span></h3>
                 </div>
             </div>
         </div>
@@ -62,7 +62,7 @@
                         <i class="bx bx-time fs-3"></i>
                     </div>
                     <small class="text-muted text-uppercase fw-bold ls-1 mb-1" style="font-size: 0.65rem;">Menunggu</small>
-                    <h3 class="fw-bold mb-0 text-dark">{{ $stats['pending'] }}</h3>
+                    <h3 class="fw-bold mb-0 text-dark"><span class="count-up" data-value="{{ $stats['pending'] }}">0</span></h3>
                 </div>
             </div>
         </div>
@@ -74,7 +74,7 @@
                         <i class="bx bx-package fs-3"></i>
                     </div>
                     <small class="text-muted text-uppercase fw-bold ls-1 mb-1" style="font-size: 0.65rem;">Sedang Proses</small>
-                    <h3 class="fw-bold mb-0 text-dark">{{ $stats['active_rental_count'] }}</h3>
+                    <h3 class="fw-bold mb-0 text-dark"><span class="count-up" data-value="{{ $stats['active_rental_count'] }}">0</span></h3>
                 </div>
             </div>
         </div>
@@ -86,7 +86,7 @@
                         <i class="bx bx-x-circle fs-3"></i>
                     </div>
                     <small class="text-muted text-uppercase fw-bold ls-1 mb-1" style="font-size: 0.65rem;">Ditolak</small>
-                    <h3 class="fw-bold mb-0 text-dark">{{ $stats['rejected'] }}</h3>
+                    <h3 class="fw-bold mb-0 text-dark"><span class="count-up" data-value="{{ $stats['rejected'] }}">0</span></h3>
                 </div>
             </div>
         </div>
@@ -98,7 +98,7 @@
                         <i class="bx bx-error-circle fs-3"></i>
                     </div>
                     <small class="text-muted text-uppercase fw-bold ls-1 mb-1" style="font-size: 0.65rem;">Minta Batal</small>
-                    <h3 class="fw-bold mb-0 text-dark">{{ $stats['cancellation_pending'] }}</h3>
+                    <h3 class="fw-bold mb-0 text-dark"><span class="count-up" data-value="{{ $stats['cancellation_pending'] }}">0</span></h3>
                 </div>
             </div>
         </div>

@@ -40,7 +40,7 @@
                         </div>
                         <div>
                             <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Total Pendapatan</small>
-                            <h3 class="fw-bold mb-0 text-dark" style="font-size: 1.25rem;">Rp {{ number_format($totalPendapatan, 0, ',', '.') }}</h3>
+                            <h5 class="fw-bold mb-0 text-dark" style="white-space: nowrap;">Rp <span class="count-up-rupiah" data-value="{{ $totalPendapatan }}">0</span></h5>
                         </div>
                     </div>
                     <div class="d-flex align-items-center small text-muted">
@@ -68,7 +68,7 @@
                         </div>
                         <div>
                             <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Unit Penyewaan</small>
-                            <h3 class="fw-bold mb-0 text-dark" style="font-size: 1.25rem;">Rp {{ number_format($totalPenyewaan, 0, ',', '.') }}</h3>
+                            <h5 class="fw-bold mb-0 text-dark" style="white-space: nowrap;">Rp <span class="count-up-rupiah" data-value="{{ $totalPenyewaan }}">0</span></h5>
                         </div>
                     </div>
                     <div class="d-flex align-items-center small text-muted">
@@ -96,7 +96,7 @@
                         </div>
                         <div>
                             <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Unit Gas</small>
-                            <h3 class="fw-bold mb-0 text-dark" style="font-size: 1.25rem;">Rp {{ number_format($totalGas, 0, ',', '.') }}</h3>
+                            <h5 class="fw-bold mb-0 text-dark" style="white-space: nowrap;">Rp <span class="count-up-rupiah" data-value="{{ $totalGas }}">0</span></h5>
                         </div>
                     </div>
                      <div class="d-flex align-items-center small text-muted">
@@ -124,7 +124,7 @@
                         </div>
                         <div>
                             <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Unit Sewa Mobil</small>
-                            <h3 class="fw-bold mb-0 text-dark" style="font-size: 1.25rem;">Rp {{ number_format($totalMobil ?? 0, 0, ',', '.') }}</h3>
+                            <h5 class="fw-bold mb-0 text-dark" style="white-space: nowrap;">Rp <span class="count-up-rupiah" data-value="{{ $totalMobil ?? 0 }}">0</span></h5>
                         </div>
                     </div>
                      <div class="d-flex align-items-center small text-muted">
@@ -189,14 +189,14 @@
                         <div class="flex-grow-1">
                             <div class="d-flex justify-content-between align-items-center mb-1">
                                 <h6 class="fw-bold text-dark mb-0">Unit Penyewaan Alat</h6>
-                                <span class="fw-bold text-dark">Rp {{ number_format($totalPendapatanData['rental']['revenue'] ?? 0, 0, ',', '.') }}</span>
+                                <span class="fw-bold text-dark">Rp <span class="count-up-rupiah" data-value="{{ $totalPendapatanData['rental']['revenue'] ?? 0 }}">0</span></span>
                             </div>
                             <div class="progress mb-2" style="height: 6px;">
                                 <div class="progress-bar bg-warning" role="progressbar" style="width: {{ $totalPendapatanData['rental']['percentage'] ?? 0 }}%"></div>
                             </div>
                             <div class="d-flex justify-content-between text-muted small">
-                                <span>{{ $totalPendapatanData['rental']['transactions'] ?? 0 }} Transaksi</span>
-                                <span>{{ $totalPendapatanData['rental']['percentage'] ?? 0 }}% dari Total</span>
+                                <span><span class="count-up" data-value="{{ $totalPendapatanData['rental']['transactions'] ?? 0 }}">0</span> Transaksi</span>
+                                <span><span class="count-up" data-value="{{ $totalPendapatanData['rental']['percentage'] ?? 0 }}">0</span>% dari Total</span>
                             </div>
                         </div>
                     </div>
@@ -209,14 +209,14 @@
                          <div class="flex-grow-1">
                             <div class="d-flex justify-content-between align-items-center mb-1">
                                 <h6 class="fw-bold text-dark mb-0">Unit Penjualan Gas</h6>
-                                <span class="fw-bold text-dark">Rp {{ number_format($totalPendapatanData['gas']['revenue'] ?? 0, 0, ',', '.') }}</span>
+                                <span class="fw-bold text-dark">Rp <span class="count-up-rupiah" data-value="{{ $totalPendapatanData['gas']['revenue'] ?? 0 }}">0</span></span>
                             </div>
                             <div class="progress mb-2" style="height: 6px;">
                                 <div class="progress-bar bg-info" role="progressbar" style="width: {{ $totalPendapatanData['gas']['percentage'] ?? 0 }}%"></div>
                             </div>
                              <div class="d-flex justify-content-between text-muted small">
-                                <span>{{ $totalPendapatanData['gas']['transactions'] ?? 0 }} Transaksi</span>
-                                <span>{{ $totalPendapatanData['gas']['percentage'] ?? 0 }}% dari Total</span>
+                                <span><span class="count-up" data-value="{{ $totalPendapatanData['gas']['transactions'] ?? 0 }}">0</span> Transaksi</span>
+                                <span><span class="count-up" data-value="{{ $totalPendapatanData['gas']['percentage'] ?? 0 }}">0</span>% dari Total</span>
                             </div>
                         </div>
                     </div>
@@ -229,14 +229,14 @@
                          <div class="flex-grow-1">
                             <div class="d-flex justify-content-between align-items-center mb-1">
                                 <h6 class="fw-bold text-dark mb-0">Unit Sewa Mobil</h6>
-                                <span class="fw-bold text-dark">Rp {{ number_format($totalPendapatanData['mobil']['revenue'] ?? 0, 0, ',', '.') }}</span>
+                                <span class="fw-bold text-dark">Rp <span class="count-up-rupiah" data-value="{{ $totalPendapatanData['mobil']['revenue'] ?? 0 }}">0</span></span>
                             </div>
                             <div class="progress mb-2" style="height: 6px;">
                                 <div class="progress-bar bg-danger" role="progressbar" style="width: {{ $totalPendapatanData['mobil']['percentage'] ?? 0 }}%"></div>
                             </div>
                              <div class="d-flex justify-content-between text-muted small">
-                                <span>{{ $totalPendapatanData['mobil']['transactions'] ?? 0 }} Transaksi</span>
-                                <span>{{ $totalPendapatanData['mobil']['percentage'] ?? 0 }}% dari Total</span>
+                                <span><span class="count-up" data-value="{{ $totalPendapatanData['mobil']['transactions'] ?? 0 }}">0</span> Transaksi</span>
+                                <span><span class="count-up" data-value="{{ $totalPendapatanData['mobil']['percentage'] ?? 0 }}">0</span>% dari Total</span>
                             </div>
                         </div>
                     </div>

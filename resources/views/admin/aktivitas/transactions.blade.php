@@ -28,7 +28,7 @@
                         </div>
                         <div>
                             <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Total Bukti</small>
-                            <h4 class="fw-bold mb-0 text-dark">{{ $stats['total'] }}</h4>
+                            <h4 class="fw-bold mb-0 text-dark"><span class="count-up" data-value="{{ $stats['total'] }}">0</span></h4>
                         </div>
                     </div>
                 </div>
@@ -43,7 +43,7 @@
                         </div>
                         <div>
                             <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Penyewaan</small>
-                            <h4 class="fw-bold mb-0 text-dark">{{ $stats['rental_total'] }}</h4>
+                            <h4 class="fw-bold mb-0 text-dark"><span class="count-up" data-value="{{ $stats['rental_total'] }}">0</span></h4>
                         </div>
                     </div>
                 </div>
@@ -58,7 +58,7 @@
                         </div>
                         <div>
                             <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Gas</small>
-                            <h4 class="fw-bold mb-0 text-dark">{{ $stats['gas_total'] }}</h4>
+                            <h4 class="fw-bold mb-0 text-dark"><span class="count-up" data-value="{{ $stats['gas_total'] }}">0</span></h4>
                         </div>
                     </div>
                 </div>
@@ -73,7 +73,7 @@
                         </div>
                         <div>
                             <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Tunai</small>
-                            <h4 class="fw-bold mb-0 text-dark">{{ $stats['cash_total'] }}</h4>
+                            <h4 class="fw-bold mb-0 text-dark"><span class="count-up" data-value="{{ $stats['cash_total'] }}">0</span></h4>
                         </div>
                     </div>
                 </div>

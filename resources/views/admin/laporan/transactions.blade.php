@@ -50,7 +50,7 @@
                         </div>
                         <div>
                             <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Total Transaksi</small>
-                            <h4 class="fw-bold mb-0 text-dark">{{ $rentalRequests->count() + $gasOrders->count() + $mobilBookings->count() + $fasilitasBookings->count() }}</h4>
+                            <h4 class="fw-bold mb-0 text-dark"><span class="count-up" data-value="{{ $rentalRequests->count() + $gasOrders->count() + $mobilBookings->count() + $fasilitasBookings->count() }}">0</span></h4>
                         </div>
                     </div>
                 </div>
@@ -65,7 +65,7 @@
                         </div>
                         <div>
                             <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Selesai</small>
-                            <h4 class="fw-bold mb-0 text-dark">{{ $rentalRequests->where('status', 'completed')->count() + $gasOrders->where('status', 'completed')->count() + $mobilBookings->where('status', 'completed')->count() + $fasilitasBookings->where('status', 'completed')->count() }}</h4>
+                            <h4 class="fw-bold mb-0 text-dark"><span class="count-up" data-value="{{ $rentalRequests->where('status', 'completed')->count() + $gasOrders->where('status', 'completed')->count() + $mobilBookings->where('status', 'completed')->count() + $fasilitasBookings->where('status', 'completed')->count() }}">0</span></h4>
                         </div>
                     </div>
                 </div>
@@ -80,7 +80,7 @@
                         </div>
                         <div>
                             <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Penyewaan</small>
-                            <h4 class="fw-bold mb-0 text-dark">{{ $rentalRequests->count() }}</h4>
+                            <h4 class="fw-bold mb-0 text-dark"><span class="count-up" data-value="{{ $rentalRequests->count() }}">0</span></h4>
                         </div>
                     </div>
                 </div>
@@ -95,7 +95,7 @@
                         </div>
                         <div>
                             <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Gas</small>
-                            <h4 class="fw-bold mb-0 text-dark">{{ $gasOrders->count() }}</h4>
+                            <h4 class="fw-bold mb-0 text-dark"><span class="count-up" data-value="{{ $gasOrders->count() }}">0</span></h4>
                         </div>
                     </div>
                 </div>
@@ -110,7 +110,7 @@
                         </div>
                         <div>
                             <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Sewa Mobil</small>
-                            <h4 class="fw-bold mb-0 text-dark">{{ $mobilBookings->count() }}</h4>
+                            <h4 class="fw-bold mb-0 text-dark"><span class="count-up" data-value="{{ $mobilBookings->count() }}">0</span></h4>
                         </div>
                     </div>
                 </div>
@@ -125,7 +125,7 @@
                         </div>
                         <div>
                             <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Fasilitas Umum</small>
-                            <h4 class="fw-bold mb-0 text-dark">{{ $fasilitasBookings->count() }}</h4>
+                            <h4 class="fw-bold mb-0 text-dark"><span class="count-up" data-value="{{ $fasilitasBookings->count() }}">0</span></h4>
                         </div>
                     </div>
                 </div>

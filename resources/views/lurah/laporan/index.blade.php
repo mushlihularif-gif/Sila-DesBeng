@@ -28,7 +28,7 @@
                         <i class="bx bx-clipboard fs-3"></i>
                     </div>
                     <small class="text-muted text-uppercase fw-bold ls-1 mb-1" style="font-size: 0.65rem;">Total Laporan</small>
-                    <h3 class="fw-bold mb-0 text-dark">{{ $stats['total_laporan'] }}</h3>
+                    <h3 class="fw-bold mb-0 text-dark"><span class="count-up" data-value="{{ $stats['total_laporan'] }}">0</span></h3>
                 </div>
             </div>
         </div>
@@ -40,7 +40,7 @@
                         <i class="bx bx-time fs-3"></i>
                     </div>
                     <small class="text-muted text-uppercase fw-bold ls-1 mb-1" style="font-size: 0.65rem;">Tertunda</small>
-                    <h3 class="fw-bold mb-0 text-dark">{{ $stats['pending'] }}</h3>
+                    <h3 class="fw-bold mb-0 text-dark"><span class="count-up" data-value="{{ $stats['pending'] }}">0</span></h3>
                 </div>
             </div>
         </div>
@@ -52,7 +52,7 @@
                         <i class="bx bx-loader-circle fs-3"></i>
                     </div>
                     <small class="text-muted text-uppercase fw-bold ls-1 mb-1" style="font-size: 0.65rem;">Proses</small>
-                    <h3 class="fw-bold mb-0 text-dark">{{ $stats['proses'] }}</h3>
+                    <h3 class="fw-bold mb-0 text-dark"><span class="count-up" data-value="{{ $stats['proses'] }}">0</span></h3>
                 </div>
             </div>
         </div>
@@ -64,7 +64,7 @@
                         <i class="bx bx-check-circle fs-3"></i>
                     </div>
                     <small class="text-muted text-uppercase fw-bold ls-1 mb-1" style="font-size: 0.65rem;">Selesai</small>
-                    <h3 class="fw-bold mb-0 text-dark">{{ $stats['selesai'] }}</h3>
+                    <h3 class="fw-bold mb-0 text-dark"><span class="count-up" data-value="{{ $stats['selesai'] }}">0</span></h3>
                 </div>
             </div>
         </div>
@@ -76,7 +76,7 @@
                         <i class="bx bx-share fs-3"></i>
                     </div>
                     <small class="text-muted text-uppercase fw-bold ls-1 mb-1" style="font-size: 0.65rem;">Diteruskan</small>
-                    <h3 class="fw-bold mb-0 text-dark">{{ $stats['diteruskan'] ?? 0 }}</h3>
+                    <h3 class="fw-bold mb-0 text-dark"><span class="count-up" data-value="{{ $stats['diteruskan'] ?? 0 }}">0</span></h3>
                 </div>
             </div>
         </div>
@@ -88,7 +88,7 @@
                         <i class="bx bx-x-circle fs-3"></i>
                     </div>
                     <small class="text-muted text-uppercase fw-bold ls-1 mb-1" style="font-size: 0.65rem;">Ditolak</small>
-                    <h3 class="fw-bold mb-0 text-dark">{{ $stats['ditolak'] }}</h3>
+                    <h3 class="fw-bold mb-0 text-dark"><span class="count-up" data-value="{{ $stats['ditolak'] }}">0</span></h3>
                 </div>
             </div>
         </div>
