@@ -48,7 +48,45 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
+        // Create Admin Kecamatan User
+        $regionKecamatan = \App\Models\Region::where('type', 'kecamatan')->first();
+        User::firstOrCreate(
+            ['email' => 'adminkecamatan@isewa.com'],
+            [
+                'username' => 'adminkecamatan',
+                'name' => 'Admin Kecamatan',
+                'phone' => '087654321098',
+                'address' => 'Kantor Camat',
+                'gender' => 'laki-laki',
+                'role' => 'admin_kecamatan',
+                'status' => 'aktif',
+                'region_id' => $regionKecamatan ? $regionKecamatan->id : null,
+                'email_verified_at' => now(),
+                'password' => Hash::make('password123'),
+            ]
+        );
+
+        // Create Admin Desa User
+        $regionDesa = \App\Models\Region::where('type', 'desa')->first();
+        User::firstOrCreate(
+            ['email' => 'admindesa@isewa.com'],
+            [
+                'username' => 'admindesa',
+                'name' => 'Admin Desa',
+                'phone' => '089876543210',
+                'address' => 'Kantor Kepala Desa',
+                'gender' => 'laki-laki',
+                'role' => 'admin_desa',
+                'status' => 'aktif',
+                'region_id' => $regionDesa ? $regionDesa->id : null,
+                'email_verified_at' => now(),
+                'password' => Hash::make('password123'),
+            ]
+        );
+
         echo "\n✅ Admin created: admin@isewa.com / admin123";
+        echo "\n✅ Admin Kecamatan created: adminkecamatan@isewa.com / password123";
+        echo "\n✅ Admin Desa created: admindesa@isewa.com / password123";
         echo "\n✅ User created: user@test.com / password123\n\n";
     }
 }

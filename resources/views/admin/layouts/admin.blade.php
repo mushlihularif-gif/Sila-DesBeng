@@ -473,6 +473,7 @@
                     </li>
 
                     <!-- Unit Layanan (Dropdown) -->
+                @if(in_array(auth()->user()->role, ['super_admin', 'admin', 'admin_desa']))
                 <li class="menu-item {{ request()->is('admin/unit*') ? 'open active show' : '' }}">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
                         <i class="menu-icon tf-icons bx bx-building-house"></i>
@@ -501,6 +502,7 @@
                             </li>
                         </ul>
                     </li>
+                @endif
 
                 <!-- Manajemen (Dropdown) -->
                 <li class="menu-item {{ request()->is('admin/manajemen-pengguna*') || request()->is('admin/kemitraan*') || request()->is('admin/kelola-wilayah*') || request()->is('admin/banners*') || request()->is('admin/announcements*') || request()->routeIs('lurah.laporan.*') ? 'open active show' : '' }}">
@@ -509,6 +511,7 @@
                         <div data-i18n="Manajemen">Manajemen</div>
                     </a>
                     <ul class="menu-sub">
+                        @if(in_array(auth()->user()->role, ['super_admin', 'admin', 'admin_kecamatan']))
                         <li class="menu-item {{ request()->routeIs('admin.manajemen-pengguna.*') ? 'active' : '' }}">
                             <a href="{{ route('admin.manajemen-pengguna.index') }}" class="menu-link">
                                 <div>Pengguna</div>
@@ -524,6 +527,7 @@
                                 <div>Banner</div>
                             </a>
                         </li>
+                        @endif
                         <li class="menu-item {{ request()->routeIs('admin.announcements.*') ? 'active' : '' }}">
                             <a href="{{ route('admin.announcements.index') }}" class="menu-link">
                                 <div>Pengumuman</div>
@@ -534,7 +538,7 @@
                                 <div>Pelaporan Warga</div>
                             </a>
                         </li>
-                        @if(in_array(auth()->user()->role, ['admin_desa', 'lurah', 'admin_rw', 'super_admin', 'admin']))
+                        @if(in_array(auth()->user()->role, ['admin_kecamatan', 'admin_desa', 'lurah', 'admin_rw', 'super_admin', 'admin']))
                         <li class="menu-item {{ request()->routeIs('admin.kelola-wilayah.*') ? 'active' : '' }}">
                             <a href="{{ route('admin.kelola-wilayah.index') }}" class="menu-link">
                                 <div>Kelola Wilayah</div>
@@ -545,6 +549,7 @@
                 </li>
 
                 <!-- Aktivitas -->
+                @if(in_array(auth()->user()->role, ['admin_desa', 'lurah', 'admin_rw', 'admin_rt']))
                 <li
                     class="menu-item {{ request()->is('admin/aktivitas/permintaan-pengajuan*') || request()->is('admin/aktivitas/bukti-transaksi*') || request()->routeIs('admin.laporan.log') ? 'open active show' : '' }}">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -563,11 +568,13 @@
                                 <div data-i18n="Bukti Transaksi">Bukti Transaksi</div>
                             </a>
                         </li>
+                        @if(in_array(auth()->user()->role, ['super_admin', 'admin', 'admin_kecamatan']))
                         <li class="menu-item {{ request()->routeIs('admin.laporan.log') ? 'active' : '' }}">
                             <a href="{{ route('admin.laporan.log') }}" class="menu-link">
                                 <div data-i18n="Log Aktivitas">Log Aktivitas</div>
                             </a>
                         </li>
+                        @endif
                     </ul>
                 </li>
                 <!-- Data & Laporan (Dropdown) -->
@@ -589,14 +596,17 @@
                         </li>
                     </ul>
                 </li>
+                @endif
 
                 <!-- Pengaturan (Dropdown) -->
+                @if(in_array(auth()->user()->role, ['super_admin', 'admin', 'admin_kecamatan']))
                 <li class="menu-item {{ request()->routeIs('admin.system-settings.*') || request()->routeIs('admin.region-settings.*') ? 'open active show' : '' }}">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
                         <i class="menu-icon tf-icons bx bx-cog"></i>
                         <div data-i18n="Pengaturan">Pengaturan</div>
                     </a>
                     <ul class="menu-sub">
+                        @if(in_array(auth()->user()->role, ['super_admin', 'admin']))
                         <li class="menu-item {{ request()->routeIs('admin.system-settings.index') ? 'active' : '' }}">
                             <a href="{{ route('admin.system-settings.index') }}" class="menu-link">
                                 <div>Layanan Pusat</div>
@@ -607,6 +617,7 @@
                                 <div>Pembayaran Pusat</div>
                             </a>
                         </li>
+                        @endif
                         <li class="menu-item {{ request()->routeIs('admin.region-settings.index') ? 'active' : '' }}">
                             <a href="{{ route('admin.region-settings.index') }}" class="menu-link">
                                 <div>Layanan Wilayah</div>
@@ -619,6 +630,7 @@
                         </li>
                     </ul>
                 </li>
+                @endif
 
 
                 <!-- Profil & Info (Dropdown) -->
@@ -635,7 +647,15 @@
                         </li>
                         <li class="menu-item {{ request()->routeIs('admin.siladesbeng.profile-bumdes') || request()->routeIs('admin.siladesbeng.bumdes.*') ? 'active' : '' }}">
                             <a href="{{ route('admin.siladesbeng.profile-bumdes') }}" class="menu-link">
-                                <div>Pemerintah Desa</div>
+                                @php
+                                    $sidebarRegionLabel = 'Pemerintah Desa';
+                                    if(auth()->user()->role === 'admin_kecamatan') {
+                                        $sidebarRegionLabel = 'Pemerintah Kecamatan';
+                                    } elseif(in_array(auth()->user()->role, ['super_admin', 'admin'])) {
+                                        $sidebarRegionLabel = 'Pemerintah Kabupaten';
+                                    }
+                                @endphp
+                                <div>{{ $sidebarRegionLabel }}</div>
                             </a>
                         </li>
                     </ul>
@@ -696,7 +716,17 @@
                                 <a class="nav-link dropdown-toggle hide-arrow position-relative" href="javascript:void(0);" data-bs-toggle="dropdown" data-bs-auto-close="outside">
                                     <i class="bx bx-bell bx-sm"></i>
                                     @php
+<<<<<<< HEAD
                                         $unreadCount = \App\Models\AdminNotification::where('is_read', false)->count();
+=======
+                                        $notifQuery = \App\Models\AdminNotification::query();
+                                        if (in_array(auth()->user()->role, ['super_admin', 'admin'])) {
+                                            $notifQuery->whereNull('region_id');
+                                        } else {
+                                            $notifQuery->where('region_id', auth()->user()->region_id);
+                                        }
+                                        $unreadCount = (clone $notifQuery)->where('is_read', false)->count();
+>>>>>>> 51af67d3288f5c263305ddf37823cfdb4ae0f347
                                     @endphp
                                     @if($unreadCount > 0)
                                     <span class="badge bg-danger rounded-pill badge-notifications position-absolute" style="top: -2px; right: -6px; font-size: 10px; min-width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;">{{ $unreadCount > 99 ? '99+' : $unreadCount }}</span>
@@ -705,7 +735,7 @@
                                 <ul class="dropdown-menu dropdown-menu-end py-0" style="width: 380px; max-height: 420px;">
                                     <li class="dropdown-menu-header border-bottom">
                                         <div class="dropdown-header d-flex align-items-center justify-content-between py-3 px-4">
-                                            <h6 class="mb-0 fw-bold">Notifikasi</h6>
+                                            <h6 class="mb-0 fw-bold">Notifikasi Admin</h6>
                                             @if($unreadCount > 0)
                                             <span class="badge rounded-pill bg-label-primary">{{ $unreadCount }} Baru</span>
                                             @endif
@@ -714,21 +744,31 @@
                                     <li>
                                         <div style="max-height: 280px; overflow-y: auto;">
                                             @php
+<<<<<<< HEAD
                                                 $recentNotifications = \App\Models\AdminNotification::latest()->take(5)->get();
+=======
+                                                $recentNotifications = (clone $notifQuery)->latest()->take(5)->get();
+>>>>>>> 51af67d3288f5c263305ddf37823cfdb4ae0f347
                                             @endphp
                                             @forelse($recentNotifications as $notif)
-                                            <a href="{{ route('admin.notifications.index') }}" class="dropdown-item d-flex align-items-start gap-3 py-3 px-4" style="white-space: normal; {{ !$notif->is_read ? 'background-color: rgba(105, 108, 255, 0.08);' : '' }}">
+                                            <a href="{{ route('admin.aktivitas.permintaan-pengajuan.index') }}" class="dropdown-item d-flex align-items-start gap-3 py-3 px-4" style="white-space: normal; {{ !$notif->is_read ? 'background-color: rgba(105, 108, 255, 0.08);' : '' }}">
                                                 <div class="flex-shrink-0">
                                                     <div class="rounded-circle d-flex align-items-center justify-content-center {{ !$notif->is_read ? 'bg-label-primary' : 'bg-label-secondary' }}" style="width: 36px; height: 36px;">
-                                                        <i class="bx {{ $notif->type === 'update_status' ? 'bx-refresh' : ($notif->type === 'new_order' ? 'bx-cart' : 'bx-bell') }} {{ !$notif->is_read ? 'text-primary' : 'text-secondary' }}"></i>
+                                                        <i class="bx {{ $notif->type === 'cancellation_request' ? 'bx-error-circle' : ($notif->type === 'gas_order' ? 'bx-gas-pump' : 'bx-bell') }} {{ !$notif->is_read ? 'text-primary' : 'text-secondary' }}"></i>
                                                     </div>
                                                 </div>
                                                 <div class="flex-grow-1">
+<<<<<<< HEAD
                                                     <h6 class="mb-1 fw-semibold {{ !$notif->is_read ? 'text-primary' : 'text-dark' }}">{{ $notif->title }}</h6>
                                                     <p class="mb-1 text-muted small" style="line-height: 1.4;">{{ Str::limit($notif->message, 60) }}</p>
                                                     <small class="text-muted d-flex align-items-center mt-2">
                                                         <i class="bx bx-time-five me-1"></i> {{ $notif->created_at->diffForHumans() }}
                                                     </small>
+=======
+                                                    <p class="mb-0 fw-semibold small">{{ $notif->title }}</p>
+                                                    <p class="mb-0 text-muted" style="font-size: 0.75rem;">{{ \Illuminate\Support\Str::limit($notif->message, 50) }}</p>
+                                                    <small class="text-muted" style="font-size: 0.7rem;">{{ $notif->created_at->diffForHumans() }}</small>
+>>>>>>> 51af67d3288f5c263305ddf37823cfdb4ae0f347
                                                 </div>
                                             </a>
                                             @empty
@@ -740,8 +780,8 @@
                                         </div>
                                     </li>
                                     <li class="dropdown-menu-footer border-top">
-                                        <a href="{{ route('admin.notifications.index') }}" class="dropdown-item text-center py-3 text-primary fw-semibold">
-                                            Lihat Semua Notifikasi
+                                        <a href="{{ route('admin.aktivitas.permintaan-pengajuan.index') }}" class="dropdown-item text-center py-3 text-primary fw-semibold">
+                                            <i class="bx bx-list-ul me-1"></i> Lihat Semua Permintaan
                                         </a>
                                     </li>
                                 </ul>
@@ -836,14 +876,14 @@
                     @yield('content')
                     
                     <!-- Footer -->
-                    <footer class="content-footer footer bg-footer-theme">
-                        <div class="container-xxl d-flex flex-wrap justify-content-between py-3 flex-md-row flex-column text-muted">
-                            <div class="mb-2 mb-md-0">
-                                © {{ date('Y') }} Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis
-                            </div>
-                            <div>
-                                Made with <span class="text-danger">❤️</span> by <a href="#" target="_blank" class="footer-link fw-bolder">SiladesBeng Project Team</a>
-                            </div>
+                    <footer class="content-footer footer bg-white border-top mt-auto">
+                        <div class="container-xxl py-4 text-center">
+                            <p class="mb-1 text-muted">
+                                &copy; {{ date('Y') }} <strong>Sistem Sinergi Layanan dan Aspirasi Desa</strong> di Kabupaten Bengkalis
+                            </p>
+                            <p class="mb-0 text-muted small">
+                                Made with <span class="text-danger">&#10084;</span> by <span class="fw-bolder text-primary">SiladesBeng Project Team</span>
+                            </p>
                         </div>
                     </footer>
                     <!-- / Footer -->
@@ -1044,6 +1084,8 @@
                 });
             </script>
             @yield('scripts')
+            @yield('modals')
+            @stack('modals')
 </body>
 
 </html>

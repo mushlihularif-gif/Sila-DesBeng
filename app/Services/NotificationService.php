@@ -105,10 +105,18 @@ class NotificationService
             'admin_id' => auth()->id(),
         ]);
 
+        $regionId = null;
+        if ($type === 'gas') {
+            $regionId = $order->gas->region_id ?? null;
+        } elseif ($type === 'rental') {
+            $regionId = $order->barang->region_id ?? null;
+        }
+
         // Notify admin
         AdminNotification::create([
             'type' => 'stock_alert',
             'reference_id' => $order->id,
+            'region_id' => $regionId,
             'title' => 'Gagal Approve - Stok Tidak Cukup',
             'message' => "⚠️ Gagal approve request #{$order->order_number}. Stok {$itemName} tidak cukup (tersisa: {$availableStock}, diminta: {$requestedQty})",
             'is_read' => false,
@@ -142,6 +150,7 @@ class NotificationService
         AdminNotification::create([
             'type' => 'stock_low',
             'reference_id' => $item->id,
+            'region_id' => $item->region_id ?? null,
             'title' => 'Stok Menipis',
             'message' => "⚠️ Stok {$itemName} menipis! Tersisa: {$currentStock} {$satuan}. Segera restock.",
             'is_read' => false,
@@ -158,6 +167,7 @@ class NotificationService
         AdminNotification::create([
             'type' => 'stock_depleted',
             'reference_id' => $item->id,
+            'region_id' => $item->region_id ?? null,
             'title' => 'Stok Habis',
             'message' => "🚨 Stok {$itemName} HABIS! Segera restock atau nonaktifkan item.",
             'is_read' => false,

@@ -46,7 +46,15 @@
                                 </a>
                             @endif
                             <h4 class="card-title text-primary fw-bold mb-1">Manajemen Wilayah: {{ $parentRegion->name }}</h4>
-                            <p class="card-text text-muted mb-0">Kelola hierarki struktur tingkat bawah (RW/RT) beserta akun kepengurusannya secara terpusat.</p>
+                            @php
+                                $childLevelText = '';
+                                if($parentRegion->type == 'kabupaten') $childLevelText = '(Kecamatan)';
+                                elseif($parentRegion->type == 'kecamatan') $childLevelText = '(Desa/Kelurahan)';
+                                elseif(in_array($parentRegion->type, ['desa', 'kelurahan'])) $childLevelText = '(Dusun/RW)';
+                                elseif($parentRegion->type == 'rw') $childLevelText = '(RT)';
+                                else $childLevelText = 'di bawahnya';
+                            @endphp
+                            <p class="card-text text-muted mb-0">Kelola hierarki wilayah {{ $childLevelText }} beserta akun kepengurusannya secara terpusat.</p>
                         </div>
                         <button type="button" class="btn btn-primary rounded-pill px-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#addRegionModal">
                             <i class="bx bx-plus me-1"></i> Tambah {{ strtoupper($targetType) }}
@@ -203,7 +211,9 @@
                                                             </div>
                                                             
                                                             <!-- Include Modals for RT -->
-                                                            @include('admin.region_management.partials.modals', ['region' => $rt])
+                                                            @push('modals')
+                                                                @include('admin.region_management.partials.modals', ['region' => $rt])
+                                                            @endpush
                                                         @endforeach
                                                     </div>
                                                 @else
@@ -222,72 +232,74 @@
                         </div>
 
                         <!-- Include Modals for RW -->
-                        @include('admin.region_management.partials.modals', ['region' => $child])
-                        
-                        <!-- Modal Add RT khusus di bawah RW ini -->
-                        @if($child->type == 'rw')
-                        <div class="modal fade" id="addRTModal{{ $child->id }}" tabindex="-1" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered" role="document">
-                                <div class="modal-content rounded-4 border-0 shadow-lg">
-                                    <form action="{{ route('admin.kelola-wilayah.store') }}" method="POST">
-                                        @csrf
-                                        <input type="hidden" name="type" value="rt">
-                                        <input type="hidden" name="parent_id" value="{{ $child->id }}">
-                                        
-                                        <div class="modal-header border-bottom-0 pb-0">
-                                            <h5 class="modal-title fw-bold text-primary"><i class="bx bx-map-pin me-2"></i> Tambah RT di {{ $child->name }}</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <div class="bg-label-primary p-3 rounded-3 mb-4">
-                                                <label class="form-label fw-semibold text-primary">Nama RT <span class="text-danger">*</span></label>
-                                                <div class="input-group input-group-merge">
-                                                    <span class="input-group-text"><i class="bx bx-home-circle"></i></span>
-                                                    <input type="text" name="name" class="form-control" placeholder="Contoh: RT 01" required>
-                                                </div>
-                                            </div>
-
-                                            <div class="d-flex align-items-center mb-3">
-                                                <div class="flex-grow-1 border-bottom"></div>
-                                                <span class="px-3 text-muted small fw-semibold">BUAT AKUN ADMIN (OPSIONAL)</span>
-                                                <div class="flex-grow-1 border-bottom"></div>
-                                            </div>
+                        @push('modals')
+                            @include('admin.region_management.partials.modals', ['region' => $child])
+                            
+                            <!-- Modal Add RT khusus di bawah RW ini -->
+                            @if($child->type == 'rw')
+                            <div class="modal fade" id="addRTModal{{ $child->id }}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered" role="document">
+                                    <div class="modal-content rounded-4 border-0 shadow-lg">
+                                        <form action="{{ route('admin.kelola-wilayah.store') }}" method="POST">
+                                            @csrf
+                                            <input type="hidden" name="type" value="rt">
+                                            <input type="hidden" name="parent_id" value="{{ $child->id }}">
                                             
-                                            <p class="text-muted small text-center mb-4">Isi form di bawah jika Anda ingin langsung membuatkan akun akses untuk pengurus wilayah ini.</p>
+                                            <div class="modal-header border-bottom-0 pb-0">
+                                                <h5 class="modal-title fw-bold text-primary"><i class="bx bx-map-pin me-2"></i> Tambah RT di {{ $child->name }}</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="mb-4">
+                                                    <label class="form-label fw-semibold">Nama RT <span class="text-danger">*</span></label>
+                                                    <div class="input-group input-group-merge">
+                                                        <span class="input-group-text"><i class="bx bx-home-circle"></i></span>
+                                                        <input type="text" name="name" class="form-control" placeholder="Contoh: RT 01" required>
+                                                    </div>
+                                                </div>
 
-                                            <div class="row g-3">
-                                                <div class="col-12">
-                                                    <label class="form-label fw-semibold">Nama Pengurus</label>
-                                                    <div class="input-group input-group-merge">
-                                                        <span class="input-group-text"><i class="bx bx-user"></i></span>
-                                                        <input type="text" name="admin_name" class="form-control" placeholder="Contoh: Bpk. Budi Santoso">
-                                                    </div>
+                                                <div class="d-flex align-items-center mb-3">
+                                                    <div class="flex-grow-1 border-bottom"></div>
+                                                    <span class="px-3 text-muted small fw-semibold">BUAT AKUN ADMIN (OPSIONAL)</span>
+                                                    <div class="flex-grow-1 border-bottom"></div>
                                                 </div>
-                                                <div class="col-12">
-                                                    <label class="form-label fw-semibold">Email Pengurus</label>
-                                                    <div class="input-group input-group-merge">
-                                                        <span class="input-group-text"><i class="bx bx-envelope"></i></span>
-                                                        <input type="email" name="admin_email" class="form-control" placeholder="Email aktif">
+                                                
+                                                <p class="text-muted small text-center mb-4">Isi form di bawah jika Anda ingin langsung membuatkan akun akses untuk pengurus wilayah ini.</p>
+
+                                                <div class="row g-3">
+                                                    <div class="col-12">
+                                                        <label class="form-label fw-semibold">Nama Pengurus</label>
+                                                        <div class="input-group input-group-merge">
+                                                            <span class="input-group-text"><i class="bx bx-user"></i></span>
+                                                            <input type="text" name="admin_name" class="form-control" placeholder="Contoh: Bpk. Budi Santoso">
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div class="col-12">
-                                                    <label class="form-label fw-semibold">Password Sementara</label>
-                                                    <div class="input-group input-group-merge">
-                                                        <span class="input-group-text"><i class="bx bx-lock-alt"></i></span>
-                                                        <input type="text" name="admin_password" class="form-control" placeholder="Biarkan kosong untuk: password123">
+                                                    <div class="col-12">
+                                                        <label class="form-label fw-semibold">Email Pengurus</label>
+                                                        <div class="input-group input-group-merge">
+                                                            <span class="input-group-text"><i class="bx bx-envelope"></i></span>
+                                                            <input type="email" name="admin_email" class="form-control" placeholder="Email aktif">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-12">
+                                                        <label class="form-label fw-semibold">Password Sementara</label>
+                                                        <div class="input-group input-group-merge">
+                                                            <span class="input-group-text"><i class="bx bx-lock-alt"></i></span>
+                                                            <input type="text" name="admin_password" class="form-control" placeholder="Biarkan kosong untuk: password123">
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="modal-footer border-top-0 pt-0">
-                                            <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Batal</button>
-                                            <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm"><i class="bx bx-save me-1"></i> Simpan Data</button>
-                                        </div>
-                                    </form>
+                                            <div class="modal-footer border-top-0 pt-0">
+                                                <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Batal</button>
+                                                <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm"><i class="bx bx-save me-1"></i> Simpan Data</button>
+                                            </div>
+                                        </form>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        @endif
+                            @endif
+                        @endpush
 
                     @endforeach
                 </div>
@@ -306,6 +318,7 @@
     </div>
 </div>
 
+@push('modals')
 <!-- Modal Add Region (Utama) -->
 <div class="modal fade" id="addRegionModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
@@ -319,8 +332,8 @@
                 <div class="modal-body">
                     <input type="hidden" name="type" value="{{ $targetType }}">
                     
-                    <div class="bg-label-primary p-3 rounded-3 mb-4">
-                        <label class="form-label fw-semibold text-primary">Nama {{ strtoupper($targetType) }} <span class="text-danger">*</span></label>
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Nama {{ strtoupper($targetType) }} <span class="text-danger">*</span></label>
                         <div class="input-group input-group-merge">
                             <span class="input-group-text"><i class="bx bx-home-circle"></i></span>
                             <input type="text" name="name" class="form-control" placeholder="Contoh: {{ strtoupper($targetType) }} 01" required>
@@ -367,5 +380,6 @@
         </div>
     </div>
 </div>
+@endpush
 
 @endsection

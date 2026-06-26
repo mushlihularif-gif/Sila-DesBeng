@@ -13,6 +13,9 @@ class ManualReport extends Model
     {
         parent::boot();
 
+        // Terapkan isolasi wilayah secara otomatis untuk Admin RT/RW
+        static::addGlobalScope(new \App\Models\Scopes\RegionIsolationScope('creator'));
+
         static::saving(function ($model) {
             // Sanitize text fields to prevent stored XSS
             if ($model->isDirty('description')) {

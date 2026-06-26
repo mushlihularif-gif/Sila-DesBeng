@@ -41,6 +41,24 @@
                                 @endforeach
                             </select>
                         </div>
+                        @elseif(auth()->user()->role === 'admin_kecamatan')
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bx bx-search"></i></span>
+                                <input type="text" name="search" class="form-control" placeholder="Cari nama atau email..." value="{{ $search }}">
+                                <button class="btn btn-primary" type="submit">Cari</button>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <select name="filter_desa_id" class="form-select" onchange="this.form.submit()">
+                                <option value="">-- Semua Desa --</option>
+                                @foreach($desaOptions as $opt)
+                                    <option value="{{ $opt->id }}" {{ $filter_desa_id == $opt->id ? 'selected' : '' }}>
+                                        {{ $opt->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
                         @else
                         <div class="col-md-6">
                             <div class="input-group">

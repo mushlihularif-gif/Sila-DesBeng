@@ -94,13 +94,25 @@ class ActivityController extends Controller
             'cancellation_status' => 'pending',
         ]);
 
+        $regionId = null;
+        if ($type === 'rental') {
+            $regionId = $order->barang->region_id ?? null;
+        } elseif ($type === 'gas') {
+            $regionId = $order->gas->region_id ?? null;
+        } elseif ($type === 'mobil') {
+            $regionId = $order->mobil->region_id ?? null;
+        } elseif ($type === 'fasilitas') {
+            $regionId = $order->fasilitas->region_id ?? null;
+        }
+
         // Create notification for admin
-        Notification::create([
+        \App\Models\AdminNotification::create([
             'title' => 'Permintaan Pembatalan Pesanan',
             'message' => "User " . Auth::user()->name . " mengajukan pembatalan pesanan #{$order->order_number}. Alasan: {$request->reason}",
             'type' => 'cancellation_request',
-            'user_id' => null, // For admin
-            'admin_id' => \App\Models\User::where('role', 'admin')->first()->id ?? 1, // Dynamically get the first admin ID
+            'reference_id' => $order->id,
+            'region_id' => $regionId,
+            'is_read' => false,
         ]);
 
         return response()->json([

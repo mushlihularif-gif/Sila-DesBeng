@@ -44,53 +44,78 @@ public function index(Request $request)
     $availableYears = array_unique(array_merge($rentalYears, $gasYears, [now()->year]));
     rsort($availableYears);
 
-    $rentalRequests = RentalBooking::withTrashed()->with(['user', 'barang'])
-        ->where(function($q) {
-            $q->where('status', 'pending')
-              ->orWhere('cancellation_status', 'pending');
-        })
-        ->get()
-        ->map(function ($item) {
-            $item->type = 'rental';
-            $item->item_name = $item->barang->nama_barang ?? 'Unknown Item';
-            return $item;
-        });
-    Log::info('DashboardController: Rental requests fetched. Count: ' . $rentalRequests->count());
+    $baseRental = $this->applyRegionFilter(RentalBooking::withTrashed());
+    $baseGas = $this->applyRegionFilter(GasOrder::withTrashed());
+    $baseMobil = $this->applyRegionFilter(\App\Models\MobilBooking::withTrashed());
 
-    // Ambil pesanan gas yang tertunda atau minta batal
-    $gasRequests = GasOrder::withTrashed()->with('user')
-        ->where(function($q) {
-             $q->where('status', 'pending')
-               ->orWhere('cancellation_status', 'pending');
-        })
-        ->get()
-        ->map(function ($item) {
-            $item->type = 'gas';
-            $item->item_name = $item->item_name ?? 'Gas Order'; 
-            return $item;
+    // Filter by specific village if requested
+    $selectedDesaId = request('desa_id');
+    if ($selectedDesaId && $selectedDesaId !== 'all') {
+        $baseRental->whereHas('user', function($q) use ($selectedDesaId) {
+            $q->where('region_id', $selectedDesaId);
         });
+        $baseGas->whereHas('user', function($q) use ($selectedDesaId) {
+            $q->where('region_id', $selectedDesaId);
+        });
+        $baseMobil->whereHas('user', function($q) use ($selectedDesaId) {
+            $q->where('region_id', $selectedDesaId);
+        });
+    }
 
-    // Gabungkan dan urutkan berdasarkan created_at desc
-    $latestRequests = $rentalRequests->concat($gasRequests)->sortByDesc('created_at')->take(5);
+    $rentalRequests = collect();
+    $gasRequests = collect();
+    $latestRequests = collect();
+
+    // Hanya admin tingkat desa ke bawah yang mengurus pesanan/permintaan
+    if (in_array(auth()->user()->role, ['admin_desa', 'lurah', 'admin_rw', 'admin_rt'])) {
+        $rentalRequests = $baseRental->clone()->with(['user', 'barang'])
+            ->where(function($q) {
+                $q->where('status', 'pending')
+                  ->orWhere('cancellation_status', 'pending');
+            })
+            ->get()
+            ->map(function ($item) {
+                $item->type = 'rental';
+                $item->item_name = $item->barang->nama_barang ?? 'Unknown Item';
+                return $item;
+            });
+        Log::info('DashboardController: Rental requests fetched. Count: ' . $rentalRequests->count());
+
+        // Ambil pesanan gas yang tertunda atau minta batal
+        $gasRequests = $baseGas->clone()->with('user')
+            ->where(function($q) {
+                 $q->where('status', 'pending')
+                   ->orWhere('cancellation_status', 'pending');
+            })
+            ->get()
+            ->map(function ($item) {
+                $item->type = 'gas';
+                $item->item_name = $item->item_name ?? 'Gas Order'; 
+                return $item;
+            });
+
+        // Gabungkan dan urutkan berdasarkan created_at desc
+        $latestRequests = $rentalRequests->concat($gasRequests)->sortByDesc('created_at')->take(5);
+    }
 
     // Hitung statistik nyata
-    $totalOrders = RentalBooking::withTrashed()->count() + GasOrder::withTrashed()->count();
+    $totalOrders = $baseRental->clone()->count() + $baseGas->clone()->count();
     
     // Hitung total order selesai/sukses
-    $completedRentals = RentalBooking::withTrashed()->where('status', 'completed')->count();
-    $completedGas = GasOrder::withTrashed()->where('status', 'completed')->count();
+    $completedRentals = $baseRental->clone()->where('status', 'completed')->count();
+    $completedGas = $baseGas->clone()->where('status', 'completed')->count();
     $completedOrders = $completedRentals + $completedGas;
 
     // Hitung statistik untuk Donut Chart (Total Transaksi per Kategori) - Filter Tahun Ini & Tidak Cancel
-    $rentalCount = RentalBooking::withTrashed()->whereYear('created_at', $selectedYear)
+    $rentalCount = $baseRental->clone()->whereYear('created_at', $selectedYear)
         ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
         ->count();
 
-    $gasCount = GasOrder::withTrashed()->whereYear('created_at', $selectedYear)
+    $gasCount = $baseGas->clone()->whereYear('created_at', $selectedYear)
         ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
         ->count();
 
-    $mobilCount = \App\Models\MobilBooking::withTrashed()->whereYear('created_at', $selectedYear)
+    $mobilCount = $baseMobil->clone()->whereYear('created_at', $selectedYear)
         ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
         ->count();
 
@@ -103,14 +128,14 @@ public function index(Request $request)
     // Hitung performa bulanan (total transaksi per bulan)
     $monthlyPerformance = array_fill(0, 12, 0);
     
-    $rentalCounts = RentalBooking::withTrashed()
+    $rentalCounts = $baseRental->clone()
         ->selectRaw('MONTH(created_at) as month, COUNT(*) as count')
         ->whereYear('created_at', $selectedYear)
         ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
         ->groupBy('month')
         ->pluck('count', 'month');
 
-    $gasCounts = GasOrder::withTrashed()
+    $gasCounts = $baseGas->clone()
         ->selectRaw('MONTH(created_at) as month, COUNT(*) as count')
         ->whereYear('created_at', $selectedYear)
         ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
@@ -138,7 +163,7 @@ public function index(Request $request)
     ];
     
     // Pendapatan dari sistem (RentalBooking)
-    foreach (RentalBooking::withTrashed()->selectRaw('SUM(total_amount) as total, MONTH(created_at) as month')
+    foreach ($baseRental->clone()->selectRaw('SUM(total_amount) as total, MONTH(created_at) as month')
         ->whereYear('created_at', $selectedYear)
         ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
         ->groupBy('month')
@@ -147,7 +172,7 @@ public function index(Request $request)
     }
 
     // Pendapatan dari pesanan gas
-    foreach (GasOrder::withTrashed()->selectRaw('SUM(price * quantity) as total, MONTH(created_at) as month')
+    foreach ($baseGas->clone()->selectRaw('SUM(price * quantity) as total, MONTH(created_at) as month')
         ->whereYear('created_at', $selectedYear)
         ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
         ->groupBy('month')
@@ -156,7 +181,8 @@ public function index(Request $request)
     }
     
     // Pendapatan dari laporan manual
-    foreach (ManualReport::selectRaw('SUM(amount * quantity) as total, MONTH(transaction_date) as month')
+    $baseManual = $this->applyRegionFilter(ManualReport::query(), 'creator');
+    foreach ($baseManual->clone()->selectRaw('SUM(amount * quantity) as total, MONTH(transaction_date) as month')
         ->whereYear('transaction_date', $selectedYear)
         ->groupBy('month')
         ->pluck('total', 'month') as $month => $amount) {
@@ -168,23 +194,48 @@ public function index(Request $request)
     
     // Hitung statistik item populer (data nyata dari database) - Filter Tahun Ini
     $popularItems = [
-        'gas_lpg_3kg' => GasOrder::withTrashed()->whereYear('created_at', $selectedYear)->where('item_name', 'LIKE', '%3%')->count(),
-        'sound_system' => RentalBooking::withTrashed()->whereYear('created_at', $selectedYear)->whereHas('barang', function($q) {
+        'gas_lpg_3kg' => $baseGas->clone()->whereYear('created_at', $selectedYear)->where('item_name', 'LIKE', '%3%')->count(),
+        'sound_system' => $baseRental->clone()->whereYear('created_at', $selectedYear)->whereHas('barang', function($q) {
                 $q->where('nama_barang', 'LIKE', '%Sound%');
             })->count(),
-        'tenda_komplit' => RentalBooking::withTrashed()->whereYear('created_at', $selectedYear)->whereHas('barang', function($q) {
+        'tenda_komplit' => $baseRental->clone()->whereYear('created_at', $selectedYear)->whereHas('barang', function($q) {
                 $q->where('nama_barang', 'LIKE', '%Tenda%');
             })->count(),
-        'meja_kursi' => RentalBooking::withTrashed()->whereYear('created_at', $selectedYear)->whereHas('barang', function($q) {
+        'meja_kursi' => $baseRental->clone()->whereYear('created_at', $selectedYear)->whereHas('barang', function($q) {
                 $q->where('nama_barang', 'LIKE', '%Meja%')
                   ->orWhere('nama_barang', 'LIKE', '%Kursi%');
             })->count(),
     ];
 
+    // Filter wilayah untuk User
+    $baseUser = User::query();
+    $currentUser = auth()->user();
+    if ($currentUser && $currentUser->region_id && in_array($currentUser->role, ['admin_rt', 'admin_rw'])) {
+        $allowedRegionIds = \App\Models\Region::getDescendantIds($currentUser->region_id);
+        $allowedRegionIds[] = $currentUser->region_id;
+        $baseUser->whereIn('region_id', $allowedRegionIds);
+    }
+    
+    if ($selectedDesaId && $selectedDesaId !== 'all') {
+        $baseUser->where('region_id', $selectedDesaId);
+    }
+
+    // Ambil daftar Desa untuk dropdown filter
+    $desaList = collect();
+    if (in_array(auth()->user()->role, ['super_admin', 'admin'])) {
+        $desaList = \App\Models\Region::where('type', 'desa')->get();
+    } elseif (auth()->user()->role === 'admin_kecamatan') {
+        $desaList = \App\Models\Region::where('type', 'desa')
+                        ->where('parent_id', auth()->user()->region_id)
+                        ->get();
+    } elseif (in_array(auth()->user()->role, ['admin_desa', 'lurah'])) {
+        $desaList = \App\Models\Region::where('id', auth()->user()->region_id)->get();
+    }
+
     $data = [
-        'totalUsers' => User::count(),
+        'totalUsers' => $baseUser->clone()->count(),
         'totalOrders' => $totalOrders,
-        'newUsers' => User::whereDate('created_at', '>=', now()->subMonth())->count(),
+        'newUsers' => $baseUser->clone()->whereDate('created_at', '>=', now()->subMonth())->count(),
         'completedOrders' => $completedOrders,
         'latestRequests' => $latestRequests,
         'totalPending' => $totalPending,
@@ -193,6 +244,8 @@ public function index(Request $request)
         'mobilCount' => $mobilCount,
         'selectedYear' => $selectedYear,
         'availableYears' => $availableYears,
+        'desaList' => $desaList,
+        'selectedDesaId' => $selectedDesaId,
         // Data nyata untuk grafik
         'monthlyPerformance' => $monthlyPerformance,
         'monthlyIncome' => $monthlyIncome,

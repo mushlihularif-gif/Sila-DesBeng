@@ -77,6 +77,15 @@ class RentalBookingController extends Controller
 
         // Server-side price recalculation to prevent parameter tampering
         $item = Barang::findOrFail($validated['barang_id']);
+
+        // Validate stock before proceeding
+        if (!$item->hasStock($validated['quantity'])) {
+            return response()->json([
+                'success' => false,
+                'message' => "Mohon maaf, stok tidak mencukupi. Sisa stok: {$item->stok}"
+            ], 400);
+        }
+
         $totalAmount = $item->harga_sewa * $validated['quantity'] * $daysCount;
 
         // Tangani unggahan bukti pembayaran
@@ -119,6 +128,7 @@ class RentalBookingController extends Controller
         \App\Models\AdminNotification::create([
             'type' => 'rental_request',
             'reference_id' => $booking->id,
+            'region_id' => $item->region_id,
             'title' => 'Permintaan Penyewaan Baru',
             'message' => 'Permintaan penyewaan ' . $item->nama_barang . ' dari ' . Auth::user()->name,
             'is_read' => false,

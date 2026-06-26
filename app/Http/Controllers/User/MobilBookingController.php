@@ -58,6 +58,15 @@ class MobilBookingController extends Controller
         ]);
 
         $item = Mobil::findOrFail($validated['mobil_id']);
+        
+        // Validate availability before proceeding
+        if ($item->status !== 'tersedia') {
+            return response()->json([
+                'success' => false,
+                'message' => "Mohon maaf, mobil sedang tidak tersedia saat ini."
+            ], 400);
+        }
+
         $totalAmount = $item->harga_sewa * $validated['quantity'] * $validated['distance_km'];
 
         $paymentProofPath = null;

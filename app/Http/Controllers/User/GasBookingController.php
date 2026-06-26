@@ -32,6 +32,14 @@ class GasBookingController extends Controller
         // Get gas item
         $gas = Gas::findOrFail($validated['gas_id']);
         
+        // Validate stock before proceeding
+        if (!$gas->hasStock($validated['quantity'])) {
+            return response()->json([
+                'success' => false,
+                'message' => "Mohon maaf, stok tidak mencukupi. Sisa stok: {$gas->stok}"
+            ], 400);
+        }
+
         // Calculate total
         $totalAmount = $gas->harga_satuan * $validated['quantity'];
 
@@ -78,6 +86,7 @@ class GasBookingController extends Controller
         AdminNotification::create([
             'type' => 'gas_order',
             'reference_id' => $order->id,
+            'region_id' => $gas->region_id,
             'title' => 'Pesanan Gas Baru',
             'message' => 'Pesanan ' . $gas->jenis_gas . ' dari ' . Auth::user()->name,
             'is_read' => false,

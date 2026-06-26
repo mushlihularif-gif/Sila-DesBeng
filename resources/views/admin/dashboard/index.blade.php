@@ -31,8 +31,10 @@
                             </div>
                             <div class="col-12 mt-auto">
                                 <div class="px-4 pb-2">
-                                    <p class="mb-3 text-muted">Sistem Pelayanan Terpadu berbasis Digital <br><span class="fw-bold text-dark">Pemerintahan Desa Pematang Duku Timur</span></p>
+                                    <p class="mb-3 text-muted">Sistem Pelayanan Terpadu berbasis Digital <br><span class="fw-bold text-dark">{{ \App\Models\Region::find(auth()->user()->region_id)->name ?? 'Pemerintah Kabupaten Bengkalis' }}</span></p>
+                                    @if(in_array(auth()->user()->role, ['admin_desa', 'lurah']))
                                     <a href="{{ route('admin.siladesbeng.profile-bumdes') }}" class="btn btn-outline-primary">Profil Pemerintah Desa</a>
+                                    @endif
                                 </div>
                                 <div class="px-3 pb-3">
                                     <div id="dashboardBannerCarousel" class="carousel slide" data-bs-ride="carousel">
@@ -98,18 +100,34 @@
                                     <span class="badge bg-label-warning rounded-pill">Tahun {{ $selectedYear }}</span>
                                 </div>
                                 <div class="d-flex flex-column flex-sm-row gap-2 mt-3 mt-sm-0">
+                                    @if(in_array(auth()->user()->role, ['super_admin', 'admin', 'admin_kecamatan']))
                                     <select class="form-select form-select-sm" id="desaSelect" style="min-width: 200px;">
-                                        <option selected>Desa Pematang Duku Timur</option>
+                                        <option value="all" {{ $selectedDesaId == 'all' || empty($selectedDesaId) ? 'selected' : '' }}>Semua Desa</option>
+                                        @foreach($desaList as $desa)
+                                            <option value="{{ $desa->id }}" {{ $selectedDesaId == $desa->id ? 'selected' : '' }}>{{ $desa->name }}</option>
+                                        @endforeach
                                     </select>
+                                    @endif
                                     <select class="form-select form-select-sm" id="tahunSelect" style="min-width: 100px;">
                                         @foreach($availableYears as $year)
                                             <option value="{{ $year }}" {{ $year == $selectedYear ? 'selected' : '' }}>{{ $year }}</option>
                                         @endforeach
                                     </select>
                                     <script>
-                                        document.getElementById('tahunSelect').addEventListener('change', function() {
-                                            window.location.href = "{{ route('admin.dashboard') }}?year=" + this.value;
-                                        });
+                                        function updateFilters() {
+                                            let year = document.getElementById('tahunSelect').value;
+                                            let desaSelect = document.getElementById('desaSelect');
+                                            let url = "{{ route('admin.dashboard') }}?year=" + year;
+                                            if (desaSelect) {
+                                                url += "&desa_id=" + desaSelect.value;
+                                            }
+                                            window.location.href = url;
+                                        }
+                                        document.getElementById('tahunSelect').addEventListener('change', updateFilters);
+                                        let desaSel = document.getElementById('desaSelect');
+                                        if (desaSel) {
+                                            desaSel.addEventListener('change', updateFilters);
+                                        }
                                     </script>
                                 </div>
                             </div>
@@ -123,8 +141,7 @@
             <div class="mb-3"></div>
 
             <!-- Kartu Unit - Lebar Penuh -->
-            <div class="row mb-4">
-                @php
+            @php
                     $laporanPendingCount = 0;
                     if(class_exists('\App\Models\Laporan')) {
                         $laporanPendingCount = \App\Models\Laporan::where('status', 'Pending')->count() ?? 0;
@@ -182,7 +199,8 @@
 
                     $activeServicesList = isset($activeServices) && count($activeServices) > 0 ? $activeServices : ['Penyewaan Alat', 'Penjualan Gas'];
                 @endphp
-
+            @if(in_array(auth()->user()->role, ['admin_desa', 'admin_rt', 'admin_rw', 'lurah']))
+            <div class="row mb-4">
                 @foreach($activeServicesList as $serviceName)
                     @if(isset($unitConfigs[$serviceName]))
                         @php $config = $unitConfigs[$serviceName]; @endphp
@@ -206,6 +224,7 @@
                     @endif
                 @endforeach
             </div>
+            @endif
 
                 <!-- Bagian Notifikasi -->
                 <div class="row mb-4">
@@ -584,6 +603,7 @@
                 </div>
 
                 <!-- Produk Populer -->
+                @if(in_array(auth()->user()->role, ['admin_desa', 'admin_rt', 'admin_rw', 'lurah']))
                 <div class="row mb-4">
                     <div class="col-12">
                         <div class="card shadow-sm">
@@ -665,6 +685,7 @@
                         </div>
                     </div>
                 </div>
+                @endif
 
                 <!-- Custom CSS untuk Product Cards -->
                 <style>

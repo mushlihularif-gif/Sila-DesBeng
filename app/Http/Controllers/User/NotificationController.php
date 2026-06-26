@@ -11,6 +11,7 @@ class NotificationController extends Controller
     public function index()
     {
         // Ambil semua notifikasi untuk pengguna yang diautentikasi, diurutkan dari yang terbaru
+<<<<<<< HEAD
         $notifications = Notification::where(function ($query) {
                 $query->where('user_id', auth()->id())
                       ->orWhere(function ($q) {
@@ -18,6 +19,9 @@ class NotificationController extends Controller
                             ->where('type', 'pesan_admin');
                       });
             })
+=======
+        $notifications = Notification::where('user_id', auth()->id())
+>>>>>>> 51af67d3288f5c263305ddf37823cfdb4ae0f347
             ->with('user')
             ->orderByDesc('created_at')
             ->get();

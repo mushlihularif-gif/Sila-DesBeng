@@ -11,6 +11,7 @@ class FasilitasUmumBooking extends Model
 
     protected $table = 'fasilitas_umum_bookings';
 
+
     protected $fillable = [
         'uuid',
         'order_number',
@@ -46,6 +47,9 @@ class FasilitasUmumBooking extends Model
     protected static function boot()
     {
         parent::boot();
+
+        // Terapkan isolasi wilayah secara otomatis untuk Admin RT/RW
+        static::addGlobalScope(new \App\Models\Scopes\RegionIsolationScope('user'));
 
         static::creating(function ($model) {
             if (empty($model->uuid)) {

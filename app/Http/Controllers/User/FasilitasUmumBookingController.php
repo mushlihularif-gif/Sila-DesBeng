@@ -58,6 +58,14 @@ class FasilitasUmumBookingController extends Controller
         }
 
         $item = FasilitasUmum::findOrFail($validated['fasilitas_id']);
+        
+        // Validate stock before proceeding
+        if ($item->stok < $validated['quantity']) {
+            return response()->json([
+                'success' => false,
+                'message' => "Mohon maaf, fasilitas sedang tidak tersedia. Sisa stok: {$item->stok}"
+            ], 400);
+        }
 
         $booking = FasilitasUmumBooking::create([
             'user_id' => Auth::id(),

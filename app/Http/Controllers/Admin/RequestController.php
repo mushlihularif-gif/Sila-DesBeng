@@ -25,7 +25,7 @@ class RequestController extends Controller
         $category = $request->get('category', 'all');
 
         // Buat query untuk pemesanan penyewaan (Include deleted for history)
-        $rentalQuery = RentalBooking::withTrashed()->with(['user', 'barang']);
+        $rentalQuery = $this->applyRegionFilter(RentalBooking::withTrashed())->with(['user', 'barang']);
         if ($status !== 'all') {
             if ($status === 'cancellation_pending') {
                 $rentalQuery->where('cancellation_status', 'pending');
@@ -41,7 +41,7 @@ class RequestController extends Controller
         }
 
         // Buat query untuk pesanan gas (Include deleted for history)
-        $gasQuery = GasOrder::withTrashed()->with('user');
+        $gasQuery = $this->applyRegionFilter(GasOrder::withTrashed())->with('user');
         if ($status !== 'all') {
             if ($status === 'cancellation_pending') {
                 $gasQuery->where('cancellation_status', 'pending');
@@ -57,7 +57,7 @@ class RequestController extends Controller
         }
 
         // Buat query untuk mobil
-        $mobilQuery = MobilBooking::withTrashed()->with(['user', 'mobil']);
+        $mobilQuery = $this->applyRegionFilter(MobilBooking::withTrashed())->with(['user', 'mobil']);
         if ($status !== 'all') {
             if ($status === 'cancellation_pending') {
                 $mobilQuery->where('cancellation_status', 'pending');
@@ -73,7 +73,7 @@ class RequestController extends Controller
         }
 
         // Buat query untuk fasilitas umum
-        $fasilitasQuery = FasilitasUmumBooking::withTrashed()->with(['user', 'fasilitas']);
+        $fasilitasQuery = $this->applyRegionFilter(FasilitasUmumBooking::withTrashed())->with(['user', 'fasilitas']);
         if ($status !== 'all') {
             if ($status === 'cancellation_pending') {
                 $fasilitasQuery->where('cancellation_status', 'pending');
@@ -137,43 +137,53 @@ class RequestController extends Controller
             $fasilitasRequests = $fasilitasQuery->orderByRaw($statusOrder)->get();
         }
 
-        // Hitung statistik
+        // Helper untuk stats agar filter wilayah selalu diterapkan
+        $qRental = clone $rentalQuery; $qRental->getQuery()->orders = null;
+        $qGas = clone $gasQuery; $qGas->getQuery()->orders = null;
+        $qMobil = clone $mobilQuery; $qMobil->getQuery()->orders = null;
+        $qFasilitas = clone $fasilitasQuery; $qFasilitas->getQuery()->orders = null;
+
+        $baseRT = $this->applyRegionFilter(RentalBooking::withTrashed());
+        $baseGT = $this->applyRegionFilter(GasOrder::withTrashed());
+        $baseMT = $this->applyRegionFilter(MobilBooking::withTrashed());
+        $baseFT = $this->applyRegionFilter(FasilitasUmumBooking::withTrashed());
+
         // Hitung statistik (Include deleted for history functionality)
         $stats = [
-            'total' => RentalBooking::withTrashed()->count() + GasOrder::withTrashed()->count() + MobilBooking::withTrashed()->count() + FasilitasUmumBooking::withTrashed()->count(),
-            'pending' => RentalBooking::where('status', 'pending')->count() + GasOrder::where('status', 'pending')->count() + MobilBooking::where('status', 'pending')->count() + FasilitasUmumBooking::where('status', 'pending')->count(),
-            'approved' => RentalBooking::where('status', 'approved')->count() + GasOrder::where('status', 'approved')->count() + MobilBooking::where('status', 'approved')->count() + FasilitasUmumBooking::where('status', 'approved')->count(),
-            'rejected' => RentalBooking::withTrashed()->whereIn('status', ['cancelled', 'rejected'])->count() + GasOrder::withTrashed()->whereIn('status', ['cancelled', 'rejected'])->count() + MobilBooking::withTrashed()->whereIn('status', ['cancelled', 'rejected'])->count() + FasilitasUmumBooking::withTrashed()->whereIn('status', ['cancelled', 'rejected'])->count(),
-            'cancellation_pending' => RentalBooking::where('cancellation_status', 'pending')->count() + GasOrder::where('cancellation_status', 'pending')->count() + MobilBooking::where('cancellation_status', 'pending')->count() + FasilitasUmumBooking::where('cancellation_status', 'pending')->count(),
-            'rental_total' => RentalBooking::withTrashed()->count(),
-            'gas_total' => GasOrder::withTrashed()->count(),
-            'mobil_total' => MobilBooking::withTrashed()->count(),
-            'fasilitas_total' => FasilitasUmumBooking::withTrashed()->count(),
-            'active_rental_count' => RentalBooking::whereIn('status', ['confirmed', 'being_prepared', 'in_delivery', 'arrived'])->sum('quantity'),
+            'total' => $baseRT->clone()->count() + $baseGT->clone()->count() + $baseMT->clone()->count() + $baseFT->clone()->count(),
+            'pending' => $baseRT->clone()->where('status', 'pending')->count() + $baseGT->clone()->where('status', 'pending')->count() + $baseMT->clone()->where('status', 'pending')->count() + $baseFT->clone()->where('status', 'pending')->count(),
+            'approved' => $baseRT->clone()->where('status', 'approved')->count() + $baseGT->clone()->where('status', 'approved')->count() + $baseMT->clone()->where('status', 'approved')->count() + $baseFT->clone()->where('status', 'approved')->count(),
+            'rejected' => $baseRT->clone()->whereIn('status', ['cancelled', 'rejected'])->count() + $baseGT->clone()->whereIn('status', ['cancelled', 'rejected'])->count() + $baseMT->clone()->whereIn('status', ['cancelled', 'rejected'])->count() + $baseFT->clone()->whereIn('status', ['cancelled', 'rejected'])->count(),
+            'cancellation_pending' => $baseRT->clone()->where('cancellation_status', 'pending')->count() + $baseGT->clone()->where('cancellation_status', 'pending')->count() + $baseMT->clone()->where('cancellation_status', 'pending')->count() + $baseFT->clone()->where('cancellation_status', 'pending')->count(),
+            'rental_total' => $baseRT->clone()->count(),
+            'gas_total' => $baseGT->clone()->count(),
+            'mobil_total' => $baseMT->clone()->count(),
+            'fasilitas_total' => $baseFT->clone()->count(),
+            'active_rental_count' => $baseRT->clone()->whereIn('status', ['confirmed', 'being_prepared', 'in_delivery', 'arrived'])->sum('quantity'),
         ];
 
         // Hitung notifikasi detail
         $notificationCounts = [
             'rental' => [
-                'pending' => RentalBooking::where('status', 'pending')->count(),
-                'cancellation' => RentalBooking::where('cancellation_status', 'pending')->count(),
-                'total' => RentalBooking::where('status', 'pending')->orWhere('cancellation_status', 'pending')->count()
+                'pending' => $baseRT->clone()->where('status', 'pending')->count(),
+                'cancellation' => $baseRT->clone()->where('cancellation_status', 'pending')->count(),
+                'total' => $baseRT->clone()->where(function($q) { $q->where('status', 'pending')->orWhere('cancellation_status', 'pending'); })->count()
             ],
             'gas' => [
-                'pending' => GasOrder::where('status', 'pending')->count(),
-                'cancellation' => GasOrder::where('cancellation_status', 'pending')->count(),
-                'total' => GasOrder::where('status', 'pending')->orWhere('cancellation_status', 'pending')->count()
+                'pending' => $baseGT->clone()->where('status', 'pending')->count(),
+                'cancellation' => $baseGT->clone()->where('cancellation_status', 'pending')->count(),
+                'total' => $baseGT->clone()->where(function($q) { $q->where('status', 'pending')->orWhere('cancellation_status', 'pending'); })->count()
             ],
             'mobil' => [
-                'pending' => MobilBooking::where('status', 'pending')->count(),
-                'cancellation' => MobilBooking::where('cancellation_status', 'pending')->count(),
-                'total' => MobilBooking::where('status', 'pending')->orWhere('cancellation_status', 'pending')->count()
+                'pending' => $baseMT->clone()->where('status', 'pending')->count(),
+                'cancellation' => $baseMT->clone()->where('cancellation_status', 'pending')->count(),
+                'total' => $baseMT->clone()->where(function($q) { $q->where('status', 'pending')->orWhere('cancellation_status', 'pending'); })->count()
             ],
             'fasilitas' => [
-                'pending' => FasilitasUmumBooking::where('status', 'pending')->count(),
-                'cancellation' => FasilitasUmumBooking::where('cancellation_status', 'pending')->count(),
-                'total' => FasilitasUmumBooking::where('status', 'pending')->orWhere('cancellation_status', 'pending')->count()
-            ],
+                'pending' => $baseFT->clone()->where('status', 'pending')->count(),
+                'cancellation' => $baseFT->clone()->where('cancellation_status', 'pending')->count(),
+                'total' => $baseFT->clone()->where(function($q) { $q->where('status', 'pending')->orWhere('cancellation_status', 'pending'); })->count()
+            ]
         ];
 
         return response()
@@ -245,8 +255,8 @@ class RequestController extends Controller
                     throw new \Exception("Permintaan sudah diproses sebelumnya.");
                 }
 
-                // Ambil barang dan validasi stok
-                $barang = $model->barang;
+                // Ambil barang dan validasi stok dengan PESSIMISTIC LOCK (mencegah race condition)
+                $barang = \App\Models\Barang::where('id', $model->barang_id)->lockForUpdate()->firstOrFail();
                 $quantity = $model->quantity;
 
                 if (!$barang->hasStock($quantity)) {
@@ -287,7 +297,8 @@ class RequestController extends Controller
                 $model = MobilBooking::with('mobil')->findOrFail($id);
                 if ($model->status !== 'pending') throw new \Exception("Permintaan sudah diproses sebelumnya.");
 
-                $mobil = $model->mobil;
+                // PESSIMISTIC LOCK
+                $mobil = \App\Models\Mobil::where('id', $model->mobil_id)->lockForUpdate()->firstOrFail();
                 if ($mobil->status !== 'tersedia') throw new \Exception("Mobil sedang tidak tersedia.");
                 
                 $mobil->update(['status' => 'disewa']);
@@ -300,7 +311,8 @@ class RequestController extends Controller
                 $model = FasilitasUmumBooking::with('fasilitas')->findOrFail($id);
                 if ($model->status !== 'pending') throw new \Exception("Permintaan sudah diproses sebelumnya.");
 
-                $fasilitas = $model->fasilitas;
+                // PESSIMISTIC LOCK
+                $fasilitas = \App\Models\FasilitasUmum::where('id', $model->fasilitas_id)->lockForUpdate()->firstOrFail();
                 if ($fasilitas->stok < 1) throw new \Exception("Fasilitas sedang tidak tersedia.");
                 
                 $fasilitas->decrement('stok');
@@ -320,8 +332,8 @@ class RequestController extends Controller
                     throw new \Exception("Permintaan sudah diproses sebelumnya.");
                 }
 
-                // Ambil gas dan validasi stok
-                $gas = Gas::findOrFail($model->gas_id);
+                // Ambil gas dan validasi stok dengan PESSIMISTIC LOCK
+                $gas = \App\Models\Gas::where('id', $model->gas_id)->lockForUpdate()->firstOrFail();
                 $quantity = $model->quantity;
 
                 if (!$gas->hasStock($quantity)) {
