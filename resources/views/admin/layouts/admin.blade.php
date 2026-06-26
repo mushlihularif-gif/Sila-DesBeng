@@ -1042,6 +1042,8 @@
                 });
             </script>
             @yield('scripts')
+            @yield('modals')
+            @stack('modals')
 </body>
 
 </html>

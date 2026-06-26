@@ -168,7 +168,9 @@
         </div>
     </div>
 
-    @include('admin.profile.modals')
+    @section('modals')
+        @include('admin.profile.modals')
+    @endsection
 
     <style>
         .profile-card, .security-card {
