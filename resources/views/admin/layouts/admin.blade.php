@@ -473,7 +473,7 @@
                     </li>
 
                     <!-- Unit Layanan (Dropdown) -->
-                @if(in_array(auth()->user()->role, ['super_admin', 'admin', 'admin_kecamatan', 'admin_desa']))
+                @if(in_array(auth()->user()->role, ['super_admin', 'admin', 'admin_desa']))
                 <li class="menu-item {{ request()->is('admin/unit*') ? 'open active show' : '' }}">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
                         <i class="menu-icon tf-icons bx bx-building-house"></i>
@@ -549,7 +549,7 @@
                 </li>
 
                 <!-- Aktivitas -->
-                @if(in_array(auth()->user()->role, ['super_admin', 'admin', 'admin_kecamatan', 'admin_desa']))
+                @if(in_array(auth()->user()->role, ['admin_desa', 'lurah', 'admin_rw', 'admin_rt']))
                 <li
                     class="menu-item {{ request()->is('admin/aktivitas/permintaan-pengajuan*') || request()->is('admin/aktivitas/bukti-transaksi*') || request()->routeIs('admin.laporan.log') ? 'open active show' : '' }}">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -647,7 +647,15 @@
                         </li>
                         <li class="menu-item {{ request()->routeIs('admin.siladesbeng.profile-bumdes') || request()->routeIs('admin.siladesbeng.bumdes.*') ? 'active' : '' }}">
                             <a href="{{ route('admin.siladesbeng.profile-bumdes') }}" class="menu-link">
-                                <div>Pemerintah Desa</div>
+                                @php
+                                    $sidebarRegionLabel = 'Pemerintah Desa';
+                                    if(auth()->user()->role === 'admin_kecamatan') {
+                                        $sidebarRegionLabel = 'Pemerintah Kecamatan';
+                                    } elseif(in_array(auth()->user()->role, ['super_admin', 'admin'])) {
+                                        $sidebarRegionLabel = 'Pemerintah Kabupaten';
+                                    }
+                                @endphp
+                                <div>{{ $sidebarRegionLabel }}</div>
                             </a>
                         </li>
                     </ul>
@@ -708,7 +716,13 @@
                                 <a class="nav-link dropdown-toggle hide-arrow position-relative" href="javascript:void(0);" data-bs-toggle="dropdown" data-bs-auto-close="outside">
                                     <i class="bx bx-bell bx-sm"></i>
                                     @php
-                                        $unreadCount = \App\Models\AdminNotification::where('is_read', false)->count();
+                                        $notifQuery = \App\Models\AdminNotification::query();
+                                        if (in_array(auth()->user()->role, ['super_admin', 'admin'])) {
+                                            $notifQuery->whereNull('region_id');
+                                        } else {
+                                            $notifQuery->where('region_id', auth()->user()->region_id);
+                                        }
+                                        $unreadCount = (clone $notifQuery)->where('is_read', false)->count();
                                     @endphp
                                     @if($unreadCount > 0)
                                     <span class="badge bg-danger rounded-pill badge-notifications position-absolute" style="top: -2px; right: -6px; font-size: 10px; min-width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;">{{ $unreadCount > 99 ? '99+' : $unreadCount }}</span>
@@ -726,7 +740,7 @@
                                     <li>
                                         <div style="max-height: 280px; overflow-y: auto;">
                                             @php
-                                                $recentNotifications = \App\Models\AdminNotification::latest()->take(5)->get();
+                                                $recentNotifications = (clone $notifQuery)->latest()->take(5)->get();
                                             @endphp
                                             @forelse($recentNotifications as $notif)
                                             <a href="{{ route('admin.aktivitas.permintaan-pengajuan.index') }}" class="dropdown-item d-flex align-items-start gap-3 py-3 px-4" style="white-space: normal; {{ !$notif->is_read ? 'background-color: rgba(105, 108, 255, 0.08);' : '' }}">
@@ -846,14 +860,14 @@
                     @yield('content')
                     
                     <!-- Footer -->
-                    <footer class="content-footer footer bg-footer-theme">
-                        <div class="container-xxl d-flex flex-wrap justify-content-between py-3 flex-md-row flex-column text-muted">
-                            <div class="mb-2 mb-md-0">
-                                © {{ date('Y') }} Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis
-                            </div>
-                            <div>
-                                Made with <span class="text-danger">❤️</span> by <a href="#" target="_blank" class="footer-link fw-bolder">SiladesBeng Project Team</a>
-                            </div>
+                    <footer class="content-footer footer bg-white border-top mt-auto">
+                        <div class="container-xxl py-4 text-center">
+                            <p class="mb-1 text-muted">
+                                &copy; {{ date('Y') }} <strong>Sistem Sinergi Layanan dan Aspirasi Desa</strong> di Kabupaten Bengkalis
+                            </p>
+                            <p class="mb-0 text-muted small">
+                                Made with <span class="text-danger">&#10084;</span> by <span class="fw-bolder text-primary">SiladesBeng Project Team</span>
+                            </p>
                         </div>
                     </footer>
                     <!-- / Footer -->

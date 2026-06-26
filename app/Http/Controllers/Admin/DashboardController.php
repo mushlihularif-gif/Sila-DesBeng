@@ -48,34 +48,55 @@ public function index(Request $request)
     $baseGas = $this->applyRegionFilter(GasOrder::withTrashed());
     $baseMobil = $this->applyRegionFilter(\App\Models\MobilBooking::withTrashed());
 
-    $rentalRequests = $baseRental->clone()->with(['user', 'barang'])
-        ->where(function($q) {
-            $q->where('status', 'pending')
-              ->orWhere('cancellation_status', 'pending');
-        })
-        ->get()
-        ->map(function ($item) {
-            $item->type = 'rental';
-            $item->item_name = $item->barang->nama_barang ?? 'Unknown Item';
-            return $item;
+    // Filter by specific village if requested
+    $selectedDesaId = request('desa_id');
+    if ($selectedDesaId && $selectedDesaId !== 'all') {
+        $baseRental->whereHas('user', function($q) use ($selectedDesaId) {
+            $q->where('region_id', $selectedDesaId);
         });
-    Log::info('DashboardController: Rental requests fetched. Count: ' . $rentalRequests->count());
-
-    // Ambil pesanan gas yang tertunda atau minta batal
-    $gasRequests = $baseGas->clone()->with('user')
-        ->where(function($q) {
-             $q->where('status', 'pending')
-               ->orWhere('cancellation_status', 'pending');
-        })
-        ->get()
-        ->map(function ($item) {
-            $item->type = 'gas';
-            $item->item_name = $item->item_name ?? 'Gas Order'; 
-            return $item;
+        $baseGas->whereHas('user', function($q) use ($selectedDesaId) {
+            $q->where('region_id', $selectedDesaId);
         });
+        $baseMobil->whereHas('user', function($q) use ($selectedDesaId) {
+            $q->where('region_id', $selectedDesaId);
+        });
+    }
 
-    // Gabungkan dan urutkan berdasarkan created_at desc
-    $latestRequests = $rentalRequests->concat($gasRequests)->sortByDesc('created_at')->take(5);
+    $rentalRequests = collect();
+    $gasRequests = collect();
+    $latestRequests = collect();
+
+    // Hanya admin tingkat desa ke bawah yang mengurus pesanan/permintaan
+    if (in_array(auth()->user()->role, ['admin_desa', 'lurah', 'admin_rw', 'admin_rt'])) {
+        $rentalRequests = $baseRental->clone()->with(['user', 'barang'])
+            ->where(function($q) {
+                $q->where('status', 'pending')
+                  ->orWhere('cancellation_status', 'pending');
+            })
+            ->get()
+            ->map(function ($item) {
+                $item->type = 'rental';
+                $item->item_name = $item->barang->nama_barang ?? 'Unknown Item';
+                return $item;
+            });
+        Log::info('DashboardController: Rental requests fetched. Count: ' . $rentalRequests->count());
+
+        // Ambil pesanan gas yang tertunda atau minta batal
+        $gasRequests = $baseGas->clone()->with('user')
+            ->where(function($q) {
+                 $q->where('status', 'pending')
+                   ->orWhere('cancellation_status', 'pending');
+            })
+            ->get()
+            ->map(function ($item) {
+                $item->type = 'gas';
+                $item->item_name = $item->item_name ?? 'Gas Order'; 
+                return $item;
+            });
+
+        // Gabungkan dan urutkan berdasarkan created_at desc
+        $latestRequests = $rentalRequests->concat($gasRequests)->sortByDesc('created_at')->take(5);
+    }
 
     // Hitung statistik nyata
     $totalOrders = $baseRental->clone()->count() + $baseGas->clone()->count();
@@ -194,6 +215,22 @@ public function index(Request $request)
         $allowedRegionIds[] = $currentUser->region_id;
         $baseUser->whereIn('region_id', $allowedRegionIds);
     }
+    
+    if ($selectedDesaId && $selectedDesaId !== 'all') {
+        $baseUser->where('region_id', $selectedDesaId);
+    }
+
+    // Ambil daftar Desa untuk dropdown filter
+    $desaList = collect();
+    if (in_array(auth()->user()->role, ['super_admin', 'admin'])) {
+        $desaList = \App\Models\Region::where('type', 'desa')->get();
+    } elseif (auth()->user()->role === 'admin_kecamatan') {
+        $desaList = \App\Models\Region::where('type', 'desa')
+                        ->where('parent_id', auth()->user()->region_id)
+                        ->get();
+    } elseif (in_array(auth()->user()->role, ['admin_desa', 'lurah'])) {
+        $desaList = \App\Models\Region::where('id', auth()->user()->region_id)->get();
+    }
 
     $data = [
         'totalUsers' => $baseUser->clone()->count(),
@@ -207,6 +244,8 @@ public function index(Request $request)
         'mobilCount' => $mobilCount,
         'selectedYear' => $selectedYear,
         'availableYears' => $availableYears,
+        'desaList' => $desaList,
+        'selectedDesaId' => $selectedDesaId,
         // Data nyata untuk grafik
         'monthlyPerformance' => $monthlyPerformance,
         'monthlyIncome' => $monthlyIncome,

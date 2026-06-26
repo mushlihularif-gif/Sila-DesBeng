@@ -84,6 +84,7 @@ class GasBookingController extends Controller
         AdminNotification::create([
             'type' => 'gas_order',
             'reference_id' => $order->id,
+            'region_id' => $gas->region_id,
             'title' => 'Pesanan Gas Baru',
             'message' => 'Pesanan ' . $gas->jenis_gas . ' dari ' . Auth::user()->name,
             'is_read' => false,

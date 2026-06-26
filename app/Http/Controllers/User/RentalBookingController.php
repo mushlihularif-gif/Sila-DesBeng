@@ -117,6 +117,7 @@ class RentalBookingController extends Controller
         \App\Models\AdminNotification::create([
             'type' => 'rental_request',
             'reference_id' => $booking->id,
+            'region_id' => $item->region_id,
             'title' => 'Permintaan Penyewaan Baru',
             'message' => 'Permintaan penyewaan ' . $item->nama_barang . ' dari ' . Auth::user()->name,
             'is_read' => false,

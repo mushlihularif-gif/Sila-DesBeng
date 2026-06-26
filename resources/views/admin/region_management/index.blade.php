@@ -46,7 +46,15 @@
                                 </a>
                             @endif
                             <h4 class="card-title text-primary fw-bold mb-1">Manajemen Wilayah: {{ $parentRegion->name }}</h4>
-                            <p class="card-text text-muted mb-0">Kelola hierarki struktur tingkat bawah (RW/RT) beserta akun kepengurusannya secara terpusat.</p>
+                            @php
+                                $childLevelText = '';
+                                if($parentRegion->type == 'kabupaten') $childLevelText = '(Kecamatan)';
+                                elseif($parentRegion->type == 'kecamatan') $childLevelText = '(Desa/Kelurahan)';
+                                elseif(in_array($parentRegion->type, ['desa', 'kelurahan'])) $childLevelText = '(Dusun/RW)';
+                                elseif($parentRegion->type == 'rw') $childLevelText = '(RT)';
+                                else $childLevelText = 'di bawahnya';
+                            @endphp
+                            <p class="card-text text-muted mb-0">Kelola hierarki wilayah {{ $childLevelText }} beserta akun kepengurusannya secara terpusat.</p>
                         </div>
                         <button type="button" class="btn btn-primary rounded-pill px-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#addRegionModal">
                             <i class="bx bx-plus me-1"></i> Tambah {{ strtoupper($targetType) }}

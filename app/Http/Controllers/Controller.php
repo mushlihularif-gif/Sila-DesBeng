@@ -14,7 +14,7 @@ abstract class Controller
     protected function applyRegionFilter($query, $userRelationName = 'user')
     {
         $currentUser = auth()->user();
-        if ($currentUser && $currentUser->region_id && in_array($currentUser->role, ['admin_rt', 'admin_rw'])) {
+        if ($currentUser && $currentUser->region_id && in_array($currentUser->role, ['admin_kecamatan', 'admin_desa', 'lurah', 'admin_rw', 'admin_rt'])) {
             $allowedRegionIds = \App\Models\Region::getDescendantIds($currentUser->region_id);
             $allowedRegionIds[] = $currentUser->region_id;
 
