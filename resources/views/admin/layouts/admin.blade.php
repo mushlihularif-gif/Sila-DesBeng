@@ -696,7 +696,7 @@
                                 <a class="nav-link dropdown-toggle hide-arrow position-relative" href="javascript:void(0);" data-bs-toggle="dropdown" data-bs-auto-close="outside">
                                     <i class="bx bx-bell bx-sm"></i>
                                     @php
-                                        $unreadCount = \App\Models\Notification::where('is_read', false)->count();
+                                        $unreadCount = \App\Models\AdminNotification::where('is_read', false)->count();
                                     @endphp
                                     @if($unreadCount > 0)
                                     <span class="badge bg-danger rounded-pill badge-notifications position-absolute" style="top: -2px; right: -6px; font-size: 10px; min-width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;">{{ $unreadCount > 99 ? '99+' : $unreadCount }}</span>
@@ -705,7 +705,7 @@
                                 <ul class="dropdown-menu dropdown-menu-end py-0" style="width: 380px; max-height: 420px;">
                                     <li class="dropdown-menu-header border-bottom">
                                         <div class="dropdown-header d-flex align-items-center justify-content-between py-3 px-4">
-                                            <h6 class="mb-0 fw-bold">Notifikasi</h6>
+                                            <h6 class="mb-0 fw-bold">Notifikasi Admin</h6>
                                             @if($unreadCount > 0)
                                             <span class="badge rounded-pill bg-label-primary">{{ $unreadCount }} Baru</span>
                                             @endif
@@ -714,18 +714,19 @@
                                     <li>
                                         <div style="max-height: 280px; overflow-y: auto;">
                                             @php
-                                                $recentNotifications = \App\Models\Notification::with('user')->latest()->take(5)->get();
+                                                $recentNotifications = \App\Models\AdminNotification::latest()->take(5)->get();
                                             @endphp
                                             @forelse($recentNotifications as $notif)
-                                            <a href="{{ route('admin.notifications.index') }}" class="dropdown-item d-flex align-items-start gap-3 py-3 px-4" style="white-space: normal; {{ !$notif->is_read ? 'background-color: rgba(105, 108, 255, 0.08);' : '' }}">
+                                            <a href="{{ route('admin.aktivitas.permintaan-pengajuan.index') }}" class="dropdown-item d-flex align-items-start gap-3 py-3 px-4" style="white-space: normal; {{ !$notif->is_read ? 'background-color: rgba(105, 108, 255, 0.08);' : '' }}">
                                                 <div class="flex-shrink-0">
                                                     <div class="rounded-circle d-flex align-items-center justify-content-center {{ !$notif->is_read ? 'bg-label-primary' : 'bg-label-secondary' }}" style="width: 36px; height: 36px;">
-                                                        <i class="bx {{ $notif->type === 'update_status' ? 'bx-refresh' : ($notif->type === 'new_order' ? 'bx-cart' : 'bx-bell') }} {{ !$notif->is_read ? 'text-primary' : 'text-secondary' }}"></i>
+                                                        <i class="bx {{ $notif->type === 'cancellation_request' ? 'bx-error-circle' : ($notif->type === 'gas_order' ? 'bx-gas-pump' : 'bx-bell') }} {{ !$notif->is_read ? 'text-primary' : 'text-secondary' }}"></i>
                                                     </div>
                                                 </div>
                                                 <div class="flex-grow-1">
                                                     <p class="mb-0 fw-semibold small">{{ $notif->title }}</p>
-                                                    <small class="text-muted">{{ $notif->created_at->diffForHumans() }}</small>
+                                                    <p class="mb-0 text-muted" style="font-size: 0.75rem;">{{ \Illuminate\Support\Str::limit($notif->message, 50) }}</p>
+                                                    <small class="text-muted" style="font-size: 0.7rem;">{{ $notif->created_at->diffForHumans() }}</small>
                                                 </div>
                                             </a>
                                             @empty
@@ -737,8 +738,8 @@
                                         </div>
                                     </li>
                                     <li class="dropdown-menu-footer border-top">
-                                        <a href="{{ route('admin.notifications.index') }}" class="dropdown-item text-center py-3 text-primary fw-semibold">
-                                            Lihat Semua Notifikasi
+                                        <a href="{{ route('admin.aktivitas.permintaan-pengajuan.index') }}" class="dropdown-item text-center py-3 text-primary fw-semibold">
+                                            <i class="bx bx-list-ul me-1"></i> Lihat Semua Permintaan
                                         </a>
                                     </li>
                                 </ul>

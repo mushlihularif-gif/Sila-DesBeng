@@ -21,16 +21,16 @@ class ReportController extends Controller
         $endDate = $request->get('end_date');
 
         // Query Penyewaan
-        $rentalQuery = RentalBooking::withTrashed()->with('user')->orderByDesc('created_at');
+        $rentalQuery = $this->applyRegionFilter(RentalBooking::withTrashed())->with('user')->orderByDesc('created_at');
         
         // Query Gas
-        $gasQuery = GasOrder::withTrashed()->with('user')->orderByDesc('created_at');
+        $gasQuery = $this->applyRegionFilter(GasOrder::withTrashed())->with('user')->orderByDesc('created_at');
 
         // Query Mobil
-        $mobilQuery = \App\Models\MobilBooking::withTrashed()->with(['user', 'mobil'])->orderByDesc('created_at');
+        $mobilQuery = $this->applyRegionFilter(\App\Models\MobilBooking::withTrashed())->with(['user', 'mobil'])->orderByDesc('created_at');
 
         // Query Fasilitas Umum
-        $fasilitasQuery = \App\Models\FasilitasUmumBooking::withTrashed()->with(['user', 'fasilitas'])->orderByDesc('created_at');
+        $fasilitasQuery = $this->applyRegionFilter(\App\Models\FasilitasUmumBooking::withTrashed())->with(['user', 'fasilitas'])->orderByDesc('created_at');
 
         // Terapkan Filter
         if ($status && $status !== 'all') {

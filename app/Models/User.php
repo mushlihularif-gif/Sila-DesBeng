@@ -19,6 +19,9 @@ class User extends Authenticatable
     {
         parent::boot();
 
+        // Terapkan isolasi wilayah secara otomatis untuk Admin RT/RW
+        static::addGlobalScope(new \App\Models\Scopes\RegionIsolationScope(''));
+
         static::creating(function ($model) {
             if (empty($model->uuid)) {
                 $model->uuid = Str::uuid()->toString();

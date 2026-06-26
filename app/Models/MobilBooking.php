@@ -10,6 +10,14 @@ class MobilBooking extends Model
 
     protected $table = 'mobil_bookings';
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Terapkan isolasi wilayah secara otomatis untuk Admin RT/RW
+        static::addGlobalScope(new \App\Models\Scopes\RegionIsolationScope('user'));
+    }
+
     protected $fillable = [
         'uuid',
         'order_number',
