@@ -22,9 +22,20 @@ class MobilBookingController extends Controller
         
         $setting = SystemSetting::first();
         
+        // Ambil SOP Penyewaan Mobil
+        $region = \App\Models\Region::find(Auth::user()->region_id);
+        $paymentInfo = $region ? ($region->payment_info ?? []) : [];
+        
+        $activeSop = $paymentInfo['sop_mobil_active'] ?? 'ditanggung';
+        
+        $defaultSopDitanggung = "1. Penyewa wajib menjaga mobil sewaan dengan baik.\n2. Jika terjadi KERUSAKAN atau KEHILANGAN mobil selama masa penyewaan, maka SEPENUHNYA menjadi tanggung jawab PENGGUNA (penyewa) untuk mengganti rugi atau memperbaiki mobil tersebut sesuai dengan kerusakan.\n3. Keterlambatan pengembalian dapat dikenakan denda sesuai ketentuan yang berlaku.";
+        $defaultSopTidakDitanggung = "1. Penyewa wajib menjaga mobil sewaan dengan baik.\n2. Jika terjadi kerusakan atau kehilangan mobil selama masa penyewaan yang diakibatkan oleh faktor ketidaksengajaan/bencana, maka TIDAK DITANGGUNG oleh pengguna (penyewa) karena telah didukung oleh dana operasional/APBD.\n3. Namun pengguna tetap diwajibkan melaporkan kejadian tersebut secara transparan.";
+        
+        $sop_mobil = $paymentInfo['sop_mobil_' . $activeSop] ?? ($activeSop == 'ditanggung' ? $defaultSopDitanggung : $defaultSopTidakDitanggung);
+        
         $quantity = request()->get('quantity', 1);
         
-        return view('users.mobil-rental-booking', compact('item', 'setting', 'quantity'));
+        return view('users.mobil-rental-booking', compact('item', 'setting', 'quantity', 'sop_mobil'));
     }
 
     public function store(Request $request)

@@ -4,24 +4,76 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Mobil;
+use App\Models\Region;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class UnitPenyewaanMobilController extends Controller
 {
+    // Default SOP Texts
+    private $defaultSopDitanggung = "1. Penyewa wajib menjaga mobil sewaan dengan baik.\n2. Jika terjadi KERUSAKAN atau KEHILANGAN mobil selama masa penyewaan, maka SEPENUHNYA menjadi tanggung jawab PENGGUNA (penyewa) untuk mengganti rugi atau memperbaiki mobil tersebut sesuai dengan kerusakan.\n3. Keterlambatan pengembalian dapat dikenakan denda sesuai ketentuan yang berlaku.";
+    private $defaultSopTidakDitanggung = "1. Penyewa wajib menjaga mobil sewaan dengan baik.\n2. Jika terjadi kerusakan atau kehilangan mobil selama masa penyewaan yang diakibatkan oleh faktor ketidaksengajaan/bencana, maka TIDAK DITANGGUNG oleh pengguna (penyewa) karena telah didukung oleh dana operasional.\n3. Namun pengguna tetap diwajibkan melaporkan kejadian tersebut secara transparan.";
+
     public function index(Request $request)
     {
         $search = $request->get('search');
         
         $mobils = Mobil::query()
             ->when($search, function ($query, $search) {
-                return $query->where('nama_mobil', 'LIKE', "%{$search}%")
-                           ->orWhere('kategori', 'LIKE', "%{$search}%");
+                return $query->searchWhereLike(['nama_mobil', 'kategori'], $search);
             })
             ->paginate(6)
             ->appends(['search' => $search]);
         
         return view('admin.unit.mobil.index', compact('mobils', 'search'));
+    }
+
+    public function sop()
+    {
+        $user = auth()->user();
+        $region = Region::find($user->region_id);
+
+        if (!$region) {
+            return redirect()->back()->with('error', 'Region tidak ditemukan.');
+        }
+
+        $paymentInfo = $region->payment_info ?? [];
+        
+        $sop_active = $paymentInfo['sop_mobil_active'] ?? 'ditanggung';
+        $sop_ditanggung = $paymentInfo['sop_mobil_ditanggung'] ?? $this->defaultSopDitanggung;
+        $sop_tidak_ditanggung = $paymentInfo['sop_mobil_tidak_ditanggung'] ?? $this->defaultSopTidakDitanggung;
+        
+        $default_ditanggung = $this->defaultSopDitanggung;
+        $default_tidak_ditanggung = $this->defaultSopTidakDitanggung;
+
+        return view('admin.unit.mobil.sop', compact('sop_active', 'sop_ditanggung', 'sop_tidak_ditanggung', 'default_ditanggung', 'default_tidak_ditanggung'));
+    }
+
+    public function updateSop(Request $request)
+    {
+        $request->validate([
+            'sop_mobil_active' => 'required|in:ditanggung,tidak_ditanggung',
+            'sop_mobil_ditanggung' => 'nullable|string',
+            'sop_mobil_tidak_ditanggung' => 'nullable|string',
+        ]);
+
+        $user = auth()->user();
+        $region = Region::find($user->region_id);
+
+        if (!$region) {
+            return redirect()->back()->with('error', 'Region tidak ditemukan.');
+        }
+
+        $paymentInfo = $region->payment_info ?? [];
+        $paymentInfo['sop_mobil_active'] = $request->sop_mobil_active;
+        $paymentInfo['sop_mobil_ditanggung'] = $request->sop_mobil_ditanggung ?? $this->defaultSopDitanggung;
+        $paymentInfo['sop_mobil_tidak_ditanggung'] = $request->sop_mobil_tidak_ditanggung ?? $this->defaultSopTidakDitanggung;
+
+        $region->update([
+            'payment_info' => $paymentInfo,
+        ]);
+
+        return redirect()->route('admin.unit.mobil.sop')->with('success', 'Ketentuan SOP berhasil diperbarui.');
     }
 
     public function create()

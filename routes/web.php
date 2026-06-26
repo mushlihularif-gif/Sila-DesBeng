@@ -31,6 +31,10 @@ Route::get('/beranda', [App\Http\Controllers\User\BerandaController::class, 'ind
     ->name('beranda')
     ->middleware('role:user,guest');
 
+// Live Search API
+Route::get('/beranda/live-search', [App\Http\Controllers\User\BerandaController::class, 'liveSearch'])
+    ->name('beranda.live-search');
+
 // Kabar Daerah / Pengumuman
 Route::get('/kabar-daerah', [App\Http\Controllers\User\AnnouncementController::class, 'index'])
     ->name('announcements.index')
@@ -339,6 +343,8 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
     // Route Unit
     Route::prefix('unit')->group(function () {
         // Penyewaan Alat
+        Route::get('penyewaan/sop', [UnitPenyewaanController::class, 'sop'])->name('admin.unit.penyewaan.sop');
+        Route::post('penyewaan/sop', [UnitPenyewaanController::class, 'updateSop'])->name('admin.unit.penyewaan.sop.update');
         Route::resource('penyewaan', UnitPenyewaanController::class)->names([
             'index' => 'admin.unit.penyewaan.index',
             'create' => 'admin.unit.penyewaan.create',
@@ -350,6 +356,8 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
         ]);
 
         // Penyewaan Mobil
+        Route::get('mobil/sop', [\App\Http\Controllers\Admin\UnitPenyewaanMobilController::class, 'sop'])->name('admin.unit.mobil.sop');
+        Route::post('mobil/sop', [\App\Http\Controllers\Admin\UnitPenyewaanMobilController::class, 'updateSop'])->name('admin.unit.mobil.sop.update');
         Route::resource('mobil', \App\Http\Controllers\Admin\UnitPenyewaanMobilController::class)->names([
             'index' => 'admin.unit.mobil.index',
             'create' => 'admin.unit.mobil.create',
@@ -372,6 +380,8 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
         ]);
 
         // Fasilitas Umum
+        Route::get('fasilitas_umum/sop', [\App\Http\Controllers\Admin\UnitFasilitasUmumController::class, 'sop'])->name('admin.unit.fasilitas_umum.sop');
+        Route::post('fasilitas_umum/sop', [\App\Http\Controllers\Admin\UnitFasilitasUmumController::class, 'updateSop'])->name('admin.unit.fasilitas_umum.sop.update');
         Route::resource('fasilitas_umum', \App\Http\Controllers\Admin\UnitFasilitasUmumController::class)->names([
             'index' => 'admin.unit.fasilitas_umum.index',
             'create' => 'admin.unit.fasilitas_umum.create',

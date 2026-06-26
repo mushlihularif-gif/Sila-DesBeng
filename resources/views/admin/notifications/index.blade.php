@@ -80,23 +80,9 @@
                                     </div>
                                 </td>
                                 <td class="py-3">
-                                    @if($notification->user)
-                                        <div class="d-flex align-items-center">
-                                            <div class="avatar avatar-sm me-2 border rounded-circle">
-                                                <span class="avatar-initial rounded-circle bg-primary-subtle text-primary fw-bold">
-                                                    {{ strtoupper(substr($notification->user->name, 0, 1)) }}
-                                                </span>
-                                            </div>
-                                            <div>
-                                                <div class="fw-semibold text-dark small">{{ $notification->user->name }}</div>
-                                                <small class="text-muted" style="font-size: 0.7rem;">{{ $notification->user->email }}</small>
-                                            </div>
-                                        </div>
-                                    @else
-                                        <span class="badge bg-warning-subtle text-warning rounded-pill">
-                                            <i class="bx bx-broadcast me-1"></i> Semua User
-                                        </span>
-                                    @endif
+                                    <span class="badge bg-secondary-subtle text-secondary rounded-pill">
+                                        <i class="bx bx-server me-1"></i> Sistem
+                                    </span>
                                 </td>
                                 <td class="py-3">
                                     <div class="fw-medium text-dark small">{{ $notification->created_at->locale('id')->isoFormat('D MMM Y') }}</div>

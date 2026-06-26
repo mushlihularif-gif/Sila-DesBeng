@@ -4,24 +4,76 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\FasilitasUmum;
+use App\Models\Region;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class UnitFasilitasUmumController extends Controller
 {
+    // Default SOP Texts
+    private $defaultSopDitanggung = "1. Penyewa wajib menjaga fasilitas umum dengan baik.\n2. Jika terjadi KERUSAKAN fasilitas selama masa peminjaman/penyewaan, maka SEPENUHNYA menjadi tanggung jawab PENGGUNA (penyewa) untuk mengganti rugi atau memperbaiki fasilitas tersebut sesuai dengan kerusakan.\n3. Fasilitas harus dikembalikan dalam keadaan bersih dan rapi.";
+    private $defaultSopTidakDitanggung = "1. Penyewa wajib menjaga fasilitas umum dengan baik.\n2. Jika terjadi kerusakan fasilitas selama masa peminjaman/penyewaan yang diakibatkan oleh faktor ketidaksengajaan/bencana, maka TIDAK DITANGGUNG oleh pengguna karena telah didukung oleh dana operasional.\n3. Namun pengguna tetap diwajibkan melaporkan kejadian tersebut secara transparan dan menjaga kebersihan.";
+
     public function index(Request $request)
     {
         $search = $request->get('search');
         
         $fasilitas = FasilitasUmum::query()
             ->when($search, function ($query, $search) {
-                return $query->where('nama_fasilitas', 'LIKE', "%{$search}%")
-                           ->orWhere('kategori', 'LIKE', "%{$search}%");
+                return $query->searchWhereLike(['nama_fasilitas', 'kategori'], $search);
             })
             ->paginate(6)
             ->appends(['search' => $search]);
         
         return view('admin.unit.fasilitas_umum.index', compact('fasilitas', 'search'));
+    }
+
+    public function sop()
+    {
+        $user = auth()->user();
+        $region = Region::find($user->region_id);
+
+        if (!$region) {
+            return redirect()->back()->with('error', 'Region tidak ditemukan.');
+        }
+
+        $paymentInfo = $region->payment_info ?? [];
+        
+        $sop_active = $paymentInfo['sop_fasilitas_active'] ?? 'ditanggung';
+        $sop_ditanggung = $paymentInfo['sop_fasilitas_ditanggung'] ?? $this->defaultSopDitanggung;
+        $sop_tidak_ditanggung = $paymentInfo['sop_fasilitas_tidak_ditanggung'] ?? $this->defaultSopTidakDitanggung;
+        
+        $default_ditanggung = $this->defaultSopDitanggung;
+        $default_tidak_ditanggung = $this->defaultSopTidakDitanggung;
+
+        return view('admin.unit.fasilitas_umum.sop', compact('sop_active', 'sop_ditanggung', 'sop_tidak_ditanggung', 'default_ditanggung', 'default_tidak_ditanggung'));
+    }
+
+    public function updateSop(Request $request)
+    {
+        $request->validate([
+            'sop_fasilitas_active' => 'required|in:ditanggung,tidak_ditanggung',
+            'sop_fasilitas_ditanggung' => 'nullable|string',
+            'sop_fasilitas_tidak_ditanggung' => 'nullable|string',
+        ]);
+
+        $user = auth()->user();
+        $region = Region::find($user->region_id);
+
+        if (!$region) {
+            return redirect()->back()->with('error', 'Region tidak ditemukan.');
+        }
+
+        $paymentInfo = $region->payment_info ?? [];
+        $paymentInfo['sop_fasilitas_active'] = $request->sop_fasilitas_active;
+        $paymentInfo['sop_fasilitas_ditanggung'] = $request->sop_fasilitas_ditanggung ?? $this->defaultSopDitanggung;
+        $paymentInfo['sop_fasilitas_tidak_ditanggung'] = $request->sop_fasilitas_tidak_ditanggung ?? $this->defaultSopTidakDitanggung;
+
+        $region->update([
+            'payment_info' => $paymentInfo,
+        ]);
+
+        return redirect()->route('admin.unit.fasilitas_umum.sop')->with('success', 'Ketentuan SOP berhasil diperbarui.');
     }
 
     public function create()

@@ -208,13 +208,74 @@
                     @endif
                 </div>
 
+                @php
+                    $antarActive = !isset($setting->payment_info['gas_delivery_antar_active']) || $setting->payment_info['gas_delivery_antar_active'];
+                    $jemputActive = !isset($setting->payment_info['gas_delivery_jemput_active']) || $setting->payment_info['gas_delivery_jemput_active'];
+                    $defaultMethod = $antarActive ? 'antar' : 'jemput';
+                @endphp
+                <input type="hidden" name="delivery_method" id="delivery-method-input" value="{{ $defaultMethod }}">
+
+                <!-- Pilihan Metode Pengiriman -->
+                <div class="flex flex-col sm:flex-row justify-center gap-6 mb-10 items-center">
+                    @if($antarActive)
+                    <!-- Antar Card -->
+                    <div class="delivery-method-card {{ $defaultMethod == 'antar' ? 'active' : '' }} cursor-pointer bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 w-48 text-center border-4 border-transparent" data-method="antar">
+                        <div class="mb-4 flex justify-center">
+                            <img src="{{ asset('Admin/img/elements/antar.png') }}" alt="Antar" class="w-20 h-20 object-contain">
+                        </div>
+                        <p class="font-bold text-lg text-gray-800">Diantar</p>
+                    </div>
+                    @endif
+
+                    @if($jemputActive)
+                    <!-- Jemput Card -->
+                    <div class="delivery-method-card {{ $defaultMethod == 'jemput' ? 'active' : '' }} cursor-pointer bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 w-48 text-center border-4 border-transparent" data-method="jemput">
+                        <div class="mb-4 flex justify-center">
+                            <img src="{{ asset('Admin/img/elements/jemput.png') }}" alt="Jemput" class="w-20 h-20 object-contain">
+                        </div>
+                        <p class="font-bold text-lg text-gray-800">Ambil Sendiri</p>
+                    </div>
+                    @endif
+                </div>
+
+                <!-- Info Note -->
+                <div id="antar-note" class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6 rounded-r-lg {{ $defaultMethod == 'antar' ? '' : 'hidden' }}">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-blue-700">
+                                <span class="font-bold">Info:</span> Pesanan Gas akan diantar oleh pihak BUMDes ke alamat Anda.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="jemput-note" class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded-r-lg {{ $defaultMethod == 'jemput' ? '' : 'hidden' }}">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-yellow-700">
+                                <span class="font-bold">NB:</span> Pengambilan Gas dilakukan secara mandiri oleh Anda di lokasi BUMDes.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Kartu Informasi Pembeli -->
                 <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
                     <div class="flex items-center gap-3 mb-4">
                         <svg class="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
                         </svg>
-                        <h3 class="text-lg font-bold text-gray-800">Nama dan Alamat Pembeli</h3>
+                        <h3 class="text-lg font-bold text-gray-800">Nama dan Alamat Lengkap</h3>
                     </div>
                     
                     <div class="space-y-4">
@@ -595,6 +656,21 @@
         50% { top: 100%; }
         100% { top: 0; }
     }
+
+    /* Delivery Method Cards */
+    .delivery-method-card {
+        border: 2px solid transparent;
+        background-color: white;
+    }
+    .delivery-method-card.active {
+        border-color: #3b82f6;
+        background-color: #eff6ff;
+        transform: scale(1.05);
+    }
+    .delivery-method-card:hover:not(.active) {
+        border-color: #93c5fd;
+        transform: translateY(-2px);
+    }
 </style>
 @endpush
 
@@ -606,6 +682,36 @@
 
         const pricePerUnit = {{ $item->harga_satuan }};
         const maxStock = {{ $item->stok }};
+
+        // Delivery Method Logic
+        const deliveryCards = document.querySelectorAll('.delivery-method-card');
+        const deliveryMethodInput = document.getElementById('delivery-method-input');
+        const antarNote = document.getElementById('antar-note');
+        const jemputNote = document.getElementById('jemput-note');
+
+        if (deliveryCards.length > 0) {
+            deliveryCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    const method = this.dataset.method;
+                    
+                    // Update active state on cards
+                    deliveryCards.forEach(c => c.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Update hidden input
+                    deliveryMethodInput.value = method;
+                    
+                    // Toggle notes
+                    if (method === 'antar') {
+                        if(antarNote) antarNote.classList.remove('hidden');
+                        if(jemputNote) jemputNote.classList.add('hidden');
+                    } else {
+                        if(antarNote) antarNote.classList.add('hidden');
+                        if(jemputNote) jemputNote.classList.remove('hidden');
+                    }
+                });
+            });
+        }
 
         // Quantity Selector
         const qtyInput = document.getElementById('quantity-display');

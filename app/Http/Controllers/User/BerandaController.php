@@ -22,158 +22,11 @@ class BerandaController extends Controller
         // $year = date('Y'); // Removed, moved to logic below
         $search = $request->input('search');
         $searchResults = [];
-
         // Handle Search
         if ($search) {
-            // Search Rental Items
-            $rentalResults = \App\Models\Barang::where('nama_barang', 'LIKE', "%{$search}%")
-                ->orWhere('kategori', 'LIKE', "%{$search}%")
-                ->get()
-                ->map(function ($item) {
-                    return (object) [
-                        'id' => $item->id,
-                        'name' => $item->nama_barang,
-                        'image' => $item->foto,
-                        'price' => $item->harga_sewa,
-                        'price_formatted' => 'Rp ' . number_format($item->harga_sewa, 0, ',', '.'),
-                        'stock' => $item->stok,
-                        'type' => 'rental',
-                        'category' => 'Unit Penyewaan Alat', // Or actual category: $item->kategori
-                        'real_category' => $item->kategori,
-                        'unit' => $item->satuan ?? 'unit',
-                        'link' => route('rental.equipment.show', $item->id)
-                    ];
-                });
-
-            // Search Gas Items
-            $gasResults = \App\Models\Gas::where('jenis_gas', 'LIKE', "%{$search}%")
-                ->get()
-                ->map(function ($item) {
-                    return (object) [
-                        'id' => $item->id,
-                        'name' => $item->jenis_gas,
-                        'image' => $item->foto,
-                        'price' => $item->harga_satuan,
-                        'price_formatted' => 'Rp ' . number_format($item->harga_satuan, 0, ',', '.'),
-                        'stock' => $item->stok,
-                        'type' => 'gas',
-                        'category' => 'Unit Penjualan Gas',
-                        'real_category' => 'Gas',
-                        'unit' => 'tabung',
-                        'link' => route('gas.sales.show', $item->id)
-                    ];
-                });
-
-            // Search Mobil Items
-            $mobilResults = \App\Models\Mobil::where('nama_mobil', 'LIKE', "%{$search}%")
-                ->orWhere('kategori', 'LIKE', "%{$search}%")
-                ->get()
-                ->map(function ($item) {
-                    return (object) [
-                        'id' => $item->id,
-                        'name' => $item->nama_mobil,
-                        'image' => $item->foto,
-                        'price' => $item->harga_sewa,
-                        'price_formatted' => 'Rp ' . number_format($item->harga_sewa, 0, ',', '.'),
-                        'stock' => $item->stok,
-                        'type' => 'mobil',
-                        'category' => 'Unit Penyewaan Mobil',
-                        'real_category' => $item->kategori,
-                        'unit' => $item->satuan ?? 'hari',
-                        'link' => route('mobil.rental.show', $item->id)
-                    ];
-                });
-
-            // Search Fasilitas Umum Items
-            $fasilitasResults = \App\Models\FasilitasUmum::where('nama_fasilitas', 'LIKE', "%{$search}%")
-                ->orWhere('kategori', 'LIKE', "%{$search}%")
-                ->get()
-                ->map(function ($item) {
-                    return (object) [
-                        'id' => $item->id,
-                        'name' => $item->nama_fasilitas,
-                        'image' => $item->foto,
-                        'price' => 0, // Fasilitas Umum might be free or negotiated, set 0 for display
-                        'price_formatted' => 'Peminjaman',
-                        'stock' => $item->stok,
-                        'type' => 'fasilitas',
-                        'category' => 'Fasilitas Umum',
-                        'real_category' => $item->kategori,
-                        'unit' => 'kegiatan',
-                        'link' => route('fasilitas.show', $item->id)
-                    ];
-                });
-
-            // Search BUMDes Members (Struktur Organisasi)
-            $bumdesResults = \App\Models\BumdesMember::where('name', 'LIKE', "%{$search}%")
-                ->orWhere('position', 'LIKE', "%{$search}%")
-                ->get()
-                ->map(function ($item) {
-                    // Fix: Don't add 'storage/' here because the view adds it automatically for non-static paths
-                    $photoUrl = $item->photo ? $item->photo : 'Admin/img/avatars/default.png';
-                    
-                    return (object) [
-                        'id' => $item->id,
-                        'name' => $item->name,
-                        'image' => $photoUrl, // Already relative path or URL
-                        'price' => 0,
-                        'price_formatted' => $item->position, // Display Position as "Price"
-                        'stock' => 0,
-                        'type' => 'profile',
-                        'category' => 'Profil BUMDes',
-                        'real_category' => 'Personil',
-                        'unit' => '',
-                        'link' => route('bumdes.detail') // Link to BUMDes profile page
-                    ];
-                });
-
-            // Search Static Developers (Profil SiladesBeng)
-            $developers = [
-                [
-                    'name' => 'Rizqy Hamadi Ken',
-                    'image' => 'User/img/avatars/ken.png',
-                    'position' => 'Pengembang SiladesBeng',
-                    'link' => route('isewa.profile')
-                ],
-                [
-                    'name' => 'Mushlihul Arif',
-                    'image' => 'User/img/avatars/ayep123.jpg',
-                    'position' => 'Pengembang SiladesBeng',
-                    'link' => route('isewa.profile')
-                ],
-                [
-                    'name' => 'Dicki Wahyudi',
-                    'image' => 'User/img/avatars/dicki.png',
-                    'position' => 'Pengembang SiladesBeng',
-                    'link' => route('isewa.profile')
-                ]
-            ];
-
-            $developerResults = collect($developers)->filter(function ($dev) use ($search) {
-                return stripos($dev['name'], $search) !== false || stripos($dev['position'], $search) !== false;
-            })->map(function ($dev) {
-                return (object) [
-                    'id' => 'dev_' . Str::slug($dev['name']),
-                    'name' => $dev['name'],
-                    'image' => $dev['image'],
-                    'price' => 0,
-                    'price_formatted' => $dev['position'],
-                    'stock' => 0,
-                    'type' => 'profile',
-                    'category' => 'Pengembang',
-                    'real_category' => 'Developer',
-                    'unit' => '',
-                    'link' => $dev['link']
-                ];
-            });
-
-            $searchResults = $rentalResults->concat($gasResults)
-                            ->concat($mobilResults)
-                            ->concat($fasilitasResults)
-                            ->concat($bumdesResults)
-                            ->concat($developerResults);
+            $searchResults = $this->performGlobalSearch($search);
         }
-        
+
         // Dapatkan tahun yang dipilih (default ke tahun sekarang)
         $yearRequest = $request->input('year', now()->year);
         $year = (int)$yearRequest; // Strict integer cast
@@ -493,5 +346,212 @@ class BerandaController extends Controller
             'laporan' => $laporanData,
             'pengumuman' => $pengumumanData
         ];
+    }
+
+    /**
+     * API for Live Search Dropdown
+     */
+    public function liveSearch(Request $request)
+    {
+        $search = $request->input('search');
+        
+        if (!$search || strlen($search) < 2) {
+            return response()->json([]);
+        }
+
+        $results = $this->performGlobalSearch($search);
+        
+        // Limit total results for dropdown to keep it clean
+        $results = collect($results)->take(8)->values();
+
+        // Format image URLs for frontend
+        $results = $results->map(function ($item) {
+            $item->image_url = $item->image ? (
+                \Illuminate\Support\Str::startsWith($item->image, ['http', 'https', 'User', 'Admin']) 
+                    ? asset($item->image) 
+                    : asset('storage/' . $item->image)
+            ) : null;
+            return $item;
+        });
+
+        return response()->json($results);
+    }
+
+    /**
+     * Perform global search across all modules
+     */
+    private function performGlobalSearch($search)
+    {
+        // Search Rental Items
+        $rentalResults = \App\Models\Barang::searchWhereLike(['nama_barang', 'kategori'], $search)
+            ->get()
+            ->map(function ($item) {
+                return (object) [
+                    'id' => $item->id,
+                    'name' => $item->nama_barang,
+                    'image' => $item->foto,
+                    'price' => $item->harga_sewa,
+                    'price_formatted' => 'Rp ' . number_format($item->harga_sewa, 0, ',', '.'),
+                    'stock' => $item->stok,
+                    'type' => 'rental',
+                    'category' => 'Unit Penyewaan Alat',
+                    'real_category' => $item->kategori,
+                    'unit' => $item->satuan ?? 'unit',
+                    'link' => route('rental.equipment.show', $item->id)
+                ];
+            });
+
+        // Search Gas Items
+        $gasResults = \App\Models\Gas::searchWhereLike(['jenis_gas', 'kategori'], $search)
+            ->get()
+            ->map(function ($item) {
+                return (object) [
+                    'id' => $item->id,
+                    'name' => $item->jenis_gas,
+                    'image' => $item->foto,
+                    'price' => $item->harga_satuan,
+                    'price_formatted' => 'Rp ' . number_format($item->harga_satuan, 0, ',', '.'),
+                    'stock' => $item->stok,
+                    'type' => 'gas',
+                    'category' => 'Unit Penjualan Gas',
+                    'real_category' => 'Gas',
+                    'unit' => 'tabung',
+                    'link' => route('gas.sales.show', $item->id)
+                ];
+            });
+
+        // Search Mobil Items
+        $mobilResults = \App\Models\Mobil::searchWhereLike(['nama_mobil', 'kategori'], $search)
+            ->get()
+            ->map(function ($item) {
+                return (object) [
+                    'id' => $item->id,
+                    'name' => $item->nama_mobil,
+                    'image' => $item->foto,
+                    'price' => $item->harga_sewa,
+                    'price_formatted' => 'Rp ' . number_format($item->harga_sewa, 0, ',', '.'),
+                    'stock' => $item->stok,
+                    'type' => 'mobil',
+                    'category' => 'Unit Penyewaan Mobil',
+                    'real_category' => $item->kategori,
+                    'unit' => $item->satuan ?? 'hari',
+                    'link' => route('mobil.rental.show', $item->id)
+                ];
+            });
+
+        // Search Fasilitas Umum Items
+        $fasilitasResults = \App\Models\FasilitasUmum::searchWhereLike(['nama_fasilitas', 'kategori'], $search)
+            ->get()
+            ->map(function ($item) {
+                return (object) [
+                    'id' => $item->id,
+                    'name' => $item->nama_fasilitas,
+                    'image' => $item->foto,
+                    'price' => 0,
+                    'price_formatted' => 'Peminjaman',
+                    'stock' => $item->stok,
+                    'type' => 'fasilitas',
+                    'category' => 'Fasilitas Umum',
+                    'real_category' => $item->kategori,
+                    'unit' => 'kegiatan',
+                    'link' => route('fasilitas.show', $item->id)
+                ];
+            });
+
+        // Search BUMDes Members
+        $bumdesResults = \App\Models\BumdesMember::searchWhereLike(['name', 'position'], $search)
+            ->get()
+            ->map(function ($item) {
+                $photoUrl = $item->photo ? $item->photo : 'User/img/avatars/logodomain.png';
+                return (object) [
+                    'id' => $item->id,
+                    'name' => $item->name,
+                    'image' => $photoUrl,
+                    'price' => 0,
+                    'price_formatted' => $item->position,
+                    'stock' => 0,
+                    'type' => 'profile',
+                    'category' => 'Profil BUMDes',
+                    'real_category' => 'Personil',
+                    'unit' => '',
+                    'link' => route('bumdes.detail')
+                ];
+            });
+
+        // Search Static Developers
+        $developers = [
+            [
+                'name' => 'Rizqy Hamadi Ken',
+                'image' => 'User/img/avatars/ken.png',
+                'position' => 'Pengembang SiladesBeng',
+                'link' => '#'
+            ],
+            [
+                'name' => 'Mushlihul Arif',
+                'image' => 'User/img/avatars/ayep123.jpg',
+                'position' => 'Pengembang SiladesBeng',
+                'link' => '#'
+            ],
+            [
+                'name' => 'Dicki Wahyudi',
+                'image' => 'User/img/avatars/dicki.png',
+                'position' => 'Pengembang SiladesBeng',
+                'link' => '#'
+            ]
+        ];
+
+        $developerResults = collect($developers)->filter(function ($dev) use ($search) {
+            $cleanSearch = strtolower(str_replace(['desa ', 'kelurahan ', 'kecamatan ', 'kabupaten '], '', strtolower($search)));
+            return \Illuminate\Support\Str::contains(strtolower($dev['name']), $cleanSearch) || 
+                   \Illuminate\Support\Str::contains(strtolower($dev['position']), $cleanSearch);
+        })->map(function ($dev) {
+            return (object) [
+                'id' => 'dev-' . \Illuminate\Support\Str::slug($dev['name']),
+                'name' => $dev['name'],
+                'image' => $dev['image'],
+                'price' => 0,
+                'price_formatted' => $dev['position'],
+                'stock' => 0,
+                'type' => 'developer',
+                'category' => 'Tim SiladesBeng',
+                'real_category' => 'Pengembang',
+                'unit' => '',
+                'link' => $dev['link']
+            ];
+        });
+
+        // Search Region
+        $regionResults = \App\Models\Region::with('parent')->where('name', 'LIKE', "%{$search}%")
+            ->get()
+            ->map(function ($item) {
+                $typeStr = ucfirst($item->type ?? 'Wilayah');
+                $parentStr = $item->parent ? $item->parent->name : 'Kabupaten Bengkalis';
+                $description = "{$typeStr} dari {$parentStr}";
+
+                return (object) [
+                    'id' => $item->id,
+                    'name' => $item->name,
+                    'image' => null,
+                    'price' => 0,
+                    'price_formatted' => $description,
+                    'stock' => 0,
+                    'type' => 'region',
+                    'category' => 'Wilayah / Desa',
+                    'real_category' => 'Wilayah',
+                    'unit' => '',
+                    'link' => '#'
+                ];
+            });
+
+        return collect([])
+            ->concat($rentalResults)
+            ->concat($gasResults)
+            ->concat($mobilResults)
+            ->concat($fasilitasResults)
+            ->concat($bumdesResults)
+            ->concat($regionResults)
+            ->concat($developerResults)
+            ->values()
+            ->toArray();
     }
 }

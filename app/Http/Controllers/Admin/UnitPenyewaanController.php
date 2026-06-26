@@ -4,27 +4,92 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Barang;
+use App\Models\Region;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class UnitPenyewaanController extends Controller
 {
+    // Default SOP Texts
+    private $defaultSopDitanggung = "1. Penyewa wajib menjaga barang sewaan dengan baik.\n2. Jika terjadi KERUSAKAN atau KEHILANGAN barang selama masa penyewaan, maka SEPENUHNYA menjadi tanggung jawab PENGGUNA (penyewa) untuk mengganti rugi atau memperbaiki alat tersebut sesuai dengan nilai barang.\n3. Keterlambatan pengembalian dapat dikenakan denda sesuai ketentuan yang berlaku.";
+    private $defaultSopTidakDitanggung = "1. Penyewa wajib menjaga barang sewaan dengan baik.\n2. Jika terjadi kerusakan atau kehilangan barang selama masa penyewaan yang diakibatkan oleh faktor ketidaksengajaan/bencana, maka TIDAK DITANGGUNG oleh pengguna (penyewa) karena telah didukung oleh dana operasional.\n3. Namun pengguna tetap diwajibkan melaporkan kejadian tersebut secara transparan.";
+
     /**
      * Menampilkan daftar barang.
      */
     public function index(Request $request)
     {
+        $user = auth()->user();
+        $region = Region::find($user->region_id);
+        $paymentInfo = $region ? ($region->payment_info ?? []) : [];
+        
+        $activeSop = $paymentInfo['sop_penyewaan_active'] ?? 'ditanggung';
+        $sop_penyewaan_alat = $paymentInfo['sop_penyewaan_' . $activeSop] ?? $this->{'defaultSop' . ucfirst(\Illuminate\Support\Str::camel($activeSop))} ?? '';
+
         $search = $request->get('search');
         
         $barangs = Barang::query()
             ->when($search, function ($query, $search) {
-                return $query->where('nama_barang', 'LIKE', "%{$search}%")
-                           ->orWhere('kategori', 'LIKE', "%{$search}%");
+                return $query->searchWhereLike(['nama_barang', 'kategori'], $search);
             })
             ->paginate(6)
             ->appends(['search' => $search]);
         
-        return view('admin.unit.penyewaan.index', compact('barangs', 'search'));
+        return view('admin.unit.penyewaan.index', compact('barangs', 'search', 'sop_penyewaan_alat'));
+    }
+
+    /**
+     * Menampilkan halaman Ketentuan SOP.
+     */
+    public function sop()
+    {
+        $user = auth()->user();
+        $region = Region::find($user->region_id);
+        
+        if (!$region) {
+            return redirect()->back()->with('error', 'Region tidak ditemukan.');
+        }
+
+        $paymentInfo = $region->payment_info ?? [];
+        
+        $sop_active = $paymentInfo['sop_penyewaan_active'] ?? 'ditanggung';
+        $sop_ditanggung = $paymentInfo['sop_penyewaan_ditanggung'] ?? $this->defaultSopDitanggung;
+        $sop_tidak_ditanggung = $paymentInfo['sop_penyewaan_tidak_ditanggung'] ?? $this->defaultSopTidakDitanggung;
+        
+        $default_ditanggung = $this->defaultSopDitanggung;
+        $default_tidak_ditanggung = $this->defaultSopTidakDitanggung;
+
+        return view('admin.unit.penyewaan.sop', compact('sop_active', 'sop_ditanggung', 'sop_tidak_ditanggung', 'default_ditanggung', 'default_tidak_ditanggung'));
+    }
+
+    /**
+     * Menyimpan Ketentuan SOP.
+     */
+    public function updateSop(Request $request)
+    {
+        $request->validate([
+            'sop_penyewaan_active' => 'required|in:ditanggung,tidak_ditanggung',
+            'sop_penyewaan_ditanggung' => 'nullable|string',
+            'sop_penyewaan_tidak_ditanggung' => 'nullable|string',
+        ]);
+
+        $user = auth()->user();
+        $region = Region::find($user->region_id);
+
+        if (!$region) {
+            return redirect()->back()->with('error', 'Region tidak ditemukan.');
+        }
+
+        $paymentInfo = $region->payment_info ?? [];
+        $paymentInfo['sop_penyewaan_active'] = $request->sop_penyewaan_active;
+        $paymentInfo['sop_penyewaan_ditanggung'] = $request->sop_penyewaan_ditanggung ?? $this->defaultSopDitanggung;
+        $paymentInfo['sop_penyewaan_tidak_ditanggung'] = $request->sop_penyewaan_tidak_ditanggung ?? $this->defaultSopTidakDitanggung;
+
+        $region->update([
+            'payment_info' => $paymentInfo,
+        ]);
+
+        return redirect()->route('admin.unit.penyewaan.sop')->with('success', 'Ketentuan SOP berhasil diperbarui.');
     }
 
     /**

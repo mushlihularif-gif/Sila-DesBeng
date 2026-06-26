@@ -95,8 +95,88 @@
                             <input type="date" name="end_date" id="end-date" min="{{ date('Y-m-d') }}" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
                         </div>
                     </div>
+                    </div>
 
-                    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded-r-lg">
+                    @php
+                        $paymentInfo = $region->payment_info ?? [];
+                        $antarActive = !isset($paymentInfo['fasilitas_delivery_antar_active']) || $paymentInfo['fasilitas_delivery_antar_active'];
+                        $jemputActive = !isset($paymentInfo['fasilitas_delivery_jemput_active']) || $paymentInfo['fasilitas_delivery_jemput_active'];
+                        $defaultMethod = $antarActive ? 'antar' : 'jemput';
+                    @endphp
+                    <input type="hidden" name="delivery_method" id="delivery-method-input" value="{{ $defaultMethod }}">
+
+                    <!-- Pilihan Metode Pengiriman -->
+                    <div class="flex flex-col sm:flex-row justify-center gap-6 mb-10 items-center mt-8">
+                        @if($antarActive)
+                        <!-- Antar Card -->
+                        <div class="delivery-method-card {{ $defaultMethod == 'antar' ? 'active' : '' }} cursor-pointer bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 w-48 text-center border-4 border-transparent" data-method="antar">
+                            <div class="mb-4 flex justify-center">
+                                <img src="{{ asset('Admin/img/elements/antar.png') }}" alt="Antar" class="w-20 h-20 object-contain">
+                            </div>
+                            <p class="font-bold text-lg text-gray-800">Diantar</p>
+                        </div>
+                        @endif
+
+                        @if($jemputActive)
+                        <!-- Jemput Card -->
+                        <div class="delivery-method-card {{ $defaultMethod == 'jemput' ? 'active' : '' }} cursor-pointer bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 w-48 text-center border-4 border-transparent" data-method="jemput">
+                            <div class="mb-4 flex justify-center">
+                                <img src="{{ asset('Admin/img/elements/jemput.png') }}" alt="Jemput" class="w-20 h-20 object-contain">
+                            </div>
+                            <p class="font-bold text-lg text-gray-800">Ambil Sendiri</p>
+                        </div>
+                        @endif
+                    </div>
+
+                    <!-- Form Alamat Pengiriman (Hanya tampil jika Antar dipilih) -->
+                    <div id="delivery-address-form" class="{{ $defaultMethod == 'antar' ? 'block' : 'hidden' }} animate-fade-in bg-blue-50/50 p-6 rounded-2xl mb-8 border border-blue-100">
+                        <h4 class="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                            Informasi Pengiriman
+                        </h4>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">Nama Penerima <span class="text-red-500">*</span></label>
+                                <input type="text" name="recipient_name" id="recipient-name" value="{{ Auth::user()->name }}" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">Alamat Lengkap Tujuan <span class="text-red-500">*</span></label>
+                                <textarea name="delivery_address" id="delivery-address" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all resize-none" placeholder="Masukkan alamat lengkap tujuan pengiriman (termasuk RT/RW, Dusun, dll)"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="jemput-note" class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded-r-lg {{ $defaultMethod == 'jemput' ? '' : 'hidden' }}">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-yellow-700">
+                                    <span class="font-bold">Info:</span> Anda harus mengambil dan mengembalikan sendiri fasilitas umum ke lokasi operasional.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Info BBM & Supir (Jika dikonfigurasi) -->
+                    @if(isset($paymentInfo['fasilitas_bbm_default']) || isset($paymentInfo['fasilitas_supir_default']))
+                    <div class="bg-gray-50 p-4 rounded-xl mb-6 border border-gray-200">
+                        <h5 class="font-bold text-gray-700 mb-2">Informasi Tambahan (Jika Kendaraan)</h5>
+                        <ul class="list-disc pl-5 text-sm text-gray-600 space-y-1">
+                            @if(isset($paymentInfo['fasilitas_bbm_default']))
+                            <li>BBM: <span class="font-semibold">{{ $paymentInfo['fasilitas_bbm_default'] }}</span></li>
+                            @endif
+                            @if(isset($paymentInfo['fasilitas_supir_default']))
+                            <li>Supir: <span class="font-semibold">{{ $paymentInfo['fasilitas_supir_default'] }}</span></li>
+                            @endif
+                        </ul>
+                    </div>
+                    @endif
+
+                    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded-r-lg mt-6">
                         <div class="flex">
                             <div class="flex-shrink-0">
                                 <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
@@ -110,6 +190,27 @@
                             </div>
                         </div>
                     </div>
+
+                    @if(!empty($sop_fasilitas_umum))
+                    <!-- SOP Section -->
+                    <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                        <div class="flex items-center gap-3 mb-4">
+                            <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                            </svg>
+                            <h3 class="text-lg font-bold text-gray-800">Ketentuan SOP</h3>
+                        </div>
+                        
+                        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm text-gray-700 h-40 overflow-y-auto mb-4 whitespace-pre-wrap">
+                            {{ $sop_fasilitas_umum }}
+                        </div>
+                        
+                        <div class="flex items-center">
+                            <input type="checkbox" id="agree-sop" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                            <label for="agree-sop" class="ml-2 text-sm text-gray-800 font-medium">Saya telah membaca dan menyetujui Ketentuan SOP</label>
+                        </div>
+                    </div>
+                    @endif
 
                     <div class="flex justify-end">
                         <button type="button" class="confirm-action-btn px-8 py-3 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5">
@@ -193,6 +294,20 @@
     @keyframes stroke { 100% { stroke-dashoffset: 0; } }
     @keyframes scale { 0%, 100% { transform: none; } 50% { transform: scale3d(1.1, 1.1, 1); } }
     @keyframes fill { 100% { box-shadow: inset 0px 0px 0px 75px #4ade80; } }
+
+    /* Delivery Method Card Styles */
+    .delivery-method-card {
+        border-color: #e5e7eb;
+    }
+    .delivery-method-card.active {
+        border-color: #3b82f6;
+        background-color: #eff6ff;
+        transform: scale(1.05);
+    }
+    .delivery-method-card:hover:not(.active) {
+        border-color: #93c5fd;
+        transform: translateY(-5px);
+    }
 </style>
 @endpush
 
@@ -205,6 +320,57 @@
         const increaseBtn = document.getElementById('increase-qty');
         const maxStock = {{ $item->stok }};
         
+        // Delivery Method Logic
+        const deliveryCards = document.querySelectorAll('.delivery-method-card');
+        const deliveryMethodInput = document.getElementById('delivery-method-input');
+        const deliveryAddressForm = document.getElementById('delivery-address-form');
+        const antarNote = document.getElementById('antar-note');
+        const jemputNote = document.getElementById('jemput-note');
+        const recipientName = document.getElementById('recipient-name');
+        const deliveryAddress = document.getElementById('delivery-address');
+
+        deliveryCards.forEach(card => {
+            card.addEventListener('click', function() {
+                deliveryCards.forEach(c => c.classList.remove('active'));
+                this.classList.add('active');
+                
+                const method = this.getAttribute('data-method');
+                deliveryMethodInput.value = method;
+
+                if (method === 'antar') {
+                    if (deliveryAddressForm) {
+                        deliveryAddressForm.classList.remove('hidden');
+                        deliveryAddressForm.classList.add('block');
+                        recipientName.required = true;
+                        deliveryAddress.required = true;
+                    }
+                    if(antarNote) {
+                        antarNote.classList.remove('hidden');
+                        antarNote.classList.add('block');
+                    }
+                    if(jemputNote) {
+                        jemputNote.classList.add('hidden');
+                        jemputNote.classList.remove('block');
+                    }
+                } else {
+                    if (deliveryAddressForm) {
+                        deliveryAddressForm.classList.remove('block');
+                        deliveryAddressForm.classList.add('hidden');
+                        recipientName.required = false;
+                        deliveryAddress.required = false;
+                    }
+                    if(antarNote) {
+                        antarNote.classList.add('hidden');
+                        antarNote.classList.remove('block');
+                    }
+                    if(jemputNote) {
+                        jemputNote.classList.remove('hidden');
+                        jemputNote.classList.add('block');
+                    }
+                }
+            });
+        });
+
         if (decreaseBtn && increaseBtn && qtyInput) {
             decreaseBtn.addEventListener('click', () => {
                 let val = parseInt(qtyInput.value) || 1;
@@ -241,8 +407,15 @@
                 const startDate = document.getElementById('start-date').value;
                 const endDate = document.getElementById('end-date').value;
                 
+                const agreeSop = document.getElementById('agree-sop');
+
                 if (!purposeVal || !startDate || !endDate) {
                     Swal.fire({ icon: 'warning', title: 'Data Belum Lengkap', text: 'Mohon lengkapi Tujuan, Tanggal Mulai dan Tanggal Selesai.' });
+                    return;
+                }
+
+                if (agreeSop && !agreeSop.checked) {
+                    Swal.fire({ icon: 'warning', title: 'Ketentuan SOP', text: 'Anda harus menyetujui Ketentuan SOP terlebih dahulu sebelum melanjutkan pemesanan.' });
                     return;
                 }
                 modal.style.display = 'flex';

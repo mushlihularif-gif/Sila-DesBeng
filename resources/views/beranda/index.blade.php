@@ -9,7 +9,9 @@
     {{-- UTAMA --}}<main class="flex-grow relative w-full overflow-x-clip">
 
         <!-- Layer khusus untuk efek blur di belakang navbar (hanya di paling atas) -->
-        <div id="navbar-blur-bg"></div>
+        <div id="navbar-blur-bg">
+            <div id="blur-carousel-slides" class="flex transition-transform duration-500 ease-out h-full w-full"></div>
+        </div>
 
         {{-- BAGIAN BERANDA --}}<section id="beranda" class="relative z-10">
             <div class="w-full mx-auto">
@@ -645,28 +647,40 @@
             margin-top: 1rem;
         }
 
-        /* Styling untuk layer buram di belakang navbar */
+        /* Styling untuk layer sinkron di belakang navbar */
         #navbar-blur-bg {
-            position: fixed;
+            position: absolute;
             top: 0;
             left: 0;
             width: 100%;
-            z-index: 40; /* Di bawah navbar (z-index 50) tapi di atas main content */
-            background-size: cover;
-            background-position: top center;
-            filter: blur(10px) brightness(0.95);
-            transform: translateZ(0) scale(1.05); /* HW acceleration */
-            transition: height 0.3s ease, opacity 0.3s ease;
-            opacity: 1; /* Default visible */
-            pointer-events: none; /* Cegah intersep scroll */
-            will-change: transform, opacity, height;
+            height: var(--nav-height, 96px);
+            z-index: 40;
+            overflow: hidden;
+            transform: translateZ(0); /* HW acceleration */
+            transition: transform 0.3s ease-in-out;
+            pointer-events: none;
+            will-change: transform;
         }
-        
-        #navbar-blur-bg.hidden-blur {
-            opacity: 0;
-        }        
+        body:has(#master-navbar.hidden-nav) #navbar-blur-bg {
+            transform: translateY(-100%) translateZ(0);
+        }
+        .blur-slide {
+            min-width: 100%;
+            height: 400px;
+            background-size: cover;
+            background-position: center;
+            flex-shrink: 0;
+        }
+        @media (min-width: 768px) { .blur-slide { height: 40vw; } }
+        @media (min-width: 1024px) { .blur-slide { height: 45vw; } }
+
         #beranda {
-            transition: padding-top 0.3s ease;
+            padding-top: var(--nav-height, 96px);
+            transition: padding-top 0.3s ease-in-out;
+            will-change: padding-top, scroll-position;
+        }
+        body:has(#master-navbar.hidden-nav) #beranda {
+            padding-top: 0 !important;
         }
 
         /* Area Carousel/Hero - TIDAK PAKAI BACKGROUND */
@@ -862,7 +876,11 @@
             // Initialize all components
             init() {
                 this.initYearSelectors(); // Call this FIRST to ensure filters always work
-                this.initCarousel();
+                try {
+                    this.initCarousel();
+                } catch (e) {
+                    console.error("Carousel failed to initialize:", e);
+                }
                 try {
                     this.initCharts();
                 } catch (e) {
@@ -872,104 +890,19 @@
                 this.initNavbarMarginSync();
             },
 
-            // Sinkronisasi margin beranda dengan navbar dan fake blur
+            // Sinkronisasi tinggi layer blur dan padding
             initNavbarMarginSync() {
                 const navbar = document.getElementById('master-navbar');
-                const berandaSection = document.getElementById('beranda');
-                const blurLayer = document.getElementById('navbar-blur-bg');
+                if (!navbar) return;
+
+                const syncHeights = () => {
+                    document.body.style.setProperty('--nav-height', navbar.offsetHeight + 'px');
+                };
                 
-                if (!navbar || !berandaSection) return;
-
-                let lastScrollState = null;
-                let cachedNavHeight = navbar.offsetHeight;
-
-                const syncHeightAndMargin = () => {
-                    const currentScrollY = window.scrollY;
-                    const isScrolled = currentScrollY > 10;
-                    
-                    // Handle blur fade out naturally
-                    if (blurLayer && lastScrollState !== isScrolled) {
-                        if (isScrolled) {
-                            blurLayer.classList.add('hidden-blur');
-                        } else {
-                            blurLayer.classList.remove('hidden-blur');
-                        }
-                        lastScrollState = isScrolled;
-                    }
-
-                    // Reset padding to normal if we reach the absolute top and navbar is shown
-                    if (currentScrollY <= 10 && !navbar.classList.contains('hidden-nav')) {
-                        berandaSection.style.paddingTop = cachedNavHeight + 'px';
-                        if (blurLayer) blurLayer.style.height = cachedNavHeight + 'px';
-                    }
-                };
-
-                // Setup image sync for fake blur
-                if (blurLayer) {
-                    if (window.syncNavbarBlurImage) {
-                        window.syncNavbarBlurImage(0);
-                    }
-                    window.syncNavbarBlurImage = (slideIndex) => {
-                        const slideContainers = document.querySelectorAll('.carousel-slide');
-                        if(slideContainers[slideIndex]) {
-                            const desktopImg = slideContainers[slideIndex].querySelector('img.md\\:block, img.hidden.md\\:block');
-                            const mobileImg = slideContainers[slideIndex].querySelector('img.md\\:hidden, img.block.md\\:hidden');
-                            
-                            let img = slideContainers[slideIndex].querySelector('img');
-                            
-                            if (desktopImg && mobileImg) {
-                                img = window.innerWidth >= 768 ? desktopImg : mobileImg;
-                            }
-                            
-                            if (img) {
-                                const imgSrc = img.getAttribute('src');
-                                blurLayer.style.backgroundImage = `url('${imgSrc}')`;
-                            }
-                        }
-                    };
-                    setTimeout(() => { if (window.syncNavbarBlurImage) window.syncNavbarBlurImage(0); }, 50);
-                }
-
-                // Clear previous listeners if any (Turbo Drive support)
-                if (window.berandaScrollHandler) {
-                    window.removeEventListener('scroll', window.berandaScrollHandler);
-                    window.removeEventListener('resize', window.berandaResizeHandler);
-                }
-
-                let ticking = false;
-                window.berandaScrollHandler = () => {
-                    if (!ticking) {
-                        window.requestAnimationFrame(() => {
-                            syncHeightAndMargin();
-                            ticking = false;
-                        });
-                        ticking = true;
-                    }
-                };
-
-                window.berandaResizeHandler = () => {
-                    cachedNavHeight = navbar.offsetHeight;
-                    lastNavState = null; // force update
-                    syncHeightAndMargin();
-                };
-
-                syncHeightAndMargin();
-
-                window.addEventListener('resize', window.berandaResizeHandler);
-                window.addEventListener('scroll', window.berandaScrollHandler);
-
-                const masterToggle = document.getElementById('master-navbar-toggle');
-                if (masterToggle && !masterToggle.dataset.berandaToggle) {
-                    masterToggle.dataset.berandaToggle = 'true';
-                    masterToggle.addEventListener('click', () => {
-                        // KUNCI PERBAIKAN: Hanya ubah padding saat tombol toggle DITEKAN secara manual!
-                        setTimeout(() => {
-                            const isHidden = navbar.classList.contains('hidden-nav');
-                            berandaSection.style.paddingTop = isHidden ? '0px' : cachedNavHeight + 'px';
-                            if (blurLayer) blurLayer.style.height = isHidden ? '0px' : cachedNavHeight + 'px';
-                        }, 10);
-                    });
-                }
+                syncHeights();
+                window.addEventListener('resize', syncHeights);
+                const logoImg = navbar.querySelector('.sd-nav-logo img');
+                if (logoImg) logoImg.addEventListener('load', syncHeights);
             },
 
             // Initialize Year & Region Selectors
@@ -1025,6 +958,19 @@
                             } else if (oldEl && !newEl) {
                                 oldEl.innerHTML = ''; // Clear if removed
                                 updatedAny = true;
+                            } else if (!oldEl && newEl) {
+                                // If search-results-section didn't exist before, insert it before populer-section
+                                if (id === 'search-results-section') {
+                                    const populer = document.getElementById('populer-section');
+                                    if (populer) {
+                                        const wrapper = document.createElement('div');
+                                        wrapper.id = 'search-results-section';
+                                        wrapper.className = newEl.className;
+                                        wrapper.innerHTML = newEl.innerHTML;
+                                        populer.parentNode.insertBefore(wrapper, populer);
+                                        updatedAny = true;
+                                    }
+                                }
                             }
                         });
                         
@@ -1071,6 +1017,28 @@
                 const carouselSlides = document.getElementById('carousel-slides');
                 if (!carouselSlides) return;
 
+                const blurCarouselSlides = document.getElementById('blur-carousel-slides');
+                if (blurCarouselSlides) {
+                    const populateBlurSlides = () => {
+                        blurCarouselSlides.innerHTML = '';
+                        const slides = carouselSlides.querySelectorAll('.carousel-slide');
+                        slides.forEach((slide) => {
+                            const desktopImg = slide.querySelector('img[class*="md:block"]');
+                            const mobileImg = slide.querySelector('img[class*="md:hidden"]');
+                            let img = slide.querySelector('img');
+                            if (desktopImg && mobileImg) {
+                                img = window.innerWidth >= 768 ? desktopImg : mobileImg;
+                            }
+                            const blurSlide = document.createElement('div');
+                            blurSlide.className = 'blur-slide';
+                            if (img) blurSlide.style.backgroundImage = `url('${img.getAttribute('src')}')`;
+                            blurCarouselSlides.appendChild(blurSlide);
+                        });
+                    };
+                    populateBlurSlides();
+                    window.addEventListener('resize', () => { setTimeout(populateBlurSlides, 200); }, { passive: true });
+                }
+
                 const prevButton = document.getElementById('carousel-prev');
                 const nextButton = document.getElementById('carousel-next');
                 // Use let so we can update the reference after cloning
@@ -1084,14 +1052,11 @@
                 let blurTimeout;
                 const goToSlide = (slideIndex) => {
                     currentSlide = slideIndex;
-                    carouselSlides.style.transform = `translateX(-${slideIndex * 100}%)`;
-                    
-                    if(window.syncNavbarBlurImage) {
-                        clearTimeout(blurTimeout);
-                        blurTimeout = setTimeout(() => {
-                            window.syncNavbarBlurImage(slideIndex);
-                        }, 400); // Sinkronkan dengan durasi transisi slide (duration-500)
-                    }
+                    requestAnimationFrame(() => {
+                        carouselSlides.style.transform = `translateX(-${slideIndex * 100}%)`;
+                        const blurCarouselSlides = document.getElementById('blur-carousel-slides');
+                        if (blurCarouselSlides) blurCarouselSlides.style.transform = `translateX(-${slideIndex * 100}%)`;
+                    });
 
                     // indicators variable now points to the LIVE elements in DOM
                     indicators.forEach((indicator, index) => {

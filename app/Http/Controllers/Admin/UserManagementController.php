@@ -56,8 +56,7 @@ class UserManagementController extends Controller
         
         $users = $usersQuery->when($search, function ($query, $search) {
                 return $query->where(function($q) use ($search) {
-                    $q->where('name', 'LIKE', "%{$search}%")
-                      ->orWhere('email', 'LIKE', "%{$search}%");
+                    $q->searchWhereLike(['name', 'email'], $search);
                 });
             })
             ->orderBy('name', 'asc')

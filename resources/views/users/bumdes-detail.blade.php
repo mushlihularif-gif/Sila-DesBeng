@@ -128,18 +128,16 @@
                 </div>
 
                 <!-- Members Grid -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+                <div class="flex flex-wrap justify-center gap-8 mb-16">
                     @foreach($members as $member)
-                    <div class="member-card bg-white/60 backdrop-blur-sm rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300">
-                        <div class="flex flex-col items-center text-center">
-                            <div class="member-photo-wrapper mb-4">
-                                <img src="{{ $member->photo_url }}" 
-                                     alt="{{ $member->name }}"
-                                     class="member-photo">
-                            </div>
-                            <h3 class="text-lg font-bold text-gray-800 mb-1">{{ $member->name }}</h3>
-                            <p class="text-sm text-gray-600">{{ $member->position }}</p>
+                    <div class="member-card">
+                        <div class="member-photo-wrapper">
+                            <img src="{{ $member->photo_url }}" 
+                                 alt="{{ $member->name }}"
+                                 class="member-photo">
                         </div>
+                        <h3 class="text-lg font-bold text-gray-800 mt-5 mb-1">{{ $member->name }}</h3>
+                        <p class="text-sm text-gray-500">{{ $member->position }}</p>
                     </div>
                     @endforeach
                 </div>
@@ -237,26 +235,33 @@
 
     /* Member Card Styles */
     .member-card {
-        position: relative;
-        background: rgba(255, 255, 255, 0.6);
-        backdrop-filter: blur(10px);
-        border: none;
+        background: white;
+        border-radius: 1rem;
+        padding: 2rem 1.5rem 1.5rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
+        text-align: center;
+        width: 240px;
+        transition: all 0.3s ease;
+    }
+
+    .member-card:hover {
+        box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+        transform: translateY(-4px);
     }
 
     .member-photo-wrapper {
-        position: relative;
-        padding: 5px;
-        background: linear-gradient(135deg, #fbbf24, #60a5fa, #3b82f6);
-        border-radius: 50%;
-        display: inline-block;
+        width: 180px;
+        height: 200px;
+        margin: 0 auto;
+        overflow: hidden;
+        border-radius: 0.75rem;
+        background: #f8fafc;
     }
 
     .member-photo {
-        width: 140px;
-        height: 140px;
-        border-radius: 50%;
+        width: 100%;
+        height: 100%;
         object-fit: cover;
-        border: 5px solid white;
         display: block;
     }
 

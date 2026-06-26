@@ -412,10 +412,9 @@ class ReportController extends Controller
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
-                $q->where('description', 'like', "%{$search}%")
-                  ->orWhere('action', 'like', "%{$search}%")
+                $q->searchWhereLike(['description', 'action'], $search)
                   ->orWhereHas('user', function($u) use ($search) {
-                      $u->where('name', 'like', "%{$search}%");
+                      $u->searchWhereLike('name', $search);
                   });
             });
         }

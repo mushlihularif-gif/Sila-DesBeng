@@ -25,12 +25,17 @@
         }
         .sd-navbar-toggle {
             position: absolute; bottom: -28px; right: 32px;
-            width: 40px; height: 28px; cursor: pointer;
+            width: 56px; height: 28px; cursor: pointer;
             display: flex; align-items: center; justify-content: center;
             color: #38bdf8; z-index: 51;
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 0 0 16px 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
             transition: all 0.3s;
         }
-        .sd-navbar-toggle:hover { color: #0284c7; }
+        .sd-navbar-toggle:hover { color: #0284c7; background: rgba(255, 255, 255, 0.4); }
         .sd-navbar-toggle svg { width: 32px; height: 32px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); }
         
         .sd-nav-container {
@@ -161,7 +166,7 @@
 
                 <div class="relative group">
                     <button class="flex items-center gap-2.5 hover:opacity-90 transition bg-transparent border-none outline-none cursor-pointer">
-                        <span class="text-gray-900 font-bold text-[15px] group-hover:border-b-2 group-hover:border-blue-500 pb-0.5">{{ auth()->user()->name }}</span>
+                        <span class="text-gray-900 font-bold text-[15px] group-hover:border-b-2 group-hover:border-blue-500 pb-0.5">{{ auth()->user()->username }}</span>
                         <div class="w-11 h-11 rounded-full overflow-hidden bg-[#D1D5DB] flex-shrink-0 shadow-md">
                             @if (auth()->user()->file)
                                 <img src="{{ auth()->user()->file->file_stream }}" alt="Avatar" class="w-full h-full object-cover">
@@ -240,9 +245,13 @@
                 if(navbar.classList.contains('hidden-nav')) {
                     if(iconUp) iconUp.style.display = 'none';
                     if(iconDown) iconDown.style.display = 'block';
+                    const blurBg = document.getElementById('navbar-blur-bg');
+                    if(blurBg) blurBg.classList.add('hidden-blur');
                 } else {
                     if(iconUp) iconUp.style.display = 'block';
                     if(iconDown) iconDown.style.display = 'none';
+                    const blurBg = document.getElementById('navbar-blur-bg');
+                    if(blurBg) blurBg.classList.remove('hidden-blur');
                 }
             });
         }
@@ -272,6 +281,8 @@
                                 navbar.classList.add('hidden-nav');
                                 if(iconUp) iconUp.style.display = 'none';
                                 if(iconDown) iconDown.style.display = 'block';
+                                const blurBg = document.getElementById('navbar-blur-bg');
+                                if(blurBg) blurBg.classList.add('hidden-blur');
                             }
                         } else if (currentScrollY < lastScrollY) {
                             // Scroll up: Show navbar
@@ -279,6 +290,8 @@
                                 navbar.classList.remove('hidden-nav');
                                 if(iconUp) iconUp.style.display = 'block';
                                 if(iconDown) iconDown.style.display = 'none';
+                                const blurBg = document.getElementById('navbar-blur-bg');
+                                if(blurBg) blurBg.classList.remove('hidden-blur');
                             }
                         }
                         lastScrollY = currentScrollY;

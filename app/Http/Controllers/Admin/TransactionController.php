@@ -48,30 +48,30 @@ class TransactionController extends Controller
         // Filter by search
         if ($search) {
             $rentalQuery->where(function($q) use ($search) {
-                $q->where('status', 'LIKE', "%{$search}%")
+                $q->searchWhereLike('status', $search)
                   ->orWhereHas('user', function($userQuery) use ($search) {
-                      $userQuery->where('name', 'LIKE', "%{$search}%");
+                      $userQuery->searchWhereLike('name', $search);
                   });
             });
             
             $gasQuery->where(function($q) use ($search) {
-                $q->where('status', 'LIKE', "%{$search}%")
+                $q->searchWhereLike('status', $search)
                   ->orWhereHas('user', function($userQuery) use ($search) {
-                      $userQuery->where('name', 'LIKE', "%{$search}%");
+                      $userQuery->searchWhereLike('name', $search);
                   });
             });
 
             $mobilQuery->where(function($q) use ($search) {
-                $q->where('status', 'LIKE', "%{$search}%")
+                $q->searchWhereLike('status', $search)
                   ->orWhereHas('user', function($userQuery) use ($search) {
-                      $userQuery->where('name', 'LIKE', "%{$search}%");
+                      $userQuery->searchWhereLike('name', $search);
                   });
             });
 
             $fasilitasQuery->where(function($q) use ($search) {
-                $q->where('status', 'LIKE', "%{$search}%")
+                $q->searchWhereLike('status', $search)
                   ->orWhereHas('user', function($userQuery) use ($search) {
-                      $userQuery->where('name', 'LIKE', "%{$search}%");
+                      $userQuery->searchWhereLike('name', $search);
                   });
             });
         }

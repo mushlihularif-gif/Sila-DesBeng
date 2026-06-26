@@ -3,8 +3,17 @@
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Unit Layanan /</span> Penyewaan Mobil</h4>
-            <a href="{{ route('admin.unit.mobil.create') }}" class="btn btn-primary">Tambah Alat</a>
+            <div>
+                <h4 class="fw-bold py-3 mb-2"><span class="text-muted fw-light">Unit Layanan /</span> Penyewaan Mobil</h4>
+                <div class="alert alert-warning d-flex align-items-center p-2 mb-0 text-dark" style="font-size: 0.85rem; border-left: 4px solid #ffab00;">
+                    <i class="bx bx-error me-2 fs-5"></i>
+                    <div><strong>PENTING:</strong> Tentukan dan Pastikan Ketentuan SOP sesuai dengan ketentuan daerah anda.</div>
+                </div>
+            </div>
+            <div>
+                <a href="{{ route('admin.unit.mobil.sop') }}" class="btn btn-outline-info me-2">Manajemen SOP</a>
+                <a href="{{ route('admin.unit.mobil.create') }}" class="btn btn-primary">Tambah Mobil</a>
+            </div>
         </div>
 
         <!-- Products Grid -->

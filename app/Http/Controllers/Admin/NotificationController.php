@@ -14,14 +14,8 @@ class NotificationController extends Controller
         $search = $request->get('search');
         
         // Ambil semua notifikasi untuk admin, diurutkan dari yang terbaru
-        // Ambil semua notifikasi untuk admin, diurutkan dari yang terbaru
-        $notifications = Notification::with(['user', 'admin'])
-            ->when($search, function ($query, $search) {
-                return $query->where('title', 'LIKE', "%{$search}%")
-                           ->orWhere('message', 'LIKE', "%{$search}%")
-                           ->orWhereHas('user', function($q) use ($search) {
-                               $q->where('name', 'LIKE', "%{$search}%");
-                           });
+        $notifications = \App\Models\AdminNotification::when($search, function ($query, $search) {
+                return $query->searchWhereLike(['title', 'message'], $search);
             })
             ->orderBy('created_at', 'desc')
             ->paginate(10)
@@ -68,23 +62,19 @@ class NotificationController extends Controller
 
     public function markAsRead($id)
     {
-        $notification = Notification::findOrFail($id);
+        $notification = \App\Models\AdminNotification::findOrFail($id);
         $notification->is_read = true;
-        $notification->read_at = now();
         $notification->save();
 
-        // Jika notifikasi terkait user, bisa redirect ke halaman user tertentu
-        // Untuk sekarang, kembali ke index
         return redirect()->back()->with('success', 'Notifikasi ditandai sebagai sudah dibaca.');
     }
 
     public function markAllAsRead()
     {
         // Tandai semua notifikasi yang belum dibaca sebagai sudah dibaca
-        Notification::where('is_read', false)
+        \App\Models\AdminNotification::where('is_read', false)
             ->update([
                 'is_read' => true,
-                'read_at' => now(),
             ]);
 
         return redirect()->back()->with('success', 'Semua notifikasi ditandai sebagai sudah dibaca.');
@@ -93,7 +83,7 @@ class NotificationController extends Controller
     public function destroy($id)
     {
         try {
-            $notification = Notification::findOrFail($id);
+            $notification = \App\Models\AdminNotification::findOrFail($id);
             $notification->delete();
 
             return redirect()->back()->with('success', 'Notifikasi berhasil dihapus.');

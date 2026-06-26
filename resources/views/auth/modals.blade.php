@@ -1,3 +1,10 @@
+{{-- Include Custom CSS for Placeholders --}}
+<style>
+    .custom-placeholder { opacity: 0; pointer-events: none; transition: opacity 0.2s ease-in-out; }
+    .input-with-placeholder:placeholder-shown + .custom-placeholder { opacity: 1; }
+    .input-with-placeholder:focus + .custom-placeholder { opacity: 0; }
+</style>
+
 {{-- Modal Auth Container --}}
 <div id="auth-modal-overlay"
     class="fixed inset-0 bg-black/40 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300" style="z-index: 9999;">
@@ -35,7 +42,7 @@
             <form id="form-login" action="{{ route('auth.login') }}" method="POST" data-turbo="false" class="space-y-4">
                 @csrf
                 <div>
-                    <input type="text" name="email_or_phone" placeholder="Email / Username / No Telepon" required
+                    <input type="text" name="email_or_phone" placeholder="Email / Nama Pengguna / Nomor Telepon" required
                         class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition">
                     <span class="text-red-500 text-sm hidden block mt-1" data-error="email_or_phone"></span>
                 </div>
@@ -125,6 +132,39 @@
             <form id="form-google-register" class="space-y-3">
                 @csrf
                 <input type="hidden" name="otp_method" value="email">
+                
+                <div>
+                    <div class="relative">
+                        <input type="text" name="nik" placeholder=" " pattern="[0-9]{16}" title="NIK harus berupa 16 digit angka" required
+                            class="input-with-placeholder w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm">
+                        <div class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm custom-placeholder">
+                            NIK KTP (16 Digit) <span class="text-red-500 font-bold">*</span>
+                        </div>
+                    </div>
+                    <span class="text-red-500 text-xs hidden block mt-1" data-error="nik"></span>
+                </div>
+                
+                <div>
+                    <div class="relative">
+                        <input type="text" name="name" id="google-reg-name" placeholder=" " required value="{{ session('google_register_data')['name'] ?? '' }}"
+                            class="input-with-placeholder w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm">
+                        <div class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm custom-placeholder">
+                            Nama Lengkap (Sesuai KTP) <span class="text-red-500 font-bold">*</span>
+                        </div>
+                    </div>
+                    <span class="text-red-500 text-xs hidden block mt-1" data-error="name"></span>
+                </div>
+
+                <div>
+                    <select name="gender" required
+                        class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm">
+                        <option value="">Pilih Jenis Kelamin</option>
+                        <option value="laki-laki">Laki-laki</option>
+                        <option value="perempuan">Perempuan</option>
+                    </select>
+                    <span class="text-red-500 text-xs hidden block mt-1" data-error="gender"></span>
+                </div>
+
                 <div>
                     <select name="kabupaten" id="google-reg-kabupaten" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-gray-100 text-gray-700 outline-none transition text-sm cursor-not-allowed">
                         <option value="">Memuat Kabupaten...</option>
@@ -157,13 +197,13 @@
                 </div>
 
                 <div>
-                    <input type="tel" name="phone" placeholder="No Telepon" required
+                    <input type="tel" name="phone" placeholder="Nomor Telepon" required
                         class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm">
                     <span class="text-red-500 text-xs hidden block mt-1" data-error="phone"></span>
                 </div>
 
                 <div>
-                    <textarea name="address" placeholder="Alamat Detail" required rows="2"
+                    <textarea name="address" placeholder="Alamat Detail (Contoh: Jl. Soekarno Hatta No. 12)" required rows="2"
                         class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm resize-none"></textarea>
                     <span class="text-red-500 text-xs hidden block mt-1" data-error="address"></span>
                 </div>
@@ -212,9 +252,19 @@
             <form id="form-register" action="{{ route('auth.register') }}" method="POST" class="space-y-3 max-h-96 overflow-y-auto pr-2">
                 @csrf
                 <input type="hidden" name="otp_method" value="email">
+                <div>
+                    <div class="relative">
+                        <input type="text" name="nik" placeholder=" " pattern="[0-9]{16}" title="NIK harus berupa 16 digit angka" required
+                            class="input-with-placeholder w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm">
+                        <div class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm custom-placeholder">
+                            NIK KTP (16 Digit) <span class="text-red-500 font-bold">*</span>
+                        </div>
+                    </div>
+                    <span class="text-red-500 text-xs hidden block mt-1" data-error="nik"></span>
+                </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <input type="text" name="username" placeholder="Username" required
+                        <input type="text" name="username" placeholder="Nama Pengguna" required
                             class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm">
                         <span class="text-red-500 text-xs hidden block mt-1" data-error="username"></span>
                     </div>
@@ -227,12 +277,17 @@
 
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <input type="text" name="name" placeholder="Nama Lengkap" required
-                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm">
+                        <div class="relative">
+                            <input type="text" name="name" placeholder=" " required
+                                class="input-with-placeholder w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm">
+                            <div class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm custom-placeholder">
+                                Nama Lengkap (Sesuai KTP) <span class="text-red-500 font-bold">*</span>
+                            </div>
+                        </div>
                         <span class="text-red-500 text-xs hidden block mt-1" data-error="name"></span>
                     </div>
                     <div>
-                        <input type="tel" name="phone" placeholder="No Telepon" required
+                        <input type="tel" name="phone" placeholder="Nomor Telepon" required
                             class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm">
                         <span class="text-red-500 text-xs hidden block mt-1" data-error="phone"></span>
                     </div>
@@ -270,7 +325,7 @@
                 </div>
 
                 <div>
-                    <textarea name="address" placeholder="Alamat Detail" required rows="2"
+                    <textarea name="address" placeholder="Alamat Detail (Contoh: Jl. Soekarno Hatta No. 12)" required rows="2"
                         class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm resize-none"></textarea>
                     <span class="text-red-500 text-xs hidden block mt-1" data-error="address"></span>
                 </div>

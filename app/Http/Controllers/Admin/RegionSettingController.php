@@ -47,7 +47,15 @@ class RegionSettingController extends Controller
         $activeServices = $region->services->pluck('id')->toArray();
         $exclusiveServices = $region->services->where('pivot.is_exclusive', true)->pluck('id')->toArray();
 
-        return view('admin.region_settings.index', compact('region', 'allServices', 'activeServices', 'exclusiveServices'));
+        $hasFasilitasKendaraan = \App\Models\FasilitasUmum::where('region_id', $region->id)
+            ->where(function($q) {
+                $q->where('nama_fasilitas', 'like', '%mobil%')
+                  ->orWhere('nama_fasilitas', 'like', '%ambulan%')
+                  ->orWhere('nama_fasilitas', 'like', '%bus%')
+                  ->orWhere('nama_fasilitas', 'like', '%pick%up%');
+            })->exists();
+
+        return view('admin.region_settings.index', compact('region', 'allServices', 'activeServices', 'exclusiveServices', 'hasFasilitasKendaraan'));
     }
 
     public function update(Request $request)
@@ -67,12 +75,68 @@ class RegionSettingController extends Controller
             'services.*' => 'exists:services,id'
         ]);
 
+        $mobilServiceId = \App\Models\Service::where('name', 'Penyewaan Mobil')->value('id');
+        $alatServiceId = \App\Models\Service::where('name', 'Penyewaan Alat')->value('id');
+        $gasServiceId = \App\Models\Service::where('name', 'Penjualan Gas')->value('id');
+        $fasilitasServiceId = \App\Models\Service::where('name', 'Fasilitas Umum')->value('id');
+
+        $selectedServices = $request->input('services', []);
+
+        if (in_array($mobilServiceId, $selectedServices) && !$request->has('mobil_delivery_antar_active') && !$request->has('mobil_delivery_jemput_active')) {
+            return redirect()->back()->with('error', 'Gagal: Minimal satu metode pengiriman untuk Mobil harus diaktifkan!')->withInput();
+        }
+        if (in_array($alatServiceId, $selectedServices) && !$request->has('alat_delivery_antar_active') && !$request->has('alat_delivery_jemput_active')) {
+            return redirect()->back()->with('error', 'Gagal: Minimal satu metode pengiriman untuk Alat harus diaktifkan!')->withInput();
+        }
+        if (in_array($gasServiceId, $selectedServices) && !$request->has('gas_delivery_antar_active') && !$request->has('gas_delivery_jemput_active')) {
+            return redirect()->back()->with('error', 'Gagal: Minimal satu metode pengiriman untuk Gas harus diaktifkan!')->withInput();
+        }
+        if (in_array($fasilitasServiceId, $selectedServices) && !$request->has('fasilitas_delivery_antar_active') && !$request->has('fasilitas_delivery_jemput_active')) {
+            return redirect()->back()->with('error', 'Gagal: Minimal satu metode pengiriman untuk Fasilitas Umum harus diaktifkan!')->withInput();
+        }
+
         // Update whatsapp_name inside payment_info JSON
         $paymentInfo = $region->payment_info ?? [];
         if ($request->has('whatsapp_name')) {
             $paymentInfo['whatsapp_name'] = $request->whatsapp_name;
         }
         $paymentInfo['whatsapp_active'] = $request->has('whatsapp_active');
+        
+        $paymentInfo['mobil_delivery_antar_active'] = $request->has('mobil_delivery_antar_active');
+        $paymentInfo['mobil_delivery_jemput_active'] = $request->has('mobil_delivery_jemput_active');
+        
+        $paymentInfo['alat_delivery_antar_active'] = $request->has('alat_delivery_antar_active');
+        $paymentInfo['alat_delivery_jemput_active'] = $request->has('alat_delivery_jemput_active');
+        
+        $paymentInfo['gas_delivery_antar_active'] = $request->has('gas_delivery_antar_active');
+        $paymentInfo['gas_delivery_jemput_active'] = $request->has('gas_delivery_jemput_active');
+
+        $paymentInfo['fasilitas_delivery_antar_active'] = $request->has('fasilitas_delivery_antar_active');
+        $paymentInfo['fasilitas_delivery_jemput_active'] = $request->has('fasilitas_delivery_jemput_active');
+
+        // Store defaults
+        if ($request->has('mobil_bbm')) {
+            $paymentInfo['mobil_bbm_default'] = $request->mobil_bbm;
+            // Bulk update existing mobils
+            \App\Models\Mobil::where('region_id', $region->id)->update([
+                'bbm_ditanggung' => $request->mobil_bbm,
+                'opsi_supir' => $request->mobil_supir
+            ]);
+        }
+        if ($request->has('fasilitas_bbm')) {
+            $paymentInfo['fasilitas_bbm_default'] = $request->fasilitas_bbm;
+            // Bulk update existing fasilitas umums
+            \App\Models\FasilitasUmum::where('region_id', $region->id)->update([
+                'bbm_ditanggung' => $request->fasilitas_bbm,
+                'opsi_supir' => $request->fasilitas_supir
+            ]);
+        }
+        if ($request->has('mobil_supir')) {
+            $paymentInfo['mobil_supir_default'] = $request->mobil_supir;
+        }
+        if ($request->has('fasilitas_supir')) {
+            $paymentInfo['fasilitas_supir_default'] = $request->fasilitas_supir;
+        }
 
         $region->update([
             'profile_text' => $request->profile_text,

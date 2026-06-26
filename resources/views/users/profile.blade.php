@@ -109,9 +109,9 @@
                     {{-- KARTU 1: Info Dasar (Username, Nama, Email, Telepon) --}}
                     <div class="glass-card rounded-3xl p-6 border border-white/50 shadow-lg">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                            {{-- Username (dapat diedit) --}}
+                            {{-- Nama Pengguna (dapat diedit) --}}
                             <div>
-                                <label class="block text-sm font-bold text-gray-800 mb-2">Username</label>
+                                <label class="block text-sm font-bold text-gray-800 mb-2">Nama Pengguna</label>
                                 <input type="text" name="username" value="{{ old('username', $user->username) }}" 
                                        class="w-full px-4 py-2.5 bg-white/80 border border-white/60 rounded-xl focus:border-blue-400 focus:ring-2 focus:ring-blue-200/50 outline-none transition glass-input text-gray-800 text-sm">
                                 @error('username')
@@ -136,100 +136,112 @@
                                        class="w-full px-4 py-2.5 bg-white/60 border border-white/40 rounded-xl text-gray-700 cursor-not-allowed glass-input text-sm">
                             </div>
 
-                            {{-- No Telepon --}}
+                            {{-- Nomor Telepon --}}
                             <div>
-                                <label class="block text-sm font-bold text-gray-800 mb-2">No Telepon</label>
+                                <label class="block text-sm font-bold text-gray-800 mb-2">Nomor Telepon</label>
                                 <input type="tel" name="phone" value="{{ old('phone', $user->phone) }}" 
                                        class="w-full px-4 py-2.5 bg-white/80 border border-white/60 rounded-xl focus:border-blue-400 focus:ring-2 focus:ring-blue-200/50 outline-none transition glass-input text-gray-800 text-sm">
                                 @error('phone')
                                 <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>
-                        </div>
-                    </div>
-
-                    {{-- KARTU 2: Detail Tambahan (Jenis Kelamin, Alamat, Kata Sandi) --}}
-                    <div class="glass-card rounded-3xl p-6 border border-white/50 shadow-lg">
-                        <div class="space-y-5">
-                            {{-- Jenis Kelamin --}}
-                            <div>
-                                <label class="block text-sm font-bold text-gray-800 mb-2">Jenis Kelamin</label>
+                        
+                        {{-- Jenis Kelamin (Full Width) --}}
+                        <div class="mt-5 md:col-span-2">
+                            <label class="block text-sm font-bold text-gray-800 mb-2">Jenis Kelamin</label>
+                            <div class="relative">
                                 <select name="gender" 
-                                        class="w-full px-4 py-2.5 bg-white/80 border border-white/60 rounded-xl focus:border-blue-400 focus:ring-2 focus:ring-blue-200/50 outline-none transition glass-input text-gray-800 text-sm">
+                                        class="appearance-none w-full px-4 py-2.5 pr-10 bg-white/80 border border-white/60 rounded-xl focus:border-blue-400 focus:ring-2 focus:ring-blue-200/50 outline-none transition glass-input text-gray-800 text-sm">
                                     <option value="">Pilih Jenis Kelamin</option>
                                     <option value="laki-laki" {{ old('gender', $user->gender) == 'laki-laki' ? 'selected' : '' }}>Laki-laki</option>
                                     <option value="perempuan" {{ old('gender', $user->gender) == 'perempuan' ? 'selected' : '' }}>Perempuan</option>
                                 </select>
-                                @error('gender')
-                                <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-                                @enderror
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
+                                    <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path>
+                                    </svg>
+                                </div>
                             </div>
+                            @error('gender')
+                            <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
+                </div>
+            </div> {{-- Menutup Grid Utama (Kiri & Kanan) --}}
+        </div>
 
-                            {{-- Alamat --}}
-                            <div>
-                                <label class="block text-sm font-bold text-gray-800 mb-2">Alamat</label>
-                                <textarea name="address" rows="2.5" 
-                                          class="w-full px-4 py-2.5 bg-white/80 border border-white/60 rounded-xl focus:border-blue-400 focus:ring-2 focus:ring-blue-200/50 outline-none transition resize-none glass-input text-gray-800 text-sm">{{ old('address', $user->address) }}</textarea>
-                                @error('address')
-                                <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-                                @enderror
-                            </div>
+            {{-- KOLOM BAWAH: Detail Tambahan (Di luar grid utama agar otomatis 100% lebar) --}}
+            <div class="mt-5 w-full">
+                <div class="glass-card rounded-3xl p-6 border border-white/50 shadow-lg">
+                    {{-- Alamat (Full Width) --}}
+                    <div class="mb-5">
+                        <label class="block text-sm font-bold text-gray-800 mb-2">Alamat Detail</label>
+                        <textarea name="address" rows="2.5" placeholder="Contoh: Jl. Soekarno Hatta No. 12"
+                                  class="w-full px-4 py-2.5 bg-white/80 border border-white/60 rounded-xl focus:border-blue-400 focus:ring-2 focus:ring-blue-200/50 outline-none transition resize-none glass-input text-gray-800 text-sm">{{ old('address', $user->address) }}</textarea>
+                        @error('address')
+                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
 
-                            {{-- Kecamatan --}}
-                            <div>
-                                <label class="block text-sm font-bold text-gray-800 mb-2">Kecamatan</label>
-                                <input type="text" value="{{ $kecamatan_name }}" disabled 
-                                       class="w-full px-4 py-2.5 bg-white/60 border border-white/40 rounded-xl text-gray-700 cursor-not-allowed glass-input text-sm">
-                            </div>
+                    {{-- Grid 2 Kolom untuk wilayah --}}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+                        {{-- Kecamatan --}}
+                        <div>
+                            <label class="block text-sm font-bold text-gray-800 mb-2">Kecamatan</label>
+                            <input type="text" value="{{ $kecamatan_name }}" disabled 
+                                   class="w-full px-4 py-2.5 bg-white/60 border border-white/40 rounded-xl text-gray-700 cursor-not-allowed glass-input text-sm">
+                        </div>
 
-                            {{-- Desa / Kelurahan --}}
-                            <div>
-                                <label class="block text-sm font-bold text-gray-800 mb-2">Desa / Kelurahan</label>
-                                <input type="text" value="{{ $desa_name }}" disabled 
-                                       class="w-full px-4 py-2.5 bg-white/60 border border-white/40 rounded-xl text-gray-700 cursor-not-allowed glass-input text-sm">
-                            </div>
+                        {{-- Desa / Kelurahan --}}
+                        <div>
+                            <label class="block text-sm font-bold text-gray-800 mb-2">Desa / Kelurahan</label>
+                            <input type="text" value="{{ $desa_name }}" disabled 
+                                   class="w-full px-4 py-2.5 bg-white/60 border border-white/40 rounded-xl text-gray-700 cursor-not-allowed glass-input text-sm">
+                        </div>
 
-                            {{-- RW --}}
-                            <div>
-                                <label class="block text-sm font-bold text-gray-800 mb-2">RW</label>
-                                <input type="text" value="{{ $rw_name }}" disabled 
-                                       class="w-full px-4 py-2.5 bg-white/60 border border-white/40 rounded-xl text-gray-700 cursor-not-allowed glass-input text-sm">
-                            </div>
+                        {{-- RW --}}
+                        <div>
+                            <label class="block text-sm font-bold text-gray-800 mb-2">RW</label>
+                            <input type="text" value="{{ $rw_name }}" disabled 
+                                   class="w-full px-4 py-2.5 bg-white/60 border border-white/40 rounded-xl text-gray-700 cursor-not-allowed glass-input text-sm">
+                        </div>
 
-                            {{-- RT --}}
-                            <div>
-                                <label class="block text-sm font-bold text-gray-800 mb-2">RT</label>
-                                <input type="text" value="{{ $rt_name }}" disabled 
-                                       class="w-full px-4 py-2.5 bg-white/60 border border-white/40 rounded-xl text-gray-700 cursor-not-allowed glass-input text-sm">
-                            </div>
+                        {{-- RT --}}
+                        <div>
+                            <label class="block text-sm font-bold text-gray-800 mb-2">RT</label>
+                            <input type="text" value="{{ $rt_name }}" disabled 
+                                   class="w-full px-4 py-2.5 bg-white/60 border border-white/40 rounded-xl text-gray-700 cursor-not-allowed glass-input text-sm">
+                        </div>
+                    </div>
 
-                            {{-- Kata Sandi --}}
-                            <div>
-                                <label class="block text-sm font-bold text-gray-800 mb-2">Kata Sandi</label>
-                                <input type="password" value="••••••••" disabled 
-                                       class="w-full px-4 py-2.5 bg-white/60 border border-white/40 rounded-xl text-gray-700 cursor-not-allowed glass-input text-sm">
-                            </div>
+                    {{-- Kata Sandi (Full Width) --}}
+                    <div class="mb-5">
+                        <label class="block text-sm font-bold text-gray-800 mb-2">Kata Sandi</label>
+                        <input type="password" value="••••••••" disabled 
+                               class="w-full px-4 py-2.5 bg-white/60 border border-white/40 rounded-xl text-gray-700 cursor-not-allowed glass-input text-sm">
+                    </div>
 
-                            {{-- 3 Tombol Aksi - Tata Letak Horizontal --}}
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-3">
-                                {{-- Ubah Sandi - Button Border Putih --}}
-                                <button type="button" id="btn-open-change-password"
-                                        class="button-interactive py-3.5 bg-white/70 backdrop-blur-sm text-blue-500 rounded-full font-semibold text-base transition-all duration-300 shadow-md border border-white/80 hover:bg-white/90 hover:shadow-lg hover:scale-105 active:scale-95">
-                                    Ubah Sandi
-                                </button>
-                                
-                                {{-- Simpan - Button Border Putih --}}
-                                <button type="submit" 
-                                        class="button-interactive py-3.5 bg-white/70 backdrop-blur-sm text-blue-500 rounded-full font-semibold text-base transition-all duration-300 shadow-md border border-white/80 hover:bg-white/90 hover:shadow-lg hover:scale-105 active:scale-95">
-                                    Simpan
-                                </button>
-                                
-                                {{-- Keluar - Button Border Putih --}}
-                                <button type="button" id="btn-open-logout-profile"
-                                        class="button-interactive py-3.5 bg-white/70 backdrop-blur-sm text-red-500 rounded-full font-semibold text-base transition-all duration-300 shadow-md border border-white/80 hover:bg-white/90 hover:shadow-lg hover:scale-105 active:scale-95">
-                                    Keluar
-                                </button>
-                            </div>
+                    {{-- 3 Tombol Aksi - Tata Letak Horizontal --}}
+                    <div class="pt-4 mt-2 border-t border-white/30">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            {{-- Ubah Sandi - Button Border Putih --}}
+                            <button type="button" id="btn-open-change-password"
+                                    class="button-interactive py-3.5 bg-white/70 backdrop-blur-sm text-blue-500 rounded-full font-semibold text-base transition-all duration-300 shadow-md border border-white/80 hover:bg-white/90 hover:shadow-lg hover:scale-105 active:scale-95">
+                                Ubah Sandi
+                            </button>
+                            
+                            {{-- Simpan - Button Border Putih --}}
+                            <button type="submit" 
+                                    class="button-interactive py-3.5 bg-white/70 backdrop-blur-sm text-blue-500 rounded-full font-semibold text-base transition-all duration-300 shadow-md border border-white/80 hover:bg-white/90 hover:shadow-lg hover:scale-105 active:scale-95">
+                                Simpan
+                            </button>
+                            
+                            {{-- Keluar - Button Border Putih --}}
+                            <button type="button" id="btn-open-logout-profile"
+                                    class="button-interactive py-3.5 bg-white/70 backdrop-blur-sm text-red-500 rounded-full font-semibold text-base transition-all duration-300 shadow-md border border-white/80 hover:bg-white/90 hover:shadow-lg hover:scale-105 active:scale-95">
+                                Keluar
+                            </button>
                         </div>
                     </div>
                 </div>

@@ -354,6 +354,11 @@
                             </div>
                             
                             <div class="mb-3">
+                                <small class="text-muted d-block uppercase ls-1 mb-1">NIK (KTP)</small>
+                                <span class="fw-medium text-dark">{{ $request->user->nik ?? '-' }}</span>
+                            </div>
+                            
+                            <div class="mb-3">
                                 <small class="text-muted d-block uppercase ls-1 mb-1">Email</small>
                                 <span class="fw-medium text-dark">{{ $request->email ?? $request->user->email }}</span>
                             </div>

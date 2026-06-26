@@ -140,6 +140,102 @@
                 <h1 class="text-3xl md:text-4xl font-bold mb-2">
                     <span class="text-gray-800">Metode </span>
                     <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Antar Jemput Alat Sewa</span>
+@extends('layouts.user')
+
+@php
+    // Tentukan gaya latar belakang kartu berdasarkan pengaturan admin
+    $cardStyle = 'background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);'; // default blue
+    $amountColor = 'text-yellow-300'; // Default amount color
+    $cardTextColor = 'text-white'; // Default card text color
+    $buttonClass = 'bg-white/20 backdrop-blur-sm border border-white/40 text-white hover:bg-white/30'; // Default button style
+    $borderClass = 'border-white/30'; // Default border style
+    
+    if ($setting && $setting->card_gradient_style) {
+        $gradients = [
+            'white' => 'linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%)',
+            'silver' => 'linear-gradient(135deg, #e0e0e0 0%, #c0c0c0 100%)',
+            'gold' => 'linear-gradient(135deg, #ffd700 0%, #fdb931 100%)',
+            'transparent' => 'rgba(59, 130, 246, 0.3)',
+            'blue' => 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)',
+            'green' => 'linear-gradient(135deg, #00a884 0%, #005c4b 100%)',
+            'purple' => 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            'dark' => 'linear-gradient(135deg, #232526 0%, #414345 100%)',
+            'orange' => 'linear-gradient(135deg, #f7971e 0%, #ffd200 100%)',
+            'red' => 'linear-gradient(135deg, #eb3349 0%, #f45c43 100%)',
+        ];
+        
+        $style = $setting->card_gradient_style;
+        $cardStyle = 'background: ' . ($gradients[$style] ?? $gradients['blue']) . ';';
+        
+        // Tentukan warna berdasarkan latar belakang
+        if (in_array($style, ['white', 'silver', 'gold', 'transparent'])) {
+            $amountColor = 'text-red-600';
+            $cardTextColor = 'text-gray-800';
+            $buttonClass = 'bg-gray-200 hover:bg-gray-300 text-gray-800 border border-gray-400';
+            $borderClass = 'border-gray-300';
+        } elseif ($style == 'red') {
+            $amountColor = 'text-white';
+            $cardTextColor = 'text-white';
+        } else {
+            $amountColor = 'text-yellow-300'; // Blue, Green, Purple, Dark
+            $cardTextColor = 'text-white';
+        }
+    }
+    
+    // Dukungan legacy untuk gambar (jika diaktifkan kembali atau sudah ada)
+    if ($setting && $setting->card_background_type === 'image' && $setting->card_background_image) {
+        $cardStyle = "background-image: url('" . asset('storage/' . $setting->card_background_image) . "'); background-size: cover; background-position: center;";
+        $amountColor = 'text-yellow-300';
+        $cardTextColor = 'text-white';
+    }
+    
+    // Dapatkan deskripsi pembayaran tunai
+    $cashDescription = $setting->cash_payment_description ?? 'Yani - Bendahara BUMDes';
+
+    // Bank Logo Mapping
+    $bankLogos = [
+        'Bank Syariah Indonesia' => 'admin/img/banks/bsi.png',
+        'BRI' => 'admin/img/banks/bri.png',
+        'Mandiri' => 'admin/img/banks/mandiri.png',
+        'BNI' => 'admin/img/banks/bni.png',
+        'BCA' => 'admin/img/banks/bca.png',
+        'Bank Riau Kepri Syariah' => 'admin/img/banks/brk.png',
+        'Bank Mega' => 'admin/img/banks/mega.png',
+    ];
+    $bankLogoPath = $bankLogos[$setting->bank_name ?? ''] ?? 'admin/img/banks/bsi.png';
+    
+    // Tentukan metode pembayaran yang tersedia dengan fallback yang lebih baik
+    $methods = $setting?->payment_methods ?? ['transfer', 'tunai'];
+    if (!is_array($methods) || empty($methods)) {
+        $methods = ['transfer', 'tunai'];
+    }
+    $hasTransfer = in_array('transfer', $methods);
+    $hasTunai = in_array('tunai', $methods);
+    
+    // Pastikan setidaknya satu metode tersedia
+    if (!$hasTransfer && !$hasTunai) {
+        $hasTransfer = true;
+        $hasTunai = true;
+    }
+    
+    // Tentukan metode aktif default
+    $defaultMethod = $hasTransfer ? 'transfer' : 'tunai';
+@endphp
+
+@section('page')
+<main class="flex-grow relative w-full">
+    <section class="relative z-10 min-h-screen pt-32 pb-16 bg-cover bg-center bg-no-repeat bg-fixed" 
+             style="background-image: url('{{ asset('Admin/img/elements/background1.png') }}');">
+        
+        <!-- White Overlay (25% opacity / 75% transparent) to make background visible -->
+        <div class="absolute inset-0 bg-white/25 pointer-events-none"></div>
+
+        <div class="max-w-5xl mx-auto px-6 relative z-20">
+            <!-- Header dengan Teks Gradien -->
+            <div class="text-center mb-12 mt-8">
+                <h1 class="text-3xl md:text-4xl font-bold mb-2">
+                    <span class="text-gray-800">Metode </span>
+                    <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Antar Jemput Alat Sewa</span>
                 </h1>
             </div>
 
@@ -147,31 +243,40 @@
                 @csrf
                 <input type="hidden" name="mobil_id" value="{{ $item->id }}">
                 <input type="hidden" name="quantity" id="hidden-quantity" value="{{ $quantity }}">
-                <input type="hidden" name="delivery_method" id="delivery-method-input" value="antar">
+                @php
+                    $antarActive = !isset($setting->payment_info['mobil_delivery_antar_active']) || $setting->payment_info['mobil_delivery_antar_active'];
+                    $jemputActive = !isset($setting->payment_info['mobil_delivery_jemput_active']) || $setting->payment_info['mobil_delivery_jemput_active'];
+                    $defaultMethod = $antarActive ? 'antar' : 'jemput';
+                @endphp
+                <input type="hidden" name="delivery_method" id="delivery-method-input" value="{{ $defaultMethod }}">
 
                 <!-- Pilihan Metode Pengiriman -->
                 <div class="flex flex-col sm:flex-row justify-center gap-6 mb-10 items-center">
+                    @if($antarActive)
                     <!-- Antar Card -->
-                    <div class="delivery-method-card active cursor-pointer bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 w-48 text-center border-4 border-transparent" data-method="antar">
+                    <div class="delivery-method-card {{ $defaultMethod == 'antar' ? 'active' : '' }} cursor-pointer bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 w-48 text-center border-4 border-transparent" data-method="antar">
                         <!-- Placeholder for Truck Icon -->
                         <div class="mb-4 flex justify-center">
                             <img src="{{ asset('Admin/img/elements/antar.png') }}" alt="Antar" class="w-20 h-20 object-contain">
                         </div>
                         <p class="font-bold text-lg text-gray-800">Antar</p>
                     </div>
+                    @endif
 
+                    @if($jemputActive)
                     <!-- Jemput Card -->
-                    <div class="delivery-method-card cursor-pointer bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 w-48 text-center border-4 border-transparent" data-method="jemput">
+                    <div class="delivery-method-card {{ $defaultMethod == 'jemput' ? 'active' : '' }} cursor-pointer bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 w-48 text-center border-4 border-transparent" data-method="jemput">
                         <!-- Placeholder for Warehouse Icon -->
                         <div class="mb-4 flex justify-center">
                             <img src="{{ asset('Admin/img/elements/jemput.png') }}" alt="Jemput" class="w-20 h-20 object-contain">
                         </div>
                         <p class="font-bold text-lg text-gray-800">Jemput</p>
                     </div>
+                    @endif
                 </div>
 
                 <!-- Antar Method Form -->
-                <div id="antar-form" class="delivery-form-content">
+                <div id="antar-form" class="delivery-form-content {{ $defaultMethod == 'antar' ? '' : 'hidden' }}">
                     <!-- Important Note -->
                     <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded-r-lg">
                         <div class="flex">
@@ -182,7 +287,7 @@
                             </div>
                             <div class="ml-3">
                                 <p class="text-sm text-yellow-700">
-                                    <span class="font-bold">NB:</span> Pengembalian Alat Sewa akan dijemput oleh Pihak BUMDes setelah waktu penyewaan selesai.
+                                    <span class="font-bold">NB:</span> Pengembalian Mobil akan dijemput oleh Pihak BUMDes setelah waktu penyewaan selesai.
                                 </p>
                             </div>
                         </div>
@@ -339,6 +444,27 @@
                         </div>
                     </div>
 
+                    @if(!empty($sop_mobil))
+                    <!-- SOP Section for Antar -->
+                    <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                        <div class="flex items-center gap-3 mb-4">
+                            <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                            </svg>
+                            <h3 class="text-lg font-bold text-gray-800">Ketentuan SOP</h3>
+                        </div>
+                        
+                        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm text-gray-700 h-40 overflow-y-auto mb-4 whitespace-pre-wrap">
+                            {{ $sop_mobil }}
+                        </div>
+                        
+                        <div class="flex items-center">
+                            <input type="checkbox" id="agree-sop-antar" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                            <label for="agree-sop-antar" class="ml-2 text-sm text-gray-800 font-medium">Saya telah membaca dan menyetujui Ketentuan SOP</label>
+                        </div>
+                    </div>
+                    @endif
+
                     <!-- Submit Button -->
                     <div class="flex justify-end">
                         <button type="button" 
@@ -349,7 +475,7 @@
                 </div>
 
                 <!-- Jemput Method Form -->
-                <div id="jemput-form" class="delivery-form-content hidden">
+                <div id="jemput-form" class="delivery-form-content {{ $defaultMethod == 'jemput' ? '' : 'hidden' }}">
                     <!-- Important Note -->
                     <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded-r-lg">
                         <div class="flex">
@@ -596,6 +722,27 @@
                             </div>
                         </div>
                     </div>
+
+                    @if(!empty($sop_mobil))
+                    <!-- SOP Section for Jemput -->
+                    <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                        <div class="flex items-center gap-3 mb-4">
+                            <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                            </svg>
+                            <h3 class="text-lg font-bold text-gray-800">Ketentuan SOP</h3>
+                        </div>
+                        
+                        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm text-gray-700 h-40 overflow-y-auto mb-4 whitespace-pre-wrap">
+                            {{ $sop_mobil }}
+                        </div>
+                        
+                        <div class="flex items-center">
+                            <input type="checkbox" id="agree-sop-jemput" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                            <label for="agree-sop-jemput" class="ml-2 text-sm text-gray-800 font-medium">Saya telah membaca dan menyetujui Ketentuan SOP</label>
+                        </div>
+                    </div>
+                    @endif
 
                     <!-- Submit Button -->
                     <div class="flex justify-end">
@@ -1069,10 +1216,14 @@
                         const startDateVal = startDate?.value;
                         const endDateVal = endDate?.value;
                         const rentalPurpose = getEl('rental-purpose')?.value;
+                        const agreeSopAntar = document.getElementById('agree-sop-antar');
 
                         if (!recipientName || !deliveryAddress || !startDateVal || !endDateVal || !rentalPurpose) {
                             isValid = false;
                             errorMessage = 'Mohon lengkapi semua field yang wajib diisi (Nama, Alamat, Tujuan Sewa, Tanggal)';
+                        } else if (agreeSopAntar && !agreeSopAntar.checked) {
+                            isValid = false;
+                            errorMessage = 'Anda harus menyetujui Ketentuan SOP terlebih dahulu sebelum melanjutkan pemesanan.';
                         }
                     } else {
                         const startDateVal = startDateJemput?.value;
@@ -1080,10 +1231,14 @@
                         const rentalPurposeJemput = getEl('rental-purpose-jemput')?.value;
                         const recipientNameJemput = getEl('recipient-name-jemput')?.value;
                         const recipientAddressJemput = getEl('delivery-address-jemput')?.value;
+                        const agreeSopJemput = document.getElementById('agree-sop-jemput');
 
                         if (!startDateVal || !endDateVal || !rentalPurposeJemput || !recipientNameJemput || !recipientAddressJemput) {
                             isValid = false;
                             errorMessage = 'Mohon lengkapi Nama Penyewa, Alamat, Tanggal Mulai, Tanggal Selesai, dan Tujuan Sewa';
+                        } else if (agreeSopJemput && !agreeSopJemput.checked) {
+                            isValid = false;
+                            errorMessage = 'Anda harus menyetujui Ketentuan SOP terlebih dahulu sebelum melanjutkan pemesanan.';
                         }
                     }
 

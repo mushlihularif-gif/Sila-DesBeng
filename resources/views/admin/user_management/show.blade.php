@@ -19,13 +19,13 @@
                             <h5>Informasi Profil</h5>
                             <div class="row">
                                 <div class="col-md-6">
-                                    <p><strong>Username:</strong> {{ $user->username }}</p>
+                                    <p><strong>Nama Pengguna:</strong> {{ $user->username }}</p>
                                     <p><strong>Nama Lengkap:</strong> {{ $user->name }}</p>
                                     <p><strong>Jenis Kelamin:</strong> {{ ucfirst($user->gender) ?? 'Tidak Ditentukan' }}</p>
                                 </div>
                                 <div class="col-md-6">
                                     <p><strong>Email:</strong> {{ $user->email }}</p>
-                                    <p><strong>No Telepon:</strong> {{ $user->phone ?? '-' }}</p>
+                                    <p><strong>Nomor Telepon:</strong> {{ $user->phone ?? '-' }}</p>
                                     <p><strong>Status Akun:</strong>
                                         <span class="badge {{ $user->status === 'aktif' ? 'badge-success' : 'badge-danger' }}">
                                             {{ ucfirst($user->status) }}

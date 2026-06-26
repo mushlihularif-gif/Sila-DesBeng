@@ -325,8 +325,7 @@ public function index(Request $request)
         }
         
         // Cari di Produk Penyewaan (Barang)
-        $rentalProducts = Barang::where('nama_barang', 'LIKE', "%{$search}%")
-            ->orWhere('kategori', 'LIKE', "%{$search}%")
+        $rentalProducts = Barang::searchWhereLike(['nama_barang', 'kategori'], $search)
             ->get()
             ->map(function($item) {
                 return [
@@ -342,8 +341,7 @@ public function index(Request $request)
             });
         
         // Cari di Produk Gas
-        $gasProducts = Gas::where('jenis_gas', 'LIKE', "%{$search}%")
-            ->orWhere('kategori', 'LIKE', "%{$search}%")
+        $gasProducts = Gas::searchWhereLike(['jenis_gas', 'kategori'], $search)
             ->get()
             ->map(function($item) {
                 return [
@@ -359,8 +357,7 @@ public function index(Request $request)
             });
         
         // Cari di Pengguna
-        $users = User::where('name', 'LIKE', "%{$search}%")
-            ->orWhere('email', 'LIKE', "%{$search}%")
+        $users = User::searchWhereLike(['name', 'email'], $search)
             ->get()
             ->map(function($item) {
                 return [
@@ -376,8 +373,7 @@ public function index(Request $request)
             });
         
         // Cari di Anggota BUMDes
-        $bumdesMembers = \App\Models\BumdesMember::where('name', 'LIKE', "%{$search}%")
-            ->orWhere('position', 'LIKE', "%{$search}%")
+        $bumdesMembers = \App\Models\BumdesMember::searchWhereLike(['name', 'position'], $search)
             ->get()
             ->map(function($item) {
                 return [
@@ -394,9 +390,11 @@ public function index(Request $request)
         
         // Cari di Transaksi (Penyewaan)
         $rentalTransactions = RentalBooking::with('user')
-            ->where('status', 'LIKE', "%{$search}%")
-            ->orWhereHas('user', function($q) use ($search) {
-                $q->where('name', 'LIKE', "%{$search}%");
+            ->where(function($q) use ($search) {
+                $q->searchWhereLike('status', $search)
+                  ->orWhereHas('user', function($q2) use ($search) {
+                      $q2->searchWhereLike('name', $search);
+                  });
             })
             ->get()
             ->map(function($item) {
@@ -415,9 +413,11 @@ public function index(Request $request)
         
         // Cari di Transaksi (Gas)
         $gasTransactions = GasOrder::with('user')
-            ->where('status', 'LIKE', "%{$search}%")
-            ->orWhereHas('user', function($q) use ($search) {
-                $q->where('name', 'LIKE', "%{$search}%");
+            ->where(function($q) use ($search) {
+                $q->searchWhereLike('status', $search)
+                  ->orWhereHas('user', function($q2) use ($search) {
+                      $q2->searchWhereLike('name', $search);
+                  });
             })
             ->get()
             ->map(function($item) {

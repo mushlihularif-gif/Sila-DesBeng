@@ -274,26 +274,7 @@
                                 </div>
                                 
                                 <div class="row g-3">
-                                    <div class="col-md-4">
-                                        <label class="form-label fw-semibold" for="bbm_ditanggung">
-                                            Bahan Bakar (BBM) <span class="text-danger">*</span>
-                                        </label>
-                                        <select class="form-select modern-input" id="bbm_ditanggung" name="bbm_ditanggung" required>
-                                            <option value="Penyewa" {{ old('bbm_ditanggung', $mobil->bbm_ditanggung ?? '') == 'Penyewa' ? 'selected' : '' }}>Ditanggung Penyewa (Isi Sendiri)</option>
-                                            <option value="Pemerintah Desa" {{ old('bbm_ditanggung', $mobil->bbm_ditanggung ?? '') == 'Pemerintah Desa' ? 'selected' : '' }}>Ditanggung Pemerintah Desa (Gratis BBM)</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label fw-semibold" for="opsi_supir">
-                                            Opsi Supir <span class="text-danger">*</span>
-                                        </label>
-                                        <select class="form-select modern-input" id="opsi_supir" name="opsi_supir" required>
-                                            <option value="Lepas Kunci" {{ old('opsi_supir', $mobil->opsi_supir ?? '') == 'Lepas Kunci' ? 'selected' : '' }}>Lepas Kunci (Tanpa Supir)</option>
-                                            <option value="Dengan Supir" {{ old('opsi_supir', $mobil->opsi_supir ?? '') == 'Dengan Supir' ? 'selected' : '' }}>Dengan Supir (Disediakan Pemdes)</option>
-                                            <option value="Bebas Pilih" {{ old('opsi_supir', $mobil->opsi_supir ?? '') == 'Bebas Pilih' ? 'selected' : '' }}>Bebas Pilih</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-4">
+                                    <div class="col-md-6">
                                         <label class="form-label fw-semibold" for="stok">
                                             Stok Mobil Tersedia <span class="text-danger">*</span>
                                         </label>
@@ -301,7 +282,7 @@
                                                name="stok" value="{{ old('stok', $mobil->stok) }}" 
                                                placeholder="1" min="0" required />
                                     </div>
-                                    <div class="col-md-4">
+                                    <div class="col-md-6">
                                         <label class="form-label fw-semibold" for="satuan">
                                             Satuan <span class="text-danger">*</span>
                                         </label>

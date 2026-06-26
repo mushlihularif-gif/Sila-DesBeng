@@ -18,8 +18,7 @@ class GasController extends Controller
         
         $gases = Gas::query()
             ->when($search, function ($query, $search) {
-                return $query->where('jenis_gas', 'LIKE', "%{$search}%")
-                           ->orWhere('kategori', 'LIKE', "%{$search}%");
+                return $query->searchWhereLike(['jenis_gas', 'kategori'], $search);
             })
             ->orderBy('created_at', 'desc')
             ->paginate(9)

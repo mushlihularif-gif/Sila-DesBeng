@@ -147,31 +147,40 @@
                 @csrf
                 <input type="hidden" name="barang_id" value="{{ $item->id }}">
                 <input type="hidden" name="quantity" id="hidden-quantity" value="{{ $quantity }}">
-                <input type="hidden" name="delivery_method" id="delivery-method-input" value="antar">
+                @php
+                    $antarActive = !isset($setting->payment_info['alat_delivery_antar_active']) || $setting->payment_info['alat_delivery_antar_active'];
+                    $jemputActive = !isset($setting->payment_info['alat_delivery_jemput_active']) || $setting->payment_info['alat_delivery_jemput_active'];
+                    $defaultMethod = $antarActive ? 'antar' : 'jemput';
+                @endphp
+                <input type="hidden" name="delivery_method" id="delivery-method-input" value="{{ $defaultMethod }}">
 
                 <!-- Pilihan Metode Pengiriman -->
                 <div class="flex flex-col sm:flex-row justify-center gap-6 mb-10 items-center">
+                    @if($antarActive)
                     <!-- Antar Card -->
-                    <div class="delivery-method-card active cursor-pointer bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 w-48 text-center border-4 border-transparent" data-method="antar">
+                    <div class="delivery-method-card {{ $defaultMethod == 'antar' ? 'active' : '' }} cursor-pointer bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 w-48 text-center border-4 border-transparent" data-method="antar">
                         <!-- Placeholder for Truck Icon -->
                         <div class="mb-4 flex justify-center">
                             <img src="{{ asset('Admin/img/elements/antar.png') }}" alt="Antar" class="w-20 h-20 object-contain">
                         </div>
                         <p class="font-bold text-lg text-gray-800">Antar</p>
                     </div>
+                    @endif
 
+                    @if($jemputActive)
                     <!-- Jemput Card -->
-                    <div class="delivery-method-card cursor-pointer bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 w-48 text-center border-4 border-transparent" data-method="jemput">
+                    <div class="delivery-method-card {{ $defaultMethod == 'jemput' ? 'active' : '' }} cursor-pointer bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 w-48 text-center border-4 border-transparent" data-method="jemput">
                         <!-- Placeholder for Warehouse Icon -->
                         <div class="mb-4 flex justify-center">
                             <img src="{{ asset('Admin/img/elements/jemput.png') }}" alt="Jemput" class="w-20 h-20 object-contain">
                         </div>
                         <p class="font-bold text-lg text-gray-800">Jemput</p>
                     </div>
+                    @endif
                 </div>
 
                 <!-- Antar Method Form -->
-                <div id="antar-form" class="delivery-form-content">
+                <div id="antar-form" class="delivery-form-content {{ $defaultMethod == 'antar' ? '' : 'hidden' }}">
                     <!-- Important Note -->
                     <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded-r-lg">
                         <div class="flex">
@@ -340,6 +349,27 @@
                         </div>
                     </div>
 
+                    @if(!empty($sop_penyewaan_alat))
+                    <!-- SOP Section for Antar -->
+                    <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                        <div class="flex items-center gap-3 mb-4">
+                            <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                            </svg>
+                            <h3 class="text-lg font-bold text-gray-800">Ketentuan SOP</h3>
+                        </div>
+                        
+                        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm text-gray-700 h-40 overflow-y-auto mb-4 whitespace-pre-wrap">
+                            {{ $sop_penyewaan_alat }}
+                        </div>
+                        
+                        <div class="flex items-center">
+                            <input type="checkbox" id="agree-sop-antar" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                            <label for="agree-sop-antar" class="ml-2 text-sm text-gray-800 font-medium">Saya telah membaca dan menyetujui Ketentuan SOP</label>
+                        </div>
+                    </div>
+                    @endif
+
                     <!-- Submit Button -->
                     <div class="flex justify-end">
                         <button type="button" 
@@ -350,7 +380,7 @@
                 </div>
 
                 <!-- Jemput Method Form -->
-                <div id="jemput-form" class="delivery-form-content hidden">
+                <div id="jemput-form" class="delivery-form-content {{ $defaultMethod == 'jemput' ? '' : 'hidden' }}">
                     <!-- Important Note -->
                     <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded-r-lg">
                         <div class="flex">
@@ -598,6 +628,27 @@
                             </div>
                         </div>
                     </div>
+
+                    @if(!empty($sop_penyewaan_alat))
+                    <!-- SOP Section for Jemput -->
+                    <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                        <div class="flex items-center gap-3 mb-4">
+                            <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                            </svg>
+                            <h3 class="text-lg font-bold text-gray-800">Ketentuan SOP</h3>
+                        </div>
+                        
+                        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm text-gray-700 h-40 overflow-y-auto mb-4 whitespace-pre-wrap">
+                            {{ $sop_penyewaan_alat }}
+                        </div>
+                        
+                        <div class="flex items-center">
+                            <input type="checkbox" id="agree-sop-jemput" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                            <label for="agree-sop-jemput" class="ml-2 text-sm text-gray-800 font-medium">Saya telah membaca dan menyetujui Ketentuan SOP</label>
+                        </div>
+                    </div>
+                    @endif
 
                     <!-- Submit Button -->
                     <div class="flex justify-end">
@@ -1089,6 +1140,28 @@
                             confirmButtonColor: '#3085d6',
                         });
                         return;
+                    }
+
+                    // SOP Validation
+                    const sopRequired = {{ !empty($sop_penyewaan_alat) ? 'true' : 'false' }};
+                    if (sopRequired) {
+                        if (deliveryMethod === 'antar' && !getEl('agree-sop-antar').checked) {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Perhatian',
+                                text: 'Mohon setujui Ketentuan SOP terlebih dahulu.',
+                                confirmButtonColor: '#3085d6',
+                            });
+                            return;
+                        } else if (deliveryMethod === 'jemput' && !getEl('agree-sop-jemput').checked) {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Perhatian',
+                                text: 'Mohon setujui Ketentuan SOP terlebih dahulu.',
+                                confirmButtonColor: '#3085d6',
+                            });
+                            return;
+                        }
                     }
 
                     // Show confirmation modal

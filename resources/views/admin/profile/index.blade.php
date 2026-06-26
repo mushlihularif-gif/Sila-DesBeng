@@ -66,11 +66,11 @@
                             <div class="row g-4">
                                 <div class="col-md-6">
                                     <label for="username" class="form-label fw-semibold mb-2">
-                                        <i class="bx bx-user me-1"></i>Username
+                                        <i class="bx bx-user me-1"></i>Nama Pengguna
                                     </label>
                                     <input class="form-control form-control-lg" type="text" id="username" name="username"
                                         value="{{ $user->username ?? 'admin_user' }}" disabled style="background-color: #f3f4f6;" />
-                                    <small class="text-muted mt-2 d-block">Username tidak dapat diubah</small>
+                                    <small class="text-muted mt-2 d-block">Nama Pengguna tidak dapat diubah</small>
                                 </div>
                                 <div class="col-md-6">
                                     <label for="email" class="form-label fw-semibold mb-2">

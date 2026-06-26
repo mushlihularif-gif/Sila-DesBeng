@@ -21,6 +21,7 @@ class GasBookingController extends Controller
         // Validate the request
         $validated = $request->validate([
             'gas_id' => 'required|exists:gas,id',
+            'delivery_method' => 'required|in:antar,jemput',
             'buyer_name' => 'required|string|max:255',
             'buyer_address' => 'required|string',
             'quantity' => 'required|integer|min:1|max:100',
@@ -52,6 +53,7 @@ class GasBookingController extends Controller
             'quantity' => $validated['quantity'],
             'price' => $gas->harga_satuan,
             'order_date' => now(),
+            'delivery_method' => $validated['delivery_method'],
             'payment_method' => ucfirst($validated['payment_method']),
             'address' => $validated['buyer_address'],
             'full_name' => $validated['buyer_name'],

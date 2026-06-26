@@ -215,27 +215,6 @@
                                         <input type="text" class="form-control modern-input" id="lokasi" 
                                                name="lokasi" value="Desa Pematang Duku Timur" required />
                                     </div>
-                                    <div class="col-md-6 kendaraan-options">
-                                        <label class="form-label fw-semibold" for="opsi_supir">
-                                            Opsi Supir (Hanya untuk Kendaraan)
-                                        </label>
-                                        <select class="form-select modern-input" id="opsi_supir" name="opsi_supir">
-                                            <option value="" selected>Tidak Ada (Bukan Kendaraan)</option>
-                                            <option value="Lepas Kunci">Lepas Kunci (Tanpa Supir)</option>
-                                            <option value="Dengan Supir">Dengan Supir (Disediakan Pemdes)</option>
-                                            <option value="Bebas Pilih">Bebas Pilih</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-6 kendaraan-options">
-                                        <label class="form-label fw-semibold" for="bbm_ditanggung">
-                                            Bahan Bakar (Hanya untuk Kendaraan)
-                                        </label>
-                                        <select class="form-select modern-input" id="bbm_ditanggung" name="bbm_ditanggung">
-                                            <option value="" selected>Tidak Ada (Bukan Kendaraan)</option>
-                                            <option value="Penyewa">Ditanggung Penyewa (Isi Sendiri)</option>
-                                            <option value="Pemerintah Desa">Ditanggung Pemerintah Desa (Gratis BBM)</option>
-                                        </select>
-                                    </div>
                                 </div>
                             </div>
 

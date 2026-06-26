@@ -42,9 +42,7 @@ class WilayahAdminController extends Controller
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
-                $q->where('nama', 'like', "%{$search}%")
-                  ->orWhere('deskripsi', 'like', "%{$search}%")
-                  ->orWhere('lokasi', 'like', "%{$search}%");
+                $q->searchWhereLike(['nama', 'deskripsi', 'lokasi'], $search);
             });
         }
 
@@ -84,8 +82,7 @@ class WilayahAdminController extends Controller
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
+                $q->searchWhereLike(['title', 'description'], $search);
             });
         }
         
@@ -163,8 +160,7 @@ class WilayahAdminController extends Controller
 
         $wargas = $usersQuery->when($search, function ($query, $search) {
                 return $query->where(function($q) use ($search) {
-                    $q->where('name', 'LIKE', "%{$search}%")
-                      ->orWhere('email', 'LIKE', "%{$search}%");
+                    $q->searchWhereLike(['name', 'email'], $search);
                 });
             })
             ->orderBy('name', 'asc')

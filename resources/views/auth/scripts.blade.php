@@ -17,9 +17,6 @@
         function openModal(modal) {
             if (!modal) return;
 
-            const scrollbarWidth = getScrollbarWidth();
-            document.body.style.paddingRight = `${scrollbarWidth}px`;
-
             // 1. Reset semua modal content lain agar hidden
             document.querySelectorAll('.modal-content').forEach(m => {
                 m.classList.add('hidden');
@@ -46,7 +43,7 @@
                 }, 50); // Delay dikit biar transisi jalan
             }, 10);
             
-            document.body.style.overflow = 'hidden'; // Lock scroll
+            // overflow hidden dihapus agar scrollbar tidak hilang dan navbar tidak geser
         }
 
         function closeModal() {
@@ -64,8 +61,7 @@
                 document.querySelectorAll('.modal-content').forEach(m => {
                     m.classList.add('hidden');
                 });
-                document.body.style.overflow = ''; // Restore scroll
-                document.body.style.paddingRight = ''; // Restore padding
+                // Restore scroll logic dihapus
             }, 300); // Sesuaikan dengan duration-300
         }
 

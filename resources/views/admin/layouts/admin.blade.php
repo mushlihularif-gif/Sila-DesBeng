@@ -696,7 +696,7 @@
                                 <a class="nav-link dropdown-toggle hide-arrow position-relative" href="javascript:void(0);" data-bs-toggle="dropdown" data-bs-auto-close="outside">
                                     <i class="bx bx-bell bx-sm"></i>
                                     @php
-                                        $unreadCount = \App\Models\Notification::where('is_read', false)->count();
+                                        $unreadCount = \App\Models\AdminNotification::where('is_read', false)->count();
                                     @endphp
                                     @if($unreadCount > 0)
                                     <span class="badge bg-danger rounded-pill badge-notifications position-absolute" style="top: -2px; right: -6px; font-size: 10px; min-width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;">{{ $unreadCount > 99 ? '99+' : $unreadCount }}</span>
@@ -714,7 +714,7 @@
                                     <li>
                                         <div style="max-height: 280px; overflow-y: auto;">
                                             @php
-                                                $recentNotifications = \App\Models\Notification::with('user')->latest()->take(5)->get();
+                                                $recentNotifications = \App\Models\AdminNotification::latest()->take(5)->get();
                                             @endphp
                                             @forelse($recentNotifications as $notif)
                                             <a href="{{ route('admin.notifications.index') }}" class="dropdown-item d-flex align-items-start gap-3 py-3 px-4" style="white-space: normal; {{ !$notif->is_read ? 'background-color: rgba(105, 108, 255, 0.08);' : '' }}">
@@ -724,8 +724,11 @@
                                                     </div>
                                                 </div>
                                                 <div class="flex-grow-1">
-                                                    <p class="mb-0 fw-semibold small">{{ $notif->title }}</p>
-                                                    <small class="text-muted">{{ $notif->created_at->diffForHumans() }}</small>
+                                                    <h6 class="mb-1 fw-semibold {{ !$notif->is_read ? 'text-primary' : 'text-dark' }}">{{ $notif->title }}</h6>
+                                                    <p class="mb-1 text-muted small" style="line-height: 1.4;">{{ Str::limit($notif->message, 60) }}</p>
+                                                    <small class="text-muted d-flex align-items-center mt-2">
+                                                        <i class="bx bx-time-five me-1"></i> {{ $notif->created_at->diffForHumans() }}
+                                                    </small>
                                                 </div>
                                             </a>
                                             @empty

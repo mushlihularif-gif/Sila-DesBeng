@@ -17,6 +17,7 @@ class AuthController extends Controller
     {
         try {
             $validated = $request->validate([
+                'nik' => 'required|string|size:16|unique:users,nik',
                 'username' => 'required|string|max:255|unique:users,username',
                 'email' => 'required|email|unique:users,email',
                 'name' => 'required|string|max:255',
@@ -40,6 +41,7 @@ class AuthController extends Controller
             session([
                 'temp_registration' => [
                     'temp_id' => $tempUserId,
+                    'nik' => $validated['nik'],
                     'username' => $validated['username'],
                     'email' => $validated['email'],
                     'name' => $validated['name'],
@@ -162,6 +164,7 @@ class AuthController extends Controller
 
             // Create user with safe fields only (no role/status via mass assignment)
             $user = User::create([
+                'nik' => $tempData['nik'],
                 'username' => $tempData['username'],
                 'email' => $tempData['email'],
                 'name' => $tempData['name'],
