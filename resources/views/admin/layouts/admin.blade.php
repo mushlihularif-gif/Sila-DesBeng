@@ -473,6 +473,7 @@
                     </li>
 
                     <!-- Unit Layanan (Dropdown) -->
+                @if(in_array(auth()->user()->role, ['super_admin', 'admin', 'admin_kecamatan', 'admin_desa']))
                 <li class="menu-item {{ request()->is('admin/unit*') ? 'open active show' : '' }}">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
                         <i class="menu-icon tf-icons bx bx-building-house"></i>
@@ -501,6 +502,7 @@
                             </li>
                         </ul>
                     </li>
+                @endif
 
                 <!-- Manajemen (Dropdown) -->
                 <li class="menu-item {{ request()->is('admin/manajemen-pengguna*') || request()->is('admin/kemitraan*') || request()->is('admin/kelola-wilayah*') || request()->is('admin/banners*') || request()->is('admin/announcements*') || request()->routeIs('lurah.laporan.*') ? 'open active show' : '' }}">
@@ -509,6 +511,7 @@
                         <div data-i18n="Manajemen">Manajemen</div>
                     </a>
                     <ul class="menu-sub">
+                        @if(in_array(auth()->user()->role, ['super_admin', 'admin', 'admin_kecamatan']))
                         <li class="menu-item {{ request()->routeIs('admin.manajemen-pengguna.*') ? 'active' : '' }}">
                             <a href="{{ route('admin.manajemen-pengguna.index') }}" class="menu-link">
                                 <div>Pengguna</div>
@@ -524,6 +527,7 @@
                                 <div>Banner</div>
                             </a>
                         </li>
+                        @endif
                         <li class="menu-item {{ request()->routeIs('admin.announcements.*') ? 'active' : '' }}">
                             <a href="{{ route('admin.announcements.index') }}" class="menu-link">
                                 <div>Pengumuman</div>
@@ -534,7 +538,7 @@
                                 <div>Pelaporan Warga</div>
                             </a>
                         </li>
-                        @if(in_array(auth()->user()->role, ['admin_desa', 'lurah', 'admin_rw', 'super_admin', 'admin']))
+                        @if(in_array(auth()->user()->role, ['admin_kecamatan', 'admin_desa', 'lurah', 'admin_rw', 'super_admin', 'admin']))
                         <li class="menu-item {{ request()->routeIs('admin.kelola-wilayah.*') ? 'active' : '' }}">
                             <a href="{{ route('admin.kelola-wilayah.index') }}" class="menu-link">
                                 <div>Kelola Wilayah</div>
@@ -545,6 +549,7 @@
                 </li>
 
                 <!-- Aktivitas -->
+                @if(in_array(auth()->user()->role, ['super_admin', 'admin', 'admin_kecamatan', 'admin_desa']))
                 <li
                     class="menu-item {{ request()->is('admin/aktivitas/permintaan-pengajuan*') || request()->is('admin/aktivitas/bukti-transaksi*') || request()->routeIs('admin.laporan.log') ? 'open active show' : '' }}">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -563,11 +568,13 @@
                                 <div data-i18n="Bukti Transaksi">Bukti Transaksi</div>
                             </a>
                         </li>
+                        @if(in_array(auth()->user()->role, ['super_admin', 'admin', 'admin_kecamatan']))
                         <li class="menu-item {{ request()->routeIs('admin.laporan.log') ? 'active' : '' }}">
                             <a href="{{ route('admin.laporan.log') }}" class="menu-link">
                                 <div data-i18n="Log Aktivitas">Log Aktivitas</div>
                             </a>
                         </li>
+                        @endif
                     </ul>
                 </li>
                 <!-- Data & Laporan (Dropdown) -->
@@ -589,14 +596,17 @@
                         </li>
                     </ul>
                 </li>
+                @endif
 
                 <!-- Pengaturan (Dropdown) -->
+                @if(in_array(auth()->user()->role, ['super_admin', 'admin', 'admin_kecamatan']))
                 <li class="menu-item {{ request()->routeIs('admin.system-settings.*') || request()->routeIs('admin.region-settings.*') ? 'open active show' : '' }}">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
                         <i class="menu-icon tf-icons bx bx-cog"></i>
                         <div data-i18n="Pengaturan">Pengaturan</div>
                     </a>
                     <ul class="menu-sub">
+                        @if(in_array(auth()->user()->role, ['super_admin', 'admin']))
                         <li class="menu-item {{ request()->routeIs('admin.system-settings.index') ? 'active' : '' }}">
                             <a href="{{ route('admin.system-settings.index') }}" class="menu-link">
                                 <div>Layanan Pusat</div>
@@ -607,6 +617,7 @@
                                 <div>Pembayaran Pusat</div>
                             </a>
                         </li>
+                        @endif
                         <li class="menu-item {{ request()->routeIs('admin.region-settings.index') ? 'active' : '' }}">
                             <a href="{{ route('admin.region-settings.index') }}" class="menu-link">
                                 <div>Layanan Wilayah</div>
@@ -619,6 +630,7 @@
                         </li>
                     </ul>
                 </li>
+                @endif
 
 
                 <!-- Profil & Info (Dropdown) -->

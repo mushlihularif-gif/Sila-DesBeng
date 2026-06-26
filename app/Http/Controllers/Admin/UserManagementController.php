@@ -77,6 +77,8 @@ class UserManagementController extends Controller
             if ($filter_kecamatan_id) {
                 $desaOptions = \App\Models\Region::where('type', 'desa')->where('parent_id', $filter_kecamatan_id)->orderBy('name')->get();
             }
+        } elseif ($user->role === 'admin_kecamatan') {
+            $desaOptions = \App\Models\Region::where('type', 'desa')->where('parent_id', $user->region_id)->orderBy('name')->get();
         }
 
         return view('admin.user_management.index', compact('users', 'search', 'kecamatanOptions', 'desaOptions', 'filter_kecamatan_id', 'filter_desa_id'));
