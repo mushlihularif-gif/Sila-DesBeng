@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Storage;
 
 class AnnouncementController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $user = auth()->user();
         
@@ -23,8 +23,41 @@ class AnnouncementController extends Controller
             $query->whereIn('region_id', $allowedRegionIds);
         }
 
-        $announcements = $query->paginate(10);
-        return view('admin.announcements.index', compact('announcements'));
+        $filter_type = $request->get('type');
+        $filter_kecamatan_id = $request->get('filter_kecamatan_id');
+        $filter_desa_id = $request->get('filter_desa_id');
+
+        if ($filter_type) {
+            $query->where('type', $filter_type);
+        }
+
+        if ($filter_desa_id) {
+            $query->where('region_id', $filter_desa_id);
+        } elseif ($filter_kecamatan_id) {
+            $allowed = \App\Models\Region::getDescendantIds($filter_kecamatan_id);
+            $allowed[] = $filter_kecamatan_id;
+            $query->whereIn('region_id', $allowed);
+        }
+
+        $announcements = $query->paginate(10)->withQueryString();
+        
+        if ($request->ajax()) {
+            return view('admin.announcements.partials.table', compact('announcements'))->render();
+        }
+
+        $kecamatanOptions = collect();
+        $desaOptions = collect();
+
+        if (in_array($user->role, ['super_admin', 'admin'])) {
+            $kecamatanOptions = \App\Models\Region::where('type', 'kecamatan')->orderBy('name')->get();
+            if ($filter_kecamatan_id) {
+                $desaOptions = \App\Models\Region::where('type', 'desa')->where('parent_id', $filter_kecamatan_id)->orderBy('name')->get();
+            }
+        } elseif ($user->role === 'admin_kecamatan') {
+            $desaOptions = \App\Models\Region::where('type', 'desa')->where('parent_id', $user->region_id)->orderBy('name')->get();
+        }
+
+        return view('admin.announcements.index', compact('announcements', 'kecamatanOptions', 'desaOptions', 'filter_kecamatan_id', 'filter_desa_id'));
     }
 
     public function create(Request $request)
@@ -39,10 +72,15 @@ class AnnouncementController extends Controller
         if ($user->role !== 'super_admin' && $user->region_id) {
             $regionIds = \App\Models\Region::getDescendantIds($user->region_id);
             array_unshift($regionIds, $user->region_id); // Termasuk wilayah admin itu sendiri
-            $regions = \App\Models\Region::whereIn('id', $regionIds)->get();
+            $regions = \App\Models\Region::whereIn('id', $regionIds)->whereNotIn('type', ['rw', 'rt'])->get();
         } elseif ($user->role === 'super_admin') {
-            $regions = \App\Models\Region::all();
+            $regions = \App\Models\Region::whereNotIn('type', ['rw', 'rt'])->get();
         }
+        
+        $regions->transform(function ($region) {
+            $region->display_name = ucwords($region->type) . ' ' . $region->name;
+            return $region;
+        });
         
         return view('admin.announcements.form', compact('laporan', 'regions'));
     }
@@ -105,10 +143,15 @@ class AnnouncementController extends Controller
                 abort(403, 'Anda tidak berhak mengedit pengumuman ini.');
             }
             
-            $regions = \App\Models\Region::whereIn('id', $allowedRegionIds)->get();
+            $regions = \App\Models\Region::whereIn('id', $allowedRegionIds)->whereNotIn('type', ['rw', 'rt'])->get();
         } elseif ($user->role === 'super_admin') {
-            $regions = \App\Models\Region::all();
+            $regions = \App\Models\Region::whereNotIn('type', ['rw', 'rt'])->get();
         }
+
+        $regions->transform(function ($region) {
+            $region->display_name = ucwords($region->type) . ' ' . $region->name;
+            return $region;
+        });
 
         return view('admin.announcements.form', compact('announcement', 'regions'));
     }

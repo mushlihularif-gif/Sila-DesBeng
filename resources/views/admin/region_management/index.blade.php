@@ -79,8 +79,8 @@
                                             <small class="text-muted text-uppercase">{{ $child->type }}</small>
                                         </div>
                                         <div class="d-flex gap-2">
-                                            @if($child->type == 'rw')
-                                                <span class="badge bg-label-info px-3 py-2 rounded-pill d-inline-flex align-items-center justify-content-center">{{ $child->children->count() }} RT Terdaftar</span>
+                                            @if($child->type != 'rt')
+                                                <span class="badge bg-label-info px-3 py-2 rounded-pill d-inline-flex align-items-center justify-content-center">{{ $child->children->count() }} Sub-Wilayah Terdaftar</span>
                                             @endif
                                             @if($child->users->count() > 0)
                                                 <span class="badge bg-label-success px-3 py-2 rounded-pill d-inline-flex align-items-center justify-content-center"><i class='bx bx-check-circle me-1'></i> Akun Aktif</span>
@@ -152,74 +152,85 @@
                                             </div>
                                         </div>
 
-                                        <!-- Kolom Kanan: Daftar Sub-Wilayah (Hanya untuk RW) -->
-                                        @if($child->type == 'rw')
+                                        <!-- Kolom Kanan: Daftar Sub-Wilayah -->
+                                        @if($child->type != 'rt')
+                                        @php
+                                            $subType = '';
+                                            if($child->type == 'kabupaten') $subType = 'kecamatan';
+                                            elseif($child->type == 'kecamatan') $subType = 'desa';
+                                            elseif(in_array($child->type, ['desa', 'kelurahan'])) $subType = 'rw';
+                                            elseif($child->type == 'rw') $subType = 'rt';
+                                        @endphp
                                         <div class="col-md-7 border-start">
                                             <div class="d-flex align-items-center justify-content-between mb-3 ps-md-3">
-                                                <h6 class="fw-semibold mb-0">Daftar Sub-Wilayah (RT)</h6>
-                                                <button type="button" class="btn btn-sm btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#addRTModal{{ $child->id }}">
-                                                    <i class="bx bx-plus me-1"></i> Tambah RT
-                                                </button>
+                                                <h6 class="fw-semibold mb-0">Daftar Sub-Wilayah ({{ strtoupper($subType) }})</h6>
+                                                <div class="d-flex gap-2">
+                                                    <a href="{{ route('admin.kelola-wilayah.index', $child->id) }}" class="btn btn-sm btn-outline-primary rounded-pill">
+                                                        <i class="bx bx-show me-1"></i> Lihat Detail
+                                                    </a>
+                                                    <button type="button" class="btn btn-sm btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#addRegionModal{{ $child->id }}">
+                                                        <i class="bx bx-plus me-1"></i> Tambah {{ strtoupper($subType) }}
+                                                    </button>
+                                                </div>
                                             </div>
 
                                             <div class="ps-md-3">
                                                 @if($child->children->count() > 0)
                                                     <div class="list-group list-group-flush">
-                                                        @foreach($child->children as $rt)
+                                                        @foreach($child->children as $sub)
                                                             <div class="list-group-item d-flex justify-content-between align-items-center p-3 region-card mb-2 rounded-3">
                                                                 <div class="d-flex align-items-center">
-                                                                    <!-- Avatar RT -->
+                                                                    <!-- Avatar Sub -->
                                                                     <div class="avatar avatar-sm me-3 shadow-sm rounded-circle overflow-hidden">
-                                                                        @if ($rt->users->count() > 0 && $rt->users->first()->file)
-                                                                            <img src="{{ $rt->users->first()->file->file_stream }}" alt="Avatar" class="w-100 h-100" style="object-fit: cover;">
+                                                                        @if ($sub->users->count() > 0 && $sub->users->first()->file)
+                                                                            <img src="{{ $sub->users->first()->file->file_stream }}" alt="Avatar" class="w-100 h-100" style="object-fit: cover;">
                                                                         @else
                                                                             <span class="avatar-initial rounded-circle bg-label-secondary text-primary"><i class="bx bx-user"></i></span>
                                                                         @endif
                                                                     </div>
                                                                     <div>
-                                                                        <h6 class="mb-0 text-dark">{{ $rt->name }}</h6>
-                                                                        @if($rt->users->count() > 0)
-                                                                            <small class="text-success"><i class='bx bx-check-circle'></i> Ada Pengurus ({{ $rt->users->first()->name }})</small>
+                                                                        <h6 class="mb-0 text-dark">{{ $sub->name }}</h6>
+                                                                        @if($sub->users->count() > 0)
+                                                                            <small class="text-success"><i class='bx bx-check-circle'></i> Ada Pengurus ({{ $sub->users->first()->name }})</small>
                                                                         @else
                                                                             <small class="text-warning"><i class='bx bx-error-circle'></i> Belum Ada Akun</small>
                                                                         @endif
                                                                     </div>
                                                                 </div>
                                                                 <div class="d-flex gap-2">
-                                                                    @if($rt->users->count() == 0)
-                                                                        <button type="button" class="btn btn-sm btn-outline-primary rounded-circle px-2" data-bs-toggle="modal" data-bs-target="#generateAdminModal{{ $rt->id }}" title="Buat Akun RT">
+                                                                    @if($sub->users->count() == 0)
+                                                                        <button type="button" class="btn btn-sm btn-outline-primary rounded-circle px-2" data-bs-toggle="modal" data-bs-target="#generateAdminModal{{ $sub->id }}" title="Buat Akun">
                                                                             <i class="bx bx-user-plus"></i>
                                                                         </button>
                                                                     @else
-                                                                        <form action="{{ route('admin.kelola-wilayah.destroy-admin', $rt->users->first()->id) }}" method="POST" onsubmit="return confirm('Yakin hapus akun RT ini?');">
+                                                                        <form action="{{ route('admin.kelola-wilayah.destroy-admin', $sub->users->first()->id) }}" method="POST" onsubmit="return confirm('Yakin hapus akun pengurus ini?');">
                                                                             @csrf @method('DELETE')
-                                                                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle px-2" title="Hapus Akun RT"><i class="bx bx-user-x"></i></button>
+                                                                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle px-2" title="Hapus Akun"><i class="bx bx-user-x"></i></button>
                                                                         </form>
                                                                     @endif
                                                                     
-                                                                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-circle px-2" data-bs-toggle="modal" data-bs-target="#editRegionModal{{ $rt->id }}" title="Edit Nama RT">
+                                                                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-circle px-2" data-bs-toggle="modal" data-bs-target="#editRegionModal{{ $sub->id }}" title="Edit Nama">
                                                                         <i class="bx bx-edit-alt"></i>
                                                                     </button>
 
-                                                                    @if($rt->users->count() == 0)
-                                                                    <form action="{{ route('admin.kelola-wilayah.destroy', $rt->id) }}" method="POST" onsubmit="return confirm('Hapus struktur RT ini?');">
+                                                                    @if($sub->users->count() == 0 && $sub->children()->count() == 0)
+                                                                    <form action="{{ route('admin.kelola-wilayah.destroy', $sub->id) }}" method="POST" onsubmit="return confirm('Hapus struktur wilayah ini?');">
                                                                         @csrf @method('DELETE')
-                                                                        <button type="submit" class="btn btn-sm btn-danger rounded-circle px-2" title="Hapus Wilayah RT"><i class="bx bx-trash"></i></button>
+                                                                        <button type="submit" class="btn btn-sm btn-danger rounded-circle px-2" title="Hapus Wilayah"><i class="bx bx-trash"></i></button>
                                                                     </form>
                                                                     @endif
                                                                 </div>
                                                             </div>
                                                             
-                                                            <!-- Include Modals for RT -->
+                                                            <!-- Include Modals for Sub -->
                                                             @push('modals')
-                                                                @include('admin.region_management.partials.modals', ['region' => $rt])
+                                                                @include('admin.region_management.partials.modals', ['region' => $sub])
                                                             @endpush
                                                         @endforeach
                                                     </div>
                                                 @else
                                                     <div class="text-center py-4 bg-light rounded-3">
-                                                        <i class="bx bx-map-pin text-muted fs-2 mb-2"></i>
-                                                        <p class="text-muted mb-0">Belum ada RT di dalam RW ini.</p>
+                                                        <p class="text-muted mb-0 small">Belum ada struktur {{ strtoupper($subType) }}.</p>
                                                     </div>
                                                 @endif
                                             </div>
@@ -231,30 +242,37 @@
                             </div>
                         </div>
 
-                        <!-- Include Modals for RW -->
+                        <!-- Modals for Region -->
                         @push('modals')
                             @include('admin.region_management.partials.modals', ['region' => $child])
                             
-                            <!-- Modal Add RT khusus di bawah RW ini -->
-                            @if($child->type == 'rw')
-                            <div class="modal fade" id="addRTModal{{ $child->id }}" tabindex="-1" aria-hidden="true">
+                            @if($child->type != 'rt')
+                            @php
+                                $subType = '';
+                                if($child->type == 'kabupaten') $subType = 'kecamatan';
+                                elseif($child->type == 'kecamatan') $subType = 'desa';
+                                elseif(in_array($child->type, ['desa', 'kelurahan'])) $subType = 'rw';
+                                elseif($child->type == 'rw') $subType = 'rt';
+                            @endphp
+                            <!-- Modal Add Sub Region -->
+                            <div class="modal fade" id="addRegionModal{{ $child->id }}" tabindex="-1" aria-hidden="true">
                                 <div class="modal-dialog modal-dialog-centered" role="document">
                                     <div class="modal-content rounded-4 border-0 shadow-lg">
                                         <form action="{{ route('admin.kelola-wilayah.store') }}" method="POST">
                                             @csrf
-                                            <input type="hidden" name="type" value="rt">
+                                            <input type="hidden" name="type" value="{{ $subType }}">
                                             <input type="hidden" name="parent_id" value="{{ $child->id }}">
                                             
                                             <div class="modal-header border-bottom-0 pb-0">
-                                                <h5 class="modal-title fw-bold text-primary"><i class="bx bx-map-pin me-2"></i> Tambah RT di {{ $child->name }}</h5>
+                                                <h5 class="modal-title fw-bold text-primary"><i class="bx bx-map-pin me-2"></i> Tambah {{ strtoupper($subType) }} Baru</h5>
                                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                             </div>
                                             <div class="modal-body">
                                                 <div class="mb-4">
-                                                    <label class="form-label fw-semibold">Nama RT <span class="text-danger">*</span></label>
+                                                    <label class="form-label fw-semibold">Nama {{ strtoupper($subType) }} <span class="text-danger">*</span></label>
                                                     <div class="input-group input-group-merge">
                                                         <span class="input-group-text"><i class="bx bx-home-circle"></i></span>
-                                                        <input type="text" name="name" class="form-control" placeholder="Contoh: RT 01" required>
+                                                        <input type="text" name="name" class="form-control" placeholder="Contoh: {{ strtoupper($subType) }} 01" required>
                                                     </div>
                                                 </div>
 
@@ -282,10 +300,10 @@
                                                         </div>
                                                     </div>
                                                     <div class="col-12">
-                                                        <label class="form-label fw-semibold">Password Sementara</label>
+                                                        <label class="form-label fw-semibold">Password <span class="text-danger">*</span></label>
                                                         <div class="input-group input-group-merge">
                                                             <span class="input-group-text"><i class="bx bx-lock-alt"></i></span>
-                                                            <input type="text" name="admin_password" class="form-control" placeholder="Biarkan kosong untuk: password123">
+                                                            <input type="text" name="admin_password" class="form-control" placeholder="Masukkan password minimal 8 karakter" required minlength="8">
                                                         </div>
                                                     </div>
                                                 </div>
@@ -364,10 +382,10 @@
                             </div>
                         </div>
                         <div class="col-12">
-                            <label class="form-label fw-semibold">Password Sementara</label>
+                            <label class="form-label fw-semibold">Password <span class="text-danger">*</span></label>
                             <div class="input-group input-group-merge">
                                 <span class="input-group-text"><i class="bx bx-lock-alt"></i></span>
-                                <input type="text" name="admin_password" class="form-control" placeholder="Biarkan kosong untuk: password123">
+                                <input type="text" name="admin_password" class="form-control" placeholder="Wajib diisi jika membuat akun pengurus (min 8 karakter)">
                             </div>
                         </div>
                     </div>

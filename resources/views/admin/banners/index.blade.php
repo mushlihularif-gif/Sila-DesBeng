@@ -67,6 +67,7 @@
                         </td>
                     </tr>
 
+                    @push('modals')
                     <!-- Edit Modal -->
                     <div class="modal fade" id="editBannerModal{{ $banner->id }}" tabindex="-1" aria-hidden="true">
                         <div class="modal-dialog" role="document">
@@ -81,11 +82,11 @@
                                     <div class="modal-body">
                                         <div class="mb-3">
                                             <label class="form-label">Gambar Saat Ini</label><br>
-                                            <img src="{{ Storage::url($banner->image_path) }}" class="img-thumbnail mb-2" style="max-height: 150px;">
+                                            <img id="editBannerPreview{{ $banner->id }}" src="{{ Storage::url($banner->image_path) }}" class="img-thumbnail mb-2" style="max-height: 150px; width: auto;">
                                         </div>
                                         <div class="mb-3">
                                             <label class="form-label">Ganti Gambar (Opsional)</label>
-                                            <input type="file" name="image" class="form-control" accept="image/*">
+                                            <input type="file" name="image" class="form-control" accept="image/*" onchange="previewImage(this, 'editBannerPreview{{ $banner->id }}')">
                                             <small class="text-muted d-block mt-1">
                                                 <i class="bx bx-info-circle"></i> Maksimal ukuran file <b>5MB</b>. Rekomendasi dimensi: <b>1774 x 887 piksel</b>.
                                             </small>
@@ -107,6 +108,7 @@
                             </form>
                         </div>
                     </div>
+                    @endpush
                     @empty
                     <tr>
                         <td colspan="4" class="text-center">Belum ada banner iklan.</td>
@@ -118,6 +120,7 @@
     </div>
 </div>
 
+@push('modals')
 <!-- Add Modal -->
 <div class="modal fade" id="addBannerModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog" role="document">
@@ -131,7 +134,9 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label">Gambar Banner <span class="text-danger">*</span></label>
-                        <input type="file" name="image" class="form-control" accept="image/*" required>
+                        <br>
+                        <img id="newBannerPreview" src="" class="img-thumbnail mb-2 d-none" style="max-height: 150px; width: auto;">
+                        <input type="file" name="image" id="newBannerInput" class="form-control" accept="image/*" required onchange="previewImage(this, 'newBannerPreview')">
                         <small class="text-muted d-block mt-1">
                             <i class="bx bx-info-circle"></i> Maksimal ukuran file <b>5MB</b>. Rekomendasi dimensi: <b>1774 x 887 piksel</b>.
                         </small>
@@ -149,4 +154,23 @@
         </form>
     </div>
 </div>
+@endpush
+
+@section('scripts')
+<script>
+    function previewImage(input, previewId) {
+        const preview = document.getElementById(previewId);
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                preview.classList.remove('d-none');
+            }
+            reader.readAsDataURL(input.files[0]);
+        } else {
+            // If user cancels file selection, we could reset it, but keeping the old one is usually fine.
+        }
+    }
+</script>
+@endsection
 @endsection

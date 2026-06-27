@@ -22,18 +22,15 @@ class RegionManagementController extends Controller
         }
 
         if ($region_id) {
-            // Jika ada region_id spesifik (Admin Desa ingin melihat RT di dalam RW tertentu)
             $parentRegion = Region::with(['children.users'])->find($region_id);
-            // Idealnya tambahkan validasi apakah $parentRegion ini benar-benar di bawah kewenangan $user->region_id
         } elseif ($isSuperAdmin) {
-            // Untuk keperluan testing/UI oleh Super Admin, ambil desa pertama sebagai sampel
-            $parentRegion = Region::with(['children.users'])->whereIn('type', ['desa', 'kelurahan'])->first();
+            // Admin Kabupaten: Tampilkan Kabupaten Bengkalis (root region)
+            $parentRegion = Region::with(['children.users'])->whereNull('parent_id')->orWhere('parent_id', 0)->first();
             if (!$parentRegion) {
-                // Buat dummy region jika tidak ada di database sama sekali
-                $parentRegion = new Region(['id' => 0, 'name' => 'Desa Simulasi (Super Admin)', 'type' => 'desa']);
+                $parentRegion = Region::with(['children.users'])->where('type', 'kabupaten')->first();
             }
         } else {
-            // Default: Ambil region milik admin yang sedang login
+            // Admin tingkat lain (Kecamatan, Desa, RW, dll)
             $parentRegion = Region::with(['children.users'])->find($user->region_id);
         }
         
@@ -41,23 +38,22 @@ class RegionManagementController extends Controller
             return redirect()->back()->with('error', 'Wilayah Anda tidak ditemukan.');
         }
 
-        $childrenQuery = Region::with(['users' => function($q) {
-                $q->whereIn('role', ['admin_rw', 'admin_rt']);
-            }, 'children.users' => function($q) {
-                $q->where('role', 'admin_rt');
-            }])
-            ->orderBy('name', 'asc');
+        $childrenQuery = Region::with(['users', 'children.users'])->orderBy('name', 'asc');
 
-        if ($isSuperAdmin && $parentRegion->id === 0) {
-            $childrenRegions = collect([]); // Kosongkan jika dummy
-        } else {
+        if ($parentRegion) {
             $childrenRegions = $childrenQuery->where('parent_id', $parentRegion->id)->get();
+        } else {
+            $childrenRegions = collect([]);
         }
 
         $targetType = '';
-        if (in_array($parentRegion->type, ['desa', 'kelurahan'])) {
+        if ($parentRegion && $parentRegion->type == 'kabupaten') {
+            $targetType = 'kecamatan';
+        } elseif ($parentRegion && $parentRegion->type == 'kecamatan') {
+            $targetType = 'desa';
+        } elseif ($parentRegion && in_array($parentRegion->type, ['desa', 'kelurahan'])) {
             $targetType = 'rw';
-        } elseif ($parentRegion->type == 'rw') {
+        } elseif ($parentRegion && $parentRegion->type == 'rw') {
             $targetType = 'rt';
         }
 
@@ -71,11 +67,11 @@ class RegionManagementController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'type' => ['required', Rule::in(['rw', 'rt'])],
+            'type' => ['required', Rule::in(['kecamatan', 'desa', 'kelurahan', 'rw', 'rt'])],
             'parent_id' => 'nullable|exists:regions,id',
             'admin_name' => 'nullable|string|max:255',
             'admin_email' => 'nullable|string|email|max:255|unique:users,email',
-            'admin_password' => 'nullable|string|min:8',
+            'admin_password' => 'required_with:admin_email|string|min:8',
         ]);
 
         $user = auth()->user();
@@ -83,10 +79,10 @@ class RegionManagementController extends Controller
         // Tentukan parent: Jika request membawa parent_id, gunakan itu. Jika tidak, gunakan region milik user.
         $targetParentId = $request->input('parent_id', $user->region_id);
         
-        // Untuk super admin testing
         $isSuperAdmin = in_array($user->role, ['super_admin', 'admin']);
         if ($isSuperAdmin && !$request->filled('parent_id')) {
-             $targetParentId = Region::whereIn('type', ['desa', 'kelurahan'])->first()->id ?? 0;
+             $kabupaten = Region::where('type', 'kabupaten')->first() ?? Region::whereNull('parent_id')->first();
+             $targetParentId = $kabupaten ? $kabupaten->id : 0;
         }
 
         $parentRegion = Region::find($targetParentId);
@@ -94,32 +90,49 @@ class RegionManagementController extends Controller
             return back()->with('error', 'Wilayah parent tidak ditemukan.');
         }
 
+        // Validasikan tipe turunan yang diizinkan
+        if ($parentRegion && $parentRegion->type === 'kabupaten' && $request->type !== 'kecamatan') {
+            return back()->with('error', 'Kabupaten hanya dapat menambahkan struktur Kecamatan.');
+        }
+        if ($parentRegion && $parentRegion->type === 'kecamatan' && !in_array($request->type, ['desa', 'kelurahan'])) {
+            return back()->with('error', 'Kecamatan hanya dapat menambahkan struktur Desa/Kelurahan.');
+        }
         if ($parentRegion && in_array($parentRegion->type, ['desa', 'kelurahan']) && $request->type !== 'rw') {
             return back()->with('error', 'Desa/Kelurahan hanya dapat menambahkan struktur RW.');
         }
-
         if ($parentRegion && $parentRegion->type === 'rw' && $request->type !== 'rt') {
             return back()->with('error', 'RW hanya dapat menambahkan struktur RT.');
         }
 
-        $newRegion = Region::create([
+        $newRegion = Region::firstOrCreate([
             'name' => $request->name,
             'type' => $request->type,
             'parent_id' => $targetParentId,
         ]);
 
         if ($request->filled('admin_name') && $request->filled('admin_email')) {
-            $role = ($request->type == 'rw') ? 'admin_rw' : 'admin_rt';
-            User::create([
-                'name' => $request->admin_name,
-                'email' => $request->admin_email,
-                'username' => 'admin_' . $request->type . '_' . uniqid(),
-                'password' => Hash::make($request->admin_password ?: 'password123'),
-                'role' => $role,
-                'region_id' => $newRegion->id,
-                'status' => 'aktif',
-            ]);
-            return back()->with('success', 'Struktur wilayah dan akun admin berhasil ditambahkan.');
+            $roleMapping = [
+                'kecamatan' => 'admin_kecamatan',
+                'desa' => 'admin_desa',
+                'kelurahan' => 'admin_desa',
+                'rw' => 'admin_rw',
+                'rt' => 'admin_rt',
+            ];
+            
+            $role = $roleMapping[$request->type] ?? null;
+            
+            if ($role) {
+                User::create([
+                    'name' => $request->admin_name,
+                    'email' => $request->admin_email,
+                    'username' => 'admin_' . $request->type . '_' . uniqid(),
+                    'password' => Hash::make($request->admin_password),
+                    'role' => $role,
+                    'region_id' => $newRegion->id,
+                    'status' => 'aktif',
+                ]);
+                return back()->with('success', 'Struktur wilayah dan akun admin berhasil ditambahkan.');
+            }
         }
 
         return back()->with('success', 'Struktur wilayah baru berhasil ditambahkan.');
@@ -188,7 +201,7 @@ class RegionManagementController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'nullable|string|min:8',
+            'password' => 'required|string|min:8',
         ]);
 
         $region = Region::findOrFail($region_id);
@@ -201,10 +214,17 @@ class RegionManagementController extends Controller
         }
 
         // Tentukan Role
-        $role = '';
-        if ($region->type == 'rw') $role = 'admin_rw';
-        elseif ($region->type == 'rt') $role = 'admin_rt';
-        else {
+        $roleMapping = [
+            'kecamatan' => 'admin_kecamatan',
+            'desa' => 'admin_desa',
+            'kelurahan' => 'admin_desa',
+            'rw' => 'admin_rw',
+            'rt' => 'admin_rt',
+        ];
+        
+        $role = $roleMapping[$region->type] ?? null;
+        
+        if (!$role) {
             return back()->with('error', 'Tipe wilayah tidak didukung untuk pembuatan akun admin otomatis.');
         }
 
@@ -213,7 +233,7 @@ class RegionManagementController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'username' => 'admin_' . $region->type . '_' . uniqid(),
-            'password' => Hash::make($request->password ?: 'password123'),
+            'password' => Hash::make($request->password),
             'role' => $role,
             'region_id' => $region->id,
             'status' => 'aktif',
@@ -229,15 +249,15 @@ class RegionManagementController extends Controller
     {
         $user = auth()->user();
         
-        if (!in_array($user->role, ['admin_desa', 'lurah', 'super_admin', 'admin', 'admin_rw'])) {
+        if (!in_array($user->role, ['admin_kecamatan', 'admin_desa', 'lurah', 'super_admin', 'admin', 'admin_rw'])) {
             return redirect()->back()->with('error', 'Anda tidak memiliki hak akses.');
         }
 
         $targetUser = User::findOrFail($user_id);
         
-        // Pastikan user tersebut adalah admin_rw atau admin_rt
-        if (!in_array($targetUser->role, ['admin_rw', 'admin_rt'])) {
-            return back()->with('error', 'Hanya akun pengurus yang dapat dihapus.');
+        // Pastikan user tersebut adalah akun pengurus wilayah
+        if (!in_array($targetUser->role, ['admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt'])) {
+            return back()->with('error', 'Hanya akun pengurus wilayah yang dapat dihapus.');
         }
 
         $targetUser->delete();

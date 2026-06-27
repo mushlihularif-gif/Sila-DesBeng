@@ -10,16 +10,14 @@ class BumdesUserController extends Controller
 {
     public function show(\Illuminate\Http\Request $request)
     {
+        $regionId = $request->query('id');
+        
         // Fetch organizational structure ordered by position
-        $members = BumdesMember::orderBy('order')->get();
-        
-        // Fetch WhatsApp number from system settings
-        $settings = SystemSetting::first();
-        $whatsappNumber = $settings->whatsapp_number ?? '+6281234567890';
-        
-        // Generate WhatsApp link (remove all non-numeric characters except +)
-        $cleanNumber = preg_replace('/[^0-9+]/', '', $whatsappNumber);
-        $whatsappLink = 'https://wa.me/' . ltrim($cleanNumber, '+');
+        $members = BumdesMember::when($regionId, function($q) use ($regionId) {
+            return $q->where('region_id', $regionId);
+        }, function($q) {
+            return $q->whereNull('region_id')->orWhere('region_id', 0);
+        })->orderBy('order')->get();
         
         // Fetch region and its active services if id is provided
         $regionId = $request->query('id');
@@ -35,6 +33,18 @@ class BumdesUserController extends Controller
                 $activeServices = $region->services->pluck('name')->toArray();
             }
         }
+
+        // Fetch WhatsApp number from region or fallback to system settings
+        if ($region && $region->contact_phone) {
+            $whatsappNumber = $region->contact_phone;
+        } else {
+            $settings = SystemSetting::first();
+            $whatsappNumber = $settings->whatsapp_number ?? '+6281234567890';
+        }
+        
+        // Generate WhatsApp link (remove all non-numeric characters except +)
+        $cleanNumber = preg_replace('/[^0-9+]/', '', $whatsappNumber);
+        $whatsappLink = 'https://wa.me/' . ltrim($cleanNumber, '+');
         
         return view('users.bumdes-detail', compact('members', 'whatsappLink', 'whatsappNumber', 'region', 'activeServices'));
     }

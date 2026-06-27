@@ -47,8 +47,8 @@
                             <div class="form-text">Bisa menggunakan email asli atau email khusus untuk akun ini.</div>
                         </div>
                         <div class="col-12">
-                            <label class="form-label">Password Sementara</label>
-                            <input type="text" name="password" class="form-control" placeholder="Biarkan kosong untuk: password123">
+                            <label class="form-label">Password <span class="text-danger">*</span></label>
+                            <input type="text" name="password" class="form-control" placeholder="Masukkan password minimal 8 karakter" required minlength="8">
                         </div>
                     </div>
                 </div>

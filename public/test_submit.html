@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Form</title>
+</head>
+<body>
+    <form id="filter-form" action="" method="GET">
+        <select id="filter_kecamatan_id" name="filter_kecamatan_id">
+            <option value="">-- Semua Kecamatan --</option>
+            <option value="2">Kecamatan Bengkalis</option>
+        </select>
+        <select id="filter_desa_id" name="filter_desa_id">
+            <option value="">-- Semua Desa --</option>
+        </select>
+        <button class="btn btn-primary" type="submit">Cari</button>
+    </form>
+    <script>
+        const filterForm = document.getElementById('filter-form');
+        const filterKecamatan = document.getElementById('filter_kecamatan_id');
+        const filterDesa = document.getElementById('filter_desa_id');
+        
+        filterKecamatan.addEventListener('change', function() {
+            if(filterDesa) filterDesa.value = '';
+            filterForm.submit();
+        });
+    </script>
+</body>
+</html>

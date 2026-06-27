@@ -94,5 +94,36 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('verify-transaction', function ($user) {
             return $user->role === 'admin';
         });
+
+        // =====================================================
+        // VIEW COMPOSER: Admin Sidebar Services
+        // =====================================================
+        \Illuminate\Support\Facades\View::composer('admin.layouts.admin', function ($view) {
+            $user = auth()->user();
+            $hasActiveServices = false;
+            $activeServicesMenu = [];
+            
+            if ($user && in_array($user->role, ['super_admin', 'admin', 'admin_desa'])) {
+                if ($user->role === 'super_admin' || $user->role === 'admin') {
+                    // For super_admin, check if the system settings or top region has services enabled
+                    $region = \App\Models\Region::with('services')->find($user->region_id);
+                    if (!$region) $region = \App\Models\Region::first();
+                    if ($region) {
+                        $activeServicesMenu = $region->services->pluck('name')->toArray();
+                        $hasActiveServices = count($activeServicesMenu) > 0;
+                    }
+                } else if ($user->role === 'admin_desa') {
+                    // For admin_desa, check their own region_id
+                    $region = \App\Models\Region::with('services')->find($user->region_id);
+                    if ($region) {
+                        $activeServicesMenu = $region->services->pluck('name')->toArray();
+                        $hasActiveServices = count($activeServicesMenu) > 0;
+                    }
+                }
+            }
+            
+            $view->with('hasActiveServices', $hasActiveServices);
+            $view->with('activeServicesMenu', $activeServicesMenu);
+        });
     }
 }

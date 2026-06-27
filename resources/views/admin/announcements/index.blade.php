@@ -14,71 +14,64 @@
     @endif
 
     <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
+        <div class="card-header border-bottom d-flex justify-content-between align-items-center flex-wrap gap-3">
             <h5 class="mb-0">Daftar Pengumuman & Event</h5>
             <a href="{{ route('admin.announcements.create') }}" class="btn btn-primary">
                 <i class="bx bx-plus me-1"></i> Buat Baru
             </a>
         </div>
-        <div class="table-responsive text-nowrap">
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th>Tipe</th>
-                        <th>Judul</th>
-                        <th>Penulis</th>
-                        <th>Wilayah</th>
-                        <th>Tanggal Event</th>
-                        <th>Status</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody class="table-border-bottom-0">
-                    @forelse($announcements as $item)
-                    <tr>
-                        <td>
-                            @if($item->type == 'Gotong Royong')
-                                <span class="badge bg-label-success"><i class="bx bx-run me-1"></i> Gotong Royong</span>
-                            @elseif($item->type == 'Event')
-                                <span class="badge bg-label-warning"><i class="bx bx-calendar-event me-1"></i> Event</span>
-                            @else
-                                <span class="badge bg-label-info"><i class="bx bx-bell me-1"></i> Pengumuman</span>
-                            @endif
-                        </td>
-                        <td>
-                            <strong>{{ \Illuminate\Support\Str::limit($item->title, 40) }}</strong>
-                            @if($item->laporan_id)
-                                <br><small class="text-muted"><i class="bx bx-link"></i> Terhubung Laporan #{{ $item->laporan_id }}</small>
-                            @endif
-                        </td>
-                        <td>{{ $item->admin->name ?? 'Sistem' }}</td>
-                        <td>{{ $item->region->name ?? 'Semua Wilayah' }}</td>
-                        <td>{{ $item->event_date ? $item->event_date->format('d M Y H:i') : '-' }}</td>
-                        <td>
-                            <span class="badge bg-label-{{ $item->is_active ? 'primary' : 'secondary' }}">
-                                {{ $item->is_active ? 'Aktif' : 'Nonaktif' }}
-                            </span>
-                        </td>
-                        <td>
-                            <a href="{{ route('admin.announcements.edit', $item->id) }}" class="btn btn-sm btn-info">Edit</a>
-                            <form action="{{ route('admin.announcements.destroy', $item->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus ini?');">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-danger">Hapus</button>
-                            </form>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="7" class="text-center">Belum ada pengumuman atau event.</td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
+        <div class="card-body border-bottom pt-3 pb-3">
+            <form id="filter-form" class="row g-3 align-items-center" method="GET">
+                <div class="col-md-3">
+                    <select id="filter_type" name="type" class="form-select" onchange="this.form.submit()">
+                        <option value="">Semua Tipe</option>
+                        <option value="Pengumuman" {{ request('type') == 'Pengumuman' ? 'selected' : '' }}>Pengumuman</option>
+                        <option value="Event" {{ request('type') == 'Event' ? 'selected' : '' }}>Event</option>
+                        <option value="Gotong Royong" {{ request('type') == 'Gotong Royong' ? 'selected' : '' }}>Gotong Royong</option>
+                    </select>
+                </div>
+                
+                @if(in_array(auth()->user()->role, ['super_admin', 'admin']))
+                <div class="col-md-4">
+                    <select id="filter_kecamatan_id" name="filter_kecamatan_id" class="form-select" onchange="this.form.submit()">
+                        <option value="">-- Semua Kecamatan --</option>
+                        @foreach($kecamatanOptions as $opt)
+                            <option value="{{ $opt->id }}" {{ request('filter_kecamatan_id') == $opt->id ? 'selected' : '' }}>
+                                {{ $opt->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <select id="filter_desa_id" name="filter_desa_id" class="form-select" onchange="this.form.submit()">
+                        <option value="">-- Semua Desa --</option>
+                        @foreach($desaOptions as $opt)
+                            <option value="{{ $opt->id }}" {{ request('filter_desa_id') == $opt->id ? 'selected' : '' }}>
+                                {{ $opt->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                @elseif(auth()->user()->role === 'admin_kecamatan')
+                <div class="col-md-4">
+                    <select id="filter_desa_id" name="filter_desa_id" class="form-select" onchange="this.form.submit()">
+                        <option value="">-- Semua Desa --</option>
+                        @foreach($desaOptions as $opt)
+                            <option value="{{ $opt->id }}" {{ request('filter_desa_id') == $opt->id ? 'selected' : '' }}>
+                                {{ $opt->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                @endif
+            </form>
         </div>
-        <div class="card-footer">
-            {{ $announcements->links() }}
+
+        <div id="table-container">
+            @include('admin.announcements.partials.table')
         </div>
     </div>
 </div>
+
+
 @endsection

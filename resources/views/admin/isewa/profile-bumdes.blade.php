@@ -8,7 +8,15 @@
         <div class="col-12">
             <!-- HEADER -->
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h4 class="text-primary fw-bold mb-0">Struktur <span class="text-info">Pemerintah {{ auth()->user()->region->name ?? 'Daerah' }}</span></h4>
+                <h4 class="text-primary fw-bold mb-0">Struktur <span class="text-info">
+                    @if(in_array(auth()->user()->role, ['admin', 'super_admin']))
+                        Pemerintah Kabupaten Bengkalis
+                    @elseif(auth()->user()->role == 'admin_kecamatan')
+                        Pemerintah Kecamatan {{ auth()->user()->region->name ?? 'Daerah' }}
+                    @else
+                        Pemerintah Desa {{ auth()->user()->region->name ?? 'Daerah' }}
+                    @endif
+                </span></h4>
                 <a href="{{ route('admin.siladesbeng.bumdes.create') }}" class="btn btn-primary">
                     <i class="bx bx-plus me-1"></i> Tambah Anggota
                 </a>
@@ -80,7 +88,7 @@
         });
 
         // Sidebar Active
-        const sidebarLink = document.querySelector('a[href="{{ route("admin.siladesbeng.profile-bumdes") }}"]');
+        const sidebarLink = document.querySelector('a[href="{{ route("admin.siladesbeng.bumdes.index") }}"]');
         if (sidebarLink) {
             const listItem = sidebarLink.closest('li');
             if (listItem) {

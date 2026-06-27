@@ -252,17 +252,7 @@
                                             </div>
                                         </div>
                                         
-                                        <div class="mt-auto pt-3 border-top">
-                                            <div class="d-flex align-items-center justify-content-between mb-2" onclick="event.stopPropagation();">
-                                                <label class="text-dark small fw-semibold mb-0" for="exclusive_{{ $service->id }}">
-                                                    Eksklusif Warga Lokal
-                                                </label>
-                                                <div class="form-check form-switch mb-0">
-                                                    <input class="form-check-input m-0" type="checkbox" name="exclusive_services[]" value="{{ $service->id }}" id="exclusive_{{ $service->id }}" {{ in_array($service->id, $exclusiveServices ?? []) ? 'checked' : '' }}>
-                                                </div>
-                                            </div>
-                                            <small class="text-muted d-block" style="font-size: 0.75rem; line-height: 1.4;">Jika aktif, hanya warga {{ ucwords(($region->type ?? 'desa') == 'desa' ? 'Desa/Kelurahan' : ($region->type ?? 'Pusat')) }} {{ $region->name ?? 'Pusat' }} yang dapat melihat dan memesan layanan ini.</small>
-                                        </div>
+
                                     </div>
                                 </label>
                             </div>

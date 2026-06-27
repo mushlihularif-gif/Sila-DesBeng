@@ -80,6 +80,10 @@ class UserManagementController extends Controller
             $desaOptions = \App\Models\Region::where('type', 'desa')->where('parent_id', $user->region_id)->orderBy('name')->get();
         }
 
+        if ($request->ajax()) {
+            return view('admin.user_management.partials.table', compact('users'))->render();
+        }
+
         return view('admin.user_management.index', compact('users', 'search', 'kecamatanOptions', 'desaOptions', 'filter_kecamatan_id', 'filter_desa_id'));
     }
 

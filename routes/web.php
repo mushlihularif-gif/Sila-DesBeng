@@ -24,7 +24,8 @@ Route::get('/', function () {
 });
 
 Route::get('/test-route-123', function() {
-    return response('Test Route 123 Works', 200);
+    \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+    return response('Migrated! ' . \Illuminate\Support\Facades\Artisan::output(), 200);
 });
 
 Route::get('/beranda', [App\Http\Controllers\User\BerandaController::class, 'index'])
@@ -436,10 +437,10 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
     // Route SiladesBeng
     Route::prefix('siladesbeng')->group(function () {
         Route::get('/profile', [\App\Http\Controllers\Admin\SettingController::class, 'showIsewaProfile'])->name('admin.siladesbeng.profile');
-        Route::get('/developer/{name}', [\App\Http\Controllers\Admin\SettingController::class, 'showDeveloperProfile'])->name('admin.siladesbeng.developer.profile');
+        Route::get('/run-mig', function() { \Illuminate\Support\Facades\Artisan::call('migrate'); return \Illuminate\Support\Facades\Artisan::output(); }); Route::get('/developer/{name}', [\App\Http\Controllers\Admin\SettingController::class, 'showDeveloperProfile'])->name('admin.siladesbeng.developer.profile');
         
-        Route::get('/profil-pemerintah-desa', [\App\Http\Controllers\Admin\BumdesController::class, 'index'])->name('admin.siladesbeng.profile-bumdes');
-        Route::prefix('pemerintah-desa')->group(function () {
+        Route::get('/profil-pemerintah', [\App\Http\Controllers\Admin\BumdesController::class, 'index'])->name('admin.siladesbeng.profile-bumdes');
+        Route::prefix('profil-pemerintah')->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\BumdesController::class, 'index'])->name('admin.siladesbeng.bumdes.index');
             Route::get('/create', [\App\Http\Controllers\Admin\BumdesController::class, 'create'])->name('admin.siladesbeng.bumdes.create');
             Route::post('/', [\App\Http\Controllers\Admin\BumdesController::class, 'store'])->name('admin.siladesbeng.bumdes.store');
@@ -664,3 +665,6 @@ Route::get('/dev/create-test-rtrw', function () {
 
     return "Berhasil membuat akun uji coba:<br><br><b>Admin RW:</b><br>Email: admin.rw@siladesbeng.com<br>Password: password123<br><br><b>Admin RT:</b><br>Email: admin.rt@siladesbeng.com<br>Password: password123";
 });
+
+Route::get('/run-mig-now', function() { \Illuminate\Support\Facades\Artisan::call('migrate'); return \Illuminate\Support\Facades\Artisan::output(); });
+

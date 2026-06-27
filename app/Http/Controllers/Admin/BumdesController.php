@@ -12,11 +12,20 @@ class BumdesController extends Controller
     public function index(Request $request)
     {
         $search = $request->get('search');
+        $user = auth()->user();
         
         $members = BumdesMember::query()
+            ->when($user->role !== 'super_admin' && $user->role !== 'admin', function($q) use ($user) {
+                return $q->where('region_id', $user->region_id);
+            })
+            ->when(in_array($user->role, ['super_admin', 'admin']), function($q) {
+                return $q->whereNull('region_id')->orWhere('region_id', 0);
+            })
             ->when($search, function ($query, $search) {
-                return $query->where('name', 'LIKE', "%{$search}%")
-                           ->orWhere('position', 'LIKE', "%{$search}%");
+                return $query->where(function($q) use ($search) {
+                    $q->where('name', 'LIKE', "%{$search}%")
+                      ->orWhere('position', 'LIKE', "%{$search}%");
+                });
             })
             ->orderBy('order')
             ->get();
@@ -30,8 +39,6 @@ class BumdesController extends Controller
         return view('admin.isewa.bumdes.create');
     }
 
-
-
     public function store(Request $request)
     {
         $request->validate([
@@ -40,10 +47,12 @@ class BumdesController extends Controller
             'photo' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:8192',
         ]);
 
+        $user = auth()->user();
         $member = new BumdesMember();
         $member->name = $request->name;
         $member->position = $request->position;
-        $member->order = BumdesMember::max('order') + 1;
+        $member->region_id = in_array($user->role, ['super_admin', 'admin']) ? null : $user->region_id;
+        $member->order = BumdesMember::where('region_id', $member->region_id)->max('order') + 1;
 
         if ($request->hasFile('photo')) {
             $path = $request->file('photo')->store('bumdes', 'public');
@@ -52,12 +61,24 @@ class BumdesController extends Controller
 
         $member->save();
 
-        return redirect()->route('admin.siladesbeng.bumdes.index')->with('success', 'Anggota BUMDes berhasil ditambahkan.');
+        return redirect()->route('admin.siladesbeng.bumdes.index')->with('success', 'Pengurus berhasil ditambahkan.');
     }
 
     public function edit($id)
     {
-        $member = BumdesMember::findOrFail($id);
+        $user = auth()->user();
+        $query = BumdesMember::where('id', $id);
+        
+        if (!in_array($user->role, ['super_admin', 'admin'])) {
+            $query->where('region_id', $user->region_id);
+        } else {
+            $query->where(function($q) {
+                $q->whereNull('region_id')->orWhere('region_id', 0);
+            });
+        }
+        
+        $member = $query->firstOrFail();
+        
         return view('admin.isewa.bumdes.edit', compact('member'));
     }
 
@@ -69,7 +90,19 @@ class BumdesController extends Controller
             'photo' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:8192',
         ]);
 
-        $member = BumdesMember::findOrFail($id);
+        $user = auth()->user();
+        $query = BumdesMember::where('id', $id);
+        
+        if (!in_array($user->role, ['super_admin', 'admin'])) {
+            $query->where('region_id', $user->region_id);
+        } else {
+            $query->where(function($q) {
+                $q->whereNull('region_id')->orWhere('region_id', 0);
+            });
+        }
+        
+        $member = $query->firstOrFail();
+        
         $member->name = $request->name;
         $member->position = $request->position;
 
@@ -88,17 +121,29 @@ class BumdesController extends Controller
 
         $member->save();
 
-        return redirect()->route('admin.siladesbeng.bumdes.index')->with('success', 'Anggota BUMDes berhasil diperbarui.');
+        return redirect()->route('admin.siladesbeng.bumdes.index')->with('success', 'Pengurus berhasil diperbarui.');
     }
 
     public function destroy($id)
     {
-        $member = BumdesMember::findOrFail($id);
+        $user = auth()->user();
+        $query = BumdesMember::where('id', $id);
+        
+        if (!in_array($user->role, ['super_admin', 'admin'])) {
+            $query->where('region_id', $user->region_id);
+        } else {
+            $query->where(function($q) {
+                $q->whereNull('region_id')->orWhere('region_id', 0);
+            });
+        }
+        
+        $member = $query->firstOrFail();
+        
         if ($member->photo) {
             Storage::disk('public')->delete($member->photo);
         }
         $member->delete();
 
-        return redirect()->route('admin.siladesbeng.bumdes.index')->with('success', 'Anggota BUMDes berhasil dihapus.');
+        return redirect()->route('admin.siladesbeng.bumdes.index')->with('success', 'Pengurus berhasil dihapus.');
     }
 }

@@ -472,36 +472,57 @@
                         </a>
                     </li>
 
-                    <!-- Unit Layanan (Dropdown) -->
+                <!-- Unit Layanan (Dropdown) -->
                 @if(in_array(auth()->user()->role, ['super_admin', 'admin', 'admin_desa']))
-                <li class="menu-item {{ request()->is('admin/unit*') ? 'open active show' : '' }}">
-                    <a href="javascript:void(0);" class="menu-link menu-toggle">
-                        <i class="menu-icon tf-icons bx bx-building-house"></i>
-                        <div data-i18n="Unit Layanan">Unit Layanan</div>
-                    </a>
-                    <ul class="menu-sub">
-                            <li class="menu-item {{ request()->is('admin/unit/penyewaan*') ? 'active' : '' }}">
-                                <a href="{{ route('admin.unit.penyewaan.index') }}" class="menu-link">
-                                    <div data-i18n="Penyewaan Alat">Penyewaan Alat</div>
-                                </a>
-                            </li>
-                            <li class="menu-item {{ request()->is('admin/unit/gas*') ? 'active' : '' }}">
-                                <a href="{{ route('admin.unit.penjualan_gas.index') }}" class="menu-link">
-                                    <div data-i18n="Penjualan Gas">Penjualan Gas</div>
-                                </a>
-                            </li>
-                            <li class="menu-item {{ request()->is('admin/unit/mobil*') ? 'active' : '' }}">
-                                <a href="{{ route('admin.unit.mobil.index') }}" class="menu-link">
-                                    <div data-i18n="Penyewaan Mobil">Penyewaan Mobil</div>
-                                </a>
-                            </li>
-                            <li class="menu-item {{ request()->is('admin/unit/fasilitas_umum*') ? 'active' : '' }}">
-                                <a href="{{ route('admin.unit.fasilitas_umum.index') }}" class="menu-link">
-                                    <div data-i18n="Fasilitas Umum">Fasilitas Umum</div>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
+                    @if(isset($hasActiveServices) && $hasActiveServices)
+                        <li class="menu-item {{ request()->is('admin/unit*') ? 'open active show' : '' }}">
+                            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                                <i class="menu-icon tf-icons bx bx-building-house"></i>
+                                <div data-i18n="Unit Layanan">Unit Layanan</div>
+                            </a>
+                            <ul class="menu-sub">
+                                @if(in_array('Penyewaan Alat', $activeServicesMenu ?? []))
+                                <li class="menu-item {{ request()->is('admin/unit/penyewaan*') ? 'active' : '' }}">
+                                    <a href="{{ route('admin.unit.penyewaan.index') }}" class="menu-link">
+                                        <div data-i18n="Penyewaan Alat">Penyewaan Alat</div>
+                                    </a>
+                                </li>
+                                @endif
+                                @if(in_array('Penjualan Gas', $activeServicesMenu ?? []))
+                                <li class="menu-item {{ request()->is('admin/unit/gas*') ? 'active' : '' }}">
+                                    <a href="{{ route('admin.unit.penjualan_gas.index') }}" class="menu-link">
+                                        <div data-i18n="Penjualan Gas">Penjualan Gas</div>
+                                    </a>
+                                </li>
+                                @endif
+                                @if(in_array('Penyewaan Mobil', $activeServicesMenu ?? []))
+                                <li class="menu-item {{ request()->is('admin/unit/mobil*') ? 'active' : '' }}">
+                                    <a href="{{ route('admin.unit.mobil.index') }}" class="menu-link">
+                                        <div data-i18n="Penyewaan Mobil">Penyewaan Mobil</div>
+                                    </a>
+                                </li>
+                                @endif
+                                @if(in_array('Fasilitas Umum', $activeServicesMenu ?? []))
+                                <li class="menu-item {{ request()->is('admin/unit/fasilitas_umum*') ? 'active' : '' }}">
+                                    <a href="{{ route('admin.unit.fasilitas_umum.index') }}" class="menu-link">
+                                        <div data-i18n="Fasilitas Umum">Fasilitas Umum</div>
+                                    </a>
+                                </li>
+                                @endif
+                            </ul>
+                        </li>
+                    @else
+                        <!-- No active services: Show prompt to activate -->
+                        <li class="menu-item">
+                            @php
+                                $settingsRoute = in_array(auth()->user()->role, ['super_admin', 'admin']) ? route('admin.system-settings.index') : route('admin.region-settings.index');
+                            @endphp
+                            <a href="{{ $settingsRoute }}" class="menu-link text-warning">
+                                <i class="menu-icon tf-icons bx bx-building-house"></i>
+                                <div>Ayo aktifkan layanan daerah mu!</div>
+                            </a>
+                        </li>
+                    @endif
                 @endif
 
                 <!-- Manajemen (Dropdown) -->
@@ -538,7 +559,7 @@
                                 <div>Pelaporan Warga</div>
                             </a>
                         </li>
-                        @if(in_array(auth()->user()->role, ['admin_kecamatan', 'admin_desa', 'lurah', 'admin_rw', 'super_admin', 'admin']))
+                        @if(in_array(auth()->user()->role, ['super_admin', 'admin', 'admin_kecamatan', 'admin_desa', 'lurah', 'admin_rw']))
                         <li class="menu-item {{ request()->routeIs('admin.kelola-wilayah.*') ? 'active' : '' }}">
                             <a href="{{ route('admin.kelola-wilayah.index') }}" class="menu-link">
                                 <div>Kelola Wilayah</div>
@@ -551,7 +572,7 @@
                 <!-- Aktivitas -->
                 @if(in_array(auth()->user()->role, ['admin_desa', 'lurah', 'admin_rw', 'admin_rt']))
                 <li
-                    class="menu-item {{ request()->is('admin/aktivitas/permintaan-pengajuan*') || request()->is('admin/aktivitas/bukti-transaksi*') || request()->routeIs('admin.laporan.log') ? 'open active show' : '' }}">
+                    class="menu-item {{ request()->is('admin/aktivitas/permintaan-pengajuan*') || request()->is('admin/aktivitas/bukti-transaksi*') ? 'open active show' : '' }}">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
                         <i class="menu-icon tf-icons bx bx-time"></i>
                         <div data-i18n="Aktivitas">Aktivitas</div>
@@ -567,18 +588,11 @@
                             <a href="{{ route('admin.aktivitas.bukti-transaksi.index') }}" class="menu-link">
                                 <div data-i18n="Bukti Transaksi">Bukti Transaksi</div>
                             </a>
-                        </li>
-                        @if(in_array(auth()->user()->role, ['super_admin', 'admin', 'admin_kecamatan']))
-                        <li class="menu-item {{ request()->routeIs('admin.laporan.log') ? 'active' : '' }}">
-                            <a href="{{ route('admin.laporan.log') }}" class="menu-link">
-                                <div data-i18n="Log Aktivitas">Log Aktivitas</div>
-                            </a>
-                        </li>
-                        @endif
                     </ul>
                 </li>
+                @endif
                 <!-- Data & Laporan (Dropdown) -->
-                <li class="menu-item {{ request()->routeIs('admin.laporan.*') && !request()->routeIs('admin.laporan.log') ? 'open active show' : '' }}">
+                <li class="menu-item {{ request()->routeIs('admin.laporan.*') ? 'open active show' : '' }}">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
                         <i class="menu-icon tf-icons bx bx-bar-chart-alt-2"></i>
                         <div data-i18n="Data & Laporan">Data & Laporan</div>
@@ -594,9 +608,15 @@
                                 <div data-i18n="Laporan Pendapatan">Laporan Pendapatan</div>
                             </a>
                         </li>
+                        @if(in_array(auth()->user()->role, ['super_admin', 'admin', 'admin_kecamatan']))
+                        <li class="menu-item {{ request()->routeIs('admin.laporan.log') ? 'active' : '' }}">
+                            <a href="{{ route('admin.laporan.log') }}" class="menu-link">
+                                <div data-i18n="Log Aktivitas">Log Aktivitas</div>
+                            </a>
+                        </li>
+                        @endif
                     </ul>
                 </li>
-                @endif
 
                 <!-- Pengaturan (Dropdown) -->
                 @if(in_array(auth()->user()->role, ['super_admin', 'admin', 'admin_kecamatan']))
@@ -612,29 +632,34 @@
                                 <div>Layanan Pusat</div>
                             </a>
                         </li>
+                        @if(isset($hasActiveServices) && $hasActiveServices)
                         <li class="menu-item {{ request()->routeIs('admin.system-settings.payment') ? 'active' : '' }}">
                             <a href="{{ route('admin.system-settings.payment') }}" class="menu-link">
                                 <div>Pembayaran Pusat</div>
                             </a>
                         </li>
                         @endif
+                        @else
                         <li class="menu-item {{ request()->routeIs('admin.region-settings.index') ? 'active' : '' }}">
                             <a href="{{ route('admin.region-settings.index') }}" class="menu-link">
                                 <div>Layanan Wilayah</div>
                             </a>
                         </li>
+                        @if(isset($hasActiveServices) && $hasActiveServices)
                         <li class="menu-item {{ request()->routeIs('admin.region-settings.payment') ? 'active' : '' }}">
                             <a href="{{ route('admin.region-settings.payment') }}" class="menu-link">
                                 <div>Pembayaran Wilayah</div>
                             </a>
                         </li>
+                        @endif
+                        @endif
                     </ul>
                 </li>
                 @endif
 
 
                 <!-- Profil & Info (Dropdown) -->
-                <li class="menu-item {{ request()->is('admin/siladesbeng/profile*') || request()->is('admin/siladesbeng/developer*') || request()->routeIs('admin.siladesbeng.profile-bumdes') || request()->routeIs('admin.siladesbeng.bumdes.*') ? 'open active show' : '' }}">
+                <li class="menu-item {{ request()->is('admin/siladesbeng/profile*') || request()->is('admin/siladesbeng/developer*') || request()->routeIs('admin.siladesbeng.bumdes.index') || request()->routeIs('admin.siladesbeng.bumdes.*') ? 'open active show' : '' }}">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
                         <i class="menu-icon tf-icons bx bx-info-circle"></i>
                         <div data-i18n="Profil & Info">Profil & Info</div>
@@ -645,8 +670,8 @@
                                 <div>SiladesBeng</div>
                             </a>
                         </li>
-                        <li class="menu-item {{ request()->routeIs('admin.siladesbeng.profile-bumdes') || request()->routeIs('admin.siladesbeng.bumdes.*') ? 'active' : '' }}">
-                            <a href="{{ route('admin.siladesbeng.profile-bumdes') }}" class="menu-link">
+                        <li class="menu-item {{ request()->routeIs('admin.siladesbeng.bumdes.index') || request()->routeIs('admin.siladesbeng.bumdes.*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.siladesbeng.bumdes.index') }}" class="menu-link">
                                 @php
                                     $sidebarRegionLabel = 'Pemerintah Desa';
                                     if(auth()->user()->role === 'admin_kecamatan') {
@@ -867,9 +892,7 @@
                             <p class="mb-1 text-muted">
                                 &copy; {{ date('Y') }} <strong>Sistem Sinergi Layanan dan Aspirasi Desa</strong> di Kabupaten Bengkalis
                             </p>
-                            <p class="mb-0 text-muted small">
-                                Made with <span class="text-danger">&#10084;</span> by <span class="fw-bolder text-primary">SiladesBeng Project Team</span>
-                            </p>
+
                         </div>
                     </footer>
                     <!-- / Footer -->

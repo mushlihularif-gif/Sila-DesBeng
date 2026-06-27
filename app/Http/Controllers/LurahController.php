@@ -135,6 +135,18 @@ class LurahController extends Controller
             $query->whereIn('region_id', $allowedRegionIds);
         }
 
+        // Filter Region
+        $filter_kecamatan_id = $request->get('filter_kecamatan_id');
+        $filter_desa_id = $request->get('filter_desa_id');
+
+        if ($filter_desa_id) {
+            $query->where('region_id', $filter_desa_id);
+        } elseif ($filter_kecamatan_id) {
+            $allowed = \App\Models\Region::getDescendantIds($filter_kecamatan_id);
+            $allowed[] = $filter_kecamatan_id;
+            $query->whereIn('region_id', $allowed);
+        }
+
         // Filter RW
         if ($request->filled('rw')) {
             $query->where('rw', $request->rw);
@@ -180,8 +192,24 @@ class LurahController extends Controller
             ->orderBy('kategori')
             ->get();
 
+        $kecamatanOptions = collect();
+        $desaOptions = collect();
+
+        if (in_array($user->role, ['super_admin', 'admin'])) {
+            $kecamatanOptions = \App\Models\Region::where('type', 'kecamatan')->orderBy('name')->get();
+            if ($filter_kecamatan_id) {
+                $desaOptions = \App\Models\Region::where('type', 'desa')->where('parent_id', $filter_kecamatan_id)->orderBy('name')->get();
+            }
+        } elseif ($user->role === 'admin_kecamatan') {
+            $desaOptions = \App\Models\Region::where('type', 'desa')->where('parent_id', $user->region_id)->orderBy('name')->get();
+        }
+
         // ✅ FIX: View harus ke lurah/laporan/index, bukan admin/laporan/index
-        return view('lurah.laporan.index', compact('laporans', 'rwList', 'kategoriList', 'stats'));
+        if ($request->ajax()) {
+            return view('lurah.laporan.partials.laporan_content', compact('laporans', 'rwList', 'kategoriList', 'stats', 'kecamatanOptions', 'desaOptions', 'filter_kecamatan_id', 'filter_desa_id'))->render();
+        }
+
+        return view('lurah.laporan.index', compact('laporans', 'rwList', 'kategoriList', 'stats', 'kecamatanOptions', 'desaOptions', 'filter_kecamatan_id', 'filter_desa_id'));
     }
 
     /**

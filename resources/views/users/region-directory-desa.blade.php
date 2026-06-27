@@ -75,6 +75,9 @@
             </div>
             @endif
 
+            <!-- Unit Pelayanan Section -->
+            @include('users.partials.unit-carousel')
+
             <!-- Pemerintahan Section -->
             <div class="mb-16 mt-24">
                 <div class="text-center mb-16">
@@ -83,7 +86,23 @@
                     </h2>
                 </div>
 
+                <!-- Members Grid -->
+                <div class="flex flex-wrap justify-center gap-8 mb-16">
+                    @foreach($members as $member)
+                    <div class="member-card">
+                        <div class="member-photo-wrapper">
+                            <img src="{{ $member->photo_url }}" 
+                                 alt="{{ $member->name }}"
+                                 class="member-photo">
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-800 mt-5 mb-1">{{ $member->name }}</h3>
+                        <p class="text-sm text-gray-500">{{ $member->position }}</p>
+                    </div>
+                    @endforeach
+                </div>
+
                 <!-- WhatsApp Contact Button -->
+                @if($isWhatsappActive)
                 <div class="text-center mb-16">
                     <a href="{{ $whatsappLink }}" 
                        target="_blank"
@@ -94,6 +113,7 @@
                         <span>Halo Layanan</span>
                     </a>
                 </div>
+                @endif
             </div>
         </div>
     </section>
@@ -145,10 +165,44 @@
     .search-hidden {
         display: none !important;
     }
+    
+    /* Member Card Styles */
+    .member-card {
+        background: white;
+        border-radius: 1rem;
+        padding: 2rem 1.5rem 1.5rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
+        text-align: center;
+        width: 240px;
+        transition: all 0.3s ease;
+    }
+
+    .member-card:hover {
+        box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+        transform: translateY(-4px);
+    }
+
+    .member-photo-wrapper {
+        width: 180px;
+        height: 200px;
+        margin: 0 auto;
+        overflow: hidden;
+        border-radius: 0.75rem;
+        background: #f8fafc;
+    }
+
+    .member-photo {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+    @include('users.partials.unit-carousel-styles')
 </style>
 @endpush
 
 @push('scripts')
+    @include('users.partials.unit-carousel-scripts')
 <script>
 (function() {
     function initDesaSearch() {

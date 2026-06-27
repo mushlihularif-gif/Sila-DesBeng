@@ -186,6 +186,16 @@ class RequestController extends Controller
             ]
         ];
 
+        if ($request->ajax()) {
+            return response()
+                ->view('admin.aktivitas.partials.requests_content', compact('rentalRequests', 'gasOrders', 'mobilRequests', 'fasilitasRequests', 'stats', 'status', 'category', 'notificationCounts'))
+                ->withHeaders([
+                    'Cache-Control' => 'no-cache, no-store, must-revalidate',
+                    'Pragma' => 'no-cache',
+                    'Expires' => '0',
+                ]);
+        }
+
         return response()
             ->view('admin.aktivitas.requests', compact('rentalRequests', 'gasOrders', 'mobilRequests', 'fasilitasRequests', 'stats', 'status', 'category', 'notificationCounts'))
             ->withHeaders([

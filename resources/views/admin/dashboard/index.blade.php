@@ -25,15 +25,35 @@
                                             $greeting = 'Selamat Malam';
                                             $icon = '<i class="bx bx-moon text-info fs-4 ms-1" style="vertical-align: middle;"></i>';
                                         }
+
+                                        $role = auth()->user()->role;
+                                        if (in_array($role, ['super_admin', 'admin'])) {
+                                            $regionName = 'Pemerintah Kabupaten Bengkalis';
+                                            $kinerjaTitle = 'Kinerja Tingkat Kabupaten';
+                                            $pendapatanTitle = 'Jumlah Pendapatan Layanan Kabupaten';
+                                            $perbandinganTitle = 'Perbandingan Transaksi Kabupaten';
+                                        } elseif ($role == 'admin_kecamatan') {
+                                            $name = \App\Models\Region::find(auth()->user()->region_id)->name ?? 'Kecamatan';
+                                            $regionName = 'Pemerintah ' . $name;
+                                            $kinerjaTitle = 'Kinerja Tingkat Kecamatan';
+                                            $pendapatanTitle = 'Jumlah Pendapatan Layanan Kecamatan';
+                                            $perbandinganTitle = 'Perbandingan Transaksi Kecamatan';
+                                        } else {
+                                            $name = \App\Models\Region::find(auth()->user()->region_id)->name ?? 'Desa';
+                                            $regionName = 'Pemerintah ' . $name;
+                                            $kinerjaTitle = 'Kinerja Pemerintah Desa';
+                                            $pendapatanTitle = 'Jumlah Pendapatan Unit Pelayanan Usaha';
+                                            $perbandinganTitle = 'Perbandingan Transaksi';
+                                        }
                                     @endphp
                                     <h5 class="card-title text-primary fw-bold mb-0">{{ $greeting }}, {{ explode(' ', Auth::user()->name ?? 'Administrator')[0] }} {!! $icon !!}</h5>
                                 </div>
                             </div>
                             <div class="col-12 mt-auto">
                                 <div class="px-4 pb-2">
-                                    <p class="mb-3 text-muted">Sistem Pelayanan Terpadu berbasis Digital <br><span class="fw-bold text-dark">{{ \App\Models\Region::find(auth()->user()->region_id)->name ?? 'Pemerintah Kabupaten Bengkalis' }}</span></p>
+                                    <p class="mb-3 text-muted">Sistem Pelayanan Terpadu berbasis Digital <br><span class="fw-bold text-dark">{{ $regionName }}</span></p>
                                     @if(in_array(auth()->user()->role, ['admin_desa', 'lurah']))
-                                    <a href="{{ route('admin.siladesbeng.profile-bumdes') }}" class="btn btn-outline-primary">Profil Pemerintah Desa</a>
+                                    <a href="{{ route('admin.siladesbeng.bumdes.index') }}" class="btn btn-outline-primary">Profil Pemerintah Desa</a>
                                     @endif
                                 </div>
                                 <div class="px-3 pb-3">
@@ -96,37 +116,63 @@
                             <div
                                 class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-4">
                                 <div>
-                                    <h5 class="card-title fw-bold mb-2">Kinerja Pemerintah Desa</h5>
+                                    <h5 class="card-title fw-bold mb-2">{{ $kinerjaTitle }}</h5>
                                     <span class="badge bg-label-warning rounded-pill">Tahun {{ $selectedYear }}</span>
                                 </div>
                                 <div class="d-flex flex-column flex-sm-row gap-2 mt-3 mt-sm-0">
+                                    @if(in_array(auth()->user()->role, ['super_admin', 'admin']))
+                                    <select class="form-select form-select-sm" id="kecamatanSelect" style="min-width: 150px;">
+                                        <option value="all" {{ empty($selectedKecamatanId) || $selectedKecamatanId == 'all' ? 'selected' : '' }}>Semua Kecamatan</option>
+                                        @foreach($kecamatanList ?? [] as $kecamatan)
+                                            <option value="{{ $kecamatan->id }}" {{ $selectedKecamatanId == $kecamatan->id ? 'selected' : '' }}>{{ $kecamatan->name }}</option>
+                                        @endforeach
+                                    </select>
+                                    @endif
+
                                     @if(in_array(auth()->user()->role, ['super_admin', 'admin', 'admin_kecamatan']))
-                                    <select class="form-select form-select-sm" id="desaSelect" style="min-width: 200px;">
-                                        <option value="all" {{ $selectedDesaId == 'all' || empty($selectedDesaId) ? 'selected' : '' }}>Semua Desa</option>
-                                        @foreach($desaList as $desa)
+                                    <select class="form-select form-select-sm" id="desaSelect" style="min-width: 150px;">
+                                        <option value="all" {{ empty($selectedDesaId) || $selectedDesaId == 'all' ? 'selected' : '' }}>Semua Desa</option>
+                                        @foreach($desaList ?? [] as $desa)
                                             <option value="{{ $desa->id }}" {{ $selectedDesaId == $desa->id ? 'selected' : '' }}>{{ $desa->name }}</option>
                                         @endforeach
                                     </select>
                                     @endif
+
                                     <select class="form-select form-select-sm" id="tahunSelect" style="min-width: 100px;">
                                         @foreach($availableYears as $year)
                                             <option value="{{ $year }}" {{ $year == $selectedYear ? 'selected' : '' }}>{{ $year }}</option>
                                         @endforeach
                                     </select>
                                     <script>
-                                        function updateFilters() {
+                                        function updateFilters(isKecamatanChange = false) {
                                             let year = document.getElementById('tahunSelect').value;
+                                            let kecamatanSelect = document.getElementById('kecamatanSelect');
                                             let desaSelect = document.getElementById('desaSelect');
+                                            
                                             let url = "{{ route('admin.dashboard') }}?year=" + year;
-                                            if (desaSelect) {
+                                            
+                                            if (kecamatanSelect && kecamatanSelect.value !== 'all') {
+                                                url += "&kecamatan_id=" + kecamatanSelect.value;
+                                            }
+                                            
+                                            // Only append desa_id if we didn't just change the kecamatan (resetting desa filter)
+                                            if (desaSelect && desaSelect.value !== 'all' && !isKecamatanChange) {
                                                 url += "&desa_id=" + desaSelect.value;
                                             }
+                                            
                                             window.location.href = url;
                                         }
-                                        document.getElementById('tahunSelect').addEventListener('change', updateFilters);
+
+                                        document.getElementById('tahunSelect').addEventListener('change', () => updateFilters(false));
+                                        
+                                        let kecSel = document.getElementById('kecamatanSelect');
+                                        if (kecSel) {
+                                            kecSel.addEventListener('change', () => updateFilters(true));
+                                        }
+
                                         let desaSel = document.getElementById('desaSelect');
                                         if (desaSel) {
-                                            desaSel.addEventListener('change', updateFilters);
+                                            desaSel.addEventListener('change', () => updateFilters(false));
                                         }
                                     </script>
                                 </div>
@@ -197,7 +243,7 @@
                         ]
                     ];
 
-                    $activeServicesList = isset($activeServices) && count($activeServices) > 0 ? $activeServices : ['Penyewaan Alat', 'Penjualan Gas'];
+                    $activeServicesList = isset($activeServices) ? $activeServices : [];
                 @endphp
             @if(in_array(auth()->user()->role, ['admin_desa', 'admin_rt', 'admin_rw', 'lurah']))
             <div class="row mb-4">
@@ -535,7 +581,7 @@
                         <div class="card h-100">
                             <div class="card-header d-flex justify-content-between align-items-center">
                                 <h5 class="card-title mb-0 text-dark">
-                                    Total Pendapatan Unit Pelayanan Usaha
+                                    {{ $pendapatanTitle }}
                                 </h5>
                                 <select id="pendapatan-month" class="form-select form-select-sm" style="width: auto;">
                                     @foreach(['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'] as $index => $month)
@@ -546,44 +592,54 @@
                                 </select>
                             </div>
                             <div class="card-body">
-                                <div class="row h-100 align-items-center">
-                                    <!-- Data List -->
-                                    <div class="col-md-7">
-                                        @php
-                                            $revenueServices = ['Penyewaan Alat', 'Penjualan Gas', 'Penyewaan Mobil'];
-                                            $activeRevenueServices = array_intersect($activeServicesList, $revenueServices);
-                                        @endphp
-                                        @foreach($activeRevenueServices as $serviceName)
-                                            @php
-                                                $dataItem = $totalPendapatanData[$serviceName] ?? ['revenue' => 0, 'transactions' => 0, 'percentage' => 0, 'color' => 'secondary'];
-                                            @endphp
-                                            <div class="mb-4">
-                                                <div class="d-flex justify-content-between mb-1">
-                                                    <span class="fw-medium">Unit {{ $serviceName }}</span>
-                                                    <span class="fw-bold">Rp <span class="count-up-rupiah" data-value="{{ $dataItem['revenue'] }}">0</span></span>
+                                @php
+                                    $revenueServices = ['Penyewaan Alat', 'Penjualan Gas', 'Penyewaan Mobil'];
+                                    $activeRevenueServices = array_intersect($activeServicesList, $revenueServices);
+                                @endphp
+                                @if(count($activeRevenueServices) > 0)
+                                    <div class="row h-100 align-items-center">
+                                        <!-- Data List -->
+                                        <div class="col-md-7">
+                                            @foreach($activeRevenueServices as $serviceName)
+                                                @php
+                                                    $dataItem = $totalPendapatanData[$serviceName] ?? ['revenue' => 0, 'transactions' => 0, 'percentage' => 0, 'color' => 'secondary'];
+                                                @endphp
+                                                <div class="mb-4">
+                                                    <div class="d-flex justify-content-between mb-1">
+                                                        <span class="fw-medium">Unit {{ $serviceName }}</span>
+                                                        <span class="fw-bold">Rp <span class="count-up-rupiah" data-value="{{ $dataItem['revenue'] }}">0</span></span>
+                                                    </div>
+                                                    <div class="progress" style="height: 8px;">
+                                                        <div class="progress-bar bg-{{ $dataItem['color'] }}" role="progressbar" style="width: {{ $dataItem['percentage'] }}%"></div>
+                                                    </div>
+                                                    <small class="text-muted"><span class="count-up" data-value="{{ $dataItem['transactions'] }}">0</span> Transaksi</small>
                                                 </div>
-                                                <div class="progress" style="height: 8px;">
-                                                    <div class="progress-bar bg-{{ $dataItem['color'] }}" role="progressbar" style="width: {{ $dataItem['percentage'] }}%"></div>
-                                                </div>
-                                                <small class="text-muted"><span class="count-up" data-value="{{ $dataItem['transactions'] }}">0</span> Transaksi</small>
-                                            </div>
-                                        @endforeach
+                                            @endforeach
 
-                                        <!-- Total -->
-                                        <div class="pt-3 border-top">
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <h6 class="mb-0">Total Keseluruhan</h6>
-                                                <h6 class="mb-0 fw-bold">Rp <span class="count-up-rupiah" data-value="{{ $totalPendapatanData['total']['revenue'] ?? 0 }}">0</span></h6>
+                                            <!-- Total -->
+                                            <div class="pt-3 border-top">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <h6 class="mb-0">Total Keseluruhan</h6>
+                                                    <h6 class="mb-0 fw-bold">Rp <span class="count-up-rupiah" data-value="{{ $totalPendapatanData['total']['revenue'] ?? 0 }}">0</span></h6>
+                                                </div>
+                                                <small class="text-muted"><span class="count-up" data-value="{{ $totalPendapatanData['total']['transactions'] ?? 0 }}">0</span> Transaksi</small>
                                             </div>
-                                            <small class="text-muted"><span class="count-up" data-value="{{ $totalPendapatanData['total']['transactions'] ?? 0 }}">0</span> Transaksi</small>
+                                        </div>
+
+                                        <!-- Pie Chart -->
+                                        <div class="col-md-5 d-flex align-items-center justify-content-center">
+                                            <div id="pendapatanPieChart" style="width: 100%;"></div>
                                         </div>
                                     </div>
-
-                                    <!-- Pie Chart -->
-                                    <div class="col-md-5 d-flex align-items-center justify-content-center">
-                                        <div id="pendapatanPieChart" style="width: 100%;"></div>
+                                @else
+                                    <div class="d-flex h-100 justify-content-center align-items-center">
+                                        <div class="text-center py-5">
+                                            <i class="bx bx-store-alt text-muted fs-1 mb-3"></i>
+                                            <h6 class="mb-1">Data Belum Tersedia</h6>
+                                            <p class="text-muted mb-0 small">Belum ada unit layanan yang diaktifkan. Silakan aktifkan unit layanan terlebih dahulu di menu Pengaturan Layanan.</p>
+                                        </div>
                                     </div>
-                                </div>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -592,11 +648,19 @@
                     <div class="col-lg-4">
                         <div class="card h-100">
                             <div class="card-header pb-0">
-                                <h5 class="card-title mb-0">Perbandingan Transaksi</h5>
+                                <h5 class="card-title mb-0">{{ $perbandinganTitle }}</h5>
                             </div>
                             <div class="card-body d-flex flex-column justify-content-center align-items-center"
                                 style="min-height: 280px; padding: 1rem;">
-                                <div id="transactionDonutChart" style="width: 100%;"></div>
+                                @if(count($activeRevenueServices) > 0)
+                                    <div id="transactionDonutChart" style="width: 100%;"></div>
+                                @else
+                                    <div class="text-center">
+                                        <i class="bx bx-pie-chart-alt text-muted fs-1 mb-3"></i>
+                                        <h6 class="mb-1">Grafik Belum Tersedia</h6>
+                                        <p class="text-muted mb-0 small">Aktifkan unit layanan terlebih dahulu.</p>
+                                    </div>
+                                @endif
                             </div>
                         </div>
                     </div>

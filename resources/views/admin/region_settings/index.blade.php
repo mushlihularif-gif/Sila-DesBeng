@@ -262,7 +262,7 @@
                                                 <p class="text-muted small mb-0">Aktifkan modul {{ strtolower($service->name) }}.</p>
                                             </div>
                                         </div>
-                                        
+                                        @if($region->type !== 'kabupaten')
                                         <div class="mt-auto pt-3 border-top">
                                             <div class="d-flex align-items-center justify-content-between mb-2" onclick="event.stopPropagation();">
                                                 <label class="text-dark small fw-semibold mb-0" for="exclusive_{{ $service->id }}">
@@ -274,6 +274,7 @@
                                             </div>
                                             <small class="text-muted d-block" style="font-size: 0.75rem; line-height: 1.4;">Jika aktif, hanya warga {{ ucwords($region->type == 'desa' ? 'Desa/Kelurahan' : $region->type) }} {{ $region->name }} yang dapat melihat dan memesan layanan ini.</small>
                                         </div>
+                                        @endif
                                     </div>
                                 </label>
                             </div>

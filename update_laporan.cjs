@@ -1,23 +1,8 @@
-@extends('admin.layouts.admin')
-
-@section('title', 'Kelola Laporan')
-
-@section('content')
-<div class="container-fluid py-4">
-
-    <!-- Judul Header Halaman -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h4 class="fw-bold fs-3 mb-1 text-primary">Kelola Semua Laporan</h4>
-            <p class="text-muted mb-0">Pemantauan dan manajemen laporan warga dari seluruh RW</p>
-        </div>
-        <div class="d-flex gap-2">
-            <a href="{{ route('lurah.laporan.index') }}" class="btn btn-white border shadow-sm rounded-pill px-4">
-                <i class="bx bx-refresh me-2"></i>Refresh
-            </a>
-        </div>
-    </div>
-
+const fs=require('fs'); 
+const lines=fs.readFileSync('D:/laragon/www/SilaDesBeng/resources/views/lurah/laporan/index.blade.php', 'utf8').split('\n'); 
+const top=lines.slice(0, 20).join('\n'); 
+const bottom=lines.slice(255).join('\n'); 
+const mid=`
     <div id="laporan-container">
         @include('lurah.laporan.partials.laporan_content')
     </div>
@@ -100,3 +85,5 @@ document.addEventListener('DOMContentLoaded', function() {
     attachAjaxEvents();
 });
 </script>
+`;
+fs.writeFileSync('D:/laragon/www/SilaDesBeng/resources/views/lurah/laporan/index.blade.php', top + mid);

@@ -77,7 +77,7 @@
                         <hr class="my-4">
 
                         <div class="row g-3">
-                            <div class="col-md-6">
+                            <div class="col-md-3">
                                 <label class="form-label fw-semibold"><i class="bx bx-category me-1"></i>Tipe Pengumuman <span class="text-danger">*</span></label>
                                 <select name="type" class="form-select border-primary" required>
                                     <option value="Pengumuman" {{ (isset($announcement) && $announcement->type == 'Pengumuman') ? 'selected' : '' }}>Pengumuman Biasa</option>
@@ -86,18 +86,28 @@
                                 </select>
                             </div>
 
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold"><i class="bx bx-map-alt me-1"></i>Target Wilayah <span class="text-danger">*</span></label>
-                                <select name="target_region_id" class="form-select border-primary" required>
-                                    <option value="">-- Pilih Target Wilayah --</option>
-                                    @foreach($regions as $region)
-                                        <option value="{{ $region->id }}" {{ (isset($announcement) && $announcement->region_id == $region->id) || (!isset($announcement) && auth()->user()->region_id == $region->id) ? 'selected' : '' }}>
-                                            {{ $region->name }} ({{ ucfirst($region->type) }})
-                                            @if(auth()->user()->region_id == $region->id) - Wilayah Anda @endif
-                                        </option>
-                                    @endforeach
+                            <input type="hidden" name="target_region_id" id="final_target_region_id" required>
+
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold"><i class="bx bx-map me-1"></i>Kabupaten <span class="text-danger">*</span></label>
+                                <select id="select_kabupaten" class="form-select border-primary" required>
+                                    <option value="">Memuat...</option>
                                 </select>
-                                <div class="form-text small">Tampil di wilayah ini dan jajarannya.</div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold"><i class="bx bx-map-alt me-1"></i>Kecamatan</label>
+                                <select id="select_kecamatan" class="form-select border-primary" disabled>
+                                    <option value="">Pilih Kecamatan (Opsional)</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold"><i class="bx bx-home me-1"></i>Desa/Kelurahan</label>
+                                <select id="select_desa" class="form-select border-primary" disabled>
+                                    <option value="">Pilih Desa (Opsional)</option>
+                                </select>
+                                <div class="form-text small">Biarkan kosong untuk target lebih luas.</div>
                             </div>
                         </div>
 
@@ -209,4 +219,104 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const allRegions = @json($regions);
+    const kabSelect = document.getElementById('select_kabupaten');
+    const kecSelect = document.getElementById('select_kecamatan');
+    const desaSelect = document.getElementById('select_desa');
+    const finalTarget = document.getElementById('final_target_region_id');
+
+    let initialId = {{ isset($announcement) ? $announcement->region_id : 'null' }};
+    if (initialId === null) {
+        initialId = {{ auth()->user()->region_id ?? 'null' }};
+    }
+
+    let initKab = null, initKec = null, initDesa = null;
+    
+    if (initialId) {
+        let current = allRegions.find(r => r.id == initialId);
+        if (current) {
+            if (current.type === 'desa' || current.type === 'kelurahan') {
+                initDesa = current.id;
+                initKec = current.parent_id;
+                let parentKec = allRegions.find(r => r.id == initKec);
+                if (parentKec) initKab = parentKec.parent_id;
+            } else if (current.type === 'kecamatan') {
+                initKec = current.id;
+                initKab = current.parent_id;
+            } else if (current.type === 'kabupaten') {
+                initKab = current.id;
+            }
+        }
+    }
+
+    const kabupatens = allRegions.filter(r => r.type === 'kabupaten');
+    kabSelect.innerHTML = '';
+    kabupatens.forEach(k => {
+        kabSelect.innerHTML += `<option value="${k.id}">${k.name}</option>`;
+    });
+    if (initKab) { kabSelect.value = initKab; }
+
+    function updateFinalTarget() {
+        if (desaSelect.value) {
+            finalTarget.value = desaSelect.value;
+        } else if (kecSelect.value) {
+            finalTarget.value = kecSelect.value;
+        } else {
+            finalTarget.value = kabSelect.value;
+        }
+    }
+
+    function populateKecamatan() {
+        const kabId = parseInt(kabSelect.value);
+        kecSelect.innerHTML = '<option value="">Semua Kecamatan (Opsional)</option>';
+        desaSelect.innerHTML = '<option value="">Semua Desa (Opsional)</option>';
+        desaSelect.disabled = true;
+
+        if (kabId) {
+            const kecs = allRegions.filter(r => r.type === 'kecamatan' && r.parent_id === kabId);
+            kecs.sort((a,b) => a.name.localeCompare(b.name)).forEach(k => {
+                kecSelect.innerHTML += `<option value="${k.id}">${k.name}</option>`;
+            });
+            kecSelect.disabled = false;
+        } else {
+            kecSelect.disabled = true;
+        }
+        updateFinalTarget();
+    }
+
+    function populateDesa() {
+        const kecId = parseInt(kecSelect.value);
+        desaSelect.innerHTML = '<option value="">Semua Desa (Opsional)</option>';
+        
+        if (kecId) {
+            const desas = allRegions.filter(r => (r.type === 'desa' || r.type === 'kelurahan') && r.parent_id === kecId);
+            desas.sort((a,b) => a.name.localeCompare(b.name)).forEach(d => {
+                desaSelect.innerHTML += `<option value="${d.id}">${d.name}</option>`;
+            });
+            desaSelect.disabled = false;
+        } else {
+            desaSelect.disabled = true;
+        }
+        updateFinalTarget();
+    }
+
+    kabSelect.addEventListener('change', populateKecamatan);
+    kecSelect.addEventListener('change', populateDesa);
+    desaSelect.addEventListener('change', updateFinalTarget);
+
+    populateKecamatan();
+    if (initKec) {
+        kecSelect.value = initKec;
+        populateDesa();
+        if (initDesa) {
+            desaSelect.value = initDesa;
+        }
+    }
+    updateFinalTarget();
+});
+</script>
+
 @endsection

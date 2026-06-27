@@ -27,8 +27,11 @@ class RegionSettingController extends Controller
                 ['name' => 'Pematang Duku Timur', 'type' => 'desa', 'parent_id' => $kecamatan->id],
                 ['profile_text' => 'Pemerintahan Desa Pematang Duku Timur, Kecamatan Bengkalis, Kabupaten Bengkalis.']
             );
-            
-            $user->region_id = $desa->id;
+            if (in_array($user->role, ['super_admin', 'admin'])) {
+                $user->region_id = $kabupaten->id;
+            } else {
+                $user->region_id = $desa->id;
+            }
             $user->save();
         }
 

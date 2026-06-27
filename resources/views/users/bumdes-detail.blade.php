@@ -12,118 +12,18 @@
             <!-- Header Section -->
             <div class="text-center mb-16">
                 <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-8">
-                    {{ $region ? $region->name : 'Profil Layanan Daerah' }}
+                    {{ $region ? $region->name : 'Kabupaten Bengkalis' }}
                 </h1>
             </div>
 
             <!-- Unit Pelayanan Section -->
-            <div id="unit-carousel-container" class="max-w-7xl mx-auto px-6 py-16 overflow-hidden">
-                <div class="max-w-7xl mx-auto">
-                    <div class="text-center mb-16 relative">
-                        <h2 class="text-3xl font-bold mb-2">
-                            <span class="text-gray-800">Unit </span>
-                            <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Pelayanan</span>
-                        </h2>
-                    </div>
-
-                    <div class="relative h-[400px] w-full flex justify-center items-center">
-                        <div class="relative w-full max-w-6xl mx-auto h-full">
-                            @php
-                                $isServiceActive = function($name) use ($activeServices, $region) {
-                                    // Jika tidak ada region spesifik (misal diakses manual), tampilkan semua
-                                    if (!$region) return true; 
-                                    
-                                    // Mapping nama tampilan ke nama layanan di database
-                                    $map = [
-                                        'Unit Penyewaan Alat' => 'Penyewaan Alat',
-                                        'Unit Penjualan Gas' => 'Penjualan Gas',
-                                        'Unit Penyewaan Mobil' => 'Penyewaan Mobil',
-                                        'Unit Peminjaman Fasilitas Umum' => 'Peminjaman Fasilitas Umum',
-                                        'Pelaporan Warga' => 'Pelaporan Warga',
-                                        'Pengumuman dan Event' => 'Pengumuman dan Event'
-                                    ];
-                                    
-                                    $dbName = $map[$name] ?? $name;
-                                    
-                                    // Pengecualian: Mungkin 'Pengumuman dan Event' selalu aktif untuk semua desa
-                                    if ($dbName === 'Pengumuman dan Event') return true;
-                                    
-                                    return in_array($dbName, $activeServices);
-                                };
-
-                                $index = 0;
-                            @endphp
-
-                            @if($isServiceActive('Unit Penyewaan Alat'))
-                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="{{ $index++ }}" data-name="Unit Penyewaan Alat" onclick="window.location.href='{{ route('rental.equipment') . '?region_id=' . $region->id }}'">
-                                <img src="{{ asset('User/img/elemen/F1.png') }}" alt="Alat">
-                            </div>
-                            @endif
-
-                            @if($isServiceActive('Unit Penjualan Gas'))
-                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="{{ $index++ }}" data-name="Unit Penjualan Gas" onclick="window.location.href='{{ route('gas.sales') . '?region_id=' . $region->id }}'">
-                                <img src="{{ asset('User/img/elemen/F2.png') }}" alt="Gas">
-                            </div>
-                            @endif
-
-                            @if($isServiceActive('Unit Penyewaan Mobil'))
-                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="{{ $index++ }}" data-name="Unit Penyewaan Mobil" onclick="window.location.href='{{ route('mobil.rental.equipment') . '?region_id=' . $region->id }}'">
-                                <img src="{{ asset('User/img/elemen/mobil.png') }}" alt="Mobil">
-                            </div>
-                            @endif
-
-                            @if($isServiceActive('Unit Peminjaman Fasilitas Umum'))
-                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="{{ $index++ }}" data-name="Unit Peminjaman Fasilitas Umum" onclick="window.location.href='{{ route('user.fasilitas-umum.equipment') . '?region_id=' . $region->id }}'">
-                                <img src="{{ asset('User/img/elemen/fasilitas.png') }}" alt="Fasilitas">
-                            </div>
-                            @endif
-                            
-                            @if($isServiceActive('Pelaporan Warga'))
-                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="{{ $index++ }}" data-name="Pelaporan Warga" onclick="window.location.href='{{ route('pelaporan.landing') . '?region_id=' . $region->id }}'">
-                                <img src="{{ asset('User/img/elemen/lapor.png') }}" alt="Lapor">
-                            </div>
-                            @endif
-
-                            @if($isServiceActive('Pengumuman dan Event'))
-                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="{{ $index++ }}" data-name="Pengumuman dan Event" onclick="window.location.href='{{ route('announcements.index') . '?region_id=' . $region->id }}'">
-                                <img src="{{ asset('User/img/elemen/event.png') }}" alt="Event">
-                            </div>
-                            @endif
-                        </div>
-
-                        <div class="absolute -bottom-6 left-0 right-0 flex items-center justify-center gap-4 md:gap-12 z-[60]">
-                            <button id="unit-prev"
-                                class="bg-white hover:bg-gray-50 text-gray-800 rounded-full p-3 shadow-lg border border-gray-100 transition-transform active:scale-95">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                        d="M15 19l-7-7 7-7" />
-                                </svg>
-                            </button>
-
-                            <div class="min-w-[300px] text-center">
-                                <h3 id="unit-title"
-                                    class="text-xl md:text-2xl font-bold text-black transition-all duration-300">
-                                    Unit Penyewaan Alat
-                                </h3>
-                            </div>
-
-                            <button id="unit-next"
-                                class="bg-white hover:bg-gray-50 text-gray-800 rounded-full p-3 shadow-lg border border-gray-100 transition-transform active:scale-95">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                        d="M9 5l7 7-7 7" />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            @include('users.partials.unit-carousel')
 
             <!-- Pemerintahan Section -->
             <div class="mb-16 mt-24">
                 <div class="text-center mb-16">
                     <h2 class="text-3xl md:text-4xl font-bold">
-                        <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Pemerintah {{ $region ? $region->name : 'Daerah' }}</span>
+                        <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Pemerintah {{ $region ? $region->name : 'Kabupaten Bengkalis' }}</span>
                     </h2>
                 </div>
 
@@ -163,59 +63,6 @@
 <style>
     * {
         font-family: 'Inter', sans-serif;
-    }
-
-    /* Unit Carousel Styles */
-    .unit-card {
-        width: 280px;
-        height: 280px;
-        position: absolute;
-        top: 45%;
-        transform-origin: center center;
-        transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
-        will-change: transform, left, opacity;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .unit-card img {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-        filter: drop-shadow(0 15px 25px rgba(0, 0, 0, 0.15));
-    }
-
-    .state-0 {
-        left: 15% !important;
-        transform: translate(-50%, -50%) scale(0.65) !important;
-        opacity: 0.8;
-        z-index: 20;
-        filter: grayscale(10%);
-    }
-
-    .state-1 {
-        left: 50% !important;
-        transform: translate(-50%, -50%) scale(1.5) !important;
-        opacity: 1;
-        z-index: 50;
-        filter: grayscale(0%) drop-shadow(0 25px 35px rgba(0, 0, 0, 0.25));
-    }
-
-    .state-2 {
-        left: 80% !important;
-        transform: translate(-50%, -50%) scale(0.65) !important;
-        opacity: 0.8;
-        z-index: 20;
-        filter: grayscale(10%);
-    }
-
-    .state-3 {
-        left: 100% !important;
-        transform: translate(-50%, -50%) scale(0.5) !important;
-        opacity: 0.6;
-        z-index: 10;
-        filter: grayscale(30%);
     }
 
     .state-4 {
@@ -326,119 +173,5 @@
 @endpush
 
 @push('scripts')
-<script>
-    const BumdesDetailPage = {
-        init() {
-            this.initUnitCarousel();
-        },
-
-        initUnitCarousel() {
-            const cards = Array.from(document.querySelectorAll('.unit-card'));
-            if (cards.length === 0) return;
-
-            const titleElement = document.getElementById('unit-title');
-            const nextBtn = document.getElementById('unit-next');
-            const prevBtn = document.getElementById('unit-prev');
-
-            const stateClasses = ['state-0', 'state-1', 'state-2', 'state-3', 'state-4', 'state-5'];
-            
-            // Inisialisasi posisi secara dinamis sesuai jumlah cards
-            let positions = [];
-            const n = cards.length;
-            
-            if (n === 1) {
-                positions = [1];
-            } else if (n === 2) {
-                positions = [1, 2];
-            } else if (n === 3) {
-                positions = [1, 2, 0];
-            } else {
-                // Untuk n >= 4
-                positions = Array.from({length: n}, (_, i) => {
-                    if (i === 0) return 1;
-                    if (i === 1) return 2;
-                    if (i === n - 1) return 0;
-                    return 3; // sisanya hidden
-                });
-            }
-
-            let autoSlideInterval;
-            const autoSlideDelay = 3000;
-
-            const updateCarousel = () => {
-                cards.forEach((card, index) => {
-                    card.classList.remove(...stateClasses);
-                    const currentPos = positions[index];
-                    card.classList.add(stateClasses[currentPos] || 'state-3');
-
-                    if (currentPos === 1 && titleElement) {
-                        titleElement.style.opacity = '0';
-                        setTimeout(() => {
-                            titleElement.textContent = card.getAttribute('data-name');
-                            titleElement.style.opacity = '1';
-                        }, 200);
-                    }
-                });
-            };
-
-            const handleNext = () => {
-                if (n === 1) return;
-                
-                // Shift positions array to the right cyclically
-                // example for n=3: [1, 2, 0] -> [0, 1, 2] -> [2, 0, 1]
-                positions.unshift(positions.pop());
-                updateCarousel();
-            };
-
-            const handlePrev = () => {
-                if (n === 1) return;
-                
-                // Shift positions array to the left cyclically
-                positions.push(positions.shift());
-                updateCarousel();
-            };
-
-            const startAutoSlide = () => {
-                if (n <= 1) return;
-                clearInterval(autoSlideInterval);
-                autoSlideInterval = setInterval(handleNext, autoSlideDelay);
-            };
-
-            const resetAutoSlide = () => {
-                if (n <= 1) return;
-                clearInterval(autoSlideInterval);
-                startAutoSlide();
-            };
-
-            if (nextBtn) {
-                const newNext = nextBtn.cloneNode(true);
-                nextBtn.parentNode.replaceChild(newNext, nextBtn);
-                newNext.addEventListener('click', () => {
-                    handleNext();
-                    resetAutoSlide();
-                });
-            }
-            if (prevBtn) {
-                const newPrev = prevBtn.cloneNode(true);
-                prevBtn.parentNode.replaceChild(newPrev, prevBtn);
-                newPrev.addEventListener('click', () => {
-                    handlePrev();
-                    resetAutoSlide();
-                });
-            }
-
-            const container = document.getElementById('unit-carousel-container');
-            if (container) {
-                container.addEventListener('mouseenter', () => clearInterval(autoSlideInterval));
-                container.addEventListener('mouseleave', startAutoSlide);
-            }
-
-            updateCarousel();
-            startAutoSlide();
-
-        },
-    };
-    // Initialize
-    BumdesDetailPage.init();
- </script>
+    @include('users.partials.unit-carousel-scripts')
 @endpush
