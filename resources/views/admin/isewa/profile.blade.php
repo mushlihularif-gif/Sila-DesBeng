@@ -284,7 +284,7 @@
                     <div class="card-body p-4">
                         <div class="avatar-ring">
                             <div class="avatar-inner">
-                                <img src="{{ asset('User/img/avatars/ken2.png') }}" alt="Rizqy Hamadi Ken">
+                                <img src="{{ asset('User/img/avatars/ken1.jpg') }}" alt="Rizqy Hamadi Ken">
                             </div>
                         </div>
                         <h5 class="fw-bold text-dark mb-1">Rizqy Hamadi Ken</h5>
