@@ -8,9 +8,11 @@ class AddRegionIdToBumdesMembersTable extends Migration
 {
     public function up()
     {
-        Schema::table('bumdes_members', function (Blueprint $table) {
-            $table->foreignId('region_id')->nullable()->after('id')->constrained('regions')->onDelete('cascade');
-        });
+        if (!Schema::hasColumn('bumdes_members', 'region_id')) {
+            Schema::table('bumdes_members', function (Blueprint $table) {
+                $table->foreignId('region_id')->nullable()->after('id')->constrained('regions')->onDelete('cascade');
+            });
+        }
     }
 
     public function down()
