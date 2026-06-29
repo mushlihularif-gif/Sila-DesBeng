@@ -272,7 +272,7 @@
             @endif
 
             <!-- Section Unit Pelayanan -->
-            <div id="unit-carousel-container" class="max-w-7xl mx-auto px-6 py-16 overflow-hidden">
+            <div id="unit-carousel-container" class="max-w-7xl mx-auto px-6 py-16 overflow-hidden" style="padding-bottom: 8rem;">
                 <div class="max-w-7xl mx-auto">
 
                     <div class="text-center mb-16 relative">
@@ -282,7 +282,7 @@
                         </h2>
                     </div>
 
-                    <div class="relative h-[400px] w-full flex justify-center items-center">
+                    <div class="relative w-full flex justify-center items-center" style="height: 480px;">
 
                         <div class="relative w-full max-w-6xl mx-auto h-full">
                             @php
@@ -737,7 +737,7 @@
 
         /* Area GRAFIK UMUM - Pakai 3.webp (WAVE BESAR TENGAH) */
         .bg-wave-center-grafik {
-            top: 45%;
+            top: 52%;
             left: 50%;
             width: 115%;
             transform: translateX(-50%) scale(1.1);
@@ -1157,7 +1157,7 @@
 
                 const options = {
                     series: [{
-                        name: 'Kinerja (Juta Rupiah)',
+                        name: 'Indeks Poin',
                         data: kinerjaData.data
                     }],
                     chart: {
@@ -1171,10 +1171,10 @@
                         },
                         background: 'transparent'
                     },
-                    colors: ['#f59e0b'],
+                    colors: ['#ffab00'],
                     stroke: {
                         curve: 'smooth',
-                        width: 2.5
+                        width: 3
                     },
                     fill: {
                         type: 'gradient',
@@ -1211,9 +1211,8 @@
                         }
                     },
                     yaxis: {
-                        tickAmount: 5,
                         labels: {
-                            formatter: (val) => val.toFixed(1),
+                            formatter: (val) => val.toFixed(0),
                             style: {
                                 colors: '#6b7280',
                                 fontSize: '11px'
@@ -1228,11 +1227,6 @@
                                 show: true
                             }
                         },
-                        yaxis: {
-                            lines: {
-                                show: true
-                            }
-                        },
                         padding: {
                             top: 0,
                             right: 5,
@@ -1242,7 +1236,7 @@
                     },
                     tooltip: {
                         y: {
-                            formatter: (val) => 'Rp ' + val.toFixed(1) + ' Juta'
+                            formatter: (val) => val + ' Indeks Poin'
                         }
                     }
                 };

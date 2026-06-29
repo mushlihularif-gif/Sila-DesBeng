@@ -190,7 +190,7 @@
                     </div>
                 </div>
 
-                <div class="mt-5 border-top pt-4 text-center">
+                <div class="mt-5 border-top pt-4 pb-4 mb-2 text-center">
                     <button type="submit" class="btn btn-primary btn-lg">
                         <i class="bx bx-save me-1"></i> Simpan Pengaturan Pembayaran
                     </button>

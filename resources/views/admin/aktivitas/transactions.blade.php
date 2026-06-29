@@ -4,7 +4,35 @@
 
 @section('content')
 <div class="container-fluid py-4">
-    
+    @php
+    $activeServices = $activeServices ?? [];
+    $isRentalActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'alat'));
+    $isGasActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'gas'));
+    $isMobilActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'mobil'));
+    $isFasilitasActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'fasilitas'));
+    $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasilitasActive])->filter()->count();
+    @endphp
+
+    @if($totalActive === 0)
+        <!-- Page Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h4 class="fw-bold fs-3 mb-1 text-primary">Bukti Transaksi</h4>
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-white border shadow-sm rounded-pill px-4" onclick="location.reload()">
+                    <i class="bx bx-refresh me-2"></i>Refresh
+                </button>
+            </div>
+        </div>
+        <div class="alert alert-warning border-0 shadow-sm rounded-4 p-4 text-center">
+            <div class="avatar avatar-lg bg-warning-subtle text-warning rounded-circle mx-auto mb-3">
+                <i class="bx bx-info-circle fs-2"></i>
+            </div>
+            <h5 class="fw-bold text-dark mb-2">Saat ini Layanan Belum Di Aktifkan</h5>
+            <p class="text-muted mb-0">Silakan aktifkan setidaknya satu layanan pada menu Pengaturan Wilayah.</p>
+        </div>
+    @else
     <!-- Page Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
@@ -34,6 +62,7 @@
                 </div>
             </div>
         </div>
+        @if($isRentalActive)
         <div class="col-md-3 col-6">
             <div class="card border-0 shadow-sm h-100 rounded-4 position-relative overflow-hidden">
                 <div class="card-body p-3">
@@ -49,6 +78,8 @@
                 </div>
             </div>
         </div>
+        @endif
+        @if($isGasActive)
         <div class="col-md-3 col-6">
             <div class="card border-0 shadow-sm h-100 rounded-4 position-relative overflow-hidden">
                 <div class="card-body p-3">
@@ -64,6 +95,7 @@
                 </div>
             </div>
         </div>
+        @endif
         <div class="col-md-3 col-6">
             <div class="card border-0 shadow-sm h-100 rounded-4 position-relative overflow-hidden">
                 <div class="card-body p-3">
@@ -85,30 +117,38 @@
     <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
         <div class="card-header bg-white border-bottom py-3 px-4">
              <ul class="nav nav-pills card-header-pills gap-2" id="proofTabs" role="tablist">
+                @if($isRentalActive)
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link {{ $category == 'rental' || $category == 'all' ? 'active' : '' }} rounded-pill px-4 fw-semibold" id="rental-tab" data-bs-toggle="tab" data-bs-target="#rental-pane" type="button" role="tab">
+                    <button class="nav-link {{ $category == 'rental' || $category == 'all' || (!$isRentalActive && $totalActive > 0) ? 'active' : '' }} rounded-pill px-4 fw-semibold" id="rental-tab" data-bs-toggle="tab" data-bs-target="#rental-pane" type="button" role="tab">
                         <i class="bx bx-wrench me-2"></i>Penyewaan Alat
                         <span class="badge {{ $category == 'rental' || $category == 'all' ? 'bg-white text-primary' : 'bg-primary text-white' }} ms-2 shadow-sm">{{ $rentalPayments->count() }}</span>
                     </button>
                 </li>
+                @endif
+                @if($isGasActive)
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link {{ $category == 'gas' ? 'active' : '' }} rounded-pill px-4 fw-semibold" id="gas-tab" data-bs-toggle="tab" data-bs-target="#gas-pane" type="button" role="tab">
+                    <button class="nav-link {{ $category == 'gas' || (!$isRentalActive && ($category == 'rental' || $category == 'all')) ? 'active' : '' }} rounded-pill px-4 fw-semibold" id="gas-tab" data-bs-toggle="tab" data-bs-target="#gas-pane" type="button" role="tab">
                         <i class="bx bxs-gas-pump me-2"></i>Pembelian Gas
                         <span class="badge {{ $category == 'gas' ? 'bg-white text-primary' : 'bg-primary text-white' }} ms-2 shadow-sm">{{ $gasPayments->count() }}</span>
                     </button>
                 </li>
+                @endif
+                @if($isMobilActive)
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link {{ $category == 'mobil' ? 'active' : '' }} rounded-pill px-4 fw-semibold" id="mobil-tab" data-bs-toggle="tab" data-bs-target="#mobil-pane" type="button" role="tab">
+                    <button class="nav-link {{ $category == 'mobil' || (!$isRentalActive && !$isGasActive && ($category == 'rental' || $category == 'all')) ? 'active' : '' }} rounded-pill px-4 fw-semibold" id="mobil-tab" data-bs-toggle="tab" data-bs-target="#mobil-pane" type="button" role="tab">
                         <i class="bx bx-car me-2"></i>Penyewaan Mobil
                         <span class="badge {{ $category == 'mobil' ? 'bg-white text-primary' : 'bg-primary text-white' }} ms-2 shadow-sm">{{ $mobilPayments->count() }}</span>
                     </button>
                 </li>
+                @endif
+                @if($isFasilitasActive)
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link {{ $category == 'fasilitas' ? 'active' : '' }} rounded-pill px-4 fw-semibold" id="fasilitas-tab" data-bs-toggle="tab" data-bs-target="#fasilitas-pane" type="button" role="tab">
+                    <button class="nav-link {{ $category == 'fasilitas' || (!$isRentalActive && !$isGasActive && !$isMobilActive && ($category == 'rental' || $category == 'all')) ? 'active' : '' }} rounded-pill px-4 fw-semibold" id="fasilitas-tab" data-bs-toggle="tab" data-bs-target="#fasilitas-pane" type="button" role="tab">
                         <i class="bx bx-building-house me-2"></i>Fasilitas Umum
                         <span class="badge {{ $category == 'fasilitas' ? 'bg-white text-primary' : 'bg-primary text-white' }} ms-2 shadow-sm">{{ $fasilitasPayments->count() }}</span>
                     </button>
                 </li>
+                @endif
             </ul>
         </div>
         
@@ -116,7 +156,8 @@
              <div class="tab-content" id="proofTabsContent">
                 
                 <!-- RENTAL TAB -->
-                <div class="tab-pane fade show active" id="rental-pane" role="tabpanel">
+                @if($isRentalActive)
+                <div class="tab-pane fade {{ $category == 'rental' || $category == 'all' || (!$isRentalActive && $totalActive > 0) ? 'show active' : '' }}" id="rental-pane" role="tabpanel">
                     @if($rentalPayments->isEmpty())
                         <div class="text-center py-5">
                             <div class="mb-3"><i class="bx bx-receipt fs-1 text-muted opacity-25"></i></div>
@@ -203,9 +244,11 @@
                         </div>
                     @endif
                 </div>
+                @endif
 
                 <!-- GAS TAB -->
-                <div class="tab-pane fade" id="gas-pane" role="tabpanel">
+                @if($isGasActive)
+                <div class="tab-pane fade {{ $category == 'gas' || (!$isRentalActive && ($category == 'rental' || $category == 'all')) ? 'show active' : '' }}" id="gas-pane" role="tabpanel">
                       @if($gasPayments->isEmpty())
                         <div class="text-center py-5">
                             <div class="mb-3"><i class="bx bx-receipt fs-1 text-muted opacity-25"></i></div>
@@ -291,9 +334,11 @@
                         </div>
                     @endif
                 </div>
+                @endif
 
                 <!-- MOBIL TAB -->
-                <div class="tab-pane fade" id="mobil-pane" role="tabpanel">
+                @if($isMobilActive)
+                <div class="tab-pane fade {{ $category == 'mobil' || (!$isRentalActive && !$isGasActive && ($category == 'rental' || $category == 'all')) ? 'show active' : '' }}" id="mobil-pane" role="tabpanel">
                       @if($mobilPayments->isEmpty())
                         <div class="text-center py-5">
                             <div class="mb-3"><i class="bx bx-receipt fs-1 text-muted opacity-25"></i></div>
@@ -375,9 +420,11 @@
                         </div>
                     @endif
                 </div>
+                @endif
 
                 <!-- FASILITAS TAB -->
-                <div class="tab-pane fade" id="fasilitas-pane" role="tabpanel">
+                @if($isFasilitasActive)
+                <div class="tab-pane fade {{ $category == 'fasilitas' || (!$isRentalActive && !$isGasActive && !$isMobilActive && ($category == 'rental' || $category == 'all')) ? 'show active' : '' }}" id="fasilitas-pane" role="tabpanel">
                       @if($fasilitasPayments->isEmpty())
                         <div class="text-center py-5">
                             <div class="mb-3"><i class="bx bx-receipt fs-1 text-muted opacity-25"></i></div>
@@ -459,9 +506,11 @@
                         </div>
                     @endif
                 </div>
+                @endif
             </div>
         </div>
     </div>
+    @endif
 </div>
 
 @endsection

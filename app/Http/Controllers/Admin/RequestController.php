@@ -25,7 +25,7 @@ class RequestController extends Controller
         $category = $request->get('category', 'all');
 
         // Buat query untuk pemesanan penyewaan (Include deleted for history)
-        $rentalQuery = $this->applyRegionFilter(RentalBooking::withTrashed())->with(['user', 'barang']);
+        $rentalQuery = $this->applyRegionFilter(RentalBooking::withTrashed(), 'barang', true)->with(['user', 'barang']);
         if ($status !== 'all') {
             if ($status === 'cancellation_pending') {
                 $rentalQuery->where('cancellation_status', 'pending');
@@ -41,7 +41,7 @@ class RequestController extends Controller
         }
 
         // Buat query untuk pesanan gas (Include deleted for history)
-        $gasQuery = $this->applyRegionFilter(GasOrder::withTrashed())->with('user');
+        $gasQuery = $this->applyRegionFilter(GasOrder::withTrashed(), 'gas', true)->with('user');
         if ($status !== 'all') {
             if ($status === 'cancellation_pending') {
                 $gasQuery->where('cancellation_status', 'pending');
@@ -57,7 +57,7 @@ class RequestController extends Controller
         }
 
         // Buat query untuk mobil
-        $mobilQuery = $this->applyRegionFilter(MobilBooking::withTrashed())->with(['user', 'mobil']);
+        $mobilQuery = $this->applyRegionFilter(MobilBooking::withTrashed(), 'mobil', true)->with(['user', 'mobil']);
         if ($status !== 'all') {
             if ($status === 'cancellation_pending') {
                 $mobilQuery->where('cancellation_status', 'pending');
@@ -73,7 +73,7 @@ class RequestController extends Controller
         }
 
         // Buat query untuk fasilitas umum
-        $fasilitasQuery = $this->applyRegionFilter(FasilitasUmumBooking::withTrashed())->with(['user', 'fasilitas']);
+        $fasilitasQuery = $this->applyRegionFilter(FasilitasUmumBooking::withTrashed(), 'fasilitas', true)->with(['user', 'fasilitas']);
         if ($status !== 'all') {
             if ($status === 'cancellation_pending') {
                 $fasilitasQuery->where('cancellation_status', 'pending');
@@ -143,10 +143,10 @@ class RequestController extends Controller
         $qMobil = clone $mobilQuery; $qMobil->getQuery()->orders = null;
         $qFasilitas = clone $fasilitasQuery; $qFasilitas->getQuery()->orders = null;
 
-        $baseRT = $this->applyRegionFilter(RentalBooking::withTrashed());
-        $baseGT = $this->applyRegionFilter(GasOrder::withTrashed());
-        $baseMT = $this->applyRegionFilter(MobilBooking::withTrashed());
-        $baseFT = $this->applyRegionFilter(FasilitasUmumBooking::withTrashed());
+        $baseRT = $this->applyRegionFilter(RentalBooking::withTrashed(), 'barang', true);
+        $baseGT = $this->applyRegionFilter(GasOrder::withTrashed(), 'gas', true);
+        $baseMT = $this->applyRegionFilter(MobilBooking::withTrashed(), 'mobil', true);
+        $baseFT = $this->applyRegionFilter(FasilitasUmumBooking::withTrashed(), 'fasilitas', true);
 
         // Hitung statistik (Include deleted for history functionality)
         $stats = [
@@ -186,9 +186,11 @@ class RequestController extends Controller
             ]
         ];
 
+        $activeServices = $this->getActivatedServices();
+
         if ($request->ajax()) {
             return response()
-                ->view('admin.aktivitas.partials.requests_content', compact('rentalRequests', 'gasOrders', 'mobilRequests', 'fasilitasRequests', 'stats', 'status', 'category', 'notificationCounts'))
+                ->view('admin.aktivitas.partials.requests_content', compact('rentalRequests', 'gasOrders', 'mobilRequests', 'fasilitasRequests', 'stats', 'status', 'category', 'notificationCounts', 'activeServices'))
                 ->withHeaders([
                     'Cache-Control' => 'no-cache, no-store, must-revalidate',
                     'Pragma' => 'no-cache',
@@ -197,7 +199,7 @@ class RequestController extends Controller
         }
 
         return response()
-            ->view('admin.aktivitas.requests', compact('rentalRequests', 'gasOrders', 'mobilRequests', 'fasilitasRequests', 'stats', 'status', 'category', 'notificationCounts'))
+            ->view('admin.aktivitas.requests', compact('rentalRequests', 'gasOrders', 'mobilRequests', 'fasilitasRequests', 'stats', 'status', 'category', 'notificationCounts', 'activeServices'))
             ->withHeaders([
                 'Cache-Control' => 'no-cache, no-store, must-revalidate',
                 'Pragma' => 'no-cache',

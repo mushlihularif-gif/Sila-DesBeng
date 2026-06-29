@@ -46,16 +46,14 @@
                                             $perbandinganTitle = 'Perbandingan Transaksi';
                                         }
                                     @endphp
-                                    <h5 class="card-title text-primary fw-bold mb-0">{{ $greeting }}, {{ explode(' ', Auth::user()->name ?? 'Administrator')[0] }} {!! $icon !!}</h5>
+                                    <h5 class="card-title text-primary fw-bold mb-3">{{ $greeting }}, {{ explode(' ', Auth::user()->name ?? 'Administrator')[0] }} {!! $icon !!}</h5>
+                                    <p class="mb-2 text-muted">Sistem Pelayanan Terpadu berbasis Digital <br><span class="fw-bold text-dark">{{ $regionName }}</span></p>
+                                    @if(in_array(auth()->user()->role, ['admin_desa', 'lurah']))
+                                    <a href="{{ route('admin.siladesbeng.bumdes.index') }}" class="btn btn-sm btn-outline-primary">Profil Pemerintah Desa</a>
+                                    @endif
                                 </div>
                             </div>
                             <div class="col-12 mt-auto">
-                                <div class="px-4 pb-2">
-                                    <p class="mb-3 text-muted">Sistem Pelayanan Terpadu berbasis Digital <br><span class="fw-bold text-dark">{{ $regionName }}</span></p>
-                                    @if(in_array(auth()->user()->role, ['admin_desa', 'lurah']))
-                                    <a href="{{ route('admin.siladesbeng.bumdes.index') }}" class="btn btn-outline-primary">Profil Pemerintah Desa</a>
-                                    @endif
-                                </div>
                                 <div class="px-3 pb-3">
                                     <div id="dashboardBannerCarousel" class="carousel slide" data-bs-ride="carousel">
                                         @php
@@ -825,24 +823,25 @@
                 // ========================================
                 const kinerjaOptions = {
                     series: [{
-                        name: 'Transaksi',
+                        name: 'Indeks Poin',
                         data: {!! json_encode($monthlyPerformance ?? [0,0,0,0,0,0,0,0,0,0,0,0]) !!}
                     }],
                     chart: {
+                        height: 350,
                         type: 'area',
-                        height: 240,
+                        parentHeightOffset: 0,
                         toolbar: {
                             show: false
-                        },
-                        zoom: {
-                            enabled: false
                         }
                     },
-                    colors: ['#f59e0b'],
+                    dataLabels: {
+                        enabled: false
+                    },
                     stroke: {
                         curve: 'smooth',
                         width: 3
                     },
+                    colors: ['#ffab00'],
                     fill: {
                         type: 'gradient',
                         gradient: {
@@ -852,51 +851,33 @@
                             stops: [0, 90, 100]
                         }
                     },
-                    dataLabels: {
-                        enabled: false
-                    },
-                    markers: {
-                        size: 0,
-                        hover: {
-                            size: 5
-                        }
-                    },
                     xaxis: {
-                        categories: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'],
-                        labels: {
-                            style: {
-                                colors: '#374151',
-                                fontSize: '12px',
-                                fontWeight: 500
-                            }
-                        },
+                        categories: {!! json_encode($monthNames ?? ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des']) !!},
                         axisBorder: {
                             show: false
                         },
                         axisTicks: {
                             show: false
+                        },
+                        labels: {
+                            style: {
+                                colors: '#a1acb8',
+                                fontSize: '13px'
+                            }
                         }
                     },
                     yaxis: {
                         labels: {
-                            formatter: function(val) {
-                                return Math.round(val);
-                            },
                             style: {
-                                colors: '#6b7280',
-                                fontSize: '11px'
+                                colors: '#a1acb8',
+                                fontSize: '13px'
                             }
                         }
                     },
                     grid: {
-                        borderColor: '#e5e7eb',
-                        strokeDashArray: 3,
+                        borderColor: '#eceef1',
+                        strokeDashArray: 4,
                         xaxis: {
-                            lines: {
-                                show: true
-                            }
-                        },
-                        yaxis: {
                             lines: {
                                 show: true
                             }
@@ -911,7 +892,7 @@
                     tooltip: {
                         y: {
                             formatter: function(val) {
-                                return val + ' transaksi';
+                                return val + ' Indeks Poin';
                             }
                         }
                     }

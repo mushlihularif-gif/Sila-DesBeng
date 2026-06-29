@@ -26,22 +26,22 @@ class TransactionController extends Controller
         // Include transactions with proof OR system generated (active/completed statuses)
         $activeStatuses = ['confirmed', 'approved', 'being_prepared', 'in_delivery', 'arrived', 'completed', 'returned'];
         
-        $rentalQuery = RentalBooking::withTrashed()->with(['user', 'barang'])->where(function($q) use ($activeStatuses) {
+        $rentalQuery = $this->applyRegionFilter(RentalBooking::withTrashed(), 'barang', true)->with(['user', 'barang'])->where(function($q) use ($activeStatuses) {
             $q->whereNotNull('payment_proof')
               ->orWhereIn('status', $activeStatuses);
         });
 
-        $gasQuery = GasOrder::withTrashed()->with('user')->where(function($q) use ($activeStatuses) {
+        $gasQuery = $this->applyRegionFilter(GasOrder::withTrashed(), 'gas', true)->with('user')->where(function($q) use ($activeStatuses) {
             $q->whereNotNull('proof_of_payment')
               ->orWhereIn('status', $activeStatuses);
         });
 
-        $mobilQuery = MobilBooking::withTrashed()->with(['user', 'mobil'])->where(function($q) use ($activeStatuses) {
+        $mobilQuery = $this->applyRegionFilter(MobilBooking::withTrashed(), 'mobil', true)->with(['user', 'mobil'])->where(function($q) use ($activeStatuses) {
             $q->whereNotNull('payment_proof')
               ->orWhereIn('status', $activeStatuses);
         });
 
-        $fasilitasQuery = FasilitasUmumBooking::withTrashed()->with(['user', 'fasilitas'])->where(function($q) use ($activeStatuses) {
+        $fasilitasQuery = $this->applyRegionFilter(FasilitasUmumBooking::withTrashed(), 'fasilitas', true)->with(['user', 'fasilitas'])->where(function($q) use ($activeStatuses) {
             $q->whereIn('status', $activeStatuses);
         });
 
@@ -142,7 +142,9 @@ class TransactionController extends Controller
             'cash_total' => $rentalCount + $gasCount + $mobilCount + $fasilitasCount, // All valid transactions are essentially verified/cash/system
         ];
 
-        return view('admin.aktivitas.transactions', compact('rentalPayments', 'gasPayments', 'mobilPayments', 'fasilitasPayments', 'stats', 'category', 'paymentMethod', 'search'));
+        $activeServices = $this->getActivatedServices();
+
+        return view('admin.aktivitas.transactions', compact('rentalPayments', 'gasPayments', 'mobilPayments', 'fasilitasPayments', 'stats', 'category', 'paymentMethod', 'search', 'activeServices'));
     }
 
     public function verify(Request $request, $id, $type)

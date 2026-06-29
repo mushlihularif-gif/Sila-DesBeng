@@ -173,7 +173,7 @@
         padding: 2rem 1.5rem 1.5rem;
         box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
         text-align: center;
-        width: 240px;
+        width: 280px;
         transition: all 0.3s ease;
     }
 
@@ -183,8 +183,8 @@
     }
 
     .member-photo-wrapper {
-        width: 180px;
-        height: 200px;
+        width: 210px;
+        height: 230px;
         margin: 0 auto;
         overflow: hidden;
         border-radius: 0.75rem;
@@ -197,6 +197,8 @@
         object-fit: cover;
         display: block;
     }
+
+    /* Expand/Collapse animations */
     @include('users.partials.unit-carousel-styles')
 </style>
 @endpush

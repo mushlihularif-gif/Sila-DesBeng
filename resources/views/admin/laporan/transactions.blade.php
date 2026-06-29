@@ -27,7 +27,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h4 class="fw-bold fs-3 mb-1 text-primary">Laporan Transaksi</h4>
-            <p class="text-muted mb-0">Rekapitulasi lengkap seluruh transaksi yang tercatat</p>
+            <p class="text-muted mb-0">Rekapitulasi lengkap seluruh transaksi yang tercatat di {{ auth()->user()->role === 'admin' ? 'Kabupaten Bengkalis' : (auth()->user()->region->name ?? 'Anda') }}</p>
         </div>
         <div class="d-flex gap-2">
             <button class="btn btn-primary shadow-sm rounded-pill px-4" onclick="window.print()">
@@ -44,6 +44,7 @@
     </div>
 </div>
 
+@push('modals')
 <!-- Filter Modal -->
 <div class="modal fade" id="filterModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -84,6 +85,7 @@
         </div>
     </div>
 </div>
+@endpush
 
 <style>
     /* Custom Tab Styling */

@@ -282,8 +282,8 @@
                     </div>
                 </div>
 
-                <div class="mt-5 border-top pt-4 text-end">
-                    <button type="submit" class="btn btn-primary btn-lg">
+                <div class="mt-5 border-top pt-4 pb-4 mb-2 text-end">
+                    <button type="submit" class="btn btn-primary btn-lg me-4">
                         <i class="bx bx-save me-1"></i> Simpan Pengaturan
                     </button>
                 </div>

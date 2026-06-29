@@ -425,6 +425,8 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
     Route::prefix('laporan')->group(function () {
         Route::get('/transaksi', [\App\Http\Controllers\Admin\ReportController::class, 'transactions'])->name('admin.laporan.transaksi');
         Route::get('/pendapatan', [\App\Http\Controllers\Admin\ReportController::class, 'income'])->name('admin.laporan.pendapatan');
+        Route::get('/pendapatan/riwayat', [\App\Http\Controllers\Admin\ReportController::class, 'incomeHistory'])->name('admin.laporan.pendapatan.riwayat');
+        Route::get('/wilayah', [\App\Http\Controllers\Admin\ReportController::class, 'wilayah'])->name('admin.laporan.wilayah');
         Route::post('/log/clear', [\App\Http\Controllers\Admin\ReportController::class, 'clearLogs'])->name('admin.laporan.log.clear');
         Route::get('/log', [\App\Http\Controllers\Admin\ReportController::class, 'logs'])->name('admin.laporan.log');
         

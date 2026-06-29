@@ -1,3 +1,21 @@
+@php
+$activeServices = $activeServices ?? [];
+$isRentalActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'alat'));
+$isGasActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'gas'));
+$isMobilActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'mobil'));
+$isFasilitasActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'fasilitas'));
+$totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasilitasActive])->filter()->count();
+@endphp
+
+@if($totalActive === 0)
+    <div class="alert alert-warning border-0 shadow-sm rounded-4 p-4 text-center">
+        <div class="avatar avatar-lg bg-warning-subtle text-warning rounded-circle mx-auto mb-3">
+            <i class="bx bx-info-circle fs-2"></i>
+        </div>
+        <h5 class="fw-bold text-dark mb-2">Saat ini Layanan Belum Di Aktifkan</h5>
+        <p class="text-muted mb-0">Silakan aktifkan setidaknya satu layanan pada menu Pengaturan Wilayah.</p>
+    </div>
+@else
     <!-- Statistics Cards -->
     <!-- Statistik Pesanan -->
     <div class="row g-3 mb-4 row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5">
@@ -95,8 +113,9 @@
     <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
         <div class="card-header bg-white border-bottom py-3 px-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
             <ul class="nav nav-pills card-header-pills gap-2" id="orderTabs" role="tablist">
+                @if($isRentalActive)
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link {{ $activeTab == 'rental' ? 'active' : '' }} rounded-pill px-4 fw-semibold" id="rental-tab" data-bs-toggle="tab" data-bs-target="#rental-pane" type="button" role="tab">
+                    <button class="nav-link {{ $activeTab == 'rental' || (!$isRentalActive && $totalActive > 0) ? 'active' : '' }} rounded-pill px-4 fw-semibold" id="rental-tab" data-bs-toggle="tab" data-bs-target="#rental-pane" type="button" role="tab">
                         <i class="bx bx-wrench me-2"></i>Penyewaan Alat
                         @php $rentalTotal = $notificationCounts['rental']['total'] ?? 0; @endphp
                         @php $rentalCount = $rentalTotal > 0 ? $rentalTotal : $rentalRequests->count(); @endphp
@@ -107,8 +126,10 @@
                         </span>
                     </button>
                 </li>
+                @endif
+                @if($isGasActive)
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link {{ $activeTab == 'gas' ? 'active' : '' }} rounded-pill px-4 fw-semibold" id="gas-tab" data-bs-toggle="tab" data-bs-target="#gas-pane" type="button" role="tab">
+                    <button class="nav-link {{ $activeTab == 'gas' || (!$isRentalActive && $activeTab == 'rental') ? 'active' : '' }} rounded-pill px-4 fw-semibold" id="gas-tab" data-bs-toggle="tab" data-bs-target="#gas-pane" type="button" role="tab">
                         <i class="bx bxs-gas-pump me-2"></i>Pembelian Gas
                         @php $gasTotal = $notificationCounts['gas']['total'] ?? 0; @endphp
                         @php $gasCount = $gasTotal > 0 ? $gasTotal : $gasOrders->count(); @endphp
@@ -119,8 +140,10 @@
                         </span>
                     </button>
                 </li>
+                @endif
+                @if($isMobilActive)
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link {{ $activeTab == 'mobil' ? 'active' : '' }} rounded-pill px-4 fw-semibold" id="mobil-tab" data-bs-toggle="tab" data-bs-target="#mobil-pane" type="button" role="tab">
+                    <button class="nav-link {{ $activeTab == 'mobil' || (!$isRentalActive && !$isGasActive && $activeTab == 'rental') ? 'active' : '' }} rounded-pill px-4 fw-semibold" id="mobil-tab" data-bs-toggle="tab" data-bs-target="#mobil-pane" type="button" role="tab">
                         <i class="bx bx-car me-2"></i>Penyewaan Mobil
                         @php $mobilTotal = $notificationCounts['mobil']['total'] ?? 0; @endphp
                         @php $mobilCount = $mobilTotal > 0 ? $mobilTotal : $mobilRequests->count(); @endphp
@@ -131,8 +154,10 @@
                         </span>
                     </button>
                 </li>
+                @endif
+                @if($isFasilitasActive)
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link {{ $activeTab == 'fasilitas' ? 'active' : '' }} rounded-pill px-4 fw-semibold" id="fasilitas-tab" data-bs-toggle="tab" data-bs-target="#fasilitas-pane" type="button" role="tab">
+                    <button class="nav-link {{ $activeTab == 'fasilitas' || (!$isRentalActive && !$isGasActive && !$isMobilActive && $activeTab == 'rental') ? 'active' : '' }} rounded-pill px-4 fw-semibold" id="fasilitas-tab" data-bs-toggle="tab" data-bs-target="#fasilitas-pane" type="button" role="tab">
                         <i class="bx bx-building-house me-2"></i>Fasilitas Umum
                         @php $fasilitasTotal = $notificationCounts['fasilitas']['total'] ?? 0; @endphp
                         @php $fasilitasCount = $fasilitasTotal > 0 ? $fasilitasTotal : $fasilitasRequests->count(); @endphp
@@ -143,6 +168,7 @@
                         </span>
                     </button>
                 </li>
+                @endif
             </ul>
 
             {{-- Area Teks Notifikasi --}}
@@ -173,7 +199,8 @@
             <div class="tab-content" id="orderTabsContent">
                 
                 <!-- RENTAL TAB -->
-                <div class="tab-pane fade {{ $activeTab == 'rental' ? 'show active' : '' }}" id="rental-pane" role="tabpanel">
+                @if($isRentalActive)
+                <div class="tab-pane fade {{ $activeTab == 'rental' || (!$isRentalActive && $totalActive > 0) ? 'show active' : '' }}" id="rental-pane" role="tabpanel">
                     @if($rentalRequests->isEmpty())
                         <div class="text-center py-5">
                             <div class="mb-3"><i class="bx bx-folder-open fs-1 text-muted opacity-25"></i></div>
@@ -314,10 +341,12 @@
                         </div>
                     @endif
                 </div>
+                @endif
 
                 <!-- GAS TAB -->
                 <!-- GAS TAB -->
-                <div class="tab-pane fade {{ $activeTab == 'gas' ? 'show active' : '' }}" id="gas-pane" role="tabpanel">
+                @if($isGasActive)
+                <div class="tab-pane fade {{ $activeTab == 'gas' || (!$isRentalActive && $activeTab == 'rental') ? 'show active' : '' }}" id="gas-pane" role="tabpanel">
                     @if($gasOrders->isEmpty())
                         <div class="text-center py-5">
                             <div class="mb-3"><i class="bx bx-cylinder fs-1 text-muted opacity-25"></i></div>
@@ -416,9 +445,11 @@
                         </div>
                     @endif
                 </div>
+                @endif
 
                 <!-- MOBIL TAB -->
-                <div class="tab-pane fade {{ $activeTab == 'mobil' ? 'show active' : '' }}" id="mobil-pane" role="tabpanel">
+                @if($isMobilActive)
+                <div class="tab-pane fade {{ $activeTab == 'mobil' || (!$isRentalActive && !$isGasActive && $activeTab == 'rental') ? 'show active' : '' }}" id="mobil-pane" role="tabpanel">
                     @if($mobilRequests->isEmpty())
                         <div class="text-center py-5">
                             <div class="mb-3"><i class="bx bx-car fs-1 text-muted opacity-25"></i></div>
@@ -536,9 +567,11 @@
                         </div>
                     @endif
                 </div>
+                @endif
 
                 <!-- FASILITAS UMUM TAB -->
-                <div class="tab-pane fade {{ $activeTab == 'fasilitas' ? 'show active' : '' }}" id="fasilitas-pane" role="tabpanel">
+                @if($isFasilitasActive)
+                <div class="tab-pane fade {{ $activeTab == 'fasilitas' || (!$isRentalActive && !$isGasActive && !$isMobilActive && $activeTab == 'rental') ? 'show active' : '' }}" id="fasilitas-pane" role="tabpanel">
                     @if($fasilitasRequests->isEmpty())
                         <div class="text-center py-5">
                             <div class="mb-3"><i class="bx bx-building-house fs-1 text-muted opacity-25"></i></div>
@@ -650,6 +683,7 @@
                         </div>
                     @endif
                 </div>
+                @endif
 
             </div>
         </div>
@@ -740,6 +774,8 @@
         </div>
     </div>
 </div>
+
+@endif
 
 <style>
     /* Custom Tab Styling */

@@ -468,7 +468,7 @@
 
         const options = {
             series: [{
-                name: 'Kinerja (Juta Rupiah)',
+                name: 'Indeks Poin',
                 data: chartData.data
             }],
             chart: {
@@ -478,7 +478,7 @@
                 zoom: { enabled: false },
                 background: 'transparent'
             },
-            colors: ['#f59e0b'],
+            colors: ['#ffab00'],
             stroke: {
                 curve: 'smooth',
                 width: 3
@@ -511,26 +511,18 @@
             },
             yaxis: {
                 labels: {
-                    formatter: (val) => val.toFixed(1),
-                    style: {
-                        colors: '#6b7280',
-                        fontSize: '11px'
-                    }
+                    formatter: (val) => val.toFixed(0),
+                    style: { colors: '#6b7280', fontSize: '11px' }
                 }
             },
             grid: {
                 borderColor: '#e5e7eb',
                 strokeDashArray: 3,
-                padding: {
-                    top: 0,
-                    right: 5,
-                    bottom: 0,
-                    left: 5
-                }
+                xaxis: { lines: { show: true } }
             },
             tooltip: {
                 y: {
-                    formatter: (val) => 'Rp ' + val.toFixed(1) + ' Juta'
+                    formatter: (val) => val + ' Indeks Poin'
                 }
             }
         };

@@ -66,6 +66,11 @@ class RegionSettingController extends Controller
         $user = auth()->user();
         $region = Region::find($user->region_id);
 
+        // Fallback untuk admin kabupaten jika region_id belum diset
+        if (!$region && in_array($user->role, ['super_admin', 'admin'])) {
+            $region = Region::first();
+        }
+
         if (!$region) {
             return redirect()->back()->with('error', 'Region tidak ditemukan.');
         }

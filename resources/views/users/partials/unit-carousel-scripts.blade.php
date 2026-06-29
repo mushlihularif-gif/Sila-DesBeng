@@ -27,10 +27,12 @@
             } else {
                 // Untuk n >= 4
                 positions = Array.from({length: n}, (_, i) => {
-                    if (i === 0) return 1;
-                    if (i === 1) return 2;
-                    if (i === n - 1) return 0;
-                    return 3; // sisanya hidden
+                    if (i === 0) return 1; // Center
+                    if (i === 1) return 2; // Right
+                    if (i === 2) return 3; // Far Right
+                    if (i === n - 1) return 0; // Left
+                    if (i === n - 2) return 4; // Far Left
+                    return 5; // Hidden off-screen
                 });
             }
 

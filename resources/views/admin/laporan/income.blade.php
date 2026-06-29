@@ -4,12 +4,53 @@
 
 @section('content')
 <div class="container-fluid py-4">
+    @php
+    $activeServices = $activeServices ?? [];
+    $isRentalActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'alat'));
+    $isGasActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'gas'));
+    $isMobilActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'mobil'));
+    $isFasilitasActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'fasilitas'));
+    $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasilitasActive])->filter()->count();
+    @endphp
+
+    @if($totalActive === 0)
+        <!-- Page Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h4 class="fw-bold fs-3 mb-1 text-primary">Laporan Pendapatan</h4>
+                <p class="text-muted mb-0">Ringkasan pendapatan dan analisis keuangan {{ auth()->user()->role === 'admin' ? 'Kabupaten Bengkalis' : (auth()->user()->region->name ?? 'Anda') }}</p>
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-outline-secondary shadow-sm rounded-pill px-4" type="button" data-bs-toggle="dropdown">
+                    <i class="bx bx-calendar me-2"></i>Tahun {{ $year }}
+                </button>
+                <ul class="dropdown-menu shadow border-0 rounded-4">
+                    @foreach($availableYears as $optYear)
+                        <li><a class="dropdown-item {{ $optYear == $year ? 'active' : '' }}" href="{{ route('admin.laporan.pendapatan', ['year' => $optYear]) }}">{{ $optYear }}</a></li>
+                    @endforeach
+                </ul>
+                <a href="{{ route('admin.laporan.pendapatan.riwayat') }}" class="btn btn-info text-white shadow-sm rounded-pill px-4">
+                    <i class="bx bx-history me-2"></i>Riwayat Pendapatan
+                </a>
+                <button class="btn btn-primary shadow-sm rounded-pill px-4" onclick="window.print()">
+                    <i class="bx bx-printer me-2"></i>Cetak
+                </button>
+            </div>
+        </div>
+        <div class="alert alert-warning border-0 shadow-sm rounded-4 p-4 text-center">
+            <div class="avatar avatar-lg bg-warning-subtle text-warning rounded-circle mx-auto mb-3">
+                <i class="bx bx-info-circle fs-2"></i>
+            </div>
+            <h5 class="fw-bold text-dark mb-2">Saat ini Layanan Belum Di Aktifkan</h5>
+            <p class="text-muted mb-0">Silakan aktifkan setidaknya satu layanan pada menu Pengaturan Wilayah.</p>
+        </div>
+    @else
 
     <!-- Page Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h4 class="fw-bold fs-3 mb-1 text-primary">Laporan Pendapatan</h4>
-            <p class="text-muted mb-0">Ringkasan pendapatan dan analisis keuangan BUMDes</p>
+            <p class="text-muted mb-0">Ringkasan pendapatan dan analisis keuangan {{ auth()->user()->role === 'admin' ? 'Kabupaten Bengkalis' : (auth()->user()->region->name ?? 'Anda') }}</p>
         </div>
         <div class="d-flex gap-2">
             <button class="btn btn-outline-secondary shadow-sm rounded-pill px-4" type="button" data-bs-toggle="dropdown">
@@ -23,6 +64,9 @@
              <button class="btn btn-success shadow-sm rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#manualTransactionModal">
                 <i class="bx bx-plus me-2"></i>Catat Transaksi Manual
             </button>
+            <a href="{{ route('admin.laporan.pendapatan.riwayat') }}" class="btn btn-info text-white shadow-sm rounded-pill px-4">
+                <i class="bx bx-history me-2"></i>Riwayat Pendapatan
+            </a>
             <button class="btn btn-primary shadow-sm rounded-pill px-4" onclick="window.print()">
                 <i class="bx bx-printer me-2"></i>Cetak
             </button>
@@ -59,6 +103,7 @@
                 </div>
             </div>
         </div>
+        @if($isRentalActive)
         <div class="col-md-3">
             <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden position-relative">
                 <div class="card-body p-4">
@@ -87,6 +132,8 @@
                 </div>
             </div>
         </div>
+        @endif
+        @if($isGasActive)
         <div class="col-md-3">
             <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden position-relative">
                 <div class="card-body p-4">
@@ -115,6 +162,8 @@
                 </div>
             </div>
         </div>
+        @endif
+        @if($isMobilActive)
         <div class="col-md-3">
             <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden position-relative">
                 <div class="card-body p-4">
@@ -143,6 +192,7 @@
                 </div>
             </div>
         </div>
+        @endif
     </div>
 
     <!-- Charts Section -->
@@ -181,6 +231,7 @@
                     </select>
                 </div>
                 <div class="card-body p-4">
+                    @if($isRentalActive)
                     <!-- Rental Item -->
                     <div class="d-flex align-items-center mb-4 p-3 rounded-3 hover-bg-light transition-all border border-dashed-hover">
                          <div class="avatar avatar-md bg-warning-subtle text-warning rounded-3 p-2 me-3">
@@ -200,7 +251,9 @@
                             </div>
                         </div>
                     </div>
+                    @endif
 
+                    @if($isGasActive)
                     <!-- Gas Item -->
                     <div class="d-flex align-items-center mb-4 p-3 rounded-3 hover-bg-light transition-all border border-dashed-hover">
                          <div class="avatar avatar-md bg-info-subtle text-info rounded-3 p-2 me-3">
@@ -220,7 +273,9 @@
                             </div>
                         </div>
                     </div>
+                    @endif
 
+                    @if($isMobilActive)
                     <!-- Mobil Item -->
                     <div class="d-flex align-items-center p-3 rounded-3 hover-bg-light transition-all border border-dashed-hover">
                          <div class="avatar avatar-md bg-danger-subtle text-danger rounded-3 p-2 me-3">
@@ -240,6 +295,7 @@
                             </div>
                         </div>
                     </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -349,7 +405,11 @@
              @endif
         </div>
     </div>
-</div><!-- Manual Transaction Modal -->
+    @endif
+</div>
+
+@push('modals')
+<!-- Manual Transaction Modal -->
 <div class="modal fade" id="manualTransactionModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg rounded-4">
@@ -465,6 +525,7 @@
         </div>
     </div>
 </div>
+@endpush
 
 <style>
     .transition-all { transition: all 0.3s ease; }
@@ -481,6 +542,33 @@
         .table-responsive {
             overflow: visible;
         }
+    }
+    
+    /* ApexCharts Tooltip Fix */
+    .apexcharts-tooltip {
+        background: #ffffff !important;
+        border: 1px solid #e0e0e0 !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+        opacity: 1 !important;
+    }
+    .apexcharts-tooltip * {
+        color: #333333 !important;
+        font-family: inherit !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+    .apexcharts-tooltip-title {
+        background: #f8f9fa !important;
+        border-bottom: 1px solid #eceef1 !important;
+        font-weight: bold !important;
+        padding: 6px 10px !important;
+    }
+    .apexcharts-tooltip-text-y-value {
+        font-weight: bold !important;
+        color: #696cff !important;
+    }
+    .apexcharts-tooltip-text-y-label {
+        font-weight: normal !important;
     }
 </style>
 
@@ -513,7 +601,20 @@
                     axisBorder: { show: false },
                     axisTicks: { show: false }
                 },
-                grid: { borderColor: '#eceef1', strokeDashArray: 4 }
+                grid: { borderColor: '#eceef1', strokeDashArray: 4 },
+                tooltip: {
+                    theme: 'light',
+                    style: {
+                        fontSize: '13px',
+                        fontFamily: 'inherit'
+                    },
+                    marker: { show: true },
+                    y: {
+                        formatter: function (val) {
+                            return "Rp " + new Intl.NumberFormat('id-ID').format(val)
+                        }
+                    }
+                }
             }).render();
         }
 
