@@ -14,7 +14,7 @@ class PartnerApplicationController extends Controller
                 $query->where('type', 'desa')
                       ->with(['services' => function($q) {
                           $q->wherePivot('is_active', true);
-                      }]);
+                      }, 'users']);
             }])
             ->get();
 
@@ -28,6 +28,7 @@ class PartnerApplicationController extends Controller
     {
         $validated = $request->validate([
             'applicant_name' => 'required|string|max:255',
+            'position' => 'required|string|max:255',
             'region_type' => 'required|in:kecamatan,desa,rw,rt',
             'region_name' => 'required|string|max:255',
             'parent_region_id' => 'required|exists:regions,id',

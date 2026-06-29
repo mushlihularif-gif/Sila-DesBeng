@@ -90,7 +90,7 @@
                     <!-- Tujuan Laporan -->
                     <div>
                         <label class="block font-semibold text-[#1e3a5f] mb-2">Tujuan Pelaporan <span class="text-red-500">*</span></label>
-                        <select name="tujuan_laporan" required
+                        <select name="tujuan_laporan" id="tujuan_laporan" required
                             class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 transition-all shadow-sm @error('tujuan_laporan') border-red-500 @enderror">
                             <option value="" disabled {{ old('tujuan_laporan') ? '' : 'selected' }}>Pilih tujuan laporan</option>
                             <option value="rt" {{ old('tujuan_laporan') == 'rt' ? 'selected' : '' }}>Laporkan kepada RT dan Pemerintah Desa</option>
@@ -177,7 +177,7 @@
                                 <p class="text-gray-600 text-sm leading-relaxed">
                                     Laporan akan dikirim atas nama: <strong class="text-[#1e3a5f]">{{ Auth::user()->name }}</strong><br>
                                     Email: <strong class="text-[#1e3a5f]">{{ Auth::user()->email }}</strong><br>
-                                    Wilayah Anda: <strong class="text-[#1e3a5f]">RW {{ Auth::user()->rw ?? 6 }} / RT {{ Auth::user()->rt ?? 21 }}</strong>
+                                    Wilayah Anda: <strong class="text-[#1e3a5f]" id="display-wilayah-user">RW {{ Auth::user()->rw ?? '-' }} / RT {{ Auth::user()->rt ?? '-' }}</strong>
                                 </p>
                             </div>
                         </div>
@@ -368,5 +368,174 @@
                 previewContainer.classList.add('hidden');
             }
         });
+    </script>
+
+    {{-- ===== MODAL LENGKAPI RT/RW ===== --}}
+    <div id="rtrw-modal" class="fixed inset-0 items-center justify-center hidden" style="z-index: 99999; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md mx-4 relative overflow-hidden">
+            <div class="text-center mb-6">
+                <div class="bg-blue-100 text-blue-600 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.242-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                </div>
+                <h3 class="text-[#1e3a5f] font-bold text-xl">Lengkapi Profil Wilayah</h3>
+                <p class="text-gray-500 text-sm mt-2">Bantu kami mengarahkan laporan Anda dengan tepat. Silakan pilih RW dan RT domisili Anda.</p>
+            </div>
+
+            <form id="form-update-rtrw">
+                <div class="space-y-4 mb-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Pilih RW <span class="text-red-500">*</span></label>
+                        <select id="rw-select" required class="w-full px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-blue-500 text-gray-800">
+                            <option value="">Memuat RW...</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Pilih RT <span class="text-red-500">*</span></label>
+                        <select id="rt-select" required class="w-full px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-blue-500 text-gray-800" disabled>
+                            <option value="">Pilih RW Terlebih Dahulu</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-3">
+                    <button type="submit" id="btn-save-rtrw" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition text-sm shadow-sm flex items-center justify-center gap-2">
+                        <span>Simpan Profil</span>
+                    </button>
+                    <button type="button" id="btn-skip-rtrw" class="w-full py-2.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-600 font-semibold rounded-xl transition text-sm">
+                        RW/RT Saya Belum Ada di Opsi Pilihan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {{-- ===== SCRIPT RT/RW MODAL ===== --}}
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const isRtRwEmpty = {{ empty(Auth::user()->rw) || empty(Auth::user()->rt) ? 'true' : 'false' }};
+        const modal = document.getElementById('rtrw-modal');
+        const rwSelect = document.getElementById('rw-select');
+        const rtSelect = document.getElementById('rt-select');
+        const formUpdate = document.getElementById('form-update-rtrw');
+        const btnSkip = document.getElementById('btn-skip-rtrw');
+        const tujuanLaporanSelect = document.getElementById('tujuan_laporan');
+        const displayWilayah = document.getElementById('display-wilayah-user');
+        
+        let allRegions = [];
+        // User's village id
+        const userDesaId = {{ Auth::user()->region_id ?? 'null' }};
+
+        if (isRtRwEmpty) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            // Lock background scroll
+            document.body.style.overflow = 'hidden';
+
+            // Fetch regions
+            fetch('/api/regions')
+                .then(res => res.json())
+                .then(data => {
+                    allRegions = data;
+                    
+                    // Filter RW based on desa id
+                    const rws = data.filter(d => d.type === 'rw' && d.parent_id == userDesaId);
+                    
+                    rwSelect.innerHTML = '<option value="">Pilih RW</option>';
+                    rws.forEach(rw => {
+                        rwSelect.innerHTML += `<option value="${rw.id}">${rw.name}</option>`;
+                    });
+                })
+                .catch(err => {
+                    console.error('Error fetching regions:', err);
+                    rwSelect.innerHTML = '<option value="">Gagal memuat data</option>';
+                });
+                
+            // When RW changes, load RT
+            rwSelect.addEventListener('change', function() {
+                const rwId = this.value;
+                if(rwId) {
+                    const rts = allRegions.filter(d => d.type === 'rt' && d.parent_id == rwId);
+                    rtSelect.innerHTML = '<option value="">Pilih RT</option>';
+                    rts.forEach(rt => {
+                        rtSelect.innerHTML += `<option value="${rt.id}">${rt.name}</option>`;
+                    });
+                    rtSelect.disabled = false;
+                } else {
+                    rtSelect.innerHTML = '<option value="">Pilih RW Terlebih Dahulu</option>';
+                    rtSelect.disabled = true;
+                }
+            });
+        }
+
+        // Handle skip button
+        btnSkip.addEventListener('click', function() {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.style.overflow = 'auto';
+
+            // Lock tujuan_laporan to Desa only
+            Array.from(tujuanLaporanSelect.options).forEach(opt => {
+                if(opt.value === 'rt' || opt.value === 'rw') {
+                    opt.style.display = 'none';
+                    opt.disabled = true;
+                }
+            });
+            tujuanLaporanSelect.value = 'desa';
+            
+            alert('Karena RW/RT Anda belum diisi atau belum terdaftar, opsi tujuan laporan akan dikunci agar diteruskan langsung ke Pemerintah Desa.');
+        });
+
+        // Handle Form Submit (AJAX)
+        formUpdate.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const btnSave = document.getElementById('btn-save-rtrw');
+            
+            if(!rwSelect.value || !rtSelect.value) {
+                alert('Silakan lengkapi pilihan RW dan RT');
+                return;
+            }
+
+            btnSave.disabled = true;
+            btnSave.innerHTML = 'Menyimpan...';
+
+            fetch('{{ route('profile.update-rtrw') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    rw_id: rwSelect.value,
+                    region_id: rtSelect.value
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) {
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                    document.body.style.overflow = 'auto';
+                    
+                    // Update display text
+                    const rwName = rwSelect.options[rwSelect.selectedIndex].text.replace(/RW\s+/i, '');
+                    const rtName = rtSelect.options[rtSelect.selectedIndex].text.replace(/RT\s+/i, '');
+                    displayWilayah.innerHTML = `RW ${rwName} / RT ${rtName}`;
+                    
+                    alert('Profil RT/RW berhasil disimpan. Silakan lanjutkan pelaporan.');
+                } else {
+                    alert(data.message || 'Gagal menyimpan data.');
+                    btnSave.disabled = false;
+                    btnSave.innerHTML = 'Simpan Profil';
+                }
+            })
+            .catch(err => {
+                console.error('Error saving profile:', err);
+                alert('Terjadi kesalahan jaringan saat menyimpan.');
+                btnSave.disabled = false;
+                btnSave.innerHTML = 'Simpan Profil';
+            });
+        });
+    });
     </script>
 @endsection

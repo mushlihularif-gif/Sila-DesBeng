@@ -89,18 +89,28 @@
         initModal();
     </script>
     @endif
+
     {{-- Global Modern Toast Notification --}}
+    <style>
+        .toast-enter-start { opacity: 0; transform: translateX(50px) scale(0.95); }
+        .toast-enter-end { opacity: 1; transform: translateX(0) scale(1); }
+        .toast-leave-start { opacity: 1; transform: translateX(0) scale(1); }
+        .toast-leave-end { opacity: 0; transform: translateX(50px) scale(0.95); }
+        .toast-transition-enter { transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+        .toast-transition-leave { transition: all 0.4s ease-in; }
+    </style>
     @if(session('error') || session('success'))
-    <div x-data="{ show: true }" 
-         x-init="setTimeout(() => show = false, 5000)" 
+    <div x-data="{ show: false }" 
+         x-init="setTimeout(() => show = true, 50); setTimeout(() => show = false, 5000)" 
          x-show="show" 
-         x-transition:enter="transition ease-out duration-300"
-         x-transition:enter-start="opacity-0 transform -translate-y-4"
-         x-transition:enter-end="opacity-100 transform translate-y-0"
-         x-transition:leave="transition ease-in duration-200"
-         x-transition:leave-start="opacity-100 transform translate-y-0"
-         x-transition:leave-end="opacity-0 transform -translate-y-4"
-         class="fixed top-24 right-6 z-[10000] flex items-center p-4 rounded-xl shadow-2xl border-l-4 {{ session('error') ? 'bg-white border-red-500' : 'bg-white border-green-500' }} max-w-sm w-full">
+         x-transition:enter="toast-transition-enter"
+         x-transition:enter-start="toast-enter-start"
+         x-transition:enter-end="toast-enter-end"
+         x-transition:leave="toast-transition-leave"
+         x-transition:leave-start="toast-leave-start"
+         x-transition:leave-end="toast-leave-end"
+         class="fixed flex items-center p-4 rounded-xl shadow-2xl border-l-4 {{ session('error') ? 'bg-white border-red-500' : 'bg-white border-green-500' }} max-w-sm w-full"
+         style="z-index: 10000; top: 70px; right: 24px;">
         <div class="flex-shrink-0">
             @if(session('error'))
             <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -120,8 +130,8 @@
                 {{ session('error') ?? session('success') }}
             </p>
         </div>
-        <button @click="show = false" class="ml-auto -mx-1.5 -my-1.5 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex h-8 w-8 text-gray-500">
-            <span class="sr-only">Close</span>
+        <button @click="show = false" class="ml-auto -mx-1.5 -my-1.5 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex items-center justify-center h-8 w-8 text-gray-500 cursor-pointer">
+            <span style="display: none;">Close</span>
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
             </svg>

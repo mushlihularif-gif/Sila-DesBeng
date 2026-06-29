@@ -95,7 +95,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function showToast(message, type = 'success') {
         const toast = document.createElement('div');
-        toast.className = `sd-toast fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg text-white z-[60] transform transition-all duration-300 translate-x-full ${
+        toast.className = `sd-toast fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg text-white z-[9999] transform transition-all duration-300 translate-x-full ${
             type === 'success' ? 'bg-green-500' : 'bg-red-500'
         }`;
         toast.textContent = message;
@@ -370,46 +370,6 @@ document.addEventListener('DOMContentLoaded', function() {
     btnConfirmSuccess?.addEventListener('click', function() {
         closeProfileModal();
         window.location.reload(); // Refresh halaman
-    });
-
-    // ========================================
-    // AVATAR PREVIEW
-    // ========================================
-    const profileInput = document.getElementById('profile-input');
-    const avatarPreview = document.getElementById('avatar-preview');
-    const avatarPlaceholder = document.getElementById('avatar-placeholder');
-
-    profileInput?.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        // Validasi type
-        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
-        if (!allowedTypes.includes(file.type)) {
-            showToast('Format file harus JPG, JPEG, atau PNG', 'error');
-            this.value = '';
-            return;
-        }
-
-        // Validasi size (max 2MB)
-        if (file.size > 2 * 1024 * 1024) {
-            showToast('Ukuran file maksimal 2MB', 'error');
-            this.value = '';
-            return;
-        }
-
-        // Preview
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            if (avatarPreview) {
-                avatarPreview.src = e.target.result;
-                avatarPreview.classList.remove('hidden');
-            }
-            if (avatarPlaceholder) {
-                avatarPlaceholder.classList.add('hidden');
-            }
-        };
-        reader.readAsDataURL(file);
     });
 
     // ========================================

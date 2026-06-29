@@ -282,93 +282,103 @@
                         </h2>
                     </div>
 
-                    <div class="relative w-full flex justify-center items-center" style="height: 480px;">
-
-                        <div class="relative w-full max-w-6xl mx-auto h-full">
-                            @php
-                                $isLoggedInWithRegion = auth()->check() && auth()->user()->region_id;
-                                $userRegionId = $isLoggedInWithRegion ? auth()->user()->region_id : null;
-                                
-                                $isServiceActive = function($unitName) use ($isLoggedInWithRegion, $activeServices) {
-                                    if (!$isLoggedInWithRegion) return true;
-                                    
-                                    $map = [
-                                        'Unit Penyewaan Alat' => 'Penyewaan Alat',
-                                        'Unit Penjualan Gas' => 'Penjualan Gas',
-                                        'Unit Penyewaan Mobil' => 'Penyewaan Mobil',
-                                        'Unit Peminjaman Fasilitas Umum' => 'Peminjaman Fasilitas Umum',
-                                        'Pelaporan Warga' => 'Pelaporan Warga',
-                                        'Pengumuman dan Event' => 'Pengumuman dan Event'
-                                    ];
-                                    
-                                    return in_array($map[$unitName] ?? $unitName, $activeServices ?? []);
-                                };
-                            @endphp
-
-                            @if($isServiceActive('Unit Penyewaan Alat'))
-                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="0" data-name="Unit Penyewaan Alat" onclick="window.location.href='{{ $isLoggedInWithRegion ? route('rental.equipment') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=rental.equipment' }}'">
-                                <img src="{{ asset('User/img/elemen/F1.png') }}" alt="Alat" loading="lazy">
-                            </div>
-                            @endif
-
-                            @if($isServiceActive('Unit Penjualan Gas'))
-                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="1" data-name="Unit Penjualan Gas" onclick="window.location.href='{{ $isLoggedInWithRegion ? route('gas.sales') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=gas.sales' }}'">
-                                <img src="{{ asset('User/img/elemen/F2.png') }}" alt="Gas" loading="lazy">
-                            </div>
-                            @endif
-
-                            @if($isServiceActive('Unit Penyewaan Mobil'))
-                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="2" data-name="Unit Penyewaan Mobil" onclick="window.location.href='{{ $isLoggedInWithRegion ? route('mobil.rental.equipment') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=mobil.rental.equipment' }}'">
-                                <img src="{{ asset('User/img/elemen/mobil.png') }}" alt="Mobil" loading="lazy">
-                            </div>
-                            @endif
-
-                            @if($isServiceActive('Unit Peminjaman Fasilitas Umum'))
-                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="3" data-name="Unit Peminjaman Fasilitas Umum" onclick="window.location.href='{{ $isLoggedInWithRegion ? route('user.fasilitas-umum.equipment') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=user.fasilitas-umum.equipment' }}'">
-                                <img src="{{ asset('User/img/elemen/fasilitas.png') }}" alt="Fasilitas" loading="lazy">
-                            </div>
-                            @endif
-
-                            @if($isServiceActive('Pelaporan Warga'))
-                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="4" data-name="Pelaporan Warga" onclick="window.location.href='{{ $isLoggedInWithRegion ? route('pelaporan.landing') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=pelaporan.landing' }}'">
-                                <img src="{{ asset('User/img/elemen/lapor.png') }}" alt="Lapor" loading="lazy">
-                            </div>
-                            @endif
-
-                            @if($isServiceActive('Pengumuman dan Event'))
-                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="5" data-name="Pengumuman dan Event" onclick="window.location.href='{{ $isLoggedInWithRegion ? route('announcements.index') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=announcements.index' }}'">
-                                <img src="{{ asset('User/img/elemen/event.png') }}" alt="Event" loading="lazy">
-                            </div>
-                            @endif
+                        @php
+                            $isLoggedInWithRegion = auth()->check() && auth()->user()->region_id;
+                            $userRegionId = $isLoggedInWithRegion ? auth()->user()->region_id : null;
                             
-                        </div>
+                            $isServiceActive = function($unitName) use ($isLoggedInWithRegion, $activeServices) {
+                                if (!$isLoggedInWithRegion) return true;
+                                
+                                $map = [
+                                    'Unit Penyewaan Alat' => 'Penyewaan Alat',
+                                    'Unit Penjualan Gas' => 'Penjualan Gas',
+                                    'Unit Penyewaan Mobil' => 'Penyewaan Mobil',
+                                    'Unit Peminjaman Fasilitas Umum' => 'Peminjaman Fasilitas Umum',
+                                    'Pelaporan Warga' => 'Pelaporan Warga',
+                                    'Pengumuman dan Event' => 'Pengumuman dan Event'
+                                ];
+                                
+                                return in_array($map[$unitName] ?? $unitName, $activeServices ?? []);
+                            };
 
-                        <div
-                            class="absolute -bottom-6 left-0 right-0 flex items-center justify-center gap-4 md:gap-12 z-60">
-                            <button id="unit-prev"
-                                class="bg-white hover:bg-gray-50 text-gray-800 rounded-full p-3 shadow-lg border border-gray-100 transition-transform active:scale-95">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                        d="M15 19l-7-7 7-7" />
-                                </svg>
-                            </button>
+                            $activeCount = 0;
+                            $allUnits = ['Unit Penyewaan Alat', 'Unit Penjualan Gas', 'Unit Penyewaan Mobil', 'Unit Peminjaman Fasilitas Umum', 'Pelaporan Warga', 'Pengumuman dan Event'];
+                            foreach ($allUnits as $unit) {
+                                if ($isServiceActive($unit)) $activeCount++;
+                            }
+                        @endphp
 
-                            <div class="min-w-[300px] text-center">
-                                <h3 id="unit-title"
-                                    class="text-xl md:text-2xl font-bold text-black transition-all duration-300">
-                                    Unit Penyewaan Alat
-                                </h3>
+                        @if($activeCount > 0)
+                        <div class="relative w-full flex justify-center items-center" style="height: 480px;">
+                            <div class="relative w-full max-w-6xl mx-auto h-full">
+                                @if($isServiceActive('Unit Penyewaan Alat'))
+                                <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="0" data-name="Unit Penyewaan Alat" onclick="window.location.href='{{ $isLoggedInWithRegion ? route('rental.equipment') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=rental.equipment' }}'">
+                                    <img src="{{ asset('User/img/elemen/F1.png') }}" alt="Alat" loading="lazy">
+                                </div>
+                                @endif
+
+                                @if($isServiceActive('Unit Penjualan Gas'))
+                                <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="1" data-name="Unit Penjualan Gas" onclick="window.location.href='{{ $isLoggedInWithRegion ? route('gas.sales') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=gas.sales' }}'">
+                                    <img src="{{ asset('User/img/elemen/F2.png') }}" alt="Gas" loading="lazy">
+                                </div>
+                                @endif
+
+                                @if($isServiceActive('Unit Penyewaan Mobil'))
+                                <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="2" data-name="Unit Penyewaan Mobil" onclick="window.location.href='{{ $isLoggedInWithRegion ? route('mobil.rental.equipment') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=mobil.rental.equipment' }}'">
+                                    <img src="{{ asset('User/img/elemen/mobil.png') }}" alt="Mobil" loading="lazy">
+                                </div>
+                                @endif
+
+                                @if($isServiceActive('Unit Peminjaman Fasilitas Umum'))
+                                <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="3" data-name="Unit Peminjaman Fasilitas Umum" onclick="window.location.href='{{ $isLoggedInWithRegion ? route('user.fasilitas-umum.equipment') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=user.fasilitas-umum.equipment' }}'">
+                                    <img src="{{ asset('User/img/elemen/fasilitas.png') }}" alt="Fasilitas" loading="lazy">
+                                </div>
+                                @endif
+
+                                @if($isServiceActive('Pelaporan Warga'))
+                                <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="4" data-name="Pelaporan Warga" onclick="window.location.href='{{ $isLoggedInWithRegion ? route('pelaporan.landing') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=pelaporan.landing' }}'">
+                                    <img src="{{ asset('User/img/elemen/lapor.png') }}" alt="Lapor" loading="lazy">
+                                </div>
+                                @endif
+
+                                @if($isServiceActive('Pengumuman dan Event'))
+                                <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="5" data-name="Pengumuman dan Event" onclick="window.location.href='{{ $isLoggedInWithRegion ? route('announcements.index') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=announcements.index' }}'">
+                                    <img src="{{ asset('User/img/elemen/event.png') }}" alt="Event" loading="lazy">
+                                </div>
+                                @endif
                             </div>
 
-                            <button id="unit-next"
-                                class="bg-white hover:bg-gray-50 text-gray-800 rounded-full p-3 shadow-lg border border-gray-100 transition-transform active:scale-95">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                        d="M9 5l7 7-7 7" />
-                                </svg>
-                            </button>
+                            <div class="absolute -bottom-6 left-0 right-0 flex items-center justify-center gap-4 md:gap-12 z-60">
+                                <button id="unit-prev" class="bg-white hover:bg-gray-50 text-gray-800 rounded-full p-3 shadow-lg border border-gray-100 transition-transform active:scale-95">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+                                    </svg>
+                                </button>
+
+                                <div class="min-w-[300px] text-center">
+                                    <h3 id="unit-title" class="text-xl md:text-2xl font-bold text-black transition-all duration-300">
+                                        Unit Penyewaan Alat
+                                    </h3>
+                                </div>
+
+                                <button id="unit-next" class="bg-white hover:bg-gray-50 text-gray-800 rounded-full p-3 shadow-lg border border-gray-100 transition-transform active:scale-95">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
-                    </div>
+                        @else
+                        <div class="w-full flex flex-col items-center justify-center text-center p-12 bg-white/60 backdrop-blur-md rounded-3xl border border-white/50 shadow-lg mt-4 max-w-4xl mx-auto">
+                            <div class="w-20 h-20 mb-6 rounded-full bg-blue-50/80 flex items-center justify-center border border-blue-100 shadow-inner">
+                                <svg class="w-10 h-10 text-[#115789]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <h3 class="text-2xl font-bold text-gray-800 mb-3">Unit Pelayanan Belum Tersedia</h3>
+                            <p class="text-gray-500 max-w-lg text-lg leading-relaxed">Mohon maaf, Kelurahan atau Desa Anda saat ini belum mengaktifkan layanan operasional di sistem SilaDesBeng.</p>
+                        </div>
+                        @endif
                 </div>
             </div>
 

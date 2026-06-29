@@ -243,6 +243,10 @@ Route::put('/profile', [App\Http\Controllers\User\ProfileController::class, 'upd
     ->name('profile.update')
     ->middleware('role:user');
 
+Route::post('/profile/update-rtrw', [App\Http\Controllers\User\ProfileController::class, 'updateRtRw'])
+    ->name('profile.update-rtrw')
+    ->middleware('role:user');
+
 
 Route::post('/profile/change-password', [App\Http\Controllers\User\ProfileController::class, 'changePassword'])
     ->name('profile.change-password')

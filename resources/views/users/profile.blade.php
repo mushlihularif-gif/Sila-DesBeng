@@ -25,17 +25,7 @@
             </h1>
         </div>
 
-        {{-- Peringatan Sukses --}}
-        @if(session('success'))
-        <div id="success-alert" class="mb-6 bg-green-50 border border-green-200 text-green-800 px-6 py-4 rounded-xl transition-opacity duration-300">
-            <div class="flex items-center gap-3">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                </svg>
-                <span class="font-medium">{{ session('success') }}</span>
-            </div>
-        </div>
-        @endif
+        {{-- Peringatan Sukses ditangani secara global oleh AlpineJS Toast di app.blade.php --}}
 
         <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data">
             @csrf
@@ -49,17 +39,14 @@
                             {{-- Avatar dengan Border Biru --}}
                             <div class="relative group">
                                 <div class="w-44 h-44 rounded-full overflow-hidden border-[5px] border-blue-400 shadow-xl bg-[#D1D5DB]">
-                                    @if($user->file)
-                                        <img id="avatar-preview" src="{{ $user->file->file_stream }}" alt="Avatar" class="w-full h-full object-cover">
-                                    @else
-                                        <img id="avatar-preview" src="" alt="Avatar" class="w-full h-full object-cover hidden">
-                                        {{-- Placeholder Ikon Pengguna SVG --}}
-                                        <div id="avatar-placeholder" class="w-full h-full flex items-center justify-center">
-                                            <svg class="w-24 h-24 text-white" viewBox="0 0 24 24" fill="currentColor">
-                                                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                                            </svg>
-                                        </div>
-                                    @endif
+                                    <img id="avatar-preview" src="{{ $user->file ? $user->file->file_stream : '' }}" alt="Avatar" class="w-full h-full object-cover {{ $user->file ? '' : 'hidden' }}">
+                                    
+                                    {{-- Placeholder Ikon Pengguna SVG --}}
+                                    <div id="avatar-placeholder" class="w-full h-full flex items-center justify-center {{ $user->file ? 'hidden' : '' }}">
+                                        <svg class="w-24 h-24 text-white" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                                        </svg>
+                                    </div>
                                 </div>
 
                                 {{-- Overlay Unggah --}}
@@ -263,8 +250,24 @@
 @include('auth.profile-scripts')
 
 <script>
-    // Sembunyikan otomatis peringatan sukses setelah 5 detik
-    document.addEventListener('DOMContentLoaded', function() {
+    function initProfilePage() {
+        // Kembalikan posisi scroll jika pengguna baru saja menyimpan profil
+        const savedScroll = sessionStorage.getItem('profileFormSubmitScroll');
+        if (savedScroll) {
+            setTimeout(() => {
+                window.scrollTo({ top: parseInt(savedScroll), behavior: 'instant' });
+            }, 10);
+            sessionStorage.removeItem('profileFormSubmitScroll');
+        }
+
+        // Simpan posisi scroll saat form disubmit
+        const profileForm = document.querySelector('form[action="{{ route('profile.update') }}"]');
+        if (profileForm) {
+            profileForm.addEventListener('submit', function() {
+                sessionStorage.setItem('profileFormSubmitScroll', window.scrollY);
+            });
+        }
+
         const alert = document.getElementById('success-alert');
         if (alert) {
             setTimeout(() => {
@@ -282,7 +285,11 @@
         const uploadHint = document.getElementById('upload-hint');
 
         if (profileInput) {
-            profileInput.addEventListener('change', function(e) {
+            // Hapus listener lama jika ada (untuk mencegah double listener dari turbo:load)
+            const newProfileInput = profileInput.cloneNode(true);
+            profileInput.parentNode.replaceChild(newProfileInput, profileInput);
+            
+            newProfileInput.addEventListener('change', function(e) {
                 const file = e.target.files[0];
                 const clientErrorProfile = document.getElementById('client-error-profile');
 
@@ -328,12 +335,16 @@
 
         // Tangani Tombol Hapus Foto (Ditunda)
         if (deletePhotoBtn) {
-            deletePhotoBtn.addEventListener('click', function() {
+            const newDeleteBtn = deletePhotoBtn.cloneNode(true);
+            deletePhotoBtn.parentNode.replaceChild(newDeleteBtn, deletePhotoBtn);
+
+            newDeleteBtn.addEventListener('click', function() {
                 // Setel flag untuk menghapus saat disimpan
                  if(deleteAvatarInput) deleteAvatarInput.value = '1';
                 
                 // Bersihkan nilai input agar jika mereka mengunggah file yang sama lagi, itu memicu perubahan
-                if(profileInput) profileInput.value = '';
+                const currentProfileInput = document.getElementById('profile-input');
+                if(currentProfileInput) currentProfileInput.value = '';
 
                 // Tampilkan placeholder secara visual
                 if (avatarPreview) {
@@ -344,10 +355,13 @@
                     avatarPlaceholder.classList.remove('hidden');
                 }
                 
-                // Sembunyikan tombol hapus itu sendiri sebentar atau biarkan saja? 
-                // Biasanya kita bisa menyembunyikannya atau mengubahnya menjadi "Batalkan". Untuk saat ini, mari kita sembunyikan saja.
-                deletePhotoBtn.style.display = 'none';
+                newDeleteBtn.style.display = 'none';
                 if(uploadHint) uploadHint.classList.remove('hidden');
+                
+                // Tambahkan toast notifikasi informatif
+                if (typeof showToast === 'function') {
+                    showToast('Silakan klik tombol "Simpan" di bawah untuk menghapus foto secara permanen', 'info');
+                }
             });
         }
 
@@ -355,7 +369,11 @@
         // Efek Ripple Tombol
         const interactiveButtons = document.querySelectorAll('.button-interactive');
         interactiveButtons.forEach(button => {
-            button.addEventListener('click', function(e) {
+            // Clone to remove old listeners
+            const newBtn = button.cloneNode(true);
+            button.parentNode.replaceChild(newBtn, button);
+
+            newBtn.addEventListener('click', function(e) {
                 const ripple = document.createElement('span');
                 const rect = this.getBoundingClientRect();
                 const size = Math.max(rect.width, rect.height);
@@ -376,7 +394,10 @@
                 setTimeout(() => ripple.remove(), 600);
             });
         });
-    });
+    }
+
+    document.addEventListener('DOMContentLoaded', initProfilePage);
+    document.addEventListener('turbo:load', initProfilePage);
 </script>
 @endpush
 

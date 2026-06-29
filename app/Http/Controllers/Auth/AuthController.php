@@ -59,11 +59,11 @@ class AuthController extends Controller
             // # ===================================================================
             // # MODE SANDBOX UNTUK MASS-TESTING DEMO
             // # ===================================================================
-            // if ($validated['otp_method'] === 'email') {
-            //     Mail::to($validated['email'])->send(new OtpMail($otpCode));
-            // } else {
-            //     // Implement SMS API logic here
-            // }
+            if ($validated['otp_method'] === 'email') {
+                Mail::to($validated['email'])->send(new OtpMail($otpCode));
+            } else {
+                // Implement SMS API logic here
+            }
             // # ===================================================================
 
             session()->flash('otp_demo_sandbox_code', $otpCode);
@@ -381,9 +381,9 @@ class AuthController extends Controller
             ]);
 
             // # MODE SANDBOX UNTUK MASS-TESTING DEMO
-            // if ($validated['otp_method'] === 'email') {
-            //     Mail::to($user->email)->send(new OtpMail($otpCode));
-            // }
+            if ($validated['otp_method'] === 'email') {
+                Mail::to($user->email)->send(new OtpMail($otpCode));
+            }
 
             session()->flash('otp_demo_sandbox_code', $otpCode);
             session()->flash('trigger_open_otp_tab', true);

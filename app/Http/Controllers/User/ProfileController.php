@@ -129,6 +129,65 @@ class ProfileController extends Controller
     }
 
     /**
+     * Perbarui data RT dan RW (dari Modal Laporan)
+     */
+    public function updateRtRw(Request $request)
+    {
+        if (!auth()->check()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Silakan login terlebih dahulu'
+            ], 401);
+        }
+
+        try {
+            $validated = $request->validate([
+                'rw_id' => 'required|exists:regions,id',
+                'region_id' => 'required|exists:regions,id',
+            ]);
+
+            $user = auth()->user();
+            
+            $rw = \App\Models\Region::find($validated['rw_id']);
+            $rt = \App\Models\Region::find($validated['region_id']);
+
+            if ($rw && $rt) {
+                // Ambil angkanya saja, misal 'RW 01' jadi '01'
+                $rwNumber = str_ireplace('rw ', '', $rw->name);
+                $rtNumber = str_ireplace('rt ', '', $rt->name);
+
+                $user->update([
+                    'rw' => trim($rwNumber),
+                    'rt' => trim($rtNumber),
+                ]);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Data RT/RW berhasil disimpan permanen.'
+                ]);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Data wilayah tidak ditemukan.'
+            ], 404);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal.',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            Log::error('Update RT/RW error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan sistem saat menyimpan.'
+            ], 500);
+        }
+    }
+
+    /**
      * LANGKAH 1: Kirim OTP untuk ganti password
      */
     public function changePassword(Request $request)

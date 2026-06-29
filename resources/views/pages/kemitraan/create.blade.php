@@ -168,7 +168,9 @@
                 $totalJoined = 0;
                 foreach($kecamatans as $kecamatan) {
                     $totalJoined += $kecamatan->children->filter(function($desa) {
-                        return $desa->services->count() > 0;
+                        return $desa->users->filter(function($user) {
+                            return in_array($user->role, ['admin_desa', 'lurah', 'admin']);
+                        })->count() > 0;
                     })->count();
                 }
             @endphp
@@ -217,18 +219,16 @@
                         @foreach($kecamatans as $index => $kecamatan)
                             @php
                                 $joinedCount = $kecamatan->children->filter(function($desa) {
-                                    return $desa->services->count() > 0;
+                                    return $desa->users->filter(function($user) {
+                                        return in_array($user->role, ['admin_desa', 'lurah', 'admin']);
+                                    })->count() > 0;
                                 })->count();
                             @endphp
                             <div id="kecamatan-content-{{ $kecamatan->id }}" class="kecamatan-panel transition-opacity duration-300 {{ $index === 0 ? 'block opacity-100' : 'hidden opacity-0' }}" data-joined="{{ $joinedCount }}">
                         @if($joinedCount > 0)
                             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" style="gap: 2rem;">
                                 @foreach($kecamatan->children as $desa)
-                                @php
-                                    // Desa is considered active if it has at least 1 active service
-                                    $hasServices = $desa->services->count() > 0;
-                                @endphp
-                                @if($hasServices)
+                                @if($desa->users->filter(function($user) { return in_array($user->role, ['admin_desa', 'lurah', 'admin']); })->count() > 0)
                                 <div class="bg-white/40 backdrop-blur-sm border border-gray-100 shadow-sm rounded-xl p-5 hover:shadow-md transition-all animate-section">
                                     <div class="flex justify-between items-start mb-4">
                                         <h3 class="font-bold text-gray-800">{{ $desa->name }}</h3>
@@ -238,16 +238,17 @@
                                     </div>
                                     
                                     <div class="flex flex-col gap-3 mt-4">
-                                        @foreach($desa->services as $service)
-                                            @php
-                                                $nameLower = strtolower($service->name);
-                                                $iconColor = 'color: #6b7280;';
-                                                $bgColor = 'background-color: #f9fafb;';
-                                                
-                                                if (strpos($nameLower, 'alat') !== false) {
-                                                    $iconColor = 'color: #f97316;';
-                                                    $bgColor = 'background-color: #fff7ed;';
-                                                } elseif (strpos($nameLower, 'gas') !== false) {
+                                        @if($desa->services->count() > 0)
+                                            @foreach($desa->services as $service)
+                                                @php
+                                                    $nameLower = strtolower($service->name);
+                                                    $iconColor = 'color: #6b7280;';
+                                                    $bgColor = 'background-color: #f9fafb;';
+                                                    
+                                                    if (strpos($nameLower, 'alat') !== false) {
+                                                        $iconColor = 'color: #f97316;';
+                                                        $bgColor = 'background-color: #fff7ed;';
+                                                    } elseif (strpos($nameLower, 'gas') !== false) {
                                                     $iconColor = 'color: #3b82f6;';
                                                     $bgColor = 'background-color: #eff6ff;';
                                                 } elseif (strpos($nameLower, 'mobil') !== false || strpos($nameLower, 'kendaraan') !== false) {
@@ -283,6 +284,12 @@
                                                 <span class="text-sm font-semibold text-gray-800">{{ $service->name }}</span>
                                             </div>
                                         @endforeach
+                                    @else
+                                        <div class="flex items-center gap-2 mt-1">
+                                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                            <span class="text-xs text-gray-500 italic">Belum ada layanan aktif</span>
+                                        </div>
+                                    @endif
                                     </div>
                                 </div>
                                 @endif
@@ -304,101 +311,150 @@
         </div>
     </section>
 
-    {{-- Modal Form Pengajuan --}}
-    <div id="application-modal" class="fixed inset-0 z-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-        <div class="fixed inset-0 bg-gray-900 bg-opacity-75 backdrop-blur-sm transition-opacity" onclick="closeModal()"></div>
+    {{-- Modal Form Pengajuan (Format Surat Resmi) --}}
+    <div id="application-modal" class="fixed inset-0 hidden" style="z-index: 10000;" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div id="modal-backdrop" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity duration-300 opacity-0" onclick="closeModal()"></div>
 
-        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-            <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
-                <div class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-2xl">
-                    <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
-                        <div class="flex justify-between items-center mb-5 pb-4 border-b">
-                            <h3 class="text-2xl font-bold leading-6 text-gray-900" id="modal-title">Form Pengajuan Kemitraan</h3>
-                            <button type="button" onclick="closeModal()" class="text-gray-400 hover:text-gray-500 focus:outline-none">
-                                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                            </button>
+        <div class="fixed inset-0 overflow-y-auto" style="z-index: 10001;">
+            {{-- Posisi diturunkan dengan items-start dan pt-24 (sebelumnya items-center) --}}
+            <div class="flex min-h-full items-start justify-center pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+                {{-- Diperbesar menjadi max-w-6xl --}}
+                <div id="modal-content" class="relative transform rounded-3xl shadow-2xl transition-all duration-300 opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95 w-full max-w-6xl">
+                    <div class="relative overflow-hidden rounded-3xl bg-white text-left w-full h-full">
+                    
+                    {{-- Tombol Close --}}
+                    <button type="button" onclick="closeModal()" class="absolute z-20 bg-gray-100 hover:bg-gray-200 rounded-full p-2 text-gray-500 hover:text-gray-700 focus:outline-none transition-all" style="top: 1.5rem; right: 1.5rem;">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+
+                    {{-- Kop Surat: Logo Kiri - Judul Tengah - Logo Kanan --}}
+                    <div style="padding: 3.5rem 3rem 1.5rem;">
+                        <div class="flex items-center justify-between">
+                            {{-- Logo SiladesBeng (Kiri) --}}
+                            <div class="flex-shrink-0 flex justify-center" style="width: 110px;">
+                                <img src="{{ asset('Admin/img/illustrations/logodomain.png') }}" alt="Logo SiladesBeng" class="object-contain" style="width: 100px; height: 100px;">
+                            </div>
+
+                            {{-- Judul Tengah --}}
+                            <div class="text-center flex-1 px-4">
+                                <h3 class="text-2xl font-bold text-gray-900 uppercase tracking-wide" id="modal-title">Form Pengajuan Kemitraan</h3>
+                                <p class="text-base text-gray-500 mt-2">Daftarkan desa/kelurahan Anda untuk bergabung</p>
+                                <p class="text-sm text-gray-400 mt-1">Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis</p>
+                            </div>
+
+                            {{-- Logo Kabupaten (Kanan) --}}
+                            <div class="flex-shrink-0 w-24 flex justify-center pr-4">
+                                <img src="{{ asset('Admin/img/illustrations/logokab.png') }}" alt="Logo Kabupaten Bengkalis" class="h-20 w-20 object-contain">
+                            </div>
                         </div>
-                        
-                        <form action="{{ route('kemitraan.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+
+                        {{-- Garis pemisah kop surat --}}
+                        <div class="mt-6 border-b-2 border-gray-800"></div>
+                        <div class="mt-1 border-b border-gray-400"></div>
+                    </div>
+
+                    {{-- Body Form --}}
+                    <div class="bg-white" style="padding: 1rem 3rem 3.5rem;">
+                        <form action="{{ route('kemitraan.store') }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             
-                            <div class="grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-6">
-                                <div class="sm:col-span-2">
-                                    <label for="applicant_name" class="block text-sm font-medium text-gray-700">Nama Lengkap Pendaftar</label>
-                                    <input type="text" name="applicant_name" id="applicant_name" value="{{ old('applicant_name') }}" class="mt-1 py-2.5 px-3 block w-full shadow-sm focus:ring-[#115789] focus:border-[#115789] border-gray-300 rounded-md bg-gray-50" required placeholder="Budi Santoso">
-                                </div>
-
+                            {{-- Baris 1: Data Pribadi (4 kolom) --}}
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
                                 <div>
-                                    <label for="contact_phone" class="block text-sm font-medium text-gray-700">Nomor WhatsApp</label>
-                                    <input type="text" name="contact_phone" id="contact_phone" value="{{ old('contact_phone') }}" class="mt-1 py-2.5 px-3 block w-full shadow-sm focus:ring-[#115789] focus:border-[#115789] border-gray-300 rounded-md bg-gray-50" required placeholder="08123456789">
+                                    <label for="applicant_name" class="block text-sm font-semibold text-gray-700 mb-1">Nama Lengkap Pendaftar</label>
+                                    <input type="text" name="applicant_name" id="applicant_name" value="{{ old('applicant_name') }}" class="py-2 px-3 block w-full border border-gray-200 rounded-lg bg-gray-50 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#115789]/30 focus:border-[#115789] transition-colors" style="outline: none;" required placeholder="Budi Santoso">
                                 </div>
-
                                 <div>
-                                    <label for="contact_email" class="block text-sm font-medium text-gray-700">Email Kontak</label>
-                                    <input type="email" name="contact_email" id="contact_email" value="{{ old('contact_email') }}" class="mt-1 py-2.5 px-3 block w-full shadow-sm focus:ring-[#115789] focus:border-[#115789] border-gray-300 rounded-md bg-gray-50" required placeholder="email@desa.id">
+                                    <label for="position" class="block text-sm font-semibold text-gray-700 mb-1">Jabatan</label>
+                                    <input type="text" name="position" id="position" value="{{ old('position') }}" class="py-2 px-3 block w-full border border-gray-200 rounded-lg bg-gray-50 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#115789]/30 focus:border-[#115789] transition-colors" style="outline: none;" required placeholder="Kepala Desa">
                                 </div>
-
-                                <div class="sm:col-span-2">
-                                    <h4 class="font-semibold text-gray-800 mb-2 border-b pb-2">Informasi Wilayah</h4>
-                                </div>
-
                                 <div>
-                                    <label for="region_type" class="block text-sm font-medium text-gray-700">Tingkat Wilayah</label>
-                                    <select id="region_type" name="region_type" class="mt-1 py-2.5 px-3 block w-full shadow-sm focus:ring-[#115789] focus:border-[#115789] border-gray-300 rounded-md bg-gray-50" required>
-                                        <option value="" disabled selected>Pilih Tingkat</option>
-                                        <option value="desa" {{ old('region_type') == 'desa' ? 'selected' : '' }}>Desa / Kelurahan</option>
-                                        <option value="kecamatan" {{ old('region_type') == 'kecamatan' ? 'selected' : '' }}>Kecamatan</option>
-                                    </select>
+                                    <label for="contact_phone" class="block text-sm font-semibold text-gray-700 mb-1">Nomor WhatsApp</label>
+                                    <input type="text" name="contact_phone" id="contact_phone" value="{{ old('contact_phone') }}" class="py-2 px-3 block w-full border border-gray-200 rounded-lg bg-gray-50 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#115789]/30 focus:border-[#115789] transition-colors" style="outline: none;" required placeholder="08123456789">
                                 </div>
-
                                 <div>
-                                    <label for="region_name" class="block text-sm font-medium text-gray-700">Nama Wilayah</label>
-                                    <input type="text" name="region_name" id="region_name" value="{{ old('region_name') }}" class="mt-1 py-2.5 px-3 block w-full shadow-sm focus:ring-[#115789] focus:border-[#115789] border-gray-300 rounded-md bg-gray-50" required placeholder="Pematang Duku Timur">
+                                    <label for="contact_email" class="block text-sm font-semibold text-gray-700 mb-1">Email Kontak</label>
+                                    <input type="email" name="contact_email" id="contact_email" value="{{ old('contact_email') }}" class="py-2 px-3 block w-full border border-gray-200 rounded-lg bg-gray-50 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#115789]/30 focus:border-[#115789] transition-colors" style="outline: none;" required placeholder="email@desa.id">
                                 </div>
+                            </div>
 
-                                <div class="sm:col-span-2">
-                                    <label for="parent_region_id" class="block text-sm font-medium text-gray-700">Menginduk ke Wilayah Mana?</label>
-                                    <select id="parent_region_id" name="parent_region_id" class="mt-1 py-2.5 px-3 block w-full shadow-sm focus:ring-[#115789] focus:border-[#115789] border-gray-300 rounded-md bg-gray-50" required>
-                                        <option value="" disabled selected>Pilih Wilayah Induk</option>
-                                        @foreach($regions as $region)
-                                            <option value="{{ $region->id }}" {{ old('parent_region_id') == $region->id ? 'selected' : '' }}>
-                                                [{{ strtoupper($region->type) }}] {{ $region->name }}
-                                            </option>
+                            {{-- Divider Informasi Wilayah --}}
+                            <div class="flex items-center gap-2 mb-5">
+                                <svg class="w-6 h-6 shrink-0" style="color: #2f80ed;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                <h4 class="font-bold text-gray-800 text-sm ml-1">Informasi Wilayah</h4>
+                                <div class="flex-1 border-b border-gray-200"></div>
+                            </div>
+
+                            {{-- Baris 2: Informasi Wilayah (3 kolom) --}}
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-6">
+                                {{-- Hidden Input for region_type --}}
+                                <input type="hidden" name="region_type" value="desa">
+
+                                {{-- Kabupaten (Fixed) --}}
+                                <div>
+                                    <div class="py-2.5 px-4 w-full border border-gray-300 rounded-lg bg-white text-[#1f2937] text-[15px] font-bold shadow-sm flex items-center h-full">
+                                        Kabupaten Bengkalis
+                                    </div>
+                                </div>
+                                
+                                {{-- Kecamatan Dropdown --}}
+                                <div>
+                                    <select id="parent_region_id" name="parent_region_id" class="py-2.5 px-4 block w-full border border-gray-300 rounded-lg bg-white text-[#1f2937] text-[15px] font-bold shadow-sm focus:ring-2 focus:ring-[#115789]/30 focus:border-[#115789] transition-colors cursor-pointer h-full" required onchange="updateDesaDropdown()">
+                                        <option value="" disabled selected>Semua Kecamatan</option>
+                                        @foreach($kecamatans as $kecamatan)
+                                            <option value="{{ $kecamatan->id }}" {{ old('parent_region_id') == $kecamatan->id ? 'selected' : '' }}>{{ $kecamatan->name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
-                                
-                                <div class="sm:col-span-2">
-                                    <label for="document" class="block text-sm font-medium text-gray-700">Unggah SK/Surat Tugas (Max 5MB)</label>
-                                    <div class="mt-1 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-6 bg-gray-50 hover:bg-gray-100 transition-colors">
-                                        <div class="text-center">
-                                            <svg class="mx-auto h-12 w-12 text-gray-300" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                                                <path fill-rule="evenodd" d="M1.5 6a2.25 2.25 0 012.25-2.25h16.5A2.25 2.25 0 0122.5 6v12a2.25 2.25 0 01-2.25 2.25H3.75A2.25 2.25 0 011.5 18V6zM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0021 18v-1.94l-2.69-2.689a1.5 1.5 0 00-2.12 0l-.88.879.97.97a.75.75 0 11-1.06 1.06l-5.16-5.159a1.5 1.5 0 00-2.12 0L3 16.061zm10.125-7.81a1.125 1.125 0 112.25 0 1.125 1.125 0 01-2.25 0z" clip-rule="evenodd" />
-                                            </svg>
-                                            <div class="mt-4 flex text-sm leading-6 text-gray-600 justify-center">
-                                                <label for="document" class="relative cursor-pointer rounded-md bg-white font-semibold text-[#115789] focus-within:outline-none focus-within:ring-2 focus-within:ring-[#115789] focus-within:ring-offset-2 hover:text-blue-500">
-                                                    <span>Upload file</span>
-                                                    <input id="document" name="document" type="file" class="sr-only" required accept=".pdf,.jpg,.jpeg,.png">
-                                                </label>
-                                                <p class="pl-1">or drag and drop</p>
-                                            </div>
-                                            <p class="text-xs leading-5 text-gray-500" id="file-name-display">PDF, PNG, JPG up to 5MB</p>
-                                        </div>
-                                    </div>
-                                </div>
 
-                                <div class="sm:col-span-2">
-                                    <label for="reason" class="block text-sm font-medium text-gray-700">Pesan Tambahan</label>
-                                    <textarea id="reason" name="reason" rows="3" class="mt-1 py-2.5 px-3 block w-full shadow-sm focus:ring-[#115789] focus:border-[#115789] border-gray-300 rounded-md bg-gray-50" required placeholder="Alasan mengapa desa Anda ingin bergabung...">{{ old('reason') }}</textarea>
+                                {{-- Kelurahan/Desa Dropdown --}}
+                                <div>
+                                    <select id="region_name" name="region_name" class="py-2.5 px-4 block w-full border border-gray-300 rounded-lg bg-white text-[#1f2937] text-[15px] font-bold shadow-sm focus:ring-2 focus:ring-[#115789]/30 focus:border-[#115789] transition-colors cursor-pointer h-full" required>
+                                        <option value="" disabled selected>Semua Kelurahan/Desa</option>
+                                    </select>
                                 </div>
                             </div>
-                            
-                            <div class="mt-6 sm:flex sm:flex-row-reverse border-t pt-4">
-                                <button type="submit" class="inline-flex w-full justify-center rounded-md bg-[#115789] px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-800 sm:ml-3 sm:w-auto transition-colors">Kirim Pengajuan</button>
-                                <button type="button" onclick="closeModal()" class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-6 py-3 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto transition-colors">Batal</button>
+
+                            {{-- Baris 3: Upload & Pesan (2 kolom sejajar) --}}
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-8">
+                                {{-- Upload Dokumen --}}
+                                <div>
+                                    <label for="document" class="block text-sm font-semibold text-gray-700 mb-1">Unggah SK/Surat Tugas (Max 5MB)</label>
+                                    <label for="document" class="flex items-center gap-3 rounded-lg border-2 border-dashed border-gray-300 px-4 py-4 bg-gray-50 hover:border-blue-500 hover:bg-blue-50/30 transition-all cursor-pointer group">
+                                        <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-100 transition-colors">
+                                            <svg class="h-5 w-5" style="color: #2f80ed;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center gap-1 text-sm">
+                                                <span class="font-semibold group-hover:text-blue-600 transition-colors" style="color: #2f80ed;">Pilih file</span>
+                                                <input id="document" name="document" type="file" style="display: none;" required accept=".pdf,.jpg,.jpeg,.png">
+                                                <span class="text-gray-500">atau seret dan lepas</span>
+                                            </div>
+                                            <p class="text-xs text-gray-400 mt-0.5" id="file-name-display">PDF, PNG, JPG maksimal 5MB</p>
+                                        </div>
+                                    </label>
+                                </div>
+
+                                {{-- Pesan Tambahan --}}
+                                <div>
+                                    <label for="reason" class="block text-sm font-semibold text-gray-700 mb-1">Pesan Tambahan</label>
+                                    <textarea id="reason" name="reason" rows="3" class="py-2 px-3 block w-full border border-gray-200 rounded-lg bg-gray-50 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#115789]/30 focus:border-[#115789] transition-colors" style="outline: none;" required placeholder="Alasan mengapa desa Anda ingin bergabung...">{{ old('reason') }}</textarea>
+                                </div>
+                            </div>
+
+                            {{-- Tombol Aksi --}}
+                            <div class="flex items-center justify-between border-t border-gray-100 pt-5 mt-2">
+                                <p class="text-xs text-gray-400 italic">* Semua kolom wajib diisi</p>
+                                <div class="flex items-center gap-3">
+                                    <button type="button" onclick="closeModal()" class="inline-flex justify-center rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-200 hover:bg-gray-50 transition-colors">Batal</button>
+                                    <button type="submit" class="inline-flex justify-center items-center gap-2 rounded-full px-8 py-2.5 text-sm font-bold text-white shadow-sm hover:shadow transition-all hover:bg-blue-600" style="background-color: #2f80ed;">
+                                        Kirim Pengajuan
+                                    </button>
+                                </div>
                             </div>
                         </form>
                     </div>
+                    </div> {{-- Penutup div inner bg-white --}}
                 </div>
             </div>
         </div>
@@ -453,15 +509,83 @@
 @endpush
 
 <script>
+    // Data Desa per Kecamatan
+    const desaData = {
+        @foreach($kecamatans as $kecamatan)
+            "{{ $kecamatan->id }}": [
+                @foreach($kecamatan->children as $desa)
+                    { id: "{{ $desa->id }}", name: "{{ $desa->name }}" },
+                @endforeach
+            ],
+        @endforeach
+    };
+
+    function updateDesaDropdown() {
+        const kecamatanId = document.getElementById('parent_region_id').value;
+        const desaDropdown = document.getElementById('region_name');
+        
+        desaDropdown.innerHTML = '<option value="" disabled selected>Semua Kelurahan/Desa</option>';
+        
+        if (kecamatanId && desaData[kecamatanId]) {
+            desaData[kecamatanId].forEach(desa => {
+                const option = document.createElement('option');
+                option.value = desa.name;
+                option.textContent = desa.name;
+                desaDropdown.appendChild(option);
+            });
+        }
+    }
+
+    // Trigger on load if old value exists
+    document.addEventListener('DOMContentLoaded', function() {
+        if (document.getElementById('parent_region_id').value) {
+            updateDesaDropdown();
+            // Need to set timeout so it sets value after dropdown is populated
+            setTimeout(() => {
+                @if(old('region_name'))
+                    document.getElementById('region_name').value = "{{ old('region_name') }}";
+                @endif
+            }, 100);
+        }
+    });
+
     // Modal logic
     function openModal() {
-        document.getElementById('application-modal').classList.remove('hidden');
-        document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        const modal = document.getElementById('application-modal');
+        const backdrop = document.getElementById('modal-backdrop');
+        const content = document.getElementById('modal-content');
+        
+        modal.classList.remove('hidden');
+        // document.body.style.overflow = 'hidden'; // Removed to keep scrollbar visible
+        
+        // Trigger reflow
+        void modal.offsetWidth;
+        
+        // Animate in
+        backdrop.classList.remove('opacity-0');
+        backdrop.classList.add('opacity-100');
+        
+        content.classList.remove('opacity-0', 'translate-y-4', 'sm:scale-95');
+        content.classList.add('opacity-100', 'translate-y-0', 'sm:scale-100');
     }
     
     function closeModal() {
-        document.getElementById('application-modal').classList.add('hidden');
-        document.body.style.overflow = 'auto';
+        const modal = document.getElementById('application-modal');
+        const backdrop = document.getElementById('modal-backdrop');
+        const content = document.getElementById('modal-content');
+        
+        // Animate out
+        backdrop.classList.remove('opacity-100');
+        backdrop.classList.add('opacity-0');
+        
+        content.classList.remove('opacity-100', 'translate-y-0', 'sm:scale-100');
+        content.classList.add('opacity-0', 'translate-y-4', 'sm:scale-95');
+        
+        // Wait for transition to finish
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            // document.body.style.overflow = 'auto';
+        }, 300); // 300ms matches duration-300
     }
 
     // File name display logic
@@ -470,7 +594,6 @@
         document.getElementById('file-name-display').textContent = 'File terpilih: ' + fileName;
         document.getElementById('file-name-display').classList.add('text-[#115789]', 'font-medium');
     });
-
 </script>
 
 

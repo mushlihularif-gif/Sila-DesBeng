@@ -10,7 +10,7 @@ class PartnerApplication extends Model
     use HasFactory;
 
     protected $fillable = [
-        'applicant_name', 'region_type', 'region_name', 'parent_region_id', 
+        'applicant_name', 'position', 'region_type', 'region_name', 'parent_region_id', 
         'reason', 'contact_email', 'contact_phone', 'status', 'user_id', 'document_path'
     ];
 

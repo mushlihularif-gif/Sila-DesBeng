@@ -150,14 +150,8 @@
             }, 3000);
         }
 
-        // ⭐ NEW: Handle Session Flash Messages on Page Load
-        @if(session('success'))
-            showToast("{{ session('success') }}", 'success');
-        @endif
-
-        @if(session('error'))
-            showToast("{{ session('error') }}", 'error');
-        @endif
+        // Session flash messages sudah ditangani oleh AlpineJS global toast di layouts/app.blade.php
+        // Jadi kita tidak perlu memanggil showToast() lagi di sini.
 
         // ⭐ INJECT SERVER-SIDE VALIDATION ERRORS
         @if($errors->any())
@@ -454,19 +448,19 @@
 
             // Cek panjang password
             if (password.length > 0 && password.length < 8) {
-                showError(form, 'password', '⚠️ Kata sandi minimal 8 karakter (saat ini ' + password.length + ' karakter)');
+                showError(form, 'password', 'Kata sandi minimal 8 karakter (saat ini ' + password.length + ' karakter)');
                 hasError = true;
             } else if (password.length === 0) {
-                showError(form, 'password', '⚠️ Kata sandi wajib diisi');
+                showError(form, 'password', 'Kata sandi wajib diisi');
                 hasError = true;
             }
 
             // Cek konfirmasi password
             if (confirm.length === 0) {
-                showError(form, 'password_confirmation', '⚠️ Konfirmasi kata sandi wajib diisi');
+                showError(form, 'password_confirmation', 'Konfirmasi kata sandi wajib diisi');
                 hasError = true;
             } else if (password !== confirm) {
-                showError(form, 'password_confirmation', '⚠️ Konfirmasi kata sandi tidak cocok');
+                showError(form, 'password_confirmation', 'Konfirmasi kata sandi tidak cocok');
                 hasError = true;
             }
 
@@ -486,7 +480,7 @@
             if (!form) return;
             const errSpan = form.querySelector('[data-error="password"]');
             if (this.value.length > 0 && this.value.length < 8) {
-                showError(form, 'password', '⚠️ Kata sandi minimal 8 karakter');
+                showError(form, 'password', 'Kata sandi minimal 8 karakter');
             } else {
                 if (errSpan) {
                     errSpan.textContent = '';
@@ -502,7 +496,7 @@
             const password = document.getElementById('register-password')?.value || '';
             const errSpan = form.querySelector('[data-error="password_confirmation"]');
             if (this.value.length > 0 && this.value !== password) {
-                showError(form, 'password_confirmation', '⚠️ Konfirmasi kata sandi tidak cocok');
+                showError(form, 'password_confirmation', 'Konfirmasi kata sandi tidak cocok');
             } else {
                 if (errSpan) {
                     errSpan.textContent = '';
@@ -536,14 +530,12 @@
         // ========================================
         // REGION DROPDOWN LOGIC
         // ========================================
-        function initRegionDropdowns(kabId, kecId, desaId, rwId, rtId) {
+        function initRegionDropdowns(kabId, kecId, desaId) {
             const regKab = document.getElementById(kabId);
             const regKec = document.getElementById(kecId);
             const regDesa = document.getElementById(desaId);
-            const regRw = document.getElementById(rwId);
-            const regRt = document.getElementById(rtId);
             
-            if (!regKab || !regKec || !regDesa || !regRw || !regRt) return;
+            if (!regKab || !regKec || !regDesa) return;
 
             if (allRegions.length > 0) {
                 populateRegions(regKab, regKec, regDesa);
@@ -565,10 +557,6 @@
                 const kecVal = parseInt(this.value);
                 regDesa.innerHTML = '<option value="">Pilih Desa/Kelurahan</option>';
                 regDesa.disabled = true;
-                regRw.innerHTML = '<option value="">Pilih RW</option>';
-                regRw.disabled = true;
-                regRt.innerHTML = '<option value="">Pilih RT</option>';
-                regRt.disabled = true;
 
                 if (kecVal) {
                     const desas = allRegions.filter(r => r.type === 'desa' && r.parent_id === kecVal);
@@ -576,38 +564,6 @@
                         regDesa.innerHTML += `<option value="${d.id}">${d.name}</option>`;
                     });
                     regDesa.disabled = false;
-                }
-            });
-
-            // Handle Desa change
-            regDesa.addEventListener('change', function() {
-                const desaVal = parseInt(this.value);
-                regRw.innerHTML = '<option value="">Pilih RW</option>';
-                regRw.disabled = true;
-                regRt.innerHTML = '<option value="">Pilih RT</option>';
-                regRt.disabled = true;
-
-                if (desaVal) {
-                    const rws = allRegions.filter(r => r.type === 'rw' && r.parent_id === desaVal);
-                    rws.sort((a,b) => a.name.localeCompare(b.name)).forEach(r => {
-                        regRw.innerHTML += `<option value="${r.id}">${r.name}</option>`;
-                    });
-                    regRw.disabled = false;
-                }
-            });
-
-            // Handle RW change
-            regRw.addEventListener('change', function() {
-                const rwVal = parseInt(this.value);
-                regRt.innerHTML = '<option value="">Pilih RT</option>';
-                regRt.disabled = true;
-
-                if (rwVal) {
-                    const rts = allRegions.filter(r => r.type === 'rt' && r.parent_id === rwVal);
-                    rts.sort((a,b) => a.name.localeCompare(b.name)).forEach(r => {
-                        regRt.innerHTML += `<option value="${r.id}">${r.name}</option>`;
-                    });
-                    regRt.disabled = false;
                 }
             });
         }
@@ -629,7 +585,7 @@
         }
 
         let allRegions = [];
-        initRegionDropdowns('reg-kabupaten', 'reg-kecamatan', 'reg-desa', 'reg-rw', 'reg-rt');
-        initRegionDropdowns('google-reg-kabupaten', 'google-reg-kecamatan', 'google-reg-desa', 'google-reg-rw', 'google-reg-rt');
+        initRegionDropdowns('reg-kabupaten', 'reg-kecamatan', 'reg-desa');
+        initRegionDropdowns('google-reg-kabupaten', 'google-reg-kecamatan', 'google-reg-desa');
     })();
 </script>

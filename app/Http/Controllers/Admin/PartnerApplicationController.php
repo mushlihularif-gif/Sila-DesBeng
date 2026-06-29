@@ -96,6 +96,7 @@ class PartnerApplicationController extends Controller
             'email' => $application->contact_email,
             'password' => Hash::make($password),
             'phone' => $application->contact_phone,
+            'position' => $application->position,
             'role' => $role,
             'region_id' => $region->id,
         ]);
