@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Announcement;
 use App\Models\Laporan;
 use Illuminate\Support\Facades\Storage;
+use App\Services\ImageCompressorService;
 
 class AnnouncementController extends Controller
 {
@@ -108,7 +109,7 @@ class AnnouncementController extends Controller
 
         $imagePath = null;
         if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('announcements', 'public');
+            $imagePath = ImageCompressorService::compressAndStore($request->file('image'), 'announcements');
         }
 
         Announcement::create([
@@ -191,7 +192,7 @@ class AnnouncementController extends Controller
             if ($announcement->image_path && Storage::disk('public')->exists($announcement->image_path)) {
                 Storage::disk('public')->delete($announcement->image_path);
             }
-            $data['image_path'] = $request->file('image')->store('announcements', 'public');
+            $data['image_path'] = ImageCompressorService::compressAndStore($request->file('image'), 'announcements');
         }
 
         $announcement->update($data);

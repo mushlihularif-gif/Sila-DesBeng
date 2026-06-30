@@ -1,3 +1,33 @@
+@php
+    $isServiceActive = function($name) use ($activeServices, $region) {
+        // Jika tidak ada region spesifik (misal diakses manual), tampilkan semua
+        if (!$region) return true; 
+        
+        // Mapping nama tampilan ke nama layanan di database
+        $map = [
+            'Unit Penyewaan Alat' => 'Penyewaan Alat',
+            'Unit Penjualan Gas' => 'Penjualan Gas',
+            'Unit Penyewaan Mobil' => 'Penyewaan Mobil',
+            'Unit Peminjaman Fasilitas Umum' => 'Peminjaman Fasilitas Umum',
+            'Pelaporan Warga' => 'Pelaporan Warga',
+            'Pengumuman dan Event' => 'Pengumuman dan Event'
+        ];
+        
+        $dbName = $map[$name] ?? $name;
+        
+        return in_array($dbName, $activeServices);
+    };
+
+    $activeCount = 0;
+    $allUnits = ['Unit Penyewaan Alat', 'Unit Penjualan Gas', 'Unit Penyewaan Mobil', 'Unit Peminjaman Fasilitas Umum', 'Pelaporan Warga', 'Pengumuman dan Event'];
+    foreach ($allUnits as $unit) {
+        if ($isServiceActive($unit)) $activeCount++;
+    }
+
+    $index = 0;
+@endphp
+
+@if($activeCount > 0)
             <!-- Unit Pelayanan Section -->
             <div id="unit-carousel-container" class="max-w-7xl mx-auto px-6 py-16 overflow-hidden">
                 <div class="max-w-7xl mx-auto">
@@ -10,31 +40,6 @@
 
                     <div class="relative h-[400px] w-full flex justify-center items-center">
                         <div class="relative w-full max-w-6xl mx-auto h-full">
-                            @php
-                                $isServiceActive = function($name) use ($activeServices, $region) {
-                                    // Jika tidak ada region spesifik (misal diakses manual), tampilkan semua
-                                    if (!$region) return true; 
-                                    
-                                    // Mapping nama tampilan ke nama layanan di database
-                                    $map = [
-                                        'Unit Penyewaan Alat' => 'Penyewaan Alat',
-                                        'Unit Penjualan Gas' => 'Penjualan Gas',
-                                        'Unit Penyewaan Mobil' => 'Penyewaan Mobil',
-                                        'Unit Peminjaman Fasilitas Umum' => 'Peminjaman Fasilitas Umum',
-                                        'Pelaporan Warga' => 'Pelaporan Warga',
-                                        'Pengumuman dan Event' => 'Pengumuman dan Event'
-                                    ];
-                                    
-                                    $dbName = $map[$name] ?? $name;
-                                    
-                                    // Pengecualian: Mungkin 'Pengumuman dan Event' selalu aktif untuk semua desa
-                                    if ($dbName === 'Pengumuman dan Event') return true;
-                                    
-                                    return in_array($dbName, $activeServices);
-                                };
-
-                                $index = 0;
-                            @endphp
 
                             @if($isServiceActive('Unit Penyewaan Alat'))
                             <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="{{ $index++ }}" data-name="Unit Penyewaan Alat" onclick="window.location.href='{{ route('rental.equipment') . '?region_id=' . $region->id }}'">
@@ -85,7 +90,6 @@
                             <div class="min-w-[300px] text-center">
                                 <h3 id="unit-title"
                                     class="text-xl md:text-2xl font-bold text-black transition-all duration-300">
-                                    Unit Penyewaan Alat
                                 </h3>
                             </div>
 
@@ -100,4 +104,5 @@
                     </div>
                 </div>
             </div>
+@endif
 

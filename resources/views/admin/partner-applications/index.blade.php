@@ -40,19 +40,72 @@
                                 <span class="badge bg-warning"><i class="bx bx-time me-1"></i> Menunggu</span>
                             </td>
                             <td>
-                                <div class="d-flex gap-2">
-                                    <form action="{{ route('admin.kemitraan.approve', $app->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menyetujui kemitraan ini? Ini akan otomatis membuatkan akun admin untuk wilayah tersebut.');">
-                                        @csrf
-                                        <button type="submit" class="btn btn-sm btn-success" title="Setujui">
-                                            <i class="bx bx-check"></i> Setujui
-                                        </button>
-                                    </form>
-                                    <form action="{{ route('admin.kemitraan.reject', $app->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menolak permohonan ini?');">
-                                        @csrf
-                                        <button type="submit" class="btn btn-sm btn-danger" title="Tolak">
-                                            <i class="bx bx-x"></i> Tolak
-                                        </button>
-                                    </form>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <a href="{{ route('admin.kemitraan.document', $app->id) }}" target="_blank" class="btn btn-sm btn-info" title="Lihat Dokumen">
+                                        <i class="bx bx-file"></i> Dokumen
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#approveModal{{ $app->id }}" title="Setujui">
+                                        <i class="bx bx-check"></i> Setujui
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#rejectModal{{ $app->id }}" title="Tolak">
+                                        <i class="bx bx-x"></i> Tolak
+                                    </button>
+                                </div>
+
+                                <!-- Approve Modal -->
+                                <div class="modal fade" id="approveModal{{ $app->id }}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Setujui Kemitraan: {{ $app->applicant_name }}</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <form action="{{ route('admin.kemitraan.approve', $app->id) }}" method="POST">
+                                                @csrf
+                                                <div class="modal-body text-start">
+                                                    <div class="alert alert-warning">
+                                                        <i class="bx bx-info-circle me-1"></i> Ini akan otomatis membuatkan akun admin untuk wilayah {{ $app->region_name }}.
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label text-dark">Alasan / Catatan Persetujuan</label>
+                                                        <textarea name="reason" class="form-control" rows="3" required placeholder="Contoh: Dokumen lengkap dan valid."></textarea>
+                                                        <small class="text-muted">Pesan ini akan dikirimkan ke notifikasi pemohon.</small>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                                                    <button type="submit" class="btn btn-success">Ya, Setujui</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Reject Modal -->
+                                <div class="modal fade" id="rejectModal{{ $app->id }}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Tolak Kemitraan: {{ $app->applicant_name }}</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <form action="{{ route('admin.kemitraan.reject', $app->id) }}" method="POST">
+                                                @csrf
+                                                <div class="modal-body text-start">
+                                                    <p>Apakah Anda yakin ingin menolak permohonan kemitraan ini?</p>
+                                                    <div class="mb-3">
+                                                        <label class="form-label text-dark">Alasan Penolakan</label>
+                                                        <textarea name="reason" class="form-control" rows="3" required placeholder="Contoh: Dokumen SK tidak valid."></textarea>
+                                                        <small class="text-muted">Alasan ini akan dikirimkan ke notifikasi pemohon.</small>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                                                    <button type="submit" class="btn btn-danger">Ya, Tolak</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
                                 </div>
                             </td>
                         </tr>

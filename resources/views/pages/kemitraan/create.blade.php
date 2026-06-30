@@ -375,6 +375,7 @@
                                 <div>
                                     <label for="contact_email" class="block text-sm font-semibold text-gray-700 mb-1">Email Kontak</label>
                                     <input type="email" name="contact_email" id="contact_email" value="{{ old('contact_email') }}" class="py-2 px-3 block w-full border border-gray-200 rounded-lg bg-gray-50 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#115789]/30 focus:border-[#115789] transition-colors" style="outline: none;" required placeholder="email@desa.id">
+                                    <p class="text-xs mt-1.5 italic font-medium" style="color: #2f80ed;">* Email dan Sandi akun Anda akan dikirim melalui email ini. Pastikan email aktif.</p>
                                 </div>
                             </div>
 
@@ -596,7 +597,41 @@
     });
 </script>
 
+</script>
 
-
+@if(session('success_modal'))
+<!-- Success Modal -->
+<div id="success-modal" class="fixed inset-0 z-[2147483647] flex items-center justify-center bg-gray-900 bg-opacity-50 transition-opacity" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="bg-white rounded-3xl overflow-hidden shadow-2xl transform transition-all sm:max-w-md w-full mx-4 relative animate-fade-in-up">
+        <div class="px-6 pt-10 pb-8 text-center">
+            <!-- Icon Success (Animated Checkmark) -->
+            <div class="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-green-50 mb-6 relative">
+                <svg class="h-10 w-10 text-green-500 animate-[pulse_2s_ease-in-out_infinite]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" class="animate-[dash_1s_ease-out_forwards]" style="stroke-dasharray: 50; stroke-dashoffset: 50;"></path>
+                </svg>
+            </div>
+            
+            <h3 class="text-2xl leading-6 font-bold text-gray-900 mb-4" id="modal-title">
+                Pengajuan Terkirim!
+            </h3>
+            <div class="mt-2">
+                <p class="text-sm text-gray-500 leading-relaxed">
+                    {{ session('success_modal') }}
+                </p>
+            </div>
+        </div>
+        <div class="px-6 py-5 bg-gray-50 flex justify-center border-t border-gray-100">
+            <button type="button" onclick="document.getElementById('success-modal').style.display='none'" class="inline-flex justify-center rounded-xl border border-gray-300 shadow-sm px-10 py-3 bg-white text-base font-semibold text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#115789] transition-colors sm:text-sm">
+                Kembali
+            </button>
+        </div>
+    </div>
+</div>
+<style>
+    @keyframes dash {
+        to { stroke-dashoffset: 0; }
+    }
 </style>
+@endif
+
 @endsection

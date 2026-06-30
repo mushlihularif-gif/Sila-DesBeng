@@ -7,6 +7,7 @@ use App\Models\FasilitasUmum;
 use App\Models\Region;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use App\Services\ImageCompressorService;
 
 class UnitFasilitasUmumController extends Controller
 {
@@ -109,13 +110,13 @@ class UnitFasilitasUmumController extends Controller
         ];
 
         if ($request->hasFile('foto_utama')) { 
-            $data['foto'] = $request->file('foto_utama')->store('fasilitas_umum', 'public'); 
+            $data['foto'] = ImageCompressorService::compressAndStore($request->file('foto_utama'), 'fasilitas_umum'); 
         }
         if ($request->hasFile('foto_2')) {
-            $data['foto_2'] = $request->file('foto_2')->store('fasilitas_umum', 'public');
+            $data['foto_2'] = ImageCompressorService::compressAndStore($request->file('foto_2'), 'fasilitas_umum');
         }
         if ($request->hasFile('foto_3')) {
-            $data['foto_3'] = $request->file('foto_3')->store('fasilitas_umum', 'public');
+            $data['foto_3'] = ImageCompressorService::compressAndStore($request->file('foto_3'), 'fasilitas_umum');
         }
 
         FasilitasUmum::create($data);
@@ -179,7 +180,7 @@ class UnitFasilitasUmumController extends Controller
 
         if ($request->hasFile('foto_utama')) {
             if ($fasilitas->foto) Storage::disk('public')->delete($fasilitas->foto);
-            $data['foto'] = $request->file('foto_utama')->store('fasilitas_umum', 'public');
+            $data['foto'] = ImageCompressorService::compressAndStore($request->file('foto_utama'), 'fasilitas_umum');
         } elseif ($request->input('delete_foto') == '1') {
             if ($fasilitas->foto) Storage::disk('public')->delete($fasilitas->foto);
             $data['foto'] = null;
@@ -187,7 +188,7 @@ class UnitFasilitasUmumController extends Controller
 
         if ($request->hasFile('foto_2')) {
             if ($fasilitas->foto_2) Storage::disk('public')->delete($fasilitas->foto_2);
-            $data['foto_2'] = $request->file('foto_2')->store('fasilitas_umum', 'public');
+            $data['foto_2'] = ImageCompressorService::compressAndStore($request->file('foto_2'), 'fasilitas_umum');
         } elseif ($request->input('delete_foto_2') == '1') {
             if ($fasilitas->foto_2) Storage::disk('public')->delete($fasilitas->foto_2);
             $data['foto_2'] = null;
@@ -195,7 +196,7 @@ class UnitFasilitasUmumController extends Controller
 
         if ($request->hasFile('foto_3')) {
             if ($fasilitas->foto_3) Storage::disk('public')->delete($fasilitas->foto_3);
-            $data['foto_3'] = $request->file('foto_3')->store('fasilitas_umum', 'public');
+            $data['foto_3'] = ImageCompressorService::compressAndStore($request->file('foto_3'), 'fasilitas_umum');
         } elseif ($request->input('delete_foto_3') == '1') {
             if ($fasilitas->foto_3) Storage::disk('public')->delete($fasilitas->foto_3);
             $data['foto_3'] = null;

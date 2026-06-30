@@ -46,6 +46,8 @@ class BumdesUserController extends Controller
         $cleanNumber = preg_replace('/[^0-9+]/', '', $whatsappNumber);
         $whatsappLink = 'https://wa.me/' . ltrim($cleanNumber, '+');
         
-        return view('users.bumdes-detail', compact('members', 'whatsappLink', 'whatsappNumber', 'region', 'activeServices'));
+        $isWhatsappActive = $region && isset($region->payment_info['whatsapp_active']) ? $region->payment_info['whatsapp_active'] : false;
+        
+        return view('users.bumdes-detail', compact('members', 'whatsappLink', 'whatsappNumber', 'region', 'activeServices', 'isWhatsappActive'));
     }
 }

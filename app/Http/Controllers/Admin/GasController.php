@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Gas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use App\Services\ImageCompressorService;
 
 class GasController extends Controller
 {
@@ -72,13 +73,13 @@ class GasController extends Controller
         $gas->satuan = $validated['satuan'];
 
         if ($request->hasFile('foto')) {
-            $gas->foto = $request->file('foto')->store('gas', 'public');
+            $gas->foto = ImageCompressorService::compressAndStore($request->file('foto'), 'gas');
         }
         if ($request->hasFile('foto_2')) {
-            $gas->foto_2 = $request->file('foto_2')->store('gas', 'public');
+            $gas->foto_2 = ImageCompressorService::compressAndStore($request->file('foto_2'), 'gas');
         }
         if ($request->hasFile('foto_3')) {
-            $gas->foto_3 = $request->file('foto_3')->store('gas', 'public');
+            $gas->foto_3 = ImageCompressorService::compressAndStore($request->file('foto_3'), 'gas');
         }
 
         $gas->save();
@@ -148,7 +149,7 @@ class GasController extends Controller
         if ($request->hasFile('foto')) {
             if ($gas->foto)
                 Storage::disk('public')->delete($gas->foto);
-            $dataUpdate['foto'] = $request->file('foto')->store('gas', 'public');
+            $dataUpdate['foto'] = ImageCompressorService::compressAndStore($request->file('foto'), 'gas');
         } elseif ($request->input('delete_foto') == '1') {
             if ($gas->foto)
                 Storage::disk('public')->delete($gas->foto);
@@ -159,7 +160,7 @@ class GasController extends Controller
         if ($request->hasFile('foto_2')) {
             if ($gas->foto_2)
                 Storage::disk('public')->delete($gas->foto_2);
-            $dataUpdate['foto_2'] = $request->file('foto_2')->store('gas', 'public');
+            $dataUpdate['foto_2'] = ImageCompressorService::compressAndStore($request->file('foto_2'), 'gas');
         } elseif ($request->input('delete_foto_2') == '1') {
             if ($gas->foto_2)
                 Storage::disk('public')->delete($gas->foto_2);
@@ -170,7 +171,7 @@ class GasController extends Controller
         if ($request->hasFile('foto_3')) {
             if ($gas->foto_3)
                 Storage::disk('public')->delete($gas->foto_3);
-            $dataUpdate['foto_3'] = $request->file('foto_3')->store('gas', 'public');
+            $dataUpdate['foto_3'] = ImageCompressorService::compressAndStore($request->file('foto_3'), 'gas');
         } elseif ($request->input('delete_foto_3') == '1') {
             if ($gas->foto_3)
                 Storage::disk('public')->delete($gas->foto_3);

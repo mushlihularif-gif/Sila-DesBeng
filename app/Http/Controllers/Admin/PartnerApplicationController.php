@@ -10,6 +10,9 @@ use App\Models\User;
 use App\Models\Service;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\AccountApprovedMail;
+use App\Models\Notification;
 
 class PartnerApplicationController extends Controller
 {
@@ -32,8 +35,44 @@ class PartnerApplicationController extends Controller
         return view('admin.partner-applications.index', compact('applications'));
     }
 
+    public function document($id)
+    {
+        $application = PartnerApplication::findOrFail($id);
+        
+        $user = auth()->user();
+        if ($user->role !== 'super_admin' && $application->parent_region_id !== $user->region_id) {
+            abort(403);
+        }
+
+        if ($application->user_id && $application->status === 'pending') {
+            $existingNotif = Notification::where('user_id', $application->user_id)
+                ->where('title', 'Pengajuan Sedang Diproses')
+                ->where('message', 'like', '%'. $application->region_name .'%')
+                ->exists();
+
+            if (!$existingNotif) {
+                Notification::create([
+                    'user_id' => $application->user_id,
+                    'type' => 'kemitraan',
+                    'title' => 'Pengajuan Sedang Diproses',
+                    'message' => 'Pengajuan kemitraan untuk ' . $application->region_name . ' sedang diproses oleh tim kami.',
+                    'icon' => 'bx bx-time',
+                    'is_read' => false
+                ]);
+            }
+        }
+
+        $path = storage_path('app/public/' . $application->document_path);
+        if (!file_exists($path)) {
+            return back()->with('error', 'Dokumen tidak ditemukan.');
+        }
+
+        return response()->file($path);
+    }
+
     public function approve(Request $request, $id)
     {
+        $request->validate(['reason' => 'required|string']);
         $application = PartnerApplication::findOrFail($id);
         
         // Security check
@@ -76,12 +115,10 @@ class PartnerApplicationController extends Controller
             $username = $baseUsername . $counter;
             $counter++;
         }
-
-        $password = Str::random(8); // or you could use a default like 'password123'
-
+        
         // Determine Role
         $roleMap = [
-            'kabupaten' => 'super_admin', // if someone applies for Kabupaten
+            'kabupaten' => 'super_admin',
             'kecamatan' => 'admin_kecamatan',
             'desa' => 'admin_desa',
             'rw' => 'admin_rw',
@@ -89,28 +126,79 @@ class PartnerApplicationController extends Controller
         ];
         $role = $roleMap[$application->region_type] ?? 'admin';
 
-        // Create Admin User for this region
-        $newAdmin = User::create([
-            'name' => $application->applicant_name,
-            'username' => $username,
-            'email' => $application->contact_email,
-            'password' => Hash::make($password),
-            'phone' => $application->contact_phone,
-            'position' => $application->position,
-            'role' => $role,
-            'region_id' => $region->id,
-        ]);
+        // Check if user already exists
+        $existingUser = User::where('email', $application->contact_email)->first();
+
+        if ($existingUser) {
+            // Upgrade existing user
+            $existingUser->update([
+                'role' => $role,
+                'region_id' => $region->id,
+                'position' => $application->position,
+                'phone' => $application->contact_phone,
+            ]);
+            
+            $username = $existingUser->username ?? $existingUser->email;
+            $password = "(Sandi Anda Sebelumnya)"; 
+            // We tell them to use their existing password
+        } else {
+            // Generate password yang mudah diketik (Tidak full acak)
+            // Format: Silades + 4 angka acak (contoh: Silades1945)
+            $password = 'Silades' . rand(1000, 9999);
+
+            // Create Admin User for this region
+            $newAdmin = User::create([
+                'name' => $application->applicant_name,
+                'username' => $username,
+                'email' => $application->contact_email,
+                'password' => Hash::make($password),
+                'phone' => $application->contact_phone,
+                'position' => $application->position,
+                'role' => $role,
+                'region_id' => $region->id,
+            ]);
+        }
 
         // Update Application Status
         $application->update(['status' => 'approved']);
 
-        // In a real application, you would send an email to $application->contact_email with their username and password.
-        // For now, we'll return it in the success message.
-        return back()->with('success', "Kemitraan disetujui! Wilayah dan Akun Admin berhasil dibuat. Username: $username | Password: $password");
+        if ($application->user_id) {
+            Notification::create([
+                'user_id' => $application->user_id,
+                'type' => 'kemitraan',
+                'title' => 'Pengajuan Disetujui',
+                'message' => 'Pengajuan kemitraan untuk ' . $region->name . ' telah disetujui. Alasan/Catatan: ' . $request->reason,
+                'icon' => 'bx bx-check-circle text-success',
+                'is_read' => false
+            ]);
+        }
+
+        // Send Email to Applicant
+        try {
+            Mail::to($application->contact_email)->send(new AccountApprovedMail($username, $password, $region->name));
+            return back()->with('success', "Kemitraan disetujui! Wilayah dan Akun Admin berhasil dibuat. Username dan Password telah dikirimkan ke email: <b>" . $application->contact_email . "</b>");
+        } catch (\Exception $e) {
+            // Format nomor HP (ubah 0 jadi 62 jika perlu)
+            $phone = $application->contact_phone;
+            if (str_starts_with($phone, '0')) {
+                $phone = '62' . substr($phone, 1);
+            }
+            
+            // Siapkan teks WhatsApp
+            $waText = "Halo " . $application->applicant_name . ", Pengajuan kemitraan " . $region->name . " telah disetujui.\n\nBerikut adalah informasi akun Admin Anda:\nUsername: " . $username . "\nPassword: " . $password . "\n\nHarap segera login dan ubah password Anda demi keamanan.";
+            $waLink = "https://api.whatsapp.com/send?phone=" . $phone . "&text=" . urlencode($waText);
+
+            $fallbackMsg = "Email GAGAL terkirim karena masalah koneksi. <br>Silahkan kirim email dan sandi ini ke WhatsApp <b>{$application->applicant_name}</b> ({$application->contact_phone}):<br><br>";
+            $fallbackMsg .= "Username: <b>{$username}</b><br>Password: <b>{$password}</b><br>";
+            $fallbackMsg .= "<a href='{$waLink}' target='_blank' class='inline-block mt-3 px-4 py-2 bg-green-500 text-white text-xs font-bold rounded-full shadow hover:bg-green-600 transition-colors'>Kirim via WhatsApp</a>";
+
+            return back()->with('success', $fallbackMsg);
+        }
     }
 
     public function reject(Request $request, $id)
     {
+        $request->validate(['reason' => 'required|string']);
         $application = PartnerApplication::findOrFail($id);
         
         $user = auth()->user();
@@ -119,6 +207,17 @@ class PartnerApplicationController extends Controller
         }
 
         $application->update(['status' => 'rejected']);
+
+        if ($application->user_id) {
+            Notification::create([
+                'user_id' => $application->user_id,
+                'type' => 'kemitraan',
+                'title' => 'Pengajuan Ditolak',
+                'message' => 'Mohon maaf, pengajuan kemitraan untuk ' . $application->region_name . ' ditolak. Alasan: ' . $request->reason,
+                'icon' => 'bx bx-x-circle text-danger',
+                'is_read' => false
+            ]);
+        }
 
         return back()->with('success', 'Permohonan kemitraan ditolak.');
     }

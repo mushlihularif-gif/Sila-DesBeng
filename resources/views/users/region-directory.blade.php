@@ -89,16 +89,29 @@
                 </div>
 
                 <!-- Members Grid -->
-                <div class="flex flex-wrap justify-center gap-8 mb-16">
+                <div class="flex flex-wrap justify-center gap-10 mb-16 mt-6">
                     @foreach($members as $member)
-                    <div class="member-card">
-                        <div class="member-photo-wrapper">
-                            <img src="{{ $member->photo_url }}" 
-                                 alt="{{ $member->name }}"
-                                 class="member-photo">
+                    <div class="member-card transition-all duration-300 text-center w-72">
+                        <div class="relative mx-auto mb-8" style="width: 190px; height: 230px;">
+                            <!-- Bingkai Belakang (Gradient Biru) -->
+                            <div class="absolute inset-0 opacity-90" style="
+                                border-radius: 0 50px 0 50px; 
+                                transform: translate(6px, 6px); 
+                                padding: 3px; 
+                                background: linear-gradient(135deg, #115789, #3b82f6); 
+                                -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); 
+                                -webkit-mask-composite: xor; 
+                                mask-composite: exclude;
+                            "></div>
+                            <!-- Foto dengan efek mengambang -->
+                            <div class="absolute inset-0 overflow-hidden bg-gray-50 animate-float z-10" style="border-radius: 0 50px 0 50px; box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.15);">
+                                <img src="{{ $member->photo_url }}" 
+                                     alt="{{ $member->name }}"
+                                     class="w-full h-full object-cover">
+                            </div>
                         </div>
-                        <h3 class="text-lg font-bold text-gray-800 mt-5 mb-1">{{ $member->name }}</h3>
-                        <p class="text-sm text-gray-500">{{ $member->position }}</p>
+                        <h3 class="text-lg font-bold mt-2 mb-1" style="color: #000000;">{{ $member->name }}</h3>
+                        <p class="text-sm font-medium" style="color: #000000;">{{ $member->position }}</p>
                     </div>
                     @endforeach
                 </div>
@@ -190,34 +203,25 @@
 
     /* Member Card Styles */
     .member-card {
-        background: white;
-        border-radius: 1rem;
-        padding: 2rem 1.5rem 1.5rem;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
         text-align: center;
         width: 280px;
+        padding: 1rem;
         transition: all 0.3s ease;
     }
 
     .member-card:hover {
-        box-shadow: 0 8px 30px rgba(0,0,0,0.1);
         transform: translateY(-4px);
     }
 
-    .member-photo-wrapper {
-        width: 210px;
-        height: 230px;
-        margin: 0 auto;
-        overflow: hidden;
-        border-radius: 0.75rem;
-        background: #f8fafc;
+    /* Float Animation */
+    @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+        100% { transform: translateY(0px); }
     }
-
-    .member-photo {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
+    
+    .animate-float {
+        animation: float 4s ease-in-out infinite;
     }
 
     /* Responsive Mobile - 3 Column Layout (Center Focus) */

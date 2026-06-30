@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Notification;
 
 class PartnerApplicationController extends Controller
 {
@@ -45,8 +46,20 @@ class PartnerApplicationController extends Controller
 
         $validated['user_id'] = auth()->check() ? auth()->id() : null;
 
-        \App\Models\PartnerApplication::create($validated);
+        $application = \App\Models\PartnerApplication::create($validated);
 
-        return redirect()->back()->with('success', 'Permohonan kemitraan berhasil dikirim. Tim kami akan memverifikasi berkas Anda dalam waktu 1x24 jam.');
+        if (auth()->check()) {
+            Notification::create([
+                'user_id' => auth()->id(),
+                'type' => 'kemitraan',
+                'title' => 'Pengajuan Terkirim',
+                'message' => 'Pengajuan kemitraan Anda terkirim, silakan tunggu notifikasi selanjutnya.',
+                'link' => null,
+                'icon' => 'bx bx-paper-plane',
+                'is_read' => false
+            ]);
+        }
+
+        return redirect()->back()->with('success_modal', 'Pengajuan kemitraan Anda terkirim. Silakan tunggu notifikasinya, email dan sandi akun Anda akan dikirim setelah disetujui.');
     }
 }

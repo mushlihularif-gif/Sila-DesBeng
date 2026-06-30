@@ -4,7 +4,26 @@
 
 @push('styles')
 <style>
-    /* Custom styling if needed */
+    .stat-value {
+        font-size: clamp(2.5rem, 4vw, 3.5rem); font-weight: 900;
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        background-clip: text; margin-bottom: 12px;
+    }
+    .stat-value.blue { background-image: linear-gradient(to right, #60a5fa, #2563eb); }
+    .stat-value.yellow { background-image: linear-gradient(to right, #facc15, #f97316); }
+    .stat-value.purple { background-image: linear-gradient(to right, #c084fc, #ec4899); }
+    .stat-value.green { background-image: linear-gradient(to right, #4ade80, #059669); }
+    .stat-value.red { background-image: linear-gradient(to right, #f87171, #e11d48); }
+
+    .stat-label { color: #4b5563; font-size: 1rem; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 16px; }
+    
+    .stat-bar { height: 8px; background: rgba(0,0,0,0.08); border-radius: 9999px; overflow: hidden; width: 100%; margin-top: auto; }
+    .stat-bar-fill { height: 100%; border-radius: 9999px; width: 100%; }
+    .stat-bar-fill.blue { background: linear-gradient(to right, #60a5fa, #2563eb); }
+    .stat-bar-fill.yellow { background: linear-gradient(to right, #facc15, #f97316); }
+    .stat-bar-fill.purple { background: linear-gradient(to right, #c084fc, #ec4899); }
+    .stat-bar-fill.green { background: linear-gradient(to right, #4ade80, #059669); }
+    .stat-bar-fill.red { background: linear-gradient(to right, #f87171, #e11d48); }
 </style>
 @endpush
 
@@ -34,40 +53,45 @@
                     <div class="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mb-4">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
                     </div>
-                    <span class="text-[11px] font-bold text-gray-500 uppercase tracking-[0.2em] mb-2">Total</span>
-                    <span class="text-4xl font-normal text-gray-800">{{ $stats['total_laporan'] ?? 0 }}</span>
+                    <div class="stat-value blue">{{ $stats['total_laporan'] ?? 0 }}</div>
+                    <div class="stat-label">Total Laporan</div>
+                    <div class="stat-bar"><div class="stat-bar-fill blue"></div></div>
                 </div>
                 <!-- Pending -->
                 <div class="backdrop-blur-sm bg-white/70 rounded-3xl border border-white/80 p-6 flex flex-col items-center justify-center shadow-sm hover:shadow-md transition-all">
                     <div class="w-12 h-12 rounded-full bg-yellow-50 text-yellow-600 flex items-center justify-center mb-4">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     </div>
-                    <span class="text-[11px] font-bold text-gray-500 uppercase tracking-[0.2em] mb-2">Tertunda</span>
-                    <span class="text-4xl font-normal text-gray-800">{{ $stats['pending'] ?? 0 }}</span>
+                    <div class="stat-value yellow">{{ $stats['pending'] ?? 0 }}</div>
+                    <div class="stat-label">Tertunda</div>
+                    <div class="stat-bar"><div class="stat-bar-fill yellow"></div></div>
                 </div>
                 <!-- Proses -->
                 <div class="backdrop-blur-sm bg-white/70 rounded-3xl border border-white/80 p-6 flex flex-col items-center justify-center shadow-sm hover:shadow-md transition-all">
                     <div class="w-12 h-12 rounded-full bg-indigo-50 text-indigo-500 flex items-center justify-center mb-4">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                     </div>
-                    <span class="text-[11px] font-bold text-gray-500 uppercase tracking-[0.2em] mb-2">Proses</span>
-                    <span class="text-4xl font-normal text-gray-800">{{ $stats['proses'] ?? 0 }}</span>
+                    <div class="stat-value purple">{{ $stats['proses'] ?? 0 }}</div>
+                    <div class="stat-label">Proses</div>
+                    <div class="stat-bar"><div class="stat-bar-fill purple"></div></div>
                 </div>
                 <!-- Selesai -->
                 <div class="backdrop-blur-sm bg-white/70 rounded-3xl border border-white/80 p-6 flex flex-col items-center justify-center shadow-sm hover:shadow-md transition-all">
                     <div class="w-12 h-12 rounded-full bg-green-50 text-green-500 flex items-center justify-center mb-4">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     </div>
-                    <span class="text-[11px] font-bold text-gray-500 uppercase tracking-[0.2em] mb-2">Selesai</span>
-                    <span class="text-4xl font-normal text-gray-800">{{ $stats['selesai'] ?? 0 }}</span>
+                    <div class="stat-value green">{{ $stats['selesai'] ?? 0 }}</div>
+                    <div class="stat-label">Selesai</div>
+                    <div class="stat-bar"><div class="stat-bar-fill green"></div></div>
                 </div>
                 <!-- Ditolak -->
                 <div class="backdrop-blur-sm bg-white/70 rounded-3xl border border-white/80 p-6 flex flex-col items-center justify-center shadow-sm hover:shadow-md transition-all">
                     <div class="w-12 h-12 rounded-full bg-red-50 text-red-400 flex items-center justify-center mb-4">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     </div>
-                    <span class="text-[11px] font-bold text-gray-500 uppercase tracking-[0.2em] mb-2">Ditolak</span>
-                    <span class="text-4xl font-normal text-gray-800">{{ $stats['ditolak'] ?? 0 }}</span>
+                    <div class="stat-value red">{{ $stats['ditolak'] ?? 0 }}</div>
+                    <div class="stat-label">Ditolak</div>
+                    <div class="stat-bar"><div class="stat-bar-fill red"></div></div>
                 </div>
             </div>
 

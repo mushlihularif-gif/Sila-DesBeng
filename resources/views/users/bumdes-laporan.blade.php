@@ -52,7 +52,7 @@
                     </div>
 
                     <div class="relative inline-block" style="min-width: 240px;">
-                        <select id="desaSelect" class="w-full appearance-none px-4 py-3 pr-10 text-sm border border-gray-300 rounded-xl bg-white/80 backdrop-blur-md text-gray-800 font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 hover:bg-white transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm" {{ $kecamatanId == 'all' ? 'disabled' : '' }}>
+                        <select id="desaSelect" class="w-full appearance-none px-4 py-3 pr-10 text-sm border border-gray-300 rounded-xl bg-white/80 backdrop-blur-md text-gray-800 font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 hover:bg-white transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm" {{ $kecamatanId === 'all' ? 'disabled' : '' }}>
                             <option value="all">Semua Kelurahan/Desa</option>
                             @foreach($desas as $desa)
                                 <option value="{{ $desa->id }}" {{ $desaId == $desa->id ? 'selected' : '' }}>{{ $desa->name }}</option>
@@ -364,7 +364,8 @@
                 window.history.pushState({}, '', url.toString());
 
                 const response = await fetch(url.toString(), {
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    cache: 'no-store'
                 });
                 
                 if (!response.ok) throw new Error('Network response was not ok');
@@ -420,11 +421,10 @@
                     // Restore scroll position
                     window.scrollTo(0, scrollPos);
                 } else {
-                    window.location.reload();
+                    console.error('newMainContent is null. Server returned:', htmlString.substring(0, 500));
                 }
             } catch (error) {
-                console.error('AJAX failed, falling back to reload:', error);
-                window.location.reload();
+                console.error('AJAX failed:', error);
             } finally {
                 if (mainContent) {
                     mainContent.style.opacity = '1';

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Banner;
 use Illuminate\Support\Facades\Storage;
+use App\Services\ImageCompressorService;
 
 class BannerController extends Controller
 {
@@ -50,7 +51,7 @@ class BannerController extends Controller
             'image.image' => 'Gagal mengunggah: File yang diunggah harus berupa gambar.',
         ]);
 
-        $path = $request->file('image')->store('banners', 'public');
+        $path = ImageCompressorService::compressAndStore($request->file('image'), 'banners', 1280, 80, true);
 
         Banner::create([
             'title' => $request->title,
@@ -91,7 +92,7 @@ class BannerController extends Controller
             if (Storage::disk('public')->exists($banner->image_path)) {
                 Storage::disk('public')->delete($banner->image_path);
             }
-            $data['image_path'] = $request->file('image')->store('banners', 'public');
+            $data['image_path'] = ImageCompressorService::compressAndStore($request->file('image'), 'banners', 1280, 80, true);
         }
 
         $banner->update($data);

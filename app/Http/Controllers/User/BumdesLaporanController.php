@@ -60,9 +60,7 @@ class BumdesLaporanController extends Controller
         
         $desas = collect([]);
         if ($kecamatanId !== 'all' && !empty($kecamatanId)) {
-            $desas = \App\Models\Region::where('parent_id', $kecamatanId)
-                ->where('type', 'desa')
-                ->get();
+            $desas = \App\Models\Region::where('parent_id', $kecamatanId)->get();
         }
 
         // Get Kinerja BUMDes data (monthly revenue)

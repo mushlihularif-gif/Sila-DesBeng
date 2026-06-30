@@ -90,6 +90,23 @@
     </script>
     @endif
 
+    @if(session('show_login_modal'))
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                var btn = document.getElementById('btn-open-login');
+                if (btn) btn.click();
+            }, 300);
+        });
+        document.addEventListener('turbo:load', function() {
+            setTimeout(function() {
+                var btn = document.getElementById('btn-open-login');
+                if (btn) btn.click();
+            }, 300);
+        });
+    </script>
+    @endif
+
     {{-- Global Modern Toast Notification --}}
     <style>
         .toast-enter-start { opacity: 0; transform: translateX(50px) scale(0.95); }
@@ -127,7 +144,7 @@
                 {{ session('error') ? 'Peringatan' : 'Berhasil' }}
             </p>
             <p class="text-sm text-gray-600 mt-1">
-                {{ session('error') ?? session('success') }}
+                {!! session('error') ?? session('success') !!}
             </p>
         </div>
         <button @click="show = false" class="ml-auto -mx-1.5 -my-1.5 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex items-center justify-center h-8 w-8 text-gray-500 cursor-pointer">

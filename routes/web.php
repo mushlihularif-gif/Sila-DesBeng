@@ -282,6 +282,11 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
     
     // Manajemen Kemitraan Daerah
     Route::get('/kemitraan', [\App\Http\Controllers\Admin\PartnerApplicationController::class, 'index'])->name('admin.kemitraan.index');
+    
+    Route::get('/test_regions', function() {
+        return \App\Models\Region::all();
+    });
+    Route::get('/kemitraan/{id}/document', [\App\Http\Controllers\Admin\PartnerApplicationController::class, 'document'])->name('admin.kemitraan.document');
     Route::post('/kemitraan/{id}/approve', [\App\Http\Controllers\Admin\PartnerApplicationController::class, 'approve'])->name('admin.kemitraan.approve');
     Route::post('/kemitraan/{id}/reject', [\App\Http\Controllers\Admin\PartnerApplicationController::class, 'reject'])->name('admin.kemitraan.reject');
     

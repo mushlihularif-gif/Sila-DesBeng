@@ -7,6 +7,7 @@ use App\Models\Barang;
 use App\Models\Region;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use App\Services\ImageCompressorService;
 
 class UnitPenyewaanController extends Controller
 {
@@ -139,13 +140,13 @@ class UnitPenyewaanController extends Controller
 
         // Upload gambar
         if ($request->hasFile('foto_utama')) { 
-            $data['foto'] = $request->file('foto_utama')->store('barang', 'public'); 
+            $data['foto'] = ImageCompressorService::compressAndStore($request->file('foto_utama'), 'barang'); 
         }
         if ($request->hasFile('foto_2')) {
-            $data['foto_2'] = $request->file('foto_2')->store('barang', 'public');
+            $data['foto_2'] = ImageCompressorService::compressAndStore($request->file('foto_2'), 'barang');
         }
         if ($request->hasFile('foto_3')) {
-            $data['foto_3'] = $request->file('foto_3')->store('barang', 'public');
+            $data['foto_3'] = ImageCompressorService::compressAndStore($request->file('foto_3'), 'barang');
         }
 
         Barang::create($data);
@@ -235,43 +236,30 @@ class UnitPenyewaanController extends Controller
             'satuan' => $request->satuan,
         ];
 
-        // Upload & ganti foto utama (jika diupload baru)
+        // Update gambar utama
         if ($request->hasFile('foto_utama')) {
-            if ($barang->foto) {
+            if ($barang->foto && Storage::disk('public')->exists($barang->foto)) {
                 Storage::disk('public')->delete($barang->foto);
             }
-            $data['foto'] = $request->file('foto_utama')->store('barang', 'public');
-        } elseif ($request->input('delete_foto') == '1') {
-            if ($barang->foto) {
-                Storage::disk('public')->delete($barang->foto);
-            }
-            $data['foto'] = null;
+            $data['foto'] = ImageCompressorService::compressAndStore($request->file('foto_utama'), 'barang');
         }
 
-        // Upload & ganti foto tambahan 1
-        if ($request->hasFile('foto_2')) {
-            if ($barang->foto_2) {
-                Storage::disk('public')->delete($barang->foto_2);
-            }
-            $data['foto_2'] = $request->file('foto_2')->store('barang', 'public');
-        } elseif ($request->input('delete_foto_2') == '1') {
-            if ($barang->foto_2) {
-                Storage::disk('public')->delete($barang->foto_2);
-            }
+        // Update foto_2
+        if ($request->input('delete_foto_2') == '1') {
+            if ($barang->foto_2 && Storage::disk('public')->exists($barang->foto_2)) Storage::disk('public')->delete($barang->foto_2);
             $data['foto_2'] = null;
+        } elseif ($request->hasFile('foto_2')) {
+            if ($barang->foto_2 && Storage::disk('public')->exists($barang->foto_2)) Storage::disk('public')->delete($barang->foto_2);
+            $data['foto_2'] = ImageCompressorService::compressAndStore($request->file('foto_2'), 'barang');
         }
 
-        // Upload & ganti foto tambahan 2
-        if ($request->hasFile('foto_3')) {
-            if ($barang->foto_3) {
-                Storage::disk('public')->delete($barang->foto_3);
-            }
-            $data['foto_3'] = $request->file('foto_3')->store('barang', 'public');
-        } elseif ($request->input('delete_foto_3') == '1') {
-            if ($barang->foto_3) {
-                Storage::disk('public')->delete($barang->foto_3);
-            }
+        // Update foto_3
+        if ($request->input('delete_foto_3') == '1') {
+            if ($barang->foto_3 && Storage::disk('public')->exists($barang->foto_3)) Storage::disk('public')->delete($barang->foto_3);
             $data['foto_3'] = null;
+        } elseif ($request->hasFile('foto_3')) {
+            if ($barang->foto_3 && Storage::disk('public')->exists($barang->foto_3)) Storage::disk('public')->delete($barang->foto_3);
+            $data['foto_3'] = ImageCompressorService::compressAndStore($request->file('foto_3'), 'barang');
         }
 
         // Simpan perubahan
