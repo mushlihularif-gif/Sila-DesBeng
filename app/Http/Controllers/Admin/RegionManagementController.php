@@ -104,8 +104,18 @@ class RegionManagementController extends Controller
             return back()->with('error', 'RW hanya dapat menambahkan struktur RT.');
         }
 
+        // Sanitasi KETAT nama wilayah agar tidak ada duplikasi akibat salah ketik (spasi/huruf besar-kecil)
+        $cleanName = ucwords(strtolower(trim(preg_replace('/\s+/', ' ', $request->name))));
+
+        // Pastikan prefix otomatis untuk meminimalisir duplikasi
+        if ($request->type === 'kecamatan' && !str_starts_with(strtolower($cleanName), 'kecamatan')) {
+            $cleanName = 'Kecamatan ' . $cleanName;
+        } elseif (in_array($request->type, ['desa', 'kelurahan']) && !str_starts_with(strtolower($cleanName), 'desa') && !str_starts_with(strtolower($cleanName), 'kelurahan')) {
+            $cleanName = 'Desa ' . $cleanName;
+        }
+
         $newRegion = Region::firstOrCreate([
-            'name' => $request->name,
+            'name' => $cleanName,
             'type' => $request->type,
             'parent_id' => $targetParentId,
         ]);

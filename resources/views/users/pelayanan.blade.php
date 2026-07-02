@@ -25,7 +25,7 @@
             {{-- Header --}}
             <div class="text-left mb-16 mt-16 md:mt-20 animate-section">
                 <h1 class="text-5xl font-bold mb-2">
-                    <span class="bg-gradient-to-r from-[#115789] to-blue-300 bg-clip-text text-transparent drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]">Pelayanan</span>
+                    <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Pelayanan</span>
                 </h1>
             </div>
 

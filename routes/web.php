@@ -677,5 +677,8 @@ Route::get('/dev/create-test-rtrw', function () {
     return "Berhasil membuat akun uji coba:<br><br><b>Admin RW:</b><br>Email: admin.rw@siladesbeng.com<br>Password: password123<br><br><b>Admin RT:</b><br>Email: admin.rt@siladesbeng.com<br>Password: password123";
 });
 
+// Chatbot API Route
+Route::post('/chatbot/ask', [\App\Http\Controllers\User\ChatbotController::class, 'ask']);
+
 Route::get('/run-mig-now', function() { \Illuminate\Support\Facades\Artisan::call('migrate'); return \Illuminate\Support\Facades\Artisan::output(); });
 

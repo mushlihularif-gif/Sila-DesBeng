@@ -81,13 +81,17 @@ class PartnerApplicationController extends Controller
             return back()->with('error', 'Anda tidak memiliki akses untuk menyetujui aplikasi ini.');
         }
 
-        // Create or Find Region to prevent duplicates
-        $regionName = $application->region_type === 'desa' && !str_starts_with(strtolower($application->region_name), 'desa') && !str_starts_with(strtolower($application->region_name), 'kelurahan') 
-            ? 'Desa ' . $application->region_name 
-            : $application->region_name;
+        // Create or Find Region to prevent duplicates (dengan SANITASI KETAT agar tidak double)
+        // 1. Hilangkan spasi berlebih di awal, akhir, dan tengah kata
+        // 2. Format jadi Huruf Kapital di Awal Kata
+        $cleanName = ucwords(strtolower(trim(preg_replace('/\s+/', ' ', $application->region_name))));
 
-        if ($application->region_type === 'kecamatan' && !str_starts_with(strtolower($application->region_name), 'kecamatan')) {
-            $regionName = 'Kecamatan ' . $application->region_name;
+        $regionName = $application->region_type === 'desa' && !str_starts_with(strtolower($cleanName), 'desa') && !str_starts_with(strtolower($cleanName), 'kelurahan') 
+            ? 'Desa ' . $cleanName 
+            : $cleanName;
+
+        if ($application->region_type === 'kecamatan' && !str_starts_with(strtolower($cleanName), 'kecamatan')) {
+            $regionName = 'Kecamatan ' . $cleanName;
         }
 
         $region = Region::firstOrCreate(

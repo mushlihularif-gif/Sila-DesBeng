@@ -721,7 +721,7 @@
                     </div>
                 </div>
                 <h2 class="text-2xl font-bold text-gray-900 mb-2">Keluar Akun?</h2>
-                <p class="text-sm text-gray-500">Apakah Anda yakin ingin keluar dari Sila-DesBeng?</p>
+                <p class="text-sm text-gray-500">Apakah Anda yakin ingin keluar dari SiladesBeng?</p>
             </div>
 
             <div class="flex gap-3">

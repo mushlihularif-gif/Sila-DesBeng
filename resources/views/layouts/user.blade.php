@@ -78,6 +78,9 @@
     {{-- MODAL AUTENTIKASI --}}
     @include('auth.modals')
 
+    {{-- CHATBOT AI (BISA DIGESER) --}}
+    @include('partials.chatbot')
+
 @endsection
 
 @push('scripts')

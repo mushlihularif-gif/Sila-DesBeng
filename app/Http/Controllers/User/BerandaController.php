@@ -126,13 +126,23 @@ class BerandaController extends Controller
         // Ambil Active Services jika user login dan punya region
         $activeServices = [];
         if (auth()->check() && auth()->user()->region_id) {
-            $userRegion = \App\Models\Region::with(['services' => function($q) {
-                $q->where('is_active', true);
-            }])->find(auth()->user()->region_id);
+            $userRegionId = auth()->user()->region_id;
             
-            if ($userRegion) {
-                $activeServices = $userRegion->services->pluck('name')->toArray();
+            // Dapatkan ID wilayah user dan semua leluhurnya (RT -> RW -> Desa -> Kec)
+            $ancestorIds = \App\Models\Region::getAncestorIds($userRegionId);
+            $relevantIds = array_merge([$userRegionId], $ancestorIds);
+            
+            // Cari layanan aktif di wilayah user atau leluhurnya (biasanya nempel di Desa)
+            $regionsWithServices = \App\Models\Region::with(['services' => function($q) {
+                $q->where('is_active', true);
+            }])->whereIn('id', $relevantIds)->get();
+            
+            foreach ($regionsWithServices as $region) {
+                if ($region->services->isNotEmpty()) {
+                    $activeServices = array_merge($activeServices, $region->services->pluck('name')->toArray());
+                }
             }
+            $activeServices = array_unique($activeServices);
         }
         
         return view('beranda.index', compact(

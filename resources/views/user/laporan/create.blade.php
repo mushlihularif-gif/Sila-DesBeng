@@ -3,12 +3,19 @@
 @section('title', 'Buat Laporan Warga')
 
 @section('page')
-    <div class="min-h-screen bg-[#f0f4f8] pt-32 pb-20 text-gray-800 relative" style="background: #f0f4f8 url('{{ asset("Admin/img/elements/background.png") }}') no-repeat center center fixed; background-size: cover;">
-        <div class="max-w-4xl mx-auto px-6 relative z-10" data-aos="fade-up">
-            <div class="bg-white/95 backdrop-blur-md border border-gray-100 rounded-3xl shadow-xl p-8 md:p-10">
+    <div class="min-h-screen bg-[#f0f4f8] pt-32 pb-20 text-gray-800 relative">
+        {{-- Custom Vector Abstract Background --}}
+        <div class="fixed inset-0 overflow-hidden z-0 pointer-events-none" id="premium-bg">
+            <canvas id="abstract-canvas" class="w-full h-full absolute inset-0"></canvas>
+        </div>
+        <div class="max-w-4xl mx-auto px-6 relative z-10 mb-20" data-aos="fade-up">
+            <div class="bg-white/60 backdrop-blur-md border border-gray-100 rounded-2xl shadow-sm p-8 md:p-10">
 
                 <div class="text-center mb-10">
-                    <h1 class="text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#115789] to-blue-300 bg-clip-text text-transparent relative inline-block drop-shadow-[0_0_15px_rgba(59,130,246,0.5)] mb-4">Formulir Pengaduan</h1>
+                    <h1 class="text-3xl md:text-4xl font-bold mb-4 relative inline-block">
+                        <span class="bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">Formulir</span>
+                        <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Pengaduan</span>
+                    </h1>
                     <p class="text-gray-500">
                         Sampaikan keluhan atau saran Anda dengan sopan dan jujur untuk kemajuan bersama.
                     </p>
@@ -142,20 +149,30 @@
                     </div>
 
                     <!-- Bukti -->
-                    <div class="p-5 border-2 border-dashed border-gray-200 rounded-2xl bg-gray-50/50 hover:bg-blue-50/50 transition-colors">
+                    <div>
                         <label class="block font-semibold text-[#1e3a5f] mb-2">Unggah Bukti (Opsional)</label>
-                        <input type="file" name="bukti" id="bukti" accept="image/jpeg,image/jpg,image/png"
-                            class="w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200 transition-colors cursor-pointer @error('bukti') border-red-500 @enderror">
-                        <small class="text-gray-400 block mt-2">Format: JPG, JPEG, PNG | Maksimal 2MB</small>
+                        <div class="relative group border-2 border-dashed border-gray-300 rounded-2xl bg-gray-50 hover:bg-blue-50/50 hover:border-blue-400 transition-colors duration-300 text-center flex flex-col items-center justify-center py-10 px-6 cursor-pointer">
+                            <input type="file" name="bukti" id="bukti" accept="image/jpeg,image/jpg,image/png"
+                                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 @error('bukti') border-red-500 @enderror">
+                            
+                            <div class="w-16 h-16 mb-4 rounded-full bg-blue-100 text-blue-500 flex items-center justify-center group-hover:scale-110 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300 shadow-sm">
+                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                </svg>
+                            </div>
+                            <p class="text-sm font-semibold text-[#1e3a5f] mb-1">Klik atau seret file ke sini untuk mengunggah</p>
+                            <p class="text-xs text-gray-500">Format: JPG, JPEG, PNG | Maksimal 2MB</p>
+                        </div>
                         @error('bukti')
-                            <p class="text-red-500 text-xs mt-1 font-medium">{{ $message }}</p>
+                            <p class="text-red-500 text-xs mt-2 font-medium">{{ $message }}</p>
                         @enderror
 
                         <!-- Preview -->
                         <div id="preview-container" class="mt-4 hidden">
-                            <p class="text-sm font-medium text-gray-600 mb-2">Pratinjau Gambar:</p>
-                            <img id="preview-image" class="rounded-xl border border-gray-200 w-full max-h-64 object-cover shadow-sm"
-                                alt="Preview">
+                            <p class="text-sm font-semibold text-[#1e3a5f] mb-2">Pratinjau Gambar:</p>
+                            <div class="relative inline-block w-full">
+                                <img id="preview-image" class="rounded-2xl border border-gray-200 w-full h-64 object-cover shadow-sm" alt="Preview">
+                            </div>
                         </div>
                     </div>
 
@@ -163,8 +180,8 @@
                     <div class="bg-blue-50/50 border border-blue-100 rounded-2xl p-6">
                         <div class="flex items-center gap-5">
                             {{-- Avatar User --}}
-                            @if (Auth::user()->avatar)
-                                <img src="{{ asset(Auth::user()->avatar) }}" alt="{{ Auth::user()->name }}"
+                            @if (Auth::user()->file)
+                                <img src="{{ Auth::user()->file->file_stream }}" alt="{{ Auth::user()->name }}"
                                     class="w-16 h-16 rounded-full object-cover border-2 border-white shadow-md flex-shrink-0">
                             @else
                                 <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full flex items-center justify-center border-2 border-white shadow-md flex-shrink-0">
@@ -186,15 +203,12 @@
                     <!-- Tombol -->
                     <div class="flex flex-col-reverse sm:flex-row gap-4 justify-end pt-4 border-t border-gray-100">
                         <a href="{{ route('user.laporan.index') }}"
-                            class="inline-flex items-center justify-center px-8 py-3 bg-white text-gray-600 font-bold border border-gray-200 rounded-xl hover:bg-gray-50 hover:text-gray-900 shadow-sm transition-all">
+                            class="inline-flex items-center justify-center px-8 py-3 bg-white text-gray-600 font-semibold border border-gray-200 rounded-full hover:bg-gray-50 hover:text-gray-900 shadow-sm transition-all duration-300 w-full sm:w-auto">
                             Batalkan
                         </a>
                         <button type="submit"
-                            class="sd-btn-register hover:-translate-y-1 transition-transform duration-300 w-full sm:w-auto" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-weight: bold;">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 1.414L10.586 9H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.414 1.414l3-3a1 1 0 000-1.414z" clip-rule="evenodd" />
-                            </svg>
-                            <span>Kirim Laporan</span>
+                            class="inline-flex items-center justify-center px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full shadow-sm hover:shadow-md transition-colors duration-300 w-full sm:w-auto">
+                            Kirim Laporan
                         </button>
                     </div>
                 </form>
@@ -539,3 +553,229 @@
     });
     </script>
 @endsection
+
+@push('scripts')
+<script>
+    // Canvas Vector Abstract Background Script (Turbo-Compatible)
+    if (!window.initAbstractCanvas) {
+        window.initAbstractCanvas = function() {
+            if (window.abstractCanvasAnimationId) {
+                cancelAnimationFrame(window.abstractCanvasAnimationId);
+            }
+
+            const canvas = document.getElementById('abstract-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            let width, height;
+            let mouse = { x: -1000, y: -1000 };
+            let targetMouse = { x: -1000, y: -1000 };
+
+            function resize() {
+                if (width !== window.innerWidth || height !== window.innerHeight) {
+                    width = window.innerWidth;
+                    height = window.innerHeight;
+                    canvas.width = width;
+                    canvas.height = height;
+                    initWaves();
+                }
+            }
+
+            window.removeEventListener('resize', window._abstractCanvasResize);
+            window.removeEventListener('mousemove', window._abstractCanvasMouseMove);
+            window.removeEventListener('mouseout', window._abstractCanvasMouseOut);
+            window.removeEventListener('scroll', window._abstractCanvasScroll);
+
+            window._abstractCanvasResize = resize;
+            window._abstractCanvasMouseMove = (e) => {
+                targetMouse.x = e.clientX;
+                targetMouse.y = e.clientY;
+            };
+            window._abstractCanvasMouseOut = () => {
+                targetMouse.x = -1000;
+                targetMouse.y = -1000;
+            };
+            
+            let scrollY = window.scrollY;
+            window._abstractCanvasScroll = () => {
+                scrollY = window.scrollY;
+            };
+
+            window.addEventListener('resize', window._abstractCanvasResize);
+            window.addEventListener('mousemove', window._abstractCanvasMouseMove);
+            window.addEventListener('mouseout', window._abstractCanvasMouseOut);
+            window.addEventListener('scroll', window._abstractCanvasScroll);
+
+            class Wave {
+                constructor(getGradient, yOffset, amplitude, speed, wavelength) {
+                    this.getGradient = getGradient;
+                    this.yOffset = yOffset; 
+                    this.amplitude = amplitude; 
+                    this.speed = speed; 
+                    this.wavelength = wavelength; 
+                    this.points = [];
+                    this.time = Math.random() * 100;
+                }
+
+                init() {
+                    this.points = [];
+                    let numPoints = Math.ceil(width / 25) + 2; 
+                    for(let i = 0; i < numPoints; i++) {
+                        let startX = (i - 1) * 25;
+                        let startBaseY = height * this.yOffset;
+                        let startY = startBaseY + Math.sin(this.time + startX / this.wavelength) * this.amplitude;
+                        this.points.push({
+                            x: startX,
+                            baseY: startBaseY,
+                            y: startY,
+                            vy: 0,
+                            spring: 0.05, 
+                            friction: 0.90 
+                        });
+                    }
+                }
+
+                update() {
+                    this.time += this.speed;
+                    for(let i = 0; i < this.points.length; i++) {
+                        let pt = this.points[i];
+                        
+                        let targetY = pt.baseY + Math.sin(this.time + pt.x / this.wavelength) * this.amplitude;
+                        
+                        let dx = mouse.x - pt.x;
+                        let dy = mouse.y - targetY;
+                        let distance = Math.sqrt(dx*dx + dy*dy);
+                        
+                        if (distance < 200) {
+                            let force = Math.pow((200 - distance) / 200, 2); 
+                            let pushDir = (dy > 0) ? -1 : 1; 
+                            targetY += pushDir * force * 60;
+                        }
+                        
+                        let forceY = (targetY - pt.y) * pt.spring;
+                        pt.vy += forceY;
+                        pt.vy *= pt.friction;
+                        pt.y += pt.vy;
+                    }
+                }
+
+                draw() {
+                    ctx.beginPath();
+                    ctx.moveTo(this.points[0].x, this.points[0].y);
+                    
+                    for(let i = 0; i < this.points.length - 1; i++) {
+                        let cx = (this.points[i].x + this.points[i+1].x) / 2;
+                        let cy = (this.points[i].y + this.points[i+1].y) / 2;
+                        ctx.quadraticCurveTo(this.points[i].x, this.points[i].y, cx, cy);
+                    }
+                    
+                    let last = this.points[this.points.length - 1];
+                    ctx.lineTo(last.x, last.y);
+                    ctx.lineTo(width, height * 2 + scrollY);
+                    ctx.lineTo(0, height * 2 + scrollY);
+                    ctx.closePath();
+                    
+                    ctx.fillStyle = this.getGradient(ctx, width, height);
+                    ctx.fill();
+                }
+            }
+
+            let waves = [];
+            function initWaves() {
+                waves = [
+                    new Wave((ctx, w, h) => {
+                        let grad = ctx.createLinearGradient(0, h*0.2, 0, h*1.2);
+                        grad.addColorStop(0, 'rgba(140, 190, 250, 0.7)');
+                        grad.addColorStop(1, 'rgba(180, 215, 255, 0.1)');
+                        return grad;
+                    }, 0.35, 40, 0.005, 600),
+
+                    new Wave((ctx, w, h) => {
+                        let grad = ctx.createLinearGradient(0, h*0.3, 0, h*1.2);
+                        grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
+                        grad.addColorStop(1, 'rgba(245, 250, 255, 0.5)');
+                        return grad;
+                    }, 0.45, 30, 0.003, 500),
+
+                    new Wave((ctx, w, h) => {
+                        let grad = ctx.createLinearGradient(0, h*0.4, 0, h*1.1);
+                        grad.addColorStop(0, 'rgba(245, 225, 130, 0.5)'); 
+                        grad.addColorStop(1, 'rgba(255, 255, 255, 0)'); 
+                        return grad;
+                    }, 0.55, 45, 0.007, 700)
+                ];
+                waves.forEach(w => w.init());
+            }
+
+            function animate() {
+                if (!canvas.isConnected) {
+                    cancelAnimationFrame(window.abstractCanvasAnimationId);
+                    return;
+                }
+
+                mouse.x += (targetMouse.x - mouse.x) * 0.1;
+                mouse.y += (targetMouse.y - mouse.y) * 0.1;
+
+                ctx.fillStyle = '#e8eff5'; 
+                ctx.fillRect(0, 0, width, height);
+
+                ctx.save();
+                ctx.translate(0, -scrollY * 0.4); 
+
+                let glowX = width * 0.15;
+                let glowY = height * 0.4;
+                let gradGlow = ctx.createRadialGradient(glowX, glowY, 0, glowX, glowY, width * 0.3);
+                gradGlow.addColorStop(0, 'rgba(245, 235, 150, 0.15)'); 
+                gradGlow.addColorStop(1, 'rgba(245, 235, 150, 0)');
+                ctx.fillStyle = gradGlow;
+                ctx.beginPath();
+                ctx.arc(glowX, glowY, width * 0.3, 0, Math.PI*2);
+                ctx.fill();
+
+                waves.forEach(w => {
+                    w.update();
+                    w.draw();
+                });
+
+                ctx.save();
+                ctx.translate(width * 0.9, height * 0.08);
+                
+                let dxD = mouse.x - (width * 0.9);
+                let dyD = mouse.y - (height * 0.08);
+                let distD = Math.sqrt(dxD*dxD + dyD*dyD);
+                if(distD < 300) {
+                    let f = (300 - distD)/300;
+                    ctx.translate(-(dxD/distD)*f*20, -(dyD/distD)*f*20);
+                }
+
+                ctx.rotate(Math.PI / 4);
+                
+                ctx.fillStyle = 'rgba(74, 144, 226, 0.4)';
+                ctx.fillRect(-15, -15, 30, 30);
+                
+                ctx.fillStyle = 'rgba(120, 175, 240, 0.3)';
+                ctx.fillRect(5, 5, 25, 25);
+                
+                ctx.strokeStyle = 'rgba(150, 190, 250, 0.4)';
+                ctx.lineWidth = 1.5;
+                ctx.strokeRect(20, 20, 15, 15);
+
+                ctx.restore(); 
+                ctx.restore(); 
+
+                window.abstractCanvasAnimationId = requestAnimationFrame(animate);
+            }
+
+            resize();
+            animate();
+        };
+
+        document.addEventListener('turbo:load', window.initAbstractCanvas);
+    }
+    
+    // Always trigger init on execution if DOM is ready
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+        setTimeout(window.initAbstractCanvas, 100);
+    }
+</script>
+@endpush

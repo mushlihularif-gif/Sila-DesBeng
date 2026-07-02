@@ -177,12 +177,13 @@
 
         /* ============ STAT CARDS ============ */
         .stat-card {
-            background: rgba(255,255,255,0.85);
+            background: rgba(255,255,255,0.60);
             backdrop-filter: blur(16px);
-            border: 1px solid rgba(0,0,0,0.08);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(243,244,246,1);
             border-radius: 16px; padding: 32px; text-align: center;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
         }
         .stat-card:hover {
             transform: scale(1.05) translateY(-8px);
@@ -225,13 +226,14 @@
 
         /* ============ CATEGORY CARDS ============ */
         .cat-card {
-            background: rgba(255,255,255,0.85);
+            background: rgba(255,255,255,0.60);
             backdrop-filter: blur(16px);
-            border: 1px solid rgba(0,0,0,0.08);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(243,244,246,1);
             border-radius: 16px; padding: 24px; text-align: center;
             overflow: hidden; position: relative;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
         }
         .cat-card:hover { transform: scale(1.05); }
         .cat-card-overlay {
@@ -517,7 +519,7 @@
     <div class="cta-orb cta-orb-tl"></div>
     <div class="cta-orb cta-orb-br"></div>
     <div class="container mx-auto px-4 md:px-6 text-center relative" style="z-index:10">
-        <div class="cta-house"><img src="{{ asset('User/img/pelaporanicon/17.png') }}" alt="Icon" class="h-20 w-auto object-contain mx-auto inline-block"></div>
+        <!-- Ikon rumah dihapus atas permintaan user -->
         <h2 class="cta-title">Mari Bersama Membangun<br>Lingkungan yang Lebih Baik</h2>
         <p class="cta-desc">
             Suara Anda adalah kunci kemajuan. Bersama kita wujudkan.
@@ -544,7 +546,7 @@
 
 <!-- ==================== SCRIPTS ==================== -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+(() => {
     // Smooth Scroll
     document.querySelectorAll('.nav-scroll').forEach(a => {
         a.addEventListener('click', function(e) {
@@ -591,7 +593,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }, { threshold: 0.1 });
     fadeEls.forEach(el => fadeObserver.observe(el));
-});
+})();
 </script>
 
 </div>
@@ -599,7 +601,7 @@ document.addEventListener('DOMContentLoaded', function() {
 @push('scripts')
 <script>
     // Canvas Vector Abstract Background Script
-    document.addEventListener('DOMContentLoaded', () => {
+    (() => {
         const canvas = document.getElementById('abstract-canvas');
         if (!canvas) return;
         const ctx = canvas.getContext('2d');
@@ -742,7 +744,12 @@ document.addEventListener('DOMContentLoaded', function() {
             waves.forEach(w => w.init());
         }
 
+        let animationId;
         function animate() {
+            if (!document.body.contains(canvas)) {
+                cancelAnimationFrame(animationId);
+                return;
+            }
             // Lerp mouse
             mouse.x += (targetMouse.x - mouse.x) * 0.1;
             mouse.y += (targetMouse.y - mouse.y) * 0.1;
@@ -800,12 +807,12 @@ document.addEventListener('DOMContentLoaded', function() {
             ctx.restore(); // Restore efek rotasi wajik
             ctx.restore(); // Restore efek Parallax Scroll
 
-            requestAnimationFrame(animate);
+            animationId = requestAnimationFrame(animate);
         }
 
         resize();
         animate();
-    });
+    })();
 </script>
 @endpush
 

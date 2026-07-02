@@ -165,9 +165,8 @@
                 <div class="max-w-7xl mx-auto">
                     <!-- Judul Populer -->
                     <div class="text-center mb-8 relative">
-                        <h2
-                            class="text-3xl font-bold bg-gradient-to-r from-[#115789] to-blue-300 bg-clip-text text-transparent relative inline-block drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]">
-                            Populer
+                        <h2 class="text-3xl font-bold mb-2">
+                            <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Populer</span>
                         </h2>
                     </div>
                     <!-- Flex Container (Centered) -->
@@ -276,9 +275,9 @@
                 <div class="max-w-7xl mx-auto">
 
                     <div class="text-center mb-16 relative">
-                        <h2
-                            class="text-3xl font-bold bg-gradient-to-r from-[#115789] to-blue-300 bg-clip-text text-transparent relative inline-block drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]">
-                            Unit Pelayanan
+                        <h2 class="text-3xl font-bold mb-2">
+                            <span class="bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">Unit</span> 
+                            <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Pelayanan</span>
                         </h2>
                     </div>
 
@@ -386,9 +385,9 @@
             <div id="grafik-umum" class="max-w-6xl mx-auto px-6 py-16">
                 <!-- Title dengan gradient -->
                 <div class="text-center mb-6">
-                    <h2
-                        class="text-3xl font-bold bg-gradient-to-r from-[#115789] to-blue-300 bg-clip-text text-transparent relative inline-block drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]">
-                        Grafik Umum
+                    <h2 class="text-3xl font-bold mb-2">
+                        <span class="bg-gradient-to-r from-gray-600 to-gray-600 bg-clip-text text-transparent">Grafik</span> 
+                        <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Umum</span>
                     </h2>
                 </div>
 
@@ -488,9 +487,33 @@
                     </div>
                     <!-- Tombol Lihat Lainnya -->
                     <div class="text-center">
-                        <a href="{{ route('bumdes.laporan') }}"
-                            class="inline-block px-10 py-3 bg-white/70 backdrop-blur-sm text-[#45aaf2] border-2 border-[#45aaf2] rounded-full font-semibold hover:bg-[#45aaf2] hover:text-white transition-all duration-300 shadow-md hover:shadow-xl">
-                            Lihat Lainnya
+                        <style>
+                            .btn-lihat-lainnya {
+                                display: inline-flex; align-items: center; justify-content: center;
+                                padding: 12px 40px; font-weight: 600;
+                                color: #2563eb; background: rgba(255, 255, 255, 0.7);
+                                backdrop-filter: blur(4px);
+                                border: 2px solid #2563eb; border-radius: 9999px;
+                                cursor: pointer; transition: color 0.5s ease;
+                                position: relative; overflow: hidden;
+                                text-decoration: none;
+                                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                            }
+                            .btn-lihat-lainnya:hover {
+                                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+                                color: #fff !important;
+                            }
+                            .btn-lihat-lainnya::before {
+                                content: ''; position: absolute; inset: 0;
+                                background: #2563eb; transform: translateY(100%);
+                                transition: transform 0.5s ease;
+                                z-index: 0;
+                            }
+                            .btn-lihat-lainnya:hover::before { transform: translateY(0); }
+                            .btn-lihat-lainnya span { position: relative; z-index: 1; }
+                        </style>
+                        <a href="{{ route('bumdes.laporan') }}" class="btn-lihat-lainnya">
+                            <span>Lihat Lainnya</span>
                         </a>
                     </div>
                 </div>
@@ -524,9 +547,9 @@
                 <div class="relative z-10">
                     <!-- Title -->
                     <div class="text-center mb-10">
-                        <h2
-                            class="text-3xl font-bold bg-gradient-to-r from-[#115789] to-blue-300 bg-clip-text text-transparent relative inline-block drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]">
-                            Tentang Kami
+                        <h2 class="text-3xl font-bold mb-2">
+                            <span class="bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">Tentang</span> 
+                            <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Kami</span>
                         </h2>
                     </div>
 

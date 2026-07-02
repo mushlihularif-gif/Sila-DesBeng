@@ -81,7 +81,7 @@
             display: inline-block; padding: 12px 40px; color: #ffffff;
             border-radius: 9999px; font-size: 15px; font-weight: 500;
             text-decoration: none; transition: all 0.3s; border: none; outline: none; cursor: pointer;
-            background: linear-gradient(to right, #7dc8f0 0%, #45aaf2 100%);
+            background: linear-gradient(to right, #60a5fa 0%, #2563eb 100%);
         }
         .sd-btn-register:hover { box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
         
@@ -394,8 +394,7 @@
 
                 {{-- Tombol Daftar dengan Gradient Background --}}
                 <button id="btn-open-register-mobile" type="button"
-                    class="w-full px-6 py-3 text-white rounded-full text-[15px] font-medium hover:shadow-lg transition-all duration-300"
-                    style="background: linear-gradient(to right, #7dc8f0 0%, #78c7f0 3%, #73c6f0 6%, #6ec5f0 9%, #69c4f0 12%, #64c3f0 15%, #5fc2f0 18%, #5ac1f0 21%, #55c0f0 24%, #50bff0 27%, #4bbef0 30%, #4abdf1 33%, #49bcf1 36%, #48bbf1 39%, #47baf1 42%, #46b9f1 45%, #45b8f2 48%, #45b7f2 51%, #45b6f2 54%, #45b5f2 57%, #45b4f2 60%, #45b3f2 63%, #45b2f2 66%, #45b1f2 69%, #45b0f2 72%, #45aff2 75%, #45aef2 78%, #45adf2 81%, #45acf2 84%, #45abf2 87%, #45aaf2 90%, #45aaf2 93%, #45aaf2 96%, #45aaf2 100%);">
+                    class="w-full px-6 py-3 text-white rounded-full text-[15px] font-medium hover:shadow-lg transition-all duration-300 bg-gradient-to-r from-blue-400 to-blue-600">
                     Daftar
                 </button>
             </div>

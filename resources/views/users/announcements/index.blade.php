@@ -24,7 +24,7 @@
 
             {{-- Filter & Search Bar --}}
             <div class="max-w-4xl mx-auto mb-12 animate-section">
-                <div class="backdrop-blur-sm bg-white/70 rounded-3xl p-4 md:p-6 border border-white/80 shadow-lg">
+                <div class="backdrop-blur-md bg-white/60 rounded-2xl p-4 md:p-6 border border-gray-100 shadow-sm">
                     <div class="flex flex-col md:flex-row gap-6 justify-between items-center">
                         
                         {{-- Filter Pills --}}
@@ -80,7 +80,7 @@
             @if($announcements->count() > 0)
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-section">
                     @foreach($announcements as $item)
-                        <a href="{{ route('announcements.show', $item->id) }}" class="group flex flex-col backdrop-blur-sm bg-white/70 rounded-3xl overflow-hidden border border-white/80 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
+                        <a href="{{ route('announcements.show', $item->id) }}" class="group flex flex-col backdrop-blur-md bg-white/60 rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
                             
                             {{-- Image Header --}}
                             <div class="h-56 relative overflow-hidden bg-gray-100">

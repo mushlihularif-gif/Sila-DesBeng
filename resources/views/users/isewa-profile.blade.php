@@ -18,8 +18,9 @@
             <div class="mb-20 relative animate-section">
                 <div class="flex items-start justify-between gap-8">
                     <div class="flex-1">
-                        <h2 class="text-3xl md:text-4xl font-bold mb-3 bg-gradient-to-r from-[#1a1a1a] via-[#0099ff] to-[#33b5ff] bg-clip-text text-transparent">
-                            Cerita Kami
+                        <h2 class="text-3xl md:text-4xl font-bold mb-3">
+                            <span class="bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">Cerita</span>
+                            <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Kami</span>
                         </h2>
                         <p class="text-lg font-bold text-gray-800 mb-4">
                             Langkah Awal Mewujudkan Digitalisasi Bengkalis
@@ -46,8 +47,9 @@
 
             <!-- Nilai Kami Section -->
             <div class="mb-20 animate-section">
-                <h2 class="text-3xl md:text-4xl font-bold mb-6 text-center bg-gradient-to-r from-[#1a1a1a] via-[#0099ff] to-[#33b5ff] bg-clip-text text-transparent">
-                    Nilai Kami
+                <h2 class="text-3xl md:text-4xl font-bold mb-6 text-center">
+                    <span class="bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">Nilai</span>
+                    <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Kami</span>
                 </h2>
                 <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-lg p-8 border border-gray-200 hover:-translate-y-2 transition-all duration-300">
                     <div class="space-y-4">
@@ -92,8 +94,9 @@
 
             <!-- Fungsi Utama Section -->
             <div class="mb-20 animate-section">
-                <h2 class="text-3xl md:text-4xl font-bold mb-6 text-center bg-gradient-to-r from-[#1a1a1a] via-[#0099ff] to-[#33b5ff] bg-clip-text text-transparent">
-                    Fungsi Utama
+                <h2 class="text-3xl md:text-4xl font-bold mb-6 text-center">
+                    <span class="bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">Fungsi</span>
+                    <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Utama</span>
                 </h2>
                 <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-lg p-8 border border-gray-200 hover:-translate-y-2 transition-all duration-300">
                     <div class="space-y-4">
@@ -169,8 +172,8 @@
 
             <!-- Misi Section -->
             <div class="mb-20 animate-section">
-                <h2 class="text-3xl md:text-4xl font-bold mb-6 text-center bg-gradient-to-r from-[#1a1a1a] via-[#0099ff] to-[#33b5ff] bg-clip-text text-transparent">
-                    Misi
+                <h2 class="text-3xl md:text-4xl font-bold mb-6 text-center">
+                    <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Misi</span>
                 </h2>
                 <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-lg p-8 border border-gray-200 hover:-translate-y-2 transition-all duration-300">
                     <div class="space-y-4">
@@ -208,8 +211,9 @@
 
             <!-- Struktur Pengembang SiladesBeng Section -->
             <div class="mb-16 animate-section">
-                <h2 class="text-3xl md:text-4xl font-bold mb-12 text-center bg-gradient-to-r from-[#1a1a1a] via-[#0099ff] to-[#33b5ff] bg-clip-text text-transparent">
-                    Struktur Pengembang SiladesBeng
+                <h2 class="text-3xl md:text-4xl font-bold mb-12 text-center">
+                    <span class="bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">Struktur Pengembang</span>
+                    <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">SiladesBeng</span>
                 </h2>
                 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">

@@ -49,7 +49,7 @@
             <!-- Statistik -->
             <div class="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-3 gap-6 mb-12 animate-section">
                 <!-- Total -->
-                <div class="backdrop-blur-sm bg-white/70 rounded-3xl border border-white/80 p-6 flex flex-col items-center justify-center shadow-sm hover:shadow-md transition-all">
+                <div class="backdrop-blur-md bg-white/60 rounded-2xl border border-gray-100 p-6 flex flex-col items-center justify-center shadow-sm hover:shadow-md transition-all">
                     <div class="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mb-4">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
                     </div>
@@ -58,7 +58,7 @@
                     <div class="stat-bar"><div class="stat-bar-fill blue"></div></div>
                 </div>
                 <!-- Pending -->
-                <div class="backdrop-blur-sm bg-white/70 rounded-3xl border border-white/80 p-6 flex flex-col items-center justify-center shadow-sm hover:shadow-md transition-all">
+                <div class="backdrop-blur-md bg-white/60 rounded-2xl border border-gray-100 p-6 flex flex-col items-center justify-center shadow-sm hover:shadow-md transition-all">
                     <div class="w-12 h-12 rounded-full bg-yellow-50 text-yellow-600 flex items-center justify-center mb-4">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     </div>
@@ -67,7 +67,7 @@
                     <div class="stat-bar"><div class="stat-bar-fill yellow"></div></div>
                 </div>
                 <!-- Proses -->
-                <div class="backdrop-blur-sm bg-white/70 rounded-3xl border border-white/80 p-6 flex flex-col items-center justify-center shadow-sm hover:shadow-md transition-all">
+                <div class="backdrop-blur-md bg-white/60 rounded-2xl border border-gray-100 p-6 flex flex-col items-center justify-center shadow-sm hover:shadow-md transition-all">
                     <div class="w-12 h-12 rounded-full bg-indigo-50 text-indigo-500 flex items-center justify-center mb-4">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                     </div>
@@ -76,7 +76,7 @@
                     <div class="stat-bar"><div class="stat-bar-fill purple"></div></div>
                 </div>
                 <!-- Selesai -->
-                <div class="backdrop-blur-sm bg-white/70 rounded-3xl border border-white/80 p-6 flex flex-col items-center justify-center shadow-sm hover:shadow-md transition-all">
+                <div class="backdrop-blur-md bg-white/60 rounded-2xl border border-gray-100 p-6 flex flex-col items-center justify-center shadow-sm hover:shadow-md transition-all">
                     <div class="w-12 h-12 rounded-full bg-green-50 text-green-500 flex items-center justify-center mb-4">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     </div>
@@ -85,7 +85,7 @@
                     <div class="stat-bar"><div class="stat-bar-fill green"></div></div>
                 </div>
                 <!-- Ditolak -->
-                <div class="backdrop-blur-sm bg-white/70 rounded-3xl border border-white/80 p-6 flex flex-col items-center justify-center shadow-sm hover:shadow-md transition-all">
+                <div class="backdrop-blur-md bg-white/60 rounded-2xl border border-gray-100 p-6 flex flex-col items-center justify-center shadow-sm hover:shadow-md transition-all">
                     <div class="w-12 h-12 rounded-full bg-red-50 text-red-400 flex items-center justify-center mb-4">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     </div>
@@ -97,7 +97,7 @@
 
             <!-- Filter & Search Bar -->
             <div class="max-w-5xl mx-auto mb-12 animate-section">
-                <div class="backdrop-blur-sm bg-white/70 rounded-3xl p-4 md:p-6 border border-white/80 shadow-lg">
+                <div class="backdrop-blur-md bg-white/60 rounded-2xl p-4 md:p-6 border border-gray-100 shadow-sm">
                     <div class="flex flex-col lg:flex-row gap-6 justify-between items-center w-full">
                         
                         {{-- Filter Pills --}}
@@ -159,7 +159,7 @@
 
             <div id="laporan-list-container" class="transition-all duration-300" :class="{ 'opacity-50 pointer-events-none scale-[0.98]': loading }">
             <!-- Table Laporan -->
-            <div class="bg-white/80 backdrop-blur-md rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="bg-white/60 backdrop-blur-md rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50/80">
