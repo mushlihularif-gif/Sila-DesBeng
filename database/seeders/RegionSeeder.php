@@ -14,6 +14,8 @@ class RegionSeeder extends Seeder
     {
         // 1. Create Services
         $servicePenyewaan = \App\Models\Service::firstOrCreate(['slug' => 'penyewaan-alat'], ['name' => 'Penyewaan Alat']);
+        $serviceMobil = \App\Models\Service::firstOrCreate(['slug' => 'penyewaan-mobil'], ['name' => 'Penyewaan Mobil']);
+        $serviceFasilitas = \App\Models\Service::firstOrCreate(['slug' => 'fasilitas-umum'], ['name' => 'Fasilitas Umum']);
         $serviceGas = \App\Models\Service::firstOrCreate(['slug' => 'penjualan-gas'], ['name' => 'Penjualan Gas']);
         $serviceLaporan = \App\Models\Service::firstOrCreate(['slug' => 'pelaporan-warga'], ['name' => 'Pelaporan Warga']);
 
@@ -42,6 +44,8 @@ class RegionSeeder extends Seeder
         // 5. Attach services to Desa
         $desaPDT->services()->syncWithoutDetaching([
             $servicePenyewaan->id => ['is_active' => true],
+            $serviceMobil->id => ['is_active' => true],
+            $serviceFasilitas->id => ['is_active' => true],
             $serviceGas->id => ['is_active' => true],
             $serviceLaporan->id => ['is_active' => true],
         ]);
