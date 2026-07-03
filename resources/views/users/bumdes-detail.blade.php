@@ -5,7 +5,7 @@
     <section class="relative z-10 min-h-screen pt-40 pb-16">
         <!-- Decorative Background Elements -->
         <div class="absolute inset-0 z-0 pointer-events-none">
-            <img src="{{ asset('Admin/img/elements/background.png') }}" class="w-full h-full object-cover" alt="Background">
+            <img src="{{ asset('Admin/img/elements/background.webp') }}" class="w-full h-full object-cover" alt="Background">
         </div>
 
         <div class="max-w-7xl mx-auto px-6 relative z-10">

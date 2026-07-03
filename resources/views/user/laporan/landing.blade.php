@@ -6,7 +6,7 @@
         .page-wrapper {
             position: relative; z-index: 10;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #f0f4f8 url('{{ asset("Admin/img/elements/background.png") }}') no-repeat center center fixed;
+            background: #f0f4f8 url('{{ asset("Admin/img/elements/background.webp") }}') no-repeat center center fixed;
             background-size: cover;
             color: #fff;
             min-height: 100vh;
@@ -35,7 +35,7 @@
         }
         .hero-bg {
             position: absolute; inset: 0; z-index: 0;
-            /* Background dihapus - menggunakan background.png dari body */
+            /* Background dihapus - menggunakan background.webp dari body */
         }
         .hero-content { position: relative; z-index: 10; }
 
@@ -152,11 +152,11 @@
         .section {
             z-index: 10;
             z-index: 10; padding: 96px 0; position: relative; }
-        .section-stats { /* transparent - background.png terlihat */ }
-        .section-kategori { /* transparent - background.png terlihat */ }
-        .section-cara { /* transparent - background.png terlihat */ }
+        .section-stats { /* transparent - background.webp terlihat */ }
+        .section-kategori { /* transparent - background.webp terlihat */ }
+        .section-cara { /* transparent - background.webp terlihat */ }
         .section-cta {
-            /* transparent - background.png terlihat */
+            /* transparent - background.webp terlihat */
             overflow: hidden;
         }
 

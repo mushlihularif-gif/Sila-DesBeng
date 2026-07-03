@@ -332,7 +332,7 @@
                         <div class="flex items-center justify-between">
                             {{-- Logo SiladesBeng (Kiri) --}}
                             <div class="flex-shrink-0 flex justify-center" style="width: 110px;">
-                                <img src="{{ asset('Admin/img/illustrations/logodomain.png') }}" alt="Logo SiladesBeng" class="object-contain" style="width: 100px; height: 100px;">
+                                <img src="{{ asset('Admin/img/illustrations/logodomain.webp') }}" alt="Logo SiladesBeng" class="object-contain" style="width: 100px; height: 100px;">
                             </div>
 
                             {{-- Judul Tengah --}}

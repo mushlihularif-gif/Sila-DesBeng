@@ -9,7 +9,7 @@
     <title>Dashboard - SiladesBeng Admin</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="description" content="" />
-    <link rel="icon" type="image/png" href="{{ asset('Admin/img/illustrations/logodomain.png') }}?v={{ time() }}" />
+    <link rel="icon" type="image/png" href="{{ asset('Admin/img/illustrations/logodomain.webp') }}?v={{ time() }}" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -442,7 +442,7 @@
                 <span class="visually-hidden">Loading...</span>
             </div>
             <!-- Logo berdenyut di tengah -->
-            <img src="{{ asset('Admin/img/illustrations/logodomain.png') }}" alt="Logo" class="preloader-logo">
+            <img src="{{ asset('Admin/img/illustrations/logodomain.webp') }}" alt="Logo" class="preloader-logo">
         </div>
     </div>
     <div class="layout-wrapper layout-content-navbar">
@@ -452,7 +452,7 @@
                 <div class="app-brand demo">
                     <a href="{{ route('admin.dashboard') }}" class="app-brand-link">
                         <span class="app-brand-logo demo">
-                            <img src="{{ asset('Admin/img/illustrations/logodomain.png') }}" alt="Logo"
+                            <img src="{{ asset('Admin/img/illustrations/logodomain.webp') }}" alt="Logo"
                                 style="max-height: 40px; width: auto; object-fit: contain;">
                         </span>
                         <span class="app-brand-text demo menu-text fw-bolder ms-2 fs-4" style="text-transform: capitalize;">Administrator</span>

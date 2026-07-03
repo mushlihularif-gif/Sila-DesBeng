@@ -332,14 +332,14 @@
 <div class="chatbot-fab" id="chatbot-fab">
     <div class="chatbot-tooltip" id="chatbot-tooltip"><span id="tooltip-text"></span><span class="cursor">|</span></div>
     <div class="notification-badge" id="chatbot-badge">1</div>
-    <img src="{{ asset('User/img/logo/logocb.png') }}" alt="SiladesBeng Assistant" draggable="false">
+    <img src="{{ asset('User/img/logo/logocb.webp') }}" alt="SiladesBeng Assistant" draggable="false">
 </div>
 
 <!-- Chat Window -->
 <div class="chatbot-window" id="chatbot-window">
     <div class="chatbot-header">
         <div class="chatbot-header-info">
-            <img src="{{ asset('User/img/logo/logocb.png') }}" alt="AI">
+            <img src="{{ asset('User/img/logo/logocb.webp') }}" alt="AI">
             <div>
                 <h4 class="chatbot-title">SiladesBeng Assistant</h4>
                 <div class="chatbot-subtitle"><span class="online-dot"></span> Online - AI Ready</div>

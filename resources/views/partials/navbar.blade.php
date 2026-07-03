@@ -98,7 +98,7 @@
     <div class="sd-nav-container">
         <!-- Logo -->
         <a href="{{ route('beranda') }}" class="sd-nav-logo">
-            <img src="{{ asset('User/img/logo/iSewa.png') }}" alt="SiladesBeng Logo">
+            <img src="{{ asset('User/img/logo/iSewa.webp') }}" alt="SiladesBeng Logo">
         </a>
 
         <!-- Menu Desktop -->
@@ -319,7 +319,7 @@
     
     {{-- Header Sidebar --}}
     <div class="py-5 px-5 flex items-center justify-between border-b bg-white">
-        <img src="{{ asset('User/img/logo/iSewa.png') }}" class="h-10" alt="SiladesBeng">
+        <img src="{{ asset('User/img/logo/iSewa.webp') }}" class="h-10" alt="SiladesBeng">
         <button id="sidebar-close" type="button" class="p-2 hover:bg-gray-100 rounded-lg transition">
             <svg class="w-6 h-6 text-gray-600" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />

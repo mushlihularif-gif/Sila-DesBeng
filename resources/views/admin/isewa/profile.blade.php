@@ -106,7 +106,7 @@
                     </p>
                 </div>
                 <div class="col-lg-4 text-center d-none d-lg-block">
-                    <img src="{{ asset('User/img/avatars/logodomain.png') }}" alt="SiladesBeng Logo" class="img-fluid" style="max-width: 250px;">
+                    <img src="{{ asset('User/img/avatars/logodomain.webp') }}" alt="SiladesBeng Logo" class="img-fluid" style="max-width: 250px;">
                 </div>
             </div>
         </div>

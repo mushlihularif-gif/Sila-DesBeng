@@ -36,7 +36,7 @@
                     <!-- Logo with Shadow Overlay -->
                     <div class="relative flex-shrink-0 hidden md:block">
                         <div class="relative">
-                            <img src="{{ asset('User/img/avatars/logodomain.png') }}" 
+                            <img src="{{ asset('User/img/avatars/logodomain.webp') }}" 
                                  alt="SiladesBeng Logo" 
                                  class="w-72 h-72 lg:w-80 lg:h-80 object-contain drop-shadow-xl scale-110">
                             <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-white/60"></div>
