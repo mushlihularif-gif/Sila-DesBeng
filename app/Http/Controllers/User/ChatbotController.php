@@ -17,6 +17,7 @@ class ChatbotController extends Controller
         ]);
 
         $apiKey = env('GEMINI_API_KEY');
+        $model = env('GEMINI_MODEL', 'gemini-2.5-flash');
         if (empty($apiKey)) {
             return response()->json(['error' => 'API Key tidak ditemukan. Hubungi administrator.'], 500);
         }
@@ -76,7 +77,7 @@ Gunakan bahasa Indonesia yang santai, profesional, dan membantu, disertai emoji 
         try {
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json',
-            ])->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={$apiKey}", [
+            ])->post("https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$apiKey}", [
                 'system_instruction' => [
                     'parts' => [
                         ['text' => $systemInstruction]
