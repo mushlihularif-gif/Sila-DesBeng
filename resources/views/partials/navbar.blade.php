@@ -81,7 +81,7 @@
             display: inline-block; padding: 12px 40px; color: #ffffff;
             border-radius: 9999px; font-size: 15px; font-weight: 500;
             text-decoration: none; transition: all 0.3s; border: none; outline: none; cursor: pointer;
-            background: linear-gradient(to right, #60a5fa 0%, #009dff 100%);
+            background: linear-gradient(to right, #60a5fa 0%, #1280f5 100%);
         }
         .sd-btn-register:hover { box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
         
