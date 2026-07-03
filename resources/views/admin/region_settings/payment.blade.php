@@ -71,16 +71,58 @@
                                 </div>
 
                                 <div class="mb-3">
-                                    <label class="form-label fw-semibold text-primary">Pilih Bank</label>
-                                    <select name="bank_name" id="bank_name" class="form-select border-primary" onchange="updateCardPreview()">
-                                        <option value="">-- Pilih Bank --</option>
-                                        <option value="BSI" {{ (old('bank_name', $region->payment_info['bank_name'] ?? '') == 'BSI') ? 'selected' : '' }}>Bank Syariah Indonesia (BSI)</option>
-                                        <option value="BRK Syariah" {{ (old('bank_name', $region->payment_info['bank_name'] ?? '') == 'BRK Syariah') ? 'selected' : '' }}>Bank Riau Kepri Syariah</option>
-                                        <option value="Mandiri" {{ (old('bank_name', $region->payment_info['bank_name'] ?? '') == 'Mandiri') ? 'selected' : '' }}>Bank Mandiri</option>
-                                        <option value="BRI" {{ (old('bank_name', $region->payment_info['bank_name'] ?? '') == 'BRI') ? 'selected' : '' }}>Bank Rakyat Indonesia (BRI)</option>
-                                        <option value="BNI" {{ (old('bank_name', $region->payment_info['bank_name'] ?? '') == 'BNI') ? 'selected' : '' }}>Bank Negara Indonesia (BNI)</option>
-                                        <option value="BCA" {{ (old('bank_name', $region->payment_info['bank_name'] ?? '') == 'BCA') ? 'selected' : '' }}>Bank Central Asia (BCA)</option>
-                                    </select>
+                                    <label class="form-label fw-semibold text-primary d-block">Pilih Bank</label>
+                                    <div class="row g-2">
+                                        @php $currentBank = old('bank_name', $region->payment_info['bank_name'] ?? ''); @endphp
+                                        <div class="col-4">
+                                            <label class="payment-logo-card">
+                                                <input type="radio" name="bank_name" value="BSI" class="payment-radio" onchange="updateCardPreview()" {{ $currentBank == 'BSI' ? 'checked' : '' }}>
+                                                <div class="logo-wrapper">
+                                                    <img src="{{ asset('assets/img/payment_logos/bsi.png') }}" alt="BSI" class="img-fluid payment-logo">
+                                                </div>
+                                            </label>
+                                        </div>
+                                        <div class="col-4">
+                                            <label class="payment-logo-card">
+                                                <input type="radio" name="bank_name" value="BRK Syariah" class="payment-radio" onchange="updateCardPreview()" {{ $currentBank == 'BRK Syariah' ? 'checked' : '' }}>
+                                                <div class="logo-wrapper">
+                                                    <img src="{{ asset('assets/img/payment_logos/brksyariah.png') }}" alt="BRK Syariah" class="img-fluid payment-logo">
+                                                </div>
+                                            </label>
+                                        </div>
+                                        <div class="col-4">
+                                            <label class="payment-logo-card">
+                                                <input type="radio" name="bank_name" value="Mandiri" class="payment-radio" onchange="updateCardPreview()" {{ $currentBank == 'Mandiri' ? 'checked' : '' }}>
+                                                <div class="logo-wrapper">
+                                                    <img src="{{ asset('assets/img/payment_logos/mandiri.png') }}" alt="Mandiri" class="img-fluid payment-logo">
+                                                </div>
+                                            </label>
+                                        </div>
+                                        <div class="col-4">
+                                            <label class="payment-logo-card">
+                                                <input type="radio" name="bank_name" value="BRI" class="payment-radio" onchange="updateCardPreview()" {{ $currentBank == 'BRI' ? 'checked' : '' }}>
+                                                <div class="logo-wrapper">
+                                                    <img src="{{ asset('assets/img/payment_logos/bri.png') }}" alt="BRI" class="img-fluid payment-logo">
+                                                </div>
+                                            </label>
+                                        </div>
+                                        <div class="col-4">
+                                            <label class="payment-logo-card">
+                                                <input type="radio" name="bank_name" value="BNI" class="payment-radio" onchange="updateCardPreview()" {{ $currentBank == 'BNI' ? 'checked' : '' }}>
+                                                <div class="logo-wrapper">
+                                                    <img src="{{ asset('assets/img/payment_logos/bni.png') }}" alt="BNI" class="img-fluid payment-logo">
+                                                </div>
+                                            </label>
+                                        </div>
+                                        <div class="col-4">
+                                            <label class="payment-logo-card">
+                                                <input type="radio" name="bank_name" value="BCA" class="payment-radio" onchange="updateCardPreview()" {{ $currentBank == 'BCA' ? 'checked' : '' }}>
+                                                <div class="logo-wrapper">
+                                                    <img src="{{ asset('assets/img/payment_logos/bca.jpg') }}" alt="BCA" class="img-fluid payment-logo">
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div class="mb-3">
@@ -134,14 +176,42 @@
                                 
                                 <div id="ewallet_fields" style="display: {{ (old('ewallet_active', $region->payment_info['ewallet_active'] ?? false)) ? 'block' : 'none' }}; border-top: 1px dashed #03c3ec; padding-top: 15px;">
                                 <div class="mb-3">
-                                    <label class="form-label fw-semibold text-info">Pilih E-Wallet</label>
-                                    <select name="ewallet_name" class="form-select border-info">
-                                        <option value="">-- Pilih E-Wallet --</option>
-                                        <option value="DANA" {{ (old('ewallet_name', $region->payment_info['ewallet_name'] ?? '') == 'DANA') ? 'selected' : '' }}>DANA</option>
-                                        <option value="OVO" {{ (old('ewallet_name', $region->payment_info['ewallet_name'] ?? '') == 'OVO') ? 'selected' : '' }}>OVO</option>
-                                        <option value="GoPay" {{ (old('ewallet_name', $region->payment_info['ewallet_name'] ?? '') == 'GoPay') ? 'selected' : '' }}>GoPay</option>
-                                        <option value="ShopeePay" {{ (old('ewallet_name', $region->payment_info['ewallet_name'] ?? '') == 'ShopeePay') ? 'selected' : '' }}>ShopeePay</option>
-                                    </select>
+                                    <label class="form-label fw-semibold text-info d-block">Pilih E-Wallet</label>
+                                    <div class="row g-2">
+                                        @php $currentEwallet = old('ewallet_name', $region->payment_info['ewallet_name'] ?? ''); @endphp
+                                        <div class="col-4">
+                                            <label class="payment-logo-card border-info">
+                                                <input type="radio" name="ewallet_name" value="DANA" class="payment-radio" {{ $currentEwallet == 'DANA' ? 'checked' : '' }}>
+                                                <div class="logo-wrapper">
+                                                    <img src="{{ asset('assets/img/payment_logos/dana.png') }}" alt="DANA" class="img-fluid payment-logo">
+                                                </div>
+                                            </label>
+                                        </div>
+                                        <div class="col-4">
+                                            <label class="payment-logo-card border-info">
+                                                <input type="radio" name="ewallet_name" value="OVO" class="payment-radio" {{ $currentEwallet == 'OVO' ? 'checked' : '' }}>
+                                                <div class="logo-wrapper">
+                                                    <img src="{{ asset('assets/img/payment_logos/ovo.png') }}" alt="OVO" class="img-fluid payment-logo">
+                                                </div>
+                                            </label>
+                                        </div>
+                                        <div class="col-4">
+                                            <label class="payment-logo-card border-info">
+                                                <input type="radio" name="ewallet_name" value="GoPay" class="payment-radio" {{ $currentEwallet == 'GoPay' ? 'checked' : '' }}>
+                                                <div class="logo-wrapper">
+                                                    <img src="{{ asset('assets/img/payment_logos/gopay.png') }}" alt="GoPay" class="img-fluid payment-logo">
+                                                </div>
+                                            </label>
+                                        </div>
+                                        <div class="col-4">
+                                            <label class="payment-logo-card border-info">
+                                                <input type="radio" name="ewallet_name" value="ShopeePay" class="payment-radio" {{ $currentEwallet == 'ShopeePay' ? 'checked' : '' }}>
+                                                <div class="logo-wrapper">
+                                                    <img src="{{ asset('assets/img/payment_logos/shopeepay.png') }}" alt="ShopeePay" class="img-fluid payment-logo">
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div class="mb-3">
@@ -250,11 +320,62 @@
     .theme-gold { background: linear-gradient(135deg, #bf953f 0%, #fcf6ba 25%, #b38728 50%, #fbf5b7 75%, #aa771c 100%) !important; }
     .theme-dark { background: linear-gradient(135deg, #232526 0%, #414345 100%) !important; }
     .theme-green { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%) !important; }
+
+    .payment-logo-card {
+        display: block;
+        cursor: pointer;
+        height: 100%;
+        margin-bottom: 0;
+    }
+    .payment-radio {
+        display: none;
+    }
+    .logo-wrapper {
+        border: 2px solid #e7e7e7;
+        border-radius: 8px;
+        padding: 5px 10px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease-in-out;
+        background-color: #fff;
+    }
+    .payment-logo-card:hover .logo-wrapper {
+        border-color: #b1b1b1;
+    }
+    .payment-radio:checked + .logo-wrapper {
+        border-color: #696cff;
+        box-shadow: 0 0 0 1px #696cff;
+    }
+    .payment-logo-card.border-info .payment-radio:checked + .logo-wrapper {
+        border-color: #03c3ec;
+        box-shadow: 0 0 0 1px #03c3ec;
+    }
+    .payment-logo {
+        max-height: 32px;
+        max-width: 100%;
+        object-fit: contain;
+        filter: grayscale(100%);
+        opacity: 0.6;
+        transition: all 0.2s ease-in-out;
+    }
+    .logo-wrapper span {
+        filter: grayscale(100%);
+        opacity: 0.6;
+        transition: all 0.2s ease-in-out;
+    }
+    .payment-radio:checked + .logo-wrapper .payment-logo,
+    .payment-radio:checked + .logo-wrapper span {
+        filter: grayscale(0%);
+        opacity: 1;
+    }
 </style>
 
 <script>
     function updateCardPreview() {
-        const bankName = document.getElementById('bank_name').value || 'BANK / E-WALLET';
+        const checkedBank = document.querySelector('input[name="bank_name"]:checked');
+        const bankName = checkedBank ? checkedBank.value : 'BANK / E-WALLET';
         let accNum = document.getElementById('account_number').value || '0000 0000 0000 0000';
         const accName = document.getElementById('account_name').value || 'PEMILIK';
         const theme = document.getElementById('card_theme').value;
