@@ -187,7 +187,12 @@ class ReceiptGeneratorService
         $y += $lineHeight;
         $this->addText($image, 'Hormat Kami', 130, $y, $normalSize, $black, $fontPath);
         
-        $y += 420; // Ruang untuk tanda tangan (Lebih besar karena teks SiladesBeng dihapus sesuai edit pengguna, tapi butuh ruang)
+        // Tambahkan QR Code Validasi & Branding SiladesBeng
+        $token = hash_hmac('sha256', $booking->id . $booking->order_number, config('app.key'));
+        $qrUrl = url("/validasi/transaksi/rental/{$booking->id}?token={$token}");
+        $this->addFooterTtd($image, $y, $qrUrl, $fontPath, $normalSize, $black);
+        
+        $y += 420; // Ruang untuk QR dan teks
          
         // Simpan bukti transaksi
         $filename = 'receipt_rental_' . $booking->order_number . '_' . time() . '.png';
@@ -379,7 +384,12 @@ class ReceiptGeneratorService
         $y += $lineHeight;
         $this->addText($image, 'Hormat Kami', 130, $y, $normalSize, $black, $fontPath);
         
-        $y += 420; // Ruang untuk tanda tangan (Lebih besar karena teks SiladesBeng dihapus sesuai edit pengguna, tapi butuh ruang)
+        // Tambahkan QR Code Validasi & Branding SiladesBeng
+        $token = hash_hmac('sha256', $order->id . $order->order_number, config('app.key'));
+        $qrUrl = url("/validasi/transaksi/gas/{$order->id}?token={$token}");
+        $this->addFooterTtd($image, $y, $qrUrl, $fontPath, $normalSize, $black);
+        
+        $y += 420; // Ruang untuk tanda tangan
         
         // Simpan bukti transaksi
         $filename = 'receipt_gas_' . $order->order_number . '_' . time() . '.png';
@@ -554,6 +564,11 @@ class ReceiptGeneratorService
         $y += $lineHeight;
         $this->addText($image, 'Hormat Kami', 130, $y, $normalSize, $black, $fontPath);
         
+        // Tambahkan QR Code Validasi & Branding SiladesBeng
+        $token = hash_hmac('sha256', $booking->id . $booking->order_number, config('app.key'));
+        $qrUrl = url("/validasi/transaksi/mobil/{$booking->id}?token={$token}");
+        $this->addFooterTtd($image, $y, $qrUrl, $fontPath, $normalSize, $black);
+        
         $y += 420;
         
         $filename = 'receipt_mobil_' . $booking->order_number . '_' . time() . '.png';
@@ -692,6 +707,11 @@ class ReceiptGeneratorService
         $y += $lineHeight;
         $this->addText($image, 'Hormat Kami', 130, $y, $normalSize, $black, $fontPath);
         
+        // Tambahkan QR Code Validasi & Branding SiladesBeng
+        $token = hash_hmac('sha256', $booking->id . $booking->order_number, config('app.key'));
+        $qrUrl = url("/validasi/transaksi/fasilitas/{$booking->id}?token={$token}");
+        $this->addFooterTtd($image, $y, $qrUrl, $fontPath, $normalSize, $black);
+        
         $y += 420;
         
         $filename = 'receipt_fasilitas_' . $booking->order_number . '_' . time() . '.png';
@@ -801,5 +821,76 @@ class ReceiptGeneratorService
         ];
 
         return $labels[$model->status] ?? ucfirst($model->status);
+    }
+
+    /**
+     * Helper untuk menambahkan QR Code & Teks Branding di Footer
+     */
+    protected function addFooterTtd($image, $y, $url, $fontPath, $normalSize, $black)
+    {
+        $imageWidth = imagesx($image);
+        $qrSize = 250; // Perbesar QR Code sedikit
+        $yQr = $y + 60; // Jarak QR dari tulisan Hormat Kami
+        
+        // Posisikan QR di tengah (Center)
+        $qrX = ($imageWidth - $qrSize) / 2;
+        
+        // 1. Generate & Tempel QR Code via API
+        $qrApiUrl = "https://api.qrserver.com/v1/create-qr-code/?size={$qrSize}x{$qrSize}&data=" . urlencode($url);
+        
+        try {
+            // Kita bypass SSL error jika server lokal
+            $context = stream_context_create([
+                "ssl" => [
+                    "verify_peer" => false,
+                    "verify_peer_name" => false,
+                ]
+            ]);
+            $qrData = @file_get_contents($qrApiUrl, false, $context);
+            if ($qrData) {
+                $qrImage = @imagecreatefromstring($qrData);
+                if ($qrImage) {
+                    // Copy QR Code ke main image
+                    imagecopyresampled($image, $qrImage, $qrX, $yQr, 0, 0, $qrSize, $qrSize, imagesx($qrImage), imagesy($qrImage));
+                    
+                    // Tambahkan Logo SiladesBeng di tengah QR Code
+                    $logoPath = public_path('Admin/img/illustrations/logodomain.png');
+                    if (file_exists($logoPath)) {
+                        $logoImage = @imagecreatefrompng($logoPath);
+                        if ($logoImage) {
+                            $logoSize = $qrSize * 0.35; // Perbesar porsi logo menjadi 35% agar lebih jelas
+                            $logoX = $qrX + ($qrSize - $logoSize) / 2;
+                            $logoY = $yQr + ($qrSize - $logoSize) / 2;
+                            
+                            // Buat background putih untuk logo (padding 6px agar kotak putih proporsional)
+                            imagefilledrectangle($image, $logoX - 6, $logoY - 6, $logoX + $logoSize + 6, $logoY + $logoSize + 6, imagecolorallocate($image, 255, 255, 255));
+                            
+                            // Tempel logo di atas background putih tersebut
+                            imagecopyresampled($image, $logoImage, $logoX, $logoY, 0, 0, $logoSize, $logoSize, imagesx($logoImage), imagesy($logoImage));
+                            imagedestroy($logoImage);
+                        }
+                    }
+                    
+                    imagedestroy($qrImage);
+                }
+            }
+        } catch (\Exception $e) {
+            // Abaikan jika API gagal, lanjut render teks saja
+        }
+        
+        // 2. Tambahkan Branding SiladesBeng di bawah QR (Rata Tengah)
+        $yBranding = $yQr + $qrSize + 40;
+        
+        // Menghitung bounding box teks agar bisa rata tengah
+        $bboxTitle = imagettfbbox($normalSize + 4, 0, $fontPath, 'SiladesBeng');
+        $titleWidth = $bboxTitle[2] - $bboxTitle[0];
+        $titleX = ($imageWidth - $titleWidth) / 2;
+        
+        $bboxDesc = imagettfbbox($normalSize - 4, 0, $fontPath, 'Platform E-Government Kab. Bengkalis');
+        $descWidth = $bboxDesc[2] - $bboxDesc[0];
+        $descX = ($imageWidth - $descWidth) / 2;
+        
+        $this->addText($image, 'SiladesBeng', $titleX, $yBranding, $normalSize + 4, $black, $fontPath, true); // Bold
+        $this->addText($image, 'Platform E-Government Kab. Bengkalis', $descX, $yBranding + 35, $normalSize - 4, $black, $fontPath);
     }
 }

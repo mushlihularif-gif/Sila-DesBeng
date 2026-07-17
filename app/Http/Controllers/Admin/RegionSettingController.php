@@ -99,9 +99,7 @@ class RegionSettingController extends Controller
         if (in_array($gasServiceId, $selectedServices) && !$request->has('gas_delivery_antar_active') && !$request->has('gas_delivery_jemput_active')) {
             return redirect()->back()->with('error', 'Gagal: Minimal satu metode pengiriman untuk Gas harus diaktifkan!')->withInput();
         }
-        if (in_array($fasilitasServiceId, $selectedServices) && !$request->has('fasilitas_delivery_antar_active') && !$request->has('fasilitas_delivery_jemput_active')) {
-            return redirect()->back()->with('error', 'Gagal: Minimal satu metode pengiriman untuk Fasilitas Umum harus diaktifkan!')->withInput();
-        }
+        // Pengaturan pengiriman untuk Fasilitas Umum telah ditiadakan
 
         // Update whatsapp_name inside payment_info JSON
         $paymentInfo = $region->payment_info ?? [];
@@ -217,5 +215,36 @@ class RegionSettingController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Pengaturan Pembayaran Wilayah berhasil diperbarui.');
+    }
+
+    public function toggleDelivery(Request $request)
+    {
+        $request->validate([
+            'field' => 'required|string',
+            'value' => 'required|boolean'
+        ]);
+
+        $user = auth()->user();
+        $region = Region::find($user->region_id);
+        
+        if (!$region && in_array($user->role, ['super_admin', 'admin'])) {
+            $region = Region::first();
+        }
+
+        if (!$region) {
+            return response()->json(['success' => false, 'message' => 'Region tidak ditemukan.'], 404);
+        }
+
+        $paymentInfo = $region->payment_info ?? [];
+        $paymentInfo[$request->field] = $request->value;
+        
+        $region->update(['payment_info' => $paymentInfo]);
+
+        return response()->json([
+            'success' => true, 
+            'message' => 'Pengaturan berhasil disinkronkan.',
+            'field' => $request->field,
+            'value' => $request->value
+        ]);
     }
 }

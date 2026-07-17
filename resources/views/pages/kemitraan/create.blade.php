@@ -36,9 +36,16 @@
             $userRegionIds = array_merge([auth()->user()->region_id], \App\Models\Region::getAncestorIds(auth()->user()->region_id));
             foreach($kecamatans as $kecamatan) {
                 foreach($kecamatan->children as $desa) {
-                    if(in_array($desa->id, $userRegionIds) && $desa->services->count() > 0) {
-                        $isJoined = true;
-                        break 2;
+                    if(in_array($desa->id, $userRegionIds)) {
+                        // Cek apakah desa ini sudah punya admin
+                        $hasAdmin = $desa->users->filter(function($user) {
+                            return in_array($user->role, ['admin_desa', 'lurah', 'admin']);
+                        })->count() > 0;
+                        
+                        if ($hasAdmin) {
+                            $isJoined = true;
+                            break 2;
+                        }
                     }
                 }
             }
@@ -330,9 +337,9 @@
                     {{-- Kop Surat: Logo Kiri - Judul Tengah - Logo Kanan --}}
                     <div style="padding: 3.5rem 3rem 1.5rem;">
                         <div class="flex items-center justify-between">
-                            {{-- Logo SiladesBeng (Kiri) --}}
-                            <div class="flex-shrink-0 flex justify-center" style="width: 110px;">
-                                <img src="{{ asset('Admin/img/illustrations/logodomain.webp') }}" alt="Logo SiladesBeng" class="object-contain" style="width: 100px; height: 100px;">
+                            {{-- Logo Kabupaten (Kiri) --}}
+                            <div class="flex-shrink-0 flex justify-center pl-4" style="width: 110px;">
+                                <img src="{{ asset('Admin/img/illustrations/logokab.png') }}" alt="Logo Kabupaten Bengkalis" class="h-20 w-20 object-contain">
                             </div>
 
                             {{-- Judul Tengah --}}
@@ -342,9 +349,9 @@
                                 <p class="text-sm text-gray-400 mt-1">Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis</p>
                             </div>
 
-                            {{-- Logo Kabupaten (Kanan) --}}
-                            <div class="flex-shrink-0 w-24 flex justify-center pr-4">
-                                <img src="{{ asset('Admin/img/illustrations/logokab.png') }}" alt="Logo Kabupaten Bengkalis" class="h-20 w-20 object-contain">
+                            {{-- Logo SiladesBeng (Kanan) --}}
+                            <div class="flex-shrink-0 flex justify-center pr-4" style="width: 110px;">
+                                <img src="{{ asset('Admin/img/illustrations/logodomain.webp') }}" alt="Logo SiladesBeng" class="object-contain" style="width: 100px; height: 100px;">
                             </div>
                         </div>
 

@@ -1,5 +1,10 @@
 @extends('admin.layouts.admin')
 
+@php
+    $userRegion = \App\Models\Region::find(auth()->user()->region_id);
+    $paymentInfo = $userRegion->payment_info ?? [];
+@endphp
+
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
         <!-- Breadcrumb -->
@@ -48,7 +53,33 @@
                             @csrf
                             @method('PUT')
                             
-                            <!-- Section: Foto Produk -->
+                            
+                            <!-- STEPS NAVIGATION -->
+                            <ul class="nav nav-pills nav-justified mb-4 wizard-steps" id="formWizard" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="step1-tab" data-bs-toggle="pill" data-bs-target="#step1" type="button" role="tab" aria-controls="step1" aria-selected="true">
+                                        <span class="step-icon"><i class='bx bx-info-circle'></i></span>
+                                        <span class="step-text d-none d-sm-inline ms-1">Info & Media</span>
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="step2-tab" data-bs-toggle="pill" data-bs-target="#step2" type="button" role="tab" aria-controls="step2" aria-selected="false">
+                                        <span class="step-icon"><i class='bx bx-money'></i></span>
+                                        <span class="step-text d-none d-sm-inline ms-1">Harga & Stok</span>
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="step3-tab" data-bs-toggle="pill" data-bs-target="#step3" type="button" role="tab" aria-controls="step3" aria-selected="false">
+                                        <span class="step-icon"><i class='bx bx-cog'></i></span>
+                                        <span class="step-text d-none d-sm-inline ms-1">Pengaturan & Simpan</span>
+                                    </button>
+                                </li>
+                            </ul>
+
+                            <div class="tab-content" id="formWizardContent">
+                                <!-- STEP 1: INFO & MEDIA -->
+                                <div class="tab-pane fade show active" id="step1" role="tabpanel" aria-labelledby="step1-tab">
+<!-- Section: Foto Produk -->
                             <div class="form-section mb-4">
                                 <h6 class="section-title mb-3">
                                     <i class='bx bx-image me-2'></i>Foto Produk
@@ -191,8 +222,7 @@
                                                 <i class="bx bx-plus"></i>
                                             </button>
                                         </div>
-                                    </div>
-                                    <div class="col-12">
+                                    </div><div class="col-12">
                                         <label class="form-label fw-semibold" for="deskripsi">
                                             Deskripsi <span class="text-danger">*</span>
                                         </label>
@@ -202,10 +232,62 @@
                                 </div>
                             </div>
 
-                            <!-- Section: Harga & Jarak (Sistem Zona Borongan) -->
+                            
+                                    <div class="d-flex justify-content-end mt-4">
+                                        <button type="button" class="btn btn-primary" onclick="nextStep('step2-tab')">Selanjutnya <i class='bx bx-right-arrow-alt'></i></button>
+                                    </div>
+                                </div>
+                                
+                                <!-- STEP 2: HARGA & STOK -->
+                                <div class="tab-pane fade" id="step2" role="tabpanel" aria-labelledby="step2-tab">
+
+                            <!-- Section: Pengaturan Rental Harian -->
                             <div class="form-section mb-4">
                                 <h6 class="section-title mb-3">
-                                    <i class='bx bx-money me-2'></i>Pengaturan Harga Berdasarkan Zona Jarak
+                                    <i class='bx bx-car me-2'></i><span class="badge bg-primary me-2">RENTAL HARIAN</span> Pengaturan Rental (Sewa Lepas/Dengan Supir)
+                                </h6>
+                                <p class="text-muted small mb-3">Tentukan harga dasar per hari dan opsi layanan pendukung untuk penyewaan sistem harian.</p>
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-semibold" for="harga_sewa">
+                                            Harga Sewa Dasar (Per Hari) <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">Rp</span>
+                                            <input type="text" class="form-control modern-input" id="harga_sewa" 
+                                                   name="harga_sewa" placeholder="250.000" 
+                                                   value="{{ old('harga_sewa', isset($mobil) ? number_format($mobil->harga_sewa, 0, ',', '.') : '') }}"
+                                                   required oninput="formatRupiah(this)" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-semibold" for="opsi_supir">
+                                            Opsi Supir <span class="text-danger">*</span>
+                                        </label>
+                                        <select class="form-select modern-input" id="opsi_supir" name="opsi_supir" required>
+                                            <option value="" disabled {{ old('opsi_supir', $mobil->opsi_supir ?? '') == '' ? 'selected' : '' }}>Pilih Opsi Supir</option>
+                                            <option value="Lepas Kunci" {{ old('opsi_supir', $mobil->opsi_supir ?? '') == 'Lepas Kunci' ? 'selected' : '' }}>Hanya Lepas Kunci (Tanpa Supir)</option>
+                                            <option value="Dengan Supir" {{ old('opsi_supir', $mobil->opsi_supir ?? '') == 'Dengan Supir' ? 'selected' : '' }}>Wajib Dengan Supir</option>
+                                            <option value="Bebas Pilih" {{ old('opsi_supir', $mobil->opsi_supir ?? '') == 'Bebas Pilih' ? 'selected' : '' }}>Bebas Pilih (Lepas / Supir)</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-semibold" for="bbm_ditanggung">
+                                            BBM Ditanggung Oleh <span class="text-danger">*</span>
+                                        </label>
+                                        <select class="form-select modern-input" id="bbm_ditanggung" name="bbm_ditanggung" required>
+                                            <option value="" disabled {{ old('bbm_ditanggung', $mobil->bbm_ditanggung ?? '') == '' ? 'selected' : '' }}>Pilih Penanggung BBM</option>
+                                            <option value="Pemerintah Desa" {{ old('bbm_ditanggung', $mobil->bbm_ditanggung ?? '') == 'Pemerintah Desa' ? 'selected' : '' }}>Desa (Sudah Termasuk)</option>
+                                            <option value="Penyewa" {{ old('bbm_ditanggung', $mobil->bbm_ditanggung ?? '') == 'Penyewa' ? 'selected' : '' }}>Penyewa (Tanggung Sendiri)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Section: Harga & Jarak \(Sistem Zona Borongan\) -->
+                            <div class="form-section mb-4">
+                                <h6 class="section-title mb-3">
+                                    <i class='bx bx-money me-2'></i><span class="badge bg-success me-2">SEWA BORONGAN</span> Pengaturan Zona Jarak
                                 </h6>
                                 <p class="text-muted small mb-3">Tentukan harga borongan (paket sewa) berdasarkan jarak tempuh tujuan penyewa. Biarkan batas Km tetap 0 jika tidak ada batasan.</p>
                                 
@@ -295,7 +377,55 @@
                                 </div>
                             </div>
 
-                            <!-- Section: Status & Lokasi -->
+                            
+                                    <div class="d-flex justify-content-between mt-4">
+                                        <button type="button" class="btn btn-secondary" onclick="prevStep('step1-tab')"><i class='bx bx-left-arrow-alt'></i> Sebelumnya</button>
+                                        <button type="button" class="btn btn-primary" onclick="nextStep('step3-tab')">Selanjutnya <i class='bx bx-right-arrow-alt'></i></button>
+                                    </div>
+                                </div>
+                                
+                                <!-- STEP 3: PENGATURAN & SIMPAN -->
+                                <div class="tab-pane fade" id="step3" role="tabpanel" aria-labelledby="step3-tab">
+                                
+                                    
+                                    <!-- PENGATURAN PENGIRIMAN GLOBAL SEWA & RENTAL -->
+                                    <div class="col-12 mb-4">
+                                        <div class="row g-4">
+                                            <div class="col-md-6">
+                                                <div class="border rounded-3 p-4 bg-light bg-opacity-50 h-100">
+                                                    <h6 class="section-title text-success mb-3"><i class='bx bx-sync me-2'></i>Pengiriman (Sewa Borongan)</h6>
+                                                    <p class="text-muted small mb-4">Pengaturan ini khusus untuk opsi Sewa Borongan.</p>
+                                                    <div class="d-flex flex-column gap-3">
+                                                        <div class="form-check form-switch d-flex align-items-center gap-2">
+                                                            <input class="form-check-input delivery-toggle" type="checkbox" id="delivery_antar_sewa" data-field="mobil_sewa_delivery_antar_active" {{ !empty($paymentInfo['mobil_sewa_delivery_antar_active']) || !isset($paymentInfo['mobil_sewa_delivery_antar_active']) ? 'checked' : '' }}>
+                                                            <label class="form-check-label fw-bold" for="delivery_antar_sewa">Sediakan Jasa Diantar</label>
+                                                        </div>
+                                                        <div class="form-check form-switch d-flex align-items-center gap-2">
+                                                            <input class="form-check-input delivery-toggle" type="checkbox" id="delivery_jemput_sewa" data-field="mobil_sewa_delivery_jemput_active" {{ !empty($paymentInfo['mobil_sewa_delivery_jemput_active']) || !isset($paymentInfo['mobil_sewa_delivery_jemput_active']) ? 'checked' : '' }}>
+                                                            <label class="form-check-label fw-bold" for="delivery_jemput_sewa">Bisa Jemput Sendiri (Self-Pickup)</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="border rounded-3 p-4 bg-light bg-opacity-50 h-100">
+                                                    <h6 class="section-title text-primary mb-3"><i class='bx bx-sync me-2'></i>Pengiriman (Rental Harian)</h6>
+                                                    <p class="text-muted small mb-4">Pengaturan ini khusus untuk opsi Rental Harian.</p>
+                                                    <div class="d-flex flex-column gap-3">
+                                                        <div class="form-check form-switch d-flex align-items-center gap-2">
+                                                            <input class="form-check-input delivery-toggle" type="checkbox" id="delivery_antar_rental" data-field="mobil_rental_delivery_antar_active" {{ !empty($paymentInfo['mobil_rental_delivery_antar_active']) || !isset($paymentInfo['mobil_rental_delivery_antar_active']) ? 'checked' : '' }}>
+                                                            <label class="form-check-label fw-bold" for="delivery_antar_rental">Sediakan Jasa Diantar</label>
+                                                        </div>
+                                                        <div class="form-check form-switch d-flex align-items-center gap-2">
+                                                            <input class="form-check-input delivery-toggle" type="checkbox" id="delivery_jemput_rental" data-field="mobil_rental_delivery_jemput_active" {{ !empty($paymentInfo['mobil_rental_delivery_jemput_active']) || !isset($paymentInfo['mobil_rental_delivery_jemput_active']) ? 'checked' : '' }}>
+                                                            <label class="form-check-label fw-bold" for="delivery_jemput_rental">Bisa Jemput Sendiri (Self-Pickup)</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Section: Status & Lokasi -->
                             <div class="form-section mb-4">
                                 <h6 class="section-title mb-3">
                                     <i class='bx bx-map me-2'></i>Status & Lokasi
@@ -310,8 +440,7 @@
                                             <option value="disewa" {{ old('status', $mobil->status) == 'disewa' ? 'selected' : '' }}>Disewa</option>
                                             <option value="rusak" {{ old('status', $mobil->status) == 'rusak' ? 'selected' : '' }}>Rusak</option>
                                         </select>
-                                    </div>
-                                    <div class="col-md-6">
+                                    </div><div class="col-md-6">
                                         <label class="form-label fw-semibold" for="lokasi">
                                             Lokasi <span class="text-danger">*</span>
                                         </label>
@@ -323,23 +452,27 @@
 
 
 
-                            <!-- Action Buttons -->
-                            <div class="d-flex justify-content-end gap-3 pt-3 border-top">
-                                <a href="{{ route('admin.unit.mobil.index') }}" class="btn btn-light modern-btn-secondary px-4">
-                                    <i class='bx bx-x me-1'></i> Batal
-                                </a>
-                                <button type="submit" class="btn btn-primary modern-btn-primary px-4">
-                                    <i class='bx bx-save me-1'></i> Simpan Perubahan
-                                </button>
-                            </div>
+                            
+                                    <div class="d-flex justify-content-between mt-4">
+                                        <button type="button" class="btn btn-secondary" onclick="prevStep('step2-tab')"><i class='bx bx-left-arrow-alt'></i> Sebelumnya</button>
+                                        <div>
+                                            <a href="{{ route('admin.unit.mobil.index') }}" class="btn btn-light me-2 border">Batal</a>
+                                            <button type="submit" class="btn btn-success"><i class='bx bx-save'></i> Simpan Data</button>
+                                        </div>
+                                    </div>
+                                </div> <!-- End step 3 -->
+                            </div> <!-- End tab-content -->
+
                         </form>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+@endsection
 
-    <!-- Modal Tambah Kategori -->
+@section('modals')
+<!-- Modal Tambah Kategori -->
     <div class="modal fade" id="addCategoryModal" tabindex="-1" aria-labelledby="addCategoryModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content modern-modal">
@@ -636,9 +769,31 @@
         .modern-card {
             animation: fadeInUp 0.5s ease;
         }
-    </style>
+    
+<style>
+    .wizard-steps .nav-link {
+        border-radius: 0.5rem;
+        color: #6c757d;
+        font-weight: 500;
+        padding: 0.75rem 1rem;
+        transition: all 0.2s ease;
+    }
+    .wizard-steps .nav-link.active {
+        background-color: #0d6efd;
+        color: white;
+        box-shadow: 0 4px 6px rgba(13, 110, 253, 0.2);
+    }
+    .step-icon {
+        font-size: 1.25rem;
+        vertical-align: middle;
+    }
+</style>
 
-    <script>
+</style>
+@endsection
+
+@section('scripts')
+<script>
     // Fungsi untuk format angka menjadi Rupiah
     function formatRupiah(input) {
         let value = input.value.replace(/\D/g, '');
@@ -701,7 +856,7 @@
             option.textContent = newKategori;
             select.appendChild(option);
             select.value = newKategori;
-            bootstrap.Modal.getInstance(document.getElementById('addCategoryModal'))?.hide();
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('addCategoryModal'))?.hide();
             document.getElementById('new_kategori').value = '';
         } else {
             alert('Silakan masukkan nama kategori.');
@@ -718,11 +873,75 @@
             option.textContent = newSatuan;
             select.appendChild(option);
             select.value = newSatuan;
-            bootstrap.Modal.getInstance(document.getElementById('addSatuanModal'))?.hide();
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('addSatuanModal'))?.hide();
             document.getElementById('new_satuan').value = '';
         } else {
             alert('Silakan masukkan nama satuan.');
         }
     });
-    </script>
+    
+    function nextStep(tabId) {
+        var activeTabPane = document.querySelector('.tab-pane.active');
+        if (activeTabPane) {
+            var inputs = activeTabPane.querySelectorAll('input[required], select[required], textarea[required]');
+            for (var i = 0; i < inputs.length; i++) {
+                if (!inputs[i].checkValidity()) {
+                    inputs[i].reportValidity();
+                    return; 
+                }
+            }
+        }
+        var tabEl = document.querySelector('#' + tabId);
+        var tab = new bootstrap.Tab(tabEl);
+        tab.show();
+        window.scrollTo(0, 0);
+    }
+    function prevStep(tabId) {
+        var tabEl = document.querySelector('#' + tabId);
+        var tab = new bootstrap.Tab(tabEl);
+        tab.show();
+        window.scrollTo(0, 0);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const toggles = document.querySelectorAll('.delivery-toggle');
+        toggles.forEach(toggle => {
+            toggle.addEventListener('change', function() {
+                const field = this.dataset.field;
+                const value = this.checked ? 1 : 0;
+                this.disabled = true;
+
+                fetch('{{ route("admin.region-settings.toggle-delivery") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({ field: field, value: value })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    this.disabled = false;
+                    if(data.success) {
+                        const toast = document.createElement('div');
+                        toast.className = 'alert alert-success position-fixed top-0 end-0 m-3 shadow-sm';
+                        toast.style.zIndex = '9999';
+                        toast.innerHTML = '<i class="bx bx-check-circle me-2"></i>' + data.message;
+                        document.body.appendChild(toast);
+                        setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 500); }, 3000);
+                    } else {
+                        alert(data.message);
+                        this.checked = !this.checked; 
+                    }
+                })
+                .catch(err => {
+                    this.disabled = false;
+                    alert('Terjadi kesalahan jaringan.');
+                    this.checked = !this.checked; 
+                });
+            });
+        });
+    });
+
+</script>
 @endsection

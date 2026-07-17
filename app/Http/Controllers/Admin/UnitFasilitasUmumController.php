@@ -94,8 +94,8 @@ class UnitFasilitasUmumController extends Controller
             'foto_utama' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
             'foto_2' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
             'foto_3' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
-            'opsi_supir' => 'nullable|string|in:Lepas Kunci,Dengan Supir,Bebas Pilih',
-            'bbm_ditanggung' => 'nullable|string|in:Pemerintah Desa,Penyewa',
+            'opsi_supir' => 'nullable|string|in:Sediakan Supir Sendiri,Disediakan',
+            'bbm_ditanggung' => 'nullable|string|in:Ditanggung Pengguna,Disediakan',
         ]);
 
         $data = [
@@ -161,8 +161,8 @@ class UnitFasilitasUmumController extends Controller
             'foto_utama' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'foto_2' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'foto_3' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'opsi_supir' => 'nullable|string|in:Lepas Kunci,Dengan Supir,Bebas Pilih',
-            'bbm_ditanggung' => 'nullable|string|in:Pemerintah Desa,Penyewa',
+            'opsi_supir' => 'nullable|string|in:Sediakan Supir Sendiri,Disediakan',
+            'bbm_ditanggung' => 'nullable|string|in:Ditanggung Pengguna,Disediakan',
         ]);
 
         $fasilitas = FasilitasUmum::findOrFail($id);

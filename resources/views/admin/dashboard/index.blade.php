@@ -215,7 +215,7 @@
                             'image' => asset('User/img/elemen/mobil.png'),
                             'color' => 'info'
                         ],
-                        'Peminjaman Fasilitas Umum' => [
+                        'Fasilitas Umum' => [
                             'title' => 'Unit Peminjaman Fasilitas Umum',
                             'count' => (\App\Models\FasilitasUmum::count() ?? 0),
                             'label' => 'Fasilitas',
@@ -231,7 +231,7 @@
                             'image' => asset('User/img/elemen/lapor.png'),
                             'color' => 'primary'
                         ],
-                        'Pengumuman dan Event' => [
+                        'Pengumuman' => [
                             'title' => 'Pengumuman & Event',
                             'count' => (\App\Models\Announcement::count() ?? 0),
                             'label' => 'Info',

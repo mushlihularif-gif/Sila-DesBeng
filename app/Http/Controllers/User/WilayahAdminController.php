@@ -169,4 +169,158 @@ class WilayahAdminController extends Controller
 
         return view('user.wilayah.warga', compact('wargas', 'search'));
     }
+
+    public function showLaporan($id)
+    {
+        $user = auth()->user();
+        $allowedRegionIds = \App\Models\Region::getDescendantIds($user->region_id);
+        $allowedRegionIds[] = $user->region_id;
+
+        $laporan = Laporan::with(['user', 'region'])->whereIn('region_id', $allowedRegionIds)->findOrFail($id);
+        
+        return view('user.wilayah.laporan_detail', compact('laporan'));
+    }
+
+    public function respondLaporan(Request $request, $id)
+    {
+        $request->validate([
+            'catatan' => 'required|string',
+        ]);
+
+        $user = auth()->user();
+        $allowedRegionIds = \App\Models\Region::getDescendantIds($user->region_id);
+        $allowedRegionIds[] = $user->region_id;
+
+        $laporan = Laporan::whereIn('region_id', $allowedRegionIds)->findOrFail($id);
+
+        if ($laporan->status === 'Selesai' || $laporan->status === 'Ditolak') {
+            return back()->with('error', 'Laporan sudah ditutup.');
+        }
+
+        // Tentukan level admin saat ini berdasarkan jabatannya
+        $currentAdminLevel = $user->region->type; // 'rt', 'rw', 'desa', dll
+
+        if ($currentAdminLevel === 'rt') {
+            $laporan->catatan_rt = $request->catatan;
+            $laporan->rt_handler_id = $user->id;
+        } elseif ($currentAdminLevel === 'rw') {
+            $laporan->catatan_rw = $request->catatan;
+            $laporan->rw_handler_id = $user->id;
+        } else {
+            $laporan->catatan_admin = $request->catatan;
+            $laporan->admin_id = $user->id;
+        }
+
+        $laporan->status = 'Proses';
+        $laporan->save();
+
+        return back()->with('success', 'Tanggapan berhasil dikirim dan status diubah menjadi Proses.');
+    }
+
+    public function escalateLaporan(Request $request, $id)
+    {
+        $request->validate([
+            'catatan' => 'required|string',
+        ]);
+
+        $user = auth()->user();
+        $allowedRegionIds = \App\Models\Region::getDescendantIds($user->region_id);
+        $allowedRegionIds[] = $user->region_id;
+
+        $laporan = Laporan::whereIn('region_id', $allowedRegionIds)->findOrFail($id);
+
+        if (!$laporan->canBeEscalated()) {
+            return back()->with('error', 'Laporan ini tidak dapat di-eskalasi (sudah mencapai tingkat tertinggi atau sudah ditutup).');
+        }
+
+        // Pastikan level admin yang mencoba eskalasi sesuai dengan level laporan saat ini
+        $currentAdminLevel = $user->region->type;
+        $laporanLevel = $laporan->escalation_level ?? 'rt';
+
+        if ($currentAdminLevel !== $laporanLevel && $user->role !== 'super_admin') {
+            return back()->with('error', "Anda tidak dapat me-eskalasi laporan ini. Laporan saat ini berada di tingkat: $laporanLevel");
+        }
+
+        // Lakukan eskalasi manual
+        $laporan->escalateTo($user->id, $request->catatan);
+
+        return back()->with('success', 'Laporan berhasil di-eskalasi ke tingkat atasnya.');
+    }
+
+    public function resolveLaporan(Request $request, $id)
+    {
+        $request->validate([
+            'catatan' => 'nullable|string',
+        ]);
+
+        $user = auth()->user();
+        $allowedRegionIds = \App\Models\Region::getDescendantIds($user->region_id);
+        $allowedRegionIds[] = $user->region_id;
+
+        $laporan = Laporan::whereIn('region_id', $allowedRegionIds)->findOrFail($id);
+
+        if ($laporan->status === 'Selesai' || $laporan->status === 'Ditolak') {
+            return back()->with('error', 'Laporan sudah ditutup.');
+        }
+
+        $currentAdminLevel = $user->region->type;
+
+        if ($currentAdminLevel === 'rt') {
+            $laporan->catatan_rt = $request->catatan ?? $laporan->catatan_rt;
+            $laporan->rt_handler_id = $user->id;
+        } elseif ($currentAdminLevel === 'rw') {
+            $laporan->catatan_rw = $request->catatan ?? $laporan->catatan_rw;
+            $laporan->rw_handler_id = $user->id;
+        } else {
+            $laporan->catatan_admin = $request->catatan ?? $laporan->catatan_admin;
+            $laporan->admin_id = $user->id;
+        }
+
+        $laporan->status = 'Selesai';
+        $laporan->save();
+
+        return back()->with('success', 'Laporan berhasil diselesaikan!');
+    }
+
+    /**
+     * Cetak Surat Bukti Pelaporan (PDF)
+     * Menggunakan gambar latar desain dari user dan QR Code validasi digital.
+     */
+    public function cetakBukti($id)
+    {
+        $user = auth()->user();
+        $allowedRegionIds = \App\Models\Region::getDescendantIds($user->region_id);
+        $allowedRegionIds[] = $user->region_id;
+
+        $laporan = Laporan::with(['user', 'region'])->whereIn('region_id', $allowedRegionIds)->findOrFail($id);
+
+        // Hanya bisa cetak jika status sudah Proses, Dilanjutkan, atau Selesai
+        if (!in_array($laporan->status, ['Proses', 'Dilanjutkan', 'Selesai'])) {
+            return back()->with('error', 'Surat bukti hanya dapat dicetak untuk laporan yang sudah diproses.');
+        }
+
+        // Tentukan nama handler (penanggung jawab terakhir)
+        $handler_name = 'Sistem SiladesBeng';
+        if ($laporan->admin_id) {
+            $handler = \App\Models\User::find($laporan->admin_id);
+            if ($handler) $handler_name = $handler->name;
+        } elseif ($laporan->rw_handler_id) {
+            $handler = \App\Models\User::find($laporan->rw_handler_id);
+            if ($handler) $handler_name = $handler->name;
+        } elseif ($laporan->rt_handler_id) {
+            $handler = \App\Models\User::find($laporan->rt_handler_id);
+            if ($handler) $handler_name = $handler->name;
+        }
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.bukti_laporan', [
+            'laporan' => $laporan,
+            'handler_name' => $handler_name,
+        ]);
+
+        $pdf->setPaper('A4', 'portrait');
+
+        $filename = 'Bukti_Laporan_SDB_' . str_pad($laporan->id, 5, '0', STR_PAD_LEFT) . '.pdf';
+
+        return $pdf->stream($filename);
+    }
 }

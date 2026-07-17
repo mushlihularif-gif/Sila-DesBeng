@@ -292,9 +292,9 @@
                                     'Unit Penyewaan Alat' => 'Penyewaan Alat',
                                     'Unit Penjualan Gas' => 'Penjualan Gas',
                                     'Unit Penyewaan Mobil' => 'Penyewaan Mobil',
-                                    'Unit Peminjaman Fasilitas Umum' => 'Peminjaman Fasilitas Umum',
+                                    'Unit Peminjaman Fasilitas Umum' => 'Fasilitas Umum',
                                     'Pelaporan Warga' => 'Pelaporan Warga',
-                                    'Pengumuman dan Event' => 'Pengumuman dan Event'
+                                    'Pengumuman dan Event' => 'Pengumuman'
                                 ];
                                 
                                 return in_array($map[$unitName] ?? $unitName, $activeServices ?? []);

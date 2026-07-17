@@ -25,6 +25,19 @@ class User extends Authenticatable
             }
         });
 
+        // ✅ BLIND INDEXING: Buat hash dari nomor HP sebelum disimpan
+        // Ini memungkinkan pencarian (login) meskipun nomor HP dienkripsi
+        static::saving(function ($model) {
+            if ($model->isDirty('phone') && !empty($model->phone)) {
+                // $model->phone akan memanggil Cast get() dan mengembalikan teks biasa
+                $plainPhone = $model->phone;
+                // Cegah hashing ganda jika nilainya terlanjur prefix chacha
+                if (!str_starts_with($plainPhone, '$chacha20$')) {
+                    $model->phone_hash = hash_hmac('sha256', $plainPhone, config('app.key'));
+                }
+            }
+        });
+
         // ✅ MENCEGAH BUG HANTU DATA: Hapus relasi foto saat User dihapus
         static::deleting(function ($model) {
             if ($model->file) {
@@ -86,6 +99,9 @@ class User extends Authenticatable
             'reset_token_expires_at' => 'datetime', // ✅ TAMBAH INI
             'password' => 'hashed',
             'status' => 'string',
+            // Defense in Depth: ChaCha20-Poly1305 Database-Level Encryption (PII)
+            'phone' => \App\Casts\ChaCha20Encrypted::class,
+            'address' => \App\Casts\ChaCha20Encrypted::class,
         ];
     }
 

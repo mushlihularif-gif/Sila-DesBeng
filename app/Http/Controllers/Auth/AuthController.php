@@ -266,9 +266,12 @@ class AuthController extends Controller
             $loginField = $validated['email_or_phone'];
             
             // Check if it's an email, otherwise it could be username or phone
+            // ✅ BLIND INDEXING: Cari berdasarkan phone_hash untuk nomor HP
+            $phoneHash = hash_hmac('sha256', $loginField, config('app.key'));
+            
             $user = User::where('email', $loginField)
                 ->orWhere('username', $loginField)
-                ->orWhere('phone', $loginField)
+                ->orWhere('phone_hash', $phoneHash)
                 ->first();
 
             if (!$user) {

@@ -91,16 +91,36 @@
                                                 <h5 class="fw-bold text-primary mb-0">Mobil</h5>
                                             </div>
                                             <div class="d-flex flex-column gap-2 mt-3">
-                                                <div class="d-flex justify-content-between align-items-center border-bottom pb-2">
-                                                    <span class="text-primary fw-semibold small">Diantar</span>
-                                                    <div class="form-check form-switch mb-0">
-                                                        <input class="form-check-input" type="checkbox" name="mobil_delivery_antar_active" id="mobil_delivery_antar_active" {{ isset($region->payment_info['mobil_delivery_antar_active']) ? ($region->payment_info['mobil_delivery_antar_active'] ? 'checked' : '') : 'checked' }}>
+                                                <!-- Sewa Borongan -->
+                                                <div class="mt-2 mb-2 p-2 border rounded bg-white bg-opacity-50">
+                                                    <span class="text-primary fw-bold small d-block mb-2 border-bottom pb-1">Sewa Borongan</span>
+                                                    <div class="d-flex justify-content-between align-items-center pb-2">
+                                                        <span class="text-primary fw-semibold small">Diantar</span>
+                                                        <div class="form-check form-switch mb-0">
+                                                            <input class="form-check-input" type="checkbox" name="mobil_sewa_delivery_antar_active" id="mobil_sewa_delivery_antar_active" {{ isset($region->payment_info['mobil_sewa_delivery_antar_active']) ? ($region->payment_info['mobil_sewa_delivery_antar_active'] ? 'checked' : '') : 'checked' }}>
+                                                        </div>
+                                                    </div>
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <span class="text-primary fw-semibold small">Jemput Sendiri</span>
+                                                        <div class="form-check form-switch mb-0">
+                                                            <input class="form-check-input" type="checkbox" name="mobil_sewa_delivery_jemput_active" id="mobil_sewa_delivery_jemput_active" {{ isset($region->payment_info['mobil_sewa_delivery_jemput_active']) ? ($region->payment_info['mobil_sewa_delivery_jemput_active'] ? 'checked' : '') : 'checked' }}>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                <div class="d-flex justify-content-between align-items-center pb-2 border-bottom">
-                                                    <span class="text-primary fw-semibold small">Jemput Sendiri</span>
-                                                    <div class="form-check form-switch mb-0">
-                                                        <input class="form-check-input" type="checkbox" name="mobil_delivery_jemput_active" id="mobil_delivery_jemput_active" {{ isset($region->payment_info['mobil_delivery_jemput_active']) ? ($region->payment_info['mobil_delivery_jemput_active'] ? 'checked' : '') : 'checked' }}>
+                                                <!-- Rental Harian -->
+                                                <div class="p-2 border rounded bg-white bg-opacity-50">
+                                                    <span class="text-primary fw-bold small d-block mb-2 border-bottom pb-1">Rental Harian</span>
+                                                    <div class="d-flex justify-content-between align-items-center pb-2">
+                                                        <span class="text-primary fw-semibold small">Diantar</span>
+                                                        <div class="form-check form-switch mb-0">
+                                                            <input class="form-check-input" type="checkbox" name="mobil_rental_delivery_antar_active" id="mobil_rental_delivery_antar_active" {{ isset($region->payment_info['mobil_rental_delivery_antar_active']) ? ($region->payment_info['mobil_rental_delivery_antar_active'] ? 'checked' : '') : 'checked' }}>
+                                                        </div>
+                                                    </div>
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <span class="text-primary fw-semibold small">Jemput Sendiri</span>
+                                                        <div class="form-check form-switch mb-0">
+                                                            <input class="form-check-input" type="checkbox" name="mobil_rental_delivery_jemput_active" id="mobil_rental_delivery_jemput_active" {{ isset($region->payment_info['mobil_rental_delivery_jemput_active']) ? ($region->payment_info['mobil_rental_delivery_jemput_active'] ? 'checked' : '') : 'checked' }}>
+                                                        </div>
                                                     </div>
                                                 </div>
                                                 

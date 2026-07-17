@@ -79,6 +79,76 @@ Route::post('/kemitraan/gabung', [App\Http\Controllers\PartnerApplicationControl
     ->name('kemitraan.store')
     ->middleware('role:user,guest');
 
+// Validasi QR Code Surat Bukti Laporan (Publik, tanpa login)
+Route::get('/validasi/laporan/{id}', function ($id) {
+    $token = request('token');
+    $laporan = \App\Models\Laporan::find($id);
+    
+    $valid = false;
+    $handler_name = 'Sistem SiladesBeng';
+
+    if ($laporan && $token) {
+        $expectedToken = hash_hmac('sha256', $laporan->id . $laporan->created_at, config('app.key'));
+        $valid = hash_equals($expectedToken, $token);
+
+        if ($valid) {
+            // Tentukan nama handler (penanggung jawab terakhir)
+            if ($laporan->admin_id) {
+                $handler = \App\Models\User::find($laporan->admin_id);
+                if ($handler) $handler_name = $handler->name;
+            } elseif ($laporan->rw_handler_id) {
+                $handler = \App\Models\User::find($laporan->rw_handler_id);
+                if ($handler) $handler_name = $handler->name;
+            } elseif ($laporan->rt_handler_id) {
+                $handler = \App\Models\User::find($laporan->rt_handler_id);
+                if ($handler) $handler_name = $handler->name;
+            }
+        }
+    }
+    
+    return view('pages.validasi.laporan', [
+        'valid' => $valid,
+        'laporan' => $valid ? $laporan : null,
+        'handler_name' => $handler_name,
+    ]);
+})->name('validasi.laporan');
+
+// Validasi QR Code Bukti Transaksi (Publik, tanpa login)
+Route::get('/validasi/transaksi/{type}/{id}', function ($type, $id) {
+    $token = request('token');
+    $valid = false;
+    $transaksi = null;
+    $title = 'Bukti Transaksi';
+
+    // Cari model berdasarkan tipe transaksi
+    if ($type === 'rental') {
+        $transaksi = \App\Models\RentalBooking::find($id);
+        $title = 'Penyewaan Alat Berat';
+    } elseif ($type === 'gas') {
+        $transaksi = \App\Models\GasOrder::find($id);
+        $title = 'Pembelian Tabung Gas';
+    } elseif ($type === 'mobil') {
+        $transaksi = \App\Models\MobilBooking::find($id);
+        $title = 'Penyewaan Mobil BUMDes';
+    } elseif ($type === 'fasilitas') {
+        $transaksi = \App\Models\FasilitasUmumBooking::find($id);
+        $title = 'Peminjaman Fasilitas Umum';
+    }
+
+    if ($transaksi && $token) {
+        // Logika enkripsi menggunakan order_number
+        $expectedToken = hash_hmac('sha256', $transaksi->id . $transaksi->order_number, config('app.key'));
+        $valid = hash_equals($expectedToken, $token);
+    }
+    
+    return view('pages.validasi.transaksi', [
+        'valid' => $valid,
+        'transaksi' => $valid ? $transaksi : null,
+        'type' => $type,
+        'title' => $title,
+    ]);
+})->name('validasi.transaksi');
+
 
 
 Route::get('/unit-penyewaan-alat', [App\Http\Controllers\User\RentalUserController::class, 'index'])
@@ -300,6 +370,7 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
     // Pengaturan Wilayah & Layanan (Kas Independen)
     Route::get('/region-settings', [\App\Http\Controllers\Admin\RegionSettingController::class, 'index'])->name('admin.region-settings.index');
     Route::post('/region-settings', [\App\Http\Controllers\Admin\RegionSettingController::class, 'update'])->name('admin.region-settings.update');
+    Route::post('/region-settings/toggle-delivery', [\App\Http\Controllers\Admin\RegionSettingController::class, 'toggleDelivery'])->name('admin.region-settings.toggle-delivery');
     Route::get('/pengaturan-pembayaran-wilayah', [\App\Http\Controllers\Admin\RegionSettingController::class, 'paymentIndex'])->name('admin.region-settings.payment');
     Route::put('/pengaturan-pembayaran-wilayah', [\App\Http\Controllers\Admin\RegionSettingController::class, 'paymentUpdate'])->name('admin.region-settings.payment.update');
     
@@ -520,6 +591,11 @@ Route::middleware(['auth', 'role:user'])->group(function () {
     // Fitur Khusus Admin RT/RW di Frontend
     Route::prefix('wilayah')->name('wilayah.')->middleware('role:admin_rt,admin_rw')->group(function () {
         Route::get('/laporan', [\App\Http\Controllers\User\WilayahAdminController::class, 'indexLaporan'])->name('laporan.index');
+        Route::get('/laporan/{id}', [\App\Http\Controllers\User\WilayahAdminController::class, 'showLaporan'])->name('laporan.show');
+        Route::post('/laporan/{id}/respond', [\App\Http\Controllers\User\WilayahAdminController::class, 'respondLaporan'])->name('laporan.respond');
+        Route::post('/laporan/{id}/escalate', [\App\Http\Controllers\User\WilayahAdminController::class, 'escalateLaporan'])->name('laporan.escalate');
+        Route::post('/laporan/{id}/resolve', [\App\Http\Controllers\User\WilayahAdminController::class, 'resolveLaporan'])->name('laporan.resolve');
+        Route::get('/laporan/{id}/cetak', [\App\Http\Controllers\User\WilayahAdminController::class, 'cetakBukti'])->name('laporan.cetak');
         Route::get('/pengumuman', [\App\Http\Controllers\User\WilayahAdminController::class, 'indexPengumuman'])->name('pengumuman.index');
         Route::post('/pengumuman', [\App\Http\Controllers\User\WilayahAdminController::class, 'storePengumuman'])->name('pengumuman.store');
         Route::get('/warga', [\App\Http\Controllers\User\WilayahAdminController::class, 'indexWarga'])->name('warga.index');
@@ -681,4 +757,4 @@ Route::get('/dev/create-test-rtrw', function () {
 Route::post('/chatbot/ask', [\App\Http\Controllers\User\ChatbotController::class, 'ask']);
 
 Route::get('/run-mig-now', function() { \Illuminate\Support\Facades\Artisan::call('migrate'); return \Illuminate\Support\Facades\Artisan::output(); });
-
+Route::get('/run-encrypt', function() { \Illuminate\Support\Facades\Artisan::call('data:encrypt-existing'); return \Illuminate\Support\Facades\Artisan::output(); });

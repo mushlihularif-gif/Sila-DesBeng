@@ -19,57 +19,57 @@
         <!-- Products Grid -->
         @if($fasilitas->count() > 0)
             <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
-                @foreach ($fasilitas as $fasilitas)
+                @foreach ($fasilitas as $item)
                     <div class="col">
                         <div class="card h-100 product-card">
                             <div class="position-relative">
-                                <div id="carouselExample{{ $fasilitas->id }}" class="carousel slide" data-bs-ride="carousel">
+                                <div id="carouselExample{{ $item->id }}" class="carousel slide" data-bs-ride="carousel">
                                     <div class="carousel-inner">
                                         <div class="carousel-item active">
-                                            <img src="{{ asset('storage/' . $fasilitas->foto) }}" class="card-img-top"
-                                                alt="{{ $fasilitas->nama_fasilitas }}"
+                                            <img src="{{ asset('storage/' . $item->foto) }}" class="card-img-top"
+                                                alt="{{ $item->nama_fasilitas }}"
                                                 style="height: 300px; object-fit: cover; object-position: center;">
                                         </div>
-                                        @if ($fasilitas->foto_2)
+                                        @if ($item->foto_2)
                                             <div class="carousel-item">
-                                                <img src="{{ asset('storage/' . $fasilitas->foto_2) }}" class="card-img-top"
-                                                    alt="{{ $fasilitas->nama_fasilitas }}"
+                                                <img src="{{ asset('storage/' . $item->foto_2) }}" class="card-img-top"
+                                                    alt="{{ $item->nama_fasilitas }}"
                                                     style="height: 300px; object-fit: cover; object-position: center;">
                                             </div>
                                         @endif
-                                        @if ($fasilitas->foto_3)
+                                        @if ($item->foto_3)
                                             <div class="carousel-item">
-                                                <img src="{{ asset('storage/' . $fasilitas->foto_3) }}" class="card-img-top"
-                                                    alt="{{ $fasilitas->nama_fasilitas }}"
+                                                <img src="{{ asset('storage/' . $item->foto_3) }}" class="card-img-top"
+                                                    alt="{{ $item->nama_fasilitas }}"
                                                     style="height: 300px; object-fit: cover; object-position: center;">
                                             </div>
                                         @endif
                                     </div>
                                     <button class="carousel-control-prev" type="button"
-                                        data-bs-target="#carouselExample{{ $fasilitas->id }}" data-bs-slide="prev">
+                                        data-bs-target="#carouselExample{{ $item->id }}" data-bs-slide="prev">
                                         <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                                         <span class="visually-hidden">Previous</span>
                                     </button>
                                     <button class="carousel-control-next" type="button"
-                                        data-bs-target="#carouselExample{{ $fasilitas->id }}" data-bs-slide="next">
+                                        data-bs-target="#carouselExample{{ $item->id }}" data-bs-slide="next">
                                         <span class="carousel-control-next-icon" aria-hidden="true"></span>
                                         <span class="visually-hidden">Next</span>
                                     </button>
                                 </div>
                             </div>
                             <div class="card-body">
-                                <h5 class="card-title">{{ $fasilitas->nama_fasilitas }}</h5>
-                                <p class="card-text">{{ Str::limit($fasilitas->deskripsi, 100) }}</p>
+                                <h5 class="card-title">{{ $item->nama_fasilitas }}</h5>
+                                <p class="card-text">{{ Str::limit($item->deskripsi, 100) }}</p>
                                 <div class="d-flex justify-content-between align-items-center">
 
-                                    <span class="badge bg-success">{{ $fasilitas->stok }} {{ $fasilitas->satuan }}</span>
+                                    <span class="badge bg-success">{{ $item->stok }} {{ $item->satuan }}</span>
                                 </div>
                                 <div class="mt-3 d-flex gap-2">
-                                    <a href="{{ route('admin.unit.fasilitas_umum.show', $fasilitas->id) }}"
+                                    <a href="{{ route('admin.unit.fasilitas_umum.show', $item->id) }}"
                                         class="btn btn-sm btn-outline-info">Detail</a>
-                                    <a href="{{ route('admin.unit.fasilitas_umum.edit', $fasilitas->id) }}"
+                                    <a href="{{ route('admin.unit.fasilitas_umum.edit', $item->id) }}"
                                         class="btn btn-sm btn-outline-warning">Ubah</a>
-                                    <form action="{{ route('admin.unit.fasilitas_umum.destroy', $fasilitas->id) }}" method="POST"
+                                    <form action="{{ route('admin.unit.fasilitas_umum.destroy', $item->id) }}" method="POST"
                                         onsubmit="return confirm('Apakah Anda yakin ingin menghapus fasilitas ini?');">
                                         @csrf
                                         @method('DELETE')
@@ -188,4 +188,5 @@
     }
 </style>
 @endpush
+
 

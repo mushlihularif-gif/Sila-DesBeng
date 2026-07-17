@@ -95,6 +95,108 @@
                                 <div class="accordion-body border-top p-4">
                                     
                                     <div class="row">
+                                        @if($child->type == 'rt')
+                                        {{-- Layout Khusus RT: Full-width 2 kolom seimbang --}}
+                                        <div class="col-md-6 mb-4 mb-md-0">
+                                            <h6 class="fw-semibold mb-3"><i class="bx bx-user-circle text-primary me-1"></i> Informasi Kepengurusan {{ strtoupper($child->type) }}</h6>
+                                            
+                                            <div class="admin-info-box mb-3">
+                                                @if($child->users->count() > 0)
+                                                    @foreach($child->users as $admin)
+                                                        <div class="d-flex align-items-start mb-3">
+                                                            <div class="avatar avatar-md me-3 shadow-sm rounded-circle overflow-hidden" style="width: 50px; height: 50px;">
+                                                                @if ($admin->file)
+                                                                    <img src="{{ $admin->file->file_stream }}" alt="Avatar" class="w-100 h-100" style="object-fit: cover;">
+                                                                @else
+                                                                    <span class="avatar-initial rounded-circle bg-primary text-white fs-4"><i class="bx bx-user"></i></span>
+                                                                @endif
+                                                            </div>
+                                                            <div>
+                                                                <h6 class="mb-0">{{ $admin->name }}</h6>
+                                                                <small class="text-muted d-block">{{ $admin->email }}</small>
+                                                                <span class="badge bg-label-success px-3 py-2 mt-2 rounded-pill"><i class='bx bx-shield-quarter me-1'></i>{{ strtoupper(str_replace('_', ' ', $admin->role)) }}</span>
+                                                            </div>
+                                                        </div>
+                                                        <form action="{{ route('admin.kelola-wilayah.destroy-admin', $admin->id) }}" method="POST" class="mt-3" onsubmit="return confirm('Apakah Anda yakin ingin menghapus akun pengurus ini secara permanen? Wilayah tetap dipertahankan.');">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill w-100">
+                                                                <i class="bx bx-user-x me-1"></i> Hapus Akun
+                                                            </button>
+                                                        </form>
+                                                    @endforeach
+                                                @else
+                                                    <div class="text-center py-3">
+                                                        <i class='bx bx-user-circle text-muted fs-1 mb-2'></i>
+                                                        <p class="text-muted mb-2">Belum ada akun pengurus untuk wilayah ini.</p>
+                                                        <button type="button" class="btn btn-sm btn-primary w-100" data-bs-toggle="modal" data-bs-target="#generateAdminModal{{ $child->id }}">
+                                                            <i class="bx bx-user-plus me-1"></i> Buat Akun Pengurus
+                                                        </button>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6 border-start">
+                                            <div class="ps-md-3">
+                                                <h6 class="fw-semibold mb-3"><i class="bx bx-info-circle text-primary me-1"></i> Detail Wilayah</h6>
+                                                
+                                                {{-- Info Cards --}}
+                                                <div class="row g-3 mb-4">
+                                                    <div class="col-6">
+                                                        <div class="border rounded-3 p-3 text-center h-100" style="background: linear-gradient(135deg, #f0f4ff 0%, #e8f0fe 100%);">
+                                                            <i class="bx bx-map-pin text-primary fs-3 mb-1 d-block"></i>
+                                                            <small class="text-muted d-block mb-1">Tingkat</small>
+                                                            <span class="fw-bold text-dark">{{ strtoupper($child->type) }}</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <div class="border rounded-3 p-3 text-center h-100" style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);">
+                                                            <i class="bx bx-group text-success fs-3 mb-1 d-block"></i>
+                                                            <small class="text-muted d-block mb-1">Status Akun</small>
+                                                            @if($child->users->count() > 0)
+                                                                <span class="fw-bold text-success">Aktif</span>
+                                                            @else
+                                                                <span class="fw-bold text-warning">Belum Ada</span>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <div class="border rounded-3 p-3 text-center h-100" style="background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);">
+                                                            <i class="bx bx-home-alt text-warning fs-3 mb-1 d-block"></i>
+                                                            <small class="text-muted d-block mb-1">Induk Wilayah</small>
+                                                            <span class="fw-bold text-dark">{{ $parentRegion->name }}</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <div class="border rounded-3 p-3 text-center h-100" style="background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%);">
+                                                            <i class="bx bx-calendar text-danger fs-3 mb-1 d-block"></i>
+                                                            <small class="text-muted d-block mb-1">Dibuat</small>
+                                                            <span class="fw-bold text-dark">{{ $child->created_at ? $child->created_at->format('d M Y') : '-' }}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <h6 class="fw-semibold mb-3"><i class="bx bx-cog text-primary me-1"></i> Aksi Wilayah</h6>
+                                                <div class="d-flex gap-2">
+                                                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill flex-grow-1" data-bs-toggle="modal" data-bs-target="#editRegionModal{{ $child->id }}">
+                                                        <i class="bx bx-edit-alt me-1"></i> Edit Nama
+                                                    </button>
+                                                    @if($child->users->count() == 0 && $child->children()->count() == 0)
+                                                        <form action="{{ route('admin.kelola-wilayah.destroy', $child->id) }}" method="POST" class="d-inline flex-grow-1" onsubmit="return confirm('Apakah Anda yakin ingin menghapus struktur wilayah ini?');">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill w-100">
+                                                                <i class="bx bx-trash me-1"></i> Hapus Wilayah
+                                                            </button>
+                                                        </form>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        @else
+                                        {{-- Layout Default: Kolom kiri pengurus + Kolom kanan sub-wilayah --}}
                                         <!-- Kolom Kiri: Detail Pengurus & Aksi Wilayah -->
                                         <div class="col-md-5 mb-4 mb-md-0">
                                             <h6 class="fw-semibold mb-3">Informasi Kepengurusan {{ strtoupper($child->type) }}</h6>
@@ -153,7 +255,6 @@
                                         </div>
 
                                         <!-- Kolom Kanan: Daftar Sub-Wilayah -->
-                                        @if($child->type != 'rt')
                                         @php
                                             $subType = '';
                                             if($child->type == 'kabupaten') $subType = 'kecamatan';

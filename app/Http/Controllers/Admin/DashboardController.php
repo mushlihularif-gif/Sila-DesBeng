@@ -301,7 +301,7 @@ public function index(Request $request)
         }])->find($user->region_id);
         
         if ($userRegion) {
-            $activeServices = $userRegion->services->pluck('name')->toArray();
+            $activeServices = $userRegion->services->pluck('name')->unique()->values()->toArray();
         }
     }
     $data['activeServices'] = $activeServices;

@@ -46,66 +46,143 @@
     </div>
 
     <!-- Statistics Cards -->
-    <div class="row g-3 mb-4">
-        <div class="col-md-3 col-6">
-            <div class="card border-0 shadow-sm h-100 rounded-4 position-relative overflow-hidden">
-                <div class="card-body p-3">
-                    <div class="d-flex align-items-center mb-2">
-                        <div class="avatar avatar-md bg-primary-subtle text-primary rounded-3 p-2 me-3">
-                            <i class="bx bx-receipt fs-3"></i>
-                        </div>
-                        <div>
-                            <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Total Bukti</small>
-                            <h4 class="fw-bold mb-0 text-dark"><span class="count-up" data-value="{{ $stats['total'] }}">0</span></h4>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        @if($isRentalActive)
-        <div class="col-md-3 col-6">
-            <div class="card border-0 shadow-sm h-100 rounded-4 position-relative overflow-hidden">
-                <div class="card-body p-3">
-                    <div class="d-flex align-items-center mb-2">
-                        <div class="avatar avatar-md bg-info-subtle text-info rounded-3 p-2 me-3">
-                            <i class="bx bx-wrench fs-3"></i>
-                        </div>
-                        <div>
-                            <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Penyewaan</small>
-                            <h4 class="fw-bold mb-0 text-dark"><span class="count-up" data-value="{{ $stats['rental_total'] }}">0</span></h4>
+    <div class="row g-4 mb-4">
+        <!-- Kategori Layanan -->
+        <div class="col-12 col-xl-7">
+            <h6 class="fw-bold text-secondary mb-3 text-uppercase small ls-1">Berdasarkan Kategori Layanan</h6>
+            <div class="row g-3">
+                <div class="col-6 col-md-4">
+                    <div class="card border-0 shadow-sm h-100 rounded-4 position-relative overflow-hidden">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="avatar avatar-md bg-primary-subtle text-primary rounded-3 p-2 me-3">
+                                    <i class="bx bx-receipt fs-3"></i>
+                                </div>
+                                <div>
+                                    <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Total Bukti</small>
+                                    <h4 class="fw-bold mb-0 text-dark"><span class="count-up" data-value="{{ $stats['total'] }}">0</span></h4>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-        @endif
-        @if($isGasActive)
-        <div class="col-md-3 col-6">
-            <div class="card border-0 shadow-sm h-100 rounded-4 position-relative overflow-hidden">
-                <div class="card-body p-3">
-                    <div class="d-flex align-items-center mb-2">
-                        <div class="avatar avatar-md bg-success-subtle text-success rounded-3 p-2 me-3">
-                            <i class="bx bxs-gas-pump fs-3"></i>
-                        </div>
-                        <div>
-                            <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Gas</small>
-                            <h4 class="fw-bold mb-0 text-dark"><span class="count-up" data-value="{{ $stats['gas_total'] }}">0</span></h4>
+                @if($isRentalActive)
+                <div class="col-6 col-md-4">
+                    <div class="card border-0 shadow-sm h-100 rounded-4 position-relative overflow-hidden">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="avatar avatar-md bg-info-subtle text-info rounded-3 p-2 me-3">
+                                    <i class="bx bx-wrench fs-3"></i>
+                                </div>
+                                <div>
+                                    <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Penyewaan Alat</small>
+                                    <h4 class="fw-bold mb-0 text-dark"><span class="count-up" data-value="{{ $stats['rental_total'] }}">0</span></h4>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
+                @endif
+                @if($isGasActive)
+                <div class="col-6 col-md-4">
+                    <div class="card border-0 shadow-sm h-100 rounded-4 position-relative overflow-hidden">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="avatar avatar-md bg-success-subtle text-success rounded-3 p-2 me-3">
+                                    <i class="bx bxs-gas-pump fs-3"></i>
+                                </div>
+                                <div>
+                                    <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Pembelian Gas</small>
+                                    <h4 class="fw-bold mb-0 text-dark"><span class="count-up" data-value="{{ $stats['gas_total'] }}">0</span></h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endif
+                @if($isMobilActive)
+                <div class="col-6 col-md-4">
+                    <div class="card border-0 shadow-sm h-100 rounded-4 position-relative overflow-hidden">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="avatar avatar-md bg-primary-subtle text-primary rounded-3 p-2 me-3">
+                                    <i class="bx bx-car fs-3"></i>
+                                </div>
+                                <div>
+                                    <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Penyewaan Mobil</small>
+                                    <h4 class="fw-bold mb-0 text-dark"><span class="count-up" data-value="{{ $stats['mobil_total'] }}">0</span></h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endif
+                @if($isFasilitasActive)
+                <div class="col-6 col-md-4">
+                    <div class="card border-0 shadow-sm h-100 rounded-4 position-relative overflow-hidden">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="avatar avatar-md bg-warning-subtle text-warning rounded-3 p-2 me-3">
+                                    <i class="bx bx-building-house fs-3"></i>
+                                </div>
+                                <div>
+                                    <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Fasilitas Umum</small>
+                                    <h4 class="fw-bold mb-0 text-dark"><span class="count-up" data-value="{{ $stats['fasilitas_total'] }}">0</span></h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endif
             </div>
         </div>
-        @endif
-        <div class="col-md-3 col-6">
-            <div class="card border-0 shadow-sm h-100 rounded-4 position-relative overflow-hidden">
-                <div class="card-body p-3">
-                    <div class="d-flex align-items-center mb-2">
-                        <div class="avatar avatar-md bg-warning-subtle text-warning rounded-3 p-2 me-3">
-                            <i class="bx bx-money fs-3"></i>
+
+        <!-- Metode Pembayaran -->
+        <div class="col-12 col-xl-5">
+            <h6 class="fw-bold text-secondary mb-3 text-uppercase small ls-1">Berdasarkan Metode Pembayaran</h6>
+            <div class="row g-3">
+                <div class="col-6 col-md-4 col-xl-6">
+                    <div class="card border-0 shadow-sm h-100 rounded-4 position-relative overflow-hidden">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="avatar avatar-md bg-success-subtle text-success rounded-3 p-2 me-3">
+                                    <i class="bx bx-money fs-3"></i>
+                                </div>
+                                <div>
+                                    <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Tunai / Cash</small>
+                                    <h4 class="fw-bold mb-0 text-dark"><span class="count-up" data-value="{{ $stats['cash_total'] }}">0</span></h4>
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Tunai</small>
-                            <h4 class="fw-bold mb-0 text-dark"><span class="count-up" data-value="{{ $stats['cash_total'] }}">0</span></h4>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-xl-6">
+                    <div class="card border-0 shadow-sm h-100 rounded-4 position-relative overflow-hidden">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="avatar avatar-md bg-info-subtle text-info rounded-3 p-2 me-3">
+                                    <i class="bx bx-transfer fs-3"></i>
+                                </div>
+                                <div>
+                                    <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Transfer Manual</small>
+                                    <h4 class="fw-bold mb-0 text-dark"><span class="count-up" data-value="{{ $stats['transfer_total'] }}">0</span></h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-xl-12">
+                    <div class="card border-0 shadow-sm h-100 rounded-4 position-relative overflow-hidden">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="avatar avatar-md bg-primary-subtle text-primary rounded-3 p-2 me-3">
+                                    <i class="bx bx-credit-card-front fs-3"></i>
+                                </div>
+                                <div>
+                                    <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Pembayaran Digital / Gateway</small>
+                                    <h4 class="fw-bold mb-0 text-dark"><span class="count-up" data-value="{{ $stats['digital_total'] }}">0</span></h4>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -1,5 +1,10 @@
 @extends('admin.layouts.admin')
 
+@php
+    $userRegion = \App\Models\Region::find(auth()->user()->region_id);
+    $paymentInfo = $userRegion->payment_info ?? [];
+@endphp
+
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
         <!-- Breadcrumb -->
@@ -47,7 +52,33 @@
                         <form action="{{ route('admin.unit.fasilitas_umum.store') }}" method="POST" enctype="multipart/form-data">
                             @csrf
 
-                            <!-- Section: Foto Fasilitas -->
+                            
+                            <!-- STEPS NAVIGATION -->
+                            <ul class="nav nav-pills nav-justified mb-4 wizard-steps" id="formWizard" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="step1-tab" data-bs-toggle="pill" data-bs-target="#step1" type="button" role="tab" aria-controls="step1" aria-selected="true">
+                                        <span class="step-icon"><i class='bx bx-info-circle'></i></span>
+                                        <span class="step-text d-none d-sm-inline ms-1">Info & Media</span>
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="step2-tab" data-bs-toggle="pill" data-bs-target="#step2" type="button" role="tab" aria-controls="step2" aria-selected="false">
+                                        <span class="step-icon"><i class='bx bx-box'></i></span>
+                                        <span class="step-text d-none d-sm-inline ms-1">Kapasitas & Stok</span>
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="step3-tab" data-bs-toggle="pill" data-bs-target="#step3" type="button" role="tab" aria-controls="step3" aria-selected="false">
+                                        <span class="step-icon"><i class='bx bx-cog'></i></span>
+                                        <span class="step-text d-none d-sm-inline ms-1">Pengaturan & Simpan</span>
+                                    </button>
+                                </li>
+                            </ul>
+
+                            <div class="tab-content" id="formWizardContent">
+                                <!-- STEP 1: INFO & MEDIA -->
+                                <div class="tab-pane fade show active" id="step1" role="tabpanel" aria-labelledby="step1-tab">
+<!-- Section: Foto Fasilitas -->
                             <div class="form-section mb-4">
                                 <h6 class="section-title mb-3">
                                     <i class='bx bx-image me-2'></i>Foto Fasilitas
@@ -148,6 +179,25 @@
                                             </button>
                                         </div>
                                     </div>
+                                    
+                                    <!-- Opsi Supir & BBM (Hanya muncul jika kategori Kendaraan) -->
+                                    <div class="col-md-6 kendaraan-options" style="display:none;">
+                                        <label class="form-label fw-semibold" for="opsi_supir">Opsi Supir</label>
+                                        <select class="form-select modern-input" id="opsi_supir" name="opsi_supir">
+                                            <option value="">-- Pilih --</option>
+                                            <option value="Sediakan Supir Sendiri">Sediakan Supir Sendiri</option>
+                                            <option value="Disediakan">Disediakan (Oleh Desa)</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 kendaraan-options" style="display:none;">
+                                        <label class="form-label fw-semibold" for="bbm_ditanggung">Opsi BBM</label>
+                                        <select class="form-select modern-input" id="bbm_ditanggung" name="bbm_ditanggung">
+                                            <option value="">-- Pilih --</option>
+                                            <option value="Ditanggung Pengguna">Ditanggung Pengguna</option>
+                                            <option value="Disediakan">Disediakan (Oleh Desa)</option>
+                                        </select>
+                                    </div>
+                                    
                                     <div class="col-12">
                                         <label class="form-label fw-semibold" for="deskripsi">
                                             Deskripsi <span class="text-danger">*</span>
@@ -158,7 +208,15 @@
                                 </div>
                             </div>
 
-                            <!-- Section: Kapasitas & Satuan -->
+                            
+                                    <div class="d-flex justify-content-end mt-4">
+                                        <button type="button" class="btn btn-primary" onclick="nextStep('step2-tab')">Selanjutnya <i class='bx bx-right-arrow-alt'></i></button>
+                                    </div>
+                                </div>
+                                
+                                <!-- STEP 2: HARGA & STOK -->
+                                <div class="tab-pane fade" id="step2" role="tabpanel" aria-labelledby="step2-tab">
+<!-- Section: Kapasitas & Satuan -->
                             <div class="form-section mb-4">
                                 <h6 class="section-title mb-3">
                                     <i class='bx bx-list-ol me-2'></i>Kapasitas & Satuan
@@ -192,7 +250,18 @@
                                 </div>
                             </div>
 
-                            <!-- Section: Status & Lokasi -->
+                            
+                                    <div class="d-flex justify-content-between mt-4">
+                                        <button type="button" class="btn btn-secondary" onclick="prevStep('step1-tab')"><i class='bx bx-left-arrow-alt'></i> Sebelumnya</button>
+                                        <button type="button" class="btn btn-primary" onclick="nextStep('step3-tab')">Selanjutnya <i class='bx bx-right-arrow-alt'></i></button>
+                                    </div>
+                                </div>
+                                
+                                <!-- STEP 3: PENGATURAN & SIMPAN -->
+                                <div class="tab-pane fade" id="step3" role="tabpanel" aria-labelledby="step3-tab">
+                                
+
+<!-- Section: Status & Lokasi -->
                             <div class="form-section mb-4">
                                 <h6 class="section-title mb-3">
                                     <i class='bx bx-map me-2'></i>Status & Lokasi
@@ -203,9 +272,9 @@
                                             Status <span class="text-danger">*</span>
                                         </label>
                                         <select class="form-select modern-input" id="status" name="status" required>
-                                            <option value="tersedia" selected>Tersedia</option>
-                                            <option value="disewa">Disewa</option>
-                                            <option value="rusak">Rusak</option>
+                                            <option value="Tersedia" selected>Tersedia</option>
+                                            <option value="Disewa">Disewa</option>
+                                            <option value="Tidak Tersedia">Tidak Tersedia</option>
                                         </select>
                                     </div>
                                     <div class="col-md-6">
@@ -219,23 +288,27 @@
                             </div>
 
 
-                            <!-- Action Buttons -->
-                            <div class="d-flex justify-content-end gap-3 pt-3 border-top">
-                                <a href="{{ route('admin.unit.fasilitas_umum.index') }}" class="btn btn-light modern-btn-secondary px-4">
-                                    <i class='bx bx-x me-1'></i> Batal
-                                </a>
-                                <button type="submit" class="btn btn-primary modern-btn-primary px-4">
-                                    <i class='bx bx-save me-1'></i> Simpan Data
-                                </button>
-                            </div>
+                            
+                                    <div class="d-flex justify-content-between mt-4">
+                                        <button type="button" class="btn btn-secondary" onclick="prevStep('step2-tab')"><i class='bx bx-left-arrow-alt'></i> Sebelumnya</button>
+                                        <div>
+                                            <a href="{{ route('admin.unit.fasilitas_umum.index') }}" class="btn btn-light me-2 border">Batal</a>
+                                            <button type="submit" class="btn btn-success"><i class='bx bx-save'></i> Simpan Data</button>
+                                        </div>
+                                    </div>
+                                </div> <!-- End step 3 -->
+                            </div> <!-- End tab-content -->
+
                         </form>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+@endsection
 
-    <!-- Modal Tambah Kategori -->
+@section('modals')
+<!-- Modal Tambah Kategori -->
     <div class="modal fade" id="addCategoryModal" tabindex="-1" aria-labelledby="addCategoryModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content modern-modal">
@@ -533,9 +606,31 @@
         .modern-card {
             animation: fadeInUp 0.5s ease;
         }
-    </style>
+    
+<style>
+    .wizard-steps .nav-link {
+        border-radius: 0.5rem;
+        color: #6c757d;
+        font-weight: 500;
+        padding: 0.75rem 1rem;
+        transition: all 0.2s ease;
+    }
+    .wizard-steps .nav-link.active {
+        background-color: #0d6efd;
+        color: white;
+        box-shadow: 0 4px 6px rgba(13, 110, 253, 0.2);
+    }
+    .step-icon {
+        font-size: 1.25rem;
+        vertical-align: middle;
+    }
+</style>
 
-    <script>
+</style>
+@endsection
+
+@section('scripts')
+<script>
 
 
     // Fungsi untuk preview file gambar
@@ -578,7 +673,7 @@
             option.textContent = newKategori;
             select.appendChild(option);
             select.value = newKategori;
-            bootstrap.Modal.getInstance(document.getElementById('addCategoryModal')).hide();
+            $('#addCategoryModal').modal('hide');
             document.getElementById('new_kategori').value = '';
         } else {
             alert('Silakan masukkan nama kategori.');
@@ -595,7 +690,7 @@
             option.textContent = newSatuan;
             select.appendChild(option);
             select.value = newSatuan;
-            bootstrap.Modal.getInstance(document.getElementById('addSatuanModal')).hide();
+            $('#addSatuanModal').modal('hide');
             document.getElementById('new_satuan').value = '';
         } else {
             alert('Silakan masukkan nama satuan.');
@@ -623,6 +718,69 @@
     // Jalankan saat pertama dimuat
     document.addEventListener('DOMContentLoaded', toggleKendaraanOptions);
 
-    </script>
-@endsection
+    
+    function nextStep(tabId) {
+        var activeTabPane = document.querySelector('.tab-pane.active');
+        if (activeTabPane) {
+            var inputs = activeTabPane.querySelectorAll('input[required], select[required], textarea[required]');
+            for (var i = 0; i < inputs.length; i++) {
+                if (!inputs[i].checkValidity()) {
+                    inputs[i].reportValidity();
+                    return; 
+                }
+            }
+        }
+        var tabEl = document.querySelector('#' + tabId);
+        var tab = new bootstrap.Tab(tabEl);
+        tab.show();
+        window.scrollTo(0, 0);
+    }
+    function prevStep(tabId) {
+        var tabEl = document.querySelector('#' + tabId);
+        var tab = new bootstrap.Tab(tabEl);
+        tab.show();
+        window.scrollTo(0, 0);
+    }
 
+    document.addEventListener('DOMContentLoaded', function() {
+        const toggles = document.querySelectorAll('.delivery-toggle');
+        toggles.forEach(toggle => {
+            toggle.addEventListener('change', function() {
+                const field = this.dataset.field;
+                const value = this.checked ? 1 : 0;
+                this.disabled = true;
+
+                fetch('{{ route("admin.region-settings.toggle-delivery") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({ field: field, value: value })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    this.disabled = false;
+                    if(data.success) {
+                        const toast = document.createElement('div');
+                        toast.className = 'alert alert-success position-fixed top-0 end-0 m-3 shadow-sm';
+                        toast.style.zIndex = '9999';
+                        toast.innerHTML = '<i class="bx bx-check-circle me-2"></i>' + data.message;
+                        document.body.appendChild(toast);
+                        setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 500); }, 3000);
+                    } else {
+                        alert(data.message);
+                        this.checked = !this.checked; 
+                    }
+                })
+                .catch(err => {
+                    this.disabled = false;
+                    alert('Terjadi kesalahan jaringan.');
+                    this.checked = !this.checked; 
+                });
+            });
+        });
+    });
+
+</script>
+@endsection

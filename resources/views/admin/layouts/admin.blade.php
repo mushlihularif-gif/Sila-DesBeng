@@ -1104,9 +1104,9 @@
                     animateCountUp('.count-up-rupiah', true);
                 });
             </script>
-            @yield('scripts')
             @yield('modals')
             @stack('modals')
+            @yield('scripts')
 </body>
 
 </html>

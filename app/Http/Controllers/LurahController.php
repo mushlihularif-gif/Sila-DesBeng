@@ -229,7 +229,7 @@ class LurahController extends Controller
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|in:Pending,Proses,Selesai,Ditolak',
+            'status' => 'required|in:Pending,Proses,Dilanjutkan,Selesai,Ditolak',
             'catatan_admin' => 'nullable|string|max:500'
         ]);
 
@@ -245,9 +245,13 @@ class LurahController extends Controller
         $laporan->admin_id = auth()->id();
         $laporan->save();
 
-        // Kirim notifikasi jika status berubah (opsional)
+        // Kirim notifikasi jika status berubah
         if ($oldStatus !== $request->status) {
-            // Bisa ditambahkan sistem notifikasi di sini
+            try {
+                \App\Services\NotificationService::sendLaporanStatusUpdateNotification($laporan);
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('Failed to send status update notification: ' . $e->getMessage());
+            }
         }
 
         return redirect()->back()->with('success', 'Status laporan berhasil diperbarui oleh Lurah!');

@@ -244,8 +244,8 @@
                 <input type="hidden" name="mobil_id" value="{{ $item->id }}">
                 <input type="hidden" name="quantity" id="hidden-quantity" value="{{ $quantity }}">
                 @php
-                    $antarActive = !isset($setting->payment_info['mobil_delivery_antar_active']) || $setting->payment_info['mobil_delivery_antar_active'];
-                    $jemputActive = !isset($setting->payment_info['mobil_delivery_jemput_active']) || $setting->payment_info['mobil_delivery_jemput_active'];
+                    $antarActive = !isset($setting->payment_info['mobil_rental_delivery_antar_active']) || $setting->payment_info['mobil_rental_delivery_antar_active'];
+                    $jemputActive = !isset($setting->payment_info['mobil_rental_delivery_jemput_active']) || $setting->payment_info['mobil_rental_delivery_jemput_active'];
                     $defaultMethod = $antarActive ? 'antar' : 'jemput';
                 @endphp
                 <input type="hidden" name="delivery_method" id="delivery-method-input" value="{{ $defaultMethod }}">

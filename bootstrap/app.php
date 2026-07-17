@@ -10,6 +10,10 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
+    ->withSchedule(function (\Illuminate\Console\Scheduling\Schedule $schedule) {
+        // MATRIKS ESKALASI: Cek batas SLA pelaporan warga setiap jam
+        $schedule->command('laporan:auto-escalate')->hourly();
+    })
     ->withMiddleware(function (Middleware $middleware) {
         // Register global middleware (Skenario 1, 2: Security Headers & Input Sanitization)
         $middleware->append(\App\Http\Middleware\SecurityHeaders::class);

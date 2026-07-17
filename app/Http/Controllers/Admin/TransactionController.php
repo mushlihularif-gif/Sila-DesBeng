@@ -112,25 +112,51 @@ class TransactionController extends Controller
             $fasilitasPayments = $fasilitasQuery->orderByDesc('updated_at')->get();
         }
 
-        // Count statistics
-        $rentalCount = RentalBooking::withTrashed()->where(function($q) use ($activeStatuses) {
-            $q->whereNotNull('payment_proof')
-              ->orWhereIn('status', $activeStatuses);
-        })->count();
+        // Count statistics (WITH region filter to match the table data)
+        // Kita simpan query dasar agar tidak mengeksekusi ulang query yang sudah dimodifikasi filter
+        $baseRental = $this->applyRegionFilter(RentalBooking::withTrashed(), 'barang', true)->where(function($q) use ($activeStatuses) {
+            $q->whereNotNull('payment_proof')->orWhereIn('status', $activeStatuses);
+        });
+        $rentalCount = (clone $baseRental)->count();
         
-        $gasCount = GasOrder::withTrashed()->where(function($q) use ($activeStatuses) {
-            $q->whereNotNull('proof_of_payment')
-              ->orWhereIn('status', $activeStatuses);
-        })->count();
+        $baseGas = $this->applyRegionFilter(GasOrder::withTrashed(), 'gas', true)->where(function($q) use ($activeStatuses) {
+            $q->whereNotNull('proof_of_payment')->orWhereIn('status', $activeStatuses);
+        });
+        $gasCount = (clone $baseGas)->count();
 
-        $mobilCount = MobilBooking::withTrashed()->where(function($q) use ($activeStatuses) {
-            $q->whereNotNull('payment_proof')
-              ->orWhereIn('status', $activeStatuses);
-        })->count();
+        $baseMobil = $this->applyRegionFilter(MobilBooking::withTrashed(), 'mobil', true)->where(function($q) use ($activeStatuses) {
+            $q->whereNotNull('payment_proof')->orWhereIn('status', $activeStatuses);
+        });
+        $mobilCount = (clone $baseMobil)->count();
 
-        $fasilitasCount = FasilitasUmumBooking::withTrashed()->where(function($q) use ($activeStatuses) {
+        $baseFasilitas = $this->applyRegionFilter(FasilitasUmumBooking::withTrashed(), 'fasilitas', true)->where(function($q) use ($activeStatuses) {
             $q->whereIn('status', $activeStatuses);
-        })->count();
+        });
+        $fasilitasCount = (clone $baseFasilitas)->count();
+
+        // Hitung berdasarkan metode pembayaran
+        // Kita ambil semua payment_method dari keempat modul yang aktif
+        $allMethods = collect();
+        if ($rentalCount > 0) $allMethods = $allMethods->merge((clone $baseRental)->pluck('payment_method'));
+        if ($gasCount > 0) $allMethods = $allMethods->merge((clone $baseGas)->pluck('payment_method'));
+        if ($mobilCount > 0) $allMethods = $allMethods->merge((clone $baseMobil)->pluck('payment_method'));
+        if ($fasilitasCount > 0) $allMethods = $allMethods->merge((clone $baseFasilitas)->pluck('payment_method'));
+
+        $transferCount = 0;
+        $digitalCount = 0;
+        $tunaiCount = 0;
+
+        foreach ($allMethods as $method) {
+            $m = strtolower($method ?? '');
+            if (str_contains($m, 'transfer') || str_contains($m, 'bank')) {
+                $transferCount++;
+            } elseif (str_contains($m, 'qris') || str_contains($m, 'gopay') || str_contains($m, 'ovo') || str_contains($m, 'dana') || str_contains($m, 'shopee') || str_contains($m, 'linkaja') || str_contains($m, 'midtrans') || str_contains($m, 'digital') || str_contains($m, 'gateway')) {
+                $digitalCount++;
+            } else {
+                // Asumsi jika bukan transfer dan bukan digital, maka Tunai / Cash
+                $tunaiCount++;
+            }
+        }
 
         $stats = [
             'total' => $rentalCount + $gasCount + $mobilCount + $fasilitasCount,
@@ -138,8 +164,9 @@ class TransactionController extends Controller
             'gas_total' => $gasCount,
             'mobil_total' => $mobilCount,
             'fasilitas_total' => $fasilitasCount,
-            'transfer_total' => 0, // Transfer is disabled for now
-            'cash_total' => $rentalCount + $gasCount + $mobilCount + $fasilitasCount, // All valid transactions are essentially verified/cash/system
+            'transfer_total' => $transferCount,
+            'digital_total' => $digitalCount,
+            'cash_total' => $tunaiCount,
         ];
 
         $activeServices = $this->getActivatedServices();
