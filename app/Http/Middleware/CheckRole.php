@@ -29,8 +29,11 @@ class CheckRole
         // Check if 'guest' is allowed
         $allowGuest = in_array('guest', $roles);
         
+        // Determine the appropriate guard (e.g., if auth:sanctum was called, 'sanctum' is in roles)
+        $guard = in_array('sanctum', $roles) ? 'sanctum' : null;
+        
         // Check if user is authenticated
-        if (!Auth::check()) {
+        if (!Auth::guard($guard)->check()) {
             // If guest is allowed, let them through
             if ($allowGuest) {
                 return $next($request);
@@ -72,16 +75,20 @@ class CheckRole
         }
 
         // User is authenticated
-        $user = Auth::user();
+        if ($guard) {
+            Auth::shouldUse($guard);
+        }
+        
+        $user = Auth::guard($guard)->user();
         Log::info('CheckRole: User ' . $user->email . ' (Role: ' . $user->role . ') accessing ' . $request->path());
         
         // If no roles specified (only 'auth'), just check authentication (already passed above)
-        if (empty($roles)) {
+        if (empty($roles) || (count($roles) === 1 && $roles[0] === 'sanctum')) {
             return $next($request);
         }
         
-        // Check if user has one of the required roles (excluding 'guest' from check)
-        $requiredRoles = array_filter($roles, fn($role) => $role !== 'guest');
+        // Check if user has one of the required roles (excluding 'guest' and 'sanctum' from check)
+        $requiredRoles = array_filter($roles, fn($role) => $role !== 'guest' && $role !== 'sanctum');
         
         // If no required roles (only 'guest' was specified), allow authenticated user too
         if (empty($requiredRoles)) {
