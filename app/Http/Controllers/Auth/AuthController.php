@@ -17,16 +17,12 @@ class AuthController extends Controller
     {
         try {
             $validated = $request->validate([
-                'nik' => 'required|string|size:16|unique:users,nik',
                 'username' => 'required|string|max:255|unique:users,username',
                 'email' => 'required|email|unique:users,email',
-                'name' => 'required|string|max:255',
                 'phone' => 'required|string|max:20',
-                'address' => 'required|string',
-                'gender' => 'required|in:laki-laki,perempuan',
                 'password' => 'required|string|min:8|confirmed',
                 'region_id' => 'required|exists:regions,id',
-                'otp_method' => 'required|in:email,sms',
+                'otp_method' => 'required|in:email,whatsapp',
             ], [
                 'username.unique' => 'Username sudah digunakan',
                 'email.unique' => 'Email sudah terdaftar',
@@ -41,13 +37,10 @@ class AuthController extends Controller
             session([
                 'temp_registration' => [
                     'temp_id' => $tempUserId,
-                    'nik' => $validated['nik'],
                     'username' => $validated['username'],
                     'email' => $validated['email'],
-                    'name' => $validated['name'],
+                    'name' => $validated['username'], // Default to username for now
                     'phone' => $validated['phone'],
-                    'address' => $validated['address'],
-                    'gender' => $validated['gender'],
                     'password' => Hash::make($validated['password']),
                     'region_id' => $validated['region_id'],
                     'otp_code' => $otpCode,
@@ -61,15 +54,16 @@ class AuthController extends Controller
             // # ===================================================================
             if ($validated['otp_method'] === 'email') {
                 Mail::to($validated['email'])->send(new OtpMail($otpCode));
-            } else {
-                // Implement SMS API logic here
+            } elseif ($validated['otp_method'] === 'whatsapp') {
+                $fonnte = new \App\Services\FonnteService();
+                $fonnte->sendOtp($validated['phone'], $otpCode);
             }
             // # ===================================================================
 
             session()->flash('otp_demo_sandbox_code', $otpCode);
             session()->flash('trigger_open_otp_tab', true);
 
-            $methodText = $validated['otp_method'] === 'sms' ? 'nomor telepon' : 'email';
+            $methodText = $validated['otp_method'] === 'whatsapp' ? 'nomor WhatsApp' : 'email';
             return redirect()->route('beranda')->with('open_otp_modal', true)
                 ->with('success', 'Kode OTP telah dikirim ke ' . $methodText . ' Anda');
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -95,13 +89,13 @@ class AuthController extends Controller
 
         if (session('temp_registration')) {
             $otpCode = session('temp_registration')['otp_code'] ?? '1234';
-            if (isset(session('temp_registration')['otp_method']) && session('temp_registration')['otp_method'] === 'sms') {
-                $method = 'SMS';
+            if (isset(session('temp_registration')['otp_method']) && session('temp_registration')['otp_method'] === 'whatsapp') {
+                $method = 'WhatsApp';
             }
         } elseif (session('forgot_password_data')) {
             $otpCode = session('forgot_password_data')['otp_code'] ?? '1234';
-            if (isset(session('forgot_password_data')['otp_method']) && session('forgot_password_data')['otp_method'] === 'sms') {
-                $method = 'SMS';
+            if (isset(session('forgot_password_data')['otp_method']) && session('forgot_password_data')['otp_method'] === 'whatsapp') {
+                $method = 'WhatsApp';
             }
         }
         
@@ -164,13 +158,13 @@ class AuthController extends Controller
 
             // Create user with safe fields only (no role/status via mass assignment)
             $user = User::create([
-                'nik' => $tempData['nik'],
+                'nik' => null,
                 'username' => $tempData['username'],
                 'email' => $tempData['email'],
                 'name' => $tempData['name'],
                 'phone' => $tempData['phone'],
-                'address' => $tempData['address'],
-                'gender' => $tempData['gender'],
+                'address' => '-',
+                'gender' => 'laki-laki',
                 'password' => $tempData['password'],
                 'region_id' => $tempData['region_id'],
             ]);
@@ -225,7 +219,7 @@ class AuthController extends Controller
             session()->flash('otp_demo_sandbox_code', $newOtpCode);
             session()->flash('trigger_open_otp_tab', true);
 
-            $methodText = ($method === 'sms') ? 'nomor telepon' : 'email';
+            $methodText = ($method === 'whatsapp') ? 'nomor WhatsApp' : 'email';
             return redirect()->route('beranda')
                 ->with('success', 'Kode OTP baru telah dikirim ke ' . $methodText . ' Anda.')
                 ->with('open_otp_modal', true);
@@ -355,7 +349,7 @@ class AuthController extends Controller
         try {
             $validated = $request->validate([
                 'email_or_phone' => 'required|string',
-                'otp_method' => 'required|in:email,sms',
+                'otp_method' => 'required|in:email,whatsapp',
             ], [
                 'email_or_phone.required' => 'Email atau Nomor Telepon harus diisi',
                 'otp_method.required' => 'Metode OTP harus dipilih',
@@ -386,12 +380,15 @@ class AuthController extends Controller
             // # MODE SANDBOX UNTUK MASS-TESTING DEMO
             if ($validated['otp_method'] === 'email') {
                 Mail::to($user->email)->send(new OtpMail($otpCode));
+            } elseif ($validated['otp_method'] === 'whatsapp') {
+                $fonnte = new \App\Services\FonnteService();
+                $fonnte->sendOtp($user->phone, $otpCode);
             }
 
             session()->flash('otp_demo_sandbox_code', $otpCode);
             session()->flash('trigger_open_otp_tab', true);
 
-            $methodText = $validated['otp_method'] === 'sms' ? 'nomor telepon' : 'email';
+            $methodText = $validated['otp_method'] === 'whatsapp' ? 'nomor WhatsApp' : 'email';
             return redirect()->route('beranda')->with('open_forgot_otp_modal', true)
                 ->with('success', 'Kode OTP telah dikirim ke ' . $methodText . ' Anda');
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -524,7 +521,7 @@ class AuthController extends Controller
             session()->flash('otp_demo_sandbox_code', $newOtpCode);
             session()->flash('trigger_open_otp_tab', true);
 
-            $methodText = ($method === 'sms') ? 'nomor telepon' : 'email';
+            $methodText = ($method === 'whatsapp') ? 'nomor WhatsApp' : 'email';
             return redirect()->route('beranda')
                 ->with('success', 'Kode OTP baru telah dikirim ke ' . $methodText . ' Anda.')
                 ->with('open_forgot_otp_modal', true);

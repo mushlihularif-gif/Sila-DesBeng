@@ -166,7 +166,14 @@
 
                 <div class="relative group">
                     <button class="flex items-center gap-2.5 hover:opacity-90 transition bg-transparent border-none outline-none cursor-pointer">
-                        <span class="text-gray-900 font-bold text-[15px] group-hover:border-b-2 group-hover:border-blue-500 pb-0.5">{{ auth()->user()->username }}</span>
+                        <span class="text-gray-900 font-bold text-[15px] group-hover:border-b-2 group-hover:border-blue-500 pb-0.5 flex items-center gap-1">
+                            {{ auth()->user()->username }}
+                            @if(auth()->user()->verification_status === 'verified')
+                            <svg class="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20" title="Warga Terverifikasi">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                            </svg>
+                            @endif
+                        </span>
                         <div class="w-11 h-11 rounded-full overflow-hidden bg-[#D1D5DB] flex-shrink-0 shadow-md">
                             @if (auth()->user()->file)
                                 <img src="{{ auth()->user()->file->file_stream }}" alt="Avatar" class="w-full h-full object-cover">
@@ -180,8 +187,17 @@
 
                     <!-- Wrapper padding transparan untuk jembatan hover agar tidak hilang -->
                     <div class="absolute top-full right-0 pt-2 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                        <div class="w-48 bg-white rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.1)] border border-gray-200 overflow-hidden">
+                        <div class="w-56 bg-white rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.1)] border border-gray-200 overflow-hidden">
                             <div class="py-1.5">
+                                @if(auth()->user()->verification_status !== 'verified')
+                                <a href="{{ route('kyc.index') }}" class="block px-4 py-2.5 text-amber-600 hover:bg-amber-50 hover:border-l-[3px] hover:border-l-amber-500 transition-all duration-150 border-l-[3px] border-l-transparent bg-amber-50/50">
+                                    <span class="text-[15px] font-medium text-center block flex items-center justify-center gap-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                                        Verifikasi Akun
+                                    </span>
+                                </a>
+                                <div class="h-px bg-gray-100 mx-3 my-1"></div>
+                                @endif
                                 <a href="{{ route('profile') }}" class="block px-4 py-2.5 text-gray-800 hover:bg-blue-50 hover:border-l-[3px] hover:border-l-blue-500 transition-all duration-150 border-l-[3px] border-l-transparent">
                                     <span class="text-[15px] font-normal text-center block">Profil</span>
                                 </a>
@@ -366,11 +382,24 @@
                     @endif
                 </div>
                 <div>
-                    <p class="font-semibold text-gray-900">{{ auth()->user()->name }}</p>
+                    <p class="font-semibold text-gray-900 flex items-center gap-1">
+                        {{ auth()->user()->name }}
+                        @if(auth()->user()->verification_status === 'verified')
+                        <svg class="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20" title="Warga Terverifikasi">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                        </svg>
+                        @endif
+                    </p>
                     <p class="text-sm text-gray-500">{{ auth()->user()->email }}</p>
                 </div>
             </div>
             <div class="space-y-2">
+                @if(auth()->user()->verification_status !== 'verified')
+                <a href="{{ route('kyc.index') }}" class="block w-full text-center px-4 py-2.5 rounded-lg font-medium bg-amber-100 text-amber-700 hover:bg-amber-200 transition flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                    Verifikasi Akun
+                </a>
+                @endif
                 <a href="{{ route('profile') }}" class="block w-full text-center px-4 py-2.5 rounded-lg font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition">
                     Profil Saya
                 </a>

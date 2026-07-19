@@ -571,8 +571,7 @@
         function populateRegions(regKab, regKec, regDesa) {
             const kabupaten = allRegions.find(r => r.type === 'kabupaten' && r.name === 'Kabupaten Bengkalis');
             if (kabupaten) {
-                regKab.innerHTML = `<option value="${kabupaten.id}">${kabupaten.name}</option>`;
-                regKab.value = kabupaten.id;
+                // regKab is a div now, no need to set innerHTML or value
                 
                 // Populate Kecamatan
                 const kecamatans = allRegions.filter(r => r.type === 'kecamatan' && r.parent_id === kabupaten.id);

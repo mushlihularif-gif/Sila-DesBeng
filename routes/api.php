@@ -20,6 +20,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/profile/update', [AuthController::class, 'updateProfile']);
     Route::post('/profile/password', [AuthController::class, 'updatePassword']);
     
+    // KYC
+    Route::post('/kyc/process', [\App\Http\Controllers\Api\KycController::class, 'process']);
+    Route::post('/kyc/submit', [\App\Http\Controllers\Api\KycController::class, 'submit']);
+    
     // Laporan
     Route::post('/laporan', [\App\Http\Controllers\Api\LaporanController::class, 'store']);
     Route::get('/admin-reports', [\App\Http\Controllers\Api\LaporanController::class, 'getAdminReports']);

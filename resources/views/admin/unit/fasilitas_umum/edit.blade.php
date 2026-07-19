@@ -228,21 +228,90 @@
                                     </div>
 
                                     <!-- Opsi Supir & BBM (Hanya muncul jika kategori Kendaraan) -->
-                                    <div class="col-md-6 kendaraan-options" style="display:none;">
-                                        <label class="form-label fw-semibold" for="opsi_supir">Opsi Supir</label>
-                                        <select class="form-select modern-input" id="opsi_supir" name="opsi_supir">
-                                            <option value="">-- Pilih --</option>
-                                            <option value="Sediakan Supir Sendiri" {{ old('opsi_supir', $fasilitas->opsi_supir) == 'Sediakan Supir Sendiri' ? 'selected' : '' }}>Sediakan Supir Sendiri</option>
-                                            <option value="Disediakan" {{ old('opsi_supir', $fasilitas->opsi_supir) == 'Disediakan' ? 'selected' : '' }}>Disediakan (Oleh Desa)</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-6 kendaraan-options" style="display:none;">
-                                        <label class="form-label fw-semibold" for="bbm_ditanggung">Opsi BBM</label>
-                                        <select class="form-select modern-input" id="bbm_ditanggung" name="bbm_ditanggung">
-                                            <option value="">-- Pilih --</option>
-                                            <option value="Ditanggung Pengguna" {{ old('bbm_ditanggung', $fasilitas->bbm_ditanggung) == 'Ditanggung Pengguna' ? 'selected' : '' }}>Ditanggung Pengguna</option>
-                                            <option value="Disediakan" {{ old('bbm_ditanggung', $fasilitas->bbm_ditanggung) == 'Disediakan' ? 'selected' : '' }}>Disediakan (Oleh Desa)</option>
-                                        </select>
+                                    <div class="col-12 kendaraan-options" style="display:none;">
+                                        <div class="form-section mb-4 border border-info bg-light">
+                                            <h6 class="section-title mb-3 text-info">
+                                                <i class='bx bx-car me-2'></i>Pengaturan Kendaraan (Supir & BBM)
+                                            </h6>
+                                            <p class="text-muted small mb-3">Aktifkan opsi layanan untuk unit kendaraan ini. Biarkan tidak aktif jika tidak menyediakan opsi tersebut.</p>
+                                            
+                                            <div class="row g-3">
+                                                <!-- Opsi Supir -->
+                                                <div class="col-md-6">
+                                                    <div class="p-3 border rounded bg-white">
+                                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                                            <div class="d-flex align-items-center gap-2">
+                                                                <img src="{{ asset('User/img/iconbaru/supirsendiri.png') }}" style="width: 40px; height: 40px; object-fit: contain;">
+                                                                <h6 class="mb-0 fw-bold">Sewa Tanpa Supir (Bawa Sendiri)</h6>
+                                                            </div>
+                                                            <div class="form-check form-switch fs-5 mb-0">
+                                                                <input class="form-check-input cursor-pointer" type="radio" name="supir_switch" id="switch_supir_sendiri" value="Sediakan Supir Sendiri" onchange="updateSupirStatus()" {{ old('opsi_supir', $fasilitas->opsi_supir) == 'Sediakan Supir Sendiri' ? 'checked' : '' }}>
+                                                            </div>
+                                                        </div>
+                                                        <div class="text-muted small mb-0 fw-semibold" id="status_supir_sendiri">Tidak Aktif</div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-6">
+                                                    <div class="p-3 border rounded bg-white">
+                                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                                            <div class="d-flex align-items-center gap-2">
+                                                                <img src="{{ asset('User/img/iconbaru/disediakansupir.png') }}" style="width: 40px; height: 40px; object-fit: contain;">
+                                                                <h6 class="mb-0 fw-bold">Sewa Dengan Supir Desa</h6>
+                                                            </div>
+                                                            <div class="form-check form-switch fs-5 mb-0">
+                                                                <input class="form-check-input cursor-pointer" type="radio" name="supir_switch" id="switch_supir_disediakan" value="Disediakan" onchange="updateSupirStatus()" {{ old('opsi_supir', $fasilitas->opsi_supir) == 'Disediakan' ? 'checked' : '' }}>
+                                                            </div>
+                                                        </div>
+                                                        <div class="text-muted small mb-0 fw-semibold" id="status_supir_disediakan">Tidak Aktif</div>
+                                                        
+                                                        <div id="form_supir_details" class="mt-3 p-3 bg-light rounded border" style="display: {{ old('opsi_supir', $fasilitas->opsi_supir) == 'Disediakan' ? 'block' : 'none' }};">
+                                                            <label class="form-label fw-bold text-primary small mb-2"><i class="bx bx-user me-1"></i>Keterangan Supir (Opsional)</label>
+                                                            <input type="text" class="form-control form-control-sm mb-2 modern-input" name="nama_supir" id="nama_supir" placeholder="Nama Supir" value="{{ old('nama_supir', $fasilitas->nama_supir) }}">
+                                                            <input type="text" class="form-control form-control-sm modern-input" name="kontak_supir" id="kontak_supir" placeholder="No. WhatsApp Supir" value="{{ old('kontak_supir', $fasilitas->kontak_supir) }}">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <input type="hidden" name="opsi_supir" id="opsi_supir" value="{{ old('opsi_supir', $fasilitas->opsi_supir) }}">
+                                            
+                                            <hr class="my-4 text-muted">
+
+                                            <div class="row g-3">
+                                                <!-- Opsi BBM -->
+                                                <div class="col-md-6">
+                                                    <div class="p-3 border rounded bg-white">
+                                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                                            <div class="d-flex align-items-center gap-2">
+                                                                <img src="{{ asset('User/img/iconbaru/bbmdisediakan.png') }}" style="width: 40px; height: 40px; object-fit: contain;">
+                                                                <h6 class="mb-0 fw-bold">BBM Disediakan Desa</h6>
+                                                            </div>
+                                                            <div class="form-check form-switch fs-5 mb-0">
+                                                                <input class="form-check-input cursor-pointer" type="radio" name="bbm_switch" id="switch_bbm_disediakan" value="Disediakan" onchange="updateBbmStatus()" {{ old('bbm_ditanggung', $fasilitas->bbm_ditanggung) == 'Disediakan' ? 'checked' : '' }}>
+                                                            </div>
+                                                        </div>
+                                                        <div class="text-muted small mb-0 fw-semibold" id="status_bbm_disediakan">Tidak Aktif</div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-6">
+                                                    <div class="p-3 border rounded bg-white">
+                                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                                            <div class="d-flex align-items-center gap-2">
+                                                                <img src="{{ asset('User/img/iconbaru/bbmditanggungpengguna.png') }}" style="width: 40px; height: 40px; object-fit: contain;">
+                                                                <h6 class="mb-0 fw-bold">BBM Ditanggung Penyewa</h6>
+                                                            </div>
+                                                            <div class="form-check form-switch fs-5 mb-0">
+                                                                <input class="form-check-input cursor-pointer" type="radio" name="bbm_switch" id="switch_bbm_pengguna" value="Ditanggung Pengguna" onchange="updateBbmStatus()" {{ old('bbm_ditanggung', $fasilitas->bbm_ditanggung) == 'Ditanggung Pengguna' ? 'checked' : '' }}>
+                                                            </div>
+                                                        </div>
+                                                        <div class="text-muted small mb-0 fw-semibold" id="status_bbm_pengguna">Tidak Aktif</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <input type="hidden" name="bbm_ditanggung" id="bbm_ditanggung" value="{{ old('bbm_ditanggung', $fasilitas->bbm_ditanggung) }}">
+                                        </div>
                                     </div>
 
                                     <div class="col-12">
@@ -553,6 +622,38 @@
             color: #495057;
         }
 
+        /* Option Cards (Toggle UI) */
+        .option-card {
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            background: white;
+        }
+        .option-card:hover {
+            border-color: var(--primary-light);
+            background: var(--bg-soft);
+            transform: translateY(-2px);
+        }
+        .option-card.active {
+            border-color: var(--primary-color);
+            background: var(--primary-soft);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+        }
+        .option-card img {
+            max-height: 80px;
+            object-fit: contain;
+            margin-bottom: 10px;
+        }
+        .option-card p {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 0;
+            color: #475569;
+        }
+
         .modern-btn-outline {
             border: 1.5px solid #0d6efd;
             border-radius: 0 8px 8px 0;
@@ -727,19 +828,69 @@
         const input = document.getElementById(inputId);
         const preview = document.getElementById(previewId);
         const placeholder = document.getElementById('placeholder_' + inputId);
-        const img = preview.querySelector('img');
         const deleteInput = document.getElementById('delete_' + inputId);
+        const img = preview.querySelector('img');
 
         input.value = '';
-        img.src = '#';
-        preview.style.display = 'none';
-        placeholder.style.display = 'block';
-        
-        // Set flag hapus
         if (deleteInput) {
             deleteInput.value = '1';
         }
+        img.src = '#';
+        preview.style.display = 'none';
+        placeholder.style.display = 'block';
     }
+
+    // JS Logic for Supir & BBM Toggle
+    function updateSupirStatus() {
+        const switchSendiri = document.getElementById('switch_supir_sendiri').checked;
+        const switchDisediakan = document.getElementById('switch_supir_disediakan').checked;
+        
+        document.getElementById('status_supir_sendiri').textContent = switchSendiri ? 'Aktif' : 'Tidak Aktif';
+        document.getElementById('status_supir_sendiri').className = switchSendiri ? 'small mb-0 fw-bold text-success' : 'small mb-0 fw-semibold text-muted';
+        
+        document.getElementById('status_supir_disediakan').textContent = switchDisediakan ? 'Aktif' : 'Tidak Aktif';
+        document.getElementById('status_supir_disediakan').className = switchDisediakan ? 'small mb-0 fw-bold text-success' : 'small mb-0 fw-semibold text-muted';
+
+        const input = document.getElementById('opsi_supir');
+        const details = document.getElementById('form_supir_details');
+        
+        if (switchSendiri) {
+            input.value = 'Sediakan Supir Sendiri';
+        } else if (switchDisediakan) {
+            input.value = 'Disediakan';
+        } else {
+            input.value = '';
+        }
+        
+        if (switchDisediakan) {
+            details.style.display = 'block';
+        } else {
+            details.style.display = 'none';
+        }
+    }
+
+    function updateBbmStatus() {
+        const switchDisediakan = document.getElementById('switch_bbm_disediakan').checked;
+        const switchPengguna = document.getElementById('switch_bbm_pengguna').checked;
+        
+        document.getElementById('status_bbm_disediakan').textContent = switchDisediakan ? 'Aktif' : 'Tidak Aktif';
+        document.getElementById('status_bbm_disediakan').className = switchDisediakan ? 'small mb-0 fw-bold text-success' : 'small mb-0 fw-semibold text-muted';
+
+        document.getElementById('status_bbm_pengguna').textContent = switchPengguna ? 'Aktif' : 'Tidak Aktif';
+        document.getElementById('status_bbm_pengguna').className = switchPengguna ? 'small mb-0 fw-bold text-success' : 'small mb-0 fw-semibold text-muted';
+
+        if (switchDisediakan) {
+            document.getElementById('bbm_ditanggung').value = 'Disediakan';
+        } else if (switchPengguna) {
+            document.getElementById('bbm_ditanggung').value = 'Ditanggung Pengguna';
+        } else {
+            document.getElementById('bbm_ditanggung').value = '';
+        }
+    }
+    
+    // Initialize toggles
+    updateSupirStatus();
+    updateBbmStatus();
 
     // Fungsi untuk menambah kategori
     document.getElementById('saveCategoryBtn')?.addEventListener('click', function() {

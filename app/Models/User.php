@@ -73,6 +73,8 @@ class User extends Authenticatable
         'role',
         'region_id',
         'google_id',
+        'verification_status',
+        'verified_at',
     ];
 
     /**

@@ -20,7 +20,9 @@ class FasilitasUmum extends Model
         'lokasi',
         'region_id',
         'opsi_supir',
-        'bbm_ditanggung'
+        'bbm_ditanggung',
+        'nama_supir',
+        'kontak_supir'
     ];
 
     public function bookings()

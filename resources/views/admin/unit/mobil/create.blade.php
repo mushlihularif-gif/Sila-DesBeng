@@ -63,12 +63,18 @@
                                 </li>
                                 <li class="nav-item" role="presentation">
                                     <button class="nav-link" id="step2-tab" data-bs-toggle="pill" data-bs-target="#step2" type="button" role="tab" aria-controls="step2" aria-selected="false">
-                                        <span class="step-icon"><i class='bx bx-money'></i></span>
-                                        <span class="step-text d-none d-sm-inline ms-1">Harga & Stok</span>
+                                        <span class="step-icon"><i class='bx bx-car'></i></span>
+                                        <span class="step-text d-none d-sm-inline ms-1">Sewa Harian</span>
                                     </button>
                                 </li>
                                 <li class="nav-item" role="presentation">
                                     <button class="nav-link" id="step3-tab" data-bs-toggle="pill" data-bs-target="#step3" type="button" role="tab" aria-controls="step3" aria-selected="false">
+                                        <span class="step-icon"><i class='bx bx-money'></i></span>
+                                        <span class="step-text d-none d-sm-inline ms-1">Sewa Borongan</span>
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="step4-tab" data-bs-toggle="pill" data-bs-target="#step4" type="button" role="tab" aria-controls="step4" aria-selected="false">
                                         <span class="step-icon"><i class='bx bx-cog'></i></span>
                                         <span class="step-text d-none d-sm-inline ms-1">Pengaturan & Simpan</span>
                                     </button>
@@ -175,140 +181,10 @@
                                                 <i class="bx bx-plus"></i>
                                             </button>
                                         </div>
-                                    </div><div class="col-12">
-                                        <label class="form-label fw-semibold" for="deskripsi">
-                                            Deskripsi <span class="text-danger">*</span>
-                                        </label>
-                                        <textarea class="form-control modern-input" id="deskripsi" name="deskripsi" 
-                                                  rows="4" placeholder="Jelaskan detail alat, kondisi, dan spesifikasi..." required></textarea>
                                     </div>
                                 </div>
-                            </div>
 
-                            
-                                    <div class="d-flex justify-content-end mt-4">
-                                        <button type="button" class="btn btn-primary" onclick="nextStep('step2-tab')">Selanjutnya <i class='bx bx-right-arrow-alt'></i></button>
-                                    </div>
-                                </div>
-                                
-                                <!-- STEP 2: HARGA & STOK -->
-                                <div class="tab-pane fade" id="step2" role="tabpanel" aria-labelledby="step2-tab">
-
-                            <!-- Section: Pengaturan Rental Harian -->
-                            <div class="form-section mb-4">
-                                <h6 class="section-title mb-3">
-                                    <i class='bx bx-car me-2'></i><span class="badge bg-primary me-2">RENTAL HARIAN</span> Pengaturan Rental (Sewa Lepas/Dengan Supir)
-                                </h6>
-                                <p class="text-muted small mb-3">Tentukan harga dasar per hari dan opsi layanan pendukung untuk penyewaan sistem harian.</p>
-                                <div class="row g-3">
-                                    <div class="col-md-4">
-                                        <label class="form-label fw-semibold" for="harga_sewa">
-                                            Harga Sewa Dasar (Per Hari) <span class="text-danger">*</span>
-                                        </label>
-                                        <div class="input-group">
-                                            <span class="input-group-text">Rp</span>
-                                            <input type="text" class="form-control modern-input" id="harga_sewa" 
-                                                   name="harga_sewa" placeholder="250.000" 
-                                                   value="{{ old('harga_sewa', isset($mobil) ? number_format($mobil->harga_sewa, 0, ',', '.') : '') }}"
-                                                   required oninput="formatRupiah(this)" />
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label fw-semibold" for="opsi_supir">
-                                            Opsi Supir <span class="text-danger">*</span>
-                                        </label>
-                                        <select class="form-select modern-input" id="opsi_supir" name="opsi_supir" required>
-                                            <option value="" disabled {{ old('opsi_supir', $mobil->opsi_supir ?? '') == '' ? 'selected' : '' }}>Pilih Opsi Supir</option>
-                                            <option value="Lepas Kunci" {{ old('opsi_supir', $mobil->opsi_supir ?? '') == 'Lepas Kunci' ? 'selected' : '' }}>Hanya Lepas Kunci (Tanpa Supir)</option>
-                                            <option value="Dengan Supir" {{ old('opsi_supir', $mobil->opsi_supir ?? '') == 'Dengan Supir' ? 'selected' : '' }}>Wajib Dengan Supir</option>
-                                            <option value="Bebas Pilih" {{ old('opsi_supir', $mobil->opsi_supir ?? '') == 'Bebas Pilih' ? 'selected' : '' }}>Bebas Pilih (Lepas / Supir)</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label fw-semibold" for="bbm_ditanggung">
-                                            BBM Ditanggung Oleh <span class="text-danger">*</span>
-                                        </label>
-                                        <select class="form-select modern-input" id="bbm_ditanggung" name="bbm_ditanggung" required>
-                                            <option value="" disabled {{ old('bbm_ditanggung', $mobil->bbm_ditanggung ?? '') == '' ? 'selected' : '' }}>Pilih Penanggung BBM</option>
-                                            <option value="Pemerintah Desa" {{ old('bbm_ditanggung', $mobil->bbm_ditanggung ?? '') == 'Pemerintah Desa' ? 'selected' : '' }}>Desa (Sudah Termasuk)</option>
-                                            <option value="Penyewa" {{ old('bbm_ditanggung', $mobil->bbm_ditanggung ?? '') == 'Penyewa' ? 'selected' : '' }}>Penyewa (Tanggung Sendiri)</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Section: Harga & Jarak \(Sistem Zona Borongan\) -->
-                            <div class="form-section mb-4">
-                                <h6 class="section-title mb-3">
-                                    <i class='bx bx-money me-2'></i><span class="badge bg-success me-2">SEWA BORONGAN</span> Pengaturan Zona Jarak
-                                </h6>
-                                <p class="text-muted small mb-3">Tentukan harga borongan (paket sewa) berdasarkan jarak tempuh tujuan penyewa. Biarkan batas Km tetap 0 jika tidak ada batasan.</p>
-                                
-                                <div class="row g-3 mb-4">
-                                    <!-- Dalam Desa -->
-                                    <div class="col-md-4">
-                                        <div class="p-3 border rounded bg-white">
-                                            <label class="form-label fw-bold text-primary"><i class="bx bx-home me-1"></i>Zona 1: Dalam Desa</label>
-                                            <div class="mb-2">
-                                                <small class="text-muted d-block mb-1">Maksimal Jarak (Km)</small>
-                                                <div class="input-group input-group-sm">
-                                                    <input type="number" class="form-control" name="batas_km_dalam_desa" value="5" required>
-                                                    <span class="input-group-text">Km</span>
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <small class="text-muted d-block mb-1">Harga Sewa</small>
-                                                <div class="input-group input-group-sm">
-                                                    <span class="input-group-text">Rp</span>
-                                                    <input type="text" class="form-control" name="harga_dalam_desa" placeholder="100.000" required oninput="formatRupiah(this)">
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Luar Desa -->
-                                    <div class="col-md-4">
-                                        <div class="p-3 border rounded bg-white">
-                                            <label class="form-label fw-bold text-warning"><i class="bx bx-map me-1"></i>Zona 2: Luar Desa</label>
-                                            <div class="mb-2">
-                                                <small class="text-muted d-block mb-1">Maksimal Jarak (Km)</small>
-                                                <div class="input-group input-group-sm">
-                                                    <input type="number" class="form-control" name="batas_km_luar_desa" value="50" required>
-                                                    <span class="input-group-text">Km</span>
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <small class="text-muted d-block mb-1">Harga Sewa</small>
-                                                <div class="input-group input-group-sm">
-                                                    <span class="input-group-text">Rp</span>
-                                                    <input type="text" class="form-control" name="harga_luar_desa" placeholder="200.000" required oninput="formatRupiah(this)">
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Luar Kota -->
-                                    <div class="col-md-4">
-                                        <div class="p-3 border rounded bg-white">
-                                            <label class="form-label fw-bold text-danger"><i class="bx bx-building-house me-1"></i>Zona 3: Luar Kota</label>
-                                            <div class="mb-2">
-                                                <small class="text-muted d-block mb-1">Syarat Jarak</small>
-                                                <div class="input-group input-group-sm">
-                                                    <input type="text" class="form-control" value="> Batas Luar Desa" readonly disabled>
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <small class="text-muted d-block mb-1">Harga Sewa</small>
-                                                <div class="input-group input-group-sm">
-                                                    <span class="input-group-text">Rp</span>
-                                                    <input type="text" class="form-control" name="harga_luar_kota" placeholder="400.000" required oninput="formatRupiah(this)">
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="row g-3">
+                                <div class="row g-3 mt-1">
                                     <div class="col-md-6">
                                         <label class="form-label fw-semibold" for="stok">
                                             Stok Mobil Tersedia <span class="text-danger">*</span>
@@ -326,51 +202,399 @@
                                         </div>
                                     </div>
                                 </div>
+
+                                <div class="row g-3">
+                                    <div class="col-12 mt-3">
+                                        <label class="form-label fw-semibold" for="deskripsi">
+                                            Deskripsi <span class="text-danger">*</span>
+                                        </label>
+                                        <textarea class="form-control modern-input" id="deskripsi" name="deskripsi" 
+                                                  rows="4" placeholder="Jelaskan detail alat, kondisi, dan spesifikasi..." required></textarea>
+                                    </div>
+                                </div>
                             </div>
 
                             
+                                    <div class="d-flex justify-content-end mt-4">
+                                        <button type="button" class="btn btn-primary" onclick="nextStep('step2-tab')">Selanjutnya <i class='bx bx-right-arrow-alt'></i></button>
+                                    </div>
+                                </div>
+                                
+                                <!-- STEP 2: SEWA HARIAN -->
+                                <div class="tab-pane fade" id="step2" role="tabpanel" aria-labelledby="step2-tab">
+
+                            <!-- Section: Pengaturan Sewa Harian -->
+                            <div class="form-section mb-4">
+                                <h6 class="section-title mb-3">
+                                    <i class='bx bx-car me-2'></i><span class="badge bg-primary me-2">SEWA HARIAN</span> Pengaturan Sewa Harian
+                                </h6>
+                                <p class="text-muted small mb-3">Tentukan harga dasar per hari dan opsi layanan pendukung untuk penyewaan sistem harian.</p>
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label text-muted small fw-semibold text-uppercase letter-spacing-1 mb-2" for="harga_sewa">
+                                            Harga Sewa Dasar (Per Hari) <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light">Rp</span>
+                                            <input type="text" class="form-control fw-semibold" id="harga_sewa" 
+                                                   name="harga_sewa" placeholder="250.000" 
+                                                   value="{{ old('harga_sewa', isset($mobil) ? number_format($mobil->harga_sewa, 0, ',', '.') : '') }}"
+                                                   required oninput="formatRupiah(this)" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Section: Layanan Tambahan -->
+                                <div class="form-section mb-4">
+                                    <h6 class="section-title mb-3">
+                                        <i class='bx bx-plus-circle me-2'></i>Pengaturan Layanan Tambahan (Supir & BBM)
+                                    </h6>
+                                    <p class="text-muted small mb-3">Aktifkan layanan yang ingin Anda sediakan untuk unit penyewaan ini (Berlaku untuk Sewa Harian).</p>
+                                    
+                                    <div class="row g-3">
+                                        <!-- Opsi Tanpa Supir -->
+                                        <div class="col-md-6">
+                                            <div class="p-3 border rounded bg-white">
+                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <img src="{{ asset('User/img/iconbaru/supirsendiri.png') }}" style="width: 40px; height: 40px; object-fit: contain;">
+                                                        <h6 class="mb-0 fw-bold">Sewa Tanpa Supir (Bawa Sendiri)</h6>
+                                                    </div>
+                                                    <div class="form-check form-switch fs-5 mb-0">
+                                                        <input class="form-check-input cursor-pointer" type="checkbox" id="switch_tanpa_supir" onchange="updateSupirStatus()" checked>
+                                                    </div>
+                                                </div>
+                                                <div class="text-muted small mb-0 fw-semibold" id="status_tanpa_supir">Tidak Aktif</div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Opsi Dengan Supir -->
+                                        <div class="col-md-6">
+                                            <div class="p-3 border rounded bg-white">
+                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <img src="{{ asset('User/img/iconbaru/disediakansupir.png') }}" style="width: 40px; height: 40px; object-fit: contain;">
+                                                        <h6 class="mb-0 fw-bold">Sewa Dengan Supir Pengelola</h6>
+                                                    </div>
+                                                    <div class="form-check form-switch fs-5 mb-0">
+                                                        <input class="form-check-input cursor-pointer" type="checkbox" id="switch_dengan_supir" onchange="updateSupirStatus()">
+                                                    </div>
+                                                </div>
+                                                <div class="text-muted small mb-0 fw-semibold" id="status_dengan_supir">Tidak Aktif</div>
+                                                
+                                                <!-- Form Detail Supir -->
+                                                <div id="form_supir_details" class="mt-3 p-3 bg-light rounded border" style="display: none;">
+                                                    <label class="form-label fw-bold text-primary small mb-2"><i class="bx bx-user me-1"></i>Keterangan Supir (Opsional)</label>
+                                                    <input type="text" class="form-control form-control-sm mb-2 modern-input" name="nama_supir" id="nama_supir" placeholder="Nama Supir">
+                                                    <input type="text" class="form-control form-control-sm modern-input" name="kontak_supir" id="kontak_supir" placeholder="No. WhatsApp Supir">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <input type="hidden" name="opsi_supir" id="opsi_supir" required>
+
+                                    <hr class="my-4 text-muted">
+                                    
+                                    <div class="row g-3">
+                                        <!-- BBM Ditanggung Desa -->
+                                        <div class="col-md-6">
+                                            <div class="p-3 border rounded bg-white">
+                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <img src="{{ asset('User/img/iconbaru/bbmdisediakan.png') }}" style="width: 40px; height: 40px; object-fit: contain;">
+                                                        <h6 class="mb-0 fw-bold">BBM Disediakan Pengelola</h6>
+                                                    </div>
+                                                    <div class="form-check form-switch fs-5 mb-0">
+                                                        <input class="form-check-input cursor-pointer" type="radio" name="bbm_switch" id="switch_bbm_desa" value="Pengelola" onchange="updateBbmStatus()">
+                                                    </div>
+                                                </div>
+                                                <div class="text-muted small mb-0 fw-semibold" id="status_bbm_desa">Tidak Aktif</div>
+                                            </div>
+                                        </div>
+
+                                        <!-- BBM Ditanggung Penyewa -->
+                                        <div class="col-md-6">
+                                            <div class="p-3 border rounded bg-white">
+                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <img src="{{ asset('User/img/iconbaru/bbmditanggungpengguna.png') }}" style="width: 40px; height: 40px; object-fit: contain;">
+                                                        <h6 class="mb-0 fw-bold">BBM Ditanggung Penyewa</h6>
+                                                    </div>
+                                                    <div class="form-check form-switch fs-5 mb-0">
+                                                        <input class="form-check-input cursor-pointer" type="radio" name="bbm_switch" id="switch_bbm_penyewa" value="Penyewa" onchange="updateBbmStatus()" checked>
+                                                    </div>
+                                                </div>
+                                                <div class="text-muted small mb-0 fw-semibold" id="status_bbm_penyewa">Tidak Aktif</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <input type="hidden" name="bbm_ditanggung" id="bbm_ditanggung" required>
+                                </div>
+
                                     <div class="d-flex justify-content-between mt-4">
                                         <button type="button" class="btn btn-secondary" onclick="prevStep('step1-tab')"><i class='bx bx-left-arrow-alt'></i> Sebelumnya</button>
                                         <button type="button" class="btn btn-primary" onclick="nextStep('step3-tab')">Selanjutnya <i class='bx bx-right-arrow-alt'></i></button>
                                     </div>
                                 </div>
                                 
-                                <!-- STEP 3: PENGATURAN & SIMPAN -->
+                                <!-- STEP 3: SEWA BORONGAN -->
                                 <div class="tab-pane fade" id="step3" role="tabpanel" aria-labelledby="step3-tab">
+
+                            <!-- Section: Harga & Jarak \(Sistem Zona Borongan\) -->
+                            <div class="form-section mb-4">
+                                <h6 class="section-title mb-3">
+                                    <i class='bx bx-money me-2'></i><span class="badge bg-success me-2">SEWA BORONGAN (DROP OFF)</span> Pengaturan Zona Jarak
+                                </h6>
+                                <p class="text-muted small mb-3">Tentukan harga borongan (paket sewa) berdasarkan jarak tempuh tujuan penyewa. Biarkan batas Km tetap 0 jika tidak ada batasan.</p>
+                                
+                                <div class="row g-4 mb-4">
+                                    <!-- Dalam Desa -->
+                                    <div class="col-md-4">
+                                        <div class="card h-100 shadow-sm border-0">
+                                            <div class="card-header bg-transparent border-bottom border-primary border-2 pb-2">
+                                                <h6 class="mb-0 fw-bold text-primary"><i class="bx bx-home-circle me-2 fs-5 align-middle"></i>Zona 1: Dalam Desa</h6>
+                                            </div>
+                                            <div class="card-body pt-3">
+                                                <div class="mb-3">
+                                                    <label class="form-label text-muted small fw-semibold">Maksimal Jarak (Km)</label>
+                                                    <div class="input-group input-group-sm">
+                                                        <input type="number" class="form-control" name="batas_km_dalam_desa" value="5" required>
+                                                        <span class="input-group-text bg-light">Km</span>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <label class="form-label text-muted small fw-semibold">Harga Sewa</label>
+                                                    <div class="input-group">
+                                                        <span class="input-group-text bg-light">Rp</span>
+                                                        <input type="text" class="form-control fw-semibold" name="harga_dalam_desa" placeholder="100.000" required oninput="formatRupiah(this)">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Luar Desa -->
+                                    <div class="col-md-4">
+                                        <div class="card h-100 shadow-sm border-0">
+                                            <div class="card-header bg-transparent border-bottom border-warning border-2 pb-2">
+                                                <h6 class="mb-0 fw-bold text-warning"><i class="bx bx-map me-2 fs-5 align-middle"></i>Zona 2: Luar Desa</h6>
+                                            </div>
+                                            <div class="card-body pt-3">
+                                                <div class="mb-3">
+                                                    <label class="form-label text-muted small fw-semibold">Maksimal Jarak (Km)</label>
+                                                    <div class="input-group input-group-sm">
+                                                        <input type="number" class="form-control" name="batas_km_luar_desa" value="50" required>
+                                                        <span class="input-group-text bg-light">Km</span>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <label class="form-label text-muted small fw-semibold">Harga Sewa</label>
+                                                    <div class="input-group">
+                                                        <span class="input-group-text bg-light">Rp</span>
+                                                        <input type="text" class="form-control fw-semibold" name="harga_luar_desa" placeholder="200.000" required oninput="formatRupiah(this)">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Luar Kota -->
+                                    <div class="col-md-4">
+                                        <div class="card h-100 shadow-sm border-0">
+                                            <div class="card-header bg-transparent border-bottom border-danger border-2 pb-2">
+                                                <h6 class="mb-0 fw-bold text-danger"><i class="bx bx-building-house me-2 fs-5 align-middle"></i>Zona 3: Luar Kota</h6>
+                                            </div>
+                                            <div class="card-body pt-3">
+                                                <div class="mb-3">
+                                                    <label class="form-label text-muted small fw-semibold">Syarat Jarak</label>
+                                                    <div class="input-group input-group-sm">
+                                                        <input type="text" class="form-control bg-lighter text-muted" value="> Batas Luar Desa" readonly disabled>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <label class="form-label text-muted small fw-semibold">Harga Sewa</label>
+                                                    <div class="input-group">
+                                                        <span class="input-group-text bg-light">Rp</span>
+                                                        <input type="text" class="form-control fw-semibold" name="harga_luar_kota" placeholder="400.000" required oninput="formatRupiah(this)">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+
+
+                            </div>
+                            
+                            <!-- Section: Layanan Tambahan Borongan -->
+                            <div class="form-section mb-4">
+                                <h6 class="section-title mb-3">
+                                    <i class='bx bx-plus-circle me-2'></i>Pengaturan Layanan Tambahan Borongan (Supir & BBM)
+                                </h6>
+                                <p class="text-muted small mb-3">Aktifkan layanan yang ingin Anda sediakan untuk unit penyewaan ini (Berlaku untuk Sewa Borongan).</p>
+                                
+                                <div class="row g-3">
+                                    <!-- Opsi Tanpa Supir Borongan -->
+                                    <div class="col-md-6">
+                                        <div class="p-3 border rounded bg-white">
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <img src="{{ asset('User/img/iconbaru/supirsendiri.png') }}" style="width: 40px; height: 40px; object-fit: contain;">
+                                                    <h6 class="mb-0 fw-bold">Sewa Tanpa Supir (Bawa Sendiri)</h6>
+                                                </div>
+                                                <div class="form-check form-switch fs-5 mb-0">
+                                                    <input class="form-check-input cursor-pointer" type="checkbox" id="switch_tanpa_supir_borongan" onchange="updateSupirStatusBorongan()" checked>
+                                                </div>
+                                            </div>
+                                            <div class="text-muted small mb-0 fw-semibold" id="status_tanpa_supir_borongan">Tidak Aktif</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Opsi Dengan Supir Borongan -->
+                                    <div class="col-md-6">
+                                        <div class="p-3 border rounded bg-white">
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <img src="{{ asset('User/img/iconbaru/disediakansupir.png') }}" style="width: 40px; height: 40px; object-fit: contain;">
+                                                    <h6 class="mb-0 fw-bold">Sewa Dengan Supir Desa</h6>
+                                                </div>
+                                                <div class="form-check form-switch fs-5 mb-0">
+                                                    <input class="form-check-input cursor-pointer" type="checkbox" id="switch_dengan_supir_borongan" onchange="updateSupirStatusBorongan()">
+                                                </div>
+                                            </div>
+                                            <div class="text-muted small mb-0 fw-semibold" id="status_dengan_supir_borongan">Tidak Aktif</div>
+                                            
+                                            <!-- Form Detail Supir Borongan -->
+                                            <div id="form_supir_details_borongan" class="mt-3 p-3 bg-light rounded border" style="display: none;">
+                                                <label class="form-label fw-bold text-primary small mb-2"><i class="bx bx-user me-1"></i>Keterangan Supir (Opsional)</label>
+                                                <input type="text" class="form-control form-control-sm mb-2 modern-input" name="nama_supir_borongan" id="nama_supir_borongan" placeholder="Nama Supir">
+                                                <input type="text" class="form-control form-control-sm modern-input" name="kontak_supir_borongan" id="kontak_supir_borongan" placeholder="No. WhatsApp Supir">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <input type="hidden" name="opsi_supir_borongan" id="opsi_supir_borongan" required>
+
+                                <hr class="my-4 text-muted">
+                                
+                                <div class="row g-3 mb-4">
+                                    <!-- BBM Ditanggung Desa Borongan -->
+                                    <div class="col-md-6">
+                                        <div class="p-3 border rounded bg-white">
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <img src="{{ asset('User/img/iconbaru/bbmdisediakan.png') }}" style="width: 40px; height: 40px; object-fit: contain;">
+                                                    <h6 class="mb-0 fw-bold">BBM Disediakan Desa</h6>
+                                                </div>
+                                                <div class="form-check form-switch fs-5 mb-0">
+                                                    <input class="form-check-input cursor-pointer" type="radio" name="bbm_switch_borongan" id="switch_bbm_desa_borongan" value="Pemerintah Desa" onchange="updateBbmStatusBorongan()">
+                                                </div>
+                                            </div>
+                                            <div class="text-muted small mb-0 fw-semibold" id="status_bbm_desa_borongan">Tidak Aktif</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- BBM Ditanggung Penyewa Borongan -->
+                                    <div class="col-md-6">
+                                        <div class="p-3 border rounded bg-white">
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <img src="{{ asset('User/img/iconbaru/bbmditanggungpengguna.png') }}" style="width: 40px; height: 40px; object-fit: contain;">
+                                                    <h6 class="mb-0 fw-bold">BBM Ditanggung Penyewa</h6>
+                                                </div>
+                                                <div class="form-check form-switch fs-5 mb-0">
+                                                    <input class="form-check-input cursor-pointer" type="radio" name="bbm_switch_borongan" id="switch_bbm_penyewa_borongan" value="Penyewa" onchange="updateBbmStatusBorongan()" checked>
+                                                </div>
+                                            </div>
+                                            <div class="text-muted small mb-0 fw-semibold" id="status_bbm_penyewa_borongan">Tidak Aktif</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <input type="hidden" name="bbm_ditanggung_borongan" id="bbm_ditanggung_borongan" required>
+                            </div>
+
+                            
+                                    <div class="d-flex justify-content-between mt-4">
+                                        <button type="button" class="btn btn-secondary" onclick="prevStep('step2-tab')"><i class='bx bx-left-arrow-alt'></i> Sebelumnya</button>
+                                        <button type="button" class="btn btn-primary" onclick="nextStep('step4-tab')">Selanjutnya <i class='bx bx-right-arrow-alt'></i></button>
+                                    </div>
+                                </div>
+                                
+                                <!-- STEP 4: PENGATURAN & SIMPAN -->
+                                <div class="tab-pane fade" id="step4" role="tabpanel" aria-labelledby="step4-tab">
                                 
                                     
                                     <!-- PENGATURAN PENGIRIMAN GLOBAL SEWA & RENTAL -->
                                     <div class="col-12 mb-4">
                                         <div class="row g-4">
+                                            <!-- Sewa Borongan -->
                                             <div class="col-md-6">
-                                                <div class="border rounded-3 p-4 bg-light bg-opacity-50 h-100">
-                                                    <h6 class="section-title text-success mb-3"><i class='bx bx-sync me-2'></i>Pengiriman (Sewa Borongan)</h6>
-                                                    <p class="text-muted small mb-4">Pengaturan ini khusus untuk opsi Sewa Borongan.</p>
-                                                    <div class="d-flex flex-column gap-3">
-                                                        <div class="form-check form-switch d-flex align-items-center gap-2">
-                                                            <input class="form-check-input delivery-toggle" type="checkbox" id="delivery_antar_sewa" data-field="mobil_sewa_delivery_antar_active" {{ !empty($paymentInfo['mobil_sewa_delivery_antar_active']) || !isset($paymentInfo['mobil_sewa_delivery_antar_active']) ? 'checked' : '' }}>
-                                                            <label class="form-check-label fw-bold" for="delivery_antar_sewa">Sediakan Jasa Diantar</label>
-                                                        </div>
-                                                        <div class="form-check form-switch d-flex align-items-center gap-2">
-                                                            <input class="form-check-input delivery-toggle" type="checkbox" id="delivery_jemput_sewa" data-field="mobil_sewa_delivery_jemput_active" {{ !empty($paymentInfo['mobil_sewa_delivery_jemput_active']) || !isset($paymentInfo['mobil_sewa_delivery_jemput_active']) ? 'checked' : '' }}>
-                                                            <label class="form-check-label fw-bold" for="delivery_jemput_sewa">Bisa Jemput Sendiri (Self-Pickup)</label>
-                                                        </div>
+                                                <div class="card h-100 shadow-sm border-0">
+                                                    <div class="card-header bg-transparent border-bottom border-success border-2 pb-2">
+                                                        <h6 class="mb-0 fw-bold text-success"><i class="bx bx-package me-2 fs-5 align-middle"></i>Sewa Borongan (Drop-off)</h6>
+                                                    </div>
+                                                    <div class="card-body p-4 pt-3">
+                                                        <p class="text-muted small mb-3">Aktifkan opsi pengiriman yang tersedia khusus untuk layanan Sewa Borongan.</p>
+                                                        
+                                                        <ul class="list-group list-group-flush">
+                                                            <li class="list-group-item d-flex justify-content-between align-items-center px-0 bg-transparent py-3">
+                                                                <div>
+                                                                    <h6 class="mb-0 fw-semibold text-dark">Sediakan Jasa Diantar</h6>
+                                                                    <small class="text-muted">Unit diantar ke lokasi penyewa</small>
+                                                                </div>
+                                                                <div class="form-check form-switch fs-4 mb-0">
+                                                                    <input class="form-check-input delivery-toggle cursor-pointer" type="checkbox" id="delivery_antar_sewa" data-field="mobil_sewa_delivery_antar_active" {{ !empty($paymentInfo['mobil_sewa_delivery_antar_active']) || !isset($paymentInfo['mobil_sewa_delivery_antar_active']) ? 'checked' : '' }}>
+                                                                </div>
+                                                            </li>
+                                                            
+                                                            <li class="list-group-item d-flex justify-content-between align-items-center px-0 bg-transparent border-bottom-0 pb-0 pt-3">
+                                                                <div>
+                                                                    <h6 class="mb-0 fw-semibold text-dark">Bisa Jemput Sendiri</h6>
+                                                                    <small class="text-muted">Penyewa ambil unit di garasi</small>
+                                                                </div>
+                                                                <div class="form-check form-switch fs-4 mb-0">
+                                                                    <input class="form-check-input delivery-toggle cursor-pointer" type="checkbox" id="delivery_jemput_sewa" data-field="mobil_sewa_delivery_jemput_active" {{ !empty($paymentInfo['mobil_sewa_delivery_jemput_active']) || !isset($paymentInfo['mobil_sewa_delivery_jemput_active']) ? 'checked' : '' }}>
+                                                                </div>
+                                                            </li>
+                                                        </ul>
                                                     </div>
                                                 </div>
                                             </div>
+                                            
+                                            <!-- Rental Harian -->
                                             <div class="col-md-6">
-                                                <div class="border rounded-3 p-4 bg-light bg-opacity-50 h-100">
-                                                    <h6 class="section-title text-primary mb-3"><i class='bx bx-sync me-2'></i>Pengiriman (Rental Harian)</h6>
-                                                    <p class="text-muted small mb-4">Pengaturan ini khusus untuk opsi Rental Harian.</p>
-                                                    <div class="d-flex flex-column gap-3">
-                                                        <div class="form-check form-switch d-flex align-items-center gap-2">
-                                                            <input class="form-check-input delivery-toggle" type="checkbox" id="delivery_antar_rental" data-field="mobil_rental_delivery_antar_active" {{ !empty($paymentInfo['mobil_rental_delivery_antar_active']) || !isset($paymentInfo['mobil_rental_delivery_antar_active']) ? 'checked' : '' }}>
-                                                            <label class="form-check-label fw-bold" for="delivery_antar_rental">Sediakan Jasa Diantar</label>
-                                                        </div>
-                                                        <div class="form-check form-switch d-flex align-items-center gap-2">
-                                                            <input class="form-check-input delivery-toggle" type="checkbox" id="delivery_jemput_rental" data-field="mobil_rental_delivery_jemput_active" {{ !empty($paymentInfo['mobil_rental_delivery_jemput_active']) || !isset($paymentInfo['mobil_rental_delivery_jemput_active']) ? 'checked' : '' }}>
-                                                            <label class="form-check-label fw-bold" for="delivery_jemput_rental">Bisa Jemput Sendiri (Self-Pickup)</label>
-                                                        </div>
+                                                <div class="card h-100 shadow-sm border-0">
+                                                    <div class="card-header bg-transparent border-bottom border-primary border-2 pb-2">
+                                                        <h6 class="mb-0 fw-bold text-primary"><i class="bx bx-calendar me-2 fs-5 align-middle"></i>Rental Harian</h6>
+                                                    </div>
+                                                    <div class="card-body p-4 pt-3">
+                                                        <p class="text-muted small mb-3">Aktifkan opsi pengiriman yang tersedia khusus untuk layanan Rental Harian.</p>
+                                                        
+                                                        <ul class="list-group list-group-flush">
+                                                            <li class="list-group-item d-flex justify-content-between align-items-center px-0 bg-transparent py-3">
+                                                                <div>
+                                                                    <h6 class="mb-0 fw-semibold text-dark">Sediakan Jasa Diantar</h6>
+                                                                    <small class="text-muted">Unit diantar ke lokasi penyewa</small>
+                                                                </div>
+                                                                <div class="form-check form-switch fs-4 mb-0">
+                                                                    <input class="form-check-input delivery-toggle cursor-pointer" type="checkbox" id="delivery_antar_rental" data-field="mobil_rental_delivery_antar_active" {{ !empty($paymentInfo['mobil_rental_delivery_antar_active']) || !isset($paymentInfo['mobil_rental_delivery_antar_active']) ? 'checked' : '' }}>
+                                                                </div>
+                                                            </li>
+                                                            
+                                                            <li class="list-group-item d-flex justify-content-between align-items-center px-0 bg-transparent border-bottom-0 pb-0 pt-3">
+                                                                <div>
+                                                                    <h6 class="mb-0 fw-semibold text-dark">Bisa Jemput Sendiri</h6>
+                                                                    <small class="text-muted">Penyewa ambil unit di garasi</small>
+                                                                </div>
+                                                                <div class="form-check form-switch fs-4 mb-0">
+                                                                    <input class="form-check-input delivery-toggle cursor-pointer" type="checkbox" id="delivery_jemput_rental" data-field="mobil_rental_delivery_jemput_active" {{ !empty($paymentInfo['mobil_rental_delivery_jemput_active']) || !isset($paymentInfo['mobil_rental_delivery_jemput_active']) ? 'checked' : '' }}>
+                                                                </div>
+                                                            </li>
+                                                        </ul>
                                                     </div>
                                                 </div>
                                             </div>
@@ -405,7 +629,7 @@
 
                             
                                     <div class="d-flex justify-content-between mt-4">
-                                        <button type="button" class="btn btn-secondary" onclick="prevStep('step2-tab')"><i class='bx bx-left-arrow-alt'></i> Sebelumnya</button>
+                                        <button type="button" class="btn btn-secondary" onclick="prevStep('step3-tab')"><i class='bx bx-left-arrow-alt'></i> Sebelumnya</button>
                                         <div>
                                             <a href="{{ route('admin.unit.mobil.index') }}" class="btn btn-light me-2 border">Batal</a>
                                             <button type="submit" class="btn btn-success"><i class='bx bx-save'></i> Simpan Data</button>
@@ -603,6 +827,38 @@
             color: #495057;
         }
 
+        /* Option Cards (Toggle UI) */
+        .option-card {
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            background: white;
+        }
+        .option-card:hover {
+            border-color: var(--primary-light);
+            background: var(--bg-soft);
+            transform: translateY(-2px);
+        }
+        .option-card.active {
+            border-color: var(--primary-color);
+            background: var(--primary-soft);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+        }
+        .option-card img {
+            max-height: 80px;
+            object-fit: contain;
+            margin-bottom: 10px;
+        }
+        .option-card p {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 0;
+            color: #475569;
+        }
+
         .modern-btn-outline {
             border: 1.5px solid #0d6efd;
             border-radius: 0 8px 8px 0;
@@ -784,6 +1040,112 @@
         preview.style.display = 'none';
         placeholder.style.display = 'block';
     }
+
+    // JS Logic for Supir & BBM Toggle
+    function updateSupirStatus() {
+        const switchTanpa = document.getElementById('switch_tanpa_supir').checked;
+        const switchDengan = document.getElementById('switch_dengan_supir').checked;
+        
+        document.getElementById('status_tanpa_supir').textContent = switchTanpa ? 'Aktif' : 'Tidak Aktif';
+        document.getElementById('status_tanpa_supir').className = switchTanpa ? 'small mb-0 fw-bold text-success' : 'small mb-0 fw-semibold text-muted';
+        
+        document.getElementById('status_dengan_supir').textContent = switchDengan ? 'Aktif' : 'Tidak Aktif';
+        document.getElementById('status_dengan_supir').className = switchDengan ? 'small mb-0 fw-bold text-success' : 'small mb-0 fw-semibold text-muted';
+
+        const input = document.getElementById('opsi_supir');
+        const details = document.getElementById('form_supir_details');
+        
+        if (switchTanpa && switchDengan) {
+            input.value = 'Bebas Pilih';
+        } else if (switchTanpa) {
+            input.value = 'Lepas Kunci';
+        } else if (switchDengan) {
+            input.value = 'Dengan Supir';
+        } else {
+            input.value = '';
+        }
+        
+        if (switchDengan) {
+            details.style.display = 'block';
+        } else {
+            details.style.display = 'none';
+            document.getElementById('nama_supir').value = '';
+            document.getElementById('kontak_supir').value = '';
+        }
+    }
+
+    function updateBbmStatus() {
+        const switchDesa = document.getElementById('switch_bbm_desa').checked;
+        const switchPenyewa = document.getElementById('switch_bbm_penyewa').checked;
+        
+        document.getElementById('status_bbm_desa').textContent = switchDesa ? 'Aktif' : 'Tidak Aktif';
+        document.getElementById('status_bbm_desa').className = switchDesa ? 'small mb-0 fw-bold text-success' : 'small mb-0 fw-semibold text-muted';
+
+        document.getElementById('status_bbm_penyewa').textContent = switchPenyewa ? 'Aktif' : 'Tidak Aktif';
+        document.getElementById('status_bbm_penyewa').className = switchPenyewa ? 'small mb-0 fw-bold text-success' : 'small mb-0 fw-semibold text-muted';
+
+        if (switchDesa) {
+            document.getElementById('bbm_ditanggung').value = 'Pengelola';
+        } else if (switchPenyewa) {
+            document.getElementById('bbm_ditanggung').value = 'Penyewa';
+        }
+    }
+
+    // JS Logic for Supir & BBM Toggle (Borongan)
+    function updateSupirStatusBorongan() {
+        const switchTanpa = document.getElementById('switch_tanpa_supir_borongan').checked;
+        const switchDengan = document.getElementById('switch_dengan_supir_borongan').checked;
+        
+        document.getElementById('status_tanpa_supir_borongan').textContent = switchTanpa ? 'Aktif' : 'Tidak Aktif';
+        document.getElementById('status_tanpa_supir_borongan').className = switchTanpa ? 'small mb-0 fw-bold text-success' : 'small mb-0 fw-semibold text-muted';
+        
+        document.getElementById('status_dengan_supir_borongan').textContent = switchDengan ? 'Aktif' : 'Tidak Aktif';
+        document.getElementById('status_dengan_supir_borongan').className = switchDengan ? 'small mb-0 fw-bold text-success' : 'small mb-0 fw-semibold text-muted';
+
+        const input = document.getElementById('opsi_supir_borongan');
+        const details = document.getElementById('form_supir_details_borongan');
+        
+        if (switchTanpa && switchDengan) {
+            input.value = 'Bebas Pilih';
+        } else if (switchTanpa) {
+            input.value = 'Lepas Kunci';
+        } else if (switchDengan) {
+            input.value = 'Dengan Supir';
+        } else {
+            input.value = '';
+        }
+        
+        if (switchDengan) {
+            details.style.display = 'block';
+        } else {
+            details.style.display = 'none';
+            document.getElementById('nama_supir_borongan').value = '';
+            document.getElementById('kontak_supir_borongan').value = '';
+        }
+    }
+
+    function updateBbmStatusBorongan() {
+        const switchDesa = document.getElementById('switch_bbm_desa_borongan').checked;
+        const switchPenyewa = document.getElementById('switch_bbm_penyewa_borongan').checked;
+        
+        document.getElementById('status_bbm_desa_borongan').textContent = switchDesa ? 'Aktif' : 'Tidak Aktif';
+        document.getElementById('status_bbm_desa_borongan').className = switchDesa ? 'small mb-0 fw-bold text-success' : 'small mb-0 fw-semibold text-muted';
+
+        document.getElementById('status_bbm_penyewa_borongan').textContent = switchPenyewa ? 'Aktif' : 'Tidak Aktif';
+        document.getElementById('status_bbm_penyewa_borongan').className = switchPenyewa ? 'small mb-0 fw-bold text-success' : 'small mb-0 fw-semibold text-muted';
+
+        if (switchDesa) {
+            document.getElementById('bbm_ditanggung_borongan').value = 'Pengelola';
+        } else if (switchPenyewa) {
+            document.getElementById('bbm_ditanggung_borongan').value = 'Penyewa';
+        }
+    }
+
+    // Inisialisasi status di awal
+    updateSupirStatus();
+    updateBbmStatus();
+    updateSupirStatusBorongan();
+    updateBbmStatusBorongan();
 
     // Fungsi untuk menambah kategori
     document.getElementById('saveCategoryBtn').addEventListener('click', function() {

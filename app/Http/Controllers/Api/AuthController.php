@@ -106,25 +106,21 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $request->validate([
-            'nik' => 'required|string|size:16|unique:users,nik',
             'username' => 'required|string|max:255|unique:users,username',
             'email' => 'required|string|email|max:255|unique:users',
-            'name' => 'required|string|max:255',
             'phone' => 'required|string|max:20',
-            'address' => 'required|string',
-            'gender' => 'required|in:laki-laki,perempuan',
             'region_id' => 'required|exists:regions,id',
             'password' => 'required|string|min:8|confirmed',
         ]);
 
         $user = User::create([
-            'nik' => $request->nik,
+            'nik' => null,
             'username' => $request->username,
-            'name' => $request->name,
+            'name' => $request->username,
             'email' => $request->email,
             'phone' => $request->phone,
-            'address' => $request->address,
-            'gender' => $request->gender,
+            'address' => '-',
+            'gender' => 'laki-laki',
             'region_id' => $request->region_id,
             'password' => Hash::make($request->password),
         ]);

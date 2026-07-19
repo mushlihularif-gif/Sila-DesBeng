@@ -27,7 +27,13 @@ class Mobil extends Model
         'batas_km_luar_desa',
         'harga_luar_kota',
         'bbm_ditanggung',
-        'opsi_supir'
+        'opsi_supir',
+        'nama_supir',
+        'kontak_supir',
+        'opsi_supir_borongan',
+        'nama_supir_borongan',
+        'kontak_supir_borongan',
+        'bbm_ditanggung_borongan'
     ];
 
     protected $casts = [

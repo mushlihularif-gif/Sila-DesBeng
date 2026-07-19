@@ -306,6 +306,13 @@ Route::get('/auth/register-google', [App\Http\Controllers\Auth\GoogleController:
 Route::post('/auth/register-google', [App\Http\Controllers\Auth\GoogleController::class, 'completeRegistration'])->name('register.google.complete');
 
 
+// KYC Routes
+Route::middleware(['auth', 'role:user'])->group(function () {
+    Route::get('/kyc', [\App\Http\Controllers\KycController::class, 'index'])->name('kyc.index');
+    Route::post('/kyc/process', [\App\Http\Controllers\KycController::class, 'process'])->name('kyc.process');
+    Route::post('/kyc/submit', [\App\Http\Controllers\KycController::class, 'submit'])->name('kyc.submit');
+});
+
 Route::get('/profile', [App\Http\Controllers\User\ProfileController::class, 'index'])
     ->name('profile')
     ->middleware('role:user');
@@ -404,6 +411,14 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
     Route::get('/manajemen-pengguna/{user}', [UserManagementController::class, 'show'])->name('admin.manajemen-pengguna.show');
     Route::put('/manajemen-pengguna/{user}/toggle-status', [UserManagementController::class, 'toggleStatus'])->name('admin.manajemen-pengguna.toggle-status');
     Route::put('/manajemen-pengguna/{user}/kick', [UserManagementController::class, 'kick'])->name('admin.manajemen-pengguna.kick');
+
+    // Route untuk Manajemen KYC
+    Route::prefix('kyc')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\KycReviewController::class, 'index'])->name('admin.kyc.index');
+        Route::get('/{id}', [\App\Http\Controllers\Admin\KycReviewController::class, 'show'])->name('admin.kyc.show');
+        Route::post('/{id}/approve', [\App\Http\Controllers\Admin\KycReviewController::class, 'approve'])->name('admin.kyc.approve');
+        Route::post('/{id}/reject', [\App\Http\Controllers\Admin\KycReviewController::class, 'reject'])->name('admin.kyc.reject');
+    });
 
     // Route untuk Notifikasi
     Route::get('/notifications', [NotificationController::class, 'index'])->name('admin.notifications.index');

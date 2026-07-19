@@ -96,6 +96,8 @@ class UnitFasilitasUmumController extends Controller
             'foto_3' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
             'opsi_supir' => 'nullable|string|in:Sediakan Supir Sendiri,Disediakan',
             'bbm_ditanggung' => 'nullable|string|in:Ditanggung Pengguna,Disediakan',
+            'nama_supir' => 'nullable|string|max:255',
+            'kontak_supir' => 'nullable|string|max:255',
         ]);
 
         $data = [
@@ -107,6 +109,8 @@ class UnitFasilitasUmumController extends Controller
             'lokasi' => $request->lokasi,
             'opsi_supir' => $request->opsi_supir,
             'bbm_ditanggung' => $request->bbm_ditanggung,
+            'nama_supir' => $request->nama_supir,
+            'kontak_supir' => $request->kontak_supir,
         ];
 
         if ($request->hasFile('foto_utama')) { 
@@ -163,6 +167,8 @@ class UnitFasilitasUmumController extends Controller
             'foto_3' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'opsi_supir' => 'nullable|string|in:Sediakan Supir Sendiri,Disediakan',
             'bbm_ditanggung' => 'nullable|string|in:Ditanggung Pengguna,Disediakan',
+            'nama_supir' => 'nullable|string|max:255',
+            'kontak_supir' => 'nullable|string|max:255',
         ]);
 
         $fasilitas = FasilitasUmum::findOrFail($id);
@@ -176,6 +182,8 @@ class UnitFasilitasUmumController extends Controller
             'lokasi' => $request->lokasi,
             'opsi_supir' => $request->opsi_supir,
             'bbm_ditanggung' => $request->bbm_ditanggung,
+            'nama_supir' => $request->nama_supir,
+            'kontak_supir' => $request->kontak_supir,
         ];
 
         if ($request->hasFile('foto_utama')) {

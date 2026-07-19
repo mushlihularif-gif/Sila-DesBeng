@@ -74,14 +74,8 @@ class GoogleController extends Controller
     public function completeRegistration(Request $request)
     {
         $request->validate([
-            'nik' => 'required|string|size:16|unique:users,nik',
-            'name' => 'required|string|max:255',
-            'gender' => 'required|in:laki-laki,perempuan',
             'region_id' => 'required|exists:regions,id',
-            'address' => 'required|string',
             'phone' => 'required|string|max:20',
-        ], [
-            'nik.unique' => 'NIK sudah digunakan',
         ]);
 
         $googleData = session('google_register_data');
@@ -94,11 +88,8 @@ class GoogleController extends Controller
 
         if ($existingUser) {
             $newUser = $existingUser;
-            $newUser->nik = $request->nik;
-            $newUser->name = $request->name;
-            $newUser->gender = $request->gender;
+            $newUser->name = $googleData['name'];
             $newUser->phone = $request->phone;
-            $newUser->address = $request->address;
             $newUser->region_id = $request->region_id;
             $newUser->google_id = $googleData['id'];
             $newUser->status = 'aktif';
@@ -116,14 +107,14 @@ class GoogleController extends Controller
 
             // Create User
             $newUser = User::create([
-                'nik' => $request->nik,
-                'name' => $request->name,
+                'nik' => null,
+                'name' => $googleData['name'],
                 'email' => $googleData['email'],
                 'username' => $username,
                 'password' => Hash::make(uniqid()), // Random password
                 'phone' => $request->phone,
-                'address' => $request->address,
-                'gender' => $request->gender,
+                'address' => '-',
+                'gender' => 'laki-laki',
                 'region_id' => $request->region_id,
             ]);
 

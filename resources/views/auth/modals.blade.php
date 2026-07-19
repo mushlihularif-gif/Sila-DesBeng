@@ -133,42 +133,16 @@
                 @csrf
                 <input type="hidden" name="otp_method" value="email">
                 
-                <div>
-                    <div class="relative">
-                        <input type="text" name="nik" placeholder=" " pattern="[0-9]{16}" title="NIK harus berupa 16 digit angka" required
-                            class="input-with-placeholder w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm">
-                        <div class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm custom-placeholder">
-                            NIK KTP (16 Digit) <span class="text-red-500 font-bold">*</span>
-                        </div>
-                    </div>
-                    <span class="text-red-500 text-xs hidden block mt-1" data-error="nik"></span>
-                </div>
+                
+                <!-- Removed Nama Lengkap because it is retrieved from Google Session -->
+
                 
                 <div>
-                    <div class="relative">
-                        <input type="text" name="name" id="google-reg-name" placeholder=" " required value="{{ session('google_register_data')['name'] ?? '' }}"
-                            class="input-with-placeholder w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm">
-                        <div class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm custom-placeholder">
-                            Nama Lengkap (Sesuai KTP) <span class="text-red-500 font-bold">*</span>
-                        </div>
+                    <input type="hidden" name="kabupaten" id="google-reg-kabupaten-input" value="bengkalis">
+                    <div id="google-reg-kabupaten" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-gray-100 text-gray-700 outline-none text-sm cursor-not-allowed flex items-center justify-between">
+                        <span>Kabupaten Bengkalis</span>
+                        <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path></svg>
                     </div>
-                    <span class="text-red-500 text-xs hidden block mt-1" data-error="name"></span>
-                </div>
-
-                <div>
-                    <select name="gender" required
-                        class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm">
-                        <option value="">Pilih Jenis Kelamin</option>
-                        <option value="laki-laki">Laki-laki</option>
-                        <option value="perempuan">Perempuan</option>
-                    </select>
-                    <span class="text-red-500 text-xs hidden block mt-1" data-error="gender"></span>
-                </div>
-
-                <div>
-                    <select name="kabupaten" id="google-reg-kabupaten" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-gray-100 text-gray-700 outline-none transition text-sm cursor-not-allowed">
-                        <option value="">Memuat Kabupaten...</option>
-                    </select>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
@@ -186,17 +160,12 @@
 
 
                 <div>
-                    <input type="tel" name="phone" placeholder="Nomor Telepon" required
+                    <input type="tel" name="phone" placeholder="Nomor WhatsApp (Contoh: 0812...)" required
                         class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm">
                     <span class="text-red-500 text-xs hidden block mt-1" data-error="phone"></span>
                 </div>
 
-                <div>
-                    <textarea name="address" placeholder="Alamat Detail (Contoh: Jl. Soekarno Hatta No. 12)" required rows="2"
-                        class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm resize-none"></textarea>
-                    <span class="text-red-500 text-xs hidden block mt-1" data-error="address"></span>
-                </div>
-
+                
                 <button type="submit"
                     class="w-full py-3 bg-blue-500 text-white rounded-full font-semibold hover:bg-blue-600 transition disabled:opacity-50 disabled:cursor-not-allowed mt-4">
                     <span class="btn-text">Lanjutkan</span>
@@ -241,16 +210,7 @@
             <form id="form-register" action="{{ route('auth.register') }}" method="POST" class="space-y-3 max-h-96 overflow-y-auto pr-2">
                 @csrf
                 <input type="hidden" name="otp_method" value="email">
-                <div>
-                    <div class="relative">
-                        <input type="text" name="nik" placeholder=" " pattern="[0-9]{16}" title="NIK harus berupa 16 digit angka" required
-                            class="input-with-placeholder w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm">
-                        <div class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm custom-placeholder">
-                            NIK KTP (16 Digit) <span class="text-red-500 font-bold">*</span>
-                        </div>
-                    </div>
-                    <span class="text-red-500 text-xs hidden block mt-1" data-error="nik"></span>
-                </div>
+                
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <input type="text" name="username" placeholder="Nama Pengguna" required
@@ -264,28 +224,18 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <div class="relative">
-                            <input type="text" name="name" placeholder=" " required
-                                class="input-with-placeholder w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm">
-                            <div class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm custom-placeholder">
-                                Nama Lengkap (Sesuai KTP) <span class="text-red-500 font-bold">*</span>
-                            </div>
-                        </div>
-                        <span class="text-red-500 text-xs hidden block mt-1" data-error="name"></span>
-                    </div>
-                    <div>
-                        <input type="tel" name="phone" placeholder="Nomor Telepon" required
-                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm">
-                        <span class="text-red-500 text-xs hidden block mt-1" data-error="phone"></span>
-                    </div>
+                <div>
+                    <input type="tel" name="phone" placeholder="Nomor WhatsApp (Contoh: 0812...)" required
+                        class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm">
+                    <span class="text-red-500 text-xs hidden block mt-1" data-error="phone"></span>
                 </div>
 
                 <div>
-                    <select name="kabupaten" id="reg-kabupaten" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-gray-100 text-gray-700 outline-none transition text-sm cursor-not-allowed">
-                        <option value="">Memuat Kabupaten...</option>
-                    </select>
+                    <input type="hidden" name="kabupaten" id="reg-kabupaten-input" value="bengkalis">
+                    <div id="reg-kabupaten" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-gray-100 text-gray-700 outline-none text-sm cursor-not-allowed flex items-center justify-between">
+                        <span>Kabupaten Bengkalis</span>
+                        <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path></svg>
+                    </div>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
@@ -302,22 +252,7 @@
                 </div>
 
 
-                <div>
-                    <textarea name="address" placeholder="Alamat Detail (Contoh: Jl. Soekarno Hatta No. 12)" required rows="2"
-                        class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm resize-none"></textarea>
-                    <span class="text-red-500 text-xs hidden block mt-1" data-error="address"></span>
-                </div>
-
-                <div>
-                    <select name="gender" required
-                        class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm">
-                        <option value="">Jenis Kelamin</option>
-                        <option value="laki-laki">Laki-laki</option>
-                        <option value="perempuan">Perempuan</option>
-                    </select>
-                    <span class="text-red-500 text-xs hidden block mt-1" data-error="gender"></span>
-                </div>
-
+                
                 <div class="relative">
                     <input type="password" name="password" id="register-password" placeholder="Kata Sandi" required
                         class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm pr-12">
