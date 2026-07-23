@@ -4,7 +4,46 @@
     {{-- NAVIGASI --}}
 
     <!-- Bagian Carousel -->
+    @push('styles')
+    <style>
+        /* Styling untuk layer sinkron di belakang navbar */
+        #navbar-blur-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: var(--nav-height, 96px);
+            z-index: 40;
+            overflow: hidden;
+            transform: translateZ(0); /* HW acceleration */
+            transition: transform 0.3s ease-in-out;
+            pointer-events: none;
+            will-change: transform;
+        }
+        body:has(#master-navbar.hidden-nav) #navbar-blur-bg {
+            transform: translateY(-100%) translateZ(0);
+        }
+        .blur-slide {
+            width: 100%;
+            min-width: 100%;
+            height: 500px;
+            max-height: 60vh;
+            min-height: 250px;
+            background-size: cover;
+            background-position: center;
+            flex-shrink: 0;
+        }
 
+        #beranda {
+            padding-top: var(--nav-height, 96px);
+            transition: padding-top 0.3s ease-in-out;
+            will-change: padding-top, scroll-position;
+        }
+        body:has(#master-navbar.hidden-nav) #beranda {
+            padding-top: 0 !important;
+        }
+    </style>
+    @endpush
 
     {{-- UTAMA --}}<main class="flex-grow relative w-full overflow-x-clip">
 
@@ -17,10 +56,10 @@
             <div class="w-full mx-auto">
                 <div class="relative overflow-hidden group">
                     <!-- Wadah Slide -->
-                    <div id="carousel-slides" class="flex transition-transform duration-500 ease-out">
+                    <div id="carousel-slides" class="flex transition-transform duration-500 ease-out w-full">
                         @if(isset($activeBanners) && $activeBanners->count() > 0)
                             @foreach($activeBanners as $index => $banner)
-                            <div class="carousel-slide min-w-full flex-shrink-0 relative">
+                            <div class="carousel-slide w-full min-w-full flex-shrink-0 relative">
                                 <!-- Banner Image -->
                                 @if($banner->target_url)
                                 <a href="{{ $banner->target_url }}" target="_blank">
@@ -28,25 +67,19 @@
                                     <img src="{{ Storage::url($banner->image_path) }}" alt="{{ $banner->title ?? 'Banner ' . ($index + 1) }}"
                                         loading="{{ $index == 0 ? 'eager' : 'lazy' }}"
                                         fetchpriority="{{ $index == 0 ? 'high' : 'auto' }}"
-                                        class="w-full h-[400px] md:h-[40vw] lg:h-[45vw] object-cover">
+                                        class="w-full object-cover object-center" style="height: 500px; max-height: 60vh; min-height: 250px;">
                                 @if($banner->target_url)
                                 </a>
                                 @endif
                             </div>
                             @endforeach
                         @else
-                            <!-- Default Fallback Slides -->
-                            <div class="carousel-slide min-w-full flex-shrink-0">
-                                <img src="{{ asset('User/img/elemen/entrance-mobile.png') }}" class="block md:hidden w-full h-[400px] object-cover">
-                                <img src="{{ asset('User/img/elemen/entrance.png') }}" class="hidden md:block w-full md:h-[40vw] lg:h-[45vw] object-cover">
+                            <!-- Default Fallback Slides (Bawaan Sistem) -->
+                            <div class="carousel-slide w-full min-w-full flex-shrink-0 relative">
+                                <img src="{{ asset('User/img/slidebanner/kuncislide1r.png') }}" class="w-full object-cover object-center" style="height: 500px; max-height: 60vh; min-height: 250px;">
                             </div>
-                            <div class="carousel-slide min-w-full flex-shrink-0">
-                                <img src="{{ asset('User/img/elemen/biru-mobile.png') }}" class="block md:hidden w-full h-[400px] object-cover">
-                                <img src="{{ asset('User/img/elemen/biru.png') }}" class="hidden md:block w-full md:h-[40vw] lg:h-[45vw] object-cover">
-                            </div>
-                            <div class="carousel-slide min-w-full flex-shrink-0">
-                                <img src="{{ asset('User/img/elemen/ppq-mobile.png') }}" class="block md:hidden w-full h-[400px] object-cover">
-                                <img src="{{ asset('User/img/elemen/ppq.png') }}" class="hidden md:block w-full md:h-[40vw] lg:h-[45vw] object-cover">
+                            <div class="carousel-slide w-full min-w-full flex-shrink-0 relative">
+                                <img src="{{ asset('User/img/slidebanner/kuncislide2r.png') }}" class="w-full object-cover object-center" style="height: 500px; max-height: 60vh; min-height: 250px;">
                             </div>
                         @endif
                     </div>
@@ -69,7 +102,7 @@
                     <!-- Indicators -->
                     <div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2.5 z-10">
                         @php
-                            $slideCount = (isset($activeBanners) && $activeBanners->count() > 0) ? $activeBanners->count() : 3;
+                            $slideCount = (isset($activeBanners) && $activeBanners->count() > 0) ? $activeBanners->count() : 2;
                         @endphp
                         @for($i = 0; $i < $slideCount; $i++)
                         <button
@@ -1078,7 +1111,7 @@
                 let indicators = document.querySelectorAll('.carousel-indicator');
 
                 let currentSlide = 0;
-                const totalSlides = {{ isset($activeBanners) && $activeBanners->count() > 0 ? $activeBanners->count() : 3 }};
+                const totalSlides = {{ isset($activeBanners) && $activeBanners->count() > 0 ? $activeBanners->count() : 2 }};
                 let autoSlideInterval;
                 const autoSlideDelay = 7000; // 7 Seconds
 

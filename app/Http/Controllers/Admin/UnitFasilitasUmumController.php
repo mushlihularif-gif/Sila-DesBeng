@@ -25,8 +25,21 @@ class UnitFasilitasUmumController extends Controller
             })
             ->paginate(6)
             ->appends(['search' => $search]);
+            
+        $user = auth()->user();
+        $region = Region::find($user->region_id);
         
-        return view('admin.unit.fasilitas_umum.index', compact('fasilitas', 'search'));
+        $paymentInfo = $region->payment_info ?? [];
+        $regionSettings = $region->settings ?? [];
+        
+        $sop_active = $paymentInfo['sop_fasilitas_active'] ?? 'ditanggung';
+        $sop_ditanggung = $paymentInfo['sop_fasilitas_ditanggung'] ?? $this->defaultSopDitanggung;
+        $sop_tidak_ditanggung = $paymentInfo['sop_fasilitas_tidak_ditanggung'] ?? $this->defaultSopTidakDitanggung;
+        
+        $default_ditanggung = $this->defaultSopDitanggung;
+        $default_tidak_ditanggung = $this->defaultSopTidakDitanggung;
+        
+        return view('admin.unit.fasilitas_umum.index', compact('fasilitas', 'search', 'sop_active', 'sop_ditanggung', 'sop_tidak_ditanggung', 'default_ditanggung', 'default_tidak_ditanggung', 'regionSettings'));
     }
 
     public function sop()
@@ -52,12 +65,6 @@ class UnitFasilitasUmumController extends Controller
 
     public function updateSop(Request $request)
     {
-        $request->validate([
-            'sop_fasilitas_active' => 'required|in:ditanggung,tidak_ditanggung',
-            'sop_fasilitas_ditanggung' => 'nullable|string',
-            'sop_fasilitas_tidak_ditanggung' => 'nullable|string',
-        ]);
-
         $user = auth()->user();
         $region = Region::find($user->region_id);
 
@@ -66,15 +73,20 @@ class UnitFasilitasUmumController extends Controller
         }
 
         $paymentInfo = $region->payment_info ?? [];
-        $paymentInfo['sop_fasilitas_active'] = $request->sop_fasilitas_active;
-        $paymentInfo['sop_fasilitas_ditanggung'] = $request->sop_fasilitas_ditanggung ?? $this->defaultSopDitanggung;
-        $paymentInfo['sop_fasilitas_tidak_ditanggung'] = $request->sop_fasilitas_tidak_ditanggung ?? $this->defaultSopTidakDitanggung;
+        
+        $paymentInfo['sop_fasilitas_active'] = $request->sop_active;
+        $paymentInfo['sop_fasilitas_ditanggung'] = $request->sop_ditanggung;
+        $paymentInfo['sop_fasilitas_tidak_ditanggung'] = $request->sop_tidak_ditanggung;
+        
+        $region->payment_info = $paymentInfo;
+        
+        $settings = $region->settings ?? [];
+        $settings['kontak_aula'] = $request->kontak_aula;
+        $region->settings = $settings;
+        
+        $region->save();
 
-        $region->update([
-            'payment_info' => $paymentInfo,
-        ]);
-
-        return redirect()->route('admin.unit.fasilitas_umum.sop')->with('success', 'Ketentuan SOP berhasil diperbarui.');
+        return redirect()->back()->with('success', 'Pengaturan SOP dan Kontak berhasil disimpan.');
     }
 
     public function create()
@@ -98,7 +110,14 @@ class UnitFasilitasUmumController extends Controller
             'bbm_ditanggung' => 'nullable|string|in:Ditanggung Pengguna,Disediakan',
             'nama_supir' => 'nullable|string|max:255',
             'kontak_supir' => 'nullable|string|max:255',
+            'status_biaya' => 'required|in:gratis,berbayar',
+            'harga_sewa' => 'nullable|string',
         ]);
+
+        $hargaBersih = 0;
+        if ($request->status_biaya === 'berbayar' && $request->harga_sewa) {
+            $hargaBersih = (int) preg_replace('/[^0-9]/', '', $request->harga_sewa);
+        }
 
         $data = [
             'nama_fasilitas' => $request->nama_fasilitas,
@@ -111,6 +130,8 @@ class UnitFasilitasUmumController extends Controller
             'bbm_ditanggung' => $request->bbm_ditanggung,
             'nama_supir' => $request->nama_supir,
             'kontak_supir' => $request->kontak_supir,
+            'status_biaya' => $request->status_biaya,
+            'harga_sewa' => $hargaBersih > 0 ? $hargaBersih : null,
         ];
 
         if ($request->hasFile('foto_utama')) { 
@@ -169,9 +190,16 @@ class UnitFasilitasUmumController extends Controller
             'bbm_ditanggung' => 'nullable|string|in:Ditanggung Pengguna,Disediakan',
             'nama_supir' => 'nullable|string|max:255',
             'kontak_supir' => 'nullable|string|max:255',
+            'status_biaya' => 'required|in:gratis,berbayar',
+            'harga_sewa' => 'nullable|string',
         ]);
 
         $fasilitas = FasilitasUmum::findOrFail($id);
+
+        $hargaBersih = 0;
+        if ($request->status_biaya === 'berbayar' && $request->harga_sewa) {
+            $hargaBersih = (int) preg_replace('/[^0-9]/', '', $request->harga_sewa);
+        }
 
         $data = [
             'nama_fasilitas' => $request->nama_fasilitas,
@@ -184,6 +212,8 @@ class UnitFasilitasUmumController extends Controller
             'bbm_ditanggung' => $request->bbm_ditanggung,
             'nama_supir' => $request->nama_supir,
             'kontak_supir' => $request->kontak_supir,
+            'status_biaya' => $request->status_biaya,
+            'harga_sewa' => $hargaBersih > 0 ? $hargaBersih : null,
         ];
 
         if ($request->hasFile('foto_utama')) {

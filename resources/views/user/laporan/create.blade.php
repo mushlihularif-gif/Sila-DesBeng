@@ -112,7 +112,15 @@
                     {{-- Lokasi + Peta --}}
                     <div>
                         <label class="block font-semibold text-[#1e3a5f] mb-1">Lokasi Kejadian <span class="text-red-500">*</span></label>
-                        <p class="text-sm text-gray-500 mb-3"> Klik pada peta untuk menentukan lokasi kejadian secara tepat.</p>
+                        <p class="text-sm text-gray-500 mb-3"> Klik pada peta atau gunakan tombol GPS untuk menentukan lokasi kejadian secara tepat.</p>
+
+                        {{-- Tombol GPS Otomatis --}}
+                        <button type="button" id="btn-gps" onclick="getMyLocation()"
+                            class="mb-3 inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-semibold rounded-xl shadow-sm hover:shadow-md transition-all duration-300 text-sm">
+                            <svg id="gps-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                            <svg id="gps-spinner" class="w-5 h-5 animate-spin hidden" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                            <span id="gps-text">Gunakan Lokasi Saya (GPS)</span>
+                        </button>
 
                         <div style="position:relative; z-index:0;">
                             <div id="map" style="height:420px; width:100%; border-radius:12px; border:2px solid #e5e7eb; z-index: 1;"></div>
@@ -125,7 +133,7 @@
                         {{-- Tampilan nama lokasi hasil klik --}}
                         <div class="mt-3 p-4 rounded-xl bg-gray-50 border border-gray-200 min-h-[52px] flex items-center gap-3 transition-colors" id="lokasi-display">
                             <div>
-                                <p id="lokasi-nama" class="text-gray-400 text-sm italic">Belum ada lokasi dipilih. Klik peta di atas.</p>
+                                <p id="lokasi-nama" class="text-gray-400 text-sm italic">Belum ada lokasi dipilih. Klik peta di atas atau gunakan tombol GPS.</p>
                                 <p id="lokasi-coords" class="text-gray-500 text-xs mt-0.5 hidden"></p>
                             </div>
                         </div>
@@ -222,7 +230,9 @@
         style="z-index: 99999; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px);">
         <div class="bg-white border border-gray-100 rounded-2xl shadow-2xl p-6 max-w-sm w-full mx-4">
             <div class="flex items-center gap-2 mb-1">
-                <span class="text-2xl">📍</span>
+                <span class="text-blue-500">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                </span>
                 <h3 class="text-[#1e3a5f] font-bold text-lg">Konfirmasi Lokasi</h3>
             </div>
             <p class="text-gray-500 text-sm mb-4">Apakah ini lokasi kejadian yang Anda maksud?</p>
@@ -234,12 +244,14 @@
 
             <div class="flex gap-3">
                 <button type="button" id="btn-confirm"
-                    class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition text-sm shadow-sm">
-                    ✅ Ya, Benar
+                    class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition text-sm shadow-sm flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    Ya, Benar
                 </button>
                 <button type="button" id="btn-cancel"
-                    class="flex-1 py-2.5 bg-white border border-gray-300 hover:bg-gray-50 hover:text-red-500 text-gray-700 font-semibold rounded-xl transition text-sm">
-                    ❌ Pilih Ulang
+                    class="flex-1 py-2.5 bg-white border border-gray-300 hover:bg-gray-50 hover:text-red-500 text-gray-700 font-semibold rounded-xl transition text-sm shadow-sm flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    Pilih Ulang
                 </button>
             </div>
         </div>
@@ -343,6 +355,72 @@
             marker.setPosition({ lat: parseFloat(confirmedLat), lng: parseFloat(confirmedLng) });
         }
     }
+
+    // ✅ Fix 2: Fungsi GPS Otomatis (Share Location)
+    function getMyLocation() {
+        const btn = document.getElementById('btn-gps');
+        const icon = document.getElementById('gps-icon');
+        const spinner = document.getElementById('gps-spinner');
+        const text = document.getElementById('gps-text');
+
+        if (!navigator.geolocation) {
+            alert('Browser Anda tidak mendukung fitur GPS/Geolocation.');
+            return;
+        }
+
+        // Tampilkan loading state
+        btn.disabled = true;
+        btn.classList.add('opacity-75', 'cursor-wait');
+        icon.classList.add('hidden');
+        spinner.classList.remove('hidden');
+        text.innerText = 'Mendeteksi lokasi Anda...';
+
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+
+                // Pindahkan peta ke lokasi user
+                map.setCenter({ lat: lat, lng: lng });
+                map.setZoom(18);
+
+                // Tampilkan modal konfirmasi seperti klik biasa
+                showLocationModal(lat, lng);
+
+                // Reset tombol
+                btn.disabled = false;
+                btn.classList.remove('opacity-75', 'cursor-wait');
+                icon.classList.remove('hidden');
+                spinner.classList.add('hidden');
+                text.innerText = 'Gunakan Lokasi Saya (GPS)';
+            },
+            function(error) {
+                let msg = 'Gagal mendapatkan lokasi. ';
+                switch(error.code) {
+                    case error.PERMISSION_DENIED:
+                        msg += 'Anda menolak izin akses lokasi. Silakan aktifkan GPS di pengaturan browser Anda.';
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        msg += 'Informasi lokasi tidak tersedia.';
+                        break;
+                    case error.TIMEOUT:
+                        msg += 'Permintaan lokasi melebihi batas waktu. Coba lagi.';
+                        break;
+                    default:
+                        msg += 'Terjadi kesalahan yang tidak diketahui.';
+                }
+                alert(msg);
+
+                // Reset tombol
+                btn.disabled = false;
+                btn.classList.remove('opacity-75', 'cursor-wait');
+                icon.classList.remove('hidden');
+                spinner.classList.add('hidden');
+                text.innerText = 'Gunakan Lokasi Saya (GPS)';
+            },
+            { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+        );
+    }
     </script>
 
     <script async defer
@@ -358,7 +436,7 @@
             const file = this.files[0];
             if (file) {
                 if (file.size > 2 * 1024 * 1024) {
-                    alert('⚠️ Ukuran file terlalu besar! Maksimal 2MB');
+                    alert('Ukuran file terlalu besar! Maksimal 2MB');
                     this.value = '';
                     previewContainer.classList.add('hidden');
                     return;
@@ -366,7 +444,7 @@
 
                 const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
                 if (!allowedTypes.includes(file.type)) {
-                    alert('⚠️ Format file tidak didukung! Gunakan JPG, JPEG, atau PNG');
+                    alert('Format file tidak didukung! Gunakan JPG, JPEG, atau PNG');
                     this.value = '';
                     previewContainer.classList.add('hidden');
                     return;

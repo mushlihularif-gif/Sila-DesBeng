@@ -10,11 +10,12 @@ class Region extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name', 'type', 'parent_id', 'profile_text', 'contact_phone', 'contact_email', 'payment_info'
+        'name', 'type', 'parent_id', 'profile_text', 'contact_phone', 'contact_email', 'payment_info', 'settings'
     ];
 
     protected $casts = [
         'payment_info' => 'array',
+        'settings' => 'array',
     ];
 
     public function parent()

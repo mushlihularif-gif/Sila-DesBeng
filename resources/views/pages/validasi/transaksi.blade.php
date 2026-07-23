@@ -68,6 +68,13 @@
                             <dt class="text-sm font-medium text-gray-500">Total Pembayaran</dt>
                             <dd class="text-sm font-bold text-gray-900">Rp. {{ number_format($type === 'gas' ? ($transaksi->price * $transaksi->quantity) : ($transaksi->total_amount ?? $transaksi->total_harga ?? 0), 0, ',', '.') }}</dd>
                         </div>
+                        
+                        @if(!empty($transaksi->payment_method))
+                        <div class="flex justify-between border-b border-gray-100 pb-3">
+                            <dt class="text-sm font-medium text-gray-500">Metode Pembayaran</dt>
+                            <dd class="text-sm text-gray-900 capitalize">{{ str_replace('_', ' ', $transaksi->payment_method) }}</dd>
+                        </div>
+                        @endif
                         @endif
 
                         <div class="flex justify-between bg-blue-50 p-3 rounded-md border border-blue-100">

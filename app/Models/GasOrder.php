@@ -26,6 +26,16 @@ class GasOrder extends Model
                 $model->uuid = Str::uuid()->toString();
             }
         });
+
+        // ✅ BLIND INDEXING: Buat hash dari nomor_kk sebelum disimpan
+        static::saving(function ($model) {
+            if ($model->isDirty('nomor_kk') && !empty($model->nomor_kk)) {
+                $plainKk = $model->nomor_kk;
+                if (!str_starts_with($plainKk, '$chacha20$')) {
+                    $model->nomor_kk_hash = hash_hmac('sha256', $plainKk, config('app.key'));
+                }
+            }
+        });
     }
     
     protected $fillable = [
@@ -41,6 +51,7 @@ class GasOrder extends Model
         'address',
         'full_name',
         'email',
+        'nomor_kk',
         'notes',
         'status',
         'rejection_reason',
@@ -65,7 +76,10 @@ class GasOrder extends Model
         'cancellation_requested_at' => 'datetime',
         'confirmed_at' => 'datetime',
         'price' => 'decimal:2',
+        'nomor_kk' => \App\Casts\ChaCha20Encrypted::class,
     ];
+
+
 
     /**
      * Ambil pengguna yang membuat pesanan

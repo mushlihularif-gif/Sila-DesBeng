@@ -4,8 +4,35 @@
     <div class="container-xxl flex-grow-1 container-p-y">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Unit Layanan /</span> Penjualan Gas</h4>
-            <a href="{{ route('admin.unit.penjualan_gas.create') }}" class="btn btn-primary">Tambah Gas</a>
+            <div class="d-flex gap-2">
+                @php
+                    $admin = auth()->user();
+                    $region = \App\Models\Region::find($admin->region_id);
+                    $settings = $region ? $region->settings : [];
+                    $isCrisisMode = isset($settings['crisis_mode_gas']) ? $settings['crisis_mode_gas'] : false;
+                    $quotaLimit = $settings['gas_quota_limit'] ?? 1;
+                    $quotaDays = $settings['gas_quota_days'] ?? 7;
+                @endphp
+                <button type="button" class="btn {{ $isCrisisMode ? 'btn-danger' : 'btn-outline-danger' }}" data-bs-toggle="modal" data-bs-target="#crisisModeModal">
+                    <i class='bx {{ $isCrisisMode ? 'bx-error-circle' : 'bx-shield-quarter' }}'></i> 
+                    {{ $isCrisisMode ? 'MODE KRISIS AKTIF' : 'Pengaturan Mode Krisis' }}
+                </button>
+                <a href="{{ route('admin.unit.penjualan_gas.create') }}" class="btn btn-primary">Tambah Gas</a>
+            </div>
         </div>
+
+        @if(session('success'))
+            <div class="alert alert-success alert-dismissible" role="alert">
+                {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+        @if(session('error'))
+            <div class="alert alert-danger alert-dismissible" role="alert">
+                {{ session('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
 
         <!-- Products Grid -->
         @if($gases->count() > 0)
@@ -142,7 +169,65 @@
             </div>
         @endif
     </div>
+
+    <!-- Modal Pengaturan Mode Krisis -->
+    <div class="modal fade" id="crisisModeModal" tabindex="-1" aria-labelledby="crisisModeModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <form action="{{ route('admin.unit.penjualan_gas.crisis_mode') }}" method="POST" class="modal-content">
+                @csrf
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title text-white" id="crisisModeModalLabel"><i class='bx bx-shield-quarter'></i> Pengaturan Mode Krisis Elpiji</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted mb-4">Dalam kondisi normal, tidak ada batasan kuota per KK (Warga bebas memesan). Aktifkan Mode Krisis ini <strong>hanya saat kelangkaan</strong> untuk mencegah penimbunan.</p>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Status Mode Krisis</label>
+                        <select name="is_crisis_mode" id="is_crisis_mode" class="form-select" onchange="toggleCrisisInputs()">
+                            <option value="0" {{ !$isCrisisMode ? 'selected' : '' }}>Nonaktif (Kuota Normal / Bebas)</option>
+                            <option value="1" {{ $isCrisisMode ? 'selected' : '' }}>Aktif (Gunakan Pembatasan)</option>
+                        </select>
+                    </div>
+
+                    <div id="crisis_settings_wrapper" class="{{ !$isCrisisMode ? 'd-none' : '' }} bg-light p-3 rounded border">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Batas Maksimal Tabung (Per KK)</label>
+                            <input type="number" name="quota_limit" class="form-control" min="1" value="{{ $quotaLimit }}" placeholder="Contoh: 1">
+                            <small class="text-muted">Berapa banyak tabung yang boleh dibeli oleh 1 KK?</small>
+                        </div>
+                        <div class="mb-0">
+                            <label class="form-label fw-bold">Dalam Rentang Waktu (Hari)</label>
+                            <div class="input-group">
+                                <input type="number" name="quota_days" class="form-control" min="1" value="{{ $quotaDays }}" placeholder="Contoh: 7">
+                                <span class="input-group-text">Hari</span>
+                            </div>
+                            <small class="text-muted">Contoh: Jika diisi 7, maka KK hanya bisa memesan sejumlah batas di atas dalam kurun waktu 1 minggu.</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-danger">Simpan Pengaturan</button>
+                </div>
+            </form>
+        </div>
+    </div>
 @endsection
+
+@push('scripts')
+<script>
+    function toggleCrisisInputs() {
+        const select = document.getElementById('is_crisis_mode');
+        const wrapper = document.getElementById('crisis_settings_wrapper');
+        if (select.value === '1') {
+            wrapper.classList.remove('d-none');
+        } else {
+            wrapper.classList.add('d-none');
+        }
+    }
+</script>
+@endpush
 
 @push('styles')
 <style>

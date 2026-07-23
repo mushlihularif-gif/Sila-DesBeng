@@ -12,22 +12,32 @@ class BannerController extends Controller
 {
     public function index()
     {
-        // Auto-seed if empty
-        if (Banner::count() == 0) {
-            $files = ['entrance.png', 'biru.png', 'ppq.png'];
-            foreach ($files as $index => $file) {
-                $source = public_path('User/img/elemen/' . $file);
-                if(file_exists($source)) {
-                    $dest = storage_path('app/public/banners/' . $file);
-                    if(!is_dir(dirname($dest))) {
+        // Auto-seed slide bawaan sistem (terkunci) jika belum ada
+        if (Banner::where('is_locked', true)->count() == 0) {
+            $lockedSlides = [
+                ['file' => 'kuncislide1r.png', 'title' => 'Slide Bawaan Sistem 1'],
+                ['file' => 'kuncislide2r.png', 'title' => 'Slide Bawaan Sistem 2'],
+            ];
+
+            foreach ($lockedSlides as $index => $slide) {
+                $source = public_path('User/img/slidebanner/' . $slide['file']);
+                if (file_exists($source)) {
+                    $dest = storage_path('app/public/banners/' . $slide['file']);
+                    if (!is_dir(dirname($dest))) {
                         mkdir(dirname($dest), 0755, true);
                     }
-                    if(!file_exists($dest)) {
+                    if (!file_exists($dest)) {
                         copy($source, $dest);
                     }
                     Banner::firstOrCreate(
-                        ['image_path' => 'banners/' . $file],
-                        ['title' => 'Banner ' . ($index + 1), 'description' => 'Banner default sistem', 'is_active' => true, 'sort_order' => $index + 1]
+                        ['image_path' => 'banners/' . $slide['file']],
+                        [
+                            'title' => $slide['title'],
+                            'description' => 'Slide bawaan sistem — tidak dapat diedit atau dihapus.',
+                            'is_active' => true,
+                            'is_locked' => true,
+                            'sort_order' => $index + 1,
+                        ]
                     );
                 }
             }
@@ -51,7 +61,7 @@ class BannerController extends Controller
             'image.image' => 'Gagal mengunggah: File yang diunggah harus berupa gambar.',
         ]);
 
-        $path = ImageCompressorService::compressAndStore($request->file('image'), 'banners', 1280, 80, true);
+        $path = ImageCompressorService::compressAndStore($request->file('image'), 'banners', 1920, 80, true);
 
         Banner::create([
             'title' => $request->title,
@@ -59,6 +69,7 @@ class BannerController extends Controller
             'image_path' => $path,
             'target_url' => $request->target_url,
             'is_active' => $request->has('is_active'),
+            'is_locked' => false,
             'sort_order' => Banner::max('sort_order') + 1,
         ]);
 
@@ -68,6 +79,11 @@ class BannerController extends Controller
     public function update(Request $request, $id)
     {
         $banner = Banner::findOrFail($id);
+
+        // Proteksi: Slide terkunci tidak boleh diedit
+        if ($banner->is_locked) {
+            return redirect()->back()->with('error', 'Slide bawaan sistem tidak dapat diedit.');
+        }
 
         $request->validate([
             'title' => 'nullable|string|max:255',
@@ -92,7 +108,7 @@ class BannerController extends Controller
             if (Storage::disk('public')->exists($banner->image_path)) {
                 Storage::disk('public')->delete($banner->image_path);
             }
-            $data['image_path'] = ImageCompressorService::compressAndStore($request->file('image'), 'banners', 1280, 80, true);
+            $data['image_path'] = ImageCompressorService::compressAndStore($request->file('image'), 'banners', 1920, 80, true);
         }
 
         $banner->update($data);
@@ -103,6 +119,11 @@ class BannerController extends Controller
     public function destroy($id)
     {
         $banner = Banner::findOrFail($id);
+
+        // Proteksi: Slide terkunci tidak boleh dihapus
+        if ($banner->is_locked) {
+            return redirect()->back()->with('error', 'Slide bawaan sistem tidak dapat dihapus.');
+        }
         
         if (Storage::disk('public')->exists($banner->image_path)) {
             Storage::disk('public')->delete($banner->image_path);

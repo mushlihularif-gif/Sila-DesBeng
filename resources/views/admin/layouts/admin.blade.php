@@ -450,12 +450,10 @@
             <!-- Sidebar -->
             <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
                 <div class="app-brand demo">
-                    <a href="{{ route('admin.dashboard') }}" class="app-brand-link">
-                        <span class="app-brand-logo demo">
-                            <img src="{{ asset('Admin/img/illustrations/logodomain.webp') }}" alt="Logo"
-                                style="max-height: 40px; width: auto; object-fit: contain;">
-                        </span>
-                        <span class="app-brand-text demo menu-text fw-bolder ms-2 fs-4" style="text-transform: capitalize;">Administrator</span>
+                    <a href="{{ route('admin.dashboard') }}" class="app-brand-link" style="display: flex; align-items: center;">
+                        <img src="{{ asset('Admin/img/illustrations/logodomain.webp') }}?v={{ time() }}" alt="Logo"
+                            style="height: 40px; width: auto; object-fit: contain;">
+                        <span class="app-brand-text demo menu-text fw-bold ms-2" style="font-size: 1.2rem; color: #566a7f; letter-spacing: 0.5px; text-transform: capitalize;">Administrator</span>
                     </a>
                     <a href="javascript:void(0);"
                         class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
@@ -475,7 +473,7 @@
                 <!-- Unit Layanan (Dropdown) -->
                 @if(in_array(auth()->user()->role, ['super_admin', 'admin', 'admin_kecamatan', 'admin_desa']))
                     @if(isset($hasActiveServices) && $hasActiveServices)
-                        <li class="menu-item {{ request()->is('admin/unit*') ? 'open active show' : '' }}">
+                        <li class="menu-item {{ request()->is('admin/unit*') || request()->routeIs('admin.announcements.*') ? 'open active show' : '' }}">
                             <a href="javascript:void(0);" class="menu-link menu-toggle">
                                 <i class="menu-icon tf-icons bx bx-building-house"></i>
                                 <div data-i18n="Unit Layanan">Unit Layanan</div>
@@ -508,7 +506,18 @@
                                         <div data-i18n="Fasilitas Umum">Fasilitas Umum</div>
                                     </a>
                                 </li>
+                                <!-- Ambulans Darurat (Hybrid) -->
+                                <li class="menu-item {{ request()->is('admin/unit/ambulans*') ? 'active' : '' }}">
+                                    <a href="{{ route('admin.unit.ambulans.index') ?? '#' }}" class="menu-link">
+                                        <div data-i18n="Ambulans Darurat">Ambulans Darurat</div>
+                                    </a>
+                                </li>
                                 @endif
+                                <li class="menu-item {{ request()->routeIs('admin.announcements.*') ? 'active' : '' }}">
+                                    <a href="{{ route('admin.announcements.index') }}" class="menu-link">
+                                        <div data-i18n="Pengumuman">Pengumuman</div>
+                                    </a>
+                                </li>
                             </ul>
                         </li>
                     @else
@@ -526,7 +535,7 @@
                 @endif
 
                 <!-- Manajemen (Dropdown) -->
-                <li class="menu-item {{ request()->is('admin/manajemen-pengguna*') || request()->is('admin/kelola-wilayah*') || request()->is('admin/banners*') || request()->is('admin/announcements*') ? 'open active show' : '' }}">
+                <li class="menu-item {{ request()->is('admin/manajemen-pengguna*') || request()->is('admin/kelola-wilayah*') || request()->is('admin/banners*') || request()->routeIs('admin.warga.mutasi.*') ? 'open active show' : '' }}">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
                         <i class="menu-icon tf-icons bx bx-briefcase"></i>
                         <div data-i18n="Manajemen">Manajemen</div>
@@ -547,11 +556,13 @@
                             </a>
                         </li>
                         @endif
-                        <li class="menu-item {{ request()->routeIs('admin.announcements.*') ? 'active' : '' }}">
-                            <a href="{{ route('admin.announcements.index') }}" class="menu-link">
-                                <div>Pengumuman</div>
+                        @if(in_array(auth()->user()->role, ['super_admin', 'admin', 'admin_kecamatan', 'admin_desa']))
+                        <li class="menu-item {{ request()->routeIs('admin.warga.mutasi.*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.warga.mutasi.index') }}" class="menu-link">
+                                <div>Mutasi Penduduk</div>
                             </a>
                         </li>
+                        @endif
 
                         @if(in_array(auth()->user()->role, ['super_admin', 'admin', 'admin_kecamatan', 'admin_desa', 'lurah', 'admin_rw']))
                         <li class="menu-item {{ request()->routeIs('admin.kelola-wilayah.*') ? 'active' : '' }}">
@@ -566,7 +577,7 @@
                 <!-- Aktivitas -->
                 @if(in_array(auth()->user()->role, ['super_admin', 'admin', 'admin_kecamatan', 'admin_desa', 'lurah', 'admin_rw', 'admin_rt']))
                 <li
-                    class="menu-item {{ request()->is('admin/aktivitas/permintaan-pengajuan*') || request()->is('admin/aktivitas/bukti-transaksi*') || request()->is('admin/kemitraan*') || request()->routeIs('lurah.laporan.*') ? 'open active show' : '' }}">
+                    class="menu-item {{ request()->is('admin/aktivitas/permintaan-pengajuan*') || request()->is('admin/aktivitas/bukti-transaksi*') || request()->is('admin/kemitraan*') || (request()->routeIs('lurah.laporan.*') && !request()->has('status')) ? 'open active show' : '' }}">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
                         <i class="menu-icon tf-icons bx bx-time"></i>
                         <div data-i18n="Permintaan & Aktivitas">Permintaan & Aktivitas</div>
@@ -590,7 +601,7 @@
                             </a>
                         </li>
                         @endif
-                        <li class="menu-item {{ request()->routeIs('lurah.laporan.*') ? 'active' : '' }}">
+                        <li class="menu-item {{ request()->routeIs('lurah.laporan.*') && !request()->has('status') ? 'active' : '' }}">
                             <a href="{{ route('lurah.laporan.index') }}" class="menu-link">
                                 <div>Pelaporan Warga</div>
                             </a>
@@ -599,12 +610,17 @@
                 </li>
                 @endif
                 <!-- Data & Laporan (Dropdown) -->
-                <li class="menu-item {{ request()->routeIs('admin.laporan.*') ? 'open active show' : '' }}">
+                <li class="menu-item {{ request()->routeIs('admin.laporan.*') || (request()->routeIs('lurah.laporan.*') && request()->query('status') == 'Selesai') ? 'open active show' : '' }}">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
                         <i class="menu-icon tf-icons bx bx-bar-chart-alt-2"></i>
                         <div data-i18n="Data & Laporan">Data & Laporan</div>
                     </a>
                     <ul class="menu-sub">
+                        <li class="menu-item {{ request()->routeIs('lurah.laporan.*') && request()->query('status') == 'Selesai' ? 'active' : '' }}">
+                            <a href="{{ route('lurah.laporan.index', ['status' => 'Selesai']) }}" class="menu-link">
+                                <div data-i18n="Bukti Pelaporan Warga">Bukti Pelaporan Warga</div>
+                            </a>
+                        </li>
                         <li class="menu-item {{ request()->routeIs('admin.laporan.transaksi') ? 'active' : '' }}">
                             <a href="{{ route('admin.laporan.transaksi') }}" class="menu-link">
                                 <div data-i18n="Laporan Transaksi">Laporan Transaksi</div>

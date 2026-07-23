@@ -14,7 +14,7 @@ class ReceiptGeneratorService
     public function generateRentalReceipt(RentalBooking $booking)
     {
         // Muat template latar belakang
-        $backgroundPath = public_path('Admin/img/buktitransaksi/bukti sewa alat.png');
+        $backgroundPath = public_path('Admin/img/buktitransaksi/buktisewaalatqr.png');
         
         if (!file_exists($backgroundPath)) {
             throw new \Exception('Background template not found: ' . $backgroundPath);
@@ -219,7 +219,7 @@ class ReceiptGeneratorService
     public function generateGasReceipt(GasOrder $order)
     {
         // Muat template latar belakang
-        $backgroundPath = public_path('Admin/img/buktitransaksi/bukti beli gas.png');
+        $backgroundPath = public_path('Admin/img/buktitransaksi/buktibeligasqr.png');
         
         if (!file_exists($backgroundPath)) {
             throw new \Exception('Background template not found: ' . $backgroundPath);
@@ -416,7 +416,7 @@ class ReceiptGeneratorService
     public function generateMobilReceipt(\App\Models\MobilBooking $booking)
     {
         // Muat template latar belakang
-        $backgroundPath = public_path('Admin/img/buktitransaksi/bukti sewa mobil.png');
+        $backgroundPath = public_path('Admin/img/buktitransaksi/buktisewamobilqr.png');
         
         if (!file_exists($backgroundPath)) {
             throw new \Exception('Background template not found: ' . $backgroundPath);
@@ -595,7 +595,7 @@ class ReceiptGeneratorService
     public function generateFasilitasReceipt(\App\Models\FasilitasUmumBooking $booking)
     {
         // Muat template latar belakang
-        $backgroundPath = public_path('Admin/img/buktitransaksi/bukti pinjam fasilitas umum.png');
+        $backgroundPath = public_path('Admin/img/buktitransaksi/buktipinjamfasilitasumumqr.png');
         
         if (!file_exists($backgroundPath)) {
             throw new \Exception('Background template not found: ' . $backgroundPath);
@@ -787,11 +787,19 @@ class ReceiptGeneratorService
     protected function getPaymentMethodLabel($method)
     {
         $labels = [
-            'transfer' => 'Transfer - Bank Syariah Indonesia',
-            'tunai' => 'Pembayaran Tunai',
-            'cash' => 'Pembayaran Tunai',
+            'transfer' => 'Transfer Manual',
+            'tunai' => 'Tunai (Cash)',
+            'cash' => 'Tunai (Cash)',
+            'qris' => 'QRIS (Digital Payment)',
+            'gopay' => 'GoPay (Digital Payment)',
+            'shopeepay' => 'ShopeePay (Digital Payment)',
+            'bank_transfer' => 'Virtual Account / Bank Transfer',
+            'midtrans' => 'Payment Gateway (Digital)',
+            'credit_card' => 'Kartu Kredit',
         ];
-        return $labels[$method] ?? ucfirst($method);
+        
+        $methodLower = strtolower(trim($method));
+        return $labels[$methodLower] ?? ucwords(str_replace('_', ' ', $methodLower)) . ' (Digital Payment)';
     }
 
     /**

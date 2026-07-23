@@ -15,6 +15,12 @@ class Banner extends Model
         'image_path',
         'target_url',
         'is_active',
+        'is_locked',
         'sort_order',
+    ];
+
+    protected $casts = [
+        'is_locked' => 'boolean',
+        'is_active' => 'boolean',
     ];
 }

@@ -18,6 +18,10 @@ use App\Http\Controllers\Admin\ProfileController;
 
 Route::get('/media/avatar/{filename}', [MediaController::class, 'adminAvatar'])->name('media.avatar');
 Route::get('/media/profile/{filename}', [MediaController::class, 'userProfile'])->name('media.profile');
+// Rute Defense in Depth untuk Watermark
+Route::get('/media/secure/ktp/{filename}', [MediaController::class, 'secureKtpImage'])
+    ->name('media.secure.ktp')
+    ->middleware('auth');
 
 Route::get('/', function () {
     return redirect('beranda');
@@ -192,6 +196,20 @@ Route::post('/fasilitas-umum/booking', [App\Http\Controllers\User\FasilitasUmumB
     ->name('user.fasilitas-umum.book.store')
     ->middleware('auth');
 
+Route::middleware('auth')->group(function () {
+    // Ambulans User
+    Route::get('/layanan-ambulans', [App\Http\Controllers\User\AmbulansUserController::class, 'index'])
+        ->name('user.ambulans.index')
+        ->middleware(['role:user']);
+        
+    // Verifikasi Identitas
+    Route::get('/profile/verifikasi', [App\Http\Controllers\User\VerificationController::class, 'index'])->name('user.verifikasi.index');
+    Route::post('/profile/verifikasi', [App\Http\Controllers\User\VerificationController::class, 'store'])->name('user.verifikasi.store');
+    
+    // Mutasi Penduduk (User)
+    Route::post('/profile/mutasi', [App\Http\Controllers\User\MutasiUserController::class, 'store'])->name('user.mutasi.store');
+});
+
 
 Route::get('/unit-penjualan-gas', [App\Http\Controllers\User\GasSalesUserController::class, 'index'])
     ->name('gas.sales')
@@ -284,9 +302,9 @@ Route::get('/receipt/fasilitas/{id}/download', [App\Http\Controllers\User\Receip
 
 
 
-Route::post('/auth/register', [AuthController::class, 'register'])->name('auth.register')->middleware('throttle:100,1');
+Route::post('/auth/register', [AuthController::class, 'register'])->name('auth.register')->middleware('throttle:5,5');
 Route::get('/auth/otp', [AuthController::class, 'showOtpForm'])->name('auth.otp.view');
-Route::post('/auth/verify-otp', [AuthController::class, 'verifyOtp'])->name('auth.verify-otp')->middleware('throttle:100,10');
+Route::post('/auth/verify-otp', [AuthController::class, 'verifyOtp'])->name('auth.verify-otp')->middleware('throttle:10,5');
 Route::get('/auth/sandbox-otp-display', [AuthController::class, 'showSandboxOtp'])->name('auth.sandbox.otp');
 Route::post('/auth/resend-otp', [AuthController::class, 'resendOtp'])->name('auth.resend-otp')->middleware('throttle:3,5');
 Route::post('/auth/login', [AuthController::class, 'login'])->name('auth.login');
@@ -398,6 +416,18 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
         'destroy' => 'admin.announcements.destroy',
     ]);
     
+    // Warga Verification
+    Route::get('/warga/verifikasi', [\App\Http\Controllers\Admin\UserVerificationController::class, 'index'])->name('admin.warga.verifikasi.index');
+    Route::get('/warga/verifikasi/image/{type}/{id}', [\App\Http\Controllers\Admin\UserVerificationController::class, 'viewImage'])->name('admin.warga.verifikasi.image');
+    Route::post('/warga/verifikasi/{id}/approve', [\App\Http\Controllers\Admin\UserVerificationController::class, 'approve'])->name('admin.warga.verifikasi.approve');
+    Route::post('/warga/verifikasi/{id}/reject', [\App\Http\Controllers\Admin\UserVerificationController::class, 'reject'])->name('admin.warga.verifikasi.reject');
+
+    // Mutasi Penduduk
+    Route::get('/warga/mutasi', [\App\Http\Controllers\Admin\MutasiAdminController::class, 'index'])->name('admin.warga.mutasi.index');
+    Route::post('/warga/mutasi/tarik', [\App\Http\Controllers\Admin\MutasiAdminController::class, 'tarikWarga'])->name('admin.warga.mutasi.tarik');
+    Route::post('/warga/mutasi/{id}/approve', [\App\Http\Controllers\Admin\MutasiAdminController::class, 'approve'])->name('admin.warga.mutasi.approve');
+    Route::post('/warga/mutasi/{id}/reject', [\App\Http\Controllers\Admin\MutasiAdminController::class, 'reject'])->name('admin.warga.mutasi.reject');
+
     // Route untuk Profil Admin (menggunakan ProfileController)
     Route::get('/profile', [ProfileController::class, 'index'])->name('admin.profile');
     Route::put('/profile', [ProfileController::class, 'update'])->name('admin.profile.update');
@@ -465,6 +495,7 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
         ]);
 
         // Penjualan Gas
+        Route::post('gas/crisis-mode', [GasController::class, 'updateCrisisSettings'])->name('admin.unit.penjualan_gas.crisis_mode');
         Route::resource('gas', GasController::class)->names([
             'index' => 'admin.unit.penjualan_gas.index',
             'create' => 'admin.unit.penjualan_gas.create',
@@ -486,6 +517,19 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
             'edit' => 'admin.unit.fasilitas_umum.edit',
             'update' => 'admin.unit.fasilitas_umum.update',
             'destroy' => 'admin.unit.fasilitas_umum.destroy',
+        ]);
+
+        // Ambulans Darurat
+        Route::get('ambulans/sop', [\App\Http\Controllers\Admin\UnitAmbulansController::class, 'sop'])->name('admin.unit.ambulans.sop');
+        Route::post('ambulans/sop', [\App\Http\Controllers\Admin\UnitAmbulansController::class, 'updateSop'])->name('admin.unit.ambulans.sop.update');
+        Route::resource('ambulans', \App\Http\Controllers\Admin\UnitAmbulansController::class)->names([
+            'index' => 'admin.unit.ambulans.index',
+            'create' => 'admin.unit.ambulans.create',
+            'store' => 'admin.unit.ambulans.store',
+            'show' => 'admin.unit.ambulans.show',
+            'edit' => 'admin.unit.ambulans.edit',
+            'update' => 'admin.unit.ambulans.update',
+            'destroy' => 'admin.unit.ambulans.destroy',
         ]);
     });
     

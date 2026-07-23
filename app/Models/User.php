@@ -26,15 +26,30 @@ class User extends Authenticatable
             }
         });
 
-        // ✅ BLIND INDEXING: Buat hash dari nomor HP sebelum disimpan
-        // Ini memungkinkan pencarian (login) meskipun nomor HP dienkripsi
+        // ✅ BLIND INDEXING: Buat hash dari data sensitif sebelum disimpan
+        // Ini memungkinkan pencarian (seperti saat login atau cek data) meskipun data dienkripsi
         static::saving(function ($model) {
+            // Hashing Phone
             if ($model->isDirty('phone') && !empty($model->phone)) {
-                // $model->phone akan memanggil Cast get() dan mengembalikan teks biasa
                 $plainPhone = $model->phone;
-                // Cegah hashing ganda jika nilainya terlanjur prefix chacha
                 if (!str_starts_with($plainPhone, '$chacha20$')) {
                     $model->phone_hash = hash_hmac('sha256', $plainPhone, config('app.key'));
+                }
+            }
+
+            // Hashing NIK
+            if ($model->isDirty('nik') && !empty($model->nik)) {
+                $plainNik = $model->nik;
+                if (!str_starts_with($plainNik, '$chacha20$')) {
+                    $model->nik_hash = hash_hmac('sha256', $plainNik, config('app.key'));
+                }
+            }
+
+            // Hashing Name
+            if ($model->isDirty('name') && !empty($model->name)) {
+                $plainName = $model->name;
+                if (!str_starts_with($plainName, '$chacha20$')) {
+                    $model->name_hash = hash_hmac('sha256', $plainName, config('app.key'));
                 }
             }
         });
@@ -75,6 +90,9 @@ class User extends Authenticatable
         'google_id',
         'verification_status',
         'verified_at',
+        'ktp_photo_path',
+        'face_photo_path',
+        'ktp_rejection_reason',
     ];
 
     /**
@@ -105,6 +123,8 @@ class User extends Authenticatable
             // Defense in Depth: ChaCha20-Poly1305 Database-Level Encryption (PII)
             'phone' => \App\Casts\ChaCha20Encrypted::class,
             'address' => \App\Casts\ChaCha20Encrypted::class,
+            'nik' => \App\Casts\ChaCha20Encrypted::class,
+            'name' => \App\Casts\ChaCha20Encrypted::class,
         ];
     }
 
@@ -154,7 +174,7 @@ class User extends Authenticatable
 
     public function isAdmin()
     {
-        return in_array($this->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin', 'lurah']);
+        return in_array($this->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin', 'lurah', 'admin_rw', 'admin_rt']);
     }
 
     public function region()

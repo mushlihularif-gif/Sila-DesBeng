@@ -30,7 +30,33 @@ class KycVerification extends Model
     protected $casts = [
         'face_scan_data' => 'array',
         'reviewed_at' => 'datetime',
+        'nik_from_ocr' => \App\Casts\ChaCha20Encrypted::class,
+        'name_from_ocr' => \App\Casts\ChaCha20Encrypted::class,
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        // ✅ BLIND INDEXING: Buat hash dari data sensitif sebelum disimpan
+        static::saving(function ($model) {
+            // Hashing NIK
+            if ($model->isDirty('nik_from_ocr') && !empty($model->nik_from_ocr)) {
+                $plainNik = $model->nik_from_ocr;
+                if (!str_starts_with($plainNik, '$chacha20$')) {
+                    $model->nik_from_ocr_hash = hash_hmac('sha256', $plainNik, config('app.key'));
+                }
+            }
+
+            // Hashing Name
+            if ($model->isDirty('name_from_ocr') && !empty($model->name_from_ocr)) {
+                $plainName = $model->name_from_ocr;
+                if (!str_starts_with($plainName, '$chacha20$')) {
+                    $model->name_from_ocr_hash = hash_hmac('sha256', $plainName, config('app.key'));
+                }
+            }
+        });
+    }
 
     public function user()
     {

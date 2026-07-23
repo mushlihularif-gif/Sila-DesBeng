@@ -13,6 +13,13 @@
         </div>
     @endif
 
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible" role="alert">
+            {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
     @if($errors->any())
         <div class="alert alert-danger alert-dismissible" role="alert">
             <h6 class="alert-heading d-flex align-items-center fw-bold mb-1"><i class="bx bx-error-circle me-2"></i>Terjadi Kesalahan!</h6>
@@ -29,7 +36,7 @@
         <div class="card-header d-flex justify-content-between align-items-center">
             <div>
                 <h5 class="mb-1"><i class="bx bx-image me-2"></i> Daftar Banner</h5>
-                <small class="text-muted"><i class="bx bx-info-circle"></i> Maksimal ukuran file <b>5MB</b>. Rekomendasi dimensi: <b>1774 x 887 piksel</b>.</small>
+                <small class="text-muted"><i class="bx bx-info-circle"></i> Maksimal ukuran file <b>5MB</b>. Rekomendasi dimensi: <b>1920 x 700 piksel</b>.</small>
             </div>
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addBannerModal">
                 <i class="bx bx-plus me-1"></i> Tambah Banner
@@ -52,21 +59,34 @@
                             <img src="{{ Storage::url($banner->image_path) }}" alt="Banner" class="rounded" style="max-height: 50px; max-width: 100px; object-fit: cover;">
                         </td>
                         <td>
-                            <span class="badge bg-label-{{ $banner->is_active ? 'success' : 'secondary' }}">
-                                {{ $banner->is_active ? 'Aktif' : 'Nonaktif' }}
-                            </span>
+                            @if($banner->is_locked)
+                                <span class="badge bg-label-warning">
+                                    <i class="bx bx-lock-alt me-1"></i> Bawaan Sistem
+                                </span>
+                            @else
+                                <span class="badge bg-label-{{ $banner->is_active ? 'success' : 'secondary' }}">
+                                    {{ $banner->is_active ? 'Aktif' : 'Nonaktif' }}
+                                </span>
+                            @endif
                         </td>
                         <td>{{ $banner->sort_order }}</td>
                         <td>
-                            <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#editBannerModal{{ $banner->id }}">Edit</button>
-                            <form action="{{ route('admin.banners.destroy', $banner->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus banner ini?');">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-danger">Hapus</button>
-                            </form>
+                            @if($banner->is_locked)
+                                <span class="text-muted" title="Slide ini merupakan bawaan sistem dan tidak dapat diubah atau dihapus.">
+                                    <i class="bx bx-lock-alt"></i> Terkunci
+                                </span>
+                            @else
+                                <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#editBannerModal{{ $banner->id }}">Edit</button>
+                                <form action="{{ route('admin.banners.destroy', $banner->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus banner ini?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-danger">Hapus</button>
+                                </form>
+                            @endif
                         </td>
                     </tr>
 
+                    @if(!$banner->is_locked)
                     @push('modals')
                     <!-- Edit Modal -->
                     <div class="modal fade" id="editBannerModal{{ $banner->id }}" tabindex="-1" aria-hidden="true">
@@ -88,7 +108,7 @@
                                             <label class="form-label">Ganti Gambar (Opsional)</label>
                                             <input type="file" name="image" class="form-control" accept="image/*" onchange="previewImage(this, 'editBannerPreview{{ $banner->id }}')">
                                             <small class="text-muted d-block mt-1">
-                                                <i class="bx bx-info-circle"></i> Maksimal ukuran file <b>5MB</b>. Rekomendasi dimensi: <b>1774 x 887 piksel</b>.
+                                                <i class="bx bx-info-circle"></i> Maksimal ukuran file <b>5MB</b>. Rekomendasi dimensi: <b>1920 x 700 piksel</b>.
                                             </small>
                                         </div>
                                         <div class="mb-3">
@@ -109,6 +129,7 @@
                         </div>
                     </div>
                     @endpush
+                    @endif
                     @empty
                     <tr>
                         <td colspan="4" class="text-center">Belum ada banner iklan.</td>
@@ -138,7 +159,7 @@
                         <img id="newBannerPreview" src="" class="img-thumbnail mb-2 d-none" style="max-height: 150px; width: auto;">
                         <input type="file" name="image" id="newBannerInput" class="form-control" accept="image/*" required onchange="previewImage(this, 'newBannerPreview')">
                         <small class="text-muted d-block mt-1">
-                            <i class="bx bx-info-circle"></i> Maksimal ukuran file <b>5MB</b>. Rekomendasi dimensi: <b>1774 x 887 piksel</b>.
+                            <i class="bx bx-info-circle"></i> Maksimal ukuran file <b>5MB</b>. Rekomendasi dimensi: <b>1920 x 700 piksel</b>.
                         </small>
                     </div>
                     <div class="mb-3 form-check form-switch">
@@ -167,8 +188,6 @@
                 preview.classList.remove('d-none');
             }
             reader.readAsDataURL(input.files[0]);
-        } else {
-            // If user cancels file selection, we could reset it, but keeping the old one is usually fine.
         }
     }
 </script>

@@ -16,7 +16,7 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 lg:gap-8 mb-0">
 
             <div class="flex flex-col items-center md:items-start">
-                <img src="{{ asset('User/img/logo/iSewaF.png') }}?v={{ time() }}" alt="SiladesBeng Logo"
+                <img src="{{ asset('User/img/logo/logosdfooter.webp') }}?v={{ time() }}" alt="SiladesBeng Logo"
                     class="footer-logo-1 h-auto object-contain relative z-10">
 
                 <img src="{{ asset('User/img/logo/bklss.png') }}?v={{ time() }}" alt="Bengkalis Bermasa"

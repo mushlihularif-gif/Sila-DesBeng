@@ -187,9 +187,6 @@ class GasController extends Controller
     // ===========================
     // DESTROY
     // ===========================
-    // ===========================
-    // DESTROY
-    // ===========================
     public function destroy($id)
     {
         try {
@@ -208,5 +205,42 @@ class GasController extends Controller
         } catch (\Exception $e) {
             return redirect()->route('admin.unit.penjualan_gas.index')->with('error', 'Gagal menghapus gas: ' . $e->getMessage());
         }
+    }
+
+    // ===========================
+    // CRISIS MODE (Elpiji 3kg)
+    // ===========================
+    public function updateCrisisSettings(Request $request)
+    {
+        $request->validate([
+            'is_crisis_mode' => 'required|boolean',
+            'quota_limit' => 'required_if:is_crisis_mode,1|integer|min:1',
+            'quota_days' => 'required_if:is_crisis_mode,1|integer|min:1',
+        ]);
+
+        $admin = auth()->user();
+        $region = \App\Models\Region::find($admin->region_id);
+        
+        if (!$region) {
+            return redirect()->back()->with('error', 'Wilayah tidak ditemukan.');
+        }
+
+        $settings = $region->settings ?? [];
+        
+        // Update status
+        $settings['crisis_mode_gas'] = (bool) $request->is_crisis_mode;
+        
+        if ($settings['crisis_mode_gas']) {
+            $settings['gas_quota_limit'] = (int) $request->quota_limit;
+            $settings['gas_quota_days'] = (int) $request->quota_days;
+            $statusText = "DIAKTIFKAN (Batas {$settings['gas_quota_limit']} Tabung per {$settings['gas_quota_days']} Hari)";
+        } else {
+            $statusText = "DINONAKTIFKAN (Kuota Normal / Bebas Tanpa Batas)";
+        }
+        
+        $region->settings = $settings;
+        $region->save();
+
+        return redirect()->back()->with('success', "Pengaturan Mode Krisis Elpiji berhasil diperbarui: $statusText.");
     }
 }

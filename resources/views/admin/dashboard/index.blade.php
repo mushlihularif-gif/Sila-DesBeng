@@ -53,8 +53,32 @@
                                     @endif
                                 </div>
                             </div>
+                            <!-- Menambahkan indikator layanan aktif di atas banner -->
+                            <div class="col-12 mt-4 px-4">
+                                @php
+                                    $activeServicesCount = \App\Models\RegionService::where('region_id', auth()->user()->region_id)->where('is_active', true)->count();
+                                    $totalServicesCount = \App\Models\Service::count();
+                                @endphp
+                                <div class="d-flex align-items-center bg-light rounded-3 p-3 shadow-sm">
+                                    <div class="avatar flex-shrink-0 me-3" style="width: 50px; height: 50px;">
+                                        <span class="avatar-initial rounded bg-label-primary w-100 h-100 p-1">
+                                            <img src="{{ asset('Admin/img/illustrations/logokab.webp') }}" alt="Logo Kab" style="width: 100%; height: 100%; object-fit: contain;">
+                                        </span>
+                                    </div>
+                                    <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                                        <div class="me-2">
+                                            <h6 class="mb-0 fw-bold text-dark">Modul Layanan Aktif</h6>
+                                            <small class="text-muted">Untuk {{ $regionName }}</small>
+                                        </div>
+                                        <div class="user-progress text-end">
+                                            <small class="fw-bold text-primary fs-5">{{ $activeServicesCount }}</small> <small class="text-muted fs-6">/ {{ $totalServicesCount }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
                             <div class="col-12 mt-auto">
-                                <div class="px-3 pb-3">
+                                <div class="px-3 pb-3 pt-4">
                                     <div id="dashboardBannerCarousel" class="carousel slide" data-bs-ride="carousel">
                                         @php
                                             $banners = \App\Models\Banner::where('is_active', true)->latest()->get();
@@ -69,7 +93,6 @@
                                             @else
                                                 <button type="button" data-bs-target="#dashboardBannerCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
                                                 <button type="button" data-bs-target="#dashboardBannerCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
-                                                <button type="button" data-bs-target="#dashboardBannerCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
                                             @endif
                                         </div>
 
@@ -77,18 +100,15 @@
                                             @if($banners->count() > 0)
                                                 @foreach($banners as $index => $banner)
                                                     <div class="carousel-item {{ $index == 0 ? 'active' : '' }}" data-bs-interval="3000">
-                                                        <img src="{{ Storage::url($banner->image_path) }}" class="d-block w-100 rounded-3" style="object-fit: cover; aspect-ratio: 16/9;" alt="Banner {{ $index + 1 }}">
+                                                        <img src="{{ Storage::url($banner->image_path) }}" class="d-block w-100 rounded-3" style="object-fit: cover; aspect-ratio: 1920/550;" alt="Banner {{ $index + 1 }}">
                                                     </div>
                                                 @endforeach
                                             @else
                                                 <div class="carousel-item active" data-bs-interval="3000">
-                                                    <img src="{{ asset('User/img/elemen/entrance.png') }}" class="d-block w-100 rounded-3" style="object-fit: cover; aspect-ratio: 16/9;" alt="Slide 1">
+                                                    <img src="{{ asset('User/img/elemen/kuncislide1r.png') }}" class="d-block w-100 rounded-3" style="object-fit: cover; aspect-ratio: 1920/550;" alt="Slide 1">
                                                 </div>
                                                 <div class="carousel-item" data-bs-interval="3000">
-                                                    <img src="{{ asset('User/img/elemen/biru.png') }}" class="d-block w-100 rounded-3" style="object-fit: cover; aspect-ratio: 16/9;" alt="Slide 2">
-                                                </div>
-                                                <div class="carousel-item" data-bs-interval="3000">
-                                                    <img src="{{ asset('User/img/elemen/ppq.png') }}" class="d-block w-100 rounded-3" style="object-fit: cover; aspect-ratio: 16/9;" alt="Slide 3">
+                                                    <img src="{{ asset('User/img/elemen/kuncislide2r.png') }}" class="d-block w-100 rounded-3" style="object-fit: cover; aspect-ratio: 1920/550;" alt="Slide 2">
                                                 </div>
                                             @endif
                                         </div>

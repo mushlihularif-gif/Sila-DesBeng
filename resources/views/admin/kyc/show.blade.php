@@ -24,8 +24,8 @@
                 </div>
                 <div class="card-body text-center">
                     @if($kyc->ktp_image_path)
-                        <img src="{{ asset('storage/' . $kyc->ktp_image_path) }}" class="img-fluid rounded border p-1 mb-3" alt="KTP {{ $kyc->user->name }}">
-                        <a href="{{ asset('storage/' . $kyc->ktp_image_path) }}" target="_blank" class="btn btn-sm btn-outline-primary"><i class="fas fa-search-plus"></i> Perbesar</a>
+                        <img src="{{ route('media.secure.ktp', basename($kyc->ktp_image_path)) }}" class="img-fluid rounded border p-1 mb-3" alt="KTP {{ $kyc->user->name }}">
+                        <a href="{{ route('media.secure.ktp', basename($kyc->ktp_image_path)) }}" target="_blank" class="btn btn-sm btn-outline-primary"><i class="fas fa-search-plus"></i> Perbesar</a>
                     @else
                         <div class="alert alert-warning">Foto KTP tidak tersedia.</div>
                     @endif
@@ -38,8 +38,8 @@
                 </div>
                 <div class="card-body text-center">
                     @if($kyc->face_image_path)
-                        <img src="{{ asset('storage/' . $kyc->face_image_path) }}" class="img-fluid rounded border p-1 mb-3" alt="Selfie {{ $kyc->user->name }}">
-                        <a href="{{ asset('storage/' . $kyc->face_image_path) }}" target="_blank" class="btn btn-sm btn-outline-primary mb-3"><i class="fas fa-search-plus"></i> Perbesar</a>
+                        <img src="{{ route('media.secure.ktp', basename($kyc->face_image_path)) }}" class="img-fluid rounded border p-1 mb-3" alt="Selfie {{ $kyc->user->name }}">
+                        <a href="{{ route('media.secure.ktp', basename($kyc->face_image_path)) }}" target="_blank" class="btn btn-sm btn-outline-primary mb-3"><i class="fas fa-search-plus"></i> Perbesar</a>
                     @endif
 
                     @if($kyc->face_scan_data)

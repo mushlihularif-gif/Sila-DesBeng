@@ -71,29 +71,80 @@ class LaporanController extends Controller
             'has_bukti' => isset($data['bukti']),
         ]);
 
-        // Kirim notifikasi berjenjang
+        // ✅ Fix 4: Smart Routing - Kirim notifikasi berdasarkan ketersediaan admin
         try {
-            $regionIds = [];
+            $regionName = '';
             $currentRegion = Region::find($user->region_id);
             $regionName = $currentRegion ? $currentRegion->name : 'Unknown';
-            while ($currentRegion) {
-                $regionIds[] = $currentRegion->id;
-                $currentRegion = $currentRegion->parent;
+
+            // Kumpulkan region_id dari desa ke kabupaten (untuk fallback)
+            $regionIds = [];
+            $tempRegion = $currentRegion;
+            while ($tempRegion) {
+                $regionIds[] = $tempRegion->id;
+                $tempRegion = $tempRegion->parent;
             }
 
-            $admins = User::whereIn('role', ['admin', 'super_admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'lurah'])
-                ->whereIn('region_id', $regionIds)
-                ->get();
+            $targetAdmins = collect();
+            $actualDestination = $validated['tujuan_laporan'];
 
-            foreach ($admins as $admin) {
+            // STEP 1: Cek ketersediaan Admin RT
+            if ($actualDestination === 'rt' && $user->rt && $user->rw) {
+                $adminRt = User::where('role', 'admin_rt')
+                    ->where('region_id', $user->region_id)
+                    ->where('rt', $user->rt)
+                    ->where('rw', $user->rw)
+                    ->get();
+
+                if ($adminRt->isNotEmpty()) {
+                    $targetAdmins = $adminRt;
+                    Log::info('[API] Laporan dikirim ke Admin RT', ['rt' => $user->rt, 'rw' => $user->rw]);
+                } else {
+                    $actualDestination = 'rw';
+                    Log::info('[API] Admin RT belum ada, eskalasi ke RW');
+                }
+            }
+
+            // STEP 2: Cek ketersediaan Admin RW
+            if ($targetAdmins->isEmpty() && in_array($actualDestination, ['rw', 'rt']) && $user->rw) {
+                $adminRw = User::where('role', 'admin_rw')
+                    ->where('region_id', $user->region_id)
+                    ->where('rw', $user->rw)
+                    ->get();
+
+                if ($adminRw->isNotEmpty()) {
+                    $targetAdmins = $adminRw;
+                    $actualDestination = 'rw';
+                    Log::info('[API] Laporan dikirim ke Admin RW', ['rw' => $user->rw]);
+                } else {
+                    $actualDestination = 'desa';
+                    Log::info('[API] Admin RW belum ada, eskalasi ke Desa');
+                }
+            }
+
+            // STEP 3: Fallback ke Admin Desa
+            if ($targetAdmins->isEmpty()) {
+                $targetAdmins = User::whereIn('role', ['admin', 'super_admin', 'admin_desa', 'lurah'])
+                    ->whereIn('region_id', $regionIds)
+                    ->get();
+                $actualDestination = 'desa';
+                Log::info('[API] Laporan dikirim ke Admin Desa (fallback)');
+            }
+
+            // Update tujuan laporan jika berubah
+            if ($actualDestination !== $validated['tujuan_laporan']) {
+                $laporan->update(['tujuan_laporan' => $actualDestination]);
+            }
+
+            foreach ($targetAdmins as $admin) {
                 Notification::create([
                     'user_id' => $admin->id,
                     'laporan_id' => $laporan->id,
                     'type' => 'laporan_baru',
-                    'title' => '📋 Laporan Baru Masuk',
+                    'title' => 'Laporan Baru Masuk',
                     'message' => "User {$user->name} telah melakukan pelaporan dari {$regionName}. Kategori: {$laporan->kategori}",
                     'link' => '/admin/laporan/' . $laporan->id,
-                    'icon' => '📋',
+                    'icon' => 'fas fa-file-alt',
                 ]);
             }
         } catch (\Exception $e) {

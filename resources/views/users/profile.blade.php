@@ -99,6 +99,55 @@
 
                 {{-- KOLOM KANAN: Kartu Form (span 8 kolom) --}}
                 <div class="lg:col-span-8 space-y-5">
+                    
+                    {{-- KTP DIGITAL (Fase 5) --}}
+                    @if($user->verification_status === 'verified')
+                    <div class="glass-card rounded-3xl p-0 border border-blue-300 shadow-[0_0_20px_rgba(59,130,246,0.3)] overflow-hidden relative group">
+                        <div class="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-transparent to-blue-500/10 opacity-50 group-hover:opacity-100 transition"></div>
+                        <div class="absolute top-0 right-0 p-4">
+                            <img src="{{ asset('Admin/img/illustrations/isewalogo.webp') }}" class="w-16 opacity-30">
+                        </div>
+                        <div class="p-6">
+                            <div class="flex items-center justify-between border-b border-blue-200/50 pb-3 mb-4">
+                                <h3 class="text-xl font-black text-blue-900 tracking-wider">KTP DIGITAL</h3>
+                                <span class="bg-blue-600 text-white text-xs px-3 py-1 rounded-full font-bold shadow">TERVERIFIKASI</span>
+                            </div>
+                            <div class="flex gap-6 items-center">
+                                <div class="w-24 h-32 rounded-lg border-2 border-blue-300 overflow-hidden shadow-md shrink-0">
+                                    <img src="{{ $user->file ? $user->file->file_stream : asset('Admin/img/avatars/1.png') }}" class="w-full h-full object-cover">
+                                </div>
+                                <div class="flex-1 space-y-2 text-sm text-blue-900 font-medium">
+                                    <div class="grid grid-cols-[100px_1fr]">
+                                        <span class="text-blue-700 font-bold">NIK</span>
+                                        <span class="font-mono bg-blue-100 px-2 py-0.5 rounded tracking-widest">{{ $user->nik ? substr($user->nik, 0, 4) . '********' . substr($user->nik, -4) : 'Belum diisi' }}</span>
+                                    </div>
+                                    <div class="grid grid-cols-[100px_1fr]">
+                                        <span class="text-blue-700 font-bold">NAMA</span>
+                                        <span class="uppercase font-bold flex items-center gap-1">
+                                            {{ $user->name }}
+                                            <i class='bx bxs-badge-check text-blue-500 text-lg' title="Terverifikasi"></i>
+                                        </span>
+                                    </div>
+                                    <div class="grid grid-cols-[100px_1fr]">
+                                        <span class="text-blue-700 font-bold">ALAMAT</span>
+                                        <span>RT {{ $user->rt }}/RW {{ $user->rw }} - (Disensor)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @else
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-3xl p-6 shadow-sm flex items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-yellow-800 text-lg mb-1">Identitas Belum Terverifikasi</h3>
+                            <p class="text-yellow-700 text-sm">Anda belum dapat mengakses layanan publik (seperti meminjam fasilitas) sebelum memverifikasi KTP & Wajah.</p>
+                        </div>
+                        <a href="{{ route('user.verifikasi.index') }}" class="px-6 py-2 bg-yellow-500 hover:bg-yellow-600 text-white font-bold rounded-xl shadow transition shrink-0">
+                            Verifikasi Sekarang
+                        </a>
+                    </div>
+                    @endif
+
                     {{-- KARTU 1: Info Dasar (Username, Nama, Email, Telepon) --}}
                     <div class="glass-card rounded-3xl p-6 border border-white/50 shadow-lg">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -240,6 +289,52 @@
                 </div>
             </div>
         </form>
+
+        {{-- Pengajuan Mutasi / Pindah Desa --}}
+        @if($user->verification_status === 'verified')
+        <div class="mt-8 w-full glass-card rounded-3xl p-6 border border-white/50 shadow-lg relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-2 h-full bg-orange-500"></div>
+            <h3 class="text-xl font-bold text-gray-800 mb-2 flex items-center gap-2">
+                <i class='bx bx-transfer-alt text-orange-500'></i> Pengajuan Pindah Desa (Mutasi)
+            </h3>
+            
+            @php
+                $pendingMutasi = \App\Models\MutasiPenduduk::where('user_id', $user->id)->where('status', 'pending')->first();
+            @endphp
+
+            @if($pendingMutasi)
+                <div class="bg-orange-50 border border-orange-200 text-orange-800 p-4 rounded-xl mt-4">
+                    <p class="font-bold flex items-center gap-2">
+                        <i class='bx bx-time-five animate-spin-slow'></i> Sedang Diproses
+                    </p>
+                    <p class="text-sm mt-1">Pengajuan pindah Anda ke <strong>{{ $pendingMutasi->toRegion->desa }}</strong> sedang menunggu persetujuan (Handshake) dari Kepala Desa saat ini.</p>
+                </div>
+            @else
+                <p class="text-gray-600 text-sm mb-4">Jika Anda berpindah domisili ke desa lain, Anda bisa mengajukan perpindahan data secara digital. Kades asal harus menyetujui pelepasan data Anda.</p>
+                <form action="{{ route('user.mutasi.store') }}" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-4" onsubmit="return confirm('Apakah Anda yakin ingin mengajukan pindah desa? Anda tidak dapat memesan fasilitas desa hingga proses ini selesai.')">
+                    @csrf
+                    <div>
+                        <label class="block text-sm font-bold text-gray-800 mb-2">Pilih Desa Tujuan</label>
+                        <select name="to_region_id" class="w-full px-4 py-2 bg-white/80 border border-white/60 rounded-xl focus:border-orange-400 outline-none text-gray-800 text-sm" required>
+                            <option value="">-- Pilih Desa --</option>
+                            @foreach(\App\Models\Region::where('id', '!=', $user->region_id)->get() as $reg)
+                                <option value="{{ $reg->id }}">{{ $reg->kecamatan }} - {{ $reg->desa }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-800 mb-2">Alasan Pindah</label>
+                        <input type="text" name="reason" placeholder="Contoh: Ikut suami, pindah domisili, dll" class="w-full px-4 py-2 bg-white/80 border border-white/60 rounded-xl focus:border-orange-400 outline-none text-gray-800 text-sm" required>
+                    </div>
+                    <div class="md:col-span-2">
+                        <button type="submit" class="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl shadow transition">
+                            Ajukan Pindah Sekarang
+                        </button>
+                    </div>
+                </form>
+            @endif
+        </div>
+        @endif
 
         {{-- Form Logout (Tersembunyi) --}}
         <form id="logout-form" action="{{ route('auth.logout') }}" method="POST" class="hidden">

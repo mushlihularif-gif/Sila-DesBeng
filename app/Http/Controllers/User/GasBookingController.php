@@ -24,6 +24,7 @@ class GasBookingController extends Controller
             'delivery_method' => 'required|in:antar,jemput',
             'buyer_name' => 'required|string|max:255',
             'buyer_address' => 'required|string',
+            'nomor_kk' => 'required|string|size:16',
             'quantity' => 'required|integer|min:1|max:100',
             'payment_method' => 'required|in:tunai,bank_transfer_bca,bank_transfer_bri,bank_transfer_bni,bank_transfer_mandiri,gopay,qris',
             'payment_proof' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
@@ -39,6 +40,38 @@ class GasBookingController extends Controller
                 'message' => "Mohon maaf, stok tidak mencukupi. Sisa stok: {$gas->stok}"
             ], 400);
         }
+
+        // --- VALIDASI KUOTA KK (HANYA SAAT MODE KRISIS) ---
+        // Baca status Crisis Mode dari region
+        $region = \App\Models\Region::find($gas->region_id);
+        $settings = $region ? $region->settings : [];
+        $isCrisisMode = isset($settings['crisis_mode_gas']) && $settings['crisis_mode_gas'] == true;
+
+        if ($isCrisisMode) {
+            $quotaLimit = $settings['gas_quota_limit'] ?? 1;
+            $quotaDays = $settings['gas_quota_days'] ?? 7;
+
+            // Hitung total pembelian KK ini dalam kurun waktu quota_days (yang tidak ditolak/dibatalkan)
+            $pastDate = now()->subDays($quotaDays);
+            
+            // Blind Indexing Search
+            $kkHash = hash_hmac('sha256', $validated['nomor_kk'], config('app.key'));
+            
+            $pastOrders = GasOrder::where('nomor_kk_hash', $kkHash)
+                ->where('gas_id', $gas->id)
+                ->where('created_at', '>=', $pastDate)
+                ->whereNotIn('status', ['rejected', 'cancelled'])
+                ->sum('quantity');
+
+            if (($pastOrders + $validated['quantity']) > $quotaLimit) {
+                $sisa = max(0, $quotaLimit - $pastOrders);
+                return response()->json([
+                    'success' => false,
+                    'message' => "Mohon maaf, Mode Krisis sedang aktif. Maksimal pembelian adalah {$quotaLimit} tabung per {$quotaDays} hari. Sisa kuota Anda saat ini: {$sisa} tabung."
+                ], 400);
+            }
+        }
+        // --- END VALIDASI KUOTA KK ---
 
         // Calculate total
         $totalAmount = $gas->harga_satuan * $validated['quantity'];
@@ -66,6 +99,7 @@ class GasBookingController extends Controller
             'address' => $validated['buyer_address'],
             'full_name' => $validated['buyer_name'],
             'email' => Auth::user()->email,
+            'nomor_kk' => $validated['nomor_kk'],
             'status' => 'pending',
             'proof_of_payment' => $paymentProofPath,
         ]);

@@ -18,7 +18,7 @@
                 <p class="text-gray-600">Peminjaman fasilitas ini tidak dipungut biaya (Gratis).</p>
             </div>
 
-            <form id="booking-form" action="#" method="POST" onsubmit="return false;">
+            <form id="booking-form" action="#" method="POST" onsubmit="return false;" enctype="multipart/form-data">
                 @csrf
                 <input type="hidden" name="fasilitas_id" value="{{ $item->id }}">
 
@@ -29,6 +29,28 @@
                             <h3 class="text-xl font-bold text-gray-800">{{ $item->nama_fasilitas }}</h3>
                             <span class="text-sm text-gray-600">{{ $item->kategori }} | Stok: {{ $item->stok }} {{ $item->satuan }}</span>
                         </div>
+                    </div>
+
+                    <!-- Kategori Acara -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-bold text-gray-700 mb-3">Kategori Acara <span class="text-red-500">*</span></label>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <label class="border border-gray-300 rounded-lg p-3 cursor-pointer bg-white hover:bg-blue-50 hover:border-blue-300 flex items-center gap-2 transition-colors">
+                                <input type="radio" name="jenis_acara" value="sosial" class="w-4 h-4 text-blue-600 focus:ring-blue-500" required>
+                                <span class="text-sm font-semibold text-gray-700">Sosial / Masyarakat (Gratis)</span>
+                            </label>
+                            <label class="border border-gray-300 rounded-lg p-3 cursor-pointer bg-white hover:bg-blue-50 hover:border-blue-300 flex items-center gap-2 transition-colors">
+                                <input type="radio" name="jenis_acara" value="komersial" class="w-4 h-4 text-blue-600 focus:ring-blue-500">
+                                <span class="text-sm font-semibold text-gray-700">Komersial / Pribadi (Berbayar)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Upload Surat Pengantar (Dinamic: Hanya muncul untuk acara Sosial) -->
+                    <div id="surat-pengantar-container" class="mb-6 hidden bg-yellow-50 border border-yellow-200 p-5 rounded-xl">
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Upload Surat Pengantar (Opsional) <span class="text-xs text-gray-500 font-normal">Mempercepat validasi dari Admin</span></label>
+                        <input type="file" name="surat_pengantar" accept=".pdf,.jpg,.jpeg,.png" class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                        <p class="text-xs text-gray-500 mt-2">* Format: PDF/JPG/PNG. Maksimal ukuran file: 5MB.</p>
                     </div>
 
                     <!-- Keterangan / Tujuan Penyewaan -->
@@ -67,6 +89,11 @@
                     <div class="mb-6">
                         <label class="block text-sm font-bold text-gray-700 mb-2">Keterangan / Tujuan Peminjaman <span class="text-red-500">*</span></label>
                         <textarea name="rental_purpose" id="rental-purpose" rows="3" placeholder="Contoh: Untuk acara RT, rapat desa, dll." class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required></textarea>
+                        
+                        <div class="mt-3 flex items-center gap-2">
+                            <input type="checkbox" name="butuh_gudang" id="butuh_gudang" value="1" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
+                            <label for="butuh_gudang" class="text-sm text-gray-700 font-medium cursor-pointer">Saya juga membutuhkan kunci akses fasilitas Gudang (Opsional)</label>
+                        </div>
                     </div>
                     @endif
 
@@ -212,7 +239,14 @@
                     </div>
                     @endif
 
-                    <div class="flex justify-end">
+                    <div class="flex justify-between items-center">
+                        @if(isset($regionSettings['kontak_aula']) && $regionSettings['kontak_aula'])
+                        <a href="https://wa.me/{{ preg_replace('/^0/', '62', $regionSettings['kontak_aula']) }}" target="_blank" class="flex items-center gap-2 px-6 py-3 bg-green-500 hover:bg-green-600 text-white font-bold rounded-full shadow-lg transition-all duration-300">
+                            <i class='bx bxl-whatsapp text-2xl'></i> Halo Layanan
+                        </a>
+                        @else
+                        <div></div>
+                        @endif
                         <button type="button" class="confirm-action-btn px-8 py-3 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5">
                             Konfirmasi Peminjaman
                         </button>
@@ -320,6 +354,20 @@
         const increaseBtn = document.getElementById('increase-qty');
         const maxStock = {{ $item->stok }};
         
+        // Logic Jenis Acara -> Surat Pengantar
+        const jenisAcaraRadios = document.querySelectorAll('input[name="jenis_acara"]');
+        const suratContainer = document.getElementById('surat-pengantar-container');
+        
+        jenisAcaraRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (this.value === 'sosial') {
+                    suratContainer.classList.remove('hidden');
+                } else {
+                    suratContainer.classList.add('hidden');
+                }
+            });
+        });
+
         // Delivery Method Logic
         const deliveryCards = document.querySelectorAll('.delivery-method-card');
         const deliveryMethodInput = document.getElementById('delivery-method-input');

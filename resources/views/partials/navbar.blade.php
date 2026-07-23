@@ -98,7 +98,7 @@
     <div class="sd-nav-container">
         <!-- Logo -->
         <a href="{{ route('beranda') }}" class="sd-nav-logo">
-            <img src="{{ asset('User/img/logo/iSewa.webp') }}" alt="SiladesBeng Logo">
+            <img src="{{ asset('Admin/img/illustrations/logodomain.webp') }}?v={{ time() }}" alt="SiladesBeng Logo">
         </a>
 
         <!-- Menu Desktop -->
@@ -186,13 +186,13 @@
                     </button>
 
                     <!-- Wrapper padding transparan untuk jembatan hover agar tidak hilang -->
-                    <div class="absolute top-full right-0 pt-2 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                    <div class="absolute top-full right-0 pt-2 z-[60] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                         <div class="w-56 bg-white rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.1)] border border-gray-200 overflow-hidden">
                             <div class="py-1.5">
                                 @if(auth()->user()->verification_status !== 'verified')
                                 <a href="{{ route('kyc.index') }}" class="block px-4 py-2.5 text-amber-600 hover:bg-amber-50 hover:border-l-[3px] hover:border-l-amber-500 transition-all duration-150 border-l-[3px] border-l-transparent bg-amber-50/50">
-                                    <span class="text-[15px] font-medium text-center block flex items-center justify-center gap-2">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                                    <span class="text-[15px] font-medium flex items-center justify-center gap-2 whitespace-nowrap">
+                                        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
                                         Verifikasi Akun
                                     </span>
                                 </a>
@@ -335,7 +335,7 @@
     
     {{-- Header Sidebar --}}
     <div class="py-5 px-5 flex items-center justify-between border-b bg-white">
-        <img src="{{ asset('User/img/logo/iSewa.webp') }}" class="h-10" alt="SiladesBeng">
+        <img src="{{ asset('Admin/img/illustrations/logodomain.webp') }}?v={{ time() }}" class="h-10" alt="SiladesBeng">
         <button id="sidebar-close" type="button" class="p-2 hover:bg-gray-100 rounded-lg transition">
             <svg class="w-6 h-6 text-gray-600" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />

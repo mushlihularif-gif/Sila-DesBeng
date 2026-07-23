@@ -180,6 +180,27 @@
                                         </div>
                                     </div>
                                     
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold" for="status_biaya">
+                                            Status Pembiayaan <span class="text-danger">*</span>
+                                        </label>
+                                        <select class="form-select modern-input" id="status_biaya" name="status_biaya" required onchange="toggleHargaSewa()">
+                                            <option value="gratis" selected>Gratis Sepenuhnya (Kegiatan Sosial/Pendidikan)</option>
+                                            <option value="berbayar">Bisa Disewakan (Komersial/Pribadi)</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6" id="harga_sewa_container" style="display: none;">
+                                        <label class="form-label fw-semibold" for="harga_sewa">
+                                            Harga Sewa (Per Hari) <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text modern-input">Rp</span>
+                                            <input type="text" class="form-control modern-input format-rupiah" id="harga_sewa" 
+                                                   name="harga_sewa" placeholder="Contoh: 1.000.000" />
+                                        </div>
+                                        <small class="text-muted">Biaya ini akan ditagihkan jika warga memilih kategori Acara Pribadi.</small>
+                                    </div>
+                                    
                                     <!-- Opsi Supir & BBM (Hanya muncul jika kategori Kendaraan) -->
                                     <div class="col-12 kendaraan-options" style="display:none;">
                                         <div class="form-section mb-4 border border-info bg-light">
@@ -813,6 +834,42 @@
             document.getElementById('bbm_ditanggung').value = '';
         }
     }
+
+    // Toggle Harga Sewa
+    function toggleHargaSewa() {
+        var statusBiaya = document.getElementById('status_biaya').value;
+        var hargaSewaContainer = document.getElementById('harga_sewa_container');
+        var hargaSewaInput = document.getElementById('harga_sewa');
+        
+        if (statusBiaya === 'berbayar') {
+            hargaSewaContainer.style.display = 'block';
+            hargaSewaInput.setAttribute('required', 'required');
+        } else {
+            hargaSewaContainer.style.display = 'none';
+            hargaSewaInput.removeAttribute('required');
+            hargaSewaInput.value = '';
+        }
+    }
+
+    // Format Rupiah
+    const formatRupiahInputs = document.querySelectorAll('.format-rupiah');
+    formatRupiahInputs.forEach(input => {
+        input.addEventListener('keyup', function(e) {
+            let value = this.value.replace(/[^,\d]/g, '').toString();
+            let split = value.split(',');
+            let sisa = split[0].length % 3;
+            let rupiah = split[0].substr(0, sisa);
+            let ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+
+            if (ribuan) {
+                let separator = sisa ? '.' : '';
+                rupiah += separator + ribuan.join('.');
+            }
+
+            rupiah = split[1] != undefined ? rupiah + ',' + split[1] : rupiah;
+            this.value = rupiah;
+        });
+    });
 
     // Fungsi untuk menambah kategori
     document.getElementById('saveCategoryBtn').addEventListener('click', function() {

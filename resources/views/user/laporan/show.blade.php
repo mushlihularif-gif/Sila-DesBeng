@@ -24,11 +24,11 @@
             {{-- Header --}}
             <div class="bg-gradient-to-r from-yellow-400 to-amber-500 p-6">
                 <div class="flex items-center justify-between">
-                    <h1 class="text-2xl font-bold text-[#004635]">📋 Detail Laporan</h1>
+                    <h1 class="text-2xl font-bold text-[#004635]">Detail Laporan</h1>
                     <div class="flex gap-2">
                         <a href="{{ route('user.laporan.export', $laporan->id) }}"
                             class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold transition flex items-center gap-2">
-                            <span>📄</span>
+                            <i class="fas fa-file-pdf"></i>
                             <span>Download PDF</span>
                         </a>
                         <a href="{{ route('user.laporan.index') }}"
@@ -44,37 +44,37 @@
                 <div class="grid md:grid-cols-2 gap-6 mb-8">
                     {{-- Nomor Laporan --}}
                     <div>
-                        <p class="text-gray-400 text-sm mb-1">🔢 Nomor Laporan</p>
+                        <p class="text-gray-400 text-sm mb-1">Nomor Laporan</p>
                         <p class="text-white font-bold text-lg">#{{ str_pad($laporan->id, 3, '0', STR_PAD_LEFT) }}</p>
                     </div>
 
                     {{-- Status --}}
                     <div>
-                        <p class="text-gray-400 text-sm mb-1">📊 Status</p>
+                        <p class="text-gray-400 text-sm mb-1">Status</p>
                         <div class="flex items-center gap-2">
                             @if ($laporan->status === 'Pending')
-                            <span class="inline-flex px-3 py-1.5 bg-yellow-500/20 text-yellow-400 border border-yellow-400/50 rounded-lg text-sm font-bold">
-                                ⏳ Pending
+                            <span class="inline-flex px-3 py-1.5 bg-yellow-500/20 text-yellow-400 border border-yellow-400/50 rounded-lg text-sm font-bold flex items-center gap-2">
+                                <i class="fas fa-clock"></i> Pending
                             </span>
 
                             @elseif(in_array($laporan->status, ['Proses','Diproses']))
-                            <span class="inline-flex px-3 py-1.5 bg-blue-500/20 text-blue-400 border border-blue-400/50 rounded-lg text-sm font-bold">
-                                🔄 Proses
+                            <span class="inline-flex px-3 py-1.5 bg-blue-500/20 text-blue-400 border border-blue-400/50 rounded-lg text-sm font-bold flex items-center gap-2">
+                                <i class="fas fa-spinner fa-spin"></i> Proses
                             </span>
 
                             @elseif($laporan->status === 'Dilanjutkan')
-                            <span class="inline-flex px-3 py-1.5 bg-orange-500/20 text-orange-400 border border-orange-400/50 rounded-lg text-sm font-bold">
-                                📤 Dilanjutkan
+                            <span class="inline-flex px-3 py-1.5 bg-orange-500/20 text-orange-400 border border-orange-400/50 rounded-lg text-sm font-bold flex items-center gap-2">
+                                <i class="fas fa-share"></i> Dilanjutkan
                             </span>
 
                             @elseif($laporan->status === 'Selesai')
-                            <span class="inline-flex px-3 py-1.5 bg-green-500/20 text-green-400 border border-green-400/50 rounded-lg text-sm font-bold">
-                                ✅ Selesai
+                            <span class="inline-flex px-3 py-1.5 bg-green-500/20 text-green-400 border border-green-400/50 rounded-lg text-sm font-bold flex items-center gap-2">
+                                <i class="fas fa-check"></i> Selesai
                             </span>
 
                             @elseif($laporan->status === 'Ditolak')
-                            <span class="inline-flex px-3 py-1.5 bg-red-500/20 text-red-400 border border-red-400/50 rounded-lg text-sm font-bold">
-                                ❌ Ditolak
+                            <span class="inline-flex px-3 py-1.5 bg-red-500/20 text-red-400 border border-red-400/50 rounded-lg text-sm font-bold flex items-center gap-2">
+                                <i class="fas fa-times"></i> Ditolak
                             </span>
                             @endif
                         </div>
@@ -82,7 +82,8 @@
 
                     {{-- Nama Pelapor --}}
                     <div>
-                        <p class="text-gray-400 text-sm mb-1">👤 Nama Pelapor</p>
+                    <div>
+                        <p class="text-gray-400 text-sm mb-1">Nama Pelapor</p>
                         <p class="text-white font-semibold truncate">
                             {{ $laporan->nama ?? ($laporan->user->name ?? 'Tidak Diketahui') }}
                         </p>
@@ -90,7 +91,7 @@
 
                     {{-- Kategori --}}
                     <div>
-                        <p class="text-gray-400 text-sm mb-1">📂 Kategori</p>
+                        <p class="text-gray-400 text-sm mb-1">Kategori</p>
                         <span class="inline-block px-3 py-1 bg-blue-500/20 text-blue-300 border border-blue-400/40 rounded-lg text-sm">
                             {{ $laporan->kategori }}
                         </span>
@@ -98,32 +99,32 @@
 
                     {{-- RW --}}
                     <div>
-                        <p class="text-gray-400 text-sm mb-1">🏘️ RW</p>
+                        <p class="text-gray-400 text-sm mb-1">RW</p>
                         <p class="text-yellow-400 font-bold text-xl">{{ $laporan->rw ?? '-' }}</p>
                     </div>
 
                     {{-- RT --}}
                     <div>
-                        <p class="text-gray-400 text-sm mb-1">🏠 RT</p>
+                        <p class="text-gray-400 text-sm mb-1">RT</p>
                         <p class="text-green-400 font-bold text-xl">{{ $laporan->rt ?? '-' }}</p>
                     </div>
 
                     {{-- Tanggal Lapor --}}
                     <div>
-                        <p class="text-gray-400 text-sm mb-1">📅 Tanggal Lapor</p>
+                        <p class="text-gray-400 text-sm mb-1">Tanggal Lapor</p>
                         <p class="text-white text-sm">{{ $laporan->created_at->format('d M Y, H:i') }} WIB</p>
                     </div>
 
                     {{-- Update Terakhir --}}
                     <div>
-                        <p class="text-gray-400 text-sm mb-1">🔄 Update Terakhir</p>
+                        <p class="text-gray-400 text-sm mb-1">Update Terakhir</p>
                         <p class="text-white text-sm">{{ $laporan->updated_at->format('d M Y, H:i') }} WIB</p>
                     </div>
                 </div>
 
                 {{-- Deskripsi --}}
                 <div class="mb-6">
-                    <h2 class="text-yellow-400 font-bold text-xl mb-3">📝 Deskripsi Laporan</h2>
+                    <h2 class="text-yellow-400 font-bold text-xl mb-3"><i class="fas fa-align-left mr-2"></i> Deskripsi Laporan</h2>
                     <div class="bg-[#003026]/50 border border-yellow-400/20 rounded-xl p-5">
                         <p class="text-gray-300 leading-relaxed">{{ $laporan->deskripsi }}</p>
                     </div>
@@ -132,7 +133,7 @@
                 {{-- Lokasi --}}
                 @if ($laporan->lokasi)
                 <div class="mb-6">
-                    <p class="text-gray-400 text-sm mb-2">📍 Lokasi Kejadian</p>
+                    <p class="text-gray-400 text-sm mb-2"><i class="fas fa-map-marker-alt mr-2"></i> Lokasi Kejadian</p>
                     <div class="bg-[#003026]/30 border border-yellow-400/20 rounded-lg p-4">
                         <p class="text-white">{{ $laporan->lokasi }}</p>
                     </div>
@@ -142,7 +143,7 @@
                 {{-- Foto Bukti --}}
                 @if ($laporan->bukti)
                 <div class="mb-6">
-                    <p class="text-gray-400 text-sm mb-3">📸 Foto Bukti</p>
+                    <p class="text-gray-400 text-sm mb-3"><i class="fas fa-camera mr-2"></i> Foto Bukti</p>
                     <div class="bg-gray-900 rounded-xl overflow-hidden border-2 border-yellow-400/30 shadow-lg">
                         <img
                             src="{{ asset('storage/' . $laporan->bukti) }}"

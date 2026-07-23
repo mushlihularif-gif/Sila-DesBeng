@@ -57,6 +57,8 @@ class KycReviewController extends Controller
                 'name' => $kyc->name_from_ocr ?? $user->name,
                 'gender' => $kyc->gender_from_ocr ?? $user->gender,
                 'address' => $kyc->address_from_ocr ?? $user->address,
+                'rt' => $kyc->rt_from_ocr ?? $user->rt,
+                'rw' => $kyc->rw_from_ocr ?? $user->rw,
                 'verification_status' => 'verified',
                 'verified_at' => now(),
             ]);

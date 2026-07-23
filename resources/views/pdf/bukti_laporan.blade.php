@@ -23,19 +23,31 @@
             min-height: 100vh;
         }
 
-        .background-image {
+        /* Background untuk Halaman 2 dan seterusnya (Fixed, berulang) */
+        .background-image-fixed {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 0;
+            z-index: -1000;
         }
 
+        /* Background KHUSUS Halaman 1 (Absolute, menutupi fixed) */
+        .background-image-first {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -999;
+        }
+
+        /* Padding untuk Halaman 1 (Kop Surat Besar) */
         .content-overlay {
             position: relative;
             z-index: 1;
-            padding: 200px 70px 80px 70px;
+            padding: 210px 70px 80px 70px; /* Jarak atas disesuaikan untuk Kop Surat */
         }
 
         /* ===================== */
@@ -45,10 +57,11 @@
             page-break-before: always;
         }
 
+        /* Padding untuk Halaman 2 dst (Tanpa Kop Surat Besar) */
         .lampiran-content {
             position: relative;
             z-index: 1;
-            padding: 200px 70px 80px 70px;
+            padding: 120px 70px 80px 70px; /* Jarak atas lebih kecil karena tanpa Kop Surat */
         }
 
         /* ===================== */
@@ -57,20 +70,23 @@
 
         /* Nomor Surat */
         .surat-header {
-            text-align: center;
-            margin-bottom: 30px;
+            text-align: left;
+            margin-bottom: 25px;
+            display: table;
+            width: 100%;
         }
 
-        .surat-header h2 {
-            font-size: 16pt;
+        .surat-header .title-left {
+            display: table-cell;
+            width: 50%;
+            font-size: 14pt;
             font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin: 0 0 5px 0;
-            text-decoration: underline;
         }
-
-        .surat-header .nomor-surat {
+        
+        .surat-header .nomor-right {
+            display: table-cell;
+            width: 50%;
+            text-align: right;
             font-size: 11pt;
             color: #333;
         }
@@ -282,20 +298,25 @@
     </style>
 </head>
 <body>
+    <!-- Background Image (Desain dari user) -->
+    <!-- Background untuk Halaman 2 dan seterusnya (Fixed position agar berulang di semua halaman) -->
+    <img src="{{ public_path('User/img/buktilapor/Halaman2danseterusnya(tanpakopsurat).png') }}" class="background-image-fixed">
+
+    <!-- Background KHUSUS Halaman 1 (Absolute position agar hanya muncul di halaman 1 dan menutupi fixed) -->
+    <img src="{{ public_path('User/img/buktilapor/Halaman1buktipelaporan(kopsurat).png') }}" class="background-image-first">
+
     {{-- ============================================== --}}
     {{-- HALAMAN 1: LEMBAR PENGESAHAN (LEGALITAS RESMI) --}}
     {{-- ============================================== --}}
     <div class="page-wrapper">
-        <!-- Background Image (Desain dari user) -->
-        <img src="{{ public_path('User/img/buktilapor/LaporanMas.png') }}" class="background-image">
         
         <!-- Content di atas background -->
         <div class="content-overlay">
             
             <!-- Header Surat -->
             <div class="surat-header">
-                <h2>Surat Bukti Pelaporan Masyarakat</h2>
-                <p class="nomor-surat">Nomor: SDB/{{ date('Y') }}/{{ date('m') }}/{{ str_pad($laporan->id, 5, '0', STR_PAD_LEFT) }}</p>
+                <div class="title-left">Bukti Registrasi Pelaporan Warga</div>
+                <div class="nomor-right">Nomor Ref: SDB/{{ date('Y') }}/{{ date('m') }}/{{ str_pad($laporan->id, 5, '0', STR_PAD_LEFT) }}</div>
             </div>
 
             <!-- Informasi Pelapor -->
@@ -414,8 +435,8 @@
             <div class="footer-section">
                 <div class="ttd-area">
                     <p class="tanggal">Bengkalis, {{ now()->format('d F Y') }}</p>
-                    <p class="jabatan">{{ $handler_name }}</p>
-                    <p style="font-size: 9pt; color: #555; margin-bottom: 6px;">Admin {{ ucfirst($laporan->escalation_level) }}</p>
+                    <p class="jabatan">{{ $handler_name ?? 'Sistem SilaDesBeng' }}</p>
+                    <p style="font-size: 9pt; color: #555; margin-bottom: 6px;">Admin {{ ucfirst($laporan->escalation_level ?? 'Desa') }}</p>
                     
                     <!-- QR Code Validasi dengan Logo di Tengah -->
                     <div style="position: relative; width: 120px; height: 120px; margin: 0 auto;">
@@ -445,15 +466,13 @@
     {{-- ============================================== --}}
     @if($laporan->bukti || $laporan->lokasi)
     <div class="page-break page-wrapper">
-        <!-- Background tetap sama di halaman 2 -->
-        <img src="{{ public_path('User/img/buktilapor/LaporanMas.png') }}" class="background-image">
         
         <div class="lampiran-content">
             
             <!-- Header Lampiran -->
             <div class="surat-header">
-                <h2>Lampiran Bukti Visual dan Lokasi</h2>
-                <p class="nomor-surat">Ref: SDB/{{ date('Y') }}/{{ date('m') }}/{{ str_pad($laporan->id, 5, '0', STR_PAD_LEFT) }}</p>
+                <div class="title-left">LAMPIRAN BUKTI VISUAL DAN LOKASI</div>
+                <div class="nomor-right">Ref: SDB/{{ date('Y') }}/{{ date('m') }}/{{ str_pad($laporan->id, 5, '0', STR_PAD_LEFT) }}</div>
             </div>
 
             {{-- ======================== --}}

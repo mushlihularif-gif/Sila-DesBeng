@@ -46,6 +46,8 @@ class FasilitasUmumBookingController extends Controller
             'start_date' => 'required|date|after_or_equal:today',
             'end_date' => 'required|date|after_or_equal:start_date',
             'rental_purpose' => 'required|string|max:1000',
+            'jenis_acara' => 'required|in:sosial,komersial',
+            'surat_pengantar' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
             'recipient_name' => 'nullable|string|max:255',
             'delivery_address' => 'nullable|string',
         ]);
@@ -67,6 +69,19 @@ class FasilitasUmumBookingController extends Controller
             ], 400);
         }
 
+        $totalAmount = 0;
+        if ($item->status_biaya === 'berbayar' && $validated['jenis_acara'] === 'komersial' && $item->harga_sewa > 0) {
+            $startDate = \Carbon\Carbon::parse($validated['start_date']);
+            $endDate = \Carbon\Carbon::parse($validated['end_date']);
+            $days = $startDate->diffInDays($endDate) + 1;
+            $totalAmount = $days * $item->harga_sewa * $validated['quantity'];
+        }
+
+        $suratPath = null;
+        if ($request->hasFile('surat_pengantar')) {
+            $suratPath = $request->file('surat_pengantar')->store('surat_pengantar', 'public');
+        }
+
         $booking = FasilitasUmumBooking::create([
             'user_id' => Auth::id(),
             'fasilitas_id' => $validated['fasilitas_id'],
@@ -77,13 +92,20 @@ class FasilitasUmumBookingController extends Controller
             'start_date' => $validated['start_date'],
             'end_date' => $validated['end_date'],
             'rental_purpose' => $validated['rental_purpose'],
+            'jenis_acara' => $validated['jenis_acara'],
+            'surat_pengantar' => $suratPath ?? null,
+            'butuh_gudang' => $request->has('butuh_gudang'),
+            'total_amount' => $totalAmount,
             'status' => 'pending',
             'region_id' => $item->region_id,
         ]);
 
+        // We can just rely on the normal flow for now, the user can check their activity dashboard
+        // If we want a separate payment page, we can build it later.
+        
         return response()->json([
             'success' => true,
-            'message' => 'Pengajuan Peminjaman Fasilitas Umum berhasil dibuat! Menunggu konfirmasi admin.',
+            'message' => 'Pengajuan Peminjaman Fasilitas Umum berhasil dibuat! ' . ($totalAmount > 0 ? 'Silakan periksa detail tagihan Anda.' : 'Menunggu konfirmasi admin.'),
             'receipt_id' => $booking->id
         ]);
     }
