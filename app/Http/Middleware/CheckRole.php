@@ -40,7 +40,7 @@ class CheckRole
             }
 
             // Custom handle for Guest accessing Admin routes
-            $adminRoles = ['admin', 'super_admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'lurah'];
+            $adminRoles = ['admin', 'super_admin', 'admin_kecamatan', 'admin_desa', 'rw', 'rt', 'lurah'];
             if (count(array_intersect($adminRoles, $roles)) > 0) {
                 Log::warning('SECURITY: Unauthorized access attempt', [
                     'ip' => $request->ip(),
@@ -98,12 +98,12 @@ class CheckRole
         foreach ($requiredRoles as $role) {
             if ($role === 'admin' || $role === 'lurah') {
                 // 'admin' or 'lurah' pseudo-role matches any of the new admin hierarchy
-                if (in_array($user->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'admin', 'lurah'])) {
+                if (in_array($user->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'rw', 'rt', 'admin', 'lurah'])) {
                     return $next($request);
                 }
             } else if ($role === 'user') {
-                // 'user' pseudo-role also matches admin_rw and admin_rt since they use frontend
-                if (in_array($user->role, ['user', 'admin_rw', 'admin_rt'])) {
+                // 'user' pseudo-role also matches rw and rt since they use frontend
+                if (in_array($user->role, ['user', 'rw', 'rt'])) {
                     return $next($request);
                 }
             } else if ($user->role === $role) {
@@ -120,7 +120,7 @@ class CheckRole
         ]);
 
         // Special case: If admin tries to access user-only pages, redirect to admin dashboard
-        // Pengecualian: admin_rw dan admin_rt diizinkan mengakses halaman frontend user
+        // Pengecualian: rw dan rt diizinkan mengakses halaman frontend user
         $isAdminUser = in_array($user->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin', 'lurah']);
         if ($isAdminUser && (in_array('user', $requiredRoles) || $allowGuest)) {
             // Handle AJAX request

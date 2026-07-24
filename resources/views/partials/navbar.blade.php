@@ -133,18 +133,15 @@
             <a href="{{ route('announcements.index') }}" class="sd-nav-link {{ request()->routeIs('announcements.*') ? 'active' : '' }}">Kabar Daerah</a>
             <a href="{{ route('siladesbeng.profile') }}" class="sd-nav-link {{ request()->routeIs('siladesbeng.profile') ? 'active' : '' }}">Profil SiladesBeng</a>
             <a href="{{ route('kemitraan.create') }}" class="sd-nav-link {{ request()->routeIs('kemitraan.*') ? 'active' : '' }}">Gabung Kemitraan</a>
-        </div>
-
-        <!-- Auth Buttons / User Profile -->
-        <div class="sd-nav-auth">
             @auth
-                @if(in_array(auth()->user()->role, ['admin_rt', 'admin_rw']))
-                    <div class="relative group mr-2">
+                @if(in_array(auth()->user()->role, ['rt', 'rw']))
+                    <div class="relative group flex items-center">
                         <button class="sd-nav-link gap-1 p-0 bg-transparent border-none outline-none cursor-pointer {{ request()->routeIs('wilayah.*') ? 'active' : '' }}">
-                            <span class="whitespace-nowrap">Kelola Layanan Wilayah</span>
-                            <svg class="w-4 h-4 flex-shrink-0 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            <span class="whitespace-nowrap">Layanan Wilayah</span>
+                            <svg class="w-4 h-4 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </button>
-                        <div class="absolute top-full right-0 pt-2 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                        
+                        <div class="absolute top-full left-1/2 -translate-x-1/2 pt-2 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                             <div class="min-w-[200px] bg-white rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.1)] border border-gray-200 overflow-hidden">
                                 <div class="py-1.5">
                                     <a href="{{ route('wilayah.laporan.index') }}" class="block px-4 py-2.5 text-gray-800 hover:bg-blue-50 hover:border-l-[3px] hover:border-l-blue-500 transition-all duration-150 whitespace-nowrap {{ request()->routeIs('wilayah.laporan.*') ? 'bg-blue-50 border-l-[3px] border-l-blue-500 font-medium' : 'border-l-[3px] border-l-transparent' }}">
@@ -163,7 +160,12 @@
                         </div>
                     </div>
                 @endif
+            @endauth
+        </div>
 
+        <!-- Auth Buttons / User Profile -->
+        <div class="sd-nav-auth">
+            @auth
                 <div class="relative group">
                     <button class="flex items-center gap-2.5 hover:opacity-90 transition bg-transparent border-none outline-none cursor-pointer">
                         <span class="text-gray-900 font-bold text-[15px] group-hover:border-b-2 group-hover:border-blue-500 pb-0.5 flex items-center gap-1">
@@ -201,6 +203,15 @@
                                 <a href="{{ route('profile') }}" class="block px-4 py-2.5 text-gray-800 hover:bg-blue-50 hover:border-l-[3px] hover:border-l-blue-500 transition-all duration-150 border-l-[3px] border-l-transparent">
                                     <span class="text-[15px] font-normal text-center block">Profil</span>
                                 </a>
+                                @if(in_array(auth()->user()->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin', 'lurah']))
+                                <div class="h-px bg-gray-100 mx-3 my-1"></div>
+                                <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2.5 text-blue-700 hover:bg-blue-100 hover:border-l-[3px] hover:border-l-blue-600 transition-all duration-150 border-l-[3px] border-l-transparent bg-blue-50/50">
+                                    <span class="text-[15px] font-bold text-center block flex justify-center items-center gap-1">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"></path></svg>
+                                        Panel Admin
+                                    </span>
+                                </a>
+                                @endif
                                 <div class="h-px bg-gray-100 mx-3 my-1"></div>
                                 <a href="{{ route('user.activity') }}" class="block px-4 py-2.5 text-gray-800 hover:bg-blue-50 hover:border-l-[3px] hover:border-l-blue-500 transition-all duration-150 border-l-[3px] border-l-transparent">
                                     <span class="text-[15px] font-normal text-center block">Aktivitas</span>

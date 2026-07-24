@@ -648,7 +648,7 @@ Route::middleware(['auth', 'role:user'])->group(function () {
     });
 
     // Fitur Khusus Admin RT/RW di Frontend
-    Route::prefix('wilayah')->name('wilayah.')->middleware('role:admin_rt,admin_rw')->group(function () {
+    Route::prefix('wilayah')->name('wilayah.')->middleware('role:rt,rw')->group(function () {
         Route::get('/laporan', [\App\Http\Controllers\User\WilayahAdminController::class, 'indexLaporan'])->name('laporan.index');
         Route::get('/laporan/{id}', [\App\Http\Controllers\User\WilayahAdminController::class, 'showLaporan'])->name('laporan.show');
         Route::post('/laporan/{id}/respond', [\App\Http\Controllers\User\WilayahAdminController::class, 'respondLaporan'])->name('laporan.respond');
