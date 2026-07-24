@@ -11,8 +11,11 @@ class VerificationController extends Controller
     public function index()
     {
         $user = Auth::user();
-        // Hanya yang status unverified atau pending/rejected yang butuh kesini
-        // Jika sudah verified, bisa di-redirect atau tampilkan KTP digital.
+        
+        if ($user->verification_status === 'verified') {
+            return redirect()->route('user.profile')->with('info', 'Akun Anda sudah diverifikasi.');
+        }
+
         return view('users.verifikasi', compact('user'));
     }
 

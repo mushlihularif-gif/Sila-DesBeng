@@ -272,7 +272,7 @@
                                     </div>
                                 </div>
                                 <h3 class="text-xl font-bold text-gray-900">Dicki Wahyudi</h3>
-                                <p class="text-gray-600 text-sm font-medium mt-1">Project Manager</p>
+                                <p class="text-gray-600 text-sm font-medium mt-1">Mobile Developer</p>
                             </div>
                         </div>
                     </div>

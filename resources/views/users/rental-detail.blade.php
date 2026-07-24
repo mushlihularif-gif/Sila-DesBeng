@@ -206,6 +206,8 @@
         </div>
     </section>
 </main>
+
+
 @endsection
 
 @push('styles')
@@ -259,6 +261,34 @@
 @endpush
 
 @push('scripts')
+<!-- Modal Peringatan KYC -->
+@if(session('show_kyc_modal'))
+<div id="kyc-prompt-modal" class="fixed inset-0 flex items-center justify-center p-4" style="z-index: 999999;">
+    <div class="absolute inset-0" style="background-color: rgba(17, 24, 39, 0.7); backdrop-filter: blur(4px);" onclick="document.getElementById('kyc-prompt-modal').remove()"></div>
+    
+    <!-- Balok mirip halaman KYC -->
+    <div class="relative w-full max-w-lg z-10" style="animation: fadeInUp 0.3s ease-out;">
+        <div class="bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-gray-100 overflow-hidden relative">
+            <button onclick="document.getElementById('kyc-prompt-modal').remove()" class="absolute top-4 right-4 z-50 p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors">
+                <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <div class="p-8 text-center">
+                <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
+                    </svg>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-2">Verifikasi Identitas (KYC)</h2>
+                <p class="text-gray-600 mb-8">Anda harus menyelesaikan verifikasi identitas terlebih dahulu untuk dapat melanjutkan penyewaan layanan ini.</p>
+                <a href="{{ route('kyc.index') }}" class="w-full inline-flex justify-center items-center px-4 py-3 border border-transparent text-sm font-bold rounded-full shadow-sm text-white bg-blue-600 hover:bg-blue-700 transition">
+                    Mulai Verifikasi KYC
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
+
 <script>
     // Quantity Selector
     const qtyInput = document.getElementById('quantity');

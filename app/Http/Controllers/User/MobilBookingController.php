@@ -14,10 +14,16 @@ class MobilBookingController extends Controller
 {
     public function create($itemId)
     {
+        // Validasi KYC: Pengguna harus sudah terverifikasi
+        if (Auth::user()->verification_status !== 'verified') {
+            return redirect()->back()->with('show_kyc_modal', true);
+        }
+
         $item = Mobil::findOrFail($itemId);
 
+        // Validasi: Warga hanya bisa memesan layanan di wilayahnya sendiri
         if (Auth::user()->region_id != $item->region_id) {
-            return redirect()->back()->with('error', 'Anda Tidak Bisa Melanjutkan karena desa/wilayah ini hanya menyediakan layanan untuk warganya sendiri. Silakan sesuaikan dengan wilayah Anda.');
+            return redirect()->back()->with('error', 'Layanan khusus warga lokal. Silakan sesuaikan wilayah Anda.');
         }
         
         $setting = SystemSetting::first();

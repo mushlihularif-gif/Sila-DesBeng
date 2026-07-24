@@ -318,7 +318,7 @@
                             </div>
                         </div>
                         <h5 class="fw-bold text-dark mb-1">Dicki Wahyudi</h5>
-                        <p class="text-muted small fw-semibold mb-0">Project Manager</p>
+                        <p class="text-muted small fw-semibold mb-0">Mobile Developer</p>
                     </div>
                 </div>
             </div>

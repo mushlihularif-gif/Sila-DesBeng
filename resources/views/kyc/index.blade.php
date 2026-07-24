@@ -1,10 +1,14 @@
-@extends('layouts.app')
+@extends('layouts.user')
 
 @section('title', 'Verifikasi KTP & Wajah')
 
-@section('content')
-<div class="max-w-3xl mx-auto py-10 px-4 sm:px-6 lg:px-8 mt-20">
-    <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+@section('page')
+<main class="flex-grow relative w-full">
+    {{-- Custom Vector Abstract Background --}}
+    @include('partials.abstract-bg')
+
+    <div class="max-w-3xl mx-auto py-10 px-4 sm:px-6 lg:px-8 mt-20 relative z-10">
+        <div class="bg-white/60 backdrop-blur-md rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="p-8">
             <div class="text-center mb-10">
                 <h2 class="text-3xl font-bold text-gray-900">Verifikasi Identitas (KYC)</h2>
@@ -33,9 +37,9 @@
                                 <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                             </svg>
                             <div class="flex text-sm text-gray-600 justify-center">
-                                <label for="ktp_image" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
+                                <label for="ktp_image" class="relative cursor-pointer bg-transparent rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
                                     <span>Pilih File KTP</span>
-                                    <input id="ktp_image" name="ktp_image" type="file" class="sr-only" accept="image/*" required>
+                                    <input id="ktp_image" name="ktp_image" type="file" class="hidden" accept="image/*" required>
                                 </label>
                                 <p class="pl-1">atau drag and drop</p>
                             </div>
@@ -178,6 +182,7 @@
         <p class="text-sm text-gray-500 mt-2 text-center max-w-xs">AI kami sedang membaca KTP Anda. Mohon tunggu sebentar.</p>
     </div>
 </div>
+</main>
 @endsection
 
 @push('scripts')
@@ -437,19 +442,40 @@
             faceMesh.onResults(onResults);
         }
 
-        camera = new Camera(videoElement, {
-            onFrame: async () => {
-                canvasElement.width = videoElement.videoWidth;
-                canvasElement.height = videoElement.videoHeight;
-                await faceMesh.send({image: videoElement});
-            },
-            width: 480,
-            height: 640
-        });
-        camera.start();
-        
-        livenessState = 0;
-        submitBtn.disabled = true;
+        // Coba akses kamera terlebih dahulu sebelum memulai MediaPipe Camera
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then((stream) => {
+                // Hentikan stream testing
+                stream.getTracks().forEach(track => track.stop());
+                
+                camera = new Camera(videoElement, {
+                    onFrame: async () => {
+                        canvasElement.width = videoElement.videoWidth;
+                        canvasElement.height = videoElement.videoHeight;
+                        await faceMesh.send({image: videoElement});
+                    },
+                    width: 480,
+                    height: 640
+                });
+                camera.start();
+                
+                livenessState = 0;
+                submitBtn.disabled = true;
+            })
+            .catch((err) => {
+                // Kamera gagal dimuat (tidak ada izin, tidak ada kamera, atau error HTTPS)
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Kamera Bermasalah',
+                    text: 'Sistem tidak dapat mengakses kamera Anda untuk Scan Wajah Cerdas. Anda akan dialihkan ke halaman Verifikasi Manual.',
+                    confirmButtonText: 'Lanjut ke Manual',
+                    allowOutsideClick: false
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = "{{ route('user.verifikasi.index') }}";
+                    }
+                });
+            });
     }
 
     // --- Submit KYC ---
