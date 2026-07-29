@@ -134,7 +134,7 @@
             <a href="{{ route('siladesbeng.profile') }}" class="sd-nav-link {{ request()->routeIs('siladesbeng.profile') ? 'active' : '' }}">Profil SiladesBeng</a>
             <a href="{{ route('kemitraan.create') }}" class="sd-nav-link {{ request()->routeIs('kemitraan.*') ? 'active' : '' }}">Gabung Kemitraan</a>
             @auth
-                @if(in_array(auth()->user()->role, ['rt', 'rw']))
+                @if(in_array(auth()->user()->role, ['admin_rt', 'admin_rw']))
                     <div class="relative group flex items-center">
                         <button class="sd-nav-link gap-1 p-0 bg-transparent border-none outline-none cursor-pointer {{ request()->routeIs('wilayah.*') ? 'active' : '' }}">
                             <span class="whitespace-nowrap">Layanan Wilayah</span>

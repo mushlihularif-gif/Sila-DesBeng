@@ -98,12 +98,12 @@ class CheckRole
         foreach ($requiredRoles as $role) {
             if ($role === 'admin' || $role === 'lurah') {
                 // 'admin' or 'lurah' pseudo-role matches any of the new admin hierarchy
-                if (in_array($user->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'rw', 'rt', 'admin', 'lurah'])) {
+                if (in_array($user->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'admin', 'lurah'])) {
                     return $next($request);
                 }
             } else if ($role === 'user') {
                 // 'user' pseudo-role also matches rw and rt since they use frontend
-                if (in_array($user->role, ['user', 'rw', 'rt'])) {
+                if (in_array($user->role, ['user', 'admin_rw', 'admin_rt'])) {
                     return $next($request);
                 }
             } else if ($user->role === $role) {

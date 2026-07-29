@@ -164,10 +164,10 @@ class LaporanController extends Controller
         
         $query = Laporan::with('user')->where('region_id', $user->region_id);
 
-        if ($user->role === 'rt') {
+        if ($user->role === 'admin_rt') {
             $query->where('rt', $user->rt)
                   ->where('rw', $user->rw);
-        } elseif ($user->role === 'rw') {
+        } elseif ($user->role === 'admin_rw') {
             $query->where('rw', $user->rw);
         }
 
@@ -198,10 +198,10 @@ class LaporanController extends Controller
             $laporan->update([
                 'status' => 'Diteruskan ke Desa',
                 'escalation_level' => 3,
-                'catatan_rw' => $user->role === 'rw' ? $catatan : $laporan->catatan_rw,
-                'catatan_rt' => $user->role === 'rt' ? $catatan : $laporan->catatan_rt,
-                'rt_handler_id' => $user->role === 'rt' ? $user->id : $laporan->rt_handler_id,
-                'rw_handler_id' => $user->role === 'rw' ? $user->id : $laporan->rw_handler_id,
+                'catatan_rw' => $user->role === 'admin_rw' ? $catatan : $laporan->catatan_rw,
+                'catatan_rt' => $user->role === 'admin_rt' ? $catatan : $laporan->catatan_rt,
+                'rt_handler_id' => $user->role === 'admin_rt' ? $user->id : $laporan->rt_handler_id,
+                'rw_handler_id' => $user->role === 'admin_rw' ? $user->id : $laporan->rw_handler_id,
             ]);
         } elseif ($action === 'reject') {
             $laporan->update(['status' => 'Ditolak', 'catatan_admin' => $catatan]);
