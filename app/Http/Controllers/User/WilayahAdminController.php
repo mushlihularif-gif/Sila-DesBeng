@@ -57,6 +57,7 @@ class WilayahAdminController extends Controller
             'proses' => (clone $statsQuery)->where('status', 'Proses')->count(),
             'selesai' => (clone $statsQuery)->where('status', 'Selesai')->count(),
             'ditolak' => (clone $statsQuery)->where('status', 'Ditolak')->count(),
+            'dilanjutkan' => (clone $statsQuery)->where('status', 'Dilanjutkan')->count(),
         ];
 
         // List untuk dropdown filter

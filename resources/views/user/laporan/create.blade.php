@@ -96,16 +96,63 @@
 
                     <!-- Tujuan Laporan -->
                     <div>
-                        <label class="block font-semibold text-[#1e3a5f] mb-2">Tujuan Pelaporan <span class="text-red-500">*</span></label>
-                        <select name="tujuan_laporan" id="tujuan_laporan" required
-                            class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 transition-all shadow-sm @error('tujuan_laporan') border-red-500 @enderror">
-                            <option value="" disabled {{ old('tujuan_laporan') ? '' : 'selected' }}>Pilih tujuan laporan</option>
-                            <option value="rt" {{ old('tujuan_laporan') == 'rt' ? 'selected' : '' }}>Laporkan kepada RT dan Pemerintah Desa</option>
-                            <option value="rw" {{ old('tujuan_laporan') == 'rw' ? 'selected' : '' }}>Laporkan kepada RW dan Pemerintah Desa</option>
-                            <option value="desa" {{ old('tujuan_laporan') == 'desa' ? 'selected' : '' }}>Laporkan kepada Pemerintah Desa Saja</option>
-                        </select>
+                        <label class="block font-semibold text-[#1e3a5f] mb-3">Tujuan Pelaporan <span class="text-red-500">*</span></label>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <!-- Opsi RT -->
+                            <label class="relative flex flex-col p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 {{ $hasAdminRT ? 'bg-white border-gray-200 hover:border-blue-300 hover:bg-blue-50' : 'bg-gray-100 border-gray-200 opacity-70 cursor-not-allowed' }}">
+                                <input type="radio" name="tujuan_laporan" value="rt" class="peer sr-only" {{ old('tujuan_laporan') == 'rt' ? 'checked' : '' }} {{ !$hasAdminRT ? 'disabled' : '' }} required>
+                                <div class="absolute top-4 right-4 w-5 h-5 rounded-full border-2 border-gray-300 peer-checked:border-blue-500 peer-checked:bg-blue-500 flex items-center justify-center transition-colors">
+                                    <div class="w-2 h-2 rounded-full bg-white opacity-0 peer-checked:opacity-100 transition-opacity"></div>
+                                </div>
+                                <div class="flex items-center gap-3 mb-2">
+                                    <div class="w-10 h-10 rounded-full {{ $hasAdminRT ? 'bg-blue-100 text-blue-600' : 'bg-gray-200 text-gray-400' }} flex items-center justify-center flex-shrink-0 transition-colors">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                                    </div>
+                                    <h3 class="font-bold text-gray-800 leading-tight">Pengurus RT</h3>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-auto leading-relaxed">
+                                    {{ $hasAdminRT ? 'Laporan akan diterima dan diproses oleh Ketua RT Anda.' : 'Opsi ini dikunci karena Admin RT di wilayah Anda belum terdaftar di sistem.' }}
+                                </p>
+                                <div class="absolute inset-0 rounded-xl border-2 border-transparent peer-checked:border-blue-500 pointer-events-none transition-colors"></div>
+                            </label>
+
+                            <!-- Opsi RW -->
+                            <label class="relative flex flex-col p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 {{ $hasAdminRW ? 'bg-white border-gray-200 hover:border-blue-300 hover:bg-blue-50' : 'bg-gray-100 border-gray-200 opacity-70 cursor-not-allowed' }}">
+                                <input type="radio" name="tujuan_laporan" value="rw" class="peer sr-only" {{ old('tujuan_laporan') == 'rw' ? 'checked' : '' }} {{ !$hasAdminRW ? 'disabled' : '' }}>
+                                <div class="absolute top-4 right-4 w-5 h-5 rounded-full border-2 border-gray-300 peer-checked:border-blue-500 peer-checked:bg-blue-500 flex items-center justify-center transition-colors">
+                                    <div class="w-2 h-2 rounded-full bg-white opacity-0 peer-checked:opacity-100 transition-opacity"></div>
+                                </div>
+                                <div class="flex items-center gap-3 mb-2">
+                                    <div class="w-10 h-10 rounded-full {{ $hasAdminRW ? 'bg-blue-100 text-blue-600' : 'bg-gray-200 text-gray-400' }} flex items-center justify-center flex-shrink-0 transition-colors">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                                    </div>
+                                    <h3 class="font-bold text-gray-800 leading-tight">Pengurus RW</h3>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-auto leading-relaxed">
+                                    {{ $hasAdminRW ? 'Laporan akan ditangani oleh Ketua RW (jika masalah melebihi kapasitas RT).' : 'Opsi ini dikunci karena Admin RW di wilayah Anda belum terdaftar di sistem.' }}
+                                </p>
+                                <div class="absolute inset-0 rounded-xl border-2 border-transparent peer-checked:border-blue-500 pointer-events-none transition-colors"></div>
+                            </label>
+
+                            <!-- Opsi Desa -->
+                            <label class="relative flex flex-col p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 bg-white border-gray-200 hover:border-blue-300 hover:bg-blue-50">
+                                <input type="radio" name="tujuan_laporan" value="desa" class="peer sr-only" {{ old('tujuan_laporan') == 'desa' ? 'checked' : '' }}>
+                                <div class="absolute top-4 right-4 w-5 h-5 rounded-full border-2 border-gray-300 peer-checked:border-blue-500 peer-checked:bg-blue-500 flex items-center justify-center transition-colors">
+                                    <div class="w-2 h-2 rounded-full bg-white opacity-0 peer-checked:opacity-100 transition-opacity"></div>
+                                </div>
+                                <div class="flex items-center gap-3 mb-2">
+                                    <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z"></path></svg>
+                                    </div>
+                                    <h3 class="font-bold text-gray-800 leading-tight">Pemerintah Desa</h3>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-auto leading-relaxed">Laporan langsung ditujukan ke Pemerintah Desa/Kelurahan untuk respon tingkat tinggi.</p>
+                                <div class="absolute inset-0 rounded-xl border-2 border-transparent peer-checked:border-blue-500 pointer-events-none transition-colors"></div>
+                            </label>
+                        </div>
                         @error('tujuan_laporan')
-                            <p class="text-red-500 text-xs mt-1 font-medium">{{ $message }}</p>
+                            <p class="text-red-500 text-xs mt-2 font-medium">{{ $message }}</p>
                         @enderror
                     </div>
 
@@ -567,13 +614,23 @@
             document.body.style.overflow = 'auto';
 
             // Lock tujuan_laporan to Desa only
-            Array.from(tujuanLaporanSelect.options).forEach(opt => {
-                if(opt.value === 'rt' || opt.value === 'rw') {
-                    opt.style.display = 'none';
-                    opt.disabled = true;
-                }
-            });
-            tujuanLaporanSelect.value = 'desa';
+            const rtRadio = document.querySelector('input[name="tujuan_laporan"][value="rt"]');
+            const rwRadio = document.querySelector('input[name="tujuan_laporan"][value="rw"]');
+            const desaRadio = document.querySelector('input[name="tujuan_laporan"][value="desa"]');
+            
+            if (rtRadio) { 
+                rtRadio.disabled = true; 
+                rtRadio.closest('label').classList.add('opacity-70', 'cursor-not-allowed', 'bg-gray-100'); 
+                rtRadio.closest('label').classList.remove('bg-white', 'hover:border-blue-300', 'hover:bg-blue-50'); 
+            }
+            if (rwRadio) { 
+                rwRadio.disabled = true; 
+                rwRadio.closest('label').classList.add('opacity-70', 'cursor-not-allowed', 'bg-gray-100'); 
+                rwRadio.closest('label').classList.remove('bg-white', 'hover:border-blue-300', 'hover:bg-blue-50'); 
+            }
+            if (desaRadio) {
+                desaRadio.checked = true;
+            }
             
             alert('Karena RW/RT Anda belum diisi atau belum terdaftar, opsi tujuan laporan akan dikunci agar diteruskan langsung ke Pemerintah Desa.');
         });

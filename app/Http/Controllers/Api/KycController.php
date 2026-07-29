@@ -26,10 +26,20 @@ class KycController extends Controller
 
         $user = $request->user();
 
-        $path = $request->file('ktp_image')->store('ktp', 'public');
-        $fullPath = storage_path('app/public/' . $path);
+        // Ambil isi file asli
+        $ktpFile = $request->file('ktp_image');
+        $fileContent = $ktpFile->get();
 
-        $ocrData = $this->ocrService->extractKtpData($fullPath);
+        // Enkripsi isi file menggunakan ChaCha20
+        $encryptedContent = \App\Services\FileEncryptionService::encrypt($fileContent);
+
+        // Simpan file terenkripsi ke disk private
+        $fileName = 'ktp_' . uniqid() . '.enc';
+        $path = 'kyc/ktp/' . $fileName;
+        Storage::disk('private')->put($path, $encryptedContent);
+
+        // Proses OCR menggunakan file temporer asli
+        $ocrData = $this->ocrService->extractKtpData($ktpFile->getRealPath());
 
         KycVerification::where('user_id', $user->id)->whereIn('status', ['pending', 'rejected'])->delete();
 
@@ -63,6 +73,9 @@ class KycController extends Controller
             'face_data' => 'required|array', 
         ]);
 
+        // Catatan: Pada submit API, sepertinya tidak menerima face_image, hanya face_data.
+        // Jika API ini tidak mengupload foto face (hanya JSON array titik wajah), maka tidak perlu enkripsi image.
+        
         $kyc = KycVerification::where('id', $request->kyc_id)
             ->where('user_id', $request->user()->id)
             ->firstOrFail();

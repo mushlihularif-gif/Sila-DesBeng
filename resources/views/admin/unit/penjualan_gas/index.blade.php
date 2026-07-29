@@ -169,7 +169,9 @@
             </div>
         @endif
     </div>
+@endsection
 
+@push('modals')
     <!-- Modal Pengaturan Mode Krisis -->
     <div class="modal fade" id="crisisModeModal" tabindex="-1" aria-labelledby="crisisModeModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -213,9 +215,9 @@
             </form>
         </div>
     </div>
-@endsection
+@endpush
 
-@push('scripts')
+@section('scripts')
 <script>
     function toggleCrisisInputs() {
         const select = document.getElementById('is_crisis_mode');
@@ -227,9 +229,9 @@
         }
     }
 </script>
-@endpush
+@endsection
 
-@push('styles')
+@section('styles')
 <style>
     
     .card {
@@ -263,4 +265,4 @@
         background-color: #fff;
     }
 </style>
-@endpush
+@endsection

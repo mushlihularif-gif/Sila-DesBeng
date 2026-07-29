@@ -47,95 +47,106 @@
 
             <!-- Statistik -->
             <!-- Statistik -->
-            <div class="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-3 gap-6 mb-12 animate-section">
+            <div class="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-3 gap-6 mb-12 animate-section">
                 <!-- Total -->
-                <div class="backdrop-blur-md bg-white/60 rounded-2xl border border-gray-100 p-6 flex flex-col items-center justify-center shadow-sm hover:shadow-md transition-all">
-                    <div class="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mb-4">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                <div class="backdrop-blur-md bg-white/60 rounded-2xl border border-gray-100 p-4 flex flex-col items-center justify-center shadow-sm hover:shadow-md transition-all text-center">
+                    <div class="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mb-3">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
                     </div>
-                    <div class="stat-value blue">{{ $stats['total_laporan'] ?? 0 }}</div>
-                    <div class="stat-label">Total Laporan</div>
+                    <div class="stat-value blue text-3xl">{{ $stats['total_laporan'] ?? 0 }}</div>
+                    <div class="stat-label text-xs mb-3">Total Laporan</div>
                     <div class="stat-bar"><div class="stat-bar-fill blue"></div></div>
                 </div>
                 <!-- Pending -->
-                <div class="backdrop-blur-md bg-white/60 rounded-2xl border border-gray-100 p-6 flex flex-col items-center justify-center shadow-sm hover:shadow-md transition-all">
-                    <div class="w-12 h-12 rounded-full bg-yellow-50 text-yellow-600 flex items-center justify-center mb-4">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div class="backdrop-blur-md bg-white/60 rounded-2xl border border-gray-100 p-4 flex flex-col items-center justify-center shadow-sm hover:shadow-md transition-all text-center">
+                    <div class="w-10 h-10 rounded-full bg-yellow-50 text-yellow-600 flex items-center justify-center mb-3">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     </div>
-                    <div class="stat-value yellow">{{ $stats['pending'] ?? 0 }}</div>
-                    <div class="stat-label">Tertunda</div>
+                    <div class="stat-value yellow text-3xl">{{ $stats['pending'] ?? 0 }}</div>
+                    <div class="stat-label text-xs mb-3">Tertunda</div>
                     <div class="stat-bar"><div class="stat-bar-fill yellow"></div></div>
                 </div>
                 <!-- Proses -->
-                <div class="backdrop-blur-md bg-white/60 rounded-2xl border border-gray-100 p-6 flex flex-col items-center justify-center shadow-sm hover:shadow-md transition-all">
-                    <div class="w-12 h-12 rounded-full bg-indigo-50 text-indigo-500 flex items-center justify-center mb-4">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                <div class="backdrop-blur-md bg-white/60 rounded-2xl border border-gray-100 p-4 flex flex-col items-center justify-center shadow-sm hover:shadow-md transition-all text-center">
+                    <div class="w-10 h-10 rounded-full bg-indigo-50 text-indigo-500 flex items-center justify-center mb-3">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                     </div>
-                    <div class="stat-value purple">{{ $stats['proses'] ?? 0 }}</div>
-                    <div class="stat-label">Proses</div>
+                    <div class="stat-value purple text-3xl">{{ $stats['proses'] ?? 0 }}</div>
+                    <div class="stat-label text-xs mb-3">Proses</div>
                     <div class="stat-bar"><div class="stat-bar-fill purple"></div></div>
                 </div>
                 <!-- Selesai -->
-                <div class="backdrop-blur-md bg-white/60 rounded-2xl border border-gray-100 p-6 flex flex-col items-center justify-center shadow-sm hover:shadow-md transition-all">
-                    <div class="w-12 h-12 rounded-full bg-green-50 text-green-500 flex items-center justify-center mb-4">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div class="backdrop-blur-md bg-white/60 rounded-2xl border border-gray-100 p-4 flex flex-col items-center justify-center shadow-sm hover:shadow-md transition-all text-center">
+                    <div class="w-10 h-10 rounded-full bg-green-50 text-green-500 flex items-center justify-center mb-3">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     </div>
-                    <div class="stat-value green">{{ $stats['selesai'] ?? 0 }}</div>
-                    <div class="stat-label">Selesai</div>
+                    <div class="stat-value green text-3xl">{{ $stats['selesai'] ?? 0 }}</div>
+                    <div class="stat-label text-xs mb-3">Selesai</div>
                     <div class="stat-bar"><div class="stat-bar-fill green"></div></div>
                 </div>
                 <!-- Ditolak -->
-                <div class="backdrop-blur-md bg-white/60 rounded-2xl border border-gray-100 p-6 flex flex-col items-center justify-center shadow-sm hover:shadow-md transition-all">
-                    <div class="w-12 h-12 rounded-full bg-red-50 text-red-400 flex items-center justify-center mb-4">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div class="backdrop-blur-md bg-white/60 rounded-2xl border border-gray-100 p-4 flex flex-col items-center justify-center shadow-sm hover:shadow-md transition-all text-center">
+                    <div class="w-10 h-10 rounded-full bg-red-50 text-red-400 flex items-center justify-center mb-3">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     </div>
-                    <div class="stat-value red">{{ $stats['ditolak'] ?? 0 }}</div>
-                    <div class="stat-label">Ditolak</div>
+                    <div class="stat-value red text-3xl">{{ $stats['ditolak'] ?? 0 }}</div>
+                    <div class="stat-label text-xs mb-3">Ditolak</div>
                     <div class="stat-bar"><div class="stat-bar-fill red"></div></div>
+                </div>
+                <!-- Dilanjutkan/Eskalasi -->
+                <div class="backdrop-blur-md bg-white/60 rounded-2xl border border-gray-100 p-4 flex flex-col items-center justify-center shadow-sm hover:shadow-md transition-all text-center" title="Laporan dialihkan ke atasan karena lewat batas waktu atau diteruskan manual">
+                    <div class="w-10 h-10 rounded-full bg-orange-50 text-orange-500 flex items-center justify-center mb-3">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    </div>
+                    <div class="stat-value orange text-3xl" style="background-image: linear-gradient(to right, #f97316, #ea580c);">{{ $stats['dilanjutkan'] ?? 0 }}</div>
+                    <div class="stat-label text-xs mb-3">Dialihkan</div>
+                    <div class="stat-bar"><div class="stat-bar-fill" style="background: linear-gradient(to right, #f97316, #ea580c);"></div></div>
                 </div>
             </div>
 
             <!-- Filter & Search Bar -->
             <div class="max-w-5xl mx-auto mb-12 animate-section">
                 <div class="backdrop-blur-md bg-white/60 rounded-2xl p-4 md:p-6 border border-gray-100 shadow-sm">
-                    <div class="flex flex-col lg:flex-row gap-6 justify-between items-center w-full">
+                    <div class="flex flex-col lg:flex-row gap-4 justify-between items-center w-full">
                         
                         {{-- Filter Pills --}}
-                        <div class="flex flex-nowrap overflow-x-auto gap-2 w-full lg:flex-1 justify-start pb-1 filter-scroll" style="scrollbar-width: none; -ms-overflow-style: none;">
-                            <style>
-                                .filter-scroll::-webkit-scrollbar { display: none; }
-                            </style>
+                        <div class="flex flex-wrap gap-2 w-full lg:flex-1 justify-start pb-1">
                             <button type="button" @click.prevent="updateFilter('')" 
                                :class="!status ? 'bg-blue-500 text-white border-blue-500 shadow-md' : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300 hover:text-blue-500'"
-                               class="px-4 py-2 rounded-full font-semibold text-sm transition-all duration-300 border-2 focus:outline-none whitespace-nowrap flex-shrink-0">
+                               class="px-3 py-2 rounded-full font-semibold text-sm transition-all duration-300 border-2 focus:outline-none whitespace-nowrap flex-shrink-0">
                                Semua
                             </button>
                             <button type="button" @click.prevent="updateFilter('Pending')" 
                                :class="status === 'Pending' ? 'bg-blue-500 text-white border-blue-500 shadow-md' : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300 hover:text-blue-500'"
-                               class="px-4 py-2 rounded-full font-semibold text-sm transition-all duration-300 border-2 focus:outline-none whitespace-nowrap flex-shrink-0">
+                               class="px-3 py-2 rounded-full font-semibold text-sm transition-all duration-300 border-2 focus:outline-none whitespace-nowrap flex-shrink-0">
                                Pending
                             </button>
                             <button type="button" @click.prevent="updateFilter('Proses')" 
                                :class="status === 'Proses' ? 'bg-blue-500 text-white border-blue-500 shadow-md' : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300 hover:text-blue-500'"
-                               class="px-4 py-2 rounded-full font-semibold text-sm transition-all duration-300 border-2 focus:outline-none whitespace-nowrap flex-shrink-0">
+                               class="px-3 py-2 rounded-full font-semibold text-sm transition-all duration-300 border-2 focus:outline-none whitespace-nowrap flex-shrink-0">
                                Proses
                             </button>
                             <button type="button" @click.prevent="updateFilter('Selesai')" 
                                :class="status === 'Selesai' ? 'bg-blue-500 text-white border-blue-500 shadow-md' : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300 hover:text-blue-500'"
-                               class="px-4 py-2 rounded-full font-semibold text-sm transition-all duration-300 border-2 focus:outline-none whitespace-nowrap flex-shrink-0">
+                               class="px-3 py-2 rounded-full font-semibold text-sm transition-all duration-300 border-2 focus:outline-none whitespace-nowrap flex-shrink-0">
                                Selesai
                             </button>
                             <button type="button" @click.prevent="updateFilter('Ditolak')" 
                                :class="status === 'Ditolak' ? 'bg-blue-500 text-white border-blue-500 shadow-md' : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300 hover:text-blue-500'"
-                               class="px-4 py-2 rounded-full font-semibold text-sm transition-all duration-300 border-2 focus:outline-none whitespace-nowrap flex-shrink-0">
+                               class="px-3 py-2 rounded-full font-semibold text-sm transition-all duration-300 border-2 focus:outline-none whitespace-nowrap flex-shrink-0">
                                Ditolak
+                            </button>
+                            <button type="button" @click.prevent="updateFilter('Dilanjutkan')" 
+                               :class="status === 'Dilanjutkan' ? 'bg-blue-500 text-white border-blue-500 shadow-md' : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300 hover:text-blue-500'"
+                               class="px-3 py-2 rounded-full font-semibold text-sm transition-all duration-300 border-2 focus:outline-none whitespace-nowrap flex-shrink-0">
+                               Dialihkan
                             </button>
                         </div>
 
                         {{-- Search Input & Kategori Select --}}
                         <div class="w-full lg:w-fit flex items-center justify-end">
                             <!-- Search Input -->
-                            <div class="w-full sm:w-72 relative group">
+                            <div class="w-full relative group" style="max-width: 250px;">
                                 <div class="absolute -inset-0.5 bg-gradient-to-r from-blue-500 via-blue-400 to-amber-400 rounded-full opacity-70 group-hover:opacity-100 transition-opacity duration-300"></div>
                                 <div class="relative flex items-center bg-white rounded-full overflow-hidden">
                                     <input type="text" x-model="search" @input.debounce.500ms="fetchData()" placeholder="Cari laporan..." 
@@ -201,6 +212,8 @@
                                         <span class="px-3 py-1.5 inline-flex text-xs leading-5 font-semibold rounded-lg bg-yellow-50 text-yellow-700 border border-yellow-200">Menunggu</span>
                                     @elseif($laporan->status == 'Proses')
                                         <span class="px-3 py-1.5 inline-flex text-xs leading-5 font-semibold rounded-lg bg-blue-50 text-blue-700 border border-blue-200">Diproses</span>
+                                    @elseif($laporan->status == 'Dilanjutkan')
+                                        <span class="px-3 py-1.5 inline-flex text-xs leading-5 font-semibold rounded-lg bg-orange-50 text-orange-700 border border-orange-200" title="Dialihkan ke atasan">Dialihkan</span>
                                     @elseif($laporan->status == 'Selesai')
                                         <span class="px-3 py-1.5 inline-flex text-xs leading-5 font-semibold rounded-lg bg-green-50 text-green-700 border border-green-200">Selesai</span>
                                     @else

@@ -24,7 +24,30 @@ class LaporanController extends Controller
 
     public function create()
     {
-        return view('user.laporan.create');
+        $user = auth()->user();
+        
+        $hasAdminRT = false;
+        $hasAdminRW = false;
+
+        if ($user->region_id) {
+            $rtRegion = \App\Models\Region::find($user->region_id);
+            
+            if ($rtRegion) {
+                // Cek Admin RT
+                $hasAdminRT = User::where('role', 'admin_rt')
+                                  ->where('region_id', $rtRegion->id)
+                                  ->exists();
+                
+                // Cek Admin RW (berdasarkan parent_id dari RT)
+                if ($rtRegion->parent_id) {
+                    $hasAdminRW = User::where('role', 'admin_rw')
+                                      ->where('region_id', $rtRegion->parent_id)
+                                      ->exists();
+                }
+            }
+        }
+
+        return view('user.laporan.create', compact('hasAdminRT', 'hasAdminRW'));
     }
 
     public function store(Request $request)

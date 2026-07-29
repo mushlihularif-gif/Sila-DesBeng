@@ -22,6 +22,7 @@ class LurahController extends Controller
         'proses' => Laporan::where('status', 'Proses')->count(),
         'selesai' => Laporan::where('status', 'Selesai')->count(),
         'ditolak' => Laporan::where('status', 'Ditolak')->count(),
+        'dilanjutkan' => Laporan::where('status', 'Dilanjutkan')->count(),
     ];
 
     // 2. Laporan per RW
@@ -119,8 +120,8 @@ class LurahController extends Controller
             'pending' => Laporan::where('status', 'Pending')->count(),
             'proses' => Laporan::where('status', 'Proses')->count(),
             'selesai' => Laporan::where('status', 'Selesai')->count(),
-
             'ditolak' => Laporan::where('status', 'Ditolak')->count(),
+            'dilanjutkan' => Laporan::where('status', 'Dilanjutkan')->count(),
         ];
 
         // Query Laporan dengan Filter
@@ -412,6 +413,7 @@ public function exportPdf(Request $request)
             'proses' => $laporans->where('status', 'Proses')->count(),
             'selesai' => $laporans->where('status', 'Selesai')->count(),
             'ditolak' => $laporans->where('status', 'Ditolak')->count(),
+            'dilanjutkan' => $laporans->where('status', 'Dilanjutkan')->count(),
         ],
         'filters' => [
             'rw' => $request->rw,
@@ -463,6 +465,7 @@ public function exportDetailPdf($id)
             'proses' => Laporan::where('status', 'Proses')->count(),
             'selesai' => Laporan::where('status', 'Selesai')->count(),
             'ditolak' => Laporan::where('status', 'Ditolak')->count(),
+            'dilanjutkan' => Laporan::where('status', 'Dilanjutkan')->count(),
         ];
 
         // 2. Statistik per bulan (12 bulan terakhir)

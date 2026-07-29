@@ -28,16 +28,27 @@ class VerificationController extends Controller
 
         $user = Auth::user();
 
-        // Menyimpan di Private Disk
-        $ktpPath = $request->file('ktp_photo')->store('verifications/ktp', 'private');
-        $facePath = $request->file('face_photo')->store('verifications/face', 'private');
+        // Ambil isi file asli KTP & Face
+        $ktpFile = $request->file('ktp_photo');
+        $faceFile = $request->file('face_photo');
+
+        // Enkripsi isi file
+        $ktpEncrypted = \App\Services\FileEncryptionService::encrypt($ktpFile->get());
+        $faceEncrypted = \App\Services\FileEncryptionService::encrypt($faceFile->get());
+
+        // Simpan file terenkripsi ke disk private
+        $ktpPath = 'verifications/ktp/ktp_' . uniqid() . '.enc';
+        $facePath = 'verifications/face/face_' . uniqid() . '.enc';
+        
+        Storage::disk('private')->put($ktpPath, $ktpEncrypted);
+        Storage::disk('private')->put($facePath, $faceEncrypted);
 
         $user->ktp_photo_path = $ktpPath;
         $user->face_photo_path = $facePath;
-        $user->verification_status = 'pending';
         $user->ktp_rejection_reason = null; // reset alasan
+        $user->verification_status = 'pending';
         $user->save();
 
-        return redirect()->route('user.profile')->with('success', 'Data verifikasi berhasil dikirim. Silakan tunggu persetujuan Admin.');
+        return redirect()->back()->with('success', 'Data verifikasi berhasil dikirim. Harap tunggu persetujuan Admin.');
     }
 }
