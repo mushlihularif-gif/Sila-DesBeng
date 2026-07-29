@@ -506,12 +506,6 @@
                                         <div data-i18n="Fasilitas Umum">Fasilitas Umum</div>
                                     </a>
                                 </li>
-                                <!-- Ambulans Darurat (Hybrid) -->
-                                <li class="menu-item {{ request()->is('admin/unit/ambulans*') ? 'active' : '' }}">
-                                    <a href="{{ route('admin.unit.ambulans.index') ?? '#' }}" class="menu-link">
-                                        <div data-i18n="Ambulans Darurat">Ambulans Darurat</div>
-                                    </a>
-                                </li>
                                 @endif
                                 <li class="menu-item {{ request()->routeIs('admin.announcements.*') ? 'active' : '' }}">
                                     <a href="{{ route('admin.announcements.index') }}" class="menu-link">

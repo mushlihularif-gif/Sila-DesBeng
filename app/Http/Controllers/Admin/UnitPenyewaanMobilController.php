@@ -20,6 +20,7 @@ class UnitPenyewaanMobilController extends Controller
         $search = $request->get('search');
         
         $mobils = Mobil::query()
+            ->where('kategori', '!=', 'ambulans') // Mencegah kendaraan fasilitas umum masuk
             ->when($search, function ($query, $search) {
                 return $query->searchWhereLike(['nama_mobil', 'kategori'], $search);
             })

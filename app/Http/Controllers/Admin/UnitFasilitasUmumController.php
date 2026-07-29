@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\FasilitasUmum;
+use App\Models\Mobil;
 use App\Models\Region;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -18,13 +19,23 @@ class UnitFasilitasUmumController extends Controller
     public function index(Request $request)
     {
         $search = $request->get('search');
+        $tab = $request->get('tab', 'kendaraan'); // default tab
         
         $fasilitas = FasilitasUmum::query()
             ->when($search, function ($query, $search) {
                 return $query->searchWhereLike(['nama_fasilitas', 'kategori'], $search);
             })
-            ->paginate(6)
-            ->appends(['search' => $search]);
+            ->paginate(6, ['*'], 'page_gedung')
+            ->appends(['search' => $search, 'tab' => 'gedung']);
+            
+        // Ambil kendaraan publik (Ambulans, dsb)
+        $mobils = Mobil::query()
+            ->where('kategori', 'ambulans') // Untuk saat ini, kendaraan publik = ambulans
+            ->when($search, function ($query, $search) {
+                return $query->searchWhereLike(['nama_mobil', 'kategori'], $search);
+            })
+            ->paginate(6, ['*'], 'page_kendaraan')
+            ->appends(['search' => $search, 'tab' => 'kendaraan']);
             
         $user = auth()->user();
         $region = Region::find($user->region_id);
@@ -39,7 +50,7 @@ class UnitFasilitasUmumController extends Controller
         $default_ditanggung = $this->defaultSopDitanggung;
         $default_tidak_ditanggung = $this->defaultSopTidakDitanggung;
         
-        return view('admin.unit.fasilitas_umum.index', compact('fasilitas', 'search', 'sop_active', 'sop_ditanggung', 'sop_tidak_ditanggung', 'default_ditanggung', 'default_tidak_ditanggung', 'regionSettings'));
+        return view('admin.unit.fasilitas_umum.index', compact('fasilitas', 'mobils', 'tab', 'search', 'sop_active', 'sop_ditanggung', 'sop_tidak_ditanggung', 'default_ditanggung', 'default_tidak_ditanggung', 'regionSettings'));
     }
 
     public function sop()

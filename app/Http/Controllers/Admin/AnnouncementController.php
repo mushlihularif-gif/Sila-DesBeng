@@ -69,21 +69,20 @@ class AnnouncementController extends Controller
         }
         
         $user = auth()->user();
-        $regions = collect();
-        if ($user->role !== 'super_admin' && $user->region_id) {
-            $regionIds = \App\Models\Region::getDescendantIds($user->region_id);
-            array_unshift($regionIds, $user->region_id); // Termasuk wilayah admin itu sendiri
-            $regions = \App\Models\Region::whereIn('id', $regionIds)->whereNotIn('type', ['rw', 'rt'])->get();
-        } elseif ($user->role === 'super_admin') {
-            $regions = \App\Models\Region::whereNotIn('type', ['rw', 'rt'])->get();
-        }
+        
+        // Selalu ambil semua region agar hirarki dropdown di Javascript terbentuk sempurna
+        // Pengecekan izin (role) tetap aman karena divalidasi saat disubmit
+        $regions = \App\Models\Region::whereNotIn('type', ['rw', 'rt'])->get();
+        
+        // Kita juga perlu tahu role user saat ini untuk men-disable dropdown di View
+        $userRole = $user->role;
         
         $regions->transform(function ($region) {
             $region->display_name = ucwords($region->type) . ' ' . $region->name;
             return $region;
         });
         
-        return view('admin.announcements.form', compact('laporan', 'regions'));
+        return view('admin.announcements.form', compact('laporan', 'regions', 'userRole'));
     }
 
     public function store(Request $request)
@@ -143,18 +142,20 @@ class AnnouncementController extends Controller
             if (!in_array($announcement->region_id, $allowedRegionIds)) {
                 abort(403, 'Anda tidak berhak mengedit pengumuman ini.');
             }
-            
-            $regions = \App\Models\Region::whereIn('id', $allowedRegionIds)->whereNotIn('type', ['rw', 'rt'])->get();
-        } elseif ($user->role === 'super_admin') {
-            $regions = \App\Models\Region::whereNotIn('type', ['rw', 'rt'])->get();
         }
+            
+        // Selalu ambil semua region agar hirarki dropdown di Javascript terbentuk sempurna
+        // Pengecekan izin (role) tetap aman karena divalidasi saat disubmit dan di atas
+        $regions = \App\Models\Region::whereNotIn('type', ['rw', 'rt'])->get();
+        
+        $userRole = $user->role;
 
         $regions->transform(function ($region) {
             $region->display_name = ucwords($region->type) . ' ' . $region->name;
             return $region;
         });
 
-        return view('admin.announcements.form', compact('announcement', 'regions'));
+        return view('admin.announcements.form', compact('announcement', 'regions', 'userRole'));
     }
 
     public function update(Request $request, $id)

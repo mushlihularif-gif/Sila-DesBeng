@@ -223,6 +223,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const allRegions = @json($regions);
+    const userRole = '{{ $userRole ?? "admin" }}';
     const kabSelect = document.getElementById('select_kabupaten');
     const kecSelect = document.getElementById('select_kecamatan');
     const desaSelect = document.getElementById('select_desa');
@@ -258,6 +259,9 @@ document.addEventListener('DOMContentLoaded', function() {
         kabSelect.innerHTML += `<option value="${k.id}">${k.name}</option>`;
     });
     if (initKab) { kabSelect.value = initKab; }
+    
+    // Kabupaten selalu dikunci (Sistem ini khusus Kabupaten Bengkalis)
+    kabSelect.disabled = true;
 
     function updateFinalTarget() {
         if (desaSelect.value) {
@@ -271,35 +275,61 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function populateKecamatan() {
         const kabId = parseInt(kabSelect.value);
-        kecSelect.innerHTML = '<option value="">Semua Kecamatan (Opsional)</option>';
-        desaSelect.innerHTML = '<option value="">Semua Desa (Opsional)</option>';
+        
+        // Hanya tampilkan opsi "Semua Kecamatan" jika user adalah super_admin
+        if (userRole === 'super_admin') {
+            kecSelect.innerHTML = '<option value="">Semua Kecamatan (Opsional)</option>';
+        } else {
+            kecSelect.innerHTML = '';
+        }
+        
+        if (userRole !== 'admin_desa') {
+            desaSelect.innerHTML = '<option value="">Semua Desa (Opsional)</option>';
+        } else {
+            desaSelect.innerHTML = '';
+        }
+        
         desaSelect.disabled = true;
 
         if (kabId) {
             const kecs = allRegions.filter(r => r.type === 'kecamatan' && r.parent_id === kabId);
             kecs.sort((a,b) => a.name.localeCompare(b.name)).forEach(k => {
-                kecSelect.innerHTML += `<option value="${k.id}">${k.name}</option>`;
+                // Jika user bukan super admin, hanya tampilkan kecamatannya sendiri
+                if (userRole === 'super_admin' || k.id == initKec) {
+                    kecSelect.innerHTML += `<option value="${k.id}">${k.name}</option>`;
+                }
             });
             kecSelect.disabled = false;
         } else {
             kecSelect.disabled = true;
         }
+        
         updateFinalTarget();
     }
 
     function populateDesa() {
         const kecId = parseInt(kecSelect.value);
-        desaSelect.innerHTML = '<option value="">Semua Desa (Opsional)</option>';
+        
+        // Hanya tampilkan opsi "Semua Desa" jika user bukan admin desa
+        if (userRole !== 'admin_desa') {
+            desaSelect.innerHTML = '<option value="">Semua Desa (Opsional)</option>';
+        } else {
+            desaSelect.innerHTML = '';
+        }
         
         if (kecId) {
             const desas = allRegions.filter(r => (r.type === 'desa' || r.type === 'kelurahan') && r.parent_id === kecId);
             desas.sort((a,b) => a.name.localeCompare(b.name)).forEach(d => {
-                desaSelect.innerHTML += `<option value="${d.id}">${d.name}</option>`;
+                // Jika user adalah admin desa, hanya tampilkan desanya sendiri
+                if (userRole !== 'admin_desa' || d.id == initDesa) {
+                    desaSelect.innerHTML += `<option value="${d.id}">${d.name}</option>`;
+                }
             });
             desaSelect.disabled = false;
         } else {
             desaSelect.disabled = true;
         }
+        
         updateFinalTarget();
     }
 
