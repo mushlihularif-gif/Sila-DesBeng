@@ -39,12 +39,20 @@ class KycController extends Controller
 
         $user = Auth::user();
 
-        // Simpan gambar KTP
-        $path = $request->file('ktp_image')->store('ktp', 'public');
-        $fullPath = storage_path('app/public/' . $path);
+        // Ambil isi file asli
+        $ktpFile = $request->file('ktp_image');
+        $fileContent = $ktpFile->get();
 
-        // Proses OCR
-        $ocrData = $this->ocrService->extractKtpData($fullPath);
+        // Enkripsi isi file menggunakan ChaCha20
+        $encryptedContent = \App\Services\FileEncryptionService::encrypt($fileContent);
+
+        // Simpan file terenkripsi ke disk private
+        $fileName = 'ktp_' . uniqid() . '.enc';
+        $path = 'kyc/ktp/' . $fileName;
+        Storage::disk('private')->put($path, $encryptedContent);
+
+        // Proses OCR menggunakan file temporer asli (belum terenkripsi)
+        $ocrData = $this->ocrService->extractKtpData($ktpFile->getRealPath());
 
         // Hapus verifikasi yang pending/rejected sebelumnya (jika ada)
         KycVerification::where('user_id', $user->id)->whereIn('status', ['pending', 'rejected'])->delete();
@@ -91,12 +99,16 @@ class KycController extends Controller
         if ($request->face_image) {
             $image_parts = explode(";base64,", $request->face_image);
             if (count($image_parts) == 2) {
-                $image_type_aux = explode("image/", $image_parts[0]);
-                $image_type = $image_type_aux[1];
                 $image_base64 = base64_decode($image_parts[1]);
-                $fileName = 'face_' . uniqid() . '.jpg';
-                $imagePath = 'kyc_faces/' . $fileName;
-                Storage::disk('public')->put($imagePath, $image_base64);
+                
+                // Enkripsi isi gambar menggunakan ChaCha20
+                $encryptedFace = \App\Services\FileEncryptionService::encrypt($image_base64);
+                
+                $fileName = 'face_' . uniqid() . '.enc';
+                $imagePath = 'kyc/face/' . $fileName;
+                
+                // Simpan ke disk private
+                Storage::disk('private')->put($imagePath, $encryptedFace);
             }
         }
 

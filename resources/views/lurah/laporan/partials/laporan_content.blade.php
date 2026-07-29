@@ -48,15 +48,15 @@
                 </div>
             </div>
         </div>
-        <!-- Diteruskan -->
+        <!-- Eskalasi -->
         <div class="col">
             <div class="card border-0 shadow-sm h-100 rounded-4">
                 <div class="card-body p-3 d-flex flex-column align-items-center justify-content-center text-center">
                     <div class="avatar avatar-md bg-secondary-subtle text-secondary rounded-circle p-2 mb-2">
-                        <i class="bx bx-share fs-3"></i>
+                        <i class="bx bx-error fs-3"></i>
                     </div>
-                    <small class="text-muted text-uppercase fw-bold ls-1 mb-1" style="font-size: 0.65rem;">Diteruskan</small>
-                    <h3 class="fw-bold mb-0 text-dark"><span class="count-up" data-value="{{ $stats['diteruskan'] ?? 0 }}">0</span></h3>
+                    <small class="text-muted text-uppercase fw-bold ls-1 mb-1" style="font-size: 0.65rem;">Eskalasi</small>
+                    <h3 class="fw-bold mb-0 text-dark"><span class="count-up" data-value="{{ $stats['dilanjutkan'] ?? 0 }}">0</span></h3>
                 </div>
             </div>
         </div>
@@ -92,9 +92,9 @@
            class="btn btn-sm rounded-pill px-3 {{ request('status') == 'Selesai' ? 'btn-success text-white' : 'bg-white text-secondary border shadow-sm' }}">
             Selesai
         </a>
-        <a href="{{ route('lurah.laporan.index', ['status' => 'Diteruskan'] + request()->except('status')) }}" 
-           class="btn btn-sm rounded-pill px-3 {{ request('status') == 'Diteruskan' ? 'btn-secondary text-white' : 'bg-white text-secondary border shadow-sm' }}">
-            Diteruskan
+        <a href="{{ route('lurah.laporan.index', ['status' => 'Dilanjutkan'] + request()->except('status')) }}" 
+           class="btn btn-sm rounded-pill px-3 {{ request('status') == 'Dilanjutkan' ? 'btn-secondary text-white' : 'bg-white text-secondary border shadow-sm' }}">
+            Eskalasi
         </a>
         <a href="{{ route('lurah.laporan.index', ['status' => 'Ditolak'] + request()->except('status')) }}" 
            class="btn btn-sm rounded-pill px-3 {{ request('status') == 'Ditolak' ? 'btn-danger text-white' : 'bg-white text-secondary border shadow-sm' }}">
@@ -213,7 +213,7 @@
                                             'Pending'    => ['class' => 'bg-warning-subtle text-warning', 'icon' => 'bx-time'],
                                             'Proses'     => ['class' => 'bg-info-subtle text-info', 'icon' => 'bx-loader-circle'],
                                             'Selesai'    => ['class' => 'bg-success-subtle text-success', 'icon' => 'bx-check-circle'],
-                                            'Diteruskan' => ['class' => 'bg-secondary-subtle text-secondary', 'icon' => 'bx-share'],
+                                            'Dilanjutkan' => ['class' => 'bg-secondary-subtle text-secondary', 'icon' => 'bx-error'],
                                             'Ditolak'    => ['class' => 'bg-danger-subtle text-danger', 'icon' => 'bx-x-circle'],
                                         ];
                                         $sc = $statusMap[$laporan->status] ?? $statusMap['Pending'];

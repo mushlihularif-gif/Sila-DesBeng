@@ -68,27 +68,35 @@ class MediaController extends Controller
         if (empty($filename) || str_contains($filename, '..') || str_contains($filename, "\0")) {
             abort(404);
         }
+        
+        // Cek semua kemungkinan path penyimpanan dari berbagai sistem (KYC & Manual)
+        $possiblePaths = [
+            'kyc/ktp/' . $filename,
+            'kyc/face/' . $filename,
+            'verifications/ktp/' . $filename,
+            'verifications/face/' . $filename,
+            $filename
+        ];
 
-        $path = $filename; // KycController saves them as ktp_123.jpg directly in private/
-        
-        // Wait, where exactly does KycController save them? 
-        // Let's assume it's just in storage/app/private/
-        // I will use Storage::disk('local')->path($filename);
-        // Tapi kita akan cari aman dengan membaca dari lokasi yang benar
-        $fullPath = storage_path('app/private/' . $filename);
-        
-        if (!file_exists($fullPath)) {
-            // coba cek kyc folder
-            $fullPath = storage_path('app/private/kyc/' . $filename);
-            if (!file_exists($fullPath)) {
-                // cek root private
-                $fullPath = storage_path('app/' . $filename);
-                if (!file_exists($fullPath)) abort(404);
+        $fullPath = null;
+        foreach ($possiblePaths as $p) {
+            if (\Illuminate\Support\Facades\Storage::disk('private')->exists($p)) {
+                $fullPath = storage_path('app/private/' . $p);
+                break;
             }
         }
 
-        // Membaca file gambar (GD Library)
-        $imageContent = file_get_contents($fullPath);
+        if (!$fullPath) abort(404, 'File gambar tidak ditemukan.');
+
+        // Membaca file gambar dari storage private
+        $fileContent = file_get_contents($fullPath);
+        
+        // Coba dekripsi jika dienkripsi dengan ChaCha20
+        $decryptedContent = \App\Services\FileEncryptionService::decrypt($fileContent);
+        
+        // Jika hasil dekripsi kosong, asumsikan ini file lama yang belum dienkripsi
+        $imageContent = $decryptedContent ?: $fileContent;
+
         $img = @imagecreatefromstring($imageContent);
 
         if ($img !== false) {
@@ -119,6 +127,7 @@ class MediaController extends Controller
             return response($finalImage)->header('Content-Type', 'image/jpeg');
         }
 
-        return response()->file($fullPath);
+        // Jika gambar gagal diproses (bukan gambar valid)
+        return response($imageContent)->header('Content-Type', 'image/jpeg');
     }
 }

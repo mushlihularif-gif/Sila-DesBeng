@@ -342,6 +342,53 @@
     const animSelesai = `<svg class="w-16 h-16 text-green-400 animate-pulse" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>`;
     const animContainer = document.getElementById('liveness-animation');
 
+    let frameFront = null;
+    let frameBlink = null;
+    let frameTurn = null;
+    let isBuildingCollage = false;
+
+    async function buildCollage(src1, src2, src3) {
+        const loadImage = (src) => {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.src = src;
+            });
+        };
+        
+        const img1 = await loadImage(src1);
+        const img2 = await loadImage(src2);
+        const img3 = await loadImage(src3);
+        
+        const width = img1.width;
+        const height = img1.height;
+        
+        const canvas = document.createElement('canvas');
+        canvas.width = width * 3;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        
+        // Jika kamera pakai mirror flip (scaleX -1), gambar asli sebenarnya tidak terbalik
+        // Tapi mari kita buat kolase tetap seperti apa adanya
+        ctx.drawImage(img1, 0, 0);
+        ctx.drawImage(img2, width, 0);
+        ctx.drawImage(img3, width * 2, 0);
+        
+        // Tambahkan label pita hitam transparan di bawah
+        ctx.fillStyle = "rgba(0,0,0,0.6)";
+        ctx.fillRect(0, height - 50, canvas.width, 50);
+        
+        ctx.fillStyle = "white";
+        ctx.font = "bold 24px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText("HADAP DEPAN", width/2, height - 18);
+        ctx.fillText("MATA KEDIP", width + width/2, height - 18);
+        ctx.fillText("TOLEH KANAN/KIRI", width*2 + width/2, height - 18);
+        
+        // Kompres 70% agar base64 tidak terlalu besar saat di-upload
+        return canvas.toDataURL("image/jpeg", 0.7);
+    }
+
     function onResults(results) {
         canvasCtx.save();
         canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
@@ -379,6 +426,8 @@
                 if(animContainer.innerHTML !== animDepan) animContainer.innerHTML = animDepan;
                 
                 if (noseTurn > 0.4 && noseTurn < 0.6) {
+                    // Capture snapshot Depan
+                    if(!frameFront) frameFront = canvasElement.toDataURL("image/jpeg", 0.9);
                     livenessState = 1;
                 }
             } 
@@ -388,6 +437,8 @@
                 if(animContainer.innerHTML !== animKedip) animContainer.innerHTML = animKedip;
                 
                 if (avgEAR < blinkThreshold) {
+                    // Capture snapshot Kedip
+                    if(!frameBlink) frameBlink = canvasElement.toDataURL("image/jpeg", 0.9);
                     livenessState = 2;
                 }
             } 
@@ -397,6 +448,8 @@
                 if(animContainer.innerHTML !== animKananKiri) animContainer.innerHTML = animKananKiri;
                 
                 if (noseTurn < 0.35 || noseTurn > 0.65) {
+                    // Capture snapshot Toleh
+                    if(!frameTurn) frameTurn = canvasElement.toDataURL("image/jpeg", 0.9);
                     livenessState = 3;
                 }
             }
@@ -407,18 +460,23 @@
                 statusEl.classList.replace('bg-blue-600', 'bg-green-600');
                 if(animContainer.innerHTML !== animSelesai) animContainer.innerHTML = animSelesai;
                 
-                // Capture snapshot for Admin verification
-                if (!faceSnapshot) {
-                    faceSnapshot = canvasElement.toDataURL("image/jpeg", 0.8);
+                // Build Collage from the 3 frames
+                if (!faceSnapshot && frameFront && frameBlink && frameTurn && !isBuildingCollage) {
+                    isBuildingCollage = true;
+                    statusEl.innerHTML = `<span class="animate-pulse">Menyusun Kolase Foto...</span>`;
+                    
+                    buildCollage(frameFront, frameBlink, frameTurn).then(collageData => {
+                        faceSnapshot = collageData;
+                        statusEl.innerHTML = `Siap Dikirim!`;
+                        submitBtn.disabled = false;
+                        submitBtn.classList.remove('cursor-not-allowed');
+                        
+                        // Stop camera once verified to save resources
+                        setTimeout(() => {
+                            if(camera) camera.stop();
+                        }, 500);
+                    });
                 }
-
-                submitBtn.disabled = false;
-                submitBtn.classList.remove('cursor-not-allowed');
-                
-                // Stop camera once verified to save resources
-                setTimeout(() => {
-                    if(camera) camera.stop();
-                }, 1000);
             }
 
         } else {

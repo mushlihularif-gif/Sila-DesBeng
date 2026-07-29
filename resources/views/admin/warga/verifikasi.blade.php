@@ -139,17 +139,58 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body text-center p-0">
-                <img id="modalPreviewImg" src="" class="img-fluid rounded shadow-lg" style="max-height: 85vh;">
+                <img id="modalPreviewImg" src="" class="img-fluid rounded shadow-lg protected-image" style="max-height: 85vh;">
             </div>
         </div>
     </div>
 </div>
+
+@push('styles')
+<style>
+    /* Proteksi gambar: cegah drag, save, dan seleksi */
+    .protected-image,
+    td img {
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        -webkit-user-drag: none;
+        pointer-events: auto;
+        -webkit-touch-callout: none;
+    }
+</style>
+@endpush
 
 @push('scripts')
 <script>
     function showImage(src) {
         document.getElementById('modalPreviewImg').src = src;
     }
+
+    // Cegah klik kanan pada gambar KTP/Selfie
+    document.addEventListener('contextmenu', function(e) {
+        if (e.target.tagName === 'IMG') {
+            e.preventDefault();
+            alert('⚠️ PERINGATAN KEAMANAN\n\nAnda tidak diizinkan menyimpan atau menyalin foto identitas warga.\nSeluruh aktivitas Anda pada halaman ini tercatat dalam sistem audit.');
+            return false;
+        }
+    });
+
+    // Cegah drag gambar
+    document.addEventListener('dragstart', function(e) {
+        if (e.target.tagName === 'IMG') {
+            e.preventDefault();
+            return false;
+        }
+    });
+
+    // Peringatan jika mendeteksi PrintScreen (hanya edukasi, tidak bisa benar-benar mencegah)
+    document.addEventListener('keyup', function(e) {
+        if (e.key === 'PrintScreen') {
+            alert('⚠️ PERINGATAN KEAMANAN\n\nScreenshot terdeteksi!\nSeluruh foto identitas sudah dilindungi watermark.\nPenyalahgunaan data warga adalah pelanggaran hukum (UU PDP No. 27/2022).');
+        }
+    });
 </script>
 @endpush
 @endsection
+
