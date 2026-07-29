@@ -72,10 +72,11 @@ class AnnouncementController extends Controller
         $regions = collect();
         if ($user->role !== 'super_admin' && $user->region_id) {
             $regionIds = \App\Models\Region::getDescendantIds($user->region_id);
-            array_unshift($regionIds, $user->region_id); // Termasuk wilayah admin itu sendiri
-            $regions = \App\Models\Region::whereIn('id', $regionIds)->whereNotIn('type', ['rw', 'rt'])->get();
+            $ancestorIds = \App\Models\Region::getAncestorIds($user->region_id);
+            $allNeededIds = array_unique(array_merge([$user->region_id], $regionIds, $ancestorIds));
+            $regions = \App\Models\Region::whereIn('id', $allNeededIds)->get();
         } elseif ($user->role === 'super_admin') {
-            $regions = \App\Models\Region::whereNotIn('type', ['rw', 'rt'])->get();
+            $regions = \App\Models\Region::all();
         }
         
         $regions->transform(function ($region) {
@@ -144,9 +145,11 @@ class AnnouncementController extends Controller
                 abort(403, 'Anda tidak berhak mengedit pengumuman ini.');
             }
             
-            $regions = \App\Models\Region::whereIn('id', $allowedRegionIds)->whereNotIn('type', ['rw', 'rt'])->get();
+            $ancestorIds = \App\Models\Region::getAncestorIds($user->region_id);
+            $allNeededIds = array_unique(array_merge($allowedRegionIds, $ancestorIds));
+            $regions = \App\Models\Region::whereIn('id', $allNeededIds)->get();
         } elseif ($user->role === 'super_admin') {
-            $regions = \App\Models\Region::whereNotIn('type', ['rw', 'rt'])->get();
+            $regions = \App\Models\Region::all();
         }
 
         $regions->transform(function ($region) {

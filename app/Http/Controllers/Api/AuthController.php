@@ -196,6 +196,8 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string',
+            'rt' => 'nullable|string|max:10',
+            'rw' => 'nullable|string|max:10',
             'gender' => 'nullable|in:laki-laki,perempuan',
             'profile' => 'nullable|image|mimes:jpg,jpeg,png|max:8192',
         ]);
@@ -204,6 +206,8 @@ class AuthController extends Controller
             'name' => $validated['name'],
             'phone' => $validated['phone'],
             'address' => $validated['address'],
+            'rt' => $validated['rt'] ?? $user->rt,
+            'rw' => $validated['rw'] ?? $user->rw,
             'gender' => $validated['gender'],
         ]);
 

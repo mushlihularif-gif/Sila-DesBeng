@@ -10,8 +10,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Set invalid roles to 'user' to prevent truncation error
-        DB::statement("UPDATE users SET role = 'user' WHERE role NOT IN ('super_admin','admin_kecamatan','admin_desa','admin','lurah','user','admin_rt','admin_rw','rt','rw')");
+        // Pastikan enum role di tabel users mencakup admin_rt, admin_rw, rt, dan rw agar tidak terjadi Data truncated error
         DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('super_admin','admin_kecamatan','admin_desa','admin','lurah','user','admin_rt','admin_rw','rt','rw') DEFAULT 'user'");
     }
 
@@ -20,6 +19,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('super_admin','admin_kecamatan','admin_desa','admin','lurah','user','admin_rt','admin_rw') DEFAULT 'user'");
+        DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('super_admin','admin_kecamatan','admin_desa','admin','lurah','user','rt','rw') DEFAULT 'user'");
     }
 };

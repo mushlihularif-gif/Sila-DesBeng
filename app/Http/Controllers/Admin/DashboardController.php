@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
@@ -23,10 +22,8 @@ class DashboardController extends Controller
  */
 public function index(Request $request)
 {
-    Log::info('DashboardController index accessed');
     // Ambil pemesanan penyewaan yang tertunda atau minta batal
     $selectedYear = $request->input('year', now()->year);
-    Log::info('DashboardController: Starting index. Selected Year: ' . $selectedYear);
     
     // Ambil daftar tahun yang tersedia dari database
     $rentalYears = RentalBooking::withTrashed()
@@ -95,7 +92,6 @@ public function index(Request $request)
                 $item->item_name = $item->barang->nama_barang ?? 'Unknown Item';
                 return $item;
             });
-        Log::info('DashboardController: Rental requests fetched. Count: ' . $rentalRequests->count());
 
         // Ambil pesanan gas yang tertunda atau minta batal
         $gasRequests = $baseGas->clone()->with('user')
@@ -306,7 +302,6 @@ public function index(Request $request)
     }
     $data['activeServices'] = $activeServices;
 
-    Log::info('DashboardController: All data prepared. Rendering view.');
     return view('admin.dashboard.index', $data);
 }
 
