@@ -57,6 +57,15 @@
                 <div class="relative overflow-hidden group">
                     <!-- Wadah Slide -->
                     <div id="carousel-slides" class="flex transition-transform duration-500 ease-out w-full">
+                        <!-- Default Fallback Slides (Selalu Tampil sebagai Slide 1 & 2) -->
+                        <div class="carousel-slide w-full min-w-full flex-shrink-0 relative">
+                            <img src="{{ asset('User/img/elemen/kuncislide1r.png') }}" class="w-full object-cover object-center" style="height: 500px; max-height: 60vh; min-height: 250px;">
+                        </div>
+                        <div class="carousel-slide w-full min-w-full flex-shrink-0 relative">
+                            <img src="{{ asset('User/img/elemen/kuncislide2r.png') }}" class="w-full object-cover object-center" style="height: 500px; max-height: 60vh; min-height: 250px;">
+                        </div>
+
+                        <!-- Banner Dinamis dari Admin (Tampil sebagai Slide 3 dst) -->
                         @if(isset($activeBanners) && $activeBanners->count() > 0)
                             @foreach($activeBanners as $index => $banner)
                             <div class="carousel-slide w-full min-w-full flex-shrink-0 relative">
@@ -64,23 +73,14 @@
                                 @if($banner->target_url)
                                 <a href="{{ $banner->target_url }}" target="_blank">
                                 @endif
-                                    <img src="{{ Storage::url($banner->image_path) }}" alt="{{ $banner->title ?? 'Banner ' . ($index + 1) }}"
-                                        loading="{{ $index == 0 ? 'eager' : 'lazy' }}"
-                                        fetchpriority="{{ $index == 0 ? 'high' : 'auto' }}"
+                                    <img src="{{ Storage::url($banner->image_path) }}" alt="{{ $banner->title ?? 'Banner Tambahan ' . ($index + 1) }}"
+                                        loading="lazy"
                                         class="w-full object-cover object-center" style="height: 500px; max-height: 60vh; min-height: 250px;">
                                 @if($banner->target_url)
                                 </a>
                                 @endif
                             </div>
                             @endforeach
-                        @else
-                            <!-- Default Fallback Slides (Bawaan Sistem) -->
-                            <div class="carousel-slide w-full min-w-full flex-shrink-0 relative">
-                                <img src="{{ asset('User/img/slidebanner/kuncislide1r.png') }}" class="w-full object-cover object-center" style="height: 500px; max-height: 60vh; min-height: 250px;">
-                            </div>
-                            <div class="carousel-slide w-full min-w-full flex-shrink-0 relative">
-                                <img src="{{ asset('User/img/slidebanner/kuncislide2r.png') }}" class="w-full object-cover object-center" style="height: 500px; max-height: 60vh; min-height: 250px;">
-                            </div>
                         @endif
                     </div>
 
@@ -102,7 +102,7 @@
                     <!-- Indicators -->
                     <div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2.5 z-10">
                         @php
-                            $slideCount = (isset($activeBanners) && $activeBanners->count() > 0) ? $activeBanners->count() : 2;
+                            $slideCount = 2 + ((isset($activeBanners) && $activeBanners->count() > 0) ? $activeBanners->count() : 0);
                         @endphp
                         @for($i = 0; $i < $slideCount; $i++)
                         <button
