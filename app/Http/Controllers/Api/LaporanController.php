@@ -13,6 +13,31 @@ use Illuminate\Support\Str;
 
 class LaporanController extends Controller
 {
+    /**
+     * Get all reports by the authenticated user
+     */
+    public function getMyReports(Request $request)
+    {
+        $user = auth('sanctum')->user();
+        
+        $reports = Laporan::where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+            
+        $reports->transform(function ($report) {
+            $report->image_url = $report->foto_bukti ? asset('storage/' . $report->foto_bukti) : null;
+            return $report;
+        });
+            
+        return response()->json([
+            'status' => 'success',
+            'data' => $reports
+        ]);
+    }
+
+    /**
+     * Store a newly created report in storage.
+     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -146,6 +171,15 @@ class LaporanController extends Controller
                     'link' => '/admin/laporan/' . $laporan->id,
                     'icon' => 'fas fa-file-alt',
                 ]);
+
+                if ($admin->fcm_token) {
+                    $firebase = new \App\Services\FirebaseService();
+                    $firebase->sendPushNotification(
+                        $admin->fcm_token,
+                        'Laporan Baru Masuk',
+                        "User {$user->name} telah melakukan pelaporan. Kategori: {$laporan->kategori}"
+                    );
+                }
             }
         } catch (\Exception $e) {
             Log::error('Notif error via API: ' . $e->getMessage());
@@ -207,6 +241,10 @@ class LaporanController extends Controller
             $laporan->update(['status' => 'Ditolak', 'catatan_admin' => $catatan]);
         } elseif ($action === 'resolve') {
             $laporan->update(['status' => 'Selesai', 'catatan_admin' => $catatan]);
+        } elseif ($action === 'process') {
+            $laporan->update(['status' => 'Diproses', 'catatan_admin' => $catatan]);
+        } elseif ($action === 'process_rw') {
+            $laporan->update(['status' => 'Diproses RW', 'catatan_admin' => $catatan]);
         }
 
         // Notify user
@@ -220,6 +258,17 @@ class LaporanController extends Controller
                 'link' => '/laporan/' . $laporan->id,
                 'icon' => '📝',
             ]);
+
+            // Send FCM Push Notification
+            $laporanOwner = User::find($laporan->user_id);
+            if ($laporanOwner && $laporanOwner->fcm_token) {
+                $firebase = new \App\Services\FirebaseService();
+                $firebase->sendPushNotification(
+                    $laporanOwner->fcm_token,
+                    'Status Laporan Diperbarui',
+                    "Laporan Anda telah diperbarui menjadi: {$laporan->status}"
+                );
+            }
         } catch (\Exception $e) {
             Log::error('Notif error via API: ' . $e->getMessage());
         }

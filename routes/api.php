@@ -19,6 +19,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'user']);
     Route::post('/profile/update', [AuthController::class, 'updateProfile']);
     Route::post('/profile/password', [AuthController::class, 'updatePassword']);
+    Route::post('/fcm-token', [AuthController::class, 'updateFcmToken']);
     
     // KYC
     Route::post('/kyc/process', [\App\Http\Controllers\Api\KycController::class, 'process']);
@@ -26,18 +27,28 @@ Route::middleware('auth:sanctum')->group(function () {
     
     // Laporan
     Route::post('/laporan', [\App\Http\Controllers\Api\LaporanController::class, 'store']);
+    Route::get('/my-reports', [\App\Http\Controllers\Api\LaporanController::class, 'getMyReports']);
     Route::get('/admin-reports', [\App\Http\Controllers\Api\LaporanController::class, 'getAdminReports']);
     Route::post('/admin-reports/{id}/forward', [\App\Http\Controllers\Api\LaporanController::class, 'forwardReport']);
     
     // Gas
     Route::get('/gas', [\App\Http\Controllers\Api\GasController::class, 'index']);
     Route::post('/gas/booking', [\App\Http\Controllers\Api\GasBookingController::class, 'store']);
-    
+    Route::post('/gas/payment/{id}', [\App\Http\Controllers\Api\GasBookingController::class, 'uploadPayment']);
+    Route::get('/gas/receipt/{id}', [\App\Http\Controllers\Api\GasBookingController::class, 'getReceipt']);
+
+    Route::get('/history', [\App\Http\Controllers\Api\HistoryController::class, 'index']);
+
     // Notifikasi
     Route::get('/notifications', [\App\Http\Controllers\Api\NotificationController::class, 'index']);
     Route::post('/notifications/{id}/read', [\App\Http\Controllers\Api\NotificationController::class, 'markAsRead']);
     Route::post('/notifications/read-all', [\App\Http\Controllers\Api\NotificationController::class, 'markAllAsRead']);
     Route::delete('/notifications/delete-all', [\App\Http\Controllers\Api\NotificationController::class, 'deleteAll']);
     
+    // Wilayah Admin Dashboard (RT/RW)
+    Route::prefix('wilayah')->middleware('role:admin_rt,admin_rw')->group(function () {
+        Route::get('/dashboard', [\App\Http\Controllers\Api\WilayahAdminApiController::class, 'getDashboardStats']);
+    });
+
     Route::post('/logout', [AuthController::class, 'logout']);
 });

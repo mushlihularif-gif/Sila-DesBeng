@@ -1049,6 +1049,8 @@
                             !href.startsWith('#') && 
                             !href.startsWith('javascript:') && 
                             !this.hasAttribute('onclick') &&
+                            !this.hasAttribute('data-bs-toggle') &&
+                            !this.hasAttribute('data-toggle') &&
                             this.hostname === window.location.hostname &&
                             !e.ctrlKey && !e.shiftKey && !e.metaKey
                         ) {
@@ -1057,7 +1059,13 @@
                             
                             // Munculkan preloader (kaca blur)
                             const preloader = document.getElementById('page-preloader');
-                            if (preloader) preloader.classList.remove('loaded');
+                            if (preloader) {
+                                preloader.classList.remove('loaded');
+                                // Failsafe: sembunyikan kembali setelah 10 detik jika gagal pindah
+                                setTimeout(() => {
+                                    preloader.classList.add('loaded');
+                                }, 10000);
+                            }
                             
                             // Pindah halaman
                             setTimeout(() => {
