@@ -30,7 +30,7 @@
                 <i class='bx bx-time-five text-5xl text-yellow-500 mb-3 animate-spin-slow'></i>
                 <h3 class="text-2xl font-bold text-yellow-800 mb-2">Menunggu Persetujuan</h3>
                 <p class="text-yellow-700">Data verifikasi Anda sedang diperiksa oleh Admin Desa. Proses ini biasanya memakan waktu 1x24 jam.</p>
-                <a href="{{ route('user.profile') }}" class="mt-4 inline-block px-6 py-2 bg-yellow-500 text-white font-bold rounded-lg hover:bg-yellow-600 transition">
+                <a href="{{ route('profile') }}" class="mt-4 inline-block px-6 py-2 bg-yellow-500 text-white font-bold rounded-lg hover:bg-yellow-600 transition">
                     Kembali ke Profil
                 </a>
             </div>
@@ -44,15 +44,15 @@
                     <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
                         <i class='bx bx-credit-card-front text-blue-500'></i> 1. Foto e-KTP Asli
                     </h3>
-                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md relative hover:bg-gray-50 transition cursor-pointer" id="ktp-dropzone">
+                    <div class="mt-1 flex justify-center p-2 border-2 border-gray-300 border-dashed rounded-md relative hover:bg-gray-50 transition cursor-pointer" id="ktp-dropzone">
                         <input type="file" name="ktp_photo" id="ktp_photo" accept="image/*" capture="environment" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" required>
-                        <div id="ktp-preview-container" class="hidden absolute inset-0 z-0">
-                            <img id="ktp-preview" src="" class="w-full h-full object-cover">
-                            <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition">
+                        <div id="ktp-preview-container" class="hidden w-full flex justify-center z-0 relative">
+                            <img id="ktp-preview" src="" class="max-h-[300px] w-auto rounded object-contain">
+                            <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition rounded">
                                 <span class="text-white font-bold">Ganti Foto</span>
                             </div>
                         </div>
-                        <div id="ktp-placeholder" class="space-y-1 text-center z-0 relative pointer-events-none">
+                        <div id="ktp-placeholder" class="py-10 space-y-1 text-center z-0 relative pointer-events-none">
                             <i class='bx bx-camera text-5xl text-gray-400 mb-3 block'></i>
                             <div class="flex text-sm text-gray-600 justify-center">
                                 <span class="relative bg-transparent rounded-md font-medium text-blue-600">Tap untuk Ambil Foto KTP</span>
@@ -81,13 +81,16 @@
                         <div id="camera-start-view" class="py-8">
                             <i class='bx bx-camera text-5xl text-gray-400 mb-3'></i>
                             <p class="font-bold text-gray-700 mb-4">Siap untuk Selfie?</p>
-                            <button type="button" id="start-camera-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-full transition shadow-md">
+                            <button type="button" id="start-camera-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-full transition shadow-md mb-3">
                                 Buka Kamera
+                            </button>
+                            <button type="button" onclick="document.getElementById('face_photo').click()" class="text-sm text-blue-600 hover:text-blue-800 underline block mx-auto transition">
+                                atau Unggah File (Jika kamera laptop error)
                             </button>
                         </div>
 
                         <!-- Live Video State -->
-                        <div id="camera-live-view" class="hidden relative w-full max-w-sm mx-auto bg-black rounded-lg overflow-hidden shadow-inner aspect-[3/4]">
+                        <div id="camera-live-view" class="hidden relative w-full max-w-sm mx-auto bg-black rounded-lg overflow-hidden shadow-inner" style="aspect-ratio: 3/4;">
                             <video id="webcam-video" class="absolute inset-0 w-full h-full object-cover transform -scale-x-100" autoplay playsinline></video>
                             
                             <div class="absolute bottom-4 left-0 right-0 flex justify-center">
@@ -98,15 +101,15 @@
                         </div>
 
                         <!-- Result State -->
-                        <div id="camera-result-view" class="hidden relative w-full max-w-sm mx-auto rounded-lg overflow-hidden shadow-md aspect-[3/4]">
-                            <img id="selfie-preview" class="absolute inset-0 w-full h-full object-cover transform -scale-x-100" src="">
-                            <div class="absolute bottom-4 left-0 right-0 flex justify-center gap-4 px-4">
+                        <div id="camera-result-view" class="hidden w-full flex flex-col items-center gap-4 py-2">
+                            <img id="selfie-preview" class="max-h-[400px] w-auto rounded-lg shadow-md" src="">
+                            <div class="flex justify-center gap-4 w-full max-w-sm relative z-20">
                                 <button type="button" id="retake-photo-btn" class="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-full transition shadow-md">
                                     Ulangi
                                 </button>
-                                <span class="flex-1 bg-green-500 text-white font-bold py-2 px-4 rounded-full shadow-md text-center flex items-center justify-center">
+                                <button type="button" id="ok-photo-btn" class="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full shadow-md transition flex items-center justify-center">
                                     <i class='bx bx-check mr-1'></i> Oke
-                                </span>
+                                </button>
                             </div>
                         </div>
 
@@ -324,7 +327,43 @@
             retakePhotoBtn.addEventListener('click', function() {
                 cameraResultView.classList.add('hidden');
                 faceInput.value = ''; 
-                initCamera(); // Langsung buka kamera lagi
+                cameraStartView.classList.remove('hidden'); // Kembali ke tampilan awal
+            });
+        }
+
+        const okPhotoBtn = document.getElementById('ok-photo-btn');
+        if(okPhotoBtn) {
+            okPhotoBtn.addEventListener('click', function() {
+                // Scroll ke tombol submit utama
+                const submitBtn = document.querySelector('button[type="submit"]');
+                if(submitBtn) {
+                    submitBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    // Opsional: Beri highlight sejenak pada tombol submit
+                    submitBtn.classList.add('ring-4', 'ring-green-400');
+                    setTimeout(() => submitBtn.classList.remove('ring-4', 'ring-green-400'), 1500);
+                }
+            });
+        }
+
+        // Logic unggah manual (Fallback)
+        if(faceInput) {
+            faceInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        selfiePreview.src = event.target.result;
+                        
+                        // Hilangkan efek cermin (mirror) karena ini file asli, bukan dari webcam
+                        selfiePreview.classList.remove('transform', '-scale-x-100');
+                        
+                        // Sembunyikan view lain dan tampilkan hasil
+                        cameraStartView.classList.add('hidden');
+                        cameraLiveView.classList.add('hidden');
+                        cameraResultView.classList.remove('hidden');
+                    }
+                    reader.readAsDataURL(file);
+                }
             });
         }
     });

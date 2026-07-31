@@ -31,8 +31,8 @@
                 
                 <form id="form-ktp" enctype="multipart/form-data">
                     @csrf
-                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md relative hover:bg-gray-50 transition cursor-pointer" id="drop-zone">
-                        <div class="space-y-1 text-center">
+                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md relative hover:bg-gray-50 transition cursor-pointer overflow-hidden" id="drop-zone">
+                        <div class="space-y-1 text-center" id="drop-zone-text">
                             <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
                                 <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                             </svg>
@@ -45,10 +45,7 @@
                             </div>
                             <p class="text-xs text-gray-500">PNG, JPG, JPEG up to 5MB</p>
                         </div>
-                    </div>
-                    
-                    <div id="ktp-preview-container" class="hidden mt-4 text-center">
-                        <img id="ktp-preview" class="max-h-48 mx-auto rounded-lg shadow-sm border border-gray-200" src="" alt="Preview KTP">
+                        <img id="ktp-preview" class="hidden max-h-48 mx-auto rounded-lg shadow-sm" src="" alt="Preview KTP">
                     </div>
 
                     <div class="mt-6">
@@ -199,16 +196,51 @@
     
     // --- Step 1: KTP Upload ---
     const fileInput = document.getElementById('ktp_image');
-    const previewContainer = document.getElementById('ktp-preview-container');
+    const dropZoneText = document.getElementById('drop-zone-text');
     const previewImage = document.getElementById('ktp-preview');
     const dropZone = document.getElementById('drop-zone');
+
+    // Memicu klik file input ketika area dropZone diklik
+    dropZone.addEventListener('click', () => {
+        fileInput.click();
+    });
+
+    // Mencegah file input diklik dua kali jika label di dalamnya diklik
+    fileInput.addEventListener('click', (e) => {
+        e.stopPropagation();
+    });
+
+    // Menangani Event Drag and Drop
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('bg-blue-50', 'border-blue-400');
+    });
+
+    dropZone.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('bg-blue-50', 'border-blue-400');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('bg-blue-50', 'border-blue-400');
+        
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            fileInput.files = e.dataTransfer.files;
+            
+            // Panggil event 'change' secara manual untuk memperbarui preview
+            const event = new Event('change');
+            fileInput.dispatchEvent(event);
+        }
+    });
 
     fileInput.addEventListener('change', function(e) {
         if (this.files && this.files[0]) {
             const reader = new FileReader();
             reader.onload = function(e) {
                 previewImage.src = e.target.result;
-                previewContainer.classList.remove('hidden');
+                previewImage.classList.remove('hidden');
+                dropZoneText.classList.add('hidden');
             }
             reader.readAsDataURL(this.files[0]);
         }

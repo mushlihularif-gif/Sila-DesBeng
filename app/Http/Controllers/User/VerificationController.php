@@ -5,6 +5,7 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class VerificationController extends Controller
 {
@@ -13,7 +14,7 @@ class VerificationController extends Controller
         $user = Auth::user();
         
         if ($user->verification_status === 'verified') {
-            return redirect()->route('user.profile')->with('info', 'Akun Anda sudah diverifikasi.');
+            return redirect()->route('profile')->with('info', 'Akun Anda sudah diverifikasi.');
         }
 
         return view('users.verifikasi', compact('user'));

@@ -23,9 +23,9 @@ class OcrService
                 'file', file_get_contents($imagePath), 'ktp.jpg'
             )->post('https://api.ocr.space/parse/image', [
                 'apikey' => $this->apiKey,
-                'language' => 'ind',
-                'isOverlayRequired' => false,
-                'OCREngine' => 2 // Engine 2 is usually better for numbers/special chars
+                'language' => 'eng',
+                'isOverlayRequired' => 'false',
+                'OCREngine' => '2' // Engine 2 is usually better for numbers/special chars
             ]);
 
             $result = $response->json();
