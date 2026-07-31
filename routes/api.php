@@ -21,6 +21,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/profile/password', [AuthController::class, 'updatePassword']);
     Route::post('/fcm-token', [AuthController::class, 'updateFcmToken']);
     
+    // Kemitraan
+    Route::get('/kemitraan/regions', [\App\Http\Controllers\Api\PartnerApplicationApiController::class, 'getRegions']);
+    Route::post('/kemitraan/gabung', [\App\Http\Controllers\Api\PartnerApplicationApiController::class, 'store']);
+
     // KYC
     Route::post('/kyc/process', [\App\Http\Controllers\Api\KycController::class, 'process']);
     Route::post('/kyc/submit', [\App\Http\Controllers\Api\KycController::class, 'submit']);
