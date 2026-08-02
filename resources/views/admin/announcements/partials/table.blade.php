@@ -5,7 +5,7 @@
                 <th>Tipe</th>
                 <th>Judul</th>
                 <th>Penulis</th>
-                <th>Wilayah</th>
+                <th>Target Pembaca</th>
                 <th>Tanggal Event</th>
                 <th>Status</th>
                 <th>Aksi</th>
@@ -15,12 +15,16 @@
             @forelse($announcements as $item)
             <tr>
                 <td>
-                    @if($item->type == 'Gotong Royong')
-                        <span class="badge bg-label-success"><i class="bx bx-run me-1"></i> Gotong Royong</span>
-                    @elseif($item->type == 'Event')
-                        <span class="badge bg-label-warning"><i class="bx bx-calendar-event me-1"></i> Event</span>
+                    @if($category === 'Berita')
+                        <span class="badge bg-label-primary"><i class="bx bx-news me-1"></i> Berita Daerah</span>
                     @else
-                        <span class="badge bg-label-info"><i class="bx bx-bell me-1"></i> Pengumuman</span>
+                        @if($item->type == 'Gotong Royong')
+                            <span class="badge bg-label-success"><i class="bx bx-run me-1"></i> Gotong Royong</span>
+                        @elseif($item->type == 'Event')
+                            <span class="badge bg-label-warning"><i class="bx bx-calendar-event me-1"></i> Event</span>
+                        @else
+                            <span class="badge bg-label-info"><i class="bx bx-bell me-1"></i> Pengumuman</span>
+                        @endif
                     @endif
                 </td>
                 <td>
@@ -30,7 +34,13 @@
                     @endif
                 </td>
                 <td>{{ $item->admin->name ?? 'Sistem' }}</td>
-                <td>{{ $item->region->name ?? 'Semua Wilayah' }}</td>
+                <td>
+                    @if($item->target_audience_type === 'all')
+                        <span class="badge bg-primary">Global (Se-Kabupaten)</span>
+                    @else
+                        {{ $item->targetRegion->name ?? 'Tidak diketahui' }}
+                    @endif
+                </td>
                 <td>{{ $item->event_date ? $item->event_date->format('d M Y H:i') : '-' }}</td>
                 <td>
                     <span class="badge bg-label-{{ $item->is_active ? 'primary' : 'secondary' }}">
@@ -55,5 +65,5 @@
     </table>
 </div>
 <div class="card-footer" id="pagination-links">
-    {{ $announcements->appends(request()->except('page'))->links() }}
+    {{ $announcements->appends(request()->query())->links() }}
 </div>

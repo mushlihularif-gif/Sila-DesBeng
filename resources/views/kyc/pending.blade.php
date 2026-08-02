@@ -12,7 +12,7 @@
             </svg>
         </div>
 
-        <h2 class="text-3xl font-bold text-gray-900 mb-4">Verifikasi Sedang Diproses</h2>
+        <h2 class="text-3xl font-bold text-gray-900 mb-4">Status Verifikasi Identitas</h2>
         
         <p class="text-gray-600 mb-8 leading-relaxed">
             Data diri dan hasil scan wajah Anda telah kami terima dan sedang dalam tahap peninjauan oleh Admin Desa. Proses ini biasanya memakan waktu maksimal 1x24 jam kerja.

@@ -72,8 +72,8 @@
                             @endif
 
                             @if($isServiceActive('Pengumuman dan Event'))
-                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="{{ $index++ }}" data-name="Pengumuman dan Event" onclick="window.location.href='{{ route('announcements.index') . '?region_id=' . $region->id }}'">
-                                <img src="{{ asset('User/img/elemen/event.png') }}" alt="Event">
+                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="{{ $index++ }}" data-name="Kabar dan Informasi Daerah" onclick="window.location.href='{{ route('announcements.index') . '?region_id=' . $region->id }}'">
+                                <img src="{{ asset('User/img/elemen/KabardanInformasiDaerah.png') }}" alt="Event">
                             </div>
                             @endif
                         </div>

@@ -16,7 +16,7 @@
             
             <!-- Header Section -->
             <div class="text-center mb-16 animate-section">
-                <h1 class="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-[#1a1a1a] via-[#0099ff] to-[#33b5ff] bg-clip-text text-transparent">
+                <h1 class="text-4xl md:text-5xl font-bold mb-4 pb-2 bg-gradient-to-r from-[#1a1a1a] via-[#0099ff] to-[#33b5ff] bg-clip-text text-transparent">
                     Laporan Layanan Daerah
                 </h1>
                 <p class="text-lg text-gray-700">
@@ -29,7 +29,7 @@
                 <h2 class="text-2xl md:text-3xl font-bold text-gray-900 text-center mb-2">
                     Kabupaten Bengkalis
                 </h2>
-                <h3 class="text-xl md:text-2xl font-bold text-center bg-gradient-to-r from-[#1a1a1a] via-[#0099ff] to-[#33b5ff] bg-clip-text text-transparent mb-8">
+                <h3 class="text-xl md:text-2xl font-bold text-center pb-2 bg-gradient-to-r from-[#1a1a1a] via-[#0099ff] to-[#33b5ff] bg-clip-text text-transparent mb-8">
                     Grafik Umum
                 </h3>
 
@@ -81,8 +81,8 @@
                 <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-lg p-8 border border-gray-200">
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
                         <h3 class="text-xl font-bold mb-3 md:mb-0">
-                            <span class="text-gray-900">Kinerja </span>
-                            <span class="bg-gradient-to-r from-[#1a1a1a] via-[#0099ff] to-[#33b5ff] bg-clip-text text-transparent">Layanan</span>
+                            <span class="text-gray-900">Persentase Pendapatan </span>
+                            <span class="bg-gradient-to-r from-[#1a1a1a] via-[#0099ff] to-[#33b5ff] bg-clip-text text-transparent pb-1">Unit Pelayanan Daerah</span>
                         </h3>
                     </div>
                     <div class="bg-white/50 backdrop-blur-sm rounded-2xl p-5 border border-gray-100" style="min-height: 340px;">
@@ -100,7 +100,7 @@
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
                         <h3 class="text-xl font-bold mb-3 md:mb-0">
                             <span class="text-gray-900">Unit </span>
-                            <span class="bg-gradient-to-r from-[#1a1a1a] via-[#0099ff] to-[#33b5ff] bg-clip-text text-transparent">Populer</span>
+                            <span class="bg-gradient-to-r from-[#1a1a1a] via-[#0099ff] to-[#33b5ff] bg-clip-text text-transparent pb-1">Populer</span>
                         </h3>
                     </div>
                     <div class="bg-white/50 backdrop-blur-sm rounded-2xl p-5 mb-5 border border-gray-100" style="min-height: 340px;">
@@ -130,7 +130,7 @@
                         </div>
                         <div class="flex items-center gap-2">
                             <div class="w-3 h-3 rounded-sm" style="background-color: #06b6d4;"></div>
-                            <span class="text-gray-700 font-medium">Pengumuman & Event</span>
+                            <span class="text-gray-700 font-medium">Kabar dan Informasi Daerah</span>
                         </div>
                     </div>
                     <p class="text-sm text-gray-600 leading-relaxed mt-2">
@@ -144,9 +144,8 @@
                 <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-lg p-8 border border-gray-200">
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
                         <h3 class="text-xl font-bold mb-3 md:mb-0">
-                            <span class="text-gray-900">Total </span>
-                            <span class="bg-gradient-to-r from-[#1a1a1a] via-[#0099ff] to-[#33b5ff] bg-clip-text text-transparent">Pendapatan</span>
-                            <span class="text-gray-900"> Unit Pelayanan Daerah</span>
+                            <span class="text-gray-900">Total Pendapatan </span>
+                            <span class="bg-gradient-to-r from-[#1a1a1a] via-[#0099ff] to-[#33b5ff] bg-clip-text text-transparent pb-1">Unit Pelayanan Daerah</span>
                         </h3>
                         <select id="pendapatan-month" class="px-4 py-2 text-sm border border-gray-300 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400">
                             <option value="all" {{ $totalPendapatanData['month'] === 'all' ? 'selected' : '' }}>Sepanjang Tahun {{ $totalPendapatanData['year'] }}</option>
@@ -169,7 +168,7 @@
                             <div>
                                 <div class="flex justify-between items-center mb-2">
                                     <span class="text-sm font-medium text-gray-700">Unit Penyewaan Alat</span>
-                                    <span class="text-sm font-bold text-gray-900">Rp {{ number_format($totalPendapatanData['rental']['revenue'], 0, ',', '.') }}</span>
+                                    <span class="text-sm font-bold text-gray-900">{{ number_format($totalPendapatanData['rental']['percentage'], 1, ',', '.') }}%</span>
                                 </div>
                                 <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
                                     <div class="bg-gradient-to-r from-[#f59e0b] to-[#fbbf24] h-4 rounded-full transition-all duration-500" 
@@ -182,7 +181,7 @@
                             <div>
                                 <div class="flex justify-between items-center mb-2">
                                     <span class="text-sm font-medium text-gray-700">Unit Penjualan Gas</span>
-                                    <span class="text-sm font-bold text-gray-900">Rp {{ number_format($totalPendapatanData['gas']['revenue'], 0, ',', '.') }}</span>
+                                    <span class="text-sm font-bold text-gray-900">{{ number_format($totalPendapatanData['gas']['percentage'], 1, ',', '.') }}%</span>
                                 </div>
                                 <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
                                     <div class="bg-gradient-to-r from-[#3b82f6] to-[#60a5fa] h-4 rounded-full transition-all duration-500" 
@@ -195,7 +194,7 @@
                             <div>
                                 <div class="flex justify-between items-center mb-2">
                                     <span class="text-sm font-medium text-gray-700">Unit Peminjaman Mobil</span>
-                                    <span class="text-sm font-bold text-gray-900">Rp {{ number_format($totalPendapatanData['mobil']['revenue'], 0, ',', '.') }}</span>
+                                    <span class="text-sm font-bold text-gray-900">{{ number_format($totalPendapatanData['mobil']['percentage'], 1, ',', '.') }}%</span>
                                 </div>
                                 <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
                                     <div class="bg-gradient-to-r from-[#10b981] to-[#34d399] h-4 rounded-full transition-all duration-500" 
@@ -208,7 +207,7 @@
                             <div class="pt-4 border-t border-gray-300">
                                 <div class="flex justify-between items-center">
                                     <span class="text-base font-bold text-gray-900">Total Keseluruhan</span>
-                                    <span class="text-base font-bold text-gray-900">Rp {{ number_format($totalPendapatanData['total']['revenue'], 0, ',', '.') }}</span>
+                                    <span class="text-base font-bold text-gray-900">{{ $totalPendapatanData['total']['transactions'] > 0 ? '100%' : '0%' }}</span>
                                 </div>
                                 <p class="text-xs text-gray-500 mt-1">{{ $totalPendapatanData['total']['transactions'] }} Transaksi</p>
                             </div>
@@ -237,7 +236,7 @@
                     </div>
 
                     <p class="text-sm text-gray-600 mt-6 leading-relaxed">
-                        Diagram menunjukkan perbandingan total pendapatan dari transaksi per unit Layanan Daerah per bulan. Informasi ini membantu dalam memahami kontribusi setiap unit terhadap total pendapatan Layanan Daerah dan dapat digunakan untuk perencanaan strategi ke depan.
+                        Diagram menunjukkan perbandingan persentase kontribusi pendapatan dari transaksi per unit Layanan Daerah per bulan. Informasi ini disajikan dalam bentuk persentase untuk menjaga privasi nominal usaha daerah, namun tetap efektif dalam membantu memahami kontribusi setiap unit dan dapat digunakan untuk perencanaan strategi ke depan.
                     </p>
                 </div>
             </div>
@@ -568,7 +567,7 @@
                     data: chartData.laporan
                 },
                 {
-                    name: 'Pengumuman & Event',
+                    name: 'Kabar dan Informasi Daerah',
                     data: chartData.pengumuman
                 }
             ],

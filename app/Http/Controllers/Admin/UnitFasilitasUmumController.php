@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\FasilitasUmum;
+use App\Models\Category;
 use App\Models\Mobil;
 use App\Models\Region;
 use Illuminate\Http\Request;
@@ -102,7 +103,18 @@ class UnitFasilitasUmumController extends Controller
 
     public function create()
     {
-        return view('admin.unit.fasilitas_umum.create');
+        $savedLocations = FasilitasUmum::select('lokasi', 'latitude', 'longitude')
+            ->whereNotNull('lokasi')
+            ->where('lokasi', '!=', '')
+            ->distinct()
+            ->get();
+            
+        $categories = Category::where('region_id', auth()->user()->region_id)
+            ->where(function($q) {
+                $q->where('type', 'fasilitas')->orWhereNull('type');
+            })->orderBy('name')->get();
+
+        return view('admin.unit.fasilitas_umum.create', compact('savedLocations', 'categories'));
     }
 
     public function store(Request $request)
@@ -114,6 +126,8 @@ class UnitFasilitasUmumController extends Controller
             'status' => 'required|in:Tersedia,Tidak Tersedia,Disewa',
             'kategori' => 'required|string',
             'lokasi' => 'required|string',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
             'foto_utama' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
             'foto_2' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
             'foto_3' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
@@ -137,6 +151,8 @@ class UnitFasilitasUmumController extends Controller
             'status' => $request->status,
             'kategori' => $request->kategori,
             'lokasi' => $request->lokasi,
+            'latitude' => $request->latitude,
+            'longitude' => $request->longitude,
             'opsi_supir' => $request->opsi_supir,
             'bbm_ditanggung' => $request->bbm_ditanggung,
             'nama_supir' => $request->nama_supir,
@@ -169,7 +185,18 @@ class UnitFasilitasUmumController extends Controller
     public function edit($id)
     {
         $fasilitas = FasilitasUmum::findOrFail($id);
-        return view('admin.unit.fasilitas_umum.edit', compact('fasilitas'));
+        $savedLocations = FasilitasUmum::select('lokasi', 'latitude', 'longitude')
+            ->whereNotNull('lokasi')
+            ->where('lokasi', '!=', '')
+            ->distinct()
+            ->get();
+            
+        $categories = Category::where('region_id', auth()->user()->region_id)
+            ->where(function($q) {
+                $q->where('type', 'fasilitas')->orWhereNull('type');
+            })->orderBy('name')->get();
+
+        return view('admin.unit.fasilitas_umum.edit', compact('fasilitas', 'savedLocations', 'categories'));
     }
 
     public function destroy($id)
@@ -194,6 +221,8 @@ class UnitFasilitasUmumController extends Controller
             'status' => 'required|in:Tersedia,Tidak Tersedia,Disewa',
             'kategori' => 'required|string',
             'lokasi' => 'required|string',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
             'foto_utama' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'foto_2' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'foto_3' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
@@ -219,6 +248,8 @@ class UnitFasilitasUmumController extends Controller
             'status' => $request->status,
             'kategori' => $request->kategori,
             'lokasi' => $request->lokasi,
+            'latitude' => $request->latitude,
+            'longitude' => $request->longitude,
             'opsi_supir' => $request->opsi_supir,
             'bbm_ditanggung' => $request->bbm_ditanggung,
             'nama_supir' => $request->nama_supir,

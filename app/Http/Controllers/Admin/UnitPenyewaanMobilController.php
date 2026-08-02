@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Mobil;
+use App\Models\Category;
 use App\Models\Region;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -80,7 +81,18 @@ class UnitPenyewaanMobilController extends Controller
 
     public function create()
     {
-        return view('admin.unit.mobil.create');
+        $savedLocations = Mobil::select('lokasi', 'latitude', 'longitude')
+            ->whereNotNull('lokasi')
+            ->where('lokasi', '!=', '')
+            ->distinct()
+            ->get();
+            
+        $categories = Category::where('region_id', auth()->user()->region_id)
+            ->where(function($q) {
+                $q->where('type', 'mobil')->orWhereNull('type');
+            })->orderBy('name')->get();
+
+        return view('admin.unit.mobil.create', compact('savedLocations', 'categories'));
     }
 
     public function store(Request $request)
@@ -93,6 +105,8 @@ class UnitPenyewaanMobilController extends Controller
             'status' => 'required|in:tersedia,disewa,rusak',
             'kategori' => 'required|string',
             'lokasi' => 'required|string',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
             'satuan' => 'required|string',
             'foto_utama' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
             'foto_2' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
@@ -129,6 +143,8 @@ class UnitPenyewaanMobilController extends Controller
             'status' => $request->status,
             'kategori' => $request->kategori,
             'lokasi' => $request->lokasi,
+            'latitude' => $request->latitude,
+            'longitude' => $request->longitude,
             'satuan' => $request->satuan,
             'harga_dalam_desa' => $hargaDalamDesa,
             'batas_km_dalam_desa' => $request->batas_km_dalam_desa,
@@ -169,7 +185,18 @@ class UnitPenyewaanMobilController extends Controller
     public function edit($id)
     {
         $mobil = Mobil::findOrFail($id);
-        return view('admin.unit.mobil.edit', compact('mobil'));
+        $savedLocations = Mobil::select('lokasi', 'latitude', 'longitude')
+            ->whereNotNull('lokasi')
+            ->where('lokasi', '!=', '')
+            ->distinct()
+            ->get();
+            
+        $categories = Category::where('region_id', auth()->user()->region_id)
+            ->where(function($q) {
+                $q->where('type', 'mobil')->orWhereNull('type');
+            })->orderBy('name')->get();
+
+        return view('admin.unit.mobil.edit', compact('mobil', 'savedLocations', 'categories'));
     }
 
     public function destroy($id)
@@ -195,6 +222,8 @@ class UnitPenyewaanMobilController extends Controller
             'status' => 'required|in:tersedia,disewa,rusak',
             'kategori' => 'required|string',
             'lokasi' => 'required|string',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
             'satuan' => 'required|string',
             'foto_utama' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'foto_2' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
@@ -233,6 +262,8 @@ class UnitPenyewaanMobilController extends Controller
             'status' => $request->status,
             'kategori' => $request->kategori,
             'lokasi' => $request->lokasi,
+            'latitude' => $request->latitude,
+            'longitude' => $request->longitude,
             'satuan' => $request->satuan,
             'harga_dalam_desa' => $hargaDalamDesa,
             'batas_km_dalam_desa' => $request->batas_km_dalam_desa,

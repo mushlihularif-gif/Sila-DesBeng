@@ -41,10 +41,33 @@ class KycController extends Controller
 
         // Ambil isi file asli
         $ktpFile = $request->file('ktp_image');
-        $fileContent = $ktpFile->get();
+        
+        // --- PROSES WATERMARK KTP ---
+        $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
+        $image = $manager->read($ktpFile->getRealPath());
+        
+        $fontSize = max(16, min($image->width() / 20, 64)); // Ukuran responsif
+        $image->text('HANYA UNTUK VERIFIKASI SILADESBENG', $image->width() / 2, $image->height() / 2, function($font) use ($fontSize) {
+            $font->file(public_path('fonts/arial.ttf'));
+            $font->size($fontSize);
+            $font->color('rgba(255, 255, 255, 0.45)');
+            $font->align('center');
+            $font->valign('middle');
+        });
+        
+        $image->text(date('d-m-Y H:i'), $image->width() / 2, ($image->height() / 2) + $fontSize + 10, function($font) use ($fontSize) {
+            $font->file(public_path('fonts/arial.ttf'));
+            $font->size($fontSize * 0.6);
+            $font->color('rgba(255, 255, 255, 0.45)');
+            $font->align('center');
+            $font->valign('middle');
+        });
 
-        // Enkripsi isi file menggunakan ChaCha20
-        $encryptedContent = \App\Services\FileEncryptionService::encrypt($fileContent);
+        // Encode image ke jpg
+        $watermarkedKtp = (string) $image->encodeByExtension('jpg', 80);
+
+        // Enkripsi isi file yang sudah di-watermark menggunakan ChaCha20
+        $encryptedContent = \App\Services\FileEncryptionService::encrypt($watermarkedKtp);
 
         // Simpan file terenkripsi ke disk private
         $fileName = 'ktp_' . uniqid() . '.enc';
@@ -101,8 +124,30 @@ class KycController extends Controller
             if (count($image_parts) == 2) {
                 $image_base64 = base64_decode($image_parts[1]);
                 
+                // --- PROSES WATERMARK SELFIE ---
+                $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
+                $image = $manager->read($image_base64);
+                
+                $fontSize = max(16, min($image->width() / 15, 48));
+                $image->text('VERIFIKASI SILADESBENG', $image->width() / 2, $image->height() - 60, function($font) use ($fontSize) {
+                    $font->file(public_path('fonts/arial.ttf'));
+                    $font->size($fontSize);
+                    $font->color('rgba(255, 255, 255, 0.5)');
+                    $font->align('center');
+                    $font->valign('middle');
+                });
+                $image->text(date('d-m-Y H:i'), $image->width() / 2, $image->height() - 30, function($font) use ($fontSize) {
+                    $font->file(public_path('fonts/arial.ttf'));
+                    $font->size($fontSize * 0.6);
+                    $font->color('rgba(255, 255, 255, 0.5)');
+                    $font->align('center');
+                    $font->valign('middle');
+                });
+                
+                $watermarkedFace = (string) $image->encodeByExtension('jpg', 80);
+
                 // Enkripsi isi gambar menggunakan ChaCha20
-                $encryptedFace = \App\Services\FileEncryptionService::encrypt($image_base64);
+                $encryptedFace = \App\Services\FileEncryptionService::encrypt($watermarkedFace);
                 
                 $fileName = 'face_' . uniqid() . '.enc';
                 $imagePath = 'kyc/face/' . $fileName;

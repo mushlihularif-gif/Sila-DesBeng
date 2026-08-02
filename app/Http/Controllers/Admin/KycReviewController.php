@@ -13,14 +13,29 @@ use Illuminate\Support\Facades\DB;
 
 class KycReviewController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $verifications = KycVerification::with('user')
-            ->orderByRaw("FIELD(status, 'pending', 'approved', 'rejected')")
+        $status = $request->input('status', 'all');
+        
+        $query = KycVerification::with('user');
+        
+        if ($status !== 'all' && in_array($status, ['pending', 'approved', 'rejected'])) {
+            $query->where('status', $status);
+        }
+
+        $counts = [
+            'all' => KycVerification::count(),
+            'pending' => KycVerification::where('status', 'pending')->count(),
+            'approved' => KycVerification::where('status', 'approved')->count(),
+            'rejected' => KycVerification::where('status', 'rejected')->count(),
+        ];
+
+        $verifications = $query->orderByRaw("FIELD(status, 'pending', 'approved', 'rejected')")
             ->latest()
-            ->paginate(15);
+            ->paginate(15)
+            ->appends(request()->query());
             
-        return view('admin.kyc.index', compact('verifications'));
+        return view('admin.kyc.index', compact('verifications', 'status', 'counts'));
     }
 
     public function show($id)

@@ -28,8 +28,32 @@
                     <div class="backdrop-blur-sm bg-white/80 rounded-3xl overflow-hidden shadow-xl border border-white/80">
                         
                         {{-- Image/Banner --}}
-                        <div class="w-full h-64 md:h-96 bg-gray-100 relative">
-                            @if($announcement->image_path)
+                        <div class="w-full h-64 md:h-[500px] bg-gray-100 relative group overflow-hidden">
+                            @if($announcement->images && $announcement->images->count() > 0)
+                                <div class="flex transition-transform duration-700 ease-in-out h-full" id="slider-main">
+                                    @foreach($announcement->images as $img)
+                                        <div class="w-full h-full flex-shrink-0 relative">
+                                            <img src="{{ Storage::url($img->image_path) }}" alt="{{ $announcement->title }}" class="w-full h-full object-cover">
+                                        </div>
+                                    @endforeach
+                                </div>
+                                
+                                @if($announcement->images->count() > 1)
+                                    <!-- Controls -->
+                                    <button id="slider-prev" class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/30 hover:bg-white/50 backdrop-blur-md rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <i class="bx bx-chevron-left text-2xl"></i>
+                                    </button>
+                                    <button id="slider-next" class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/30 hover:bg-white/50 backdrop-blur-md rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <i class="bx bx-chevron-right text-2xl"></i>
+                                    </button>
+                                    <!-- Indicators -->
+                                    <div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-20" id="slider-indicators">
+                                        @foreach($announcement->images as $index => $img)
+                                            <button class="w-2 h-2 rounded-full transition-all {{ $index === 0 ? 'bg-white w-4' : 'bg-white/50' }}"></button>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            @elseif($announcement->image_path)
                                 <img src="{{ Storage::url($announcement->image_path) }}" alt="{{ $announcement->title }}" class="w-full h-full object-cover">
                             @else
                                 <div class="w-full h-full flex items-center justify-center text-8xl opacity-30 bg-gradient-to-br from-blue-50 to-blue-200">
@@ -41,17 +65,21 @@
                             @endif
                             
                             {{-- Gradient Overlay --}}
-                            <div class="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-gray-900/30 to-transparent"></div>
+                            <div class="absolute inset-0 bg-gradient-to-t from-gray-900/90 via-gray-900/40 to-transparent z-10 pointer-events-none"></div>
                             
                             {{-- Title Overlay --}}
-                            <div class="absolute bottom-6 left-6 right-6">
+                            <div class="absolute bottom-6 left-6 right-6 z-20 pointer-events-none">
                                 <div class="flex items-center gap-3 mb-3">
-                                    @if($announcement->type == 'Gotong Royong')
-                                        <span class="px-4 py-1.5 bg-emerald-500 text-white rounded-full text-xs font-bold shadow-lg flex items-center gap-1.5">🤝 Gotong Royong</span>
-                                    @elseif($announcement->type == 'Event')
-                                        <span class="px-4 py-1.5 bg-purple-500 text-white rounded-full text-xs font-bold shadow-lg flex items-center gap-1.5">🎉 Event</span>
+                                    @if($announcement->post_category === 'Berita')
+                                        <span class="px-4 py-1.5 bg-blue-500 text-white rounded-full text-xs font-bold shadow-lg flex items-center gap-1.5"><i class="bx bx-news"></i> Berita Daerah</span>
                                     @else
-                                        <span class="px-4 py-1.5 bg-blue-500 text-white rounded-full text-xs font-bold shadow-lg flex items-center gap-1.5">📢 Pengumuman</span>
+                                        @if($announcement->type == 'Gotong Royong')
+                                            <span class="px-4 py-1.5 bg-emerald-500 text-white rounded-full text-xs font-bold shadow-lg flex items-center gap-1.5">🤝 Gotong Royong</span>
+                                        @elseif($announcement->type == 'Event')
+                                            <span class="px-4 py-1.5 bg-purple-500 text-white rounded-full text-xs font-bold shadow-lg flex items-center gap-1.5">🎉 Event</span>
+                                        @else
+                                            <span class="px-4 py-1.5 bg-blue-500 text-white rounded-full text-xs font-bold shadow-lg flex items-center gap-1.5">📢 Pengumuman</span>
+                                        @endif
                                     @endif
                                     
                                     <span class="px-4 py-1.5 bg-white/20 backdrop-blur-md text-white rounded-full text-xs font-semibold border border-white/30 flex items-center gap-1.5">
@@ -201,4 +229,53 @@
         opacity: 0;
     }
 </style>
+@endpush
+
+@push('scripts')
+@if($announcement->images && $announcement->images->count() > 1)
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const slider = document.getElementById('slider-main');
+        const prev = document.getElementById('slider-prev');
+        const next = document.getElementById('slider-next');
+        const indicators = document.getElementById('slider-indicators').children;
+        const total = {{ $announcement->images->count() }};
+        let current = 0;
+
+        function updateSlider() {
+            slider.style.transform = `translateX(-${current * 100}%)`;
+            Array.from(indicators).forEach((ind, i) => {
+                if(i === current) {
+                    ind.className = 'w-4 h-2 rounded-full transition-all bg-white';
+                } else {
+                    ind.className = 'w-2 h-2 rounded-full transition-all bg-white/50';
+                }
+            });
+        }
+
+        prev.addEventListener('click', () => {
+            current = current > 0 ? current - 1 : total - 1;
+            updateSlider();
+        });
+
+        next.addEventListener('click', () => {
+            current = current < total - 1 ? current + 1 : 0;
+            updateSlider();
+        });
+
+        Array.from(indicators).forEach((ind, i) => {
+            ind.addEventListener('click', () => {
+                current = i;
+                updateSlider();
+            });
+        });
+
+        // Auto slide
+        setInterval(() => {
+            current = current < total - 1 ? current + 1 : 0;
+            updateSlider();
+        }, 5000);
+    });
+</script>
+@endif
 @endpush

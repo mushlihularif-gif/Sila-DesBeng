@@ -267,8 +267,8 @@
                                                 <input type="checkbox" name="services[]" value="{{ $service->id }}" class="form-check-input" style="width: 1.4em; height: 1.4em;" {{ in_array($service->id, $activeServices) ? 'checked' : '' }}>
                                             </div>
                                             <div>
-                                                <span class="fw-bold fs-6 text-dark d-block mb-1">{{ $service->name }}</span>
-                                                <p class="text-muted small mb-0">Aktifkan modul {{ strtolower($service->name) }}.</p>
+                                                <span class="fw-bold fs-6 text-dark d-block mb-1">{{ (strpos(strtolower($service->name), 'pengumuman') !== false || strpos(strtolower($service->name), 'event') !== false) ? 'Kabar dan Informasi Daerah' : $service->name }}</span>
+                                                <p class="text-muted small mb-0">Aktifkan modul {{ (strpos(strtolower($service->name), 'pengumuman') !== false || strpos(strtolower($service->name), 'event') !== false) ? 'kabar dan informasi daerah' : strtolower($service->name) }}.</p>
                                             </div>
                                         </div>
                                         

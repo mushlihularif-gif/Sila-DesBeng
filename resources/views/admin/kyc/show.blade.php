@@ -1,11 +1,11 @@
-@extends('admin.layouts.app')
+@extends('admin.layouts.admin')
 
-@section('title', 'Detail KYC - ' . $kyc->user->name)
+@section('title', 'Detail Verifikasi Identitas - ' . $kyc->user->name)
 
 @section('content')
 <div class="container-fluid">
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Detail Verifikasi KYC</h1>
+        <h1 class="h3 mb-0 text-gray-800">Detail Verifikasi Identitas</h1>
         <a href="{{ route('admin.kyc.index') }}" class="btn btn-secondary btn-sm">
             <i class="fas fa-arrow-left"></i> Kembali
         </a>
@@ -34,13 +34,6 @@
 
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Data Scan Wajah (Liveness)</h6>
-                </div>
-                <div class="card-body text-center">
-                    @if($kyc->face_image_path)
-                        <img src="{{ route('media.secure.ktp', basename($kyc->face_image_path)) }}" class="img-fluid rounded border p-1 mb-3" alt="Selfie {{ $kyc->user->name }}">
-                        <a href="{{ route('media.secure.ktp', basename($kyc->face_image_path)) }}" target="_blank" class="btn btn-sm btn-outline-primary mb-3"><i class="fas fa-search-plus"></i> Perbesar</a>
-                    @endif
 
                     @if($kyc->face_scan_data)
                         <div class="alert alert-success text-left">
@@ -156,7 +149,7 @@
             <form action="{{ route('admin.kyc.reject', $kyc->id) }}" method="POST">
                 @csrf
                 <div class="modal-header">
-                    <h5 class="modal-title" id="rejectModalLabel">Tolak Verifikasi KYC</h5>
+                    <h5 class="modal-title" id="rejectModalLabel">Tolak Verifikasi Identitas</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -182,7 +175,7 @@
 @push('scripts')
 <script>
     function confirmApprove() {
-        if(confirm('Apakah Anda yakin ingin menyetujui KYC ini? Data profil pengguna akan otomatis diperbarui sesuai KTP.')) {
+        if(confirm('Apakah Anda yakin ingin menyetujui verifikasi ini? Data profil pengguna akan otomatis diperbarui sesuai KTP.')) {
             document.getElementById('form-approve').submit();
         }
     }

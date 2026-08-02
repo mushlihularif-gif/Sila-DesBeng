@@ -57,6 +57,12 @@ class SecurityHeaders
         ]);
         $response->headers->set('Content-Security-Policy', $csp);
 
+        // Mencegah caching pada level browser (bfcache) untuk menghindari isu status auth tidak sinkron
+        // (contoh: user sudah login, tapi ketika menekan tombol Back terlihat seperti Guest)
+        $response->headers->set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+        $response->headers->set('Pragma', 'no-cache');
+        $response->headers->set('Expires', 'Sat, 01 Jan 2000 00:00:00 GMT');
+
         return $response;
     }
 }

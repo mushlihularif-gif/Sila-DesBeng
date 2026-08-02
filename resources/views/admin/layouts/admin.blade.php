@@ -509,7 +509,7 @@
                                 @endif
                                 <li class="menu-item {{ request()->routeIs('admin.announcements.*') ? 'active' : '' }}">
                                     <a href="{{ route('admin.announcements.index') }}" class="menu-link">
-                                        <div data-i18n="Pengumuman">Pengumuman</div>
+                                        <div data-i18n="Kabar dan Informasi Daerah">Kabar dan Informasi Daerah</div>
                                     </a>
                                 </li>
                             </ul>
@@ -529,7 +529,7 @@
                 @endif
 
                 <!-- Manajemen (Dropdown) -->
-                <li class="menu-item {{ request()->is('admin/manajemen-pengguna*') || request()->is('admin/kelola-wilayah*') || request()->is('admin/banners*') || request()->routeIs('admin.warga.mutasi.*') ? 'open active show' : '' }}">
+                <li class="menu-item {{ request()->is('admin/manajemen-pengguna*') || request()->is('admin/kelola-wilayah*') || request()->is('admin/banners*') || request()->routeIs('admin.warga.mutasi.*') || request()->routeIs('admin.kyc.*') || request()->routeIs('admin.categories.*') ? 'open active show' : '' }}">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
                         <i class="menu-icon tf-icons bx bx-briefcase"></i>
                         <div data-i18n="Manajemen">Manajemen</div>
@@ -539,6 +539,11 @@
                         <li class="menu-item {{ request()->routeIs('admin.manajemen-pengguna.*') ? 'active' : '' }}">
                             <a href="{{ route('admin.manajemen-pengguna.index') }}" class="menu-link">
                                 <div>Pengguna</div>
+                            </a>
+                        </li>
+                        <li class="menu-item {{ request()->routeIs('admin.kyc.*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.kyc.index') }}" class="menu-link">
+                                <div>Verifikasi Identitas</div>
                             </a>
                         </li>
                         @endif
@@ -554,6 +559,11 @@
                         <li class="menu-item {{ request()->routeIs('admin.warga.mutasi.*') ? 'active' : '' }}">
                             <a href="{{ route('admin.warga.mutasi.index') }}" class="menu-link">
                                 <div>Mutasi Penduduk</div>
+                            </a>
+                        </li>
+                        <li class="menu-item {{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.categories.index') }}" class="menu-link">
+                                <div>Kategori Produk</div>
                             </a>
                         </li>
                         @endif

@@ -72,7 +72,7 @@
                                 @foreach($images as $index => $image)
                                 <div class="w-full h-full flex-shrink-0 flex-grow-0">
                                     <img src="{{ asset('storage/' . $image) }}" 
-                                         alt="{{ $item->nama_barang }} - Image {{ $index + 1 }}"
+                                         alt="{{ $item->nama_mobil }} - Image {{ $index + 1 }}"
                                          {{ $index === 0 ? 'fetchpriority="high"' : 'loading="lazy"' }}
                                          class="w-full h-full object-cover product-image">
                                 </div>
@@ -108,14 +108,33 @@
                         </div>
 
                         <!-- Location - Below Image -->
-                        @if($setting && $setting->latitude && $setting->longitude)
+                        @if($item->latitude && $item->longitude)
+                        {{-- Produk punya koordinat sendiri: tampilkan sebagai link ke Google Maps --}}
+                        <a href="https://www.google.com/maps?q={{ $item->latitude }},{{ $item->longitude }}" 
+                           target="_blank"
+                           class="flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-colors">
+                            <svg class="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                            </svg>
+                            <span class="font-medium text-base">{{ $item->lokasi ?? 'Lihat di Peta' }}</span>
+                        </a>
+                        @elseif($item->lokasi)
+                        {{-- Produk punya teks lokasi tapi tanpa koordinat: tampilkan teks biasa (tidak bisa diklik) --}}
+                        <div class="flex items-center gap-2 text-gray-600">
+                            <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                            </svg>
+                            <span class="font-medium text-base">{{ $item->lokasi }}</span>
+                        </div>
+                        @elseif($setting && $setting->latitude && $setting->longitude)
+                        {{-- Fallback: gunakan lokasi pusat BUMDes dari SystemSetting --}}
                         <a href="https://www.google.com/maps?q={{ $setting->latitude }},{{ $setting->longitude }}" 
                            target="_blank"
                            class="flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-colors">
                             <svg class="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
                             </svg>
-                            <span class="font-medium text-base">{{ $setting->location_name ?? 'Desa Pematang Duku Timur' }}</span>
+                            <span class="font-medium text-base">{{ $setting->location_name ?? 'Lokasi BUMDes' }}</span>
                         </a>
                         @endif
                     </div>
@@ -123,7 +142,7 @@
                     <!-- Right Side: Product Information -->
                     <div class="lg:w-7/12 flex flex-col">
                         <!-- Product Name -->
-                        <h2 class="text-3xl font-bold text-gray-800 mb-4">{{ $item->nama_barang }}</h2>
+                        <h2 class="text-3xl font-bold text-gray-800 mb-4">{{ $item->nama_mobil }}</h2>
 
                         <!-- Description -->
                         <p class="text-gray-600 text-justify mb-6 leading-relaxed text-sm">
@@ -268,7 +287,7 @@
     
     <!-- Balok mirip halaman KYC -->
     <div class="relative w-full max-w-lg z-10" style="animation: fadeInUp 0.3s ease-out;">
-        <div class="bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-gray-100 overflow-hidden relative">
+        <div class="bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden relative">
             <button onclick="document.getElementById('kyc-prompt-modal').remove()" class="absolute top-4 right-4 z-50 p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors">
                 <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>

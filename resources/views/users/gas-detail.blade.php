@@ -7,11 +7,18 @@
         <canvas id="gas-canvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none;"></canvas>
 
         <div class="max-w-6xl mx-auto px-6 relative z-10">
-            <!-- Detail Card - CLEAN & MINIMAL LAYOUT -->
-            <div class="bg-white rounded-3xl shadow-xl p-6 md:p-10 border border-gray-100">
-                <div class="flex flex-col lg:flex-row gap-8 md:gap-16">
+            <!-- Header Section with Gradient Text - LEFT ALIGNED -->
+            <div class="mb-12 mt-12">
+                <h1 class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">
+                    Detail
+                </h1>
+            </div>
+
+            <!-- Detail Card - HORIZONTAL LAYOUT -->
+            <div class="bg-white rounded-3xl shadow-2xl p-8 md:p-10">
+                <div class="flex flex-col lg:flex-row gap-8">
                     <!-- Left Side: Product Image + Location -->
-                    <div class="lg:w-5/12 flex-shrink-0 w-full mx-auto max-w-[320px] sm:max-w-[400px] lg:max-w-none">
+                    <div class="lg:w-5/12 flex-shrink-0">
                         <!-- Product Image Carousel -->
                         <div class="relative aspect-square overflow-hidden rounded-2xl shadow-lg mb-6 group w-full">
                             @php
@@ -20,9 +27,9 @@
                             @endphp
 
                             <!-- Images Container -->
-                            <div id="product-carousel" class="flex w-full h-full bg-gray-50/50 transition-transform duration-500 ease-out">
+                            <div id="product-carousel" class="flex w-full h-full transition-transform duration-500 ease-out">
                                 @foreach($images as $index => $image)
-                                <div class="w-full h-full flex-shrink-0 flex-grow-0 p-8">
+                                <div class="w-full h-full flex-shrink-0 flex-grow-0">
                                     <img src="{{ asset('storage/' . $image) }}" 
                                          alt="{{ $item->jenis_gas }} - Image {{ $index + 1 }}"
                                          class="w-full h-full object-contain drop-shadow-xl product-image">
@@ -59,68 +66,84 @@
                         </div>
 
                         <!-- Location - Below Image -->
-                        @if($setting && $setting->latitude && $setting->longitude)
+                        @if($item->latitude && $item->longitude)
+                        {{-- Produk punya koordinat sendiri: tampilkan sebagai link ke Google Maps --}}
+                        <a href="https://www.google.com/maps?q={{ $item->latitude }},{{ $item->longitude }}" 
+                           target="_blank"
+                           class="flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-colors">
+                            <svg class="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                            </svg>
+                            <span class="font-medium text-base">{{ $item->lokasi ?? 'Lihat di Peta' }}</span>
+                        </a>
+                        @elseif($item->lokasi)
+                        {{-- Produk punya teks lokasi tapi tanpa koordinat: tampilkan teks biasa (tidak bisa diklik) --}}
+                        <div class="flex items-center gap-2 text-gray-600">
+                            <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                            </svg>
+                            <span class="font-medium text-base">{{ $item->lokasi }}</span>
+                        </div>
+                        @elseif($setting && $setting->latitude && $setting->longitude)
+                        {{-- Fallback: gunakan lokasi pusat BUMDes dari SystemSetting --}}
                         <a href="https://www.google.com/maps?q={{ $setting->latitude }},{{ $setting->longitude }}" 
                            target="_blank"
-                           class="flex items-center justify-center lg:justify-start gap-2 text-gray-700 hover:text-blue-600 transition-colors mt-2">
-                            <div class="bg-red-50 p-2 rounded-full text-red-600">
-                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
-                                </svg>
-                            </div>
-                            <span class="font-medium text-sm sm:text-base">{{ $setting->location_name ?? 'Desa Pematang Duku Timur' }}</span>
+                           class="flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-colors">
+                            <svg class="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                            </svg>
+                            <span class="font-medium text-base">{{ $setting->location_name ?? 'Lokasi BUMDes' }}</span>
                         </a>
                         @endif
                     </div>
 
                     <!-- Right Side: Product Information -->
-                    <div class="lg:w-7/12 flex flex-col w-full mt-4 lg:mt-0">
+                    <div class="lg:w-7/12 flex flex-col">
                         <!-- Product Name -->
-                        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-5 leading-tight text-center lg:text-left">{{ $item->jenis_gas }}</h2>
+                        <h2 class="text-3xl font-bold text-gray-800 mb-4">{{ $item->jenis_gas }}</h2>
 
                         <!-- Description -->
-                        <p class="text-gray-600 text-justify mb-8 leading-relaxed text-sm md:text-base">
+                        <p class="text-gray-600 text-justify mb-6 leading-relaxed text-sm">
                             {{ $item->deskripsi }}
                         </p>
 
                         <!-- Product Details Grid -->
-                        <div class="mb-8 border-y border-gray-100 py-6 space-y-4">
+                        <div class="space-y-2 mb-6">
                             <!-- Stock -->
                             <div class="flex justify-between items-center">
-                                <span class="text-gray-500 font-medium text-sm">Stok Tersedia</span>
-                                <span class="text-gray-900 font-semibold text-base">{{ $item->stok }} {{ $item->satuan }}</span>
+                                <span class="text-gray-600 font-medium text-sm">Stok Tersedia</span>
+                                <span class="text-gray-800 font-semibold text-sm">{{ $item->stok }} {{ $item->satuan }}</span>
                             </div>
 
                             <!-- Status -->
                             <div class="flex justify-between items-center">
-                                <span class="text-gray-500 font-medium text-sm">Status</span>
+                                <span class="text-gray-600 font-medium text-sm">Status</span>
                                 <span class="px-3 py-1 rounded-full text-xs font-semibold 
-                                    {{ $item->status == 'tersedia' ? 'bg-green-50 text-green-700' : 
-                                       ($item->status == 'dipesan' ? 'bg-yellow-50 text-yellow-700' : 'bg-red-50 text-red-700') }}">
+                                    {{ $item->status == 'tersedia' ? 'bg-green-100 text-green-700' : 
+                                       ($item->status == 'dipesan' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700') }}">
                                     {{ ucfirst($item->status) }}
                                 </span>
                             </div>
 
                             <!-- Category -->
                             <div class="flex justify-between items-center">
-                                <span class="text-gray-500 font-medium text-sm">Kategori</span>
-                                <span class="text-gray-900 font-semibold text-base">{{ $item->kategori }}</span>
+                                <span class="text-gray-600 font-medium text-sm">Kategori</span>
+                                <span class="text-gray-800 font-semibold text-sm">{{ $item->kategori }}</span>
                             </div>
                         </div>
 
                         <!-- Price -->
-                        <div class="mb-8 text-left">
-                            <p class="text-sm text-gray-500 mb-1">Harga Satuan</p>
-                            <p class="text-3xl font-bold text-gray-800">Rp {{ number_format($item->harga_satuan, 0, ',', '.') }}</p>
+                        <div class="mb-6">
+                            <p class="text-3xl font-bold text-red-600">Rp. {{ number_format($item->harga_satuan, 0, ',', '.') }}</p>
                         </div>
 
                         <!-- Quantity Selector + Order Button -->
-                        <div class="flex flex-wrap items-center gap-4 mt-auto">
+                        <div class="flex items-center gap-4 mt-auto">
                             <!-- Quantity Selector -->
-                            <div class="flex items-center gap-4 border border-gray-300 bg-white rounded-xl px-4 py-2.5">
+                            <div class="flex items-center gap-3 border-2 border-gray-300 rounded-full px-4 py-2">
                                 <button type="button" 
                                         onclick="let q = document.getElementById('quantity'); let v = parseInt(q.value) || 1; if(v > 1) q.value = v - 1;"
-                                        class="w-8 h-8 flex items-center justify-center rounded text-gray-500 hover:text-blue-600 hover:bg-blue-50 transition-colors">
+                                        class="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-gray-800 transition-colors">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
                                     </svg>
@@ -135,7 +158,7 @@
                                 
                                 <button type="button" 
                                         onclick="let q = document.getElementById('quantity'); let v = parseInt(q.value) || 1; let max = {{ $item->stok ?? 0 }}; if(v < max) q.value = v + 1;"
-                                        class="w-8 h-8 flex items-center justify-center rounded text-gray-500 hover:text-blue-600 hover:bg-blue-50 transition-colors">
+                                        class="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-gray-800 transition-colors">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                     </svg>
@@ -145,7 +168,7 @@
                             <!-- Order Button -->
                             <button type="button" 
                                     onclick="window.location.href='{{ route('gas.booking', ['id' => $item->id]) }}?quantity=' + (document.getElementById('quantity').value || 1)"
-                                    class="flex-1 min-w-[200px] bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 text-base shadow-sm">
+                                    class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-full transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-center">
                                 Pesan
                             </button>
                         </div>
@@ -217,7 +240,7 @@
     
     <!-- Balok mirip halaman KYC -->
     <div class="relative w-full max-w-lg z-10" style="animation: fadeInUp 0.3s ease-out;">
-        <div class="bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-gray-100 overflow-hidden relative">
+        <div class="bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden relative">
             <button onclick="document.getElementById('kyc-prompt-modal').remove()" class="absolute top-4 right-4 z-50 p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors">
                 <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>

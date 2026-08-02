@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Barang;
+use App\Models\Category;
 use App\Models\Region;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -98,7 +99,18 @@ class UnitPenyewaanController extends Controller
      */
     public function create()
     {
-        return view('admin.unit.penyewaan.create');
+        $savedLocations = Barang::select('lokasi', 'latitude', 'longitude')
+            ->whereNotNull('lokasi')
+            ->where('lokasi', '!=', '')
+            ->distinct()
+            ->get();
+            
+        $categories = Category::where('region_id', auth()->user()->region_id)
+            ->where(function($q) {
+                $q->where('type', 'barang')->orWhereNull('type');
+            })->orderBy('name')->get();
+
+        return view('admin.unit.penyewaan.create', compact('savedLocations', 'categories'));
     }
 
     /**
@@ -115,6 +127,8 @@ class UnitPenyewaanController extends Controller
             'status' => 'required|in:tersedia,disewa,rusak',
             'kategori' => 'required|string',
             'lokasi' => 'required|string',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
             'satuan' => 'required|string',
             'foto_utama' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
             'foto_2' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
@@ -135,6 +149,8 @@ class UnitPenyewaanController extends Controller
             'status' => $request->status,
             'kategori' => $request->kategori,
             'lokasi' => $request->lokasi,
+            'latitude' => $request->latitude,
+            'longitude' => $request->longitude,
             'satuan' => $request->satuan,
         ];
 
@@ -169,7 +185,18 @@ class UnitPenyewaanController extends Controller
     public function edit($id)
     {
         $barang = Barang::findOrFail($id);
-        return view('admin.unit.penyewaan.edit', compact('barang'));
+        $savedLocations = Barang::select('lokasi', 'latitude', 'longitude')
+            ->whereNotNull('lokasi')
+            ->where('lokasi', '!=', '')
+            ->distinct()
+            ->get();
+            
+        $categories = Category::where('region_id', auth()->user()->region_id)
+            ->where(function($q) {
+                $q->where('type', 'barang')->orWhereNull('type');
+            })->orderBy('name')->get();
+
+        return view('admin.unit.penyewaan.edit', compact('barang', 'savedLocations', 'categories'));
     }
 
     /**
@@ -209,6 +236,8 @@ class UnitPenyewaanController extends Controller
             'status' => 'required|in:tersedia,disewa,rusak',
             'kategori' => 'required|string',
             'lokasi' => 'required|string',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
             'satuan' => 'required|string',
             'foto_utama' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'foto_2' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
@@ -233,6 +262,8 @@ class UnitPenyewaanController extends Controller
             'status' => $request->status,
             'kategori' => $request->kategori,
             'lokasi' => $request->lokasi,
+            'latitude' => $request->latitude,
+            'longitude' => $request->longitude,
             'satuan' => $request->satuan,
         ];
 

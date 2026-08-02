@@ -19,6 +19,8 @@ class Mobil extends Model
         'foto_2',
         'foto_3',
         'lokasi',
+        'latitude',
+        'longitude',
         'satuan',
         'region_id',
         'harga_dalam_desa',

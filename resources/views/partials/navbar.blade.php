@@ -130,7 +130,7 @@
                 </div>
             </div>
             
-            <a href="{{ route('announcements.index') }}" class="sd-nav-link {{ request()->routeIs('announcements.*') ? 'active' : '' }}">Kabar Daerah</a>
+            <a href="{{ route('announcements.index') }}" class="sd-nav-link {{ request()->routeIs('announcements.*') ? 'active' : '' }}">Kabar dan Informasi Daerah</a>
             <a href="{{ route('siladesbeng.profile') }}" class="sd-nav-link {{ request()->routeIs('siladesbeng.profile') ? 'active' : '' }}">Profil SiladesBeng</a>
             <a href="{{ route('kemitraan.create') }}" class="sd-nav-link {{ request()->routeIs('kemitraan.*') ? 'active' : '' }}">Gabung Kemitraan</a>
             @auth

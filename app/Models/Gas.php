@@ -22,6 +22,8 @@ class Gas extends Model
         'foto_2',
         'foto_3',
         'lokasi',
+        'latitude',
+        'longitude',
         'satuan', // Tambahkan jika ingin seperti penyewaan
         'region_id',
     ];

@@ -11,51 +11,70 @@ class AnnouncementController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Announcement::with(['region', 'admin'])
+        // 1. Berita Daerah (Global / Se-Kabupaten)
+        $beritasQuery = Announcement::with(['region', 'admin', 'images'])
             ->where('is_active', true)
+            ->where('post_category', 'Berita')
             ->orderBy('created_at', 'desc');
 
-        // Jika pengguna sudah login, filter hanya ke wilayah mereka dan induknya
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $beritasQuery->where(function($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        $beritas = $beritasQuery->paginate(12, ['*'], 'page_b');
+
+        // 2. Pengumuman Warga (Sesuai domisili)
         $user = auth()->user();
+        $pengumumanQuery = Announcement::with(['region', 'admin'])
+            ->where('is_active', true)
+            ->where('post_category', 'Pengumuman')
+            ->orderBy('created_at', 'desc');
+
+        // Filter berdasarkan wilayah pengguna
         if ($user && $user->region_id) {
-            // Dapatkan seluruh induk (Desa -> Kecamatan -> Kabupaten)
             $ancestorIds = Region::getAncestorIds($user->region_id);
             $relevantRegionIds = array_merge([$user->region_id], $ancestorIds);
             
-            // Hanya tampilkan pengumuman dari hierarki wilayahnya (atau yang bersifat global/null)
-            $query->where(function($q) use ($relevantRegionIds) {
-                $q->whereIn('region_id', $relevantRegionIds)
-                  ->orWhereNull('region_id');
+            $pengumumanQuery->where(function($q) use ($relevantRegionIds) {
+                $q->whereIn('target_audience_id', $relevantRegionIds)
+                  ->orWhere('target_audience_type', 'all')
+                  ->orWhereNull('target_audience_id'); // Untuk data lama yang tidak punya target khusus
             });
         }
-        // Jika Guest (Belum Login), tidak difilter (bisa lihat semua)
 
         if ($request->filled('type')) {
-            $query->where('type', $request->type);
+            $pengumumanQuery->where('type', $request->type);
         }
 
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->searchWhereLike(['title', 'description'], $search);
+            $pengumumanQuery->where(function($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
             });
         }
 
-        $announcements = $query->paginate(12);
+        $pengumumans = $pengumumanQuery->paginate(12, ['*'], 'page_p');
 
-        return view('users.announcements.index', compact('announcements'));
+        $activeTab = $request->get('tab', 'berita'); // Default tab
+
+        return view('users.announcements.index', compact('beritas', 'pengumumans', 'activeTab'));
     }
 
     public function show($id)
     {
-        $announcement = Announcement::with(['region', 'admin', 'laporan', 'laporan.user'])
+        $announcement = Announcement::with(['region', 'admin', 'laporan', 'laporan.user', 'images'])
             ->where('is_active', true)
             ->findOrFail($id);
 
-        // Fetch related announcements from same region
+        // Fetch related announcements from same category
         $relatedAnnouncements = Announcement::where('is_active', true)
             ->where('id', '!=', $id)
-            ->where('region_id', $announcement->region_id)
+            ->where('post_category', $announcement->post_category)
             ->orderBy('created_at', 'desc')
             ->take(3)
             ->get();

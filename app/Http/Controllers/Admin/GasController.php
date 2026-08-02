@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use App\Models\Gas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -34,7 +35,18 @@ class GasController extends Controller
     // ===========================
     public function create()
     {
-        return view('admin.unit.penjualan_gas.create');
+        $savedLocations = Gas::select('lokasi', 'latitude', 'longitude')
+            ->whereNotNull('lokasi')
+            ->where('lokasi', '!=', '')
+            ->distinct()
+            ->get();
+            
+        $categories = Category::where('region_id', auth()->user()->region_id)
+            ->where(function($q) {
+                $q->where('type', 'gas')->orWhereNull('type');
+            })->orderBy('name')->get();
+
+        return view('admin.unit.penjualan_gas.create', compact('savedLocations', 'categories'));
     }
 
     // ===========================
@@ -50,6 +62,8 @@ class GasController extends Controller
             'status' => 'required|in:tersedia,dipesan,rusak',
             'kategori' => 'required|string|max:255',
             'lokasi' => 'required|string|max:255',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
             'satuan' => 'required|string|max:255',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
             'foto_2' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
@@ -70,7 +84,10 @@ class GasController extends Controller
         $gas->status = $validated['status'];
         $gas->kategori = $validated['kategori'];
         $gas->lokasi = $validated['lokasi'];
+        $gas->latitude = $validated['latitude'] ?? null;
+        $gas->longitude = $validated['longitude'] ?? null;
         $gas->satuan = $validated['satuan'];
+        $gas->region_id = auth()->user()->region_id;
 
         if ($request->hasFile('foto')) {
             $gas->foto = ImageCompressorService::compressAndStore($request->file('foto'), 'gas');
@@ -102,7 +119,18 @@ class GasController extends Controller
     public function edit($id)
     {
         $gas = Gas::findOrFail($id);
-        return view('admin.unit.penjualan_gas.edit', compact('gas'));
+        $savedLocations = Gas::select('lokasi', 'latitude', 'longitude')
+            ->whereNotNull('lokasi')
+            ->where('lokasi', '!=', '')
+            ->distinct()
+            ->get();
+            
+        $categories = Category::where('region_id', auth()->user()->region_id)
+            ->where(function($q) {
+                $q->where('type', 'gas')->orWhereNull('type');
+            })->orderBy('name')->get();
+
+        return view('admin.unit.penjualan_gas.edit', compact('gas', 'savedLocations', 'categories'));
     }
 
     // ===========================
@@ -118,6 +146,8 @@ class GasController extends Controller
             'status' => 'required|in:tersedia,dipesan,rusak',
             'kategori' => 'required|string|max:255',
             'lokasi' => 'required|string|max:255',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
             'satuan' => 'required|string|max:255',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
             'foto_2' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
@@ -142,6 +172,8 @@ class GasController extends Controller
             'status' => $validated['status'],
             'kategori' => $validated['kategori'],
             'lokasi' => $validated['lokasi'],
+            'latitude' => $validated['latitude'] ?? null,
+            'longitude' => $validated['longitude'] ?? null,
             'satuan' => $validated['satuan'],
         ];
 

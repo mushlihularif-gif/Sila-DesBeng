@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\SystemSettingController;
 
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\Admin\ProfileController;
+use App\Http\Controllers\Admin\CategoryController;
 
 Route::get('/media/avatar/{filename}', [MediaController::class, 'adminAvatar'])->name('media.avatar');
 Route::get('/media/profile/{filename}', [MediaController::class, 'userProfile'])->name('media.profile');
@@ -458,6 +459,14 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
     Route::put('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('admin.notifications.mark-all-read');
     Route::delete('/notifications/hapus-semua', [NotificationController::class, 'deleteAll'])->name('admin.notifications.deleteAll');
     Route::delete('/notifications/{notification}', [NotificationController::class, 'destroy'])->name('admin.notifications.destroy');
+
+    // Manajemen Kategori (CRUD)
+    Route::resource('categories', CategoryController::class)->except(['create', 'show', 'edit'])->names([
+        'index' => 'admin.categories.index',
+        'store' => 'admin.categories.store',
+        'update' => 'admin.categories.update',
+        'destroy' => 'admin.categories.destroy',
+    ]);
 
     // Route untuk Pengaturan Sistem
     Route::get('/pengaturan-sistem', [SystemSettingController::class, 'index'])->name('admin.system-settings.index');

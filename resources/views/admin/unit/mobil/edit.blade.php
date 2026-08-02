@@ -219,9 +219,11 @@
                                         <div class="input-group">
                                             <select class="form-select modern-input" id="kategori" name="kategori" required>
                                                 <option value="" disabled>Pilih Kategori</option>
-                                                <option value="Perlengkapan Acara" {{ old('kategori', $mobil->kategori) == 'Perlengkapan Acara' ? 'selected' : '' }}>Perlengkapan Acara</option>
-                                                <option value="Tenda Acara" {{ old('kategori', $mobil->kategori) == 'Tenda Acara' ? 'selected' : '' }}>Tenda Acara</option>
-                                                <option value="Dekorasi" {{ old('kategori', $mobil->kategori) == 'Dekorasi' ? 'selected' : '' }}>Dekorasi</option>
+                                                @foreach($categories as $category)
+                                                    <option value="{{ $category->name }}" {{ old('kategori', $mobil->kategori) == $category->name ? 'selected' : '' }}>
+                                                        {{ $category->name }}
+                                                    </option>
+                                                @endforeach
                                             </select>
                                             <button type="button" class="btn btn-outline-primary modern-btn-outline" 
                                                     data-bs-toggle="modal" data-bs-target="#addCategoryModal">
@@ -656,7 +658,7 @@
                                     <i class='bx bx-map me-2'></i>Status & Lokasi
                                 </h6>
                                 <div class="row g-3">
-                                    <div class="col-md-6">
+                                    <div class="col-md-12">
                                         <label class="form-label fw-semibold" for="status">
                                             Status <span class="text-danger">*</span>
                                         </label>
@@ -665,12 +667,57 @@
                                             <option value="disewa" {{ old('status', $mobil->status) == 'disewa' ? 'selected' : '' }}>Disewa</option>
                                             <option value="rusak" {{ old('status', $mobil->status) == 'rusak' ? 'selected' : '' }}>Rusak</option>
                                         </select>
-                                    </div><div class="col-md-6">
-                                        <label class="form-label fw-semibold" for="lokasi">
-                                            Lokasi <span class="text-danger">*</span>
-                                        </label>
-                                        <input type="text" class="form-control modern-input" id="lokasi" 
-                                               name="lokasi" value="{{ old('lokasi', $mobil->lokasi ?? 'Desa Pematang Duku Timur') }}" required />
+                                    </div>
+                                    <div class="col-md-12 mt-3">
+                                        <label class="form-label fw-semibold">Pilih Metode Lokasi <span class="text-danger">*</span></label>
+                                        <div class="d-flex gap-3 mb-3">
+                                            @if($savedLocations->count() > 0)
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="lokasi_mode" id="mode_saved" value="saved" onchange="toggleLokasiMode(this.value)">
+                                                <label class="form-check-label" for="mode_saved">
+                                                    Gunakan Lokasi Tersimpan
+                                                </label>
+                                            </div>
+                                            @endif
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="lokasi_mode" id="mode_new" value="new" checked onchange="toggleLokasiMode(this.value)">
+                                                <label class="form-check-label" for="mode_new">
+                                                    Tentukan Lokasi Baru (Edit Manual)
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    @if($savedLocations->count() > 0)
+                                    <div class="col-md-12 mb-3" id="saved_location_container" style="display: none;">
+                                        <label class="form-label fw-semibold" for="saved_lokasi">Pilih Lokasi</label>
+                                        <select class="form-select modern-input" id="saved_lokasi" onchange="fillLocationData(this)">
+                                            <option value="">-- Pilih Lokasi --</option>
+                                            @foreach($savedLocations as $loc)
+                                                <option value="{{ $loc->lokasi }}" data-lat="{{ $loc->latitude }}" data-lng="{{ $loc->longitude }}">
+                                                    {{ $loc->lokasi }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    @endif
+                                    <div class="col-md-12" id="new_location_container">
+                                        <div class="row g-3">
+                                            <div class="col-md-12">
+                                                <label class="form-label fw-semibold" for="lokasi">
+                                                    Lokasi <span class="text-danger">*</span>
+                                                </label>
+                                                <input type="text" class="form-control modern-input" id="lokasi" 
+                                                       name="lokasi" value="{{ old('lokasi', $mobil->lokasi ?? 'Desa Pematang Duku Timur') }}" required />
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-semibold" for="latitude">Latitude (Opsional)</label>
+                                                <input type="text" class="form-control modern-input" id="latitude" name="latitude" value="{{ old('latitude', $mobil->latitude) }}" placeholder="-6.200000" />
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-semibold" for="longitude">Longitude (Opsional)</label>
+                                                <input type="text" class="form-control modern-input" id="longitude" name="longitude" value="{{ old('longitude', $mobil->longitude) }}" placeholder="106.816666" />
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1203,18 +1250,47 @@
     updateSupirStatusBorongan();
     updateBbmStatusBorongan();
 
-    // Fungsi untuk menambah kategori
+    // Fungsi untuk menambah kategori via AJAX
     document.getElementById('saveCategoryBtn')?.addEventListener('click', function() {
         const newKategori = document.getElementById('new_kategori')?.value.trim();
         if (newKategori) {
-            const select = document.getElementById('kategori');
-            const option = document.createElement('option');
-            option.value = newKategori;
-            option.textContent = newKategori;
-            select.appendChild(option);
-            select.value = newKategori;
-            bootstrap.Modal.getOrCreateInstance(document.getElementById('addCategoryModal'))?.hide();
-            document.getElementById('new_kategori').value = '';
+            const saveBtn = this;
+            const originalText = saveBtn.innerHTML;
+            saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Menyimpan...';
+            saveBtn.disabled = true;
+
+            fetch('{{ route("admin.categories.store") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ name: newKategori, type: 'mobil' })
+            })
+            .then(response => response.json())
+            .then(data => {
+                saveBtn.innerHTML = originalText;
+                saveBtn.disabled = false;
+                
+                if(data.success) {
+                    const select = document.getElementById('kategori');
+                    const option = document.createElement('option');
+                    option.value = data.category.name;
+                    option.textContent = data.category.name;
+                    select.appendChild(option);
+                    select.value = data.category.name;
+                    bootstrap.Modal.getOrCreateInstance(document.getElementById('addCategoryModal'))?.hide();
+                    document.getElementById('new_kategori').value = '';
+                } else {
+                    alert('Gagal menyimpan kategori.');
+                }
+            })
+            .catch(err => {
+                saveBtn.innerHTML = originalText;
+                saveBtn.disabled = false;
+                alert('Terjadi kesalahan jaringan.');
+            });
         } else {
             alert('Silakan masukkan nama kategori.');
         }
@@ -1304,6 +1380,45 @@
             });
         });
     });
+
+    function toggleLokasiMode(mode) {
+        const savedContainer = document.getElementById('saved_location_container');
+        const newContainer = document.getElementById('new_location_container');
+        const select = document.getElementById('saved_lokasi');
+        const inputLokasi = document.getElementById('lokasi');
+        const inputLat = document.getElementById('latitude');
+        const inputLng = document.getElementById('longitude');
+
+        if (mode === 'saved') {
+            if(savedContainer) savedContainer.style.display = 'block';
+            newContainer.style.display = 'none';
+            if(select) {
+                inputLokasi.readOnly = true;
+                inputLat.readOnly = true;
+                inputLng.readOnly = true;
+                fillLocationData(select);
+            }
+        } else {
+            if(savedContainer) savedContainer.style.display = 'none';
+            newContainer.style.display = 'block';
+            inputLokasi.readOnly = false;
+            inputLat.readOnly = false;
+            inputLng.readOnly = false;
+        }
+    }
+
+    function fillLocationData(select) {
+        const option = select.options[select.selectedIndex];
+        if (option && option.value !== '') {
+            document.getElementById('lokasi').value = option.value;
+            document.getElementById('latitude').value = option.dataset.lat || '';
+            document.getElementById('longitude').value = option.dataset.lng || '';
+        } else {
+            document.getElementById('lokasi').value = '';
+            document.getElementById('latitude').value = '';
+            document.getElementById('longitude').value = '';
+        }
+    }
 
 </script>
 @endsection

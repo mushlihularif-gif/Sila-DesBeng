@@ -51,52 +51,93 @@
 
         <div class="max-w-7xl mx-auto px-6 relative z-10">
             <!-- Header Section -->
-            <div class="text-center mb-20 mt-12">
+            <div class="text-center mb-12 mt-12">
                 <h1 class="text-3xl md:text-4xl font-bold mb-4">
                     <span class="text-gray-800">Unit </span>
                     <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Penjualan Gas</span>
                 </h1>
             </div>
 
+            <!-- Category Filter -->
+            @php
+                $categories = $items->pluck('kategori')->filter()->unique()->values();
+            @endphp
+            
+            @if($categories->count() > 0)
+            <div class="flex flex-wrap justify-center gap-3 mb-10 max-w-4xl mx-auto px-4">
+                <button class="filter-btn active px-6 py-2.5 rounded-full font-semibold text-sm transition-all duration-300 bg-blue-500 text-white shadow-md border border-transparent hover:bg-blue-600 hover:shadow-lg hover:scale-105" data-filter="all">
+                    Semua
+                </button>
+                @foreach($categories as $category)
+                <button class="filter-btn px-6 py-2.5 rounded-full font-semibold text-sm transition-all duration-300 bg-white text-gray-600 border border-gray-200 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 shadow-sm hover:shadow-md" data-filter="{{ Str::slug($category) }}">
+                    {{ ucfirst(str_replace('-', ' ', $category)) }}
+                </button>
+                @endforeach
+            </div>
+            @endif
+
             <!-- Grid Kartu Produk -->
             @if($items->count() > 0)
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16 max-w-6xl mx-auto">
                     @foreach($items as $item)
-                    <a href="{{ route('gas.sales.show', $item->id) }}" class="block">
-                    <div class="product-card bg-white rounded-[2rem] p-6 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 mx-auto w-full max-w-[380px]">
+                    <a href="{{ route('gas.sales.show', $item->id) }}" class="block group product-item transition-all duration-500" data-category="{{ $item->kategori ? Str::slug($item->kategori) : '' }}">
+                    <div class="product-card bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 mx-auto w-full max-w-[350px] flex flex-col h-full">
+
+                        
                         <!-- Gambar Produk -->
-                        <div class="product-image-wrapper mb-6 relative aspect-[4/3] overflow-hidden rounded-2xl bg-gray-50 flex items-center justify-center p-4">
+                        <div class="product-image-wrapper mb-6 relative aspect-square overflow-hidden rounded-2xl bg-gradient-to-b from-gray-50 to-gray-100/50 flex items-center justify-center group-hover:from-blue-50 group-hover:to-blue-50/30 transition-colors">
                             <img src="{{ asset('storage/' . $item->foto) }}" 
                                  alt="{{ $item->jenis_gas }}"
                                  loading="lazy"
-                                 class="product-image w-full h-full object-contain">
+                                 class="product-image w-full h-full object-contain drop-shadow-md group-hover:scale-105 transition-transform duration-500 p-2">
                             
-                            <!-- Badges -->
-                            @if($item->kategori)
-                                <span class="absolute top-3 left-3 px-3 py-1 text-[10px] font-bold rounded-full {{ $item->kategori === 'bersubsidi' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700' }}">
-                                    {{ ucfirst(str_replace('-', ' ', $item->kategori)) }}
-                                </span>
-                            @endif
+                            <!-- Status Badge -->
                             @if($item->stok > 0)
-                                <span class="absolute top-3 right-3 px-3 py-1 text-[10px] font-bold rounded-full bg-emerald-500 text-white shadow-sm">Tersedia</span>
+                                <div class="absolute top-4 right-4 px-3 py-1.5 text-[10px] font-bold rounded-full bg-green-500 text-white shadow-md flex items-center gap-1 tracking-wider uppercase">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    Tersedia
+                                </div>
                             @else
-                                <span class="absolute top-3 right-3 px-3 py-1 text-[10px] font-bold rounded-full bg-red-500 text-white shadow-sm">Habis</span>
+                                <div class="absolute top-4 right-4 px-3 py-1.5 text-[10px] font-bold rounded-full bg-red-500 text-white shadow-md flex items-center gap-1 tracking-wider uppercase">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                    Habis
+                                </div>
                             @endif
                         </div>
 
                         <!-- Info Produk -->
-                        <div class="product-info text-center">
-                            <h3 class="product-name text-sm font-bold text-gray-800 mb-2">
+                        <div class="product-info flex flex-col flex-1 px-2">
+                            <!-- Kategori -->
+                            @if($item->kategori)
+                                <div class="mb-4">
+                                    <span class="inline-flex items-center px-3 py-1.5 rounded-md text-[10px] font-bold text-white bg-blue-600 shadow-sm">
+                                        {{ ucfirst(str_replace('-', ' ', $item->kategori)) }}
+                                    </span>
+                                </div>
+                            @endif
+
+                            <h3 class="product-name text-base font-bold text-gray-800 mb-2 line-clamp-2 group-hover:text-[#115789] transition-colors">
                                 {{ $item->jenis_gas }}
                             </h3>
-                            <p class="text-[#115789] font-bold text-lg mb-1">
-                                Rp {{ number_format($item->harga_satuan, 0, ',', '.') }}
-                                <span class="text-xs text-gray-500 font-normal">/ {{ $item->satuan ?? 'tabung' }}</span>
-                            </p>
-                            <p class="text-xs text-gray-500 flex items-center justify-center gap-1">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-                                Stok: {{ $item->stok }} {{ $item->satuan ?? 'tabung' }}
-                            </p>
+                            
+                            <div class="mt-auto pt-3 flex items-end justify-between">
+                                <div class="flex flex-col">
+                                    <span class="text-xs text-gray-500 mb-0.5 font-medium">Harga</span>
+                                    <p class="text-gray-900 font-bold text-xl tracking-tight leading-none">
+                                        Rp {{ number_format($item->harga_satuan, 0, ',', '.') }}<span class="text-xs text-gray-400 font-medium tracking-normal ml-0.5">/{{ $item->satuan ?? 'Unit' }}</span>
+                                    </p>
+                                </div>
+                                <div class="text-right flex flex-col">
+                                    <span class="text-xs text-gray-400 mb-0.5 font-medium">Sisa Stok</span>
+                                    <p class="text-base font-bold {{ $item->stok > 0 ? 'text-gray-800' : 'text-red-500' }} leading-none">
+                                        {{ $item->stok }}
+                                    </p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     </a>
@@ -109,7 +150,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
                     </svg>
                     <h3 class="text-xl font-semibold text-gray-700 mb-2">Belum Ada Produk Gas Tersedia</h3>
-                    <p class="text-gray-500">Produk penjualan gas akan segera ditambahkan oleh BUMDes.</p>
+                    <p class="text-gray-500">Mohon menunggu, stok produk gas akan segera diperbarui dalam waktu dekat.</p>
                 </div>
             @endif
         </div>
@@ -204,6 +245,64 @@
                     this.style.opacity = '1';
                 });
             }
+        });
+
+        // Filter Logic with State Persistence
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const productItems = document.querySelectorAll('.product-item');
+        
+        // Gunakan path URL untuk membedakan state antar halaman
+        const storageKey = 'filter_' + window.location.pathname;
+
+        const activeClasses = ['bg-blue-500', 'text-white', 'shadow-md', 'border-transparent', 'hover:bg-blue-600', 'hover:shadow-lg', 'hover:scale-105', 'active'];
+        const inactiveClasses = ['bg-white', 'text-gray-600', 'border-gray-200', 'hover:bg-blue-50', 'hover:text-blue-600', 'hover:border-blue-200', 'shadow-sm', 'hover:shadow-md'];
+
+        function applyFilter(filterValue) {
+            // Update button UI
+            filterBtns.forEach(btn => {
+                if (btn.getAttribute('data-filter') === filterValue) {
+                    btn.classList.remove(...inactiveClasses);
+                    btn.classList.add(...activeClasses);
+                } else {
+                    btn.classList.remove(...activeClasses);
+                    btn.classList.add(...inactiveClasses);
+                }
+            });
+
+            // Update items display with smooth opacity
+            productItems.forEach(item => {
+                // Disable transition temporarily to prevent weird jumping
+                item.style.transition = 'none';
+                
+                if (filterValue === 'all' || item.getAttribute('data-category') === filterValue) {
+                    item.style.display = 'block';
+                    item.style.opacity = '0';
+                    // Force reflow
+                    void item.offsetWidth; 
+                    // Re-enable transition and fade in
+                    item.style.transition = 'opacity 0.4s ease-out, transform 0.3s ease';
+                    item.style.opacity = '1';
+                } else {
+                    item.style.display = 'none';
+                    item.style.opacity = '0';
+                }
+            });
+            
+            // Simpan state pilihan terakhir
+            sessionStorage.setItem(storageKey, filterValue);
+        }
+
+        // Initialize state saat halaman dimuat (BfCache / Back button support)
+        const savedFilter = sessionStorage.getItem(storageKey) || 'all';
+        applyFilter(savedFilter);
+
+        // Click handlers
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault(); // Mencegah default behavior
+                const filterValue = btn.getAttribute('data-filter');
+                applyFilter(filterValue);
+            });
         });
     });
 </script>

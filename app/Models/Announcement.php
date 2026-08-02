@@ -13,6 +13,9 @@ class Announcement extends Model
         'region_id',
         'admin_id',
         'laporan_id',
+        'post_category',
+        'target_audience_type',
+        'target_audience_id',
         'title',
         'description',
         'type',
@@ -40,5 +43,15 @@ class Announcement extends Model
     public function laporan()
     {
         return $this->belongsTo(Laporan::class);
+    }
+
+    public function targetRegion()
+    {
+        return $this->belongsTo(Region::class, 'target_audience_id');
+    }
+
+    public function images()
+    {
+        return $this->hasMany(AnnouncementImage::class);
     }
 }

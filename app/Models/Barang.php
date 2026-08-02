@@ -22,6 +22,8 @@ class Barang extends Model
         'foto_2',
         'foto_3',
         'lokasi',
+        'latitude',
+        'longitude',
         'satuan', 
     ];
 

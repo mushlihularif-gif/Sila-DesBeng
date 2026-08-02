@@ -252,11 +252,11 @@
                             'color' => 'primary'
                         ],
                         'Pengumuman' => [
-                            'title' => 'Pengumuman & Event',
+                            'title' => 'Kabar dan Informasi Daerah',
                             'count' => (\App\Models\Announcement::count() ?? 0),
                             'label' => 'Info',
                             'route' => route('admin.announcements.index'),
-                            'image' => asset('User/img/elemen/event.png'),
+                            'image' => asset('User/img/elemen/KabardanInformasiDaerah.png'),
                             'color' => 'secondary'
                         ]
                     ];

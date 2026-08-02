@@ -45,7 +45,7 @@
     </style>
     @endpush
 
-    {{-- UTAMA --}}<main class="flex-grow relative w-full overflow-x-clip">
+    {{-- UTAMA --}}<main class="flex-grow relative w-full overflow-hidden">
 
         <!-- Layer khusus untuk efek blur di belakang navbar (hanya di paling atas) -->
         <div id="navbar-blur-bg">
@@ -247,7 +247,7 @@
                     <div class="flex justify-between items-end mb-8">
                         <div>
                             <h2 class="text-3xl font-bold bg-gradient-to-r from-[#115789] to-blue-300 bg-clip-text text-transparent drop-shadow-sm mb-2">
-                                Kabar Daerah
+                                Kabar dan Informasi Daerah
                             </h2>
                             <p class="text-gray-500">Pengumuman dan agenda terbaru</p>
                         </div>
@@ -374,8 +374,8 @@
                                 @endif
 
                                 @if($isServiceActive('Pengumuman dan Event'))
-                                <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="5" data-name="Pengumuman dan Event" onclick="window.location.href='{{ $isLoggedInWithRegion ? route('announcements.index') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=announcements.index' }}'">
-                                    <img src="{{ asset('User/img/elemen/event.png') }}" alt="Event" loading="lazy">
+                                <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="5" data-name="Kabar dan Informasi Daerah" onclick="window.location.href='{{ $isLoggedInWithRegion ? route('announcements.index') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=announcements.index' }}'">
+                                    <img src="{{ asset('User/img/elemen/KabardanInformasiDaerah.png') }}" alt="Event" loading="lazy">
                                 </div>
                                 @endif
                             </div>
@@ -513,7 +513,7 @@
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <div class="w-3 h-3 rounded-sm" style="background-color: #06b6d4;"></div>
-                                    <span class="text-gray-600 font-medium">Pengumuman & Event</span>
+                                    <span class="text-gray-600 font-medium">Kabar dan Informasi Daerah</span>
                                 </div>
                             </div>
                         </div>
@@ -594,7 +594,7 @@
                                     <span class="font-semibold text-gray-800">SiladesBeng</span> (Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis) merupakan platform digital terpadu berskala kabupaten yang dirancang khusus untuk memodernisasi tata kelola administrasi dan pelayanan publik di seluruh jaringan kecamatan hingga tingkat desa se-Kabupaten Bengkalis. Platform ini mengintegrasikan berbagai pilar layanan esensial masyarakat dan operasional BUMDes dalam satu pintu.
                                 </p>
                                 <p>
-                                    Melalui SiladesBeng, masyarakat Kabupaten Bengkalis dapat dengan mudah mengakses beragam unit layanan, mulai dari penyewaan alat, pendistribusian gas, peminjaman mobilitas (kendaraan), hingga pemanfaatan fasilitas umum. Di samping itu, sistem ini juga mewadahi fitur <span class="font-medium text-gray-800">Pelaporan Warga</span> serta pusat informasi <span class="font-medium text-gray-800">Pengumuman & Event</span> secara <i>real-time</i>. Kami percaya bahwa ekosistem digital yang transparan dan terukur dari jenjang kabupaten hingga pelosok desa ini merupakan kunci utama untuk mewujudkan pelayanan publik yang prima, memajukan perekonomian daerah, dan membangun kemandirian masyarakat Bengkalis yang berkelanjutan.
+                                    Melalui SiladesBeng, masyarakat Kabupaten Bengkalis dapat dengan mudah mengakses beragam unit layanan, mulai dari penyewaan alat, pendistribusian gas, peminjaman mobilitas (kendaraan), hingga pemanfaatan fasilitas umum. Di samping itu, sistem ini juga mewadahi fitur <span class="font-medium text-gray-800">Pelaporan Warga</span> serta pusat informasi <span class="font-medium text-gray-800">Kabar dan Informasi Daerah</span> secara <i>real-time</i>. Kami percaya bahwa ekosistem digital yang transparan dan terukur dari jenjang kabupaten hingga pelosok desa ini merupakan kunci utama untuk mewujudkan pelayanan publik yang prima, memajukan perekonomian daerah, dan membangun kemandirian masyarakat Bengkalis yang berkelanjutan.
                                 </p>
                             </div>
                         </div>
@@ -1348,7 +1348,7 @@
                             data: unitPopulerData.laporan
                         },
                         {
-                            name: 'Pengumuman & Event',
+                            name: 'Kabar dan Informasi Daerah',
                             data: unitPopulerData.pengumuman
                         }
                     ],

@@ -18,6 +18,8 @@ class FasilitasUmum extends Model
         'foto_2',
         'foto_3',
         'lokasi',
+        'latitude',
+        'longitude',
         'region_id',
         'opsi_supir',
         'bbm_ditanggung',

@@ -7,11 +7,11 @@
     {{-- Custom Vector Abstract Background --}}
     @include('partials.abstract-bg')
 
-    <div class="max-w-3xl mx-auto py-10 px-4 sm:px-6 lg:px-8 mt-20 relative z-10">
-        <div class="bg-white/60 backdrop-blur-md rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="max-w-3xl mx-auto py-10 px-4 sm:px-6 lg:px-8 mt-20 relative z-10 animate-section">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="p-8">
             <div class="text-center mb-10">
-                <h2 class="text-3xl font-bold text-gray-900">Verifikasi Identitas (KYC)</h2>
+                <h2 class="text-3xl font-bold text-gray-900">Verifikasi Identitas</h2>
                 <p class="mt-2 text-sm text-gray-600">Selesaikan verifikasi untuk mendapatkan fitur penuh SiladesBeng.</p>
             </div>
 
@@ -39,7 +39,7 @@
                             <div class="flex text-sm text-gray-600 justify-center">
                                 <label for="ktp_image" class="relative cursor-pointer bg-transparent rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
                                     <span>Pilih File KTP</span>
-                                    <input id="ktp_image" name="ktp_image" type="file" class="hidden" accept="image/*" required>
+                                    <input id="ktp_image" name="ktp_image" type="file" class="hidden" accept="image/*">
                                 </label>
                                 <p class="pl-1">atau drag and drop</p>
                             </div>
@@ -182,6 +182,33 @@
 </main>
 @endsection
 
+@push('styles')
+<style>
+    /* Smooth animations */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .animate-section {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    }
+
+    .animate-section.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+</style>
+@endpush
+
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <!-- MediaPipe Scripts -->
@@ -191,6 +218,41 @@
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
 
 <script>
+    // --- SweetAlert Toast Configuration ---
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.addEventListener('mouseenter', Swal.stopTimer)
+            toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+    });
+
+    // --- Intersection Observer for Entrance Animations ---
+    document.addEventListener('DOMContentLoaded', () => {
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.animate-section').forEach((el) => {
+            observer.observe(el);
+        });
+    });
+
     let currentKycId = null;
     let faceSnapshot = null;
     
@@ -251,7 +313,10 @@
         
         const formData = new FormData(this);
         if(!fileInput.files[0]) {
-            Swal.fire('Error', 'Silakan pilih foto KTP terlebih dahulu', 'error');
+            Toast.fire({
+                icon: 'error',
+                title: 'Silakan pilih foto KTP terlebih dahulu'
+            });
             return;
         }
 
@@ -299,10 +364,16 @@
                 document.getElementById('step-1').classList.add('hidden');
                 document.getElementById('step-1-half').classList.remove('hidden');
             } else {
-                Swal.fire('Gagal', data.message || 'Terjadi kesalahan saat membaca KTP.', 'error');
+                Toast.fire({
+                    icon: 'error',
+                    title: data.message || 'Terjadi kesalahan saat membaca KTP.'
+                });
             }
         } catch (error) {
-            Swal.fire('Gagal', 'Terjadi kesalahan server.', 'error');
+            Toast.fire({
+                icon: 'error',
+                title: 'Terjadi kesalahan server.'
+            });
             console.error(error);
         } finally {
             btn.disabled = false;
@@ -367,11 +438,126 @@
         return (p2_p6 + p3_p5) / (2.0 * p1_p4);
     }
 
-    // Animations
-    const animDepan = `<svg class="w-16 h-16 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
-    const animKedip = `<svg class="w-16 h-16 animate-ping" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>`;
-    const animKananKiri = `<svg class="w-16 h-16 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>`;
-    const animSelesai = `<svg class="w-16 h-16 text-green-400 animate-pulse" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>`;
+    // Base SVG Defs for the 3D Tanjak AI Robot
+    const svgDefs = `
+        <defs>
+            <radialGradient id="bodyGrad" cx="40%" cy="30%" r="60%">
+                <stop offset="0%" stop-color="#ffffff"/>
+                <stop offset="70%" stop-color="#e2e8f0"/>
+                <stop offset="100%" stop-color="#94a3b8"/>
+            </radialGradient>
+            <linearGradient id="visorGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#0a1128"/>
+                <stop offset="100%" stop-color="#1e293b"/>
+            </linearGradient>
+            <linearGradient id="blueGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#3b82f6"/>
+                <stop offset="100%" stop-color="#1d4ed8"/>
+            </linearGradient>
+            <linearGradient id="yellowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#fde047"/>
+                <stop offset="100%" stop-color="#ca8a04"/>
+            </linearGradient>
+        </defs>
+    `;
+
+    const svgBody = `
+        <!-- Left Ear (Headphone) -->
+        <rect x="18" y="55" width="12" height="30" rx="4" fill="url(#blueGrad)" transform="rotate(15, 24, 70)" />
+        <circle cx="20" cy="70" r="14" fill="#0f172a" />
+        <circle cx="20" cy="70" r="12" fill="url(#blueGrad)" />
+        <circle cx="20" cy="70" r="6" fill="#38bdf8" />
+        
+        <!-- Right Ear (Headphone) -->
+        <rect x="90" y="55" width="12" height="30" rx="4" fill="url(#blueGrad)" transform="rotate(-15, 96, 70)" />
+        <circle cx="100" cy="70" r="14" fill="#0f172a" />
+        <circle cx="100" cy="70" r="12" fill="url(#blueGrad)" />
+        <circle cx="100" cy="70" r="6" fill="#38bdf8" />
+        
+        <!-- Mic Boom (Right side) -->
+        <path d="M 100 80 Q 95 100 80 95" fill="none" stroke="url(#blueGrad)" stroke-width="4" stroke-linecap="round" />
+        <rect x="74" y="92" width="8" height="6" rx="3" fill="url(#yellowGrad)" transform="rotate(-20, 78, 95)" />
+
+        <!-- Main Body -->
+        <circle cx="60" cy="65" r="38" fill="url(#bodyGrad)" stroke="#cbd5e1" stroke-width="1"/>
+        
+        <!-- Visor (Face Screen) -->
+        <rect x="30" y="48" width="60" height="42" rx="21" fill="url(#visorGrad)" stroke="#334155" stroke-width="2"/>
+        
+        <!-- Tanjak (Headgear) -->
+        <path d="M 35 45 C 50 20, 65 10, 80 5 C 75 25, 80 40, 85 45 Z" fill="url(#blueGrad)" />
+        <path d="M 45 42 C 60 30, 75 20, 85 20 C 82 30, 85 38, 88 45 Z" fill="url(#yellowGrad)" />
+        <path d="M 24 50 Q 60 38 96 50 L 92 40 Q 60 28 28 40 Z" fill="url(#yellowGrad)" />
+    `;
+
+    // Animations - Tanjak AI Assistant
+    const animDepan = \`<svg class="w-32 h-32 mx-auto drop-shadow-2xl" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+        \${svgDefs}
+        <g class="animate-[bounce_2s_infinite]">
+            \${svgBody}
+            <!-- Mouth -->
+            <path d="M 54 78 Q 60 85 66 78 Z" fill="url(#yellowGrad)" />
+            <!-- Eyes -->
+            <g class="animate-pulse">
+                <ellipse cx="45" cy="62" rx="7" ry="10" fill="#00ffff" />
+                <circle cx="42" cy="58" r="2.5" fill="#ffffff" />
+                <ellipse cx="75" cy="62" rx="7" ry="10" fill="#00ffff" />
+                <circle cx="72" cy="58" r="2.5" fill="#ffffff" />
+            </g>
+        </g>
+    </svg>\`;
+    
+    const animKedip = \`<svg class="w-32 h-32 mx-auto drop-shadow-2xl" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+        <style>
+            @keyframes aiBlink { 0%, 70%, 100% { transform: scaleY(1); } 85% { transform: scaleY(0.1); } }
+            .eye-blink { transform-origin: 60px 62px; animation: aiBlink 1.5s infinite; }
+        </style>
+        \${svgDefs}
+        <g class="animate-[bounce_2s_infinite]">
+            \${svgBody}
+            <!-- Mouth -->
+            <path d="M 54 78 Q 60 85 66 78 Z" fill="url(#yellowGrad)" />
+            <!-- Eyes -->
+            <g class="eye-blink">
+                <ellipse cx="45" cy="62" rx="7" ry="10" fill="#00ffff" />
+                <circle cx="42" cy="58" r="2.5" fill="#ffffff" />
+                <ellipse cx="75" cy="62" rx="7" ry="10" fill="#00ffff" />
+                <circle cx="72" cy="58" r="2.5" fill="#ffffff" />
+            </g>
+        </g>
+    </svg>\`;
+    
+    const animKananKiri = \`<svg class="w-32 h-32 mx-auto drop-shadow-2xl" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+        <style>
+            @keyframes aiLook { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-12px); } 75% { transform: translateX(12px); } }
+            .eye-look { animation: aiLook 2s infinite ease-in-out; }
+        </style>
+        \${svgDefs}
+        <g class="animate-[bounce_2s_infinite]">
+            \${svgBody}
+            <!-- Mouth -->
+            <path d="M 56 78 Q 60 82 64 78 Z" fill="url(#yellowGrad)" />
+            <!-- Eyes -->
+            <g class="eye-look">
+                <ellipse cx="45" cy="62" rx="7" ry="10" fill="#00ffff" />
+                <circle cx="42" cy="58" r="2.5" fill="#ffffff" />
+                <ellipse cx="75" cy="62" rx="7" ry="10" fill="#00ffff" />
+                <circle cx="72" cy="58" r="2.5" fill="#ffffff" />
+            </g>
+        </g>
+    </svg>\`;
+    
+    const animSelesai = \`<svg class="w-32 h-32 mx-auto drop-shadow-2xl" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+        \${svgDefs}
+        <g class="animate-bounce">
+            \${svgBody}
+            <!-- Happy Mouth -->
+            <path d="M 50 76 Q 60 88 70 76 Z" fill="url(#yellowGrad)" />
+            <!-- Happy Eyes -->
+            <path d="M 38 64 Q 45 54 52 64" fill="none" stroke="#4ade80" stroke-width="5" stroke-linecap="round" />
+            <path d="M 68 64 Q 75 54 82 64" fill="none" stroke="#4ade80" stroke-width="5" stroke-linecap="round" />
+        </g>
+    </svg>\`;
     const animContainer = document.getElementById('liveness-animation');
 
     let frameFront = null;
@@ -568,7 +754,7 @@
             });
     }
 
-    // --- Submit KYC ---
+    // --- Submit Verifikasi Identitas ---
     submitBtn.addEventListener('click', async function() {
         this.disabled = true;
         this.innerHTML = "Mengirim...";
@@ -601,12 +787,18 @@
                     window.location.href = '{{ route('beranda') }}';
                 });
             } else {
-                Swal.fire('Gagal', data.message, 'error');
+                Toast.fire({
+                    icon: 'error',
+                    title: data.message
+                });
                 this.disabled = false;
                 this.innerHTML = "Kirim Data";
             }
         } catch (error) {
-            Swal.fire('Gagal', 'Terjadi kesalahan server.', 'error');
+            Toast.fire({
+                icon: 'error',
+                title: 'Terjadi kesalahan server.'
+            });
             console.error(error);
             this.disabled = false;
             this.innerHTML = "Kirim Data";

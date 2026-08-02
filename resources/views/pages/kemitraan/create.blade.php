@@ -288,7 +288,9 @@
                                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                                                     @endif
                                                 </div>
-                                                <span class="text-sm font-semibold text-gray-800">{{ $service->name }}</span>
+                                                <span class="text-sm font-semibold text-gray-800">
+                                                    {{ (strpos(strtolower($service->name), 'pengumuman') !== false || strpos(strtolower($service->name), 'event') !== false) ? 'Kabar dan Informasi Daerah' : $service->name }}
+                                                </span>
                                             </div>
                                         @endforeach
                                     @else

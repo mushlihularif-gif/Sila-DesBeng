@@ -15,7 +15,7 @@ class GasSalesUserController extends Controller
         $query = Gas::where('status', '!=', 'rusak');
 
         // Validasi: Warga hanya bisa melihat gas dari desa/wilayahnya sendiri
-        if (auth()->check() && auth()->user()->hasRole('user')) {
+        if (auth()->check() && auth()->user()->role === 'user') {
             $query->where('region_id', auth()->user()->region_id);
         }
 

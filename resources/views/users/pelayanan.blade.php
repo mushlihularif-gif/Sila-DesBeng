@@ -68,25 +68,25 @@
                             <p class="text-gray-700 leading-relaxed text-justify">
                                 Laporan keuangan, laporan transaksi, serta kinerja unit usaha secara otomatis dan real-time.
                                 Sistem ini membantu meningkatkan akuntabilitas dan mempermudah evaluasi pengelolaan dana
-                                desa
+                                daerah
                                 dengan laporan digital yang rapi dan terintegrasi.
                             </p>
                         </div>
                     </div>
                 </div>
 
-                {{-- Service 3: Penjualan Gas Desa --}}
+                {{-- Service 3: Penjualan Gas Daerah --}}
                 <div
                     class="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-md hover:shadow-xl transition-all duration-300 border border-white/50 animate-section">
                     <div class="flex flex-col md:flex-row gap-8 items-start">
                         <div class="flex-shrink-0">
                             <div class="w-32 h-32 flex items-center justify-center">
-                                <img src="{{ asset('User/img/elemen/C3.png') }}" alt="Penjualan Gas Desa"
+                                <img src="{{ asset('User/img/elemen/C3.png') }}" alt="Penjualan Gas Daerah"
                                     class="w-full h-full object-contain drop-shadow-md">
                             </div>
                         </div>
                         <div class="flex-1">
-                            <h3 class="text-2xl font-bold text-gray-900 mb-4">Penjualan Gas Desa</h3>
+                            <h3 class="text-2xl font-bold text-gray-900 mb-4">Penjualan Gas Daerah</h3>
                             <p class="text-gray-700 leading-relaxed text-justify">
                                 Warga dapat membeli tabung gas seperti gas LPG 3 kg secara digital melalui sistem SiladesBeng.
                                 Proses pencatatan transaksi, validasi pembayaran, dan laporan penjualan dilakukan otomatis
@@ -156,21 +156,21 @@
                     </div>
                 </div>
 
-                {{-- Service 7: Pengumuman dan Event --}}
+                {{-- Service 7: Kabar dan Informasi Daerah --}}
                 <div
                     class="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-md hover:shadow-xl transition-all duration-300 border border-white/50 animate-section">
                     <div class="flex flex-col md:flex-row gap-8 items-start">
                         <div class="flex-shrink-0">
                             <div class="w-32 h-32 flex items-center justify-center">
-                                <img src="{{ asset('User/img/elemen/event.png') }}" alt="Pengumuman dan Event"
+                                <img src="{{ asset('User/img/elemen/KabardanInformasiDaerah.png') }}" alt="Kabar dan Informasi Daerah"
                                     class="w-full h-full object-contain drop-shadow-md">
                             </div>
                         </div>
                         <div class="flex-1">
-                            <h3 class="text-2xl font-bold text-gray-900 mb-4">Pengumuman dan Event</h3>
+                            <h3 class="text-2xl font-bold text-gray-900 mb-4">Kabar dan Informasi Daerah</h3>
                             <p class="text-gray-700 leading-relaxed text-justify">
-                                Pusat informasi terkini seputar kegiatan, gotong royong, berita, dan acara penting lainnya yang diadakan di daerah.
-                                Memastikan seluruh elemen warga mendapatkan informasi resmi dan terbaru dengan mudah melalui platform aplikasi web.
+                                Portal resmi yang tidak hanya menyajikan pengumuman, tetapi juga meliput berbagai berita daerah, artikel kegiatan, gotong royong, dan acara penting lainnya.
+                                Memastikan seluruh elemen warga selalu update dengan kabar berita terbaru dan informasi resmi pemerintah daerah secara terpadu melalui satu pintu digital.
                             </p>
                         </div>
                     </div>
