@@ -111,13 +111,22 @@
             </div>
 
             <!-- Evidence Photo Card -->
-            @if($laporan->bukti)
+            @if(!empty($laporan->bukti_array))
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-gray-200">
-                <div class="px-6 py-5 border-b border-gray-200 bg-gray-50">
+                <div class="px-6 py-5 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
                     <h3 class="text-lg leading-6 font-medium text-gray-900">Lampiran Bukti Foto</h3>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        {{ count($laporan->bukti_array) }} Foto
+                    </span>
                 </div>
-                <div class="px-6 py-5">
-                    <img src="{{ asset('storage/laporan/' . $laporan->bukti) }}" alt="Bukti Laporan" class="rounded-lg max-w-full h-auto shadow border border-gray-200">
+                <div class="p-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        @foreach($laporan->bukti_array as $foto)
+                        <div class="relative group rounded-lg overflow-hidden border border-gray-200 shadow-sm">
+                            <img src="{{ asset('storage/' . $foto) }}" alt="Bukti Laporan" class="object-cover w-full h-48 group-hover:scale-105 transition-transform duration-300">
+                        </div>
+                        @endforeach
+                    </div>
                 </div>
             </div>
             @endif

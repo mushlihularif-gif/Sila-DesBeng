@@ -151,7 +151,7 @@
                     
                     <div>
                         <p class="text-xl md:text-2xl mb-1">
-                            <span class="font-bold title-blue">{{ Auth::user()->name }}</span>
+                            <span class="font-bold text-gray-800">{{ Auth::user()->name }}</span>
                         </p>
                         <p class="text-sm md:text-base text-gray-500">
                             {{ Auth::user()->email }}

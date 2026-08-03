@@ -413,7 +413,7 @@
     <div class="container mx-auto px-4 md:px-6 relative" style="z-index:10">
         <div class="text-center mb-16">
             <h2 class="section-title">Statistik Real-Time</h2>
-            <p class="section-subtitle">Transparansi data pengaduan warga</p>
+            <p class="section-subtitle">Transparansi Data Pengaduan Warga se-Kabupaten Bengkalis</p>
         </div>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
             @php

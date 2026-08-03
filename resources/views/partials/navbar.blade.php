@@ -216,6 +216,7 @@
                                 <a href="{{ route('user.activity') }}" class="block px-4 py-2.5 text-gray-800 hover:bg-blue-50 hover:border-l-[3px] hover:border-l-blue-500 transition-all duration-150 border-l-[3px] border-l-transparent">
                                     <span class="text-[15px] font-normal text-center block">Aktivitas</span>
                                 </a>
+                                <div class="h-px bg-gray-100 mx-3 my-1"></div>
                                 <a href="{{ route('user.notifications') }}" class="block px-4 py-2.5 text-gray-800 hover:bg-blue-50 hover:border-l-[3px] hover:border-l-blue-500 transition-all duration-150 border-l-[3px] border-l-transparent">
                                     <span class="text-[15px] font-normal text-center block">Notifikasi</span>
                                 </a>

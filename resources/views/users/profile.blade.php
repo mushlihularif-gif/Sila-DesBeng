@@ -100,7 +100,7 @@
                 {{-- KOLOM KANAN: Kartu Form (span 8 kolom) --}}
                 <div class="lg:col-span-8 space-y-5">
                     
-                    {{-- BUMDES GAS PARTNER INFO ALERT --}}
+                    {{-- GAS PARTNER INFO ALERT --}}
                     @if(isset($setting) && $setting->whatsapp_number)
                     <div class="bg-indigo-50 border border-indigo-100 rounded-3xl p-5 shadow-sm flex flex-col sm:flex-row gap-4 items-start sm:items-center">
                         <div class="bg-indigo-100 p-3 rounded-full flex-shrink-0">
@@ -109,8 +109,8 @@
                             </svg>
                         </div>
                         <div class="flex-1">
-                            <h3 class="font-bold text-indigo-900 text-lg mb-1">Punya Warung (Ingin Jadi Pengecer)?</h3>
-                            <p class="text-indigo-700 text-sm">Bagi warga yang memiliki warung dan ingin mendaftar sebagai Mitra Gas Desa untuk pembelian dalam jumlah besar (kemitraan), harap menghubungi Halo Layanan.</p>
+                            <h3 class="font-bold text-indigo-900 text-lg mb-1">Bapak/Ibu Punya Warung?</h3>
+                            <p class="text-indigo-700 text-sm">Ingin jualan Gas Daerah? Silakan hubungi admin kami untuk mendaftar sebagai pengecer resmi.</p>
                         </div>
                         <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $setting->whatsapp_number) }}" target="_blank" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl shadow transition shrink-0 inline-flex items-center gap-2 text-sm">
                             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">

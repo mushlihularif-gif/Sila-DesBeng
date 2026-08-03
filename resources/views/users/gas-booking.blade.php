@@ -41,7 +41,7 @@
     }
     
     // Dapatkan deskripsi pembayaran tunai
-    $cashDescription = $setting->cash_payment_description ?? 'Yani - Bendahara BUMDes';
+    $cashDescription = $setting->cash_payment_description ?? 'Bendahara Layanan';
 
     // Bank Logo Mapping
     $bankLogos = [
@@ -122,7 +122,7 @@
                 <input type="hidden" name="gas_id" value="{{ $item->id }}">
                 <input type="hidden" name="quantity" id="hidden-quantity" value="{{ $quantity }}">
 
-                <!-- Alamat BUMDes Card -->
+                <!-- Alamat Layanan Card -->
                 <div class="bg-white rounded-2xl shadow-lg p-6 mb-6 hover:shadow-xl transition-all duration-300">
                     <div class="flex items-center gap-3 mb-4">
                         <div class="p-2 bg-red-100 rounded-lg">
@@ -130,7 +130,7 @@
                                 <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
                             </svg>
                         </div>
-                        <h3 class="text-lg font-bold text-gray-800">Alamat Bumdes</h3>
+                        <h3 class="text-lg font-bold text-gray-800">Alamat Pusat Layanan</h3>
                         <a href="{{ ($setting && $setting->latitude && $setting->longitude) ? 'https://www.google.com/maps?q=' . $setting->latitude . ',' . $setting->longitude : 'https://maps.app.goo.gl/LE5JRcccSP6EjpZ37' }}" target="_blank" class="ml-auto flex items-center gap-2 text-blue-500 hover:text-blue-600 transition-colors group">
                             <span class="text-sm font-medium group-hover:underline">Lihat lokasi</span>
                             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -201,7 +201,7 @@
                             </div>
                             <div class="flex-1">
                                 <p class="text-sm font-semibold text-gray-500 mb-1">Hubungi Kami</p>
-                                <p class="text-base font-bold text-gray-800 group-hover:text-green-600 transition-colors">Halo BUMDes</p>
+                                <p class="text-base font-bold text-gray-800 group-hover:text-green-600 transition-colors">Halo Layanan</p>
                             </div>
                         </a>
                     </div>
@@ -217,8 +217,8 @@
                         </svg>
                     </div>
                     <div class="flex-1">
-                        <h4 class="text-indigo-900 font-bold text-lg mb-1">Anda Pemilik Warung (Pengecer)?</h4>
-                        <p class="text-indigo-700 text-sm">Bagi warga yang memiliki warung dan ingin mendaftar sebagai Mitra Gas (pembelian jumlah besar), harap hubungi layanan Halo Layanan terlebih dahulu untuk proses verifikasi.</p>
+                        <h4 class="text-indigo-900 font-bold text-lg mb-1">Bapak/Ibu Punya Warung?</h4>
+                        <p class="text-indigo-700 text-sm">Ingin jualan Gas Daerah? Silakan hubungi admin kami untuk mendaftar sebagai pengecer resmi dan dapatkan harga khusus warung.</p>
                     </div>
                     <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $setting->whatsapp_number) }}" target="_blank" class="flex-shrink-0 inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-medium transition-colors text-sm">
                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -269,7 +269,7 @@
                         </div>
                         <div class="ml-3">
                             <p class="text-sm text-blue-700">
-                                <span class="font-bold">Info:</span> Pesanan Gas akan diantar oleh pihak BUMDes ke alamat Anda.
+                                <span class="font-bold">Info:</span> Pesanan Gas akan diantar oleh pihak pengelola ke alamat Anda.
                             </p>
                         </div>
                     </div>
@@ -284,7 +284,7 @@
                         </div>
                         <div class="ml-3">
                             <p class="text-sm text-yellow-700">
-                                <span class="font-bold">NB:</span> Pengambilan Gas dilakukan secara mandiri oleh Anda di lokasi BUMDes.
+                                <span class="font-bold">NB:</span> Pengambilan Gas dilakukan secara mandiri oleh Anda di lokasi layanan.
                             </p>
                         </div>
                     </div>
@@ -915,7 +915,7 @@
                             Swal.fire({
                                 icon: 'success',
                                 title: 'Pesanan Berhasil Dibuat',
-                                text: 'Pesanan COD Anda sedang diproses. Mohon siapkan uang pas saat BUMDes tiba di alamat Anda.',
+                                text: 'Pesanan COD Anda sedang diproses. Mohon siapkan uang pas saat petugas tiba di alamat Anda.',
                                 confirmButtonColor: '#3b82f6',
                             }).then(() => {
                                 window.location.href = '{{ route("user.activity") }}';

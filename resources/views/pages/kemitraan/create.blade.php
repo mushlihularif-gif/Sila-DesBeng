@@ -384,7 +384,7 @@
                                 <div>
                                     <label for="contact_email" class="block text-sm font-semibold text-gray-700 mb-1">Email Kontak</label>
                                     <input type="email" name="contact_email" id="contact_email" value="{{ old('contact_email') }}" class="py-2 px-3 block w-full border border-gray-200 rounded-lg bg-gray-50 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#115789]/30 focus:border-[#115789] transition-colors" style="outline: none;" required placeholder="email@desa.id">
-                                    <p class="text-xs mt-1.5 italic font-medium" style="color: #2f80ed;">* Email dan Sandi akun Anda akan dikirim melalui email ini. Pastikan email aktif.</p>
+                                    <p class="text-xs mt-2.5 italic font-medium" style="color: #2f80ed;">* Email dan Sandi akun Anda akan dikirim melalui email ini. Pastikan email aktif.</p>
                                 </div>
                             </div>
 

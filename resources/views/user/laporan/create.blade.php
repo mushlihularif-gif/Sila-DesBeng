@@ -9,16 +9,34 @@
             <canvas id="abstract-canvas" class="w-full h-full absolute inset-0"></canvas>
         </div>
         <div class="max-w-4xl mx-auto px-6 relative z-10 mb-20" data-aos="fade-up">
-            <div class="bg-white/60 backdrop-blur-md border border-gray-100 rounded-2xl shadow-sm p-8 md:p-10">
+            <div class="bg-white/60 backdrop-blur-md border border-gray-100 rounded-2xl shadow-sm pt-6 pb-8 px-8 md:pt-8 md:pb-10 md:px-10">
 
-                <div class="text-center mb-10">
-                    <h1 class="text-3xl md:text-4xl font-bold mb-4 relative inline-block">
-                        <span class="bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">Formulir</span>
-                        <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Pengaduan</span>
-                    </h1>
-                    <p class="text-gray-500">
-                        Sampaikan keluhan atau saran Anda dengan sopan dan jujur untuk kemajuan bersama.
-                    </p>
+                {{-- Kop Surat Resmi Pemerintahan --}}
+                <div class="mb-6" style="padding: 0 0 1.5rem;">
+                    <div class="flex items-center justify-between">
+                        {{-- Logo Kabupaten (Kiri) --}}
+                        <div class="flex-shrink-0 flex justify-center items-center md:pl-4 w-[80px] md:w-[120px]">
+                            <img src="{{ asset('Admin/img/illustrations/logokab.png') }}" alt="Logo Kabupaten Bengkalis" class="h-20 w-20 md:h-[100px] md:w-[100px] object-contain drop-shadow-sm">
+                        </div>
+
+                        {{-- Judul Tengah --}}
+                        <div class="text-center flex-1 px-2 md:px-4">
+                            <h3 class="text-xl md:text-3xl font-bold text-gray-900 uppercase tracking-wide notranslate" translate="no">
+                                Form Pelaporan
+                            </h3>
+                            <p class="text-xs md:text-sm text-gray-500 mt-2">Sampaikan keluhan atau saran Anda secara jujur dan beretika</p>
+                            <p class="text-[10px] md:text-xs text-gray-400 mt-1">Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis</p>
+                        </div>
+
+                        {{-- Logo SiladesBeng (Kanan) --}}
+                        <div class="flex-shrink-0 flex justify-center items-center md:pr-4 w-[96px] md:w-[140px]">
+                            <img src="{{ asset('Admin/img/illustrations/logodomain.webp') }}" alt="Logo SiladesBeng" class="h-24 w-24 md:h-[115px] md:w-[115px] object-contain drop-shadow-sm">
+                        </div>
+                    </div>
+
+                    {{-- Garis pemisah kop surat --}}
+                    <div class="mt-4 md:mt-6 border-b-[3px] border-gray-800"></div>
+                    <div class="mt-1 border-b border-gray-400"></div>
                 </div>
 
                 <!-- Alert Success -->
@@ -62,20 +80,41 @@
                     @csrf
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <!-- Nama (auto-fill dari user login) -->
+                        <!-- Nama (Dinamis: Terkunci jika KYC Approved, Bisa diedit jika belum) -->
+                        @php
+                            $isVerified = Auth::user()->kycVerification && Auth::user()->kycVerification->status === 'approved';
+                        @endphp
                         <div>
-                            <label class="block font-semibold text-[#1e3a5f] mb-2">Nama Lengkap <span class="text-red-500">*</span></label>
-                            <input type="text" name="nama" required value="{{ old('nama', Auth::user()->name) }}"
-                                class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 transition-all shadow-sm @error('nama') border-red-500 @enderror"
-                                placeholder="Masukkan nama Anda">
-                            @error('nama')
-                                <p class="text-red-500 text-xs mt-1 font-medium">{{ $message }}</p>
-                            @enderror
+                            <label class="block font-semibold text-gray-800 mb-2">Nama Lengkap 
+                                @if($isVerified)
+                                    <span class="text-gray-500 text-xs font-normal ml-1">(Sesuai KTP)</span>
+                                @else
+                                    <span class="text-red-500">*</span>
+                                @endif
+                            </label>
+
+                            @if($isVerified)
+                                <input type="text" name="nama" required value="{{ Auth::user()->name }}" readonly
+                                    class="w-full px-4 py-3 rounded-xl bg-gray-100 border border-gray-200 text-gray-600 font-medium cursor-not-allowed opacity-90 shadow-sm focus:outline-none">
+                                <p class="text-xs text-green-600 mt-2.5 font-medium">
+                                    * Terverifikasi KTP & Dikunci demi validitas.
+                                </p>
+                            @else
+                                <input type="text" name="nama" required value="{{ old('nama', Auth::user()->name) }}"
+                                    class="w-full px-4 py-3 rounded-xl bg-white border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 transition-all shadow-sm hover:border-gray-400 @error('nama') border-red-500 @enderror"
+                                    placeholder="Masukkan nama asli Anda">
+                                <p class="text-xs mt-2.5 italic font-medium" style="color: #2f80ed;">
+                                    * Anda belum verifikasi KTP. Silakan perbaiki nama jika tidak sesuai.
+                                </p>
+                                @error('nama')
+                                    <p class="text-red-500 text-xs mt-1 font-medium">{{ $message }}</p>
+                                @enderror
+                            @endif
                         </div>
 
                         <!-- Kategori -->
                         <div>
-                            <label class="block font-semibold text-[#1e3a5f] mb-2">Kategori <span class="text-red-500">*</span></label>
+                            <label class="block font-semibold text-gray-800 mb-2">Kategori <span class="text-red-500">*</span></label>
                             <select name="kategori" required
                                 class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 transition-all shadow-sm @error('kategori') border-red-500 @enderror">
                                 <option value="" disabled {{ old('kategori') ? '' : 'selected' }}>Pilih kategori laporan</option>
@@ -96,76 +135,173 @@
 
                     <!-- Tujuan Laporan -->
                     <div>
-                        <label class="block font-semibold text-[#1e3a5f] mb-3">Tujuan Pelaporan <span class="text-red-500">*</span></label>
+                        <label class="block font-semibold text-gray-800 mb-3">Tujuan Pelaporan <span class="text-red-500">*</span></label>
                         
+                        {{-- Hidden input untuk menyimpan region_id tujuan --}}
+                        <input type="hidden" name="target_region_id" id="target_region_id" value="{{ old('target_region_id') }}">
+
+                        <style>
+                            /* Menangani state checked manual karena class peer-checked Tailwind ter-purge */
+                            input[name="tujuan_laporan"]:checked ~ .custom-radio {
+                                border-color: #3b82f6 !important; /* blue-500 */
+                                background-color: #3b82f6 !important;
+                            }
+                            input[name="tujuan_laporan"]:checked ~ .custom-radio .custom-radio-inner {
+                                opacity: 1 !important;
+                            }
+                            input[name="tujuan_laporan"]:checked ~ .card-outline {
+                                border-color: #3b82f6 !important;
+                            }
+                        </style>
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <!-- Opsi RT -->
-                            <label class="relative flex flex-col p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 {{ $hasAdminRT ? 'bg-white border-gray-200 hover:border-blue-300 hover:bg-blue-50' : 'bg-gray-100 border-gray-200 opacity-70 cursor-not-allowed' }}">
-                                <input type="radio" name="tujuan_laporan" value="rt" class="peer sr-only" {{ old('tujuan_laporan') == 'rt' ? 'checked' : '' }} {{ !$hasAdminRT ? 'disabled' : '' }} required>
-                                <div class="absolute top-4 right-4 w-5 h-5 rounded-full border-2 border-gray-300 peer-checked:border-blue-500 peer-checked:bg-blue-500 flex items-center justify-center transition-colors">
-                                    <div class="w-2 h-2 rounded-full bg-white opacity-0 peer-checked:opacity-100 transition-opacity"></div>
+                            <label class="relative flex flex-col p-4 rounded-xl border-2 cursor-pointer transition-all duration-300 {{ $hasAdminRT ? 'bg-white border-gray-200 hover:border-blue-400 hover:shadow-lg hover:shadow-blue-500/10 hover:-translate-y-1' : 'bg-gray-50 border-gray-200 opacity-60 cursor-not-allowed' }}">
+                                <input type="radio" name="tujuan_laporan" value="rt" class="absolute opacity-0 w-0 h-0" {{ old('tujuan_laporan') == 'rt' ? 'checked' : '' }} {{ !$hasAdminRT ? 'disabled' : '' }} required>
+                                
+                                <div class="custom-radio absolute top-4 right-4 w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center transition-all">
+                                    <div class="custom-radio-inner w-2 h-2 rounded-full bg-white opacity-0 transition-opacity"></div>
                                 </div>
-                                <div class="flex items-center gap-3 mb-2">
-                                    <div class="w-10 h-10 rounded-full {{ $hasAdminRT ? 'bg-blue-100 text-blue-600' : 'bg-gray-200 text-gray-400' }} flex items-center justify-center flex-shrink-0 transition-colors">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                                
+                                <div class="flex items-center gap-3 mb-4 mt-1">
+                                    <div class="w-10 h-10 rounded-xl {{ $hasAdminRT ? 'bg-gradient-to-br from-blue-50 to-blue-100 text-blue-600 shadow-sm border border-blue-100' : 'bg-gray-200 text-gray-400' }} flex items-center justify-center flex-shrink-0 transition-colors">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
                                     </div>
-                                    <h3 class="font-bold text-gray-800 leading-tight">Pengurus RT</h3>
+                                    <div>
+                                        <h3 class="font-bold text-gray-800 text-base leading-tight">Pengurus RT</h3>
+                                        @if($hasAdminRT)
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-green-100 text-green-700 mt-1">
+                                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                                Tersedia
+                                            </span>
+                                        @else
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-red-100 text-red-700 mt-1">
+                                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                                Belum Tersedia
+                                            </span>
+                                        @endif
+                                    </div>
                                 </div>
-                                <p class="text-xs text-gray-500 mt-auto leading-relaxed">
-                                    {{ $hasAdminRT ? 'Laporan akan diterima dan diproses oleh Ketua RT Anda.' : 'Opsi ini dikunci karena Admin RT di wilayah Anda belum terdaftar di sistem.' }}
+                                
+                                <p class="text-xs text-gray-500 mt-auto leading-relaxed border-t border-gray-100 pt-3">
+                                    {{ $hasAdminRT ? 'Pilih RT tujuan secara spesifik dari daftar pencarian.' : 'Opsi ini tidak dapat dipilih karena belum ada satupun Pengurus RT yang terdaftar.' }}
                                 </p>
-                                <div class="absolute inset-0 rounded-xl border-2 border-transparent peer-checked:border-blue-500 pointer-events-none transition-colors"></div>
+                                
+                                <div class="card-outline absolute inset-0 rounded-xl border-2 border-transparent pointer-events-none transition-colors"></div>
                             </label>
 
                             <!-- Opsi RW -->
-                            <label class="relative flex flex-col p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 {{ $hasAdminRW ? 'bg-white border-gray-200 hover:border-blue-300 hover:bg-blue-50' : 'bg-gray-100 border-gray-200 opacity-70 cursor-not-allowed' }}">
-                                <input type="radio" name="tujuan_laporan" value="rw" class="peer sr-only" {{ old('tujuan_laporan') == 'rw' ? 'checked' : '' }} {{ !$hasAdminRW ? 'disabled' : '' }}>
-                                <div class="absolute top-4 right-4 w-5 h-5 rounded-full border-2 border-gray-300 peer-checked:border-blue-500 peer-checked:bg-blue-500 flex items-center justify-center transition-colors">
-                                    <div class="w-2 h-2 rounded-full bg-white opacity-0 peer-checked:opacity-100 transition-opacity"></div>
+                            <label class="relative flex flex-col p-4 rounded-xl border-2 cursor-pointer transition-all duration-300 {{ $hasAdminRW ? 'bg-white border-gray-200 hover:border-blue-400 hover:shadow-lg hover:shadow-blue-500/10 hover:-translate-y-1' : 'bg-gray-50 border-gray-200 opacity-60 cursor-not-allowed' }}">
+                                <input type="radio" name="tujuan_laporan" value="rw" class="absolute opacity-0 w-0 h-0" {{ old('tujuan_laporan') == 'rw' ? 'checked' : '' }} {{ !$hasAdminRW ? 'disabled' : '' }}>
+                                
+                                <div class="custom-radio absolute top-4 right-4 w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center transition-all">
+                                    <div class="custom-radio-inner w-2 h-2 rounded-full bg-white opacity-0 transition-opacity"></div>
                                 </div>
-                                <div class="flex items-center gap-3 mb-2">
-                                    <div class="w-10 h-10 rounded-full {{ $hasAdminRW ? 'bg-blue-100 text-blue-600' : 'bg-gray-200 text-gray-400' }} flex items-center justify-center flex-shrink-0 transition-colors">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                                
+                                <div class="flex items-center gap-3 mb-4 mt-1">
+                                    <div class="w-10 h-10 rounded-xl {{ $hasAdminRW ? 'bg-gradient-to-br from-blue-50 to-blue-100 text-blue-600 shadow-sm border border-blue-100' : 'bg-gray-200 text-gray-400' }} flex items-center justify-center flex-shrink-0 transition-colors">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
                                     </div>
-                                    <h3 class="font-bold text-gray-800 leading-tight">Pengurus RW</h3>
+                                    <div>
+                                        <h3 class="font-bold text-gray-800 text-base leading-tight">Pengurus RW</h3>
+                                        @if($hasAdminRW)
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-green-100 text-green-700 mt-1">
+                                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                                Tersedia
+                                            </span>
+                                        @else
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-red-100 text-red-700 mt-1">
+                                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                                Belum Tersedia
+                                            </span>
+                                        @endif
+                                    </div>
                                 </div>
-                                <p class="text-xs text-gray-500 mt-auto leading-relaxed">
-                                    {{ $hasAdminRW ? 'Laporan akan ditangani oleh Ketua RW (jika masalah melebihi kapasitas RT).' : 'Opsi ini dikunci karena Admin RW di wilayah Anda belum terdaftar di sistem.' }}
+                                
+                                <p class="text-xs text-gray-500 mt-auto leading-relaxed border-t border-gray-100 pt-3">
+                                    {{ $hasAdminRW ? 'Pilih RW tujuan secara spesifik dari daftar pencarian.' : 'Opsi ini tidak dapat dipilih karena belum ada satupun Pengurus RW yang terdaftar.' }}
                                 </p>
-                                <div class="absolute inset-0 rounded-xl border-2 border-transparent peer-checked:border-blue-500 pointer-events-none transition-colors"></div>
+                                
+                                <div class="card-outline absolute inset-0 rounded-xl border-2 border-transparent pointer-events-none transition-colors"></div>
                             </label>
 
                             <!-- Opsi Desa -->
-                            <label class="relative flex flex-col p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 bg-white border-gray-200 hover:border-blue-300 hover:bg-blue-50">
-                                <input type="radio" name="tujuan_laporan" value="desa" class="peer sr-only" {{ old('tujuan_laporan') == 'desa' ? 'checked' : '' }}>
-                                <div class="absolute top-4 right-4 w-5 h-5 rounded-full border-2 border-gray-300 peer-checked:border-blue-500 peer-checked:bg-blue-500 flex items-center justify-center transition-colors">
-                                    <div class="w-2 h-2 rounded-full bg-white opacity-0 peer-checked:opacity-100 transition-opacity"></div>
+                            <label class="relative flex flex-col p-4 rounded-xl border-2 cursor-pointer transition-all duration-300 bg-white border-gray-200 hover:border-blue-400 hover:shadow-lg hover:shadow-blue-500/10 hover:-translate-y-1">
+                                <input type="radio" name="tujuan_laporan" value="desa" class="absolute opacity-0 w-0 h-0" {{ old('tujuan_laporan') == 'desa' ? 'checked' : '' }}>
+                                
+                                <div class="custom-radio absolute top-4 right-4 w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center transition-all">
+                                    <div class="custom-radio-inner w-2 h-2 rounded-full bg-white opacity-0 transition-opacity"></div>
                                 </div>
-                                <div class="flex items-center gap-3 mb-2">
-                                    <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z"></path></svg>
+                                
+                                <div class="flex items-center gap-3 mb-4 mt-1">
+                                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 text-blue-600 shadow-sm border border-blue-100 flex items-center justify-center flex-shrink-0">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z"></path></svg>
                                     </div>
-                                    <h3 class="font-bold text-gray-800 leading-tight">Pemerintah Desa</h3>
+                                    <div>
+                                        <h3 class="font-bold text-gray-800 text-base leading-tight">Pemerintah Desa</h3>
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-green-100 text-green-700 mt-1">
+                                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                            Selalu Aktif
+                                        </span>
+                                    </div>
                                 </div>
-                                <p class="text-xs text-gray-500 mt-auto leading-relaxed">Laporan langsung ditujukan ke Pemerintah Desa/Kelurahan untuk respon tingkat tinggi.</p>
-                                <div class="absolute inset-0 rounded-xl border-2 border-transparent peer-checked:border-blue-500 pointer-events-none transition-colors"></div>
+                                
+                                <p class="text-xs text-gray-500 mt-auto leading-relaxed border-t border-gray-100 pt-3">
+                                    Laporan langsung ditujukan ke Pemerintah Desa/Kelurahan untuk mendapatkan respon tingkat tinggi.
+                                </p>
+                                
+                                <div class="card-outline absolute inset-0 rounded-xl border-2 border-transparent pointer-events-none transition-colors"></div>
                             </label>
                         </div>
                         @error('tujuan_laporan')
                             <p class="text-red-500 text-xs mt-2 font-medium">{{ $message }}</p>
                         @enderror
+
+                        {{-- Searchable Dropdown RT/RW (muncul dinamis sesuai pilihan radio) --}}
+                        <div id="dropdown-tujuan-wrapper" class="mt-4 hidden">
+                            <label id="dropdown-tujuan-label" class="block text-sm font-semibold text-gray-700 mb-1.5">Pilih RT Tujuan</label>
+                            <div class="relative" id="searchable-select-container">
+                                {{-- Trigger Button --}}
+                                <button type="button" id="dropdown-trigger"
+                                    class="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 transition-all shadow-sm text-left text-sm">
+                                    <span id="dropdown-trigger-text" class="text-gray-500">Pilih tujuan...</span>
+                                    <svg class="w-4 h-4 text-gray-400 transition-transform" id="dropdown-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                </button>
+
+                                {{-- Dropdown Panel --}}
+                                <div id="dropdown-panel" class="absolute z-50 w-full mt-1.5 bg-white border border-gray-200 rounded-xl shadow-lg hidden overflow-hidden">
+                                    {{-- Search Input --}}
+                                    <div class="border-b border-gray-100" style="padding: 12px;">
+                                        <div class="relative">
+                                            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="pointer-events: none;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                                            <input type="text" id="dropdown-search" placeholder="Cari nama atau nomor..."
+                                                class="w-full pl-9 pr-4 py-2 text-sm rounded-lg bg-gray-50 border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 outline-none transition-all shadow-inner"
+                                                style="box-sizing: border-box; padding-left: 2.5rem; width: 100%; max-width: 100%; margin: 0;">
+                                        </div>
+                                    </div>
+                                    {{-- Options List --}}
+                                    <ul id="dropdown-options" class="max-h-48 overflow-y-auto py-2">
+                                        {{-- Diisi oleh JavaScript --}}
+                                    </ul>
+                                    {{-- Empty State --}}
+                                    <div id="dropdown-empty" class="hidden px-4 py-6 text-center">
+                                        <svg class="w-8 h-8 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                        <p class="text-gray-400 text-xs">Tidak ditemukan. Pengurus RT/RW ini belum bergabung.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     {{-- Lokasi + Peta --}}
                     <div>
-                        <label class="block font-semibold text-[#1e3a5f] mb-1">Lokasi Kejadian <span class="text-red-500">*</span></label>
+                        <label class="block font-semibold text-gray-800 mb-1">Lokasi Kejadian <span class="text-red-500">*</span></label>
                         <p class="text-sm text-gray-500 mb-3"> Klik pada peta atau gunakan tombol GPS untuk menentukan lokasi kejadian secara tepat.</p>
 
                         {{-- Tombol GPS Otomatis --}}
                         <button type="button" id="btn-gps" onclick="getMyLocation()"
-                            class="mb-3 inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-semibold rounded-xl shadow-sm hover:shadow-md transition-all duration-300 text-sm">
-                            <svg id="gps-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                            <svg id="gps-spinner" class="w-5 h-5 animate-spin hidden" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                            class="mb-3 inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-300 hover:border-blue-400 hover:bg-blue-50 text-gray-700 font-semibold rounded-xl shadow-sm transition-all duration-300 text-sm group">
+                            <svg id="gps-icon" class="w-5 h-5 group-hover:scale-110 transition-transform" style="color: #2f80ed;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                            <svg id="gps-spinner" class="w-5 h-5 animate-spin hidden" style="color: #2f80ed;" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
                             <span id="gps-text">Gunakan Lokasi Saya (GPS)</span>
                         </button>
 
@@ -191,7 +327,7 @@
 
                     <!-- Deskripsi -->
                     <div>
-                        <label class="block font-semibold text-[#1e3a5f] mb-2">Deskripsi Laporan <span class="text-red-500">*</span></label>
+                        <label class="block font-semibold text-gray-800 mb-2">Deskripsi Laporan <span class="text-red-500">*</span></label>
                         <textarea name="deskripsi" rows="5" required
                             class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 transition-all shadow-sm @error('deskripsi') border-red-500 @enderror"
                             placeholder="Jelaskan keluhan Anda dengan detail...">{{ old('deskripsi') }}</textarea>
@@ -205,29 +341,43 @@
 
                     <!-- Bukti -->
                     <div>
-                        <label class="block font-semibold text-[#1e3a5f] mb-2">Unggah Bukti (Opsional)</label>
-                        <div class="relative group border-2 border-dashed border-gray-300 rounded-2xl bg-gray-50 hover:bg-blue-50/50 hover:border-blue-400 transition-colors duration-300 text-center flex flex-col items-center justify-center py-10 px-6 cursor-pointer">
-                            <input type="file" name="bukti" id="bukti" accept="image/jpeg,image/jpg,image/png"
-                                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 @error('bukti') border-red-500 @enderror">
-                            
-                            <div class="w-16 h-16 mb-4 rounded-full bg-blue-100 text-blue-500 flex items-center justify-center group-hover:scale-110 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300 shadow-sm">
-                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                                </svg>
-                            </div>
-                            <p class="text-sm font-semibold text-[#1e3a5f] mb-1">Klik atau seret file ke sini untuk mengunggah</p>
-                            <p class="text-xs text-gray-500">Format: JPG, JPEG, PNG | Maksimal 2MB</p>
+                        <label class="block font-semibold text-gray-800 mb-2">Unggah Bukti Laporan <span class="text-gray-500 font-normal">(Maks. 3 Foto)</span></label>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                            <!-- Tombol Kamera -->
+                            <label for="bukti-kamera" class="flex flex-col items-center justify-center p-4 rounded-xl border-2 border-dashed border-blue-300 bg-blue-50 hover:bg-blue-100 hover:border-blue-500 transition-all cursor-pointer group text-center">
+                                <div class="w-12 h-12 rounded-full bg-white flex items-center justify-center mb-3 shadow-sm text-blue-500 group-hover:scale-110 transition-transform">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                </div>
+                                <span class="font-bold text-blue-700 text-sm">Ambil Foto (Kamera)</span>
+                                <span class="text-xs text-blue-500 mt-1">Otomatis deteksi lokasi (GPS)</span>
+                                <input id="bukti-kamera" type="file" accept="image/jpeg,image/png,image/jpg" capture class="hidden" onchange="handleFileSelect(event, true)">
+                            </label>
+
+                            <!-- Tombol Galeri -->
+                            <label for="bukti-galeri" class="flex flex-col items-center justify-center p-4 rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 hover:bg-gray-100 hover:border-gray-400 transition-all cursor-pointer group text-center">
+                                <div class="w-12 h-12 rounded-full bg-white flex items-center justify-center mb-3 shadow-sm text-gray-500 group-hover:scale-110 transition-transform">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                </div>
+                                <span class="font-bold text-gray-700 text-sm">Pilih dari Galeri</span>
+                                <span class="text-xs text-gray-500 mt-1">Maks. 2MB per file (JPG/PNG)</span>
+                                <input id="bukti-galeri" type="file" accept="image/jpeg,image/jpg,image/png" multiple class="hidden" onchange="handleFileSelect(event, false)">
+                            </label>
                         </div>
+
+                        <!-- Real hidden input that gets submitted to backend -->
+                        <input type="file" name="bukti[]" id="bukti-real" multiple class="hidden">
+                        
                         @error('bukti')
-                            <p class="text-red-500 text-xs mt-2 font-medium">{{ $message }}</p>
+                            <p class="text-red-500 text-xs mt-1 font-medium">{{ $message }}</p>
+                        @enderror
+                        @error('bukti.*')
+                            <p class="text-red-500 text-xs mt-1 font-medium">{{ $message }}</p>
                         @enderror
 
-                        <!-- Preview -->
-                        <div id="preview-container" class="mt-4 hidden">
-                            <p class="text-sm font-semibold text-[#1e3a5f] mb-2">Pratinjau Gambar:</p>
-                            <div class="relative inline-block w-full">
-                                <img id="preview-image" class="rounded-2xl border border-gray-200 w-full h-64 object-cover shadow-sm" alt="Preview">
-                            </div>
+                        <!-- Preview Container for Multiple Images -->
+                        <div id="multi-preview-container" class="grid grid-cols-2 sm:grid-cols-3 gap-3 hidden mt-4">
+                            <!-- Thumbnails injected by JS -->
                         </div>
                     </div>
 
@@ -247,9 +397,22 @@
                             {{-- Info User --}}
                             <div class="flex-1">
                                 <p class="text-gray-600 text-sm leading-relaxed">
-                                    Laporan akan dikirim atas nama: <strong class="text-[#1e3a5f]">{{ Auth::user()->name }}</strong><br>
-                                    Email: <strong class="text-[#1e3a5f]">{{ Auth::user()->email }}</strong><br>
-                                    Wilayah Anda: <strong class="text-[#1e3a5f]" id="display-wilayah-user">RW {{ Auth::user()->rw ?? '-' }} / RT {{ Auth::user()->rt ?? '-' }}</strong>
+                                    @if($isVerified)
+                                        Nama Pelapor: <strong class="text-gray-800">{{ Auth::user()->name }}</strong> 
+                                        <span class="inline-flex items-center text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full ml-1 font-medium border border-green-200">
+                                            <svg class="w-3 h-3 mr-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                                            Sesuai KTP
+                                        </span><br>
+                                    @else
+                                        Nama Akun Pelapor: <strong class="text-gray-800">{{ Auth::user()->name }}</strong> 
+                                        <span class="inline-flex items-center text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full ml-1 font-medium border border-amber-200">
+                                            <svg class="w-3 h-3 mr-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                            Belum Verifikasi KTP
+                                        </span><br>
+                                        Nama Pelapor: <strong class="text-blue-600 italic">Sesuai nama yang Anda ketik di atas</strong><br>
+                                    @endif
+                                    Email: <strong class="text-gray-800">{{ Auth::user()->email }}</strong><br>
+                                    Wilayah Anda: <strong class="text-gray-800" id="display-wilayah-user">RW {{ Auth::user()->rw ?? '-' }} / RT {{ Auth::user()->rt ?? '-' }}</strong>
                                 </p>
                             </div>
                         </div>
@@ -280,7 +443,7 @@
                 <span class="text-blue-500">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                 </span>
-                <h3 class="text-[#1e3a5f] font-bold text-lg">Konfirmasi Lokasi</h3>
+                <h3 class="text-gray-800 font-bold text-lg">Konfirmasi Lokasi</h3>
             </div>
             <p class="text-gray-500 text-sm mb-4">Apakah ini lokasi kejadian yang Anda maksud?</p>
 
@@ -475,221 +638,327 @@
     </script>
 
     <script>
-        const inputBukti = document.getElementById('bukti');
-        const previewContainer = document.getElementById('preview-container');
-        const previewImage = document.getElementById('preview-image');
-
-        inputBukti.addEventListener('change', function() {
-            const file = this.files[0];
-            if (file) {
-                if (file.size > 2 * 1024 * 1024) {
-                    alert('Ukuran file terlalu besar! Maksimal 2MB');
-                    this.value = '';
-                    previewContainer.classList.add('hidden');
-                    return;
-                }
-
-                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
-                if (!allowedTypes.includes(file.type)) {
-                    alert('Format file tidak didukung! Gunakan JPG, JPEG, atau PNG');
-                    this.value = '';
-                    previewContainer.classList.add('hidden');
-                    return;
-                }
-
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    previewImage.src = e.target.result;
-                    previewContainer.classList.remove('hidden');
-                };
-                reader.readAsDataURL(file);
-            } else {
-                previewContainer.classList.add('hidden');
-            }
-        });
-    </script>
-
-    {{-- ===== MODAL LENGKAPI RT/RW ===== --}}
-    <div id="rtrw-modal" class="fixed inset-0 items-center justify-center hidden" style="z-index: 99999; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);">
-        <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md mx-4 relative overflow-hidden">
-            <div class="text-center mb-6">
-                <div class="bg-blue-100 text-blue-600 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.242-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                </div>
-                <h3 class="text-[#1e3a5f] font-bold text-xl">Lengkapi Profil Wilayah</h3>
-                <p class="text-gray-500 text-sm mt-2">Bantu kami mengarahkan laporan Anda dengan tepat. Silakan pilih RW dan RT domisili Anda.</p>
-            </div>
-
-            <form id="form-update-rtrw">
-                <div class="space-y-4 mb-6">
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">Pilih RW <span class="text-red-500">*</span></label>
-                        <select id="rw-select" required class="w-full px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-blue-500 text-gray-800">
-                            <option value="">Memuat RW...</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">Pilih RT <span class="text-red-500">*</span></label>
-                        <select id="rt-select" required class="w-full px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-blue-500 text-gray-800" disabled>
-                            <option value="">Pilih RW Terlebih Dahulu</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="flex flex-col gap-3">
-                    <button type="submit" id="btn-save-rtrw" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition text-sm shadow-sm flex items-center justify-center gap-2">
-                        <span>Simpan Profil</span>
-                    </button>
-                    <button type="button" id="btn-skip-rtrw" class="w-full py-2.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-600 font-semibold rounded-xl transition text-sm">
-                        RW/RT Saya Belum Ada di Opsi Pilihan
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    {{-- ===== SCRIPT RT/RW MODAL ===== --}}
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const isRtRwEmpty = {{ empty(Auth::user()->rw) || empty(Auth::user()->rt) ? 'true' : 'false' }};
-        const modal = document.getElementById('rtrw-modal');
-        const rwSelect = document.getElementById('rw-select');
-        const rtSelect = document.getElementById('rt-select');
-        const formUpdate = document.getElementById('form-update-rtrw');
-        const btnSkip = document.getElementById('btn-skip-rtrw');
-        const tujuanLaporanSelect = document.getElementById('tujuan_laporan');
-        const displayWilayah = document.getElementById('display-wilayah-user');
+        const maxFiles = 3;
+        let selectedFiles = []; // Array of File objects
+        const dataTransfer = new DataTransfer(); // Used to sync with the hidden input
         
-        let allRegions = [];
-        // User's village id
-        const userDesaId = {{ Auth::user()->region_id ?? 'null' }};
+        const realInput = document.getElementById('bukti-real');
+        const previewContainer = document.getElementById('multi-preview-container');
 
-        if (isRtRwEmpty) {
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-            
-            // Lock background scroll
-            document.body.style.overflow = 'hidden';
+        function handleFileSelect(event, isCamera) {
+            const files = Array.from(event.target.files);
+            if (!files.length) return;
 
-            // Fetch regions
-            fetch('/api/regions')
-                .then(res => res.json())
-                .then(data => {
-                    allRegions = data;
-                    
-                    // Filter RW based on desa id
-                    const rws = data.filter(d => d.type === 'rw' && d.parent_id == userDesaId);
-                    
-                    rwSelect.innerHTML = '<option value="">Pilih RW</option>';
-                    rws.forEach(rw => {
-                        rwSelect.innerHTML += `<option value="${rw.id}">${rw.name}</option>`;
-                    });
-                })
-                .catch(err => {
-                    console.error('Error fetching regions:', err);
-                    rwSelect.innerHTML = '<option value="">Gagal memuat data</option>';
-                });
-                
-            // When RW changes, load RT
-            rwSelect.addEventListener('change', function() {
-                const rwId = this.value;
-                if(rwId) {
-                    const rts = allRegions.filter(d => d.type === 'rt' && d.parent_id == rwId);
-                    rtSelect.innerHTML = '<option value="">Pilih RT</option>';
-                    rts.forEach(rt => {
-                        rtSelect.innerHTML += `<option value="${rt.id}">${rt.name}</option>`;
-                    });
-                    rtSelect.disabled = false;
-                } else {
-                    rtSelect.innerHTML = '<option value="">Pilih RW Terlebih Dahulu</option>';
-                    rtSelect.disabled = true;
-                }
-            });
-        }
-
-        // Handle skip button
-        btnSkip.addEventListener('click', function() {
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-            document.body.style.overflow = 'auto';
-
-            // Lock tujuan_laporan to Desa only
-            const rtRadio = document.querySelector('input[name="tujuan_laporan"][value="rt"]');
-            const rwRadio = document.querySelector('input[name="tujuan_laporan"][value="rw"]');
-            const desaRadio = document.querySelector('input[name="tujuan_laporan"][value="desa"]');
-            
-            if (rtRadio) { 
-                rtRadio.disabled = true; 
-                rtRadio.closest('label').classList.add('opacity-70', 'cursor-not-allowed', 'bg-gray-100'); 
-                rtRadio.closest('label').classList.remove('bg-white', 'hover:border-blue-300', 'hover:bg-blue-50'); 
+            // Trigger GPS if camera was used
+            if (isCamera) {
+                getMyLocation();
             }
-            if (rwRadio) { 
-                rwRadio.disabled = true; 
-                rwRadio.closest('label').classList.add('opacity-70', 'cursor-not-allowed', 'bg-gray-100'); 
-                rwRadio.closest('label').classList.remove('bg-white', 'hover:border-blue-300', 'hover:bg-blue-50'); 
-            }
-            if (desaRadio) {
-                desaRadio.checked = true;
-            }
-            
-            alert('Karena RW/RT Anda belum diisi atau belum terdaftar, opsi tujuan laporan akan dikunci agar diteruskan langsung ke Pemerintah Desa.');
-        });
 
-        // Handle Form Submit (AJAX)
-        formUpdate.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const btnSave = document.getElementById('btn-save-rtrw');
-            
-            if(!rwSelect.value || !rtSelect.value) {
-                alert('Silakan lengkapi pilihan RW dan RT');
+            // Check if adding these files exceeds maxFiles
+            if (selectedFiles.length + files.length > maxFiles) {
+                alert(`Anda hanya dapat mengunggah maksimal ${maxFiles} foto.`);
+                event.target.value = ''; // Reset input
                 return;
             }
 
-            btnSave.disabled = true;
-            btnSave.innerHTML = 'Menyimpan...';
-
-            fetch('{{ route('profile.update-rtrw') }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                body: JSON.stringify({
-                    rw_id: rwSelect.value,
-                    region_id: rtSelect.value
-                })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if(data.success) {
-                    modal.classList.add('hidden');
-                    modal.classList.remove('flex');
-                    document.body.style.overflow = 'auto';
-                    
-                    // Update display text
-                    const rwName = rwSelect.options[rwSelect.selectedIndex].text.replace(/RW\s+/i, '');
-                    const rtName = rtSelect.options[rtSelect.selectedIndex].text.replace(/RT\s+/i, '');
-                    displayWilayah.innerHTML = `RW ${rwName} / RT ${rtName}`;
-                    
-                    alert('Profil RT/RW berhasil disimpan. Silakan lanjutkan pelaporan.');
+            // Validate and add files
+            let validFilesAdded = false;
+            files.forEach(file => {
+                if (file.size > 2 * 1024 * 1024) {
+                    alert(`File ${file.name} terlalu besar. Maksimal 2MB.`);
                 } else {
-                    alert(data.message || 'Gagal menyimpan data.');
-                    btnSave.disabled = false;
-                    btnSave.innerHTML = 'Simpan Profil';
+                    selectedFiles.push(file);
+                    dataTransfer.items.add(file);
+                    validFilesAdded = true;
                 }
-            })
-            .catch(err => {
-                console.error('Error saving profile:', err);
-                alert('Terjadi kesalahan jaringan saat menyimpan.');
-                btnSave.disabled = false;
-                btnSave.innerHTML = 'Simpan Profil';
+            });
+
+            // Update real hidden input
+            realInput.files = dataTransfer.files;
+
+            // Render previews
+            if (validFilesAdded) {
+                renderPreviews();
+            }
+            
+            // Reset the original inputs so the same file can be selected again if needed
+            event.target.value = '';
+        }
+
+        function renderPreviews() {
+            previewContainer.innerHTML = '';
+            
+            if (selectedFiles.length === 0) {
+                previewContainer.classList.add('hidden');
+                return;
+            }
+            
+            previewContainer.classList.remove('hidden');
+
+            // 1. Render actual images using Object URL (Synchronous & Faster)
+            selectedFiles.forEach((file, index) => {
+                const objectUrl = URL.createObjectURL(file);
+                const div = document.createElement('div');
+                div.className = 'relative group';
+                div.innerHTML = `
+                    <img src="${objectUrl}" class="rounded-xl border border-gray-200 w-full h-32 object-cover shadow-sm" onload="URL.revokeObjectURL(this.src)">
+                    <button type="button" onclick="removeFile(${index})" class="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-md hover:bg-red-600 z-10">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                `;
+                previewContainer.appendChild(div);
+            });
+
+            // 2. Render empty slots (Visual placeholders)
+            const emptySlots = maxFiles - selectedFiles.length;
+            for(let i = 0; i < emptySlots; i++) {
+                const div = document.createElement('div');
+                div.className = 'w-full h-32 rounded-xl border-2 border-dashed border-gray-200 bg-gray-50/50 flex flex-col items-center justify-center text-gray-400';
+                div.innerHTML = `
+                    <svg class="w-6 h-6 mb-1 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    <span class="text-xs font-medium opacity-70">Slot Tersedia</span>
+                `;
+                previewContainer.appendChild(div);
+            }
+        }
+
+        function removeFile(index) {
+            selectedFiles.splice(index, 1);
+            
+            // Rebuild DataTransfer
+            dataTransfer.items.clear();
+            selectedFiles.forEach(file => dataTransfer.items.add(file)); // Keep sync
+            
+            realInput.files = dataTransfer.files;
+            renderPreviews();
+        }
+    </script>
+
+    {{-- Modal RTRW legacy telah dihapus — domisili kini dikelola oleh KYC KTP --}}
+
+    {{-- ===== SCRIPT SEARCHABLE DROPDOWN TUJUAN PELAPORAN ===== --}}
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Data RT/RW dari backend (semua RT/RW disertakan, dengan flag has_admin)
+        const allRTData = {!! json_encode($allRTData->map(fn($rt) => ['id' => $rt->id, 'name' => $rt->name, 'rw_name' => $rt->rw_name, 'has_admin' => $rt->has_admin])->values()->all()) !!};
+        const allRWData = {!! json_encode($allRWData->map(fn($rw) => ['id' => $rw->id, 'name' => $rw->name, 'has_admin' => $rw->has_admin])->values()->all()) !!};
+
+        // DOM Elements
+        const radios = document.querySelectorAll('input[name="tujuan_laporan"]');
+        const wrapper = document.getElementById('dropdown-tujuan-wrapper');
+        const label = document.getElementById('dropdown-tujuan-label');
+        const trigger = document.getElementById('dropdown-trigger');
+        const triggerText = document.getElementById('dropdown-trigger-text');
+        const arrow = document.getElementById('dropdown-arrow');
+        const panel = document.getElementById('dropdown-panel');
+        const searchInput = document.getElementById('dropdown-search');
+        const optionsList = document.getElementById('dropdown-options');
+        const emptyState = document.getElementById('dropdown-empty');
+        const hiddenInput = document.getElementById('target_region_id');
+
+        let currentItems = [];
+        let isOpen = false;
+
+        // Render opsi dropdown
+        function renderOptions(items, searchTerm = '') {
+            optionsList.innerHTML = '';
+            const filtered = items.filter(item => {
+                const label = item.label || item.name;
+                return label.toLowerCase().includes(searchTerm.toLowerCase());
+            });
+
+            if (filtered.length === 0) {
+                emptyState.classList.remove('hidden');
+                optionsList.classList.add('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            optionsList.classList.remove('hidden');
+
+            filtered.forEach(item => {
+                const li = document.createElement('li');
+                
+                if (item.has_admin) {
+                    li.className = 'px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 cursor-pointer transition-colors flex items-center justify-between border-b border-gray-50 last:border-0';
+                } else {
+                    li.className = 'px-4 py-2.5 text-sm text-gray-400 cursor-not-allowed flex items-center justify-between bg-gray-50/50 border-b border-gray-100 last:border-0';
+                }
+                
+                const labelContainer = document.createElement('div');
+                labelContainer.className = 'flex items-center gap-2';
+
+                const labelSpan = document.createElement('span');
+                labelSpan.className = item.has_admin ? 'font-medium' : '';
+                labelSpan.textContent = item.label || item.name;
+                labelContainer.appendChild(labelSpan);
+
+                if (item.badge) {
+                    const badge = document.createElement('span');
+                    badge.className = 'text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-gray-200 text-gray-600';
+                    badge.textContent = item.badge;
+                    labelContainer.appendChild(badge);
+                }
+                
+                li.appendChild(labelContainer);
+
+                if (item.has_admin) {
+                    const statusBadge = document.createElement('span');
+                    statusBadge.className = 'text-[10px] font-medium px-2 py-0.5 rounded bg-green-100 text-green-700 whitespace-nowrap';
+                    statusBadge.textContent = '✓ Aktif';
+                    li.appendChild(statusBadge);
+
+                    li.addEventListener('click', () => {
+                        selectItem(item);
+                    });
+                } else {
+                    const statusBadge = document.createElement('span');
+                    statusBadge.className = 'text-[10px] font-medium px-2 py-0.5 rounded bg-red-100 text-red-600 whitespace-nowrap';
+                    statusBadge.textContent = 'Admin Belum Bergabung';
+                    li.appendChild(statusBadge);
+                }
+
+                optionsList.appendChild(li);
+            });
+        }
+
+        // Pilih item
+        function selectItem(item) {
+            hiddenInput.value = item.id;
+            triggerText.textContent = item.label || item.name;
+            triggerText.classList.remove('text-gray-400');
+            triggerText.classList.add('text-gray-800');
+            closeDropdown();
+        }
+
+        // Buka dropdown
+        function openDropdown() {
+            panel.classList.remove('hidden');
+            arrow.classList.add('rotate-180');
+            isOpen = true;
+            searchInput.value = '';
+            renderOptions(currentItems);
+            setTimeout(() => searchInput.focus(), 50);
+        }
+
+        // Tutup dropdown
+        function closeDropdown() {
+            panel.classList.add('hidden');
+            arrow.classList.remove('rotate-180');
+            isOpen = false;
+        }
+
+        // Toggle dropdown
+        trigger.addEventListener('click', () => {
+            isOpen ? closeDropdown() : openDropdown();
+        });
+
+        // Search filter
+        searchInput.addEventListener('input', (e) => {
+            renderOptions(currentItems, e.target.value);
+        });
+
+        // Tutup saat klik di luar
+        document.addEventListener('click', (e) => {
+            const container = document.getElementById('searchable-select-container');
+            if (container && !container.contains(e.target)) {
+                closeDropdown();
+            }
+        });
+
+        // Handle radio button change
+        radios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                const val = this.value;
+                hiddenInput.value = ''; // Reset pilihan
+                triggerText.textContent = 'Ketik untuk mencari...';
+                triggerText.classList.add('text-gray-400');
+                triggerText.classList.remove('text-gray-800');
+
+                if (val === 'rt' && allRTData.length > 0) {
+                    label.textContent = 'Pilih RT Tujuan';
+                    currentItems = allRTData.map(rt => ({
+                        id: rt.id,
+                        name: rt.name,
+                        label: rt.name + ' — ' + rt.rw_name,
+                        badge: rt.rw_name,
+                        has_admin: rt.has_admin
+                    }));
+                    wrapper.classList.remove('hidden');
+                } else if (val === 'rw' && allRWData.length > 0) {
+                    label.textContent = 'Pilih RW Tujuan';
+                    currentItems = allRWData.map(rw => ({
+                        id: rw.id,
+                        name: rw.name,
+                        label: rw.name,
+                        has_admin: rw.has_admin
+                    }));
+                    wrapper.classList.remove('hidden');
+                } else {
+                    wrapper.classList.add('hidden');
+                    currentItems = [];
+                }
+
+                closeDropdown();
             });
         });
+
+        // Restore state jika ada old value
+        const oldTujuan = '{{ old('tujuan_laporan') }}';
+        const oldRegionId = '{{ old('target_region_id') }}';
+        if (oldTujuan && oldRegionId) {
+            const checkedRadio = document.querySelector(`input[name="tujuan_laporan"][value="${oldTujuan}"]`);
+            if (checkedRadio) {
+                checkedRadio.dispatchEvent(new Event('change'));
+                // Set selected item
+                setTimeout(() => {
+                    const found = currentItems.find(i => i.id == oldRegionId);
+                    if (found) selectItem(found);
+                }, 100);
+            }
+        }
     });
     </script>
 @endsection
 
 @push('scripts')
+    <!-- SweetAlert2 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // Override native browser alert dengan SweetAlert2 untuk tampilan profesional
+        window.alert = function(message) {
+            let iconType = 'info';
+            // Deteksi konteks error secara sederhana dari isi pesan
+            if (message.toLowerCase().includes('gagal') || message.toLowerCase().includes('error') || message.toLowerCase().includes('tidak mendukung') || message.toLowerCase().includes('terlalu besar') || message.toLowerCase().includes('tidak didukung')) {
+                iconType = 'error';
+            } else if (message.toLowerCase().includes('berhasil')) {
+                iconType = 'success';
+            } else if (message.toLowerCase().includes('karena rw/rt anda belum diisi')) {
+                iconType = 'warning';
+            }
+
+            // Konfigurasi SweetAlert2 sebagai Toast (Pojok Kanan Atas)
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 4000,
+                timerProgressBar: true,
+                customClass: {
+                    popup: 'rounded-xl shadow-lg border border-gray-100 mt-16', // mt-16 agar tidak tertutup navbar
+                },
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            });
+
+            Toast.fire({
+                icon: iconType,
+                title: message
+            });
+        };
+    </script>
 <script>
     // Canvas Vector Abstract Background Script (Turbo-Compatible)
     if (!window.initAbstractCanvas) {

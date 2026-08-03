@@ -329,7 +329,7 @@
                         @php
                             $nik = $laporan->user->nik ?? '-';
                             if (strlen($nik) >= 16) {
-                                $censoredNik = substr($nik, 0, 4) . str_repeat('*', 8) . substr($nik, -4);
+                                $censoredNik = substr($nik, 0, 2) . str_repeat('*', 12) . substr($nik, -2);
                             } else {
                                 $censoredNik = $nik;
                             }
@@ -491,20 +491,28 @@
             @endif
 
             {{-- Foto Bukti --}}
-            @if($laporan->bukti)
+            @if(!empty($laporan->bukti_array))
             <div class="bukti-container">
-                @php
-                    $buktiPath = public_path('storage/' . $laporan->bukti);
-                    $buktiExists = file_exists($buktiPath);
-                @endphp
-                @if($buktiExists)
-                    <img src="{{ $buktiPath }}" alt="Bukti Foto Laporan">
-                    <p class="bukti-caption">Foto bukti yang dilampirkan oleh pelapor pada saat pengajuan laporan<br>({{ $laporan->created_at->format('d F Y, H:i') }} WIB)</p>
-                @else
-                    <div style="background: #fef2f2; border: 1px solid #fecaca; padding: 20px; border-radius: 6px;">
-                        <p style="font-size: 10pt; color: #991b1b; font-style: italic;">File foto bukti tidak tersedia di server.</p>
-                    </div>
-                @endif
+                <table style="width: 100%; border-collapse: separate; border-spacing: 10px 0;">
+                    <tr>
+                    @foreach($laporan->bukti_array as $foto)
+                        @php
+                            $buktiPath = public_path('storage/' . $foto);
+                            $buktiExists = file_exists($buktiPath);
+                        @endphp
+                        <td style="width: {{ 100 / count($laporan->bukti_array) }}%; vertical-align: top; text-align: center;">
+                            @if($buktiExists)
+                                <img src="{{ $buktiPath }}" alt="Bukti Foto Laporan" style="width: 100%; border-radius: 6px;">
+                            @else
+                                <div style="background: #fef2f2; border: 1px solid #fecaca; padding: 20px; border-radius: 6px;">
+                                    <p style="font-size: 10pt; color: #991b1b; font-style: italic;">File tidak tersedia.</p>
+                                </div>
+                            @endif
+                        </td>
+                    @endforeach
+                    </tr>
+                </table>
+                <p class="bukti-caption" style="text-align: center; margin-top: 10px;">Foto bukti yang dilampirkan oleh pelapor pada saat pengajuan laporan<br>({{ $laporan->created_at->format('d F Y, H:i') }} WIB)</p>
             </div>
             @endif
 

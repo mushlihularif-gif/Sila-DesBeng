@@ -25,31 +25,31 @@
             {{-- Tabs (Cards Style) --}}
             <div class="flex flex-col sm:flex-row justify-center gap-6 mb-12 items-center animate-section">
                 <!-- Berita Terbaru Card -->
-                <a href="{{ route('announcements.index', ['tab' => 'berita']) }}" class="focus:outline-none">
-                    <div class="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 w-64 h-48 flex flex-col justify-center items-center text-center border-4 {{ $activeTab === 'berita' ? 'border-blue-500 shadow-[0_0_0_3px_rgba(59,130,246,0.1)]' : 'border-transparent' }}">
+                <div class="tab-btn focus:outline-none cursor-pointer" data-tab="berita">
+                    <div id="tab-card-berita" class="tab-card bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 w-64 h-48 flex flex-col justify-center items-center text-center border-4 border-transparent {{ $activeTab === 'berita' ? 'active' : '' }}">
                         <div class="mb-4 flex justify-center">
                             <img src="{{ asset('Admin/img/kabardaerah/Berita.png') }}" alt="Berita Daerah" class="w-20 h-20 object-contain">
                         </div>
                         <p class="font-bold text-lg text-gray-800 w-full whitespace-nowrap">Berita Daerah</p>
                     </div>
-                </a>
+                </div>
                 
                 <!-- Pengumuman Warga Card -->
-                <a href="{{ route('announcements.index', ['tab' => 'pengumuman']) }}" class="focus:outline-none">
-                    <div class="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 w-64 h-48 flex flex-col justify-center items-center text-center border-4 {{ $activeTab === 'pengumuman' ? 'border-blue-500 shadow-[0_0_0_3px_rgba(59,130,246,0.1)]' : 'border-transparent' }}">
+                <div class="tab-btn focus:outline-none cursor-pointer" data-tab="pengumuman">
+                    <div id="tab-card-pengumuman" class="tab-card bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 w-64 h-48 flex flex-col justify-center items-center text-center border-4 border-transparent {{ $activeTab === 'pengumuman' ? 'active' : '' }}">
                         <div class="mb-4 flex justify-center">
                             <img src="{{ asset('Admin/img/kabardaerah/Pengumuman1.png') }}" alt="Pengumuman" class="w-20 h-20 object-contain">
                         </div>
                         <p class="font-bold text-lg text-gray-800 w-full whitespace-nowrap">Pengumuman</p>
                     </div>
-                </a>
+                </div>
             </div>
 
             {{-- Content Container --}}
             <div id="kabar-list-container" class="transition-all duration-300">
                 
                 {{-- TAB BERITA --}}
-                <div style="display: {{ $activeTab === 'berita' ? 'block' : 'none' }};">
+                <div id="tab-content-berita" class="tab-content" style="display: {{ $activeTab === 'berita' ? 'block' : 'none' }};">
                     
                     {{-- Search Berita --}}
                     <div class="max-w-md mx-auto mb-10">
@@ -126,7 +126,7 @@
                 </div>
 
                 {{-- TAB PENGUMUMAN --}}
-                <div style="display: {{ $activeTab === 'pengumuman' ? 'block' : 'none' }};">
+                <div id="tab-content-pengumuman" class="tab-content" style="display: {{ $activeTab === 'pengumuman' ? 'block' : 'none' }};">
                     
                     {{-- Filter & Search Pengumuman --}}
                     <div class="max-w-4xl mx-auto mb-10">
@@ -251,6 +251,204 @@
 </main>
 @endsection
 
+@push('scripts')
+<script>
+    // Tab Navigation Logic
+    function initKabarTabs() {
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        if (tabBtns.length === 0) return;
+        
+        tabBtns.forEach(btn => {
+            if (btn.dataset.tabInitialized) return;
+            btn.dataset.tabInitialized = 'true';
+            
+            btn.addEventListener('click', function(e) {
+                // Jika user mengklik elemen di dalam btn (seperti icon/text), closest menangani dengan benar
+                const targetTab = this.getAttribute('data-tab');
+                
+                // Hide all contents
+                tabContents.forEach(content => {
+                    content.style.display = 'none';
+                });
+                
+                // Remove active classes from all cards
+                document.querySelectorAll('.tab-card').forEach(card => {
+                    card.classList.remove('active');
+                });
+                
+                // Show target content
+                const targetContent = document.getElementById('tab-content-' + targetTab);
+                if (targetContent) {
+                    targetContent.style.display = 'block';
+                }
+                
+                // Add active class to clicked card
+                const targetCard = document.getElementById('tab-card-' + targetTab);
+                if (targetCard) {
+                    targetCard.classList.add('active');
+                }
+                
+                // Update URL for tab switch safely without reload
+                try {
+                    const url = new URL(window.location);
+                    url.searchParams.set('tab', targetTab);
+                    window.history.pushState({}, '', url);
+                } catch(err) {}
+            });
+        });
+    }
+
+    // PJAX Logic untuk form pencarian dan filter
+    function initPjax() {
+        ['berita', 'pengumuman'].forEach(tab => {
+            const wrapper = document.getElementById('tab-content-' + tab);
+            if (!wrapper) return;
+            
+            // Cegah duplicate listener jika Turbo jalan berkali-kali
+            if (wrapper.dataset.pjaxInitialized) return;
+            wrapper.dataset.pjaxInitialized = 'true';
+            
+            // Tangkap klik pada link (Filter / Paginasi)
+            wrapper.addEventListener('click', function(e) {
+                const link = e.target.closest('a');
+                if (link && link.href && link.href.startsWith('http')) {
+                    const path = new URL(link.href).pathname;
+                    
+                    // Kalau path mengarah ke detail (/kabar-daerah/{id}), biarkan navigasi normal
+                    const isDetailRegex = /\/kabar-daerah\/[a-zA-Z0-9_-]+$/;
+                    if (isDetailRegex.test(path)) return; 
+                    
+                    // Jika path adalah /kabar-daerah (index)
+                    if (path.includes('/kabar-daerah')) {
+                        e.preventDefault();
+                        performAjax(link.href, tab);
+                    }
+                }
+            });
+            
+            // Tangkap submit pada form pencarian
+            wrapper.addEventListener('submit', function(e) {
+                const form = e.target.closest('form');
+                if (form) {
+                    e.preventDefault();
+                    
+                    // Bangun URL dengan query params dari form
+                    const url = new URL(form.action);
+                    const formData = new FormData(form);
+                    
+                    // Karena form kita punya method GET, masukkan data ke query string
+                    for (const [key, value] of formData.entries()) {
+                        url.searchParams.set(key, value);
+                    }
+                    
+                    performAjax(url.toString(), tab);
+                }
+            });
+        });
+    }
+
+    // Fungsi Fetch HTML
+    async function performAjax(url, tab) {
+        const wrapper = document.getElementById('tab-content-' + tab);
+        if (!wrapper) return;
+        
+        // Cari container hasil (pengumuman-results atau berita-results)
+        // Jika tidak ada, pakai wrapper langsung
+        const resultsId = tab === 'pengumuman' ? 'pengumuman-results' : 'berita-results';
+        let resultsContainer = wrapper.querySelector('#' + resultsId);
+        if (!resultsContainer) {
+            // Fallback: cari div terakhir yang berisi grid atau pesan kosong
+            resultsContainer = wrapper.querySelector('.grid, .backdrop-blur-sm');
+            if (resultsContainer) resultsContainer = resultsContainer.parentElement;
+        }
+        
+        // Tampilkan loading skeleton di dalam kotak
+        const loadingHtml = `
+            <div class="backdrop-blur-sm bg-white/70 rounded-3xl text-center py-20 border border-white/80 shadow-lg">
+                <div class="pjax-dots">
+                    <span></span><span></span><span></span>
+                </div>
+                <p class="pjax-loading-label">Memuat data...</p>
+            </div>
+        `;
+        
+        if (resultsContainer) {
+            resultsContainer.innerHTML = loadingHtml;
+        }
+        
+        try {
+            const response = await fetch(url, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+            
+            if (!response.ok) throw new Error('Network response was not ok');
+            const html = await response.text();
+            
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            
+            const newContent = doc.getElementById('tab-content-' + tab);
+            if (newContent) {
+                wrapper.innerHTML = newContent.innerHTML;
+                
+                // Efek fade-in slide-up hanya pada area hasil (results container)
+                const newResultsId = tab === 'pengumuman' ? 'pengumuman-results' : 'berita-results';
+                const newResults = wrapper.querySelector('#' + newResultsId);
+                if (newResults) {
+                    // Set awal: sembunyikan dulu
+                    newResults.style.opacity = '0';
+                    newResults.style.transform = 'translateY(20px)';
+                    
+                    // Tunggu 1 frame agar browser render, lalu animasikan masuk
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(() => {
+                            newResults.style.transition = 'opacity 0.4s ease-out, transform 0.4s ease-out';
+                            newResults.style.opacity = '1';
+                            newResults.style.transform = 'translateY(0)';
+                        });
+                    });
+                }
+                
+                initSlider();
+            }
+            
+            window.history.pushState({}, '', url);
+            
+        } catch(err) {
+            console.error('AJAX Error:', err);
+            window.location.href = url;
+        }
+    }
+
+    function initSlider() {
+        document.querySelectorAll('[id^="slider-"]').forEach(slider => {
+            if (slider.children.length > 1 && !slider.dataset.initialized) {
+                slider.dataset.initialized = 'true';
+                // Timer global akan menangkap ini
+            }
+        });
+    }
+
+    function initAll() {
+        initKabarTabs();
+        initPjax();
+        initSlider();
+    }
+
+    // Jalankan inisiasi saat DOM siap
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initAll);
+    } else {
+        initAll();
+    }
+    
+    // Support untuk Turbo/Livewire jika ada
+    document.addEventListener('turbo:load', initAll);
+</script>
+@endpush
+
 @push('styles')
 <style>
     * { font-family: 'Inter', sans-serif; }
@@ -259,6 +457,48 @@
     .animate-section:nth-child(1) { animation-delay: 0.1s; }
     .animate-section:nth-child(2) { animation-delay: 0.2s; }
     .animate-section:nth-child(3) { animation-delay: 0.3s; }
+    
+    /* Custom Active Style for Tabs */
+    .tab-card.active {
+        border-color: #3b82f6 !important;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+    }
+    
+    /* Bouncing Dots */
+    .pjax-dots {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin-bottom: 16px;
+    }
+    .pjax-dots span {
+        width: 12px; height: 12px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #3b82f6, #60a5fa);
+        animation: pjaxBounce 1.4s ease-in-out infinite;
+    }
+    .pjax-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .pjax-dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes pjaxBounce {
+        0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+        40% { transform: scale(1.2); opacity: 1; }
+    }
+    
+    .pjax-loading-label {
+        font-size: 15px;
+        font-weight: 600;
+        color: #6b7280;
+        margin: 0;
+    }
+    
+    /* Fade-in slide-up untuk konten baru setelah AJAX */
+    .pjax-fade-in {
+        animation: pjaxSlideUp 0.45s ease-out both;
+    }
+    @keyframes pjaxSlideUp {
+        from { opacity: 0; transform: translateY(18px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
 </style>
 @endpush
 

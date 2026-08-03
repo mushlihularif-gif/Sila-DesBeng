@@ -44,6 +44,30 @@ class Laporan extends Model
     ];
 
     // ===================================
+    // ACCESSORS UNTUK MULTI-FOTO BUKTI
+    // ===================================
+
+    /**
+     * Mengubah kolom bukti (string/json) menjadi array secara aman
+     * Menjamin backward compatibility untuk laporan lama yang hanya 1 foto
+     */
+    public function getBuktiArrayAttribute()
+    {
+        if (!$this->bukti) {
+            return [];
+        }
+
+        // Cek apakah string adalah JSON valid
+        $decoded = json_decode($this->bukti, true);
+        if (is_array($decoded)) {
+            return $decoded;
+        }
+
+        // Fallback untuk data lama (string biasa)
+        return [$this->bukti];
+    }
+
+    // ===================================
     // KONFIGURASI SLA ESKALASI OTOMATIS
     // (Proportional Response Time)
     // ===================================

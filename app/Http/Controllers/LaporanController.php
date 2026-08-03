@@ -26,28 +26,78 @@ class LaporanController extends Controller
     {
         $user = auth()->user();
         
-        $hasAdminRT = false;
-        $hasAdminRW = false;
-
+        // Ambil desa_id user (parent dari RT/RW user)
+        $desaId = null;
         if ($user->region_id) {
-            $rtRegion = \App\Models\Region::find($user->region_id);
-            
-            if ($rtRegion) {
-                // Cek Admin RT
-                $hasAdminRT = User::where('role', 'admin_rt')
-                                  ->where('region_id', $rtRegion->id)
-                                  ->exists();
-                
-                // Cek Admin RW (berdasarkan parent_id dari RT)
-                if ($rtRegion->parent_id) {
-                    $hasAdminRW = User::where('role', 'admin_rw')
-                                      ->where('region_id', $rtRegion->parent_id)
-                                      ->exists();
+            $userRegion = \App\Models\Region::find($user->region_id);
+            if ($userRegion) {
+                // Naik ke atas hingga menemukan region bertipe 'desa'
+                $temp = $userRegion;
+                while ($temp) {
+                    if ($temp->type === 'desa' || $temp->type === 'kelurahan') {
+                        $desaId = $temp->id;
+                        break;
+                    }
+                    $temp = $temp->parent;
+                }
+                // Fallback: jika tidak ketemu desa, gunakan parent dari RW
+                if (!$desaId && $userRegion->type === 'rt') {
+                    $rwRegion = $userRegion->parent;
+                    if ($rwRegion && $rwRegion->parent_id) {
+                        $desaId = $rwRegion->parent_id;
+                    }
+                } elseif (!$desaId && $userRegion->type === 'rw') {
+                    $desaId = $userRegion->parent_id;
                 }
             }
         }
 
-        return view('user.laporan.create', compact('hasAdminRT', 'hasAdminRW'));
+        // Ambil semua RW dan RT di bawah desa ini, dengan status admin-nya
+        $allRWData = collect();
+        $allRTData = collect();
+        $hasAdminRT = false;
+        $hasAdminRW = false;
+
+        if ($desaId) {
+            // Ambil semua RW di desa
+            $allRWs = \App\Models\Region::where('parent_id', $desaId)
+                ->where('type', 'rw')
+                ->get();
+
+            foreach ($allRWs as $rw) {
+                // Cek apakah RW ini punya admin
+                $hasAdmin = User::where('role', 'admin_rw')
+                    ->where('region_id', $rw->id)
+                    ->exists();
+                
+                if ($hasAdmin) $hasAdminRW = true;
+                
+                $rw->has_admin = $hasAdmin;
+                $allRWData->push($rw);
+
+                // Ambil semua RT di bawah RW ini
+                $rts = \App\Models\Region::where('parent_id', $rw->id)
+                    ->where('type', 'rt')
+                    ->get();
+
+                foreach ($rts as $rt) {
+                    $hasRtAdmin = User::where('role', 'admin_rt')
+                        ->where('region_id', $rt->id)
+                        ->exists();
+                    
+                    if ($hasRtAdmin) $hasAdminRT = true;
+
+                    // Tambahkan info RW parent ke RT untuk label dropdown
+                    $rt->rw_name = $rw->name;
+                    $rt->has_admin = $hasRtAdmin;
+                    $allRTData->push($rt);
+                }
+            }
+        }
+
+        return view('user.laporan.create', compact(
+            'hasAdminRT', 'hasAdminRW', 'allRTData', 'allRWData'
+        ));
     }
 
     public function store(Request $request)
@@ -59,10 +109,17 @@ class LaporanController extends Controller
             'kategori' => 'required|string',
             'lokasi' => 'nullable|string|max:255',
             'tujuan_laporan' => 'required|in:rt,rw,desa',
-            'bukti' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'target_region_id' => 'nullable|integer|exists:regions,id',
+            'bukti' => 'nullable|array|max:3',
+            'bukti.*' => 'image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
         $user = auth()->user();
+
+        // Tentukan region_id tujuan laporan
+        // Jika user memilih RT/RW dari dropdown, gunakan target_region_id
+        // Jika tidak (pilih Desa), fallback ke region_id domisili user
+        $targetRegionId = $validated['target_region_id'] ?? $user->region_id;
 
         // Prepare data TANPA bukti dulu
         $data = [
@@ -77,27 +134,32 @@ class LaporanController extends Controller
             'rt' => $user->rt,
             'rw_number' => $user->rw,
             'rt_number' => $user->rt,
-            'region_id' => $user->region_id,
+            'region_id' => $targetRegionId,
         ];
 
         // Upload bukti SETELAH validasi
+        // Upload bukti SETELAH validasi
         if ($request->hasFile('bukti')) {
-            $file = $request->file('bukti');
-        
-            if ($file->isValid()) {
-                $extension = $file->getClientOriginalExtension();
-                $filename = time() . '_' . Str::random(16) . '.' . $extension;
-        
-                // ⬇️ PATH KE ROOT SUBDOMAIN (INI KUNCI)
-                $destination = $_SERVER['DOCUMENT_ROOT'] . '/storage/laporan';
-                if (!is_dir($destination)) {
-                    mkdir($destination, 0755, true);
+            $buktiPaths = [];
+            // PATH KE ROOT SUBDOMAIN (INI KUNCI)
+            $destination = $_SERVER['DOCUMENT_ROOT'] . '/storage/laporan';
+            if (!is_dir($destination)) {
+                mkdir($destination, 0755, true);
+            }
+
+            foreach ($request->file('bukti') as $file) {
+                if ($file->isValid()) {
+                    $extension = $file->getClientOriginalExtension();
+                    $filename = time() . '_' . Str::random(16) . '.' . $extension;
+                    $file->move($destination, $filename);
+                    
+                    // SIMPAN RELATIVE URL
+                    $buktiPaths[] = 'laporan/' . $filename;
                 }
-        
-$file->move($destination, $filename);
-        
-                // ⬇️ SIMPAN RELATIVE URL
-$data['bukti'] = 'laporan/' . $filename;
+            }
+
+            if (!empty($buktiPaths)) {
+                $data['bukti'] = json_encode($buktiPaths);
             }
         }
 
@@ -115,15 +177,14 @@ $data['bukti'] = 'laporan/' . $filename;
             'bukti_value' => $data['bukti'] ?? 'null',
         ]);
 
-        // ✅ Fix 4: Smart Routing - Kirim notifikasi berdasarkan ketersediaan admin
+        // ✅ Smart Routing - Kirim notifikasi berdasarkan region tujuan yang dipilih
         try {
-            $regionName = '';
-            $currentRegion = \App\Models\Region::find($user->region_id);
-            $regionName = $currentRegion ? $currentRegion->name : 'Unknown';
+            $targetRegion = \App\Models\Region::find($targetRegionId);
+            $regionName = $targetRegion ? $targetRegion->name : 'Unknown';
 
-            // Kumpulkan region_id dari desa ke kabupaten (untuk fallback)
+            // Kumpulkan region_id dari target ke kabupaten (untuk fallback)
             $regionIds = [];
-            $tempRegion = $currentRegion;
+            $tempRegion = $targetRegion;
             while ($tempRegion) {
                 $regionIds[] = $tempRegion->id;
                 $tempRegion = $tempRegion->parent;
@@ -132,39 +193,45 @@ $data['bukti'] = 'laporan/' . $filename;
             $targetAdmins = collect();
             $actualDestination = $validated['tujuan_laporan']; // rt, rw, atau desa
 
-            // STEP 1: Cek ketersediaan Admin RT untuk wilayah warga ini
-            if ($actualDestination === 'rt' && $user->rt && $user->rw) {
+            // STEP 1: Cek admin di region tujuan yang dipilih (RT)
+            if ($actualDestination === 'rt' && $targetRegionId) {
                 $adminRt = User::where('role', 'admin_rt')
-                    ->where('region_id', $user->region_id)
-                    ->where('rt', $user->rt)
-                    ->where('rw', $user->rw)
+                    ->where('region_id', $targetRegionId)
                     ->get();
 
                 if ($adminRt->isNotEmpty()) {
                     $targetAdmins = $adminRt;
-                    Log::info('Laporan dikirim ke Admin RT', ['rt' => $user->rt, 'rw' => $user->rw]);
+                    Log::info('Laporan dikirim ke Admin RT', ['region_id' => $targetRegionId]);
                 } else {
-                    // RT belum ada, eskalasi otomatis ke RW
+                    // RT belum ada admin, eskalasi otomatis ke RW
                     $actualDestination = 'rw';
                     Log::info('Admin RT belum ada, eskalasi otomatis ke RW');
                 }
             }
 
             // STEP 2: Cek ketersediaan Admin RW
-            if ($targetAdmins->isEmpty() && in_array($actualDestination, ['rw', 'rt']) && $user->rw) {
-                $adminRw = User::where('role', 'admin_rw')
-                    ->where('region_id', $user->region_id)
-                    ->where('rw', $user->rw)
-                    ->get();
+            if ($targetAdmins->isEmpty() && in_array($actualDestination, ['rw', 'rt'])) {
+                // Cari RW region: jika target adalah RT, naik ke parent (RW)
+                $rwRegionId = $targetRegionId;
+                if ($targetRegion && $targetRegion->type === 'rt') {
+                    $rwRegionId = $targetRegion->parent_id;
+                }
 
-                if ($adminRw->isNotEmpty()) {
-                    $targetAdmins = $adminRw;
-                    $actualDestination = 'rw';
-                    Log::info('Laporan dikirim ke Admin RW', ['rw' => $user->rw]);
+                if ($rwRegionId) {
+                    $adminRw = User::where('role', 'admin_rw')
+                        ->where('region_id', $rwRegionId)
+                        ->get();
+
+                    if ($adminRw->isNotEmpty()) {
+                        $targetAdmins = $adminRw;
+                        $actualDestination = 'rw';
+                        Log::info('Laporan dikirim ke Admin RW', ['region_id' => $rwRegionId]);
+                    } else {
+                        $actualDestination = 'desa';
+                        Log::info('Admin RW belum ada, eskalasi otomatis ke Desa');
+                    }
                 } else {
-                    // RW juga belum ada, eskalasi ke Desa
                     $actualDestination = 'desa';
-                    Log::info('Admin RW belum ada, eskalasi otomatis ke Desa');
                 }
             }
 

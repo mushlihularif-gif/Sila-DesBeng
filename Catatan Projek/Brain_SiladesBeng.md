@@ -85,3 +85,35 @@ Dokumen ini berfungsi sebagai pusat memori dan dokumentasi (pengganti Obsidian V
   - **[Fix Browser Freeze Kabar Daerah]** Merombak total sistem navigasi pada halaman Kabar Daerah dengan menghapus sistem AJAX berbasis AlpineJS yang memicu *infinite loop* (DOM conflict). Navigasi (Tab, Filter Kategori, dan Form Pencarian) kini dikembalikan ke metode bawaan Laravel yang 100% stabil dan anti-*freeze*.
   - **[UI Fix - Laporan Keuangan]** Memperbaiki inkonsistensi efek gradasi (gradient) teks pada judul 'Persentase Pendapatan Unit Pelayanan Daerah' dan 'Total Pendapatan Unit Pelayanan Daerah' di halaman laporan keuangan. Padding bawah ditambahkan agar descenders huruf (seperti 'y' dan 'p') tidak terpotong dan gradasi tampil sempurna.
 
+
+  - **[Aturan Ketat Copywriting Skala Makro]** Dilarang keras melakukan *hardcode* kata 'BUMDes', 'Kantor Desa', atau terminologi tingkat desa lainnya pada UI (seperti form pemesanan, banner informasi, dan struk/laporan). Sistem harus selalu menggunakan terminologi generik seperti 'Layanan Daerah', 'Pengelola', 'Pusat Layanan', 'Gas Daerah', dll. Hal ini memastikan konsistensi *Multi-Tenant Architecture* di mana sistem ini bisa dioperasikan secara penuh oleh level Kabupaten maupun Kecamatan tanpa perlu mengubah satupun baris kode.
+
+  - **[UI Fix - Formulir Pengaduan] (SELESAI):**
+    - Mengganti teks judul formulir sederhana dengan format **Kop Surat Resmi Pemerintahan** (lengkap dengan Logo Kabupaten Bengkalis dan Logo SiladesBeng, serta garis pembatas ganda) agar tampil eksklusif untuk presentasi KMIPN.
+    - Menyeragamkan warna teks label formulir yang sebelumnya berwarna *navy* (#1e3a5f) menjadi 	ext-gray-800 agar konsisten dengan halaman formulir kemitraan.
+    - Meningkatkan keamanan privasi NIK pada cetak PDF Bukti Laporan dengan mengubah penyensoran menjadi 12 digit (hanya menyisakan 2 digit awal dan 2 digit akhir).
+    - Memperbaiki ejaan *subtitle* di Statistik Laporan Warga dari 'Sekabupaten' menjadi 'se-Kabupaten' sesuai standar PUEBI.
+
+  - **[Rencana Mendatang - Peta & Smart Camera Pengaduan] (DITUNDA):**
+    - Rencana memecah opsi unggah bukti laporan menjadi "Foto Langsung (Smart Camera dengan deteksi GPS otomatis)" dan "Pilih dari Galeri (Tanpa tarikan GPS otomatis)".
+    - Status: **DITUNDA** karena menunggu validasi API Key Google Maps dari anggota tim lain agar tidak merusak fungsi peta yang sudah ada.
+    - **[UX Fix - Modern Notifications] (SELESAI):** Menghapus penggunaan window.alert() bawaan browser (kotak dialog hitam jadul yang tidak profesional) di halaman formulir pengaduan. Menggantinya dengan **SweetAlert2** (melalui teknik *function overriding* pada Javascript), sehingga seluruh notifikasi peringatan/error kini tampil sebagai Toast Notification (di pojok kanan atas, tidak menghalangi layar), elegan, dan estetik sesuai standar UI KMIPN.
+    - **[UX Decision - Header Lokasi Kejadian]:** Sempat diubah agar sama dengan desain header "Informasi Wilayah" (di Kemitraan), namun akhirnya dikembalikan (*revert*) ke desain label teks sederhana seperti semula atas permintaan user karena dirasa lebih mengalir dan bersih.
+    - **[Arsitektur Sistem - Pop-up Profil Wilayah (CRITICAL)] (SELESAI):** Ditemukan celah arsitektur terkait Pop-up manual "Lengkapi Profil Wilayah" (Pilih RT/RW) di form Laporan. Pop-up ini adalah sistem *legacy* sebelum adanya fitur KYC. Karena sekarang domisili warga (RT/RW) dikunci mutlak berdasarkan data KTP (KYC), pop-up manual ini statusnya **usang dan berbahaya** (bisa dimanipulasi).
+      - **Eksekusi:** Pop-up `rtrw-modal` (HTML + JavaScript) telah **dihapus total** dari `create.blade.php`.
+      - **Pengganti:** Bagian "Tujuan Pelaporan" di formulir kini dilengkapi **Searchable Dropdown** dinamis. Saat warga memilih radio "Pengurus RT" atau "Pengurus RW", muncul dropdown dengan fitur pencarian yang hanya menampilkan RT/RW yang sudah punya admin terdaftar di sistem. Setiap opsi RT dilengkapi badge nama RW-nya agar tidak rancu (karena nomor RT bisa sama lintas RW). Empty state dropdown: *"Tidak ditemukan. Pengurus RT/RW ini belum bergabung."*
+      - **Backend (`LaporanController`):**
+        - `create()` kini mengambil koleksi `$activeRTs` dan `$activeRWs` (Region yang punya admin) dan mengirimnya ke view via `@json()`.
+        - `store()` menerima field baru `target_region_id` dari hidden input. Nilai ini menentukan ke region mana laporan dikirim (bukan lagi hard-coded dari `user->region_id`).
+        - Smart Routing Notifikasi diperbarui: pencarian admin menggunakan `targetRegionId` pilihan user, dengan mekanisme eskalasi otomatis (RT -> RW -> Desa) tetap berjalan jika admin di level tujuan tidak ditemukan.
+      - **Prinsip Kunci:** Penentuan domisili warga = KYC KTP (mutlak). Penentuan tujuan laporan = pilihan warga via form (fleksibel, tapi hanya bisa memilih yang aktif).
+
+
+    - **[UX & Security Fix - Identitas Pelapor Dinamis (KYC)] (SELESAI):**
+      - Mengunci kolom 'Nama Lengkap' secara mutlak (readonly) bagi warga yang status KYC KTP-nya telah pproved. Hal ini menjamin validitas hukum pelapor.
+      - Mengizinkan warga yang belum diverifikasi KTP untuk mengedit nama pada form, TAPI sistem akan secara eksplisit mengekspos 'Nama Akun' asli mereka di bawah 'Nama Pelapor' pada halaman Bukti Laporan. Langkah ini menutup celah pengguna anonim (contoh: akun 'Ucup Gaming' melapor atas nama 'Bapak RT') dengan menelanjangi identitas asli akun tanpa mematikan fleksibilitas form.
+      - Mengganti representasi visual status KTP dengan icon FontAwesome dan SVG murni (menggantikan karakter emoji) agar tetap profesional dan mematuhi aturan kompetisi KMIPN.
+    - **[Bug Fix - RW Searchable Dropdown] (SELESAI):** Memperbaiki kendala dropdown pencarian RW yang gagal memuat (blank) akibat data $activeRWs dirender sebagai JSON Object Javascript oleh Laravel (karena ID Region tidak berurutan). Solusinya, dilakukan re-indexing array menggunakan ->values()->all() pada LaporanController sehingga Frontend membaca data murni sebagai Array.
+    - **[UI Fix - Kop Surat Form Pelaporan] (SELESAI):** Mengoptimalkan proporsi ukuran Logo Kabupaten dan Logo Sistem pada Kop Surat formulir agar lebih simetris dan mengurangi ruang kosong (padding) berlebih di bagian atas card.
+    - **[Localization Fix] (SELESAI):** Menambahkan atribut 	ranslate=
+o` pada judul 'Form Pelaporan' untuk mencegah browser secara sepihak menerjemahkannya secara absurd (menjadi 'Buah Pelaporan').

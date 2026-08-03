@@ -80,13 +80,25 @@
                         </div>
                     </div>
 
-                    {{-- Nama Pelapor --}}
-                    <div>
+                    {{-- Nama Pelapor & Akun --}}
                     <div>
                         <p class="text-gray-400 text-sm mb-1">Nama Pelapor</p>
-                        <p class="text-white font-semibold truncate">
-                            {{ $laporan->nama ?? ($laporan->user->name ?? 'Tidak Diketahui') }}
-                        </p>
+                        @php
+                            $isVerified = $laporan->user && $laporan->user->kycVerification && $laporan->user->kycVerification->status === 'approved';
+                            $namaLaporan = $laporan->nama ?? 'Tidak Diketahui';
+                            $namaAkun = $laporan->user->name ?? 'Tidak Diketahui';
+                        @endphp
+                        
+                        @if($isVerified)
+                            <p class="text-white font-semibold truncate">{{ $namaLaporan }} 
+                                <span class="inline-flex items-center text-[10px] bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full ml-1 font-medium border border-green-400/50"><i class="fas fa-check-circle mr-1"></i> Sesuai KTP</span>
+                            </p>
+                        @else
+                            <p class="text-white font-semibold truncate">{{ $namaLaporan }} 
+                                <span class="inline-flex items-center text-[10px] bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded-full ml-1 font-medium border border-amber-400/50"><i class="fas fa-exclamation-triangle mr-1"></i> Belum KTP</span>
+                            </p>
+                            <p class="text-blue-400 text-xs mt-1">Nama Akun: {{ $namaAkun }}</p>
+                        @endif
                     </div>
 
                     {{-- Kategori --}}
@@ -141,35 +153,16 @@
                 @endif
 
                 {{-- Foto Bukti --}}
-                @if ($laporan->bukti)
+                @if (!empty($laporan->bukti_array))
                 <div class="mb-6">
-                    <p class="text-gray-400 text-sm mb-3"><i class="fas fa-camera mr-2"></i> Foto Bukti</p>
-                    <div class="bg-gray-900 rounded-xl overflow-hidden border-2 border-yellow-400/30 shadow-lg">
-                        <img
-                            src="{{ asset('storage/' . $laporan->bukti) }}"
-                            alt="Foto Bukti Laporan"
-                            class="w-full h-64 object-cover cursor-pointer hover:opacity-90 transition"
-                            onclick="openImageModal('{{ asset('storage/' . $laporan->bukti) }}')">
-                    </div>
-                    <p class="text-xs text-gray-400 mt-2 text-center">
-                        💡 Klik gambar untuk memperbesar
-                    </p>
-                </div>
-                @endif
-
-                {{-- Multiple Photos Support --}}
-                @if (!empty($fotoPath) && is_array($fotoPath))
-                <div class="mb-6">
-                    <p class="text-gray-400 text-sm mb-3">📸 Foto Bukti ({{ count($fotoPath) }} foto)</p>
+                    <p class="text-gray-400 text-sm mb-3">📸 Foto Bukti ({{ count($laporan->bukti_array) }} foto)</p>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        @foreach ($fotoPath as $foto)
-                        @if ($foto)
+                        @foreach ($laporan->bukti_array as $foto)
                         <div class="bg-gray-900 rounded-xl overflow-hidden border-2 border-yellow-400/30 shadow-lg">
                             <img src="{{ asset('storage/' . $foto) }}" alt="Foto Bukti Laporan"
                                 class="w-full h-64 object-cover cursor-pointer hover:opacity-90 transition"
                                 onclick="openImageModal('{{ asset('storage/' . $foto) }}')">
                         </div>
-                        @endif
                         @endforeach
                     </div>
                     <p class="text-xs text-gray-400 mt-2 text-center">💡 Klik gambar untuk memperbesar</p>

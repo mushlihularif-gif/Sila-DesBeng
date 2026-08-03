@@ -121,23 +121,19 @@
                 @endif
 
                 {{-- Foto Laporan --}}
-                @if ($laporan->bukti || $laporan->bukti)
+                @if (!empty($laporan->bukti_array))
                     <div class="bg-white/10 backdrop-blur-xl rounded-2xl p-6 shadow-2xl border-2 border-yellow-400/20" data-aos="fade-up">
                         <h3 class="text-yellow-400 font-bold text-xl mb-4 flex items-center gap-2">
                             <span class="text-3xl">📷</span>
                             Dokumentasi Foto
                         </h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            @php
-                                $fotoField = $laporan->bukti ?? $laporan->bukti;
-                                $photos = is_array(json_decode($fotoField, true)) ? json_decode($fotoField, true) : [$fotoField];
-                            @endphp
-                            @foreach ($photos as $foto)
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            @foreach ($laporan->bukti_array as $foto)
                                 <div class="relative group">
                                     <img src="{{ asset('storage/' . $foto) }}" alt="Foto Laporan"
                                         class="w-full h-64 object-cover rounded-xl border-2 border-yellow-400/30 hover:border-yellow-400 transition-all cursor-pointer"
                                         onclick="window.open(this.src, '_blank')">
-                                    <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-all rounded-xl flex items-center justify-center">
+                                    <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-all rounded-xl flex items-center justify-center pointer-events-none">
                                         <span class="text-white text-3xl">🔍</span>
                                     </div>
                                 </div>
