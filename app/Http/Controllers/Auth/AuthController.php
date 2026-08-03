@@ -65,7 +65,7 @@ class AuthController extends Controller
 
             $methodText = $validated['otp_method'] === 'whatsapp' ? 'nomor WhatsApp' : 'email';
             return redirect()->route('beranda')->with('open_otp_modal', true)
-                ->with('success', 'Kode OTP telah dikirim ke ' . $methodText . ' Anda');
+                ->with('success', '🔑 Kode OTP Anda: ' . $otpCode . ' — (dikirim ke ' . $methodText . ' Anda)');
         } catch (\Illuminate\Validation\ValidationException $e) {
             return redirect()->back()->withErrors($e->errors())->withInput()->with('open_register_modal', true);
         } catch (\Exception $e) {

@@ -100,15 +100,15 @@
                                             @if($banners->count() > 0)
                                                 @foreach($banners as $index => $banner)
                                                     <div class="carousel-item {{ $index == 0 ? 'active' : '' }}" data-bs-interval="3000">
-                                                        <img src="{{ Storage::url($banner->image_path) }}" class="d-block w-100 rounded-3" style="object-fit: cover; aspect-ratio: 1920/550;" alt="Banner {{ $index + 1 }}">
+                                                        <img src="{{ Storage::url($banner->image_path) }}" class="d-block w-100 rounded-3" alt="Banner {{ $index + 1 }}">
                                                     </div>
                                                 @endforeach
                                             @else
                                                 <div class="carousel-item active" data-bs-interval="3000">
-                                                    <img src="{{ asset('User/img/elemen/kuncislide1r.png') }}" class="d-block w-100 rounded-3" style="object-fit: cover; aspect-ratio: 1920/550;" alt="Slide 1">
+                                                    <img src="{{ asset('User/img/elemen/kuncislide1r.png') }}" class="d-block w-100 rounded-3" alt="Slide 1">
                                                 </div>
                                                 <div class="carousel-item" data-bs-interval="3000">
-                                                    <img src="{{ asset('User/img/elemen/kuncislide2r.png') }}" class="d-block w-100 rounded-3" style="object-fit: cover; aspect-ratio: 1920/550;" alt="Slide 2">
+                                                    <img src="{{ asset('User/img/elemen/kuncislide2r.png') }}" class="d-block w-100 rounded-3" alt="Slide 2">
                                                 </div>
                                             @endif
                                         </div>

@@ -181,4 +181,9 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Region::class);
     }
+
+    public function kycVerification()
+    {
+        return $this->hasOne(KycVerification::class)->latest();
+    }
 }

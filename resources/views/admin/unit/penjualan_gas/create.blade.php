@@ -227,7 +227,7 @@
                                                 <option value="" disabled selected>Pilih Satuan</option>
                                                 <option value="Unit">Unit</option>
                                                 <option value="Paket">Paket</option>
-                                                <option value="Set">Satu Set</option>
+
                                             </select>
                                             <button type="button" class="btn btn-outline-primary modern-btn-outline" 
                                                     data-bs-toggle="modal" data-bs-target="#addSatuanModal">

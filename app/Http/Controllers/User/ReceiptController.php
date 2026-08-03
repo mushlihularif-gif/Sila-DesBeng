@@ -25,7 +25,7 @@ class ReceiptController extends Controller
         $booking = RentalBooking::withTrashed()->findOrFail($id);
         
         // Periksa apakah pengguna memiliki pesanan ini atau adalah admin
-        if ((int)$booking->user_id !== (int)auth()->id() && auth()->user()->role !== 'admin') {
+        if ((int)$booking->user_id !== (int)auth()->id() && !in_array(auth()->user()->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'admin', 'lurah'])) {
             abort(403, 'Unauthorized access');
         }
         
@@ -54,7 +54,7 @@ class ReceiptController extends Controller
         $booking = RentalBooking::withTrashed()->findOrFail($id);
         
         // Periksa apakah pengguna memiliki pesanan ini atau adalah admin
-        if ((int)$booking->user_id !== (int)auth()->id() && auth()->user()->role !== 'admin') {
+        if ((int)$booking->user_id !== (int)auth()->id() && !in_array(auth()->user()->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'admin', 'lurah'])) {
             abort(403, 'Unauthorized access');
         }
         
@@ -81,7 +81,7 @@ class ReceiptController extends Controller
         $order = GasOrder::withTrashed()->findOrFail($id);
         
         // Periksa apakah pengguna memiliki pesanan ini atau adalah admin
-        if ((int)$order->user_id !== (int)auth()->id() && auth()->user()->role !== 'admin') {
+        if ((int)$order->user_id !== (int)auth()->id() && !in_array(auth()->user()->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'admin', 'lurah'])) {
             abort(403, 'Unauthorized access');
         }
         
@@ -110,7 +110,7 @@ class ReceiptController extends Controller
         $order = GasOrder::withTrashed()->findOrFail($id);
         
         // Periksa apakah pengguna memiliki pesanan ini atau adalah admin
-        if ((int)$order->user_id !== (int)auth()->id() && auth()->user()->role !== 'admin') {
+        if ((int)$order->user_id !== (int)auth()->id() && !in_array(auth()->user()->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'admin', 'lurah'])) {
             abort(403, 'Unauthorized access');
         }
         
@@ -135,7 +135,7 @@ class ReceiptController extends Controller
     {
         $booking = \App\Models\MobilBooking::withTrashed()->findOrFail($id);
         
-        if ((int)$booking->user_id !== (int)auth()->id() && auth()->user()->role !== 'admin') {
+        if ((int)$booking->user_id !== (int)auth()->id() && !in_array(auth()->user()->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'admin', 'lurah'])) {
             abort(403, 'Unauthorized access');
         }
         
@@ -161,7 +161,7 @@ class ReceiptController extends Controller
     {
         $booking = \App\Models\MobilBooking::withTrashed()->findOrFail($id);
         
-        if ((int)$booking->user_id !== (int)auth()->id() && auth()->user()->role !== 'admin') {
+        if ((int)$booking->user_id !== (int)auth()->id() && !in_array(auth()->user()->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'admin', 'lurah'])) {
             abort(403, 'Unauthorized access');
         }
         
@@ -185,7 +185,7 @@ class ReceiptController extends Controller
     {
         $booking = \App\Models\FasilitasUmumBooking::withTrashed()->findOrFail($id);
         
-        if ((int)$booking->user_id !== (int)auth()->id() && auth()->user()->role !== 'admin') {
+        if ((int)$booking->user_id !== (int)auth()->id() && !in_array(auth()->user()->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'admin', 'lurah'])) {
             abort(403, 'Unauthorized access');
         }
         
@@ -211,7 +211,7 @@ class ReceiptController extends Controller
     {
         $booking = \App\Models\FasilitasUmumBooking::withTrashed()->findOrFail($id);
         
-        if ((int)$booking->user_id !== (int)auth()->id() && auth()->user()->role !== 'admin') {
+        if ((int)$booking->user_id !== (int)auth()->id() && !in_array(auth()->user()->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'admin', 'lurah'])) {
             abort(403, 'Unauthorized access');
         }
         

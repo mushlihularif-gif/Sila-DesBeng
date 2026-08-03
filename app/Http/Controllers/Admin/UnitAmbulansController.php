@@ -44,6 +44,7 @@ class UnitAmbulansController extends Controller
         
         $validated['kategori'] = 'ambulans';
         $validated['region_id'] = auth()->user()->region_id;
+        $validated['harga_sewa'] = 0;
         
         // Simpan nomor plat ke dalam deskripsi atau tambah kolom khusus. 
         // Jika belum ada kolom nomor_plat, masukkan ke deskripsi sementara

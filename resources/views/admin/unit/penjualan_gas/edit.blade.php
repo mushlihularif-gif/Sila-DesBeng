@@ -278,7 +278,7 @@
                                                 <option value="" disabled>Pilih Satuan</option>
                                                 <option value="Unit" {{ old('satuan', $gas->satuan) == 'Unit' ? 'selected' : '' }}>Unit</option>
                                                 <option value="Paket" {{ old('satuan', $gas->satuan) == 'Paket' ? 'selected' : '' }}>Paket</option>
-                                                <option value="Set" {{ old('satuan', $gas->satuan) == 'Set' ? 'selected' : '' }}>Satu Set</option>
+
                                             </select>
                                             <button type="button" class="btn btn-outline-primary modern-btn-outline" 
                                                     data-bs-toggle="modal" data-bs-target="#addSatuanModal">

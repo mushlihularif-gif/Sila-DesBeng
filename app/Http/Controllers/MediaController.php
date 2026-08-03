@@ -81,7 +81,7 @@ class MediaController extends Controller
         $fullPath = null;
         foreach ($possiblePaths as $p) {
             if (\Illuminate\Support\Facades\Storage::disk('private')->exists($p)) {
-                $fullPath = storage_path('app/private/' . $p);
+                $fullPath = \Illuminate\Support\Facades\Storage::disk('private')->path($p);
                 break;
             }
         }
@@ -124,10 +124,18 @@ class MediaController extends Controller
             $finalImage = ob_get_clean();
             imagedestroy($img);
 
+            // Bersihkan output buffer sebelumnya (mencegah karakter whitespace/error nyempil di gambar)
+            while (ob_get_level() > 0) {
+                ob_end_clean();
+            }
+
             return response($finalImage)->header('Content-Type', 'image/jpeg');
         }
 
         // Jika gambar gagal diproses (bukan gambar valid)
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
         return response($imageContent)->header('Content-Type', 'image/jpeg');
     }
 }

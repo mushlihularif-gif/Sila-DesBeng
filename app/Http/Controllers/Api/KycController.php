@@ -46,13 +46,13 @@ class KycController extends Controller
         $kyc = KycVerification::create([
             'user_id' => $user->id,
             'ktp_image_path' => $path,
-            'nik_from_ocr' => $ocrData['nik'] ?? null,
-            'name_from_ocr' => $ocrData['name'] ?? null,
-            'address_from_ocr' => $ocrData['address'] ?? null,
-            'rt_from_ocr' => $ocrData['rt'] ?? null,
-            'rw_from_ocr' => $ocrData['rw'] ?? null,
-            'kecamatan_from_ocr' => $ocrData['kecamatan'] ?? null,
-            'desa_from_ocr' => $ocrData['desa'] ?? null,
+            'nik_from_ocr' => $request->nik ?? $ocrData['nik'] ?? null,
+            'name_from_ocr' => $request->name ?? $ocrData['name'] ?? null,
+            'address_from_ocr' => $request->address ?? $ocrData['address'] ?? null,
+            'rt_from_ocr' => $request->rt ?? $ocrData['rt'] ?? null,
+            'rw_from_ocr' => $request->rw ?? $ocrData['rw'] ?? null,
+            'kecamatan_from_ocr' => $request->kecamatan ?? $ocrData['kecamatan'] ?? null,
+            'desa_from_ocr' => $request->desa ?? $ocrData['desa'] ?? null,
             'gender_from_ocr' => $ocrData['gender'] ?? null,
             'status' => 'pending' 
         ]);
@@ -80,9 +80,17 @@ class KycController extends Controller
             ->where('user_id', $request->user()->id)
             ->firstOrFail();
 
-        $kyc->update([
-            'face_scan_data' => $request->face_data,
-        ]);
+        $updateData = ['face_scan_data' => $request->face_data];
+        
+        if ($request->has('nik')) $updateData['nik_from_ocr'] = $request->nik;
+        if ($request->has('name')) $updateData['name_from_ocr'] = $request->name;
+        if ($request->has('address')) $updateData['address_from_ocr'] = $request->address;
+        if ($request->has('rt')) $updateData['rt_from_ocr'] = $request->rt;
+        if ($request->has('rw')) $updateData['rw_from_ocr'] = $request->rw;
+        if ($request->has('kecamatan')) $updateData['kecamatan_from_ocr'] = $request->kecamatan;
+        if ($request->has('desa')) $updateData['desa_from_ocr'] = $request->desa;
+
+        $kyc->update($updateData);
 
         $user = $request->user();
         $user->update(['verification_status' => 'pending']);

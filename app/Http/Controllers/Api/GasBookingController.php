@@ -211,6 +211,16 @@ class GasBookingController extends Controller
             'icon' => 'fas fa-clock text-yellow-500'
         ]);
 
+        if ($validated['payment_method'] !== 'tunai') {
+            $response['payment_data'] = [
+                'va_number' => $order->payment_va_number,
+                'qr_url' => $order->payment_qr_url,
+                'channel' => $order->payment_channel,
+                'expiry_time' => $order->payment_expiry_time ? $order->payment_expiry_time->toDateTimeString() : null,
+                'total_amount' => $totalAmount
+            ];
+        }
+
         return response()->json($response);
     }
 }

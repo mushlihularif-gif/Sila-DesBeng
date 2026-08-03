@@ -85,7 +85,13 @@ class FileEncryptionService
             );
 
             sodium_memzero($encryptionKey);
-            return $plaintext !== false ? $plaintext : null;
+            
+            if ($plaintext === false) {
+                Log::error("FileEncryptionService Decrypt Error: sodium decrypt returned false");
+                return null;
+            }
+            
+            return $plaintext;
         } catch (\SodiumException $e) {
             Log::error("FileEncryptionService Decrypt Error: " . $e->getMessage());
             return null;

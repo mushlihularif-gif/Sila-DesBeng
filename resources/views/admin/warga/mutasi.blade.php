@@ -91,6 +91,7 @@
                                     </div>
                                     
                                     <!-- Reject Modal -->
+                                    @push('modals')
                                     <div class="modal fade" id="rejectModal{{ $p->id }}" tabindex="-1" aria-hidden="true">
                                         <div class="modal-dialog modal-dialog-centered">
                                             <div class="modal-content">
@@ -111,6 +112,7 @@
                                             </div>
                                         </div>
                                     </div>
+                                    @endpush
                                 </td>
                             </tr>
                             @empty
@@ -206,6 +208,7 @@
 </div>
 
 <!-- Modal Tarik Warga -->
+@push('modals')
 <div class="modal fade" id="tarikWargaModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -216,7 +219,9 @@
             <form action="{{ route('admin.warga.mutasi.tarik') }}" method="POST">
                 @csrf
                 <div class="modal-body">
-                    <div class="alert alert-info py-2">Fitur ini akan melacak NIK di seluruh sistem SilaDesBeng dan meminta "Handshake" persetujuan pelepasan dari Kades lamanya.</div>
+                    <div class="alert alert-info py-2 mb-4">
+                        Fitur ini melacak NIK di sistem SilaDesBeng dan meminta "Handshake" pelepasan dari Kades lama.
+                    </div>
                     <div class="mb-3">
                         <label class="form-label">NIK Warga</label>
                         <input type="text" name="nik" class="form-control" required placeholder="Masukkan 16 digit NIK">
@@ -234,4 +239,5 @@
         </div>
     </div>
 </div>
+@endpush
 @endsection

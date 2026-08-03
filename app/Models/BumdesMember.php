@@ -15,6 +15,6 @@ class BumdesMember extends Model
 
     public function getPhotoUrlAttribute()
     {
-        return $this->photo ? asset('storage/' . $this->photo) : 'http://isewaproject.test/Admin/img/avatars/default.png';
+        return $this->photo ? asset('storage/' . $this->photo) : asset('Admin/img/avatars/pria.png');
     }
 }
