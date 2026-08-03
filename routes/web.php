@@ -201,7 +201,7 @@ Route::middleware('auth')->group(function () {
     // Ambulans User
     Route::get('/layanan-ambulans', [App\Http\Controllers\User\AmbulansUserController::class, 'index'])
         ->name('user.ambulans.index')
-        ->middleware(['role:user']);
+        ->middleware(['role:user', 'region.service:layanan-ambulans']);
         
     // Verifikasi Identitas
     Route::get('/profile/verifikasi', [App\Http\Controllers\User\VerificationController::class, 'index'])->name('user.verifikasi.index');
