@@ -117,3 +117,5 @@ Dokumen ini berfungsi sebagai pusat memori dan dokumentasi (pengganti Obsidian V
     - **[UI Fix - Kop Surat Form Pelaporan] (SELESAI):** Mengoptimalkan proporsi ukuran Logo Kabupaten dan Logo Sistem pada Kop Surat formulir agar lebih simetris dan mengurangi ruang kosong (padding) berlebih di bagian atas card.
     - **[Localization Fix] (SELESAI):** Menambahkan atribut 	ranslate=
 o` pada judul 'Form Pelaporan' untuk mencegah browser secara sepihak menerjemahkannya secara absurd (menjadi 'Buah Pelaporan').
+
+    - **[Arsitektur Sistem - Layanan Ambulans Darurat] (SELESAI):** Memperbaiki inkonsistensi akses menu Layanan Ambulans Darurat. Sebelumnya menu ini bersifat publik/selalu terbuka untuk pengguna yang login. Kini rute /layanan-ambulans telah diproteksi menggunakan middleware `region.service:layanan-ambulans`, sehingga menu ini akan otomatis hilang dari HP warga jika Admin Desa menonaktifkan fitur tersebut (misal karena desa tidak memiliki armada ambulans), konsisten dengan logika unit layanan daerah lainnya.

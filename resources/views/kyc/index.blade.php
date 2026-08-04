@@ -29,27 +29,28 @@
                 <h3 class="text-xl font-bold text-gray-800 mb-4">Langkah 1: Unggah Foto KTP</h3>
                 <p class="text-sm text-gray-600 mb-6">Pastikan foto KTP terlihat jelas, terang, dan teks dapat terbaca.</p>
                 
-                <form id="form-ktp" enctype="multipart/form-data">
+                <form id="form-ktp" enctype="multipart/form-data" data-turbo="false" action="javascript:void(0)">
                     @csrf
-                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md relative hover:bg-gray-50 transition cursor-pointer overflow-hidden" id="drop-zone">
-                        <div class="space-y-1 text-center" id="drop-zone-text">
-                            <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
-                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                            <div class="flex text-sm text-gray-600 justify-center">
-                                <label for="ktp_image" class="relative cursor-pointer bg-transparent rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
-                                    <span>Pilih File KTP</span>
+                    <div class="mt-1 flex flex-col items-center justify-center p-6 border-2 border-gray-300 border-dashed rounded-xl relative hover:bg-gray-50 hover:border-gray-400 transition-all cursor-pointer group text-center overflow-hidden" id="drop-zone">
+                        <div class="space-y-1 text-center w-full" id="drop-zone-text">
+                            <div class="mx-auto w-16 h-16 rounded-full bg-white flex items-center justify-center mb-3 shadow-sm text-slate-500 border border-slate-200 group-hover:scale-110 transition-transform duration-300">
+                                <svg class="h-8 w-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                                </svg>
+                            </div>
+                            <div class="flex flex-col text-center">
+                                <label for="ktp_image" class="relative cursor-pointer">
+                                    <span class="font-bold text-gray-700 text-base">Pilih dari Penyimpanan</span>
                                     <input id="ktp_image" name="ktp_image" type="file" class="hidden" accept="image/*">
                                 </label>
-                                <p class="pl-1">atau drag and drop</p>
+                                <p class="text-xs text-gray-500 mt-1">PNG, JPG, JPEG up to 5MB</p>
                             </div>
-                            <p class="text-xs text-gray-500">PNG, JPG, JPEG up to 5MB</p>
                         </div>
                         <img id="ktp-preview" class="hidden max-h-48 mx-auto rounded-lg shadow-sm" src="" alt="Preview KTP">
                     </div>
 
                     <div class="mt-6">
-                        <button type="submit" id="btn-process-ktp" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-full shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition">
+                        <button type="button" id="btn-process-ktp" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-full shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition">
                             Proses & Lanjut Scan Wajah
                         </button>
                     </div>
@@ -218,21 +219,33 @@
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
 
 <script>
-    // --- SweetAlert Toast Configuration ---
-    const Toast = Swal.mixin({
-        toast: true,
-        position: 'top-end',
-        showConfirmButton: false,
-        timer: 3000,
-        timerProgressBar: true,
-        didOpen: (toast) => {
-            toast.addEventListener('mouseenter', Swal.stopTimer)
-            toast.addEventListener('mouseleave', Swal.resumeTimer)
-        }
-    });
+(function() {
+    function initKycPage() {
+        // Pastikan kita ada di halaman KYC
+        if (!document.getElementById('form-ktp')) return;
+        
+        // --- SweetAlert Toast Configuration (Lazy loaded to prevent Turbo race conditions) ---
+        const Toast = {
+            fire: function(options) {
+                if (typeof Swal !== 'undefined') {
+                    Swal.mixin({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true,
+                        didOpen: (toast) => {
+                            toast.addEventListener('mouseenter', Swal.stopTimer)
+                            toast.addEventListener('mouseleave', Swal.resumeTimer)
+                        }
+                    }).fire(options);
+                } else {
+                    alert(options.title); // Fallback
+                }
+            }
+        };
 
-    // --- Intersection Observer for Entrance Animations ---
-    document.addEventListener('DOMContentLoaded', () => {
+        // --- Intersection Observer for Entrance Animations ---
         const observerOptions = {
             root: null,
             rootMargin: '0px',
@@ -251,21 +264,24 @@
         document.querySelectorAll('.animate-section').forEach((el) => {
             observer.observe(el);
         });
-    });
 
-    let currentKycId = null;
-    let faceSnapshot = null;
-    
-    // --- Step 1: KTP Upload ---
-    const fileInput = document.getElementById('ktp_image');
-    const dropZoneText = document.getElementById('drop-zone-text');
-    const previewImage = document.getElementById('ktp-preview');
-    const dropZone = document.getElementById('drop-zone');
+        let currentKycId = null;
+        let faceSnapshot = null;
+        
+        // --- Step 1: KTP Upload ---
+        const fileInput = document.getElementById('ktp_image');
+        const dropZoneText = document.getElementById('drop-zone-text');
+        const previewImage = document.getElementById('ktp-preview');
+        const dropZone = document.getElementById('drop-zone');
 
-    // Memicu klik file input ketika area dropZone diklik
-    dropZone.addEventListener('click', () => {
-        fileInput.click();
-    });
+        // Memicu klik file input ketika area dropZone diklik
+        dropZone.addEventListener('click', (e) => {
+            // Cegah double-trigger jika user mengklik label atau isi di dalam label
+            if (e.target.closest('label') || e.target.tagName.toLowerCase() === 'input') {
+                return;
+            }
+            fileInput.click();
+        });
 
     // Mencegah file input diklik dua kali jika label di dalamnya diklik
     fileInput.addEventListener('click', (e) => {
@@ -308,10 +324,12 @@
         }
     });
 
-    document.getElementById('form-ktp').addEventListener('submit', async function(e) {
+    document.getElementById('btn-process-ktp').addEventListener('click', async function(e) {
         e.preventDefault();
         
-        const formData = new FormData(this);
+        const form = document.getElementById('form-ktp');
+        const formData = new FormData(form);
+        
         if(!fileInput.files[0]) {
             Toast.fire({
                 icon: 'error',
@@ -803,7 +821,17 @@
             this.disabled = false;
             this.innerHTML = "Kirim Data";
         }
-    });
+        });
+    }
 
+    // --- Event Listeners untuk Inisialisasi ---
+    document.addEventListener('DOMContentLoaded', initKycPage);
+    document.addEventListener('turbo:load', initKycPage);
+    
+    // Jalankan langsung jika DOM sudah siap
+    if (document.readyState !== 'loading') {
+        initKycPage();
+    }
+})();
 </script>
 @endpush
