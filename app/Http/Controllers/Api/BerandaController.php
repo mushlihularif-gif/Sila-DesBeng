@@ -37,15 +37,37 @@ class BerandaController extends Controller
      */
     public function announcements()
     {
-        $announcements = Announcement::with('region')
+        $announcements = Announcement::with(['region', 'admin', 'images'])
             ->where('is_active', true)
             ->orderBy('created_at', 'desc')
             ->take(5)
             ->get();
 
+        // Format to match mobile expectations (same as NewsApiController)
+        $formatted = $announcements->map(function ($item) {
+            $image = null;
+            if ($item->image_path) {
+                $image = asset('storage/' . $item->image_path);
+            } elseif ($item->images && $item->images->count() > 0) {
+                $image = asset('storage/' . $item->images->first()->image_path);
+            }
+
+            return [
+                'id' => $item->id,
+                'title' => $item->title,
+                'category' => $item->type ?? 'Pengumuman',
+                'date' => $item->event_date ? $item->event_date->format('Y-m-d') : $item->created_at->format('Y-m-d'),
+                'desc' => $item->description,
+                'content' => $item->description,
+                'image' => $image,
+                'location' => $item->location,
+                'author' => $item->admin ? $item->admin->name : 'Admin Desa',
+            ];
+        });
+
         return response()->json([
             'status' => 'success',
-            'data' => $announcements
+            'data' => $formatted
         ]);
     }
 
