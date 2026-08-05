@@ -45,6 +45,12 @@ class ActivityController extends Controller
         $laporans = \App\Models\Laporan::where('user_id', $user->id)
             ->orderBy('created_at', 'desc')
             ->get();
+            
+        // Fetch user's pasar orders
+        $pasarOrders = \App\Models\PasarOrder::where('user_id', $user->id)
+            ->with('items.produk')
+            ->orderBy('created_at', 'desc')
+            ->get();
         
         // Fetch system settings for location
         $setting = SystemSetting::first();
@@ -55,6 +61,7 @@ class ActivityController extends Controller
             'mobilBookings', 
             'fasilitasBookings', 
             'laporans', 
+            'pasarOrders',
             'setting'
         ));
     }
@@ -76,6 +83,9 @@ class ActivityController extends Controller
             $reasonField = 'cancellation_reason';
         } elseif ($type === 'fasilitas') {
             $order = \App\Models\FasilitasUmumBooking::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
+            $reasonField = 'cancellation_reason';
+        } elseif ($type === 'pasar') {
+            $order = \App\Models\PasarOrder::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
             $reasonField = 'cancellation_reason';
         } else {
             return response()->json(['success' => false, 'message' => 'Tipe tidak valid'], 400);
@@ -131,6 +141,8 @@ class ActivityController extends Controller
             $order = \App\Models\MobilBooking::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
         } elseif ($type === 'fasilitas') {
             $order = \App\Models\FasilitasUmumBooking::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
+        } elseif ($type === 'pasar') {
+            $order = \App\Models\PasarOrder::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
         } elseif ($type === 'laporan') {
             $order = \App\Models\Laporan::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
             $order->delete();
@@ -167,6 +179,8 @@ class ActivityController extends Controller
                 $query = \App\Models\MobilBooking::where('user_id', Auth::id());
             } elseif ($type === 'fasilitas') {
                 $query = \App\Models\FasilitasUmumBooking::where('user_id', Auth::id());
+            } elseif ($type === 'pasar') {
+                $query = \App\Models\PasarOrder::where('user_id', Auth::id());
             } elseif ($type === 'laporan') {
                 $query = \App\Models\Laporan::where('user_id', Auth::id());
                 // For laporan, we can delete all

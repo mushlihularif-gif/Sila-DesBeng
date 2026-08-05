@@ -245,6 +245,28 @@ Route::post('/gas/payment/{id}/change-method', [App\Http\Controllers\User\GasBoo
     ->name('user.gas.payment.change_method')
     ->middleware('auth');
 
+// === PASAR DAERAH (User) ===
+Route::middleware('auth')->prefix('pasar-daerah')->group(function () {
+    Route::get('/', [App\Http\Controllers\User\PasarDaerahController::class, 'index'])
+        ->name('pasar.index')
+        ->withoutMiddleware('auth')
+        ->middleware(['role:user,guest']);
+    Route::get('/keranjang', [App\Http\Controllers\User\PasarDaerahController::class, 'cart'])->name('pasar.cart');
+    Route::post('/cart/add', [App\Http\Controllers\User\PasarDaerahController::class, 'addToCart'])->name('pasar.cart.add');
+    Route::patch('/cart/update', [App\Http\Controllers\User\PasarDaerahController::class, 'updateCart'])->name('pasar.cart.update');
+    Route::delete('/cart/remove/{id}', [App\Http\Controllers\User\PasarDaerahController::class, 'removeFromCart'])->name('pasar.cart.remove');
+    Route::get('/checkout', [App\Http\Controllers\User\PasarDaerahController::class, 'checkout'])->name('pasar.checkout');
+    Route::post('/order', [App\Http\Controllers\User\PasarDaerahController::class, 'placeOrder'])->name('pasar.order.store');
+    Route::get('/payment/{id}', [App\Http\Controllers\User\PasarDaerahController::class, 'payment'])->name('pasar.payment');
+    Route::post('/payment/{id}/simulate', [App\Http\Controllers\User\PasarDaerahController::class, 'simulatePayment'])->name('pasar.payment.simulate');
+    
+    // Taruh parameter di paling bawah supaya route lain tidak ketimpa
+    Route::get('/{id}', [App\Http\Controllers\User\PasarDaerahController::class, 'show'])
+        ->name('pasar.show')
+        ->withoutMiddleware('auth')
+        ->middleware('role:user,guest');
+});
+
 Route::get('/aktivitas', [App\Http\Controllers\User\ActivityController::class, 'index'])
     ->name('user.activity')
     ->middleware('role:user');
@@ -540,6 +562,22 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
             'update' => 'admin.unit.ambulans.update',
             'destroy' => 'admin.unit.ambulans.destroy',
         ]);
+        
+        // Pasar Daerah
+        Route::post('pasar-daerah/sop', [\App\Http\Controllers\Admin\UnitPasarDaerahController::class, 'updateSop'])->name('admin.unit.pasar_daerah.sop');
+        Route::resource('pasar-daerah', \App\Http\Controllers\Admin\UnitPasarDaerahController::class)->names([
+            'index' => 'admin.unit.pasar_daerah.index',
+            'create' => 'admin.unit.pasar_daerah.create',
+            'store' => 'admin.unit.pasar_daerah.store',
+            'show' => 'admin.unit.pasar_daerah.show',
+            'edit' => 'admin.unit.pasar_daerah.edit',
+            'update' => 'admin.unit.pasar_daerah.update',
+            'destroy' => 'admin.unit.pasar_daerah.destroy',
+        ]);
+        Route::get('pasar-daerah/pesanan/list', [\App\Http\Controllers\Admin\UnitPasarDaerahController::class, 'pesanan'])->name('admin.unit.pasar_daerah.pesanan');
+        Route::get('pasar-daerah/pesanan/{id}', [\App\Http\Controllers\Admin\UnitPasarDaerahController::class, 'pesananShow'])->name('admin.unit.pasar_daerah.pesanan.show');
+        Route::put('pasar-daerah/pesanan/{id}', [\App\Http\Controllers\Admin\UnitPasarDaerahController::class, 'pesananUpdate'])->name('admin.unit.pasar_daerah.pesanan.update');
+        Route::get('pasar-daerah/laporan/transaksi', [\App\Http\Controllers\Admin\UnitPasarDaerahController::class, 'laporan'])->name('admin.unit.pasar_daerah.laporan');
     });
     
     // Route Aktivitas

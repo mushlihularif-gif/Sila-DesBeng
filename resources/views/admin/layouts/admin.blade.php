@@ -507,6 +507,13 @@
                                     </a>
                                 </li>
                                 @endif
+                                @if(in_array('Pasar Daerah', $activeServicesMenu ?? []))
+                                <li class="menu-item {{ request()->is('admin/unit/pasar_daerah*') ? 'active' : '' }}">
+                                    <a href="{{ route('admin.unit.pasar_daerah.index') }}" class="menu-link">
+                                        <div data-i18n="Pasar Daerah">Pasar Daerah</div>
+                                    </a>
+                                </li>
+                                @endif
                                 <li class="menu-item {{ request()->routeIs('admin.announcements.*') ? 'active' : '' }}">
                                     <a href="{{ route('admin.announcements.index') }}" class="menu-link">
                                         <div data-i18n="Kabar dan Informasi Daerah">Kabar dan Informasi Daerah</div>

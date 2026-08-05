@@ -328,6 +328,7 @@
                                     'Unit Penjualan Gas' => 'Penjualan Gas',
                                     'Unit Penyewaan Mobil' => 'Penyewaan Mobil',
                                     'Unit Peminjaman Fasilitas Umum' => 'Fasilitas Umum',
+                                    'Pasar Daerah' => 'Pasar Daerah',
                                     'Pelaporan Warga' => 'Pelaporan Warga',
                                     'Pengumuman dan Event' => 'Pengumuman'
                                 ];
@@ -336,7 +337,7 @@
                             };
 
                             $activeCount = 0;
-                            $allUnits = ['Unit Penyewaan Alat', 'Unit Penjualan Gas', 'Unit Penyewaan Mobil', 'Unit Peminjaman Fasilitas Umum', 'Pelaporan Warga', 'Pengumuman dan Event'];
+                            $allUnits = ['Unit Penyewaan Alat', 'Unit Penjualan Gas', 'Unit Penyewaan Mobil', 'Unit Peminjaman Fasilitas Umum', 'Pasar Daerah', 'Pelaporan Warga', 'Pengumuman dan Event'];
                             foreach ($allUnits as $unit) {
                                 if ($isServiceActive($unit)) $activeCount++;
                             }
@@ -369,15 +370,21 @@
                                 </div>
                                 @endif
 
+                                @if($isServiceActive('Pasar Daerah'))
+                                <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="4" data-name="Pasar Daerah" onclick="window.location.href='{{ $isLoggedInWithRegion ? route('pasar.index') . '?region_id=' . $userRegionId : route('pasar.index') }}'">
+                                    <img src="{{ asset('Admin/img/pasardaerah/PasarDaerah2.png') }}" alt="Pasar Daerah" loading="lazy" onerror="this.src='{{ asset('User/img/elemen/F1.png') }}'">
+                                </div>
+                                @endif
+
                                 @if($isServiceActive('Pelaporan Warga'))
-                                <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="4" data-name="Pelaporan Warga" onclick="window.location.href='{{ $isLoggedInWithRegion ? route('pelaporan.landing') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=pelaporan.landing' }}'">
+                                <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="5" data-name="Pelaporan Warga" onclick="window.location.href='{{ $isLoggedInWithRegion ? route('pelaporan.landing') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=pelaporan.landing' }}'">
                                     <img src="{{ asset('User/img/elemen/lapor.png') }}" alt="Lapor" loading="lazy">
                                 </div>
                                 @endif
 
                                 @if($isServiceActive('Pengumuman dan Event'))
-                                <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="5" data-name="Kabar dan Informasi Daerah" onclick="window.location.href='{{ $isLoggedInWithRegion ? route('announcements.index') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=announcements.index' }}'">
-                                    <img src="{{ asset('User/img/elemen/KabardanInformasiDaerah.png') }}" alt="Event" loading="lazy">
+                                <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="6" data-name="Kabar dan Informasi Daerah" onclick="window.location.href='{{ $isLoggedInWithRegion ? route('announcements.index') . '?region_id=' . $userRegionId : route('announcements.index') }}'">
+                                    <img src="{{ asset('User/img/elemen/KabardanInformasiDaerah.png') }}" alt="Kabar dan Informasi Daerah" loading="lazy" onerror="this.src='{{ asset('User/img/elemen/F3.png') }}'">
                                 </div>
                                 @endif
                             </div>

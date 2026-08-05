@@ -119,3 +119,34 @@ Dokumen ini berfungsi sebagai pusat memori dan dokumentasi (pengganti Obsidian V
 o` pada judul 'Form Pelaporan' untuk mencegah browser secara sepihak menerjemahkannya secara absurd (menjadi 'Buah Pelaporan').
 
     - **[Arsitektur Sistem - Layanan Ambulans Darurat] (SELESAI):** Memperbaiki inkonsistensi akses menu Layanan Ambulans Darurat. Sebelumnya menu ini bersifat publik/selalu terbuka untuk pengguna yang login. Kini rute /layanan-ambulans telah diproteksi menggunakan middleware `region.service:layanan-ambulans`, sehingga menu ini akan otomatis hilang dari HP warga jika Admin Desa menonaktifkan fitur tersebut (misal karena desa tidak memiliki armada ambulans), konsisten dengan logika unit layanan daerah lainnya.
+
+    - **[Fitur Baru - Pasar Daerah (Marketplace)] (IN PROGRESS):**
+      - **Latar Belakang:** Berdasarkan survei lapangan ulang oleh anggota tim, ditemukan bahwa beberapa desa memiliki usaha berbentuk marketplace (jual perabotan, pipa, pupuk, genteng, semen, hingga hasil olahan warga seperti keripik dan ubi dari lahan pertanian pemerintah daerah). Fitur ini ditambahkan sebagai penyempurnaan sistem (menambah, bukan mengurangi dari proposal).
+      - **Nama Resmi:** Pasar Daerah
+      - **Justifikasi KMIPN:** Penambahan fitur ke-7 berdasarkan temuan lapangan nyata. Bukan pengurangan fitur proposal, melainkan penyempurnaan sistem agar lebih relevan dengan kondisi daerah.
+      - **Modul Lengkap Sistem (7 Layanan):**
+        1. Penyewaan Alat Berat
+        2. Penjualan Gas LPG
+        3. Pelaporan Warga
+        4. Peminjaman Fasilitas Umum
+        5. Kabar dan Informasi Daerah
+        6. Penyewaan Kendaraan (Mobil)
+        7. **Pasar Daerah (BARU)**
+      - **Aset Ikon:** Ikon kustom tas belanja kuning-oranye dengan logo SilaDesBeng (SB) di badan tas telah ditempatkan di `public/Admin/img/pasardaerah/PasarDaerah.png`. Resolusi asli: 4500x4500px. Kompresi lossless PNG Level 9 berhasil dilakukan: 2.13 MB -> 1.4 MB (hemat 33.9%), kualitas HD terjaga.
+      - **Arsitektur Final (Disetujui):**
+        - *Cakupan:* Lintas desa se-Kabupaten Bengkalis. Warga Desa A bisa membeli produk Desa Z. Filter pencarian berdasarkan Kecamatan, Desa, dan Kategori.
+        - *Kategori Fixed (5):* Hasil Tani & Bumi, Pangan & Olahan, Material & Bangunan, Kerajinan & Kesenian, Lainnya. Dikunci oleh sistem, Admin Desa tidak bisa bikin sendiri.
+        - *Metode Pembayaran (3):* Tunai/COD, Transfer Manual (upload bukti), Midtrans Otomatis (VA/QRIS/GoPay). Replikasi dari modul Gas.
+        - *Metode Pengiriman (2):* Ambil Sendiri (gratis) dan Diantar (ongkir otomatis).
+        - *Ongkir Otomatis:* Algoritma Haversine di backend PHP (gratis, tanpa API berbayar). Admin set tarif per Km dan koordinat toko. Warga kirim GPS dari HP. Sistem hitung jarak dan total ongkir secara otomatis.
+        - *Siklus Status Pesanan:* Pending -> Confirmed -> Processing (Diproses/Dikemas) -> Ready/In Delivery (Siap Diambil/Sedang Dikirim) -> Completed (Selesai) -> Cancelled/Rejected (Batal/Ditolak).
+        - *Database (4 tabel baru):* `pasar_produks`, `pasar_carts` (keranjang), `pasar_orders`, `pasar_order_items` (1 order bisa multi-produk).
+        - *Fitur Keranjang Belanja:* Fitur baru yang belum ada di modul manapun. Warga bisa menambah beberapa produk sekaligus sebelum checkout.
+      - **Rencana Fitur Inti:**
+        - *Sisi Admin:* **(SELESAI)** CRUD Produk, Kategori Fixed (5 pilihan), Kelola Pesanan Masuk, Pengaturan On/Off, SOP Toko, Tarif Ongkir per Km. Controller (`UnitPasarDaerahController`) dan seluruh View Admin terkait telah diimplementasikan sepenuhnya dengan integrasi titik peta LeafletJS untuk ongkir.
+        - *Sisi User:* **(SELESAI)** Katalog Produk (lintas desa), Detail Produk, Keranjang Belanja, Checkout (Ambil/Antar + Tunai/Transfer/Midtrans), Riwayat Pesanan di tab Aktivitas, Bukti Transaksi + QR Code. Tampilan disempurnakan menggunakan SweetAlert2 untuk notifikasi dan penyesuaian copywriting yang mematuhi standar desain "Layanan Daerah".
+        - *Fitur yang TIDAK dibuat (terlalu kompleks):* Chat Penjual-Pembeli, Rating/Review, Wishlist, Retur, Multi-Seller C2C.
+      
+      - **Penyempurnaan Akses Global & UI/UX (Sesi Lanjutan):**
+        - **[Routing Global (Bypass Filter Wilayah)] (SELESAI):** Layanan Pasar Daerah dan Kabar & Informasi Daerah adalah layanan yang bersifat lintas desa (skala Kabupaten). Sebelumnya pengguna/tamu tertahan oleh *middleware* yang memaksa mereka memilih desa terlebih dahulu. Kini *middleware* `region.service:pasar-daerah` telah dihapus dari rute katalog, dan *redirect* di Beranda dimodifikasi sehingga akses ke 2 layanan ini 100% langsung masuk ke katalog tanpa terhalang gerbang "Pilih Wilayah". Layanan unit spesifik lainnya tetap dibatasi oleh filter wilayah.
+        - **[Penyelarasan UI/UX Pasar Daerah] (IN PROGRESS):** Melakukan perombakan *interface* Pasar Daerah agar konsisten dengan Kabar Daerah (Latar belakang Canvas Animasi, warna *font* biru bergradasi) dan menyelaraskan desain grid kartu produk agar rapat ala Shopee/Tokopedia namun tetap berpedoman pada pakem kartu produk yang ada pada modul Sewa Alat/Gas.
