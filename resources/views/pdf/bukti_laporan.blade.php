@@ -457,7 +457,6 @@
                     <tr>
                         <td style="width: 55%;"></td>
                         <td style="width: 45%; text-align: center;">
-                            <p style="font-style: italic; font-size: 10pt; margin-top: 0; margin-bottom: 10px;">Layanan Pelaporan dan Aspirasi Warga</p>
                             <p style="font-size: 10pt; margin-top: 0; margin-bottom: 5px;">Bengkalis, {{ now()->format('d F Y') }}</p>
                             
                             <!-- QR Code dipindah ke antara tanggal dan nama agar menutupi ruang kosong -->
