@@ -142,7 +142,7 @@
                             <!-- Gambar Produk -->
                             @if($booking->barang && $booking->barang->foto)
                             <img src="{{ asset('storage/' . $booking->barang->foto) }}" 
-                                 alt="{{ $booking->barang->nama_barang }}" 
+                                 alt="{{ $booking->barang?->nama_barang }}" 
                                  class="w-32 h-32 object-cover rounded-lg flex-shrink-0"
                                  onerror="this.src='{{ asset('User/img/elemen/F1.png') }}'">
                             @else
@@ -153,7 +153,7 @@
                             
                             <div class="flex-1">
                                 <!-- Nama Produk -->
-                                <h3 class="text-xl font-bold text-gray-800 mb-2">{{ $booking->barang->nama_barang }}</h3>
+                                <h3 class="text-xl font-bold text-gray-800 mb-2">{{ $booking->barang?->nama_barang ?? 'Barang Sewa (Telah Dihapus)' }}</h3>
                                 
                                 <!-- Date and Time -->
                                 <p class="text-sm text-gray-600 mb-2">
@@ -225,7 +225,7 @@
                                 
                                 <!-- View Details Button -->
                                 <button type="button" 
-                                        class="toggle-detail-btn px-6 py-2 border-2 border-blue-500 text-blue-500 rounded-lg font-semibold hover:bg-blue-50 transition-colors"
+                                        class="toggle-detail-btn px-6 py-2.5 border-2 border-blue-500 text-blue-500 rounded-lg font-semibold hover:bg-blue-50 active:scale-95 hover:shadow-md transition-all relative z-10 cursor-pointer w-full sm:w-auto"
                                         data-target="rental-detail-{{ $booking->id }}">
                                     Lihat Selengkapnya
                                 </button>
@@ -543,7 +543,7 @@
                                 
                                 <!-- View Details Button -->
                                 <button type="button" 
-                                        class="toggle-detail-btn px-6 py-2 border-2 border-blue-500 text-blue-500 rounded-lg font-semibold hover:bg-blue-50 transition-colors"
+                                        class="toggle-detail-btn px-6 py-2.5 border-2 border-blue-500 text-blue-500 rounded-lg font-semibold hover:bg-blue-50 active:scale-95 hover:shadow-md transition-all relative z-10 cursor-pointer w-full sm:w-auto"
                                         data-target="gas-detail-{{ $order->id }}">
                                     Lihat Selengkapnya
                                 </button>
@@ -726,8 +726,8 @@
                                 @endif
                             </div>
                             <div class="flex-1">
-                                <h3 class="text-xl font-bold text-gray-800 mb-2">{{ $booking->mobil->nama_mobil ?? 'Sewa Mobil' }}</h3>
-                                <p class="text-sm text-gray-600 mb-2">
+                                <h3 class="text-xl font-bold text-gray-800 mb-2">{{ $booking->mobil?->nama_mobil ?? 'Sewa Mobil' }}</h3>
+                                <p class="text-sm text-gray-600 mb-4">
                                     {{ \Carbon\Carbon::parse($booking->created_at)->locale('id')->isoFormat('dddd, DD MMMM YYYY HH:mm') }} WIB
                                 </p>
                                 <p class="text-sm text-gray-600 mb-2">Tanggal Mulai: {{ \Carbon\Carbon::parse($booking->start_date)->format('d M Y') }}</p>
@@ -768,8 +768,8 @@
                                 @endif
                             </div>
                             <div class="flex-1">
-                                <h3 class="text-xl font-bold text-gray-800 mb-2">{{ $booking->fasilitas->nama_fasilitas ?? 'Peminjaman Fasilitas' }}</h3>
-                                <p class="text-sm text-gray-600 mb-2">
+                                <h3 class="text-xl font-bold text-gray-800 mb-2">{{ $booking->fasilitas?->nama_fasilitas ?? 'Peminjaman Fasilitas' }}</h3>
+                                <p class="text-sm text-gray-600 mb-4">
                                     {{ \Carbon\Carbon::parse($booking->created_at)->locale('id')->isoFormat('dddd, DD MMMM YYYY HH:mm') }} WIB
                                 </p>
                                 <p class="text-sm text-gray-600 mb-2">Tanggal Mulai: {{ \Carbon\Carbon::parse($booking->start_date)->format('d M Y') }}</p>
@@ -859,7 +859,7 @@
                                 <p class="text-2xl font-bold text-red-600 mb-4">Rp {{ number_format($order->grand_total, 0, ',', '.') }}</p>
                                 
                                 <button type="button" 
-                                        class="toggle-detail-btn px-6 py-2 border-2 border-blue-500 text-blue-500 rounded-lg font-semibold hover:bg-blue-50 transition-colors"
+                                        class="toggle-detail-btn px-6 py-2.5 border-2 border-blue-500 text-blue-500 rounded-lg font-semibold hover:bg-blue-50 active:scale-95 hover:shadow-md transition-all relative z-10 cursor-pointer w-full sm:w-auto"
                                         data-target="pasar-detail-{{ $order->id }}">
                                     Lihat Selengkapnya
                                 </button>
@@ -1039,7 +1039,7 @@
             // Filter button clicks
             if(filterBtns) {
                 filterBtns.forEach(btn => {
-                    btn.addEventListener('click', function() {
+                    btn.onclick = function() {
                         // Update active button styling
                         filterBtns.forEach(b => {
                             b.className = "filter-btn bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-900 px-4 py-1.5 rounded-lg font-semibold transition-all text-sm shadow-sm";
@@ -1048,7 +1048,7 @@
                         this.className = "filter-btn active bg-blue-50 text-blue-700 border border-blue-500 px-4 py-1.5 rounded-lg font-bold shadow-md transition-all text-sm";
                         
                         applyFilter(this.dataset.filter);
-                    });
+                    };
                 });
             }
 
@@ -1079,7 +1079,7 @@
             }
 
             menuCards.forEach(card => {
-                card.addEventListener('click', () => {
+                card.onclick = () => {
                     const type = card.dataset.type;
                     
                     // Save to localStorage
@@ -1114,13 +1114,13 @@
                     if (activeFilterBtn) {
                         applyFilter(activeFilterBtn.dataset.filter);
                     }
-                });
+                };
             });
 
             // Toggle Detail Dropdown
             const toggleButtons = document.querySelectorAll('.toggle-detail-btn');
             toggleButtons.forEach(button => {
-                button.addEventListener('click', () => {
+                button.onclick = () => {
                     const targetId = button.dataset.target;
                     const detailSection = document.getElementById(targetId);
                     if (!detailSection) return;
@@ -1140,13 +1140,13 @@
                         }, 300);
                         button.textContent = 'Lihat Selengkapnya';
                     }
-                });
+                };
             });
 
             // Cancel Order
             const cancelButtons = document.querySelectorAll('.cancel-order-btn');
             cancelButtons.forEach(button => {
-                button.addEventListener('click', async () => {
+                button.onclick = async () => {
                     const type = button.dataset.type;
                     const id = button.dataset.id;
                     
@@ -1225,13 +1225,13 @@
                             });
                         }
                     }
-                });
+                };
             });
 
             // Delete Single Order History
             const deleteButtons = document.querySelectorAll('.delete-order-btn');
             deleteButtons.forEach(button => {
-                 button.addEventListener('click', async () => {
+                button.onclick = async () => {
                     const type = button.dataset.type;
                     const id = button.dataset.id;
                     
@@ -1296,13 +1296,13 @@
                             });
                         }
                     }
-                });
+                };
             });
 
             // Clear All History
             const clearHistoryButtons = document.querySelectorAll('.clear-history-btn');
             clearHistoryButtons.forEach(button => {
-                button.addEventListener('click', async () => {
+                 button.onclick = async () => {
                     const type = button.dataset.type;
                     let typeText = 'Penyewaan';
                     if(type === 'gas') typeText = 'Pesanan Gas';
@@ -1370,7 +1370,7 @@
                             });
                         }
                     }
-                });
+                };
             });
         };
 

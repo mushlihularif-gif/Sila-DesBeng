@@ -404,7 +404,7 @@ public function exportPdf(Request $request)
 
     // Data untuk PDF
     $data = [
-        'title' => 'Laporan Kelurahan Sungai Pakning',
+        'title' => 'Laporan Pengaduan dan Aspirasi Warga',
         'date' => now()->format('d F Y'),
         'laporans' => $laporans,
         'stats' => [
@@ -438,19 +438,23 @@ public function exportDetailPdf($id)
 {
     $laporan = Laporan::with(['user'])->findOrFail($id);
 
-    $data = [
-        'title' => 'Detail Laporan #' . $laporan->id,
-        'date' => now()->format('d F Y H:i'),
-        'laporan' => $laporan,
-    ];
+    // Tentukan nama handler
+    $handler_name = 'Sistem SiladesBeng';
+    if ($laporan->admin_id) {
+        $handler = \App\Models\User::find($laporan->admin_id);
+        if ($handler) $handler_name = $handler->name;
+    }
 
-    $pdf = Pdf::loadView('exports.laporan-lurah-pdf', $data)
+    $pdf = Pdf::loadView('pdf.bukti_laporan', [
+        'laporan' => $laporan,
+        'handler_name' => $handler_name,
+    ])
     ->setPaper('a4', 'portrait');
 
 
-    $filename = 'Laporan_' . $laporan->id . '_' . now()->format('Y-m-d') . '.pdf';
+    $filename = 'Laporan_' . $laporan->id . '_' . now()->format('Y-m-d_His') . '.pdf';
 
-    return $pdf->stream($filename);
+    return $pdf->download($filename);
 }
 
     /**

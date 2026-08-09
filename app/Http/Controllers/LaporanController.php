@@ -107,7 +107,7 @@ class LaporanController extends Controller
             'nama' => 'required|string|max:255',
             'deskripsi' => 'required|string|min:20',
             'kategori' => 'required|string',
-            'lokasi' => 'nullable|string|max:255',
+            'lokasi' => 'required|string|max:255',
             'tujuan_laporan' => 'required|in:rt,rw,desa',
             'target_region_id' => 'nullable|integer|exists:regions,id',
             'bukti' => 'nullable|array|max:3',

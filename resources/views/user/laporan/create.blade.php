@@ -311,7 +311,7 @@
 
                         <input type="hidden" name="latitude"    id="latitude">
                         <input type="hidden" name="longitude"   id="longitude">
-                        <input type="hidden" name="nama_lokasi" id="nama_lokasi">
+                        <input type="hidden" name="lokasi" id="nama_lokasi">
 
                         {{-- Tampilan nama lokasi hasil klik --}}
                         <div class="mt-3 p-4 rounded-xl bg-gray-50 border border-gray-200 min-h-[52px] flex items-center gap-3 transition-colors" id="lokasi-display">
@@ -320,7 +320,7 @@
                                 <p id="lokasi-coords" class="text-gray-500 text-xs mt-0.5 hidden"></p>
                             </div>
                         </div>
-                        @error('nama_lokasi')
+                        @error('lokasi')
                             <p class="text-red-500 text-xs mt-1 font-medium">{{ $message }}</p>
                         @enderror
                     </div>

@@ -1,5 +1,5 @@
 @extends('layouts.user')
-@section('title', 'Pengaduan Warga - Kelurahan Sungai Pakning')
+@section('title', 'Pengaduan Warga - Sistem SiladesBeng')
 @push('styles')
 <style>
         * { font-family: 'Inter', sans-serif; }

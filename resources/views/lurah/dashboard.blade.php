@@ -21,8 +21,7 @@
                             <p class="text-yellow-400 text-sm font-semibold mb-2">Selamat Datang</p>
                             <h2 class="text-4xl font-bold text-white mb-1">{{ auth()->user()->name }}</h2>
                         </div>
-                        <p class="text-gray-300 text-lg mb-4 max-w-2xl">Sistem Monitoring & Evaluasi Pelaporan Kelurahan
-                            Sungai Pakning</p>
+                        <p class="text-gray-300 text-lg mb-4 max-w-2xl">Sistem Monitoring & Evaluasi Pelaporan Pemerintah Desa / Kelurahan</p>
                         <div class="flex items-center gap-6 text-sm text-gray-300">
                             <span class="flex items-center gap-2 bg-white/10 px-3 py-2 rounded-lg">
                                 <span class="text-yellow-400">📅</span>

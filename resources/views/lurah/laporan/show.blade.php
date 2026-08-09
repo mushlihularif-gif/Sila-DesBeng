@@ -6,14 +6,6 @@
 @section('content')
     <div class="space-y-6">
 
-        {{-- Back Button --}}
-        <div data-aos="fade-down">
-            <a href="{{ route('lurah.laporan.index') }}"
-                class="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-5 py-3 rounded-xl transition-all border-2 border-yellow-400/30 font-semibold">
-                <span class="text-xl">←</span>
-                <span>Kembali ke Daftar Laporan</span>
-            </a>
-        </div>
 
         {{-- Header Card --}}
         <div class="bg-gradient-to-r from-[#004635] to-[#003026] rounded-2xl p-8 shadow-2xl border-2 border-yellow-400/40 relative overflow-hidden"
@@ -32,7 +24,7 @@
                     </a>
                     @endif
 
-                    <a href="{{ route('lurah.laporan.export.detail', $laporan->id) }}"
+                    <a href="{{ route('lurah.laporan.export.detail', $laporan->id) }}?t={{ time() }}"
                         class="inline-flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-bold border-2 border-red-300">
                         <span>📄</span>
                         <span>Export PDF</span>
@@ -93,7 +85,13 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="rounded-3xl p-4 sm:p-8 shadow-2xl relative overflow-hidden mt-6" style="background: linear-gradient(to bottom, #003026, #004635);">
+            {{-- Background pattern --}}
+            <div class="absolute inset-0 opacity-10 pointer-events-none">
+                <img src="{{ asset('assets/img/Melayu1-desktop.png') }}" class="w-full h-full object-cover" alt="" onerror="this.style.display='none'">
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 relative z-10">
 
             {{-- Main Content (Kiri - 2 kolom) --}}
             <div class="lg:col-span-2 space-y-6">
@@ -284,7 +282,7 @@
                     </h3>
                     <div class="space-y-3">
                         {{-- ✅ CORRECT: Export PDF Detail --}}
-                        <a href="{{ route('lurah.laporan.export.detail', $laporan->id) }}"
+                        <a href="{{ route('lurah.laporan.export.detail', $laporan->id) }}?t={{ time() }}"
    class="inline-flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-bold transition shadow-lg hover:shadow-red-500/50">
     <span>📄</span>
     <span>Export PDF</span>
@@ -299,6 +297,7 @@
                 </div>
 
             </div>
+        </div>
         </div>
 
     </div>
