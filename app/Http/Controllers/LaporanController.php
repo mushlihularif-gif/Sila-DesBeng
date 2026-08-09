@@ -283,9 +283,22 @@ class LaporanController extends Controller
         abort(403);
     }
 
+    // Fetch QR Code from Google Charts API safely bypassing local SSL issues
+    $qrData = urlencode(url('/validasi/laporan/' . $laporan->id . '?token=' . hash_hmac('sha256', $laporan->id . $laporan->created_at, config('app.key'))));
+    $qrUrl = "https://chart.googleapis.com/chart?chs=80x80&cht=qr&chl=" . $qrData;
+    
+    try {
+        $qrImage = \Illuminate\Support\Facades\Http::withoutVerifying()->timeout(10)->get($qrUrl)->body();
+        $qrBase64 = base64_encode($qrImage);
+    } catch (\Exception $e) {
+        $qrBase64 = null;
+    }
+
     return Pdf::loadView('pdf.bukti_laporan', [
         'laporan' => $laporan,
-        'handler_name' => 'Sistem SilaDesBeng',
+        'handler_name' => '',
+        'waktu_cetak' => now()->format('d F Y, H:i'),
+        'qrBase64' => $qrBase64
     ])->download('Bukti_Laporan_'.$laporan->id.'.pdf');
 }
 

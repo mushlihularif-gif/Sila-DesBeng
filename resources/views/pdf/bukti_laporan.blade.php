@@ -167,8 +167,10 @@
 
         /* Footer Section */
         .footer-section {
+            position: absolute;
+            bottom: 110px; /* Dinaikkan sedikit */
+            right: 0;
             width: 100%;
-            page-break-inside: avoid;
         }
 
         .ttd-table {
@@ -183,8 +185,6 @@
 
         .ttd-area {
             text-align: center;
-            background-color: #ffffff;
-            padding: 10px;
         }
 
         .ttd-area .tanggal {
@@ -205,7 +205,10 @@
 
         /* Disclaimer */
         .disclaimer {
-            margin-top: 15px; /* Diperkecil dari 40px untuk menghemat ruang */
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
             padding-top: 8px;
             border-top: 1px dashed #999;
             font-size: 8pt;
@@ -323,7 +326,7 @@
         <div class="content-overlay">
             
             <!-- Spacer khusus halaman 1 untuk menghindari overlap dengan Kop Surat -->
-            <div style="height: 140px;"></div>
+            <div style="height: 170px;"></div>
 
             <!-- Header Surat -->
             <div class="surat-header">
@@ -393,7 +396,7 @@
                 <tr>
                     <td class="label">Ditangani Oleh</td>
                     <td class="separator">:</td>
-                    <td><strong>{{ $handler_name }}</strong> (Admin {{ ucfirst($laporan->escalation_level) }})</td>
+                    <td><strong>{{ str_replace('Sistem SilaDesBeng', '', $handler_name) }}</strong> (Admin {{ ucfirst($laporan->escalation_level) }})</td>
                 </tr>
             </table>
 
@@ -443,26 +446,34 @@
                 </tbody>
             </table>
 
-            <!-- Spacer fisik untuk jarak aman dengan tabel -->
-            <div style="height: 40px; width: 100%; clear: both;"></div>
+        </div> <!-- Tutup table-responsive -->
 
-            <!-- Footer: TTD Digital -->
-            <div class="footer-section">
+        <!-- Spacer fisik untuk jarak aman dengan tabel -->
+        <div style="height: 200px; width: 100%; clear: both;"></div>
+
+        <!-- Footer: TTD Digital -->
+        <div class="footer-section">
                 <table class="ttd-table">
                     <tr>
                         <td style="width: 55%;"></td>
-                        <td style="width: 45%;" class="ttd-area">
-                            <p style="font-style: italic; font-size: 10pt; margin-bottom: 10px;">Layanan Pelaporan dan Aspirasi Warga</p>
-                            <p class="tanggal">Bengkalis, {{ now()->format('d F Y') }}</p>
-                            <p class="jabatan">{{ $handler_name ?? 'Sistem SilaDesBeng' }}</p>
-                            <p style="font-size: 9pt; color: #555; margin-bottom: 6px;">Admin {{ ucfirst($laporan->escalation_level ?? 'Desa') }}</p>
+                        <td style="width: 45%; text-align: center;">
+                            <p style="font-style: italic; font-size: 10pt; margin-top: 0; margin-bottom: 10px;">Layanan Pelaporan dan Aspirasi Warga</p>
+                            <p style="font-size: 10pt; margin-top: 0; margin-bottom: 5px;">Bengkalis, {{ now()->format('d F Y') }}</p>
                             
-                            <!-- QR Code Validasi dengan Logo di Tengah (Diperkecil sedikit agar hemat ruang) -->
-                            <div style="position: relative; width: 100px; height: 100px; margin: 0 auto;">
-                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data={{ urlencode(url('/validasi/laporan/' . $laporan->id . '?token=' . hash_hmac('sha256', $laporan->id . $laporan->created_at, config('app.key')))) }}" width="100" height="100" style="position: absolute; top: 0; left: 0;" alt="QR Validasi">
-                                <img src="{{ public_path('Admin/img/illustrations/logodomain.png') }}" width="22" height="22" style="position: absolute; top: 39px; left: 39px; background-color: white; padding: 2px; border-radius: 4px;" alt="Logo Siladesbeng">
+                            <!-- QR Code dipindah ke antara tanggal dan nama agar menutupi ruang kosong -->
+                            <div style="position: relative; width: 80px; height: 80px; margin: 15px auto;">
+                                @if(!empty($qrBase64))
+                                    <img src="data:image/png;base64,{{ $qrBase64 }}" width="80" height="80" style="position: absolute; top: 0; left: 0;" alt="QR Validasi">
+                                @else
+                                    <div style="width: 80px; height: 80px; position: absolute; top: 0; left: 0; border: 1px dashed #ccc; text-align: center; line-height: 80px; font-size: 8pt; color: #999;">QR Error</div>
+                                @endif
+                                <img src="{{ public_path('Admin/img/illustrations/logodomain.png') }}" width="18" height="18" style="position: absolute; top: 31px; left: 31px; background-color: white; padding: 2px; border-radius: 4px;" alt="Logo Siladesbeng">
                             </div>
-                            
+
+                            @if(!empty(trim($handler_name ?? '')))
+                                <p style="font-size: 10pt; font-weight: bold; margin-top: 5px; margin-bottom: 2px;">{{ $handler_name }}</p>
+                            @endif
+                            <p style="font-size: 9pt; color: #555; margin-top: 0; margin-bottom: 0;">Admin Desa</p>
                             <p style="font-size: 8pt; color: #999;">Tanda Tangan Elektronik</p>
                         </td>
                     </tr>
