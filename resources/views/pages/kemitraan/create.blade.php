@@ -69,19 +69,30 @@
                 @guest
                     <button onclick="
                         const t = document.createElement('div');
-                        t.style.position = 'fixed'; t.style.top = '24px'; t.style.right = '30px'; t.style.zIndex = '2147483647';
-                        t.style.transform = 'translateX(150%)'; t.style.opacity = '0'; t.style.transition = 'all 0.5s ease';
-                        t.className = 'px-5 py-3.5 rounded-xl shadow-2xl flex items-center gap-3 bg-red-500 text-white font-medium';
-                        t.innerHTML = `<svg class='w-6 h-6 flex-shrink-0' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'></path></svg><span>Anda harus login atau mendaftar terlebih dahulu!</span>`;
+                        t.style.position = 'fixed'; t.style.top = '70px'; t.style.right = '24px'; t.style.zIndex = '2147483647';
+                        t.style.transform = 'translateX(50px) scale(0.95)'; t.style.opacity = '0'; t.style.transition = 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)';
+                        t.className = 'flex items-center p-4 rounded-xl shadow-2xl border-l-4 bg-white border-red-500 max-w-sm w-full';
+                        t.innerHTML = `
+                            <div class='flex-shrink-0'>
+                                <svg class='w-6 h-6 text-red-500' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'></path></svg>
+                            </div>
+                            <div class='ml-3'>
+                                <p class='text-sm font-semibold text-gray-900'>Peringatan</p>
+                                <p class='text-sm text-gray-600 mt-1'>Anda harus login atau mendaftar terlebih dahulu!</p>
+                            </div>
+                            <button class='ml-auto -mx-1.5 -my-1.5 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex items-center justify-center h-8 w-8 text-gray-500 cursor-pointer'>
+                                <svg class='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 18L18 6M6 6l12 12'></path></svg>
+                            </button>`;
                         document.body.appendChild(t);
+                        t.querySelector('button').addEventListener('click', () => { t.style.transform = 'translateX(50px) scale(0.95)'; t.style.opacity = '0'; setTimeout(() => t.remove(), 400); });
                         t.offsetHeight;
-                        t.style.transform = 'translateX(0)'; t.style.opacity = '1';
-                        setTimeout(() => { t.style.transform = 'translateX(150%)'; t.style.opacity = '0'; setTimeout(() => t.remove(), 500); }, 3000);
+                        t.style.transform = 'translateX(0) scale(1)'; t.style.opacity = '1';
+                        setTimeout(() => { t.style.transform = 'translateX(50px) scale(0.95)'; t.style.opacity = '0'; setTimeout(() => t.remove(), 400); }, 5000);
 
-                        if(document.getElementById('btn-open-login')) { 
-                            document.getElementById('btn-open-login').click(); 
-                        } else if(document.getElementById('btn-open-login-mobile')) { 
-                            document.getElementById('btn-open-login-mobile').click(); 
+                        if(document.getElementById('btn-open-login')) {
+                            document.getElementById('btn-open-login').click();
+                        } else if(document.getElementById('btn-open-login-mobile')) {
+                            document.getElementById('btn-open-login-mobile').click();
                         }" class="btn-outline shadow-sm hover:shadow-lg">
                         <span>Daftarkan Desa / Kelurahan Anda</span>
                     </button>
