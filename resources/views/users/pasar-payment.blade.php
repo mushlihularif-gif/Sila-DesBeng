@@ -1,101 +1,338 @@
-@extends('layouts.app')
+@extends('layouts.user')
 
 @section('title', 'Pembayaran Pasar Daerah - SilaDesBeng')
 
-@section('content')
-<div class="min-h-screen bg-gray-50 pt-24 pb-12">
+@push('styles')
+<style>
+    * { font-family: 'Inter', sans-serif; }
+
+    /* Background styling consistent with checkout */
+    .checkout-bg {
+        position: fixed; inset: 0; z-index: 0;
+        background: linear-gradient(135deg, #f0f7ff 0%, #fafbff 40%, #fff8f0 100%);
+    }
+    .checkout-bg::before {
+        content: ''; position: absolute; top: -50%; right: -30%; width: 80%; height: 80%;
+        background: radial-gradient(circle, rgba(17,87,137,0.04) 0%, transparent 70%); border-radius: 50%;
+    }
+    .checkout-bg::after {
+        content: ''; position: absolute; bottom: -30%; left: -20%; width: 60%; height: 60%;
+        background: radial-gradient(circle, rgba(245,158,11,0.04) 0%, transparent 70%); border-radius: 50%;
+    }
+
+    /* Header styling consistent with checkout */
+    .co-header { display: flex; align-items: center; gap: 16px; margin-bottom: 12px; }
+    .co-back-btn {
+        width: 44px; height: 44px; border-radius: 14px; background: white; border: 1px solid #e2e8f0;
+        display: flex; align-items: center; justify-content: center; color: #64748b; text-decoration: none;
+        transition: all 0.3s; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .co-back-btn:hover { background: #eff6ff; border-color: #bfdbfe; color: #2563eb; transform: translateX(-3px); }
+    .co-title { font-size: 1.75rem; font-weight: 800; color: #0f172a; letter-spacing: -0.02em; }
+    
+    /* Progress Steps consistent with checkout */
+    .progress-steps {
+        display: flex; align-items: center; justify-content: center; gap: 0;
+        margin-bottom: 32px; padding: 16px 24px;
+        background: white; border-radius: 16px; border: 1px solid rgba(226,232,240,0.6);
+        box-shadow: 0 2px 12px rgba(0,0,0,0.03);
+    }
+    .step-item { display: flex; align-items: center; gap: 10px; }
+    .step-circle {
+        width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        font-size: 13px; font-weight: 800; transition: all 0.3s;
+    }
+    .step-circle.done { background: linear-gradient(135deg, #10b981, #34d399); color: white; }
+    .step-circle.active { background: linear-gradient(135deg, #115789, #1d6aaa); color: white; box-shadow: 0 0 0 4px rgba(17,87,137,0.15); }
+    .step-circle.pending { background: #f1f5f9; color: #94a3b8; border: 2px solid #e2e8f0; }
+    .step-label { font-size: 0.8rem; font-weight: 600; }
+    .step-label.done { color: #10b981; }
+    .step-label.active { color: #115789; }
+    .step-label.pending { color: #94a3b8; }
+    .step-line { width: 48px; height: 2px; margin: 0 12px; border-radius: 2px; }
+    .step-line.done { background: linear-gradient(90deg, #10b981, #34d399); }
+    .step-line.active { background: linear-gradient(90deg, #10b981, #115789); }
+    .step-line.pending { background: #e2e8f0; }
+
+    /* Cards */
+    .co-card {
+        background: white; border-radius: 20px;
+        border: 1px solid rgba(226,232,240,0.6);
+        box-shadow: 0 4px 24px rgba(0,0,0,0.04);
+        overflow: hidden; margin-bottom: 20px;
+    }
+    
+    /* Payment Summary Header Card */
+    .pay-header-card-pending {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        color: white;
+        padding: 32px 24px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    .pay-header-card-pending::before {
+        content: ''; position: absolute; inset: 0;
+        background: radial-gradient(circle at 70% 20%, rgba(17,87,137,0.2) 0%, transparent 60%);
+    }
+    .pay-header-card-success {
+        background: linear-gradient(135deg, #065f46 0%, #047857 100%);
+        color: white;
+        padding: 32px 24px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* VA Display Box */
+    .va-display-box {
+        display: flex; align-items: center; justify-content: space-between;
+        background: #f8fafc; border: 2px solid #e2e8f0;
+        border-radius: 16px; padding: 14px 18px; margin-top: 10px;
+        transition: all 0.2s;
+    }
+    .va-display-box:hover {
+        border-color: #cbd5e1;
+        background: #f1f5f9;
+    }
+
+    /* Copy Button */
+    .btn-copy {
+        background: white; border: 1px solid #cbd5e1;
+        color: #1e293b; font-weight: 700; font-size: 0.82rem;
+        padding: 6px 14px; border-radius: 10px; cursor: pointer;
+        display: inline-flex; align-items: center; gap: 6px;
+        transition: all 0.2s;
+    }
+    .btn-copy:hover {
+        border-color: #115789; color: #115789;
+        background: rgba(17,87,137,0.02);
+    }
+    .btn-copy:active { transform: scale(0.97); }
+
+    /* Sandbox Dev Box */
+    .sandbox-box {
+        background: linear-gradient(135deg, #fef3c7 0%, #fffbeb 100%);
+        border: 1px dashed #f59e0b; border-radius: 16px;
+        padding: 20px; margin-bottom: 24px; text-align: center;
+    }
+
+    /* Primary and Secondary Action Buttons */
+    .btn-action-primary {
+        background: linear-gradient(135deg, #115789, #1d6aaa); color: white;
+        font-weight: 800; font-size: 0.95rem; border: none; border-radius: 14px;
+        padding: 14px 24px; cursor: pointer; text-decoration: none;
+        display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+        transition: all 0.3s; box-shadow: 0 4px 16px rgba(17,87,137,0.2);
+    }
+    .btn-action-primary:hover {
+        transform: translateY(-2px); box-shadow: 0 6px 20px rgba(17,87,137,0.3);
+    }
+    .btn-action-primary:active { transform: translateY(0); }
+
+    .btn-action-secondary {
+        background: white; color: #475569; border: 1px solid #cbd5e1;
+        font-weight: 700; font-size: 0.95rem; border-radius: 14px;
+        padding: 14px 24px; cursor: pointer; text-decoration: none;
+        display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+        transition: all 0.3s;
+    }
+    .btn-action-secondary:hover {
+        background: #f8fafc; border-color: #94a3b8; color: #1e293b;
+    }
+
+    /* Live Countdown styles */
+    .countdown-number {
+        font-size: 1.25rem; font-weight: 800; font-mono: true;
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 6px 12px; border-radius: 10px;
+        display: inline-flex; align-items: center; gap: 4px;
+    }
+</style>
+@endpush
+
+@section('page')
+<!-- Background elements -->
+<div class="checkout-bg"></div>
+
+<main id="main-content" class="relative z-10 flex-grow py-12 md:py-16" style="transition: padding-top 0.3s ease-in-out; padding-top: 50px;">
     <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         
+        <!-- Header -->
+        <div class="co-header">
+            <a href="{{ route('pasar.index') }}" class="co-back-btn" title="Kembali ke Katalog">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
+            </a>
+            <div>
+                <h1 class="co-title">Pembayaran Pesanan</h1>
+            </div>
+        </div>
+
+        <!-- Progress Steps -->
+        <div class="progress-steps">
+            <div class="step-item">
+                <div class="step-circle done">✓</div>
+                <span class="step-label done">Keranjang</span>
+            </div>
+            <div class="step-line done"></div>
+            <div class="step-item">
+                <div class="step-circle done">✓</div>
+                <span class="step-label done">Checkout</span>
+            </div>
+            <div class="step-line done"></div>
+            <div class="step-item">
+                <div class="step-circle {{ $order->status === 'pending' ? 'active' : 'done' }}">
+                    {{ $order->status === 'pending' ? '3' : '✓' }}
+                </div>
+                <span class="step-label {{ $order->status === 'pending' ? 'active' : 'done' }}">Pembayaran</span>
+            </div>
+        </div>
+
+        <!-- Alert messages -->
         @if(session('success'))
-            <div class="bg-green-50 text-green-600 p-4 rounded-xl mb-6 flex items-center shadow-sm">
-                <i class="fas fa-check-circle mr-3"></i>
-                {{ session('success') }}
+            <div class="bg-green-50 border border-green-200 text-green-700 p-4 rounded-xl mb-6 flex items-center shadow-sm">
+                <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                <span class="font-semibold">{{ session('success') }}</span>
             </div>
         @endif
 
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <!-- Header -->
-            <div class="bg-gradient-to-r from-green-600 to-green-700 p-6 text-white text-center">
-                <p class="text-green-100 mb-1">Total Pembayaran</p>
-                <h1 class="text-4xl font-extrabold tracking-tight mb-2">Rp {{ number_format($order->grand_total, 0, ',', '.') }}</h1>
-                <p class="text-sm bg-white/20 inline-block px-3 py-1 rounded-full backdrop-blur-sm">
-                    Order ID: <strong>{{ $order->order_number }}</strong>
-                </p>
-            </div>
-
-            <div class="p-8">
-                <!-- Status & Instruction -->
-                @if($order->status === 'pending')
-                    <div class="text-center mb-8">
-                        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-100 text-amber-500 mb-4">
-                            <i class="fas fa-clock text-3xl"></i>
-                        </div>
-                        <h2 class="text-xl font-bold text-gray-900 mb-2">Menunggu Pembayaran</h2>
-                        <p class="text-gray-500">Selesaikan pembayaran Anda sebelum <strong class="text-gray-900">{{ $order->payment_expiry_time ? $order->payment_expiry_time->format('d M Y, H:i') : '-' }}</strong></p>
+        <div class="co-card">
+            <!-- Header Block -->
+            @if($order->status === 'pending')
+                <div class="pay-header-card-pending">
+                    <p class="text-slate-300 text-sm font-semibold uppercase tracking-wider mb-1">Total Pembayaran</p>
+                    <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight mb-3">
+                        Rp {{ number_format($order->grand_total, 0, ',', '.') }}
+                    </h2>
+                    <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 text-xs font-semibold text-white">
+                        <span>Order ID:</span>
+                        <span class="font-mono text-slate-100">{{ $order->order_number }}</span>
                     </div>
+                </div>
+            @else
+                <div class="pay-header-card-success">
+                    <div class="w-16 h-16 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center mx-auto mb-4 border border-white/30 shadow-lg">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                    </div>
+                    <p class="text-emerald-100 text-sm font-semibold uppercase tracking-wider mb-1">Status Pembayaran</p>
+                    <h2 class="text-3xl font-extrabold tracking-tight mb-2">Terbayar Lunas</h2>
+                    <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 text-xs font-semibold text-white">
+                        <span>Order ID:</span>
+                        <span class="font-mono text-white">{{ $order->order_number }}</span>
+                    </div>
+                </div>
+            @endif
 
-                    <!-- Payment Details -->
-                    <div class="bg-gray-50 rounded-xl p-6 mb-8 border border-gray-100">
-                        <h3 class="font-bold text-gray-900 mb-4 border-b border-gray-200 pb-2">Instruksi Pembayaran</h3>
-                        
-                        @if($order->payment_method === 'Tunai' || $order->payment_method === 'tunai')
-                            <div class="flex items-start">
-                                <i class="fas fa-money-bill-wave text-green-600 mt-1 mr-3 text-xl"></i>
-                                <div>
-                                    <p class="font-bold text-gray-900">Pembayaran Tunai (COD / Di Tempat)</p>
-                                    <p class="text-sm text-gray-600 mt-1">Silakan siapkan uang pas sebesar <strong>Rp {{ number_format($order->grand_total, 0, ',', '.') }}</strong> saat menerima pesanan atau saat mengambil pesanan di lokasi penjual.</p>
-                                </div>
-                            </div>
-                        @elseif($order->payment_method === 'Transfer Manual')
-                            <div class="flex items-start">
-                                <i class="fas fa-exchange-alt text-blue-600 mt-1 mr-3 text-xl"></i>
-                                <div>
-                                    <p class="font-bold text-gray-900">Transfer Manual ke Pengelola Layanan</p>
-                                    <p class="text-sm text-gray-600 mt-1">Anda telah mengunggah bukti transfer. Admin Pusat Layanan akan memverifikasi pembayaran Anda dalam waktu 1x24 jam kerja.</p>
-                                </div>
-                            </div>
-                        @else
-                            <!-- Midtrans VA / QRIS -->
-                            <div class="mb-4">
-                                <p class="text-sm text-gray-500 mb-1">Metode</p>
-                                <p class="font-bold text-gray-900 uppercase">{{ str_replace('_', ' ', $order->payment_method) }}</p>
-                            </div>
+            <div class="p-6 md:p-8">
+                @if($order->status === 'pending')
+                    <!-- Status Header -->
+                    <div class="text-center mb-8">
+                        <div class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-amber-50 text-amber-500 mb-3 border border-amber-100">
+                            <svg class="w-7 h-7 animate-spin" fill="none" viewBox="0 0 24 24" style="animation-duration: 4s;"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                        </div>
+                        <h2 class="text-lg font-bold text-gray-900 mb-1">Menunggu Pembayaran</h2>
+                        <p class="text-sm text-gray-500">Selesaikan pembayaran sebelum masa berlaku habis</p>
 
-                            @if($order->payment_va_number)
-                                <div class="mb-4">
-                                    <p class="text-sm text-gray-500 mb-1">Nomor Virtual Account</p>
-                                    <div class="flex items-center justify-between bg-white border border-gray-200 rounded-lg p-3">
-                                        <span class="font-mono text-xl tracking-wider text-gray-900 font-bold" id="vaNumber">{{ $order->payment_va_number }}</span>
-                                        <button onclick="navigator.clipboard.writeText('{{ $order->payment_va_number }}'); Swal.fire({toast: true, position: 'top-end', icon: 'success', title: 'Berhasil disalin!', showConfirmButton: false, timer: 1500})" class="text-green-600 hover:text-green-700 text-sm font-bold flex items-center">
-                                            <i class="far fa-copy mr-1"></i> Salin
-                                        </button>
-                                    </div>
-                                </div>
-                            @elseif($order->payment_qr_url)
-                                <div class="mb-4 text-center">
-                                    <p class="text-sm text-gray-500 mb-3">Scan QRIS Berikut</p>
-                                    <div class="inline-block p-4 bg-white border border-gray-200 rounded-xl">
-                                        @if($order->payment_qr_url === 'DUMMY_QR_CODE')
-                                            <div class="w-48 h-48 bg-gray-200 flex items-center justify-center text-gray-500 font-mono text-xs text-center border-4 border-dashed border-gray-300">
-                                                [SIMULASI QRIS]<br>Dummy Image
-                                            </div>
-                                        @else
-                                            <img src="{{ $order->payment_qr_url }}" alt="QRIS" class="w-48 h-48">
-                                        @endif
-                                    </div>
-                                </div>
-                            @endif
+                        <!-- Live Countdown Display -->
+                        @if($order->payment_expiry_time)
+                            <div class="mt-4">
+                                <span class="countdown-number text-slate-800" id="countdownTimer">
+                                    <svg class="w-4 h-4 mr-1 text-[#115789]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    <span id="countdownText">-- : -- : --</span>
+                                </span>
+                            </div>
                         @endif
                     </div>
 
-                    <!-- Sandbox Simulator Actions -->
-                    @if(config('services.midtrans.is_production') == false && !in_array(strtolower($order->payment_method), ['tunai', 'transfer manual']))
-                        <div class="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-8 text-center">
-                            <h4 class="font-bold text-blue-900 mb-2"><i class="fas fa-flask mr-2"></i> Mode Sandbox (Testing)</h4>
-                            <p class="text-sm text-blue-700 mb-4">Gunakan tombol di bawah ini untuk mensimulasikan pembayaran berhasil pada environment testing.</p>
+                    <!-- Payment Information / Instructions -->
+                    <div class="bg-slate-50 border border-slate-100 rounded-2xl p-5 md:p-6 mb-6">
+                        <h3 class="font-bold text-gray-800 text-sm tracking-wider uppercase mb-4 pb-2 border-b border-slate-200/60 flex items-center gap-2">
+                            <svg class="w-4 h-4 text-[#115789]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            Instruksi Pembayaran
+                        </h3>
+                        
+                        @if(in_array(strtolower($order->payment_method), ['tunai', 'cash']))
+                            <div class="flex items-start">
+                                <div class="w-10 h-10 rounded-xl bg-emerald-100/80 flex items-center justify-center text-emerald-600 mr-4 flex-shrink-0">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="font-bold text-gray-900 text-sm">Pembayaran Tunai (COD / Di Tempat)</p>
+                                    <p class="text-xs text-gray-500 mt-2 leading-relaxed">
+                                        Silakan siapkan uang pas sebesar <strong class="text-gray-900 font-bold">Rp {{ number_format($order->grand_total, 0, ',', '.') }}</strong> saat menerima pesanan (jika menggunakan pengiriman kurir lokal) atau saat mengambil pesanan langsung di lokasi penjual.
+                                    </p>
+                                </div>
+                            </div>
+                        @elseif(strtolower($order->payment_method) === 'transfer manual' || strtolower($order->payment_method) === 'transfer_manual')
+                            <div class="flex items-start">
+                                <div class="w-10 h-10 rounded-xl bg-blue-100/80 flex items-center justify-center text-blue-600 mr-4 flex-shrink-0">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="font-bold text-gray-900 text-sm">Transfer Manual ke Pengelola Layanan</p>
+                                    <p class="text-xs text-gray-500 mt-2 leading-relaxed">
+                                        Anda telah mengunggah bukti transfer saat melakukan checkout. Pembayaran Anda akan divalidasi oleh tim admin dalam waktu maksimal <strong class="text-gray-900">1x24 jam kerja</strong>. Anda dapat melihat status transaksi secara berkala di halaman Aktivitas.
+                                    </p>
+                                </div>
+                            </div>
+                        @else
+                            <!-- Midtrans Payment Options -->
+                            <div class="space-y-4">
+                                <div class="flex justify-between items-center text-xs border-b border-slate-200/40 pb-2">
+                                    <span class="text-slate-400 font-medium">Metode Pembayaran</span>
+                                    <span class="font-bold text-[#115789] uppercase tracking-wide bg-blue-50 px-2.5 py-1 rounded-md border border-blue-100">
+                                        {{ str_replace('_', ' ', $order->payment_method) }}
+                                    </span>
+                                </div>
+
+                                @if($order->payment_va_number)
+                                    <div>
+                                        <label class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Nomor Virtual Account</label>
+                                        <div class="va-display-box">
+                                            <span class="font-mono text-lg md:text-xl font-black text-slate-800 tracking-wider" id="vaNumber">
+                                                {{ $order->payment_va_number }}
+                                            </span>
+                                            <button onclick="copyToClipboard('{{ $order->payment_va_number }}', 'Nomor Virtual Account')" class="btn-copy">
+                                                <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 00-2 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                                                Salin
+                                            </button>
+                                        </div>
+                                    </div>
+                                @elseif($order->payment_qr_url)
+                                    <div class="text-center pt-2">
+                                        <p class="text-xs text-slate-500 font-semibold uppercase tracking-wider mb-3">Scan Kode QRIS di Bawah Ini</p>
+                                        <div class="inline-block p-4 bg-white border-2 border-slate-100 rounded-2xl shadow-sm relative group overflow-hidden">
+                                            @if($order->payment_qr_url === 'DUMMY_QR_CODE')
+                                                <div class="w-48 h-48 bg-slate-100 flex flex-col items-center justify-center text-slate-400 font-mono text-xs border-4 border-dashed border-slate-200 p-4">
+                                                    <svg class="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                                    [ SIMULASI QRIS ]<br>DUMMY QR CODE
+                                                </div>
+                                            @else
+                                                <img src="{{ $order->payment_qr_url }}" alt="QRIS Code" class="w-48 h-48 mx-auto">
+                                            @endif
+                                            
+                                            <!-- Scan line overlay animation -->
+                                            <div class="absolute inset-x-0 top-0 h-1 bg-green-500 opacity-60 shadow-lg group-hover:animate-pulse" style="animation: scan 2s linear infinite;"></div>
+                                        </div>
+                                        <p class="text-xs text-slate-400 mt-3 max-w-sm mx-auto">Gunakan aplikasi e-wallet Anda (Gopay, OVO, Dana, LinkAja) atau m-Banking untuk memindai.</p>
+                                    </div>
+                                @endif
+                            </div>
+                        @endif
+                    </div>
+
+                    <!-- Sandbox Testing Simulator Banner -->
+                    @if(config('services.midtrans.is_production') == false && !in_array(strtolower($order->payment_method), ['tunai', 'transfer manual', 'transfer_manual']))
+                        <div class="sandbox-box">
+                            <div class="flex justify-center items-center gap-2 mb-2">
+                                <svg class="w-5 h-5 text-amber-600 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 9.172V5L8 4z"></path></svg>
+                                <h4 class="font-extrabold text-amber-800 text-sm tracking-wide uppercase">Mode Sandbox (Testing)</h4>
+                            </div>
+                            <p class="text-xs text-amber-700 mb-4 max-w-md mx-auto leading-relaxed">Sistem mendeteksi Anda menggunakan environment testing/sandbox. Gunakan tombol ini untuk langsung mengubah status pesanan menjadi sukses tanpa bayar manual.</p>
                             <form action="{{ route('pasar.payment.simulate', $order->id) }}" method="POST">
                                 @csrf
-                                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition shadow-sm">
+                                <button type="submit" class="bg-amber-600 hover:bg-amber-700 text-white font-bold py-2.5 px-6 rounded-xl transition text-xs shadow-md shadow-amber-600/20 active:scale-95">
                                     Simulasikan Pembayaran Berhasil
                                 </button>
                             </form>
@@ -103,29 +340,41 @@
                     @endif
 
                 @else
-                    <!-- Success State -->
+                    <!-- Success Payment State -->
                     <div class="text-center mb-8">
-                        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 text-green-500 mb-4">
-                            <i class="fas fa-check text-3xl"></i>
+                        <h2 class="text-xl font-bold text-gray-900 mb-2">Terima Kasih atas Pembayaran Anda!</h2>
+                        <p class="text-sm text-slate-500 max-w-md mx-auto leading-relaxed mb-6">
+                            Pembayaran Anda telah berhasil diproses secara otomatis oleh sistem kami. Pesanan Anda saat ini sedang diteruskan ke penjual untuk segera dipacking dan dikirimkan.
+                        </p>
+                        
+                        <div class="flex flex-col sm:flex-row justify-center gap-3">
+                            <a href="{{ route('user.activity') }}" class="btn-action-primary">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                                Lihat Status Pesanan
+                            </a>
+                            <a href="{{ route('pasar.index') }}" class="btn-action-secondary">
+                                Belanja Lagi
+                            </a>
                         </div>
-                        <h2 class="text-xl font-bold text-gray-900 mb-2">Pembayaran Berhasil!</h2>
-                        <p class="text-gray-500 mb-6">Pesanan Anda saat ini sedang diproses oleh penjual.</p>
-                        <a href="{{ route('user.activity') }}" class="inline-flex bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg transition">
-                            Lihat Status Pesanan
-                        </a>
                     </div>
                 @endif
                 
-                <div class="border-t border-gray-100 pt-6 mt-6">
-                    <h3 class="font-bold text-gray-900 mb-4">Detail Pesanan</h3>
-                    <div class="space-y-3 text-sm">
+                <!-- Order Details Section -->
+                <div class="border-t border-slate-100 pt-6 mt-6">
+                    <h3 class="font-bold text-gray-800 text-sm tracking-wider uppercase mb-4 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                        Detail Pesanan
+                    </h3>
+                    <div class="space-y-4">
                         @foreach($order->items as $item)
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="font-medium text-gray-900">{{ $item->product_name }}</p>
-                                <p class="text-gray-500">{{ $item->quantity }} x Rp {{ number_format($item->product_price, 0, ',', '.') }}</p>
+                        <div class="flex justify-between items-start gap-4">
+                            <div class="min-w-0 flex-1">
+                                <p class="font-bold text-slate-800 text-sm truncate">{{ $item->product_name }}</p>
+                                <p class="text-xs text-slate-400 mt-0.5">{{ $item->quantity }} x Rp {{ number_format($item->product_price, 0, ',', '.') }}</p>
                             </div>
-                            <span class="font-medium">Rp {{ number_format($item->subtotal, 0, ',', '.') }}</span>
+                            <span class="font-bold text-slate-700 text-sm whitespace-nowrap">
+                                Rp {{ number_format($item->subtotal, 0, ',', '.') }}
+                            </span>
                         </div>
                         @endforeach
                     </div>
@@ -133,15 +382,99 @@
 
             </div>
             
-            <div class="bg-gray-50 p-6 border-t border-gray-100 flex justify-between items-center">
-                <a href="{{ route('pasar.index') }}" class="text-gray-600 hover:text-gray-900 font-medium">
-                    <i class="fas fa-arrow-left mr-2"></i> Kembali ke Katalog
+            <!-- Footer Action Panel -->
+            <div class="bg-slate-50 px-6 py-5 border-t border-slate-100 flex flex-col sm:flex-row gap-4 justify-between items-center">
+                <a href="{{ route('pasar.index') }}" class="text-[#115789] hover:text-[#0c4066] font-bold text-xs md:text-sm flex items-center gap-1.5 transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7 m0 0l7-7 m-7 7h18"></path></svg>
+                    Kembali ke Katalog
                 </a>
-                <a href="{{ route('user.activity') }}" class="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 font-bold py-2 px-4 rounded-lg transition">
-                    Cek Aktivitas
+                <a href="{{ route('user.activity') }}" class="btn-action-secondary py-2.5 px-5 text-xs md:text-sm">
+                    Cek Aktivitas / Transaksi
                 </a>
             </div>
         </div>
     </div>
-</div>
+</main>
+
+@push('scripts')
+<script>
+    // Copy to clipboard helper with SweetAlert2
+    function copyToClipboard(text, fieldName) {
+        navigator.clipboard.writeText(text).then(function() {
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'success',
+                title: fieldName + ' berhasil disalin!',
+                showConfirmButton: false,
+                timer: 2000
+            });
+        }).catch(function(err) {
+            console.error('Gagal menyalin: ', err);
+        });
+    }
+
+    // Countdown Timer logic
+    @if($order->status === 'pending' && $order->payment_expiry_time)
+        const expiryTime = new Date("{{ $order->payment_expiry_time->toIso8601String() }}").getTime();
+        const countdownTimer = setInterval(function() {
+            const now = new Date().getTime();
+            const distance = expiryTime - now;
+
+            if (distance < 0) {
+                clearInterval(countdownTimer);
+                document.getElementById("countdownText").innerHTML = "EXPIRED";
+                document.getElementById("countdownTimer").classList.remove("text-slate-800");
+                document.getElementById("countdownTimer").classList.add("text-red-600", "bg-red-50", "border-red-100");
+                return;
+            }
+
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            // Format numbers to always show two digits
+            const formattedHours = hours < 10 ? "0" + hours : hours;
+            const formattedMinutes = minutes < 10 ? "0" + minutes : minutes;
+            const formattedSeconds = seconds < 10 ? "0" + seconds : seconds;
+
+            document.getElementById("countdownText").innerHTML = formattedHours + " : " + formattedMinutes + " : " + formattedSeconds;
+        }, 1000);
+    @endif
+
+    // Sync Padding with Navbar visibility
+    document.addEventListener('DOMContentLoaded', function() {
+        const header = document.getElementById('master-navbar');
+        const mainContent = document.getElementById('main-content');
+        
+        if (header && mainContent) {
+            const updatePositions = () => {
+                const isHidden = header.classList.contains('hidden-nav');
+                mainContent.style.paddingTop = isHidden ? '0px' : '50px';
+            };
+            
+            updatePositions();
+            
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.attributeName === 'class') {
+                        updatePositions();
+                    }
+                });
+            });
+            
+            observer.observe(header, { attributes: true });
+        }
+    });
+</script>
+
+<!-- QRIS Scan line animation helper style -->
+<style>
+    @keyframes scan {
+        0% { top: 0%; }
+        50% { top: 100%; }
+        100% { top: 0%; }
+    }
+</style>
+@endpush
 @endsection

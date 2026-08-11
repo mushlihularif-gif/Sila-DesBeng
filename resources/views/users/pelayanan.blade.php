@@ -191,6 +191,12 @@
                                 Marketplace khusus warga daerah yang memfasilitasi transaksi jual-beli berbagai produk lokal lintas wilayah (seperti hasil tani, olahan pangan, kerajinan, hingga material bangunan).
                                 Dilengkapi dengan perhitungan ongkos kirim otomatis berdasarkan jarak lokasi serta dukungan multi-pembayaran secara digital dan tunai (COD).
                             </p>
+                            <div class="mt-6 flex gap-4">
+                                <a href="{{ route('pasar.index') . '?region_id=' . Auth::user()->region_id }}" class="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-[#115789] to-[#60a5fa] hover:from-[#0e4872] hover:to-[#3b82f6] text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 gap-2">
+                                    <i class="fas fa-store"></i>
+                                    Kunjungi Pasar Daerah
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>

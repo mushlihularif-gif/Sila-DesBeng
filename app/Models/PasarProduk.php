@@ -13,6 +13,7 @@ class PasarProduk extends Model
         'nama_produk',
         'deskripsi',
         'harga',
+        'harga_asli',
         'stok',
         'satuan',
         'status',
@@ -28,6 +29,7 @@ class PasarProduk extends Model
 
     protected $casts = [
         'harga' => 'decimal:2',
+        'harga_asli' => 'decimal:2',
         'latitude' => 'decimal:7',
         'longitude' => 'decimal:7',
     ];

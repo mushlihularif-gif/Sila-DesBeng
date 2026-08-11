@@ -49,14 +49,23 @@ class PasarDaerahController extends Controller
             $query->where('nama_produk', 'like', '%' . $request->search . '%');
         }
 
-        // Filter berdasarkan Desa (region_id)
-        if ($request->filled('desa_id') && $request->desa_id !== 'all') {
-            $query->where('region_id', $request->desa_id);
-        } 
-        // Filter berdasarkan Kecamatan (ambil semua desa di bawah kecamatan tsb)
-        elseif ($request->filled('kecamatan_id') && $request->kecamatan_id !== 'all') {
-            $desaIds = Region::where('parent_id', $request->kecamatan_id)->pluck('id')->toArray();
-            $query->whereIn('region_id', $desaIds);
+        // Filter produk khusus dari desa pengguna yang login (Pasar Desa Hiper-Lokal)
+        if (Auth::check() && Auth::user()->region_id) {
+            $query->where('region_id', Auth::user()->region_id);
+        } else {
+            // Jika belum login atau tidak punya desa (Guest), kosongkan hasil pencarian
+            $query->where('id', -1);
+        }
+        if ($request->filled('sort')) {
+            if ($request->sort == 'termurah') {
+                $query->orderBy('harga', 'asc');
+            } elseif ($request->sort == 'termahal') {
+                $query->orderBy('harga', 'desc');
+            } else {
+                $query->latest();
+            }
+        } else {
+            $query->latest();
         }
 
         $produks = $query->with('region')->paginate(12)->withQueryString();
@@ -73,6 +82,12 @@ class PasarDaerahController extends Controller
     public function show($id)
     {
         $produk = PasarProduk::with('region')->findOrFail($id);
+
+        // Pastikan produk berasal dari desa pengguna (Hiper-Lokal)
+        if (Auth::check() && Auth::user()->region_id && $produk->region_id !== Auth::user()->region_id) {
+            abort(403, 'Anda hanya dapat melihat produk dari desa Anda sendiri.');
+        }
+
         return view('users.pasar-detail', compact('produk'));
     }
 
@@ -81,7 +96,11 @@ class PasarDaerahController extends Controller
      */
     public function cart()
     {
-        $carts = PasarCart::with('produk.region')->where('user_id', Auth::id())->get();
+        // Hanya tampilkan keranjang yang produknya berasal dari desa pengguna
+        $carts = PasarCart::whereHas('produk', function($query) {
+            $query->where('region_id', Auth::user()->region_id);
+        })->with('produk.region')->where('user_id', Auth::id())->get();
+
         return view('users.pasar-keranjang', compact('carts'));
     }
 
@@ -96,6 +115,13 @@ class PasarDaerahController extends Controller
         ]);
 
         $produk = PasarProduk::findOrFail($validated['pasar_produk_id']);
+
+        if ($produk->region_id !== Auth::user()->region_id) {
+            return response()->json([
+                'success' => false,
+                'message' => "Pasar Daerah ini eksklusif. Anda hanya dapat membeli barang dari desa Anda sendiri."
+            ], 403);
+        }
 
         if (!$produk->hasStock($validated['quantity'])) {
             return response()->json([
@@ -169,19 +195,16 @@ class PasarDaerahController extends Controller
      */
     public function checkout()
     {
-        $carts = PasarCart::with('produk.region')->where('user_id', Auth::id())->get();
+        // Hanya izinkan checkout untuk produk dari desa pengguna
+        $carts = PasarCart::whereHas('produk', function($query) {
+            $query->where('region_id', Auth::user()->region_id);
+        })->with('produk.region')->where('user_id', Auth::id())->get();
+
         if ($carts->isEmpty()) {
             return redirect()->route('pasar.cart')->with('error', 'Keranjang belanja Anda kosong.');
         }
 
-        // Pastikan semua barang berasal dari Region yang SAMA
-        // Jika beda region, untuk saat ini dibatasi harus checkout per region
-        $regionIds = $carts->pluck('produk.region_id')->unique();
-        if ($regionIds->count() > 1) {
-            return redirect()->route('pasar.cart')->with('error', 'Silakan checkout produk dari satu Desa yang sama terlebih dahulu. (Multi-Desa checkout belum didukung).');
-        }
-
-        $region_id = $regionIds->first();
+        $region_id = Auth::user()->region_id;
         $region = Region::find($region_id);
         
         return view('users.pasar-checkout', compact('carts', 'region'));
