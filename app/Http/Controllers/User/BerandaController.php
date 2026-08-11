@@ -229,8 +229,38 @@ class BerandaController extends Controller
             ];
         })->filter();
 
-        // 5. Merge, Sort, Take 2 (Only Hot)
-        return $products->concat($gasProducts)->sortByDesc('sold')->take(2);
+        // 5. Get Pasar Daerah Scores
+        $pasarPopularity = \App\Models\PasarOrderItem::select('pasar_produk_id', DB::raw('SUM(quantity) as total_sold'))
+            ->whereHas('order', function($q) use ($year, $regionIds) {
+                $q->withTrashed()
+                  ->whereYear('created_at', $year)
+                  ->whereIn('region_id', $regionIds)
+                  ->whereNotIn('status', ['pending', 'cancelled', 'rejected']);
+            })
+            ->groupBy('pasar_produk_id')
+            ->with('produk')
+            ->get();
+
+        // 6. Map Pasar to common format
+        $pasarProducts = $pasarPopularity->map(function ($item) {
+            if (!$item->produk) return null;
+            return (object) [
+                'id' => $item->produk->id,
+                'name' => $item->produk->nama_produk,
+                'image' => $item->produk->foto,
+                'price' => $item->produk->harga,
+                'price_formatted' => 'Rp ' . number_format($item->produk->harga, 0, ',', '.'),
+                'stock' => $item->produk->stok,
+                'sold' => $item->total_sold,
+                'type' => 'pasar',
+                'category' => 'Pasar Daerah',
+                'unit' => $item->produk->satuan ?? 'pcs',
+                'link' => route('pasar.show', $item->produk->id)
+            ];
+        })->filter();
+
+        // 7. Merge, Sort, Take 4 (Only Hot)
+        return $products->concat($gasProducts)->concat($pasarProducts)->sortByDesc('sold')->take(4);
     }
     
     /**

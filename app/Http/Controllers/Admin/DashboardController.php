@@ -80,7 +80,7 @@ public function index(Request $request)
     $latestRequests = collect();
 
     // Hanya admin tingkat desa ke bawah yang mengurus pesanan/permintaan
-    if (in_array(auth()->user()->role, ['admin_desa', 'lurah', 'admin_rw', 'admin_rt'])) {
+    if (in_array(auth()->user()->role, ['admin_desa', 'admin_rw', 'admin_rt'])) {
         $rentalRequests = $baseRental->clone()->with(['user', 'barang'])
             ->where(function($q) {
                 $q->where('status', 'pending')
@@ -249,7 +249,7 @@ public function index(Request $request)
         $desaList = \App\Models\Region::where('type', 'desa')
                         ->where('parent_id', auth()->user()->region_id)
                         ->get();
-    } elseif (in_array(auth()->user()->role, ['admin_desa', 'lurah'])) {
+    } elseif (in_array(auth()->user()->role, ['admin_desa'])) {
         $desaList = \App\Models\Region::where('id', auth()->user()->region_id)->get();
     }
 

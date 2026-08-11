@@ -13,8 +13,14 @@ use App\Models\Region;
 
 class AnnouncementController extends Controller
 {
+    use \App\Traits\ChecksStaffDelegation;
+
     public function index(Request $request)
     {
+        if ($splash = $this->checkDelegation($request, 'kabar_daerah', 'Kabar dan Informasi Daerah')) {
+            return $splash;
+        }
+
         $user = auth()->user();
         
         $tab = $request->get('tab', 'berita');

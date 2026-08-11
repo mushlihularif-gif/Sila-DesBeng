@@ -98,6 +98,14 @@ class GasOrder extends Model
     }
 
     /**
+     * Ambil admin/staf yang memproses pesanan
+     */
+    public function handler()
+    {
+        return $this->belongsTo(User::class, 'handled_by');
+    }
+
+    /**
      * Ambil total harga terformat
      */
     public function getFormattedTotalAttribute()

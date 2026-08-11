@@ -13,7 +13,7 @@ class NewsApiController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Announcement::with(['region', 'admin'])
+        $query = Announcement::with(['region', 'admin', 'images'])
             ->where('is_active', true);
 
         // Filter by type if provided
@@ -39,13 +39,20 @@ class NewsApiController extends Controller
 
         // Format to match mobile expectations
         $formatted = $news->map(function ($item) {
+            $image = null;
+            if ($item->image_path) {
+                $image = asset('storage/' . $item->image_path);
+            } elseif ($item->images && $item->images->count() > 0) {
+                $image = asset('storage/' . $item->images->first()->image_path);
+            }
+
             return [
                 'id' => $item->id,
                 'title' => $item->title,
                 'category' => $item->type ?? 'Pengumuman', // Fallback
                 'date' => $item->event_date ? $item->event_date->format('Y-m-d') : $item->created_at->format('Y-m-d'),
                 'desc' => $item->description,
-                'image' => $item->image_path ? asset('storage/' . $item->image_path) : 'https://picsum.photos/seed/' . $item->id . '/400/300',
+                'image' => $image,
                 'location' => $item->location,
                 'author' => $item->admin ? $item->admin->name : 'Admin Desa',
             ];
@@ -62,15 +69,22 @@ class NewsApiController extends Controller
      */
     public function show($id)
     {
-        $item = Announcement::with(['region', 'admin'])->findOrFail($id);
+        $item = Announcement::with(['region', 'admin', 'images'])->findOrFail($id);
         
+        $image = null;
+        if ($item->image_path) {
+            $image = asset('storage/' . $item->image_path);
+        } elseif ($item->images && $item->images->count() > 0) {
+            $image = asset('storage/' . $item->images->first()->image_path);
+        }
+
         $formatted = [
             'id' => $item->id,
             'title' => $item->title,
             'category' => $item->type ?? 'Pengumuman',
             'date' => $item->event_date ? $item->event_date->format('Y-m-d') : $item->created_at->format('Y-m-d'),
             'desc' => $item->description,
-            'image' => $item->image_path ? asset('storage/' . $item->image_path) : 'https://picsum.photos/seed/' . $item->id . '/400/300',
+            'image' => $image,
             'location' => $item->location,
             'author' => $item->admin ? $item->admin->name : 'Admin Desa',
         ];

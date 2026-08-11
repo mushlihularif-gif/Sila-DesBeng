@@ -14,8 +14,8 @@ class MutasiAdminController extends Controller
     {
         $admin = Auth::user();
         
-        // Hanya membatasi jika admin desa/lurah. Super admin bebas.
-        $region_id = in_array($admin->role, ['admin_desa', 'lurah', 'admin_rt', 'admin_rw']) ? $admin->region_id : null;
+        // Hanya membatasi jika admin desa. Super admin bebas.
+        $region_id = in_array($admin->role, ['admin_desa', 'admin_rt', 'admin_rw']) ? $admin->region_id : null;
         
         // Pengajuan Keluar (Handshake menunggu approve dari KITA)
         $pengajuanKeluar = MutasiPenduduk::with(['user', 'toRegion'])

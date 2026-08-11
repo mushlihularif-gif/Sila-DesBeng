@@ -5,7 +5,7 @@
     <title>Bukti Laporan #{{ str_pad($laporan->id, 5, '0', STR_PAD_LEFT) }}</title>
     <style>
         @page {
-            margin: 0;
+            margin: 50px 0 0 0;
             padding: 0;
         }
 
@@ -47,7 +47,7 @@
         .content-overlay {
             position: relative;
             z-index: 1;
-            padding: 210px 70px 80px 70px; /* Jarak atas disesuaikan untuk Kop Surat */
+            padding: 0px 70px 80px 70px; /* Padding atas ditangani oleh @page margin agar tidak menabrak teks background */
         }
 
         /* ===================== */
@@ -61,7 +61,7 @@
         .lampiran-content {
             position: relative;
             z-index: 1;
-            padding: 120px 70px 80px 70px; /* Jarak atas lebih kecil karena tanpa Kop Surat */
+            padding: 70px 70px 80px 70px; /* Jarak atas lebih kecil karena tanpa Kop Surat (70 + 50 page margin = 120) */
         }
 
         /* ===================== */
@@ -167,36 +167,48 @@
 
         /* Footer Section */
         .footer-section {
-            margin-top: 25px;
+            position: absolute;
+            bottom: 110px; /* Dinaikkan sedikit */
+            right: 0;
             width: 100%;
-            page-break-inside: avoid;
         }
 
-        .footer-section .ttd-area {
-            float: right;
-            width: 250px;
+        .ttd-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .ttd-table td {
+            vertical-align: top;
+        }
+
+        .ttd-area {
             text-align: center;
         }
 
-        .footer-section .ttd-area .tanggal {
+        .ttd-area .tanggal {
             font-size: 10pt;
             margin-bottom: 5px;
         }
 
-        .footer-section .ttd-area .jabatan {
+        .ttd-area .jabatan {
             font-size: 10pt;
             font-weight: bold;
+            margin-top: 18px; 
             margin-bottom: 8px;
         }
 
-        .footer-section .ttd-area .qr-placeholder {
+        .ttd-area .qr-placeholder {
             margin: 8px auto;
         }
 
         /* Disclaimer */
         .disclaimer {
-            clear: both;
-            margin-top: 90px;
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
             padding-top: 8px;
             border-top: 1px dashed #999;
             font-size: 8pt;
@@ -303,7 +315,7 @@
     <img src="{{ public_path('User/img/buktilapor/Halaman2danseterusnya(tanpakopsurat).png') }}" class="background-image-fixed">
 
     <!-- Background KHUSUS Halaman 1 (Absolute position agar hanya muncul di halaman 1 dan menutupi fixed) -->
-    <img src="{{ public_path('User/img/buktilapor/Halaman1buktipelaporan(kopsurat).png') }}" class="background-image-first">
+    <img src="{{ public_path('User/img/buktilapor/Halaman1buktipelaporan(kopsurat).jpg') }}" class="background-image-first">
 
     {{-- ============================================== --}}
     {{-- HALAMAN 1: LEMBAR PENGESAHAN (LEGALITAS RESMI) --}}
@@ -313,6 +325,9 @@
         <!-- Content di atas background -->
         <div class="content-overlay">
             
+            <!-- Spacer khusus halaman 1 untuk menghindari overlap dengan Kop Surat -->
+            <div style="height: 170px;"></div>
+
             <!-- Header Surat -->
             <div class="surat-header">
                 <div class="title-left">Bukti Registrasi Pelaporan Warga</div>
@@ -381,7 +396,7 @@
                 <tr>
                     <td class="label">Ditangani Oleh</td>
                     <td class="separator">:</td>
-                    <td><strong>{{ $handler_name }}</strong> (Admin {{ ucfirst($laporan->escalation_level) }})</td>
+                    <td><strong>{{ str_replace('Sistem SilaDesBeng', '', $handler_name) }}</strong> (Admin {{ ucfirst($laporan->escalation_level) }})</td>
                 </tr>
             </table>
 
@@ -431,21 +446,37 @@
                 </tbody>
             </table>
 
-            <!-- Footer: TTD Digital -->
-            <div class="footer-section">
-                <div class="ttd-area">
-                    <p class="tanggal">Bengkalis, {{ now()->format('d F Y') }}</p>
-                    <p class="jabatan">{{ $handler_name ?? 'Sistem SilaDesBeng' }}</p>
-                    <p style="font-size: 9pt; color: #555; margin-bottom: 6px;">Admin {{ ucfirst($laporan->escalation_level ?? 'Desa') }}</p>
-                    
-                    <!-- QR Code Validasi dengan Logo di Tengah -->
-                    <div style="position: relative; width: 120px; height: 120px; margin: 0 auto;">
-                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data={{ urlencode(url('/validasi/laporan/' . $laporan->id . '?token=' . hash_hmac('sha256', $laporan->id . $laporan->created_at, config('app.key')))) }}" width="120" height="120" style="position: absolute; top: 0; left: 0;" alt="QR Validasi">
-                        <img src="{{ public_path('Admin/img/illustrations/logodomain.png') }}" width="26" height="26" style="position: absolute; top: 47px; left: 47px; background-color: white; padding: 2px; border-radius: 4px;" alt="Logo Siladesbeng">
-                    </div>
-                    
-                    <p style="font-size: 8pt; color: #999;">Tanda Tangan Elektronik</p>
-                </div>
+        </div> <!-- Tutup table-responsive -->
+
+        <!-- Spacer fisik untuk jarak aman dengan tabel -->
+        <div style="height: 200px; width: 100%; clear: both;"></div>
+
+        <!-- Footer: TTD Digital -->
+        <div class="footer-section">
+                <table class="ttd-table">
+                    <tr>
+                        <td style="width: 55%;"></td>
+                        <td style="width: 45%; text-align: center;">
+                            <p style="font-size: 10pt; margin-top: 0; margin-bottom: 5px;">Bengkalis, {{ now()->format('d F Y') }}</p>
+                            
+                            <!-- QR Code dipindah ke antara tanggal dan nama agar menutupi ruang kosong -->
+                            <div style="position: relative; width: 80px; height: 80px; margin: 15px auto;">
+                                @if(!empty($qrBase64))
+                                    <img src="data:image/png;base64,{{ $qrBase64 }}" width="80" height="80" style="position: absolute; top: 0; left: 0;" alt="QR Validasi">
+                                @else
+                                    <div style="width: 80px; height: 80px; position: absolute; top: 0; left: 0; border: 1px dashed #ccc; text-align: center; line-height: 80px; font-size: 8pt; color: #999;">QR Error</div>
+                                @endif
+                                <img src="{{ public_path('Admin/img/illustrations/logodomain.png') }}" width="18" height="18" style="position: absolute; top: 31px; left: 31px; background-color: white; padding: 2px; border-radius: 4px;" alt="Logo Siladesbeng">
+                            </div>
+
+                            @if(!empty(trim($handler_name ?? '')))
+                                <p style="font-size: 10pt; font-weight: bold; margin-top: 5px; margin-bottom: 2px;">{{ $handler_name }}</p>
+                            @endif
+                            <p style="font-size: 9pt; color: #555; margin-top: 0; margin-bottom: 0;">Admin Desa</p>
+                            <p style="font-size: 8pt; color: #999;">Tanda Tangan Elektronik</p>
+                        </td>
+                    </tr>
+                </table>
             </div>
 
             <!-- Disclaimer -->

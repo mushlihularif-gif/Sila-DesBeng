@@ -32,6 +32,8 @@ class Laporan extends Model
         'admin_id',
         'region_id',          // ✅ Ditambahkan: relasi ke wilayah pelapor
         'tujuan_laporan',     // ✅ Ditambahkan: target awal laporan (rt/rw/desa)
+        'latitude',
+        'longitude',
     ];
 
     protected $casts = [

@@ -34,7 +34,7 @@ class UserManagementController extends Controller
         $usersQuery = User::with('region');
 
         // Jika admin memiliki region_id (bukan super_admin/admin pusat), filter berdasarkan wilayahnya
-        if ($user->region_id && in_array($user->role, ['admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'lurah'])) {
+        if ($user->region_id && in_array($user->role, ['admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt'])) {
             $allowedRegionIds = \App\Models\Region::getDescendantIds($user->region_id);
             $allowedRegionIds[] = $user->region_id;
             
@@ -127,7 +127,7 @@ class UserManagementController extends Controller
         
         // Verifikasi hak akses
         $currentUser = auth()->user();
-        if ($currentUser->region_id && in_array($currentUser->role, ['admin_rt', 'admin_rw', 'admin_desa', 'admin_kecamatan', 'lurah'])) {
+        if ($currentUser->region_id && in_array($currentUser->role, ['admin_rt', 'admin_rw', 'admin_desa', 'admin_kecamatan'])) {
             $allowedRegionIds = \App\Models\Region::getDescendantIds($currentUser->region_id);
             $allowedRegionIds[] = $currentUser->region_id;
             if (!in_array($user->region_id, $allowedRegionIds)) {

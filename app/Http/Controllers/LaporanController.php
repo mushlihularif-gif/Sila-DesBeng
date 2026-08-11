@@ -107,7 +107,9 @@ class LaporanController extends Controller
             'nama' => 'required|string|max:255',
             'deskripsi' => 'required|string|min:20',
             'kategori' => 'required|string',
-            'lokasi' => 'nullable|string|max:255',
+            'lokasi' => 'required|string|max:255',
+            'latitude' => 'nullable|string|max:50',
+            'longitude' => 'nullable|string|max:50',
             'tujuan_laporan' => 'required|in:rt,rw,desa',
             'target_region_id' => 'nullable|integer|exists:regions,id',
             'bukti' => 'nullable|array|max:3',
@@ -128,6 +130,8 @@ class LaporanController extends Controller
             'deskripsi' => $validated['deskripsi'],
             'kategori' => $validated['kategori'],
             'lokasi' => $validated['lokasi'] ?? null,
+            'latitude' => $validated['latitude'] ?? null,
+            'longitude' => $validated['longitude'] ?? null,
             'tujuan_laporan' => $validated['tujuan_laporan'],
             'status' => 'Pending',
             'rw' => $user->rw,
@@ -235,9 +239,9 @@ class LaporanController extends Controller
                 }
             }
 
-            // STEP 3: Fallback ke Admin Desa / Lurah / Super Admin
+            // STEP 3: Fallback ke Admin Desa / Super Admin
             if ($targetAdmins->isEmpty()) {
-                $targetAdmins = User::whereIn('role', ['admin', 'super_admin', 'admin_desa', 'lurah'])
+                $targetAdmins = User::whereIn('role', ['admin', 'super_admin', 'admin_desa'])
                     ->whereIn('region_id', $regionIds)
                     ->get();
                 $actualDestination = 'desa';
@@ -283,9 +287,22 @@ class LaporanController extends Controller
         abort(403);
     }
 
+    // Fetch QR Code from Google Charts API safely bypassing local SSL issues
+    $qrData = urlencode(url('/validasi/laporan/' . $laporan->id . '?token=' . hash_hmac('sha256', $laporan->id . $laporan->created_at, config('app.key'))));
+    $qrUrl = "https://chart.googleapis.com/chart?chs=80x80&cht=qr&chl=" . $qrData;
+    
+    try {
+        $qrImage = \Illuminate\Support\Facades\Http::withoutVerifying()->timeout(10)->get($qrUrl)->body();
+        $qrBase64 = base64_encode($qrImage);
+    } catch (\Exception $e) {
+        $qrBase64 = null;
+    }
+
     return Pdf::loadView('pdf.bukti_laporan', [
         'laporan' => $laporan,
-        'handler_name' => 'Sistem SilaDesBeng',
+        'handler_name' => '',
+        'waktu_cetak' => now()->format('d F Y, H:i'),
+        'qrBase64' => $qrBase64
     ])->download('Bukti_Laporan_'.$laporan->id.'.pdf');
 }
 

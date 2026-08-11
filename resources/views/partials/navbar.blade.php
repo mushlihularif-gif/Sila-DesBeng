@@ -125,6 +125,10 @@
                             <a href="{{ route('bumdes.laporan') }}" class="block px-4 py-2.5 text-gray-800 hover:bg-blue-50 hover:border-l-[3px] hover:border-l-blue-500 transition-all duration-150 whitespace-nowrap {{ request()->routeIs('bumdes.laporan') ? 'bg-blue-50 border-l-[3px] border-l-blue-500 font-medium' : 'border-l-[3px] border-l-transparent' }}">
                                 <span class="text-[15px] font-normal text-center block">Grafik Layanan</span>
                             </a>
+                            <div class="h-px bg-gray-100 mx-3 my-1"></div>
+                            <a href="{{ route('pasar.index') }}" class="block px-4 py-2.5 text-gray-800 hover:bg-blue-50 hover:border-l-[3px] hover:border-l-blue-500 transition-all duration-150 whitespace-nowrap {{ request()->routeIs('pasar.*') ? 'bg-blue-50 border-l-[3px] border-l-blue-500 font-medium' : 'border-l-[3px] border-l-transparent' }}">
+                                <span class="text-[15px] font-normal text-center block">Pasar Daerah</span>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -203,7 +207,7 @@
                                 <a href="{{ route('profile') }}" class="block px-4 py-2.5 text-gray-800 hover:bg-blue-50 hover:border-l-[3px] hover:border-l-blue-500 transition-all duration-150 border-l-[3px] border-l-transparent">
                                     <span class="text-[15px] font-normal text-center block">Profil</span>
                                 </a>
-                                @if(in_array(auth()->user()->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin', 'lurah']))
+                                @if(in_array(auth()->user()->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin', 'admin_rt', 'admin_rw', 'staff']))
                                 <div class="h-px bg-gray-100 mx-3 my-1"></div>
                                 <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2.5 text-blue-700 hover:bg-blue-100 hover:border-l-[3px] hover:border-l-blue-600 transition-all duration-150 border-l-[3px] border-l-transparent bg-blue-50/50">
                                     <span class="text-[15px] font-bold text-center block flex justify-center items-center gap-1">
@@ -369,6 +373,9 @@
         </a>
         <a href="{{ route('bumdes.laporan') }}" class="block pl-10 pr-6 py-2.5 text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition {{ request()->routeIs('bumdes.laporan') ? 'text-blue-600 font-medium border-l-4 border-blue-500' : '' }}">
             Grafik Layanan
+        </a>
+        <a href="{{ route('pasar.index') }}" class="block pl-10 pr-6 py-2.5 text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition {{ request()->routeIs('pasar.*') ? 'text-blue-600 font-medium border-l-4 border-blue-500' : '' }}">
+            Pasar Daerah
         </a>
         <a href="{{ route('siladesbeng.profile') }}" class="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium transition {{ request()->routeIs('siladesbeng.profile') ? 'text-blue-600 bg-blue-50 border-l-4 border-blue-500' : '' }}">
             Profil SiladesBeng

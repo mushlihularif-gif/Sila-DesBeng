@@ -25,7 +25,7 @@ class ReceiptController extends Controller
         $booking = RentalBooking::withTrashed()->findOrFail($id);
         
         // Periksa apakah pengguna memiliki pesanan ini atau adalah admin
-        if ((int)$booking->user_id !== (int)auth()->id() && !in_array(auth()->user()->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'admin', 'lurah'])) {
+        if ((int)$booking->user_id !== (int)auth()->id() && !in_array(auth()->user()->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'admin'])) {
             abort(403, 'Unauthorized access');
         }
         
@@ -54,7 +54,7 @@ class ReceiptController extends Controller
         $booking = RentalBooking::withTrashed()->findOrFail($id);
         
         // Periksa apakah pengguna memiliki pesanan ini atau adalah admin
-        if ((int)$booking->user_id !== (int)auth()->id() && !in_array(auth()->user()->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'admin', 'lurah'])) {
+        if ((int)$booking->user_id !== (int)auth()->id() && !in_array(auth()->user()->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'admin'])) {
             abort(403, 'Unauthorized access');
         }
         
@@ -81,7 +81,7 @@ class ReceiptController extends Controller
         $order = GasOrder::withTrashed()->findOrFail($id);
         
         // Periksa apakah pengguna memiliki pesanan ini atau adalah admin
-        if ((int)$order->user_id !== (int)auth()->id() && !in_array(auth()->user()->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'admin', 'lurah'])) {
+        if ((int)$order->user_id !== (int)auth()->id() && !in_array(auth()->user()->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'admin'])) {
             abort(403, 'Unauthorized access');
         }
         
@@ -110,7 +110,7 @@ class ReceiptController extends Controller
         $order = GasOrder::withTrashed()->findOrFail($id);
         
         // Periksa apakah pengguna memiliki pesanan ini atau adalah admin
-        if ((int)$order->user_id !== (int)auth()->id() && !in_array(auth()->user()->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'admin', 'lurah'])) {
+        if ((int)$order->user_id !== (int)auth()->id() && !in_array(auth()->user()->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'admin'])) {
             abort(403, 'Unauthorized access');
         }
         
@@ -135,7 +135,7 @@ class ReceiptController extends Controller
     {
         $booking = \App\Models\MobilBooking::withTrashed()->findOrFail($id);
         
-        if ((int)$booking->user_id !== (int)auth()->id() && !in_array(auth()->user()->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'admin', 'lurah'])) {
+        if ((int)$booking->user_id !== (int)auth()->id() && !in_array(auth()->user()->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'admin'])) {
             abort(403, 'Unauthorized access');
         }
         
@@ -161,7 +161,7 @@ class ReceiptController extends Controller
     {
         $booking = \App\Models\MobilBooking::withTrashed()->findOrFail($id);
         
-        if ((int)$booking->user_id !== (int)auth()->id() && !in_array(auth()->user()->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'admin', 'lurah'])) {
+        if ((int)$booking->user_id !== (int)auth()->id() && !in_array(auth()->user()->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'admin'])) {
             abort(403, 'Unauthorized access');
         }
         
@@ -185,7 +185,7 @@ class ReceiptController extends Controller
     {
         $booking = \App\Models\FasilitasUmumBooking::withTrashed()->findOrFail($id);
         
-        if ((int)$booking->user_id !== (int)auth()->id() && !in_array(auth()->user()->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'admin', 'lurah'])) {
+        if ((int)$booking->user_id !== (int)auth()->id() && !in_array(auth()->user()->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'admin'])) {
             abort(403, 'Unauthorized access');
         }
         
@@ -211,7 +211,7 @@ class ReceiptController extends Controller
     {
         $booking = \App\Models\FasilitasUmumBooking::withTrashed()->findOrFail($id);
         
-        if ((int)$booking->user_id !== (int)auth()->id() && !in_array(auth()->user()->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'admin', 'lurah'])) {
+        if ((int)$booking->user_id !== (int)auth()->id() && !in_array(auth()->user()->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'admin'])) {
             abort(403, 'Unauthorized access');
         }
         
@@ -225,6 +225,55 @@ class ReceiptController extends Controller
         return Storage::disk('public')->download(
             $path,
             'Bukti_Transaksi_Fasilitas_' . $booking->order_number . '.png'
+        );
+    }
+    /**
+     * Lihat bukti transaksi pasar daerah
+     */
+    public function viewPasarReceipt($id)
+    {
+        $order = \App\Models\PasarOrder::withTrashed()->findOrFail($id);
+        
+        if ((int)$order->user_id !== (int)auth()->id() && !in_array(auth()->user()->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'admin', 'staff'])) {
+            abort(403, 'Unauthorized access');
+        }
+        
+        $path = $this->receiptService->generatePasarReceipt($order);
+        
+        if ($order->receipt_path !== $path) {
+            $order->receipt_path = $path;
+            $order->save();
+        }
+        
+        $fullPath = Storage::disk('public')->path($path);
+        
+        return Response::file($fullPath, [
+            'Content-Type' => 'image/png',
+            'Content-Disposition' => 'inline; filename="Bukti_Transaksi_' . $order->order_number . '.png"'
+        ]);
+    }
+    
+    /**
+     * Unduh bukti transaksi pasar daerah
+     */
+    public function downloadPasarReceipt($id)
+    {
+        $order = \App\Models\PasarOrder::withTrashed()->findOrFail($id);
+        
+        if ((int)$order->user_id !== (int)auth()->id() && !in_array(auth()->user()->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'admin', 'staff'])) {
+            abort(403, 'Unauthorized access');
+        }
+        
+        $path = $this->receiptService->generatePasarReceipt($order);
+        
+        if ($order->receipt_path !== $path) {
+            $order->receipt_path = $path;
+            $order->save();
+        }
+        
+        return Storage::disk('public')->download(
+            $path,
+            'Bukti_Transaksi_Pasar_' . $order->order_number . '.png'
         );
     }
 }

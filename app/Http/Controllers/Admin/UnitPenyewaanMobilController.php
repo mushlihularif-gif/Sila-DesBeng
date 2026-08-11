@@ -12,12 +12,18 @@ use App\Services\ImageCompressorService;
 
 class UnitPenyewaanMobilController extends Controller
 {
+    use \App\Traits\ChecksStaffDelegation;
+
     // Default SOP Texts
     private $defaultSopDitanggung = "1. Penyewa wajib menjaga mobil sewaan dengan baik.\n2. Jika terjadi KERUSAKAN atau KEHILANGAN mobil selama masa penyewaan, maka SEPENUHNYA menjadi tanggung jawab PENGGUNA (penyewa) untuk mengganti rugi atau memperbaiki mobil tersebut sesuai dengan kerusakan.\n3. Keterlambatan pengembalian dapat dikenakan denda sesuai ketentuan yang berlaku.";
     private $defaultSopTidakDitanggung = "1. Penyewa wajib menjaga mobil sewaan dengan baik.\n2. Jika terjadi kerusakan atau kehilangan mobil selama masa penyewaan yang diakibatkan oleh faktor ketidaksengajaan/bencana, maka TIDAK DITANGGUNG oleh pengguna (penyewa) karena telah didukung oleh dana operasional.\n3. Namun pengguna tetap diwajibkan melaporkan kejadian tersebut secara transparan.";
 
     public function index(Request $request)
     {
+        if ($splash = $this->checkDelegation($request, 'sewa_mobil', 'Penyewaan Mobil/Kendaraan')) {
+            return $splash;
+        }
+
         $search = $request->get('search');
         
         $mobils = Mobil::query()

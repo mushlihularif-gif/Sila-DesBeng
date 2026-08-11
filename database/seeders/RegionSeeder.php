@@ -62,12 +62,7 @@ class RegionSeeder extends Seeder
             'role' => 'admin_desa',
             'region_id' => $desaPDT->id
         ]);
-        
-        // Update lurah to admin_desa (or keep as lurah if preferred, but linked to desa)
-        \App\Models\User::where('role', 'lurah')->update([
-            'role' => 'admin_desa',
-            'region_id' => $desaPDT->id
-        ]);
+        // Remove legacy lurah update
 
         // Link normal users to Desa Pematang Duku Timur for now (or leave null if they are just customers, but if they are citizens, link them)
         \App\Models\User::where('role', 'user')->whereNull('region_id')->update(['region_id' => $desaPDT->id]);

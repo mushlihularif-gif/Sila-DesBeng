@@ -507,6 +507,13 @@
                                     </a>
                                 </li>
                                 @endif
+                                @if(in_array('Pasar Daerah', $activeServicesMenu ?? []))
+                                <li class="menu-item {{ request()->is('admin/unit/pasar_daerah*') ? 'active' : '' }}">
+                                    <a href="{{ route('admin.unit.pasar_daerah.index') }}" class="menu-link">
+                                        <div data-i18n="Pasar Daerah">Pasar Daerah</div>
+                                    </a>
+                                </li>
+                                @endif
                                 <li class="menu-item {{ request()->routeIs('admin.announcements.*') ? 'active' : '' }}">
                                     <a href="{{ route('admin.announcements.index') }}" class="menu-link">
                                         <div data-i18n="Kabar dan Informasi Daerah">Kabar dan Informasi Daerah</div>
@@ -568,7 +575,7 @@
                         </li>
                         @endif
 
-                        @if(in_array(auth()->user()->role, ['super_admin', 'admin', 'admin_kecamatan', 'admin_desa', 'lurah', 'admin_rw']))
+                        @if(in_array(auth()->user()->role, ['super_admin', 'admin', 'admin_kecamatan', 'admin_desa', 'admin_rw']))
                         <li class="menu-item {{ request()->routeIs('admin.kelola-wilayah.*') ? 'active' : '' }}">
                             <a href="{{ route('admin.kelola-wilayah.index') }}" class="menu-link">
                                 <div>Kelola Wilayah</div>
@@ -579,9 +586,9 @@
                 </li>
 
                 <!-- Aktivitas -->
-                @if(in_array(auth()->user()->role, ['super_admin', 'admin', 'admin_kecamatan', 'admin_desa', 'lurah', 'admin_rw', 'admin_rt']))
+                @if(in_array(auth()->user()->role, ['super_admin', 'admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt']))
                 <li
-                    class="menu-item {{ request()->is('admin/aktivitas/permintaan-pengajuan*') || request()->is('admin/aktivitas/bukti-transaksi*') || request()->is('admin/kemitraan*') || (request()->routeIs('lurah.laporan.*') && !request()->has('status')) ? 'open active show' : '' }}">
+                    class="menu-item {{ request()->is('admin/aktivitas/permintaan-pengajuan*') || request()->is('admin/aktivitas/bukti-transaksi*') || request()->is('admin/kemitraan*') || (request()->routeIs('admin.laporan.*') && !request()->has('status')) ? 'open active show' : '' }}">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
                         <i class="menu-icon tf-icons bx bx-time"></i>
                         <div data-i18n="Permintaan & Aktivitas">Permintaan & Aktivitas</div>
@@ -605,8 +612,8 @@
                             </a>
                         </li>
                         @endif
-                        <li class="menu-item {{ request()->routeIs('lurah.laporan.*') && !request()->has('status') ? 'active' : '' }}">
-                            <a href="{{ route('lurah.laporan.index') }}" class="menu-link">
+                        <li class="menu-item {{ request()->routeIs('admin.laporan.*') && !request()->has('status') ? 'active' : '' }}">
+                            <a href="{{ route('admin.laporan.index') }}" class="menu-link">
                                 <div>Pelaporan Warga</div>
                             </a>
                         </li>
@@ -614,14 +621,14 @@
                 </li>
                 @endif
                 <!-- Data & Laporan (Dropdown) -->
-                <li class="menu-item {{ request()->routeIs('admin.laporan.*') || (request()->routeIs('lurah.laporan.*') && request()->query('status') == 'Selesai') ? 'open active show' : '' }}">
+                <li class="menu-item {{ request()->routeIs('admin.laporan.*') || (request()->routeIs('admin.laporan.*') && request()->query('status') == 'Selesai') ? 'open active show' : '' }}">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
                         <i class="menu-icon tf-icons bx bx-bar-chart-alt-2"></i>
                         <div data-i18n="Data & Laporan">Data & Laporan</div>
                     </a>
                     <ul class="menu-sub">
-                        <li class="menu-item {{ request()->routeIs('lurah.laporan.*') && request()->query('status') == 'Selesai' ? 'active' : '' }}">
-                            <a href="{{ route('lurah.laporan.index', ['status' => 'Selesai']) }}" class="menu-link">
+                        <li class="menu-item {{ request()->routeIs('admin.laporan.*') && request()->query('status') == 'Selesai' ? 'active' : '' }}">
+                            <a href="{{ route('admin.laporan.index', ['status' => 'Selesai']) }}" class="menu-link">
                                 <div data-i18n="Bukti Pelaporan Warga">Bukti Pelaporan Warga</div>
                             </a>
                         </li>
@@ -738,7 +745,6 @@
                                     'admin.siladesbeng.*',
                                     'admin.kemitraan.*',
                                     'admin.manajemen-pengguna.*',
-                                    'lurah.laporan.*',
                                     'admin.system-settings.*',
                                     'admin.region-settings.*',
                                     'admin.notifications.*',
@@ -839,7 +845,9 @@
                                             'admin' => 'Admin Pusat',
                                             'admin_desa' => 'Admin Desa',
                                             'admin_rw' => 'Admin RW',
-                                            'lurah' => 'Kepala Desa',
+                                            'admin_rt' => 'Admin RT',
+                                            'admin_kecamatan' => 'Admin Kecamatan',
+                                            'staff' => 'Staf Unit',
                                             'user' => 'Pengguna',
                                         ];
                                     @endphp

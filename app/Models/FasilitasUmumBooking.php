@@ -79,4 +79,11 @@ class FasilitasUmumBooking extends Model
     {
         return $this->belongsTo(Region::class);
     }
+    /**
+     * Ambil admin/staf yang memproses pesanan
+     */
+    public function handler()
+    {
+        return $this->belongsTo(\App\Models\User::class, 'handled_by');
+    }
 }

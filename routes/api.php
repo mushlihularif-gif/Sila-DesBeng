@@ -22,6 +22,10 @@ Route::get('/unit-pelayanan', [BerandaController::class, 'unitPelayanan']);
     Route::get('/news', [\App\Http\Controllers\Api\NewsApiController::class, 'index']);
     Route::get('/news/{id}', [\App\Http\Controllers\Api\NewsApiController::class, 'show']);
 
+    // Pasar Daerah (Toko BUMDes)
+    Route::get('/pasar-daerah/products', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'getProducts']);
+    Route::get('/pasar-daerah/categories', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'getCategories']);
+
 // Protected Routes (Harus mengirimkan Bearer Token dari hasil Login)
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'user']);
@@ -59,6 +63,13 @@ Route::middleware('auth:sanctum')->group(function () {
     
     // Chatbot (Gemini AI)
     Route::post('/chatbot', [\App\Http\Controllers\User\ChatbotController::class, 'ask']);
+
+    // Pasar Daerah (Cart & Checkout)
+    Route::get('/pasar-daerah/cart', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'getCart']);
+    Route::post('/pasar-daerah/cart/add', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'addToCart']);
+    Route::post('/pasar-daerah/cart/update', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'updateCart']);
+    Route::post('/pasar-daerah/cart/remove', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'removeFromCart']);
+    Route::post('/pasar-daerah/checkout', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'checkout']);
 
     // Mutasi Domisili
     Route::get('/mutasi', [\App\Http\Controllers\Api\DomicileTransferApiController::class, 'index']);

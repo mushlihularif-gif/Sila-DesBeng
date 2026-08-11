@@ -24,6 +24,14 @@ class RequestController extends Controller
         $status = $request->get('status', 'all');
         $category = $request->get('category', 'all');
 
+        $user = auth()->user();
+        $isStaff = $user->isStaff();
+        
+        $canViewRental = !$isStaff || $user->hasUnitPermission('sewa_alat');
+        $canViewGas = !$isStaff || $user->hasUnitPermission('gas');
+        $canViewMobil = !$isStaff || $user->hasUnitPermission('sewa_mobil');
+        $canViewFasilitas = !$isStaff || $user->hasUnitPermission('fasilitas_umum');
+
         // Buat query untuk pemesanan penyewaan (Include deleted for history)
         $rentalQuery = $this->applyRegionFilter(RentalBooking::withTrashed(), 'barang', true)->with(['user', 'barang']);
         if ($status !== 'all') {
@@ -87,6 +95,12 @@ class RequestController extends Controller
                 $fasilitasQuery->where('status', $status);
             }
         }
+
+        // Apply staff permission filters
+        if (!$canViewRental) $rentalQuery->whereRaw('1 = 0');
+        if (!$canViewGas) $gasQuery->whereRaw('1 = 0');
+        if (!$canViewMobil) $mobilQuery->whereRaw('1 = 0');
+        if (!$canViewFasilitas) $fasilitasQuery->whereRaw('1 = 0');
 
         // Urutan prioritas status:
         // 1. Menunggu / Proses (pending, confirmed, approved, process, delivering, dll)
@@ -473,6 +487,7 @@ class RequestController extends Controller
             $model->update([
                 'status' => $newStatus,
                 'rejection_reason' => $request->reason,
+                'handled_by' => auth()->id()
             ]);
         }
 
@@ -523,6 +538,9 @@ class RequestController extends Controller
 
         $oldStatus = $order->status;
         $newStatus = $request->status;
+
+        // Catat siapa yang memproses
+        $order->handled_by = auth()->id();
 
         try {
             DB::beginTransaction();
@@ -757,6 +775,7 @@ class RequestController extends Controller
 
         $order->cancellation_status = $action === 'approve' ? 'approved' : 'rejected';
         $order->admin_cancellation_response = $request->admin_response;
+        $order->handled_by = auth()->id();
 
         $message = '';
         if ($action === 'approve') {

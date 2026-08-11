@@ -39,7 +39,7 @@
                     if(in_array($desa->id, $userRegionIds)) {
                         // Cek apakah desa ini sudah punya admin
                         $hasAdmin = $desa->users->filter(function($user) {
-                            return in_array($user->role, ['admin_desa', 'lurah', 'admin']);
+                            return in_array($user->role, ['admin_desa', 'admin']);
                         })->count() > 0;
                         
                         if ($hasAdmin) {
@@ -187,7 +187,7 @@
                 foreach($kecamatans as $kecamatan) {
                     $totalJoined += $kecamatan->children->filter(function($desa) {
                         return $desa->users->filter(function($user) {
-                            return in_array($user->role, ['admin_desa', 'lurah', 'admin']);
+                            return in_array($user->role, ['admin_desa', 'admin']);
                         })->count() > 0;
                     })->count();
                 }
@@ -238,7 +238,7 @@
                             @php
                                 $joinedCount = $kecamatan->children->filter(function($desa) {
                                     return $desa->users->filter(function($user) {
-                                        return in_array($user->role, ['admin_desa', 'lurah', 'admin']);
+                                        return in_array($user->role, ['admin_desa', 'admin']);
                                     })->count() > 0;
                                 })->count();
                             @endphp
@@ -246,7 +246,7 @@
                         @if($joinedCount > 0)
                             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" style="gap: 2rem;">
                                 @foreach($kecamatan->children as $desa)
-                                @if($desa->users->filter(function($user) { return in_array($user->role, ['admin_desa', 'lurah', 'admin']); })->count() > 0)
+                                @if($desa->users->filter(function($user) { return in_array($user->role, ['admin_desa', 'admin']); })->count() > 0)
                                 <div class="bg-white/40 backdrop-blur-sm border border-gray-100 shadow-sm rounded-xl p-5 hover:shadow-md transition-all animate-section">
                                     <div class="flex justify-between items-start mb-4">
                                         <h3 class="font-bold text-gray-800">{{ $desa->name }}</h3>

@@ -38,7 +38,7 @@ abstract class Controller
                 });
             }
 
-            if (in_array($currentUser->role, ['admin_kecamatan', 'admin_desa', 'lurah', 'admin_rw', 'admin_rt', 'admin', 'super_admin'])) {
+            if (in_array($currentUser->role, ['admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'admin', 'super_admin'])) {
                 $allowedRegionIds = \App\Models\Region::getDescendantIds($regionId);
                 $allowedRegionIds[] = $regionId;
 

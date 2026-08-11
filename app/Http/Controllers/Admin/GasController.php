@@ -11,11 +11,17 @@ use App\Services\ImageCompressorService;
 
 class GasController extends Controller
 {
+    use \App\Traits\ChecksStaffDelegation;
+
     // ===========================
     // INDEX
     // ===========================
     public function index(Request $request)
     {
+        if ($splash = $this->checkDelegation($request, 'gas', 'Penjualan Gas LPG')) {
+            return $splash;
+        }
+
         $search = $request->get('search');
         
         $gases = Gas::query()

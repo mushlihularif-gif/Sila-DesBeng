@@ -245,6 +245,29 @@ Route::post('/gas/payment/{id}/change-method', [App\Http\Controllers\User\GasBoo
     ->name('user.gas.payment.change_method')
     ->middleware('auth');
 
+// === PASAR DAERAH (User) ===
+Route::middleware('auth')->prefix('pasar-daerah')->group(function () {
+    Route::get('/', [App\Http\Controllers\User\PasarDaerahController::class, 'index'])
+        ->name('pasar.index')
+        ->withoutMiddleware('auth')
+        ->middleware(['role:user,guest']);
+    Route::get('/keranjang', [App\Http\Controllers\User\PasarDaerahController::class, 'cart'])->name('pasar.cart');
+    Route::get('/cart/api', [App\Http\Controllers\User\PasarDaerahController::class, 'getCartItemsApi'])->name('pasar.cart.api');
+    Route::post('/cart/add', [App\Http\Controllers\User\PasarDaerahController::class, 'addToCart'])->name('pasar.cart.add');
+    Route::patch('/cart/update', [App\Http\Controllers\User\PasarDaerahController::class, 'updateCart'])->name('pasar.cart.update');
+    Route::delete('/cart/remove/{id}', [App\Http\Controllers\User\PasarDaerahController::class, 'removeFromCart'])->name('pasar.cart.remove');
+    Route::get('/checkout', [App\Http\Controllers\User\PasarDaerahController::class, 'checkout'])->name('pasar.checkout');
+    Route::post('/order', [App\Http\Controllers\User\PasarDaerahController::class, 'placeOrder'])->name('pasar.order.store');
+    Route::get('/payment/{id}', [App\Http\Controllers\User\PasarDaerahController::class, 'payment'])->name('pasar.payment');
+    Route::post('/payment/{id}/simulate', [App\Http\Controllers\User\PasarDaerahController::class, 'simulatePayment'])->name('pasar.payment.simulate');
+    
+    // Taruh parameter di paling bawah supaya route lain tidak ketimpa
+    Route::get('/{id}', [App\Http\Controllers\User\PasarDaerahController::class, 'show'])
+        ->name('pasar.show')
+        ->withoutMiddleware('auth')
+        ->middleware('role:user,guest');
+});
+
 Route::get('/aktivitas', [App\Http\Controllers\User\ActivityController::class, 'index'])
     ->name('user.activity')
     ->middleware('role:user');
@@ -301,6 +324,14 @@ Route::get('/receipt/fasilitas/{id}/download', [App\Http\Controllers\User\Receip
     ->name('receipt.fasilitas.download')
     ->middleware('role:user,admin');
 
+// Bukti Transaksi Pasar Daerah
+Route::get('/receipt/pasar/{id}/view', [App\Http\Controllers\User\ReceiptController::class, 'viewPasarReceipt'])
+    ->name('receipt.pasar.view')
+    ->middleware('role:user,admin');
+Route::get('/receipt/pasar/{id}/download', [App\Http\Controllers\User\ReceiptController::class, 'downloadPasarReceipt'])
+    ->name('receipt.pasar.download')
+    ->middleware('role:user,admin');
+
 
 
 Route::post('/auth/register', [AuthController::class, 'register'])->name('auth.register')->middleware('throttle:5,5');
@@ -308,6 +339,9 @@ Route::get('/auth/otp', [AuthController::class, 'showOtpForm'])->name('auth.otp.
 Route::post('/auth/verify-otp', [AuthController::class, 'verifyOtp'])->name('auth.verify-otp')->middleware('throttle:10,5');
 Route::get('/auth/sandbox-otp-display', [AuthController::class, 'showSandboxOtp'])->name('auth.sandbox.otp');
 Route::post('/auth/resend-otp', [AuthController::class, 'resendOtp'])->name('auth.resend-otp')->middleware('throttle:3,5');
+Route::get('/auth/login', function () {
+    return redirect()->route('beranda')->with('open_login_modal', true);
+})->name('login');
 Route::post('/auth/login', [AuthController::class, 'login'])->name('auth.login');
 Route::post('/auth/logout', [AuthController::class, 'logout'])->name('auth.logout')->middleware('auth');
 
@@ -443,6 +477,10 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
     Route::put('/manajemen-pengguna/{user}/toggle-status', [UserManagementController::class, 'toggleStatus'])->name('admin.manajemen-pengguna.toggle-status');
     Route::put('/manajemen-pengguna/{user}/kick', [UserManagementController::class, 'kick'])->name('admin.manajemen-pengguna.kick');
 
+    // Route untuk Manajemen Staf (RBAC)
+    Route::resource('staff', \App\Http\Controllers\Admin\StaffManagementController::class)->except(['show'])->names('admin.staff');
+    Route::put('staff/{staff}/toggle-status', [\App\Http\Controllers\Admin\StaffManagementController::class, 'toggleStatus'])->name('admin.staff.toggle-status');
+
     // Route untuk Manajemen KYC
     Route::prefix('kyc')->group(function () {
         Route::get('/', [\App\Http\Controllers\Admin\KycReviewController::class, 'index'])->name('admin.kyc.index');
@@ -478,55 +516,63 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
     // Route Unit
     Route::prefix('unit')->group(function () {
         // Penyewaan Alat
-        Route::get('penyewaan/sop', [UnitPenyewaanController::class, 'sop'])->name('admin.unit.penyewaan.sop');
-        Route::post('penyewaan/sop', [UnitPenyewaanController::class, 'updateSop'])->name('admin.unit.penyewaan.sop.update');
-        Route::resource('penyewaan', UnitPenyewaanController::class)->names([
-            'index' => 'admin.unit.penyewaan.index',
-            'create' => 'admin.unit.penyewaan.create',
-            'store' => 'admin.unit.penyewaan.store',
-            'show' => 'admin.unit.penyewaan.show',
-            'edit' => 'admin.unit.penyewaan.edit',
-            'update' => 'admin.unit.penyewaan.update',
-            'destroy' => 'admin.unit.penyewaan.destroy',
-        ]);
+        Route::middleware('staff.permission:sewa_alat')->group(function () {
+            Route::get('penyewaan/sop', [UnitPenyewaanController::class, 'sop'])->name('admin.unit.penyewaan.sop');
+            Route::post('penyewaan/sop', [UnitPenyewaanController::class, 'updateSop'])->name('admin.unit.penyewaan.sop.update');
+            Route::resource('penyewaan', UnitPenyewaanController::class)->names([
+                'index' => 'admin.unit.penyewaan.index',
+                'create' => 'admin.unit.penyewaan.create',
+                'store' => 'admin.unit.penyewaan.store',
+                'show' => 'admin.unit.penyewaan.show',
+                'edit' => 'admin.unit.penyewaan.edit',
+                'update' => 'admin.unit.penyewaan.update',
+                'destroy' => 'admin.unit.penyewaan.destroy',
+            ]);
+        });
 
         // Penyewaan Mobil
-        Route::get('mobil/sop', [\App\Http\Controllers\Admin\UnitPenyewaanMobilController::class, 'sop'])->name('admin.unit.mobil.sop');
-        Route::post('mobil/sop', [\App\Http\Controllers\Admin\UnitPenyewaanMobilController::class, 'updateSop'])->name('admin.unit.mobil.sop.update');
-        Route::resource('mobil', \App\Http\Controllers\Admin\UnitPenyewaanMobilController::class)->names([
-            'index' => 'admin.unit.mobil.index',
-            'create' => 'admin.unit.mobil.create',
-            'store' => 'admin.unit.mobil.store',
-            'show' => 'admin.unit.mobil.show',
-            'edit' => 'admin.unit.mobil.edit',
-            'update' => 'admin.unit.mobil.update',
-            'destroy' => 'admin.unit.mobil.destroy',
-        ]);
+        Route::middleware('staff.permission:sewa_mobil')->group(function () {
+            Route::get('mobil/sop', [\App\Http\Controllers\Admin\UnitPenyewaanMobilController::class, 'sop'])->name('admin.unit.mobil.sop');
+            Route::post('mobil/sop', [\App\Http\Controllers\Admin\UnitPenyewaanMobilController::class, 'updateSop'])->name('admin.unit.mobil.sop.update');
+            Route::resource('mobil', \App\Http\Controllers\Admin\UnitPenyewaanMobilController::class)->names([
+                'index' => 'admin.unit.mobil.index',
+                'create' => 'admin.unit.mobil.create',
+                'store' => 'admin.unit.mobil.store',
+                'show' => 'admin.unit.mobil.show',
+                'edit' => 'admin.unit.mobil.edit',
+                'update' => 'admin.unit.mobil.update',
+                'destroy' => 'admin.unit.mobil.destroy',
+            ]);
+        });
 
         // Penjualan Gas
-        Route::post('gas/crisis-mode', [GasController::class, 'updateCrisisSettings'])->name('admin.unit.penjualan_gas.crisis_mode');
-        Route::resource('gas', GasController::class)->names([
-            'index' => 'admin.unit.penjualan_gas.index',
-            'create' => 'admin.unit.penjualan_gas.create',
-            'store' => 'admin.unit.penjualan_gas.store',
-            'show' => 'admin.unit.penjualan_gas.show',
-            'edit' => 'admin.unit.penjualan_gas.edit',
-            'update' => 'admin.unit.penjualan_gas.update',
-            'destroy' => 'admin.unit.penjualan_gas.destroy',
-        ]);
+        Route::middleware('staff.permission:gas')->group(function () {
+            Route::post('gas/crisis-mode', [GasController::class, 'updateCrisisSettings'])->name('admin.unit.penjualan_gas.crisis_mode');
+            Route::resource('gas', GasController::class)->names([
+                'index' => 'admin.unit.penjualan_gas.index',
+                'create' => 'admin.unit.penjualan_gas.create',
+                'store' => 'admin.unit.penjualan_gas.store',
+                'show' => 'admin.unit.penjualan_gas.show',
+                'edit' => 'admin.unit.penjualan_gas.edit',
+                'update' => 'admin.unit.penjualan_gas.update',
+                'destroy' => 'admin.unit.penjualan_gas.destroy',
+            ]);
+        });
 
         // Fasilitas Umum
-        Route::get('fasilitas_umum/sop', [\App\Http\Controllers\Admin\UnitFasilitasUmumController::class, 'sop'])->name('admin.unit.fasilitas_umum.sop');
-        Route::post('fasilitas_umum/sop', [\App\Http\Controllers\Admin\UnitFasilitasUmumController::class, 'updateSop'])->name('admin.unit.fasilitas_umum.sop.update');
-        Route::resource('fasilitas_umum', \App\Http\Controllers\Admin\UnitFasilitasUmumController::class)->names([
-            'index' => 'admin.unit.fasilitas_umum.index',
-            'create' => 'admin.unit.fasilitas_umum.create',
-            'store' => 'admin.unit.fasilitas_umum.store',
-            'show' => 'admin.unit.fasilitas_umum.show',
-            'edit' => 'admin.unit.fasilitas_umum.edit',
-            'update' => 'admin.unit.fasilitas_umum.update',
-            'destroy' => 'admin.unit.fasilitas_umum.destroy',
-        ]);
+        Route::middleware('staff.permission:fasilitas_umum')->group(function () {
+            Route::get('fasilitas_umum/sop', [\App\Http\Controllers\Admin\UnitFasilitasUmumController::class, 'sop'])->name('admin.unit.fasilitas_umum.sop');
+            Route::post('fasilitas_umum/sop', [\App\Http\Controllers\Admin\UnitFasilitasUmumController::class, 'updateSop'])->name('admin.unit.fasilitas_umum.sop.update');
+            Route::resource('fasilitas_umum', \App\Http\Controllers\Admin\UnitFasilitasUmumController::class)->names([
+                'index' => 'admin.unit.fasilitas_umum.index',
+                'create' => 'admin.unit.fasilitas_umum.create',
+                'store' => 'admin.unit.fasilitas_umum.store',
+                'show' => 'admin.unit.fasilitas_umum.show',
+                'edit' => 'admin.unit.fasilitas_umum.edit',
+                'update' => 'admin.unit.fasilitas_umum.update',
+                'destroy' => 'admin.unit.fasilitas_umum.destroy',
+            ]);
+        });
 
         // Ambulans Darurat
         Route::get('ambulans/sop', [\App\Http\Controllers\Admin\UnitAmbulansController::class, 'sop'])->name('admin.unit.ambulans.sop');
@@ -540,6 +586,24 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
             'update' => 'admin.unit.ambulans.update',
             'destroy' => 'admin.unit.ambulans.destroy',
         ]);
+        
+        // Pasar Daerah
+        Route::middleware('staff.permission:pasar_daerah')->group(function () {
+            Route::post('pasar-daerah/sop', [\App\Http\Controllers\Admin\UnitPasarDaerahController::class, 'updateSop'])->name('admin.unit.pasar_daerah.sop');
+            Route::resource('pasar-daerah', \App\Http\Controllers\Admin\UnitPasarDaerahController::class)->names([
+                'index' => 'admin.unit.pasar_daerah.index',
+                'create' => 'admin.unit.pasar_daerah.create',
+                'store' => 'admin.unit.pasar_daerah.store',
+                'show' => 'admin.unit.pasar_daerah.show',
+                'edit' => 'admin.unit.pasar_daerah.edit',
+                'update' => 'admin.unit.pasar_daerah.update',
+                'destroy' => 'admin.unit.pasar_daerah.destroy',
+            ]);
+            Route::get('pasar-daerah/pesanan/list', [\App\Http\Controllers\Admin\UnitPasarDaerahController::class, 'pesanan'])->name('admin.unit.pasar_daerah.pesanan');
+            Route::get('pasar-daerah/pesanan/{id}', [\App\Http\Controllers\Admin\UnitPasarDaerahController::class, 'pesananShow'])->name('admin.unit.pasar_daerah.pesanan.show');
+            Route::put('pasar-daerah/pesanan/{id}', [\App\Http\Controllers\Admin\UnitPasarDaerahController::class, 'pesananUpdate'])->name('admin.unit.pasar_daerah.pesanan.update');
+            Route::get('pasar-daerah/laporan/transaksi', [\App\Http\Controllers\Admin\UnitPasarDaerahController::class, 'laporan'])->name('admin.unit.pasar_daerah.laporan');
+        });
     });
     
     // Route Aktivitas
@@ -670,20 +734,6 @@ Route::middleware(['auth', 'role:user'])->group(function () {
     });
 });
 
-Route::middleware(['auth', 'role:super_admin,admin_kecamatan,admin_desa,lurah'])->prefix('lurah')->name('lurah.')->group(function () {
-    Route::get('/dashboard', [\App\Http\Controllers\LurahController::class, 'dashboard'])->name('dashboard');
-    Route::prefix('laporan')->name('laporan.')->group(function () {
-        Route::get('/', [\App\Http\Controllers\LurahController::class, 'indexLaporan'])->name('index');
-        Route::get('/export-pdf', [\App\Http\Controllers\LurahController::class, 'exportPdf'])->name('export.dashboard');
-        Route::get('/export/{id}', [\App\Http\Controllers\LurahController::class, 'exportDetailPdf'])->name('export.detail');
-        Route::post('/{id}/status', [\App\Http\Controllers\LurahController::class, 'updateStatus'])->name('updateStatus');
-        Route::get('/{id}', [\App\Http\Controllers\LurahController::class, 'showLaporan'])->name('show');
-    });
-    Route::get('/statistik', [\App\Http\Controllers\LurahController::class, 'statistik'])->name('statistik');
-    Route::get('/settings', [\App\Http\Controllers\LurahController::class, 'settings'])->name('settings');
-    Route::put('/profile/update', [\App\Http\Controllers\LurahController::class, 'updateProfile'])->name('profile.update');
-    Route::put('/profile/password', [\App\Http\Controllers\LurahController::class, 'updatePassword'])->name('profile.password');
-});
 
 // API Routes for Regions
 Route::get('/api/regions', function () {
@@ -826,3 +876,4 @@ Route::post('/chatbot/ask', [\App\Http\Controllers\User\ChatbotController::class
 
 Route::get('/run-mig-now', function() { \Illuminate\Support\Facades\Artisan::call('migrate'); return \Illuminate\Support\Facades\Artisan::output(); });
 Route::get('/run-encrypt', function() { \Illuminate\Support\Facades\Artisan::call('data:encrypt-existing'); return \Illuminate\Support\Facades\Artisan::output(); });
+

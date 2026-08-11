@@ -96,4 +96,11 @@ class MobilBooking extends Model
     {
         return $this->hasOne(TransactionReceipt::class, 'booking_id')->where('booking_type', 'mobil');
     }
+    /**
+     * Ambil admin/staf yang memproses pesanan
+     */
+    public function handler()
+    {
+        return $this->belongsTo(\App\Models\User::class, 'handled_by');
+    }
 }

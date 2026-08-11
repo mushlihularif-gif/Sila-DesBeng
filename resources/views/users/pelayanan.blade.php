@@ -175,6 +175,31 @@
                         </div>
                     </div>
                 </div>
+                {{-- Service 8: Pasar Daerah --}}
+                <div
+                    class="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-md hover:shadow-xl transition-all duration-300 border border-white/50 animate-section">
+                    <div class="flex flex-col md:flex-row gap-8 items-start">
+                        <div class="flex-shrink-0">
+                            <div class="w-32 h-32 flex items-center justify-center">
+                                <img src="{{ asset('Admin/img/pasardaerah/PasarDaerah2.png') }}" alt="Pasar Daerah"
+                                    class="w-full h-full object-contain drop-shadow-md">
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-2xl font-bold text-gray-900 mb-4">Pasar Daerah</h3>
+                            <p class="text-gray-700 leading-relaxed text-justify">
+                                Marketplace khusus warga daerah yang memfasilitasi transaksi jual-beli berbagai produk lokal lintas wilayah (seperti hasil tani, olahan pangan, kerajinan, hingga material bangunan).
+                                Dilengkapi dengan perhitungan ongkos kirim otomatis berdasarkan jarak lokasi serta dukungan multi-pembayaran secara digital dan tunai (COD).
+                            </p>
+                            <div class="mt-6 flex gap-4">
+                                <a href="{{ route('pasar.index') . '?region_id=' . Auth::user()->region_id }}" class="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-[#115789] to-[#60a5fa] hover:from-[#0e4872] hover:to-[#3b82f6] text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 gap-2">
+                                    <i class="fas fa-store"></i>
+                                    Kunjungi Pasar Daerah
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
     </section>
 @endsection

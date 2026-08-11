@@ -13,12 +13,18 @@ use App\Services\ImageCompressorService;
 
 class UnitFasilitasUmumController extends Controller
 {
+    use \App\Traits\ChecksStaffDelegation;
+
     // Default SOP Texts
     private $defaultSopDitanggung = "1. Penyewa wajib menjaga fasilitas umum dengan baik.\n2. Jika terjadi KERUSAKAN fasilitas selama masa peminjaman/penyewaan, maka SEPENUHNYA menjadi tanggung jawab PENGGUNA (penyewa) untuk mengganti rugi atau memperbaiki fasilitas tersebut sesuai dengan kerusakan.\n3. Fasilitas harus dikembalikan dalam keadaan bersih dan rapi.";
     private $defaultSopTidakDitanggung = "1. Penyewa wajib menjaga fasilitas umum dengan baik.\n2. Jika terjadi kerusakan fasilitas selama masa peminjaman/penyewaan yang diakibatkan oleh faktor ketidaksengajaan/bencana, maka TIDAK DITANGGUNG oleh pengguna karena telah didukung oleh dana operasional.\n3. Namun pengguna tetap diwajibkan melaporkan kejadian tersebut secara transparan dan menjaga kebersihan.";
 
     public function index(Request $request)
     {
+        if ($splash = $this->checkDelegation($request, 'fasilitas_umum', 'Fasilitas Umum & Ambulans')) {
+            return $splash;
+        }
+
         $search = $request->get('search');
         $tab = $request->get('tab', 'kendaraan'); // default tab
         

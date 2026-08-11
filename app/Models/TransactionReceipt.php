@@ -47,11 +47,22 @@ class TransactionReceipt extends Model
     }
 
     /**
+     * Get the pasar order (if type is pasar)
+     */
+    public function pasarOrder()
+    {
+        return $this->belongsTo(PasarOrder::class, 'booking_id');
+    }
+
+    /**
      * Generate unique receipt number
      */
     public static function generateReceiptNumber($type)
     {
-        $prefix = $type === 'rental' ? 'RNT' : 'GAS';
+        $prefix = 'GAS';
+        if ($type === 'rental') $prefix = 'RNT';
+        if ($type === 'pasar') $prefix = 'PSR';
+        
         $date = date('Ymd');
         $random = strtoupper(substr(md5(uniqid()), 0, 6));
         

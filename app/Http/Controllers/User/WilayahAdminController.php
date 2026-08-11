@@ -8,8 +8,14 @@ use App\Models\Laporan;
 
 class WilayahAdminController extends Controller
 {
+    use \App\Traits\ChecksStaffDelegation;
+
     public function indexLaporan(Request $request)
     {
+        if ($splash = $this->checkDelegation($request, 'pelaporan', 'Pelaporan Masyarakat')) {
+            return $splash;
+        }
+
         $user = auth()->user();
         
         // Dapatkan Region milik User beserta descendants
@@ -313,9 +319,21 @@ class WilayahAdminController extends Controller
             if ($handler) $handler_name = $handler->name;
         }
 
+        $qrUrl = url('/validasi/laporan/' . $laporan->id . '?token=' . hash_hmac('sha256', $laporan->id . $laporan->created_at, config('app.key')));
+        $qrApiUrl = "https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=" . urlencode($qrUrl);
+        $qrBase64 = '';
+        try {
+            $context = stream_context_create(["ssl" => ["verify_peer" => false, "verify_peer_name" => false]]);
+            $qrData = @file_get_contents($qrApiUrl, false, $context);
+            if ($qrData) {
+                $qrBase64 = 'data:image/png;base64,' . base64_encode($qrData);
+            }
+        } catch (\Exception $e) {}
+
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.bukti_laporan', [
             'laporan' => $laporan,
             'handler_name' => $handler_name,
+            'qr_base64' => $qrBase64,
         ]);
 
         $pdf->setPaper('A4', 'portrait');
