@@ -548,3 +548,16 @@ Dalam SilaDesBeng, satu Admin Operator (Admin Desa) bisa mendelegasikan wewenang
 
 **Kesimpulan untuk KMIPN:**
 *"Sistem ini menggunakan arsitektur keamanan multitenancy berbasis wilayah (region-bound), bukan user-bound. Artinya, pergantian, pemecatan, atau penambahan staf operasional di lapangan tidak akan merusak integritas sejarah data pemerintahan desa tersebut."*
+
+---
+
+#### *** 8.7 KEPUTUSAN KRITIS (PENTING!): EKOSISTEM PASAR DAERAH & STANDAR KODE KMIPN ***
+
+**Aturan Ekosistem Pasar Daerah (BUMDes Sentris):**
+- **Pasar Daerah BUKAN C2C (Masyarakat ke Masyarakat):** Sistem SilaDesBeng menetapkan bahwa produk yang dijual di Pasar Daerah secara eksklusif dikelola dan didaftarkan oleh **Unit Usaha BUMDes**, bukan oleh masyarakat individu secara mandiri.
+- **Alasan Operasional:** Jika masyarakat umum diizinkan menjadi penjual independen (membuat akun seller sendiri), sistem logistik (pengiriman/kurir) tidak akan berjalan karena desa tidak memiliki infrastruktur kurir independen yang mumpuni, serta akan menimbulkan kerumitan administrasi dan kontrol kualitas produk.
+- **Peran BUMDes:** Masyarakat yang memiliki produk karya asli desa (seperti Lempuk, Anyaman) dapat menjual produknya *melalui* BUMDes (BUMDes membeli atau membantu memasarkan). BUMDes bertindak sebagai sentra distributor lokal yang terverifikasi dan mengelola transaksinya.
+
+**Aturan Penamaan Aset & Kode (Standar Kompetisi KMIPN):**
+- **DILARANG Keras Meninggalkan Jejak Template Eksternal:** Karena ini adalah proyek untuk kompetisi tingkat nasional (KMIPN), juri akan menilai orisinalitas, profesionalisme, dan kerapian. Sangat dilarang keras menyimpan, membiarkan, atau membuat penamaan file/variabel/class CSS yang membawa jejak nama *template* luar atau orang lain (misalnya penamaan ulfa-pasar.css).
+- **Standardisasi Penamaan:** Semua *file* tambahan, skrip, dan penulisan *class* HTML harus ditulis ulang menggunakan *naming convention* yang relevan dengan modul aplikasi itu sendiri (misalnya: pasar-daerah.css).

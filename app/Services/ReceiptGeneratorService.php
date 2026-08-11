@@ -852,82 +852,193 @@ class ReceiptGeneratorService
      */
     public function generatePasarReceipt(\App\Models\PasarOrder $order)
     {
-        // Karena user belum membuat background, kita buat blank white background
-        $imageWidth = 1200;
-        $imageHeight = 1600;
-        $image = imagecreatetruecolor($imageWidth, $imageHeight);
+        // Muat template latar belakang
+        $backgroundPath = public_path('User/img/buktipasardaerah/bukti transaksi pasar daerah.png');
+        
+        if (!file_exists($backgroundPath)) {
+            throw new \Exception('Background template not found: ' . $backgroundPath);
+        }
+
+        $temp = imagecreatefrompng($backgroundPath);
+        $image = imagecreatetruecolor(imagesx($temp), imagesy($temp));
+        imagecopy($image, $temp, 0, 0, 0, 0, imagesx($temp), imagesy($temp));
+        imagedestroy($temp);
+        $imageWidth = imagesx($image);
+        $imageHeight = imagesy($image);
         
         // Atur warna
-        $white = imagecolorallocate($image, 255, 255, 255);
         $black = imagecolorallocate($image, 0, 0, 0);
-        $gray = imagecolorallocate($image, 128, 128, 128);
-        
-        // Isi background dengan putih
-        imagefilledrectangle($image, 0, 0, $imageWidth, $imageHeight, $white);
+        $red = imagecolorallocate($image, 255, 0, 0);
+        $green = imagecolorallocate($image, 0, 170, 0);
         
         // Jalur font
         $fontPath = public_path('fonts/arial.ttf');
+        
+        // Ukuran font
         $normalSize = 24;
         $headerSize = 28;
-        $titleSize = 36;
         
-        $y = 100;
-        $this->addText($image, 'BUKTI TRANSAKSI PASAR DAERAH', 130, $y, $titleSize, $black, $fontPath, true);
-        $y += 80;
+        // Tata letak disesuaikan
+        $startY = 400;
+        $lineHeight = 55;
+        $labelX = 130;
+        $valueX = 500;
         
-        $this->addText($image, 'No. Pesanan', 130, $y, $normalSize, $gray, $fontPath);
-        $this->addText($image, ': #' . $order->order_number, 400, $y, $normalSize, $black, $fontPath, true);
-        $y += 50;
+        // No. Pesanan
+        $y = $startY;
+        $this->addText($image, 'No. Pesanan', $labelX, $y, $normalSize, $black, $fontPath, true);
+        $this->addText($image, ': ' . $order->order_number, $valueX, $y, $normalSize, $black, $fontPath);
         
-        $this->addText($image, 'Tanggal', 130, $y, $normalSize, $gray, $fontPath);
-        $this->addText($image, ': ' . $order->created_at->format('d M Y H:i'), 400, $y, $normalSize, $black, $fontPath);
-        $y += 50;
+        // Waktu Pemesanan
+        $y += $lineHeight;
+        $this->addText($image, 'Waktu Pemesanan', $labelX, $y, $normalSize, $black, $fontPath, true);
+        $this->addText($image, ': ' . $order->created_at->locale('id')->isoFormat('dddd, DD MMMM YYYY  HH:mm') . ' WIB', $valueX, $y, $normalSize, $black, $fontPath);
         
-        $this->addText($image, 'Pelanggan', 130, $y, $normalSize, $gray, $fontPath);
-        $this->addText($image, ': ' . ($order->user->name ?? 'Anonim'), 400, $y, $normalSize, $black, $fontPath);
-        $y += 50;
+        // Nama Pemesan
+        $y += $lineHeight;
+        $this->addText($image, 'Nama Akun Pemesan', $labelX, $y, $normalSize, $black, $fontPath, true);
+        $this->addText($image, ': ' . $order->user->name, $valueX, $y, $normalSize, $black, $fontPath);
         
-        $this->addText($image, 'Status', 130, $y, $normalSize, $gray, $fontPath);
-        $this->addText($image, ': ' . strtoupper($order->status), 400, $y, $normalSize, $black, $fontPath, true);
-        $y += 100;
-        
-        // Tabel Produk
-        $this->addText($image, 'DAFTAR PRODUK', 130, $y, $headerSize, $black, $fontPath, true);
-        $y += 30;
+        // NIK (Sensor)
+        $y += $lineHeight;
+        $this->addText($image, 'NIK', $labelX, $y, $normalSize, $black, $fontPath, true);
+        $nik = $order->user->nik ?? '';
+        $censoredNik = '-';
+        if (strlen($nik) >= 8) {
+            $censoredNik = substr($nik, 0, 4) . str_repeat('*', strlen($nik) - 8) . substr($nik, -4);
+        } elseif (strlen($nik) > 0) {
+            $censoredNik = '****';
+        }
+        $this->addText($image, ': ' . $censoredNik, $valueX, $y, $normalSize, $black, $fontPath);
+
+        // Pemisah
+        $y += 60;
         $this->drawLine($image, 130, $y, $imageWidth - 130, $y, $black);
-        $y += 40;
         
+        // Header: Informasi Pengiriman
+        $y += 70;
+        $this->addText($image, 'Informasi Pengiriman', $labelX, $y, $headerSize, $black, $fontPath, true);
+
+        // Nama Penerima
+        $y += 85;
+        $this->addText($image, 'Nama Penerima', $labelX, $y, $normalSize, $black, $fontPath, true);
+        $this->addText($image, ': ' . ($order->recipient_name ?? $order->user->name), $valueX, $y, $normalSize, $black, $fontPath);
+
+        // No HP
+        $y += $lineHeight;
+        $this->addText($image, 'No. Handphone', $labelX, $y, $normalSize, $black, $fontPath, true);
+        $this->addText($image, ': ' . ($order->recipient_phone ?? '-'), $valueX, $y, $normalSize, $black, $fontPath);
+
+        // Alamat Pengiriman
+        $y += $lineHeight;
+        $this->addText($image, 'Alamat', $labelX, $y, $normalSize, $black, $fontPath, true);
+        $this->addText($image, ': ' . ($order->shipping_address ?? '-'), $valueX, $y, $normalSize, $black, $fontPath);
+        
+        // Metode Pengiriman
+        $y += $lineHeight;
+        $this->addText($image, 'Metode Pengiriman', $labelX, $y, $normalSize, $black, $fontPath, true);
+        $shippingMethod = ($order->shipping_method == 'delivery') ? 'Diantar (Kurir)' : (($order->shipping_method == 'pickup') ? 'Ambil Sendiri' : '-');
+        $this->addText($image, ': ' . $shippingMethod, $valueX, $y, $normalSize, $black, $fontPath);
+        
+        // Pemisah
+        $y += 60;
+        $this->drawLine($image, 130, $y, $imageWidth - 130, $y, $black);
+        
+        // Header: Informasi Pembayaran
+        $y += 70;
+        $this->addText($image, 'Informasi Pembayaran', $labelX, $y, $headerSize, $black, $fontPath, true);
+        
+        // Metode Pembayaran
+        $y += 85;
+        $this->addText($image, 'Metode Pembayaran', $labelX, $y, $normalSize, $black, $fontPath, true);
+        // Karena ada perbedaan method payment, bisa fallback manual jika undefined
+        $paymentLabel = method_exists($this, 'getPaymentMethodLabel') ? $this->getPaymentMethodLabel($order->payment_method) : $order->payment_method;
+        $this->addText($image, ': ' . $paymentLabel, $valueX, $y, $normalSize, $black, $fontPath);
+        
+        // Status Pembayaran/Pesanan
+        $y += $lineHeight;
+        $this->addText($image, 'Status Pesanan', $labelX, $y, $normalSize, $black, $fontPath, true);
+        $statusText = strtoupper($order->status);
+        
+        // Tentukan warna status
+        $statusColor = $black;
+        if (in_array($order->status, ['completed', 'approved', 'confirmed', 'paid', 'arrived'])) {
+            $statusColor = $green;
+        } elseif (in_array($order->status, ['cancelled', 'rejected'])) {
+            $statusColor = $red;
+        }
+
+        $this->addText($image, ': ' . $statusText, $valueX, $y, $normalSize, $statusColor, $fontPath, true);
+        
+        // Pemisah
+        $y += 60;
+        $this->drawLine($image, 130, $y, $imageWidth - 130, $y, $black);
+        
+        // Header: Detail Pesanan
+        $y += 70;
+        $this->addText($image, 'Detail Pesanan', $labelX, $y, $headerSize, $black, $fontPath, true);
+        
+        // Header Tabel
+        $y += 85;
+        $col1 = 130;
+        $col2 = 630;
+        $col3 = 780;
+        $col4 = 980;
+        
+        $this->addText($image, 'Nama Produk', $col1, $y, $normalSize, $black, $fontPath, true);
+        $this->addText($image, 'Jumlah', $col2, $y, $normalSize, $black, $fontPath, true);
+        $this->addText($image, 'Harga Satuan', $col3, $y, $normalSize, $black, $fontPath, true);
+        $this->addText($image, 'Total', $col4, $y, $normalSize, $black, $fontPath, true);
+        
+        // Garis di bawah header tabel
+        $y += 15;
+        $this->drawLine($image, 130, $y, $imageWidth - 130, $y, $black);
+        
+        // Data Tabel (Loop item pasar)
+        $y += 60;
         foreach($order->items as $item) {
             $productName = $item->produk->nama_produk ?? $item->product_name;
-            $qty = $item->quantity;
-            $price = 'Rp. ' . number_format($item->price, 0, ',', '.');
-            $sub = 'Rp. ' . number_format($item->subtotal, 0, ',', '.');
+            // Potong nama produk jika terlalu panjang
+            if(strlen($productName) > 30) {
+                $productName = substr($productName, 0, 27) . '...';
+            }
+            $quantity = (string)$item->quantity;
+            $unitPrice = 'Rp. ' . number_format($item->price, 0, ',', '.');
+            $subtotal = 'Rp. ' . number_format($item->subtotal, 0, ',', '.');
             
-            $this->addText($image, $productName, 130, $y, $normalSize, $black, $fontPath);
-            $this->addText($image, $qty . ' x ' . $price, 130, $y + 30, 20, $gray, $fontPath);
-            $this->addText($image, $sub, 900, $y + 15, $normalSize, $black, $fontPath, true);
-            $y += 80;
+            $this->addText($image, $productName, $col1, $y, $normalSize, $black, $fontPath);
+            $this->addText($image, $quantity, $col2, $y, $normalSize, $black, $fontPath);
+            $this->addText($image, $unitPrice, $col3, $y, $normalSize, $black, $fontPath);
+            $this->addText($image, $subtotal, $col4, $y, $normalSize, $black, $fontPath);
+            
+            $y += 50;
         }
         
+        // Pemisah Footer Tabel
+        $y += 10;
         $this->drawLine($image, 530, $y, $imageWidth - 130, $y, $black);
-        $y += 50;
-        $this->addText($image, 'Total Belanja', 530, $y, $normalSize, $black, $fontPath);
-        $this->addText($image, 'Rp. ' . number_format($order->total_price, 0, ',', '.'), 900, $y, $normalSize, $black, $fontPath);
         
-        $y += 50;
-        $this->addText($image, 'Ongkos Kirim', 530, $y, $normalSize, $black, $fontPath);
-        $this->addText($image, 'Rp. ' . number_format($order->shipping_cost, 0, ',', '.'), 900, $y, $normalSize, $black, $fontPath);
-        
+        // Subtotal
         $y += 60;
-        $this->addText($image, 'Grand Total', 530, $y, $headerSize, $black, $fontPath, true);
-        $this->addText($image, 'Rp. ' . number_format($order->grand_total, 0, ',', '.'), 900, $y, $headerSize, $black, $fontPath, true);
+        $this->addText($image, 'Total Harga Produk', 530, $y, $normalSize, $black, $fontPath);
+        $this->addText($image, 'Rp. ' . number_format($order->total_price, 0, ',', '.'), 980, $y, $normalSize, $black, $fontPath);
+        
+        // Ongkos Kirim
+        $y += $lineHeight;
+        $this->addText($image, 'Ongkos Kirim', 530, $y, $normalSize, $black, $fontPath);
+        $this->addText($image, 'Rp. ' . number_format($order->shipping_cost, 0, ',', '.'), 980, $y, $normalSize, $black, $fontPath);
+        
+        // Grand Total
+        $y += $lineHeight;
+        $this->addText($image, 'Total Pembayaran', 530, $y, $headerSize, $black, $fontPath, true);
+        $this->addText($image, 'Rp. ' . number_format($order->grand_total, 0, ',', '.'), 980, $y, $headerSize, $black, $fontPath, true);
         
         // Tanda tangan footer
         $y += 150;
         $location = 'Bengkalis';
         $date = $order->created_at->locale('id')->isoFormat('DD MMMM YYYY');
         $this->addText($image, $location . ', ' . $date, 130, $y, $normalSize, $black, $fontPath, true);
-        $y += 50;
+        $y += $lineHeight;
         $this->addText($image, 'Hormat Kami', 130, $y, $normalSize, $black, $fontPath);
         
         // Tambahkan QR Code Validasi & Branding SiladesBeng

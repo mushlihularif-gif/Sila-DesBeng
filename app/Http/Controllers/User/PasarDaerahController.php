@@ -49,13 +49,14 @@ class PasarDaerahController extends Controller
             $query->where('nama_produk', 'like', '%' . $request->search . '%');
         }
 
-        // Filter produk khusus dari desa pengguna yang login (Pasar Desa Hiper-Lokal)
-        if (Auth::check() && Auth::user()->region_id) {
-            $query->where('region_id', Auth::user()->region_id);
+        // Filter produk (Publik, bisa dilihat siapa saja)
+        if ($request->filled('region_id') && $request->region_id !== 'all') {
+            $query->where('region_id', $request->region_id);
         } else {
-            // Jika belum login atau tidak punya desa (Guest), kosongkan hasil pencarian
-            $query->where('id', -1);
+            // Default: Prioritaskan produk dari desa pengguna (jika login), jika tidak, tampilkan semua
+            // atau jika public, biarkan kosong agar menampilkan semua.
         }
+
         if ($request->filled('sort')) {
             if ($request->sort == 'termurah') {
                 $query->orderBy('harga', 'asc');
@@ -94,6 +95,44 @@ class PasarDaerahController extends Controller
     /**
      * Lihat Keranjang
      */
+    public function getCartItemsApi()
+    {
+        $user_id = Auth::id();
+        $user_village_id = Auth::user()->village_id;
+
+        $cartItems = PasarCart::where('user_id', $user_id)
+            ->with(['produk' => function ($query) {
+                $query->select('id', 'nama_produk', 'harga', 'foto', 'stok');
+            }])
+            ->whereHas('produk', function ($query) use ($user_village_id) {
+                $query->where('village_id', $user_village_id);
+            })
+            ->get();
+
+        $subtotal = $cartItems->sum(function ($item) {
+            return $item->produk->harga * $item->quantity;
+        });
+
+        $itemsFormatted = $cartItems->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'pasar_produk_id' => $item->pasar_produk_id,
+                'quantity' => $item->quantity,
+                'nama_produk' => $item->produk->nama_produk,
+                'harga' => $item->produk->harga,
+                'foto_url' => $item->produk->foto ? \Illuminate\Support\Facades\Storage::url($item->produk->foto) : null,
+                'stok' => $item->produk->stok
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'items' => $itemsFormatted,
+            'subtotal' => $subtotal,
+            'total_items' => $cartItems->sum('quantity')
+        ]);
+    }
+
     public function cart()
     {
         // Hanya tampilkan keranjang yang produknya berasal dari desa pengguna

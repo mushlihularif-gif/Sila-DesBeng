@@ -252,6 +252,7 @@ Route::middleware('auth')->prefix('pasar-daerah')->group(function () {
         ->withoutMiddleware('auth')
         ->middleware(['role:user,guest']);
     Route::get('/keranjang', [App\Http\Controllers\User\PasarDaerahController::class, 'cart'])->name('pasar.cart');
+    Route::get('/cart/api', [App\Http\Controllers\User\PasarDaerahController::class, 'getCartItemsApi'])->name('pasar.cart.api');
     Route::post('/cart/add', [App\Http\Controllers\User\PasarDaerahController::class, 'addToCart'])->name('pasar.cart.add');
     Route::patch('/cart/update', [App\Http\Controllers\User\PasarDaerahController::class, 'updateCart'])->name('pasar.cart.update');
     Route::delete('/cart/remove/{id}', [App\Http\Controllers\User\PasarDaerahController::class, 'removeFromCart'])->name('pasar.cart.remove');
