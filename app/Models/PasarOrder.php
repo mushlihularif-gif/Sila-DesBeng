@@ -110,4 +110,11 @@ class PasarOrder extends Model
             default => 'secondary',
         };
     }
+    /**
+     * Ambil admin/staf yang memproses pesanan
+     */
+    public function handler()
+    {
+        return $this->belongsTo(\App\Models\User::class, 'handled_by');
+    }
 }

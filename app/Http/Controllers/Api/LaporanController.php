@@ -149,7 +149,7 @@ class LaporanController extends Controller
 
             // STEP 3: Fallback ke Admin Desa
             if ($targetAdmins->isEmpty()) {
-                $targetAdmins = User::whereIn('role', ['admin', 'super_admin', 'admin_desa', 'lurah'])
+                $targetAdmins = User::whereIn('role', ['admin', 'super_admin', 'admin_desa'])
                     ->whereIn('region_id', $regionIds)
                     ->get();
                 $actualDestination = 'desa';

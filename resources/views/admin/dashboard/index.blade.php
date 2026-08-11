@@ -48,7 +48,7 @@
                                     @endphp
                                     <h5 class="card-title text-primary fw-bold mb-3">{{ $greeting }}, {{ explode(' ', Auth::user()->name ?? 'Administrator')[0] }} {!! $icon !!}</h5>
                                     <p class="mb-2 text-muted">Sistem Pelayanan Terpadu berbasis Digital <br><span class="fw-bold text-dark">{{ $regionName }}</span></p>
-                                    @if(in_array(auth()->user()->role, ['admin_desa', 'lurah']))
+                                    @if(in_array(auth()->user()->role, ['admin_desa']))
                                     <a href="{{ route('admin.siladesbeng.bumdes.index') }}" class="btn btn-sm btn-outline-primary">Profil Pemerintah Desa</a>
                                     @endif
                                 </div>
@@ -247,7 +247,7 @@
                             'title' => 'Pelaporan Warga',
                             'count' => $laporanPendingCount,
                             'label' => 'Pending',
-                            'route' => route('lurah.laporan.index'),
+                            'route' => route('admin.laporan.index'),
                             'image' => asset('User/img/elemen/lapor.png'),
                             'color' => 'primary'
                         ],
@@ -263,7 +263,7 @@
 
                     $activeServicesList = isset($activeServices) ? $activeServices : [];
                 @endphp
-            @if(in_array(auth()->user()->role, ['admin_desa', 'admin_rt', 'admin_rw', 'lurah']))
+            @if(in_array(auth()->user()->role, ['admin_desa', 'admin_rt', 'admin_rw']))
             <div class="row mb-4">
                 @foreach($activeServicesList as $serviceName)
                     @if(isset($unitConfigs[$serviceName]))
@@ -685,7 +685,7 @@
                 </div>
 
                 <!-- Produk Populer -->
-                @if(in_array(auth()->user()->role, ['admin_desa', 'admin_rt', 'admin_rw', 'lurah']))
+                @if(in_array(auth()->user()->role, ['admin_desa', 'admin_rt', 'admin_rw']))
                 <div class="row mb-4">
                     <div class="col-12">
                         <div class="card shadow-sm">

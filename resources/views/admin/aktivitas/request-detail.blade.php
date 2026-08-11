@@ -62,9 +62,16 @@
                                 <h5 class="mb-0 fw-bold text-dark">
                                     <i class="bx bx-package me-2 text-primary"></i>Informasi Pesanan
                                 </h5>
-                                <span class="badge bg-light text-dark border rounded-pill px-3">
-                                    {{ $request->order_number }}
-                                </span>
+                                <div>
+                                    <span class="badge bg-light text-dark border rounded-pill px-3 me-2">
+                                        {{ $request->order_number }}
+                                    </span>
+                                    @if($request->handled_by && $request->handler)
+                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3" data-bs-toggle="tooltip" title="Ditangani Oleh">
+                                            <i class="bx bx-user-check me-1"></i> {{ $request->handler->name }}
+                                        </span>
+                                    @endif
+                                </div>
                             </div>
                         </div>
                         <div class="card-body p-4">

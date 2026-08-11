@@ -20,7 +20,10 @@ class ReceiptGeneratorService
             throw new \Exception('Background template not found: ' . $backgroundPath);
         }
 
-        $image = imagecreatefrompng($backgroundPath);
+        $temp = imagecreatefrompng($backgroundPath);
+        $image = imagecreatetruecolor(imagesx($temp), imagesy($temp));
+        imagecopy($image, $temp, 0, 0, 0, 0, imagesx($temp), imagesy($temp));
+        imagedestroy($temp);
         $imageWidth = imagesx($image);
         $imageHeight = imagesy($image);
         
@@ -225,7 +228,10 @@ class ReceiptGeneratorService
             throw new \Exception('Background template not found: ' . $backgroundPath);
         }
 
-        $image = imagecreatefrompng($backgroundPath);
+        $temp = imagecreatefrompng($backgroundPath);
+        $image = imagecreatetruecolor(imagesx($temp), imagesy($temp));
+        imagecopy($image, $temp, 0, 0, 0, 0, imagesx($temp), imagesy($temp));
+        imagedestroy($temp);
         $imageWidth = imagesx($image);
         $imageHeight = imagesy($image);
         
@@ -422,7 +428,10 @@ class ReceiptGeneratorService
             throw new \Exception('Background template not found: ' . $backgroundPath);
         }
 
-        $image = imagecreatefrompng($backgroundPath);
+        $temp = imagecreatefrompng($backgroundPath);
+        $image = imagecreatetruecolor(imagesx($temp), imagesy($temp));
+        imagecopy($image, $temp, 0, 0, 0, 0, imagesx($temp), imagesy($temp));
+        imagedestroy($temp);
         $imageWidth = imagesx($image);
         $imageHeight = imagesy($image);
         
@@ -601,7 +610,10 @@ class ReceiptGeneratorService
             throw new \Exception('Background template not found: ' . $backgroundPath);
         }
 
-        $image = imagecreatefrompng($backgroundPath);
+        $temp = imagecreatefrompng($backgroundPath);
+        $image = imagecreatetruecolor(imagesx($temp), imagesy($temp));
+        imagecopy($image, $temp, 0, 0, 0, 0, imagesx($temp), imagesy($temp));
+        imagedestroy($temp);
         $imageWidth = imagesx($image);
         $imageHeight = imagesy($image);
         
@@ -834,6 +846,113 @@ class ReceiptGeneratorService
     /**
      * Helper untuk menambahkan QR Code & Teks Branding di Footer
      */
+
+    /**
+     * Buat bukti transaksi untuk pesanan pasar daerah
+     */
+    public function generatePasarReceipt(\App\Models\PasarOrder $order)
+    {
+        // Karena user belum membuat background, kita buat blank white background
+        $imageWidth = 1200;
+        $imageHeight = 1600;
+        $image = imagecreatetruecolor($imageWidth, $imageHeight);
+        
+        // Atur warna
+        $white = imagecolorallocate($image, 255, 255, 255);
+        $black = imagecolorallocate($image, 0, 0, 0);
+        $gray = imagecolorallocate($image, 128, 128, 128);
+        
+        // Isi background dengan putih
+        imagefilledrectangle($image, 0, 0, $imageWidth, $imageHeight, $white);
+        
+        // Jalur font
+        $fontPath = public_path('fonts/arial.ttf');
+        $normalSize = 24;
+        $headerSize = 28;
+        $titleSize = 36;
+        
+        $y = 100;
+        $this->addText($image, 'BUKTI TRANSAKSI PASAR DAERAH', 130, $y, $titleSize, $black, $fontPath, true);
+        $y += 80;
+        
+        $this->addText($image, 'No. Pesanan', 130, $y, $normalSize, $gray, $fontPath);
+        $this->addText($image, ': #' . $order->order_number, 400, $y, $normalSize, $black, $fontPath, true);
+        $y += 50;
+        
+        $this->addText($image, 'Tanggal', 130, $y, $normalSize, $gray, $fontPath);
+        $this->addText($image, ': ' . $order->created_at->format('d M Y H:i'), 400, $y, $normalSize, $black, $fontPath);
+        $y += 50;
+        
+        $this->addText($image, 'Pelanggan', 130, $y, $normalSize, $gray, $fontPath);
+        $this->addText($image, ': ' . ($order->user->name ?? 'Anonim'), 400, $y, $normalSize, $black, $fontPath);
+        $y += 50;
+        
+        $this->addText($image, 'Status', 130, $y, $normalSize, $gray, $fontPath);
+        $this->addText($image, ': ' . strtoupper($order->status), 400, $y, $normalSize, $black, $fontPath, true);
+        $y += 100;
+        
+        // Tabel Produk
+        $this->addText($image, 'DAFTAR PRODUK', 130, $y, $headerSize, $black, $fontPath, true);
+        $y += 30;
+        $this->drawLine($image, 130, $y, $imageWidth - 130, $y, $black);
+        $y += 40;
+        
+        foreach($order->items as $item) {
+            $productName = $item->produk->nama_produk ?? $item->product_name;
+            $qty = $item->quantity;
+            $price = 'Rp. ' . number_format($item->price, 0, ',', '.');
+            $sub = 'Rp. ' . number_format($item->subtotal, 0, ',', '.');
+            
+            $this->addText($image, $productName, 130, $y, $normalSize, $black, $fontPath);
+            $this->addText($image, $qty . ' x ' . $price, 130, $y + 30, 20, $gray, $fontPath);
+            $this->addText($image, $sub, 900, $y + 15, $normalSize, $black, $fontPath, true);
+            $y += 80;
+        }
+        
+        $this->drawLine($image, 530, $y, $imageWidth - 130, $y, $black);
+        $y += 50;
+        $this->addText($image, 'Total Belanja', 530, $y, $normalSize, $black, $fontPath);
+        $this->addText($image, 'Rp. ' . number_format($order->total_price, 0, ',', '.'), 900, $y, $normalSize, $black, $fontPath);
+        
+        $y += 50;
+        $this->addText($image, 'Ongkos Kirim', 530, $y, $normalSize, $black, $fontPath);
+        $this->addText($image, 'Rp. ' . number_format($order->shipping_cost, 0, ',', '.'), 900, $y, $normalSize, $black, $fontPath);
+        
+        $y += 60;
+        $this->addText($image, 'Grand Total', 530, $y, $headerSize, $black, $fontPath, true);
+        $this->addText($image, 'Rp. ' . number_format($order->grand_total, 0, ',', '.'), 900, $y, $headerSize, $black, $fontPath, true);
+        
+        // Tanda tangan footer
+        $y += 150;
+        $location = 'Bengkalis';
+        $date = $order->created_at->locale('id')->isoFormat('DD MMMM YYYY');
+        $this->addText($image, $location . ', ' . $date, 130, $y, $normalSize, $black, $fontPath, true);
+        $y += 50;
+        $this->addText($image, 'Hormat Kami', 130, $y, $normalSize, $black, $fontPath);
+        
+        // Tambahkan QR Code Validasi & Branding SiladesBeng
+        $token = hash_hmac('sha256', $order->id . $order->order_number, config('app.key'));
+        $qrUrl = url("/validasi/transaksi/pasar-daerah/{$order->id}?token={$token}");
+        $this->addFooterTtd($image, $y, $qrUrl, $fontPath, $normalSize, $black);
+        
+        $filename = 'receipt_pasar_' . $order->order_number . '_' . time() . '.png';
+        $path = 'receipts/pasar/' . $filename;
+        
+        $fullPath = storage_path('app/public/' . dirname($path));
+        if (!file_exists($fullPath)) {
+            mkdir($fullPath, 0755, true);
+        }
+        
+        ob_start();
+        imagepng($image);
+        $imageData = ob_get_clean();
+        \Illuminate\Support\Facades\Storage::disk('public')->put($path, $imageData);
+        imagedestroy($image);
+        
+        return $path;
+    }
+
+
     protected function addFooterTtd($image, $y, $url, $fontPath, $normalSize, $black)
     {
         $imageWidth = imagesx($image);
@@ -902,3 +1021,5 @@ class ReceiptGeneratorService
         $this->addText($image, 'Platform E-Government Kab. Bengkalis', $descX, $yBranding + 35, $normalSize - 4, $black, $fontPath);
     }
 }
+
+

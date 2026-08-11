@@ -22,7 +22,13 @@ class TransactionController extends Controller
         $search = $request->get('search');
 
         // Build queries
-        // Build queries
+        $user = auth()->user();
+        $isStaff = $user->isStaff();
+        
+        $canViewRental = !$isStaff || $user->hasUnitPermission('sewa_alat');
+        $canViewGas = !$isStaff || $user->hasUnitPermission('gas');
+        $canViewMobil = !$isStaff || $user->hasUnitPermission('sewa_mobil');
+        $canViewFasilitas = !$isStaff || $user->hasUnitPermission('fasilitas_umum');
         // Include transactions with proof OR system generated (active/completed statuses)
         $activeStatuses = ['confirmed', 'approved', 'being_prepared', 'in_delivery', 'arrived', 'completed', 'returned'];
         
@@ -44,6 +50,12 @@ class TransactionController extends Controller
         $fasilitasQuery = $this->applyRegionFilter(FasilitasUmumBooking::withTrashed(), 'fasilitas', true)->with(['user', 'fasilitas'])->where(function($q) use ($activeStatuses) {
             $q->whereIn('status', $activeStatuses);
         });
+
+        // Apply staff permission filters
+        if (!$canViewRental) $rentalQuery->whereRaw('1 = 0');
+        if (!$canViewGas) $gasQuery->whereRaw('1 = 0');
+        if (!$canViewMobil) $mobilQuery->whereRaw('1 = 0');
+        if (!$canViewFasilitas) $fasilitasQuery->whereRaw('1 = 0');
 
         // Filter by search
         if ($search) {

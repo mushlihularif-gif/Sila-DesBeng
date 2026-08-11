@@ -32,6 +32,14 @@ class ReportController extends Controller
         // Query Fasilitas Umum
         $fasilitasQuery = $this->applyRegionFilter(\App\Models\FasilitasUmumBooking::withTrashed(), 'fasilitas', true)->with(['user', 'fasilitas'])->orderByDesc('created_at');
 
+        $user = auth()->user();
+        if ($user->isStaff()) {
+            if (!$user->hasUnitPermission('sewa_alat')) $rentalQuery->whereRaw('1 = 0');
+            if (!$user->hasUnitPermission('gas')) $gasQuery->whereRaw('1 = 0');
+            if (!$user->hasUnitPermission('sewa_mobil')) $mobilQuery->whereRaw('1 = 0');
+            if (!$user->hasUnitPermission('fasilitas_umum')) $fasilitasQuery->whereRaw('1 = 0');
+        }
+
         // Terapkan Filter
         if ($status && $status !== 'all') {
             $rentalQuery->where('status', $status);
@@ -100,19 +108,25 @@ class ReportController extends Controller
         $availableYears = array_values($allYears);
         rsort($availableYears);
 
+        $user = auth()->user();
+        $isStaff = $user->isStaff();
+        $canViewRental = !$isStaff || $user->hasUnitPermission('sewa_alat');
+        $canViewGas = !$isStaff || $user->hasUnitPermission('gas');
+        $canViewMobil = !$isStaff || $user->hasUnitPermission('sewa_mobil');
+
         // Hitung total pendapatan per unit dari sistem (Filter Tahunan)
-        $totalPenyewaan = $this->applyRegionFilter(RentalBooking::withTrashed(), 'barang', true)->whereYear('created_at', $year)
+        $totalPenyewaan = $canViewRental ? $this->applyRegionFilter(RentalBooking::withTrashed(), 'barang', true)->whereYear('created_at', $year)
             ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-            ->sum('total_amount');
+            ->sum('total_amount') : 0;
             
-        $totalGas = $this->applyRegionFilter(GasOrder::withTrashed(), 'gas', true)->whereYear('created_at', $year)
+        $totalGas = $canViewGas ? $this->applyRegionFilter(GasOrder::withTrashed(), 'gas', true)->whereYear('created_at', $year)
             ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
             ->selectRaw('SUM(price * quantity) as total')
-            ->value('total') ?? 0;
+            ->value('total') ?? 0 : 0;
             
-        $totalMobil = $this->applyRegionFilter(\App\Models\MobilBooking::withTrashed(), 'mobil', true)->whereYear('created_at', $year)
+        $totalMobil = $canViewMobil ? $this->applyRegionFilter(\App\Models\MobilBooking::withTrashed(), 'mobil', true)->whereYear('created_at', $year)
             ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-            ->sum('total_amount');
+            ->sum('total_amount') : 0;
         
         // Hitung total dari laporan manual (Filter Tahunan)
         $manualPenyewaan = $this->applyRegionFilter(ManualReport::query(), 'creator', true)->whereYear('transaction_date', $year)
@@ -137,33 +151,33 @@ class ReportController extends Controller
         $monthlyIncome = array_fill_keys($months, 0);
 
         // Pendapatan dari sistem (RentalBooking)
-        $rentalMonthly = $this->applyRegionFilter(RentalBooking::withTrashed(), 'barang', true)->selectRaw('SUM(total_amount) as total, MONTH(created_at) as month')
+        $rentalMonthly = $canViewRental ? $this->applyRegionFilter(RentalBooking::withTrashed(), 'barang', true)->selectRaw('SUM(total_amount) as total, MONTH(created_at) as month')
             ->whereYear('created_at', $year)
             ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
             ->groupBy('month')
-            ->pluck('total', 'month');
+            ->pluck('total', 'month') : collect();
 
         foreach ($rentalMonthly as $month => $amount) {
             $monthlyIncome[self::getMonthName($month)] += $amount;
         }
 
         // Pendapatan dari sistem (GasOrder)
-        $gasMonthly = $this->applyRegionFilter(GasOrder::withTrashed(), 'gas', true)->selectRaw('SUM(price * quantity) as total, MONTH(created_at) as month')
+        $gasMonthly = $canViewGas ? $this->applyRegionFilter(GasOrder::withTrashed(), 'gas', true)->selectRaw('SUM(price * quantity) as total, MONTH(created_at) as month')
             ->whereYear('created_at', $year)
             ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
             ->groupBy('month')
-            ->pluck('total', 'month');
+            ->pluck('total', 'month') : collect();
 
         foreach ($gasMonthly as $month => $amount) {
             $monthlyIncome[self::getMonthName($month)] += $amount;
         }
 
         // Pendapatan dari sistem (MobilBooking)
-        $mobilMonthly = $this->applyRegionFilter(\App\Models\MobilBooking::withTrashed(), 'mobil', true)->selectRaw('SUM(total_amount) as total, MONTH(created_at) as month')
+        $mobilMonthly = $canViewMobil ? $this->applyRegionFilter(\App\Models\MobilBooking::withTrashed(), 'mobil', true)->selectRaw('SUM(total_amount) as total, MONTH(created_at) as month')
             ->whereYear('created_at', $year)
             ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
             ->groupBy('month')
-            ->pluck('total', 'month');
+            ->pluck('total', 'month') : collect();
 
         foreach ($mobilMonthly as $month => $amount) {
             $monthlyIncome[self::getMonthName($month)] += $amount;
@@ -186,8 +200,8 @@ class ReportController extends Controller
         }
 
         // Ambil data untuk detail per unit (Difilter Berdasarkan Tahun)
-        $rentalRequests = $this->applyRegionFilter(RentalBooking::withTrashed(), 'barang', true)->whereYear('created_at', $year)->get(); // For count & stats
-        $gasOrders = $this->applyRegionFilter(GasOrder::withTrashed(), 'gas', true)->whereYear('created_at', $year)->get();
+        $rentalRequests = $canViewRental ? $this->applyRegionFilter(RentalBooking::withTrashed(), 'barang', true)->whereYear('created_at', $year)->get() : collect();
+        $gasOrders = $canViewGas ? $this->applyRegionFilter(GasOrder::withTrashed(), 'gas', true)->whereYear('created_at', $year)->get() : collect();
         
         // Ambil laporan manual (Difilter Berdasarkan Tahun)
         $manualReports = $this->applyRegionFilter(ManualReport::with('creator'), 'creator', true)
@@ -196,17 +210,17 @@ class ReportController extends Controller
             ->get();
 
         // Hitung total transaksi untuk Donut Chart (Filter Tahunan)
-        $rentalCount = RentalBooking::withTrashed()->whereYear('created_at', $year)
+        $rentalCount = $canViewRental ? RentalBooking::withTrashed()->whereYear('created_at', $year)
             ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-            ->count();
+            ->count() : 0;
             
-        $gasCount = GasOrder::withTrashed()->whereYear('created_at', $year)
+        $gasCount = $canViewGas ? GasOrder::withTrashed()->whereYear('created_at', $year)
             ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-            ->count();
+            ->count() : 0;
             
-        $mobilCount = \App\Models\MobilBooking::withTrashed()->whereYear('created_at', $year)
+        $mobilCount = $canViewMobil ? \App\Models\MobilBooking::withTrashed()->whereYear('created_at', $year)
             ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-            ->count();
+            ->count() : 0;
             
         // Ambil Data Tahun Saat Ini (Yearly Total)
         $currentYearData = [
@@ -219,17 +233,17 @@ class ReportController extends Controller
         // Ambil Data Tahun Sebelumnya
         $prevYear = $year - 1;
         
-        $prevTotalPenyewaan = RentalBooking::withTrashed()->whereYear('created_at', $prevYear)
+        $prevTotalPenyewaan = $canViewRental ? RentalBooking::withTrashed()->whereYear('created_at', $prevYear)
             ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-            ->sum('total_amount');
+            ->sum('total_amount') : 0;
             
-        $prevTotalGas = GasOrder::withTrashed()->whereYear('created_at', $prevYear)
+        $prevTotalGas = $canViewGas ? GasOrder::withTrashed()->whereYear('created_at', $prevYear)
             ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-            ->sum(\DB::raw('price * quantity'));
+            ->sum(\DB::raw('price * quantity')) : 0;
             
-        $prevTotalMobil = \App\Models\MobilBooking::withTrashed()->whereYear('created_at', $prevYear)
+        $prevTotalMobil = $canViewMobil ? \App\Models\MobilBooking::withTrashed()->whereYear('created_at', $prevYear)
             ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-            ->sum('total_amount');
+            ->sum('total_amount') : 0;
             
         $prevManualRevenue = ManualReport::whereYear('transaction_date', $prevYear)
             ->sum(\DB::raw('amount * quantity'));
@@ -310,6 +324,15 @@ class ReportController extends Controller
         $baseMobil = $this->applyRegionFilter(\App\Models\MobilBooking::withTrashed(), 'mobil', false);
         $baseFasilitas = $this->applyRegionFilter(\App\Models\FasilitasUmumBooking::withTrashed(), 'fasilitas', false);
         $baseLaporan = $this->applyRegionFilter(\App\Models\Laporan::query(), 'user', false);
+
+        $user = auth()->user();
+        if ($user->isStaff()) {
+            if (!$user->hasUnitPermission('sewa_alat')) $baseRental->whereRaw('1 = 0');
+            if (!$user->hasUnitPermission('gas')) $baseGas->whereRaw('1 = 0');
+            if (!$user->hasUnitPermission('sewa_mobil')) $baseMobil->whereRaw('1 = 0');
+            if (!$user->hasUnitPermission('fasilitas_umum')) $baseFasilitas->whereRaw('1 = 0');
+            if (!$user->hasUnitPermission('pelaporan_warga')) $baseLaporan->whereRaw('1 = 0');
+        }
 
         // Terapkan filter dropdown Kecamatan/Desa jika ada
         if ($selectedDesaId && $selectedDesaId !== 'all') {
@@ -417,24 +440,30 @@ class ReportController extends Controller
         $gasData = [];
         $mobilData = [];
         
+        $user = auth()->user();
+        $isStaff = $user->isStaff();
+        $canViewRental = !$isStaff || $user->hasUnitPermission('sewa_alat');
+        $canViewGas = !$isStaff || $user->hasUnitPermission('gas');
+        $canViewMobil = !$isStaff || $user->hasUnitPermission('sewa_mobil');
+        
         for ($month = 1; $month <= 12; $month++) {
             // Hitung pesanan penyewaan
-            $rentalCount = $this->applyRegionFilter(RentalBooking::withTrashed(), 'barang', true)->whereYear('created_at', $year)
+            $rentalCount = $canViewRental ? $this->applyRegionFilter(RentalBooking::withTrashed(), 'barang', true)->whereYear('created_at', $year)
                 ->whereMonth('created_at', $month)
                 ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-                ->count();
+                ->count() : 0;
             
             // Hitung pesanan gas
-            $gasCount = $this->applyRegionFilter(GasOrder::withTrashed(), 'gas', true)->whereYear('created_at', $year)
+            $gasCount = $canViewGas ? $this->applyRegionFilter(GasOrder::withTrashed(), 'gas', true)->whereYear('created_at', $year)
                 ->whereMonth('created_at', $month)
                 ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-                ->count();
+                ->count() : 0;
                 
             // Hitung pesanan mobil
-            $mobilCount = $this->applyRegionFilter(\App\Models\MobilBooking::withTrashed(), 'mobil', true)->whereYear('created_at', $year)
+            $mobilCount = $canViewMobil ? $this->applyRegionFilter(\App\Models\MobilBooking::withTrashed(), 'mobil', true)->whereYear('created_at', $year)
                 ->whereMonth('created_at', $month)
                 ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-                ->count();
+                ->count() : 0;
             
             $rentalData[] = $rentalCount;
             $gasData[] = $gasCount;
@@ -454,38 +483,44 @@ class ReportController extends Controller
      */
     private function getTotalPendapatanData($month, $year)
     {   
+        $user = auth()->user();
+        $isStaff = $user->isStaff();
+        $canViewRental = !$isStaff || $user->hasUnitPermission('sewa_alat');
+        $canViewGas = !$isStaff || $user->hasUnitPermission('gas');
+        $canViewMobil = !$isStaff || $user->hasUnitPermission('sewa_mobil');
+
         // Pendapatan Penyewaan Alat
-        $rentalRevenue = RentalBooking::withTrashed()->whereYear('created_at', $year)
+        $rentalRevenue = $canViewRental ? RentalBooking::withTrashed()->whereYear('created_at', $year)
             ->whereMonth('created_at', $month)
             ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-            ->sum('total_amount');
+            ->sum('total_amount') : 0;
         
-        $rentalTransactions = RentalBooking::withTrashed()->whereYear('created_at', $year)
+        $rentalTransactions = $canViewRental ? RentalBooking::withTrashed()->whereYear('created_at', $year)
             ->whereMonth('created_at', $month)
             ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-            ->count();
+            ->count() : 0;
         
         // Pendapatan Penjualan Gas
-        $gasRevenue = GasOrder::withTrashed()->whereYear('created_at', $year)
+        $gasRevenue = $canViewGas ? GasOrder::withTrashed()->whereYear('created_at', $year)
             ->whereMonth('created_at', $month)
             ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-            ->sum(\DB::raw('price * quantity'));
+            ->sum(\DB::raw('price * quantity')) : 0;
         
-        $gasTransactions = GasOrder::withTrashed()->whereYear('created_at', $year)
+        $gasTransactions = $canViewGas ? GasOrder::withTrashed()->whereYear('created_at', $year)
             ->whereMonth('created_at', $month)
             ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-            ->count();
+            ->count() : 0;
             
         // Pendapatan Sewa Mobil
-        $mobilRevenue = \App\Models\MobilBooking::withTrashed()->whereYear('created_at', $year)
+        $mobilRevenue = $canViewMobil ? \App\Models\MobilBooking::withTrashed()->whereYear('created_at', $year)
             ->whereMonth('created_at', $month)
             ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-            ->sum('total_amount');
+            ->sum('total_amount') : 0;
         
-        $mobilTransactions = \App\Models\MobilBooking::withTrashed()->whereYear('created_at', $year)
+        $mobilTransactions = $canViewMobil ? \App\Models\MobilBooking::withTrashed()->whereYear('created_at', $year)
             ->whereMonth('created_at', $month)
             ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-            ->count();
+            ->count() : 0;
 
         // Pendapatan Laporan Manual
         $manualRevenue = ManualReport::whereYear('transaction_date', $year)

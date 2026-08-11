@@ -174,7 +174,38 @@ class User extends Authenticatable
 
     public function isAdmin()
     {
-        return in_array($this->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin', 'lurah', 'admin_rw', 'admin_rt']);
+        return in_array($this->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin', 'admin_rw', 'admin_rt', 'staff']);
+    }
+
+    public function isStaff()
+    {
+        return $this->role === 'staff';
+    }
+
+    public function isSuperAdmin()
+    {
+        return in_array($this->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin']);
+    }
+
+    public function staffPermissions()
+    {
+        return $this->hasMany(StaffPermission::class, 'user_id');
+    }
+
+    public function hasUnitPermission($unitKey)
+    {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+        return $this->staffPermissions()->where('unit_key', $unitKey)->exists();
+    }
+
+    public function getUnitPermissions()
+    {
+        if ($this->isSuperAdmin()) {
+            return collect(['gas', 'sewa_alat', 'sewa_mobil', 'fasilitas_umum', 'pasar_daerah', 'kabar_informasi', 'pelaporan_warga']);
+        }
+        return $this->staffPermissions()->pluck('unit_key');
     }
 
     public function region()

@@ -300,8 +300,6 @@ class AuthController extends Controller
             $adminRoles = ['admin', 'super_admin', 'admin_kecamatan', 'admin_desa'];
             if (in_array($user->role, $adminRoles)) {
                 $redirectUrl = route('admin.dashboard');
-            } elseif ($user->role === 'lurah') {
-                $redirectUrl = route('lurah.dashboard');
             } else {
                 $redirectUrl = route('beranda');
             }

@@ -12,6 +12,8 @@ use App\Services\ImageCompressorService;
 
 class UnitPenyewaanController extends Controller
 {
+    use \App\Traits\ChecksStaffDelegation;
+
     // Default SOP Texts
     private $defaultSopDitanggung = "1. Penyewa wajib menjaga barang sewaan dengan baik.\n2. Jika terjadi KERUSAKAN atau KEHILANGAN barang selama masa penyewaan, maka SEPENUHNYA menjadi tanggung jawab PENGGUNA (penyewa) untuk mengganti rugi atau memperbaiki alat tersebut sesuai dengan nilai barang.\n3. Keterlambatan pengembalian dapat dikenakan denda sesuai ketentuan yang berlaku.";
     private $defaultSopTidakDitanggung = "1. Penyewa wajib menjaga barang sewaan dengan baik.\n2. Jika terjadi kerusakan atau kehilangan barang selama masa penyewaan yang diakibatkan oleh faktor ketidaksengajaan/bencana, maka TIDAK DITANGGUNG oleh pengguna (penyewa) karena telah didukung oleh dana operasional.\n3. Namun pengguna tetap diwajibkan melaporkan kejadian tersebut secara transparan.";
@@ -21,6 +23,10 @@ class UnitPenyewaanController extends Controller
      */
     public function index(Request $request)
     {
+        if ($splash = $this->checkDelegation($request, 'sewa_alat', 'Penyewaan Alat/Tenda')) {
+            return $splash;
+        }
+
         $user = auth()->user();
         $region = Region::find($user->region_id);
         $paymentInfo = $region ? ($region->payment_info ?? []) : [];

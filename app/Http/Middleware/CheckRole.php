@@ -40,7 +40,7 @@ class CheckRole
             }
 
             // Custom handle for Guest accessing Admin routes
-            $adminRoles = ['admin', 'super_admin', 'admin_kecamatan', 'admin_desa', 'rw', 'rt', 'lurah'];
+            $adminRoles = ['admin', 'super_admin', 'admin_kecamatan', 'admin_desa', 'rw', 'rt', 'staff'];
             if (count(array_intersect($adminRoles, $roles)) > 0) {
                 Log::warning('SECURITY: Unauthorized access attempt', [
                     'ip' => $request->ip(),
@@ -96,9 +96,9 @@ class CheckRole
         }
         
         foreach ($requiredRoles as $role) {
-            if ($role === 'admin' || $role === 'lurah') {
-                // 'admin' or 'lurah' pseudo-role matches any of the new admin hierarchy
-                if (in_array($user->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'admin', 'lurah'])) {
+            if ($role === 'admin') {
+                // 'admin' pseudo-role matches any of the new admin hierarchy
+                if (in_array($user->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'admin', 'staff'])) {
                     return $next($request);
                 }
             } else if ($role === 'user') {
@@ -121,7 +121,7 @@ class CheckRole
 
         // Special case: If admin tries to access user-only pages, redirect to admin dashboard
         // Pengecualian: rw dan rt diizinkan mengakses halaman frontend user
-        $isAdminUser = in_array($user->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin', 'lurah']);
+        $isAdminUser = in_array($user->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin', 'staff']);
         if ($isAdminUser && (in_array('user', $requiredRoles) || $allowGuest)) {
             // Handle AJAX request
             if ($request->expectsJson() || $request->ajax()) {

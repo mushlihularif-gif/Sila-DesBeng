@@ -148,6 +148,12 @@
                     <p class="text-gray-400 text-sm mb-2"><i class="fas fa-map-marker-alt mr-2"></i> Lokasi Kejadian</p>
                     <div class="bg-[#003026]/30 border border-yellow-400/20 rounded-lg p-4">
                         <p class="text-white">{{ $laporan->lokasi }}</p>
+                        @if($laporan->latitude && $laporan->longitude)
+                            <div class="mt-4 rounded-lg overflow-hidden border border-yellow-400/30 shadow-inner" style="height: 250px;">
+                                <div id="map-{{ $laporan->id }}" class="w-full h-full"></div>
+                            </div>
+                            <p class="text-gray-400 text-xs mt-2"><i class="fas fa-satellite"></i> Titik koordinat tersimpan: {{ $laporan->latitude }}, {{ $laporan->longitude }}</p>
+                        @endif
                     </div>
                 </div>
                 @endif
@@ -331,6 +337,28 @@
         }
     });
 </script>
+
+@if($laporan->latitude && $laporan->longitude)
+<script>
+    function initMap{{ $laporan->id }}() {
+        const location = { lat: {{ $laporan->latitude }}, lng: {{ $laporan->longitude }} };
+        const map = new google.maps.Map(document.getElementById("map-{{ $laporan->id }}"), {
+            zoom: 17,
+            center: location,
+            mapTypeId: 'satellite',
+            mapTypeControl: true,
+            streetViewControl: false,
+        });
+        new google.maps.Marker({
+            position: location,
+            map: map,
+            title: "{{ $laporan->lokasi }}",
+            animation: google.maps.Animation.DROP
+        });
+    }
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google_maps.api_key') }}&callback=initMap{{ $laporan->id }}" async defer></script>
+@endif
 @endpush
 
 @push('styles')

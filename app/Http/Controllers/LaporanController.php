@@ -108,6 +108,8 @@ class LaporanController extends Controller
             'deskripsi' => 'required|string|min:20',
             'kategori' => 'required|string',
             'lokasi' => 'required|string|max:255',
+            'latitude' => 'nullable|string|max:50',
+            'longitude' => 'nullable|string|max:50',
             'tujuan_laporan' => 'required|in:rt,rw,desa',
             'target_region_id' => 'nullable|integer|exists:regions,id',
             'bukti' => 'nullable|array|max:3',
@@ -128,6 +130,8 @@ class LaporanController extends Controller
             'deskripsi' => $validated['deskripsi'],
             'kategori' => $validated['kategori'],
             'lokasi' => $validated['lokasi'] ?? null,
+            'latitude' => $validated['latitude'] ?? null,
+            'longitude' => $validated['longitude'] ?? null,
             'tujuan_laporan' => $validated['tujuan_laporan'],
             'status' => 'Pending',
             'rw' => $user->rw,
@@ -235,9 +239,9 @@ class LaporanController extends Controller
                 }
             }
 
-            // STEP 3: Fallback ke Admin Desa / Lurah / Super Admin
+            // STEP 3: Fallback ke Admin Desa / Super Admin
             if ($targetAdmins->isEmpty()) {
-                $targetAdmins = User::whereIn('role', ['admin', 'super_admin', 'admin_desa', 'lurah'])
+                $targetAdmins = User::whereIn('role', ['admin', 'super_admin', 'admin_desa'])
                     ->whereIn('region_id', $regionIds)
                     ->get();
                 $actualDestination = 'desa';

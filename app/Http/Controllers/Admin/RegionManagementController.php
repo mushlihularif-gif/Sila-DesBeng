@@ -17,7 +17,7 @@ class RegionManagementController extends Controller
         $isSuperAdmin = in_array($user->role, ['super_admin', 'admin']);
         
         // Izinkan super_admin untuk melihat halaman ini (kebutuhan testing)
-        if (!in_array($user->role, ['admin_kecamatan', 'admin_desa', 'lurah', 'admin_rw', 'super_admin', 'admin'])) {
+        if (!in_array($user->role, ['admin_kecamatan', 'admin_desa', 'admin_rw', 'super_admin', 'admin'])) {
             return redirect()->back()->with('error', 'Anda tidak memiliki hak akses ke halaman ini.');
         }
 
@@ -259,7 +259,7 @@ class RegionManagementController extends Controller
     {
         $user = auth()->user();
         
-        if (!in_array($user->role, ['admin_kecamatan', 'admin_desa', 'lurah', 'super_admin', 'admin', 'admin_rw'])) {
+        if (!in_array($user->role, ['admin_kecamatan', 'admin_desa', 'super_admin', 'admin', 'admin_rw'])) {
             return redirect()->back()->with('error', 'Anda tidak memiliki hak akses.');
         }
 

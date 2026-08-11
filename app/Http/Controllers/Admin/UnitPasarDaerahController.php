@@ -11,11 +11,17 @@ use Illuminate\Support\Facades\Storage;
 
 class UnitPasarDaerahController extends Controller
 {
+    use \App\Traits\ChecksStaffDelegation;
+
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
+        if ($splash = $this->checkDelegation($request, 'pasar_daerah', 'Pasar Daerah')) {
+            return $splash;
+        }
+
         $admin = Auth::user();
         $produks = PasarProduk::where('region_id', $admin->region_id)->latest()->get();
         
@@ -224,6 +230,7 @@ class UnitPasarDaerahController extends Controller
         ]);
         
         $pesanan->status = $validated['status'];
+        $pesanan->handled_by = auth()->id();
         $pesanan->save();
         
         return redirect()->back()->with('success', 'Status pesanan berhasil diperbarui.');
