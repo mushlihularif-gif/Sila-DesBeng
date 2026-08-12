@@ -20,9 +20,8 @@ class BerandaController extends Controller
             ->orderBy('sort_order', 'asc')
             ->get();
 
-        // Format image URLs
         $banners->transform(function ($banner) {
-            $banner->image_url = asset('storage/' . $banner->image);
+            $banner->image_url = asset('storage/' . $banner->image_path);
             return $banner;
         });
 
