@@ -27,15 +27,16 @@ Route::get('/unit-pelayanan', [BerandaController::class, 'unitPelayanan']);
     Route::get('/pasar-daerah/products/{id}', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'getProductDetail']);
     Route::get('/pasar-daerah/categories', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'getCategories']);
 
+    // Wilayah (Regions) - Public for registration
+    Route::get('/kemitraan/regions', [\App\Http\Controllers\Api\PartnerApplicationApiController::class, 'getRegions']);
+
 // Protected Routes (Harus mengirimkan Bearer Token dari hasil Login)
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'user']);
     Route::post('/profile/update', [AuthController::class, 'updateProfile']);
     Route::post('/profile/password', [AuthController::class, 'updatePassword']);
     Route::post('/fcm-token', [AuthController::class, 'updateFcmToken']);
-    
     // Kemitraan
-    Route::get('/kemitraan/regions', [\App\Http\Controllers\Api\PartnerApplicationApiController::class, 'getRegions']);
     Route::post('/kemitraan/gabung', [\App\Http\Controllers\Api\PartnerApplicationApiController::class, 'store']);
 
     // KYC

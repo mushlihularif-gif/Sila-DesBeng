@@ -46,6 +46,28 @@ class PasarDaerahApiController extends Controller
     }
 
     /**
+     * Get product detail by ID
+     */
+    public function getProductDetail($id)
+    {
+        $product = PasarProduk::find($id);
+
+        if (!$product) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Produk tidak ditemukan'
+            ], 404);
+        }
+
+        $product->image_url = $product->foto ? url('storage/' . $product->foto) : null;
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $product
+        ]);
+    }
+
+    /**
      * Get unique categories
      */
     public function getCategories()

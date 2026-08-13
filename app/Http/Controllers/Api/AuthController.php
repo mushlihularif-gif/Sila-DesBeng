@@ -381,8 +381,7 @@ class AuthController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Kode OTP telah dikirim ke ' . $request->otp_method,
-            'demo_otp' => config('app.debug') ? $otpCode : null
+            'message' => 'Kode OTP telah dikirim ke ' . $request->otp_method
         ], 200);
     }
 
@@ -465,6 +464,14 @@ class AuthController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => 'Token reset sudah kadaluarsa'
+            ], 400);
+        }
+
+        // Pastikan kata sandi baru tidak sama dengan yang lama
+        if (Hash::check($request->password, $user->password)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Anda tidak boleh menggunakan kata sandi yang lama'
             ], 400);
         }
 
