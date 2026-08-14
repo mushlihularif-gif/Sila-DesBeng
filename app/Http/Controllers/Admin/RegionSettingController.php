@@ -90,8 +90,8 @@ class RegionSettingController extends Controller
 
         $selectedServices = $request->input('services', []);
 
-        if (in_array($mobilServiceId, $selectedServices) && !$request->has('mobil_delivery_antar_active') && !$request->has('mobil_delivery_jemput_active')) {
-            return redirect()->back()->with('error', 'Gagal: Minimal satu metode pengiriman untuk Mobil harus diaktifkan!')->withInput();
+        if (in_array($mobilServiceId, $selectedServices) && !$request->has('mobil_sewa_delivery_antar_active') && !$request->has('mobil_sewa_delivery_jemput_active') && !$request->has('mobil_rental_delivery_antar_active') && !$request->has('mobil_rental_delivery_jemput_active')) {
+            return redirect()->back()->with('error', 'Gagal: Minimal satu metode pengiriman untuk Mobil (Sewa/Rental) harus diaktifkan!')->withInput();
         }
         if (in_array($alatServiceId, $selectedServices) && !$request->has('alat_delivery_antar_active') && !$request->has('alat_delivery_jemput_active')) {
             return redirect()->back()->with('error', 'Gagal: Minimal satu metode pengiriman untuk Alat harus diaktifkan!')->withInput();
@@ -108,8 +108,10 @@ class RegionSettingController extends Controller
         }
         $paymentInfo['whatsapp_active'] = $request->has('whatsapp_active');
         
-        $paymentInfo['mobil_delivery_antar_active'] = $request->has('mobil_delivery_antar_active');
-        $paymentInfo['mobil_delivery_jemput_active'] = $request->has('mobil_delivery_jemput_active');
+        $paymentInfo['mobil_sewa_delivery_antar_active'] = $request->has('mobil_sewa_delivery_antar_active');
+        $paymentInfo['mobil_sewa_delivery_jemput_active'] = $request->has('mobil_sewa_delivery_jemput_active');
+        $paymentInfo['mobil_rental_delivery_antar_active'] = $request->has('mobil_rental_delivery_antar_active');
+        $paymentInfo['mobil_rental_delivery_jemput_active'] = $request->has('mobil_rental_delivery_jemput_active');
         
         $paymentInfo['alat_delivery_antar_active'] = $request->has('alat_delivery_antar_active');
         $paymentInfo['alat_delivery_jemput_active'] = $request->has('alat_delivery_jemput_active');

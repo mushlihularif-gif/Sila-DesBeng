@@ -38,12 +38,6 @@
                     <div class="col-md-8">
                         <div class="mb-4">
                             <h6 class="fw-semibold border-bottom pb-2 mb-3"><i class="bx bx-phone-call me-1"></i>Informasi Kontak Pusat</h6>
-                            <p class="text-muted small mb-3">Informasi dasar ini disiapkan untuk ditampilkan di halaman depan (Landing Page) bagian 'Tentang Kami'.</p>
-
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">Deskripsi Singkat / Profil Platform</label>
-                                <textarea name="profile_text" rows="3" class="form-control">{{ old('profile_text', $region->profile_text ?? '') }}</textarea>
-                            </div>
                         </div>
 
                         <!-- WhatsApp Box -->

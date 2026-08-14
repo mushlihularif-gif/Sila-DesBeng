@@ -561,3 +561,26 @@ Dalam SilaDesBeng, satu Admin Operator (Admin Desa) bisa mendelegasikan wewenang
 **Aturan Penamaan Aset & Kode (Standar Kompetisi KMIPN):**
 - **DILARANG Keras Meninggalkan Jejak Template Eksternal:** Karena ini adalah proyek untuk kompetisi tingkat nasional (KMIPN), juri akan menilai orisinalitas, profesionalisme, dan kerapian. Sangat dilarang keras menyimpan, membiarkan, atau membuat penamaan file/variabel/class CSS yang membawa jejak nama *template* luar atau orang lain (misalnya penamaan ulfa-pasar.css).
 - **Standardisasi Penamaan:** Semua *file* tambahan, skrip, dan penulisan *class* HTML harus ditulis ulang menggunakan *naming convention* yang relevan dengan modul aplikasi itu sendiri (misalnya: pasar-daerah.css).
+
+---
+
+#### *** 8.8 KEPUTUSAN KRITIS: ARSITEKTUR SPA (SINGLE PAGE APPLICATION) & HYBRID ONGKIR PASAR DAERAH ***
+
+**Status:** SELESAI DIEKSEKUSI OLEH TIM (13 Agustus 2026)
+
+**1. Refactoring UI Admin Pasar Daerah ke SPA (Tab Navigasi Tanpa Reload):**
+- **Masalah Awal:** Sebelumnya, pengelolaan "Daftar Produk", "Daftar Pesanan", "Laporan", dan "Pengaturan Toko" di menu Pasar Daerah dipisah ke halaman (view) yang berbeda. Hal ini menyebabkan loading yang tidak perlu dan memperlambat alur kerja Admin Desa.
+- **Solusi Eksekusi:** Menyatukan seluruh halaman operasional Pasar Daerah ke dalam satu berkas `index.blade.php` menggunakan arsitektur Tab Bootstrap (nav-pills). Sistem kini bekerja seperti Single Page Application (SPA). Semua data (Produk, Pesanan, Laporan, Pengaturan) di-render di satu halaman, dengan navigasi instan antar tab.
+- **Keuntungan:** UX menjadi sangat responsif, mengurangi beban server (navigasi lokal DOM), dan mempermudah Admin Desa melihat gambaran utuh tokonya.
+
+**2. Kebijakan "Hybrid Ongkir" (Luar Kecamatan):**
+- **Kondisi Lapangan:** Kurir lokal desa mungkin sanggup memukul rata ongkir ke kecamatan tetangga (misal Rp20.000 ke manapun asalkan masih 1 kecamatan sebelah), tapi bisa jadi rugi jika ada kecamatan yang terpisah selat/pulau (Bengkalis adalah daerah kepulauan).
+- **Eksekusi:** Menambahkan 2 Opsi Pengiriman Luar Kecamatan:
+  1. **Pukul Rata:** Satu nominal harga pasti yang berlaku ke seluruh pembeli dari luar kecamatan.
+  2. **Per Kecamatan:** Admin Desa dapat mencentang (mengaktifkan) kecamatan mana saja yang sanggup dilayani, dan menentukan ongkir spesifik per kecamatan tersebut.
+- **Keputusan UI:** Menerapkan desain interaktif berupa "2 Kartu Besar" (Pukul Rata vs Per Kecamatan).
+
+**3. Bug Fix Kritis - Hilangnya Script Javascript di View (@push vs @section):**
+- **Kasus Laporan Bug:** Fungsi klik/interaktif di halaman Admin Pasar Daerah sering *freeze* (beku/mati) atau mengalami *500 Server Error*.
+- **Penyebab (Root Cause):** Terdapat kesalahan sintaks *rendering* bawaan Laravel. Kami sempat menggunakan perintah `@push('scripts')` untuk memuat Javascript khusus halaman tersebut. Namun, karena file induk *layout* (`admin.blade.php`) menggunakan `@yield('scripts')` (bukan `@stack('scripts')`), maka seluruh *Javascript* tersebut secara otomatis dibuang/ditolak oleh Laravel saat me-render HTML ke pengguna, sehingga tombol-tombol kehilangan "otak" (*handler* kliknya hilang).
+- **Penyelesaian Final:** Mengubah secara permanen pendekatan blok khusus (*inline script* di view) menjadi `@section('scripts')` untuk skrip, dan `@section('styles')` untuk CSS agar sesuai dengan *yield* pada *layout* utama, sekaligus menuliskan kode fungsi JS secara murni dan global (`window.setOngkirType = function(...)`) demi menjamin kekebalan kode dari intervensi CSS/Label klik ganda browser.

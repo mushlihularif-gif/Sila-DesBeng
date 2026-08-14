@@ -38,5 +38,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        $exceptions->renderable(function (\Illuminate\Session\TokenMismatchException $e, $request) {
+            return redirect('/beranda')->with('error', 'Sesi halaman telah berakhir (Kedaluwarsa). Silakan ulangi tindakan Anda atau login kembali.');
+        });
     })->create();

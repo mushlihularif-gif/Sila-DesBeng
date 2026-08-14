@@ -2,38 +2,82 @@
 
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Unit Layanan /</span> Fasilitas Umum & Aset</h4>
+        <!-- Page Header -->
+        <div class="row mb-4">
+            <div class="col-12 d-flex justify-content-between align-items-center">
+                <h4 class="fw-bold py-3 mb-0">
+                    <span class="text-muted fw-light">Unit Layanan /</span> Fasilitas Umum & Aset
+                </h4>
+            </div>
+        </div>
+
+        <!-- Panduan -->
+        <div class="card bg-label-secondary border-0 shadow-none mb-4" style="border-radius: 12px;">
+            <div class="card-body d-flex align-items-center p-4">
+                <div class="me-3">
+                    <div class="bg-secondary p-3 rounded-circle text-white d-flex align-items-center justify-content-center shadow-sm" style="width: 56px; height: 56px;">
+                        <i class="bx bx-building fs-3"></i>
+                    </div>
+                </div>
+                <div>
+                    <h5 class="fw-bold mb-1 text-secondary">Manajemen Fasilitas Umum & Aset</h5>
+                    <p class="mb-0 text-secondary" style="opacity: 0.85;">
+                        Kelola data kendaraan operasional (Ambulans, Truk Sampah) dan fasilitas publik (Gedung Serbaguna, Lapangan) yang dapat diakses oleh warga.
+                    </p>
+                </div>
+            </div>
+        </div>
 
         @if(session('success'))
-            <div class="alert alert-success alert-dismissible" role="alert">
+            <div class="alert alert-success alert-dismissible shadow-sm rounded-4 border-0 d-flex align-items-center" role="alert">
+                <i class="bx bx-check-circle fs-4 me-2"></i>
                 {{ session('success') }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         @endif
 
+        <style>
+            .nav-pills .nav-link { color: #6c757d; font-weight: 600; padding: 0.6rem 1.2rem; transition: all 0.3s; border-radius: 50rem; }
+            .nav-pills .nav-link:hover { background-color: #f8f9fa; color: #566a7f; }
+            .nav-pills .nav-link.active { background-color: #696cff; color: #fff; box-shadow: 0 4px 6px rgba(105, 108, 255, 0.2); }
+            .product-card { transition: all 0.3s ease; border: none; box-shadow: 0 0.125rem 0.25rem rgba(161, 172, 184, 0.2); border-radius: 1rem; }
+            .product-card:hover { transform: translateY(-5px); box-shadow: 0 0.5rem 1rem rgba(161, 172, 184, 0.15); }
+        </style>
+
         <div class="nav-align-top mb-4">
-            <ul class="nav nav-tabs" role="tablist">
+            <ul class="nav nav-pills gap-2 mb-4" role="tablist">
                 <li class="nav-item">
-                    <button type="button" class="nav-link {{ $tab == 'kendaraan' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-kendaraan" aria-controls="navs-top-kendaraan" aria-selected="{{ $tab == 'kendaraan' ? 'true' : 'false' }}"><i class="bx bx-car me-1"></i> Kendaraan Operasional</button>
+                    <button type="button" class="nav-link {{ $tab == 'kendaraan' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-kendaraan" aria-controls="navs-top-kendaraan" aria-selected="{{ $tab == 'kendaraan' ? 'true' : 'false' }}">
+                        <i class="bx bx-car me-2"></i> Kendaraan Operasional
+                    </button>
                 </li>
                 <li class="nav-item">
-                    <button type="button" class="nav-link {{ $tab == 'gedung' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-gedung" aria-controls="navs-top-gedung" aria-selected="{{ $tab == 'gedung' ? 'true' : 'false' }}"><i class="bx bx-building-house me-1"></i> Gedung & Ruang Publik</button>
+                    <button type="button" class="nav-link {{ $tab == 'gedung' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-gedung" aria-controls="navs-top-gedung" aria-selected="{{ $tab == 'gedung' ? 'true' : 'false' }}">
+                        <i class="bx bx-building-house me-2"></i> Gedung & Ruang Publik
+                    </button>
                 </li>
                 <li class="nav-item">
-                    <button type="button" class="nav-link" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-pengaturan" aria-controls="navs-top-pengaturan" aria-selected="false"><i class="bx bx-cog me-1"></i> Pengaturan & SOP</button>
+                    <button type="button" class="nav-link" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-pengaturan" aria-controls="navs-top-pengaturan" aria-selected="false">
+                        <i class="bx bx-cog me-2"></i> Pengaturan & SOP
+                    </button>
                 </li>
             </ul>
             
             <div class="tab-content">
                 <!-- TAB 1: KENDARAAN OPERASIONAL -->
                 <div class="tab-pane fade {{ $tab == 'kendaraan' ? 'show active' : '' }}" id="navs-top-kendaraan" role="tabpanel">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <div>
-                            <h5 class="mb-0">Daftar Kendaraan Layanan Masyarakat</h5>
-                            <small class="text-muted">Ambulans Darurat, Mobil Siaga, Truk Sampah, dll</small>
+                    <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded-4 shadow-sm">
+                        <div class="d-flex align-items-center">
+                            <div class="avatar avatar-md bg-info-subtle text-info rounded-circle me-3 d-flex justify-content-center align-items-center">
+                                <i class="bx bx-car fs-4"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-0 fw-bold">Daftar Kendaraan Layanan Masyarakat</h5>
+                                <small class="text-muted">Ambulans Darurat, Mobil Siaga, Truk Sampah, dll</small>
+                            </div>
                         </div>
                         <div>
-                            <a href="{{ route('admin.unit.ambulans.create') }}" class="btn btn-primary"><i class="bx bx-plus"></i> Tambah Kendaraan</a>
+                            <a href="{{ route('admin.unit.ambulans.create') }}" class="btn btn-primary rounded-pill px-4 shadow-sm"><i class="bx bx-plus me-1"></i> Tambah Kendaraan</a>
                         </div>
                     </div>
 
@@ -79,18 +123,21 @@
                                                 </button>
                                             </div>
                                         </div>
-                                        <div class="card-body">
-                                            <h5 class="card-title text-capitalize">{{ $mobil->kategori }}: {{ $mobil->nama_mobil }}</h5>
-                                            <p class="card-text">{{ Str::limit($mobil->deskripsi, 100) }}</p>
+                                        <div class="card-body d-flex flex-column">
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <h5 class="card-title fw-bold text-capitalize mb-0">{{ $mobil->nama_mobil }}</h5>
+                                                <span class="badge bg-label-info rounded-pill px-3">{{ $mobil->kategori }}</span>
+                                            </div>
+                                            <p class="card-text text-muted flex-grow-1" style="font-size: 0.9rem;">{{ Str::limit($mobil->deskripsi, 80) }}</p>
                                             
-                                            <div class="mt-3 d-flex gap-2">
+                                            <div class="mt-4 pt-3 border-top d-flex justify-content-end gap-2">
                                                 <a href="{{ route('admin.unit.ambulans.edit', $mobil->id) }}"
-                                                    class="btn btn-sm btn-outline-warning">Ubah</a>
+                                                    class="btn btn-sm btn-light border text-warning shadow-sm rounded-pill px-3"><i class="bx bx-edit me-1"></i>Ubah</a>
                                                 <form action="{{ route('admin.unit.ambulans.destroy', $mobil->id) }}" method="POST"
                                                     onsubmit="return confirm('Apakah Anda yakin ingin menghapus kendaraan ini?');">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger">Hapus</button>
+                                                    <button type="submit" class="btn btn-sm btn-light border text-danger shadow-sm rounded-pill px-3"><i class="bx bx-trash me-1"></i>Hapus</button>
                                                 </form>
                                             </div>
                                         </div>
@@ -124,13 +171,18 @@
 
                 <!-- TAB 2: GEDUNG & RUANG PUBLIK -->
                 <div class="tab-pane fade {{ $tab == 'gedung' ? 'show active' : '' }}" id="navs-top-gedung" role="tabpanel">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <div>
-                            <h5 class="mb-0">Daftar Gedung & Infrastruktur Publik</h5>
-                            <small class="text-muted">Gedung Serbaguna, Balai Pertemuan, Lapangan, dll</small>
+                    <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded-4 shadow-sm">
+                        <div class="d-flex align-items-center">
+                            <div class="avatar avatar-md bg-success-subtle text-success rounded-circle me-3 d-flex justify-content-center align-items-center">
+                                <i class="bx bx-building-house fs-4"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-0 fw-bold">Daftar Gedung & Infrastruktur Publik</h5>
+                                <small class="text-muted">Gedung Serbaguna, Balai Pertemuan, Lapangan, dll</small>
+                            </div>
                         </div>
                         <div>
-                            <a href="{{ route('admin.unit.fasilitas_umum.create') }}" class="btn btn-primary"><i class="bx bx-plus"></i> Tambah Gedung</a>
+                            <a href="{{ route('admin.unit.fasilitas_umum.create') }}" class="btn btn-success rounded-pill px-4 shadow-sm"><i class="bx bx-plus me-1"></i> Tambah Gedung</a>
                         </div>
                     </div>
 
@@ -176,22 +228,21 @@
                                                 </button>
                                             </div>
                                         </div>
-                                        <div class="card-body">
-                                            <h5 class="card-title">{{ $item->nama_fasilitas }}</h5>
-                                            <p class="card-text">{{ Str::limit($item->deskripsi, 100) }}</p>
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <span class="badge bg-success">{{ $item->stok }} {{ $item->satuan }}</span>
+                                        <div class="card-body d-flex flex-column">
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <h5 class="card-title fw-bold text-capitalize mb-0">{{ $item->nama_fasilitas }}</h5>
+                                                <span class="badge bg-label-success rounded-pill px-3">{{ $item->kategori }}</span>
                                             </div>
-                                            <div class="mt-3 d-flex gap-2">
-                                                <a href="{{ route('admin.unit.fasilitas_umum.show', $item->id) }}"
-                                                    class="btn btn-sm btn-outline-info">Detail</a>
+                                            <p class="card-text text-muted flex-grow-1" style="font-size: 0.9rem;">{{ Str::limit($item->deskripsi, 80) }}</p>
+                                            
+                                            <div class="mt-4 pt-3 border-top d-flex justify-content-end gap-2">
                                                 <a href="{{ route('admin.unit.fasilitas_umum.edit', $item->id) }}"
-                                                    class="btn btn-sm btn-outline-warning">Ubah</a>
+                                                    class="btn btn-sm btn-light border text-warning shadow-sm rounded-pill px-3"><i class="bx bx-edit me-1"></i>Ubah</a>
                                                 <form action="{{ route('admin.unit.fasilitas_umum.destroy', $item->id) }}" method="POST"
-                                                    onsubmit="return confirm('Apakah Anda yakin ingin menghapus fasilitas ini?');">
+                                                    onsubmit="return confirm('Apakah Anda yakin ingin menghapus gedung/fasilitas ini?');">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger">Hapus</button>
+                                                    <button type="submit" class="btn btn-sm btn-light border text-danger shadow-sm rounded-pill px-3"><i class="bx bx-trash me-1"></i>Hapus</button>
                                                 </form>
                                             </div>
                                         </div>
@@ -206,18 +257,14 @@
                             </div>
                         @endif
                     @else
-                        <div class="card border-0 shadow-sm">
-                            <div class="card-body text-center py-5">
-                                <div class="empty-state-icon mb-4">
-                                    <i class="bx bx-building" style="font-size: 120px; color: #d1d5db;"></i>
+                        <div class="card border-0 shadow-sm rounded-4 text-center py-5">
+                            <div class="card-body">
+                                <div class="mb-4">
+                                    <i class="bx bx-building text-secondary" style="font-size: 80px; opacity: 0.5;"></i>
                                 </div>
-                                <h3 class="fw-bold text-muted mb-3">Belum Ada Fasilitas Umum</h3>
-                                <p class="text-muted mb-4" style="max-width: 500px; margin: 0 auto;">
-                                    Mulai tambahkan infrastruktur seperti balai desa, lapangan, atau gedung serbaguna.
-                                </p>
-                                <a href="{{ route('admin.unit.fasilitas_umum.create') }}" class="btn btn-primary btn-lg rounded-pill px-4 shadow-sm">
-                                    <i class="bx bx-plus-circle me-2"></i>Tambah Gedung Pertama
-                                </a>
+                                <h4 class="fw-bold">Belum Ada Fasilitas</h4>
+                                <p class="text-muted mb-4">Mulai kelola infrastruktur desa dengan menambahkan fasilitas baru.</p>
+                                <a href="{{ route('admin.unit.fasilitas_umum.create') }}" class="btn btn-success rounded-pill px-4">Tambah Gedung</a>
                             </div>
                         </div>
                     @endif
@@ -227,34 +274,87 @@
                 <div class="tab-pane fade" id="navs-top-pengaturan" role="tabpanel">
                     <form action="{{ route('admin.unit.fasilitas_umum.sop.update') }}" method="POST">
                         @csrf
-                        <h6 class="mb-3">Kontak Layanan</h6>
-                        <div class="mb-4">
-                            <label class="form-label text-danger fw-bold">Nomor WhatsApp Pengurus Fasilitas Umum & Ambulans</label>
-                            <input type="text" class="form-control" name="kontak_aula" value="{{ $regionSettings['kontak_aula'] ?? '' }}" placeholder="Contoh: 08123456789">
-                            <small class="text-muted">Nomor ini akan dihubungi warga jika ada pertanyaan seputar peminjaman fasilitas.</small>
-                        </div>
-                        <hr>
                         
-                        <h6 class="mb-3 mt-4">SOP Peminjaman Gedung & Kendaraan</h6>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Model Kebijakan Penanganan Kerusakan</label>
-                            <select name="sop_active" class="form-select">
-                                <option value="ditanggung" {{ $sop_active == 'ditanggung' ? 'selected' : '' }}>Ditanggung oleh Penyewa (Mengganti Rugi)</option>
-                                <option value="tidak_ditanggung" {{ $sop_active == 'tidak_ditanggung' ? 'selected' : '' }}>Ditanggung Dana Desa (Gratis)</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">SOP Jika Kerusakan Ditanggung Penyewa</label>
-                            <textarea class="form-control" name="sop_ditanggung" rows="5">{{ $sop_ditanggung }}</textarea>
-                            <button type="button" class="btn btn-sm btn-link p-0 mt-1" onclick="document.querySelector('textarea[name=sop_ditanggung]').value = `{{ $default_ditanggung }}`">Gunakan Teks Bawaan Sistem</button>
-                        </div>
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">SOP Jika Kerusakan Ditanggung Dana Desa</label>
-                            <textarea class="form-control" name="sop_tidak_ditanggung" rows="5">{{ $sop_tidak_ditanggung }}</textarea>
-                            <button type="button" class="btn btn-sm btn-link p-0 mt-1" onclick="document.querySelector('textarea[name=sop_tidak_ditanggung]').value = `{{ $default_tidak_ditanggung }}`">Gunakan Teks Bawaan Sistem</button>
-                        </div>
+                        <div class="row">
+                            <div class="col-xl-8">
+                                <!-- Info Card -->
+                                <div class="card border-0 shadow-sm rounded-4 mb-4">
+                                    <div class="card-header bg-white border-bottom p-4">
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar avatar-sm bg-label-primary rounded-circle me-3 d-flex justify-content-center align-items-center"><i class="bx bx-phone-call"></i></div>
+                                            <h5 class="mb-0 fw-bold">Kontak Layanan</h5>
+                                        </div>
+                                    </div>
+                                    <div class="card-body p-4">
+                                        <div class="mb-2">
+                                            <label class="form-label text-dark fw-bold">Nomor WhatsApp Pengurus Fasilitas Umum & Ambulans</label>
+                                            <div class="input-group input-group-merge border-light-subtle shadow-sm rounded-3">
+                                                <span class="input-group-text"><i class="bx bxl-whatsapp text-success"></i></span>
+                                                <input type="text" class="form-control" name="kontak_aula" value="{{ $regionSettings['kontak_aula'] ?? '' }}" placeholder="Contoh: 08123456789">
+                                            </div>
+                                            <small class="text-muted mt-2 d-block">Nomor ini akan dihubungi warga jika ada pertanyaan seputar peminjaman fasilitas.</small>
+                                        </div>
+                                    </div>
+                                </div>
 
-                        <button type="submit" class="btn btn-primary">Simpan Pengaturan</button>
+                                <!-- SOP Card -->
+                                <div class="card border-0 shadow-sm rounded-4 mb-4">
+                                    <div class="card-header bg-white border-bottom p-4">
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar avatar-sm bg-label-info rounded-circle me-3 d-flex justify-content-center align-items-center"><i class="bx bx-book"></i></div>
+                                            <h5 class="mb-0 fw-bold">SOP Peminjaman Gedung & Kendaraan</h5>
+                                        </div>
+                                    </div>
+                                    <div class="card-body p-4">
+                                        <div class="alert alert-info d-flex align-items-start mb-4 shadow-sm border-0 rounded-4 p-3">
+                                            <i class="bx bx-info-circle fs-4 me-3 mt-1"></i>
+                                            <div>
+                                                <strong class="d-block mb-1">Informasi Penting</strong>
+                                                <span>SOP ini akan ditampilkan kepada masyarakat sebagai syarat dan ketentuan sebelum mereka mengajukan peminjaman.</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-4">
+                                            <label class="form-label fw-bold">Model Kebijakan Penanganan Kerusakan</label>
+                                            <select name="sop_active" class="form-select border-light-subtle shadow-sm rounded-3">
+                                                <option value="ditanggung" {{ $sop_active == 'ditanggung' ? 'selected' : '' }}>Ditanggung oleh Penyewa (Mengganti Rugi)</option>
+                                                <option value="tidak_ditanggung" {{ $sop_active == 'tidak_ditanggung' ? 'selected' : '' }}>Ditanggung Dana Desa (Gratis)</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="mb-4">
+                                            <label class="form-label fw-bold">SOP Jika Kerusakan Ditanggung Penyewa</label>
+                                            <textarea class="form-control border-light-subtle shadow-sm rounded-3" name="sop_ditanggung" rows="6">{{ $sop_ditanggung }}</textarea>
+                                            <button type="button" class="btn btn-sm btn-link p-0 mt-2" onclick="document.querySelector('textarea[name=sop_ditanggung]').value = `{{ $default_ditanggung }}`"><i class="bx bx-refresh me-1"></i>Gunakan Teks Bawaan Sistem</button>
+                                        </div>
+                                        
+                                        <div class="mb-4">
+                                            <label class="form-label fw-bold">SOP Jika Kerusakan Ditanggung Dana Desa</label>
+                                            <textarea class="form-control border-light-subtle shadow-sm rounded-3" name="sop_tidak_ditanggung" rows="6">{{ $sop_tidak_ditanggung }}</textarea>
+                                            <button type="button" class="btn btn-sm btn-link p-0 mt-2" onclick="document.querySelector('textarea[name=sop_tidak_ditanggung]').value = `{{ $default_tidak_ditanggung }}`"><i class="bx bx-refresh me-1"></i>Gunakan Teks Bawaan Sistem</button>
+                                        </div>
+
+                                        <div class="d-flex justify-content-end mt-4">
+                                            <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm"><i class="bx bx-save me-1"></i> Simpan Pengaturan</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-xl-4">
+                                <div class="card bg-primary text-white border-0 shadow-sm rounded-4 mb-4">
+                                    <div class="card-body p-4">
+                                        <h5 class="fw-bold text-white mb-3"><i class="bx bx-bulb me-2"></i>Tips Menulis SOP</h5>
+                                        <ul class="list-unstyled mb-0" style="opacity: 0.9">
+                                            <li class="mb-2"><i class="bx bx-check-circle me-2"></i>Sertakan biaya (jika ada) atau infokan jika gratis</li>
+                                            <li class="mb-2"><i class="bx bx-check-circle me-2"></i>Jelaskan prosedur pengembalian aset/kendaraan</li>
+                                            <li class="mb-2"><i class="bx bx-check-circle me-2"></i>Aturan denda jika terjadi kerusakan/keterlambatan</li>
+                                            <li class="mb-2"><i class="bx bx-check-circle me-2"></i>Syarat dokumen yang harus dibawa warga</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </form>
                 </div>
             </div>

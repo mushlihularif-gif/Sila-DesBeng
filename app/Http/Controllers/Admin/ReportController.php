@@ -32,12 +32,23 @@ class ReportController extends Controller
         // Query Fasilitas Umum
         $fasilitasQuery = $this->applyRegionFilter(\App\Models\FasilitasUmumBooking::withTrashed(), 'fasilitas', true)->with(['user', 'fasilitas'])->orderByDesc('created_at');
 
+        // Query Pasar Daerah
+        $pasarQuery = \App\Models\PasarOrder::withTrashed()->with('user')->orderByDesc('created_at');
         $user = auth()->user();
+        $regionId = $user->region_id;
+        if (!$regionId && in_array($user->role, ['super_admin', 'admin'])) {
+            $firstRegion = \App\Models\Region::first();
+            if ($firstRegion) $regionId = $firstRegion->id;
+        }
+        if ($regionId) {
+            $pasarQuery->where('region_id', $regionId);
+        }
         if ($user->isStaff()) {
             if (!$user->hasUnitPermission('sewa_alat')) $rentalQuery->whereRaw('1 = 0');
             if (!$user->hasUnitPermission('gas')) $gasQuery->whereRaw('1 = 0');
             if (!$user->hasUnitPermission('sewa_mobil')) $mobilQuery->whereRaw('1 = 0');
             if (!$user->hasUnitPermission('fasilitas_umum')) $fasilitasQuery->whereRaw('1 = 0');
+            if (!$user->hasUnitPermission('pasar_daerah')) $pasarQuery->whereRaw('1 = 0');
         }
 
         // Terapkan Filter
@@ -46,6 +57,8 @@ class ReportController extends Controller
             $gasQuery->where('status', $status);
             $mobilQuery->where('status', $status);
             $fasilitasQuery->where('status', $status);
+            // Translate status for Pasar Daerah if necessary, or just use it directly
+            $pasarQuery->where('status', $status);
         }
 
         if ($startDate) {
@@ -53,6 +66,7 @@ class ReportController extends Controller
             $gasQuery->whereDate('created_at', '>=', $startDate);
             $mobilQuery->whereDate('created_at', '>=', $startDate);
             $fasilitasQuery->whereDate('created_at', '>=', $startDate);
+            $pasarQuery->whereDate('created_at', '>=', $startDate);
         }
 
         if ($endDate) {
@@ -60,19 +74,21 @@ class ReportController extends Controller
             $gasQuery->whereDate('created_at', '<=', $endDate);
             $mobilQuery->whereDate('created_at', '<=', $endDate);
             $fasilitasQuery->whereDate('created_at', '<=', $endDate);
+            $pasarQuery->whereDate('created_at', '<=', $endDate);
         }
 
         $rentalRequests = $rentalQuery->get();
         $gasOrders = $gasQuery->get();
         $mobilBookings = $mobilQuery->get();
         $fasilitasBookings = $fasilitasQuery->get();
+        $pasarOrders = $pasarQuery->get();
 
         $activeServices = $this->getActivatedServices();
         if ($request->ajax()) {
-            return view('admin.laporan.partials.transactions_content', compact('rentalRequests', 'gasOrders', 'mobilBookings', 'fasilitasBookings', 'activeServices'))->render();
+            return view('admin.laporan.partials.transactions_content', compact('rentalRequests', 'gasOrders', 'mobilBookings', 'fasilitasBookings', 'pasarOrders', 'activeServices'))->render();
         }
 
-        return view('admin.laporan.transactions', compact('rentalRequests', 'gasOrders', 'mobilBookings', 'fasilitasBookings', 'status', 'startDate', 'endDate', 'activeServices'));
+        return view('admin.laporan.transactions', compact('rentalRequests', 'gasOrders', 'mobilBookings', 'fasilitasBookings', 'pasarOrders', 'status', 'startDate', 'endDate', 'activeServices'));
     }
 
     public function income(Request $request)

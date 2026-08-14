@@ -1,7 +1,69 @@
 @extends('admin.layouts.admin')
 
 @section('content')
-<div class="container-xxl flex-grow-1 container-p-y">
+<style>
+    .animate-fade-up {
+        animation: fadeUp 0.5s ease-out forwards;
+    }
+    @keyframes fadeUp {
+        0% { opacity: 0; transform: translateY(20px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+    .filter-btn {
+        border-radius: 50rem;
+        padding: 0.6rem 1.2rem;
+        font-weight: 600;
+        transition: all 0.2s;
+        border: 1px solid transparent;
+        text-decoration: none;
+        background: transparent;
+    }
+    .filter-btn-primary.active {
+        background-color: #0d6efd !important;
+        color: white !important;
+        box-shadow: 0 4px 10px rgba(13, 110, 253, 0.25) !important;
+    }
+    .filter-btn-danger.active {
+        background-color: #ff3e1d !important;
+        color: white !important;
+        box-shadow: 0 4px 10px rgba(255, 62, 29, 0.25) !important;
+    }
+    .filter-btn-success.active {
+        background-color: #71dd37 !important;
+        color: white !important;
+        box-shadow: 0 4px 10px rgba(113, 221, 55, 0.25) !important;
+    }
+    .filter-btn.active .badge { background-color: white !important; }
+    .filter-btn-primary.active .badge { color: #0d6efd !important; }
+    .filter-btn-danger.active .badge { color: #ff3e1d !important; }
+    .filter-btn-success.active .badge { color: #71dd37 !important; }
+    .filter-btn:not(.active) { color: #697a8d !important; }
+    .filter-btn:not(.active):hover { background-color: rgba(13, 110, 253, 0.08) !important; }
+
+    .table-modern {
+        border-collapse: separate;
+        border-spacing: 0 10px;
+    }
+    .table-modern tbody tr {
+        box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+        border-radius: 8px;
+        transition: all 0.2s;
+        background: #fff;
+    }
+    .table-modern tbody tr:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    .table-modern td {
+        border: none;
+        padding: 1.2rem 1.5rem;
+        vertical-align: middle;
+    }
+    .table-modern td:first-child { border-radius: 8px 0 0 8px; }
+    .table-modern td:last-child { border-radius: 0 8px 8px 0; }
+</style>
+
+<div class="container-xxl flex-grow-1 container-p-y animate-fade-up">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h4 class="fw-bold py-3 mb-0">
             <span class="text-muted fw-light">Warga /</span> Mutasi Penduduk (Handshake)
@@ -24,36 +86,42 @@
     </div>
     @endif
 
-    <div class="nav-align-top mb-4">
-        <ul class="nav nav-tabs" role="tablist">
-            <li class="nav-item">
-                <button type="button" class="nav-link active" role="tab" data-bs-toggle="tab" data-bs-target="#navs-keluar">
-                    Menunggu Pelepasan (Keluar)
-                    @if($pengajuanKeluar->count() > 0)
-                    <span class="badge rounded-pill badge-center h-px-20 w-px-20 bg-danger">{{ $pengajuanKeluar->count() }}</span>
-                    @endif
-                </button>
-            </li>
-            <li class="nav-item">
-                <button type="button" class="nav-link" role="tab" data-bs-toggle="tab" data-bs-target="#navs-masuk">
-                    Menunggu Persetujuan Desa Lama (Masuk)
-                    @if($pengajuanMasuk->count() > 0)
-                    <span class="badge rounded-pill badge-center h-px-20 w-px-20 bg-warning">{{ $pengajuanMasuk->count() }}</span>
-                    @endif
-                </button>
-            </li>
-            <li class="nav-item">
-                <button type="button" class="nav-link" role="tab" data-bs-toggle="tab" data-bs-target="#navs-riwayat">Riwayat Mutasi</button>
-            </li>
-        </ul>
-        <div class="tab-content">
+    <!-- TABS BUTTONS -->
+    <ul class="nav nav-pills d-flex flex-wrap gap-2 mb-4" role="tablist" style="border: none;">
+        <li class="nav-item" role="presentation">
+            <button type="button" class="nav-link filter-btn filter-btn-danger active" role="tab" data-bs-toggle="pill" data-bs-target="#navs-keluar">
+                <i class="bx bx-export me-1"></i> Menunggu Pelepasan (Keluar)
+                @if($pengajuanKeluar->count() > 0)
+                <span class="badge rounded-pill bg-label-danger ms-1">{{ $pengajuanKeluar->count() }}</span>
+                @endif
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button type="button" class="nav-link filter-btn filter-btn-success" role="tab" data-bs-toggle="pill" data-bs-target="#navs-masuk">
+                <i class="bx bx-import me-1"></i> Menunggu Persetujuan (Masuk)
+                @if($pengajuanMasuk->count() > 0)
+                <span class="badge rounded-pill bg-label-success ms-1">{{ $pengajuanMasuk->count() }}</span>
+                @endif
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button type="button" class="nav-link filter-btn filter-btn-primary" role="tab" data-bs-toggle="pill" data-bs-target="#navs-riwayat">
+                <i class="bx bx-history me-1"></i> Riwayat Mutasi
+            </button>
+        </li>
+    </ul>
+    
+    <!-- TABS CONTENT -->
+    <div class="card border-0 shadow-sm" style="border-radius: 16px;">
+        <div class="card-body bg-light bg-opacity-25 pt-4">
+            <div class="tab-content p-0 m-0 border-0 shadow-none bg-transparent">
             <!-- TAB: PENGAJUAN KELUAR -->
             <div class="tab-pane fade show active" id="navs-keluar" role="tabpanel">
                 <div class="alert alert-info">
                     <i class='bx bx-info-circle'></i> Ini adalah daftar warga Anda yang meminta pindah ke desa lain, atau warga yang ditarik oleh Kepala Desa lain. Anda memegang "Kunci Gembok" NIK mereka.
                 </div>
-                <div class="table-responsive text-nowrap">
-                    <table class="table table-hover">
+                <div class="table-responsive text-nowrap mt-3">
+                    <table class="table table-modern align-middle w-100">
                         <thead>
                             <tr>
                                 <th>Nama & NIK</th>
@@ -128,8 +196,8 @@
                 <div class="alert alert-warning">
                     <i class='bx bx-time'></i> Daftar warga yang ingin masuk ke desa Anda namun masih menunggu desa lamanya melepaskan data (menunggu Handshake Kades lama).
                 </div>
-                <div class="table-responsive text-nowrap">
-                    <table class="table table-hover">
+                <div class="table-responsive text-nowrap mt-3">
+                    <table class="table table-modern align-middle w-100">
                         <thead>
                             <tr>
                                 <th>Nama & NIK</th>
@@ -170,8 +238,8 @@
 
             <!-- TAB: RIWAYAT -->
             <div class="tab-pane fade" id="navs-riwayat" role="tabpanel">
-                <div class="table-responsive text-nowrap">
-                    <table class="table table-hover">
+                <div class="table-responsive text-nowrap mt-3">
+                    <table class="table table-modern align-middle w-100">
                         <thead>
                             <tr>
                                 <th>Tgl</th>
@@ -204,6 +272,8 @@
                 <div class="mt-3">{{ $riwayat->links() }}</div>
             </div>
         </div>
+    </div>
+    </div>
     </div>
 </div>
 

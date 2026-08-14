@@ -4,7 +4,8 @@ $isRentalActive = collect($activeServices)->contains(fn($name) => str_contains(s
 $isGasActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'gas'));
 $isMobilActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'mobil'));
 $isFasilitasActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'fasilitas'));
-$totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasilitasActive])->filter()->count();
+$isPasarActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'pasar'));
+$totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasilitasActive, $isPasarActive])->filter()->count();
 @endphp
 
 @if($totalActive === 0)
@@ -26,7 +27,7 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                         </div>
                         <div>
                             <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Total Transaksi</small>
-                            <h4 class="fw-bold mb-0 text-dark"><span class="count-up" data-value="{{ $rentalRequests->count() + $gasOrders->count() + $mobilBookings->count() + $fasilitasBookings->count() }}">0</span></h4>
+                            <h4 class="fw-bold mb-0 text-dark"><span class="count-up" data-value="{{ $rentalRequests->count() + $gasOrders->count() + $mobilBookings->count() + $fasilitasBookings->count() + $pasarOrders->count() }}">0</span></h4>
                         </div>
                     </div>
                 </div>
@@ -41,7 +42,7 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                         </div>
                         <div>
                             <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Selesai</small>
-                            <h4 class="fw-bold mb-0 text-dark"><span class="count-up" data-value="{{ $rentalRequests->where('status', 'completed')->count() + $gasOrders->where('status', 'completed')->count() + $mobilBookings->where('status', 'completed')->count() + $fasilitasBookings->where('status', 'completed')->count() }}">0</span></h4>
+                            <h4 class="fw-bold mb-0 text-dark"><span class="count-up" data-value="{{ $rentalRequests->where('status', 'completed')->count() + $gasOrders->where('status', 'completed')->count() + $mobilBookings->where('status', 'completed')->count() + $fasilitasBookings->where('status', 'completed')->count() + $pasarOrders->where('status', 'completed')->count() }}">0</span></h4>
                         </div>
                     </div>
                 </div>
@@ -52,8 +53,8 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
             <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden position-relative">
                 <div class="card-body p-3">
                     <div class="d-flex align-items-center mb-2">
-                         <div class="avatar avatar-md bg-info-subtle text-info rounded-3 p-2 me-3">
-                            <i class="bx bx-wrench fs-3"></i>
+                         <div class="avatar avatar-md bg-info-subtle rounded-3 p-2 me-3 d-flex align-items-center justify-content-center">
+                            <img src="{{ asset('User/img/elemen/F1.png') }}" style="width: 44px; height: 44px; object-fit: contain;">
                         </div>
                         <div>
                             <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Penyewaan</small>
@@ -69,8 +70,8 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
              <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden position-relative">
                 <div class="card-body p-3">
                     <div class="d-flex align-items-center mb-2">
-                         <div class="avatar avatar-md bg-warning-subtle text-warning rounded-3 p-2 me-3">
-                            <i class="bx bxs-gas-pump fs-3"></i>
+                         <div class="avatar avatar-md bg-success-subtle rounded-3 p-2 me-3 d-flex align-items-center justify-content-center">
+                            <img src="{{ asset('User/img/elemen/F2.png') }}" style="width: 44px; height: 44px; object-fit: contain;">
                         </div>
                         <div>
                             <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Gas</small>
@@ -86,8 +87,8 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
              <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden position-relative">
                 <div class="card-body p-3">
                     <div class="d-flex align-items-center mb-2">
-                         <div class="avatar avatar-md bg-danger-subtle text-danger rounded-3 p-2 me-3">
-                            <i class="bx bx-car fs-3"></i>
+                         <div class="avatar avatar-md bg-primary-subtle rounded-3 p-2 me-3 d-flex align-items-center justify-content-center">
+                            <img src="{{ asset('User/img/elemen/mobil.png') }}" style="width: 44px; height: 44px; object-fit: contain;">
                         </div>
                         <div>
                             <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Sewa Mobil</small>
@@ -103,12 +104,29 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
              <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden position-relative">
                 <div class="card-body p-3">
                     <div class="d-flex align-items-center mb-2">
-                         <div class="avatar avatar-md bg-secondary-subtle text-secondary rounded-3 p-2 me-3">
-                            <i class="bx bx-building fs-3"></i>
+                         <div class="avatar avatar-md bg-warning-subtle rounded-3 p-2 me-3 d-flex align-items-center justify-content-center">
+                            <img src="{{ asset('User/img/elemen/fasilitas.png') }}" style="width: 44px; height: 44px; object-fit: contain;">
                         </div>
                         <div>
                             <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Fasilitas Umum</small>
                             <h4 class="fw-bold mb-0 text-dark"><span class="count-up" data-value="{{ $fasilitasBookings->count() }}">0</span></h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
+        @if($isPasarActive)
+        <div class="col-md-4 col-6">
+             <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden position-relative">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-center mb-2">
+                         <div class="avatar avatar-md bg-secondary-subtle rounded-3 p-2 me-3 d-flex align-items-center justify-content-center">
+                            <img src="{{ asset('Admin/img/pasardaerah/PasarDaerah2.png') }}" style="width: 44px; height: 44px; object-fit: contain;">
+                        </div>
+                        <div>
+                            <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Pasar Daerah</small>
+                            <h4 class="fw-bold mb-0 text-dark"><span class="count-up" data-value="{{ $pasarOrders->count() }}">0</span></h4>
                         </div>
                     </div>
                 </div>
@@ -124,7 +142,7 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                 @if($isRentalActive)
                 <li class="nav-item" role="presentation">
                     <button class="nav-link {{ $totalActive > 0 ? 'active' : '' }} rounded-pill px-4 fw-semibold" id="rental-tab" data-bs-toggle="tab" data-bs-target="#rental-pane" type="button" role="tab">
-                        <i class="bx bx-wrench me-2"></i>Penyewaan Alat
+                        <img src="{{ asset('User/img/elemen/F1.png') }}" class="me-2" style="width: 24px; height: 24px; object-fit: contain;">Penyewaan Alat
                         <span class="badge bg-white text-primary ms-2 shadow-sm">{{ $rentalRequests->count() }}</span>
                     </button>
                 </li>
@@ -132,7 +150,7 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                 @if($isGasActive)
                 <li class="nav-item" role="presentation">
                     <button class="nav-link {{ !$isRentalActive ? 'active' : '' }} rounded-pill px-4 fw-semibold" id="gas-tab" data-bs-toggle="tab" data-bs-target="#gas-pane" type="button" role="tab">
-                        <i class="bx bxs-gas-pump me-2"></i>Pembelian Gas
+                        <img src="{{ asset('User/img/elemen/F2.png') }}" class="me-2" style="width: 24px; height: 24px; object-fit: contain;">Pembelian Gas
                         <span class="badge bg-white text-primary ms-2 shadow-sm">{{ $gasOrders->count() }}</span>
                     </button>
                 </li>
@@ -140,7 +158,7 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                 @if($isMobilActive)
                 <li class="nav-item" role="presentation">
                     <button class="nav-link {{ !$isRentalActive && !$isGasActive ? 'active' : '' }} rounded-pill px-4 fw-semibold" id="mobil-tab" data-bs-toggle="tab" data-bs-target="#mobil-pane" type="button" role="tab">
-                        <i class="bx bx-car me-2"></i>Sewa Mobil
+                        <img src="{{ asset('User/img/elemen/mobil.png') }}" class="me-2" style="width: 24px; height: 24px; object-fit: contain;">Sewa Mobil
                         <span class="badge bg-white text-primary ms-2 shadow-sm">{{ $mobilBookings->count() }}</span>
                     </button>
                 </li>
@@ -148,8 +166,16 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                 @if($isFasilitasActive)
                 <li class="nav-item" role="presentation">
                     <button class="nav-link {{ !$isRentalActive && !$isGasActive && !$isMobilActive ? 'active' : '' }} rounded-pill px-4 fw-semibold" id="fasilitas-tab" data-bs-toggle="tab" data-bs-target="#fasilitas-pane" type="button" role="tab">
-                        <i class="bx bx-building me-2"></i>Fasilitas Umum
+                        <img src="{{ asset('User/img/elemen/fasilitas.png') }}" class="me-2" style="width: 24px; height: 24px; object-fit: contain;">Fasilitas Umum
                         <span class="badge bg-white text-primary ms-2 shadow-sm">{{ $fasilitasBookings->count() }}</span>
+                    </button>
+                </li>
+                @endif
+                @if($isPasarActive)
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link {{ !$isRentalActive && !$isGasActive && !$isMobilActive && !$isFasilitasActive ? 'active' : '' }} rounded-pill px-4 fw-semibold" id="pasar-tab" data-bs-toggle="tab" data-bs-target="#pasar-pane" type="button" role="tab">
+                        <img src="{{ asset('Admin/img/pasardaerah/PasarDaerah2.png') }}" class="me-2" style="width: 24px; height: 24px; object-fit: contain;">Pasar Daerah
+                        <span class="badge bg-white text-primary ms-2 shadow-sm">{{ $pasarOrders->count() }}</span>
                     </button>
                 </li>
                 @endif
@@ -411,6 +437,64 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                                         </td>
                                         <td class="text-end pe-4">
                                             <a href="{{ route('admin.aktivitas.permintaan-pengajuan.show', [$order->id, 'fasilitas']) }}" class="btn btn-sm btn-light border shadow-sm rounded-pill px-3 text-primary">
+                                                <i class="bx bx-show me-1"></i>Detail
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
+                </div>
+                @endif
+
+                <!-- PASAR DAERAH RESULTS -->
+                @if($isPasarActive)
+                <div class="tab-pane fade {{ !$isRentalActive && !$isGasActive && !$isMobilActive && !$isFasilitasActive ? 'show active' : '' }}" id="pasar-pane" role="tabpanel">
+                    @if($pasarOrders->isEmpty())
+                        <div class="text-center py-5">
+                            <div class="mb-3"><i class="bx bx-store-alt fs-1 text-muted opacity-25"></i></div>
+                            <h6 class="text-muted fw-bold">Tidak ada data transaksi pasar daerah</h6>
+                        </div>
+                    @else
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th class="ps-4 py-3 text-secondary text-uppercase small fw-bold">ID & Tanggal</th>
+                                        <th class="py-3 text-secondary text-uppercase small fw-bold">Pelanggan</th>
+                                        <th class="py-3 text-secondary text-uppercase small fw-bold">Total Pembayaran</th>
+                                        <th class="py-3 text-secondary text-uppercase small fw-bold">Status</th>
+                                        <th class="text-end pe-4 py-3 text-secondary text-uppercase small fw-bold">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($pasarOrders as $order)
+                                    <tr>
+                                        <td class="ps-4">
+                                            <div class="fw-bold text-dark">#{{ $order->order_number ?? $order->id }}</div>
+                                            <small class="text-muted">{{ $order->created_at->format('d/m/Y H:i') }}</small>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                 <div class="avatar avatar-sm border rounded-circle p-1 me-2">
+                                                    <span class="avatar-initial rounded-circle bg-secondary-subtle text-secondary fw-bold">
+                                                        {{ strtoupper(substr($order->user->name ?? 'U', 0, 1)) }}
+                                                    </span>
+                                                </div>
+                                                <span class="fw-medium text-dark">{{ $order->user->name ?? 'Anonim' }}</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="text-primary fw-bold">Rp {{ number_format($order->grand_total ?? 0, 0, ',', '.') }}</div>
+                                            <small class="text-muted">Metode: {{ strtoupper($order->payment_method ?? 'COD') }}</small>
+                                        </td>
+                                        <td>
+                                            @include('admin.partials.status-badge', ['status' => $order->status])
+                                        </td>
+                                        <td class="text-end pe-4">
+                                            <a href="{{ route('admin.unit.pasar_daerah.pesanan.show', $order->id) }}" class="btn btn-sm btn-light border shadow-sm rounded-pill px-3 text-primary">
                                                 <i class="bx bx-show me-1"></i>Detail
                                             </a>
                                         </td>

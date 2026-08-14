@@ -4,7 +4,8 @@ $isRentalActive = collect($activeServices)->contains(fn($name) => str_contains(s
 $isGasActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'gas'));
 $isMobilActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'mobil'));
 $isFasilitasActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'fasilitas'));
-$totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasilitasActive])->filter()->count();
+$isPasarActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'pasar'));
+$totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasilitasActive, $isPasarActive])->filter()->count();
 @endphp
 
 @if($totalActive === 0)
@@ -82,32 +83,38 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
     </div>
 
     <!-- Filter Status -->
-    <div class="d-flex gap-2 mb-4 overflow-auto pb-2">
-        <a href="{{ route('admin.aktivitas.permintaan-pengajuan.index', ['status' => 'all'] + request()->except('status')) }}" 
-           class="btn btn-sm rounded-pill px-3 {{ request('status', 'all') == 'all' ? 'btn-dark' : 'bg-white text-secondary border shadow-sm' }}">
-            Semua
-        </a>
-        <a href="{{ route('admin.aktivitas.permintaan-pengajuan.index', ['status' => 'pending'] + request()->except('status')) }}" 
-           class="btn btn-sm rounded-pill px-3 {{ request('status') == 'pending' ? 'btn-warning text-white' : 'bg-white text-secondary border shadow-sm' }}">
-            Menunggu
-        </a>
-        <a href="{{ route('admin.aktivitas.permintaan-pengajuan.index', ['status' => 'in_process'] + request()->except('status')) }}" 
-           class="btn btn-sm rounded-pill px-3 {{ request('status') == 'in_process' ? 'btn-info text-white' : 'bg-white text-secondary border shadow-sm' }}">
-            Sedang Proses
-        </a>
-        <a href="{{ route('admin.aktivitas.permintaan-pengajuan.index', ['status' => 'completed'] + request()->except('status')) }}" 
-           class="btn btn-sm rounded-pill px-3 {{ request('status') == 'completed' ? 'btn-success text-white' : 'bg-white text-secondary border shadow-sm' }}">
-            Selesai
-        </a>
-        <a href="{{ route('admin.aktivitas.permintaan-pengajuan.index', ['status' => 'rejected'] + request()->except('status')) }}" 
-           class="btn btn-sm rounded-pill px-3 {{ request('status') == 'rejected' ? 'btn-secondary text-white' : 'bg-white text-secondary border shadow-sm' }}">
-            Ditolak
-        </a>
-        <a href="{{ route('admin.aktivitas.permintaan-pengajuan.index', ['status' => 'cancellation_pending'] + request()->except('status')) }}" 
-           class="btn btn-sm rounded-pill px-3 {{ request('status') == 'cancellation_pending' ? 'btn-danger text-white' : 'bg-white text-secondary border shadow-sm' }}">
-            Minta Batal
-        </a>
-    </div>
+    <ul class="nav nav-pills d-flex flex-wrap gap-2 mb-4 overflow-auto pb-2" style="border: none;">
+        <li class="nav-item">
+            <button type="button" class="nav-link filter-btn filter-btn-primary filter-status-btn {{ request('status', 'all') == 'all' ? 'active' : '' }}" data-status-filter="all">
+                <i class="bx bx-list-ul me-1"></i> Semua
+            </button>
+        </li>
+        <li class="nav-item">
+            <button type="button" class="nav-link filter-btn filter-btn-warning filter-status-btn {{ request('status') == 'pending' ? 'active' : '' }}" data-status-filter="pending">
+                <i class="bx bx-time me-1"></i> Menunggu
+            </button>
+        </li>
+        <li class="nav-item">
+            <button type="button" class="nav-link filter-btn filter-btn-info filter-status-btn {{ request('status') == 'in_process' ? 'active' : '' }}" data-status-filter="in_process">
+                <i class="bx bx-loader-circle me-1"></i> Sedang Proses
+            </button>
+        </li>
+        <li class="nav-item">
+            <button type="button" class="nav-link filter-btn filter-btn-success filter-status-btn {{ request('status') == 'completed' ? 'active' : '' }}" data-status-filter="completed">
+                <i class="bx bx-check-circle me-1"></i> Selesai
+            </button>
+        </li>
+        <li class="nav-item">
+            <button type="button" class="nav-link filter-btn filter-btn-danger filter-status-btn {{ request('status') == 'rejected' ? 'active' : '' }}" data-status-filter="rejected">
+                <i class="bx bx-x-circle me-1"></i> Ditolak
+            </button>
+        </li>
+        <li class="nav-item">
+            <button type="button" class="nav-link filter-btn filter-btn-danger filter-status-btn {{ request('status') == 'cancellation_pending' ? 'active' : '' }}" data-status-filter="cancellation_pending">
+                <i class="bx bx-shield-x me-1"></i> Minta Batal
+            </button>
+        </li>
+    </ul>
 
     <!-- Tab Konten Utama -->
     <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
@@ -116,7 +123,7 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                 @if($isRentalActive)
                 <li class="nav-item" role="presentation">
                     <button class="nav-link {{ $activeTab == 'rental' || (!$isRentalActive && $totalActive > 0) ? 'active' : '' }} rounded-pill px-4 fw-semibold" id="rental-tab" data-bs-toggle="tab" data-bs-target="#rental-pane" type="button" role="tab">
-                        <i class="bx bx-wrench me-2"></i>Penyewaan Alat
+                        <img src="{{ asset('User/img/elemen/F1.png') }}" class="me-2" style="width: 28px; height: 28px; object-fit: contain;">Penyewaan Alat
                         @php $rentalTotal = $notificationCounts['rental']['total'] ?? 0; @endphp
                         @php $rentalCount = $rentalTotal > 0 ? $rentalTotal : $rentalRequests->count(); @endphp
                         <span id="rental-badge" 
@@ -130,7 +137,7 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                 @if($isGasActive)
                 <li class="nav-item" role="presentation">
                     <button class="nav-link {{ $activeTab == 'gas' || (!$isRentalActive && $activeTab == 'rental') ? 'active' : '' }} rounded-pill px-4 fw-semibold" id="gas-tab" data-bs-toggle="tab" data-bs-target="#gas-pane" type="button" role="tab">
-                        <i class="bx bxs-gas-pump me-2"></i>Pembelian Gas
+                        <img src="{{ asset('User/img/elemen/F2.png') }}" class="me-2" style="width: 28px; height: 28px; object-fit: contain;">Pembelian Gas
                         @php $gasTotal = $notificationCounts['gas']['total'] ?? 0; @endphp
                         @php $gasCount = $gasTotal > 0 ? $gasTotal : $gasOrders->count(); @endphp
                         <span id="gas-badge" 
@@ -144,7 +151,7 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                 @if($isMobilActive)
                 <li class="nav-item" role="presentation">
                     <button class="nav-link {{ $activeTab == 'mobil' || (!$isRentalActive && !$isGasActive && $activeTab == 'rental') ? 'active' : '' }} rounded-pill px-4 fw-semibold" id="mobil-tab" data-bs-toggle="tab" data-bs-target="#mobil-pane" type="button" role="tab">
-                        <i class="bx bx-car me-2"></i>Penyewaan Mobil
+                        <img src="{{ asset('User/img/elemen/mobil.png') }}" class="me-2" style="width: 28px; height: 28px; object-fit: contain;">Penyewaan Mobil
                         @php $mobilTotal = $notificationCounts['mobil']['total'] ?? 0; @endphp
                         @php $mobilCount = $mobilTotal > 0 ? $mobilTotal : $mobilRequests->count(); @endphp
                         <span id="mobil-badge" 
@@ -158,13 +165,27 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                 @if($isFasilitasActive)
                 <li class="nav-item" role="presentation">
                     <button class="nav-link {{ $activeTab == 'fasilitas' || (!$isRentalActive && !$isGasActive && !$isMobilActive && $activeTab == 'rental') ? 'active' : '' }} rounded-pill px-4 fw-semibold" id="fasilitas-tab" data-bs-toggle="tab" data-bs-target="#fasilitas-pane" type="button" role="tab">
-                        <i class="bx bx-building-house me-2"></i>Fasilitas Umum
+                        <img src="{{ asset('User/img/elemen/fasilitas.png') }}" class="me-2" style="width: 28px; height: 28px; object-fit: contain;">Fasilitas Umum
                         @php $fasilitasTotal = $notificationCounts['fasilitas']['total'] ?? 0; @endphp
                         @php $fasilitasCount = $fasilitasTotal > 0 ? $fasilitasTotal : $fasilitasRequests->count(); @endphp
                         <span id="fasilitas-badge" 
                               class="badge {{ $fasilitasTotal > 0 ? 'bg-danger text-white' : 'bg-white text-primary' }} ms-2 shadow-sm"
                               data-default-count="{{ $fasilitasRequests->count() }}">
                             {{ $fasilitasCount }}
+                        </span>
+                    </button>
+                </li>
+                @endif
+                @if($isPasarActive)
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link {{ $activeTab == 'pasar' || (!$isRentalActive && !$isGasActive && !$isMobilActive && !$isFasilitasActive && $activeTab == 'rental') ? 'active' : '' }} rounded-pill px-4 fw-semibold" id="pasar-tab" data-bs-toggle="tab" data-bs-target="#pasar-pane" type="button" role="tab">
+                        <img src="{{ asset('Admin/img/pasardaerah/PasarDaerah2.png') }}" class="me-2" style="width: 28px; height: 28px; object-fit: contain;">Pasar Daerah
+                        @php $pasarTotal = $notificationCounts['pasar']['total'] ?? 0; @endphp
+                        @php $pasarCount = $pasarTotal > 0 ? $pasarTotal : $pasarOrders->count(); @endphp
+                        <span id="pasar-badge" 
+                              class="badge {{ $pasarTotal > 0 ? 'bg-danger text-white' : 'bg-white text-primary' }} ms-2 shadow-sm"
+                              data-default-count="{{ $pasarOrders->count() }}">
+                            {{ $pasarCount }}
                         </span>
                     </button>
                 </li>
@@ -208,7 +229,7 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                         </div>
                     @else
                         <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
+                            <table class="table table-modern align-middle w-100">
                                 <thead class="bg-light">
                                     <tr>
                                         <th class="ps-4 py-3 text-secondary text-uppercase small fw-bold">Nama Penyewa</th>
@@ -220,7 +241,7 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                                 </thead>
                                 <tbody>
                                     @foreach($rentalRequests as $req)
-                                    <tr>
+                                    <tr data-status="{{ $req->status }}" data-cancel-status="{{ $req->cancellation_status }}">
                                         <td class="ps-4">
                                             <div class="d-flex align-items-center">
                                                 <div class="avatar avatar-sm border rounded-circle p-1 me-3">
@@ -354,7 +375,7 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                         </div>
                     @else
                         <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
+                            <table class="table table-modern align-middle w-100">
                                 <thead class="bg-light">
                                     <tr>
                                         <th class="ps-4 py-3 text-secondary text-uppercase small fw-bold">Nama Pembeli</th>
@@ -366,12 +387,11 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                                 </thead>
                                 <tbody>
                                     @foreach($gasOrders as $order)
-                                    <tr>
+                                    <tr data-status="{{ $order->status }}" data-cancel-status="{{ $order->cancellation_status }}">
                                         <td class="ps-4">
                                             <div class="d-flex align-items-center">
                                                 <div class="avatar avatar-sm border rounded-circle p-1 me-3">
                                                     <span class="avatar-initial rounded-circle bg-info-subtle text-info fw-bold">
-                                                        {{ strtoupper(substr($order->full_name ?? $order->user->name, 0, 1)) }}
                                                     </span>
                                                 </div>
                                                 <div>
@@ -457,7 +477,7 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                         </div>
                     @else
                         <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
+                            <table class="table table-modern align-middle w-100">
                                 <thead class="bg-light">
                                     <tr>
                                         <th class="ps-4 py-3 text-secondary text-uppercase small fw-bold">Penyewa</th>
@@ -469,7 +489,7 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                                 </thead>
                                 <tbody>
                                     @foreach($mobilRequests as $req)
-                                    <tr>
+                                    <tr data-status="{{ $req->status }}" data-cancel-status="{{ $req->cancellation_status }}">
                                         <td class="ps-4">
                                             <div class="d-flex align-items-center">
                                                 <div class="avatar avatar-sm border rounded-circle p-1 me-3">
@@ -579,7 +599,7 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                         </div>
                     @else
                         <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
+                            <table class="table table-modern align-middle w-100">
                                 <thead class="bg-light">
                                     <tr>
                                         <th class="ps-4 py-3 text-secondary text-uppercase small fw-bold">Penyewa</th>
@@ -591,7 +611,7 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                                 </thead>
                                 <tbody>
                                     @foreach($fasilitasRequests as $req)
-                                    <tr>
+                                    <tr data-status="{{ $req->status }}" data-cancel-status="{{ $req->cancellation_status }}">
                                         <td class="ps-4">
                                             <div class="d-flex align-items-center">
                                                 <div class="avatar avatar-sm border rounded-circle p-1 me-3">
@@ -685,6 +705,99 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                 </div>
                 @endif
 
+
+                <!-- PASAR DAERAH TAB -->
+                @if($isPasarActive)
+                <div class="tab-pane fade {{ $activeTab == 'pasar' || (!$isRentalActive && !$isGasActive && !$isMobilActive && !$isFasilitasActive && $activeTab == 'rental') ? 'show active' : '' }}" id="pasar-pane" role="tabpanel">
+                    @if($pasarOrders->isEmpty())
+                        <div class="text-center py-5">
+                            <div class="mb-3"><i class="bx bx-store fs-1 text-muted opacity-25"></i></div>
+                            <h6 class="text-muted fw-bold">Belum ada pesanan pasar daerah</h6>
+                            <p class="text-muted small mb-0">Pesanan pasar daerah yang masuk akan muncul di sini.</p>
+                        </div>
+                    @else
+                        <div class="table-responsive">
+                            <table class="table table-modern align-middle w-100">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th class="ps-4 py-3 text-secondary text-uppercase small fw-bold">Pembeli</th>
+                                        <th class="py-3 text-secondary text-uppercase small fw-bold">Pesanan & Produk</th>
+                                        <th class="py-3 text-secondary text-uppercase small fw-bold">Waktu Pesan</th>
+                                        <th class="py-3 text-secondary text-uppercase small fw-bold text-center">Status</th>
+                                        <th class="pe-4 py-3 text-secondary text-uppercase small fw-bold text-end">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($pasarOrders as $req)
+                                    <tr data-status="{{ $req->status }}" data-cancel-status="{{ $req->cancellation_status }}">
+                                        <td class="ps-4">
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar avatar-sm border rounded-circle p-1 me-3">
+                                                    <i class="bx bx-user text-secondary fs-4"></i>
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-0 fw-bold text-dark">{{ $req->user->name ?? $req->full_name }}</h6>
+                                                    <small class="text-muted">{{ $req->user->phone ?? $req->phone }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="me-3">
+                                                    <div class="bg-primary-subtle text-primary rounded-3 p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                                        <i class="bx bx-store fs-4"></i>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-0 fw-bold text-dark">Pesanan: {{ $req->order_number }}</h6>
+                                                    <small class="text-muted">{{ $req->items->count() }} jenis produk - Total: Rp {{ number_format($req->grand_total, 0, ',', '.') }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center text-muted small">
+                                                <i class="bx bx-calendar me-1"></i>
+                                                {{ $req->created_at->format('d M Y') }} <br>
+                                                <i class="bx bx-time me-1 mt-1"></i>
+                                                {{ $req->created_at->format('H:i') }}
+                                            </div>
+                                        </td>
+                                        <td class="text-center">
+                                            @if($req->cancellation_status == 'pending')
+                                                <span class="badge bg-danger text-white py-1 px-3 rounded-pill fw-medium d-inline-flex align-items-center shadow-sm">
+                                                    <i class="bx bx-shield-x me-1"></i> Minta Batal
+                                                </span>
+                                            @elseif(in_array($req->status, ['pending', 'paid']))
+                                                <span class="badge bg-warning text-dark py-1 px-3 rounded-pill fw-medium d-inline-flex align-items-center shadow-sm">
+                                                    <i class="bx bx-time me-1"></i> Menunggu
+                                                </span>
+                                            @elseif(in_array($req->status, ['confirmed', 'in_delivery']))
+                                                <span class="badge bg-info text-white py-1 px-3 rounded-pill fw-medium d-inline-flex align-items-center shadow-sm">
+                                                    <i class="bx bx-loader-circle bx-spin me-1"></i> Diproses
+                                                </span>
+                                            @elseif($req->status == 'completed')
+                                                <span class="badge bg-success text-white py-1 px-3 rounded-pill fw-medium d-inline-flex align-items-center shadow-sm">
+                                                    <i class="bx bx-check-circle me-1"></i> Selesai
+                                                </span>
+                                            @else
+                                                <span class="badge bg-secondary text-white py-1 px-3 rounded-pill fw-medium d-inline-flex align-items-center shadow-sm">
+                                                    <i class="bx bx-x-circle me-1"></i> {{ ucfirst($req->status) }}
+                                                </span>
+                                            @endif
+                                        </td>
+                                        <td class="pe-4 text-end">
+                                            <a href="{{ route('admin.unit.pasar_daerah.pesanan.show', $req->id) }}" class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm" title="Kelola">
+                                                <i class="bx bx-cog me-1"></i> Kelola
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
+                </div>
+                @endif
             </div>
         </div>
     </div>
@@ -1037,15 +1150,51 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
         });
     });
 
-    // Force reload on back button (bfcache)
-    window.onpageshow = function(event) {
-        if (event.persisted) {
-            window.location.reload();
-        }
-    };
-
     document.addEventListener('DOMContentLoaded', function() {
-        // Function to update filter links
+        // Client-side status filtering logic
+        const statusFilters = document.querySelectorAll('.filter-status-btn');
+        statusFilters.forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Update active state visually
+                statusFilters.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                const filterValue = this.getAttribute('data-status-filter');
+                
+                // Update URL parameter without reloading
+                let url = new URL(window.location.href);
+                if (filterValue === 'all') {
+                    url.searchParams.delete('status');
+                } else {
+                    url.searchParams.set('status', filterValue);
+                }
+                window.history.replaceState({}, '', url);
+
+                // Filter rows in all modern tables
+                document.querySelectorAll('.table-modern tbody tr').forEach(row => {
+                    if (filterValue === 'all') {
+                        row.style.display = '';
+                        return;
+                    }
+                    
+                    const rowStatus = row.getAttribute('data-status');
+                    const rowCancel = row.getAttribute('data-cancel-status');
+                    
+                    let isMatch = false;
+                    if (filterValue === 'cancellation_pending' && rowCancel === 'pending') isMatch = true;
+                    else if (filterValue === 'pending' && rowStatus === 'pending') isMatch = true;
+                    else if (filterValue === 'in_process' && ['confirmed', 'approved', 'being_prepared', 'in_delivery', 'arrived', 'ongoing', 'process', 'delivering'].includes(rowStatus)) isMatch = true;
+                    else if (filterValue === 'completed' && ['completed', 'resolved', 'returned'].includes(rowStatus)) isMatch = true;
+                    else if (filterValue === 'rejected' && ['cancelled', 'rejected'].includes(rowStatus)) isMatch = true;
+                    
+                    row.style.display = isMatch ? '' : 'none';
+                });
+            });
+        });
+
+        // Function to update filter links (tab category only)
         function updateFilterLinks(type) {
             const filterLinks = document.querySelectorAll('.d-flex.gap-2.mb-4.overflow-auto a');
             filterLinks.forEach(link => {
@@ -1114,3 +1263,12 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                 container.innerHTML = '<i class="bx bx-bell bx-tada me-2"></i>Anda memiliki: ' + messages.join(', ');
                 container.classList.remove('d-none');
             } else {
+                container.innerHTML = '';
+                container.classList.add('d-none');
+            }
+        }
+
+        // Check initially and poll every 15 seconds
+        setInterval(checkNotificationCounts, 15000);
+    });
+</script>

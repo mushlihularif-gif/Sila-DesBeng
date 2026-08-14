@@ -243,10 +243,34 @@ class PasarDaerahController extends Controller
             return redirect()->route('pasar.cart')->with('error', 'Keranjang belanja Anda kosong.');
         }
 
-        $region_id = Auth::user()->region_id;
-        $region = Region::find($region_id);
+        $buyer = Region::find(Auth::user()->region_id);
+        $seller = Region::find($carts->first()->produk->region_id);
+        $settings = $seller ? $seller->settings : [];
         
-        return view('users.pasar-checkout', compact('carts', 'region'));
+        // Hitung Ongkir Wilayah
+        $ongkir = 0;
+        if ($buyer && $seller) {
+            if ($buyer->id === $seller->id) {
+                $ongkir = $settings['ongkir_dalam_desa'] ?? 0;
+            } elseif ($buyer->parent_id === $seller->parent_id) {
+                $ongkir = $settings['ongkir_luar_desa'] ?? 10000;
+            } else {
+                // Luar Kecamatan
+                $tipe = $settings['tipe_ongkir_luar_kecamatan'] ?? 'pukul_rata';
+                if ($tipe == 'pukul_rata') {
+                    $ongkir = $settings['ongkir_luar_kecamatan'] ?? 25000;
+                } else {
+                    $khusus = $settings['ongkir_kecamatan_khusus'] ?? [];
+                    if (isset($khusus[$buyer->parent_id])) {
+                        $ongkir = $khusus[$buyer->parent_id];
+                    } else {
+                        $ongkir = -1; // Flag: Tidak melayani kecamatan ini
+                    }
+                }
+            }
+        }
+        
+        return view('users.pasar-checkout', compact('carts', 'buyer', 'seller', 'ongkir'));
     }
 
     /**
@@ -286,16 +310,31 @@ class PasarDaerahController extends Controller
 
         // Hitung Ongkir
         $shippingCost = 0;
-        $distanceKm = 0;
+        $distanceKm = 0; // Jarak dihapus, diset 0
         if ($validated['delivery_method'] === 'antar') {
-            // Ambil koordinat toko dari produk pertama (asumsi 1 toko)
-            $storeLat = $carts->first()->produk->latitude;
-            $storeLon = $carts->first()->produk->longitude;
-            $ratePerKm = $settings['ongkir_per_km'] ?? 0;
-
-            if ($storeLat && $storeLon && $validated['delivery_latitude'] && $validated['delivery_longitude']) {
-                $distanceKm = $this->haversineDistance($storeLat, $storeLon, $validated['delivery_latitude'], $validated['delivery_longitude']);
-                $shippingCost = round($distanceKm * $ratePerKm);
+            $buyer = Region::find(Auth::user()->region_id);
+            $seller = Region::find($carts->first()->produk->region_id);
+            $settings = $seller ? $seller->settings : [];
+            
+            if ($buyer && $seller) {
+                if ($buyer->id === $seller->id) {
+                    $shippingCost = $settings['ongkir_dalam_desa'] ?? 0;
+                } elseif ($buyer->parent_id === $seller->parent_id) {
+                    $shippingCost = $settings['ongkir_luar_desa'] ?? 10000;
+                } else {
+                    // Luar Kecamatan
+                    $tipe = $settings['tipe_ongkir_luar_kecamatan'] ?? 'pukul_rata';
+                    if ($tipe == 'pukul_rata') {
+                        $shippingCost = $settings['ongkir_luar_kecamatan'] ?? 25000;
+                    } else {
+                        $khusus = $settings['ongkir_kecamatan_khusus'] ?? [];
+                        if (isset($khusus[$buyer->parent_id])) {
+                            $shippingCost = $khusus[$buyer->parent_id];
+                        } else {
+                            return response()->json(['success' => false, 'message' => 'Toko tidak melayani pengiriman ke kecamatan Anda.'], 400);
+                        }
+                    }
+                }
             }
         }
 
@@ -310,6 +349,17 @@ class PasarDaerahController extends Controller
 
         \DB::beginTransaction();
         try {
+            // Update GPS user jika mereka memesan dengan diantar
+            if ($validated['delivery_method'] === 'antar' && $validated['delivery_latitude'] && $validated['delivery_longitude']) {
+                $user = Auth::user();
+                $user->latitude = $validated['delivery_latitude'];
+                $user->longitude = $validated['delivery_longitude'];
+                if ($validated['delivery_address']) {
+                    $user->address = $validated['delivery_address'];
+                }
+                $user->save();
+            }
+
             // Create Order
             $order = PasarOrder::create([
                 'order_number' => $orderNumber,

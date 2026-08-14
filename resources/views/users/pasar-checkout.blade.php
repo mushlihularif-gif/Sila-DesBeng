@@ -396,14 +396,16 @@
 
                                 <div class="co-input-group">
                                     <label class="co-label">Titik Lokasi Antar <span class="required">*</span></label>
-                                    <div class="map-info">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                        <span>Geser <b>marker merah</b> pada peta ke titik lokasi pengantaran untuk perhitungan ongkir.</span>
+                                    <div class="map-info" style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 12px; border-radius: 12px; margin-bottom: 12px; display: flex; gap: 8px; align-items: flex-start;">
+                                        <svg class="w-5 h-5 text-emerald-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                        <div style="font-size: 0.8rem; color: #166534;">
+                                            Geser <b>marker merah</b> pada peta tepat di atas rumah Anda. Titik ini akan digunakan sebagai <b>panduan jalan bagi kurir</b> untuk mengantar barang.
+                                        </div>
                                     </div>
                                     <div id="map"></div>
                                     <input type="hidden" name="delivery_latitude" id="delivery_latitude">
                                     <input type="hidden" name="delivery_longitude" id="delivery_longitude">
-                                    <p class="distance-info" id="distanceInfo">Jarak belum dihitung</p>
+                                    <p class="distance-info" id="distanceInfo" style="display: none;"></p>
                                 </div>
                             </div>
                         </div>
@@ -525,7 +527,7 @@
                                             <div class="bank-number">{{ $region->settings['rekening_nomor'] ?? '123-456-7890' }}</div>
                                             <div class="bank-holder">a.n {{ $region->settings['rekening_nama'] ?? 'Pusat Layanan Daerah ' . $region->name }}</div>
                                         </div>
-                                        <button type="button" onclick="navigator.clipboard.writeText('{{ $region->settings['rekening_nomor'] ?? '1234567890' }}'); Swal.fire({toast: true, position: 'top-end', icon: 'success', title: 'Disalin!', showConfirmButton: false, timer: 1500})" class="copy-btn">
+                                        <button type="button" onclick="navigator.clipboard.writeText('{{ $region->settings['rekening_nomor'] ?? '1234567890' }}'); showSiladesBengToast('success', 'Disalin!', 'Nomor rekening berhasil disalin.', 1500)" class="copy-btn">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
                                         </button>
                                     </div>
@@ -606,10 +608,21 @@
                                     <span class="value" id="summaryGrandTotal">Rp {{ number_format($totalAmount, 0, ',', '.') }}</span>
                                 </div>
 
-                                <button type="button" onclick="submitOrder()" id="btnSubmit" class="co-submit-btn">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
-                                    Buat Pesanan Sekarang
-                                </button>
+                                @if($ongkir == -1)
+                                    <div class="p-3 mb-4 rounded-xl border border-red-200 bg-red-50 text-red-600 text-sm font-semibold flex items-center gap-2">
+                                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                        <span>Toko belum melayani pengiriman ke kecamatan Anda.</span>
+                                    </div>
+                                    <button type="button" disabled class="co-submit-btn" style="background: #94a3b8; box-shadow: none; cursor: not-allowed; opacity: 1;">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
+                                        Pengiriman Tidak Tersedia
+                                    </button>
+                                @else
+                                    <button type="button" onclick="submitOrder()" id="btnSubmit" class="co-submit-btn">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                                        Buat Pesanan Sekarang
+                                    </button>
+                                @endif
                             </div>
                         </div>
 
@@ -701,12 +714,11 @@
 
     // Constants
     const baseTotal = {{ $totalAmount }};
-    const ongkirPerKm = {{ $region->settings['ongkir_per_km'] ?? 0 }};
+    const fixedOngkir = {{ $ongkir == -1 ? 0 : $ongkir }};
     const storeLat = parseFloat("{{ $carts->first()->produk->latitude ?? '1.482755' }}") || 1.482755;
     const storeLon = parseFloat("{{ $carts->first()->produk->longitude ?? '102.138407' }}") || 102.138407;
 
-    let currentOngkir = 0;
-    let currentDistance = 0;
+    let currentOngkir = fixedOngkir;
     let map, marker;
 
     function initMap() {
@@ -744,21 +756,6 @@
     function updateCoordinates(latlng) {
         document.getElementById('delivery_latitude').value = latlng.lat;
         document.getElementById('delivery_longitude').value = latlng.lng;
-        calculateDistance(latlng.lat, latlng.lng);
-    }
-
-    function calculateDistance(lat, lon) {
-        const R = 6371;
-        const dLat = (lat - storeLat) * Math.PI / 180;
-        const dLon = (lon - storeLon) * Math.PI / 180;
-        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                  Math.cos(storeLat * Math.PI / 180) * Math.cos(lat * Math.PI / 180) *
-                  Math.sin(dLon/2) * Math.sin(dLon/2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        currentDistance = (R * c).toFixed(2);
-        currentOngkir = Math.round(currentDistance * ongkirPerKm);
-        document.getElementById('distanceInfo').innerText = `Jarak perkiraan: ${currentDistance} km`;
-        updateSummary();
     }
 
     function toggleDelivery(method) {
@@ -769,20 +766,6 @@
             updateSummary();
         } else {
             form.style.display = 'none';
-            currentOngkir = 0;
-            updateSummary();
-        }
-    }
-
-    function toggleDelivery(method) {
-        const form = document.getElementById('deliveryForm');
-        if (method === 'antar') {
-            form.style.display = 'block';
-            setTimeout(() => { initMap(); map.invalidateSize(); }, 150);
-            updateSummary();
-        } else {
-            form.style.display = 'none';
-            currentOngkir = 0;
             updateSummary();
         }
     }
@@ -795,8 +778,14 @@
         const deliveryMethod = document.querySelector('input[name="delivery_method"]:checked').value;
         const appliedOngkir = deliveryMethod === 'antar' ? currentOngkir : 0;
         const grandTotal = baseTotal + appliedOngkir;
-        document.getElementById('summaryOngkir').innerText = formatMoney(appliedOngkir);
-        document.getElementById('summaryDistance').innerText = deliveryMethod === 'antar' && currentDistance > 0 ? `(${currentDistance} km)` : '';
+        
+        if (deliveryMethod === 'antar' && currentOngkir === 0) {
+            document.getElementById('summaryOngkir').innerHTML = `<span style="color:#10b981; font-weight:bold;">Gratis</span>`;
+        } else {
+            document.getElementById('summaryOngkir').innerText = formatMoney(appliedOngkir);
+        }
+        
+        document.getElementById('summaryDistance').innerText = '';
         document.getElementById('summaryGrandTotal').innerText = formatMoney(grandTotal);
         document.getElementById('transferAmount').innerText = formatMoney(grandTotal);
     }
@@ -819,7 +808,7 @@
 
         if (deliveryMethod === 'antar') {
             if (!document.getElementById('delivery_address').value) {
-                Swal.fire({toast: true, position: 'top-end', icon: 'error', title: 'Silakan isi alamat pengiriman.', showConfirmButton: false, timer: 3000});
+                showSiladesBengToast('error', 'Peringatan', 'Silakan isi alamat pengiriman.');
                 return;
             }
         }
@@ -842,14 +831,14 @@
             if (data.success) {
                 window.location.href = `/pasar-daerah/payment/${data.order_id}`;
             } else {
-                Swal.fire({toast: true, position: 'top-end', icon: 'error', title: 'Gagal', text: data.message || 'Terjadi kesalahan.', showConfirmButton: false, timer: 3000});
+                showSiladesBengToast('error', 'Gagal', data.message || 'Terjadi kesalahan.');
                 btn.disabled = false;
                 btn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg> Buat Pesanan Sekarang';
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            Swal.fire({toast: true, position: 'top-end', icon: 'error', title: 'Error', text: 'Terjadi kesalahan pada sistem.', showConfirmButton: false, timer: 3000});
+            showSiladesBengToast('error', 'Error', 'Terjadi kesalahan pada sistem.');
             btn.disabled = false;
             btn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg> Buat Pesanan Sekarang';
         });
