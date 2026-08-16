@@ -95,6 +95,18 @@ class UserManagementController extends Controller
             },
             'gasTransactions' => function ($query) {
                 $query->withTrashed()->with('gas')->latest()->take(10);
+            },
+            'mobilTransactions' => function ($query) {
+                $query->withTrashed()->with('mobil')->latest()->take(10);
+            },
+            'fasilitasTransactions' => function ($query) {
+                $query->withTrashed()->with('fasilitas')->latest()->take(10);
+            },
+            'pasarTransactions' => function ($query) {
+                $query->with('items.produk')->latest()->take(10);
+            },
+            'laporans' => function ($query) {
+                $query->latest()->take(10);
             }
         ])->findOrFail($id);
 

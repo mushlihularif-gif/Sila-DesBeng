@@ -247,7 +247,7 @@
                             'title' => 'Pelaporan Warga',
                             'count' => $laporanPendingCount,
                             'label' => 'Pending',
-                            'route' => route('admin.laporan.index'),
+                            'route' => Route::has('admin.laporan.index') ? route('admin.laporan.index') : '#',
                             'image' => asset('User/img/elemen/lapor.png'),
                             'color' => 'primary'
                         ],

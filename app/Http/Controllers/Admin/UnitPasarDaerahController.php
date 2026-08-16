@@ -28,7 +28,37 @@ class UnitPasarDaerahController extends Controller
         $region = Region::find($admin->region_id);
         $settings = $region ? $region->settings : [];
 
-        return view('admin.unit.pasar_daerah.index', compact('produks', 'settings'));
+        // --- Data Pesanan ---
+        $status = $request->get('status', 'all');
+        $queryPesanan = \App\Models\PasarOrder::where('region_id', $admin->region_id)->with('items.produk', 'user')->latest();
+        if ($status !== 'all') {
+            $queryPesanan->where('status', $status);
+        }
+        $pesanans = $queryPesanan->get();
+
+        // --- Data Laporan ---
+        $startDate = $request->get('start_date');
+        $endDate = $request->get('end_date');
+        $queryLaporan = \App\Models\PasarOrder::where('region_id', $admin->region_id)
+            ->whereIn('status', ['completed'])
+            ->with('items.produk', 'user')
+            ->latest();
+            
+        if ($startDate && $endDate) {
+            $queryLaporan->whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
+        }
+        
+        $laporans = $queryLaporan->get();
+        $totalPendapatan = $laporans->sum('grand_total');
+
+        $tab = $request->get('tab', 'produk');
+
+        // Data Kecamatan
+        $semuaKecamatan = Region::where('type', 'kecamatan')->orderBy('name', 'asc')->get();
+
+        return view('admin.unit.pasar_daerah.index', compact(
+            'produks', 'settings', 'pesanans', 'status', 'laporans', 'startDate', 'endDate', 'totalPendapatan', 'tab', 'semuaKecamatan'
+        ));
     }
 
     /**
@@ -173,14 +203,37 @@ class UnitPasarDaerahController extends Controller
     {
         $request->validate([
             'sop_pasar' => 'nullable|string',
-            'ongkir_per_km' => 'required|numeric|min:0',
+            'ongkir_dalam_desa' => 'required|numeric|min:0',
+            'ongkir_luar_desa' => 'required|numeric|min:0',
+            'tipe_ongkir_luar_kecamatan' => 'required|in:pukul_rata,per_kecamatan',
+            'ongkir_luar_kecamatan' => 'nullable|numeric|min:0',
+            'ongkir_kecamatan_khusus' => 'nullable|array',
+            'ongkir_kecamatan_khusus.*' => 'nullable|numeric|min:0',
         ]);
 
         $region = Region::findOrFail(Auth::user()->region_id);
         
         $settings = $region->settings ?? [];
         $settings['sop_pasar'] = $request->input('sop_pasar');
-        $settings['ongkir_per_km'] = $request->input('ongkir_per_km');
+        $settings['ongkir_dalam_desa'] = $request->input('ongkir_dalam_desa');
+        $settings['ongkir_luar_desa'] = $request->input('ongkir_luar_desa');
+        
+        $tipe = $request->input('tipe_ongkir_luar_kecamatan');
+        $settings['tipe_ongkir_luar_kecamatan'] = $tipe;
+        
+        if ($tipe == 'pukul_rata') {
+            $settings['ongkir_luar_kecamatan'] = $request->input('ongkir_luar_kecamatan') ?? 25000;
+        } else {
+            $khusus = [];
+            if ($request->has('ongkir_kecamatan_khusus')) {
+                foreach ($request->input('ongkir_kecamatan_khusus') as $kec_id => $harga) {
+                    if ($harga !== null && $harga !== '') {
+                        $khusus[$kec_id] = $harga;
+                    }
+                }
+            }
+            $settings['ongkir_kecamatan_khusus'] = $khusus;
+        }
         
         $region->settings = $settings;
         $region->save();

@@ -696,23 +696,15 @@
                 if(isDirectBuy) {
                     window.location.href = '{{ route("pasar.cart") }}';
                 } else {
-                    Swal.fire({
-                        toast: true, 
-                        position: 'top-end', 
-                        icon: 'success', 
-                        title: 'Tersimpan!', 
-                        text: 'Produk ditambahkan ke keranjang.', 
-                        showConfirmButton: false, 
-                        timer: 2000
-                    });
+                    showSiladesBengToast('success', 'Tersimpan!', 'Produk ditambahkan ke keranjang.', 2000);
                 }
             } else {
-                Swal.fire({toast: true, position: 'top-end', icon: 'error', title: 'Gagal', text: data.message || 'Gagal menambahkan ke keranjang', showConfirmButton: false, timer: 3000});
+                showSiladesBengToast('error', 'Gagal', data.message || 'Gagal menambahkan ke keranjang');
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            Swal.fire({toast: true, position: 'top-end', icon: 'error', title: 'Error', text: 'Terjadi kesalahan sistem', showConfirmButton: false, timer: 3000});
+            showSiladesBengToast('error', 'Error', 'Terjadi kesalahan sistem');
         });
     }
 

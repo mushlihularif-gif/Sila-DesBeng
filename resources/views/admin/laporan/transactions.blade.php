@@ -24,18 +24,36 @@
 <div class="container-fluid py-4">
     
     <!-- Page Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h4 class="fw-bold fs-3 mb-1 text-primary">Laporan Transaksi</h4>
-            <p class="text-muted mb-0">Rekapitulasi lengkap seluruh transaksi yang tercatat di {{ auth()->user()->role === 'admin' ? 'Kabupaten Bengkalis' : (auth()->user()->region->name ?? 'Anda') }}</p>
+    <div class="row mb-4">
+        <div class="col-12 d-flex justify-content-between align-items-center">
+            <h4 class="fw-bold py-3 mb-0">
+                <span class="text-muted fw-light">Data & Laporan /</span> Laporan Transaksi
+            </h4>
+            <div class="d-flex gap-2">
+                <button class="btn btn-white border shadow-sm rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#filterModal">
+                    <i class="bx bx-filter-alt me-2"></i>Filter
+                </button>
+                <button class="btn btn-primary shadow-sm rounded-pill px-4" onclick="window.print()">
+                    <i class="bx bx-printer me-2"></i>Cetak
+                </button>
+            </div>
         </div>
-        <div class="d-flex gap-2">
-            <button class="btn btn-primary shadow-sm rounded-pill px-4" onclick="window.print()">
-                <i class="bx bx-printer me-2"></i>Cetak Laporan
-            </button>
-            <button class="btn btn-outline-secondary shadow-sm rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#filterModal">
-                <i class="bx bx-filter-alt me-2"></i>Filter
-            </button>
+    </div>
+
+    <!-- Panduan -->
+    <div class="card bg-label-primary border-0 shadow-none mb-4" style="border-radius: 12px;">
+        <div class="card-body d-flex align-items-center p-4">
+            <div class="me-3">
+                <div class="bg-primary p-3 rounded-circle text-white d-flex align-items-center justify-content-center shadow-sm" style="width: 56px; height: 56px;">
+                    <i class="bx bx-line-chart fs-3"></i>
+                </div>
+            </div>
+            <div>
+                <h5 class="fw-bold mb-1 text-primary">Laporan Transaksi</h5>
+                <p class="mb-0 text-primary" style="opacity: 0.85;">
+                    Rekapitulasi lengkap seluruh transaksi yang tercatat di {{ auth()->user()->role === 'admin' ? 'Kabupaten Bengkalis' : (auth()->user()->region->name ?? 'Anda') }}.
+                </p>
+            </div>
         </div>
     </div>
 

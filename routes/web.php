@@ -633,6 +633,17 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
         Route::get('/bukti-transaksi/{id}/{type}/download', [\App\Http\Controllers\Admin\TransactionController::class, 'downloadProof'])->name('admin.aktivitas.bukti-transaksi.download');
     });
     
+    // Route Pelaporan Warga (Admin Desa ke atas)
+    Route::prefix('pelaporan')->group(function () {
+        Route::get('/arsip', [\App\Http\Controllers\Admin\AdminPelaporanController::class, 'archive'])->name('admin.pelaporan.archive');
+        Route::get('/', [\App\Http\Controllers\Admin\AdminPelaporanController::class, 'index'])->name('admin.pelaporan.index');
+        Route::get('/{id}', [\App\Http\Controllers\Admin\AdminPelaporanController::class, 'show'])->name('admin.pelaporan.show');
+        Route::post('/{id}/respond', [\App\Http\Controllers\Admin\AdminPelaporanController::class, 'respond'])->name('admin.pelaporan.respond');
+        Route::post('/{id}/escalate', [\App\Http\Controllers\Admin\AdminPelaporanController::class, 'escalate'])->name('admin.pelaporan.escalate');
+        Route::post('/{id}/resolve', [\App\Http\Controllers\Admin\AdminPelaporanController::class, 'resolve'])->name('admin.pelaporan.resolve');
+        Route::post('/{id}/reject', [\App\Http\Controllers\Admin\AdminPelaporanController::class, 'reject'])->name('admin.pelaporan.reject');
+    });
+    
     // Route Laporan
     Route::prefix('laporan')->group(function () {
         Route::get('/transaksi', [\App\Http\Controllers\Admin\ReportController::class, 'transactions'])->name('admin.laporan.transaksi');

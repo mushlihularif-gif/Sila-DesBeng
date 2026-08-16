@@ -431,6 +431,7 @@
     <script defer src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- Custom Page Styles -->
     @yield('styles')
+    @stack('styles')
 </head>
 
 <body>
@@ -508,7 +509,7 @@
                                 </li>
                                 @endif
                                 @if(in_array('Pasar Daerah', $activeServicesMenu ?? []))
-                                <li class="menu-item {{ request()->is('admin/unit/pasar_daerah*') ? 'active' : '' }}">
+                                <li class="menu-item {{ request()->is('admin/unit/pasar-daerah*') ? 'active' : '' }}">
                                     <a href="{{ route('admin.unit.pasar_daerah.index') }}" class="menu-link">
                                         <div data-i18n="Pasar Daerah">Pasar Daerah</div>
                                     </a>
@@ -536,7 +537,7 @@
                 @endif
 
                 <!-- Manajemen (Dropdown) -->
-                <li class="menu-item {{ request()->is('admin/manajemen-pengguna*') || request()->is('admin/kelola-wilayah*') || request()->is('admin/banners*') || request()->routeIs('admin.warga.mutasi.*') || request()->routeIs('admin.kyc.*') || request()->routeIs('admin.categories.*') ? 'open active show' : '' }}">
+                <li class="menu-item {{ request()->is('admin/manajemen-pengguna*') || request()->is('admin/kelola-wilayah*') || request()->is('admin/banners*') || request()->routeIs('admin.warga.mutasi.*') || request()->routeIs('admin.kyc.*') || request()->routeIs('admin.staff.*') ? 'open active show' : '' }}">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
                         <i class="menu-icon tf-icons bx bx-briefcase"></i>
                         <div data-i18n="Manajemen">Manajemen</div>
@@ -546,6 +547,11 @@
                         <li class="menu-item {{ request()->routeIs('admin.manajemen-pengguna.*') ? 'active' : '' }}">
                             <a href="{{ route('admin.manajemen-pengguna.index') }}" class="menu-link">
                                 <div>Pengguna</div>
+                            </a>
+                        </li>
+                        <li class="menu-item {{ request()->routeIs('admin.staff.*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.staff.index') }}" class="menu-link">
+                                <div>Kelola Staf</div>
                             </a>
                         </li>
                         <li class="menu-item {{ request()->routeIs('admin.kyc.*') ? 'active' : '' }}">
@@ -568,11 +574,6 @@
                                 <div>Mutasi Penduduk</div>
                             </a>
                         </li>
-                        <li class="menu-item {{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">
-                            <a href="{{ route('admin.categories.index') }}" class="menu-link">
-                                <div>Kategori Produk</div>
-                            </a>
-                        </li>
                         @endif
 
                         @if(in_array(auth()->user()->role, ['super_admin', 'admin', 'admin_kecamatan', 'admin_desa', 'admin_rw']))
@@ -588,7 +589,7 @@
                 <!-- Aktivitas -->
                 @if(in_array(auth()->user()->role, ['super_admin', 'admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt']))
                 <li
-                    class="menu-item {{ request()->is('admin/aktivitas/permintaan-pengajuan*') || request()->is('admin/aktivitas/bukti-transaksi*') || request()->is('admin/kemitraan*') || (request()->routeIs('admin.laporan.*') && !request()->has('status')) ? 'open active show' : '' }}">
+                    class="menu-item {{ request()->is('admin/aktivitas/permintaan-pengajuan*') || request()->is('admin/aktivitas/bukti-transaksi*') || request()->is('admin/kemitraan*') || (request()->routeIs('admin.pelaporan.*') && !request()->routeIs('admin.pelaporan.archive')) ? 'open active show' : '' }}">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
                         <i class="menu-icon tf-icons bx bx-time"></i>
                         <div data-i18n="Permintaan & Aktivitas">Permintaan & Aktivitas</div>
@@ -612,8 +613,8 @@
                             </a>
                         </li>
                         @endif
-                        <li class="menu-item {{ request()->routeIs('admin.laporan.*') && !request()->has('status') ? 'active' : '' }}">
-                            <a href="{{ route('admin.laporan.index') }}" class="menu-link">
+                        <li class="menu-item {{ request()->routeIs('admin.pelaporan.*') && !request()->routeIs('admin.pelaporan.archive') ? 'active' : '' }}">
+                            <a href="{{ Route::has('admin.pelaporan.index') ? route('admin.pelaporan.index') : '#' }}" class="menu-link">
                                 <div>Pelaporan Warga</div>
                             </a>
                         </li>
@@ -621,14 +622,14 @@
                 </li>
                 @endif
                 <!-- Data & Laporan (Dropdown) -->
-                <li class="menu-item {{ request()->routeIs('admin.laporan.*') || (request()->routeIs('admin.laporan.*') && request()->query('status') == 'Selesai') ? 'open active show' : '' }}">
+                <li class="menu-item {{ request()->routeIs('admin.laporan.*') || request()->routeIs('admin.pelaporan.archive') ? 'open active show' : '' }}">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
                         <i class="menu-icon tf-icons bx bx-bar-chart-alt-2"></i>
                         <div data-i18n="Data & Laporan">Data & Laporan</div>
                     </a>
                     <ul class="menu-sub">
-                        <li class="menu-item {{ request()->routeIs('admin.laporan.*') && request()->query('status') == 'Selesai' ? 'active' : '' }}">
-                            <a href="{{ route('admin.laporan.index', ['status' => 'Selesai']) }}" class="menu-link">
+                        <li class="menu-item {{ request()->routeIs('admin.pelaporan.archive') ? 'active' : '' }}">
+                            <a href="{{ route('admin.pelaporan.archive') }}" class="menu-link">
                                 <div data-i18n="Bukti Pelaporan Warga">Bukti Pelaporan Warga</div>
                             </a>
                         </li>
@@ -681,7 +682,7 @@
                         @else
                         <li class="menu-item {{ request()->routeIs('admin.region-settings.index') ? 'active' : '' }}">
                             <a href="{{ route('admin.region-settings.index') }}" class="menu-link">
-                                <div>Layanan Wilayah</div>
+                                <div>Layanan & Metode Pengiriman</div>
                             </a>
                         </li>
                         @if(isset($hasActiveServices) && $hasActiveServices)
@@ -950,47 +951,83 @@
             <script src="{{ asset('Admin/vendor/libs/apex-charts/apexcharts.js') }}"></script>
             <script src="{{ asset('Admin/js/main.js') }}"></script>
             <script src="{{ asset('Admin/js/dashboards-analytics.js') }}"></script>
+            {{-- SiladesBeng Global Toast System (Admin) --}}
+            <style>
+                .sdb-toast-container { position: fixed; top: 70px; right: 24px; z-index: 999999 !important; display: flex; flex-direction: column; gap: 12px; pointer-events: none; }
+                .sdb-toast { pointer-events: auto; display: flex; align-items: flex-start; padding: 16px 18px; border-radius: 14px; box-shadow: 0 8px 30px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06); border-left: 4px solid; max-width: 380px; width: 100%; background: white; opacity: 0; transform: translateX(50px) scale(0.95); transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+                .sdb-toast.sdb-toast-show { opacity: 1; transform: translateX(0) scale(1); }
+                .sdb-toast.sdb-toast-hide { opacity: 0; transform: translateX(50px) scale(0.95); transition: all 0.4s ease-in; }
+                .sdb-toast-success { border-left-color: #22c55e; }
+                .sdb-toast-error { border-left-color: #ef4444; }
+                .sdb-toast-warning { border-left-color: #f59e0b; }
+                .sdb-toast-info { border-left-color: #3b82f6; }
+                .sdb-toast-icon { flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 14px; margin-top: 1px; }
+                .sdb-toast-success .sdb-toast-icon { background: #dcfce7; color: #16a34a; }
+                .sdb-toast-error .sdb-toast-icon { background: #fee2e2; color: #dc2626; }
+                .sdb-toast-warning .sdb-toast-icon { background: #fef3c7; color: #d97706; }
+                .sdb-toast-info .sdb-toast-icon { background: #dbeafe; color: #2563eb; }
+                .sdb-toast-body { flex: 1; min-width: 0; }
+                .sdb-toast-title { font-size: 14px; font-weight: 700; color: #1e293b; margin-bottom: 2px; }
+                .sdb-toast-msg { font-size: 13px; color: #64748b; line-height: 1.4; }
+                .sdb-toast-close { flex-shrink: 0; margin-left: 12px; background: none; border: none; cursor: pointer; color: #94a3b8; padding: 4px; border-radius: 6px; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
+                .sdb-toast-close:hover { background: #f1f5f9; color: #475569; }
+                .sdb-toast-progress { position: absolute; bottom: 0; left: 4px; right: 0; height: 3px; border-radius: 0 0 14px 0; }
+                .sdb-toast-success .sdb-toast-progress { background: linear-gradient(90deg, #22c55e, #86efac); }
+                .sdb-toast-error .sdb-toast-progress { background: linear-gradient(90deg, #ef4444, #fca5a5); }
+                .sdb-toast-warning .sdb-toast-progress { background: linear-gradient(90deg, #f59e0b, #fde68a); }
+                .sdb-toast-info .sdb-toast-progress { background: linear-gradient(90deg, #3b82f6, #93c5fd); }
+                @keyframes sdb-toast-progress { from { width: 100%; } to { width: 0%; } }
+            </style>
+            <div id="sdbToastContainer" class="sdb-toast-container"></div>
+            <script>
+            window.showSiladesBengToast = function(type, title, message, duration) {
+                duration = duration || 5000;
+                var container = document.getElementById('sdbToastContainer');
+                if (!container) return;
+                var icons = {
+                    success: '<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>',
+                    error: '<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>',
+                    warning: '<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01M10.29 3.86l-8.4 14.56a1.35 1.35 0 001.16 2.02h16.88a1.35 1.35 0 001.16-2.02L12.7 3.86a1.35 1.35 0 00-2.42 0z"></path></svg>',
+                    info: '<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>'
+                };
+                var toast = document.createElement('div');
+                toast.className = 'sdb-toast sdb-toast-' + type;
+                toast.style.position = 'relative';
+                toast.style.overflow = 'hidden';
+                toast.innerHTML =
+                    '<div class="sdb-toast-icon">' + (icons[type] || icons.info) + '</div>' +
+                    '<div class="sdb-toast-body">' +
+                        '<div class="sdb-toast-title">' + title + '</div>' +
+                        (message ? '<div class="sdb-toast-msg">' + message + '</div>' : '') +
+                    '</div>' +
+                    '<button class="sdb-toast-close" onclick="this.parentElement.classList.add(\'sdb-toast-hide\'); setTimeout(function(){this.parentElement.remove()}.bind(this), 400)">' +
+                        '<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>' +
+                    '</button>' +
+                    '<div class="sdb-toast-progress" style="animation: sdb-toast-progress ' + duration + 'ms linear forwards;"></div>';
+                container.appendChild(toast);
+                setTimeout(function() { toast.classList.add('sdb-toast-show'); }, 30);
+                setTimeout(function() {
+                    toast.classList.add('sdb-toast-hide');
+                    setTimeout(function() { if(toast.parentElement) toast.remove(); }, 400);
+                }, duration);
+            };
+            </script>
+
             <!-- Skrip untuk animasi dan fungsionalitas -->
             <script>
-                // Fungsi notifikasi sekarang didefinisikan di dashboard/index.blade.php
-                // menggunakan SweetAlert2 untuk UX yang lebih baik
+                // Wrapper: showToast sekarang memanggil showSiladesBengToast
+                function showToast(type, message) {
+                    const mappedType = type === 'danger' ? 'error' : type;
+                    const titleMap = { success: 'Berhasil', error: 'Peringatan', warning: 'Perhatian', info: 'Informasi' };
+                    showSiladesBengToast(mappedType, titleMap[mappedType] || 'Notifikasi', message);
+                }
 
                 // Fungsi untuk menghasilkan laporan
                 function generateReport() {
-                    showToast('info',
-                        'Laporan PDF sedang diproses. Fitur ini akan terhubung ke backend Laravel untuk menghasilkan file.');
-                    // In a real application, this would trigger a server-side PDF generation
+                    showToast('info', 'Laporan PDF sedang diproses. Fitur ini akan terhubung ke backend Laravel untuk menghasilkan file.');
                     setTimeout(() => {
                         showToast('success', 'Laporan berhasil dibuat dan siap diunduh!');
                     }, 2000);
-                }
-
-                // Fungsi untuk menampilkan notifikasi toast
-                function showToast(type, message) {
-                    if (typeof Swal !== 'undefined') {
-                        // Petakan tipe bootstrap ke tipe sweetalert
-                        const iconType = type === 'danger' ? 'error' : type;
-                        
-                        Swal.fire({
-                            toast: true,
-                            position: 'top-end',
-                            icon: iconType,
-                            title: message,
-                            showConfirmButton: false,
-                            timer: 3000,
-                            timerProgressBar: true,
-                            didOpen: (toast) => {
-                                toast.addEventListener('mouseenter', Swal.stopTimer)
-                                toast.addEventListener('mouseleave', Swal.resumeTimer)
-                            },
-                            customClass: {
-                                popup: 'colored-toast'
-                            }
-                        });
-                    } else {
-                        console.warn('SweetAlert2 is not loaded, falling back to alert');
-                        alert(message);
-                    }
                 }
 
                 // Animasi saat digulir
@@ -1025,19 +1062,19 @@
             // ⭐ Tangani Pesan Flash Sesi saat Halaman Dimuat
             document.addEventListener('DOMContentLoaded', function() {
                 @if(session('success'))
-                    showToast('success', "{{ session('success') }}");
+                    showSiladesBengToast('success', 'Berhasil', {!! json_encode(session('success')) !!});
                 @endif
 
                 @if(session('error'))
-                    showToast('danger', "{{ session('error') }}");
+                    showSiladesBengToast('error', 'Peringatan', {!! json_encode(session('error')) !!});
                 @endif
 
                 @if(session('info'))
-                    showToast('info', "{{ session('info') }}");
+                    showSiladesBengToast('info', 'Informasi', {!! json_encode(session('info')) !!});
                 @endif
 
                 @if(session('warning'))
-                    showToast('warning', "{{ session('warning') }}");
+                    showSiladesBengToast('warning', 'Perhatian', {!! json_encode(session('warning')) !!});
                 @endif
 
                 // Eksekusi Efek Preloader saat pertama dimuat
@@ -1143,6 +1180,7 @@
             @yield('modals')
             @stack('modals')
             @yield('scripts')
+            @stack('scripts')
 </body>
 
 </html>

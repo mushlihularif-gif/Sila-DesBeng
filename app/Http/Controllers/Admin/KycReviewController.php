@@ -15,27 +15,19 @@ class KycReviewController extends Controller
 {
     public function index(Request $request)
     {
-        $status = $request->input('status', 'all');
+        $all = KycVerification::with('user')->latest()->get();
+        $pending = KycVerification::with('user')->where('status', 'pending')->latest()->get();
+        $approved = KycVerification::with('user')->where('status', 'approved')->latest()->get();
+        $rejected = KycVerification::with('user')->where('status', 'rejected')->latest()->get();
         
-        $query = KycVerification::with('user');
-        
-        if ($status !== 'all' && in_array($status, ['pending', 'approved', 'rejected'])) {
-            $query->where('status', $status);
-        }
-
         $counts = [
-            'all' => KycVerification::count(),
-            'pending' => KycVerification::where('status', 'pending')->count(),
-            'approved' => KycVerification::where('status', 'approved')->count(),
-            'rejected' => KycVerification::where('status', 'rejected')->count(),
+            'all' => $all->count(),
+            'pending' => $pending->count(),
+            'approved' => $approved->count(),
+            'rejected' => $rejected->count(),
         ];
 
-        $verifications = $query->orderByRaw("FIELD(status, 'pending', 'approved', 'rejected')")
-            ->latest()
-            ->paginate(15)
-            ->appends(request()->query());
-            
-        return view('admin.kyc.index', compact('verifications', 'status', 'counts'));
+        return view('admin.kyc.index', compact('all', 'pending', 'approved', 'rejected', 'counts'));
     }
 
     public function show($id)

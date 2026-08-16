@@ -523,7 +523,7 @@
 
         if (next < 1) next = 1;
         if (next > maxStok) {
-            Swal.fire({toast: true, position: 'top-end', icon: 'error', title: 'Stok tidak mencukupi!', showConfirmButton: false, timer: 3000});
+            showSiladesBengToast('error', 'Stok Habis', 'Stok tidak mencukupi!');
             return;
         }
 
@@ -546,9 +546,8 @@
             if (data.success) {
                 location.reload();
             } else {
-                Swal.fire({toast: true, position: 'top-end', icon: 'error', title: 'Gagal', text: data.message || 'Gagal update keranjang', showConfirmButton: false, timer: 3000}).then(() => {
-                    location.reload();
-                });
+                showSiladesBengToast('error', 'Gagal', data.message || 'Gagal update keranjang');
+                location.reload();
             }
         });
     }

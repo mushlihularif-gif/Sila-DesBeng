@@ -11,6 +11,7 @@ class TransactionReceipt extends Model
         'booking_id',
         'receipt_number',
         'user_id',
+        'region_id',
         'item_name',
         'quantity',
         'total_amount',
@@ -28,6 +29,14 @@ class TransactionReceipt extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get the region (desa/kecamatan) this transaction belongs to
+     */
+    public function region()
+    {
+        return $this->belongsTo(Region::class);
     }
 
     /**

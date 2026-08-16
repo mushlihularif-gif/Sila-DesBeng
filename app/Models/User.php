@@ -80,6 +80,8 @@ class User extends Authenticatable
         'password',
         'phone',
         'address',
+        'latitude',
+        'longitude',
         'rt',
         'rw',
         'gender',
@@ -146,6 +148,21 @@ class User extends Authenticatable
     public function gasTransactions()
     {
         return $this->hasMany(GasOrder::class, 'user_id');
+    }
+
+    public function mobilTransactions()
+    {
+        return $this->hasMany(MobilBooking::class, 'user_id');
+    }
+
+    public function fasilitasTransactions()
+    {
+        return $this->hasMany(FasilitasUmumBooking::class, 'user_id');
+    }
+
+    public function pasarTransactions()
+    {
+        return $this->hasMany(PasarOrder::class, 'user_id');
     }
 
     // ===================================

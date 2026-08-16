@@ -66,7 +66,7 @@
                 <div class="activity-menu-card cursor-pointer" data-type="pasar">
                     <div class="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 w-48 text-center border-4 border-transparent">
                         <div class="mb-3 flex justify-center">
-                            <i class="fas fa-store text-green-600 text-5xl mb-2 mt-2"></i>
+                            <img src="{{ asset('Admin/img/pasardaerah/PasarDaerah2.png') }}" alt="Pasar Daerah" class="w-16 h-16 object-contain">
                         </div>
                         <p class="font-bold text-lg text-gray-800">Pasar Daerah</p>
                     </div>

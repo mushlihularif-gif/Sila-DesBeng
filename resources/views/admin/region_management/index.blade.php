@@ -4,9 +4,16 @@
 
 @section('styles')
 <style>
+    .animate-fade-up {
+        animation: fadeUp 0.5s ease-out forwards;
+    }
+    @keyframes fadeUp {
+        0% { opacity: 0; transform: translateY(20px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
     .accordion-button:not(.collapsed) {
         background-color: #f8f9fa;
-        color: #696cff;
+        color: #0d6efd; /* Adjusted to true blue */
         font-weight: 600;
         box-shadow: none;
     }
@@ -19,49 +26,66 @@
         transition: all 0.2s ease-in-out;
     }
     .region-card:hover {
-        border-color: #696cff;
-        box-shadow: 0 0.125rem 0.25rem rgba(105, 108, 255, 0.4);
+        border-color: #0d6efd;
+        box-shadow: 0 0.125rem 0.25rem rgba(13, 110, 253, 0.4);
     }
     .admin-info-box {
-        background-color: #f8f9fa;
-        border-radius: 8px;
-        padding: 15px;
-        border-left: 4px solid #696cff;
+        background-color: #ffffff;
+        border-radius: 12px;
+        padding: 20px;
+        border: 1px solid #e9ecef;
+        border-left: 4px solid #0d6efd;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.03);
     }
 </style>
 @endsection
 
 @section('content')
-<div class="container-xxl flex-grow-1 container-p-y">
-    <div class="row">
-        <div class="col-12">
-            
-            <div class="card shadow-sm border-0 mb-4">
-                <div class="card-body">
-                    <div class="d-flex flex-column flex-md-row align-items-center justify-content-between">
-                        <div class="mb-3 mb-md-0">
-                            @if(in_array(auth()->user()->role, ['admin_rw', 'admin_rt']) || $targetType == 'rt')
-                                <a href="{{ route('admin.kelola-wilayah.index') }}" class="btn btn-sm btn-outline-secondary mb-3">
-                                    <i class="bx bx-arrow-back me-1"></i> Kembali
-                                </a>
-                            @endif
-                            <h4 class="card-title text-primary fw-bold mb-1">Manajemen Wilayah: {{ $parentRegion->name }}</h4>
-                            @php
-                                $childLevelText = '';
-                                if($parentRegion->type == 'kabupaten') $childLevelText = '(Kecamatan)';
-                                elseif($parentRegion->type == 'kecamatan') $childLevelText = '(Desa/Kelurahan)';
-                                elseif(in_array($parentRegion->type, ['desa', 'kelurahan'])) $childLevelText = '(Dusun/RW)';
-                                elseif($parentRegion->type == 'rw') $childLevelText = '(RT)';
-                                else $childLevelText = 'di bawahnya';
-                            @endphp
-                            <p class="card-text text-muted mb-0">Kelola hierarki wilayah {{ $childLevelText }} beserta akun kepengurusannya secara terpusat.</p>
-                        </div>
-                        <button type="button" class="btn btn-primary rounded-pill px-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#addRegionModal">
-                            <i class="bx bx-plus me-1"></i> Tambah {{ strtoupper($targetType) }}
-                        </button>
+<div class="container-xxl flex-grow-1 container-p-y animate-fade-up">
+    <!-- Header Title -->
+    <div class="row mb-4">
+        <div class="col-12 d-flex justify-content-between align-items-center">
+            <h4 class="fw-bold py-3 mb-0">
+                <span class="text-muted fw-light">Sistem /</span> Kelola Hierarki Wilayah
+            </h4>
+            @if(in_array(auth()->user()->role, ['admin_rw', 'admin_rt']) || $targetType == 'rt')
+                <a href="{{ route('admin.kelola-wilayah.index') }}" class="btn btn-sm btn-outline-secondary">
+                    <i class="bx bx-arrow-back me-1"></i> Kembali
+                </a>
+            @endif
+        </div>
+    </div>
+
+    <!-- Banner Modern -->
+    <div class="card bg-label-primary border-0 shadow-none mb-4" style="border-radius: 12px;">
+        <div class="card-body d-flex align-items-center justify-content-between p-4 flex-wrap gap-3">
+            <div class="d-flex align-items-center">
+                <div class="me-3">
+                    <div class="bg-primary p-3 rounded-circle text-white d-flex align-items-center justify-content-center shadow-sm" style="width: 56px; height: 56px;">
+                        <i class="bx bx-map-alt fs-3"></i>
                     </div>
                 </div>
+                <div>
+                    <h5 class="fw-bold mb-1 text-primary">Manajemen Wilayah: {{ $parentRegion->name }}</h5>
+                    @php
+                        $childLevelText = '';
+                        if($parentRegion->type == 'kabupaten') $childLevelText = '(Kecamatan)';
+                        elseif($parentRegion->type == 'kecamatan') $childLevelText = '(Desa/Kelurahan)';
+                        elseif(in_array($parentRegion->type, ['desa', 'kelurahan'])) $childLevelText = '(Dusun/RW)';
+                        elseif($parentRegion->type == 'rw') $childLevelText = '(RT)';
+                        else $childLevelText = 'di bawahnya';
+                    @endphp
+                    <p class="mb-0 text-primary" style="opacity: 0.85;">
+                        Kelola hierarki wilayah {{ $childLevelText }} beserta akun kepengurusannya secara terpusat.
+                    </p>
+                </div>
             </div>
+            
+            <button type="button" class="btn btn-primary rounded-pill px-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#addRegionModal">
+                <i class="bx bx-plus me-1"></i> Tambah {{ strtoupper($targetType) }}
+            </button>
+        </div>
+    </div>
 
             <!-- Menampilkan RW sebagai Accordion -->
             @if(count($childrenRegions) > 0)
@@ -120,7 +144,7 @@
                                                         <form action="{{ route('admin.kelola-wilayah.destroy-admin', $admin->id) }}" method="POST" class="mt-3" onsubmit="return confirm('Apakah Anda yakin ingin menghapus akun pengurus ini secara permanen? Wilayah tetap dipertahankan.');">
                                                             @csrf
                                                             @method('DELETE')
-                                                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill w-100">
+                                                            <button type="submit" class="btn btn-sm rounded-pill w-100" style="background: #ffe0db; color: #ff3e1d; border: none; font-weight: 500;">
                                                                 <i class="bx bx-user-x me-1"></i> Hapus Akun
                                                             </button>
                                                         </form>
@@ -179,14 +203,14 @@
 
                                                 <h6 class="fw-semibold mb-3"><i class="bx bx-cog text-primary me-1"></i> Aksi Wilayah</h6>
                                                 <div class="d-flex gap-2">
-                                                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill flex-grow-1" data-bs-toggle="modal" data-bs-target="#editRegionModal{{ $child->id }}">
+                                                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill flex-grow-1" data-bs-toggle="modal" data-bs-target="#editRegionModal{{ $child->id }}">
                                                         <i class="bx bx-edit-alt me-1"></i> Edit Nama
                                                     </button>
                                                     @if($child->users->count() == 0 && $child->children()->count() == 0)
                                                         <form action="{{ route('admin.kelola-wilayah.destroy', $child->id) }}" method="POST" class="d-inline flex-grow-1" onsubmit="return confirm('Apakah Anda yakin ingin menghapus struktur wilayah ini?');">
                                                             @csrf
                                                             @method('DELETE')
-                                                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill w-100">
+                                                            <button type="submit" class="btn btn-sm rounded-pill w-100" style="background: #ffe0db; color: #ff3e1d; border: none; font-weight: 500;">
                                                                 <i class="bx bx-trash me-1"></i> Hapus Wilayah
                                                             </button>
                                                         </form>
@@ -221,7 +245,7 @@
                                                         <form action="{{ route('admin.kelola-wilayah.destroy-admin', $admin->id) }}" method="POST" class="mt-3" onsubmit="return confirm('Apakah Anda yakin ingin menghapus akun pengurus ini secara permanen? Wilayah tetap dipertahankan.');">
                                                             @csrf
                                                             @method('DELETE')
-                                                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill w-100">
+                                                            <button type="submit" class="btn btn-sm rounded-pill w-100" style="background: #ffe0db; color: #ff3e1d; border: none; font-weight: 500;">
                                                                 <i class="bx bx-user-x me-1"></i> Hapus Akun
                                                             </button>
                                                         </form>
@@ -239,14 +263,14 @@
 
                                             <h6 class="fw-semibold mb-3 mt-4">Aksi Wilayah</h6>
                                             <div class="d-flex gap-2">
-                                                <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill flex-grow-1" data-bs-toggle="modal" data-bs-target="#editRegionModal{{ $child->id }}">
+                                                <button type="button" class="btn btn-sm btn-outline-primary rounded-pill flex-grow-1" data-bs-toggle="modal" data-bs-target="#editRegionModal{{ $child->id }}">
                                                     <i class="bx bx-edit-alt me-1"></i> Edit Nama
                                                 </button>
                                                 @if($child->users->count() == 0 && $child->children()->count() == 0)
                                                     <form action="{{ route('admin.kelola-wilayah.destroy', $child->id) }}" method="POST" class="d-inline flex-grow-1" onsubmit="return confirm('Apakah Anda yakin ingin menghapus struktur wilayah ini?');">
                                                         @csrf
                                                         @method('DELETE')
-                                                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill w-100">
+                                                        <button type="submit" class="btn btn-sm rounded-pill w-100" style="background: #ffe0db; color: #ff3e1d; border: none; font-weight: 500;">
                                                             <i class="bx bx-trash me-1"></i> Hapus Wilayah
                                                         </button>
                                                     </form>
@@ -300,24 +324,24 @@
                                                                 </div>
                                                                 <div class="d-flex gap-2">
                                                                     @if($sub->users->count() == 0)
-                                                                        <button type="button" class="btn btn-sm btn-outline-primary rounded-circle px-2" data-bs-toggle="modal" data-bs-target="#generateAdminModal{{ $sub->id }}" title="Buat Akun">
+                                                                        <button type="button" class="btn btn-sm rounded-circle px-2" style="background: #e8f0fe; color: #0d6efd; border: none;" data-bs-toggle="modal" data-bs-target="#generateAdminModal{{ $sub->id }}" title="Buat Akun">
                                                                             <i class="bx bx-user-plus"></i>
                                                                         </button>
                                                                     @else
                                                                         <form action="{{ route('admin.kelola-wilayah.destroy-admin', $sub->users->first()->id) }}" method="POST" onsubmit="return confirm('Yakin hapus akun pengurus ini?');">
                                                                             @csrf @method('DELETE')
-                                                                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle px-2" title="Hapus Akun"><i class="bx bx-user-x"></i></button>
+                                                                            <button type="submit" class="btn btn-sm rounded-circle px-2" style="background: #ffe0db; color: #ff3e1d; border: none;" title="Hapus Akun"><i class="bx bx-user-x"></i></button>
                                                                         </form>
                                                                     @endif
                                                                     
-                                                                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-circle px-2" data-bs-toggle="modal" data-bs-target="#editRegionModal{{ $sub->id }}" title="Edit Nama">
+                                                                    <button type="button" class="btn btn-sm rounded-circle px-2" style="background: #e8f0fe; color: #0d6efd; border: none;" data-bs-toggle="modal" data-bs-target="#editRegionModal{{ $sub->id }}" title="Edit Nama">
                                                                         <i class="bx bx-edit-alt"></i>
-                                                                    </button>
+                                                                   </button>
 
                                                                     @if($sub->users->count() == 0 && $sub->children()->count() == 0)
                                                                     <form action="{{ route('admin.kelola-wilayah.destroy', $sub->id) }}" method="POST" onsubmit="return confirm('Hapus struktur wilayah ini?');">
                                                                         @csrf @method('DELETE')
-                                                                        <button type="submit" class="btn btn-sm btn-danger rounded-circle px-2" title="Hapus Wilayah"><i class="bx bx-trash"></i></button>
+                                                                        <button type="submit" class="btn btn-sm rounded-circle px-2" style="background: #ffe0db; color: #ff3e1d; border: none;" title="Hapus Wilayah"><i class="bx bx-trash"></i></button>
                                                                     </form>
                                                                     @endif
                                                                 </div>
@@ -433,8 +457,6 @@
                     </div>
                 </div>
             @endif
-        </div>
-    </div>
 </div>
 
 @push('modals')

@@ -958,24 +958,15 @@
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                Swal.fire({
-                    toast: true, 
-                    position: 'top-end', 
-                    icon: 'success', 
-                    title: 'Berhasil', 
-                    text: 'Produk ditambahkan ke keranjang!', 
-                    showConfirmButton: false, 
-                    timer: 1500
-                }).then(() => {
-                    location.reload(); 
-                });
+                showSiladesBengToast('success', 'Berhasil', 'Produk ditambahkan ke keranjang!');
+                setTimeout(() => { location.reload(); }, 1500);
             } else {
-                Swal.fire({toast: true, position: 'top-end', icon: 'error', title: 'Gagal', text: data.message || 'Gagal menambahkan produk', showConfirmButton: false, timer: 3000});
+                showSiladesBengToast('error', 'Gagal', data.message || 'Gagal menambahkan produk');
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            Swal.fire({toast: true, position: 'top-end', icon: 'error', title: 'Error', text: 'Terjadi kesalahan sistem', showConfirmButton: false, timer: 3000});
+            showSiladesBengToast('error', 'Error', 'Terjadi kesalahan sistem');
         });
     }
     @endauth

@@ -24,7 +24,11 @@ Route::get('/unit-pelayanan', [BerandaController::class, 'unitPelayanan']);
 
     // Pasar Daerah (Toko BUMDes)
     Route::get('/pasar-daerah/products', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'getProducts']);
+    Route::get('/pasar-daerah/products/{id}', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'getProductDetail']);
     Route::get('/pasar-daerah/categories', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'getCategories']);
+
+    // Wilayah (Regions) - Public for registration
+    Route::get('/kemitraan/regions', [\App\Http\Controllers\Api\PartnerApplicationApiController::class, 'getRegions']);
 
 // Protected Routes (Harus mengirimkan Bearer Token dari hasil Login)
 Route::middleware('auth:sanctum')->group(function () {
@@ -32,9 +36,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/profile/update', [AuthController::class, 'updateProfile']);
     Route::post('/profile/password', [AuthController::class, 'updatePassword']);
     Route::post('/fcm-token', [AuthController::class, 'updateFcmToken']);
-    
     // Kemitraan
-    Route::get('/kemitraan/regions', [\App\Http\Controllers\Api\PartnerApplicationApiController::class, 'getRegions']);
     Route::post('/kemitraan/gabung', [\App\Http\Controllers\Api\PartnerApplicationApiController::class, 'store']);
 
     // KYC
@@ -70,6 +72,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/pasar-daerah/cart/update', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'updateCart']);
     Route::post('/pasar-daerah/cart/remove', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'removeFromCart']);
     Route::post('/pasar-daerah/checkout', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'checkout']);
+    Route::get('/pasar-daerah/orders/{id}/payment', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'getOrderPayment']);
 
     // Mutasi Domisili
     Route::get('/mutasi', [\App\Http\Controllers\Api\DomicileTransferApiController::class, 'index']);

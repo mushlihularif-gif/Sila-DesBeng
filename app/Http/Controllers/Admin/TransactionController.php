@@ -29,6 +29,7 @@ class TransactionController extends Controller
         $canViewGas = !$isStaff || $user->hasUnitPermission('gas');
         $canViewMobil = !$isStaff || $user->hasUnitPermission('sewa_mobil');
         $canViewFasilitas = !$isStaff || $user->hasUnitPermission('fasilitas_umum');
+        $canViewPasar = !$isStaff || $user->hasUnitPermission('pasar_daerah');
         // Include transactions with proof OR system generated (active/completed statuses)
         $activeStatuses = ['confirmed', 'approved', 'being_prepared', 'in_delivery', 'arrived', 'completed', 'returned'];
         
@@ -51,11 +52,17 @@ class TransactionController extends Controller
             $q->whereIn('status', $activeStatuses);
         });
 
+        $pasarQuery = \App\Models\PasarOrder::where('region_id', $user->region_id)->withTrashed()->with(['user', 'items.produk'])->where(function($q) use ($activeStatuses) {
+            $q->whereNotNull('proof_of_payment')
+              ->orWhereIn('status', ['paid', 'confirmed', 'in_delivery', 'completed']);
+        });
+
         // Apply staff permission filters
         if (!$canViewRental) $rentalQuery->whereRaw('1 = 0');
         if (!$canViewGas) $gasQuery->whereRaw('1 = 0');
         if (!$canViewMobil) $mobilQuery->whereRaw('1 = 0');
         if (!$canViewFasilitas) $fasilitasQuery->whereRaw('1 = 0');
+        if (!$canViewPasar) $pasarQuery->whereRaw('1 = 0');
 
         // Filter by search
         if ($search) {
@@ -102,26 +109,37 @@ class TransactionController extends Controller
             $gasPayments = collect();
             $mobilPayments = collect();
             $fasilitasPayments = collect();
+            $pasarPayments = collect();
         } elseif ($category === 'gas') {
             $rentalPayments = collect();
             $gasPayments = $gasQuery->orderByDesc('updated_at')->get();
             $mobilPayments = collect();
             $fasilitasPayments = collect();
+            $pasarPayments = collect();
         } elseif ($category === 'mobil') {
             $rentalPayments = collect();
             $gasPayments = collect();
             $mobilPayments = $mobilQuery->orderByDesc('updated_at')->get();
             $fasilitasPayments = collect();
+            $pasarPayments = collect();
         } elseif ($category === 'fasilitas') {
             $rentalPayments = collect();
             $gasPayments = collect();
             $mobilPayments = collect();
             $fasilitasPayments = $fasilitasQuery->orderByDesc('updated_at')->get();
+            $pasarPayments = collect();
+        } elseif ($category === 'pasar') {
+            $rentalPayments = collect();
+            $gasPayments = collect();
+            $mobilPayments = collect();
+            $fasilitasPayments = collect();
+            $pasarPayments = $pasarQuery->orderByDesc('updated_at')->get();
         } else {
             $rentalPayments = $rentalQuery->orderByDesc('updated_at')->get();
             $gasPayments = $gasQuery->orderByDesc('updated_at')->get();
             $mobilPayments = $mobilQuery->orderByDesc('updated_at')->get();
             $fasilitasPayments = $fasilitasQuery->orderByDesc('updated_at')->get();
+            $pasarPayments = $pasarQuery->orderByDesc('updated_at')->get();
         }
 
         // Count statistics (WITH region filter to match the table data)
@@ -146,13 +164,18 @@ class TransactionController extends Controller
         });
         $fasilitasCount = (clone $baseFasilitas)->count();
 
-        // Hitung berdasarkan metode pembayaran
-        // Kita ambil semua payment_method dari keempat modul yang aktif
+        $basePasar = \App\Models\PasarOrder::where('region_id', $user->region_id)->withTrashed()->where(function($q) use ($activeStatuses) {
+            $q->whereNotNull('proof_of_payment')->orWhereIn('status', ['paid', 'confirmed', 'in_delivery', 'completed']);
+        });
+        $pasarCount = (clone $basePasar)->count();
+
+        // Gabungkan semua metode pembayaran
         $allMethods = collect();
-        if ($rentalCount > 0) $allMethods = $allMethods->merge((clone $baseRental)->pluck('payment_method'));
-        if ($gasCount > 0) $allMethods = $allMethods->merge((clone $baseGas)->pluck('payment_method'));
-        if ($mobilCount > 0) $allMethods = $allMethods->merge((clone $baseMobil)->pluck('payment_method'));
-        if ($fasilitasCount > 0) $allMethods = $allMethods->merge((clone $baseFasilitas)->pluck('payment_method'));
+        $allMethods = $allMethods->concat((clone $baseRental)->pluck('payment_method'));
+        $allMethods = $allMethods->concat((clone $baseGas)->pluck('payment_method'));
+        $allMethods = $allMethods->concat((clone $baseMobil)->pluck('payment_method'));
+        $allMethods = $allMethods->concat((clone $baseFasilitas)->pluck('payment_method'));
+        $allMethods = $allMethods->concat((clone $basePasar)->pluck('payment_method'));
 
         $transferCount = 0;
         $digitalCount = 0;
@@ -171,11 +194,12 @@ class TransactionController extends Controller
         }
 
         $stats = [
-            'total' => $rentalCount + $gasCount + $mobilCount + $fasilitasCount,
+            'total' => $rentalCount + $gasCount + $mobilCount + $fasilitasCount + $pasarCount,
             'rental_total' => $rentalCount,
             'gas_total' => $gasCount,
             'mobil_total' => $mobilCount,
             'fasilitas_total' => $fasilitasCount,
+            'pasar_total' => $pasarCount,
             'transfer_total' => $transferCount,
             'digital_total' => $digitalCount,
             'cash_total' => $tunaiCount,
@@ -183,7 +207,7 @@ class TransactionController extends Controller
 
         $activeServices = $this->getActivatedServices();
 
-        return view('admin.aktivitas.transactions', compact('rentalPayments', 'gasPayments', 'mobilPayments', 'fasilitasPayments', 'stats', 'category', 'paymentMethod', 'search', 'activeServices'));
+        return view('admin.aktivitas.transactions', compact('rentalPayments', 'gasPayments', 'mobilPayments', 'fasilitasPayments', 'pasarPayments', 'stats', 'category', 'paymentMethod', 'search', 'activeServices'));
     }
 
     public function verify(Request $request, $id, $type)

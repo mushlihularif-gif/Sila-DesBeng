@@ -108,53 +108,92 @@
     </script>
     @endif
 
-    {{-- Global Modern Toast Notification --}}
+    {{-- Global Modern Toast Notification System --}}
     <style>
-        .toast-enter-start { opacity: 0; transform: translateX(50px) scale(0.95); }
-        .toast-enter-end { opacity: 1; transform: translateX(0) scale(1); }
-        .toast-leave-start { opacity: 1; transform: translateX(0) scale(1); }
-        .toast-leave-end { opacity: 0; transform: translateX(50px) scale(0.95); }
-        .toast-transition-enter { transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
-        .toast-transition-leave { transition: all 0.4s ease-in; }
+        .sdb-toast-container { position: fixed; top: 70px; right: 24px; z-index: 999999 !important; display: flex; flex-direction: column; gap: 12px; pointer-events: none; }
+        .sdb-toast { pointer-events: auto; display: flex; align-items: flex-start; padding: 16px 18px; border-radius: 14px; box-shadow: 0 8px 30px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06); border-left: 4px solid; max-width: 380px; width: 100%; background: white; opacity: 0; transform: translateX(50px) scale(0.95); transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+        .sdb-toast.sdb-toast-show { opacity: 1; transform: translateX(0) scale(1); }
+        .sdb-toast.sdb-toast-hide { opacity: 0; transform: translateX(50px) scale(0.95); transition: all 0.4s ease-in; }
+        .sdb-toast-success { border-left-color: #22c55e; }
+        .sdb-toast-error { border-left-color: #ef4444; }
+        .sdb-toast-warning { border-left-color: #f59e0b; }
+        .sdb-toast-info { border-left-color: #3b82f6; }
+        .sdb-toast-icon { flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 14px; margin-top: 1px; }
+        .sdb-toast-success .sdb-toast-icon { background: #dcfce7; color: #16a34a; }
+        .sdb-toast-error .sdb-toast-icon { background: #fee2e2; color: #dc2626; }
+        .sdb-toast-warning .sdb-toast-icon { background: #fef3c7; color: #d97706; }
+        .sdb-toast-info .sdb-toast-icon { background: #dbeafe; color: #2563eb; }
+        .sdb-toast-body { flex: 1; min-width: 0; }
+        .sdb-toast-title { font-size: 14px; font-weight: 700; color: #1e293b; margin-bottom: 2px; }
+        .sdb-toast-msg { font-size: 13px; color: #64748b; line-height: 1.4; }
+        .sdb-toast-close { flex-shrink: 0; margin-left: 12px; background: none; border: none; cursor: pointer; color: #94a3b8; padding: 4px; border-radius: 6px; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
+        .sdb-toast-close:hover { background: #f1f5f9; color: #475569; }
+        .sdb-toast-progress { position: absolute; bottom: 0; left: 4px; right: 0; height: 3px; border-radius: 0 0 14px 0; }
+        .sdb-toast-success .sdb-toast-progress { background: linear-gradient(90deg, #22c55e, #86efac); }
+        .sdb-toast-error .sdb-toast-progress { background: linear-gradient(90deg, #ef4444, #fca5a5); }
+        .sdb-toast-warning .sdb-toast-progress { background: linear-gradient(90deg, #f59e0b, #fde68a); }
+        .sdb-toast-info .sdb-toast-progress { background: linear-gradient(90deg, #3b82f6, #93c5fd); }
+        @keyframes sdb-toast-progress { from { width: 100%; } to { width: 0%; } }
     </style>
-    @if(session('error') || session('success'))
-    <div x-data="{ show: false }" 
-         x-init="setTimeout(() => show = true, 50); setTimeout(() => show = false, 5000)" 
-         x-show="show" 
-         x-transition:enter="toast-transition-enter"
-         x-transition:enter-start="toast-enter-start"
-         x-transition:enter-end="toast-enter-end"
-         x-transition:leave="toast-transition-leave"
-         x-transition:leave-start="toast-leave-start"
-         x-transition:leave-end="toast-leave-end"
-         class="fixed flex items-center p-4 rounded-xl shadow-2xl border-l-4 {{ session('error') ? 'bg-white border-red-500' : 'bg-white border-green-500' }} max-w-sm w-full"
-         style="z-index: 10000; top: 70px; right: 24px;">
-        <div class="flex-shrink-0">
-            @if(session('error'))
-            <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-            @else
-            <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-            @endif
-        </div>
-        <div class="ml-3">
-            <p class="text-sm font-semibold text-gray-900">
-                {{ session('error') ? 'Peringatan' : 'Berhasil' }}
-            </p>
-            <p class="text-sm text-gray-600 mt-1">
-                {!! session('error') ?? session('success') !!}
-            </p>
-        </div>
-        <button @click="show = false" class="ml-auto -mx-1.5 -my-1.5 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex items-center justify-center h-8 w-8 text-gray-500 cursor-pointer">
-            <span style="display: none;">Close</span>
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-            </svg>
-        </button>
-    </div>
+
+    <div id="sdbToastContainer" class="sdb-toast-container"></div>
+
+    <script>
+    // ==========================================
+    // GLOBAL TOAST NOTIFICATION - SiladesBeng
+    // ==========================================
+    window.showSiladesBengToast = function(type, title, message, duration) {
+        duration = duration || 5000;
+        var container = document.getElementById('sdbToastContainer');
+        if (!container) return;
+
+        var icons = {
+            success: '<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>',
+            error: '<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>',
+            warning: '<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01M10.29 3.86l-8.4 14.56a1.35 1.35 0 001.16 2.02h16.88a1.35 1.35 0 001.16-2.02L12.7 3.86a1.35 1.35 0 00-2.42 0z"></path></svg>',
+            info: '<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>'
+        };
+
+        var toast = document.createElement('div');
+        toast.className = 'sdb-toast sdb-toast-' + type;
+        toast.style.position = 'relative';
+        toast.style.overflow = 'hidden';
+        toast.innerHTML =
+            '<div class="sdb-toast-icon">' + (icons[type] || icons.info) + '</div>' +
+            '<div class="sdb-toast-body">' +
+                '<div class="sdb-toast-title">' + title + '</div>' +
+                (message ? '<div class="sdb-toast-msg">' + message + '</div>' : '') +
+            '</div>' +
+            '<button class="sdb-toast-close" onclick="this.parentElement.classList.add(\'sdb-toast-hide\'); setTimeout(function(){this.parentElement.remove()}.bind(this), 400)">' +
+                '<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>' +
+            '</button>' +
+            '<div class="sdb-toast-progress" style="animation: sdb-toast-progress ' + duration + 'ms linear forwards;"></div>';
+
+        container.appendChild(toast);
+
+        // Animate in
+        setTimeout(function() { toast.classList.add('sdb-toast-show'); }, 30);
+
+        // Auto dismiss
+        setTimeout(function() {
+            toast.classList.add('sdb-toast-hide');
+            setTimeout(function() { if(toast.parentElement) toast.remove(); }, 400);
+        }, duration);
+    };
+    </script>
+
+    {{-- Server-side session flash toasts --}}
+    @if(session('success'))
+    <script>document.addEventListener('DOMContentLoaded', function(){ showSiladesBengToast('success', 'Berhasil', {!! json_encode(session('success')) !!}); });</script>
+    @endif
+    @if(session('error'))
+    <script>document.addEventListener('DOMContentLoaded', function(){ showSiladesBengToast('error', 'Peringatan', {!! json_encode(session('error')) !!}); });</script>
+    @endif
+    @if(session('warning'))
+    <script>document.addEventListener('DOMContentLoaded', function(){ showSiladesBengToast('warning', 'Perhatian', {!! json_encode(session('warning')) !!}); });</script>
+    @endif
+    @if(session('info'))
+    <script>document.addEventListener('DOMContentLoaded', function(){ showSiladesBengToast('info', 'Informasi', {!! json_encode(session('info')) !!}); });</script>
     @endif
 </body>
 </html>

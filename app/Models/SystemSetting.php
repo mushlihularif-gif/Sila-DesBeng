@@ -28,6 +28,11 @@ class SystemSetting extends Model
         'whatsapp_number',
         'office_address',
         'operating_hours',
+        'gateway_provider',
+        'gateway_secret_key',
+        'gateway_public_key',
+        'gateway_is_production',
+        'platform_fee_percentage',
     ];
 
     protected $casts = [
@@ -36,5 +41,9 @@ class SystemSetting extends Model
         'bank_account_holder' => 'encrypted',
         'ewallet_number' => 'encrypted',
         'ewallet_account_holder' => 'encrypted',
+        'gateway_secret_key' => 'encrypted',
+        'gateway_public_key' => 'encrypted',
+        'gateway_is_production' => 'boolean',
+        'platform_fee_percentage' => 'decimal:2',
     ];
 }
