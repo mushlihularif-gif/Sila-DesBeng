@@ -140,95 +140,7 @@
                 <h1 class="text-3xl md:text-4xl font-bold mb-2">
                     <span class="text-gray-800">Metode </span>
                     <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Antar Jemput Alat Sewa</span>
-@extends('layouts.user')
 
-@php
-    // Tentukan gaya latar belakang kartu berdasarkan pengaturan admin
-    $cardStyle = 'background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);'; // default blue
-    $amountColor = 'text-yellow-300'; // Default amount color
-    $cardTextColor = 'text-white'; // Default card text color
-    $buttonClass = 'bg-white/20 backdrop-blur-sm border border-white/40 text-white hover:bg-white/30'; // Default button style
-    $borderClass = 'border-white/30'; // Default border style
-    
-    if ($setting && $setting->card_gradient_style) {
-        $gradients = [
-            'white' => 'linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%)',
-            'silver' => 'linear-gradient(135deg, #e0e0e0 0%, #c0c0c0 100%)',
-            'gold' => 'linear-gradient(135deg, #ffd700 0%, #fdb931 100%)',
-            'transparent' => 'rgba(59, 130, 246, 0.3)',
-            'blue' => 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)',
-            'green' => 'linear-gradient(135deg, #00a884 0%, #005c4b 100%)',
-            'purple' => 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            'dark' => 'linear-gradient(135deg, #232526 0%, #414345 100%)',
-            'orange' => 'linear-gradient(135deg, #f7971e 0%, #ffd200 100%)',
-            'red' => 'linear-gradient(135deg, #eb3349 0%, #f45c43 100%)',
-        ];
-        
-        $style = $setting->card_gradient_style;
-        $cardStyle = 'background: ' . ($gradients[$style] ?? $gradients['blue']) . ';';
-        
-        // Tentukan warna berdasarkan latar belakang
-        if (in_array($style, ['white', 'silver', 'gold', 'transparent'])) {
-            $amountColor = 'text-red-600';
-            $cardTextColor = 'text-gray-800';
-            $buttonClass = 'bg-gray-200 hover:bg-gray-300 text-gray-800 border border-gray-400';
-            $borderClass = 'border-gray-300';
-        } elseif ($style == 'red') {
-            $amountColor = 'text-white';
-            $cardTextColor = 'text-white';
-        } else {
-            $amountColor = 'text-yellow-300'; // Blue, Green, Purple, Dark
-            $cardTextColor = 'text-white';
-        }
-    }
-    
-    // Dukungan legacy untuk gambar (jika diaktifkan kembali atau sudah ada)
-    if ($setting && $setting->card_background_type === 'image' && $setting->card_background_image) {
-        $cardStyle = "background-image: url('" . asset('storage/' . $setting->card_background_image) . "'); background-size: cover; background-position: center;";
-        $amountColor = 'text-yellow-300';
-        $cardTextColor = 'text-white';
-    }
-    
-    // Dapatkan deskripsi pembayaran tunai
-    $cashDescription = $setting->cash_payment_description ?? 'Yani - Bendahara BUMDes';
-
-    // Bank Logo Mapping
-    $bankLogos = [
-        'Bank Syariah Indonesia' => 'admin/img/banks/bsi.png',
-        'BRI' => 'admin/img/banks/bri.png',
-        'Mandiri' => 'admin/img/banks/mandiri.png',
-        'BNI' => 'admin/img/banks/bni.png',
-        'BCA' => 'admin/img/banks/bca.png',
-        'Bank Riau Kepri Syariah' => 'admin/img/banks/brk.png',
-        'Bank Mega' => 'admin/img/banks/mega.png',
-    ];
-    $bankLogoPath = $bankLogos[$setting->bank_name ?? ''] ?? 'admin/img/banks/bsi.png';
-    
-    // Tentukan metode pembayaran yang tersedia dengan fallback yang lebih baik
-    $methods = $setting?->payment_methods ?? ['transfer', 'tunai'];
-    if (!is_array($methods) || empty($methods)) {
-        $methods = ['transfer', 'tunai'];
-    }
-    $hasTransfer = in_array('transfer', $methods);
-    $hasTunai = in_array('tunai', $methods);
-    
-    // Pastikan setidaknya satu metode tersedia
-    if (!$hasTransfer && !$hasTunai) {
-        $hasTransfer = true;
-        $hasTunai = true;
-    }
-    
-    // Tentukan metode aktif default
-    $defaultMethod = $hasTransfer ? 'transfer' : 'tunai';
-@endphp
-
-@section('page')
-<main class="flex-grow relative w-full">
-    <section class="relative z-10 min-h-screen pt-32 pb-16 bg-cover bg-center bg-no-repeat bg-fixed" 
-             style="background-image: url('{{ asset('Admin/img/elements/background1.png') }}');">
-        
-        <!-- White Overlay (25% opacity / 75% transparent) to make background visible -->
-        <div class="absolute inset-0 bg-white/25 pointer-events-none"></div>
 
         <div class="max-w-5xl mx-auto px-6 relative z-20">
             <!-- Header dengan Teks Gradien -->
@@ -250,8 +162,49 @@
                 @endphp
                 <input type="hidden" name="delivery_method" id="delivery-method-input" value="{{ $defaultMethod }}">
 
+                @php
+                    $harianActive = $item->is_harian_active ?? true;
+                    $boronganActive = $item->is_borongan_active ?? true;
+                    $defaultJenis = $harianActive ? 'harian' : 'borongan';
+                @endphp
+                <input type="hidden" name="jenis_sewa" id="jenis-sewa-input" value="{{ $defaultJenis }}">
+
+                <!-- Pilihan Jenis Sewa (Pill Tabs) -->
+                <div class="flex justify-center mb-8" id="jenis-sewa-container">
+                    @if($harianActive && $boronganActive)
+                    <div class="bg-gray-100 p-1.5 rounded-full inline-flex relative overflow-hidden shadow-inner border border-gray-200">
+                        <!-- Sliding background element -->
+                        <div id="jenis-sewa-slider" class="absolute top-1.5 bottom-1.5 left-1.5 bg-blue-500 rounded-full transition-all duration-300 ease-in-out shadow-md" style="width: calc(50% - 3px); z-index: 0; transform: translateX({{ $defaultJenis == 'borongan' ? '100%' : '0' }});"></div>
+                        
+                        <button type="button" 
+                                class="jenis-sewa-btn relative z-10 px-8 py-2.5 text-sm font-bold rounded-full transition-colors duration-300 {{ $defaultJenis == 'harian' ? 'text-white' : 'text-gray-600 hover:text-gray-800' }}" 
+                                data-jenis="harian" 
+                                style="width: 160px;">
+                            Sewa Harian
+                        </button>
+                        
+                        <button type="button" 
+                                class="jenis-sewa-btn relative z-10 px-8 py-2.5 text-sm font-bold rounded-full transition-colors duration-300 {{ $defaultJenis == 'borongan' ? 'text-white' : 'text-gray-600 hover:text-gray-800' }}" 
+                                data-jenis="borongan" 
+                                style="width: 160px;">
+                            Sewa Borongan
+                        </button>
+                    </div>
+                    @elseif($harianActive)
+                    <div class="bg-blue-500 text-white px-8 py-2.5 text-sm font-bold rounded-full shadow-md">
+                        Sewa Harian
+                    </div>
+                    @elseif($boronganActive)
+                    <div class="bg-blue-500 text-white px-8 py-2.5 text-sm font-bold rounded-full shadow-md">
+                        Sewa Borongan (Drop Off)
+                    </div>
+                    @endif
+                </div>
+
                 <!-- Pilihan Metode Pengiriman -->
-                <div class="flex flex-col sm:flex-row justify-center gap-6 mb-10 items-center">
+                <div id="delivery-method-container">
+                    <h3 class="text-xl font-bold text-center text-gray-800 mb-6" id="method-label">Metode Antar Jemput</h3>
+                    <div class="flex flex-col sm:flex-row justify-center gap-6 mb-10 items-center">
                     @if($antarActive)
                     <!-- Antar Card -->
                     <div class="delivery-method-card {{ $defaultMethod == 'antar' ? 'active' : '' }} cursor-pointer bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 w-48 text-center border-4 border-transparent" data-method="antar">
@@ -339,8 +292,28 @@
                                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
                             </svg>
                             <h3 class="text-lg font-bold text-gray-800">Waktu Penyewaan</h3>
-                            <div class="ml-auto text-right">
-                                <p class="text-sm text-gray-600">Jarak Tempuh</p><p class="text-2xl font-bold text-gray-800"><input type="number" name="distance_km" id="distance_km" value="1" min="1" class="w-20 border-b-2 border-gray-300 focus:border-blue-500 focus:outline-none bg-transparent text-center" required> km</p>
+                            <div class="ml-auto text-right" id="distance-container">
+                                
+                                @if($isWilayah)
+                                    <p class="text-sm text-gray-600 mb-1">Tujuan Pengiriman</p>
+                                    <select name="tujuan_wilayah" id="tujuan_wilayah_antar" class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" onchange="calculateTotal()">
+                                        <option value="dalam_desa">Dalam Desa</option>
+                                        <option value="luar_desa">Luar Desa (1 Kec)</option>
+                                        @if(($tarifWilayah['tipe_luar_kecamatan'] ?? 'pukul_rata') == 'per_kecamatan')
+                                            @foreach($kecamatanKhusus as $kec)
+                                                <option value="kec_{{ $kec->id }}">Kec. {{ $kec->name }}</option>
+                                            @endforeach
+                                        @else
+                                            <option value="luar_kecamatan">Luar Kecamatan</option>
+                                        @endif
+                                    </select>
+                                @else
+                                    <p class="text-sm text-gray-600">Jarak Tempuh</p>
+                                    <p class="text-2xl font-bold text-gray-800">
+                                        <input type="number" name="distance_km" id="distance_km" value="1" min="1" class="w-20 border-b-2 border-gray-300 focus:border-blue-500 focus:outline-none bg-transparent text-center" onchange="updateTotals(); updateTotalsJemput();" required> km
+                                    </p>
+                                @endif
+
                             </div>
                         </div>
                         
@@ -353,7 +326,7 @@
                                        min="{{ date('Y-m-d') }}"
                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                             </div>
-                            <div>
+                            <div id="end-date-container">
                                 <label class="block text-sm text-gray-600 mb-2">Tanggal Selesai Sewa / Acara</label>
                                 <input type="date" 
                                        name="end_date" 
@@ -621,8 +594,28 @@
                                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
                             </svg>
                             <h3 class="text-lg font-bold text-gray-800">Waktu Penyewaan</h3>
-                            <div class="ml-auto text-right">
-                                <p class="text-sm text-gray-600">Jarak Tempuh</p><p class="text-2xl font-bold text-gray-800"><input type="number" name="distance_km" id="distance_km_jemput" value="1" min="1" class="w-20 border-b-2 border-gray-300 focus:border-blue-500 focus:outline-none bg-transparent text-center" required> km</p>
+                            <div class="ml-auto text-right" id="distance-container-jemput">
+                                
+                                @if($isWilayah)
+                                    <p class="text-sm text-gray-600 mb-1">Tujuan Pengiriman</p>
+                                    <select name="tujuan_wilayah" id="tujuan_wilayah_jemput" class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" onchange="calculateTotal()">
+                                        <option value="dalam_desa">Dalam Desa</option>
+                                        <option value="luar_desa">Luar Desa (1 Kec)</option>
+                                        @if(($tarifWilayah['tipe_luar_kecamatan'] ?? 'pukul_rata') == 'per_kecamatan')
+                                            @foreach($kecamatanKhusus as $kec)
+                                                <option value="kec_{{ $kec->id }}">Kec. {{ $kec->name }}</option>
+                                            @endforeach
+                                        @else
+                                            <option value="luar_kecamatan">Luar Kecamatan</option>
+                                        @endif
+                                    </select>
+                                @else
+                                    <p class="text-sm text-gray-600">Jarak Tempuh</p>
+                                    <p class="text-2xl font-bold text-gray-800">
+                                        <input type="number" name="distance_km_jemput" id="distance_km_jemput" value="1" min="1" class="w-20 border-b-2 border-gray-300 focus:border-blue-500 focus:outline-none bg-transparent text-center" onchange="updateTotals(); updateTotalsJemput();" required> km
+                                    </p>
+                                @endif
+
                             </div>
                         </div>
                         
@@ -634,7 +627,7 @@
                                        min="{{ date('Y-m-d') }}"
                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                             </div>
-                            <div>
+                            <div id="end-date-container-jemput">
                                 <label class="block text-sm text-gray-600 mb-2">Tanggal Selesai Sewa / Acara</label>
                                 <input type="date" 
                                        id="end-date-jemput"
@@ -989,31 +982,125 @@
         function updateTotals() {
             if (!qtyDisplay) return;
             const qty = parseInt(qtyDisplay.value) || 1;
-            const distance = parseInt(getEl('distance_km').value) || 1;
-            const subtotal = pricePerUnit * qty * distance;
-            const total = subtotal;
+            
+            let total = 0;
+            const jenisInput = document.getElementById('jenis-sewa-input');
+            const jenis = jenisInput ? jenisInput.value : 'harian';
+            
+            if (jenis === 'harian') {
+                const sd = startDate ? startDate.value : null;
+                const ed = endDate ? endDate.value : null;
+                let days = 1;
+                if (sd) {
+                    const start = new Date(sd);
+                    const end = ed ? new Date(ed) : new Date(sd);
+                    if (end >= start) {
+                        const diffTime = Math.abs(end - start);
+                        days = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                    }
+                }
+                if (daysCount) daysCount.textContent = days;
+                total = pricePerUnit * qty * days;
+            } else {
+                const isWilayah = {{ $isWilayah ? 'true' : 'false' }};
+                if (isWilayah) {
+                    const tarifWilayah = @json($tarifWilayah);
+                    const tujuanAntar = document.getElementById('tujuan_wilayah_antar');
+                    const tujuanVal = tujuanAntar ? tujuanAntar.value : 'dalam_desa';
+                    let p = 0;
+                    if (tujuanVal === 'dalam_desa') {
+                        p = parseInt(tarifWilayah.harga_dalam_desa) || 0;
+                    } else if (tujuanVal === 'luar_desa') {
+                        p = parseInt(tarifWilayah.harga_luar_desa) || 0;
+                    } else if (tujuanVal.startsWith('kec_')) {
+                        const kecId = tujuanVal.replace('kec_', '');
+                        p = parseInt(tarifWilayah.harga_kecamatan_khusus[kecId]) || 0;
+                    } else {
+                        p = parseInt(tarifWilayah.harga_luar_kecamatan) || 0;
+                    }
+                    total = p * qty;
+                } else {
+                    const distanceEl = document.getElementById('distance_km');
+                    const distance = parseInt(distanceEl ? distanceEl.value : 1) || 1;
+                    const batasDalam = {{ $item->batas_km_dalam_desa ?? 0 }};
+                    const hargaDalam = {{ $item->harga_dalam_desa ?? $item->harga_sewa }};
+                    const batasLuar = {{ $item->batas_km_luar_desa ?? 0 }};
+                    const hargaLuar = {{ $item->harga_luar_desa ?? $item->harga_sewa }};
+                    const hargaLuarKota = {{ $item->harga_luar_kota ?? $item->harga_sewa }};
+                    
+                    let p = hargaLuarKota;
+                    if (batasDalam > 0 && distance <= batasDalam) {
+                        p = hargaDalam;
+                    } else if (batasLuar > 0 && distance <= batasLuar) {
+                        p = hargaLuar;
+                    }
+                    total = p * qty;
+                }
+            }
             
             const subtotalEl = getEl('subtotal');
             const totalTransferEl = getEl('total-amount-transfer');
             const totalCashEl = getEl('total-amount-cash');
 
-            if (subtotalEl) subtotalEl.textContent = 'Rp. ' + subtotal.toLocaleString('id-ID');
+            if (subtotalEl) subtotalEl.textContent = 'Rp. ' + total.toLocaleString('id-ID');
             if (totalTransferEl) totalTransferEl.textContent = 'Rp. ' + total.toLocaleString('id-ID');
             if (totalCashEl) totalCashEl.textContent = 'Rp. ' + total.toLocaleString('id-ID');
         }
 
-        function updateTotalsJemput() {
+function updateTotalsJemput() {
             if (!qtyDisplayJemput) return;
             const qty = parseInt(qtyDisplayJemput.value) || 1;
-            const distance = parseInt(getEl('distance_km_jemput').value) || 1;
-            const subtotal = pricePerUnit * qty * distance;
-            const total = subtotal;
+            
+            let total = 0;
+            const jenisInput = document.getElementById('jenis-sewa-input');
+            const jenis = jenisInput ? jenisInput.value : 'harian';
+
+            if (jenis === 'harian') {
+                let days = parseInt(daysCountJemput ? daysCountJemput.textContent : 1) || 1;
+                if(days < 1) days = 1;
+                total = pricePerUnit * qty * days;
+            } else {
+                const isWilayah = {{ $isWilayah ? 'true' : 'false' }};
+                if (isWilayah) {
+                    const tarifWilayah = @json($tarifWilayah);
+                    const tujuanJemput = document.getElementById('tujuan_wilayah_jemput');
+                    const tujuanVal = tujuanJemput ? tujuanJemput.value : 'dalam_desa';
+                    let p = 0;
+                    if (tujuanVal === 'dalam_desa') {
+                        p = parseInt(tarifWilayah.harga_dalam_desa) || 0;
+                    } else if (tujuanVal === 'luar_desa') {
+                        p = parseInt(tarifWilayah.harga_luar_desa) || 0;
+                    } else if (tujuanVal.startsWith('kec_')) {
+                        const kecId = tujuanVal.replace('kec_', '');
+                        p = parseInt(tarifWilayah.harga_kecamatan_khusus[kecId]) || 0;
+                    } else {
+                        p = parseInt(tarifWilayah.harga_luar_kecamatan) || 0;
+                    }
+                    total = p * qty;
+                } else {
+                    const distanceEl = document.getElementById('distance_km_jemput');
+                    const distance = parseInt(distanceEl ? distanceEl.value : 1) || 1;
+                    const batasDalam = {{ $item->batas_km_dalam_desa ?? 0 }};
+                    const hargaDalam = {{ $item->harga_dalam_desa ?? $item->harga_sewa }};
+                    const batasLuar = {{ $item->batas_km_luar_desa ?? 0 }};
+                    const hargaLuar = {{ $item->harga_luar_desa ?? $item->harga_sewa }};
+                    const hargaLuarKota = {{ $item->harga_luar_kota ?? $item->harga_sewa }};
+                    
+                    let p = hargaLuarKota;
+                    if (batasDalam > 0 && distance <= batasDalam) {
+                        p = hargaDalam;
+                    } else if (batasLuar > 0 && distance <= batasLuar) {
+                        p = hargaLuar;
+                    }
+                    total = p * qty;
+                }
+            }
             
             const subtotalEl = getEl('subtotal-jemput');
             const totalTransferEl = getEl('total-amount-transfer-jemput');
             const totalCashEl = getEl('total-amount-cash-jemput');
 
-            if (subtotalEl) subtotalEl.textContent = 'Rp. ' + subtotal.toLocaleString('id-ID');
+            if (subtotalEl) subtotalEl.textContent = 'Rp. ' + total.toLocaleString('id-ID');
             if (totalTransferEl) totalTransferEl.textContent = 'Rp. ' + total.toLocaleString('id-ID');
             if (totalCashEl) totalCashEl.textContent = 'Rp. ' + total.toLocaleString('id-ID');
         }
@@ -1415,6 +1502,102 @@
                 window.location.href = '{{ route("user.activity") }}';
             });
         }
+
+        // Logic for Jenis Sewa Pill Tabs
+        const slider = document.getElementById('jenis-sewa-slider');
+        const jenisBtns = document.querySelectorAll('.jenis-sewa-btn');
+        const jenisInput = document.getElementById('jenis-sewa-input');
+        
+        if (slider && jenisBtns.length > 0) {
+            jenisBtns.forEach((btn, index) => {
+                btn.addEventListener('click', function() {
+                    const jenis = this.dataset.jenis;
+                    jenisInput.value = jenis;
+                    
+                    // Update text colors
+                    jenisBtns.forEach(b => {
+                        b.classList.remove('text-white');
+                        b.classList.add('text-gray-600', 'hover:text-gray-800');
+                    });
+                    this.classList.remove('text-gray-600', 'hover:text-gray-800');
+                    this.classList.add('text-white');
+                    
+                    // Move slider based on button index
+                    if (jenisBtns.length > 1) {
+                        slider.style.transform = index === 0 ? 'translateX(0)' : 'translateX(100%)';
+                    }
+                    
+                    updateUIByJenisSewa(jenis);
+                });
+            });
+        }
+        
+        function updateUIByJenisSewa(jenis) {
+            // ===== ANTAR FORM elements =====
+            const distC = document.getElementById('distance-container');
+            const distI = document.getElementById('distance_km');
+            const endC = document.getElementById('end-date-container');
+            const endI = document.getElementById('end-date');
+            
+            // ===== JEMPUT FORM elements =====
+            const distCJ = document.getElementById('distance-container-jemput');
+            const distIJ = document.getElementById('distance_km_jemput');
+            const endCJ = document.getElementById('end-date-container-jemput');
+            const endIJ = document.getElementById('end-date-jemput');
+            
+            // ===== Shared elements =====
+            const methodLabel = document.getElementById('method-label');
+            const deliveryMethodContainer = document.getElementById('delivery-method-container');
+            const jemputMethodInput = document.getElementById('delivery-method-input');
+            const jemputFormEl = document.getElementById('jemput-form');
+            const antarFormEl = document.getElementById('antar-form');
+
+            if (jenis === 'harian') {
+                // --- Antar: hide distance, show end-date ---
+                if(distC) distC.style.display = 'none';
+                if(distI) { distI.required = false; distI.value = 1; }
+                if(endC) endC.style.display = '';
+                if(endI) endI.required = true;
+                
+                // --- Jemput: hide distance, show end-date ---
+                if(distCJ) distCJ.style.display = 'none';
+                if(distIJ) { distIJ.required = false; distIJ.value = 1; }
+                if(endCJ) endCJ.style.display = '';
+                if(endIJ) endIJ.required = true;
+                
+                // Show delivery method selection (Antar/Jemput)
+                if(deliveryMethodContainer) deliveryMethodContainer.style.display = '';
+                if(methodLabel) methodLabel.textContent = 'Metode Antar Jemput';
+
+            } else {
+                // --- Borongan ---
+                // --- Antar: show distance, hide end-date ---
+                if(distC) distC.style.display = '';
+                if(distI) distI.required = true;
+                if(endC) endC.style.display = 'none';
+                if(endI) { endI.required = false; endI.value = ''; }
+                
+                // --- Jemput: show distance, hide end-date ---
+                if(distCJ) distCJ.style.display = '';
+                if(distIJ) distIJ.required = true;
+                if(endCJ) endCJ.style.display = 'none';
+                if(endIJ) { endIJ.required = false; endIJ.value = ''; }
+                
+                // Hide delivery method toggle — borongan always uses antar (drop-off)
+                if(deliveryMethodContainer) deliveryMethodContainer.style.display = 'none';
+                if(methodLabel) methodLabel.textContent = 'Sewa Borongan (Drop Off)';
+                
+                // Force to antar form & hide jemput
+                if(jemputMethodInput) jemputMethodInput.value = 'antar';
+                if(jemputFormEl) jemputFormEl.classList.add('hidden');
+                if(antarFormEl) antarFormEl.classList.remove('hidden');
+            }
+            updateTotals();
+            updateTotalsJemput();
+        }
+
+        // Initial UI setup if needed
+        if (jenisInput) updateUIByJenisSewa(jenisInput.value);
 
     });
 </script>

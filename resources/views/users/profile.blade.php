@@ -416,41 +416,24 @@
                 const clientErrorProfile = document.getElementById('client-error-profile');
 
                 if (file) {
-                    // Validasi ukuran di sisi klien (Maks 8MB)
                     if (file.size > 8 * 1024 * 1024) {
                         if (clientErrorProfile) {
                             clientErrorProfile.textContent = 'Ukuran foto Anda ' + (file.size / 1024 / 1024).toFixed(2) + ' MB. Maksimal 8 MB.';
                             clientErrorProfile.classList.remove('hidden');
                         }
-                        this.value = ''; // Reset input agar tidak terkirim
-
-                        // Kembalikan ke tampilan awal/sebelumnya
-                        if (avatarPreview) {
-                            avatarPreview.src = '';
-                            avatarPreview.classList.add('hidden');
-                        }
-                        if (avatarPlaceholder) avatarPlaceholder.classList.remove('hidden');
-                        if (deletePhotoBtn) deletePhotoBtn.style.display = 'none';
-                        return; // Berhenti memproses gambar
-                    } else {
-                        if (clientErrorProfile) clientErrorProfile.classList.add('hidden');
+                        this.value = '';
+                        return;
                     }
-
-                    // Reset flag hapus (kita mengganti, bukan hanya menghapus)
-                    if(deleteAvatarInput) deleteAvatarInput.value = '0';
-
-                    const reader = new FileReader();
-                    reader.onload = function(event) {
-                        if (avatarPreview) {
-                            avatarPreview.src = event.target.result;
-                            avatarPreview.classList.remove('hidden');
-                        }
-                        if (avatarPlaceholder) {
-                            avatarPlaceholder.classList.add('hidden');
-                        }
-                        if(uploadHint) uploadHint.classList.add('hidden');
-                    };
-                    reader.readAsDataURL(file);
+                    
+                    if (typeof initGlobalCropper === 'function') {
+                        initGlobalCropper(this, 'avatar-preview', 1);
+                        if (avatarPlaceholder) avatarPlaceholder.classList.add('hidden');
+                        if (deletePhotoBtn) deletePhotoBtn.style.display = 'inline-block';
+                        if (uploadHint) uploadHint.classList.add('hidden');
+                        if (clientErrorProfile) clientErrorProfile.classList.add('hidden');
+                    } else {
+                        console.error('Cropper is not initialized properly in layout');
+                    }
                 }
             });
         }

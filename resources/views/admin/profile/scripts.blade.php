@@ -291,16 +291,11 @@
                 if (fileInput.files[0]) {
                     if(deleteAvatarInput) deleteAvatarInput.value = '0';
                     
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        if (document.getElementById('uploadedAvatar').classList.contains('avatar-default')) {
-                            document.getElementById('uploadedAvatar').outerHTML = '<img src="' + e.target.result + '" alt="user-avatar" class="avatar-preview rounded-circle" id="uploadedAvatar" />';
-                        } else {
-                            const img = document.getElementById('uploadedAvatar');
-                            if(img) img.src = e.target.result;
-                        }
-                    };
-                    reader.readAsDataURL(fileInput.files[0]);
+                    if (typeof initGlobalCropper === 'function') {
+                        initGlobalCropper(fileInput, 'uploadedAvatar', 1);
+                    } else {
+                        console.error('Cropper is not initialized properly in layout');
+                    }
                 }
             };
 

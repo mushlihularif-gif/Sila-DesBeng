@@ -936,3 +936,59 @@ if (returnForm) {
 }
 </script>
 @endsection
+
+
+<!-- Modal Pilih Supir -->
+<div class="modal fade" id="pilihSupirModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header border-bottom bg-light">
+                <h5 class="modal-title fw-bold"><i class="bx bx-user me-2 text-primary"></i>Pilih Supir / Petugas</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <p class="text-muted mb-4">Silakan pilih supir yang akan ditugaskan untuk pesanan ini sebelum kendaraan diberangkatkan.</p>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Daftar Supir Tersedia</label>
+                    <select id="assigned_supir_id" class="form-select form-select-lg">
+                        <option value="">-- Pilih Supir --</option>
+                        @php
+                            $allSupirs = \App\Models\Supir::where('region_id', auth()->user()->region_id)->get();
+                            $tersedia = $allSupirs->where('status', 'Tersedia');
+                            $bertugas = $allSupirs->where('status', 'Sedang Bertugas');
+                            $tidakAktif = $allSupirs->where('status', 'Tidak Aktif');
+                        @endphp
+                        
+                        @if($tersedia->count() > 0)
+                            <optgroup label="Tersedia (Bisa Dipilih)">
+                                @foreach($tersedia as $supir)
+                                    <option value="{{ $supir->id }}">{{ $supir->nama }} - {{ $supir->kategori_layanan }}</option>
+                                @endforeach
+                            </optgroup>
+                        @endif
+                        
+                        @if($bertugas->count() > 0)
+                            <optgroup label="Sedang Bertugas (Tidak Bisa Dipilih)">
+                                @foreach($bertugas as $supir)
+                                    <option value="{{ $supir->id }}" disabled>{{ $supir->nama }} - {{ $supir->kategori_layanan }}</option>
+                                @endforeach
+                            </optgroup>
+                        @endif
+
+                        @if($tidakAktif->count() > 0)
+                            <optgroup label="Tidak Aktif / Cuti (Tidak Bisa Dipilih)">
+                                @foreach($tidakAktif as $supir)
+                                    <option value="{{ $supir->id }}" disabled>{{ $supir->nama }} - {{ $supir->kategori_layanan }}</option>
+                                @endforeach
+                            </optgroup>
+                        @endif
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer border-top bg-light">
+                <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary rounded-pill px-4" onclick="submitInDeliveryWithSupir()">Tugaskan & Berangkatkan</button>
+            </div>
+        </div>
+    </div>
+</div>

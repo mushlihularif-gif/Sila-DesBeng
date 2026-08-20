@@ -521,6 +521,15 @@ class RequestController extends Controller
             ]);
         }
 
+        // Otomatis bebaskan Supir jika order ditolak
+        if (in_array($type, ['mobil', 'fasilitas']) && isset($model->assigned_supir_id)) {
+            $supirToFree = \App\Models\Supir::find($model->assigned_supir_id);
+            if ($supirToFree) {
+                $supirToFree->status = 'Tersedia';
+                $supirToFree->save();
+            }
+        }
+
         // Kirim notifikasi penolakan ke pengguna
         $notificationService->notifyOrderRejected($model, $request->reason, $type);
 
@@ -552,6 +561,7 @@ class RequestController extends Controller
 
         $request->validate([
             'status' => 'required|string|in:confirmed,being_prepared,in_delivery,arrived,completed,approved',
+            'assigned_supir_id' => 'nullable|exists:supirs,id',
         ]);
 
         $notificationService = new NotificationService();
@@ -654,10 +664,40 @@ class RequestController extends Controller
                             $order->fasilitas->update(['status' => 'tersedia']);
                         }
                     }
+                    
+                    // Otomatis bebaskan Supir (kembali Tersedia) saat pesanan selesai
+                    if (in_array($type, ['mobil', 'fasilitas']) && $order->assigned_supir_id && $oldStatus !== 'completed') {
+                        $supirToFree = \App\Models\Supir::find($order->assigned_supir_id);
+                        if ($supirToFree) {
+                            $supirToFree->status = 'Tersedia';
+                            $supirToFree->save();
+                        }
+                    }
                     break;
             }
 
-            // Perbarui status
+            // PROSES OTOMATISASI PENUGASAN SUPIR
+            $assignedSupirId = $request->input('assigned_supir_id');
+            if (in_array($type, ['mobil', 'fasilitas']) && $assignedSupirId !== null && $assignedSupirId != $order->assigned_supir_id) {
+                // Bebaskan supir lama jika ada
+                if ($order->assigned_supir_id) {
+                    $oldSupir = \App\Models\Supir::find($order->assigned_supir_id);
+                    if ($oldSupir) {
+                        $oldSupir->status = 'Tersedia';
+                        $oldSupir->save();
+                    }
+                }
+                
+                // Tugaskan supir baru
+                $order->assigned_supir_id = $assignedSupirId;
+                $newSupir = \App\Models\Supir::find($assignedSupirId);
+                if ($newSupir && $newStatus !== 'completed' && $newStatus !== 'cancelled' && $newStatus !== 'rejected') {
+                    $newSupir->status = 'Sedang Bertugas';
+                    $newSupir->save();
+                }
+            }
+
+            // Perbarui status utama order
             $order->status = $newStatus;
             $order->save();
 
@@ -817,6 +857,15 @@ class RequestController extends Controller
                 $order->load('barang');
                 if ($order->barang) {
                     $order->barang->increaseStock($order->quantity);
+                }
+            }
+            
+            // Otomatis bebaskan Supir jika batal
+            if (in_array($type, ['mobil', 'fasilitas']) && $order->assigned_supir_id) {
+                $supirToFree = \App\Models\Supir::find($order->assigned_supir_id);
+                if ($supirToFree) {
+                    $supirToFree->status = 'Tersedia';
+                    $supirToFree->save();
                 }
             }
             

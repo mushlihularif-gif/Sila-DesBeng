@@ -276,7 +276,7 @@
                                                         <div class="d-flex justify-content-between align-items-center mb-2">
                                                             <div class="d-flex align-items-center gap-2">
                                                                 <img src="{{ asset('User/img/iconbaru/disediakansupir.png') }}" style="width: 40px; height: 40px; object-fit: contain;">
-                                                                <h6 class="mb-0 fw-bold">Sewa Dengan Supir Desa</h6>
+                                                                <h6 class="mb-0 fw-bold">Sewa Dengan Supir Pengelola</h6>
                                                             </div>
                                                             <div class="form-check form-switch fs-5 mb-0">
                                                                 <input class="form-check-input cursor-pointer" type="radio" name="supir_switch" id="switch_supir_disediakan" value="Disediakan" onchange="updateSupirStatus()" {{ old('opsi_supir', $fasilitas->opsi_supir) == 'Disediakan' ? 'checked' : '' }}>
@@ -284,11 +284,7 @@
                                                         </div>
                                                         <div class="text-muted small mb-0 fw-semibold" id="status_supir_disediakan">Tidak Aktif</div>
                                                         
-                                                        <div id="form_supir_details" class="mt-3 p-3 bg-light rounded border" style="display: {{ old('opsi_supir', $fasilitas->opsi_supir) == 'Disediakan' ? 'block' : 'none' }};">
-                                                            <label class="form-label fw-bold text-primary small mb-2"><i class="bx bx-user me-1"></i>Keterangan Supir (Opsional)</label>
-                                                            <input type="text" class="form-control form-control-sm mb-2 modern-input" name="nama_supir" id="nama_supir" placeholder="Nama Supir" value="{{ old('nama_supir', $fasilitas->nama_supir) }}">
-                                                            <input type="text" class="form-control form-control-sm modern-input" name="kontak_supir" id="kontak_supir" placeholder="No. WhatsApp Supir" value="{{ old('kontak_supir', $fasilitas->kontak_supir) }}">
-                                                        </div>
+                                                        
                                                     </div>
                                                 </div>
                                             </div>
@@ -304,7 +300,7 @@
                                                         <div class="d-flex justify-content-between align-items-center mb-2">
                                                             <div class="d-flex align-items-center gap-2">
                                                                 <img src="{{ asset('User/img/iconbaru/bbmdisediakan.png') }}" style="width: 40px; height: 40px; object-fit: contain;">
-                                                                <h6 class="mb-0 fw-bold">BBM Disediakan Desa</h6>
+                                                                <h6 class="mb-0 fw-bold">BBM Disediakan Pengelola</h6>
                                                             </div>
                                                             <div class="form-check form-switch fs-5 mb-0">
                                                                 <input class="form-check-input cursor-pointer" type="radio" name="bbm_switch" id="switch_bbm_disediakan" value="Disediakan" onchange="updateBbmStatus()" {{ old('bbm_ditanggung', $fasilitas->bbm_ditanggung) == 'Disediakan' ? 'checked' : '' }}>
@@ -866,23 +862,24 @@
     function previewFile(input, previewId, placeholderId) {
         const preview = document.getElementById(previewId);
         const placeholder = document.getElementById(placeholderId);
-        const img = preview.querySelector('img');
-        const inputId = input.getAttribute('id');
-        const deleteInput = document.getElementById('delete_' + inputId);
-        
+        const img = preview ? preview.querySelector('img') : null;
+
         if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                img.src = e.target.result;
-                preview.style.display = 'block';
-                placeholder.style.display = 'none';
-                
-                // Reset flag hapus
-                if (deleteInput) {
-                    deleteInput.value = '0';
-                }
-            };
-            reader.readAsDataURL(input.files[0]);
+            if (typeof initGlobalCropper === 'function') {
+                initGlobalCropper(input, img || previewId, NaN, true);
+
+                if (preview) preview.style.display = 'block';
+                if (placeholder) placeholder.style.display = 'none';
+            } else {
+                // Fallback jika cropper belum dimuat
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    if (img) img.src = e.target.result;
+                    if (preview) preview.style.display = 'block';
+                    if (placeholder) placeholder.style.display = 'none';
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
         }
     }
 
@@ -915,8 +912,6 @@
         document.getElementById('status_supir_disediakan').className = switchDisediakan ? 'small mb-0 fw-bold text-success' : 'small mb-0 fw-semibold text-muted';
 
         const input = document.getElementById('opsi_supir');
-        const details = document.getElementById('form_supir_details');
-        
         if (switchSendiri) {
             input.value = 'Sediakan Supir Sendiri';
         } else if (switchDisediakan) {

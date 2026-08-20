@@ -1,0 +1,83 @@
+﻿<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head><meta charset='utf-8'><title>RAB SilaDesBeng</title>
+<style>
+body { font-family: 'Times New Roman', serif; font-size: 12pt; }
+table { border-collapse: collapse; width: 100%; }
+th, td { border: 1px solid black; padding: 8px; text-align: left; }
+th { background-color: #f2f2f2; text-align: center; font-weight: bold; }
+.center { text-align: center; }
+.right { text-align: right; }
+.bold { font-weight: bold; }
+</style>
+</head>
+<body>
+<h2 class='center'>RENCANA ANGGARAN BIAYA (RAB)<br>PROYEK SILADESBENG - KMIPN 2026</h2>
+<br>
+<table>
+    <thead>
+        <tr>
+            <th width='5%'>No</th>
+            <th width='25%'>Komponen Kebutuhan</th>
+            <th width='50%'>Deskripsi Layanan & Vendor</th>
+            <th width='20%'>Estimasi Biaya</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td class='center'>1</td>
+            <td><b>Domain & Hosting (1 Tahun)</b></td>
+            <td><b>Vendor: Rumahweb Indonesia</b><br>Sewa <i>Shared Hosting Unlimited L</i> (mendukung akses Terminal/SSH untuk <i>background job</i> Laravel) & pembelian domain <b>untukkita.com</b>.</td>
+            <td class='right'>Rp 750.000</td>
+        </tr>
+        <tr>
+            <td class='center'>2</td>
+            <td><b>WhatsApp Gateway API</b></td>
+            <td><b>Vendor: Fonnte (md.fonnte.com)</b><br>Langganan 1 Bulan (<i>Package Regular</i>) untuk demo <i>live</i> notifikasi dan pengiriman OTP WhatsApp.</td>
+            <td class='right'>Rp 140.000</td>
+        </tr>
+        <tr>
+            <td class='center'>3</td>
+            <td><b>Ekosistem Google Cloud</b></td>
+            <td><b>Vendor: Google Cloud Console</b><br>Dana <i>buffer</i> (Pay-as-you-go) untuk mencakup:<br>&bull; <b>Maps API:</b> Fitur Peta Interaktif Pelaporan Warga.<br>&bull; <b>Gemini AI:</b> Otak <i>SilaDesBeng Assistant</i>.</td>
+            <td class='right'>Rp 300.000</td>
+        </tr>
+        <tr>
+            <td class='center'>4</td>
+            <td><b>Google Play Console</b></td>
+            <td><b>Vendor: Google Play Developer</b><br>Pendaftaran lisensi <i>Developer</i> Android (Satu kali bayar selamanya) untuk <i>publish</i> APK.</td>
+            <td class='right'>Rp 400.000</td>
+        </tr>
+        <tr>
+            <td class='center'>5</td>
+            <td><b>Payment Gateway</b></td>
+            <td><b>Vendor: Midtrans Indonesia</b><br>Pendaftaran & integrasi gratis. Hanya ada potongan biaya admin (MDR) otomatis saat warga berhasil melakukan pembayaran.</td>
+            <td class='right'>Rp 0</td>
+        </tr>
+        <tr>
+            <td class='center'>6</td>
+            <td><b>E-KYC (OCR KTP & KK)</b></td>
+            <td><b>Vendor: OCR.space</b><br>Menggunakan API pembaca teks publik (Jalur Gratis: 25.000 <i>scan</i>/bulan). Fitur <i>Scan</i> Wajah (<i>Selfie</i>) diproses lokal secara <i>Native</i>.</td>
+            <td class='right'>Rp 0</td>
+        </tr>
+        <tr>
+            <td class='center'>7</td>
+            <td><b>Firebase Cloud Messaging</b></td>
+            <td><b>Vendor: Google Firebase</b><br>Layanan gratis dari Google untuk mengirimkan <i>Push Notification</i> (pop-up HP) secara <i>real-time</i> ke perangkat Android warga.</td>
+            <td class='right'>Rp 0</td>
+        </tr>
+        <tr>
+            <td class='center'>8</td>
+            <td><b>Generate PDF & QR Code</b></td>
+            <td><b>Vendor: Native Server (SilaDesBeng)</b><br>Fitur cetak laporan, struk sewa, dan bukti orisinalitas (QR) diproses 100% menggunakan CPU <i>Hosting</i> internal tanpa API luar.</td>
+            <td class='right'>Rp 0</td>
+        </tr>
+        <tr>
+            <td colspan='3' class='right bold'>Total Estimasi Pengajuan Dana Lomba</td>
+            <td class='right bold'>Rp 1.590.000</td>
+        </tr>
+    </tbody>
+</table>
+<br>
+<p>Dibuat oleh Tim Gen Hello World untuk keperluan proposal KMIPN 2026.</p>
+</body>
+</html>

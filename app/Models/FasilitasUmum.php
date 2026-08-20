@@ -14,6 +14,7 @@ class FasilitasUmum extends Model
         'stok',
         'status',
         'kategori',
+        'plat_nomor',
         'foto',
         'foto_2',
         'foto_3',

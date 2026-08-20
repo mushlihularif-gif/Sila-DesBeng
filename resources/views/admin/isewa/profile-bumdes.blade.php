@@ -12,9 +12,9 @@
                     @if(in_array(auth()->user()->role, ['admin', 'super_admin']))
                         Pemerintah Kabupaten Bengkalis
                     @elseif(auth()->user()->role == 'admin_kecamatan')
-                        Pemerintah Kecamatan {{ auth()->user()->region->name ?? 'Daerah' }}
+                        Pemerintah Kecamatan {{ str_ireplace('Kecamatan ', '', auth()->user()->region->name ?? 'Daerah') }}
                     @else
-                        Pemerintah Desa {{ auth()->user()->region->name ?? 'Daerah' }}
+                        Pemerintah Desa {{ str_ireplace('Desa ', '', auth()->user()->region->name ?? 'Daerah') }}
                     @endif
                 </span></h4>
                 <a href="{{ route('admin.siladesbeng.bumdes.create') }}" class="btn btn-primary">

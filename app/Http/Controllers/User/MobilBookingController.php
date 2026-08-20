@@ -48,11 +48,13 @@ class MobilBookingController extends Controller
     {
         $validated = $request->validate([
             'mobil_id' => 'required|exists:mobils,id',
+            'jenis_sewa' => 'required|in:harian,borongan',
             'delivery_method' => 'required|in:antar,jemput',
             'quantity' => 'required|integer|min:1|max:50',
             'start_date' => 'required|date|after_or_equal:today',
-            'end_date' => 'required|date|after_or_equal:start_date',
-            'distance_km' => 'required|integer|min:1',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'distance_km' => 'nullable|integer|min:1',
+            'tujuan_wilayah' => 'nullable|string',
             'payment_method' => 'required|in:tunai',
             
             'recipient_name' => 'required|string|max:255',
@@ -73,7 +75,48 @@ class MobilBookingController extends Controller
             ], 400);
         }
 
-        $totalAmount = $item->harga_sewa * $validated['quantity'] * $validated['distance_km'];
+        // Hitung totalAmount berdasarkan jenis sewa
+        if ($validated['jenis_sewa'] === 'harian') {
+            $startDate = \Carbon\Carbon::parse($validated['start_date']);
+            $endDate = \Carbon\Carbon::parse($validated['end_date'] ?? $validated['start_date']);
+            $days = $startDate->diffInDays($endDate) + 1; // Minimal 1 hari
+            $totalAmount = $item->harga_sewa * $validated['quantity'] * $days;
+        } else {
+            // Borongan
+            if (($item->tipe_tarif_borongan ?? 'jarak') === 'wilayah') {
+                $tarifWilayah = json_decode($item->tarif_borongan_wilayah, true) ?? [];
+                $tujuan = $validated['tujuan_wilayah'] ?? 'dalam_desa';
+                
+                if ($tujuan === 'dalam_desa') {
+                    $pricePerUnit = $tarifWilayah['harga_dalam_desa'] ?? 0;
+                } elseif ($tujuan === 'luar_desa') {
+                    $pricePerUnit = $tarifWilayah['harga_luar_desa'] ?? 0;
+                } elseif (str_starts_with($tujuan, 'kec_')) {
+                    $kecId = str_replace('kec_', '', $tujuan);
+                    $pricePerUnit = $tarifWilayah['harga_kecamatan_khusus'][$kecId] ?? 0;
+                } else {
+                    $pricePerUnit = $tarifWilayah['harga_luar_kecamatan'] ?? 0;
+                }
+            } else {
+                // Berdasarkan Jarak
+                $dist = $validated['distance_km'] ?? 1;
+                
+                if ($item->batas_km_dalam_desa > 0 && $dist <= $item->batas_km_dalam_desa) {
+                    $pricePerUnit = $item->harga_dalam_desa;
+                } elseif ($item->batas_km_luar_desa > 0 && $dist <= $item->batas_km_luar_desa) {
+                    $pricePerUnit = $item->harga_luar_desa;
+                } else {
+                    $pricePerUnit = $item->harga_luar_kota;
+                }
+            }
+            
+            $totalAmount = $pricePerUnit * $validated['quantity'];
+            
+            // Samakan end_date dengan start_date untuk borongan jika kosong
+            if (empty($validated['end_date'])) {
+                $validated['end_date'] = $validated['start_date'];
+            }
+        }
 
         $paymentProofPath = null;
         if ($request->hasFile('payment_proof')) {
@@ -83,12 +126,14 @@ class MobilBookingController extends Controller
         $booking = MobilBooking::create([
             'user_id' => Auth::id(),
             'mobil_id' => $validated['mobil_id'],
+            'jenis_sewa' => $validated['jenis_sewa'],
             'delivery_method' => $validated['delivery_method'],
             'rental_purpose' => $validated['rental_purpose'],
             'quantity' => $validated['quantity'],
             'start_date' => $validated['start_date'],
             'end_date' => $validated['end_date'],
-            'distance_km' => $validated['distance_km'],
+            'distance_km' => $validated['distance_km'] ?? 1,
+            'tujuan_wilayah' => $validated['tujuan_wilayah'] ?? null,
             'recipient_name' => $validated['recipient_name'] ?? null,
             'delivery_address' => $validated['delivery_address'] ?? null,
             'payment_method' => $validated['payment_method'],

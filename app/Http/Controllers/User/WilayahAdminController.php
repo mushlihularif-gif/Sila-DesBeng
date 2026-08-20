@@ -153,6 +153,86 @@ class WilayahAdminController extends Controller
         return back()->with('success', 'Pengumuman baru berhasil dipublikasikan!');
     }
 
+    public function indexBerita(Request $request)
+    {
+        $user = auth()->user();
+        
+        $allowedRegionIds = \App\Models\Region::getDescendantIds($user->region_id);
+        $allowedRegionIds[] = $user->region_id;
+        
+        $query = \App\Models\Announcement::with(['admin', 'region'])->whereIn('region_id', $allowedRegionIds)->orderBy('created_at', 'desc');
+        
+        if ($request->filled('type')) {
+            $query->where('type', $request->type);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->searchWhereLike(['title', 'description'], $search);
+            });
+        }
+        
+        $beritas = $query->paginate(15);
+        
+        // Buat Opsi Jangkauan Publikasi
+        $region = \App\Models\Region::with('parent.parent')->find($user->region_id);
+        $jangkauanOptions = [];
+        if ($region) {
+            $jangkauanOptions[] = ['id' => $region->id, 'label' => 'Internal ' . $region->name];
+            if ($region->parent) {
+                $jangkauanOptions[] = ['id' => $region->parent->id, 'label' => 'Publik Tingkat ' . $region->parent->name];
+                if ($region->parent->parent && $region->type != 'desa') { // Limit up to 2 levels usually enough
+                    $jangkauanOptions[] = ['id' => $region->parent->parent->id, 'label' => 'Publik Tingkat ' . $region->parent->parent->name];
+                }
+            }
+        }
+        
+        return view('user.wilayah.berita', compact('beritas', 'jangkauanOptions'));
+    }
+
+    public function storeBerita(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'type' => 'required|string',
+            'target_region_id' => 'required|exists:regions,id',
+            'event_date' => 'nullable|date',
+            'location' => 'nullable|string|max:255',
+            'description' => 'required|string',
+            'image' => 'nullable|image|max:2048'
+        ]);
+
+        $user = auth()->user();
+        
+        // Verifikasi apakah target_region_id adalah parent/ancestor yang sah, atau diri sendiri
+        $validRegionIds = \App\Models\Region::getAncestorIds($user->region_id);
+        $validRegionIds[] = $user->region_id;
+        
+        if (!in_array($request->target_region_id, $validRegionIds)) {
+            return back()->with('error', 'Anda tidak memiliki hak untuk mempublikasikan di wilayah tersebut.');
+        }
+
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('announcements', 'public');
+        }
+
+        \App\Models\Announcement::create([
+            'admin_id' => $user->id,
+            'region_id' => $request->target_region_id,
+            'title' => $request->title,
+            'type' => $request->type,
+            'event_date' => $request->event_date,
+            'location' => $request->location,
+            'description' => $request->description,
+            'image_path' => $imagePath,
+            'is_active' => true, // Langsung aktif
+        ]);
+
+        return back()->with('success', 'Berita baru berhasil dipublikasikan!');
+    }
+
     public function indexWarga(Request $request)
     {
         $search = $request->get('search');
