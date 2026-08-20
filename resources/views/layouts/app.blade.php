@@ -195,5 +195,6 @@
     @if(session('info'))
     <script>document.addEventListener('DOMContentLoaded', function(){ showSiladesBengToast('info', 'Informasi', {!! json_encode(session('info')) !!}); });</script>
     @endif
+    @include('components.cropper-modal')
 </body>
 </html>

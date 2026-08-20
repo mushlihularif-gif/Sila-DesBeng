@@ -37,6 +37,23 @@
                 </button>
             </div>
         </div>
+        
+        <!-- Panduan -->
+        <div class="card bg-label-primary border-0 shadow-none mb-4" style="border-radius: 12px;">
+            <div class="card-body d-flex align-items-center p-4">
+                <div class="me-3">
+                    <div class="bg-primary p-3 rounded-circle text-white d-flex align-items-center justify-content-center shadow-sm" style="width: 56px; height: 56px;">
+                        <i class="bx bx-info-circle fs-3"></i>
+                    </div>
+                </div>
+                <div>
+                    <h5 class="fw-bold mb-1 text-primary">Panduan Laporan Pendapatan</h5>
+                    <p class="mb-0 text-primary" style="opacity: 0.85;">
+                        Menu ini khusus memvisualisasikan ringkasan performa finansial dan total uang masuk dari unit layanan Anda sendiri. Gunakan grafik di bawah ini untuk mengevaluasi omzet bulanan dan mengukur persentase kontribusi dari tiap sektor usaha.
+                    </p>
+                </div>
+            </div>
+        </div>
         <div class="alert alert-warning border-0 shadow-sm rounded-4 p-4 text-center">
             <div class="avatar avatar-lg bg-warning-subtle text-warning rounded-circle mx-auto mb-3">
                 <i class="bx bx-info-circle fs-2"></i>
@@ -70,6 +87,23 @@
             <button class="btn btn-primary shadow-sm rounded-pill px-4" onclick="window.print()">
                 <i class="bx bx-printer me-2"></i>Cetak
             </button>
+        </div>
+    </div>
+
+    <!-- Panduan -->
+    <div class="card bg-label-primary border-0 shadow-none mb-4" style="border-radius: 12px;">
+        <div class="card-body d-flex align-items-center p-4">
+            <div class="me-3">
+                <div class="bg-primary p-3 rounded-circle text-white d-flex align-items-center justify-content-center shadow-sm" style="width: 56px; height: 56px;">
+                    <i class="bx bx-info-circle fs-3"></i>
+                </div>
+            </div>
+            <div>
+                <h5 class="fw-bold mb-1 text-primary">Panduan Laporan Pendapatan</h5>
+                <p class="mb-0 text-primary" style="opacity: 0.85;">
+                    Menu ini khusus memvisualisasikan ringkasan performa finansial dan total uang masuk dari unit layanan Anda sendiri. Gunakan grafik di bawah ini untuk mengevaluasi omzet bulanan dan mengukur persentase kontribusi dari tiap sektor usaha.
+                </p>
+            </div>
         </div>
     </div>
 
@@ -278,23 +312,62 @@
                     @if($isMobilActive)
                     <!-- Mobil Item -->
                     <div class="d-flex align-items-center p-3 rounded-3 hover-bg-light transition-all border border-dashed-hover">
-                         <div class="avatar avatar-md bg-danger-subtle text-danger rounded-3 p-2 me-3">
-                            <i class="bx bx-car fs-3"></i>
-                        </div>
-                         <div class="flex-grow-1">
-                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                <h6 class="fw-bold text-dark mb-0">Unit Sewa Mobil</h6>
-                                <span class="fw-bold text-dark">Rp <span class="count-up-rupiah" data-value="{{ $totalPendapatanData['mobil']['revenue'] ?? 0 }}">0</span></span>
-                            </div>
-                            <div class="progress mb-2" style="height: 6px;">
-                                <div class="progress-bar bg-danger" role="progressbar" style="width: {{ $totalPendapatanData['mobil']['percentage'] ?? 0 }}%"></div>
-                            </div>
-                             <div class="d-flex justify-content-between text-muted small">
-                                <span><span class="count-up" data-value="{{ $totalPendapatanData['mobil']['transactions'] ?? 0 }}">0</span> Transaksi</span>
-                                <span><span class="count-up" data-value="{{ $totalPendapatanData['mobil']['percentage'] ?? 0 }}">0</span>% dari Total</span>
-                            </div>
-                        </div>
-                    </div>
+                          <div class="d-flex align-items-center mb-4">
+                              <div class="avatar flex-shrink-0 me-3">
+                                  <span class="avatar-initial rounded bg-label-danger"><i class="bx bx-car"></i></span>
+                              </div>
+                              <div class="flex-grow-1">
+                                  <div class="d-flex justify-content-between align-items-center mb-1">
+                                      <h6 class="fw-bold text-dark mb-0">Unit Sewa Mobil</h6>
+                                      <span class="fw-bold text-dark">Rp <span class="count-up-rupiah" data-value="{{ $totalPendapatanData['mobil']['revenue'] ?? 0 }}">0</span></span>
+                                  </div>
+                                  <div class="progress mb-2" style="height: 6px;">
+                                      <div class="progress-bar bg-danger" role="progressbar" style="width: {{ $totalPendapatanData['mobil']['percentage'] ?? 0 }}%"></div>
+                                  </div>
+                                  <div class="d-flex justify-content-between text-muted small">
+                                      <span><span class="count-up" data-value="{{ $totalPendapatanData['mobil']['transactions'] ?? 0 }}">0</span> Transaksi</span>
+                                      <span><span class="count-up" data-value="{{ $totalPendapatanData['mobil']['percentage'] ?? 0 }}">0</span>% dari Total</span>
+                                  </div>
+                              </div>
+                          </div>
+
+                          <div class="d-flex align-items-center mb-4">
+                              <div class="avatar flex-shrink-0 me-3">
+                                  <span class="avatar-initial rounded bg-label-primary"><i class="bx bx-building-house"></i></span>
+                              </div>
+                              <div class="flex-grow-1">
+                                  <div class="d-flex justify-content-between align-items-center mb-1">
+                                      <h6 class="fw-bold text-dark mb-0">Fasilitas Umum</h6>
+                                      <span class="fw-bold text-dark">Rp <span class="count-up-rupiah" data-value="{{ $totalPendapatanData['fasilitas']['revenue'] ?? 0 }}">0</span></span>
+                                  </div>
+                                  <div class="progress mb-2" style="height: 6px;">
+                                      <div class="progress-bar bg-primary" role="progressbar" style="width: {{ $totalPendapatanData['fasilitas']['percentage'] ?? 0 }}%"></div>
+                                  </div>
+                                  <div class="d-flex justify-content-between text-muted small">
+                                      <span><span class="count-up" data-value="{{ $totalPendapatanData['fasilitas']['transactions'] ?? 0 }}">0</span> Transaksi</span>
+                                      <span><span class="count-up" data-value="{{ $totalPendapatanData['fasilitas']['percentage'] ?? 0 }}">0</span>% dari Total</span>
+                                  </div>
+                              </div>
+                          </div>
+
+                          <div class="d-flex align-items-center">
+                              <div class="avatar flex-shrink-0 me-3">
+                                  <span class="avatar-initial rounded bg-label-success"><i class="bx bx-store-alt"></i></span>
+                              </div>
+                              <div class="flex-grow-1">
+                                  <div class="d-flex justify-content-between align-items-center mb-1">
+                                      <h6 class="fw-bold text-dark mb-0">Pasar Daerah</h6>
+                                      <span class="fw-bold text-dark">Rp <span class="count-up-rupiah" data-value="{{ $totalPendapatanData['pasar']['revenue'] ?? 0 }}">0</span></span>
+                                  </div>
+                                  <div class="progress mb-2" style="height: 6px;">
+                                      <div class="progress-bar bg-success" role="progressbar" style="width: {{ $totalPendapatanData['pasar']['percentage'] ?? 0 }}%"></div>
+                                  </div>
+                                  <div class="d-flex justify-content-between text-muted small">
+                                      <span><span class="count-up" data-value="{{ $totalPendapatanData['pasar']['transactions'] ?? 0 }}">0</span> Transaksi</span>
+                                      <span><span class="count-up" data-value="{{ $totalPendapatanData['pasar']['percentage'] ?? 0 }}">0</span>% dari Total</span>
+                                  </div>
+                              </div>
+                          </div>
                     @endif
                 </div>
             </div>
@@ -621,11 +694,11 @@
         // Pie Chart (Donut)
         const pieEl = document.querySelector("#pendapatanPieChart");
         if (pieEl) {
-             new ApexCharts(pieEl, {
-                series: [{{ $totalPendapatanData['rental']['revenue'] ?? 0 }}, {{ $totalPendapatanData['gas']['revenue'] ?? 0 }}, {{ $totalPendapatanData['mobil']['revenue'] ?? 0 }}],
+            new ApexCharts(pieEl, {
+                series: [{{ $totalPendapatanData['rental']['revenue'] ?? 0 }}, {{ $totalPendapatanData['gas']['revenue'] ?? 0 }}, {{ $totalPendapatanData['mobil']['revenue'] ?? 0 }}, {{ $totalPendapatanData['fasilitas']['revenue'] ?? 0 }}, {{ $totalPendapatanData['pasar']['revenue'] ?? 0 }}],
                 chart: { type: 'donut', height: 250 },
-                labels: ['Penyewaan', 'Gas', 'Sewa Mobil'],
-                colors: ['#ffab00', '#03c3ec', '#ff3e1d'], // Warning, Info, Danger
+                labels: ['Penyewaan', 'Gas', 'Sewa Mobil', 'Fasilitas Umum', 'Pasar Daerah'],
+                colors: ['#ffab00', '#03c3ec', '#ff3e1d', '#696cff', '#71dd37'], // Warning, Info, Danger, Primary, Success
                 dataLabels: { enabled: false },
                 plotOptions: {
                     pie: { donut: { size: '70%', labels: { show: true, total: { show: true, showAlways: true, label: 'Total', fontSize: '14px', color: '#a1acb8' } } } }

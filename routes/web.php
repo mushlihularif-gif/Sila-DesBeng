@@ -554,6 +554,9 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
             ]);
         });
 
+        // Supir Desa
+        Route::resource('supir', \App\Http\Controllers\Admin\SupirController::class);
+
         // Penjualan Gas
         Route::middleware('staff.permission:gas')->group(function () {
             Route::post('gas/crisis-mode', [GasController::class, 'updateCrisisSettings'])->name('admin.unit.penjualan_gas.crisis_mode');
@@ -741,15 +744,20 @@ Route::middleware(['auth', 'role:user'])->group(function () {
     });
 
     // Fitur Khusus Admin RT/RW di Frontend
-    Route::prefix('wilayah')->name('wilayah.')->middleware('role:rt,rw')->group(function () {
+    Route::prefix('wilayah')->name('wilayah.')->middleware('role:admin_rt,admin_rw')->group(function () {
         Route::get('/laporan', [\App\Http\Controllers\User\WilayahAdminController::class, 'indexLaporan'])->name('laporan.index');
         Route::get('/laporan/{id}', [\App\Http\Controllers\User\WilayahAdminController::class, 'showLaporan'])->name('laporan.show');
         Route::post('/laporan/{id}/respond', [\App\Http\Controllers\User\WilayahAdminController::class, 'respondLaporan'])->name('laporan.respond');
         Route::post('/laporan/{id}/escalate', [\App\Http\Controllers\User\WilayahAdminController::class, 'escalateLaporan'])->name('laporan.escalate');
         Route::post('/laporan/{id}/resolve', [\App\Http\Controllers\User\WilayahAdminController::class, 'resolveLaporan'])->name('laporan.resolve');
         Route::get('/laporan/{id}/cetak', [\App\Http\Controllers\User\WilayahAdminController::class, 'cetakBukti'])->name('laporan.cetak');
+        
+        Route::get('/berita', [\App\Http\Controllers\User\WilayahAdminController::class, 'indexBerita'])->name('berita.index');
+        Route::post('/berita', [\App\Http\Controllers\User\WilayahAdminController::class, 'storeBerita'])->name('berita.store');
+        
         Route::get('/pengumuman', [\App\Http\Controllers\User\WilayahAdminController::class, 'indexPengumuman'])->name('pengumuman.index');
         Route::post('/pengumuman', [\App\Http\Controllers\User\WilayahAdminController::class, 'storePengumuman'])->name('pengumuman.store');
+        
         Route::get('/warga', [\App\Http\Controllers\User\WilayahAdminController::class, 'indexWarga'])->name('warga.index');
     });
 });
@@ -897,3 +905,5 @@ Route::post('/chatbot/ask', [\App\Http\Controllers\User\ChatbotController::class
 Route::get('/run-mig-now', function() { \Illuminate\Support\Facades\Artisan::call('migrate'); return \Illuminate\Support\Facades\Artisan::output(); });
 Route::get('/run-encrypt', function() { \Illuminate\Support\Facades\Artisan::call('data:encrypt-existing'); return \Illuminate\Support\Facades\Artisan::output(); });
 
+
+Route::get('/test-berita-view', function() { return view('user.wilayah.berita', ['beritas' => collect(), 'jangkauanOptions' => []]); });

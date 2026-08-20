@@ -274,42 +274,44 @@
                                                 </div>
                                             </div>
                                             <div class="d-flex flex-column gap-3 mb-4">
-                                                <div class="d-flex justify-content-between align-items-center bg-light p-3 rounded-4 border">
-                                                    <div>
-                                                        <span class="text-dark fw-semibold d-block">Layanan Antar (Diantar Petugas)</span>
-                                                        <span class="text-muted small">Mobil desa diantarkan langsung ke titik lokasi penyewa</span>
-                                                    </div>
-                                                    <div class="form-check form-switch mb-0">
-                                                        <input class="form-check-input toggle-status" style="transform: scale(1.3); cursor: pointer;" type="checkbox" name="mobil_delivery_antar_active" {{ isset($region->payment_info['mobil_delivery_antar_active']) ? ($region->payment_info['mobil_delivery_antar_active'] ? 'checked' : '') : 'checked' }}>
-                                                    </div>
-                                                </div>
-                                                <div class="d-flex justify-content-between align-items-center bg-light p-3 rounded-4 border">
-                                                    <div>
-                                                        <span class="text-dark fw-semibold d-block">Ambil / Jemput Sendiri</span>
-                                                        <span class="text-muted small">Penyewa datang menjemput mobil di kantor atau garasi desa</span>
-                                                    </div>
-                                                    <div class="form-check form-switch mb-0">
-                                                        <input class="form-check-input toggle-status" style="transform: scale(1.3); cursor: pointer;" type="checkbox" name="mobil_delivery_jemput_active" {{ isset($region->payment_info['mobil_delivery_jemput_active']) ? ($region->payment_info['mobil_delivery_jemput_active'] ? 'checked' : '') : 'checked' }}>
-                                                    </div>
-                                                </div>
+                                                <div class="bg-light p-3 rounded-4 border">
+    <div class="d-flex justify-content-between align-items-center">
+        <div class="flex-grow-1 pe-3">
+            <span class="text-dark fw-semibold d-block">Layanan Antar (Diantar Petugas)</span>
+            <span class="text-muted small d-block mb-1">Mobil desa diantarkan langsung ke titik lokasi penyewa</span>
+            <div class="dynamic-keterangan mt-2" style="display: none;">
+                <div class="d-flex align-items-start rounded-3 p-2 border" style="background-color: #e7f1ff; border-color: #b8daff; color: #004085;">
+                    <i class="bx bx-check-circle me-2 mt-1"></i>
+                    <span class="small fw-semibold">Aktif: Warga dapat memilih opsi ini saat melakukan pemesanan.</span>
+                </div>
+            </div>
+        </div>
+        <div class="form-check form-switch mb-0 d-flex flex-column align-items-center justify-content-center" style="min-width: 80px;">
+            <input class="form-check-input toggle-status m-0" style="transform: scale(1.3); cursor: pointer; float: none;" type="checkbox" name="mobil_delivery_antar_active" {{ isset($region->payment_info['mobil_delivery_antar_active']) ? ($region->payment_info['mobil_delivery_antar_active'] ? 'checked' : '') : 'checked' }}>
+            <span class="status-label mt-2 small fw-bold text-center"></span>
+        </div>
+    </div>
+</div>
+                                                <div class="bg-light p-3 rounded-4 border">
+    <div class="d-flex justify-content-between align-items-center">
+        <div class="flex-grow-1 pe-3">
+            <span class="text-dark fw-semibold d-block">Ambil / Jemput Sendiri</span>
+            <span class="text-muted small d-block mb-1">Penyewa datang menjemput mobil di kantor atau garasi desa</span>
+            <div class="dynamic-keterangan mt-2" style="display: none;">
+                <div class="d-flex align-items-start rounded-3 p-2 border" style="background-color: #e7f1ff; border-color: #b8daff; color: #004085;">
+                    <i class="bx bx-check-circle me-2 mt-1"></i>
+                    <span class="small fw-semibold">Aktif: Warga dapat memilih opsi ini saat melakukan pemesanan.</span>
+                </div>
+            </div>
+        </div>
+        <div class="form-check form-switch mb-0 d-flex flex-column align-items-center justify-content-center" style="min-width: 80px;">
+            <input class="form-check-input toggle-status m-0" style="transform: scale(1.3); cursor: pointer; float: none;" type="checkbox" name="mobil_delivery_jemput_active" {{ isset($region->payment_info['mobil_delivery_jemput_active']) ? ($region->payment_info['mobil_delivery_jemput_active'] ? 'checked' : '') : 'checked' }}>
+            <span class="status-label mt-2 small fw-bold text-center"></span>
+        </div>
+    </div>
+</div>
                                             </div>
-                                            <div class="row g-4 border-top pt-4">
-                                                <div class="col-12">
-                                                    <label class="form-label text-dark fw-bold mb-2">BBM Kendaraan Default</label>
-                                                    <select name="mobil_bbm" class="form-select text-dark shadow-sm rounded-3 py-2">
-                                                        <option value="Penyewa" {{ ($region->payment_info['mobil_bbm_default'] ?? 'Penyewa') == 'Penyewa' ? 'selected' : '' }}>Ditanggung Penyewa</option>
-                                                        <option value="Pemerintah Desa" {{ ($region->payment_info['mobil_bbm_default'] ?? '') == 'Pemerintah Desa' ? 'selected' : '' }}>Gratis (Ditanggung Desa)</option>
-                                                    </select>
-                                                </div>
-                                                <div class="col-12">
-                                                    <label class="form-label text-dark fw-bold mb-2">Supir Kendaraan Default</label>
-                                                    <select name="mobil_supir" class="form-select text-dark shadow-sm rounded-3 py-2">
-                                                        <option value="Tanpa Supir (Bawa Sendiri)" {{ ($region->payment_info['mobil_supir_default'] ?? 'Tanpa Supir (Bawa Sendiri)') == 'Tanpa Supir (Bawa Sendiri)' || ($region->payment_info['mobil_supir_default'] ?? '') == 'Lepas Kunci' ? 'selected' : '' }}>Tanpa Supir (Lepas Kunci)</option>
-                                                        <option value="Dengan Supir" {{ ($region->payment_info['mobil_supir_default'] ?? '') == 'Dengan Supir' ? 'selected' : '' }}>Termasuk Supir Desa</option>
-                                                        <option value="Bebas Pilih" {{ ($region->payment_info['mobil_supir_default'] ?? '') == 'Bebas Pilih' ? 'selected' : '' }}>Penyewa Bebas Memilih</option>
-                                                    </select>
-                                                </div>
-                                            </div>
+
                                         </div>
                                         
                                         <!-- Alat Berat Detail -->
@@ -322,24 +324,42 @@
                                                 </div>
                                             </div>
                                             <div class="d-flex flex-column gap-3">
-                                                <div class="d-flex justify-content-between align-items-center bg-light p-3 rounded-4 border">
-                                                    <div>
-                                                        <span class="text-dark fw-semibold d-block">Layanan Antar ke Lokasi</span>
-                                                        <span class="text-muted small">Mobil desa / petugas mengantar ke lokasi warga</span>
-                                                    </div>
-                                                    <div class="form-check form-switch mb-0">
-                                                        <input class="form-check-input toggle-status" style="transform: scale(1.3); cursor: pointer;" type="checkbox" name="alat_delivery_antar_active" {{ isset($region->payment_info['alat_delivery_antar_active']) ? ($region->payment_info['alat_delivery_antar_active'] ? 'checked' : '') : 'checked' }}>
-                                                    </div>
-                                                </div>
-                                                <div class="d-flex justify-content-between align-items-center bg-light p-3 rounded-4 border">
-                                                    <div>
-                                                        <span class="text-dark fw-semibold d-block">Ambil Sendiri</span>
-                                                        <span class="text-muted small">Warga mengambil alat langsung ke kantor/gudang</span>
-                                                    </div>
-                                                    <div class="form-check form-switch mb-0">
-                                                        <input class="form-check-input toggle-status" style="transform: scale(1.3); cursor: pointer;" type="checkbox" name="alat_delivery_jemput_active" {{ isset($region->payment_info['alat_delivery_jemput_active']) ? ($region->payment_info['alat_delivery_jemput_active'] ? 'checked' : '') : 'checked' }}>
-                                                    </div>
-                                                </div>
+                                                <div class="bg-light p-3 rounded-4 border">
+    <div class="d-flex justify-content-between align-items-center">
+        <div class="flex-grow-1 pe-3">
+            <span class="text-dark fw-semibold d-block">Layanan Antar ke Lokasi</span>
+            <span class="text-muted small d-block mb-1">Mobil desa / petugas mengantar ke lokasi warga</span>
+            <div class="dynamic-keterangan mt-2" style="display: none;">
+                <div class="d-flex align-items-start rounded-3 p-2 border" style="background-color: #e7f1ff; border-color: #b8daff; color: #004085;">
+                    <i class="bx bx-check-circle me-2 mt-1"></i>
+                    <span class="small fw-semibold">Aktif: Warga dapat memilih opsi ini saat melakukan pemesanan.</span>
+                </div>
+            </div>
+        </div>
+        <div class="form-check form-switch mb-0 d-flex flex-column align-items-center justify-content-center" style="min-width: 80px;">
+            <input class="form-check-input toggle-status m-0" style="transform: scale(1.3); cursor: pointer; float: none;" type="checkbox" name="alat_delivery_antar_active" {{ isset($region->payment_info['alat_delivery_antar_active']) ? ($region->payment_info['alat_delivery_antar_active'] ? 'checked' : '') : 'checked' }}>
+            <span class="status-label mt-2 small fw-bold text-center"></span>
+        </div>
+    </div>
+</div>
+                                                <div class="bg-light p-3 rounded-4 border">
+    <div class="d-flex justify-content-between align-items-center">
+        <div class="flex-grow-1 pe-3">
+            <span class="text-dark fw-semibold d-block">Ambil Sendiri</span>
+            <span class="text-muted small d-block mb-1">Warga mengambil alat langsung ke kantor/gudang</span>
+            <div class="dynamic-keterangan mt-2" style="display: none;">
+                <div class="d-flex align-items-start rounded-3 p-2 border" style="background-color: #e7f1ff; border-color: #b8daff; color: #004085;">
+                    <i class="bx bx-check-circle me-2 mt-1"></i>
+                    <span class="small fw-semibold">Aktif: Warga dapat memilih opsi ini saat melakukan pemesanan.</span>
+                </div>
+            </div>
+        </div>
+        <div class="form-check form-switch mb-0 d-flex flex-column align-items-center justify-content-center" style="min-width: 80px;">
+            <input class="form-check-input toggle-status m-0" style="transform: scale(1.3); cursor: pointer; float: none;" type="checkbox" name="alat_delivery_jemput_active" {{ isset($region->payment_info['alat_delivery_jemput_active']) ? ($region->payment_info['alat_delivery_jemput_active'] ? 'checked' : '') : 'checked' }}>
+            <span class="status-label mt-2 small fw-bold text-center"></span>
+        </div>
+    </div>
+</div>
                                             </div>
                                         </div>
                                         
@@ -353,24 +373,42 @@
                                                 </div>
                                             </div>
                                             <div class="d-flex flex-column gap-3">
-                                                <div class="d-flex justify-content-between align-items-center bg-light p-3 rounded-4 border">
-                                                    <div>
-                                                        <span class="text-dark fw-semibold d-block">Layanan Antar (Kurir Desa)</span>
-                                                        <span class="text-muted small">Gas diantar ke rumah warga</span>
-                                                    </div>
-                                                    <div class="form-check form-switch mb-0">
-                                                        <input class="form-check-input toggle-status" style="transform: scale(1.3); cursor: pointer;" type="checkbox" name="gas_delivery_antar_active" {{ isset($region->payment_info['gas_delivery_antar_active']) ? ($region->payment_info['gas_delivery_antar_active'] ? 'checked' : '') : 'checked' }}>
-                                                    </div>
-                                                </div>
-                                                <div class="d-flex justify-content-between align-items-center bg-light p-3 rounded-4 border">
-                                                    <div>
-                                                        <span class="text-dark fw-semibold d-block">Beli di Pangkalan (Ambil Sendiri)</span>
-                                                        <span class="text-muted small">Warga datang menukar tabung ke pangkalan</span>
-                                                    </div>
-                                                    <div class="form-check form-switch mb-0">
-                                                        <input class="form-check-input toggle-status" style="transform: scale(1.3); cursor: pointer;" type="checkbox" name="gas_delivery_jemput_active" {{ isset($region->payment_info['gas_delivery_jemput_active']) ? ($region->payment_info['gas_delivery_jemput_active'] ? 'checked' : '') : 'checked' }}>
-                                                    </div>
-                                                </div>
+                                                <div class="bg-light p-3 rounded-4 border">
+    <div class="d-flex justify-content-between align-items-center">
+        <div class="flex-grow-1 pe-3">
+            <span class="text-dark fw-semibold d-block">Layanan Antar (Kurir Desa)</span>
+            <span class="text-muted small d-block mb-1">Gas diantar ke rumah warga</span>
+            <div class="dynamic-keterangan mt-2" style="display: none;">
+                <div class="d-flex align-items-start rounded-3 p-2 border" style="background-color: #e7f1ff; border-color: #b8daff; color: #004085;">
+                    <i class="bx bx-check-circle me-2 mt-1"></i>
+                    <span class="small fw-semibold">Aktif: Warga dapat memilih opsi ini saat melakukan pemesanan.</span>
+                </div>
+            </div>
+        </div>
+        <div class="form-check form-switch mb-0 d-flex flex-column align-items-center justify-content-center" style="min-width: 80px;">
+            <input class="form-check-input toggle-status m-0" style="transform: scale(1.3); cursor: pointer; float: none;" type="checkbox" name="gas_delivery_antar_active" {{ isset($region->payment_info['gas_delivery_antar_active']) ? ($region->payment_info['gas_delivery_antar_active'] ? 'checked' : '') : 'checked' }}>
+            <span class="status-label mt-2 small fw-bold text-center"></span>
+        </div>
+    </div>
+</div>
+                                                <div class="bg-light p-3 rounded-4 border">
+    <div class="d-flex justify-content-between align-items-center">
+        <div class="flex-grow-1 pe-3">
+            <span class="text-dark fw-semibold d-block">Beli di Pangkalan (Ambil Sendiri)</span>
+            <span class="text-muted small d-block mb-1">Warga datang menukar tabung ke pangkalan</span>
+            <div class="dynamic-keterangan mt-2" style="display: none;">
+                <div class="d-flex align-items-start rounded-3 p-2 border" style="background-color: #e7f1ff; border-color: #b8daff; color: #004085;">
+                    <i class="bx bx-check-circle me-2 mt-1"></i>
+                    <span class="small fw-semibold">Aktif: Warga dapat memilih opsi ini saat melakukan pemesanan.</span>
+                </div>
+            </div>
+        </div>
+        <div class="form-check form-switch mb-0 d-flex flex-column align-items-center justify-content-center" style="min-width: 80px;">
+            <input class="form-check-input toggle-status m-0" style="transform: scale(1.3); cursor: pointer; float: none;" type="checkbox" name="gas_delivery_jemput_active" {{ isset($region->payment_info['gas_delivery_jemput_active']) ? ($region->payment_info['gas_delivery_jemput_active'] ? 'checked' : '') : 'checked' }}>
+            <span class="status-label mt-2 small fw-bold text-center"></span>
+        </div>
+    </div>
+</div>
                                             </div>
                                         </div>
 
@@ -384,24 +422,42 @@
                                                 </div>
                                             </div>
                                             <div class="d-flex flex-column gap-3">
-                                                <div class="d-flex justify-content-between align-items-center bg-light p-3 rounded-4 border">
-                                                    <div>
-                                                        <span class="text-dark fw-semibold d-block">Layanan Antar (Kurir/Armada)</span>
-                                                        <span class="text-muted small">Produk diantar ke rumah warga (dengan ongkos kirim otomatis)</span>
-                                                    </div>
-                                                    <div class="form-check form-switch mb-0">
-                                                        <input class="form-check-input toggle-status" style="transform: scale(1.3); cursor: pointer;" type="checkbox" name="pasar_delivery_antar_active" {{ isset($region->payment_info['pasar_delivery_antar_active']) ? ($region->payment_info['pasar_delivery_antar_active'] ? 'checked' : '') : 'checked' }}>
-                                                    </div>
-                                                </div>
-                                                <div class="d-flex justify-content-between align-items-center bg-light p-3 rounded-4 border">
-                                                    <div>
-                                                        <span class="text-dark fw-semibold d-block">Jemput Sendiri / Pick-up (Gratis)</span>
-                                                        <span class="text-muted small">Warga dapat memilih untuk menjemput produk langsung di toko</span>
-                                                    </div>
-                                                    <div class="form-check form-switch mb-0">
-                                                        <input class="form-check-input toggle-status" style="transform: scale(1.3); cursor: pointer;" type="checkbox" name="pasar_delivery_jemput_active" {{ isset($region->payment_info['pasar_delivery_jemput_active']) ? ($region->payment_info['pasar_delivery_jemput_active'] ? 'checked' : '') : 'checked' }}>
-                                                    </div>
-                                                </div>
+                                                <div class="bg-light p-3 rounded-4 border">
+    <div class="d-flex justify-content-between align-items-center">
+        <div class="flex-grow-1 pe-3">
+            <span class="text-dark fw-semibold d-block">Layanan Antar (Kurir/Armada)</span>
+            <span class="text-muted small d-block mb-1">Produk diantar ke rumah warga (dengan ongkos kirim otomatis)</span>
+            <div class="dynamic-keterangan mt-2" style="display: none;">
+                <div class="d-flex align-items-start rounded-3 p-2 border" style="background-color: #e7f1ff; border-color: #b8daff; color: #004085;">
+                    <i class="bx bx-check-circle me-2 mt-1"></i>
+                    <span class="small fw-semibold">Aktif: Warga dapat memilih opsi ini saat melakukan pemesanan.</span>
+                </div>
+            </div>
+        </div>
+        <div class="form-check form-switch mb-0 d-flex flex-column align-items-center justify-content-center" style="min-width: 80px;">
+            <input class="form-check-input toggle-status m-0" style="transform: scale(1.3); cursor: pointer; float: none;" type="checkbox" name="pasar_delivery_antar_active" {{ isset($region->payment_info['pasar_delivery_antar_active']) ? ($region->payment_info['pasar_delivery_antar_active'] ? 'checked' : '') : 'checked' }}>
+            <span class="status-label mt-2 small fw-bold text-center"></span>
+        </div>
+    </div>
+</div>
+                                                <div class="bg-light p-3 rounded-4 border">
+    <div class="d-flex justify-content-between align-items-center">
+        <div class="flex-grow-1 pe-3">
+            <span class="text-dark fw-semibold d-block">Jemput Sendiri / Pick-up (Gratis)</span>
+            <span class="text-muted small d-block mb-1">Warga dapat memilih untuk menjemput produk langsung di toko</span>
+            <div class="dynamic-keterangan mt-2" style="display: none;">
+                <div class="d-flex align-items-start rounded-3 p-2 border" style="background-color: #e7f1ff; border-color: #b8daff; color: #004085;">
+                    <i class="bx bx-check-circle me-2 mt-1"></i>
+                    <span class="small fw-semibold">Aktif: Warga dapat memilih opsi ini saat melakukan pemesanan.</span>
+                </div>
+            </div>
+        </div>
+        <div class="form-check form-switch mb-0 d-flex flex-column align-items-center justify-content-center" style="min-width: 80px;">
+            <input class="form-check-input toggle-status m-0" style="transform: scale(1.3); cursor: pointer; float: none;" type="checkbox" name="pasar_delivery_jemput_active" {{ isset($region->payment_info['pasar_delivery_jemput_active']) ? ($region->payment_info['pasar_delivery_jemput_active'] ? 'checked' : '') : 'checked' }}>
+            <span class="status-label mt-2 small fw-bold text-center"></span>
+        </div>
+    </div>
+</div>
                                             </div>
                                         </div>
                                         
@@ -416,24 +472,42 @@
                                             </div>
                                             
                                             <div class="d-flex flex-column gap-3 mb-4">
-                                                <div class="d-flex justify-content-between align-items-center bg-light p-3 rounded-4 border">
-                                                    <div>
-                                                        <span class="text-dark fw-semibold d-block">Layanan Kunjungan / Antar / Panggilan</span>
-                                                        <span class="text-muted small">Fasilitas (seperti ambulans, kursi/tenda) atau petugas datang ke titik lokasi warga</span>
-                                                    </div>
-                                                    <div class="form-check form-switch mb-0">
-                                                        <input class="form-check-input toggle-status" style="transform: scale(1.3); cursor: pointer;" type="checkbox" name="fasilitas_delivery_antar_active" {{ isset($region->payment_info['fasilitas_delivery_antar_active']) ? ($region->payment_info['fasilitas_delivery_antar_active'] ? 'checked' : '') : 'checked' }}>
-                                                    </div>
-                                                </div>
-                                                <div class="d-flex justify-content-between align-items-center bg-light p-3 rounded-4 border">
-                                                    <div>
-                                                        <span class="text-dark fw-semibold d-block">Gunakan di Tempat / Ambil Sendiri</span>
-                                                        <span class="text-muted small">Warga mendatangi lokasi fasilitas (gedung, balai) atau mengambil sendiri barang</span>
-                                                    </div>
-                                                    <div class="form-check form-switch mb-0">
-                                                        <input class="form-check-input toggle-status" style="transform: scale(1.3); cursor: pointer;" type="checkbox" name="fasilitas_delivery_jemput_active" {{ isset($region->payment_info['fasilitas_delivery_jemput_active']) ? ($region->payment_info['fasilitas_delivery_jemput_active'] ? 'checked' : '') : 'checked' }}>
-                                                    </div>
-                                                </div>
+                                                <div class="bg-light p-3 rounded-4 border">
+    <div class="d-flex justify-content-between align-items-center">
+        <div class="flex-grow-1 pe-3">
+            <span class="text-dark fw-semibold d-block">Layanan Kunjungan / Antar / Panggilan</span>
+            <span class="text-muted small d-block mb-1">Fasilitas (seperti ambulans, kursi/tenda) atau petugas datang ke titik lokasi warga</span>
+            <div class="dynamic-keterangan mt-2" style="display: none;">
+                <div class="d-flex align-items-start rounded-3 p-2 border" style="background-color: #e7f1ff; border-color: #b8daff; color: #004085;">
+                    <i class="bx bx-check-circle me-2 mt-1"></i>
+                    <span class="small fw-semibold">Aktif: Warga dapat memilih opsi ini saat melakukan pemesanan.</span>
+                </div>
+            </div>
+        </div>
+        <div class="form-check form-switch mb-0 d-flex flex-column align-items-center justify-content-center" style="min-width: 80px;">
+            <input class="form-check-input toggle-status m-0" style="transform: scale(1.3); cursor: pointer; float: none;" type="checkbox" name="fasilitas_delivery_antar_active" {{ isset($region->payment_info['fasilitas_delivery_antar_active']) ? ($region->payment_info['fasilitas_delivery_antar_active'] ? 'checked' : '') : 'checked' }}>
+            <span class="status-label mt-2 small fw-bold text-center"></span>
+        </div>
+    </div>
+</div>
+                                                <div class="bg-light p-3 rounded-4 border">
+    <div class="d-flex justify-content-between align-items-center">
+        <div class="flex-grow-1 pe-3">
+            <span class="text-dark fw-semibold d-block">Gunakan di Tempat / Ambil Sendiri</span>
+            <span class="text-muted small d-block mb-1">Warga mendatangi lokasi fasilitas (gedung, balai) atau mengambil sendiri barang</span>
+            <div class="dynamic-keterangan mt-2" style="display: none;">
+                <div class="d-flex align-items-start rounded-3 p-2 border" style="background-color: #e7f1ff; border-color: #b8daff; color: #004085;">
+                    <i class="bx bx-check-circle me-2 mt-1"></i>
+                    <span class="small fw-semibold">Aktif: Warga dapat memilih opsi ini saat melakukan pemesanan.</span>
+                </div>
+            </div>
+        </div>
+        <div class="form-check form-switch mb-0 d-flex flex-column align-items-center justify-content-center" style="min-width: 80px;">
+            <input class="form-check-input toggle-status m-0" style="transform: scale(1.3); cursor: pointer; float: none;" type="checkbox" name="fasilitas_delivery_jemput_active" {{ isset($region->payment_info['fasilitas_delivery_jemput_active']) ? ($region->payment_info['fasilitas_delivery_jemput_active'] ? 'checked' : '') : 'checked' }}>
+            <span class="status-label mt-2 small fw-bold text-center"></span>
+        </div>
+    </div>
+</div>
                                             </div>
 
                                             @if($hasFasilitasKendaraan)
@@ -576,6 +650,9 @@
     const banner = document.getElementById('unsaved-changes-banner');
     
     if (form && banner) {
+        // Pindahkan banner ke root body agar position-fixed tidak terganggu oleh parent transform
+        document.body.appendChild(banner);
+        
         banner.style.display = 'none';
         banner.style.transform = 'translateY(100px)';
 
@@ -597,7 +674,17 @@
         const updateLabel = (el) => {
             const label = el.nextElementSibling;
             if(label && label.classList.contains('status-label')) {
-                label.innerText = el.checked ? 'Tersedia' : 'Tidak Tersedia';
+                label.innerText = el.checked ? 'Aktif' : 'Tidak Aktif';
+                
+                // Toggle keterangan
+                const parent = el.closest('.bg-light');
+                if (parent) {
+                    const ket = parent.querySelector('.dynamic-keterangan');
+                    if (ket) {
+                        ket.style.display = el.checked ? 'block' : 'none';
+                    }
+                }
+                
                 if(el.checked) {
                     label.classList.remove('text-secondary');
                     label.classList.add('text-primary');

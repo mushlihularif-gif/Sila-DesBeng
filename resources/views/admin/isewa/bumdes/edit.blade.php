@@ -10,9 +10,9 @@
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
                     <h4 class="fw-bold mb-1">
-                        <span class="text-muted fw-light">Profil SiladesBeng / Pemerintah Daerah /</span> Edit Anggota
+                        <span class="text-muted fw-light">Profil & Info / Pemerintah /</span> Edit Anggota
                     </h4>
-                    <p class="text-muted mb-0">Perbarui informasi anggota yang ditampilkan di halaman Profil SiladesBeng</p>
+                    <p class="text-muted mb-0">Perbarui informasi anggota yang ditampilkan di halaman Profil Pemerintah</p>
                 </div>
                 <a href="{{ route('admin.siladesbeng.bumdes.index') }}" class="btn btn-outline-secondary">
                     <i class="bx bx-arrow-left me-1"></i> Kembali
@@ -119,8 +119,8 @@
                                             <i class="bx bx-info-circle fs-4 me-2"></i>
                                             <div class="small">
                                                 <strong>Informasi:</strong><br>
-                                                Data anggota yang ditambahkan akan ditampilkan di halaman <strong>Profil SiladesBeng</strong> 
-                                                pada bagian <strong>Struktur Pengembang SiladesBeng</strong>.
+                                                Data anggota yang ditambahkan akan ditampilkan di halaman <strong>Profil Pemerintah</strong> 
+                                                pada bagian <strong>Struktur Pemerintah</strong>.
                                             </div>
                                         </div>
                                     </div>
@@ -236,49 +236,34 @@
 
 <script>
 function previewImage(event) {
-    const input = event.target;
-    const preview = document.getElementById('preview-image');
-    const container = document.getElementById('preview-container');
-    const deleteInput = document.getElementById('delete_photo');
+        const input = event.target;
+        const clearBtn = document.getElementById('clear-photo-btn');
 
-    if (input.files && input.files[0]) {
-        // Validate file size (2MB)
-        if (input.files[0].size > 8 * 1024 * 1024) {
-            alert('Ukuran file terlalu besar! Maksimal 8MB.');
-            input.value = '';
-            return;
-        }
-
-        // Validate file type
-        const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
-        if (!validTypes.includes(input.files[0].type)) {
-            alert('Format file tidak didukung! Gunakan JPG, PNG, atau GIF.');
-            input.value = '';
-            return;
-        }
-
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            preview.src = e.target.result;
-            preview.classList.remove('d-none');
-            preview.classList.add('photo-uploaded');
-            const icon = document.getElementById('preview-icon');
-            if(icon) icon.style.display = 'none';
-            container.style.background = 'transparent';
-            
-            // Remove animation class after animation completes
-            setTimeout(() => {
-                preview.classList.remove('photo-uploaded');
-            }, 300);
-
-            // Reset delete flag
-            if (deleteInput) {
-                deleteInput.value = '0';
+        if (input.files && input.files[0]) {
+            if (input.files[0].size > 8 * 1024 * 1024) {
+                alert('Ukuran file terlalu besar! Maksimal 8MB.');
+                input.value = '';
+                return;
             }
-        };
-        reader.readAsDataURL(input.files[0]);
+
+            const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+            if (!validTypes.includes(input.files[0].type)) {
+                alert('Format file tidak didukung! Gunakan JPG, PNG, atau GIF.');
+                input.value = '';
+                return;
+            }
+
+            if (typeof initGlobalCropper === 'function') {
+                initGlobalCropper(input, 'preview-image', 1);
+            } else {
+                console.error('Cropper is not initialized properly in layout');
+            }
+            if (clearBtn) clearBtn.style.display = 'inline-block';
+            
+            const container = document.getElementById('preview-container');
+            if (container) container.style.background = 'transparent';
+        }
     }
-}
 
 function clearPhoto() {
     const input = document.getElementById('photo-input');

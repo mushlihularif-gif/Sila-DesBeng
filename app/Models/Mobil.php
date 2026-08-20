@@ -15,6 +15,7 @@ class Mobil extends Model
         'stok',
         'status',
         'kategori',
+        'plat_nomor',
         'foto',
         'foto_2',
         'foto_3',
@@ -35,7 +36,9 @@ class Mobil extends Model
         'opsi_supir_borongan',
         'nama_supir_borongan',
         'kontak_supir_borongan',
-        'bbm_ditanggung_borongan'
+        'bbm_ditanggung_borongan',
+        'is_harian_active',
+        'is_borongan_active'
     ];
 
     protected $casts = [
@@ -43,6 +46,8 @@ class Mobil extends Model
         'harga_dalam_desa' => 'decimal:2',
         'harga_luar_desa' => 'decimal:2',
         'harga_luar_kota' => 'decimal:2',
+        'is_harian_active' => 'boolean',
+        'is_borongan_active' => 'boolean',
     ];
 
     public function bookings()

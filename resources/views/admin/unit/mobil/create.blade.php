@@ -25,8 +25,8 @@
                                 <i class='bx bx-package text-primary' style="font-size: 24px;"></i>
                             </div>
                             <div>
-                                <h5 class="mb-0 fw-bold">Form Tambah Alat Sewa</h5>
-                                <small class="text-muted">Masukkan detail alat yang akan disewakan</small>
+                                <h5 class="mb-0 fw-bold">Form Tambah Mobil Sewa</h5>
+                                <small class="text-muted">Masukkan detail kendaraan yang akan disewakan</small>
                             </div>
                         </div>
                     </div>
@@ -182,6 +182,13 @@
                                             </button>
                                         </div>
                                     </div>
+                                    <div class="col-md-12 mt-3">
+                                        <label class="form-label fw-semibold" for="plat_nomor">
+                                            Plat Nomor Kendaraan (Opsional)
+                                        </label>
+                                        <input type="text" class="form-control modern-input" id="plat_nomor" 
+                                               name="plat_nomor" placeholder="Contoh: BM 1234 XY" value="{{ isset($mobil) ? $mobil->plat_nomor : (isset($fasilitas) ? $fasilitas->plat_nomor : old('plat_nomor')) }}" />
+                                    </div>
                                 </div>
 
                                 <div class="row g-3 mt-1">
@@ -225,10 +232,28 @@
 
                             <!-- Section: Pengaturan Sewa Harian -->
                             <div class="form-section mb-4">
-                                <h6 class="section-title mb-3">
-                                    <i class='bx bx-car me-2'></i><span class="badge bg-primary me-2">SEWA HARIAN</span> Pengaturan Sewa Harian
-                                </h6>
-                                <p class="text-muted small mb-3">Tentukan harga dasar per hari dan opsi layanan pendukung untuk penyewaan sistem harian.</p>
+                                <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
+                                    <h6 class="section-title mb-0 mt-1">
+                                        <i class='bx bx-car me-2'></i><span class="badge bg-primary me-2">SEWA HARIAN</span> Pengaturan Sewa Harian
+                                    </h6>
+                                    <div class="bg-white p-2 px-3 rounded shadow-sm border d-flex align-items-center mb-0">
+                                        <div class="form-check form-switch fs-4 mb-0">
+                                            <input class="form-check-input cursor-pointer mt-1" style="margin-left: -2em;" type="checkbox" name="is_harian_active" id="is_harian_active" checked onchange="toggleLayanan('harian')">
+                                            <label class="form-check-label fs-6 mt-1 ms-3 fw-bold text-primary" for="is_harian_active">Aktifkan Layanan Ini</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="alert alert-primary bg-primary-subtle border-primary text-primary d-flex align-items-start" role="alert" style="border-radius: 12px;">
+                                    <i class="bx bx-info-circle fs-4 me-3 mt-1"></i>
+                                    <div>
+                                        <h6 class="fw-bold mb-1 text-primary">Apa itu Sewa Harian?</h6>
+                                        <p class="mb-0 small">Sistem penyewaan dihitung per 24 jam dengan tarif tetap per hari. Penyewa dapat memesan untuk 1 hari, 2 hari, seminggu (7 hari), atau lebih, dengan total harga yang dikalikan sesuai jumlah hari. Penyewa bebas menggunakan kendaraan untuk berbagai tujuan selama masa waktu sewa berjalan.</p>
+                                    </div>
+                                </div>
+
+                                <div id="harian_content_wrapper">
+                                    <p class="text-muted small mb-3">Tentukan harga dasar per hari dan opsi layanan pendukung untuk penyewaan sistem harian.</p>
                                 <div class="row g-3">
                                     <div class="col-md-4">
                                         <label class="form-label text-muted small fw-semibold text-uppercase letter-spacing-1 mb-2" for="harga_sewa">
@@ -246,7 +271,7 @@
                             </div>
 
                             <!-- Section: Layanan Tambahan -->
-                                <div class="form-section mb-4">
+                                <div class="form-section mb-4 mt-4">
                                     <h6 class="section-title mb-3">
                                         <i class='bx bx-plus-circle me-2'></i>Pengaturan Layanan Tambahan (Supir & BBM)
                                     </h6>
@@ -283,12 +308,19 @@
                                                 </div>
                                                 <div class="text-muted small mb-0 fw-semibold" id="status_dengan_supir">Tidak Aktif</div>
                                                 
-                                                <!-- Form Detail Supir -->
-                                                <div id="form_supir_details" class="mt-3 p-3 bg-light rounded border" style="display: none;">
-                                                    <label class="form-label fw-bold text-primary small mb-2"><i class="bx bx-user me-1"></i>Keterangan Supir (Opsional)</label>
-                                                    <input type="text" class="form-control form-control-sm mb-2 modern-input" name="nama_supir" id="nama_supir" placeholder="Nama Supir">
-                                                    <input type="text" class="form-control form-control-sm modern-input" name="kontak_supir" id="kontak_supir" placeholder="No. WhatsApp Supir">
-                                                </div>
+                                                
+                                                  <!-- Form Detail Supir -->
+                                                  <div id="form_supir_details" class="mt-3 p-3 bg-light border rounded" style="display: none;">
+                                                      <div class="mb-3">
+                                                          <label class="form-label small fw-bold">Nama Supir (Opsional)</label>
+                                                          <input type="text" class="form-control" name="nama_supir" id="nama_supir" placeholder="Contoh: Pak Budi" value="{{ old('nama_supir') }}">
+                                                      </div>
+                                                      <div class="mb-0">
+                                                          <label class="form-label small fw-bold">Kontak Supir (WhatsApp)</label>
+                                                          <input type="text" class="form-control" name="kontak_supir" id="kontak_supir" placeholder="Contoh: 08123456789" value="{{ old('kontak_supir') }}">
+                                                      </div>
+                                                  </div>
+                                                
                                             </div>
                                         </div>
                                     </div>
@@ -298,7 +330,7 @@
                                     <hr class="my-4 text-muted">
                                     
                                     <div class="row g-3">
-                                        <!-- BBM Ditanggung Desa -->
+                                        <!-- BBM Disediakan Pengelola -->
                                         <div class="col-md-6">
                                             <div class="p-3 border rounded bg-white">
                                                 <div class="d-flex justify-content-between align-items-center mb-2">
@@ -338,16 +370,62 @@
                                         <button type="button" class="btn btn-primary" onclick="nextStep('step3-tab')">Selanjutnya <i class='bx bx-right-arrow-alt'></i></button>
                                     </div>
                                 </div>
+                                </div> <!-- End Step 2: Sewa Harian -->
                                 
                                 <!-- STEP 3: SEWA BORONGAN -->
                                 <div class="tab-pane fade" id="step3" role="tabpanel" aria-labelledby="step3-tab">
 
                             <!-- Section: Harga & Jarak \(Sistem Zona Borongan\) -->
                             <div class="form-section mb-4">
-                                <h6 class="section-title mb-3">
-                                    <i class='bx bx-money me-2'></i><span class="badge bg-success me-2">SEWA BORONGAN (DROP OFF)</span> Pengaturan Zona Jarak
-                                </h6>
-                                <p class="text-muted small mb-3">Tentukan harga borongan (paket sewa) berdasarkan jarak tempuh tujuan penyewa. Biarkan batas Km tetap 0 jika tidak ada batasan.</p>
+                                <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
+                                    <h6 class="section-title mb-0 mt-1">
+                                        <i class='bx bx-money me-2'></i><span class="badge bg-success me-2">SEWA BORONGAN (DROP OFF)</span> Pengaturan Zona Jarak
+                                    </h6>
+                                    <div class="bg-white p-2 px-3 rounded shadow-sm border d-flex align-items-center mb-0">
+                                        <div class="form-check form-switch fs-4 mb-0">
+                                            <input class="form-check-input cursor-pointer mt-1" style="margin-left: -2em;" type="checkbox" name="is_borongan_active" id="is_borongan_active" checked onchange="toggleLayanan('borongan')">
+                                            <label class="form-check-label fs-6 mt-1 ms-3 fw-bold text-success" for="is_borongan_active">Aktifkan Layanan Ini</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="alert alert-success bg-success-subtle border-success text-success d-flex align-items-start" role="alert" style="border-radius: 12px;">
+                                    <i class="bx bx-info-circle fs-4 me-3 mt-1"></i>
+                                    <div>
+                                        <h6 class="fw-bold mb-1 text-success">Apa itu Sewa Borongan?</h6>
+                                        <p class="mb-0 small">Sistem penyewaan sekali jalan (Drop-off) atau paket insidental per rute tujuan tanpa melihat durasi harian. Sangat cocok untuk keperluan mengantar penumpang, jemputan dari bandara/pelabuhan, atau keperluan insidental satu hari penuh ke satu titik tujuan spesifik.</p>
+                                    </div>
+                                </div>
+
+                                <div id="borongan_content_wrapper">
+                                <div class="mb-4">
+                                    <label class="form-label text-dark fw-bold mb-3">Pilih Metode Perhitungan Tarif Borongan <span class="text-danger">*</span></label>
+                                    
+                                    <div class="row g-3 mb-4">
+                                        <div class="col-md-6">
+                                            <div class="d-flex align-items-center gap-3 p-3 border rounded-3 w-100" style="cursor: pointer; transition: all 0.2s;" id="label_tarif_jarak" onclick="setTarifBoronganType('jarak')">
+                                                <input type="radio" name="tipe_tarif_borongan" id="tipe_tarif_jarak" value="jarak" class="form-check-input mt-0" style="transform: scale(1.2);" checked onchange="setTarifBoronganType('jarak')">
+                                                <div>
+                                                    <div class="fw-bold text-dark mb-1">Berdasarkan Jarak (Km)</div>
+                                                    <div class="small text-muted" style="line-height: 1.2;">Hitung berdasarkan zona jarak kilometer</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="d-flex align-items-center gap-3 p-3 border rounded-3 w-100" style="cursor: pointer; transition: all 0.2s;" id="label_tarif_wilayah" onclick="setTarifBoronganType('wilayah')">
+                                                <input type="radio" name="tipe_tarif_borongan" id="tipe_tarif_wilayah" value="wilayah" class="form-check-input mt-0" style="transform: scale(1.2);" onchange="setTarifBoronganType('wilayah')">
+                                                <div>
+                                                    <div class="fw-bold text-dark mb-1">Berdasarkan Wilayah</div>
+                                                    <div class="small text-muted" style="line-height: 1.2;">Pilih tujuan berdasarkan desa atau kecamatan</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="borongan_jarak_wrapper">
+                                    <p class="text-muted small mb-3">Tentukan harga borongan (paket sewa) berdasarkan jarak tempuh tujuan penyewa. Biarkan batas Km tetap 0 jika tidak ada batasan.</p>
+
                                 
                                 <div class="row g-4 mb-4">
                                     <!-- Dalam Desa -->
@@ -429,8 +507,113 @@
 
                             </div>
                             
+                            
+                                </div> <!-- Close borongan_jarak_wrapper -->
+                                <div id="borongan_wilayah_wrapper" style="display: none;">
+                                    <p class="text-muted small mb-3">Tentukan harga borongan berdasarkan tujuan wilayah administrasi penyewa.</p>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label text-dark fw-bold" for="harga_dalam_desa_wilayah">Tarif Dalam Desa (Satu Desa) <span class="text-danger">*</span></label>
+                                        <div class="input-group input-group-merge border-light-subtle shadow-sm rounded-3">
+                                            <span class="input-group-text">Rp</span>
+                                            <input type="text" class="form-control fw-semibold" id="harga_dalam_desa_wilayah" name="harga_dalam_desa_wilayah" 
+                                                value="" oninput="formatRupiah(this)" placeholder="100.000">
+                                        </div>
+                                        <small class="text-muted mt-1 d-block">Tarif untuk tujuan di desa yang sama.</small>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label text-dark fw-bold" for="harga_luar_desa_wilayah">Tarif Luar Desa (Beda Desa, Satu Kecamatan) <span class="text-danger">*</span></label>
+                                        <div class="input-group input-group-merge border-light-subtle shadow-sm rounded-3">
+                                            <span class="input-group-text">Rp</span>
+                                            <input type="text" class="form-control fw-semibold" id="harga_luar_desa_wilayah" name="harga_luar_desa_wilayah" 
+                                                value="" oninput="formatRupiah(this)" placeholder="150.000">
+                                        </div>
+                                        <small class="text-muted mt-1 d-block">Tarif untuk tujuan ke desa tetangga di dalam 1 kecamatan.</small>
+                                    </div>
+
+                                    <hr class="my-4 text-light">
+
+                                    <div class="mb-4">
+                                        <label class="form-label text-dark fw-bold mb-3">Pilih Metode Tarif Luar Kecamatan <span class="text-danger">*</span></label>
+                                        
+                                        <div class="row g-3 mb-4">
+                                            <div class="col-md-6">
+                                                <div class="d-flex align-items-center gap-3 p-3 border rounded-3 w-100" style="cursor: pointer; transition: all 0.2s;" id="label_pukul_rata" onclick="setOngkirType('pukul_rata')">
+                                                    <input type="radio" name="tipe_luar_kecamatan_wilayah" id="tipe_pukul_rata" value="pukul_rata" class="form-check-input mt-0" style="transform: scale(1.2);" checked onchange="setOngkirType('pukul_rata')">
+                                                    <div>
+                                                        <div class="fw-bold text-dark mb-1">Pukul Rata</div>
+                                                        <div class="small text-muted" style="line-height: 1.2;">Satu harga untuk semua luar kecamatan</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="d-flex align-items-center gap-3 p-3 border rounded-3 w-100" style="cursor: pointer; transition: all 0.2s;" id="label_per_kecamatan" onclick="setOngkirType('per_kecamatan')">
+                                                    <input type="radio" name="tipe_luar_kecamatan_wilayah" id="tipe_per_kecamatan" value="per_kecamatan" class="form-check-input mt-0" style="transform: scale(1.2);" onchange="setOngkirType('per_kecamatan')">
+                                                    <div>
+                                                        <div class="fw-bold text-dark mb-1">Per Kecamatan</div>
+                                                        <div class="small text-muted" style="line-height: 1.2;">Tentukan harga untuk masing-masing daerah</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Opsi Pukul Rata -->
+                                        <div id="div_pukul_rata" class="mt-3 p-3 bg-light rounded-4 border" style="display: block;">
+                                            <label class="form-label fw-medium" for="harga_luar_kecamatan_wilayah">Harga Pukul Rata Luar Kecamatan</label>
+                                            <div class="input-group input-group-merge border-light-subtle shadow-sm rounded-3">
+                                                <span class="input-group-text bg-white">Rp</span>
+                                                <input type="text" class="form-control fw-semibold border-start-0" id="harga_luar_kecamatan_wilayah" name="harga_luar_kecamatan_wilayah" 
+                                                    value="" oninput="formatRupiah(this)" placeholder="250.000">
+                                            </div>
+                                            <small class="text-muted mt-2 d-block">Tarif otomatis berlaku untuk semua tujuan kecamatan lain.</small>
+                                        </div>
+
+                                        <!-- Opsi Per Kecamatan -->
+                                        <div id="div_per_kecamatan" class="mt-3" style="display: none;">
+                                            <div class="table-responsive text-nowrap border rounded-4 shadow-sm">
+                                                <table class="table table-hover mb-0">
+                                                    <thead class="bg-light">
+                                                        <tr>
+                                                            <th class="py-3 text-secondary text-uppercase small fw-bold" style="width: 50px;">Layanan</th>
+                                                            <th class="py-3 text-secondary text-uppercase small fw-bold">Nama Kecamatan</th>
+                                                            <th class="py-3 text-secondary text-uppercase small fw-bold text-end pe-4">Tarif (Rp)</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody class="table-border-bottom-0">
+                                                        @foreach($semuaKecamatan as $kec)
+                                                            <tr>
+                                                                <td class="text-center">
+                                                                    <div class="form-check form-switch d-flex justify-content-center mb-0">
+                                                                        <input class="form-check-input" type="checkbox" role="switch" id="switch_kec_{{ $kec->id }}" 
+                                                                            onchange="toggleKecamatan({{ $kec->id }})">
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <label class="form-check-label fw-medium text-muted" id="label_kec_{{ $kec->id }}" for="switch_kec_{{ $kec->id }}">
+                                                                        {{ $kec->name }}
+                                                                    </label>
+                                                                </td>
+                                                                <td class="pe-3">
+                                                                    <div class="input-group input-group-sm">
+                                                                        <span class="input-group-text bg-light text-muted">Rp</span>
+                                                                        <input type="text" class="form-control text-end fw-semibold" 
+                                                                            name="harga_kecamatan_khusus[{{ $kec->id }}]" id="input_kec_{{ $kec->id }}" 
+                                                                            value="" placeholder="0" disabled oninput="formatRupiah(this)">
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <small class="text-danger mt-2 d-block"><i class="bx bx-info-circle me-1"></i>Kecamatan yang dimatikan (switch abu-abu) berarti Anda TIDAK melayani penyewaan borongan ke daerah tersebut.</small>
+                                        </div>
+                                    </div>
+                                </div>
+
                             <!-- Section: Layanan Tambahan Borongan -->
-                            <div class="form-section mb-4">
+                            <div class="form-section mb-4 mt-4">
                                 <h6 class="section-title mb-3">
                                     <i class='bx bx-plus-circle me-2'></i>Pengaturan Layanan Tambahan Borongan (Supir & BBM)
                                 </h6>
@@ -459,7 +642,7 @@
                                             <div class="d-flex justify-content-between align-items-center mb-2">
                                                 <div class="d-flex align-items-center gap-2">
                                                     <img src="{{ asset('User/img/iconbaru/disediakansupir.png') }}" style="width: 40px; height: 40px; object-fit: contain;">
-                                                    <h6 class="mb-0 fw-bold">Sewa Dengan Supir Desa</h6>
+                                                    <h6 class="mb-0 fw-bold">Sewa Dengan Supir Pengelola</h6>
                                                 </div>
                                                 <div class="form-check form-switch fs-5 mb-0">
                                                     <input class="form-check-input cursor-pointer" type="checkbox" id="switch_dengan_supir_borongan" onchange="updateSupirStatusBorongan()">
@@ -467,12 +650,19 @@
                                             </div>
                                             <div class="text-muted small mb-0 fw-semibold" id="status_dengan_supir_borongan">Tidak Aktif</div>
                                             
-                                            <!-- Form Detail Supir Borongan -->
-                                            <div id="form_supir_details_borongan" class="mt-3 p-3 bg-light rounded border" style="display: none;">
-                                                <label class="form-label fw-bold text-primary small mb-2"><i class="bx bx-user me-1"></i>Keterangan Supir (Opsional)</label>
-                                                <input type="text" class="form-control form-control-sm mb-2 modern-input" name="nama_supir_borongan" id="nama_supir_borongan" placeholder="Nama Supir">
-                                                <input type="text" class="form-control form-control-sm modern-input" name="kontak_supir_borongan" id="kontak_supir_borongan" placeholder="No. WhatsApp Supir">
-                                            </div>
+                                            
+                                              <!-- Form Detail Supir Borongan -->
+                                              <div id="form_supir_details_borongan" class="mt-3 p-3 bg-light border rounded" style="display: none;">
+                                                  <div class="mb-3">
+                                                      <label class="form-label small fw-bold">Nama Supir Borongan (Opsional)</label>
+                                                      <input type="text" class="form-control" name="nama_supir_borongan" id="nama_supir_borongan" placeholder="Contoh: Pak Budi" value="{{ old('nama_supir_borongan') }}">
+                                                  </div>
+                                                  <div class="mb-0">
+                                                      <label class="form-label small fw-bold">Kontak Supir Borongan (WhatsApp)</label>
+                                                      <input type="text" class="form-control" name="kontak_supir_borongan" id="kontak_supir_borongan" placeholder="Contoh: 08123456789" value="{{ old('kontak_supir_borongan') }}">
+                                                  </div>
+                                              </div>
+                                            
                                         </div>
                                     </div>
                                 </div>
@@ -482,13 +672,13 @@
                                 <hr class="my-4 text-muted">
                                 
                                 <div class="row g-3 mb-4">
-                                    <!-- BBM Ditanggung Desa Borongan -->
+                                    <!-- BBM Disediakan Pengelola Borongan -->
                                     <div class="col-md-6">
                                         <div class="p-3 border rounded bg-white">
                                             <div class="d-flex justify-content-between align-items-center mb-2">
                                                 <div class="d-flex align-items-center gap-2">
                                                     <img src="{{ asset('User/img/iconbaru/bbmdisediakan.png') }}" style="width: 40px; height: 40px; object-fit: contain;">
-                                                    <h6 class="mb-0 fw-bold">BBM Disediakan Desa</h6>
+                                                    <h6 class="mb-0 fw-bold">BBM Disediakan Pengelola</h6>
                                                 </div>
                                                 <div class="form-check form-switch fs-5 mb-0">
                                                     <input class="form-check-input cursor-pointer" type="radio" name="bbm_switch_borongan" id="switch_bbm_desa_borongan" value="Pemerintah Desa" onchange="updateBbmStatusBorongan()">
@@ -518,6 +708,7 @@
                             </div>
 
                             
+                                </div>
                                     <div class="d-flex justify-content-between mt-4">
                                         <button type="button" class="btn btn-secondary" onclick="prevStep('step2-tab')"><i class='bx bx-left-arrow-alt'></i> Sebelumnya</button>
                                         <button type="button" class="btn btn-primary" onclick="nextStep('step4-tab')">Selanjutnya <i class='bx bx-right-arrow-alt'></i></button>
@@ -527,6 +718,13 @@
                                 <!-- STEP 4: PENGATURAN & SIMPAN -->
                                 <div class="tab-pane fade" id="step4" role="tabpanel" aria-labelledby="step4-tab">
                                 
+                                    <div class="alert alert-info bg-info-subtle border-info text-info d-flex align-items-start mb-4" role="alert" style="border-radius: 12px;">
+                                        <i class="bx bx-cog fs-4 me-3 mt-1"></i>
+                                        <div>
+                                            <h6 class="fw-bold mb-1 text-info">Tahap Akhir: Pengaturan Titik Serah Terima Kendaraan</h6>
+                                            <p class="mb-0 small">Pada tahap ini, Anda menentukan <strong>bagaimana cara penyewa menerima mobil tersebut</strong>. Anda dapat mengaktifkan opsi "Diantar ke alamat penyewa" (opsi ini memerlukan kurir/supir), atau "Jemput di Pool/Kantor" agar penyewa mengambil kendaraannya sendiri.</p>
+                                        </div>
+                                    </div>
                                     
                                     <!-- PENGATURAN PENGIRIMAN GLOBAL SEWA & RENTAL -->
                                     <div class="col-12 mb-4">
@@ -680,7 +878,7 @@
                                             <button type="submit" class="btn btn-success"><i class='bx bx-save'></i> Simpan Data</button>
                                         </div>
                                     </div>
-                                </div> <!-- End step 3 -->
+                                </div> <!-- End Step 4 -->
                             </div> <!-- End tab-content -->
 
                         </form>
@@ -1060,16 +1258,24 @@
     function previewFile(input, previewId, placeholderId) {
         const preview = document.getElementById(previewId);
         const placeholder = document.getElementById(placeholderId);
-        const img = preview.querySelector('img');
-        
+        const img = preview ? preview.querySelector('img') : null;
+
         if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                img.src = e.target.result;
-                preview.style.display = 'block';
-                placeholder.style.display = 'none';
-            };
-            reader.readAsDataURL(input.files[0]);
+            if (typeof initGlobalCropper === 'function') {
+                initGlobalCropper(input, img || previewId, NaN, true);
+
+                if (preview) preview.style.display = 'block';
+                if (placeholder) placeholder.style.display = 'none';
+            } else {
+                // Fallback jika cropper belum dimuat
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    if (img) img.src = e.target.result;
+                    if (preview) preview.style.display = 'block';
+                    if (placeholder) placeholder.style.display = 'none';
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
         }
     }
 
@@ -1099,6 +1305,10 @@
 
         const input = document.getElementById('opsi_supir');
         const details = document.getElementById('form_supir_details');
+        if (details) details.style.display = switchDengan ? 'block' : 'none';
+        
+        const detailsBorongan = document.getElementById('form_supir_details_borongan');
+        if (detailsBorongan) detailsBorongan.style.display = switchDengan ? 'block' : 'none';
         
         if (switchTanpa && switchDengan) {
             input.value = 'Bebas Pilih';
@@ -1114,8 +1324,8 @@
             details.style.display = 'block';
         } else {
             details.style.display = 'none';
-            document.getElementById('nama_supir').value = '';
-            document.getElementById('kontak_supir').value = '';
+            const ns = document.getElementById('nama_supir'); if(ns) ns.value = '';
+            const ks = document.getElementById('kontak_supir'); if(ks) ks.value = '';
         }
     }
 
@@ -1164,8 +1374,8 @@
             details.style.display = 'block';
         } else {
             details.style.display = 'none';
-            document.getElementById('nama_supir_borongan').value = '';
-            document.getElementById('kontak_supir_borongan').value = '';
+            const nsb = document.getElementById('nama_supir_borongan'); if(nsb) nsb.value = '';
+            const ksb = document.getElementById('kontak_supir_borongan'); if(ksb) ksb.value = '';
         }
     }
 
@@ -1359,6 +1569,130 @@
             document.getElementById('longitude').value = '';
         }
     }
+
+    function toggleLayanan(type) {
+        const isHarian = document.getElementById('is_harian_active').checked;
+        const isBorongan = document.getElementById('is_borongan_active').checked;
+        
+        // Cek agar tidak dua-duanya nonaktif
+        if (!isHarian && !isBorongan) {
+            alert('Minimal harus ada satu layanan (Harian atau Borongan) yang diaktifkan.');
+            if (type === 'harian') {
+                document.getElementById('is_harian_active').checked = true;
+            } else {
+                document.getElementById('is_borongan_active').checked = true;
+            }
+            return;
+        }
+
+        // Toggle visibility wrapper
+        if (type === 'harian') {
+            document.getElementById('harian_content_wrapper').style.display = isHarian ? 'block' : 'none';
+        } else {
+            document.getElementById('borongan_content_wrapper').style.display = isBorongan ? 'block' : 'none';
+        }
+    }
+
+    // Panggil saat page load
+    document.addEventListener('DOMContentLoaded', function() {
+        toggleLayanan('harian');
+        toggleLayanan('borongan');
+    });
+
+
+    // Script for Tipe Borongan
+    function setTarifBoronganType(type) {
+        const divJarak = document.getElementById('borongan_jarak_wrapper');
+        const divWilayah = document.getElementById('borongan_wilayah_wrapper');
+        const labelJarak = document.getElementById('label_tarif_jarak');
+        const labelWilayah = document.getElementById('label_tarif_wilayah');
+        
+        // Remove required from all first
+        const jarakInputs = divJarak.querySelectorAll('input[type="number"], input[type="text"]');
+        const wilayahInputs = document.querySelectorAll('#harga_dalam_desa_wilayah, #harga_luar_desa_wilayah');
+        
+        jarakInputs.forEach(el => el.removeAttribute('required'));
+        wilayahInputs.forEach(el => el.removeAttribute('required'));
+
+        if (type === 'jarak') {
+            divJarak.style.display = 'block';
+            divWilayah.style.display = 'none';
+            labelJarak.classList.replace('border', 'border-primary');
+            labelJarak.style.backgroundColor = 'var(--bs-primary-bg-subtle)';
+            labelWilayah.classList.replace('border-primary', 'border');
+            labelWilayah.style.backgroundColor = 'transparent';
+            
+            document.getElementById('tipe_tarif_jarak').checked = true;
+            
+            // Add required back to visible inputs if borongan is active
+            if(document.getElementById('is_borongan_active').checked) {
+                jarakInputs.forEach(el => el.setAttribute('required', 'required'));
+            }
+        } else {
+            divJarak.style.display = 'none';
+            divWilayah.style.display = 'block';
+            labelWilayah.classList.replace('border', 'border-primary');
+            labelWilayah.style.backgroundColor = 'var(--bs-primary-bg-subtle)';
+            labelJarak.classList.replace('border-primary', 'border');
+            labelJarak.style.backgroundColor = 'transparent';
+            
+            document.getElementById('tipe_tarif_wilayah').checked = true;
+            
+            if(document.getElementById('is_borongan_active').checked) {
+                wilayahInputs.forEach(el => el.setAttribute('required', 'required'));
+            }
+        }
+    }
+
+    function setOngkirType(type) {
+        const divPukulRata = document.getElementById('div_pukul_rata');
+        const divPerKecamatan = document.getElementById('div_per_kecamatan');
+        const labelPukulRata = document.getElementById('label_pukul_rata');
+        const labelPerKecamatan = document.getElementById('label_per_kecamatan');
+
+        if (type === 'pukul_rata') {
+            divPukulRata.style.display = 'block';
+            divPerKecamatan.style.display = 'none';
+            labelPukulRata.classList.replace('border', 'border-primary');
+            labelPukulRata.style.backgroundColor = 'var(--bs-primary-bg-subtle)';
+            labelPerKecamatan.classList.replace('border-primary', 'border');
+            labelPerKecamatan.style.backgroundColor = 'transparent';
+            document.getElementById('tipe_pukul_rata').checked = true;
+        } else {
+            divPukulRata.style.display = 'none';
+            divPerKecamatan.style.display = 'block';
+            labelPerKecamatan.classList.replace('border', 'border-primary');
+            labelPerKecamatan.style.backgroundColor = 'var(--bs-primary-bg-subtle)';
+            labelPukulRata.classList.replace('border-primary', 'border');
+            labelPukulRata.style.backgroundColor = 'transparent';
+            document.getElementById('tipe_per_kecamatan').checked = true;
+        }
+    }
+
+    function toggleKecamatan(id) {
+        const switchEl = document.getElementById('switch_kec_' + id);
+        const inputEl = document.getElementById('input_kec_' + id);
+        const labelEl = document.getElementById('label_kec_' + id);
+
+        if (switchEl.checked) {
+            inputEl.disabled = false;
+            inputEl.setAttribute('required', 'required');
+            labelEl.classList.remove('text-muted');
+            labelEl.classList.add('text-dark');
+        } else {
+            inputEl.disabled = true;
+            inputEl.removeAttribute('required');
+            inputEl.value = '';
+            labelEl.classList.remove('text-dark');
+            labelEl.classList.add('text-muted');
+        }
+    }
+
+    // Initialize styling
+    document.addEventListener('DOMContentLoaded', function() {
+        setTarifBoronganType('jarak');
+        setOngkirType('pukul_rata');
+    });
 
 </script>
 @endsection

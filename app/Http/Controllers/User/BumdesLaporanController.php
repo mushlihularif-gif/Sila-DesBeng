@@ -149,6 +149,7 @@ class BumdesLaporanController extends Controller
         $fasilitasData = [];
         $laporanData = [];
         $pengumumanData = [];
+        $pasarData = [];
         
         $regionIds = array_merge([$regionId], \App\Models\Region::getDescendantIds($regionId));
         
@@ -198,6 +199,14 @@ class BumdesLaporanController extends Controller
                 ->whereMonth('created_at', $month)
                 ->whereIn('region_id', $regionIds)
                 ->count();
+                
+            // Count pasar orders
+            $pasarCount = \App\Models\PasarOrder::withTrashed()
+                ->whereYear('created_at', $year)
+                ->whereMonth('created_at', $month)
+                ->whereIn('region_id', $regionIds)
+                ->whereNotIn('status', ['waiting', 'processing', 'cancelled', 'rejected'])
+                ->count();
             
             $rentalData[] = $rentalCount;
             $gasData[] = $gasCount;
@@ -205,6 +214,7 @@ class BumdesLaporanController extends Controller
             $fasilitasData[] = $fasilitasCount;
             $laporanData[] = $laporanCount;
             $pengumumanData[] = $pengumumanCount;
+            $pasarData[] = $pasarCount;
         }
         
         return [
@@ -214,7 +224,8 @@ class BumdesLaporanController extends Controller
             'mobil' => $mobilData,
             'fasilitas' => $fasilitasData,
             'laporan' => $laporanData,
-            'pengumuman' => $pengumumanData
+            'pengumuman' => $pengumumanData,
+            'pasar' => $pasarData
         ];
     }
     
@@ -273,8 +284,28 @@ class BumdesLaporanController extends Controller
         $mobilRevenue = (clone $mobilQuery)->sum('total_amount');
         $mobilTransactions = (clone $mobilQuery)->count();
         
-        $totalRevenue = $rentalRevenue + $gasRevenue + $manualRevenue + $mobilRevenue;
-        $totalTransactions = $rentalTransactions + $gasTransactions + $manualTransactions + $mobilTransactions;
+        // Fasilitas Umum Revenue
+        $fasilitasQuery = \App\Models\FasilitasUmumBooking::withTrashed()
+            ->whereYear('created_at', $year)
+            ->whereIn('region_id', $regionIds)
+            ->whereNotIn('status', ['pending', 'cancelled', 'rejected']);
+        $fasilitasQuery = $applyMonthFilter($fasilitasQuery);
+            
+        $fasilitasRevenue = (clone $fasilitasQuery)->sum('total_amount');
+        $fasilitasTransactions = (clone $fasilitasQuery)->count();
+        
+        // Pasar Daerah Revenue
+        $pasarQuery = \App\Models\PasarOrder::withTrashed()
+            ->whereYear('created_at', $year)
+            ->whereIn('region_id', $regionIds)
+            ->whereNotIn('status', ['waiting', 'processing', 'cancelled', 'rejected']);
+        $pasarQuery = $applyMonthFilter($pasarQuery);
+            
+        $pasarRevenue = (clone $pasarQuery)->sum('grand_total');
+        $pasarTransactions = (clone $pasarQuery)->count();
+        
+        $totalRevenue = $rentalRevenue + $gasRevenue + $manualRevenue + $mobilRevenue + $fasilitasRevenue + $pasarRevenue;
+        $totalTransactions = $rentalTransactions + $gasTransactions + $manualTransactions + $mobilTransactions + $fasilitasTransactions + $pasarTransactions;
         
         return [
             'rental' => [
@@ -291,6 +322,16 @@ class BumdesLaporanController extends Controller
                 'revenue' => $mobilRevenue,
                 'transactions' => $mobilTransactions,
                 'percentage' => $totalRevenue > 0 ? round(($mobilRevenue / $totalRevenue) * 100, 1) : 0
+            ],
+            'fasilitas' => [
+                'revenue' => $fasilitasRevenue,
+                'transactions' => $fasilitasTransactions,
+                'percentage' => $totalRevenue > 0 ? round(($fasilitasRevenue / $totalRevenue) * 100, 1) : 0
+            ],
+            'pasar' => [
+                'revenue' => $pasarRevenue,
+                'transactions' => $pasarTransactions,
+                'percentage' => $totalRevenue > 0 ? round(($pasarRevenue / $totalRevenue) * 100, 1) : 0
             ],
             'total' => [
                 'revenue' => $totalRevenue,

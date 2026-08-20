@@ -135,7 +135,10 @@
                             </div>
                         </div>
 
-                        <div class="form-section-title"><i class="bx bx-shield-quarter me-2"></i> 2. Hak Akses Unit Layanan</div>
+                        <div class="form-section-title d-flex justify-content-between align-items-center">
+                            <span><i class="bx bx-shield-quarter me-2"></i> 2. Hak Akses Unit Layanan</span>
+                            <span class="badge bg-primary rounded-pill px-3 py-2 shadow-sm" id="selected-access-count" style="font-size: 0.8rem; text-transform: none; letter-spacing: normal;">0 Hak Akses Dipilih</span>
+                        </div>
                         <div class="alert alert-warning d-flex mb-4 p-3 rounded" style="border-left: 4px solid #ffab00;" role="alert">
                             <i class="bx bx-error-circle fs-4 me-3 mt-1 text-warning"></i>
                             <div>
@@ -198,4 +201,35 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const checkboxes = document.querySelectorAll('.unit-card-checkbox');
+        const countBadge = document.getElementById('selected-access-count');
+        
+        function updateCount() {
+            let count = 0;
+            checkboxes.forEach(cb => {
+                if(cb.checked) count++;
+            });
+            
+            if(count === 0) {
+                countBadge.textContent = 'Belum Ada Hak Akses Dipilih';
+                countBadge.className = 'badge bg-label-secondary rounded-pill px-3 py-2';
+            } else {
+                countBadge.textContent = count + ' Hak Akses Dipilih';
+                countBadge.className = 'badge bg-primary rounded-pill px-3 py-2 shadow-sm';
+            }
+        }
+        
+        checkboxes.forEach(cb => {
+            cb.addEventListener('change', updateCount);
+        });
+        
+        // Initial run
+        updateCount();
+    });
+</script>
+@endpush
 @endsection

@@ -258,31 +258,70 @@
                             'route' => route('admin.announcements.index'),
                             'image' => asset('User/img/elemen/KabardanInformasiDaerah.png'),
                             'color' => 'secondary'
+                        ],
+                        'Pasar Daerah' => [
+                            'title' => 'Unit Pasar Daerah',
+                            'count' => (\App\Models\PasarProduk::count() ?? 0),
+                            'label' => 'Produk',
+                            'route' => route('admin.unit.pasar_daerah.index'),
+                            'image' => asset('Admin/img/pasardaerah/PasarDaerah2.png'),
+                            'color' => 'warning'
                         ]
                     ];
 
                     $activeServicesList = isset($activeServices) ? $activeServices : [];
+                    
+                    $validServiceCount = 0;
+                    foreach($activeServicesList as $s) {
+                        if(isset($unitConfigs[$s])) $validServiceCount++;
+                    }
+                    
+                    $colClass = 'col-md-6';
+                    $isSquare = false;
+                    
+                    if ($validServiceCount == 3) {
+                        $colClass = 'col-lg-4 col-md-6';
+                        $isSquare = true;
+                    } elseif ($validServiceCount >= 4) {
+                        $colClass = 'col-lg-3 col-md-4 col-sm-6';
+                        $isSquare = true;
+                    }
                 @endphp
             @if(in_array(auth()->user()->role, ['admin_desa', 'admin_rt', 'admin_rw']))
             <div class="row mb-4">
                 @foreach($activeServicesList as $serviceName)
                     @if(isset($unitConfigs[$serviceName]))
                         @php $config = $unitConfigs[$serviceName]; @endphp
-                        <div class="col-md-6 mb-4">
-                            <div class="card unit-card h-100 {{ $config['color'] }} hover-lift"
+                        <div class="{{ $colClass }} mb-4">
+                            <div class="card unit-card h-100 border-{{ $config['color'] }} hover-lift" style="border-top: 3px solid; cursor: pointer;"
                                 onclick="window.location='{{ $config['route'] }}'">
-                                <div class="card-body p-4 d-flex align-items-center">
-                                    <div class="avatar flex-shrink-0 me-3" style="width: 65px; height: 65px;">
-                                        <img src="{{ $config['image'] }}" alt="{{ $config['title'] }}" class="rounded w-100" />
+                                
+                                @if($isSquare)
+                                    <!-- Layout Kotak (Vertical) -->
+                                    <div class="card-body p-4 d-flex flex-column align-items-center justify-content-center text-center">
+                                        <div class="avatar mb-3" style="width: 70px; height: 70px;">
+                                            <img src="{{ $config['image'] }}" alt="{{ $config['title'] }}" class="rounded w-100" />
+                                        </div>
+                                        <div class="mt-2">
+                                            <span class="fw-semibold d-block mb-2 text-muted" style="font-size: 0.85rem; line-height: 1.2; min-height: 2em;">{{ $config['title'] }}</span>
+                                            <h4 class="card-title mb-0 text-{{ $config['color'] }}"><span class="count-up fw-bold" data-value="{{ $config['count'] }}">0</span> <span class="fs-6 text-body">{{ $config['label'] }}</span></h4>
+                                        </div>
                                     </div>
-                                    <div class="flex-grow-1">
-                                        <span class="fw-semibold d-block mb-1 text-muted">{{ $config['title'] }}</span>
-                                        <h4 class="card-title mb-0"><span class="count-up" data-value="{{ $config['count'] }}">0</span> {{ $config['label'] }}</h4>
+                                @else
+                                    <!-- Layout Memanjang (Horizontal) -->
+                                    <div class="card-body p-4 d-flex align-items-center">
+                                        <div class="avatar flex-shrink-0 me-3" style="width: 65px; height: 65px;">
+                                            <img src="{{ $config['image'] }}" alt="{{ $config['title'] }}" class="rounded w-100" />
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <span class="fw-semibold d-block mb-1 text-muted">{{ $config['title'] }}</span>
+                                            <h4 class="card-title mb-0"><span class="count-up" data-value="{{ $config['count'] }}">0</span> {{ $config['label'] }}</h4>
+                                        </div>
+                                        <div class="d-flex align-items-center justify-content-center bg-label-{{ $config['color'] }} rounded ms-3 flex-shrink-0" style="width: 36px; height: 36px;">
+                                            <i class="bx bx-chevron-right text-{{ $config['color'] }}"></i>
+                                        </div>
                                     </div>
-                                    <div class="d-flex align-items-center justify-content-center bg-label-{{ $config['color'] }} rounded ms-3 flex-shrink-0" style="width: 36px; height: 36px;">
-                                        <i class="bx bx-chevron-right text-{{ $config['color'] }}"></i>
-                                    </div>
-                                </div>
+                                @endif
                             </div>
                         </div>
                     @endif
@@ -311,120 +350,88 @@
                                 </div>
                             </div>
                             <div class="card-body p-0">
-                                <div class="table-responsive">
-                                    <table class="table table-hover align-middle mb-0">
-                                        <thead class="bg-light">
-                                            <tr>
-                                                <th class="ps-4 py-3 text-secondary text-uppercase small fw-bold">Pengguna</th>
-                                                <th class="py-3 text-secondary text-uppercase small fw-bold">Kategori</th>
-                                                <th class="py-3 text-secondary text-uppercase small fw-bold">Detail</th>
-                                                <th class="py-3 text-secondary text-uppercase small fw-bold">Tanggal</th>
-                                                <th class="py-3 text-secondary text-uppercase small fw-bold">Status</th>
-                                                <th class="text-end pe-4 py-3 text-secondary text-uppercase small fw-bold">Aksi</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @forelse($latestRequests as $request)
-                                                <tr class="notification-item">
-                                                    <td class="ps-4">
-                                                        <div class="d-flex align-items-center">
-                                                            <div class="avatar avatar-sm border rounded-circle p-1 me-3">
-                                                                @if($request->user->avatar)
-                                                                    <img src="{{ asset('storage/' . $request->user->avatar) }}" class="rounded-circle">
-                                                                @else
-                                                                    <span class="avatar-initial rounded-circle bg-label-primary fw-bold">
-                                                                        {{ strtoupper(substr($request->user->name, 0, 1)) }}
-                                                                    </span>
-                                                                @endif
-                                                            </div>
-                                                            <div>
-                                                                <h6 class="mb-0 fw-semibold text-dark">
-                                                                    @if($request->type == 'rental')
-                                                                        {{ $request->recipient_name ?? $request->user->name }}
-                                                                    @else
-                                                                        {{ $request->full_name ?? $request->user->name }}
-                                                                    @endif
-                                                                </h6>
-                                                                <small class="text-muted" style="font-size: 0.75rem;">{{ $request->user->email }}</small>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        @if($request->type == 'rental')
-                                                            <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill px-3">
-                                                                <i class="bx bx-wrench me-1"></i>Penyewaan
-                                                            </span>
-                                                        @else
-                                                            <span class="badge bg-info-subtle text-info border border-info-subtle rounded-pill px-3">
-                                                                <i class="bx bxs-gas-pump me-1"></i>Gas
-                                                            </span>
-                                                        @endif
-                                                    </td>
-                                                    <td>
-                                                        <div class="fw-medium text-dark">{{ $request->item_name }}</div>
-                                                        <small class="text-muted">
-                                                            @if($request->type == 'rental')
-                                                                {{ $request->quantity }} Unit • {{ $request->days_count }} Hari
-                                                            @else
-                                                                {{ $request->quantity }} Tabung
-                                                            @endif
-                                                        </small>
-                                                    </td>
-                                                    <td>
-                                                        <div class="d-flex flex-column">
-                                                            <span class="fw-medium text-dark">{{ $request->created_at->format('d M') }}</span>
-                                                            <small class="text-muted">{{ $request->created_at->format('H:i') }} WIB</small>
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        @include('admin.partials.status-badge', ['status' => $request->status, 'cancelStatus' => $request->cancellation_status])
-                                                    </td>
-                                                    <td class="text-end pe-4">
-                                                        <div class="d-flex gap-2 justify-content-end">
-                                                            <a href="{{ route('admin.aktivitas.permintaan-pengajuan.show', [$request->id, $request->type]) }}" 
-                                                               class="btn btn-sm btn-icon btn-outline-primary" 
-                                                               data-bs-toggle="tooltip" title="Lihat Detail">
-                                                                <i class="bx bx-show"></i>
-                                                            </a>
-                                                            
-                                                            @if($request->cancellation_status == 'pending')
-                                                                {{-- Tombol Aksi untuk Pembatalan --}}
-                                                                <button type="button" class="btn btn-sm btn-icon btn-outline-success" 
-                                                                        onclick="handleCancellation({{ $request->id }}, '{{ $request->type }}', 'approve')"
-                                                                        data-bs-toggle="tooltip" title="Setujui Pembatalan">
-                                                                    <i class="bx bx-check-double"></i>
-                                                                </button>
-                                                                <button type="button" class="btn btn-sm btn-icon btn-outline-danger" 
-                                                                        onclick="handleCancellation({{ $request->id }}, '{{ $request->type }}', 'reject')"
-                                                                        data-bs-toggle="tooltip" title="Tolak Pembatalan">
-                                                                    <i class="bx bx-x-circle"></i>
-                                                                </button>
-                                                            @elseif($request->status == 'pending')
-                                                                {{-- Tombol Aksi untuk Pesanan Baru --}}
-                                                                <button type="button" class="btn btn-sm btn-icon btn-outline-success" 
-                                                                        onclick="approveRequest({{ $request->id }}, '{{ $request->type }}')"
-                                                                        data-bs-toggle="tooltip" title="Setujui">
-                                                                    <i class="bx bx-check"></i>
-                                                                </button>
-                                                                <button type="button" class="btn btn-sm btn-icon btn-outline-danger" 
-                                                                        onclick="rejectRequest({{ $request->id }}, '{{ $request->type }}')"
-                                                                        data-bs-toggle="tooltip" title="Tolak">
-                                                                    <i class="bx bx-x"></i>
-                                                                </button>
-                                                            @endif
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            @empty
-                                                <tr>
-                                                    <td colspan="6" class="text-center py-5">
-                                                        <div class="mb-3"><i class="bx bx-bell-off fs-1 text-muted opacity-25"></i></div>
-                                                        <h6 class="text-muted fw-bold">Tidak ada notifikasi baru</h6>
-                                                    </td>
-                                                </tr>
-                                            @endforelse
-                                        </tbody>
-                                    </table>
+                                <div class="list-group list-group-flush border-0">
+                                    @forelse($latestRequests as $request)
+                                        @php
+                                            $icon = 'bx-bell';
+                                            $bgClass = 'bg-primary-subtle text-primary';
+                                            $badgeClass = 'bg-primary text-white';
+                                            $serviceName = 'Umum';
+                                            $detailLink = route('admin.aktivitas.permintaan-pengajuan.show', [$request->id, $request->type ?? 'rental']);
+                                            $canQuickAction = in_array($request->type, ['rental', 'gas', 'mobil', 'fasilitas_umum']);
+                                            
+                                            if ($request->type == 'rental') {
+                                                $icon = 'bx-wrench'; $bgClass = 'bg-warning-subtle text-warning'; $badgeClass = 'bg-warning text-white'; $serviceName = 'Penyewaan Alat';
+                                            } elseif ($request->type == 'gas') {
+                                                $icon = 'bxs-gas-pump'; $bgClass = 'bg-danger-subtle text-danger'; $badgeClass = 'bg-danger text-white'; $serviceName = 'Penjualan Gas';
+                                            } elseif ($request->type == 'mobil') {
+                                                $icon = 'bx-car'; $bgClass = 'bg-info-subtle text-info'; $badgeClass = 'bg-info text-white'; $serviceName = 'Penyewaan Mobil';
+                                            } elseif ($request->type == 'fasilitas_umum') {
+                                                $icon = 'bx-building-house'; $bgClass = 'bg-success-subtle text-success'; $badgeClass = 'bg-success text-white'; $serviceName = 'Fasilitas Umum';
+                                            } elseif ($request->type == 'pasar_daerah') {
+                                                $icon = 'bx-store-alt'; $bgClass = 'bg-primary-subtle text-primary'; $badgeClass = 'bg-primary text-white'; $serviceName = 'Pasar Daerah';
+                                                $detailLink = Route::has('admin.unit.pasar_daerah.pesanan.show') ? route('admin.unit.pasar_daerah.pesanan.show', $request->id) : '#';
+                                            } elseif ($request->type == 'laporan') {
+                                                $icon = 'bx-message-error'; $bgClass = 'bg-dark-subtle text-dark'; $badgeClass = 'bg-dark text-white'; $serviceName = 'Pelaporan Warga';
+                                                $detailLink = Route::has('admin.laporan.show') ? route('admin.laporan.show', $request->id) : '#';
+                                            }
+                                            
+                                            $requestName = $request->full_name ?? $request->recipient_name ?? $request->user->name ?? 'User';
+                                        @endphp
+                                        
+                                        <div class="list-group-item list-group-item-action d-flex align-items-center p-4 border-bottom-0 border-top" style="gap: 1.25rem; transition: all 0.2s ease;">
+                                            <!-- Icon / Avatar -->
+                                            <div class="avatar flex-shrink-0" style="width: 48px; height: 48px;">
+                                                <span class="avatar-initial rounded-circle {{ $bgClass }} shadow-sm">
+                                                    <i class="bx {{ $icon }} fs-4"></i>
+                                                </span>
+                                            </div>
+                                            
+                                            <!-- Info -->
+                                            <div class="flex-grow-1" style="min-width: 0;">
+                                                <div class="d-flex align-items-center mb-1 gap-2 flex-wrap">
+                                                    <h6 class="mb-0 fw-bold text-dark text-truncate">{{ $request->item_name }}</h6>
+                                                    <span class="badge {{ $badgeClass }} rounded-pill px-2 shadow-sm" style="font-size: 0.65rem; letter-spacing: 0.5px;">
+                                                        {{ strtoupper($serviceName) }}
+                                                    </span>
+                                                    @if(isset($request->cancellation_status) && $request->cancellation_status == 'pending')
+                                                        <span class="badge bg-danger rounded-pill px-2 shadow-sm" style="font-size: 0.65rem; letter-spacing: 0.5px;"><i class="bx bx-error-circle me-1"></i>MINTA BATAL</span>
+                                                    @endif
+                                                </div>
+                                                <div class="d-flex align-items-center text-muted small gap-3 flex-wrap">
+                                                    <span class="d-flex align-items-center"><i class="bx bx-user me-1 text-secondary"></i> <span class="fw-medium">{{ $requestName }}</span></span>
+                                                    <span class="d-flex align-items-center"><i class="bx bx-time-five me-1 text-secondary"></i> {{ $request->created_at->diffForHumans() }}</span>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Action Buttons -->
+                                            <div class="d-flex gap-2 flex-shrink-0">
+                                                <a href="{{ $detailLink }}" class="btn btn-sm btn-white rounded-pill px-3 shadow-sm text-primary fw-bold border">
+                                                    Lihat Detail <i class="bx bx-right-arrow-alt ms-1"></i>
+                                                </a>
+                                                
+                                                @if($canQuickAction)
+                                                    @if(isset($request->cancellation_status) && $request->cancellation_status == 'pending')
+                                                        <button type="button" class="btn btn-sm btn-success rounded-pill px-3 shadow-sm fw-bold" onclick="handleCancellation({{ $request->id }}, '{{ $request->type }}', 'approve')">
+                                                            <i class="bx bx-check me-1"></i> Setujui Batal
+                                                        </button>
+                                                    @elseif($request->status == 'pending' || $request->status == 'waiting')
+                                                        <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm fw-bold" onclick="approveRequest({{ $request->id }}, '{{ $request->type }}')">
+                                                            <i class="bx bx-check me-1"></i> Proses
+                                                        </button>
+                                                    @endif
+                                                @endif
+                                            </div>
+                                        </div>
+                                    @empty
+                                        <div class="p-5 text-center">
+                                            <div class="bg-label-primary rounded-circle d-inline-flex p-4 mb-3 shadow-sm">
+                                                <i class="bx bx-bell-off fs-1 text-primary"></i>
+                                            </div>
+                                            <h5 class="fw-bold text-dark mb-1">Belum Ada Notifikasi</h5>
+                                            <p class="text-muted mb-0">Saat ini tidak ada permintaan layanan yang perlu diproses.</p>
+                                        </div>
+                                    @endforelse
                                 </div>
                             </div>
                         </div>
@@ -611,7 +618,7 @@
                             </div>
                             <div class="card-body">
                                 @php
-                                    $revenueServices = ['Penyewaan Alat', 'Penjualan Gas', 'Penyewaan Mobil'];
+                                    $revenueServices = ['Penyewaan Alat', 'Penjualan Gas', 'Penyewaan Mobil', 'Fasilitas Umum', 'Pasar Daerah'];
                                     $activeRevenueServices = array_intersect($activeServicesList, $revenueServices);
                                 @endphp
                                 @if(count($activeRevenueServices) > 0)
@@ -708,47 +715,61 @@
                                     <!-- Product 2 - Sound System -->
                                     @forelse($popularProducts as $item)
                                     <div class="col-lg-3 col-md-6">
-                                        <div class="card product-card h-100 border shadow-sm" onclick="window.location.href='{{ $item->link }}'" style="cursor: pointer;">
-                                            <div class="card-body p-0">
+                                        <div class="card product-card h-100 border-0 shadow-sm" onclick="window.location.href='{{ $item->link }}'" style="cursor: pointer; border-radius: 16px;">
+                                            <div class="card-body p-0 d-flex flex-column h-100">
                                                 <!-- Product Image -->
-                                                <div class="product-img-wrapper position-relative overflow-hidden"
-                                                    style="height: 200px;">
+                                                <div class="product-img-wrapper position-relative overflow-hidden" style="height: 220px; border-radius: 16px 16px 0 0;">
                                                     <img src="{{ Str::startsWith($item->image, ['http', 'https', 'User', 'Admin']) ? asset($item->image) : asset('storage/' . $item->image) }}"
-                                                        alt="{{ $item->name }}" class="product-image"
-                                                        style="width: 100%; height: 100%; object-fit: cover;">
+                                                        alt="{{ $item->name }}" class="product-image w-100 h-100 object-fit-cover">
+                                                    
+                                                    <!-- Gradient Overlay -->
+                                                    <div class="position-absolute top-0 start-0 w-100 h-100" style="background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0) 40%, rgba(0,0,0,0.4) 100%); pointer-events: none;"></div>
+
                                                     @if($loop->iteration <= 2)
-                                                    <span class="badge bg-danger position-absolute top-0 end-0 m-3">
-                                                        <i class="bx bx-trending-up me-1"></i>Hot
-                                                    </span>
-                                                    @endif
-                                                </div>
-                                                <!-- Product Info -->
-                                                <div class="p-3">
-                                                    <div class="mb-2">
-                                                        <span class="badge bg-label-{{ $item->type == 'rental' ? 'warning' : ($item->type == 'mobil' ? 'info' : 'primary') }} text-uppercase"
-                                                            style="font-size: 0.7rem; font-weight: 600;">
-                                                            {{ $item->category }}
+                                                    <div class="position-absolute top-0 end-0 m-3 shadow-sm" style="z-index: 2;">
+                                                        <span class="badge bg-danger rounded-pill px-3 py-2 d-flex align-items-center" style="font-weight: 600; letter-spacing: 0.5px;">
+                                                            <i class="bx bxs-hot fs-6 me-1 text-white"></i> HOT
                                                         </span>
                                                     </div>
-                                                    <h6 class="mb-2 fw-semibold">{{ $item->name }}</h6>
-                                                    <div class="d-flex justify-content-between align-items-center">
-                                                        <div>
-                                                            <span class="text-primary fw-bold fs-6">{{ $item->price_formatted }}</span>
-                                                            <small class="text-muted d-block">
-                                                                @if($item->type == 'rental')
-                                                                    Per 24 jam
-                                                                @elseif($item->type == 'mobil')
-                                                                    Sewa Harian
-                                                                @else
-                                                                    Per tabung
-                                                                @endif
-                                                            </small>
-                                                        </div>
+                                                    @endif
+
+                                                    <!-- Category Badge overlay -->
+                                                    <div class="position-absolute bottom-0 start-0 m-3" style="z-index: 2;">
+                                                        <span class="badge bg-white text-dark shadow-sm border px-3 py-2 rounded-pill" style="font-size: 0.75rem; font-weight: 700;">
+                                                            <i class="bx bx-purchase-tag-alt text-primary me-1"></i> {{ strtoupper($item->category) }}
+                                                        </span>
                                                     </div>
-                                                    <div class="mt-3 pt-3 border-top">
-                                                        <div class="d-flex justify-content-between text-muted small">
-                                                            <span><i class="bx bx-check-circle me-1"></i>Stok: {{ $item->stock }}</span>
-                                                            <span><i class="bx bx-time me-1"></i>{{ $item->sold }} {{ $item->type == 'gas' ? 'Terjual' : 'Booking' }}</span>
+                                                </div>
+                                                
+                                                <!-- Product Info -->
+                                                <div class="p-4 d-flex flex-column flex-grow-1 bg-white" style="border-radius: 0 0 16px 16px;">
+                                                    <h5 class="mb-2 fw-bold text-dark text-truncate" title="{{ $item->name }}" style="line-height: 1.4;">{{ $item->name }}</h5>
+                                                    
+                                                    <div class="mt-auto mb-3 pt-2">
+                                                        <span class="text-primary fw-bolder fs-5">{{ $item->price_formatted }}</span>
+                                                        <span class="text-muted small fw-medium">
+                                                            @if($item->type == 'rental')
+                                                                / 24 jam
+                                                            @elseif($item->type == 'mobil')
+                                                                / Harian
+                                                            @else
+                                                                / Tabung
+                                                            @endif
+                                                        </span>
+                                                    </div>
+
+                                                    <div class="d-flex justify-content-between align-items-center mt-auto pt-3 border-top border-light">
+                                                        <div class="d-flex align-items-center text-muted">
+                                                            <div class="d-flex align-items-center justify-content-center bg-light rounded-circle me-2" style="width: 28px; height: 28px;">
+                                                                <i class="bx bx-box text-secondary" style="font-size: 14px;"></i>
+                                                            </div>
+                                                            <span class="small fw-medium">Stok: {{ $item->stock }}</span>
+                                                        </div>
+                                                        <div class="d-flex align-items-center text-muted">
+                                                            <div class="d-flex align-items-center justify-content-center bg-primary-subtle text-primary rounded-circle me-2" style="width: 28px; height: 28px;">
+                                                                <i class="bx bx-check-shield" style="font-size: 14px;"></i>
+                                                            </div>
+                                                            <span class="small fw-medium text-primary">{{ $item->sold }} <span class="d-none d-xxl-inline">{{ $item->type == 'gas' ? 'Terjual' : 'Booking' }}</span></span>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -772,27 +793,24 @@
                 <!-- Custom CSS untuk Product Cards -->
                 <style>
                     .product-card {
-                        transition: all 0.3s ease;
-                        border-radius: 0.5rem;
-                        overflow: hidden;
+                        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
                     }
 
                     .product-card:hover {
                         transform: translateY(-8px);
-                        box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.15) !important;
+                        box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.1) !important;
                     }
 
                     .product-img-wrapper {
                         transition: all 0.3s ease;
-                        border-radius: 0.5rem 0.5rem 0 0;
                     }
 
-                    .product-card:hover .product-img-wrapper {
-                        transform: scale(1.05);
+                    .product-card:hover .product-image {
+                        transform: scale(1.08);
                     }
 
                     .product-image {
-                        transition: all 0.3s ease;
+                        transition: transform 0.5s ease;
                     }
 
                     .badge-center {
@@ -1017,14 +1035,16 @@
                         
                         $countMap = [
                             'Penyewaan Alat' => ['count' => $rentalCount ?? 0, 'color' => '#ffc107'],
-                            'Penjualan Gas' => ['count' => $gasCount ?? 0, 'color' => '#696cff'],
-                            'Penyewaan Mobil' => ['count' => $mobilCount ?? 0, 'color' => '#0dcaf0']
+                            'Penjualan Gas' => ['count' => $gasCount ?? 0, 'color' => '#dc3545'],
+                            'Penyewaan Mobil' => ['count' => $mobilCount ?? 0, 'color' => '#0dcaf0'],
+                            'Fasilitas Umum' => ['count' => $fasilitasCount ?? 0, 'color' => '#198754'],
+                            'Pasar Daerah' => ['count' => $pasarCount ?? 0, 'color' => '#696cff']
                         ];
                         
                         foreach($activeRevenueServices as $serviceName) {
                             $c = $countMap[$serviceName]['count'] ?? 0;
                             $donutSeries[] = $c;
-                            $donutLabels[] = $serviceName . " " . $c . " Transaksi";
+                            $donutLabels[] = $serviceName . " (" . $c . ")";
                             $donutColors[] = $countMap[$serviceName]['color'] ?? '#8592a3';
                             $totalDonut += $c;
                         }
@@ -1034,7 +1054,7 @@
                         chart: {
                             type: "donut",
                             width: "100%",
-                            height: 220,
+                            height: 350,
                             events: {
                                 dataPointSelection: function(event, chartContext, config) {
                                     event.preventDefault();
@@ -1056,7 +1076,7 @@
                             },
                             itemMargin: {
                                 horizontal: 10,
-                                vertical: 5
+                                vertical: 6
                             }
                         },
                         dataLabels: {

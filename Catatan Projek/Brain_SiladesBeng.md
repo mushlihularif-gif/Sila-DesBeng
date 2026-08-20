@@ -88,95 +88,33 @@ Dokumen ini berfungsi sebagai pusat memori dan dokumentasi (pengganti Obsidian V
 
   - **[Aturan Ketat Copywriting Skala Makro]** Dilarang keras melakukan *hardcode* kata 'BUMDes', 'Kantor Desa', atau terminologi tingkat desa lainnya pada UI (seperti form pemesanan, banner informasi, dan struk/laporan). Sistem harus selalu menggunakan terminologi generik seperti 'Layanan Daerah', 'Pengelola', 'Pusat Layanan', 'Gas Daerah', dll. Hal ini memastikan konsistensi *Multi-Tenant Architecture* di mana sistem ini bisa dioperasikan secara penuh oleh level Kabupaten maupun Kecamatan tanpa perlu mengubah satupun baris kode.
 
-# Brain SiladesBeng (Catatan Memori Proyek)
 
-Dokumen ini berfungsi sebagai pusat memori dan dokumentasi (pengganti Obsidian Vault) untuk memastikan rekam jejak pengembangan sistem tetap terjaga secara persisten.
+  - **[Fitur Baru - Image Cropper / Potong Foto Interaktif] (SELESAI - 15 Agustus 2026):**
+    - **Latar Belakang:** Saat mengunggah foto profil atau foto produk, pengguna seringkali memilih foto berformat memanjang (*landscape/portrait*) yang tidak ideal. Tanpa fitur pemotongan, sistem hanya menampilkan bagian tengah foto secara otomatis, sehingga wajah atau objek penting bisa terpotong. Fitur ini memungkinkan pengguna memilih area foto yang ingin ditampilkan sebelum diunggah.
+    - **Komponen Universal:** Dibuat sebagai komponen Blade terpisah di `resources/views/components/cropper-modal.blade.php` menggunakan pustaka **Cropper.js** (CDN). Komponen ini bersifat *framework-agnostic* (bekerja baik di sisi Admin yang menggunakan Bootstrap maupun di sisi User yang menggunakan Tailwind CSS) karena menggunakan CSS murni sendiri.
+    - **Teknik Zero-Backend (DataTransfer API):** Hasil pemotongan gambar TIDAK dikirim sebagai Base64 berukuran raksasa ke server. Melainkan, hasil *crop* dikemas ulang menjadi objek `Blob` lalu disuntikkan kembali ke `<input type="file">` menggunakan teknik `DataTransfer`. Server menerima file seolah-olah pengguna mengunggah foto yang memang sudah terpotong rapi dari perangkatnya. **Seluruh controller backend tetap utuh 100% tanpa modifikasi.**
+    - **Fungsi Pemanggil Global:** `initGlobalCropper(inputElement, previewElementId, aspectRatio, showRatioButtons)` -- parameter ke-4 (`showRatioButtons`) mengontrol apakah tombol pemilihan rasio ditampilkan atau tidak.
+    - **Area Penerapan (Foto Profil - Rasio Terkunci 1:1):**
+      1. Profil Admin Desa/Kecamatan/Kabupaten (`admin/profile/scripts.blade.php`)
+      2. Profil Warga/User (`users/profile.blade.php`)
+      3. Struktur Pemerintah Desa - Tambah & Edit Anggota (`admin/isewa/bumdes/create.blade.php` & `edit.blade.php`)
+    - **Area Penerapan (Foto Produk - Rasio Dinamis):**
+      1. Penyewaan Alat - Tambah & Edit (`admin/unit/penyewaan/`)
+      2. Penjualan Gas - Tambah & Edit (`admin/unit/penjualan_gas/`)
+      3. Penyewaan Mobil - Tambah & Edit (`admin/unit/mobil/`)
+      4. Fasilitas Umum - Tambah & Edit (`admin/unit/fasilitas_umum/`)
+    - **Pilihan Rasio untuk Foto Produk:** Saat mengunggah foto produk, modal *cropper* menampilkan 3 tombol *pill* di bagian atas: **1:1 (Persegi)**, **4:3 (Lanskap)**, dan **Bebas (Free Crop)**. Rasio 16:9 dan 9:16 sengaja TIDAK disertakan karena terlalu lebar/pipih untuk tampilan katalog produk. Pengguna bisa mengganti rasio secara langsung saat memotong tanpa menutup modal.
+    - **Include di Layout:** Komponen `@include('components.cropper-modal')` telah ditambahkan sebelum tag `</body>` pada kedua layout utama: `admin/layouts/admin.blade.php` dan `layouts/app.blade.php`.
 
-## 1. Identitas Proyek
-- **Nama Sistem:** SiladesBeng (Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis)
-- **Kompetisi:** KMIPN VIII Tahun 2026 (Kategori E-Government)
-- **Tim Pengembang:** Tim Gen Hello World (Politeknik Negeri Bengkalis)
-- **Skala Implementasi:** Skala Kabupaten (Mencakup Kabupaten, 8 Kecamatan, 155 Desa, dan 47 Kelurahan di Bengkalis).
-- **Aturan Ketat Lomba:** TIDAK BOLEH MENGGUNAKAN EMOJI DALAM SISTEM MAUPUN DOKUMENTASI.
-
-## 2. Arsitektur dan Inovasi Utama
-- **Multi-Tenant Architecture:** Satu sistem (codebase) dan satu database yang melayani seluruh hierarki pemerintahan dari tingkat Kabupaten hingga RT/RW dengan otonomi ruang kerja (workspace) masing-masing instansi.
-- **Enam Modul Terintegrasi:**
-  1. Sewa Kendaraan (ambulans, mobil pick-up, dll)
-  2. Sewa Alat (tenda, kursi, sound system)
-  3. Penjualan Gas LPG (Subsidi 3kg, opsi 5.5kg & 12kg)
-  4. Fasilitas Umum (peminjaman lapangan, balai desa)
-  5. Pengumuman dan Event (Kabar Daerah)
-  6. Lapor Warga
-- **Matriks Eskalasi Pelaporan (Zero-Bottleneck):** Laporan warga masuk ke RT, jika tidak tertangani akan otomatis/manual naik ke RW, lalu ke Desa, hingga Kecamatan/Kabupaten. Pimpinan daerah memiliki Hak Pantau Real-Time.
-- **SiladesBeng Assistant (Kecerdasan Buatan):** Asisten virtual interaktif bermaskot robot bertanjak corak songket Melayu untuk memandu warga.
-- **Keamanan Berlapis (Defense in Depth):** Autentikasi, RBAC (Role-Based Access Control), dan Enkripsi tingkat lanjut (AES-256 dan ChaCha20-Poly1305).
-- **Omnichannel Payment:** Mendukung pembayaran digital (Midtrans), transfer manual, dan tunai (Cash on Delivery).
-
-## 3. Riwayat Pekerjaan yang Telah Diselesaikan
-- **Konsolidasi Modul dan UI:**
-  - Menyatukan menu "Pengumuman" dan "Event" menjadi satu halaman terpadu bernama **Kabar Daerah**.
-  - Merapikan tata letak (layout) kartu layanan dan navigasi, memastikan tinggi kartu seragam (simetris) dan teks tidak terpotong.
-- **Penanganan Otentikasi dan Sesi (Session):**
-  - Mengatasi masalah *Force Logout* (Sesi terputus secara acak) saat berpindah halaman.
-  - Memecahkan kasus "Login selalu terlempar ke Guest": 
-    - **Masalah:** Browser mengalami konflik dan menolak pengiriman cookie baru yang digenerate oleh fitur keamanan *Session Regeneration* milik Laravel setelah sukses melakukan POST request. Browser ngotot mengirimkan cookie sesi `laravel-session` lama yang sudah usang dan dianggap kosong oleh server.
-    - **Solusi Final:** Mengubah nama cookie di `config/session.php` menjadi `siladesbeng_auth_session` untuk secara paksa me-reset memori browser tanpa harus menonaktifkan fitur keamanan *Session Regeneration*.
-  - Memperbaiki *Middleware CheckRole* untuk meredirect admin yang mencoba mengakses halaman warga kembali ke Dashboard Admin tanpa memutus sesi.
-  - Mengubah konfigurasi `CACHE_STORE` ke `database` dan menambahkan `DB_CACHE_CONNECTION=mysql` agar fitur *DDoS Protection* dapat bekerja secara optimal tanpa menimbulkan *crash* di lingkungan lokal (Laragon) maupun *Production* (Hosting cPanel).
-- **Penyesuaian Aturan Lomba:**
-  - Menghapus penggunaan emoji di seluruh antarmuka yang telah dikembangkan dan menggantinya dengan aset gambar vektor kustom yang telah disediakan.
-- **Penyempurnaan UI/UX dan Stabilitas Navigasi:**
-  - **[BfCache Fix]** Menambahkan `Cache-Control: no-store` di `SecurityHeaders` untuk memaksa browser melakukan *hard refresh* saat menekan tombol *Back*, guna mencegah *white screen* atau tampilan usang.
-  - **[Layout Shift Fix]** Mengganti `overflow-x-clip` menjadi `overflow-hidden` pada elemen `<main>` di `beranda/index.blade.php`. Hal ini memecahkan bug di mana halaman beranda tiba-tiba bergeser ke kiri dan memunculkan ruang putih di kanan akibat elemen dekorasi (*background ovals*) yang keluar dari batas *viewport* saat memulihkan halaman dari *history*.
-  - **[Konsistensi Data Produk]** Memperbaiki variabel nama produk di halaman UI pengguna (`nama_barang` menjadi `nama_mobil` & `nama_fasilitas`) agar judul produk tidak kosong.
-  - **[Konsistensi UI & State Persistence Filter]** Menyeragamkan warna tombol kategori aktif dengan tombol aksi utama (biru solid) demi kepatuhan desain KMIPN, dan memfaktorkan ulang (*refactor*) Javascript filter menggunakan `sessionStorage`. Hal ini memastikan pilihan pengguna tidak ter-*reset* saat menekan tombol *Back* dari halaman detail, serta mencegah *freeze* akibat tumpukan antrean animasi CSS.
-  - **[AlpineJS UI Conflict Fix]** Memperbaiki *bug* hilangnya garis biru penanda tab aktif di halaman "Kabar dan Informasi Daerah". Masalah ini disebabkan oleh *inline style* statis (`border-color: transparent`) yang memblokir *binding* `:style` milik AlpineJS. Solusinya adalah memindahkan pengaturan warna ke atribut `:class` menggunakan utilitas Tailwind (`border-blue-500` vs `border-transparent`).
-  - **[Hierarki Nomenklatur]** Menegaskan pembagian hierarki nama menu agar tidak tumpang tindih. Menu utamanya adalah **"Kabar dan Informasi Daerah"**, yang di dalamnya terbagi menjadi dua sub-tab: **"Berita Daerah"** dan **"Pengumuman"** (sebelumnya sempat keliru/dobel penamaan akibat *find & replace* massal).
-  - **[KYC UI & Validation Enhancements]** Memoles halaman verifikasi KYC dengan berbagai penyempurnaan UI:
-    1. Mengimplementasikan transisi animasi *fade-in* (`animate-section` & `IntersectionObserver`) agar pemuatan elemen halaman tidak terlihat kaku (sebelumnya halaman termuat polos).
-    2. Menghapus atribut `required` pada input *file* KTP tersembunyi (*hidden input*) untuk mencegah *browser silent validation error* yang membuat form gagal submit tanpa respon.
-    3. Mengganti model notifikasi validasi KTP dari *modal dialog* besar SweetAlert bawaan yang terasa intrusif menjadi sistem **Toast Notification** mengambang di kanan atas layar agar lebih elegan.
-    4. Mengoreksi *bug* warna latar transparan akibat ketidakcocokan kelas utilitas fraksi opasitas Tailwind (`bg-white/95` & `bg-white/60`). Seluruh latar kotak KYC dan *modal* peringatannya (di seluruh halaman *detail* layanan) kini dipastikan menggunakan putih solid (`bg-white`).
-    5. Mengganti ikon panduan animasi generik menjadi **Karakter Tanjak AI Assistant** berdesain robot orisinal menggunakan manipulasi kode SVG murni secara kompleks (*pure code, no images*). Animasi maskot ini bereaksi sesuai status pendeteksi wajah (*scanning* depan, kedip, lirik arah, dan senyum sukses).
-
-## 4. Rencana Kerja Selanjutnya (In Progress)
-- **Desentralisasi Lokasi Map Produk (Fitur Lokasi Tersimpan):**
-  - **[SELESAI]** Awalnya sistem menggunakan 1 titik Map pusat (Kantor BUMDes) untuk semua produk. Pengguna meminta agar setiap produk/fasilitas bisa memiliki titik Map sendiri (Desentralisasi) jika lokasinya tersebar (misal: Gedung Olahraga di RT 01, Kolam Renang di RT 05).
-  - **Solusi UX Pintar:** Untuk mencegah Admin kelelahan menginput koordinat berulang kali, kita menerapkan konsep "Gunakan Lokasi Tersimpan".
-  - **Teknis Selesai:** Telah ditambahkan kolom `latitude` dan `longitude` ke tabel `barang`, `mobils`, `gas`, dan `fasilitas_umums`. Di halaman Admin Tambah/Edit Produk, terdapat *dropdown* lokasi tersimpan dan opsi "Tentukan Baru". Di sisi Pengguna (User), jika Admin tidak melampirkan titik Latitude/Longitude, maka lokasi hanya akan muncul sebagai teks mati (tidak bisa diklik), sesuai dengan privasi BUMDes.
-
-- **Implementasi Fitur Mitra Gas Daerah (Pengecer):**
-  - **[SELESAI]** Berdasarkan diskusi dengan pengembang aplikasi mobile dan penanggung jawab gas daerah, diputuskan untuk **TIDAK** membuat sistem registrasi Pengecer secara otomatis di dalam aplikasi. Alasannya:
-    - Menghindari kebingungan bagi warga awam (salah menu/salah pesan).
-    - Menghindari kerumitan birokrasi dan persetujuan (approval) yang panjang.
-  - **Solusi UX Praktis:** Menambahkan *Banner Alert* (Pop-up Info) di halaman Profil Warga dan Halaman Pemesanan Gas. Banner ini secara jelas mengarahkan warga yang memiliki warung (pengecer) untuk menghubungi nomor *Halo Layanan BUMDes* (WhatsApp) secara langsung untuk proses pendaftaran B2B (Business-to-Business) di luar sistem digital warga awam.
-
-- **Sistem Manajemen Kategori Dinamis (Lintas Modul):**
-  - **[SELESAI]** Sistem kategori yang sebelumnya *hardcoded* (statis) kini telah dirombak menjadi dinamis untuk modul **Penyewaan Alat**, **Sewa Mobil**, **Gas**, dan **Fasilitas Umum**.
-  - **Isolasi Data (Multitenancy Kategori):** Tabel `categories` menggunakan parameter `type` untuk memastikan kategori Alat tidak bercampur dengan kategori Mobil atau Gas.
-  - **Solusi UX Cerdas (AJAX on-the-fly):** Admin dapat menambahkan kategori baru langsung dari form "Tambah Produk" menggunakan modal *pop-up*. Kategori disimpan via AJAX di *background*, dan langsung muncul terpilih secara otomatis tanpa me-*refresh* halaman, memberikan pengalaman *seamless* dan tidak *nge-freeze*.
-  - **Konsistensi Data (Teks Mati):** Apabila kategori dihapus dari master data, produk yang sudah dibuat menggunakan kategori tersebut TIDAK akan terhapus atau kehilangan kategorinya (mempertahankan kategori lama sebagai teks mati di database produk). Hal ini mencegah kerusakan riwayat transaksi masa lalu.
-
-- **Standardisasi Nomenklatur Skala Kabupaten & Optimasi UI:**
-  - **[SELESAI]** Menyelaraskan seluruh *copywriting* di aplikasi agar sesuai dengan visi *Cerita Kami* (Profil SiladesBeng) yang berskala Kabupaten.
-  - Mengubah istilah berkonteks lokal (contoh: "Gas Desa", "Dana Desa", "Aspirasi Desa") menjadi **"Gas Daerah"**, **"Dana Daerah"**, dan **"Aspirasi Daerah"** agar konsisten secara makro.
-  - Memperjelas nama menu **"Kabar Daerah"** menjadi **"Kabar dan Informasi Daerah"** untuk menghindari bias persepsi (memastikan pengguna tahu bahwa halaman tersebut berisi berita, artikel liputan, sekaligus pengumuman resmi).
-  - Melakukan kompresi *lossless* pada aset gambar UI baru (misal: penggantian maskot *event.png* ke *KabardanInformasiDaerah.png*, serta *Berita.png* dan *Pengumuman1.png* untuk tab informasi) via skrip PHP *backend* demi menjaga *loading speed* web tetap optimal tanpa mengorbankan kualitas HD aset visual perlombaan.
-  - Memperbaiki proporsi ukuran ikon tab (*Berita* dan *Pengumuman*) di halaman informasi agar lebih besar dan sesuai secara estetika antarmuka.
-  - Menghapus penggunaan *jargon* teknis seperti kata "filter" pada *Empty State* pencarian dan menggantinya dengan bahasa yang lebih membumi (mudah dipahami orang awam).
-  - Menyelaraskan (standardisasi) desain kotak pencarian (Search Bar) di halaman *Kabar dan Informasi Daerah* dengan halaman Beranda (menggunakan *gradient border* dan ikon kaca pembesar) serta memperbaiki *vertical alignment* yang sebelumnya miring (senget) agar sejajar sempurna dengan tombol kategori.
-  - Meningkatkan privasi usaha daerah dengan menyembunyikan nominal pasti (Rupiah) pada halaman Laporan Keuangan publik (`layanandaerah/laporan`) dan menggantinya dengan **persentase kontribusi pendapatan**. Hal ini menjaga kerahasiaan data finansial namun tetap memberikan visualisasi kinerja unit usaha yang bermanfaat bagi publik.
-
----
-*Catatan: Dokumen ini harus dibaca setiap kali memulai sesi baru untuk memulihkan konteks pekerjaan dan memastikan pengembangan tetap selaras dengan proposal KMIPN 2026.*
-
-- **Perbaikan Kritis Tambahan (Sesi Lanjutan):**
-  - **[Fix Browser Freeze Kabar Daerah]** Merombak total sistem navigasi pada halaman Kabar Daerah dengan menghapus sistem AJAX berbasis AlpineJS yang memicu *infinite loop* (DOM conflict). Navigasi (Tab, Filter Kategori, dan Form Pencarian) kini dikembalikan ke metode bawaan Laravel yang 100% stabil dan anti-*freeze*.
-  - **[UI Fix - Laporan Keuangan]** Memperbaiki inkonsistensi efek gradasi (gradient) teks pada judul 'Persentase Pendapatan Unit Pelayanan Daerah' dan 'Total Pendapatan Unit Pelayanan Daerah' di halaman laporan keuangan. Padding bawah ditambahkan agar descenders huruf (seperti 'y' dan 'p') tidak terpotong dan gradasi tampil sempurna.
-
-
-  - **[Aturan Ketat Copywriting Skala Makro]** Dilarang keras melakukan *hardcode* kata 'BUMDes', 'Kantor Desa', atau terminologi tingkat desa lainnya pada UI (seperti form pemesanan, banner informasi, dan struk/laporan). Sistem harus selalu menggunakan terminologi generik seperti 'Layanan Daerah', 'Pengelola', 'Pusat Layanan', 'Gas Daerah', dll. Hal ini memastikan konsistensi *Multi-Tenant Architecture* di mana sistem ini bisa dioperasikan secara penuh oleh level Kabupaten maupun Kecamatan tanpa perlu mengubah satupun baris kode.
+  - **[Aturan Privasi Keuangan Antar Desa - Indeks Poin] (DIKONFIRMASI - 16 Agustus 2026):**
+    - **Prinsip Dasar:** Admin Desa **hanya bisa melihat data keuangan (nominal Rupiah) milik desanya sendiri**. Ini ditegakkan oleh fungsi `applyRegionFilter()` di `Controller.php` dengan mode `$strict = true` pada query Laporan Transaksi dan Pendapatan.
+    - **Transparansi Lintas Desa (Tanpa Bocor Nominal):** Untuk mendorong kompetisi sehat antar desa, sistem sudah menyediakan grafik **Indeks Poin** di beberapa halaman strategis:
+      - Dashboard Admin (`admin/dashboard/index.blade.php`)
+      - Laporan Wilayah Admin (`admin/laporan/wilayah.blade.php`)
+      - Beranda User / Halaman Publik (`beranda/index.blade.php`)
+      - Laporan BUMDes User (`users/bumdes-laporan.blade.php`)
+    - **Cara Kerja Indeks Poin:** Grafik ini menampilkan skor aktivitas/pertumbuhan setiap desa dalam bentuk **poin relatif**, bukan nominal Rupiah absolut. Dengan demikian, Admin Kabupaten, Kecamatan, Desa lain, maupun Warga biasa bisa melihat **siapa yang paling aktif dan berkembang**, tanpa mengetahui berapa nominal pendapatan pasti masing-masing desa. Ini menjaga kerahasiaan APBDes sekaligus menstimulasi semangat kerja.
+    - **Keputusan Final:** Sistem ini sudah BENAR dan TIDAK PERLU diubah. Tidak diperlukan fitur tambahan "Papan Peringkat Pertumbuhan Desa" karena grafik Indeks Poin yang sudah ada telah menjalankan fungsi tersebut secara sempurna.
 
   - **[UI Fix - Formulir Pengaduan] (SELESAI):**
     - Mengganti teks judul formulir sederhana dengan format **Kop Surat Resmi Pemerintahan** (lengkap dengan Logo Kabupaten Bengkalis dan Logo SiladesBeng, serta garis pembatas ganda) agar tampil eksklusif untuk presentasi KMIPN.
@@ -584,3 +522,47 @@ Dalam SilaDesBeng, satu Admin Operator (Admin Desa) bisa mendelegasikan wewenang
 - **Kasus Laporan Bug:** Fungsi klik/interaktif di halaman Admin Pasar Daerah sering *freeze* (beku/mati) atau mengalami *500 Server Error*.
 - **Penyebab (Root Cause):** Terdapat kesalahan sintaks *rendering* bawaan Laravel. Kami sempat menggunakan perintah `@push('scripts')` untuk memuat Javascript khusus halaman tersebut. Namun, karena file induk *layout* (`admin.blade.php`) menggunakan `@yield('scripts')` (bukan `@stack('scripts')`), maka seluruh *Javascript* tersebut secara otomatis dibuang/ditolak oleh Laravel saat me-render HTML ke pengguna, sehingga tombol-tombol kehilangan "otak" (*handler* kliknya hilang).
 - **Penyelesaian Final:** Mengubah secara permanen pendekatan blok khusus (*inline script* di view) menjadi `@section('scripts')` untuk skrip, dan `@section('styles')` untuk CSS agar sesuai dengan *yield* pada *layout* utama, sekaligus menuliskan kode fungsi JS secara murni dan global (`window.setOngkirType = function(...)`) demi menjamin kekebalan kode dari intervensi CSS/Label klik ganda browser.
+
+---
+
+#### *** 8.9 KEPUTUSAN KRITIS: OTOMATISASI STATUS SUPIR (FLEET MANAGEMENT) ***
+
+**Status:** SELESAI DIEKSEKUSI OLEH TIM (17 Agustus 2026)
+
+**1. Logika Penugasan Supir (Otomasi Penuh):**
+- **Masalah Awal:** Sebelumnya, Admin harus memilih "Sedang Bertugas" saat membuat data supir baru, padahal secara logika supir yang baru dimasukkan belum bertugas. Ini juga bisa memicu *human error* di mana Admin lupa mengganti status supir setelah pesanan selesai, membuat supir seolah-olah "menghilang" dari daftar tugas berikutnya.
+- **Solusi Eksekusi:** Menerapkan sistem *Smart Dispatch* di dalam `RequestController`:
+  - **Saat Tambah Data:** Pilihan "Sedang Bertugas" dhilangkan sepenuhnya dari *form* pembuatan supir baru. Supir baru hanya bisa diset sebagai "Tersedia" atau "Tidak Aktif".
+  - **Saat Ditugaskan (Assign):** Saat Admin menyetujui pesanan (Penyewaan Mobil/Fasilitas) dan memilih supir dari daftar "Tersedia", sistem secara **otomatis** mengunci status supir tersebut menjadi `Sedang Bertugas`.
+  - **Saat Selesai/Batal:** Begitu Admin menandai pesanan sebagai "Selesai", atau pesanan tersebut dibatalkan/ditolak, sistem secara **otomatis** membebaskan supir tersebut (mengembalikan statusnya menjadi `Tersedia`) sehingga ia bisa langsung muncul kembali di daftar pilihan untuk tugas warga yang lain.
+- **Keuntungan:** *Zero human error* dalam pengaturan armada. Admin tidak perlu lagi bolak-balik ke menu Manajemen Supir hanya untuk mengubah status supir secara manual.
+
+
+#### *** 8.10 STRATEGI INFRASTRUKTUR DAN RENCANA ANGGARAN BIAYA (RAB) KMIPN ***
+
+**Status:** DISEPAKATI TIM (19 Agustus 2026)
+
+Dalam persiapan pengajuan pendanaan lomba KMIPN dan strategi implementasi sistem berskala Kabupaten, disepakati arsitektur infrastruktur dan skema biaya sebagai berikut:
+
+**1. Strategi Domain (Smart Portfolio):**
+- Sistem tidak menggunakan domain pemerintah saat lomba, tetapi membeli domain .com tunggal atas nama tim, yaitu `untukkita.com`.
+- Sistem SilaDesBeng di-deploy sebagai subdomain (`siladesbeng.untukkita.com`). Hal ini memungkinkan domain utama dipakai sebagai portofolio tim jangka panjang, dan siap digunakan untuk lomba-lomba berikutnya tanpa perlu membeli domain baru.
+- **Keputusan Hosting:** Untuk efisiensi dana lomba, diputuskan menggunakan paket **Shared Hosting (Unlimited L)** yang sudah memiliki fitur **Akses SSH** (bukan VPS murni) dengan sewa langsung 1 tahun penuh. Akses SSH ini krusial agar perintah artisan Laravel tetap bisa dijalankan.
+
+**2. Google Maps API & Gemini AI (SilaDesBeng Assistant):**
+- **Model Pembayaran:** Keduanya berada di bawah Google Cloud Console dengan sistem *Pay-as-you-go* (bayar sesuai penggunaan).
+- **Status Lomba:** Dengan *Pay-as-you-go*, sebagian besar traffic ter-cover oleh *Free Credit* bulanan. Namun, untuk keperluan RAB (jaga-jaga lonjakan request saat demo), dialokasikan dana *buffer* sebesar **Rp 50.000** untuk Google Maps API dan **Rp 50.000** untuk Gemini AI API.
+
+**3. Layanan & Fitur Pendukung Lainnya:**
+- **Midtrans (Payment Gateway):** Rp 0 (Gratis Pendaftaran). Hanya ada biaya admin dari pihak Midtrans saat terjadi transaksi (biaya pendaftaran dan integrasi sistem tetap Rp 0).
+- **WhatsApp Gateway (Fonnte):** Langganan 1 bulan khusus saat final lomba berlangsung (Rp 140.000) agar notifikasi dan OTP WhatsApp warga bisa didemokan ke juri secara real-time.
+- **E-KYC (KTP & Wajah):** Menggunakan API OCR.space gratis (API Key: helloworld) untuk keperluan demo. Jika diimplementasikan penuh oleh pemerintah, disarankan menggunakan Vendor KYC resmi berbayar.
+- **Firebase Cloud Messaging (FCM):** Rp 0. Digunakan untuk mengirimkan notifikasi *Push Notification* (pop-up HP) secara *real-time* ke aplikasi Android warga. Layanan ini disediakan gratis 100% oleh Google Firebase.
+- **Generate PDF & QR Code:** Rp 0. Fitur untuk cetak laporan, struk sewa, dan bukti keaslian dokumen dibangun secara mandiri (*Native*) menggunakan *library* internal Laravel yang berjalan 100% gratis di dalam *Shared Hosting*, tanpa ketergantungan API luar.
+
+**4. Ringkasan RAB Demo Lomba (Untuk Pengajuan Kampus):**
+- **Paket Domain (`untukkita.com`) & Hosting Unlimited L (1 Tahun): Rp 750.000** *(Tagihan asli ~Rp 491.000 + Uang jaga-jaga operasional)*
+- Langganan WhatsApp API Fonnte (1 Bulan): Rp 140.000
+- Dana Buffer Google Cloud Console (Mencakup Kuota Maps API & Gemini AI API): Rp 300.000. *(Catatan: Maps API digunakan untuk fitur Peta Interaktif dan Titik Lokasi Pelaporan Warga. Gemini AI digunakan untuk SilaDesBeng Assistant sebagai AI cerdas yang menjawab pertanyaan warga).*
+- Akun Google Play Console (Satu kali bayar untuk publish APK): Rp 400.000
+- **Total Estimasi:** **Rp 1.590.000**

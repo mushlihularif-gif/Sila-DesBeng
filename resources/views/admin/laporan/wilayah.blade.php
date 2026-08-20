@@ -20,6 +20,23 @@
         </div>
     </div>
 
+    <!-- Panduan -->
+    <div class="card bg-label-primary border-0 shadow-none mb-4" style="border-radius: 12px;">
+        <div class="card-body d-flex align-items-center p-4">
+            <div class="me-3">
+                <div class="bg-primary p-3 rounded-circle text-white d-flex align-items-center justify-content-center shadow-sm" style="width: 56px; height: 56px;">
+                    <i class="bx bx-info-circle fs-3"></i>
+                </div>
+            </div>
+            <div>
+                <h5 class="fw-bold mb-1 text-primary">Panduan Laporan Wilayah</h5>
+                <p class="mb-0 text-primary" style="opacity: 0.85;">
+                    Menu ini khusus menampilkan peta persaingan dan perbandingan kinerja antar wilayah dalam bentuk <strong>Grafik Indeks Poin</strong> dan persentase pertumbuhan, tanpa menampilkan nominal Rupiah. Gunakan menu ini untuk memicu kompetisi sehat antar desa dengan tetap menjaga privasi dan kerahasiaan data APBDes masing-masing.
+                </p>
+            </div>
+        </div>
+    </div>
+
     <!-- Filters -->
     <div class="card border-0 shadow-sm rounded-4 mb-4">
         <div class="card-body p-3">

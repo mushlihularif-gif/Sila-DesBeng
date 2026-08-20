@@ -61,37 +61,16 @@ class UserVerificationController extends Controller
             $width = $image->width();
             $height = $image->height();
 
-            // Teks watermark
-            $watermarkText = 'RAHASIA - HANYA UNTUK VERIFIKASI SILA DESBENG';
-
-            // Hitung ukuran font proporsional terhadap ukuran gambar
-            $fontSize = max(14, intval(min($width, $height) / 18));
-
-            // Rentang posisi watermark: buat pola diagonal berulang
-            $stepX = intval($width / 3);
-            $stepY = intval($height / 3);
-
-            for ($y = -$stepY; $y < $height + $stepY; $y += $stepY) {
-                for ($x = -$stepX; $x < $width + $stepX; $x += $stepX) {
-                    $image->text($watermarkText, $x, $y, function ($font) use ($fontSize) {
-                        $font->size($fontSize);
-                        $font->color('rgba(255, 0, 0, 0.25)'); // Merah transparan 25%
-                        $font->angle(45); // Diagonal
-                        $font->align('center');
-                        $font->valign('middle');
-                    });
+            // Hanya berikan watermark pada KTP/KK, foto wajah dibiarkan bersih
+            if ($type === 'ktp' || $type === 'kk') {
+                $watermarkPath = public_path('Admin/img/watermarkprivasi/WatermarkPrivasi.png');
+                if (file_exists($watermarkPath)) {
+                    $watermark = $manager->read($watermarkPath);
+                    $watermarkWidth = intval($width * 0.9);
+                    $watermark->scaleDown(width: $watermarkWidth);
+                    $image->place($watermark, 'center');
                 }
             }
-
-            // Tambahkan satu watermark besar di tengah sebagai penanda utama
-            $bigFontSize = max(20, intval(min($width, $height) / 10));
-            $image->text($watermarkText, intval($width / 2), intval($height / 2), function ($font) use ($bigFontSize) {
-                $font->size($bigFontSize);
-                $font->color('rgba(255, 0, 0, 0.35)'); // Merah transparan 35%
-                $font->angle(45);
-                $font->align('center');
-                $font->valign('middle');
-            });
 
             // Encode gambar sebagai JPEG
             $encoded = $image->toJpeg(85);

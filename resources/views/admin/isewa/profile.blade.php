@@ -99,7 +99,7 @@
                         Langkah Awal Mewujudkan Digitalisasi Bengkalis
                     </h5>
                     <p class="text-muted lh-lg mb-4 text-justify">
-                        Perjalanan <span class="fw-bold text-dark">SiladesBeng</span> (Sistem Sinergi Layanan dan Aspirasi Daerah di Kabupaten Bengkalis) bermula dari sebuah visi besar untuk mendorong percepatan digitalisasi pelayanan publik di wilayah Kabupaten Bengkalis. Gagasan ini lahir sebagai solusi inovatif untuk memutus kendala jarak dan mengoptimalkan potensi daerah melalui pemanfaatan teknologi. Mimpi utama kami adalah menghubungkan seluruh jaringan kecamatan hingga pelosok daerah ke dalam satu ekosistem digital yang canggih, terpadu, dan mudah diakses oleh seluruh lapisan masyarakat.
+                        Perjalanan <span class="fw-bold text-dark">SiladesBeng</span> (Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis) bermula dari sebuah visi besar untuk mendorong percepatan digitalisasi pelayanan publik di wilayah Kabupaten Bengkalis. Gagasan ini lahir sebagai solusi inovatif untuk memutus kendala jarak dan mengoptimalkan potensi daerah melalui pemanfaatan teknologi. Mimpi utama kami adalah menghubungkan seluruh jaringan kecamatan hingga pelosok daerah ke dalam satu ekosistem digital yang canggih, terpadu, dan mudah diakses oleh seluruh lapisan masyarakat.
                     </p>
                     <p class="text-muted lh-lg mb-0 text-justify">
                         Sebagai wujud nyata dari visi tersebut, SilaDesBeng hadir mengintegrasikan berbagai pilar layanan esensial daerah, mulai dari sarana mobilitas (kendaraan), pemanfaatan fasilitas umum, hingga penyewaan alat dan pendistribusian gas. Lebih jauh lagi, kami juga menghadirkan ruang interaksi inklusif melalui fitur Pelaporan Warga dan Informasi Pengumuman. Cerita SilaDesBeng adalah cerita tentang inovasi dan kolaborasi bagaimana sentuhan teknologi mentransformasi cara dan masyarakat aparatur berinteraksi demi mewujudkan tata kelola Bengkalis yang mandiri, produktif, dan berkelanjutan.
@@ -284,7 +284,7 @@
                     <div class="card-body p-4">
                         <div class="avatar-ring">
                             <div class="avatar-inner">
-                                <img src="{{ asset('User/img/avatars/ken1.jpg') }}" alt="Rizqy Hamadi Ken">
+                                <img src="{{ asset('User/img/avatars/ken2.png') }}" alt="Rizqy Hamadi Ken">
                             </div>
                         </div>
                         <h5 class="fw-bold text-dark mb-1">Rizqy Hamadi Ken</h5>

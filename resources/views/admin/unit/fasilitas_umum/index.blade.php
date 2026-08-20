@@ -306,32 +306,81 @@
                                         </div>
                                     </div>
                                     <div class="card-body p-4">
-                                        <div class="alert alert-info d-flex align-items-start mb-4 shadow-sm border-0 rounded-4 p-3">
+                                        <div class="alert alert-info d-flex align-items-start mb-4 shadow-sm border-0 rounded-4 p-3 text-dark">
                                             <i class="bx bx-info-circle fs-4 me-3 mt-1"></i>
                                             <div>
                                                 <strong class="d-block mb-1">Informasi Penting</strong>
-                                                <span>SOP ini akan ditampilkan kepada masyarakat sebagai syarat dan ketentuan sebelum mereka mengajukan peminjaman.</span>
+                                                <span>SOP ini akan ditampilkan kepada masyarakat sebagai syarat dan ketentuan sebelum mereka mengajukan peminjaman. Pilih salah satu model kebijakan di bawah ini.</span>
                                             </div>
                                         </div>
 
-                                        <div class="mb-4">
-                                            <label class="form-label fw-bold">Model Kebijakan Penanganan Kerusakan</label>
-                                            <select name="sop_active" class="form-select border-light-subtle shadow-sm rounded-3">
-                                                <option value="ditanggung" {{ $sop_active == 'ditanggung' ? 'selected' : '' }}>Ditanggung oleh Penyewa (Mengganti Rugi)</option>
-                                                <option value="tidak_ditanggung" {{ $sop_active == 'tidak_ditanggung' ? 'selected' : '' }}>Ditanggung Dana Desa (Gratis)</option>
-                                            </select>
-                                        </div>
-                                        
-                                        <div class="mb-4">
-                                            <label class="form-label fw-bold">SOP Jika Kerusakan Ditanggung Penyewa</label>
-                                            <textarea class="form-control border-light-subtle shadow-sm rounded-3" name="sop_ditanggung" rows="6">{{ $sop_ditanggung }}</textarea>
-                                            <button type="button" class="btn btn-sm btn-link p-0 mt-2" onclick="document.querySelector('textarea[name=sop_ditanggung]').value = `{{ $default_ditanggung }}`"><i class="bx bx-refresh me-1"></i>Gunakan Teks Bawaan Sistem</button>
-                                        </div>
-                                        
-                                        <div class="mb-4">
-                                            <label class="form-label fw-bold">SOP Jika Kerusakan Ditanggung Dana Desa</label>
-                                            <textarea class="form-control border-light-subtle shadow-sm rounded-3" name="sop_tidak_ditanggung" rows="6">{{ $sop_tidak_ditanggung }}</textarea>
-                                            <button type="button" class="btn btn-sm btn-link p-0 mt-2" onclick="document.querySelector('textarea[name=sop_tidak_ditanggung]').value = `{{ $default_tidak_ditanggung }}`"><i class="bx bx-refresh me-1"></i>Gunakan Teks Bawaan Sistem</button>
+                                        <style>
+                                            .sop-card {
+                                                transition: all 0.2s ease-in-out;
+                                                border: 2px solid #ffab00 !important;
+                                                background-color: #fff3cd !important;
+                                            }
+                                            .sop-card.active-sop {
+                                                border-width: 2px !important;
+                                                box-shadow: 0 0.25rem 1rem rgba(255, 171, 0, 0.4) !important;
+                                            }
+                                            .sop-icon {
+                                                color: #ffab00;
+                                                font-size: 1.25rem;
+                                                vertical-align: middle;
+                                            }
+                                        </style>
+
+                                        <div class="row mb-4">
+                                            <!-- Opsi A: Ditanggung -->
+                                            <div class="col-md-6 mb-3">
+                                                <div class="card sop-card {{ $sop_active == 'ditanggung' ? 'active-sop' : '' }} h-100">
+                                                    <div class="card-header d-flex justify-content-between align-items-center pb-2">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="radio" name="sop_active" id="sop_active_ditanggung" value="ditanggung" {{ $sop_active == 'ditanggung' ? 'checked' : '' }}>
+                                                            <label class="form-check-label fw-bold text-dark" for="sop_active_ditanggung">
+                                                                <i class="bx bx-error sop-icon"></i> <span class="align-middle">PENTING: Ditanggung Penyewa</span>
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <p class="text-muted small mb-2">Kerusakan fasilitas/kendaraan sepenuhnya menjadi tanggung jawab penyewa.</p>
+                                                        
+                                                        <div class="mb-3">
+                                                            <textarea class="form-control border-light-subtle shadow-sm rounded-3" name="sop_ditanggung" id="sop_ditanggung_text" rows="8">{{ $sop_ditanggung }}</textarea>
+                                                        </div>
+                                                        
+                                                        <button type="button" class="btn btn-sm btn-outline-warning rounded-pill px-3 shadow-sm" onclick="resetSop('ditanggung')">
+                                                            <i class="bx bx-reset"></i> Reset ke Bawaan
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Opsi B: Tidak Ditanggung -->
+                                            <div class="col-md-6 mb-3">
+                                                <div class="card sop-card {{ $sop_active == 'tidak_ditanggung' ? 'active-sop' : '' }} h-100">
+                                                    <div class="card-header d-flex justify-content-between align-items-center pb-2">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="radio" name="sop_active" id="sop_active_tidak_ditanggung" value="tidak_ditanggung" {{ $sop_active == 'tidak_ditanggung' ? 'checked' : '' }}>
+                                                            <label class="form-check-label fw-bold text-dark" for="sop_active_tidak_ditanggung">
+                                                                <i class="bx bx-error sop-icon"></i> <span class="align-middle">PENTING: Ditanggung Dana Desa</span>
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <p class="text-muted small mb-2">Kerusakan tidak disengaja ditanggung oleh Dana Operasional (Gratis).</p>
+                                                        
+                                                        <div class="mb-3">
+                                                            <textarea class="form-control border-light-subtle shadow-sm rounded-3" name="sop_tidak_ditanggung" id="sop_tidak_ditanggung_text" rows="8">{{ $sop_tidak_ditanggung }}</textarea>
+                                                        </div>
+                                                        
+                                                        <button type="button" class="btn btn-sm btn-outline-warning rounded-pill px-3 shadow-sm" onclick="resetSop('tidak_ditanggung')">
+                                                            <i class="bx bx-reset"></i> Reset ke Bawaan
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
 
                                         <div class="d-flex justify-content-end mt-4">
@@ -361,6 +410,36 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+<script>
+    // SOP Teks Bawaan
+    const defaultSops = {
+        'ditanggung': @json($default_ditanggung ?? ''),
+        'tidak_ditanggung': @json($default_tidak_ditanggung ?? '')
+    };
+
+    function resetSop(type) {
+        if (confirm('Apakah Anda yakin ingin mereset teks SOP ini ke versi bawaan?')) {
+            document.getElementById('sop_' + type + '_text').value = defaultSops[type];
+        }
+    }
+
+    // Interactive Card selection
+    document.querySelectorAll('input[name="sop_active"]').forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            // Reset border dari semua card
+            document.querySelectorAll('.sop-card').forEach(function(card) {
+                card.classList.remove('active-sop');
+            });
+            // Tambahkan border orange menyala ke card yang dipilih
+            if(this.checked) {
+                this.closest('.sop-card').classList.add('active-sop');
+            }
+        });
+    });
+</script>
+@endpush
 
 @push('styles')
 <style>

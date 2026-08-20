@@ -132,6 +132,10 @@
                             <div class="w-3 h-3 rounded-sm" style="background-color: #06b6d4;"></div>
                             <span class="text-gray-700 font-medium">Kabar dan Informasi Daerah</span>
                         </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-3 h-3 rounded-sm" style="background-color: #ec4899;"></div>
+                            <span class="text-gray-700 font-medium">Pasar Daerah</span>
+                        </div>
                     </div>
                     <p class="text-sm text-gray-600 leading-relaxed mt-2">
                         Grafik menunjukkan tingkat aktivitas dari seluruh unit Layanan Daerah. Informasi ini membantu dalam memahami performa dan antusiasme warga terhadap masing-masing layanan sehingga dapat ditingkatkan dan dikembangkan lebih lanjut.
@@ -203,6 +207,32 @@
                                 <p class="text-xs text-gray-500 mt-1">{{ $totalPendapatanData['mobil']['transactions'] }} Transaksi</p>
                             </div>
 
+                            <!-- Unit Fasilitas Umum -->
+                            <div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-sm font-medium text-gray-700">Fasilitas Umum</span>
+                                    <span class="text-sm font-bold text-gray-900">{{ number_format($totalPendapatanData['fasilitas']['percentage'], 1, ',', '.') }}%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
+                                    <div class="bg-gradient-to-r from-[#8b5cf6] to-[#a78bfa] h-4 rounded-full transition-all duration-500" 
+                                        style="width: {{ $totalPendapatanData['fasilitas']['percentage'] }}%"></div>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">{{ $totalPendapatanData['fasilitas']['transactions'] }} Transaksi</p>
+                            </div>
+
+                            <!-- Pasar Daerah -->
+                            <div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-sm font-medium text-gray-700">Pasar Daerah</span>
+                                    <span class="text-sm font-bold text-gray-900">{{ number_format($totalPendapatanData['pasar']['percentage'], 1, ',', '.') }}%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
+                                    <div class="bg-gradient-to-r from-[#ec4899] to-[#f472b6] h-4 rounded-full transition-all duration-500" 
+                                        style="width: {{ $totalPendapatanData['pasar']['percentage'] }}%"></div>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">{{ $totalPendapatanData['pasar']['transactions'] }} Transaksi</p>
+                            </div>
+
                             <!-- Total -->
                             <div class="pt-4 border-t border-gray-300">
                                 <div class="flex justify-between items-center">
@@ -232,6 +262,14 @@
                         <div class="flex items-center gap-2">
                             <div class="w-3 h-3 rounded-sm" style="background-color: #10b981;"></div>
                             <span class="text-gray-700 font-medium">Unit Peminjaman Mobil</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-3 h-3 rounded-sm" style="background-color: #8b5cf6;"></div>
+                            <span class="text-gray-700 font-medium">Fasilitas Umum</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-3 h-3 rounded-sm" style="background-color: #ec4899;"></div>
+                            <span class="text-gray-700 font-medium">Pasar Daerah</span>
                         </div>
                     </div>
 
@@ -569,6 +607,10 @@
                 {
                     name: 'Kabar dan Informasi Daerah',
                     data: chartData.pengumuman
+                },
+                {
+                    name: 'Pasar Daerah',
+                    data: chartData.pasar
                 }
             ],
             chart: {
@@ -578,7 +620,7 @@
                 stacked: false,
                 background: 'transparent'
             },
-            colors: ['#f59e0b', '#3b82f6', '#10b981', '#8b5cf6', '#ef4444', '#06b6d4'],
+            colors: ['#f59e0b', '#3b82f6', '#10b981', '#8b5cf6', '#ef4444', '#06b6d4', '#ec4899'],
             plotOptions: {
                 bar: {
                     horizontal: false,
@@ -645,15 +687,17 @@
         const rentalPercentage = chartData.rental.percentage;
         const gasPercentage = chartData.gas.percentage;
         const mobilPercentage = chartData.mobil.percentage;
+        const fasilitasPercentage = chartData.fasilitas.percentage;
+        const pasarPercentage = chartData.pasar.percentage;
 
         const options = {
-            series: [rentalPercentage, gasPercentage, mobilPercentage],
+            series: [rentalPercentage, gasPercentage, mobilPercentage, fasilitasPercentage, pasarPercentage],
             chart: {
                 type: 'pie',
                 height: 280
             },
-            labels: ['Penyewaan Alat', 'Penjualan Gas', 'Peminjaman Mobil'],
-            colors: ['#f59e0b', '#3b82f6', '#10b981'],
+            labels: ['Penyewaan Alat', 'Penjualan Gas', 'Peminjaman Mobil', 'Fasilitas Umum', 'Pasar Daerah'],
+            colors: ['#f59e0b', '#3b82f6', '#10b981', '#8b5cf6', '#ec4899'],
             legend: {
                 show: false
             },
