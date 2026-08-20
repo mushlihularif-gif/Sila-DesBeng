@@ -51,70 +51,53 @@ public function index(Request $request)
     $baseRental = $this->applyRegionFilter(RentalBooking::withTrashed());
     $baseGas = $this->applyRegionFilter(GasOrder::withTrashed());
     $baseMobil = $this->applyRegionFilter(\App\Models\MobilBooking::withTrashed());
+    $baseFasilitas = $this->applyRegionFilter(\App\Models\FasilitasUmumBooking::withTrashed());
+    $basePasar = $this->applyRegionFilter(\App\Models\PasarOrder::withTrashed());
+    $baseLaporan = $this->applyRegionFilter(\App\Models\Laporan::query(), 'user');
 
     // Filter by specific region if requested
     $selectedKecamatanId = request('kecamatan_id');
     $selectedDesaId = request('desa_id');
     
     if ($selectedDesaId && $selectedDesaId !== 'all') {
-        $baseRental->whereHas('user', function($q) use ($selectedDesaId) {
-            $q->where('region_id', $selectedDesaId);
-        });
-        $baseGas->whereHas('user', function($q) use ($selectedDesaId) {
-            $q->where('region_id', $selectedDesaId);
-        });
-        $baseMobil->whereHas('user', function($q) use ($selectedDesaId) {
-            $q->where('region_id', $selectedDesaId);
-        });
+        $userFilter = function($q) use ($selectedDesaId) { $q->where('region_id', $selectedDesaId); };
+        $baseRental->whereHas('user', $userFilter);
+        $baseGas->whereHas('user', $userFilter);
+        $baseMobil->whereHas('user', $userFilter);
+        $baseFasilitas->whereHas('user', $userFilter);
+        $basePasar->whereHas('user', $userFilter);
+        $baseLaporan->whereHas('user', $userFilter);
     } elseif ($selectedKecamatanId && $selectedKecamatanId !== 'all') {
-        // Find all desa IDs under this kecamatan
         $desaIdsUnderKecamatan = \App\Models\Region::where('parent_id', $selectedKecamatanId)->pluck('id')->toArray();
-        $desaIdsUnderKecamatan[] = $selectedKecamatanId; // Include the kecamatan itself just in case
+        $desaIdsUnderKecamatan[] = $selectedKecamatanId;
+        $userFilter = function($q) use ($desaIdsUnderKecamatan) { $q->whereIn('region_id', $desaIdsUnderKecamatan); };
         
-        $baseRental->whereHas('user', function($q) use ($desaIdsUnderKecamatan) {
-            $q->whereIn('region_id', $desaIdsUnderKecamatan);
-        });
-        $baseGas->whereHas('user', function($q) use ($desaIdsUnderKecamatan) {
-            $q->whereIn('region_id', $desaIdsUnderKecamatan);
-        });
-        $baseMobil->whereHas('user', function($q) use ($desaIdsUnderKecamatan) {
-            $q->whereIn('region_id', $desaIdsUnderKecamatan);
-        });
+        $baseRental->whereHas('user', $userFilter);
+        $baseGas->whereHas('user', $userFilter);
+        $baseMobil->whereHas('user', $userFilter);
+        $baseFasilitas->whereHas('user', $userFilter);
+        $basePasar->whereHas('user', $userFilter);
+        $baseLaporan->whereHas('user', $userFilter);
     }
 
-    $rentalRequests = collect();
-    $gasRequests = collect();
     $latestRequests = collect();
+    $totalPending = 0;
 
-    // Hanya admin tingkat desa ke bawah yang mengurus pesanan/permintaan
     if (in_array(auth()->user()->role, ['admin_desa', 'admin_rw', 'admin_rt'])) {
-        $rentalRequests = $baseRental->clone()->with(['user', 'barang'])
-            ->where(function($q) {
-                $q->where('status', 'pending')
-                  ->orWhere('cancellation_status', 'pending');
-            })
-            ->get()
-            ->map(function ($item) {
-                $item->type = 'rental';
-                $item->item_name = $item->barang->nama_barang ?? 'Unknown Item';
-                return $item;
-            });
-
-        // Ambil pesanan gas yang tertunda atau minta batal
-        $gasRequests = $baseGas->clone()->with('user')
-            ->where(function($q) {
-                 $q->where('status', 'pending')
-                   ->orWhere('cancellation_status', 'pending');
-            })
-            ->get()
-            ->map(function ($item) {
-                $item->type = 'gas';
-                $item->item_name = $item->item_name ?? 'Gas Order'; 
-                return $item;
-            });
-
-        // Gabungkan dan urutkan berdasarkan created_at desc
-        $latestRequests = $rentalRequests->concat($gasRequests)->sortByDesc('created_at')->take(5);
+        $rentalRequests = $baseRental->clone()->with(['user', 'barang'])->where(function($q) { $q->where('status', 'pending')->orWhere('cancellation_status', 'pending'); })->get()->map(function ($i) { $i->type = 'rental'; $i->item_name = $i->barang->nama_barang ?? 'Alat'; return $i; });
+        $gasRequests = $baseGas->clone()->with('user')->where(function($q) { $q->where('status', 'pending')->orWhere('cancellation_status', 'pending'); })->get()->map(function ($i) { $i->type = 'gas'; $i->item_name = $i->item_name ?? 'Tabung Gas'; return $i; });
+        
+        $mobilRequests = $baseMobil->clone()->with(['user', 'mobil' => function($q) { $q->withTrashed(); }])->where(function($q) { $q->where('status', 'pending')->orWhere('cancellation_status', 'pending'); })->get()->map(function ($i) { $i->type = 'mobil'; $i->item_name = $i->mobil->nama_mobil ?? 'Mobil'; return $i; });
+        
+        $fasilitasRequests = $baseFasilitas->clone()->with(['user', 'fasilitas' => function($q) { $q->withTrashed(); }])->where(function($q) { $q->where('status', 'pending')->orWhere('cancellation_status', 'pending'); })->get()->map(function ($i) { $i->type = 'fasilitas_umum'; $i->item_name = $i->fasilitas->nama_fasilitas ?? 'Fasilitas'; return $i; });
+        
+        $pasarRequests = $basePasar->clone()->with('user')->where(function($q) { $q->where('status', 'waiting')->orWhere('cancellation_status', 'pending'); })->get()->map(function ($i) { $i->type = 'pasar_daerah'; $i->item_name = 'Pesanan Pasar'; return $i; });
+        
+        $laporanRequests = $baseLaporan->clone()->with('user')->where('status', 'Pending')->get()->map(function ($i) { $i->type = 'laporan'; $i->item_name = 'Laporan Warga'; return $i; });
+        
+        $latestRequests = collect()->concat($rentalRequests)->concat($gasRequests)->concat($mobilRequests)->concat($fasilitasRequests)->concat($pasarRequests)->concat($laporanRequests)->sortByDesc('created_at')->take(10);
+        
+        $totalPending = $rentalRequests->count() + $gasRequests->count() + $mobilRequests->count() + $fasilitasRequests->count() + $pasarRequests->count() + $laporanRequests->count();
     }
 
     // Hitung statistik nyata
@@ -138,7 +121,7 @@ public function index(Request $request)
         ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
         ->count();
 
-    $totalPending = $rentalRequests->count() + $gasRequests->count();
+    
 
     // ========================================
     // PERHITUNGAN DATA NYATA UNTUK GRAFIK
@@ -270,6 +253,8 @@ public function index(Request $request)
         'rentalCount' => $rentalCount,
         'gasCount' => $gasCount,
         'mobilCount' => $mobilCount,
+        'fasilitasCount' => $fasilitasCount ?? 0,
+        'pasarCount' => $pasarCount ?? 0,
         'selectedYear' => $selectedYear,
         'availableYears' => $availableYears,
         'kecamatanList' => $kecamatanList,
@@ -355,6 +340,28 @@ public function index(Request $request)
             ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
             ->count();
     
+        // Pendapatan Fasilitas Umum
+        $fasilitasRevenue = $this->applyRegionFilter(\App\Models\FasilitasUmumBooking::withTrashed(), 'user', true)->whereYear('created_at', $year)
+            ->whereMonth('created_at', $month)
+            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
+            ->sum('total_amount');
+            
+        $fasilitasTransactions = $this->applyRegionFilter(\App\Models\FasilitasUmumBooking::withTrashed(), 'user', true)->whereYear('created_at', $year)
+            ->whereMonth('created_at', $month)
+            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
+            ->count();
+
+        // Pendapatan Pasar Daerah
+        $pasarRevenue = $this->applyRegionFilter(\App\Models\PasarOrder::withTrashed(), 'user', true)->whereYear('created_at', $year)
+            ->whereMonth('created_at', $month)
+            ->whereNotIn('status', ['waiting', 'processing', 'cancelled', 'rejected'])
+            ->sum('grand_total');
+            
+        $pasarTransactions = $this->applyRegionFilter(\App\Models\PasarOrder::withTrashed(), 'user', true)->whereYear('created_at', $year)
+            ->whereMonth('created_at', $month)
+            ->whereNotIn('status', ['waiting', 'processing', 'cancelled', 'rejected'])
+            ->count();
+
         // Pendapatan Laporan Manual
         $manualRevenue = $this->applyRegionFilter(ManualReport::query(), 'creator', true)->whereYear('transaction_date', $year)
             ->whereMonth('transaction_date', $month)
@@ -364,8 +371,8 @@ public function index(Request $request)
             ->whereMonth('transaction_date', $month)
             ->count();
         
-        $totalRevenue = $rentalRevenue + $gasRevenue + $mobilRevenue + $manualRevenue;
-        $totalTransactions = $rentalTransactions + $gasTransactions + $mobilTransactions + $manualTransactions;
+        $totalRevenue = $rentalRevenue + $gasRevenue + $mobilRevenue + $fasilitasRevenue + $pasarRevenue + $manualRevenue;
+        $totalTransactions = $rentalTransactions + $gasTransactions + $mobilTransactions + $fasilitasTransactions + $pasarTransactions + $manualTransactions;
         
         return [
             'Penyewaan Alat' => [
@@ -378,13 +385,25 @@ public function index(Request $request)
                 'revenue' => $gasRevenue,
                 'transactions' => $gasTransactions,
                 'percentage' => $totalRevenue > 0 ? round(($gasRevenue / $totalRevenue) * 100, 1) : 0,
-                'color' => 'primary'
+                'color' => 'danger'
             ],
             'Penyewaan Mobil' => [
                 'revenue' => $mobilRevenue,
                 'transactions' => $mobilTransactions,
                 'percentage' => $totalRevenue > 0 ? round(($mobilRevenue / $totalRevenue) * 100, 1) : 0,
                 'color' => 'info'
+            ],
+            'Fasilitas Umum' => [
+                'revenue' => $fasilitasRevenue,
+                'transactions' => $fasilitasTransactions,
+                'percentage' => $totalRevenue > 0 ? round(($fasilitasRevenue / $totalRevenue) * 100, 1) : 0,
+                'color' => 'success'
+            ],
+            'Pasar Daerah' => [
+                'revenue' => $pasarRevenue,
+                'transactions' => $pasarTransactions,
+                'percentage' => $totalRevenue > 0 ? round(($pasarRevenue / $totalRevenue) * 100, 1) : 0,
+                'color' => 'primary'
             ],
             'total' => [
                 'revenue' => $totalRevenue,
