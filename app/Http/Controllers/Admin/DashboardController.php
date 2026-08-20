@@ -22,6 +22,13 @@ class DashboardController extends Controller
  */
 public function index(Request $request)
 {
+    // Super Admin Sistem (Diskominfotik) tidak mengelola operasional/keuangan
+    // per wilayah - dashboard "kinerja kabupaten" ini bukan untuk mereka.
+    // Home mereka adalah Monitoring Kesehatan Transaksi di Sistem Platform.
+    if (auth()->user()->role === 'super_admin') {
+        return redirect()->route('admin.sistem-platform.monitoring');
+    }
+
     // Ambil pemesanan penyewaan yang tertunda atau minta batal
     $selectedYear = $request->input('year', now()->year);
     

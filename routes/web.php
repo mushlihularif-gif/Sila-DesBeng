@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\GasController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\SystemSettingController;
+use App\Http\Controllers\Admin\SuperAdminSettingController;
 
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\Admin\ProfileController;
@@ -512,7 +513,15 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
     Route::delete('/pengaturan-sistem/reset', [SystemSettingController::class, 'reset'])->name('admin.system-settings.reset');
     Route::get('/pengaturan-pembayaran-pusat', [SystemSettingController::class, 'paymentIndex'])->name('admin.system-settings.payment');
     Route::put('/pengaturan-pembayaran-pusat', [SystemSettingController::class, 'paymentUpdate'])->name('admin.system-settings.payment.update');
-    
+
+    // Sistem Platform (khusus Super Admin Sistem / Diskominfotik)
+    Route::prefix('sistem-platform')->middleware('role:super_admin')->group(function () {
+        Route::get('/gateway', [SuperAdminSettingController::class, 'gateway'])->name('admin.sistem-platform.gateway');
+        Route::put('/gateway', [SuperAdminSettingController::class, 'gatewayUpdate'])->name('admin.sistem-platform.gateway.update');
+        Route::get('/monitoring', [SuperAdminSettingController::class, 'monitoring'])->name('admin.sistem-platform.monitoring');
+        Route::get('/log-keamanan', [SuperAdminSettingController::class, 'securityLog'])->name('admin.sistem-platform.security-log');
+    });
+
     // Route Unit
     Route::prefix('unit')->group(function () {
         // Penyewaan Alat

@@ -230,6 +230,11 @@ class User extends Authenticatable
         return $this->belongsTo(Region::class);
     }
 
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
     public function kycVerification()
     {
         return $this->hasOne(KycVerification::class)->latest();

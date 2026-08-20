@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\GasOrder;
 use App\Models\RentalBooking;
 use App\Models\TransactionReceipt;
+use App\Models\WalletTransaction;
 use Midtrans\Config;
 use Midtrans\Notification;
 
@@ -74,6 +75,25 @@ class PaymentCallbackController extends Controller
             }
 
             $order->save();
+
+            // Sinkronkan status dana tertahan di ledger dengan hasil notifikasi Midtrans.
+            // Dana tetap berstatus "ditahan" (belum dicairkan ke BUM Desa) sampai
+            // pesanan dikonfirmasi selesai/diterima - webhook ini hanya memastikan
+            // uangnya benar-benar sudah dibayar (verified) atau batal (rejected).
+            $walletTx = WalletTransaction::where('reference_type', $orderType)
+                ->where('reference_id', $order->id)
+                ->where('source', 'gateway')
+                ->latest()
+                ->first();
+
+            if ($walletTx) {
+                if (in_array($order->status, ['confirmed'])) {
+                    $walletTx->status = 'verified';
+                } elseif (in_array($order->status, ['cancelled'])) {
+                    $walletTx->status = 'rejected';
+                }
+                $walletTx->save();
+            }
 
             return response()->json([
                 'status' => 'success',

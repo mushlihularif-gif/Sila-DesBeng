@@ -521,6 +521,14 @@ class RequestController extends Controller
             ]);
         }
 
+        // Tandai dana tertahan di ledger sebagai ditolak/perlu-refund, supaya tidak
+        // ada dana yang "nyangkut" tanpa status jelas saat pesanan tidak jadi diproses.
+        $walletRefType = $type === 'gas' ? 'gas' : $type;
+        \App\Models\WalletTransaction::where('reference_type', $walletRefType)
+            ->where('reference_id', $model->id)
+            ->whereIn('status', ['pending', 'verified'])
+            ->update(['status' => 'rejected', 'notes' => 'Pesanan ditolak admin: ' . $request->reason]);
+
         // Kirim notifikasi penolakan ke pengguna
         $notificationService->notifyOrderRejected($model, $request->reason, $type);
 

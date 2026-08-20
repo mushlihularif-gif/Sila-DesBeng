@@ -110,10 +110,26 @@ class GasBookingController extends Controller
             'booking_id' => $order->id,
             'receipt_number' => TransactionReceipt::generateReceiptNumber('gas'),
             'user_id' => Auth::id(),
+            'region_id' => $gas->region_id,
             'item_name' => $gas->jenis_gas,
             'quantity' => $validated['quantity'],
             'total_amount' => $totalAmount,
             'payment_method' => $validated['payment_method'],
+        ]);
+
+        // Catat pergerakan dana ke ledger region. Pembayaran gateway ditahan dulu
+        // (escrow) sampai pesanan dikonfirmasi selesai; transfer manual/tunai
+        // langsung tercatat "masuk" karena dananya tidak pernah singgah di platform.
+        $isGateway = $validated['payment_method'] !== 'tunai';
+        \App\Models\WalletTransaction::create([
+            'region_id' => $gas->region_id,
+            'type' => $isGateway ? 'ditahan' : 'masuk',
+            'source' => $isGateway ? 'gateway' : 'manual',
+            'amount' => $totalAmount,
+            'reference_type' => 'gas',
+            'reference_id' => $order->id,
+            'status' => 'pending',
+            'proof_path' => $paymentProofPath,
         ]);
 
         // Create admin notification
