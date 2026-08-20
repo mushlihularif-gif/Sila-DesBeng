@@ -26,6 +26,7 @@ class FasilitasUmumBooking extends Model
         'butuh_gudang',
         'total_amount',
         'status',
+        'assigned_supir_id',
         'admin_notes',
         'cancellation_reason',
         'cancellation_requested_at',
@@ -85,5 +86,10 @@ class FasilitasUmumBooking extends Model
     public function handler()
     {
         return $this->belongsTo(\App\Models\User::class, 'handled_by');
+    }
+
+    public function supir()
+    {
+        return $this->belongsTo(Supir::class, 'assigned_supir_id');
     }
 }

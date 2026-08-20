@@ -745,23 +745,30 @@
     function previewFile(input, previewId, placeholderId) {
         const preview = document.getElementById(previewId);
         const placeholder = document.getElementById(placeholderId);
-        const img = preview.querySelector('img');
+        const img = preview ? preview.querySelector('img') : null;
         const inputId = input.getAttribute('id');
         const deleteInput = document.getElementById('delete_' + inputId);
-        
+
         if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                img.src = e.target.result;
-                preview.style.display = 'block';
-                placeholder.style.display = 'none';
-                
-                // Reset flag hapus
-                if (deleteInput) {
-                    deleteInput.value = '0';
-                }
-            };
-            reader.readAsDataURL(input.files[0]);
+            if (deleteInput) {
+                deleteInput.value = '0';
+            }
+
+            if (typeof initGlobalCropper === 'function') {
+                initGlobalCropper(input, img || previewId, NaN, true);
+
+                if (preview) preview.style.display = 'block';
+                if (placeholder) placeholder.style.display = 'none';
+            } else {
+                // Fallback jika cropper belum dimuat
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    if (img) img.src = e.target.result;
+                    if (preview) preview.style.display = 'block';
+                    if (placeholder) placeholder.style.display = 'none';
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
         }
     }
 

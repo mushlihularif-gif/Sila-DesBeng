@@ -2,7 +2,7 @@
 
 @section('title', isset($isArchive) && $isArchive ? 'Bukti Pelaporan Warga' : 'Pelaporan Warga')
 
-@section('content')
+@section('styles')
 <style>
     .animate-fade-up {
         animation: fadeUp 0.5s ease-out forwards;
@@ -75,7 +75,9 @@
     .table-modern td:first-child { border-radius: 8px 0 0 8px; }
     .table-modern td:last-child { border-radius: 0 8px 8px 0; }
 </style>
+@endsection
 
+@section('content')
 <div class="container-xxl flex-grow-1 container-p-y animate-fade-up">
     
     <!-- Banner Modern -->
@@ -217,8 +219,8 @@
 
     <!-- Filter Form & Table -->
     <div class="card border-0 shadow-sm rounded-4">
-        <div class="card-header bg-white border-bottom-0 p-4">
-            <form action="{{ route('admin.pelaporan.index') }}" method="GET" class="row g-3">
+        <div class="card-header bg-white border-bottom p-4">
+            <form action="{{ route('admin.pelaporan.index') }}" method="GET" class="row g-3 align-items-center">
                 @if(isset($isArchive) && $isArchive)
                     <input type="hidden" name="status" value="Selesai">
                 @else
@@ -227,28 +229,29 @@
                     @endif
                 @endif
 
-                <div class="col-md-5">
-                    <label class="form-label text-muted small fw-bold">Pencarian</label>
-                    <div class="input-group input-group-merge">
-                        <span class="input-group-text border-end-0"><i class="bx bx-search text-muted"></i></span>
-                        <input type="text" name="search" class="form-control border-start-0 ps-0" placeholder="Cari nama atau deskripsi keluhan..." value="{{ request('search') }}">
+                <div class="col-12 col-md-5">
+                    <div class="input-group input-group-merge shadow-sm" style="border-radius: 8px; overflow: hidden; border: 1px solid #d9dee3;">
+                        <span class="input-group-text bg-white border-0"><i class="bx bx-search text-muted"></i></span>
+                        <input type="text" name="search" class="form-control bg-white border-0 ps-0 shadow-none" placeholder="Cari nama pelapor atau deskripsi keluhan..." value="{{ request('search') }}">
                     </div>
                 </div>
                 
-                <div class="col-md-4">
-                    <label class="form-label text-muted small fw-bold">Filter Kategori</label>
-                    <select name="kategori" class="form-select text-capitalize">
-                        <option value="">Semua Kategori</option>
-                        @foreach($kategoriList as $kat)
-                            <option value="{{ $kat }}" {{ request('kategori') == $kat ? 'selected' : '' }}>{{ $kat }}</option>
-                        @endforeach
-                    </select>
+                <div class="col-12 col-md-4">
+                    <div class="input-group input-group-merge shadow-sm" style="border-radius: 8px; overflow: hidden; border: 1px solid #d9dee3;">
+                        <span class="input-group-text bg-white border-0"><i class="bx bx-category text-muted"></i></span>
+                        <select name="kategori" class="form-select bg-white border-0 text-capitalize shadow-none" {{ $kategoriList->isEmpty() ? 'disabled' : '' }}>
+                            <option value="">{{ $kategoriList->isEmpty() ? 'Belum Ada Kategori' : 'Semua Kategori Keluhan' }}</option>
+                            @foreach($kategoriList as $kat)
+                                <option value="{{ $kat }}" {{ request('kategori') == $kat ? 'selected' : '' }}>{{ $kat }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
                 
-                <div class="col-md-3 d-flex align-items-end">
+                <div class="col-12 col-md-3">
                     <div class="d-flex gap-2 w-100">
-                        <button type="submit" class="btn btn-primary w-100"><i class="bx bx-search-alt me-2"></i>Terapkan</button>
-                        <a href="{{ isset($isArchive) && $isArchive ? route('admin.pelaporan.archive') : route('admin.pelaporan.index') }}" class="btn btn-label-secondary px-3" title="Reset Pencarian"><i class="bx bx-reset"></i></a>
+                        <button type="submit" class="btn btn-primary shadow-sm flex-grow-1" style="border-radius: 8px;"><i class="bx bx-filter-alt me-2"></i>Filter Data</button>
+                        <a href="{{ isset($isArchive) && $isArchive ? route('admin.pelaporan.archive') : route('admin.pelaporan.index') }}" class="btn btn-light shadow-sm border px-3" style="border-radius: 8px;" title="Reset Filter"><i class="bx bx-reset text-secondary"></i></a>
                     </div>
                 </div>
             </form>
@@ -319,11 +322,25 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="6" class="text-center py-5">
-                                <div class="avatar avatar-xl bg-secondary-subtle text-secondary rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
-                                    <i class="bx bx-folder-open" style="font-size: 2.5rem;"></i>
+                            <td colspan="6" class="p-0 border-0">
+                                <div class="text-center py-5 my-4" style="background: rgba(105, 122, 141, 0.02); border-radius: 12px; border: 2px dashed rgba(105, 122, 141, 0.1);">
+                                    <div class="d-inline-flex align-items-center justify-content-center bg-white shadow-sm rounded-circle mb-4" style="width: 100px; height: 100px;">
+                                        <i class="bx bx-folder-open text-primary" style="font-size: 3.5rem;"></i>
+                                    </div>
+                                    <h5 class="fw-bold text-dark mb-2">Belum Ada Data Laporan</h5>
+                                    <p class="text-muted mb-0 mx-auto" style="max-width: 400px; line-height: 1.6;">
+                                        @if(request('search') || request('kategori') || request('status'))
+                                            Tidak ada laporan yang sesuai dengan filter atau kata kunci pencarian Anda. Silakan coba atur ulang filter.
+                                        @else
+                                            Saat ini belum ada keluhan atau pelaporan warga yang masuk ke dalam sistem. Laporan yang diajukan warga akan otomatis muncul di sini.
+                                        @endif
+                                    </p>
+                                    @if(request('search') || request('kategori') || request('status'))
+                                        <a href="{{ isset($isArchive) && $isArchive ? route('admin.pelaporan.archive') : route('admin.pelaporan.index') }}" class="btn btn-label-primary mt-4 rounded-pill px-4 shadow-sm">
+                                            <i class="bx bx-reset me-2"></i>Reset Pencarian
+                                        </a>
+                                    @endif
                                 </div>
-                                <h6 class="text-muted mb-0">Tidak ada data laporan ditemukan.</h6>
                             </td>
                         </tr>
                         @endforelse
@@ -338,7 +355,9 @@
         </div>
     </div>
 </div>
+@endsection
 
+@section('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Client-side status filtering logic

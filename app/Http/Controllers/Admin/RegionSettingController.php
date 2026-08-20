@@ -122,29 +122,7 @@ class RegionSettingController extends Controller
         $paymentInfo['fasilitas_delivery_antar_active'] = $request->has('fasilitas_delivery_antar_active');
         $paymentInfo['fasilitas_delivery_jemput_active'] = $request->has('fasilitas_delivery_jemput_active');
 
-        // Store defaults
-        if ($request->has('mobil_bbm')) {
-            $paymentInfo['mobil_bbm_default'] = $request->mobil_bbm;
-            // Bulk update existing mobils
-            \App\Models\Mobil::where('region_id', $region->id)->update([
-                'bbm_ditanggung' => $request->mobil_bbm,
-                'opsi_supir' => $request->mobil_supir
-            ]);
-        }
-        if ($request->has('fasilitas_bbm')) {
-            $paymentInfo['fasilitas_bbm_default'] = $request->fasilitas_bbm;
-            // Bulk update existing fasilitas umums
-            \App\Models\FasilitasUmum::where('region_id', $region->id)->update([
-                'bbm_ditanggung' => $request->fasilitas_bbm,
-                'opsi_supir' => $request->fasilitas_supir
-            ]);
-        }
-        if ($request->has('mobil_supir')) {
-            $paymentInfo['mobil_supir_default'] = $request->mobil_supir;
-        }
-        if ($request->has('fasilitas_supir')) {
-            $paymentInfo['fasilitas_supir_default'] = $request->fasilitas_supir;
-        }
+
 
         $region->update([
             'profile_text' => $request->profile_text,

@@ -98,7 +98,9 @@ class UnitPenyewaanMobilController extends Controller
                 $q->where('type', 'mobil')->orWhereNull('type');
             })->orderBy('name')->get();
 
-        return view('admin.unit.mobil.create', compact('savedLocations', 'categories'));
+        $semuaKecamatan = Region::where('type', 'kecamatan')->orderBy('name', 'asc')->get();
+
+        return view('admin.unit.mobil.create', compact('savedLocations', 'categories', 'semuaKecamatan'));
     }
 
     public function store(Request $request)
@@ -117,11 +119,19 @@ class UnitPenyewaanMobilController extends Controller
             'foto_utama' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
             'foto_2' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
             'foto_3' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
-            'harga_dalam_desa' => 'required|string',
-            'batas_km_dalam_desa' => 'required|integer',
-            'harga_luar_desa' => 'required|string',
-            'batas_km_luar_desa' => 'required|integer',
-            'harga_luar_kota' => 'required|string',
+            'tipe_tarif_borongan' => 'nullable|in:jarak,wilayah',
+            'harga_dalam_desa' => 'nullable|string',
+            'batas_km_dalam_desa' => 'nullable|integer',
+            'harga_luar_desa' => 'nullable|string',
+            'batas_km_luar_desa' => 'nullable|integer',
+            'harga_luar_kota' => 'nullable|string',
+            
+            'harga_dalam_desa_wilayah' => 'nullable|string',
+            'harga_luar_desa_wilayah' => 'nullable|string',
+            'tipe_luar_kecamatan_wilayah' => 'nullable|in:pukul_rata,per_kecamatan',
+            'harga_luar_kecamatan_wilayah' => 'nullable|string',
+            'harga_kecamatan_khusus' => 'nullable|array',
+            'harga_kecamatan_khusus.*' => 'nullable|string',
             'bbm_ditanggung' => 'required|string|in:Pengelola,Penyewa',
             'opsi_supir' => 'required|string|in:Lepas Kunci,Dengan Supir,Bebas Pilih',
             'nama_supir' => 'nullable|string|max:255',
@@ -133,12 +143,36 @@ class UnitPenyewaanMobilController extends Controller
         ]);
 
         $hargaBersih = (int) preg_replace('/[^0-9]/', '', $request->harga_sewa);
-        $hargaDalamDesa = (int) preg_replace('/[^0-9]/', '', $request->harga_dalam_desa);
-        $hargaLuarDesa = (int) preg_replace('/[^0-9]/', '', $request->harga_luar_desa);
-        $hargaLuarKota = (int) preg_replace('/[^0-9]/', '', $request->harga_luar_kota);
+        $hargaDalamDesa = (int) preg_replace('/[^0-9]/', '', $request->harga_dalam_desa ?? 0);
+        $hargaLuarDesa = (int) preg_replace('/[^0-9]/', '', $request->harga_luar_desa ?? 0);
+        $hargaLuarKota = (int) preg_replace('/[^0-9]/', '', $request->harga_luar_kota ?? 0);
 
-        if ($hargaDalamDesa <= 0) {
-            return back()->withErrors(['harga_dalam_desa' => 'Harga sewa harus angka valid dan lebih dari 0.'])->withInput();
+        if ($request->has('is_borongan_active') && $request->tipe_tarif_borongan === 'jarak' && $hargaDalamDesa <= 0) {
+            return back()->withErrors(['harga_dalam_desa' => 'Harga sewa borongan harus lebih dari 0.'])->withInput();
+        }
+
+        $tarifBoronganWilayah = null;
+        if ($request->tipe_tarif_borongan === 'wilayah') {
+            $khususClean = [];
+            if ($request->has('harga_kecamatan_khusus')) {
+                foreach ($request->harga_kecamatan_khusus as $kecId => $harga) {
+                    if ($harga !== null && $harga !== '') {
+                        $khususClean[$kecId] = (int) preg_replace('/[^0-9]/', '', $harga);
+                    }
+                }
+            }
+
+            $tarifBoronganWilayah = [
+                'harga_dalam_desa' => (int) preg_replace('/[^0-9]/', '', $request->harga_dalam_desa_wilayah ?? 0),
+                'harga_luar_desa' => (int) preg_replace('/[^0-9]/', '', $request->harga_luar_desa_wilayah ?? 0),
+                'tipe_luar_kecamatan' => $request->tipe_luar_kecamatan_wilayah ?? 'pukul_rata',
+                'harga_luar_kecamatan' => (int) preg_replace('/[^0-9]/', '', $request->harga_luar_kecamatan_wilayah ?? 0),
+                'harga_kecamatan_khusus' => $khususClean,
+            ];
+        }
+
+        if (!$request->has('is_harian_active') && !$request->has('is_borongan_active')) {
+            return back()->withErrors(['is_harian_active' => 'Minimal salah satu layanan (Sewa Harian atau Sewa Borongan) harus diaktifkan.'])->withInput();
         }
 
         $data = [
@@ -153,10 +187,12 @@ class UnitPenyewaanMobilController extends Controller
             'longitude' => $request->longitude,
             'satuan' => $request->satuan,
             'harga_dalam_desa' => $hargaDalamDesa,
-            'batas_km_dalam_desa' => $request->batas_km_dalam_desa,
+            'batas_km_dalam_desa' => $request->batas_km_dalam_desa ?? 0,
             'harga_luar_desa' => $hargaLuarDesa,
-            'batas_km_luar_desa' => $request->batas_km_luar_desa,
+            'batas_km_luar_desa' => $request->batas_km_luar_desa ?? 0,
             'harga_luar_kota' => $hargaLuarKota,
+            'tipe_tarif_borongan' => $request->tipe_tarif_borongan ?? 'jarak',
+            'tarif_borongan_wilayah' => $tarifBoronganWilayah ? json_encode($tarifBoronganWilayah) : null,
             'bbm_ditanggung' => $request->bbm_ditanggung,
             'opsi_supir' => $request->opsi_supir,
             'nama_supir' => $request->nama_supir,
@@ -165,6 +201,8 @@ class UnitPenyewaanMobilController extends Controller
             'nama_supir_borongan' => $request->nama_supir_borongan,
             'kontak_supir_borongan' => $request->kontak_supir_borongan,
             'bbm_ditanggung_borongan' => $request->bbm_ditanggung_borongan,
+            'is_harian_active' => $request->has('is_harian_active') ? 1 : 0,
+            'is_borongan_active' => $request->has('is_borongan_active') ? 1 : 0,
         ];
 
         if ($request->hasFile('foto_utama')) { 
@@ -202,7 +240,9 @@ class UnitPenyewaanMobilController extends Controller
                 $q->where('type', 'mobil')->orWhereNull('type');
             })->orderBy('name')->get();
 
-        return view('admin.unit.mobil.edit', compact('mobil', 'savedLocations', 'categories'));
+        $semuaKecamatan = Region::where('type', 'kecamatan')->orderBy('name', 'asc')->get();
+
+        return view('admin.unit.mobil.edit', compact('mobil', 'savedLocations', 'categories', 'semuaKecamatan'));
     }
 
     public function destroy($id)
@@ -234,11 +274,19 @@ class UnitPenyewaanMobilController extends Controller
             'foto_utama' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'foto_2' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'foto_3' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'harga_dalam_desa' => 'required|string',
-            'batas_km_dalam_desa' => 'required|integer',
-            'harga_luar_desa' => 'required|string',
-            'batas_km_luar_desa' => 'required|integer',
-            'harga_luar_kota' => 'required|string',
+            'tipe_tarif_borongan' => 'nullable|in:jarak,wilayah',
+            'harga_dalam_desa' => 'nullable|string',
+            'batas_km_dalam_desa' => 'nullable|integer',
+            'harga_luar_desa' => 'nullable|string',
+            'batas_km_luar_desa' => 'nullable|integer',
+            'harga_luar_kota' => 'nullable|string',
+            
+            'harga_dalam_desa_wilayah' => 'nullable|string',
+            'harga_luar_desa_wilayah' => 'nullable|string',
+            'tipe_luar_kecamatan_wilayah' => 'nullable|in:pukul_rata,per_kecamatan',
+            'harga_luar_kecamatan_wilayah' => 'nullable|string',
+            'harga_kecamatan_khusus' => 'nullable|array',
+            'harga_kecamatan_khusus.*' => 'nullable|string',
             'bbm_ditanggung' => 'required|string|in:Pengelola,Penyewa',
             'opsi_supir' => 'required|string|in:Lepas Kunci,Dengan Supir,Bebas Pilih',
             'nama_supir' => 'nullable|string|max:255',
@@ -250,12 +298,36 @@ class UnitPenyewaanMobilController extends Controller
         ]);
 
         $hargaBersih = (int) preg_replace('/[^0-9]/', '', $request->harga_sewa);
-        $hargaDalamDesa = (int) preg_replace('/[^0-9]/', '', $request->harga_dalam_desa);
-        $hargaLuarDesa = (int) preg_replace('/[^0-9]/', '', $request->harga_luar_desa);
-        $hargaLuarKota = (int) preg_replace('/[^0-9]/', '', $request->harga_luar_kota);
+        $hargaDalamDesa = (int) preg_replace('/[^0-9]/', '', $request->harga_dalam_desa ?? 0);
+        $hargaLuarDesa = (int) preg_replace('/[^0-9]/', '', $request->harga_luar_desa ?? 0);
+        $hargaLuarKota = (int) preg_replace('/[^0-9]/', '', $request->harga_luar_kota ?? 0);
+        
+        if ($request->has('is_borongan_active') && $request->tipe_tarif_borongan === 'jarak' && $hargaDalamDesa <= 0) {
+            return back()->withErrors(['harga_dalam_desa' => 'Harga sewa borongan harus lebih dari 0.'])->withInput();
+        }
 
-        if ($hargaDalamDesa <= 0) {
-            return back()->withErrors(['harga_dalam_desa' => 'Harga sewa harus angka valid dan lebih dari 0.'])->withInput();
+        $tarifBoronganWilayah = null;
+        if ($request->tipe_tarif_borongan === 'wilayah') {
+            $khususClean = [];
+            if ($request->has('harga_kecamatan_khusus')) {
+                foreach ($request->harga_kecamatan_khusus as $kecId => $harga) {
+                    if ($harga !== null && $harga !== '') {
+                        $khususClean[$kecId] = (int) preg_replace('/[^0-9]/', '', $harga);
+                    }
+                }
+            }
+
+            $tarifBoronganWilayah = [
+                'harga_dalam_desa' => (int) preg_replace('/[^0-9]/', '', $request->harga_dalam_desa_wilayah ?? 0),
+                'harga_luar_desa' => (int) preg_replace('/[^0-9]/', '', $request->harga_luar_desa_wilayah ?? 0),
+                'tipe_luar_kecamatan' => $request->tipe_luar_kecamatan_wilayah ?? 'pukul_rata',
+                'harga_luar_kecamatan' => (int) preg_replace('/[^0-9]/', '', $request->harga_luar_kecamatan_wilayah ?? 0),
+                'harga_kecamatan_khusus' => $khususClean,
+            ];
+        }
+
+        if (!$request->has('is_harian_active') && !$request->has('is_borongan_active')) {
+            return back()->withErrors(['is_harian_active' => 'Minimal salah satu layanan (Sewa Harian atau Sewa Borongan) harus diaktifkan.'])->withInput();
         }
 
         $mobil = Mobil::findOrFail($id);
@@ -272,10 +344,12 @@ class UnitPenyewaanMobilController extends Controller
             'longitude' => $request->longitude,
             'satuan' => $request->satuan,
             'harga_dalam_desa' => $hargaDalamDesa,
-            'batas_km_dalam_desa' => $request->batas_km_dalam_desa,
+            'batas_km_dalam_desa' => $request->batas_km_dalam_desa ?? 0,
             'harga_luar_desa' => $hargaLuarDesa,
-            'batas_km_luar_desa' => $request->batas_km_luar_desa,
+            'batas_km_luar_desa' => $request->batas_km_luar_desa ?? 0,
             'harga_luar_kota' => $hargaLuarKota,
+            'tipe_tarif_borongan' => $request->tipe_tarif_borongan ?? 'jarak',
+            'tarif_borongan_wilayah' => $tarifBoronganWilayah ? json_encode($tarifBoronganWilayah) : null,
             'bbm_ditanggung' => $request->bbm_ditanggung,
             'opsi_supir' => $request->opsi_supir,
             'nama_supir' => $request->nama_supir,
@@ -284,6 +358,8 @@ class UnitPenyewaanMobilController extends Controller
             'nama_supir_borongan' => $request->nama_supir_borongan,
             'kontak_supir_borongan' => $request->kontak_supir_borongan,
             'bbm_ditanggung_borongan' => $request->bbm_ditanggung_borongan,
+            'is_harian_active' => $request->has('is_harian_active') ? 1 : 0,
+            'is_borongan_active' => $request->has('is_borongan_active') ? 1 : 0,
         ];
 
         if ($request->hasFile('foto_utama')) {

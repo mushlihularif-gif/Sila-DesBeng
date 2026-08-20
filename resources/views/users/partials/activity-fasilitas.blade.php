@@ -15,6 +15,20 @@
                                     {{ \Carbon\Carbon::parse($booking->created_at)->locale('id')->isoFormat('dddd, DD MMMM YYYY HH:mm') }} WIB
                                 </p>
                                 <p class="text-sm text-gray-600 mb-2">Tanggal Mulai: {{ \Carbon\Carbon::parse($booking->start_date)->format('d M Y') }}</p>
+
+                                @if($booking->assigned_supir_id && $booking->supir)
+                                <div class="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                                    <p class="text-sm font-semibold text-blue-800 mb-1"><i class="fas fa-id-card mr-2"></i>Petugas / Supir yang Ditugaskan:</p>
+                                    <p class="text-sm text-blue-700 font-bold mb-1">{{ $booking->supir->nama }}</p>
+                                    @if($booking->supir->kontak)
+                                    <p class="text-sm text-blue-700">
+                                        <a href="https://wa.me/{{ preg_replace('/^0/', '62', $booking->supir->kontak) }}" target="_blank" class="hover:underline">
+                                            <i class="fab fa-whatsapp mr-1"></i> {{ $booking->supir->kontak }}
+                                        </a>
+                                    </p>
+                                    @endif
+                                </div>
+                                @endif
                             </div>
                             <div class="text-left sm:text-right mt-4 sm:mt-0">
                                 <p class="text-lg font-bold text-gray-800 mb-2">{{ ucfirst($booking->status) }}</p>

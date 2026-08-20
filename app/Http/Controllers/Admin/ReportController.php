@@ -455,12 +455,16 @@ class ReportController extends Controller
         $rentalData = [];
         $gasData = [];
         $mobilData = [];
+        $fasilitasData = [];
+        $pasarData = [];
         
         $user = auth()->user();
         $isStaff = $user->isStaff();
         $canViewRental = !$isStaff || $user->hasUnitPermission('sewa_alat');
         $canViewGas = !$isStaff || $user->hasUnitPermission('gas');
         $canViewMobil = !$isStaff || $user->hasUnitPermission('sewa_mobil');
+        $canViewFasilitas = !$isStaff || $user->hasUnitPermission('fasilitas_umum');
+        $canViewPasar = !$isStaff || $user->hasUnitPermission('pasar_daerah');
         
         for ($month = 1; $month <= 12; $month++) {
             // Hitung pesanan penyewaan
@@ -480,17 +484,33 @@ class ReportController extends Controller
                 ->whereMonth('created_at', $month)
                 ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
                 ->count() : 0;
+                
+            // Hitung pesanan fasilitas umum
+            $fasilitasCount = $canViewFasilitas ? $this->applyRegionFilter(\App\Models\FasilitasUmumBooking::withTrashed(), 'fasilitas', true)->whereYear('created_at', $year)
+                ->whereMonth('created_at', $month)
+                ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
+                ->count() : 0;
+                
+            // Hitung pesanan pasar daerah
+            $pasarCount = $canViewPasar ? $this->applyRegionFilter(\App\Models\PasarOrder::withTrashed(), 'user', true)->whereYear('created_at', $year)
+                ->whereMonth('created_at', $month)
+                ->whereNotIn('status', ['waiting', 'processing', 'cancelled', 'rejected'])
+                ->count() : 0;
             
             $rentalData[] = $rentalCount;
             $gasData[] = $gasCount;
             $mobilData[] = $mobilCount;
+            $fasilitasData[] = $fasilitasCount;
+            $pasarData[] = $pasarCount;
         }
         
         return [
             'categories' => $months,
             'rental' => $rentalData,
             'gas' => $gasData,
-            'mobil' => $mobilData
+            'mobil' => $mobilData,
+            'fasilitas' => $fasilitasData,
+            'pasar' => $pasarData
         ];
     }
 
@@ -537,6 +557,31 @@ class ReportController extends Controller
             ->whereMonth('created_at', $month)
             ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
             ->count() : 0;
+            
+        $canViewFasilitas = !$isStaff || $user->hasUnitPermission('fasilitas_umum');
+        $canViewPasar = !$isStaff || $user->hasUnitPermission('pasar_daerah');
+            
+        // Pendapatan Fasilitas Umum
+        $fasilitasRevenue = $canViewFasilitas ? \App\Models\FasilitasUmumBooking::withTrashed()->whereYear('created_at', $year)
+            ->whereMonth('created_at', $month)
+            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
+            ->sum('total_amount') : 0;
+            
+        $fasilitasTransactions = $canViewFasilitas ? \App\Models\FasilitasUmumBooking::withTrashed()->whereYear('created_at', $year)
+            ->whereMonth('created_at', $month)
+            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
+            ->count() : 0;
+            
+        // Pendapatan Pasar Daerah
+        $pasarRevenue = $canViewPasar ? \App\Models\PasarOrder::withTrashed()->whereYear('created_at', $year)
+            ->whereMonth('created_at', $month)
+            ->whereNotIn('status', ['waiting', 'processing', 'cancelled', 'rejected'])
+            ->sum('grand_total') : 0;
+            
+        $pasarTransactions = $canViewPasar ? \App\Models\PasarOrder::withTrashed()->whereYear('created_at', $year)
+            ->whereMonth('created_at', $month)
+            ->whereNotIn('status', ['waiting', 'processing', 'cancelled', 'rejected'])
+            ->count() : 0;
 
         // Pendapatan Laporan Manual
         $manualRevenue = ManualReport::whereYear('transaction_date', $year)
@@ -547,8 +592,8 @@ class ReportController extends Controller
             ->whereMonth('transaction_date', $month)
             ->count();
         
-        $totalRevenue = $rentalRevenue + $gasRevenue + $mobilRevenue + $manualRevenue;
-        $totalTransactions = $rentalTransactions + $gasTransactions + $mobilTransactions + $manualTransactions;
+        $totalRevenue = $rentalRevenue + $gasRevenue + $mobilRevenue + $fasilitasRevenue + $pasarRevenue + $manualRevenue;
+        $totalTransactions = $rentalTransactions + $gasTransactions + $mobilTransactions + $fasilitasTransactions + $pasarTransactions + $manualTransactions;
         
         return [
             'rental' => [
@@ -565,6 +610,16 @@ class ReportController extends Controller
                 'revenue' => $mobilRevenue,
                 'transactions' => $mobilTransactions,
                 'percentage' => $totalRevenue > 0 ? round(($mobilRevenue / $totalRevenue) * 100, 1) : 0
+            ],
+            'fasilitas' => [
+                'revenue' => $fasilitasRevenue,
+                'transactions' => $fasilitasTransactions,
+                'percentage' => $totalRevenue > 0 ? round(($fasilitasRevenue / $totalRevenue) * 100, 1) : 0
+            ],
+            'pasar' => [
+                'revenue' => $pasarRevenue,
+                'transactions' => $pasarTransactions,
+                'percentage' => $totalRevenue > 0 ? round(($pasarRevenue / $totalRevenue) * 100, 1) : 0
             ],
             'total' => [
                 'revenue' => $totalRevenue,

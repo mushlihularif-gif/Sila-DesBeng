@@ -319,6 +319,7 @@ class BerandaController extends Controller
         $fasilitasData = [];
         $laporanData = [];
         $pengumumanData = [];
+        $pasarData = [];
         
         $regionIds = array_merge([$regionId], \App\Models\Region::getDescendantIds($regionId));
         
@@ -368,6 +369,14 @@ class BerandaController extends Controller
                 ->whereMonth('created_at', $month)
                 ->whereIn('region_id', $regionIds)
                 ->count();
+                
+            // Count pasar orders
+            $pasarCount = \App\Models\PasarOrder::withTrashed()
+                ->whereYear('created_at', $year)
+                ->whereMonth('created_at', $month)
+                ->whereIn('region_id', $regionIds)
+                ->whereNotIn('status', ['waiting', 'processing', 'cancelled', 'rejected'])
+                ->count();
             
             $rentalData[] = $rentalCount;
             $gasData[] = $gasCount;
@@ -375,6 +384,7 @@ class BerandaController extends Controller
             $fasilitasData[] = $fasilitasCount;
             $laporanData[] = $laporanCount;
             $pengumumanData[] = $pengumumanCount;
+            $pasarData[] = $pasarCount;
         }
         
         return [
@@ -384,7 +394,8 @@ class BerandaController extends Controller
             'mobil' => $mobilData,
             'fasilitas' => $fasilitasData,
             'laporan' => $laporanData,
-            'pengumuman' => $pengumumanData
+            'pengumuman' => $pengumumanData,
+            'pasar' => $pasarData
         ];
     }
 

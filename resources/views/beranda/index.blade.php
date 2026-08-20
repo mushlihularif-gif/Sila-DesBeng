@@ -524,6 +524,10 @@
                                     <div class="w-3 h-3 rounded-sm" style="background-color: #06b6d4;"></div>
                                     <span class="text-gray-600 font-medium">Kabar dan Informasi Daerah</span>
                                 </div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-3 h-3 rounded-sm" style="background-color: #ec4899;"></div>
+                                    <span class="text-gray-600 font-medium">Pasar Daerah</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1359,6 +1363,10 @@
                         {
                             name: 'Kabar dan Informasi Daerah',
                             data: unitPopulerData.pengumuman
+                        },
+                        {
+                            name: 'Pasar Daerah',
+                            data: unitPopulerData.pasar
                         }
                     ],
                     chart: {
@@ -1370,7 +1378,7 @@
                         stacked: false,
                         background: 'transparent'
                     },
-                    colors: ['#f59e0b', '#3b82f6', '#10b981', '#8b5cf6', '#ef4444', '#06b6d4'],
+                    colors: ['#f59e0b', '#3b82f6', '#10b981', '#8b5cf6', '#ef4444', '#06b6d4', '#ec4899'],
                     plotOptions: {
                         bar: {
                             horizontal: false,

@@ -474,7 +474,7 @@
                 <!-- Unit Layanan (Dropdown) -->
                 @if(in_array(auth()->user()->role, ['super_admin', 'admin', 'admin_kecamatan', 'admin_desa']))
                     @if(isset($hasActiveServices) && $hasActiveServices)
-                        <li class="menu-item {{ request()->is('admin/unit*') || request()->routeIs('admin.announcements.*') ? 'open active show' : '' }}">
+                        <li class="menu-item {{ (request()->is('admin/unit*') && !request()->is('admin/unit/supir*')) || request()->routeIs('admin.announcements.*') ? 'open active show' : '' }}">
                             <a href="javascript:void(0);" class="menu-link menu-toggle">
                                 <i class="menu-icon tf-icons bx bx-building-house"></i>
                                 <div data-i18n="Unit Layanan">Unit Layanan</div>
@@ -515,6 +515,7 @@
                                     </a>
                                 </li>
                                 @endif
+
                                 <li class="menu-item {{ request()->routeIs('admin.announcements.*') ? 'active' : '' }}">
                                     <a href="{{ route('admin.announcements.index') }}" class="menu-link">
                                         <div data-i18n="Kabar dan Informasi Daerah">Kabar dan Informasi Daerah</div>
@@ -660,7 +661,7 @@
 
                 <!-- Pengaturan (Dropdown) -->
                 @if(in_array(auth()->user()->role, ['super_admin', 'admin', 'admin_kecamatan', 'admin_desa']))
-                <li class="menu-item {{ request()->routeIs('admin.system-settings.*') || request()->routeIs('admin.region-settings.*') ? 'open active show' : '' }}">
+                <li class="menu-item {{ request()->routeIs('admin.system-settings.*') || request()->routeIs('admin.region-settings.*') || request()->is('admin/unit/supir*') ? 'open active show' : '' }}">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
                         <i class="menu-icon tf-icons bx bx-cog"></i>
                         <div data-i18n="Pengaturan">Pengaturan</div>
@@ -692,6 +693,14 @@
                             </a>
                         </li>
                         @endif
+                        @endif
+                        
+                        @if(in_array('Penyewaan Mobil', $activeServicesMenu ?? []) || in_array('Fasilitas Umum', $activeServicesMenu ?? []))
+                        <li class="menu-item {{ request()->is('admin/unit/supir*') ? 'active' : '' }}">
+                            <a href="{{ route('supir.index') }}" class="menu-link">
+                                <div data-i18n="Data Supir & Petugas">Data Supir & Petugas</div>
+                            </a>
+                        </li>
                         @endif
                     </ul>
                 </li>
@@ -792,46 +801,93 @@
                                     <span class="badge bg-danger rounded-pill badge-notifications position-absolute" style="top: -2px; right: -6px; font-size: 10px; min-width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;">{{ $unreadCount > 99 ? '99+' : $unreadCount }}</span>
                                     @endif
                                 </a>
-                                <ul class="dropdown-menu dropdown-menu-end py-0" style="width: 380px; max-height: 420px;">
-                                    <li class="dropdown-menu-header border-bottom">
+                                <ul class="dropdown-menu dropdown-menu-end py-0" style="width: 420px; max-height: 520px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); overflow: hidden;">
+                                    <li class="dropdown-menu-header border-bottom bg-light">
                                         <div class="dropdown-header d-flex align-items-center justify-content-between py-3 px-4">
-                                            <h6 class="mb-0 fw-bold">Notifikasi Admin</h6>
+                                            <h6 class="mb-0 fw-bold text-dark fs-5">Notifikasi</h6>
                                             @if($unreadCount > 0)
-                                            <span class="badge rounded-pill bg-label-primary">{{ $unreadCount }} Baru</span>
+                                            <span class="badge rounded-pill bg-primary px-3 py-2 shadow-sm">{{ $unreadCount }} Baru</span>
                                             @endif
+                                        </div>
+                                        <!-- Pill Tabs for 6 Layanan -->
+                                        <div class="px-4 pb-3 overflow-auto d-flex align-items-center" style="white-space: nowrap; scrollbar-width: none;">
+                                            <button class="btn btn-sm btn-primary rounded-pill me-2 notif-filter-btn active fw-semibold shadow-sm" data-filter="all">Semua</button>
+                                            <button class="btn btn-sm btn-outline-secondary rounded-pill me-2 notif-filter-btn fw-medium" data-filter="mobil">Sewa Mobil</button>
+                                            <button class="btn btn-sm btn-outline-secondary rounded-pill me-2 notif-filter-btn fw-medium" data-filter="fasilitas">Fasilitas Umum</button>
+                                            <button class="btn btn-sm btn-outline-secondary rounded-pill me-2 notif-filter-btn fw-medium" data-filter="gas">Gas LPG</button>
+                                            <button class="btn btn-sm btn-outline-secondary rounded-pill me-2 notif-filter-btn fw-medium" data-filter="pasar">Pasar Desa</button>
+                                            <button class="btn btn-sm btn-outline-secondary rounded-pill me-2 notif-filter-btn fw-medium" data-filter="mutasi">Administrasi</button>
+                                            <button class="btn btn-sm btn-outline-secondary rounded-pill notif-filter-btn fw-medium" data-filter="laporan">Laporan Warga</button>
                                         </div>
                                     </li>
                                     <li>
-                                        <div style="max-height: 280px; overflow-y: auto;">
+                                        <div class="notif-list-container" style="max-height: 350px; overflow-y: auto;">
                                             @php
-                                                $recentNotifications = (clone $notifQuery)->latest()->take(5)->get();
+                                                $recentNotifications = (clone $notifQuery)->latest()->take(30)->get();
                                             @endphp
                                             @forelse($recentNotifications as $notif)
-                                            <a href="{{ route('admin.aktivitas.permintaan-pengajuan.index') }}" class="dropdown-item d-flex align-items-start gap-3 py-3 px-4" style="white-space: normal; {{ !$notif->is_read ? 'background-color: rgba(105, 108, 255, 0.08);' : '' }}">
-                                                <div class="flex-shrink-0">
-                                                    <div class="rounded-circle d-flex align-items-center justify-content-center {{ !$notif->is_read ? 'bg-label-primary' : 'bg-label-secondary' }}" style="width: 36px; height: 36px;">
-                                                        <i class="bx {{ $notif->type === 'cancellation_request' ? 'bx-error-circle' : ($notif->type === 'gas_order' ? 'bx-gas-pump' : 'bx-bell') }} {{ !$notif->is_read ? 'text-primary' : 'text-secondary' }}"></i>
+                                            @php
+                                                // Mapping icon and category
+                                                $cat = 'lainnya';
+                                                $icon = 'bx-bell';
+                                                $color = 'primary';
+                                                $bg = 'rgba(105, 108, 255, 0.08)';
+
+                                                if (in_array($notif->type, ['cancellation_request', 'mobil_order', 'rental_mobil'])) {
+                                                    $cat = 'mobil'; $icon = 'bx-car'; $color = 'info'; $bg = 'rgba(3, 195, 236, 0.08)';
+                                                } elseif (in_array($notif->type, ['fasilitas_order', 'rental_fasilitas'])) {
+                                                    $cat = 'fasilitas'; $icon = 'bx-building-house'; $color = 'success'; $bg = 'rgba(113, 221, 55, 0.08)';
+                                                } elseif ($notif->type === 'gas_order') {
+                                                    $cat = 'gas'; $icon = 'bx-gas-pump'; $color = 'warning'; $bg = 'rgba(255, 171, 0, 0.08)';
+                                                } elseif (in_array($notif->type, ['pasar_order', 'pasar'])) {
+                                                    $cat = 'pasar'; $icon = 'bx-store-alt'; $color = 'danger'; $bg = 'rgba(255, 62, 29, 0.08)';
+                                                } elseif ($notif->type === 'mutasi') {
+                                                    $cat = 'mutasi'; $icon = 'bx-id-card'; $color = 'secondary'; $bg = 'rgba(133, 146, 163, 0.08)';
+                                                } elseif (in_array($notif->type, ['laporan', 'pengumuman'])) {
+                                                    $cat = 'laporan'; $icon = 'bx-message-square-error'; $color = 'danger'; $bg = 'rgba(255, 62, 29, 0.08)';
+                                                }
+                                            @endphp
+                                            <a href="{{ route('admin.aktivitas.permintaan-pengajuan.index') }}" class="dropdown-item notif-item d-flex align-items-start gap-3 py-3 px-4 border-bottom" data-category="{{ $cat }}" style="white-space: normal; {{ !$notif->is_read ? 'background-color: '.$bg.';' : '' }} transition: all 0.2s;">
+                                                <div class="flex-shrink-0 mt-1">
+                                                    <div class="rounded-circle d-flex align-items-center justify-content-center shadow-sm {{ !$notif->is_read ? 'bg-'.$color : 'bg-label-secondary' }}" style="width: 42px; height: 42px;">
+                                                        <i class="bx {{ $icon }} fs-4 {{ !$notif->is_read ? 'text-white' : 'text-secondary' }}"></i>
                                                     </div>
                                                 </div>
                                                 <div class="flex-grow-1">
-                                                    <h6 class="mb-1 fw-semibold {{ !$notif->is_read ? 'text-primary' : 'text-dark' }}">{{ $notif->title }}</h6>
-                                                    <p class="mb-1 text-muted small" style="line-height: 1.4;">{{ Str::limit($notif->message, 60) }}</p>
-                                                    <small class="text-muted d-flex align-items-center mt-2">
+                                                    <h6 class="mb-1 fw-bold {{ !$notif->is_read ? 'text-dark' : 'text-muted' }}">{{ $notif->title }}</h6>
+                                                    <p class="mb-2 {{ !$notif->is_read ? 'text-body' : 'text-muted' }} small" style="line-height: 1.5;">{{ Str::limit($notif->message, 80) }}</p>
+                                                    <small class="text-muted d-flex align-items-center fw-medium" style="font-size: 0.75rem;">
                                                         <i class="bx bx-time-five me-1"></i> {{ $notif->created_at->diffForHumans() }}
                                                     </small>
                                                 </div>
+                                                @if(!$notif->is_read)
+                                                <div class="flex-shrink-0 align-self-center">
+                                                    <span class="badge badge-dot bg-{{ $color }} shadow-sm p-1"></span>
+                                                </div>
+                                                @endif
                                             </a>
                                             @empty
-                                            <div class="text-center py-4">
-                                                <i class="bx bx-bell-off fs-3 text-muted mb-2"></i>
-                                                <p class="text-muted small mb-0">Tidak ada notifikasi</p>
+                                            <div class="text-center py-5 notif-empty-state">
+                                                <div class="mb-3">
+                                                    <i class="bx bx-bell-off text-muted" style="font-size: 3rem; opacity: 0.5;"></i>
+                                                </div>
+                                                <h6 class="fw-semibold text-dark">Belum ada notifikasi</h6>
+                                                <p class="text-muted small mb-0">Saat ini tidak ada pemberitahuan baru.</p>
                                             </div>
                                             @endforelse
+                                            
+                                            <div class="text-center py-5 d-none notif-filtered-empty">
+                                                <div class="mb-3">
+                                                    <i class="bx bx-filter text-muted" style="font-size: 3rem; opacity: 0.5;"></i>
+                                                </div>
+                                                <h6 class="fw-semibold text-dark">Tidak ada notifikasi</h6>
+                                                <p class="text-muted small mb-0">Tidak ada notifikasi untuk layanan ini.</p>
+                                            </div>
                                         </div>
                                     </li>
-                                    <li class="dropdown-menu-footer border-top">
-                                        <a href="{{ route('admin.aktivitas.permintaan-pengajuan.index') }}" class="dropdown-item text-center py-3 text-primary fw-semibold">
-                                            <i class="bx bx-list-ul me-1"></i> Lihat Semua Permintaan
+                                    <li class="dropdown-menu-footer border-top bg-light">
+                                        <a href="{{ route('admin.aktivitas.permintaan-pengajuan.index') }}" class="dropdown-item text-center py-3 text-primary fw-bold">
+                                            <i class="bx bx-list-ul me-2"></i>Lihat Semua Aktivitas
                                         </a>
                                     </li>
                                 </ul>
@@ -943,7 +999,13 @@
                 <!-- Content wrapper -->
                 <div class="layout-overlay layout-menu-toggle"></div>
             </div>
-            <script src="{{ asset('Admin/vendor/libs/jquery/jquery.js') }}"></script>
+            <!-- / Layout page -->
+        </div>
+        <!-- / Layout container -->
+    </div>
+    <!-- / Layout wrapper -->
+
+    <script src="{{ asset('Admin/vendor/libs/jquery/jquery.js') }}"></script>
             <script src="{{ asset('Admin/vendor/libs/popper/popper.js') }}"></script>
             <script src="{{ asset('Admin/vendor/js/bootstrap.js') }}"></script>
             <script src="{{ asset('Admin/vendor/libs/perfect-scrollbar/perfect-scrollbar.js') }}"></script>
@@ -1181,6 +1243,7 @@
             @stack('modals')
             @yield('scripts')
             @stack('scripts')
+    @include('components.cropper-modal')
 </body>
 
 </html>

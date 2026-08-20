@@ -42,7 +42,7 @@
         .nav-pills .nav-link { color: #6c757d; font-weight: 600; padding: 0.6rem 1.2rem; transition: all 0.3s; border-radius: 50rem; }
         .nav-pills .nav-link:hover { background-color: #f8f9fa; color: #566a7f; }
         .nav-pills .nav-link.active { background-color: #696cff; color: #fff; box-shadow: 0 4px 6px rgba(105, 108, 255, 0.2); }
-        .tab-content { padding: 0; background: transparent; border: none; box-shadow: none; }
+        .nav-align-top > .tab-content { padding: 0 !important; background: transparent !important; border: none !important; box-shadow: none !important; }
         .tab-pane { padding-top: 1rem; }
     </style>
 
@@ -64,14 +64,16 @@
             <!-- TAB 1: BERITA DAERAH -->
             <div class="tab-pane fade {{ $tab == 'berita' ? 'show active' : '' }}" id="navs-top-berita" role="tabpanel">
                 
-                <div class="alert alert-info d-flex align-items-start mb-4 shadow-sm rounded-4 border-0 p-4" role="alert">
-                    <span class="alert-icon text-info me-3 mt-1">
-                        <i class="bx bx-info-circle fs-3"></i>
-                    </span>
-                    <div>
-                        <h6 class="alert-heading fw-bold mb-1 text-info">Kapan menggunakan Berita Daerah?</h6>
-                        <p class="mb-2">Gunakan untuk mempublikasikan <b>dokumentasi kegiatan, acara yang telah/sedang berlangsung, atau pencapaian</b> desa/kecamatan Anda. Berita ini akan tampil untuk seluruh warga se-Kabupaten.</p>
-                        <p class="mb-0 small opacity-75"><i>Contoh: "Keseruan Lomba 17 Agustus di Desa X", "Senam Massal Hari Minggu", "Pembangunan Jalan Sukses Diselesaikan".</i></p>
+                <div class="card bg-label-info border-0 shadow-sm rounded-4 mb-4">
+                    <div class="card-body d-flex align-items-start p-4">
+                        <span class="text-info me-3 mt-1">
+                            <i class="bx bx-info-circle fs-3"></i>
+                        </span>
+                        <div>
+                            <h6 class="fw-bold mb-1 text-info">Kapan menggunakan Berita Daerah?</h6>
+                            <p class="mb-2 text-info" style="opacity: 0.9;">Gunakan untuk mempublikasikan <b>dokumentasi kegiatan, acara yang telah/sedang berlangsung, atau pencapaian</b> desa/kecamatan Anda. Berita ini akan tampil untuk seluruh warga se-Kabupaten.</p>
+                            <p class="mb-0 small text-info opacity-75"><i>Contoh: "Keseruan Lomba 17 Agustus di Desa X", "Senam Massal Hari Minggu", "Pembangunan Jalan Sukses Diselesaikan".</i></p>
+                        </div>
                     </div>
                 </div>
 
@@ -116,14 +118,16 @@
             <!-- TAB 2: PENGUMUMAN WARGA -->
             <div class="tab-pane fade {{ $tab == 'pengumuman' ? 'show active' : '' }}" id="navs-top-pengumuman" role="tabpanel">
                 
-                <div class="alert alert-warning d-flex align-items-start mb-4 shadow-sm rounded-4 border-0 p-4" role="alert">
-                    <span class="alert-icon text-warning me-3 mt-1">
-                        <i class="bx bx-error-circle fs-3"></i>
-                    </span>
-                    <div>
-                        <h6 class="alert-heading fw-bold mb-1 text-warning">Kapan menggunakan Pengumuman Warga?</h6>
-                        <p class="mb-2">Gunakan untuk memberikan <b>instruksi, peringatan, jadwal layanan, atau himbauan penting</b> yang ditujukan khusus untuk warga di wilayah tertentu.</p>
-                        <p class="mb-0 small opacity-75"><i>Contoh: "Jadwal Posyandu Balita Bulan Ini", "Pemadaman Listrik Sementara Besok Pagi", "Himbauan Waspada Banjir".</i></p>
+                <div class="card bg-label-warning border-0 shadow-sm rounded-4 mb-4">
+                    <div class="card-body d-flex align-items-start p-4">
+                        <span class="text-warning me-3 mt-1">
+                            <i class="bx bx-error-circle fs-3"></i>
+                        </span>
+                        <div>
+                            <h6 class="fw-bold mb-1 text-warning">Kapan menggunakan Pengumuman Warga?</h6>
+                            <p class="mb-2 text-warning" style="opacity: 0.9;">Gunakan untuk memberikan <b>instruksi, peringatan, jadwal layanan, atau himbauan penting</b> yang ditujukan khusus untuk warga di wilayah tertentu.</p>
+                            <p class="mb-0 small text-warning opacity-75"><i>Contoh: "Jadwal Posyandu Balita Bulan Ini", "Pemadaman Listrik Sementara Besok Pagi", "Himbauan Waspada Banjir".</i></p>
+                        </div>
                     </div>
                 </div>
 

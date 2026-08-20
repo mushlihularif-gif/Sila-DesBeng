@@ -97,39 +97,39 @@ class MediaController extends Controller
         // Jika hasil dekripsi kosong, asumsikan ini file lama yang belum dienkripsi
         $imageContent = $decryptedContent ?: $fileContent;
 
-        $img = @imagecreatefromstring($imageContent);
+        if ($imageContent) {
+            try {
+                $manager = \Intervention\Image\ImageManager::gd();
+                $image = $manager->read($imageContent);
 
-        if ($img !== false) {
-            $width = imagesx($img);
-            $height = imagesy($img);
+                // Cek apakah file ini adalah KTP (bukan face photo)
+                // Deteksi dari nama path atau file. Asumsikan jika ada kata 'face', itu wajah.
+                $isFace = str_contains($fullPath, 'face');
 
-            $watermarkColor = imagecolorallocatealpha($img, 255, 0, 0, 75);
-            $font = 5;
-            
-            $text1 = "RAHASIA SILADESBENG";
-            $text2 = "VERIFIKASI BUMDES";
-            $text3 = date('Y-m-d');
-            
-            $textWidth = imagefontwidth($font) * strlen($text1);
-            
-            $x = ($width - $textWidth) / 2;
-            $y = ($height - (imagefontheight($font) * 3)) / 2;
-            
-            imagestring($img, $font, $x, $y, $text1, $watermarkColor);
-            imagestring($img, $font, $x, $y + 15, $text2, $watermarkColor);
-            imagestring($img, $font, $x, $y + 30, $text3, $watermarkColor);
-            
-            ob_start();
-            imagejpeg($img, null, 85);
-            $finalImage = ob_get_clean();
-            imagedestroy($img);
+                if (!$isFace) {
+                    $watermarkPath = public_path('Admin/img/watermarkprivasi/WatermarkPrivasi.png');
+                    if (file_exists($watermarkPath)) {
+                        $watermark = $manager->read($watermarkPath);
+                        $watermarkWidth = intval($image->width() * 0.9);
+                        $watermark->scaleDown(width: $watermarkWidth);
+                        $image->place($watermark, 'center');
+                    }
+                }
 
-            // Bersihkan output buffer sebelumnya (mencegah karakter whitespace/error nyempil di gambar)
-            while (ob_get_level() > 0) {
-                ob_end_clean();
+                $encoded = $image->toJpeg(85);
+                $finalImage = $encoded->toString();
+
+                // Bersihkan output buffer sebelumnya (mencegah karakter whitespace/error nyempil di gambar)
+                while (ob_get_level() > 0) {
+                    ob_end_clean();
+                }
+
+                return response($finalImage)->header('Content-Type', 'image/jpeg');
+            } catch (\Exception $e) {
+                \Log::error('MediaController Image Error: ' . $e->getMessage());
+                // Fallback to original decrypted content if manipulation fails
+                return response($imageContent)->header('Content-Type', 'image/jpeg');
             }
-
-            return response($finalImage)->header('Content-Type', 'image/jpeg');
         }
 
         // Jika gambar gagal diproses (bukan gambar valid)

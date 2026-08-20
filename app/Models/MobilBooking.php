@@ -16,6 +16,7 @@ class MobilBooking extends Model
         'order_number',
         'user_id',
         'mobil_id',
+        'jenis_sewa',
         'delivery_method',
         'quantity',
         'start_date',
@@ -31,6 +32,7 @@ class MobilBooking extends Model
         'delivery_proof_image',
         'total_amount',
         'status',
+        'assigned_supir_id',
         'admin_notes',
         'cancellation_reason',
         'cancellation_requested_at',
@@ -102,5 +104,10 @@ class MobilBooking extends Model
     public function handler()
     {
         return $this->belongsTo(\App\Models\User::class, 'handled_by');
+    }
+
+    public function supir()
+    {
+        return $this->belongsTo(Supir::class, 'assigned_supir_id');
     }
 }

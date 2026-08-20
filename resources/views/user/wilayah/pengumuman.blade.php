@@ -1,4 +1,4 @@
-@extends('layouts.user')
+﻿@extends('layouts.user')
 
 @section('title', 'Kelola Pengumuman - SilaDesBeng')
 
@@ -15,17 +15,17 @@
 
     <section class="relative z-10 pt-32 pb-16">
         <div class="max-w-7xl mx-auto px-6" x-data="pengumumanAdmin()">
-            <!-- Header Section -->
+            <div x-show="!isFormOpen" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
+              <!-- Header Section -->
             <div class="text-center mb-12 animate-section">
                 <h1 class="text-4xl md:text-5xl font-bold mb-4">
-                    <span class="bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">Kelola </span>
-                    <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Pengumuman</span>
-                </h1>
+                    <span class="bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">Kelola </span><span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Pengumuman</span>
+                    </h1>
                 <p class="text-gray-700 text-lg mt-2 mb-6">
                     Buat dan kelola pengumuman atau event untuk warga di wilayah Anda.
                 </p>
-                <button @click.prevent="isModalOpen = true" class="inline-flex items-center justify-center px-6 py-3 rounded-full bg-blue-500 text-white font-medium hover:bg-blue-600 shadow-md hover:shadow-lg transition-all border border-blue-500 focus:outline-none">
-                    Buat Pengumuman Baru
+                <button @click.prevent="isFormOpen = true" class="inline-flex items-center justify-center px-6 py-3 rounded-full bg-blue-500 text-white font-medium hover:bg-blue-600 shadow-md hover:shadow-lg transition-all border border-blue-500 focus:outline-none">
+                     Buat Pengumuman Baru
                 </button>
             </div>
 
@@ -46,15 +46,15 @@
                                class="px-4 py-2 whitespace-nowrap rounded-full font-semibold text-sm transition-all duration-300 border-2 focus:outline-none">
                                Pengumuman
                             </button>
-                            <button type="button" @click.prevent="updateFilter('Event')" 
-                               :class="type === 'Event' ? 'bg-blue-500 text-white border-blue-500 shadow-md' : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300 hover:text-blue-500'"
+                            <button type="button" @click.prevent="updateFilter('Darurat')" 
+                               :class="type === 'Darurat' ? 'bg-blue-500 text-white border-blue-500 shadow-md' : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300 hover:text-blue-500'"
                                class="px-4 py-2 whitespace-nowrap rounded-full font-semibold text-sm transition-all duration-300 border-2 focus:outline-none">
-                               Peristiwa
+                               Darurat
                             </button>
-                            <button type="button" @click.prevent="updateFilter('Gotong Royong')" 
-                               :class="type === 'Gotong Royong' ? 'bg-blue-500 text-white border-blue-500 shadow-md' : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300 hover:text-blue-500'"
+                            <button type="button" @click.prevent="updateFilter('Undangan')" 
+                               :class="type === 'Undangan' ? 'bg-blue-500 text-white border-blue-500 shadow-md' : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300 hover:text-blue-500'"
                                class="px-4 py-2 whitespace-nowrap rounded-full font-semibold text-sm transition-all duration-300 border-2 focus:outline-none">
-                               Gotong Royong
+                               Undangan
                             </button>
                         </div>
 
@@ -89,36 +89,22 @@
                     @foreach($pengumumans as $item)
                         <div class="group flex flex-col backdrop-blur-sm bg-white/80 rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
                             
-                            {{-- Image Header --}}
-                            <div class="h-48 relative overflow-hidden bg-gray-100">
-                                @if($item->image_path)
-                                    <img src="{{ Storage::url($item->image_path) }}" alt="{{ $item->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                                @else
-                                    <div class="w-full h-full flex items-center justify-center text-6xl opacity-50 bg-gradient-to-br from-blue-50 to-blue-100">
-                                        @if($item->type == 'Pengumuman') 📢 
-                                        @elseif($item->type == 'Event') 🎉
-                                        @else 🤝
-                                        @endif
-                                    </div>
-                                @endif
-                                
-                                {{-- Type Badge --}}
-                                <div class="absolute top-4 left-4">
-                                    @if($item->type == 'Gotong Royong')
-                                        <span class="px-3 py-1.5 bg-emerald-500/90 backdrop-blur-md text-white rounded-full text-xs font-bold shadow-sm flex items-center gap-1.5">🤝 Gotong Royong</span>
-                                    @elseif($item->type == 'Event')
-                                        <span class="px-3 py-1.5 bg-purple-500/90 backdrop-blur-md text-white rounded-full text-xs font-bold shadow-sm flex items-center gap-1.5">🎉 Event</span>
+                            {{-- Header Badges --}}
+                            <div class="px-6 pt-6 flex justify-between items-center">
+                                <div>
+                                    @if($item->type == 'Darurat')
+                                        <span class="px-3 py-1.5 bg-red-100 text-red-700 rounded-full text-xs font-bold shadow-sm border border-red-200 flex items-center gap-1.5"> Darurat</span>
+                                    @elseif($item->type == 'Undangan')
+                                        <span class="px-3 py-1.5 bg-purple-100 text-purple-700 rounded-full text-xs font-bold shadow-sm border border-purple-200 flex items-center gap-1.5"> Undangan</span>
                                     @else
-                                        <span class="px-3 py-1.5 bg-blue-500/90 backdrop-blur-md text-white rounded-full text-xs font-bold shadow-sm flex items-center gap-1.5">📢 Pengumuman</span>
+                                        <span class="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-full text-xs font-bold shadow-sm border border-blue-200 flex items-center gap-1.5"> Pengumuman</span>
                                     @endif
                                 </div>
-
-                                {{-- Status Badge --}}
-                                <div class="absolute top-4 right-4">
+                                <div>
                                     @if($item->is_active)
-                                        <span class="px-2.5 py-1 bg-green-100/90 backdrop-blur-md text-green-700 rounded-full text-xs font-bold shadow-sm border border-green-200">Aktif</span>
+                                        <span class="px-2.5 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold shadow-sm border border-green-200">Aktif</span>
                                     @else
-                                        <span class="px-2.5 py-1 bg-gray-100/90 backdrop-blur-md text-gray-600 rounded-full text-xs font-bold shadow-sm border border-gray-200">Nonaktif</span>
+                                        <span class="px-2.5 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-bold shadow-sm border border-gray-200">Nonaktif</span>
                                     @endif
                                 </div>
                             </div>
@@ -130,7 +116,7 @@
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                                         {{ $item->created_at->format('d M Y') }}
                                     </span>
-                                    <span>•</span>
+                                    <span></span>
                                     <span class="text-gray-500 truncate flex items-center gap-1">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                                         {{ $item->region->name ?? 'Semua Wilayah' }}
@@ -146,7 +132,7 @@
                                 @if($item->event_date)
                                 <div class="bg-blue-50/50 rounded-xl p-3 mb-4 border border-blue-50">
                                     <div class="flex items-center gap-2 text-blue-700 font-bold text-[10px] mb-1 uppercase tracking-wider">
-                                        🗓️ Pelaksanaan
+                                         Pelaksanaan
                                     </div>
                                     <div class="text-gray-800 font-semibold text-xs">
                                         {{ $item->event_date->format('d M Y, H:i') }} WIB
@@ -177,31 +163,31 @@
                 </div>
                 @endif
             @else
-                <div class="backdrop-blur-sm bg-white/70 rounded-3xl text-center border border-white/80 shadow-lg py-16 px-6">
+                <div class="backdrop-blur-sm bg-white/70 rounded-3xl text-center border border-white/80 shadow-lg py-16 px-6 max-w-3xl mx-auto">
                     <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-5 border border-gray-100">
                         <svg class="h-10 w-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"></path></svg>
                     </div>
                     <h3 class="text-2xl font-bold text-gray-800 mb-2">Belum ada pengumuman</h3>
                     <p class="text-gray-600 mb-6 max-w-md mx-auto">Saat ini belum ada pengumuman atau event yang diterbitkan di wilayah Anda.</p>
-                    <button @click.prevent="isModalOpen = true" class="inline-flex items-center justify-center px-6 py-3 rounded-full bg-blue-500 text-white font-medium hover:bg-blue-600 shadow-md transition-all">
-                        Buat Pengumuman Baru
+                    <button @click.prevent="isFormOpen = true" class="inline-flex items-center justify-center px-6 py-3 rounded-full bg-blue-500 text-white font-medium hover:bg-blue-600 shadow-md transition-all">
+                         Buat Pengumuman Baru
                     </button>
                 </div>
             @endif
             </div>
 
             <!-- Modal Buat Pengumuman -->
-            <div x-show="isModalOpen" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-                <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-                    <div x-show="isModalOpen" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity backdrop-blur-sm" aria-hidden="true"></div>
-                    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-                    <div x-show="isModalOpen" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="inline-block align-bottom bg-white rounded-3xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl w-full border border-gray-100">
+            <template x-teleport="body">
+            <div x-show="isFormOpen" style="display: none;" class="fixed inset-0 z-[9999] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                <div class="flex min-h-screen justify-center px-4 pt-10 pb-20 text-center sm:p-8">
+                    <div x-show="isFormOpen" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-slate-100/60 transition-opacity backdrop-blur-md" aria-hidden="true"></div>
+                    <div x-show="isFormOpen" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="relative z-10 w-full max-w-2xl bg-white rounded-3xl text-left overflow-hidden shadow-2xl transform transition-all my-10 border border-gray-100">
                         <form action="{{ route('wilayah.pengumuman.store') }}" method="POST" enctype="multipart/form-data">
                             @csrf
-                            <div class="bg-white px-6 pt-6 pb-6 sm:px-8 sm:pt-8">
+                            <div>
                                 <div class="flex justify-between items-center mb-6">
                                     <h3 class="text-2xl leading-6 font-bold text-gray-900" id="modal-title">Buat Pengumuman Baru</h3>
-                                    <button type="button" @click="isModalOpen = false" class="bg-gray-50 rounded-full p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none transition-all">
+                                    <button type="button" @click="isFormOpen = false" class="bg-gray-50 rounded-full p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none transition-all">
                                         <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                                     </button>
                                 </div>
@@ -219,10 +205,9 @@
                                             <label class="block text-sm font-semibold text-gray-700 mb-1">Kategori <span class="text-red-500">*</span></label>
                                             <select name="type" required class="w-full rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white focus:border-blue-500 focus:ring-blue-500 px-4 py-2.5 text-sm transition-colors">
                                                 <option value="" disabled selected>Pilih Kategori...</option>
-                                                <option value="Pengumuman">📢 Pengumuman</option>
-                                                <option value="Event">🎉 Event</option>
-                                                <option value="Gotong Royong">🤝 Gotong Royong</option>
-                                                <option value="Lainnya">📌 Lainnya</option>
+                                                <option value="Pengumuman"> Pengumuman</option>
+                                                <option value="Darurat"> Darurat</option>
+                                                <option value="Undangan"> Undangan</option>
                                             </select>
                                         </div>
                                         
@@ -283,15 +268,13 @@
                                 <button type="submit" class="w-full inline-flex justify-center rounded-xl border border-transparent shadow-sm px-6 py-2.5 bg-blue-600 text-base font-semibold text-white hover:bg-blue-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm transition-all">
                                     Publikasikan
                                 </button>
-                                <button type="button" @click="isModalOpen = false" class="mt-3 w-full inline-flex justify-center rounded-xl border border-gray-300 shadow-sm px-6 py-2.5 bg-white text-base font-semibold text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm transition-all">
+                                <button type="button" @click="isFormOpen = false" class="mt-3 w-full inline-flex justify-center rounded-xl border border-gray-300 shadow-sm px-6 py-2.5 bg-white text-base font-semibold text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm transition-all">
                                     Batal
                                 </button>
                             </div>
                         </form>
-                    </div>
-                </div>
-            </div>
-
+                  </div>
+              </div>
         </div>
     </section>
 </main>
@@ -306,7 +289,7 @@
                 type: '{{ request('type', '') }}',
                 search: '{{ request('search', '') }}',
                 loading: false,
-                isModalOpen: false,
+                isFormOpen: false,
 
                 init() {
                     const container = document.getElementById('pengumuman-list-container');
@@ -388,3 +371,16 @@
     })();
 </script>
 @endpush
+
+
+
+
+
+
+
+
+
+
+
+
+
