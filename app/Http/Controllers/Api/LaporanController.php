@@ -72,8 +72,20 @@ class LaporanController extends Controller
             $file = $request->file('bukti');
         
             if ($file->isValid()) {
-                $extension = $file->getClientOriginalExtension();
-                $filename = time() . '_' . Str::random(16) . '.' . $extension;
+                // SECURITY HARDENING: Gunakan ->extension() bawaan Laravel yang mengecek MIME type isi file
+                // BUKAN ->getClientOriginalExtension() yang bisa dimanipulasi attacker
+                $extension = strtolower($file->extension());
+                
+                // Strict whitelist extension
+                $allowedExtensions = ['jpg', 'jpeg', 'png'];
+                if (!in_array($extension, $allowedExtensions)) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Format file tidak valid. Keamanan sistem mendeteksi anomali.'
+                    ], 403);
+                }
+
+                $filename = time() . '_' . Str::random(24) . '.' . $extension;
         
                 // PATH KE ROOT SUBDOMAIN (Sesuai Web)
                 $destination = $_SERVER['DOCUMENT_ROOT'] . '/storage/laporan';

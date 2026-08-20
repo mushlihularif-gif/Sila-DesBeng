@@ -98,14 +98,14 @@ class PasarDaerahController extends Controller
     public function getCartItemsApi()
     {
         $user_id = Auth::id();
-        $user_village_id = Auth::user()->village_id;
+        $user_region_id = Auth::user()->region_id;
 
         $cartItems = PasarCart::where('user_id', $user_id)
             ->with(['produk' => function ($query) {
                 $query->select('id', 'nama_produk', 'harga', 'foto', 'stok');
             }])
-            ->whereHas('produk', function ($query) use ($user_village_id) {
-                $query->where('village_id', $user_village_id);
+            ->whereHas('produk', function ($query) use ($user_region_id) {
+                $query->where('region_id', $user_region_id);
             })
             ->get();
 

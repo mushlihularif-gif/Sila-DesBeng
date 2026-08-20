@@ -153,8 +153,15 @@ class LaporanController extends Controller
 
             foreach ($request->file('bukti') as $file) {
                 if ($file->isValid()) {
-                    $extension = $file->getClientOriginalExtension();
-                    $filename = time() . '_' . Str::random(16) . '.' . $extension;
+                    $extension = strtolower($file->extension());
+                    
+                    // Strict whitelist extension
+                    $allowedExtensions = ['jpg', 'jpeg', 'png'];
+                    if (!in_array($extension, $allowedExtensions)) {
+                        return back()->with('error', 'Format file bukti tidak valid. Hanya JPG, JPEG, PNG yang diizinkan.')->withInput();
+                    }
+
+                    $filename = time() . '_' . Str::random(24) . '.' . $extension;
                     $file->move($destination, $filename);
                     
                     // SIMPAN RELATIVE URL

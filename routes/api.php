@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BerandaController;
@@ -85,7 +84,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/events/{id}/join', [\App\Http\Controllers\Api\CommunityEventApiController::class, 'toggleJoin']);
 
     // Wilayah Admin Dashboard (RT/RW)
-    Route::prefix('wilayah')->middleware('role:admin_rt,admin_rw')->group(function () {
+    Route::prefix('wilayah')->middleware('role:admin_rt,admin_rw,rt,rw')->group(function () {
         Route::get('/dashboard', [\App\Http\Controllers\Api\WilayahAdminApiController::class, 'getDashboardStats']);
         Route::get('/warga', [\App\Http\Controllers\Api\AdminWargaApiController::class, 'index']);
         Route::get('/warga/{id}', [\App\Http\Controllers\Api\AdminWargaApiController::class, 'show']);

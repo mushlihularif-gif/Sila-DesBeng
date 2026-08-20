@@ -112,8 +112,15 @@ class ProfileController extends Controller
 
         if ($request->hasFile('profile')) {
             $file = $request->file('profile');
-            $extension = $file->getClientOriginalExtension();
-            $filename = $user->id . '_' . time() . '.' . $extension;
+            $extension = strtolower($file->extension());
+            
+            // Strict whitelist extension
+            $allowedExtensions = ['jpg', 'jpeg', 'png'];
+            if (!in_array($extension, $allowedExtensions)) {
+                return back()->with('error', 'Format file profil tidak valid.')->withInput();
+            }
+
+            $filename = $user->id . '_' . time() . '_' . \Illuminate\Support\Str::random(10) . '.' . $extension;
             $path = $file->storeAs('profiles', $filename, ['disk' => 'local']);
 
             $user->file()->create([

@@ -11,26 +11,28 @@ class AdminWargaApiController extends Controller
 {
     public function index(Request $request)
     {
-        $users = User::select('id', 'name', 'email', 'phone', 'rt_rw', 'address', 'verification_status', 'created_at')
-            ->withCount(['kycVerification as has_kyc' => function ($q) {
-                $q->whereIn('status', ['pending', 'approved']);
-            }])
+        $users = User::select('id', 'name', 'email', 'phone', 'rt', 'rw', 'address', 'verification_status', 'created_at')
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(function ($user) {
                 $kyc = KycVerification::where('user_id', $user->id)->latest()->first();
+                $rtStr = $user->rt ? 'RT ' . str_pad($user->rt, 2, '0', STR_PAD_LEFT) : 'RT 02';
+                $rwStr = $user->rw ? 'RW ' . str_pad($user->rw, 2, '0', STR_PAD_LEFT) : 'RW 01';
+                
                 return [
                     'id' => $user->id,
                     'name' => $user->name,
                     'email' => $user->email,
                     'phone' => $user->phone,
-                    'rt_rw' => $user->rt_rw,
-                    'address' => $user->address,
+                    'rt' => $user->rt,
+                    'rw' => $user->rw,
+                    'rt_rw' => "$rtStr / $rwStr",
+                    'address' => $user->address ?? '-',
                     'verification_status' => $user->verification_status ?? 'unverified',
                     'kyc_status' => $kyc ? $kyc->status : null,
-                    'kyc_nik' => $kyc ? $kyc->nik_from_ocr : null,
-                    'kyc_name' => $kyc ? $kyc->name_from_ocr : null,
-                    'registered_date' => $user->created_at->format('d M Y'),
+                    'kyc_nik' => $kyc ? $kyc->nik_from_ocr : $user->nik,
+                    'kyc_name' => $kyc ? $kyc->name_from_ocr : $user->name,
+                    'registered_date' => $user->created_at ? $user->created_at->format('d M Y') : '-',
                 ];
             });
 
@@ -44,6 +46,8 @@ class AdminWargaApiController extends Controller
     {
         $user = User::findOrFail($id);
         $kyc = KycVerification::where('user_id', $id)->latest()->first();
+        $rtStr = $user->rt ? 'RT ' . str_pad($user->rt, 2, '0', STR_PAD_LEFT) : 'RT 02';
+        $rwStr = $user->rw ? 'RW ' . str_pad($user->rw, 2, '0', STR_PAD_LEFT) : 'RW 01';
 
         return response()->json([
             'success' => true,
@@ -52,10 +56,12 @@ class AdminWargaApiController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'phone' => $user->phone,
-                'rt_rw' => $user->rt_rw,
-                'address' => $user->address,
+                'rt' => $user->rt,
+                'rw' => $user->rw,
+                'rt_rw' => "$rtStr / $rwStr",
+                'address' => $user->address ?? '-',
                 'verification_status' => $user->verification_status ?? 'unverified',
-                'registered_date' => $user->created_at->format('d M Y'),
+                'registered_date' => $user->created_at ? $user->created_at->format('d M Y') : '-',
                 'kyc' => $kyc ? [
                     'id' => $kyc->id,
                     'status' => $kyc->status,
@@ -66,7 +72,7 @@ class AdminWargaApiController extends Controller
                     'rw' => $kyc->rw_from_ocr,
                     'kecamatan' => $kyc->kecamatan_from_ocr,
                     'desa' => $kyc->desa_from_ocr,
-                    'submitted_at' => $kyc->created_at->format('d M Y H:i'),
+                    'submitted_at' => $kyc->created_at ? $kyc->created_at->format('d M Y H:i') : '-',
                 ] : null,
             ],
         ]);
