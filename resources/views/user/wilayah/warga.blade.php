@@ -27,12 +27,10 @@
             </div>
 
             <!-- Filter & Search Bar -->
-            <div class="max-w-5xl mx-auto mb-12 animate-section">
-                <div class="backdrop-blur-sm bg-white/70 rounded-3xl p-4 md:p-6 border border-white/80 shadow-lg">
-                    <div class="flex flex-col md:flex-row gap-6 justify-end items-center w-full">
-                        {{-- Search Input (Style gradient) --}}
-                        <div class="w-full lg:w-fit flex items-center justify-end">
-                            <form action="{{ route('wilayah.warga.index') }}" method="GET" class="w-full sm:w-[280px] lg:w-[320px] relative group flex-shrink-0">
+            <div class="max-w-5xl mx-auto mb-12 animate-section flex justify-center">
+                {{-- Search Input (Style gradient) --}}
+                <div class="w-full sm:w-auto">
+                            <form action="{{ route('wilayah.warga.index') }}" method="GET" class="w-full sm:w-[400px] lg:w-[500px] relative group flex-shrink-0">
                                 <div class="absolute -inset-0.5 bg-gradient-to-r from-blue-500 via-blue-400 to-amber-400 rounded-full opacity-70 group-hover:opacity-100 transition-opacity duration-300"></div>
                                 <div class="relative flex items-center bg-white rounded-full overflow-hidden">
                                     <input type="text" name="search" value="{{ $search }}" placeholder="Cari nama warga..." 
@@ -44,8 +42,6 @@
                                     </button>
                                 </div>
                             </form>
-                        </div>
-                    </div>
                 </div>
             </div>
 

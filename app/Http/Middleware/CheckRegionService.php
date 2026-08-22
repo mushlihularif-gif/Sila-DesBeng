@@ -34,7 +34,14 @@ class CheckRegionService
         }
 
         // Cek apakah region ini mengaktifkan layanan tersebut
-        $regionService = RegionService::where('region_id', $regionId)
+        // Periksa region_id user dan semua parent-nya (RT -> RW -> Desa)
+        $relevantRegionIds = [$regionId];
+        $ancestorIds = \App\Models\Region::getAncestorIds($regionId);
+        if ($ancestorIds) {
+            $relevantRegionIds = array_merge($relevantRegionIds, $ancestorIds);
+        }
+
+        $regionService = RegionService::whereIn('region_id', $relevantRegionIds)
             ->whereHas('service', function($q) use ($serviceSlug) {
                 $q->where('slug', $serviceSlug);
             })
@@ -63,8 +70,17 @@ class CheckRegionService
         // Cek eksklusivitas layanan (hanya untuk warga lokal)
         if ($regionService->is_exclusive) {
             $isAuthorized = false;
-            if (auth()->check() && auth()->user()->region_id == $regionId) {
-                $isAuthorized = true;
+            if (auth()->check()) {
+                $userRegionId = auth()->user()->region_id;
+                if ($userRegionId == $regionId) {
+                    $isAuthorized = true;
+                } else {
+                    // Cek apakah region user adalah anak/turunan dari region layanan
+                    $ancestorIds = \App\Models\Region::getAncestorIds($userRegionId);
+                    if (in_array($regionId, $ancestorIds) || in_array($regionService->region_id, $ancestorIds) || $userRegionId == $regionService->region_id) {
+                        $isAuthorized = true;
+                    }
+                }
             }
 
             if (!$isAuthorized) {

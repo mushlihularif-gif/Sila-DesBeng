@@ -54,4 +54,17 @@ class Announcement extends Model
     {
         return $this->hasMany(AnnouncementImage::class);
     }
+
+    public function getCoverImageAttribute()
+    {
+        if ($this->image_path) {
+            return $this->image_path;
+        }
+        $firstImage = $this->images()->first();
+        if ($firstImage) {
+            return $firstImage->image_path;
+        }
+        return null;
+    }
 }
+

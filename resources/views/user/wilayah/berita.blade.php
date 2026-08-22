@@ -22,7 +22,7 @@
                     <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Berita</span>
                 </h1>
                 <p class="text-gray-700 text-lg mt-2 mb-6">
-                    Buat dan kelola konten artikel, berita, atau kegiatan warga.
+                    Buat dan kelola berita atau kegiatan warga.
                 </p>
                 <div class="flex flex-col sm:flex-row gap-3 justify-center">
                     <a href="{{ route('announcements.index') }}" class="inline-flex items-center justify-center px-6 py-3 rounded-full bg-white text-blue-500 font-medium hover:bg-gray-50 shadow-md hover:shadow-lg transition-all border border-blue-200 focus:outline-none">
@@ -91,7 +91,7 @@
             @if($beritas->count() > 0)
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     @foreach($beritas as $item)
-                        <div class="group flex flex-col backdrop-blur-sm bg-white/80 rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                        <div class="group flex flex-col bg-white/80 rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
                             
                             {{-- Image Header (Prominent) --}}
                             <div class="h-56 relative overflow-hidden bg-gray-100">
@@ -190,7 +190,7 @@
                     <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-5 border border-gray-100">
                         <svg class="h-10 w-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"></path></svg>
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-800 mb-2">Belum ada konten</h3>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-2">Belum ada berita</h3>
                     <p class="text-gray-600 mb-6 max-w-md mx-auto">Saat ini belum ada berita atau artikel yang diterbitkan.</p>
                     <button @click.prevent="isFormOpen = true" class="inline-flex items-center justify-center px-6 py-3 rounded-full bg-blue-500 text-white font-medium hover:bg-blue-600 shadow-md transition-all">
                          Tulis Berita Baru
@@ -202,89 +202,153 @@
             </div>
 
               <!-- Form Buat Berita -->
-              <div x-show="isFormOpen" style="display: none;" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="max-w-4xl mx-auto pb-10">
-                  <div class="bg-white/80 backdrop-blur-md border border-gray-100 rounded-2xl shadow-sm pt-6 pb-8 px-6 md:pt-8 md:pb-10 md:px-10">
-                      <form action="{{ route('wilayah.berita.store') }}" method="POST" enctype="multipart/form-data">
+              <div x-show="isFormOpen" style="display: none;" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="max-w-3xl mx-auto pb-10">
+                  <div class="bg-white rounded-3xl shadow-[0_4px_24px_rgba(0,0,0,0.04)] border border-slate-100 overflow-hidden">
+                        <form action="{{ route('wilayah.berita.store') }}" method="POST" enctype="multipart/form-data">
                             @csrf
-                            <div>
-                                <div class="flex justify-between items-center mb-6">
-                                    <h3 class="text-2xl leading-6 font-bold text-gray-900" id="modal-title">Tulis Konten Baru</h3>
-                                    <button type="button" @click="isFormOpen = false" class="bg-gray-50 rounded-full p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none transition-all">
-                                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                                    </button>
-                                </div>
-                                
-                                <div class="space-y-5">
-                                    <!-- Judul -->
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-1">Judul Artikel <span class="text-red-500">*</span></label>
-                                        <input type="text" name="title" required class="w-full rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white focus:border-blue-500 focus:ring-blue-500 px-4 py-2.5 text-sm transition-colors" placeholder="Contoh: Warga RT 01 Adakan Lomba...">
-                                    </div>
-                                    
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                        <!-- Kategori -->
-                                        <div>
-                                            <label class="block text-sm font-semibold text-gray-700 mb-1">Kategori Konten <span class="text-red-500">*</span></label>
-                                            <select name="type" required class="w-full rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white focus:border-blue-500 focus:ring-blue-500 px-4 py-2.5 text-sm transition-colors">
-                                                <option value="" disabled selected>Pilih Kategori...</option>
-                                                <option value="Berita"> Berita</option>
-                                                <option value="Kegiatan"> Kegiatan</option>
-                                                <option value="Artikel"> Artikel</option>
-                                            </select>
-                                        </div>
-                                        
-                                        <!-- Jangkauan Publikasi -->
-                                        <div>
-                                            <label class="block text-sm font-semibold text-gray-700 mb-1">Jangkauan Publikasi <span class="text-red-500">*</span></label>
-                                            <select name="target_region_id" required class="w-full rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white focus:border-blue-500 focus:ring-blue-500 px-4 py-2.5 text-sm transition-colors">
-                                                @foreach($jangkauanOptions ?? [] as $opt)
-                                                    <option value="{{ $opt['id'] }}">{{ $opt['label'] }}</option>
-                                                @endforeach
-                                            </select>
-                                            <p class="text-[10px] text-gray-500 mt-1">Pilih tingkat wilayah untuk distribusi konten.</p>
-                                        </div>
-                                    </div>
+                            <div class="pt-8 px-8 md:px-12">
+                              <div class="relative text-center mb-10">
+                                  <button type="button" @click="isFormOpen = false" class="absolute right-0 top-0 bg-slate-50 rounded-full p-2.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 focus:outline-none transition-all">
+                                      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                  </button>
+                                  <h3 class="text-3xl font-bold text-gray-900">Tulis Berita Baru</h3>
+                                  <p class="mt-2 text-sm text-gray-600">Buat dan bagikan berita kegiatan atau dokumentasi wilayah dengan mudah.</p>
+                              </div>
+                              
+                              <div class="space-y-6">
+                                  <!-- Judul -->
+                                  <div>
+                                      <label class="block text-[13px] font-semibold text-slate-600 mb-2">Judul Berita <span class="text-red-500">*</span></label>
+                                      <input type="text" name="title" required class="w-full rounded-2xl border-0 bg-slate-50 py-3.5 px-4 text-sm text-slate-700 placeholder-slate-400 focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all" placeholder="Contoh: Warga RT 01 Adakan Lomba...">
+                                  </div>
+                                  
+                                                                    <!-- Kategori & Target -->
+                                  <input type="hidden" name="target_region_id" value="{{ auth()->user()->region_id }}">
+                                  <div>
+                                      <label class="block text-[13px] font-semibold text-slate-600 mb-2">Kategori Berita <span class="text-red-500">*</span></label>
+                                      <div class="relative">
+                                          <select name="type" required class="appearance-none w-full rounded-2xl border-0 bg-slate-50 py-3.5 px-4 text-sm text-slate-700 focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all">
+                                              <option value="" disabled selected>Pilih Kategori...</option>
+                                              <option value="Berita"> Berita</option>
+                                              <option value="Kegiatan"> Kegiatan</option>
+                                              <option value="Artikel"> Artikel</option>
+                                          </select>
+                                          <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-400">
+                                              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                          </div>
+                                      </div>
+                                  </div>
 
-                                    <!-- Upload Foto Utama -->
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-1">Gambar Utama (Cover) <span class="text-gray-400 font-normal">(Disarankan)</span></label>
-                                        <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-2xl hover:border-blue-400 transition-colors group bg-gray-50/30">
-                                            <div class="space-y-1 text-center">
-                                                <svg class="mx-auto h-12 w-12 text-gray-400 group-hover:text-blue-500 transition-colors" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
-                                                    <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                                                </svg>
-                                                <div class="flex text-sm text-gray-600 justify-center">
-                                                    <label for="image-upload" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none">
-                                                        <span>Pilih File Gambar</span>
-                                                        <input id="image-upload" name="image" type="file" class="sr-only" accept="image/jpeg,image/png,image/jpg">
-                                                    </label>
+                                  <!-- Upload Foto Utama -->
+                                  <div>
+                                      <label class="block text-[13px] font-semibold text-slate-600 mb-2">Foto Dokumentasi Berita <span class="text-slate-400 font-normal">(Opsional, bisa lebih dari 1 foto)</span></label>
+                                        
+                                        <div class="mt-2">
+                                            <!-- Grid Preview -->
+                                            <div id="multi-preview-grid" class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4" style="display: none;">
+                                                <!-- Previews will be injected here -->
+                                            </div>
+                                            
+                                            <!-- Hidden inputs container -->
+                                            <div id="hidden-inputs-container"></div>
+                                            
+                                            <!-- Add Photo Box (KYC Style) -->
+                                            <div class="mt-1 flex flex-col items-center justify-center p-6 border-2 border-gray-300 border-dashed rounded-xl relative hover:bg-gray-50 hover:border-gray-400 transition-all cursor-pointer group text-center overflow-hidden" onclick="addPhotoField()">
+                                                <div class="space-y-1 text-center w-full">
+                                                    <div class="mx-auto w-16 h-16 rounded-full bg-white flex items-center justify-center mb-3 shadow-sm text-slate-500 border border-slate-200 group-hover:scale-110 transition-transform duration-300">
+                                                        <svg class="h-8 w-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                                                        </svg>
+                                                    </div>
+                                                    <div class="flex flex-col text-center">
+                                                        <span class="font-bold text-gray-700 text-base">Tambah Foto</span>
+                                                        <p class="text-xs text-gray-500 mt-1">PNG, JPG, JPEG up to 5MB. Bisa lebih dari satu.</p>
+                                                    </div>
                                                 </div>
-                                                <p class="text-xs text-gray-500">Rasio 16:9 disarankan, PNG/JPG maksimal 2MB</p>
                                             </div>
                                         </div>
                                     </div>
+                                    <script>
+                                        let photoCounter = 0;
+                                        
+                                        function addPhotoField() {
+                                            photoCounter++;
+                                            const id = 'img_upload_' + photoCounter;
+                                            const previewId = 'preview_img_' + photoCounter;
+                                            
+                                            // Create hidden file input
+                                            const input = document.createElement('input');
+                                            input.type = 'file';
+                                            input.name = 'images[]';
+                                            input.accept = 'image/*';
+                                            input.className = 'd-none sr-only';
+                                            input.id = id;
+                                            
+                                            input.onchange = function() {
+                                                if (this.files && this.files[0]) {
+                                                    // Show grid if hidden
+                                                    document.getElementById('multi-preview-grid').style.display = 'grid';
+                                                    
+                                                    // Create preview box
+                                                    const grid = document.getElementById('multi-preview-grid');
+                                                    const box = document.createElement('div');
+                                                    box.className = 'w-full h-32 rounded-lg overflow-hidden border border-slate-200 shadow-sm relative group';
+                                                    box.id = 'box_' + photoCounter;
+                                                    
+                                                    box.innerHTML = `
+                                                        <img id="${previewId}" class="w-full h-full object-cover bg-gray-100" src="" alt="Preview">
+                                                        <button type="button" onclick="removePhoto(${photoCounter})" class="absolute top-2 right-2 w-8 h-8 bg-red-500/80 hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-opacity">
+                                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                                        </button>
+                                                    `;
+                                                    grid.appendChild(box);
+                                                    
+                                                    // Trigger cropper
+                                                    if (typeof initGlobalCropper === 'function') {
+                                                        initGlobalCropper(this, previewId, NaN, true); // Bebas ratio allowed
+                                                    }
+                                                } else {
+                                                    // User canceled file dialog
+                                                    this.remove();
+                                                }
+                                            };
+                                            
+                                            document.getElementById('hidden-inputs-container').appendChild(input);
+                                            
+                                            // Trigger file dialog
+                                            input.click();
+                                        }
+                                        
+                                        function removePhoto(idNum) {
+                                            const input = document.getElementById('img_upload_' + idNum);
+                                            const box = document.getElementById('box_' + idNum);
+                                            if (input) input.remove();
+                                            if (box) box.remove();
+                                            
+                                            const grid = document.getElementById('multi-preview-grid');
+                                            if (grid.children.length === 0) {
+                                                grid.style.display = 'none';
+                                            }
+                                        }
+                                    </script>
+                                    
+    <!-- Deskripsi / Editor -->
+                                  <div>
+                                      <label class="block text-[13px] font-semibold text-slate-600 mb-2">Isi Berita <span class="text-red-500">*</span></label>
+                                      <textarea name="description" rows="8" required class="w-full rounded-2xl border-0 bg-slate-50 py-4 px-4 text-sm text-slate-700 placeholder-slate-400 focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all" placeholder="Tuliskan isi berita di sini..."></textarea>
+                                  </div>
 
-                                    <!-- Deskripsi / Editor -->
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-1">Isi Konten <span class="text-red-500">*</span></label>
-                                        <textarea name="description" rows="8" required class="w-full rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white focus:border-blue-500 focus:ring-blue-500 px-4 py-3 text-sm transition-colors" placeholder="Tuliskan isi berita atau artikel di sini..."></textarea>
-                                    </div>
-
-                                </div>
+                              </div>
                             </div>
-                            <div class="bg-gray-50/80 px-6 py-5 sm:px-8 sm:flex sm:flex-row-reverse border-t border-gray-100">
-                                <button type="submit" class="w-full inline-flex justify-center rounded-xl border border-transparent shadow-sm px-6 py-2.5 bg-blue-500 text-base font-semibold text-white hover:bg-blue-600 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm transition-all">
-                                    Publikasikan
-                                </button>
-                                <button type="button" @click="isFormOpen = false" class="mt-3 w-full inline-flex justify-center rounded-xl border border-gray-300 shadow-sm px-6 py-2.5 bg-white text-base font-semibold text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm transition-all">
-                                    Simpan Draft
-                                </button>
-                            </div>
-                        </form>
-                  </div>
-              </div>
-        </div>
-    </section>
+                            <div class="mt-10 bg-slate-50 border-t border-slate-100 px-8 md:px-12 py-6 flex justify-end gap-3">
+                              <button type="button" @click="isFormOpen = false" class="px-6 py-3 rounded-full border border-slate-200 text-slate-600 bg-white hover:bg-slate-50 font-medium text-sm transition-colors shadow-sm">Batal</button>
+                              <button type="submit" class="px-6 py-3 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all focus:ring-4 focus:ring-blue-100 shadow-sm hover:shadow-md">Terbitkan Berita</button>
+                          </div>
+                      </form>
+                    </div>
+                </div>
+            </div>
+      </section>
 </main>
 @endsection
 

@@ -95,7 +95,7 @@
         
         <div class="cropper-ratio-group" id="cropper-ratio-group">
             <button type="button" class="btn-ratio active" data-ratio="1">1:1 (Persegi)</button>
-            <button type="button" class="btn-ratio" data-ratio="1.3333333333333333">4:3 (Lanskap)</button>
+            <button type="button" class="btn-ratio" data-ratio="1.3333333333333333">4:3 (Melebar)</button>
             <button type="button" class="btn-ratio" data-ratio="NaN">Bebas</button>
         </div>
 

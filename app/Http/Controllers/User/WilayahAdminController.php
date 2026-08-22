@@ -10,6 +10,8 @@ class WilayahAdminController extends Controller
 {
     use \App\Traits\ChecksStaffDelegation;
 
+
+
     public function indexLaporan(Request $request)
     {
         if ($splash = $this->checkDelegation($request, 'pelaporan', 'Pelaporan Masyarakat')) {
@@ -120,7 +122,7 @@ class WilayahAdminController extends Controller
             'event_date' => 'nullable|date',
             'location' => 'nullable|string|max:255',
             'description' => 'required|string',
-            'image' => 'nullable|image|max:2048'
+            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120'
         ]);
 
         $user = auth()->user();
@@ -200,7 +202,7 @@ class WilayahAdminController extends Controller
             'event_date' => 'nullable|date',
             'location' => 'nullable|string|max:255',
             'description' => 'required|string',
-            'image' => 'nullable|image|max:2048'
+            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120'
         ]);
 
         $user = auth()->user();
