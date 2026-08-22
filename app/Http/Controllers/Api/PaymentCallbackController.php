@@ -8,17 +8,14 @@ use App\Models\GasOrder;
 use App\Models\RentalBooking;
 use App\Models\TransactionReceipt;
 use App\Models\WalletTransaction;
-use Midtrans\Config;
+use App\Models\SystemSetting;
 use Midtrans\Notification;
 
 class PaymentCallbackController extends Controller
 {
     public function __construct()
     {
-        Config::$serverKey = config('services.midtrans.server_key');
-        Config::$isProduction = config('services.midtrans.is_production');
-        Config::$isSanitized = true;
-        Config::$is3ds = true;
+        SystemSetting::applyMidtransConfig();
     }
 
     public function handleNotification(Request $request)

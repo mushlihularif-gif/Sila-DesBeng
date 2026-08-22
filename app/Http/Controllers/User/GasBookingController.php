@@ -152,10 +152,7 @@ class GasBookingController extends Controller
 
         // Midtrans Integration using Core API
         if ($validated['payment_method'] !== 'tunai') {
-            \Midtrans\Config::$serverKey = config('services.midtrans.server_key');
-            \Midtrans\Config::$isProduction = config('services.midtrans.is_production');
-            \Midtrans\Config::$isSanitized = true;
-            \Midtrans\Config::$is3ds = true;
+            SystemSetting::applyMidtransConfig();
 
             $paymentMethod = $validated['payment_method'];
             $paymentType = '';
@@ -352,10 +349,7 @@ class GasBookingController extends Controller
         // We do not change the local $order->order_number because it's used for display
         $midtransOrderId = $order->order_number . '-' . time();
 
-        \Midtrans\Config::$serverKey = config('services.midtrans.server_key');
-        \Midtrans\Config::$isProduction = config('services.midtrans.is_production');
-        \Midtrans\Config::$isSanitized = true;
-        \Midtrans\Config::$is3ds = true;
+        SystemSetting::applyMidtransConfig();
 
         $paymentType = '';
         if (str_starts_with($newMethod, 'bank_transfer_')) {

@@ -27,6 +27,17 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // =====================================================
+        // KONFIGURASI API KEY DINAMIS (dari panel Super Admin Sistem)
+        // Timpa config('services.*') dengan kredensial dari tabel api_credentials
+        // supaya key bisa diganti lewat dashboard tanpa edit .env/redeploy.
+        //
+        // Pemetaan kategori -> kunci config didefinisikan di config/api_providers.php,
+        // jadi menambah provider baru cukup mengedit file config itu saja.
+        // Field yang belum diisi otomatis fallback ke nilai .env.
+        // =====================================================
+        \App\Models\ApiCredential::applyToConfig();
+
+        // =====================================================
         // MACRO: Global Smart Search
         // =====================================================
         Builder::macro('searchWhereLike', function ($attributes, string $searchTerm) {

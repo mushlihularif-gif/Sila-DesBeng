@@ -1,100 +1,237 @@
 @extends('admin.layouts.admin')
 
-@section('title', 'Integrasi Payment Gateway')
+@section('title', 'Integrasi & API Key Platform')
+
+@php
+    $appUrl = rtrim(config('app.url'), '/');
+@endphp
 
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Sistem Platform /</span> Integrasi Payment Gateway</h4>
+    <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Sistem Platform /</span> Integrasi &amp; API Key Platform</h4>
+    <p class="text-muted mb-4" style="margin-top: -1rem;">
+        Semua kredensial pihak ketiga disimpan terenkripsi di database, satu kartu = satu kategori = satu baris data.
+        Menekan <strong>Terapkan</strong> akan <strong>menimpa</strong> data lama kategori tersebut, jadi tidak ada data yang menumpuk.
+    </p>
 
     @if(session('success'))
         <div class="alert alert-success alert-dismissible" role="alert">
-            {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
-
-    @if($errors->any())
-        <div class="alert alert-danger alert-dismissible" role="alert">
-            <h6 class="alert-heading d-flex align-items-center fw-bold mb-1"><i class="bx bx-error-circle me-2"></i>Terjadi Kesalahan!</h6>
-            <ul class="mb-0 ps-3">
-                @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
+            <i class="bx bx-check-circle me-1"></i> {{ session('success') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
 
     <div class="row">
         <div class="col-lg-8">
+
+            {{-- ============================================================
+                 Pengaturan gateway yang sifatnya bisnis, bukan kredensial
+                 ============================================================ --}}
             <div class="card mb-4">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <div>
-                        <h5 class="mb-1"><i class="bx bx-bolt-circle me-2 text-primary"></i>Kredensial Payment Gateway Platform</h5>
-                        <small class="text-muted"><i class="bx bx-info-circle"></i> Satu kredensial dipakai sistem untuk seluruh transaksi dari semua desa/kecamatan.</small>
-                    </div>
-                    <span class="badge bg-label-{{ $settings->gateway_is_production ? 'success' : 'warning' }} rounded-pill">
-                        {{ $settings->gateway_is_production ? 'Production' : 'Sandbox' }}
-                    </span>
+                <div class="card-header">
+                    <h5 class="mb-1"><i class="bx bx-cog me-2 text-primary"></i>Pengaturan Gateway Platform</h5>
+                    <small class="text-muted"><i class="bx bx-info-circle"></i> Berlaku untuk seluruh transaksi dari semua desa/kecamatan.</small>
                 </div>
                 <div class="card-body">
+                    @if($errors->hasBag('umum'))
+                        <div class="alert alert-danger">
+                            <ul class="mb-0 ps-3">
+                                @foreach($errors->getBag('umum')->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
                     <form action="{{ route('admin.sistem-platform.gateway.update') }}" method="POST">
                         @csrf
                         @method('PUT')
-
                         <div class="row g-4">
                             <div class="col-md-6">
-                                <label class="form-label fw-semibold">Penyedia Gateway</label>
+                                <label class="form-label fw-semibold">Penyedia Gateway Aktif</label>
                                 <select name="gateway_provider" class="form-select">
                                     <option value="">- Belum dipilih -</option>
+                                    <option value="midtrans" {{ old('gateway_provider', $settings->gateway_provider) === 'midtrans' ? 'selected' : '' }}>Midtrans</option>
                                     <option value="xendit" {{ old('gateway_provider', $settings->gateway_provider) === 'xendit' ? 'selected' : '' }}>Xendit for Platforms</option>
                                     <option value="oy" {{ old('gateway_provider', $settings->gateway_provider) === 'oy' ? 'selected' : '' }}>OY! Indonesia</option>
-                                    <option value="midtrans" {{ old('gateway_provider', $settings->gateway_provider) === 'midtrans' ? 'selected' : '' }}>Midtrans</option>
                                 </select>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label fw-semibold d-block">Mode</label>
-                                <div class="form-check form-switch mt-2">
-                                    <input class="form-check-input" type="checkbox" name="gateway_is_production" id="gateway_is_production" value="1" {{ old('gateway_is_production', $settings->gateway_is_production) ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="gateway_is_production">Aktifkan Mode Production</label>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">Secret / Server Key</label>
-                                <input type="password" name="gateway_secret_key" class="form-control" placeholder="{{ $settings->gateway_secret_key ? '•••••••• (tersimpan, kosongkan jika tidak diganti)' : 'Belum diisi' }}" autocomplete="off">
-                                <small class="text-muted">Dienkripsi otomatis. Kosongkan kalau tidak ingin mengubah key yang sudah ada.</small>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">Public / Client Key</label>
-                                <input type="password" name="gateway_public_key" class="form-control" placeholder="{{ $settings->gateway_public_key ? '•••••••• (tersimpan, kosongkan jika tidak diganti)' : 'Belum diisi' }}" autocomplete="off">
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">Fee Platform (%)</label>
+                                <label class="form-label fw-semibold">Fee Platform (%) <span class="text-danger">*</span></label>
                                 <div class="input-group">
-                                    <input type="number" step="0.01" min="0" max="100" name="platform_fee_percentage" class="form-control" value="{{ old('platform_fee_percentage', $settings->platform_fee_percentage ?? 0) }}" required>
+                                    <input type="number" step="0.01" min="0" max="100" name="platform_fee_percentage"
+                                           class="form-control"
+                                           value="{{ old('platform_fee_percentage', $settings->platform_fee_percentage ?? 0) }}" required>
                                     <span class="input-group-text">%</span>
                                 </div>
                             </div>
-                        </div>
-
-                        <div class="mt-4 pt-3 border-top text-end">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bx bx-save me-1"></i> Simpan Pengaturan
-                            </button>
+                            <div class="col-12 text-end">
+                                <button type="submit" class="btn btn-outline-primary">
+                                    <i class="bx bx-save me-1"></i> Simpan Pengaturan Gateway
+                                </button>
+                            </div>
                         </div>
                     </form>
                 </div>
             </div>
+
+            {{-- ============================================================
+                 Kartu kredensial, dirender otomatis dari config/api_providers.php
+                 ============================================================ --}}
+            @foreach($providers as $category => $provider)
+                @php
+                    $baris     = $tersimpan->get($category);
+                    $nilai     = $baris?->credentials ?? [];
+                    $sudahIsi  = ! empty($nilai);
+                    $bagErrors = $errors->getBag($category);
+                @endphp
+
+                <div class="card mb-4" id="kartu-{{ $category }}">
+                    <div class="card-header d-flex justify-content-between align-items-start">
+                        <div>
+                            <h5 class="mb-1">
+                                <i class="bx {{ $provider['icon'] ?? 'bx-key' }} me-2 text-primary"></i>{{ $provider['label'] }}
+                            </h5>
+                            <small class="text-muted">{{ $provider['description'] ?? '' }}</small>
+                        </div>
+                        <span class="badge bg-label-{{ $sudahIsi ? 'success' : 'secondary' }} rounded-pill flex-shrink-0 ms-2">
+                            {{ $sudahIsi ? 'Aktif dari panel' : 'Memakai .env' }}
+                        </span>
+                    </div>
+
+                    <div class="card-body">
+                        @if($bagErrors->any())
+                            <div class="alert alert-danger">
+                                <h6 class="alert-heading fw-bold mb-1"><i class="bx bx-error-circle me-1"></i>Gagal diterapkan</h6>
+                                <ul class="mb-0 ps-3">
+                                    @foreach($bagErrors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+
+                        @if(! empty($provider['notes']))
+                            <div class="alert alert-info py-2">
+                                <ul class="mb-0 ps-3 small">
+                                    @foreach($provider['notes'] as $note)
+                                        <li>{{ str_replace('{APP_URL}', $appUrl, $note) }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+
+                        <form action="{{ route('admin.sistem-platform.credential.update', $category) }}" method="POST">
+                            @csrf
+                            @method('PUT')
+                            <div class="row g-4">
+                                @foreach($provider['fields'] as $field => $definition)
+                                    @php
+                                        $type     = $definition['type'] ?? 'text';
+                                        $terisi   = old($field, $nilai[$field] ?? '');
+                                        $adaError = $bagErrors->has($field);
+                                    @endphp
+
+                                    @if($type === 'boolean')
+                                        <div class="col-12">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox"
+                                                       name="{{ $field }}" id="{{ $category }}_{{ $field }}" value="1"
+                                                       {{ old($field, $nilai[$field] ?? false) ? 'checked' : '' }}>
+                                                <label class="form-check-label fw-semibold" for="{{ $category }}_{{ $field }}">
+                                                    {{ $definition['label'] }}
+                                                </label>
+                                            </div>
+                                            @if(! empty($definition['hint']))
+                                                <small class="text-muted">{{ $definition['hint'] }}</small>
+                                            @endif
+                                        </div>
+
+                                    @elseif($type === 'select')
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold">{{ $definition['label'] }} <span class="text-danger">*</span></label>
+                                            <select name="{{ $field }}" class="form-select @if($adaError) is-invalid @endif" required>
+                                                <option value="">- Pilih -</option>
+                                                @foreach($definition['options'] ?? [] as $opsi => $labelOpsi)
+                                                    <option value="{{ $opsi }}" {{ (string) $terisi === (string) $opsi ? 'selected' : '' }}>{{ $labelOpsi }}</option>
+                                                @endforeach
+                                            </select>
+                                            @if($adaError)<div class="invalid-feedback d-block">{{ $bagErrors->first($field) }}</div>@endif
+                                        </div>
+
+                                    @else
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold">
+                                                {{ $definition['label'] }} <span class="text-danger">*</span>
+                                            </label>
+                                            <div class="input-group">
+                                                <input type="{{ $type === 'secret' ? 'password' : 'text' }}"
+                                                       name="{{ $field }}"
+                                                       class="form-control @if($adaError) is-invalid @endif"
+                                                       value="{{ $terisi }}"
+                                                       placeholder="{{ $definition['placeholder'] ?? '' }}"
+                                                       @if(isset($definition['min'])) minlength="{{ $definition['min'] }}" @endif
+                                                       @if(isset($definition['max'])) maxlength="{{ $definition['max'] }}" @endif
+                                                       autocomplete="off"
+                                                       spellcheck="false"
+                                                       required>
+                                                @if($type === 'secret')
+                                                    <button class="btn btn-outline-secondary toggle-rahasia" type="button" tabindex="-1" title="Tampilkan / sembunyikan">
+                                                        <i class="bx bx-hide"></i>
+                                                    </button>
+                                                @endif
+                                                @if($adaError)<div class="invalid-feedback">{{ $bagErrors->first($field) }}</div>@endif
+                                            </div>
+                                            <small class="text-muted">
+                                                @if(isset($definition['min']) && isset($definition['max']))
+                                                    Wajib diisi, {{ $definition['min'] }}&ndash;{{ $definition['max'] }} karakter.
+                                                @else
+                                                    Wajib diisi.
+                                                @endif
+                                                {{ $definition['hint'] ?? '' }}
+                                            </small>
+                                        </div>
+                                    @endif
+                                @endforeach
+
+                                <div class="col-12 d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">
+                                        @if($baris)
+                                            <i class="bx bx-time-five"></i>
+                                            Terakhir diubah {{ $baris->updated_at?->translatedFormat('d M Y H:i') }}
+                                            @if($baris->updated_by) oleh {{ $baris->updated_by }} @endif
+                                        @else
+                                            <i class="bx bx-lock-alt"></i> Nilai akan dienkripsi AES-256 sebelum disimpan.
+                                        @endif
+                                    </small>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bx bx-check me-1"></i> Terapkan
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+
+                        @if($baris)
+                            <hr class="my-3">
+                            <form action="{{ route('admin.sistem-platform.credential.destroy', $category) }}" method="POST"
+                                  onsubmit="return confirm('Hapus kredensial {{ $provider['label'] }}? Sistem akan kembali memakai nilai dari file .env.');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="bx bx-trash me-1"></i> Hapus &amp; kembalikan ke .env
+                                </button>
+                            </form>
+                        @endif
+                    </div>
+                </div>
+            @endforeach
+
         </div>
 
         <div class="col-lg-4">
             <div class="d-flex align-items-center bg-light rounded-3 p-3 shadow-sm mb-3">
                 <div class="avatar flex-shrink-0 me-3">
-                    <span class="avatar-initial rounded bg-label-primary">
-                        <i class="bx bx-percentage fs-4"></i>
-                    </span>
+                    <span class="avatar-initial rounded bg-label-primary"><i class="bx bx-percentage fs-4"></i></span>
                 </div>
                 <div>
                     <h6 class="mb-0 fw-bold text-dark">Fee Platform Saat Ini</h6>
@@ -102,11 +239,50 @@
                 </div>
             </div>
 
-            <div class="alert alert-info mb-0">
+            <div class="card mb-3">
+                <div class="card-header pb-2"><h6 class="mb-0"><i class="bx bx-list-check me-1"></i>Status Integrasi</h6></div>
+                <div class="card-body pt-2">
+                    <ul class="list-unstyled mb-0">
+                        @foreach($providers as $category => $provider)
+                            @php $aktif = ! empty($tersimpan->get($category)?->credentials); @endphp
+                            <li class="d-flex justify-content-between align-items-center py-1">
+                                <span class="small">{{ $provider['label'] }}</span>
+                                <i class="bx {{ $aktif ? 'bx-check-circle text-success' : 'bx-minus-circle text-muted' }}"></i>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+
+            <div class="alert alert-info mb-3">
                 <i class="bx bx-info-circle me-1"></i>
-                Fee saat ini <strong>0%</strong> — biaya server/hosting ditanggung APBD lewat Diskominfotik. BUM Desa tidak pernah melihat kredensial ini, mereka cukup mendaftarkan rekening bank tujuan pencairan.
+                Kredensial di halaman ini menimpa nilai di file <code>.env</code> secara otomatis begitu diterapkan &mdash;
+                tidak perlu edit file server atau restart aplikasi. Kategori yang belum diisi tetap memakai <code>.env</code>.
+            </div>
+
+            <div class="alert alert-secondary mb-0">
+                <i class="bx bx-plus-circle me-1"></i>
+                <strong>Menambah layanan baru?</strong><br>
+                Daftarkan saja di <code>config/api_providers.php</code>. Kartu, validasi, dan penyimpanannya muncul sendiri
+                di halaman ini tanpa perlu migration atau mengubah tampilan.
             </div>
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+    document.querySelectorAll('.toggle-rahasia').forEach(function (tombol) {
+        tombol.addEventListener('click', function () {
+            var input = tombol.parentElement.querySelector('input');
+            var ikon = tombol.querySelector('i');
+            var disembunyikan = input.type === 'password';
+
+            input.type = disembunyikan ? 'text' : 'password';
+            ikon.classList.toggle('bx-hide', !disembunyikan);
+            ikon.classList.toggle('bx-show', disembunyikan);
+        });
+    });
+</script>
+@endpush
 @endsection

@@ -739,6 +739,11 @@
                                 <div>Log Keamanan & Audit</div>
                             </a>
                         </li>
+                        <li class="menu-item {{ request()->routeIs('admin.sistem-platform.expenses') ? 'active' : '' }}">
+                            <a href="{{ route('admin.sistem-platform.expenses') }}" class="menu-link">
+                                <div>Biaya Server & Domain</div>
+                            </a>
+                        </li>
                     </ul>
                 </li>
                 @endif

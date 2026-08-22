@@ -7,6 +7,7 @@ use App\Models\Gas;
 use App\Models\GasOrder;
 use App\Models\TransactionReceipt;
 use App\Models\AdminNotification;
+use App\Models\SystemSetting;
 use Illuminate\Http\Request;
 
 class GasBookingController extends Controller
@@ -110,10 +111,7 @@ class GasBookingController extends Controller
 
         // Midtrans Integration using Core API
         if ($validated['payment_method'] !== 'tunai') {
-            \Midtrans\Config::$serverKey = config('services.midtrans.server_key');
-            \Midtrans\Config::$isProduction = config('services.midtrans.is_production');
-            \Midtrans\Config::$isSanitized = true;
-            \Midtrans\Config::$is3ds = true;
+            SystemSetting::applyMidtransConfig();
 
             $paymentMethod = $validated['payment_method'];
             $paymentType = '';

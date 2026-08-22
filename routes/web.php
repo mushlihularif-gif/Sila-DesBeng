@@ -518,8 +518,16 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
     Route::prefix('sistem-platform')->middleware('role:super_admin')->group(function () {
         Route::get('/gateway', [SuperAdminSettingController::class, 'gateway'])->name('admin.sistem-platform.gateway');
         Route::put('/gateway', [SuperAdminSettingController::class, 'gatewayUpdate'])->name('admin.sistem-platform.gateway.update');
+        // Satu route untuk semua kategori kredensial — kategori baru cukup didaftarkan
+        // di config/api_providers.php, tanpa menambah route.
+        Route::put('/gateway/kredensial/{category}', [SuperAdminSettingController::class, 'credentialUpdate'])->name('admin.sistem-platform.credential.update');
+        Route::delete('/gateway/kredensial/{category}', [SuperAdminSettingController::class, 'credentialDestroy'])->name('admin.sistem-platform.credential.destroy');
         Route::get('/monitoring', [SuperAdminSettingController::class, 'monitoring'])->name('admin.sistem-platform.monitoring');
         Route::get('/log-keamanan', [SuperAdminSettingController::class, 'securityLog'])->name('admin.sistem-platform.security-log');
+        Route::get('/biaya-operasional', [SuperAdminSettingController::class, 'expenses'])->name('admin.sistem-platform.expenses');
+        Route::post('/biaya-operasional', [SuperAdminSettingController::class, 'expensesStore'])->name('admin.sistem-platform.expenses.store');
+        Route::put('/biaya-operasional/{expense}/lunas', [SuperAdminSettingController::class, 'expensesMarkPaid'])->name('admin.sistem-platform.expenses.mark-paid');
+        Route::delete('/biaya-operasional/{expense}', [SuperAdminSettingController::class, 'expensesDestroy'])->name('admin.sistem-platform.expenses.destroy');
     });
 
     // Route Unit
