@@ -120,7 +120,7 @@
             }
         }
 
-        function showToast(message, type = 'success') {
+        window.showToast = function(message, type = 'success') {
             const toast = document.createElement('div');
             
             let bgClass = 'bg-green-500';

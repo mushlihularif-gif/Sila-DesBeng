@@ -566,3 +566,80 @@ Dalam persiapan pengajuan pendanaan lomba KMIPN dan strategi implementasi sistem
 - Dana Buffer Google Cloud Console (Mencakup Kuota Maps API & Gemini AI API): Rp 300.000. *(Catatan: Maps API digunakan untuk fitur Peta Interaktif dan Titik Lokasi Pelaporan Warga. Gemini AI digunakan untuk SilaDesBeng Assistant sebagai AI cerdas yang menjawab pertanyaan warga).*
 - Akun Google Play Console (Satu kali bayar untuk publish APK): Rp 400.000
 - **Total Estimasi:** **Rp 1.590.000**
+
+
+## CATATAN PENTING - VERIFIKASI KYC (DITANGGUHKAN)
+Saat ini (tahap development), fitur wajib verifikasi KTP (KYC) untuk akses Pelaporan Warga dan halaman Kelola Layanan Wilayah (Admin RT/RW) **DIMATIKAN SEMENTARA**. Hal ini dilakukan agar proses pengembangan UI/UX tidak terhambat oleh proses scan KTP. Setelah tampilan selesai, fitur ini HARUS DIAKTIFKAN KEMBALI di 
+outes/web.php dan LaporanController.php.
+
+
+## CATATAN PENYELESAIAN BUG & LOGIKA SISTEM TERBARU
+
+**1. Bug "Layanan Belum Tersedia" di Panel Admin RT/RW**
+Penyebabnya: Ada kesalahan logika (bug) di Middleware CheckRegionService. Saat sistem mengecek "Apakah layanan ini aktif di daerah ini?", sistem hanya melihat ID Region milik RT/RW. Padahal, yang mengaktifkan layanannya adalah Super Admin Desa. Karena sistem tidak mengecek "induk" (Desa) dari RT tersebut, maka akses Admin RT/RW terblokir seolah-olah layanannya tidak ada. Perbaikannya: Memperbarui CheckRegionService agar turut memeriksa status layanan pada "induk/leluhur" (Desa) dari wilayah user. Sekarang, Admin RT/RW dapat mengakses layanannya dengan lancar.
+
+**2. Tampilan Menu di Halaman Beranda (Homepage)**
+Penyebabnya: Ada pemetaan nama unit layanan yang tidak lengkap di halaman beranda.index.blade.php (seperti Unit Penyewaan Mobil dan Fasilitas Umum terlewatkan dari daftar periksa) sehingga sistem menyembunyikannya secara tidak sengaja untuk user yang login. 
+Perbaikannya:
+- Memperbaiki pemetaan nama layanannya.
+- Halaman Beranda sekarang otomatis menyesuaikan jumlah ikon layanan yang tampil berdasarkan apa yang diaktifkan oleh Super Admin di daerah/desa user tersebut. Jika desa mematikan 1, maka hanya tampil sisa layanannya.
+- Pengecualian Khusus: Layanan Pasar Daerah, Kabar dan Informasi Daerah (Berita), dan Pengumuman akan selalu tampil untuk publik, terlepas dari daerah manapun, tanpa perlu pilih-pilih desa terlebih dahulu.
+- Untuk Guest: Karena lokasinya belum jelas, semua layanan (lengkap) akan tampil, namun mereka akan diminta memilih daerah saat mencoba masuk.
+
+**3. Logika Kewajiban Verifikasi KTP (KYC)**
+Menerima laporan anonim berisiko tinggi (bisa berisi ujaran kebencian tanpa tanggung jawab). Sistem telah dipasang gerbang verifikasi (KYC) tanpa membuat fitur baru, menggunakan modal popup KYC yang sudah ada:
+- Pelaporan Warga: Warga wajib melakukan verifikasi KTP sebelum bisa mengakses form Pelaporan Warga.
+- Admin RT & RW: Karena bertugas memproses laporan warga, mereka juga wajib melakukan verifikasi KTP (sebelum bisa masuk ke menu Kelola Layanan Wilayah). Jika belum, muncul popup peringatan.
+- Berita & Pengumuman (Membaca): Publik bebas membaca tanpa perlu verifikasi.
+- Memesan Layanan: Tetap wajib verifikasi.
+- Popup modal peringatan verifikasi dipasang secara global di layout utama.
+
+
+### 8.8 Keputusan UI Publik: Berita vs Pengumuman
+**Latar Belakang:**
+Secara fungsional, **Berita** (dokumentasi publik, jangkauan luas) dan **Pengumuman** (undangan, edaran, instruksi seperti 17 Agustus atau Goro) adalah dua entitas yang berbeda tujuan. Namun, dalam sistem SilaDesBeng, ketika warga mengklik dan membaca detailnya, mereka dirender menggunakan **satu template desain yang sama** (untuk efisiensi dan keseragaman UI).
+
+**Masalah:**
+Jika menggunakan satu template statis, membaca sebuah pengumuman resmi akan terasa janggal jika di bagian bawahnya terdapat label 'Berita Terkait' atau 'Rekomendasi untuk Anda'.
+
+**Keputusan Desain (Detik.com Style):**
+1. **Tata Letak Elegan:** Desain detail artikel dirombak mengikuti portal profesional (seperti Detik.com). Judul besar di atas, diikuti meta info penulis (`Pemerintah Desa X`) dan waktu rilis (`Hari, Tanggal Bulan Tahun HH:MM WIB`), baru kemudian teks isi.
+2. **Kosakata Dinamis (Smart Rendering):** Meskipun menggunakan satu file Blade template yang sama (`show.blade.php`), sistem ditambahkan kecerdasan untuk mendeteksi `post_category`.
+   - Jika membaca Berita -> Menampilkan label **'Berita Terkait'** dan **'Rekomendasi untuk Anda'**.
+   - Jika membaca Pengumuman -> Label otomatis berubah menjadi **'Pengumuman Terkait'** dan **'Pengumuman Lainnya'** agar konteks formalnya terjaga.
+
+**Nilai Jual untuk Juri KMIPN:**
+Hal ini menunjukkan kedetailan tim dalam merancang UX (User Experience). Sistem tidak hanya fungsional, tetapi juga memiliki logika linguistik yang menyesuaikan diri dengan konteks konten (Context-Aware UI), membuat portal desa terasa sangat profesional.
+
+
+## Catatan Fitur Tambahan (Backlog)
+- **E-KYC Krisis Gas**: Fitur unggah dan pemindaian OCR untuk Kartu Keluarga (KK) saat ini belum diaktifkan di halaman utama KYC, dan akan dirancang/diaktifkan khusus pada saat alur pembelian/distribusi subsidi krisis gas.
+
+
+
+## CATATAN PANDUAN UI/UX (STANDARISASI KMIPN)
+
+**1. Sistem Notifikasi (Toast / Alert):**
+Untuk menjaga konsistensi UI/UX selama penjurian KMIPN, **DILARANG** menggunakan library popup eksternal (seperti SweetAlert2) kecuali memang sudah terpasang secara global di admin panel.
+Untuk antarmuka warga (User/Public UI), sistem WAJIB menggunakan fungsi notifikasi native bawaan sistem yaitu `showToast(message, type)` (yang terpasang di `auth.scripts`) atau notifikasi AlpineJS bawaan. 
+- Format penggunaan: `showToast('Pesan Anda', 'success|error|warning|info')`.
+- Notifikasi ini akan muncul melayang di pojok kanan atas layar secara konsisten.
+
+**2. Penulisan Nama Sistem:**
+Penulisan nama aplikasi di sisi publik dan teks pesan harus konsisten menggunakan **"Siladesbeng"** (bukan SilaDesBeng atau siladesbeng), kecuali untuk keperluan penulisan variabel kode atau logo.
+
+
+## CATATAN PENGUJIAN FITUR (TESTING)
+
+**1. Liveness Detection / Kamera KTP (MediaPipe):**
+- Saat tahap *development* di Laragon (Localhost), browser modern (Chrome, Edge, dll) akan memblokir akses ke WebCam jika URL menggunakan protokol `http://` selain nama domain `localhost`.
+- Jika mengakses lewat domain virtual seperti `http://siladesbeng.test`, kamera akan *error* dan sistem akan otomatis mengarahkan warga (fallback) ke halaman Verifikasi Manual.
+- **Tindak Lanjut & Solusi Uji Coba Lokal:** 
+  Untuk membuktikan dan menguji coba fitur Liveness AI ini di komputer lokal tanpa harus menunggu *hosting*, gunakan trik `localhost`:
+  1. Jalankan perintah `php artisan serve` di terminal proyek.
+  2. Akses aplikasi melalui browser dengan URL: `http://127.0.0.1:8000` (atau `http://localhost:8000`).
+  3. Browser (Chrome/Edge) akan secara otomatis **mengizinkan akses kamera** pada domain `127.0.0.1` meskipun tanpa HTTPS.
+
+**2. Depresiasi Halaman Verifikasi Lama:**
+- Halaman verifikasi identitas manual yang lama (`/profile/verifikasi`) telah sepenuhnya dinonaktifkan dan digantikan oleh halaman E-KYC AI terpadu (`/kyc`).
+- Semua rute atau menu navigasi yang sebelumnya mengarah ke halaman lama wajib dialihkan (di-redirect) ke `/kyc` untuk memastikan warga tidak tersesat ke form manual tanpa OCR.

@@ -33,7 +33,7 @@ class AccountApprovedMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Pengajuan Kemitraan Disetujui - Akun SilaDesBeng',
+            subject: 'Pengajuan Kemitraan Disetujui - Akun SiladesBeng',
         );
     }
 

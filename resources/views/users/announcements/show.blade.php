@@ -25,10 +25,24 @@
                 
                 {{-- Main Content (Kiri) --}}
                 <div class="lg:col-span-2 space-y-8 animate-section">
-                    <div class="backdrop-blur-sm bg-white/80 rounded-3xl overflow-hidden shadow-xl border border-white/80">
-                        
+                    <div class="backdrop-blur-sm bg-white/90 rounded-3xl overflow-hidden shadow-xl border border-white/80 p-6 md:p-8">
+                        {{-- Judul dan Meta Info (Gaya Detik) --}}
+                        <div class="text-center mb-6">
+                            <h1 class="text-3xl md:text-4xl font-bold text-blue-900 leading-tight mb-4">
+                                {{ $announcement->title }}
+                            </h1>
+                            <div class="text-sm font-medium">
+                                <p class="text-blue-600 mb-1">
+                                    {{ $announcement->admin->name ?? 'Admin Sistem' }} - <span class="text-orange-500 font-bold">Pemerintah {{ $announcement->region->public_name ?? 'Pusat' }}</span>
+                                </p>
+                                <p class="text-gray-500">
+                                    {{ $announcement->region->public_name ?? 'Pusat' }}, {{ \Carbon\Carbon::parse($announcement->created_at)->translatedFormat('l, d M Y H:i') }} WIB
+                                </p>
+                            </div>
+                        </div>
+
                         {{-- Image/Banner --}}
-                        <div class="w-full h-64 md:h-[500px] bg-gray-100 relative group overflow-hidden">
+                        <div class="w-full h-64 md:h-[450px] bg-gray-100 relative group overflow-hidden rounded-2xl mb-8 shadow-sm">
                             @if($announcement->images && $announcement->images->count() > 0)
                                 <div class="flex transition-transform duration-700 ease-in-out h-full" id="slider-main">
                                     @foreach($announcement->images as $img)
@@ -40,81 +54,79 @@
                                 
                                 @if($announcement->images->count() > 1)
                                     <!-- Controls -->
-                                    <button id="slider-prev" class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/30 hover:bg-white/50 backdrop-blur-md rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button id="slider-prev" class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/30 hover:bg-black/50 backdrop-blur-md rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity">
                                         <i class="bx bx-chevron-left text-2xl"></i>
                                     </button>
-                                    <button id="slider-next" class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/30 hover:bg-white/50 backdrop-blur-md rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button id="slider-next" class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/30 hover:bg-black/50 backdrop-blur-md rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity">
                                         <i class="bx bx-chevron-right text-2xl"></i>
                                     </button>
-                                    <!-- Indicators -->
-                                    <div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-20" id="slider-indicators">
-                                        @foreach($announcement->images as $index => $img)
-                                            <button class="w-2 h-2 rounded-full transition-all {{ $index === 0 ? 'bg-white w-4' : 'bg-white/50' }}"></button>
-                                        @endforeach
-                                    </div>
                                 @endif
-                            @elseif($announcement->image_path)
-                                <img src="{{ Storage::url($announcement->image_path) }}" alt="{{ $announcement->title }}" class="w-full h-full object-cover">
+                            @elseif($announcement->cover_image)
+                                <div class="w-full h-full flex-shrink-0 relative">
+                                    <img src="{{ Storage::url($announcement->cover_image) }}" alt="{{ $announcement->title }}" class="w-full h-full object-cover">
+                                </div>
                             @else
-                                <div class="w-full h-full flex items-center justify-center text-8xl opacity-30 bg-gradient-to-br from-blue-50 to-blue-200">
-                                    @if($announcement->type == 'Pengumuman') 📢 
-                                    @elseif($announcement->type == 'Event') 🎉
-                                    @else 🤝
-                                    @endif
+                                <div class="w-full h-full flex flex-col items-center justify-center text-gray-400 bg-slate-50">
+                                    <svg class="w-16 h-16 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                    <span class="text-sm font-medium">Tidak ada gambar</span>
                                 </div>
                             @endif
-                            
-                            {{-- Gradient Overlay --}}
-                            <div class="absolute inset-0 bg-gradient-to-t from-gray-900/90 via-gray-900/40 to-transparent z-10 pointer-events-none"></div>
-                            
-                            {{-- Title Overlay --}}
-                            <div class="absolute bottom-6 left-6 right-6 z-20 pointer-events-none">
-                                <div class="flex items-center gap-3 mb-3">
-                                    @if($announcement->post_category === 'Berita')
-                                        <span class="px-4 py-1.5 bg-blue-500 text-white rounded-full text-xs font-bold shadow-lg flex items-center gap-1.5"><i class="bx bx-news"></i> Berita Daerah</span>
-                                    @else
-                                        @if($announcement->type == 'Gotong Royong')
-                                            <span class="px-4 py-1.5 bg-emerald-500 text-white rounded-full text-xs font-bold shadow-lg flex items-center gap-1.5">🤝 Gotong Royong</span>
-                                        @elseif($announcement->type == 'Event')
-                                            <span class="px-4 py-1.5 bg-purple-500 text-white rounded-full text-xs font-bold shadow-lg flex items-center gap-1.5">🎉 Event</span>
-                                        @else
-                                            <span class="px-4 py-1.5 bg-blue-500 text-white rounded-full text-xs font-bold shadow-lg flex items-center gap-1.5">📢 Pengumuman</span>
-                                        @endif
-                                    @endif
-                                    
-                                    <span class="px-4 py-1.5 bg-white/20 backdrop-blur-md text-white rounded-full text-xs font-semibold border border-white/30 flex items-center gap-1.5">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                        {{ $announcement->created_at->format('d M Y') }}
-                                    </span>
-                                </div>
-                                <h1 class="text-3xl md:text-4xl font-bold text-white drop-shadow-md leading-tight">{{ $announcement->title }}</h1>
-                            </div>
                         </div>
 
                         {{-- Content Body --}}
-                        <div class="p-6 md:p-8">
-                            {{-- Author Info --}}
-                            <div class="flex items-center justify-between border-b border-gray-200 pb-6 mb-6">
-                                <div class="flex items-center gap-4">
-                                    <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xl font-bold shadow-sm">
-                                        {{ substr($announcement->admin->name ?? 'A', 0, 1) }}
-                                    </div>
-                                    <div>
-                                        <p class="text-gray-900 font-bold text-sm md:text-base">{{ $announcement->admin->name ?? 'Admin Sistem' }}</p>
-                                        <p class="text-blue-500 text-xs md:text-sm font-semibold flex items-center gap-1">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                                            Pemerintah {{ $announcement->region->name ?? 'Pusat' }}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="prose prose-lg max-w-none text-gray-700 leading-relaxed text-justify">
+                        <div class="prose prose-lg max-w-none text-gray-700 leading-relaxed text-justify">
                                 {!! nl2br(e($announcement->description)) !!}
-                            </div>
+                            
+                                  {{-- Baca Juga (Detik Style) --}}
+                                  @if($relatedAnnouncements->count() > 0)
+                                  <div class="mt-8 pt-6 border-t border-gray-200">
+                                      <h4 class="font-bold text-gray-900 mb-3 text-lg flex items-center gap-2">
+                                          <div class="w-1 h-5 bg-blue-600 rounded-full"></div>
+                                          Baca juga:
+                                      </h4>
+                                      <ul class="space-y-3">
+                                          @foreach($relatedAnnouncements->take(2) as $related)
+                                          <li>
+                                              <a href="{{ route('announcements.show', $related->id) }}" class="text-blue-700 font-bold hover:text-blue-900 hover:underline text-lg">
+                                                  {{ $related->title }}
+                                              </a>
+                                          </li>
+                                          @endforeach
+                                      </ul>
+                                  </div>
+                                  @endif
+</div>
                         </div>
                     </div>
                 </div>
+
+                
+                    {{-- {{ $announcement->post_category === 'Pengumuman' ? 'Pengumuman Terkait' : 'Berita Terkait' }} (Detik Style Grid) --}}
+                    @if($relatedAnnouncements->count() > 0)
+                    <div class="mt-8 mb-4">
+                        <h3 class="text-xl font-bold text-blue-900 mb-6 flex items-center gap-2 border-b-2 border-blue-100 pb-2 inline-block">
+                            {{ $announcement->post_category === 'Pengumuman' ? 'Pengumuman Terkait' : 'Berita Terkait' }}
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            @foreach($relatedAnnouncements as $related)
+                            <a href="{{ route('announcements.show', $related->id) }}" class="group flex flex-col gap-3">
+                                <div class="w-full h-40 rounded-xl overflow-hidden bg-gray-100 relative shadow-sm">
+                                    @if($related->cover_image)
+                                        <img src="{{ Storage::url($related->cover_image) }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                    @else
+                                        <div class="w-full h-full flex items-center justify-center text-gray-400 bg-slate-50">
+                                            <i class="bx bx-news text-4xl"></i>
+                                        </div>
+                                    @endif
+                                </div>
+                                <h4 class="font-bold text-gray-900 leading-snug group-hover:text-blue-600 transition-colors">
+                                    {{ $related->title }}
+                                </h4>
+                            </a>
+                            @endforeach
+                        </div>
+                    </div>
+                    @endif
 
                 {{-- Sidebar (Kanan) --}}
                 <div class="space-y-6 animate-section" style="animation-delay: 0.2s;">
@@ -173,14 +185,14 @@
                     {{-- Related Announcements --}}
                     @if($relatedAnnouncements->count() > 0)
                     <div class="backdrop-blur-sm bg-white/80 rounded-3xl p-6 shadow-md border border-white/80">
-                        <h3 class="text-md font-bold text-gray-800 mb-5 border-b border-gray-200 pb-3">Kabar Lainnya dari {{ $announcement->region->name ?? 'Pusat' }}</h3>
+                        <h3 class="text-md font-bold text-gray-800 mb-5 border-b border-gray-200 pb-3">{{ $announcement->post_category === 'Pengumuman' ? 'Pengumuman Lainnya' : 'Rekomendasi untuk Anda' }}</h3>
                         <div class="space-y-4">
                             @foreach($relatedAnnouncements as $related)
                             <a href="{{ route('announcements.show', $related->id) }}" class="block group">
                                 <div class="flex gap-4 items-start p-2 rounded-2xl hover:bg-blue-50 transition-colors">
                                     <div class="w-16 h-16 rounded-xl overflow-hidden bg-gray-100 shrink-0 border border-gray-200 shadow-sm">
-                                        @if($related->image_path)
-                                            <img src="{{ Storage::url($related->image_path) }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform">
+                                        @if($related->cover_image)
+                                            <img src="{{ Storage::url($related->cover_image) }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform">
                                         @else
                                             <div class="w-full h-full flex items-center justify-center text-2xl bg-gradient-to-br from-gray-50 to-gray-200 opacity-60">📰</div>
                                         @endif

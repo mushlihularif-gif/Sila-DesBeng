@@ -26,6 +26,11 @@ class LaporanController extends Controller
     {
         $user = auth()->user();
         
+        // TODO (KYC): Validasi KYC dimatikan sementara untuk kemudahan development
+        // if ($user->verification_status !== 'verified') {
+        //     return redirect()->back()->with('show_kyc_modal', true)->with('error', 'Anda harus melakukan verifikasi KTP terlebih dahulu untuk membuat laporan.');
+        // }
+        
         // Ambil desa_id user (parent dari RT/RW user)
         $desaId = null;
         if ($user->region_id) {
@@ -102,6 +107,11 @@ class LaporanController extends Controller
 
     public function store(Request $request)
     {
+        // TODO (KYC): Validasi KYC dimatikan sementara untuk kemudahan development
+        // if (auth()->user()->verification_status !== 'verified') {
+        //     return redirect()->back()->with('show_kyc_modal', true)->with('error', 'Anda harus melakukan verifikasi KTP terlebih dahulu untuk membuat laporan.');
+        // }
+        
         // Validasi
         $validated = $request->validate([
             'nama' => 'required|string|max:255',

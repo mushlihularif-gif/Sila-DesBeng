@@ -98,7 +98,7 @@ class CheckRole
         foreach ($requiredRoles as $role) {
             if ($role === 'admin') {
                 // 'admin' pseudo-role matches any of the new admin hierarchy
-                if (in_array($user->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'admin', 'staff'])) {
+                if (in_array($user->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin', 'staff'])) {
                     return $next($request);
                 }
             } else if ($role === 'user') {

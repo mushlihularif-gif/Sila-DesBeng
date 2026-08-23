@@ -41,22 +41,35 @@
                         @endif
 
                         @if($category === 'Berita')
-                            <!-- Upload Banyak Gambar untuk Berita -->
+                            <!-- Upload Banyak Gambar untuk Berita (Cropper) -->
                             <div class="mb-4">
                                 <label class="form-label fw-semibold text-dark">Foto Dokumentasi (Bisa pilih lebih dari satu)</label>
-                                <input class="form-control" type="file" name="images[]" id="images" multiple accept="image/*">
-                                <div class="form-text">Format: JPG, PNG, GIF. Maksimal 5MB per foto.</div>
+                                
+                                <div class="border border-2 border-dashed border-primary rounded p-4 bg-light">
+                                    <div id="multi-preview-grid" class="d-flex flex-wrap gap-3 mb-3" style="display: none !important;">
+                                        <!-- Previews akan muncul di sini -->
+                                    </div>
+                                    
+                                    <div id="hidden-inputs-container"></div>
+                                    
+                                    <div class="text-center">
+                                        <button type="button" onclick="addPhotoField()" class="btn btn-outline-primary">
+                                            <i class="bx bx-image me-1"></i> Pilih dari Penyimpanan
+                                        </button>
+                                        <div class="form-text mt-2">Anda bisa mengatur posisi / crop untuk setiap foto yang ditambahkan.</div>
+                                    </div>
+                                </div>
                                 
                                 @if(isset($announcement) && $announcement->images->count() > 0)
-                                    <div class="mt-3">
-                                        <p class="mb-2">Foto Saat Ini:</p>
+                                    <div class="mt-4 p-3 border rounded bg-white">
+                                        <p class="mb-2 fw-semibold">Foto Saat Ini:</p>
                                         <div class="d-flex flex-wrap gap-2">
                                             @foreach($announcement->images as $img)
-                                                <div class="position-relative">
-                                                    <img src="{{ Storage::url($img->image_path) }}" class="rounded" style="width: 100px; height: 100px; object-fit: cover;">
-                                                    <div class="form-check mt-1">
-                                                        <input class="form-check-input" type="checkbox" name="delete_images[]" value="{{ $img->id }}" id="del_{{ $img->id }}">
-                                                        <label class="form-check-label text-danger" style="font-size: 12px;" for="del_{{ $img->id }}">
+                                                <div class="position-relative border rounded p-1">
+                                                    <img src="{{ Storage::url($img->image_path) }}" class="rounded" style="width: 120px; height: 120px; object-fit: cover;">
+                                                    <div class="form-check mt-2 text-center d-flex justify-content-center">
+                                                        <input class="form-check-input me-1" type="checkbox" name="delete_images[]" value="{{ $img->id }}" id="del_{{ $img->id }}">
+                                                        <label class="form-check-label text-danger" style="font-size: 13px;" for="del_{{ $img->id }}">
                                                             Hapus
                                                         </label>
                                                     </div>
@@ -66,8 +79,67 @@
                                     </div>
                                 @endif
                             </div>
+                            
+                            <script>
+                                let photoCounter = 0;
+                                
+                                function addPhotoField() {
+                                    photoCounter++;
+                                    const id = 'img_upload_' + photoCounter;
+                                    const previewId = 'preview_img_' + photoCounter;
+                                    
+                                    const input = document.createElement('input');
+                                    input.type = 'file';
+                                    input.name = 'images[]';
+                                    input.accept = 'image/*';
+                                    input.className = 'd-none';
+                                    input.id = id;
+                                    
+                                    input.onchange = function() {
+                                        if (this.files && this.files[0]) {
+                                            document.getElementById('multi-preview-grid').style.setProperty('display', 'flex', 'important');
+                                            
+                                            const grid = document.getElementById('multi-preview-grid');
+                                            const box = document.createElement('div');
+                                            box.className = 'position-relative border rounded overflow-hidden shadow-sm';
+                                            box.style.width = '150px';
+                                            box.style.height = '150px';
+                                            box.id = 'box_' + photoCounter;
+                                            
+                                            box.innerHTML = `
+                                                <img id="${previewId}" class="w-100 h-100" style="object-fit: cover;" src="" alt="Preview">
+                                                <button type="button" onclick="removePhoto(${photoCounter})" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1" style="padding: 2px 6px;">
+                                                    <i class="bx bx-x"></i>
+                                                </button>
+                                            `;
+                                            grid.appendChild(box);
+                                            
+                                            if (typeof initGlobalCropper === 'function') {
+                                                initGlobalCropper(this, previewId, NaN, true);
+                                            }
+                                        } else {
+                                            this.remove();
+                                        }
+                                    };
+                                    
+                                    document.getElementById('hidden-inputs-container').appendChild(input);
+                                    input.click();
+                                }
+                                
+                                function removePhoto(idNum) {
+                                    const input = document.getElementById('img_upload_' + idNum);
+                                    const box = document.getElementById('box_' + idNum);
+                                    if (input) input.remove();
+                                    if (box) box.remove();
+                                    
+                                    const grid = document.getElementById('multi-preview-grid');
+                                    if (grid.children.length === 0) {
+                                        grid.style.setProperty('display', 'none', 'important');
+                                    }
+                                }
+                            </script>
                         @else
-                            <!-- Upload Single Image untuk Pengumuman -->
+                            pload Single Image untuk Pengumuman -->
                             <div class="mb-4">
                                 <label class="form-label fw-semibold text-dark">Gambar / Poster (Opsional)</label>
                                 <div class="text-center w-100">
@@ -84,11 +156,11 @@
                                             style="object-fit: cover; max-height: 350px; {{ (isset($announcement) && $announcement->image_path) ? '' : 'display: none;' }}">
                                         
                                         <div id="uploadPlaceholder" class="p-5" style="{{ (isset($announcement) && $announcement->image_path) ? 'display: none;' : '' }}">
-                                            <div class="avatar avatar-xl bg-primary-subtle text-primary rounded-circle mb-3 mx-auto d-flex align-items-center justify-content-center">
-                                                <i class="bx bx-cloud-upload" style="font-size: 2.5rem;"></i>
+                                            <div class="avatar avatar-xl bg-white text-secondary rounded-circle mb-3 mx-auto d-flex align-items-center justify-content-center shadow-sm border" style="width: 60px; height: 60px;">
+                                                <i class="bx bx-image-alt" style="font-size: 2rem;"></i>
                                             </div>
-                                            <h6 class="fw-bold mb-1">Klik untuk memilih gambar poster</h6>
-                                            <small class="text-muted">Format: JPG, PNG, GIF. Ukuran maksimal 5MB.</small>
+                                            <h6 class="fw-bold mb-1 text-dark" style="font-size: 1.1rem;">Pilih dari Penyimpanan</h6>
+                                            <small class="text-muted">PNG, JPG, JPEG up to 5MB</small>
                                         </div>
                                     </div>
                                     <input type="file" name="image" id="imageInput" class="d-none" accept="image/*" onchange="previewImage(this)">
@@ -177,15 +249,19 @@
 <script>
     function previewImage(input) {
         if (input.files && input.files[0]) {
-            var reader = new FileReader();
-            
-            reader.onload = function(e) {
-                document.getElementById('imagePreview').src = e.target.result;
+            if (typeof initGlobalCropper === 'function') {
+                initGlobalCropper(input, 'imagePreview', 16/9, true);
                 document.getElementById('imagePreview').style.display = 'block';
                 document.getElementById('uploadPlaceholder').style.display = 'none';
+            } else {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('imagePreview').src = e.target.result;
+                    document.getElementById('imagePreview').style.display = 'block';
+                    document.getElementById('uploadPlaceholder').style.display = 'none';
+                }
+                reader.readAsDataURL(input.files[0]);
             }
-            
-            reader.readAsDataURL(input.files[0]);
         }
     }
 </script>
