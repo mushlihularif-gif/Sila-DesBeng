@@ -72,7 +72,7 @@ class KycReviewController extends Controller
 
             DB::commit();
 
-            $fonnte->sendNotification($user->phone, "*SilaDesBeng (Sistem Layanan Desa)*\n\nSelamat! Akun Anda telah berhasil diverifikasi. Anda sekarang mendapatkan lencana Centang Biru (Identitas Terverifikasi).");
+            $fonnte->sendNotification($user->phone, "*SiladesBeng (Sistem Layanan Desa)*\n\nSelamat! Akun Anda telah berhasil diverifikasi. Anda sekarang mendapatkan lencana Centang Biru (Identitas Terverifikasi).");
 
             return redirect()->route('admin.kyc.index')->with('success', 'Verifikasi disetujui.');
         } catch (\Exception $e) {
@@ -97,7 +97,7 @@ class KycReviewController extends Controller
 
         $user->update(['verification_status' => 'rejected']);
 
-        $fonnte->sendNotification($user->phone, "*SilaDesBeng (Sistem Layanan Desa)*\n\nMohon maaf, verifikasi KTP Anda ditolak dengan alasan: *" . $request->admin_notes . "*. Silakan ajukan ulang melalui aplikasi.");
+        $fonnte->sendNotification($user->phone, "*SiladesBeng (Sistem Layanan Desa)*\n\nMohon maaf, verifikasi KTP Anda ditolak dengan alasan: *" . $request->admin_notes . "*. Silakan ajukan ulang melalui aplikasi.");
 
         return redirect()->route('admin.kyc.index')->with('success', 'Verifikasi ditolak.');
     }

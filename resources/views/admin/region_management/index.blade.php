@@ -82,7 +82,7 @@
             </div>
             
             <button type="button" class="btn btn-primary rounded-pill px-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#addRegionModal">
-                <i class="bx bx-plus me-1"></i> Tambah {{ strtoupper($targetType) }}
+                <i class="bx bx-plus me-1"></i> Tambah Wilayah
             </button>
         </div>
     </div>
@@ -467,11 +467,21 @@
             <form action="{{ route('admin.kelola-wilayah.store') }}" method="POST">
                 @csrf
                 <div class="modal-header border-bottom-0 pb-0">
-                    <h5 class="modal-title fw-bold text-primary"><i class="bx bx-map-pin me-2"></i> Tambah {{ strtoupper($targetType) }} Baru</h5>
+                    <h5 class="modal-title fw-bold text-primary"><i class="bx bx-map-pin me-2"></i> Tambah Wilayah / Struktur Baru</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <input type="hidden" name="type" value="{{ $targetType }}">
+                    @if(in_array($parentRegion->type, ['desa', 'kelurahan']))
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Jenis Wilayah</label>
+                            <select name="type" class="form-select" required>
+                                <option value="rw">RW (Rukun Warga)</option>
+                                <option value="rt">RT (Rukun Tetangga) Langsung</option>
+                            </select>
+                        </div>
+                    @else
+                        <input type="hidden" name="type" value="{{ $targetType }}">
+                    @endif
                     
                     <div class="mb-4">
                         <label class="form-label fw-semibold">Nama {{ strtoupper($targetType) }} <span class="text-danger">*</span></label>

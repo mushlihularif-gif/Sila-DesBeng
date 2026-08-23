@@ -204,7 +204,7 @@ Route::middleware('auth')->group(function () {
         ->middleware(['role:user', 'region.service:layanan-ambulans']);
         
     // Verifikasi Identitas
-    Route::get('/profile/verifikasi', [App\Http\Controllers\User\VerificationController::class, 'index'])->name('user.verifikasi.index');
+    Route::redirect('/profile/verifikasi', '/kyc', 301)->name('user.verifikasi.index');
     Route::post('/profile/verifikasi', [App\Http\Controllers\User\VerificationController::class, 'store'])->name('user.verifikasi.store');
     
     // Mutasi Penduduk (User)

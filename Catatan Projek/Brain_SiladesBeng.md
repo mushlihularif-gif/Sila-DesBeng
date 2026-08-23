@@ -628,3 +628,18 @@ Untuk antarmuka warga (User/Public UI), sistem WAJIB menggunakan fungsi notifika
 **2. Penulisan Nama Sistem:**
 Penulisan nama aplikasi di sisi publik dan teks pesan harus konsisten menggunakan **"Siladesbeng"** (bukan SilaDesBeng atau siladesbeng), kecuali untuk keperluan penulisan variabel kode atau logo.
 
+
+## CATATAN PENGUJIAN FITUR (TESTING)
+
+**1. Liveness Detection / Kamera KTP (MediaPipe):**
+- Saat tahap *development* di Laragon (Localhost), browser modern (Chrome, Edge, dll) akan memblokir akses ke WebCam jika URL menggunakan protokol `http://` selain nama domain `localhost`.
+- Jika mengakses lewat domain virtual seperti `http://siladesbeng.test`, kamera akan *error* dan sistem akan otomatis mengarahkan warga (fallback) ke halaman Verifikasi Manual.
+- **Tindak Lanjut & Solusi Uji Coba Lokal:** 
+  Untuk membuktikan dan menguji coba fitur Liveness AI ini di komputer lokal tanpa harus menunggu *hosting*, gunakan trik `localhost`:
+  1. Jalankan perintah `php artisan serve` di terminal proyek.
+  2. Akses aplikasi melalui browser dengan URL: `http://127.0.0.1:8000` (atau `http://localhost:8000`).
+  3. Browser (Chrome/Edge) akan secara otomatis **mengizinkan akses kamera** pada domain `127.0.0.1` meskipun tanpa HTTPS.
+
+**2. Depresiasi Halaman Verifikasi Lama:**
+- Halaman verifikasi identitas manual yang lama (`/profile/verifikasi`) telah sepenuhnya dinonaktifkan dan digantikan oleh halaman E-KYC AI terpadu (`/kyc`).
+- Semua rute atau menu navigasi yang sebelumnya mengarah ke halaman lama wajib dialihkan (di-redirect) ke `/kyc` untuk memastikan warga tidak tersesat ke form manual tanpa OCR.

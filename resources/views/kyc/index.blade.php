@@ -18,9 +18,9 @@
             <!-- Stepper -->
             <div class="flex items-center justify-center mb-8">
                 <div class="flex items-center w-full max-w-sm">
-                    <div id="step-1-indicator" class="w-10 h-10 shrink-0 mx-[-1px] bg-blue-500 p-1.5 flex items-center justify-center rounded-full text-white font-bold transition-colors">1</div>
+                    <div id="step-1-indicator" style="cursor: pointer;" class="w-10 h-10 shrink-0 mx-[-1px] bg-blue-500 p-1.5 flex items-center justify-center rounded-full text-white font-bold transition-colors">1</div>
                     <div class="w-full h-1 bg-gray-200" id="line-1"></div>
-                    <div id="step-2-indicator" class="w-10 h-10 shrink-0 mx-[-1px] bg-gray-200 p-1.5 flex items-center justify-center rounded-full text-gray-600 font-bold transition-colors">2</div>
+                    <div id="step-2-indicator" style="cursor: pointer;" class="w-10 h-10 shrink-0 mx-[-1px] bg-gray-200 p-1.5 flex items-center justify-center rounded-full text-gray-600 font-bold transition-colors">2</div>
                 </div>
             </div>
 
@@ -167,8 +167,21 @@
                 </div>
 
                 <div class="relative w-full max-w-sm mx-auto overflow-hidden rounded-2xl bg-gray-100 shadow-inner" style="aspect-ratio: 3/4;">
-                    <!-- Video Stream -->
-                    <video id="webcam" class="absolute w-full h-full object-cover transform -scale-x-100" autoplay playsinline></video>
+                    <!-- Manual Fallback Container (Hidden by Default) -->
+<div id="manual-selfie-container" class="absolute inset-0 z-30 bg-white flex flex-col items-center justify-center p-6 hidden">
+    <svg class="w-16 h-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+    </svg>
+    <p class="text-sm text-center text-gray-600 mb-4">Kamera gagal memuat. Silakan ambil foto selfie secara manual.</p>
+    <label class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-full cursor-pointer transition-colors font-semibold text-sm shadow-md">
+        Ambil Foto Selfie
+        <input type="file" id="manual_selfie_input" accept="image/*" capture="user" class="hidden">
+    </label>
+    <img id="manual-selfie-preview" class="absolute inset-0 w-full h-full object-cover hidden" alt="Selfie">
+</div>
+<!-- Video Stream -->
+<video id="webcam"  class="absolute w-full h-full object-cover transform -scale-x-100" autoplay playsinline></video>
                     <!-- Overlay Canvas -->
                     <canvas id="output_canvas" class="absolute w-full h-full object-cover transform -scale-x-100 pointer-events-none"></canvas>
                     
@@ -196,6 +209,12 @@
                     </div>
                 </div>
 
+                <!-- Tombol Paksa Manual -->
+<div class="mt-4 mb-2 text-center w-full">
+    <button type="button" id="btn-force-manual" class="text-sm text-blue-600 hover:text-blue-800 underline font-medium">
+        Kamera hitam/bermasalah? Unggah manual di sini
+    </button>
+</div>
                 <div class="mt-8 flex justify-center space-x-4">
                     <button type="button" id="btn-back-step-1" class="py-2.5 px-6 border border-gray-300 rounded-full shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition">
                         Kembali
@@ -216,7 +235,7 @@
     <div class="bg-white p-8 rounded-2xl shadow-2xl relative z-10 flex flex-col items-center">
         <div class="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
         <p class="text-lg font-bold text-gray-800" id="loading-text">Memproses Data KTP...</p>
-        <p class="text-sm text-gray-500 mt-2 text-center max-w-xs">Sistem Siladesbeng sedang mengekstrak data KTP Anda. Mohon tunggu sebentar...</p>
+        <p class="text-sm text-gray-500 mt-2 text-center max-w-xs">Sistem SiladesBeng sedang mengekstrak data KTP Anda. Mohon tunggu sebentar...</p>
     </div>
 </div>
 </main>
@@ -550,29 +569,89 @@ function onResults(results) {
 function startLivenessDetection() {
     const videoElement = document.getElementById('webcam');
     const canvasElement = document.getElementById('output_canvas');
+    
+    // Check if running on insecure context (HTTP without localhost)
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        showToast('Browser memblokir kamera karena koneksi tidak aman (HTTP). Menggunakan mode manual.', 'warning');
+        
+        // Hide camera UI, show manual fallback UI
+        const instructionEl = document.getElementById('liveness-instruction');
+        const animationEl = document.getElementById('liveness-animation');
+        const manualContainer = document.getElementById('manual-selfie-container');
+        
+        if(instructionEl) instructionEl.style.display = 'none';
+        if(animationEl) animationEl.style.display = 'none';
+        if(manualContainer) manualContainer.classList.remove('hidden');
+        
+        // Setup manual file input listener
+        const manualInput = document.getElementById('manual_selfie_input');
+        if (manualInput) {
+            manualInput.addEventListener('change', function(e) {
+                if (e.target.files && e.target.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(evt) {
+                        const preview = document.getElementById('manual-selfie-preview');
+                        preview.src = evt.target.result;
+                        preview.classList.remove('hidden');
+                        
+                        faceSnapshot = evt.target.result;
+                        collectedFaceData = []; // empty array for manual fallback
+                        
+                        document.getElementById('btn-submit-kyc').disabled = false;
+                        document.getElementById('btn-submit-kyc').classList.remove('cursor-not-allowed');
+                    };
+                    reader.readAsDataURL(e.target.files[0]);
+                }
+            });
+        }
+        return;
+    }
+
     if (!faceMesh) {
         faceMesh = new FaceMesh({locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`});
         faceMesh.setOptions({maxNumFaces: 1, refineLandmarks: true});
         faceMesh.onResults(onResults);
     }
-    navigator.mediaDevices.getUserMedia({ video: true })
-        .then((stream) => {
-            stream.getTracks().forEach(track => track.stop());
-            camera = new Camera(videoElement, {
-                onFrame: async () => {
-                    canvasElement.width = videoElement.videoWidth;
-                    canvasElement.height = videoElement.videoHeight;
-                    await faceMesh.send({image: videoElement});
-                }, width: 480, height: 640
-            });
-            camera.start();
-            livenessState = 0;
-            document.getElementById('btn-submit-kyc').disabled = true;
-        })
-        .catch(() => {
-            showToast('Kamera bermasalah. Dialihkan ke verifikasi manual.', 'error');
-            window.location.href = "{{ route('user.verifikasi.index') }}";
+    camera = new Camera(videoElement, {
+        onFrame: async () => {
+            canvasElement.width = videoElement.videoWidth;
+            canvasElement.height = videoElement.videoHeight;
+            await faceMesh.send({image: videoElement});
+        }, width: 480, height: 640
+    });
+    
+    camera.start().then(() => {
+        livenessState = 0;
+        document.getElementById('btn-submit-kyc').disabled = true;
+    }).catch((err) => {
+        console.error(err);
+        showToast('Kamera diblokir browser atau perangkat rusak. Menggunakan mode manual.', 'warning');
+        
+        // Hide camera UI, show manual fallback UI
+        document.getElementById('liveness-instruction').style.display = 'none';
+        document.getElementById('liveness-animation').style.display = 'none';
+        document.getElementById('manual-selfie-container').classList.remove('hidden');
+        
+        // Setup manual file input listener
+        document.getElementById('manual_selfie_input').addEventListener('change', function(e) {
+            if (e.target.files && e.target.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    const preview = document.getElementById('manual-selfie-preview');
+                    preview.src = evt.target.result;
+                    preview.classList.remove('hidden');
+                    
+                    // Assign to global variables for submission
+                    faceSnapshot = evt.target.result;
+                    collectedFaceData = []; // empty array for manual fallback
+                    
+                    document.getElementById('btn-submit-kyc').disabled = false;
+                    document.getElementById('btn-submit-kyc').classList.remove('cursor-not-allowed');
+                };
+                reader.readAsDataURL(e.target.files[0]);
+            }
         });
+    });
 }
 
 function initKycPage() {
@@ -597,6 +676,15 @@ function initKycPage() {
         document.getElementById('step-1').classList.remove('hidden');
     });
 
+    const btnForce = document.getElementById('btn-force-manual');
+    if(btnForce) btnForce.addEventListener('click', () => {
+        if(camera) camera.stop();
+        document.getElementById('liveness-instruction').style.display = 'none';
+        document.getElementById('liveness-animation').style.display = 'none';
+        document.getElementById('manual-selfie-container').classList.remove('hidden');
+        showToast('Mode manual diaktifkan', 'info');
+    });
+    
     document.getElementById('btn-confirm-ktp').addEventListener('click', () => {
         document.getElementById('step-1-half').classList.add('hidden');
         document.getElementById('step-2').classList.remove('hidden');

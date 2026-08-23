@@ -94,6 +94,10 @@ class KycController extends Controller
             'edited_nik' => 'nullable|string|max:16',
             'edited_nama' => 'nullable|string|max:255',
             'edited_alamat' => 'nullable|string',
+            'edited_rt' => 'nullable|string|max:10',
+            'edited_rw' => 'nullable|string|max:10',
+            'edited_desa' => 'nullable|string|max:255',
+            'edited_kecamatan' => 'nullable|string|max:255',
         ]);
 
         $kyc = KycVerification::where('id', $request->kyc_id)
@@ -137,6 +141,18 @@ class KycController extends Controller
         }
         if ($request->filled('edited_alamat')) {
             $updateData['address_from_ocr'] = $request->edited_alamat;
+        }
+        if ($request->filled('edited_rt')) {
+            $updateData['rt_from_ocr'] = $request->edited_rt;
+        }
+        if ($request->filled('edited_rw')) {
+            $updateData['rw_from_ocr'] = $request->edited_rw;
+        }
+        if ($request->filled('edited_desa')) {
+            $updateData['desa_from_ocr'] = $request->edited_desa;
+        }
+        if ($request->filled('edited_kecamatan')) {
+            $updateData['kecamatan_from_ocr'] = $request->edited_kecamatan;
         }
 
         $kyc->update($updateData);

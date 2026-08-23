@@ -290,7 +290,7 @@
                 @csrf
                 <div class="modal-body">
                     <div class="alert alert-info py-2 mb-4">
-                        Fitur ini melacak NIK di sistem SilaDesBeng dan meminta "Handshake" pelepasan dari Kades lama.
+                        Fitur ini melacak NIK di sistem SiladesBeng dan meminta "Handshake" pelepasan dari Kades lama.
                     </div>
                     <div class="mb-3">
                         <label class="form-label">NIK Warga</label>
