@@ -61,9 +61,25 @@ class WilayahAdminApiController extends Controller
         // Ambil data laporan terbaru (Feed/Aktivitas)
         $laporanTerbaru = (clone $laporanQuery)->with('user:id,name,avatar')->orderBy('created_at', 'desc')->take(5)->get();
 
+        $user->load('region');
+        $avatarUrl = null;
+        if ($user->avatar) {
+            $avatarUrl = str_starts_with($user->avatar, 'http') ? $user->avatar : url('storage/' . $user->avatar);
+        }
+
+        $desaName = $user->region ? $user->region->name : 'Desa Pematang';
+
         return response()->json([
             'status' => 'success',
             'data' => [
+                'pengurus' => [
+                    'name' => $user->name,
+                    'role' => $user->role,
+                    'rt' => $user->rt ? sprintf('%02d', (int)$user->rt) : '02',
+                    'rw' => $user->rw ? sprintf('%02d', (int)$user->rw) : '01',
+                    'avatar_url' => $avatarUrl,
+                    'desa' => $desaName,
+                ],
                 'statistik' => [
                     'total_laporan' => $totalLaporan,
                     'laporan_baru' => $laporanPending,

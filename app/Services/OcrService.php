@@ -14,7 +14,6 @@ class OcrService
     {
         $this->apiKey = env('OCR_SPACE_API_KEY', 'helloworld');
     } 
-
     /**
      * Extract KTP Data using OCR.Space API
      *
@@ -23,31 +22,88 @@ class OcrService
      */
     public function extractKtpData($imagePath)
     {
+        $apiKey = env('OCR_SPACE_API_KEY', 'helloworld');
+
         try {
             $response = Http::attach(
                 'file', file_get_contents($imagePath), 'ktp.jpg'
-            )->post('https://api.ocr.space/parse/image', [
-                'apikey' => $this->apiKey,
+            )->timeout(30)->post('https://api.ocr.space/parse/image', [
+                'apikey' => $apiKey,
                 'language' => 'eng',
                 'OCREngine' => '2',
                 'isTable' => 'true',
                 'isOverlayRequired' => 'false',
-                'OCREngine' => '2' // Engine 2 is usually better for numbers/special chars
+                'OCREngine' => '2' // Engine 2 is best for ID numbers and structured cards
             ]);
 
             $result = $response->json();
 
             if (isset($result['ParsedResults'][0]['ParsedText'])) {
                 $rawText = $result['ParsedResults'][0]['ParsedText'];
-                return $this->parseKtpText($rawText);
+                $parsed = $this->parseKtpText($rawText);
+                
+                // If NIK successfully parsed, return it
+                if (!empty($parsed['nik'])) {
+                    return $parsed;
+                }
             }
 
-            Log::error('OCR API Error: ' . json_encode($result));
-            return [];
+            Log::warning('OCR.space returned empty/unparsed NIK. Trying Gemini AI fallback...');
+            return $this->extractUsingGemini($imagePath);
         } catch (\Exception $e) {
-            Log::error('OCR HTTP Error: ' . $e->getMessage());
+            Log::error('OCR.space HTTP Error: ' . $e->getMessage() . '. Falling back to Gemini AI...');
+            return $this->extractUsingGemini($imagePath);
+        }
+    }
+
+    /**
+     * Fallback OCR using Google Gemini Flash Vision
+     */
+    protected function extractUsingGemini($imagePath)
+    {
+        $geminiApiKey = env('GEMINI_API_KEY');
+        if (empty($geminiApiKey)) {
             return [];
         }
+
+        try {
+            $imageContent = base64_encode(file_get_contents($imagePath));
+            $prompt = 'Ekstrak data dari foto KTP Indonesia ini dan kembalikan HANYA dalam format JSON murni tanpa markdown/backticks: {"nik": "16 digit angka", "name": "nama lengkap", "address": "alamat jalan", "rt": "nomor rt misal 001", "rw": "nomor rw misal 002", "desa": "nama kelurahan/desa", "kecamatan": "nama kecamatan", "gender": "laki-laki/perempuan"}';
+
+            $response = Http::post("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={$geminiApiKey}", [
+                'contents' => [
+                    [
+                        'parts' => [
+                            ['text' => $prompt],
+                            [
+                                'inline_data' => [
+                                    'mime_type' => 'image/jpeg',
+                                    'data' => $imageContent
+                                ]
+                            ]
+                        ]
+                    ]
+                ],
+                'generationConfig' => [
+                    'temperature' => 0.1,
+                    'response_mime_type' => 'application/json'
+                ]
+            ]);
+
+            if ($response->successful()) {
+                $json = $response->json();
+                $text = $json['candidates'][0]['content']['parts'][0]['text'] ?? '{}';
+                $cleanText = trim(str_replace(['```json', '```'], '', $text));
+                $data = json_decode($cleanText, true);
+                if (is_array($data)) {
+                    return $data;
+                }
+            }
+        } catch (\Exception $e) {
+            Log::error('Gemini OCR Fallback Error: ' . $e->getMessage());
+        }
+
+        return [];
     }
 
     /**

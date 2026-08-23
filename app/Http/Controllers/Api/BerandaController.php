@@ -131,6 +131,7 @@ class BerandaController extends Controller
     public function unitPelayanan(Request $request)
     {
         $menus = [
+            ['slug' => 'pasar-daerah', 'title' => 'Pasar Daerah', 'image' => 'PasarDaerah.png', 'color' => 'teal', 'action' => 'Toko BUMDes'],
             ['slug' => 'penyewaan-mobil', 'title' => 'Penyewaan Mobil', 'image' => 'mobil.png', 'color' => 'blue', 'action' => 'Sewa Mobil'],
             ['slug' => 'penyewaan-alat', 'title' => 'Penyewaan Alat', 'image' => 'F1.png', 'color' => 'orange', 'action' => 'Sewa Alat'],
             ['slug' => 'pelaporan-warga', 'title' => 'Pelaporan', 'image' => 'lapor.png', 'color' => 'red', 'action' => 'Buat Laporan'],

@@ -51,4 +51,8 @@ return [
         'server_key' => env('MIDTRANS_SERVER_KEY'),
         'is_production' => env('MIDTRANS_IS_PRODUCTION', false),
     ],
+
+    'ocr_space' => [
+        'api_key' => env('OCR_SPACE_API_KEY', 'helloworld'),
+    ],
 ];

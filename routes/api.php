@@ -28,6 +28,7 @@ Route::get('/unit-pelayanan', [BerandaController::class, 'unitPelayanan']);
 
     // Wilayah (Regions) - Public for registration
     Route::get('/kemitraan/regions', [\App\Http\Controllers\Api\PartnerApplicationApiController::class, 'getRegions']);
+    Route::get('/kemitraan/check-desa/{id}', [\App\Http\Controllers\Api\PartnerApplicationApiController::class, 'checkDesaAdmin']);
 
 // Protected Routes (Harus mengirimkan Bearer Token dari hasil Login)
 Route::middleware('auth:sanctum')->group(function () {
@@ -45,6 +46,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Laporan
     Route::post('/laporan', [\App\Http\Controllers\Api\LaporanController::class, 'store']);
     Route::get('/my-reports', [\App\Http\Controllers\Api\LaporanController::class, 'getMyReports']);
+    Route::get('/laporan/{id}', [\App\Http\Controllers\Api\LaporanController::class, 'show']);
     Route::get('/admin-reports', [\App\Http\Controllers\Api\LaporanController::class, 'getAdminReports']);
     Route::post('/admin-reports/{id}/forward', [\App\Http\Controllers\Api\LaporanController::class, 'forwardReport']);
     

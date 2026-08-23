@@ -60,6 +60,14 @@ class KycController extends Controller
         // Proses OCR menggunakan file temporer asli (belum terenkripsi)
         $ocrData = $this->ocrService->extractKtpData($ktpFile->getRealPath());
 
+        // Validasi: pastikan gambar yang diunggah benar-benar KTP dengan mengecek apakah NIK berhasil dideteksi
+        if (empty($ocrData) || empty($ocrData['nik'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gambar tidak terdeteksi sebagai e-KTP yang valid. Pastikan gambar jelas dan NIK terlihat.'
+            ], 400);
+        }
+
         // Hapus verifikasi yang pending/rejected sebelumnya (jika ada)
         KycVerification::where('user_id', $user->id)->whereIn('status', ['pending', 'rejected'])->delete();
 
