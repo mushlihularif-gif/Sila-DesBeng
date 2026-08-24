@@ -68,7 +68,7 @@
             <tr>
                 <th class="py-3 ps-4">PROFIL STAF</th>
                 <th class="py-3">KONTAK</th>
-                <th class="py-3">UNIT LAYANAN</th>
+                <th class="py-3">HAK AKSES</th>
                 <th class="py-3">STATUS</th>
                 <th class="py-3 text-end pe-4">AKSI</th>
             </tr>

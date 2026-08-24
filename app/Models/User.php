@@ -217,6 +217,167 @@ class User extends Authenticatable
         return $this->staffPermissions()->where('unit_key', $unitKey)->exists();
     }
 
+    /**
+     * Izin modul Sistem Platform, disimpan di tabel staff_permissions yang sama
+     * dengan izin unit layanan, dibedakan lewat awalan "platform_".
+     *
+     * Dikelompokkan MENGIKUTI TAB DI SIDEBAR.
+     *
+     * Tiap izin sengaja setara satu SUB-MENU, bukan satu grup. Memberi izin
+     * "Manajemen" secara utuh tidak bermakna — yang dibuka staf selalu halaman
+     * tertentu, jadi pilihannya pun harus setingkat halaman.
+     *
+     * Bentuk: 'Nama Tab' => ['kunci_izin' => ['label', 'ikon boxicons']]
+     */
+    public const IZIN_PLATFORM_GRUP = [
+        'Sistem Platform' => [
+            'platform_integrasi'  => ['Integrasi Payment Gateway', 'bx-plug'],
+            'platform_monitoring' => ['Monitoring Transaksi', 'bx-line-chart'],
+            'platform_keamanan'   => ['Log Keamanan & Audit', 'bx-shield-quarter'],
+            'platform_biaya'      => ['Biaya Server & Domain', 'bx-server'],
+        ],
+        'Manajemen' => [
+            'platform_staf'   => ['Kelola Staf', 'bx-user-voice'],
+            'platform_banner' => ['Banner', 'bx-image'],
+        ],
+        'Data & Laporan' => [
+            'platform_aktivitas' => ['Log Aktivitas', 'bx-history'],
+        ],
+        'Dashboard' => [
+            'platform_inbox' => ['Kotak Masuk Email Instansi', 'bx-envelope'],
+        ],
+    ];
+
+    /**
+     * Bentuk datar 'kunci' => 'label', diturunkan dari IZIN_PLATFORM_GRUP
+     * supaya definisinya tidak perlu ditulis dua kali.
+     */
+    public static function izinPlatform(): array
+    {
+        $hasil = [];
+
+        foreach (self::IZIN_PLATFORM_GRUP as $izinGrup) {
+            foreach ($izinGrup as $kunci => [$label, $ikon]) {
+                $hasil[$kunci] = $label;
+            }
+        }
+
+        return $hasil;
+    }
+
+    /**
+     * Kunci izin milik satu tab, mis. kunciIzinGrup('Manajemen').
+     */
+    public static function kunciIzinGrup(string $namaGrup): array
+    {
+        return array_keys(self::IZIN_PLATFORM_GRUP[$namaGrup] ?? []);
+    }
+
+    /**
+     * Izin modul platform.
+     *
+     * BEDA dengan hasUnitPermission(): di sini HANYA super_admin yang otomatis
+     * lolos. Admin kabupaten/kecamatan/desa TIDAK, karena modul ini memuat
+     * kredensial API dan log keamanan seluruh platform.
+     */
+    public function hasPlatformPermission(string $permissionKey): bool
+    {
+        if ($this->role === 'super_admin') {
+            return true;
+        }
+
+        if ($this->role !== 'staff') {
+            return false;
+        }
+
+        return $this->staffPermissions()->where('unit_key', $permissionKey)->exists();
+    }
+
+    /**
+     * True kalau akun ini berhak membuka area Sistem Platform sama sekali.
+     * Dipakai untuk menentukan beranda dan menampilkan menu.
+     */
+    public function bolehAksesPlatform(): bool
+    {
+        if ($this->role === 'super_admin') {
+            return true;
+        }
+
+        if ($this->role !== 'staff') {
+            return false;
+        }
+
+        return $this->staffPermissions()
+            ->whereIn('unit_key', array_keys(self::izinPlatform()))
+            ->exists();
+    }
+
+    /**
+     * True untuk akun staf yang MURNI bekerja di tingkat platform.
+     *
+     * Dipakai menyembunyikan menu operasional per wilayah (Manajemen,
+     * Data & Laporan, Pengaturan). Tanpa ini mereka ikut melihat laporan
+     * transaksi dan pendapatan desa, karena banyak menu disaring dengan
+     * kondisi negatif `role !== 'super_admin'` yang dilewati role 'staff'.
+     */
+    public function hanyaPlatform(): bool
+    {
+        return $this->role === 'staff' && $this->bolehAksesPlatform();
+    }
+
+    /**
+     * True kalau punya minimal satu dari sekumpulan izin platform.
+     * Dipakai memutuskan apakah sebuah GRUP menu perlu ditampilkan.
+     */
+    public function bolehSalahSatu(array $keys): bool
+    {
+        foreach ($keys as $k) {
+            if ($this->hasPlatformPermission($k)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Boleh melihat sebuah menu yang dibagi bersama admin wilayah.
+     *
+     * $rolesBiasa = role non-staf yang selama ini sudah berhak. Staf hanya lolos
+     * kalau izin platform-nya dicentang. Bentuk ini dipakai supaya penambahan
+     * akses untuk staf platform tidak mengubah sedikit pun hak admin wilayah.
+     */
+    public function bolehMenu(array $rolesBiasa, string $izinPlatform): bool
+    {
+        if ($this->role === 'staff') {
+            return $this->hasPlatformPermission($izinPlatform);
+        }
+
+        return in_array($this->role, $rolesBiasa, true);
+    }
+
+    /**
+     * Sebutan role untuk ditampilkan di antarmuka.
+     */
+    public function labelRole(): string
+    {
+        $peta = [
+            'super_admin'     => 'Super Admin',
+            'admin'           => 'Admin Pusat',
+            'admin_kecamatan' => 'Admin Kecamatan',
+            'admin_desa'      => 'Admin Desa',
+            'admin_rw'        => 'Admin RW',
+            'admin_rt'        => 'Admin RT',
+            'user'            => 'Pengguna',
+        ];
+
+        if ($this->role === 'staff') {
+            return $this->hanyaPlatform() ? 'Staf Platform' : 'Staf Unit';
+        }
+
+        return $peta[$this->role] ?? ucfirst($this->role);
+    }
+
     public function getUnitPermissions()
     {
         if ($this->isSuperAdmin()) {

@@ -436,7 +436,7 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
     Route::put('/pengaturan-pembayaran-wilayah', [\App\Http\Controllers\Admin\RegionSettingController::class, 'paymentUpdate'])->name('admin.region-settings.payment.update');
     
     // Manajemen Banner / Iklan
-    Route::get('/banners', [\App\Http\Controllers\Admin\BannerController::class, 'index'])->name('admin.banners.index');
+    Route::get('/banners', [\App\Http\Controllers\Admin\BannerController::class, 'index'])->name('admin.banners.index')->middleware('staff.permission:platform_banner');
     Route::post('/banners', [\App\Http\Controllers\Admin\BannerController::class, 'store'])->name('admin.banners.store');
     Route::put('/banners/{id}', [\App\Http\Controllers\Admin\BannerController::class, 'update'])->name('admin.banners.update');
     Route::delete('/banners/{id}', [\App\Http\Controllers\Admin\BannerController::class, 'destroy'])->name('admin.banners.destroy');
@@ -450,7 +450,7 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
         'edit' => 'admin.announcements.edit',
         'update' => 'admin.announcements.update',
         'destroy' => 'admin.announcements.destroy',
-    ]);
+    ])->middleware('staff.permission:kabar_informasi');
     
     // Warga Verification
     Route::get('/warga/verifikasi', [\App\Http\Controllers\Admin\UserVerificationController::class, 'index'])->name('admin.warga.verifikasi.index');
@@ -479,7 +479,7 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
     Route::put('/manajemen-pengguna/{user}/kick', [UserManagementController::class, 'kick'])->name('admin.manajemen-pengguna.kick');
 
     // Route untuk Manajemen Staf (RBAC)
-    Route::resource('staff', \App\Http\Controllers\Admin\StaffManagementController::class)->except(['show'])->names('admin.staff');
+    Route::resource('staff', \App\Http\Controllers\Admin\StaffManagementController::class)->except(['show'])->names('admin.staff')->middleware('staff.permission:platform_staf');
     Route::put('staff/{staff}/toggle-status', [\App\Http\Controllers\Admin\StaffManagementController::class, 'toggleStatus'])->name('admin.staff.toggle-status');
 
     // Route untuk Manajemen KYC
@@ -514,20 +514,29 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
     Route::get('/pengaturan-pembayaran-pusat', [SystemSettingController::class, 'paymentIndex'])->name('admin.system-settings.payment');
     Route::put('/pengaturan-pembayaran-pusat', [SystemSettingController::class, 'paymentUpdate'])->name('admin.system-settings.payment.update');
 
-    // Sistem Platform (khusus Super Admin Sistem / Diskominfotik)
-    Route::prefix('sistem-platform')->middleware('role:super_admin')->group(function () {
-        Route::get('/gateway', [SuperAdminSettingController::class, 'gateway'])->name('admin.sistem-platform.gateway');
-        Route::put('/gateway', [SuperAdminSettingController::class, 'gatewayUpdate'])->name('admin.sistem-platform.gateway.update');
+    // Kotak masuk Gmail untuk panel kanan dashboard (baca-saja, JSON).
+    // Dibatasi super_admin karena yang dibaca adalah kotak surat resmi platform.
+    Route::prefix('kotak-masuk')->middleware('platform.permission:platform_inbox')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\InboxController::class, 'index'])->name('admin.inbox.index');
+        Route::get('/{uid}', [\App\Http\Controllers\Admin\InboxController::class, 'show'])->whereNumber('uid')->name('admin.inbox.show');
+    });
+
+    // Sistem Platform. Dulu dikunci role:super_admin untuk seluruh grup; kini
+    // tiap modul punya penjaga sendiri supaya akun staf platform bisa diberi
+    // akses sebagian saja. super_admin tetap lolos ke semuanya.
+    Route::prefix('sistem-platform')->group(function () {
+        Route::get('/gateway', [SuperAdminSettingController::class, 'gateway'])->name('admin.sistem-platform.gateway')->middleware('platform.permission:platform_integrasi');
+        Route::put('/gateway', [SuperAdminSettingController::class, 'gatewayUpdate'])->name('admin.sistem-platform.gateway.update')->middleware('platform.permission:platform_integrasi');
         // Satu route untuk semua kategori kredensial — kategori baru cukup didaftarkan
         // di config/api_providers.php, tanpa menambah route.
-        Route::put('/gateway/kredensial/{category}', [SuperAdminSettingController::class, 'credentialUpdate'])->name('admin.sistem-platform.credential.update');
-        Route::delete('/gateway/kredensial/{category}', [SuperAdminSettingController::class, 'credentialDestroy'])->name('admin.sistem-platform.credential.destroy');
-        Route::get('/monitoring', [SuperAdminSettingController::class, 'monitoring'])->name('admin.sistem-platform.monitoring');
-        Route::get('/log-keamanan', [SuperAdminSettingController::class, 'securityLog'])->name('admin.sistem-platform.security-log');
-        Route::get('/biaya-operasional', [SuperAdminSettingController::class, 'expenses'])->name('admin.sistem-platform.expenses');
-        Route::post('/biaya-operasional', [SuperAdminSettingController::class, 'expensesStore'])->name('admin.sistem-platform.expenses.store');
-        Route::put('/biaya-operasional/{expense}/lunas', [SuperAdminSettingController::class, 'expensesMarkPaid'])->name('admin.sistem-platform.expenses.mark-paid');
-        Route::delete('/biaya-operasional/{expense}', [SuperAdminSettingController::class, 'expensesDestroy'])->name('admin.sistem-platform.expenses.destroy');
+        Route::put('/gateway/kredensial/{category}', [SuperAdminSettingController::class, 'credentialUpdate'])->name('admin.sistem-platform.credential.update')->middleware('platform.permission:platform_integrasi');
+        Route::delete('/gateway/kredensial/{category}', [SuperAdminSettingController::class, 'credentialDestroy'])->name('admin.sistem-platform.credential.destroy')->middleware('platform.permission:platform_integrasi');
+        Route::get('/monitoring', [SuperAdminSettingController::class, 'monitoring'])->name('admin.sistem-platform.monitoring')->middleware('platform.permission:platform_monitoring');
+        Route::get('/log-keamanan', [SuperAdminSettingController::class, 'securityLog'])->name('admin.sistem-platform.security-log')->middleware('platform.permission:platform_keamanan');
+        Route::get('/biaya-operasional', [SuperAdminSettingController::class, 'expenses'])->name('admin.sistem-platform.expenses')->middleware('platform.permission:platform_biaya');
+        Route::post('/biaya-operasional', [SuperAdminSettingController::class, 'expensesStore'])->name('admin.sistem-platform.expenses.store')->middleware('platform.permission:platform_biaya');
+        Route::put('/biaya-operasional/{expense}/lunas', [SuperAdminSettingController::class, 'expensesMarkPaid'])->name('admin.sistem-platform.expenses.mark-paid')->middleware('platform.permission:platform_biaya');
+        Route::delete('/biaya-operasional/{expense}', [SuperAdminSettingController::class, 'expensesDestroy'])->name('admin.sistem-platform.expenses.destroy')->middleware('platform.permission:platform_biaya');
     });
 
     // Route Unit
@@ -654,7 +663,7 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
     });
     
     // Route Pelaporan Warga (Admin Desa ke atas)
-    Route::prefix('pelaporan')->group(function () {
+    Route::prefix('pelaporan')->middleware('staff.permission:pelaporan_warga')->group(function () {
         Route::get('/arsip', [\App\Http\Controllers\Admin\AdminPelaporanController::class, 'archive'])->name('admin.pelaporan.archive');
         Route::get('/', [\App\Http\Controllers\Admin\AdminPelaporanController::class, 'index'])->name('admin.pelaporan.index');
         Route::get('/{id}', [\App\Http\Controllers\Admin\AdminPelaporanController::class, 'show'])->name('admin.pelaporan.show');
@@ -671,7 +680,7 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
         Route::get('/pendapatan/riwayat', [\App\Http\Controllers\Admin\ReportController::class, 'incomeHistory'])->name('admin.laporan.pendapatan.riwayat');
         Route::get('/wilayah', [\App\Http\Controllers\Admin\ReportController::class, 'wilayah'])->name('admin.laporan.wilayah');
         Route::post('/log/clear', [\App\Http\Controllers\Admin\ReportController::class, 'clearLogs'])->name('admin.laporan.log.clear');
-        Route::get('/log', [\App\Http\Controllers\Admin\ReportController::class, 'logs'])->name('admin.laporan.log');
+        Route::get('/log', [\App\Http\Controllers\Admin\ReportController::class, 'logs'])->name('admin.laporan.log')->middleware('staff.permission:platform_aktivitas');
         
         // Route Transaksi Manual
         Route::post('/manual-transaction', [\App\Http\Controllers\Admin\ReportController::class, 'storeManualTransaction'])->name('admin.laporan.manual.store');

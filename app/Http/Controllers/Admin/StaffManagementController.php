@@ -12,8 +12,8 @@ use Illuminate\Validation\Rule;
 
 class StaffManagementController extends Controller
 {
-    // Kumpulan unit layanan yang tersedia
-    private $availableUnits = [
+    // Hak akses untuk staf UNIT LAYANAN, dibuat oleh admin kabupaten/kecamatan/desa.
+    private $unitLayanan = [
         'gas' => 'Penjualan Gas',
         'sewa_alat' => 'Penyewaan Alat',
         'sewa_mobil' => 'Penyewaan Mobil',
@@ -23,12 +23,127 @@ class StaffManagementController extends Controller
         'pelaporan_warga' => 'Pelaporan Warga'
     ];
 
+    /**
+     * Daftar hak akses yang ditawarkan, TERGANTUNG SIAPA YANG MEMBUAT AKUN.
+     *
+     * Super Admin Sistem membuat akun pendamping untuk dashboard Sistem Platform,
+     * jadi yang relevan adalah modul platform — bukan unit layanan per wilayah
+     * yang memang bukan wewenangnya. Admin wilayah tetap mendapat daftar unit
+     * layanan seperti sebelumnya.
+     */
+    private function availableUnits(): array
+    {
+        $user = auth()->user();
+
+        if ($user->role === 'super_admin') {
+            return User::izinPlatform();
+        }
+
+        // PENGAMAN NAIK HAK AKSES: staf pemegang izin "Kelola Staf" hanya boleh
+        // membagikan izin yang DIA SENDIRI punya. Tanpa batas ini, satu akun staf
+        // bisa membuat akun baru dengan izin apa pun — termasuk Integrasi & API Key
+        // yang memuat kredensial platform.
+        if ($user->role === 'staff') {
+            $miliknya = $user->staffPermissions()->pluck('unit_key')->all();
+
+            return array_intersect_key(User::izinPlatform(), array_flip($miliknya));
+        }
+
+        return $this->unitLayanan;
+    }
+
+    /**
+     * Boleh membuka menu Kelola Staf?
+     *
+     * isSuperAdmin() mencakup semua role admin wilayah; staf hanya lolos kalau
+     * izin platform_staf-nya dicentang.
+     */
+    private function bolehKelolaStaf(User $user): bool
+    {
+        return $user->isSuperAdmin() || $user->hasPlatformPermission('platform_staf');
+    }
+
+    /**
+     * Gabungan semua kunci izin, dipakai hanya untuk menerjemahkan kunci
+     * menjadi label saat menampilkan daftar staf.
+     */
+    private function semuaIzin(): array
+    {
+        return $this->unitLayanan + User::izinPlatform();
+    }
+
+    /**
+     * Daftar izin saat MENGEDIT staf yang sudah ada.
+     *
+     * Sengaja mengikuti jenis izin yang sudah dimiliki staf, bukan role
+     * pengeditnya. Tanpa ini, super admin (region_id NULL, jadi melihat SEMUA
+     * staf termasuk staf unit bentukan admin desa) akan disuguhi daftar modul
+     * platform ketika membuka staf unit — dan penyimpanannya akan menghapus
+     * izin unit yang tidak muncul di form.
+     */
+    private function availableUnitsFor(User $staff): array
+    {
+        $dimiliki = $staff->staffPermissions()->pluck('unit_key')->all();
+
+        if (array_intersect($dimiliki, array_keys(User::izinPlatform()))) {
+            // Pengaman yang sama seperti di availableUnits(): kalau yang mengedit
+            // adalah sesama staf, dia hanya boleh mengutak-atik izin yang dia punya.
+            if (auth()->user()->role === 'staff') {
+                $miliknya = auth()->user()->staffPermissions()->pluck('unit_key')->all();
+
+                return array_intersect_key(User::izinPlatform(), array_flip($miliknya));
+            }
+
+            return User::izinPlatform();
+        }
+
+        if (array_intersect($dimiliki, array_keys($this->unitLayanan))) {
+            return $this->unitLayanan;
+        }
+
+        // Staf tanpa izin sama sekali: ikuti kewenangan pengeditnya.
+        return $this->availableUnits();
+    }
+
+    /**
+     * Kelompokkan daftar izin mengikuti tab di sidebar, supaya kartu pilihannya
+     * tidak tersaji sebagai satu tumpukan datar yang sulit dibaca.
+     *
+     * Untuk daftar unit layanan (admin wilayah) tidak ada pengelompokan, jadi
+     * dikembalikan sebagai satu grup tanpa judul.
+     */
+    private function grupIzin(array $daftar): array
+    {
+        // Daftar unit layanan: satu grup polos.
+        if (! array_intersect(array_keys($daftar), array_keys(User::izinPlatform()))) {
+            return ['' => $daftar];
+        }
+
+        $hasil = [];
+
+        foreach (User::IZIN_PLATFORM_GRUP as $namaGrup => $isiGrup) {
+            $anggota = [];
+
+            foreach ($isiGrup as $kunci => [$label, $ikon]) {
+                if (array_key_exists($kunci, $daftar)) {
+                    $anggota[$kunci] = ['label' => $label, 'ikon' => $ikon];
+                }
+            }
+
+            if ($anggota) {
+                $hasil[$namaGrup] = $anggota;
+            }
+        }
+
+        return $hasil;
+    }
+
     public function index(Request $request)
     {
         $user = auth()->user();
-        
+
         // Pastikan hanya Super Admin (dan yang setara) yang bisa akses
-        if (!$user->isSuperAdmin()) {
+        if (! $this->bolehKelolaStaf($user)) {
             return redirect()->route('admin.dashboard')->with('error', 'Anda tidak memiliki akses ke halaman ini.');
         }
 
@@ -56,25 +171,29 @@ class StaffManagementController extends Controller
             return view('admin.staff.partials.table', compact('staffUsers'))->render();
         }
 
-        $availableUnits = $this->availableUnits;
+        // Daftar staf bisa memuat kedua jenis izin sekaligus, jadi pakai gabungan
+        // supaya label badge-nya tetap terbaca.
+        $availableUnits = $this->semuaIzin();
         return view('admin.staff.index', compact('staffUsers', 'search', 'availableUnits'));
     }
 
     public function create()
     {
-        if (!auth()->user()->isSuperAdmin()) {
+        if (! $this->bolehKelolaStaf(auth()->user())) {
             return redirect()->route('admin.dashboard')->with('error', 'Akses ditolak.');
         }
 
-        $availableUnits = $this->availableUnits;
-        return view('admin.staff.create', compact('availableUnits'));
+        $availableUnits = $this->availableUnits();
+        $grupIzin = $this->grupIzin($availableUnits);
+
+        return view('admin.staff.create', compact('availableUnits', 'grupIzin'));
     }
 
     public function store(Request $request)
     {
         $user = auth()->user();
         
-        if (!$user->isSuperAdmin()) {
+        if (! $this->bolehKelolaStaf($user)) {
             return redirect()->route('admin.dashboard')->with('error', 'Akses ditolak.');
         }
 
@@ -100,7 +219,7 @@ class StaffManagementController extends Controller
 
         if ($request->has('units')) {
             foreach ($request->units as $unitKey) {
-                if (array_key_exists($unitKey, $this->availableUnits)) {
+                if (array_key_exists($unitKey, $this->availableUnits())) {
                     StaffPermission::create([
                         'user_id' => $staff->id,
                         'unit_key' => $unitKey
@@ -115,7 +234,7 @@ class StaffManagementController extends Controller
     public function edit($id)
     {
         $user = auth()->user();
-        if (!$user->isSuperAdmin()) {
+        if (! $this->bolehKelolaStaf($user)) {
             return redirect()->route('admin.dashboard')->with('error', 'Akses ditolak.');
         }
 
@@ -126,16 +245,17 @@ class StaffManagementController extends Controller
             return redirect()->route('admin.staff.index')->with('error', 'Anda tidak memiliki akses untuk mengedit staf ini.');
         }
 
-        $availableUnits = $this->availableUnits;
+        $availableUnits = $this->availableUnitsFor($staff);
+        $grupIzin = $this->grupIzin($availableUnits);
         $activeUnits = $staff->staffPermissions->pluck('unit_key')->toArray();
 
-        return view('admin.staff.edit', compact('staff', 'availableUnits', 'activeUnits'));
+        return view('admin.staff.edit', compact('staff', 'availableUnits', 'grupIzin', 'activeUnits'));
     }
 
     public function update(Request $request, $id)
     {
         $user = auth()->user();
-        if (!$user->isSuperAdmin()) {
+        if (! $this->bolehKelolaStaf($user)) {
             return redirect()->route('admin.dashboard')->with('error', 'Akses ditolak.');
         }
 
@@ -159,11 +279,16 @@ class StaffManagementController extends Controller
         }
         $staff->save();
 
-        // Sync permissions
-        StaffPermission::where('user_id', $staff->id)->delete();
+        // Sync permissions.
+        // Hanya izin yang MEMANG ditawarkan di form ini yang dihapus — kalau
+        // menghapus semuanya, jenis izin lain yang tidak tampil di form akan
+        // ikut hilang tanpa disadari.
+        $ditawarkan = array_keys($this->availableUnitsFor($staff));
+        StaffPermission::where('user_id', $staff->id)->whereIn('unit_key', $ditawarkan)->delete();
+
         if ($request->has('units')) {
             foreach ($request->units as $unitKey) {
-                if (array_key_exists($unitKey, $this->availableUnits)) {
+                if (in_array($unitKey, $ditawarkan, true)) {
                     StaffPermission::create([
                         'user_id' => $staff->id,
                         'unit_key' => $unitKey
@@ -178,7 +303,7 @@ class StaffManagementController extends Controller
     public function destroy($id)
     {
         $user = auth()->user();
-        if (!$user->isSuperAdmin()) {
+        if (! $this->bolehKelolaStaf($user)) {
             return response()->json(['success' => false, 'message' => 'Akses ditolak.']);
         }
 
@@ -196,7 +321,7 @@ class StaffManagementController extends Controller
     public function toggleStatus($id)
     {
         $user = auth()->user();
-        if (!$user->isSuperAdmin()) {
+        if (! $this->bolehKelolaStaf($user)) {
             return redirect()->route('admin.dashboard')->with('error', 'Akses ditolak.');
         }
 

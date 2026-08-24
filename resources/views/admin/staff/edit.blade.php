@@ -136,14 +136,14 @@
                         </div>
 
                         <div class="form-section-title d-flex justify-content-between align-items-center">
-                            <span><i class="bx bx-shield-quarter me-2"></i> 2. Hak Akses Unit Layanan</span>
+                            <span><i class="bx bx-shield-quarter me-2"></i> 2. Hak Akses {{ auth()->user()->role === 'super_admin' ? 'Modul Sistem Platform' : 'Unit Layanan' }}</span>
                             <span class="badge bg-primary rounded-pill px-3 py-2 shadow-sm" id="selected-access-count" style="font-size: 0.8rem; text-transform: none; letter-spacing: normal;">0 Hak Akses Dipilih</span>
                         </div>
                         <div class="alert alert-warning d-flex mb-4 p-3 rounded" style="border-left: 4px solid #ffab00;" role="alert">
                             <i class="bx bx-error-circle fs-4 me-3 mt-1 text-warning"></i>
                             <div>
                                 <h6 class="alert-heading fw-bold mb-1" style="color: #664d03;">PENTING: Wajib Dibaca!</h6>
-                                <p class="mb-0" style="color: #664d03;">Silakan pilih <strong>satu atau lebih</strong> modul unit layanan yang boleh dikelola oleh staf ini. Staf hanya akan melihat menu sesuai akses yang diberikan.</p>
+                                <p class="mb-0" style="color: #664d03;">Silakan pilih <strong>satu atau lebih</strong> sub-menu yang boleh dibuka staf ini. Pilihan dikelompokkan sesuai tab di sidebar, dan staf hanya akan melihat menu yang dicentang.</p>
                             </div>
                         </div>
 
@@ -157,11 +157,24 @@
                                             $checkedUnits = [];
                                         }
                                     @endphp
-                                    
-                                    @foreach($availableUnits as $key => $label)
+
+                                @foreach($grupIzin as $namaGrup => $isiGrup)
+                                    @if($namaGrup !== '')
+                                        <div class="col-12">
+                                            <div class="d-flex align-items-center gap-2 mb-1 {{ $loop->first ? '' : 'mt-3' }}">
+                                                <span class="badge bg-label-primary rounded-pill px-3">{{ $namaGrup }}</span>
+                                                <span class="text-muted" style="font-size:.75rem">{{ count($isiGrup) }} sub-menu</span>
+                                                <hr class="flex-grow-1 my-0" style="opacity:.15">
+                                            </div>
+                                        </div>
+                                    @endif
+                                    @foreach($isiGrup as $key => $info)
                                     @php
+                                        // Modul platform membawa ikonnya sendiri dari User::IZIN_PLATFORM_GRUP;
+                                        // unit layanan tetap memakai gambar seperti sebelumnya.
+                                        $label = is_array($info) ? $info['label'] : $info;
+                                        $iconClass = is_array($info) ? 'bx ' . $info['ikon'] : '';
                                         $iconImg = '';
-                                        $iconClass = '';
                                         if($key == 'sewa_alat') $iconImg = asset('User/img/elemen/F1.png');
                                         elseif($key == 'gas') $iconImg = asset('User/img/elemen/F2.png');
                                         elseif($key == 'sewa_mobil') $iconImg = asset('User/img/elemen/mobil.png');
@@ -184,6 +197,7 @@
                                         </label>
                                     </div>
                                     @endforeach
+                                @endforeach
                                 </div>
                                 @error('units') <div class="text-danger small mt-2 fw-semibold"><i class="bx bx-error-circle me-1"></i> {{ $message }}</div> @enderror
                             </div>

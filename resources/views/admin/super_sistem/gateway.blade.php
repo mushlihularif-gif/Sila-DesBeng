@@ -14,6 +14,14 @@
         Menekan <strong>Terapkan</strong> akan <strong>menimpa</strong> data lama kategori tersebut, jadi tidak ada data yang menumpuk.
     </p>
 
+    {{-- Kredensial tersimpan tapi gagal diuji ke server penyedia --}}
+    @if(session('warning'))
+        <div class="alert alert-warning alert-dismissible" role="alert">
+            <i class="bx bx-error me-1"></i> {{ session('warning') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
     @if(session('success'))
         <div class="alert alert-success alert-dismissible" role="alert">
             <i class="bx bx-check-circle me-1"></i> {{ session('success') }}
@@ -116,6 +124,51 @@
                                 <ul class="mb-0 ps-3 small">
                                     @foreach($provider['notes'] as $note)
                                         <li>{{ str_replace('{APP_URL}', $appUrl, $note) }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+
+                        {{-- Tautan keluar ke dashboard/simulator penyedia. URL-nya mengikuti
+                             mode yang TERSIMPAN, bukan posisi sakelar yang belum disimpan,
+                             supaya tidak menyesatkan sebelum ditekan Terapkan. --}}
+                        @if(! empty($provider['tautan']))
+                            @php
+                                $modeField = $provider['mode_field'] ?? null;
+                                $modeProduksi = $modeField ? (bool) ($nilai[$modeField] ?? false) : false;
+                            @endphp
+                            <div class="border rounded-3 p-3 mb-4 bg-light">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <span class="badge bg-label-{{ $modeProduksi ? 'success' : 'warning' }} rounded-pill">
+                                        <i class="bx {{ $modeProduksi ? 'bx-check-shield' : 'bx-test-tube' }} me-1"></i>
+                                        Mode tersimpan: {{ $modeProduksi ? 'Production' : 'Sandbox' }}
+                                    </span>
+                                    <small class="text-muted">Tautan di bawah menyesuaikan mode ini.</small>
+                                </div>
+
+                                <div class="d-flex flex-wrap gap-2">
+                                    @foreach($provider['tautan'] as $t)
+                                        @php
+                                            $hanyaSandbox = $t['hanya_sandbox'] ?? false;
+                                            $url = $modeProduksi
+                                                ? ($t['url_production'] ?? null)
+                                                : ($t['url_sandbox'] ?? null);
+                                        @endphp
+                                        @if($url && ! ($hanyaSandbox && $modeProduksi))
+                                            <a href="{{ $url }}" target="_blank" rel="noopener noreferrer"
+                                               class="btn btn-sm btn-outline-primary"
+                                               title="{{ $t['catatan'] ?? '' }}">
+                                                <i class="bx {{ $t['ikon'] ?? 'bx-link-external' }} me-1"></i>{{ $t['label'] }}
+                                            </a>
+                                        @endif
+                                    @endforeach
+                                </div>
+
+                                <ul class="mb-0 ps-3 mt-2 text-muted" style="font-size:.72rem">
+                                    @foreach($provider['tautan'] as $t)
+                                        @if(! (($t['hanya_sandbox'] ?? false) && $modeProduksi))
+                                            <li>{{ $t['label'] }} &mdash; {{ $t['catatan'] ?? '' }}</li>
+                                        @endif
                                     @endforeach
                                 </ul>
                             </div>

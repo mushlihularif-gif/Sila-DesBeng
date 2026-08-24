@@ -100,14 +100,71 @@ return [
         ],
     ],
 
+    'gmail_imap' => [
+        'label'       => 'Kotak Masuk Gmail (IMAP)',
+        'icon'        => 'bx-envelope',
+        'description' => 'Menampilkan email yang masuk ke alamat resmi platform pada panel kanan dashboard. Bersifat baca-saja.',
+        'console_url' => 'https://myaccount.google.com/apppasswords',
+        'notes'       => [
+            'Memakai App Password, BUKAN password Gmail biasa. Verifikasi 2 Langkah wajib aktif dulu di akun Google tersebut, kalau tidak menu App passwords tidak akan muncul.',
+            'Buat di: Akun Google > Keamanan > Verifikasi 2 Langkah > App passwords. Hasilnya 16 huruf, boleh ditempel apa adanya (spasi akan dibuang otomatis).',
+            'Sengaja tidak memakai Gmail API karena scope bacanya tergolong restricted — butuh verifikasi Google berbayar, dan tautannya putus tiap 7 hari selama belum terverifikasi.',
+            'App Password hanya memberi akses ke kotak surat ini saja dan bisa dicabut kapan saja dari halaman yang sama tanpa mengganggu login Google.',
+        ],
+        'fields' => [
+            'email' => [
+                'label'       => 'Alamat Gmail',
+                'type'        => 'text',
+                'min'         => 6,
+                'max'         => 255,
+                'rules'       => ['email'],
+                'placeholder' => 'kominfo@gmail.com',
+                'hint'        => 'Alamat kotak surat yang isinya akan ditampilkan.',
+                'config'      => 'services.gmail_inbox.email',
+                'env'         => 'GMAIL_INBOX_EMAIL',
+            ],
+            'app_password' => [
+                'label'       => 'App Password',
+                'type'        => 'secret',
+                'min'         => 16,
+                'max'         => 19,
+                'placeholder' => 'abcd efgh ijkl mnop',
+                'hint'        => '16 huruf dari Google. Boleh dengan atau tanpa spasi.',
+                'config'      => 'services.gmail_inbox.app_password',
+                'env'         => 'GMAIL_INBOX_APP_PASSWORD',
+            ],
+        ],
+    ],
+
     'midtrans' => [
         'label'       => 'Payment Gateway — Midtrans',
         'icon'        => 'bx-credit-card',
         'description' => 'Kredensial pembayaran yang dipakai seluruh transaksi dari semua desa/kecamatan.',
         'console_url' => 'https://dashboard.midtrans.com/settings/config_info',
         'notes'       => [
-            'Kunci Sandbox dan Production berbeda. Pastikan sakelar Mode Production di bawah sesuai dengan kunci yang dimasukkan.',
-            'URL notifikasi pembayaran di dashboard Midtrans: {APP_URL}/api/payment/callback',
+            'Sakelar Mode Production di bawah adalah pengaturan APLIKASI INI, bukan pengaturan di akun Midtrans. Ia menentukan aplikasi menghubungi api.sandbox.midtrans.com atau api.midtrans.com.',
+            'Sakelar dan kunci harus sepasang. JANGAN menebak dari awalan kunci: akun Midtrans yang lebih baru memakai awalan "Mid-" untuk Sandbox MAUPUN Production. Panel ini menguji kuncinya langsung ke server Midtrans saat disimpan, lalu memberi tahu lingkungan mana yang menerimanya.',
+            'URL notifikasi pembayaran yang didaftarkan di dashboard Midtrans: {APP_URL}/api/payment/callback',
+        ],
+
+        // Tautan keluar yang ditampilkan di kartu. Dipilih otomatis mengikuti
+        // nilai field 'is_production' yang tersimpan.
+        'mode_field' => 'is_production',
+        'tautan' => [
+            [
+                'label'          => 'Buka Dashboard Midtrans',
+                'ikon'           => 'bx-link-external',
+                'url_sandbox'    => 'https://dashboard.sandbox.midtrans.com/',
+                'url_production' => 'https://dashboard.midtrans.com/',
+                'catatan'        => 'Tempat menyalin Merchant ID dan kunci. Perlu login akun Midtrans milik instansi.',
+            ],
+            [
+                'label'        => 'Simulator Pembayaran',
+                'ikon'         => 'bx-test-tube',
+                'url_sandbox'  => 'https://simulator.sandbox.midtrans.com/',
+                'hanya_sandbox' => true,
+                'catatan'      => 'Alat publik Midtrans untuk menandai transaksi Sandbox sebagai lunas. Tanpa login, dan tidak bisa menyentuh transaksi Production.',
+            ],
         ],
         'fields' => [
             'merchant_id' => [
@@ -124,8 +181,8 @@ return [
                 'type'        => 'secret',
                 'min'         => 20,
                 'max'         => 255,
-                'placeholder' => 'SB-Mid-server-xxxxxxxxxxxxxxxxxxxx',
-                'hint'        => 'Sandbox diawali SB-Mid-server-, production diawali Mid-server-',
+                'placeholder' => 'Mid-server-xxxxxxxxxxxxxxxxxxxx',
+                'hint'        => 'Awalan tidak menentukan lingkungan (akun baru memakai Mid- untuk keduanya). Kebenarannya diuji langsung ke Midtrans saat disimpan.',
                 'config'      => 'services.midtrans.server_key',
                 'env'         => 'MIDTRANS_SERVER_KEY',
             ],
@@ -134,7 +191,7 @@ return [
                 'type'        => 'secret',
                 'min'         => 20,
                 'max'         => 255,
-                'placeholder' => 'SB-Mid-client-xxxxxxxxxxxxxxxxxxxx',
+                'placeholder' => 'Mid-client-xxxxxxxxxxxxxxxxxxxx',
                 'config'      => 'services.midtrans.client_key',
                 'env'         => 'MIDTRANS_CLIENT_KEY',
             ],

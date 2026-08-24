@@ -45,6 +45,16 @@ return [
         'api_key' => env('GOOGLE_MAPS_API_KEY'),
     ],
 
+    // Kotak masuk Gmail via IMAP (baca-saja) untuk panel kanan dashboard admin.
+    // Nilai email & app_password normalnya diisi lewat panel Super Admin dan
+    // menimpa nilai .env ini; lihat config/api_providers.php kategori gmail_imap.
+    'gmail_inbox' => [
+        'email'        => env('GMAIL_INBOX_EMAIL'),
+        'app_password' => env('GMAIL_INBOX_APP_PASSWORD'),
+        'host'         => env('GMAIL_INBOX_HOST', 'imap.gmail.com'),
+        'port'         => env('GMAIL_INBOX_PORT', 993),
+    ],
+
     'midtrans' => [
         'merchant_id' => env('MIDTRANS_MERCHANT_ID'),
         'client_key' => env('MIDTRANS_CLIENT_KEY'),
