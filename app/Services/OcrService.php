@@ -81,105 +81,61 @@ class OcrService
         ];
 
         // Clean up empty lines
-        $lines = array_values(array_filter(array_map('trim', explode("\n", $rawText))));
+        $lines = array_values(array_filter(array_map('trim', explode("
+", $rawText))));
         
-        $nikLineIndex = -1;
-        
-        // Find NIK line first (most reliable anchor)
+        // Find NIK
         foreach ($lines as $index => $line) {
-            // Find 16 digit number
             if (preg_match('/([0-9]{16})/', $line, $matches)) {
                 $data['nik'] = $matches[1];
-                $nikLineIndex = $index;
+                
+                // Name is usually the next line
+                if (isset($lines[$index + 1])) {
+                    $namaLine = $this->cleanPrefix($lines[$index + 1]);
+                    if (strlen($namaLine) > 2) {
+                        $data['name'] = $namaLine;
+                    }
+                }
                 break;
             }
         }
-
-        // Positional Heuristic (Ultra Sharp 99% Accuracy for KTP)
-        if ($nikLineIndex !== -1) {
-            // NAMA is usually 1 line after NIK
-            if (isset($lines[$nikLineIndex + 1])) {
-                $namaLine = $lines[$nikLineIndex + 1];
-                // Strip "Nama :" or similar gibberish at start
-                $namaLine = $this->cleanPrefix($namaLine);
-                if (strlen($namaLine) > 2) {
-                    $data['name'] = $namaLine;
-                }
-            }
-
-            // TEMPAT LAHIR is usually 2 lines after NIK
-            // JENIS KELAMIN is usually 3 lines after NIK
-            if (isset($lines[$nikLineIndex + 3])) {
-                $jkLine = strtoupper($lines[$nikLineIndex + 3]);
-                if (strpos($jkLine, 'LAKI') !== false) {
-                    $data['gender'] = 'laki-laki';
-                } elseif (strpos($jkLine, 'PEREMPUAN') !== false) {
-                    $data['gender'] = 'perempuan';
-                }
-            }
-
-            // ALAMAT is usually 4 lines after NIK
-            if (isset($lines[$nikLineIndex + 4])) {
-                $alamatLine = $lines[$nikLineIndex + 4];
-                $alamatLine = $this->cleanPrefix($alamatLine);
-                if (strlen($alamatLine) > 2) {
-                    $data['address'] = $alamatLine;
-                }
-            }
-
-            // RT/RW is usually 5 lines after NIK
-            if (isset($lines[$nikLineIndex + 5])) {
-                $rtRwLine = $lines[$nikLineIndex + 5];
-                if (preg_match('~([0-9]{1,3})\s*[/\\\\]\s*([0-9]{1,3})~', $rtRwLine, $matches)) {
-                    $data['rt'] = str_pad($matches[1], 3, '0', STR_PAD_LEFT);
-                    $data['rw'] = str_pad($matches[2], 3, '0', STR_PAD_LEFT);
-                }
-            }
-
-            // KEL/DESA is usually 6 lines after NIK
-            if (isset($lines[$nikLineIndex + 6])) {
-                $desaLine = $lines[$nikLineIndex + 6];
-                $desaLine = $this->cleanPrefix($desaLine);
-                if (strlen($desaLine) > 2) {
-                    $data['desa'] = $desaLine;
-                }
-            }
-
-            // KECAMATAN is usually 7 lines after NIK
-            if (isset($lines[$nikLineIndex + 7])) {
-                $kecLine = $lines[$nikLineIndex + 7];
-                $kecLine = $this->cleanPrefix($kecLine);
-                if (strlen($kecLine) > 2) {
-                    $data['kecamatan'] = $kecLine;
-                }
-            }
+        
+        $fullText = strtoupper($rawText);
+        
+        // Extract Gender
+        if (preg_match('/(?:KELAMIN|LAKI|PEREMPUAN).*?(LAKI[-\s]*LAKI|PEREMPUAN)/i', $fullText, $m)) {
+            $data['gender'] = strpos(strtoupper($m[1]), 'PEREMPUAN') !== false ? 'perempuan' : 'laki-laki';
+        }
+        
+        // Extract RT / RW using regex anywhere in the text
+        if (preg_match('/RT[\/\\]?RW\s*[:;=]?\s*([0-9]{1,3})\s*[\/\\]\s*([0-9]{1,3})/i', $fullText, $m)) {
+            $data['rt'] = str_pad($m[1], 3, '0', STR_PAD_LEFT);
+            $data['rw'] = str_pad($m[2], 3, '0', STR_PAD_LEFT);
+        } elseif (preg_match('/([0-9]{1,3})\s*[\/\\]\s*([0-9]{1,3})/', $fullText, $m)) {
+            $data['rt'] = str_pad($m[1], 3, '0', STR_PAD_LEFT);
+            $data['rw'] = str_pad($m[2], 3, '0', STR_PAD_LEFT);
         }
 
-        // Fallback Keyword Heuristic (if position shifted due to extreme OCR errors)
-        foreach ($lines as $line) {
-            $upperLine = strtoupper($line);
-            
-            if (!$data['name'] && preg_match('/(?:Nama|Nema|Nane|Ham|Nam).*?[:=]?\s*(.+)/i', $line, $matches)) {
-                $data['name'] = trim($matches[1]);
-            }
-            if (!$data['address'] && preg_match('/(?:Alamat|Alamet|Alam).*?[:=]?\s*(.+)/i', $line, $matches)) {
-                $data['address'] = trim($matches[1]);
-            }
-            if (!$data['rt'] && preg_match('~RT[/\\\\]RW\s*[:=]?\s*([0-9]{1,3})\s*[/\\\\]\s*([0-9]{1,3})~i', $line, $matches)) {
-                $data['rt'] = str_pad($matches[1], 3, '0', STR_PAD_LEFT);
-                $data['rw'] = str_pad($matches[2], 3, '0', STR_PAD_LEFT);
-            }
-            if (!$data['desa'] && preg_match('/(?:Kel|Desa|Kei).*?[:=]?\s*(.+)/i', $line, $matches)) {
-                $data['desa'] = trim($matches[1]);
-            }
-            if (!$data['kecamatan'] && preg_match('/(?:Kecamatan|Kec).*?[:=]?\s*(.+)/i', $line, $matches)) {
-                $data['kecamatan'] = trim($matches[1]);
+        // Extract Desa/Kelurahan
+        if (preg_match('/(?:KEL|DESA).*?[:;=]\s*([A-Z0-9\s]+)/i', $fullText, $m)) {
+            $data['desa'] = trim(preg_replace('/[Kk][Ee][Cc].*$/i', '', $m[1]));
+        }
+
+        // Extract Kecamatan
+        if (preg_match('/KECAMATAN.*?[:;=]\s*([A-Z0-9\s]+)/i', $fullText, $m)) {
+            $data['kecamatan'] = trim(preg_replace('/(?:AGAMA|STATUS).*$/i', '', $m[1]));
+        }
+
+        // Extract Alamat
+        if (preg_match('/ALAMAT.*?[:;=]\s*([A-Z0-9\.\-\s]+)/i', $fullText, $m)) {
+            $alamat = trim($m[1]);
+            // Remove RT/RW from alamat if it captured too much
+            $alamat = preg_replace('/(?:RT|RW).*$/i', '', $alamat);
+            if (strlen($alamat) > 2) {
+                $data['address'] = trim($alamat);
             }
         }
 
         return $data;
     }
-
-    
-
 }
