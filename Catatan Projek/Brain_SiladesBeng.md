@@ -643,3 +643,100 @@ Penulisan nama aplikasi di sisi publik dan teks pesan harus konsisten menggunaka
 **2. Depresiasi Halaman Verifikasi Lama:**
 - Halaman verifikasi identitas manual yang lama (`/profile/verifikasi`) telah sepenuhnya dinonaktifkan dan digantikan oleh halaman E-KYC AI terpadu (`/kyc`).
 - Semua rute atau menu navigasi yang sebelumnya mengarah ke halaman lama wajib dialihkan (di-redirect) ke `/kyc` untuk memastikan warga tidak tersesat ke form manual tanpa OCR.
+
+
+
+## ?? Arsitektur Kriptografi Lapis 3 (Defense in Depth)
+
+Sistem SilaDesBeng menggunakan 3 lapis algoritma kriptografi untuk melindungi data warga dan memastikan fungsionalitas pencarian data tanpa mengorbankan privasi:
+
+1. **AES-256-GCM (Standar Laravel):**
+   Digunakan untuk mengamankan jalur lalu lintas dasar, token CSRF, Sesi Cookie, dan hal-hal yang bersifat sementara di sisi jaringan.
+
+2. **ChaCha20-Poly1305 (Enkripsi PII & File):**
+   Algoritma yang dikembangkan khusus untuk aplikasi ini (App\Casts\ChaCha20Encrypted & FileEncryptionService). ChaCha20 dipilih karena sangat cepat di perangkat *mobile* (ARM) dan sangat tangguh. Digunakan untuk:
+   - Membungkus teks Data Sensitif (Alamat, Nomor HP, Nama).
+   - Mengenkripsi file fisik (Foto KTP, Foto Selfie Wajah).
+   Sifat dari ChaCha20 adalah *Non-Deterministic* (Kodenya selalu berubah-ubah setiap kali dienkripsi ulang berkat bantuan *Nonce/IV*).
+
+3. **HMAC-SHA256 (Blind Indexing / Pencarian Buta):**
+   Karena ChaCha20 selalu merubah wujud datanya setiap detik, kita tidak bisa melakukan pencarian WHERE nik = '...'. Oleh karena itu, kita menanamkan HMAC-SHA256 pada saat proses penyimpanan (User::saving).
+   - Sifat HMAC-SHA256 adalah *Deterministic* (Pasti). Input yang sama akan selalu menghasilkan Hash 64 karakter yang sama persis kapan pun dieksekusi.
+   - Digunakan untuk: 
+ik_hash, phone_hash, dan 
+ame_hash.
+   - Hal ini memungkinkan sistem mendeteksi keidentikan data warga tanpa pernah mengetahui (atau mendekripsi) angka NIK/Nomor HP aslinya.
+
+---
+
+## ??????????? Logika Klasifikasi Kartu Keluarga (Krisis Gas) & Privacy by Design
+
+Dalam rangka memfasilitasi "Mode Krisis Gas" tanpa mengorbankan privasi warga, sistem menerapkan konsep **Zero Data Retention** (Tidak ada data sensitif yang ditahan/disimpan utuh).
+
+### 1. Alur Verifikasi Kartu Keluarga (KK):
+- Warga mengunggah foto KK.
+- Mesin OCR mengekstrak No. KK dan daftar NIK Anggota Keluarga.
+- **TIDAK ADA HAK EDIT ADMIN:** Untuk menjaga *Non-Repudiation*, Admin hanya bertugas sebagai Hakim (Setujui atau Tolak). Admin mencocokkan teks OCR dengan foto. Jika salah *typo*, Admin harus menolak agar warga mengulangnya.
+- Setelah Admin mengklik **Setujui**, sistem akan:
+  1. Menghitung Hash (HMAC-SHA256) dari No. KK asli dan seluruh NIK Anggota asli.
+  2. Menyimpan No. KK dan Nama Kepala Keluarga dalam bentuk tersensor permanen (misal: 1472********0001 dan A***D) hanya untuk tampilan kosmetik di UI Admin.
+  3. **MENGHANCURKAN FOTO KK SECARA PERMANEN** dari *storage* dan *database* (Storage::disk('private')->delete(...)). Foto hanya sekali pakai.
+
+### 2. Skema Tabel Database Keluarga Berbasis Hash:
+Kita menggunakan pemisahan tabel untuk menjaga privasi:
+- **Tabel amily_cards (Brankas Induk):** Berisi 
+o_kk_hash sebagai Kunci Induk.
+- **Tabel amily_members (Daftar Pemegang Kunci):** Berisi daftar 
+ik_hash dari seluruh anggota keluarga yang terhubung ke Brankas Induk di atas.
+
+### 3. Logika Antrian Pemesanan Gas:
+- Saat seorang warga (*login*) menekan "Pesan Gas", sistem mengambil 
+ik_hash dari profil warga tersebut.
+- Sistem mengecek di amily_members: *"Di Brankas KK (Hash) mana warga ini tergabung?"*.
+- Sistem mengecek riwayat transaksi Brankas tersebut di tabel pemesanan gas.
+- Jika ada *Hash* keluarga (anggota lain) yang sudah memesan dalam batas waktu yang ditentukan (misal 1 minggu), pesanan akan **Ditolak otomatis**.
+- Metode ini memastikan penjatahan gas tepat sasaran per Kepala Keluarga (KK), namun *Hacker* yang membobol *database* hanya akan menemukan kumpulan kode Hash acak tanpa tahu identitas asli maupun hubungan darah warga tersebut.
+
+
+
+## ??? Alasan & Fungsi dari Setiap Lapis Keamanan (Privacy Framework)
+
+Berikut adalah landasan teori dan fungsi dari masing-masing kebijakan keamanan ketat yang diterapkan di SilaDesBeng:
+
+### 1. Fungsi Penghapusan Permanen Foto KTP & KK (Burn After Reading)
+* **Fungsi:** Mengosongkan memori penyimpanan dari gambar yang mengandung identitas visual warga sesaat setelah Admin melakukan verifikasi (Setujui/Tolak).
+* **Alasan:** Foto KTP/KK adalah komoditas utama di pasar gelap dunia maya (sering disalahgunakan untuk pendaftaran Pinjol Ilegal atau penipuan). Dengan menghancurkan foto fisik, jika suatu saat server SilaDesBeng diserang peretas (*hacker*), peretas tersebut **TIDAK AKAN** menemukan satu lembar pun foto KTP warga. Warga terbebas dari ancaman nyata pencurian identitas. Selain itu, langkah ini menghemat ratusan Gigabyte kapasitas Server secara jangka panjang.
+
+### 2. Fungsi Sensor Kosmetik Bintang (Misal: 1472********0001 & R***Y***N)
+* **Fungsi:** Mengubah tampilan huruf/angka asli menjadi deretan bintang, dan menyimpannya di *database* secara permanen dalam bentuk seperti itu.
+* **Alasan:** Meskipun foto sudah dihapus, teks NIK dan Nama Lengkap yang disimpan di dalam *database* masih rawan diretas. Dengan menyensornya, aplikasi tetap bisa menampilkan informasi dasar ke warga atau Admin (misal: "Halo, R***Y***N"), namun peretas yang mencuri isi tabel *database* tidak akan pernah bisa membaca nama dan NIK aslinya.
+
+### 3. Fungsi Blind Indexing / Kode Hash HMAC-SHA256 (Misal: 8d9b1x7z...)
+* **Fungsi:** Menciptakan "Sidik Jari Digital" sepanjang 64 karakter acak dari sebuah NIK atau Nomor HP tanpa bisa diubah kembali ke bentuk angka aslinya.
+* **Alasan:** Karena NIK asli sudah disensor bintang, sistem "buta" dan tidak tahu cara mengelompokkan keluarga atau mencocokkan data. HMAC-SHA256 menutupi kelemahan ini. Karena Hash bersifat absolut (angka NIK yang sama selalu menghasilkan Hash yang sama), sistem bisa menyatukan Warga A dan Warga B ke dalam satu Kartu Keluarga murni berdasarkan pencocokan Hash. Hacker yang meretas tabel ini hanya akan melihat lautan kode acak tanpa makna.
+
+### 4. Fungsi Pencabutan Hak Edit dari Admin (Non-Repudiation)
+* **Fungsi:** Admin tidak disediakan formulir (kolom) untuk mengetik atau memperbaiki data NIK warga yang *typo*. Admin hanya memiliki wewenang menekan **Setujui** atau **Tolak**.
+* **Alasan:** Ini menutup celah *Rogue Admin* (Admin Nakal). Jika Admin bebas mengubah NIK, Admin bisa saja diam-diam mengubah NIK warga dengan NIK fiktif untuk menyedot jatah krisis gas mereka. Dengan mencabut hak edit, tanggung jawab kebenaran data mutlak ada di tangan Warga (Non-Repudiation). Warga yang salah ketik harus mengulang dari awal. Sistem menjadi sangat transparan dan minim penipuan.
+
+
+
+---
+
+## ?? STATUS IMPLEMENTASI (AGUSTUS 2026)
+
+**Tahap 1: Persiapan Database Krisis Gas & Mutasi** (SELESAI)
+- **Migrasi domicile_transfers:** Telah ditambahkan kolom t, w, dan ktp_image_path.
+  - *Fungsi:* Agar saat warga/Admin melakukan mutasi domisili, data wilayah tetap akurat hingga tingkat RT/RW, dan foto KTP fisik wajib diunggah (sebagai pengganti OCR).
+- **Tabel amily_cards (Brankas Induk):** Telah dibuat di *database* beserta Model Eloquent-nya.
+  - *Fungsi:* Menyimpan 
+o_kk_hash sebagai Kunci Induk tanpa wujud KK asli. Berperan sebagai acuan antrian gas (mencegah *double-claim*).
+- **Tabel amily_members (Pemegang Kunci):** Telah dibuat di *database* beserta relasinya.
+  - *Fungsi:* Menyimpan daftar 
+ik_hash anggota keluarga. Berfungsi sebagai pelacak saat warga *login* untuk mengetahui keluarga mana yang ia miliki.
+  - *Sistem Auto-Cabut:* Jika ada warga pindah KK, data NIK lamanya di tabel ini akan dihapus dan dipindah ke Brankas KK baru secara otomatis.
+
+
+### Aturan Privasi Fitur Mutasi Akun (Pindah Domisili)
+Sama halnya dengan verifikasi KTP awal (KYC), fitur Mutasi Akun mewajibkan warga mengunggah foto fisik KTP baru. Aturan penghancuran foto (*Burn After Reading*) **berlaku mutlak secara merata**. Setelah Admin Desa Setuju/Tolak pengajuan Mutasi, sistem wajib menggunakan perintah Storage::disk('private')->delete() untuk menghanguskan foto KTP dari memori dan mengubah kolom ktp_image_path menjadi 
+ull.

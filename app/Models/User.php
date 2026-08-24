@@ -230,6 +230,11 @@ class User extends Authenticatable
         return $this->belongsTo(Region::class);
     }
 
+    public function familyMember()
+    {
+        return $this->hasOne(FamilyMember::class, 'nik_hash', 'nik_hash');
+    }
+
     public function kycVerification()
     {
         return $this->hasOne(KycVerification::class)->latest();

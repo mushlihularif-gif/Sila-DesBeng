@@ -93,6 +93,7 @@ class ReportController extends Controller
 
     public function income(Request $request)
     {
+        $activeServices = $this->getActivatedServices();
         // Dapatkan tahun yang dipilih (default ke tahun sekarang)
         $yearRequest = $request->input('year', now()->year);
         $year = (int)$yearRequest; // Strict integer cast
@@ -118,9 +119,23 @@ class ReportController extends Controller
             ->pluck('year')
             ->map(fn($y) => (int)$y)
             ->toArray();
+            
+        $fasilitasYears = \App\Models\FasilitasUmumBooking::withTrashed()
+            ->selectRaw('YEAR(created_at) as year')
+            ->distinct()
+            ->pluck('year')
+            ->map(fn($y) => (int)$y)
+            ->toArray();
+            
+        $pasarYears = \App\Models\PasarOrder::withTrashed()
+            ->selectRaw('YEAR(created_at) as year')
+            ->distinct()
+            ->pluck('year')
+            ->map(fn($y) => (int)$y)
+            ->toArray();
         
         // Gabungkan dengan tahun sekarang secara eksplisit (Hard Merge)
-        $allYears = array_unique(array_merge($rentalYears, $gasYears, $mobilYears, [(int)now()->year]));
+        $allYears = array_unique(array_merge($rentalYears, $gasYears, $mobilYears, $fasilitasYears, $pasarYears, [(int)now()->year]));
         $availableYears = array_values($allYears);
         rsort($availableYears);
 
@@ -129,6 +144,8 @@ class ReportController extends Controller
         $canViewRental = !$isStaff || $user->hasUnitPermission('sewa_alat');
         $canViewGas = !$isStaff || $user->hasUnitPermission('gas');
         $canViewMobil = !$isStaff || $user->hasUnitPermission('sewa_mobil');
+        $canViewFasilitas = !$isStaff || $user->hasUnitPermission('fasilitas_umum');
+        $canViewPasar = !$isStaff || $user->hasUnitPermission('pasar_daerah');
 
         // Hitung total pendapatan per unit dari sistem (Filter Tahunan)
         $totalPenyewaan = $canViewRental ? $this->applyRegionFilter(RentalBooking::withTrashed(), 'barang', true)->whereYear('created_at', $year)
@@ -143,6 +160,14 @@ class ReportController extends Controller
         $totalMobil = $canViewMobil ? $this->applyRegionFilter(\App\Models\MobilBooking::withTrashed(), 'mobil', true)->whereYear('created_at', $year)
             ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
             ->sum('total_amount') : 0;
+            
+        $totalFasilitas = $canViewFasilitas ? $this->applyRegionFilter(\App\Models\FasilitasUmumBooking::withTrashed(), 'fasilitas', true)->whereYear('created_at', $year)
+            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
+            ->sum('total_amount') : 0;
+            
+        $totalPasar = $canViewPasar ? \App\Models\PasarOrder::withTrashed()->whereYear('created_at', $year)
+            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
+            ->sum('grand_total') : 0;
         
         // Hitung total dari laporan manual (Filter Tahunan)
         $manualPenyewaan = $this->applyRegionFilter(ManualReport::query(), 'creator', true)->whereYear('transaction_date', $year)
@@ -261,6 +286,14 @@ class ReportController extends Controller
             ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
             ->sum('total_amount') : 0;
             
+        $prevTotalFasilitas = $canViewFasilitas ? \App\Models\FasilitasUmumBooking::withTrashed()->whereYear('created_at', $prevYear)
+            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
+            ->sum('total_amount') : 0;
+            
+        $prevTotalPasar = $canViewPasar ? \App\Models\PasarOrder::withTrashed()->whereYear('created_at', $prevYear)
+            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
+            ->sum('grand_total') : 0;
+            
         $prevManualRevenue = ManualReport::whereYear('transaction_date', $prevYear)
             ->sum(\DB::raw('amount * quantity'));
             
@@ -304,6 +337,8 @@ class ReportController extends Controller
             'totalPenyewaan',
             'totalGas',
             'totalMobil',
+            'totalFasilitas',
+            'totalPasar',
             'totalPendapatan',
             'monthlyIncome',
             'dataPoints',
@@ -318,7 +353,8 @@ class ReportController extends Controller
             'totalPendapatanData',
             'unitPopulerData',
             'growth',
-            'availableYears'
+            'availableYears',
+            'activeServices'
         ));
     }
 

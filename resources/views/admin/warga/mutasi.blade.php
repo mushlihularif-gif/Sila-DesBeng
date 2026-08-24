@@ -146,7 +146,14 @@
                                     <span class="badge bg-label-primary">Kades Tujuan</span>
                                     @endif
                                 </td>
-                                <td style="max-width:200px; white-space:pre-wrap;">{{ $p->reason }}</td>
+                                <td style="max-width:200px; white-space:pre-wrap;">
+                                    {{ $p->reason }}
+                                    @if($p->ktp_image_path)
+                                    <div class="mt-2">
+                                        <a href="{{ route('admin.warga.mutasi.ktp', $p->id) }}" target="_blank" class="btn btn-xs btn-outline-primary"><i class="bx bx-id-card"></i> Lihat KTP</a>
+                                    </div>
+                                    @endif
+                                </td>
                                 <td>
                                     <div class="d-flex gap-2">
                                         <form action="{{ route('admin.warga.mutasi.approve', $p->id) }}" method="POST">
@@ -222,7 +229,14 @@
                                     <span class="badge bg-label-primary">Anda (Ditarik)</span>
                                     @endif
                                 </td>
-                                <td style="max-width:200px; white-space:pre-wrap;">{{ $p->reason }}</td>
+                                <td style="max-width:200px; white-space:pre-wrap;">
+                                    {{ $p->reason }}
+                                    @if($p->ktp_image_path)
+                                    <div class="mt-2">
+                                        <a href="{{ route('admin.warga.mutasi.ktp', $p->id) }}" target="_blank" class="btn btn-xs btn-outline-primary"><i class="bx bx-id-card"></i> Lihat KTP</a>
+                                    </div>
+                                    @endif
+                                </td>
                                 <td>
                                     <span class="spinner-border spinner-border-sm text-warning" role="status"></span>
                                     <span class="text-warning fw-bold ms-1">Menunggu Kades Asal</span>
