@@ -129,10 +129,13 @@ class HistoryController extends Controller
             'diproses' => 'Dikonfirmasi',
             'dikonfirmasi' => 'Dikonfirmasi',
             'dikirim' => 'Dikonfirmasi',
+            'confirmed' => 'Dikonfirmasi',
             'selesai' => 'Selesai',
+            'completed' => 'Selesai',
             'ditolak' => 'Batal',
             'batal' => 'Batal',
             'cancelled' => 'Batal',
+            'rejected' => 'Batal',
         ];
 
         $lowerStatus = strtolower($status);

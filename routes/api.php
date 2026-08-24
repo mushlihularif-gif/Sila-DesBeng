@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BerandaController;
@@ -29,6 +28,7 @@ Route::get('/unit-pelayanan', [BerandaController::class, 'unitPelayanan']);
 
     // Wilayah (Regions) - Public for registration
     Route::get('/kemitraan/regions', [\App\Http\Controllers\Api\PartnerApplicationApiController::class, 'getRegions']);
+    Route::get('/kemitraan/check-desa/{id}', [\App\Http\Controllers\Api\PartnerApplicationApiController::class, 'checkDesaAdmin']);
 
 // Protected Routes (Harus mengirimkan Bearer Token dari hasil Login)
 Route::middleware('auth:sanctum')->group(function () {
@@ -46,6 +46,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Laporan
     Route::post('/laporan', [\App\Http\Controllers\Api\LaporanController::class, 'store']);
     Route::get('/my-reports', [\App\Http\Controllers\Api\LaporanController::class, 'getMyReports']);
+    Route::get('/laporan/{id}', [\App\Http\Controllers\Api\LaporanController::class, 'show']);
     Route::get('/admin-reports', [\App\Http\Controllers\Api\LaporanController::class, 'getAdminReports']);
     Route::post('/admin-reports/{id}/forward', [\App\Http\Controllers\Api\LaporanController::class, 'forwardReport']);
     
@@ -85,7 +86,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/events/{id}/join', [\App\Http\Controllers\Api\CommunityEventApiController::class, 'toggleJoin']);
 
     // Wilayah Admin Dashboard (RT/RW)
-    Route::prefix('wilayah')->middleware('role:admin_rt,admin_rw')->group(function () {
+    Route::prefix('wilayah')->middleware('role:admin_rt,admin_rw,rt,rw')->group(function () {
         Route::get('/dashboard', [\App\Http\Controllers\Api\WilayahAdminApiController::class, 'getDashboardStats']);
         Route::get('/warga', [\App\Http\Controllers\Api\AdminWargaApiController::class, 'index']);
         Route::get('/warga/{id}', [\App\Http\Controllers\Api\AdminWargaApiController::class, 'show']);

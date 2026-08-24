@@ -13,19 +13,69 @@ use Illuminate\Support\Facades\Validator;
 class PartnerApplicationApiController extends Controller
 {
     /**
-     * Get regions (Kecamatan and its Desa) for the dropdown.
+     * Get regions (Kecamatan and its Desa) with admin status.
      */
     public function getRegions()
     {
         $kecamatans = Region::where('type', 'kecamatan')
             ->with(['children' => function($query) {
-                $query->where('type', 'desa');
+                $query->where('type', 'desa')->with(['users' => function($u) {
+                    $u->whereIn('role', ['admin_desa', 'admin']);
+                }]);
             }])
             ->get();
 
+        $data = $kecamatans->map(function($kecamatan) {
+            return [
+                'id' => $kecamatan->id,
+                'name' => $kecamatan->name,
+                'type' => $kecamatan->type,
+                'children' => $kecamatan->children->map(function($desa) {
+                    $hasAdmin = $desa->users->isNotEmpty();
+                    return [
+                        'id' => $desa->id,
+                        'name' => $desa->name,
+                        'type' => $desa->type,
+                        'parent_id' => $desa->parent_id,
+                        'has_admin' => $hasAdmin,
+                        'admin_name' => $hasAdmin ? $desa->users->first()->name : null,
+                    ];
+                })
+            ];
+        });
+
         return response()->json([
             'status' => 'success',
-            'data' => $kecamatans
+            'data' => $data
+        ]);
+    }
+
+    /**
+     * Check if a specific desa has an active admin.
+     */
+    public function checkDesaAdmin($id)
+    {
+        $desa = Region::where('type', 'desa')->with(['users' => function($u) {
+            $u->whereIn('role', ['admin_desa', 'admin']);
+        }])->find($id);
+
+        if (!$desa) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Desa / Kelurahan tidak ditemukan'
+            ], 404);
+        }
+
+        $hasAdmin = $desa->users->isNotEmpty();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => [
+                'desa_id' => $desa->id,
+                'desa_name' => $desa->name,
+                'has_admin' => $hasAdmin,
+                'admin_name' => $hasAdmin ? $desa->users->first()->name : null,
+            ]
         ]);
     }
 
