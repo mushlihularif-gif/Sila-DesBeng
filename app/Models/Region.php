@@ -72,4 +72,20 @@ class Region extends Model
         }
         return $path;
     }
+
+    public function getPublicNameAttribute()
+    {
+        $current = $this;
+        // Skip microscopic regions to protect privacy for public view
+        while ($current && in_array(strtolower($current->type), ['rt', 'rw', 'dusun', 'lingkungan'])) {
+            $current = $current->parent;
+        }
+        
+        if ($current) {
+            return $current->name;
+        }
+        
+        return $this->name;
+    }
 }
+

@@ -60,6 +60,14 @@ class KycController extends Controller
         // Proses OCR menggunakan file temporer asli (belum terenkripsi)
         $ocrData = $this->ocrService->extractKtpData($ktpFile->getRealPath());
 
+        // Validasi: pastikan gambar yang diunggah benar-benar KTP dengan mengecek apakah NIK berhasil dideteksi
+        if (empty($ocrData) || empty($ocrData['nik'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gambar tidak terdeteksi sebagai e-KTP yang valid. Pastikan gambar jelas dan NIK terlihat.'
+            ], 400);
+        }
+
         // Hapus verifikasi yang pending/rejected sebelumnya (jika ada)
         KycVerification::where('user_id', $user->id)->whereIn('status', ['pending', 'rejected'])->delete();
 
@@ -94,6 +102,10 @@ class KycController extends Controller
             'edited_nik' => 'nullable|string|max:16',
             'edited_nama' => 'nullable|string|max:255',
             'edited_alamat' => 'nullable|string',
+            'edited_rt' => 'nullable|string|max:10',
+            'edited_rw' => 'nullable|string|max:10',
+            'edited_desa' => 'nullable|string|max:255',
+            'edited_kecamatan' => 'nullable|string|max:255',
         ]);
 
         $kyc = KycVerification::where('id', $request->kyc_id)
@@ -137,6 +149,18 @@ class KycController extends Controller
         }
         if ($request->filled('edited_alamat')) {
             $updateData['address_from_ocr'] = $request->edited_alamat;
+        }
+        if ($request->filled('edited_rt')) {
+            $updateData['rt_from_ocr'] = $request->edited_rt;
+        }
+        if ($request->filled('edited_rw')) {
+            $updateData['rw_from_ocr'] = $request->edited_rw;
+        }
+        if ($request->filled('edited_desa')) {
+            $updateData['desa_from_ocr'] = $request->edited_desa;
+        }
+        if ($request->filled('edited_kecamatan')) {
+            $updateData['kecamatan_from_ocr'] = $request->edited_kecamatan;
         }
 
         $kyc->update($updateData);

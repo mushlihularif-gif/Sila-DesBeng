@@ -136,6 +136,88 @@ return [
         ],
     ],
 
+    'ocr_space' => [
+        'label'       => 'OCR KTP — OCR.space',
+        'icon'        => 'bx-id-card',
+        'description' => 'Membaca NIK dan nama dari foto KTP pada proses verifikasi identitas (KYC).',
+        'console_url' => 'https://ocr.space/ocrapi/freekey',
+        'notes'       => [
+            'Tanpa key sendiri, aplikasi memakai key contoh "helloworld" milik OCR.space yang dibatasi ketat dan tidak layak produksi.',
+            'Key gratis dikirim ke email setelah mendaftar di halaman OCR.space API. Simpan di sini, bukan di file .env.',
+            'Kalau OCR.space gagal membaca, aplikasi otomatis mencoba ulang memakai Gemini (lihat kartu Gemini AI di bawah).',
+        ],
+        'fields' => [
+            'api_key' => [
+                'label'       => 'OCR.space API Key',
+                'type'        => 'secret',
+                'min'         => 8,
+                'max'         => 255,
+                'placeholder' => 'K1234567890123',
+                'hint'        => 'Key gratis biasanya diawali huruf K.',
+                'config'      => 'services.ocr_space.api_key',
+                'env'         => 'OCR_SPACE_API_KEY',
+            ],
+        ],
+    ],
+
+    'fonnte_wa' => [
+        'label'       => 'WhatsApp OTP — Fonnte',
+        'icon'        => 'bxl-whatsapp',
+        'description' => 'Mengirim kode OTP dan notifikasi lewat WhatsApp ke nomor warga.',
+        'console_url' => 'https://md.fonnte.com/new/index.php',
+        'notes'       => [
+            'Token diambil dari dashboard Fonnte pada perangkat WhatsApp yang sudah tersambung.',
+            'Satu token terikat pada satu perangkat. Kalau perangkatnya di-scan ulang atau terputus, token lama berhenti bekerja dan harus diperbarui di sini.',
+        ],
+        'fields' => [
+            'token' => [
+                'label'       => 'Fonnte Token',
+                'type'        => 'secret',
+                'min'         => 8,
+                'max'         => 255,
+                'placeholder' => 'xxxxxxxxxxxxxxxxxxxx',
+                'hint'        => 'Terlihat di dashboard Fonnte bagian perangkat.',
+                'config'      => 'fonnte.token',
+                'env'         => 'FONNTE_TOKEN',
+            ],
+        ],
+    ],
+
+    'gemini' => [
+        'label'       => 'Gemini AI — Google',
+        'icon'        => 'bx-bot',
+        'description' => 'Chatbot bantuan warga, sekaligus cadangan pembacaan KTP kalau OCR.space gagal.',
+        'console_url' => 'https://aistudio.google.com/app/apikey',
+        'notes'       => [
+            'Key dibuat di Google AI Studio, BUKAN di Google Cloud Console tempat OAuth dan Maps tadi.',
+            'Key ini terpisah dari Login Google dan Google Maps meski sama-sama milik Google — jangan tertukar.',
+            'Kalau dikosongkan, chatbot menolak melayani dan cadangan OCR tidak aktif; verifikasi KTP tetap jalan lewat OCR.space saja.',
+        ],
+        'fields' => [
+            'api_key' => [
+                'label'       => 'Gemini API Key',
+                'type'        => 'secret',
+                'min'         => 30,
+                'max'         => 255,
+                'rules'       => ['starts_with:AIza'],
+                'placeholder' => 'AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
+                'hint'        => 'Sama seperti Maps, key Google diawali AIza.',
+                'config'      => 'services.gemini.api_key',
+                'env'         => 'GEMINI_API_KEY',
+            ],
+            'model' => [
+                'label'       => 'Model',
+                'type'        => 'text',
+                'min'         => 5,
+                'max'         => 60,
+                'placeholder' => 'gemini-2.5-flash',
+                'hint'        => 'Kosongkan bagian ini hanya kalau tahu persis nama model penggantinya.',
+                'config'      => 'services.gemini.model',
+                'env'         => 'GEMINI_MODEL',
+            ],
+        ],
+    ],
+
     'midtrans' => [
         'label'       => 'Payment Gateway — Midtrans',
         'icon'        => 'bx-credit-card',

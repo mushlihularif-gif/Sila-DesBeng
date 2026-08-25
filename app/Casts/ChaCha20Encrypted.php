@@ -63,7 +63,7 @@ class ChaCha20Encrypted implements CastsAttributes
             }
 
             // Pisahkan nonce (12 bytes pertama) dari ciphertext
-            $nonceLength = SODIUM_CRYPTO_AEAD_CHACHA20POLY1305_IETF_NPUBBYTES; // 12 bytes
+            $nonceLength = 12; // 12 bytes
 
             if (strlen($decoded) < $nonceLength) {
                 Log::warning("ChaCha20 Decrypt: Data terlalu pendek untuk field [{$key}]");
@@ -121,7 +121,7 @@ class ChaCha20Encrypted implements CastsAttributes
             $encryptionKey = $this->deriveKey();
 
             // Generate nonce acak unik (12 bytes untuk IETF variant)
-            $nonce = random_bytes(SODIUM_CRYPTO_AEAD_CHACHA20POLY1305_IETF_NPUBBYTES);
+            $nonce = random_bytes(12);
 
             // Encrypt menggunakan ChaCha20-Poly1305 IETF (AEAD)
             $ciphertext = sodium_crypto_aead_chacha20poly1305_ietf_encrypt(
@@ -168,7 +168,7 @@ class ChaCha20Encrypted implements CastsAttributes
             $key = $appKey;
         }
 
-        $requiredLength = SODIUM_CRYPTO_AEAD_CHACHA20POLY1305_IETF_KEYBYTES; // 32 bytes
+        $requiredLength = 32; // 32 bytes
 
         if (strlen($key) !== $requiredLength) {
             // Jika key bukan 32 bytes, derive menggunakan BLAKE2b hash

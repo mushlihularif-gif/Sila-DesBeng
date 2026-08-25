@@ -10,35 +10,45 @@
     $isGasActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'gas'));
     $isMobilActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'mobil'));
     $isFasilitasActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'fasilitas'));
-    $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasilitasActive])->filter()->count();
+    $isPasarActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'pasar'));
+    $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasilitasActive, $isPasarActive])->filter()->count();
     @endphp
 
-    @if($totalActive === 0)
-        <!-- Page Header -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h4 class="fw-bold fs-3 mb-1 text-primary">Laporan Pendapatan</h4>
-                <p class="text-muted mb-0">Ringkasan pendapatan dan analisis keuangan {{ auth()->user()->role === 'admin' ? 'Kabupaten Bengkalis' : (auth()->user()->region->name ?? 'Anda') }}</p>
-            </div>
-            <div class="d-flex gap-2">
-                <button class="btn btn-outline-secondary shadow-sm rounded-pill px-4" type="button" data-bs-toggle="dropdown">
-                    <i class="bx bx-calendar me-2"></i>Tahun {{ $year }}
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12 d-flex flex-column flex-md-row justify-content-between align-items-md-center">
+            <h4 class="fw-bold py-3 mb-2 mb-md-0">
+                <span class="text-muted fw-light">Laporan /</span> Pendapatan Keuangan
+            </h4>
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+                <div class="dropdown">
+                    <button class="btn btn-white border shadow-sm rounded-pill px-3" type="button" data-bs-toggle="dropdown">
+                        <i class="bx bx-calendar me-1"></i>Tahun {{ $year }}
+                    </button>
+                    <ul class="dropdown-menu shadow border-0 rounded-3">
+                        @foreach($availableYears as $optYear)
+                            <li><a class="dropdown-item {{ $optYear == $year ? 'active' : '' }}" href="{{ route('admin.laporan.pendapatan', ['year' => $optYear]) }}">{{ $optYear }}</a></li>
+                        @endforeach
+                    </ul>
+                </div>
+                
+                @if($totalActive > 0)
+                <button class="btn btn-success shadow-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#manualTransactionModal">
+                    <i class="bx bx-plus me-1"></i>Catat Manual
                 </button>
-                <ul class="dropdown-menu shadow border-0 rounded-4">
-                    @foreach($availableYears as $optYear)
-                        <li><a class="dropdown-item {{ $optYear == $year ? 'active' : '' }}" href="{{ route('admin.laporan.pendapatan', ['year' => $optYear]) }}">{{ $optYear }}</a></li>
-                    @endforeach
-                </ul>
-                <a href="{{ route('admin.laporan.pendapatan.riwayat') }}" class="btn btn-info text-white shadow-sm rounded-pill px-4">
-                    <i class="bx bx-history me-2"></i>Riwayat Pendapatan
+                @endif
+                
+                <a href="{{ route('admin.laporan.pendapatan.riwayat') }}" class="btn btn-info text-white shadow-sm rounded-pill px-3">
+                    <i class="bx bx-history me-1"></i>Riwayat
                 </a>
-                <button class="btn btn-primary shadow-sm rounded-pill px-4" onclick="window.print()">
-                    <i class="bx bx-printer me-2"></i>Cetak
+                
+                <button class="btn btn-primary shadow-sm rounded-pill px-3" onclick="window.print()">
+                    <i class="bx bx-printer me-1"></i>Cetak
                 </button>
             </div>
         </div>
-        
-        <!-- Panduan -->
+    
+    <!-- Panduan -->
         <div class="card bg-label-primary border-0 shadow-none mb-4" style="border-radius: 12px;">
             <div class="card-body d-flex align-items-center p-4">
                 <div class="me-3">
@@ -54,6 +64,11 @@
                 </div>
             </div>
         </div>
+        
+    @if($totalActive === 0)
+        </div>
+
+        
         <div class="alert alert-warning border-0 shadow-sm rounded-4 p-4 text-center">
             <div class="avatar avatar-lg bg-warning-subtle text-warning rounded-circle mx-auto mb-3">
                 <i class="bx bx-info-circle fs-2"></i>
@@ -63,49 +78,7 @@
         </div>
     @else
 
-    <!-- Page Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h4 class="fw-bold fs-3 mb-1 text-primary">Laporan Pendapatan</h4>
-            <p class="text-muted mb-0">Ringkasan pendapatan dan analisis keuangan {{ auth()->user()->role === 'admin' ? 'Kabupaten Bengkalis' : (auth()->user()->region->name ?? 'Anda') }}</p>
-        </div>
-        <div class="d-flex gap-2">
-            <button class="btn btn-outline-secondary shadow-sm rounded-pill px-4" type="button" data-bs-toggle="dropdown">
-                <i class="bx bx-calendar me-2"></i>Tahun {{ $year }}
-            </button>
-            <ul class="dropdown-menu shadow border-0 rounded-4">
-                @foreach($availableYears as $optYear)
-                    <li><a class="dropdown-item {{ $optYear == $year ? 'active' : '' }}" href="{{ route('admin.laporan.pendapatan', ['year' => $optYear]) }}">{{ $optYear }}</a></li>
-                @endforeach
-            </ul>
-             <button class="btn btn-success shadow-sm rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#manualTransactionModal">
-                <i class="bx bx-plus me-2"></i>Catat Transaksi Manual
-            </button>
-            <a href="{{ route('admin.laporan.pendapatan.riwayat') }}" class="btn btn-info text-white shadow-sm rounded-pill px-4">
-                <i class="bx bx-history me-2"></i>Riwayat Pendapatan
-            </a>
-            <button class="btn btn-primary shadow-sm rounded-pill px-4" onclick="window.print()">
-                <i class="bx bx-printer me-2"></i>Cetak
-            </button>
-        </div>
-    </div>
-
-    <!-- Panduan -->
-    <div class="card bg-label-primary border-0 shadow-none mb-4" style="border-radius: 12px;">
-        <div class="card-body d-flex align-items-center p-4">
-            <div class="me-3">
-                <div class="bg-primary p-3 rounded-circle text-white d-flex align-items-center justify-content-center shadow-sm" style="width: 56px; height: 56px;">
-                    <i class="bx bx-info-circle fs-3"></i>
-                </div>
-            </div>
-            <div>
-                <h5 class="fw-bold mb-1 text-primary">Panduan Laporan Pendapatan</h5>
-                <p class="mb-0 text-primary" style="opacity: 0.85;">
-                    Menu ini khusus memvisualisasikan ringkasan performa finansial dan total uang masuk dari unit layanan Anda sendiri. Gunakan grafik di bawah ini untuk mengevaluasi omzet bulanan dan mengukur persentase kontribusi dari tiap sektor usaha.
-                </p>
-            </div>
-        </div>
-    </div>
+    
 
     <!-- Summary Statistics -->
     <div class="row g-3 mb-4">
@@ -124,10 +97,10 @@
                     <div class="d-flex align-items-center small text-muted">
                         @if($growth['total'] > 0)
                             <i class="bx bx-trending-up text-success me-1"></i>
-                            <span class="text-success fw-semibold me-2">+{{ $growth['total'] }}%</span>
+                            <span class="text-success fw-semibold me-2">+{{ number_format($growth['total'], 1) }}%</span>
                         @elseif($growth['total'] < 0)
                             <i class="bx bx-trending-down text-danger me-1"></i>
-                            <span class="text-danger fw-semibold me-2">{{ $growth['total'] }}%</span>
+                            <span class="text-danger fw-semibold me-2">{{ number_format($growth['total'], 1) }}%</span>
                         @else
                             <i class="bx bx-minus text-secondary me-1"></i>
                             <span class="text-secondary fw-semibold me-2">0%</span>
@@ -137,13 +110,14 @@
                 </div>
             </div>
         </div>
+        
         @if($isRentalActive)
         <div class="col-md-3">
             <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden position-relative">
                 <div class="card-body p-4">
                     <div class="d-flex align-items-center mb-3">
-                        <div class="avatar avatar-md bg-warning-subtle text-warning rounded-3 p-2 me-3">
-                            <i class="bx bx-wrench fs-3"></i>
+                        <div class="avatar avatar-md bg-warning-subtle text-warning rounded-3 p-2 me-3 d-flex align-items-center justify-content-center">
+                            <img src="{{ asset('User/img/elemen/F1.png') }}" style="width: 24px; height: 24px; object-fit: contain;">
                         </div>
                         <div>
                             <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Unit Penyewaan</small>
@@ -153,10 +127,10 @@
                     <div class="d-flex align-items-center small text-muted">
                         @if($growth['rental'] > 0)
                             <i class="bx bx-trending-up text-success me-1"></i>
-                            <span class="text-success fw-semibold me-2">+{{ $growth['rental'] }}%</span>
+                            <span class="text-success fw-semibold me-2">+{{ number_format($growth['rental'], 1) }}%</span>
                         @elseif($growth['rental'] < 0)
                             <i class="bx bx-trending-down text-danger me-1"></i>
-                            <span class="text-danger fw-semibold me-2">{{ $growth['rental'] }}%</span>
+                            <span class="text-danger fw-semibold me-2">{{ number_format($growth['rental'], 1) }}%</span>
                         @else
                             <i class="bx bx-minus text-secondary me-1"></i>
                             <span class="text-secondary fw-semibold me-2">0%</span>
@@ -167,26 +141,27 @@
             </div>
         </div>
         @endif
+        
         @if($isGasActive)
         <div class="col-md-3">
             <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden position-relative">
                 <div class="card-body p-4">
                     <div class="d-flex align-items-center mb-3">
-                        <div class="avatar avatar-md bg-info-subtle text-info rounded-3 p-2 me-3">
-                            <i class="bx bxs-gas-pump fs-3"></i>
+                        <div class="avatar avatar-md bg-info-subtle text-info rounded-3 p-2 me-3 d-flex align-items-center justify-content-center">
+                            <img src="{{ asset('User/img/elemen/F2.png') }}" style="width: 24px; height: 24px; object-fit: contain;">
                         </div>
                         <div>
                             <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Unit Gas</small>
                             <h5 class="fw-bold mb-0 text-dark" style="white-space: nowrap;">Rp <span class="count-up-rupiah" data-value="{{ $totalGas }}">0</span></h5>
                         </div>
                     </div>
-                     <div class="d-flex align-items-center small text-muted">
+                    <div class="d-flex align-items-center small text-muted">
                         @if($growth['gas'] > 0)
                             <i class="bx bx-trending-up text-success me-1"></i>
-                            <span class="text-success fw-semibold me-2">+{{ $growth['gas'] }}%</span>
+                            <span class="text-success fw-semibold me-2">+{{ number_format($growth['gas'], 1) }}%</span>
                         @elseif($growth['gas'] < 0)
                             <i class="bx bx-trending-down text-danger me-1"></i>
-                            <span class="text-danger fw-semibold me-2">{{ $growth['gas'] }}%</span>
+                            <span class="text-danger fw-semibold me-2">{{ number_format($growth['gas'], 1) }}%</span>
                         @else
                             <i class="bx bx-minus text-secondary me-1"></i>
                             <span class="text-secondary fw-semibold me-2">0%</span>
@@ -197,26 +172,89 @@
             </div>
         </div>
         @endif
+        
         @if($isMobilActive)
         <div class="col-md-3">
             <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden position-relative">
                 <div class="card-body p-4">
                     <div class="d-flex align-items-center mb-3">
-                        <div class="avatar avatar-md bg-danger-subtle text-danger rounded-3 p-2 me-3">
-                            <i class="bx bx-car fs-3"></i>
+                        <div class="avatar avatar-md bg-danger-subtle text-danger rounded-3 p-2 me-3 d-flex align-items-center justify-content-center">
+                            <img src="{{ asset('User/img/elemen/mobil.png') }}" style="width: 24px; height: 24px; object-fit: contain;">
                         </div>
                         <div>
-                            <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Unit Sewa Mobil</small>
-                            <h5 class="fw-bold mb-0 text-dark" style="white-space: nowrap;">Rp <span class="count-up-rupiah" data-value="{{ $totalMobil ?? 0 }}">0</span></h5>
+                            <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Sewa Mobil</small>
+                            <h5 class="fw-bold mb-0 text-dark" style="white-space: nowrap;">Rp <span class="count-up-rupiah" data-value="{{ $totalMobil }}">0</span></h5>
                         </div>
                     </div>
-                     <div class="d-flex align-items-center small text-muted">
+                    <div class="d-flex align-items-center small text-muted">
                         @if($growth['mobil'] > 0)
                             <i class="bx bx-trending-up text-success me-1"></i>
-                            <span class="text-success fw-semibold me-2">+{{ $growth['mobil'] }}%</span>
+                            <span class="text-success fw-semibold me-2">+{{ number_format($growth['mobil'], 1) }}%</span>
                         @elseif($growth['mobil'] < 0)
                             <i class="bx bx-trending-down text-danger me-1"></i>
-                            <span class="text-danger fw-semibold me-2">{{ $growth['mobil'] }}%</span>
+                            <span class="text-danger fw-semibold me-2">{{ number_format($growth['mobil'], 1) }}%</span>
+                        @else
+                            <i class="bx bx-minus text-secondary me-1"></i>
+                            <span class="text-secondary fw-semibold me-2">0%</span>
+                        @endif
+                        dari tahun lalu
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
+        
+        @if($isFasilitasActive ?? false)
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden position-relative">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="avatar avatar-md bg-success-subtle text-success rounded-3 p-2 me-3 d-flex align-items-center justify-content-center">
+                            <img src="{{ asset('User/img/elemen/fasilitas.png') }}" style="width: 24px; height: 24px; object-fit: contain;">
+                        </div>
+                        <div>
+                            <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Fasilitas Umum</small>
+                            <h5 class="fw-bold mb-0 text-dark" style="white-space: nowrap;">Rp <span class="count-up-rupiah" data-value="{{ $totalFasilitas ?? 0 }}">0</span></h5>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center small text-muted">
+                        @if(($growth['fasilitas'] ?? 0) > 0)
+                            <i class="bx bx-trending-up text-success me-1"></i>
+                            <span class="text-success fw-semibold me-2">+{{ number_format($growth['fasilitas'] ?? 0, 1) }}%</span>
+                        @elseif(($growth['fasilitas'] ?? 0) < 0)
+                            <i class="bx bx-trending-down text-danger me-1"></i>
+                            <span class="text-danger fw-semibold me-2">{{ number_format($growth['fasilitas'] ?? 0, 1) }}%</span>
+                        @else
+                            <i class="bx bx-minus text-secondary me-1"></i>
+                            <span class="text-secondary fw-semibold me-2">0%</span>
+                        @endif
+                        dari tahun lalu
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
+        
+        @if($isPasarActive ?? false)
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden position-relative">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="avatar avatar-md bg-secondary-subtle text-secondary rounded-3 p-2 me-3 d-flex align-items-center justify-content-center">
+                            <img src="{{ asset('Admin/img/pasardaerah/PasarDaerah2.png') }}" style="width: 24px; height: 24px; object-fit: contain;">
+                        </div>
+                        <div>
+                            <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Pasar Daerah</small>
+                            <h5 class="fw-bold mb-0 text-dark" style="white-space: nowrap;">Rp <span class="count-up-rupiah" data-value="{{ $totalPasar ?? 0 }}">0</span></h5>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center small text-muted">
+                        @if(($growth['pasar'] ?? 0) > 0)
+                            <i class="bx bx-trending-up text-success me-1"></i>
+                            <span class="text-success fw-semibold me-2">+{{ number_format($growth['pasar'] ?? 0, 1) }}%</span>
+                        @elseif(($growth['pasar'] ?? 0) < 0)
+                            <i class="bx bx-trending-down text-danger me-1"></i>
+                            <span class="text-danger fw-semibold me-2">{{ number_format($growth['pasar'] ?? 0, 1) }}%</span>
                         @else
                             <i class="bx bx-minus text-secondary me-1"></i>
                             <span class="text-secondary fw-semibold me-2">0%</span>
@@ -228,10 +266,8 @@
         </div>
         @endif
     </div>
-
-    <!-- Charts Section -->
-    <div class="row g-4 mb-4">
-        <!-- Kinerja Chart -->
+    
+    <!-- Kinerja Chart -->
         <div class="col-lg-12">
             <div class="card border-0 shadow-sm rounded-4 h-100">
                 <div class="card-header bg-white border-bottom py-3 px-4 d-flex justify-content-between align-items-center">
@@ -268,8 +304,8 @@
                     @if($isRentalActive)
                     <!-- Rental Item -->
                     <div class="d-flex align-items-center mb-4 p-3 rounded-3 hover-bg-light transition-all border border-dashed-hover">
-                         <div class="avatar avatar-md bg-warning-subtle text-warning rounded-3 p-2 me-3">
-                            <i class="bx bx-wrench fs-3"></i>
+                         <div class="avatar avatar-md bg-warning-subtle rounded-3 p-2 me-3 d-flex align-items-center justify-content-center">
+                            <img src="{{ asset('User/img/elemen/F1.png') }}" style="width: 24px; height: 24px; object-fit: contain;">
                         </div>
                         <div class="flex-grow-1">
                             <div class="d-flex justify-content-between align-items-center mb-1">
@@ -290,8 +326,8 @@
                     @if($isGasActive)
                     <!-- Gas Item -->
                     <div class="d-flex align-items-center mb-4 p-3 rounded-3 hover-bg-light transition-all border border-dashed-hover">
-                         <div class="avatar avatar-md bg-info-subtle text-info rounded-3 p-2 me-3">
-                            <i class="bx bxs-gas-pump fs-3"></i>
+                         <div class="avatar avatar-md bg-info-subtle rounded-3 p-2 me-3 d-flex align-items-center justify-content-center">
+                            <img src="{{ asset('User/img/elemen/F2.png') }}" style="width: 24px; height: 24px; object-fit: contain;">
                         </div>
                          <div class="flex-grow-1">
                             <div class="d-flex justify-content-between align-items-center mb-1">
@@ -311,69 +347,74 @@
 
                     @if($isMobilActive)
                     <!-- Mobil Item -->
-                    <div class="d-flex align-items-center p-3 rounded-3 hover-bg-light transition-all border border-dashed-hover">
-                          <div class="d-flex align-items-center mb-4">
-                              <div class="avatar flex-shrink-0 me-3">
-                                  <span class="avatar-initial rounded bg-label-danger"><i class="bx bx-car"></i></span>
+                    <div class="d-flex align-items-center mb-4 p-3 rounded-3 hover-bg-light transition-all border border-dashed-hover">
+                          <div class="avatar avatar-md bg-danger-subtle rounded-3 p-2 me-3 d-flex align-items-center justify-content-center">
+                              <img src="{{ asset('User/img/elemen/mobil.png') }}" style="width: 24px; height: 24px; object-fit: contain;">
+                          </div>
+                          <div class="flex-grow-1">
+                              <div class="d-flex justify-content-between align-items-center mb-1">
+                                  <h6 class="fw-bold text-dark mb-0">Unit Sewa Mobil</h6>
+                                  <span class="fw-bold text-dark">Rp <span class="count-up-rupiah" data-value="{{ $totalPendapatanData['mobil']['revenue'] ?? 0 }}">0</span></span>
                               </div>
-                              <div class="flex-grow-1">
-                                  <div class="d-flex justify-content-between align-items-center mb-1">
-                                      <h6 class="fw-bold text-dark mb-0">Unit Sewa Mobil</h6>
-                                      <span class="fw-bold text-dark">Rp <span class="count-up-rupiah" data-value="{{ $totalPendapatanData['mobil']['revenue'] ?? 0 }}">0</span></span>
-                                  </div>
-                                  <div class="progress mb-2" style="height: 6px;">
-                                      <div class="progress-bar bg-danger" role="progressbar" style="width: {{ $totalPendapatanData['mobil']['percentage'] ?? 0 }}%"></div>
-                                  </div>
-                                  <div class="d-flex justify-content-between text-muted small">
-                                      <span><span class="count-up" data-value="{{ $totalPendapatanData['mobil']['transactions'] ?? 0 }}">0</span> Transaksi</span>
-                                      <span><span class="count-up" data-value="{{ $totalPendapatanData['mobil']['percentage'] ?? 0 }}">0</span>% dari Total</span>
-                                  </div>
+                              <div class="progress mb-2" style="height: 6px;">
+                                  <div class="progress-bar bg-danger" role="progressbar" style="width: {{ $totalPendapatanData['mobil']['percentage'] ?? 0 }}%"></div>
+                              </div>
+                              <div class="d-flex justify-content-between text-muted small">
+                                  <span><span class="count-up" data-value="{{ $totalPendapatanData['mobil']['transactions'] ?? 0 }}">0</span> Transaksi</span>
+                                  <span><span class="count-up" data-value="{{ $totalPendapatanData['mobil']['percentage'] ?? 0 }}">0</span>% dari Total</span>
                               </div>
                           </div>
-
-                          <div class="d-flex align-items-center mb-4">
-                              <div class="avatar flex-shrink-0 me-3">
-                                  <span class="avatar-initial rounded bg-label-primary"><i class="bx bx-building-house"></i></span>
-                              </div>
-                              <div class="flex-grow-1">
-                                  <div class="d-flex justify-content-between align-items-center mb-1">
-                                      <h6 class="fw-bold text-dark mb-0">Fasilitas Umum</h6>
-                                      <span class="fw-bold text-dark">Rp <span class="count-up-rupiah" data-value="{{ $totalPendapatanData['fasilitas']['revenue'] ?? 0 }}">0</span></span>
-                                  </div>
-                                  <div class="progress mb-2" style="height: 6px;">
-                                      <div class="progress-bar bg-primary" role="progressbar" style="width: {{ $totalPendapatanData['fasilitas']['percentage'] ?? 0 }}%"></div>
-                                  </div>
-                                  <div class="d-flex justify-content-between text-muted small">
-                                      <span><span class="count-up" data-value="{{ $totalPendapatanData['fasilitas']['transactions'] ?? 0 }}">0</span> Transaksi</span>
-                                      <span><span class="count-up" data-value="{{ $totalPendapatanData['fasilitas']['percentage'] ?? 0 }}">0</span>% dari Total</span>
-                                  </div>
-                              </div>
-                          </div>
-
-                          <div class="d-flex align-items-center">
-                              <div class="avatar flex-shrink-0 me-3">
-                                  <span class="avatar-initial rounded bg-label-success"><i class="bx bx-store-alt"></i></span>
-                              </div>
-                              <div class="flex-grow-1">
-                                  <div class="d-flex justify-content-between align-items-center mb-1">
-                                      <h6 class="fw-bold text-dark mb-0">Pasar Daerah</h6>
-                                      <span class="fw-bold text-dark">Rp <span class="count-up-rupiah" data-value="{{ $totalPendapatanData['pasar']['revenue'] ?? 0 }}">0</span></span>
-                                  </div>
-                                  <div class="progress mb-2" style="height: 6px;">
-                                      <div class="progress-bar bg-success" role="progressbar" style="width: {{ $totalPendapatanData['pasar']['percentage'] ?? 0 }}%"></div>
-                                  </div>
-                                  <div class="d-flex justify-content-between text-muted small">
-                                      <span><span class="count-up" data-value="{{ $totalPendapatanData['pasar']['transactions'] ?? 0 }}">0</span> Transaksi</span>
-                                      <span><span class="count-up" data-value="{{ $totalPendapatanData['pasar']['percentage'] ?? 0 }}">0</span>% dari Total</span>
-                                  </div>
-                              </div>
-                          </div>
+                    </div>
                     @endif
-                </div>
-            </div>
-        </div>
+                    
+                    @if($isFasilitasActive ?? false)
+                    <!-- Fasilitas Item -->
+                    <div class="d-flex align-items-center mb-4 p-3 rounded-3 hover-bg-light transition-all border border-dashed-hover">
+                          <div class="avatar avatar-md bg-success-subtle rounded-3 p-2 me-3 d-flex align-items-center justify-content-center">
+                              <img src="{{ asset('User/img/elemen/fasilitas.png') }}" style="width: 24px; height: 24px; object-fit: contain;">
+                          </div>
+                          <div class="flex-grow-1">
+                              <div class="d-flex justify-content-between align-items-center mb-1">
+                                  <h6 class="fw-bold text-dark mb-0">Unit Fasilitas Umum</h6>
+                                  <span class="fw-bold text-dark">Rp <span class="count-up-rupiah" data-value="{{ $totalPendapatanData['fasilitas']['revenue'] ?? 0 }}">0</span></span>
+                              </div>
+                              <div class="progress mb-2" style="height: 6px;">
+                                  <div class="progress-bar bg-success" role="progressbar" style="width: {{ $totalPendapatanData['fasilitas']['percentage'] ?? 0 }}%"></div>
+                              </div>
+                              <div class="d-flex justify-content-between text-muted small">
+                                  <span><span class="count-up" data-value="{{ $totalPendapatanData['fasilitas']['transactions'] ?? 0 }}">0</span> Transaksi</span>
+                                  <span><span class="count-up" data-value="{{ $totalPendapatanData['fasilitas']['percentage'] ?? 0 }}">0</span>% dari Total</span>
+                              </div>
+                          </div>
+                    </div>
+                    @endif
+                    
+                    @if($isPasarActive ?? false)
+                    <!-- Pasar Item -->
+                    <div class="d-flex align-items-center mb-4 p-3 rounded-3 hover-bg-light transition-all border border-dashed-hover">
+                          <div class="avatar avatar-md bg-secondary-subtle rounded-3 p-2 me-3 d-flex align-items-center justify-content-center">
+                              <img src="{{ asset('Admin/img/pasardaerah/PasarDaerah2.png') }}" style="width: 24px; height: 24px; object-fit: contain;">
+                          </div>
+                          <div class="flex-grow-1">
+                              <div class="d-flex justify-content-between align-items-center mb-1">
+                                  <h6 class="fw-bold text-dark mb-0">Pasar Daerah</h6>
+                                  <span class="fw-bold text-dark">Rp <span class="count-up-rupiah" data-value="{{ $totalPendapatanData['pasar']['revenue'] ?? 0 }}">0</span></span>
+                              </div>
+                              <div class="progress mb-2" style="height: 6px;">
+                                  <div class="progress-bar bg-secondary" role="progressbar" style="width: {{ $totalPendapatanData['pasar']['percentage'] ?? 0 }}%"></div>
+                              </div>
+                              <div class="d-flex justify-content-between text-muted small">
+                                  <span><span class="count-up" data-value="{{ $totalPendapatanData['pasar']['transactions'] ?? 0 }}">0</span> Transaksi</span>
+                                  <span><span class="count-up" data-value="{{ $totalPendapatanData['pasar']['percentage'] ?? 0 }}">0</span>% dari Total</span>
+                              </div>
+                          </div>
+                    </div>
+                    @endif
+                  </div>
+              </div>
+          </div>
 
-        <!-- Donut Chart -->
+          <!-- Donut Chart -->
          <div class="col-lg-4">
              <div class="card border-0 shadow-sm rounded-4 h-100">
                 <div class="card-header bg-white border-bottom py-3 px-4">

@@ -51,8 +51,15 @@ class ProfileController extends Controller
         if ($request->hasFile('avatar')) {
             // Store new avatar in private storage (local disk)
             $file = $request->file('avatar');
-            $extension = $file->getClientOriginalExtension();
-            $filename = $user->id . '_' . time() . '.' . $extension;
+            $extension = strtolower($file->extension());
+            
+            // Strict whitelist extension
+            $allowedExtensions = ['jpg', 'jpeg', 'png'];
+            if (!in_array($extension, $allowedExtensions)) {
+                return back()->with('error', 'Format file avatar tidak valid.')->withInput();
+            }
+
+            $filename = $user->id . '_' . time() . '_' . Str::random(10) . '.' . $extension;
             $path = $file->storeAs('profiles', $filename, ['disk' => 'local']);
 
             // Create new file record

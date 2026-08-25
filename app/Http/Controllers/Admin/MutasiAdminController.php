@@ -85,17 +85,25 @@ class MutasiAdminController extends Controller
         $mutasi = MutasiPenduduk::findOrFail($id);
         $admin = Auth::user();
 
-        // Hanya desa asal yang berhak approve pelepasannya
+        // Hanya desa asal yang berhak approve pelepasannya (Handshake awal)
         if ($mutasi->from_region_id != $admin->region_id && !in_array($admin->role, ['super_admin', 'admin_kecamatan'])) {
             abort(403, 'Anda tidak berhak menyetujui pelepasan ini.');
         }
 
         $mutasi->status = 'approved';
+        
+        // PRIVACY RULE: Burn after reading
+        if ($mutasi->ktp_image_path) {
+            \Illuminate\Support\Facades\Storage::disk('private')->delete($mutasi->ktp_image_path);
+            $mutasi->ktp_image_path = null;
+        }
         $mutasi->save();
 
         // Pindahkan user ke desa baru
         $user = User::findOrFail($mutasi->user_id);
         $user->region_id = $mutasi->to_region_id;
+        if ($mutasi->alamat_baru) $user->address = $mutasi->alamat_baru;
+        // Kita juga bisa update RT RW jika ada kolomnya di users table
         $user->save();
 
         return redirect()->back()->with('success', "Pelepasan disetujui. Warga {$user->name} telah resmi berpindah ke desa tujuan.");
@@ -114,8 +122,36 @@ class MutasiAdminController extends Controller
 
         $mutasi->status = 'rejected';
         $mutasi->rejection_reason = $request->rejection_reason;
+        
+        // PRIVACY RULE: Burn after reading even if rejected
+        if ($mutasi->ktp_image_path) {
+            \Illuminate\Support\Facades\Storage::disk('private')->delete($mutasi->ktp_image_path);
+            $mutasi->ktp_image_path = null;
+        }
+        
         $mutasi->save();
 
         return redirect()->back()->with('success', 'Mutasi ditolak dan dikembalikan.');
+    }
+    public function showKtp($id)
+    {
+        $mutasi = MutasiPenduduk::findOrFail($id);
+        $admin = Auth::user();
+
+        // Check auth
+        if ($mutasi->from_region_id != $admin->region_id && $mutasi->to_region_id != $admin->region_id && !in_array($admin->role, ['super_admin', 'admin_kecamatan'])) {
+            abort(403);
+        }
+
+        if (!$mutasi->ktp_image_path) {
+            abort(404, 'KTP tidak ditemukan atau sudah dihapus.');
+        }
+
+        $path = storage_path('app/private/' . $mutasi->ktp_image_path);
+        if (!file_exists($path)) {
+            abort(404, 'File fisik tidak ditemukan.');
+        }
+
+        return response()->file($path);
     }
 }

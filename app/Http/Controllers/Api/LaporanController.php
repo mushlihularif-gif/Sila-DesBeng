@@ -72,8 +72,20 @@ class LaporanController extends Controller
             $file = $request->file('bukti');
         
             if ($file->isValid()) {
-                $extension = $file->getClientOriginalExtension();
-                $filename = time() . '_' . Str::random(16) . '.' . $extension;
+                // SECURITY HARDENING: Gunakan ->extension() bawaan Laravel yang mengecek MIME type isi file
+                // BUKAN ->getClientOriginalExtension() yang bisa dimanipulasi attacker
+                $extension = strtolower($file->extension());
+                
+                // Strict whitelist extension
+                $allowedExtensions = ['jpg', 'jpeg', 'png'];
+                if (!in_array($extension, $allowedExtensions)) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Format file tidak valid. Keamanan sistem mendeteksi anomali.'
+                    ], 403);
+                }
+
+                $filename = time() . '_' . Str::random(24) . '.' . $extension;
         
                 // PATH KE ROOT SUBDOMAIN (Sesuai Web)
                 $destination = $_SERVER['DOCUMENT_ROOT'] . '/storage/laporan';
@@ -278,5 +290,65 @@ class LaporanController extends Controller
             'message' => 'Status laporan berhasil diperbarui',
             'data' => $laporan
         ], 200);
+    }
+
+    /**
+     * Get comprehensive report detail by ID
+     */
+    public function show($id)
+    {
+        $user = auth('sanctum')->user();
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        $laporan = Laporan::with(['user', 'admin'])->find($id);
+
+        if (!$laporan) {
+            return response()->json(['status' => 'error', 'message' => 'Laporan tidak ditemukan'], 404);
+        }
+
+        if ((int) $laporan->user_id !== (int) $user->id && !in_array($user->role, ['admin_desa', 'superadmin', 'admin_rt', 'admin_rw'])) {
+            return response()->json(['status' => 'error', 'message' => 'Akses ditolak'], 403);
+        }
+
+        $buktiUrls = [];
+        if (!empty($laporan->bukti_array)) {
+            foreach ($laporan->bukti_array as $b) {
+                $buktiUrls[] = asset('storage/' . $b);
+            }
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'data' => [
+                'id' => $laporan->id,
+                'user_id' => $laporan->user_id,
+                'nama' => $laporan->nama,
+                'judul_laporan' => $laporan->judul_laporan,
+                'deskripsi' => $laporan->deskripsi,
+                'kategori' => $laporan->kategori,
+                'lokasi' => $laporan->lokasi,
+                'latitude' => $laporan->latitude,
+                'longitude' => $laporan->longitude,
+                'status' => $laporan->status,
+                'tingkat_prioritas' => $laporan->tingkat_prioritas ?? 'Normal',
+                'escalation_level' => $laporan->escalation_level,
+                'catatan_rt' => $laporan->catatan_rt,
+                'catatan_rw' => $laporan->catatan_rw,
+                'catatan_admin' => $laporan->catatan_admin,
+                'rt_number' => $laporan->rt_number ?? $laporan->rt,
+                'rw_number' => $laporan->rw_number ?? $laporan->rw,
+                'bukti_urls' => $buktiUrls,
+                'created_at' => $laporan->created_at->format('d F Y, H:i') . ' WIB',
+                'updated_at' => $laporan->updated_at->format('d F Y, H:i') . ' WIB',
+                'handler_name' => $laporan->admin ? $laporan->admin->name : 'Pemerintah Desa Bengkalis',
+                'user' => [
+                    'name' => $laporan->user ? $laporan->user->name : $laporan->nama,
+                    'nik' => $laporan->user ? $laporan->user->nik : null,
+                    'is_verified' => $laporan->user && $laporan->user->kycVerification && $laporan->user->kycVerification->status === 'approved',
+                ]
+            ]
+        ]);
     }
 }

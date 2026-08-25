@@ -391,9 +391,16 @@ class User extends Authenticatable
         return $this->belongsTo(Region::class);
     }
 
+    /** Akun admin/staf yang membuat akun ini (dipakai Kelola Staf). */
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /** Kaitan ke anggota Kartu Keluarga, dicocokkan lewat blind index NIK. */
+    public function familyMember()
+    {
+        return $this->hasOne(FamilyMember::class, 'nik_hash', 'nik_hash');
     }
 
     public function kycVerification()

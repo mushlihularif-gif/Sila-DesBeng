@@ -1,6 +1,6 @@
 ﻿@extends('layouts.user')
 
-@section('title', 'Kelola Pengumuman - SilaDesBeng')
+@section('title', 'Kelola Pengumuman - SiladesBeng')
 
 @push('styles')
 <style>
@@ -87,7 +87,7 @@
             @if($pengumumans->count() > 0)
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     @foreach($pengumumans as $item)
-                        <div class="group flex flex-col backdrop-blur-sm bg-white/80 rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                        <div class="group flex flex-col bg-white/80 rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
                             
                             {{-- Header Badges --}}
                             <div class="px-6 pt-6 flex justify-between items-center">
@@ -176,107 +176,135 @@
             @endif
             </div>
 
-            <!-- Modal Buat Pengumuman -->
-            <template x-teleport="body">
-            <div x-show="isFormOpen" style="display: none;" class="fixed inset-0 z-[9999] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-                <div class="flex min-h-screen justify-center px-4 pt-10 pb-20 text-center sm:p-8">
-                    <div x-show="isFormOpen" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-slate-100/60 transition-opacity backdrop-blur-md" aria-hidden="true"></div>
-                    <div x-show="isFormOpen" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="relative z-10 w-full max-w-2xl bg-white rounded-3xl text-left overflow-hidden shadow-2xl transform transition-all my-10 border border-gray-100">
+            </div>
+
+            <!-- Form Buat Pengumuman -->
+              <div x-show="isFormOpen" style="display: none;" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="max-w-3xl mx-auto pb-10">
+                  <div class="bg-white rounded-3xl shadow-[0_4px_24px_rgba(0,0,0,0.04)] border border-slate-100 overflow-hidden">
                         <form action="{{ route('wilayah.pengumuman.store') }}" method="POST" enctype="multipart/form-data">
                             @csrf
-                            <div>
-                                <div class="flex justify-between items-center mb-6">
-                                    <h3 class="text-2xl leading-6 font-bold text-gray-900" id="modal-title">Buat Pengumuman Baru</h3>
-                                    <button type="button" @click="isFormOpen = false" class="bg-gray-50 rounded-full p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none transition-all">
-                                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                                    </button>
-                                </div>
-                                
-                                <div class="space-y-5">
-                                    <!-- Judul -->
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-1">Judul Pengumuman <span class="text-red-500">*</span></label>
-                                        <input type="text" name="title" required class="w-full rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white focus:border-blue-500 focus:ring-blue-500 px-4 py-2.5 text-sm transition-colors" placeholder="Contoh: Kerja Bakti Massal">
-                                    </div>
-                                    
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                        <!-- Kategori -->
-                                        <div>
-                                            <label class="block text-sm font-semibold text-gray-700 mb-1">Kategori <span class="text-red-500">*</span></label>
-                                            <select name="type" required class="w-full rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white focus:border-blue-500 focus:ring-blue-500 px-4 py-2.5 text-sm transition-colors">
-                                                <option value="" disabled selected>Pilih Kategori...</option>
+                            <div class="pt-8 px-8 md:px-12">
+                              <div class="relative text-center mb-10">
+                                  <button type="button" @click="isFormOpen = false" class="absolute right-0 top-0 bg-slate-50 rounded-full p-2.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 focus:outline-none transition-all">
+                                      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                  </button>
+                                  <h3 class="text-3xl font-bold text-gray-900">Buat Pengumuman Baru</h3>
+                                  <p class="mt-2 text-sm text-gray-600">Sampaikan informasi penting dan pengumuman kepada warga dengan cepat.</p>
+                              </div>
+                              
+                              <div class="space-y-6">
+                                  <!-- Judul -->
+                                  <div>
+                                      <label class="block text-[13px] font-semibold text-slate-600 mb-2">Judul Pengumuman <span class="text-red-500">*</span></label>
+                                      <input type="text" name="title" required class="w-full rounded-2xl border-0 bg-slate-50 py-3.5 px-4 text-sm text-slate-700 placeholder-slate-400 focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all" placeholder="Contoh: Warga RT 01 Adakan Lomba...">
+                                  </div>
+                                  
+                                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                      <!-- Kategori -->
+                                      <div>
+                                          <label class="block text-[13px] font-semibold text-slate-600 mb-2">Kategori Pengumuman <span class="text-red-500">*</span></label>
+                                          <div class="relative">
+                                              <select name="type" required class="appearance-none w-full rounded-2xl border-0 bg-slate-50 py-3.5 px-4 text-sm text-slate-700 focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all">
+                                                  <option value="" disabled selected>Pilih Kategori...</option>
                                                 <option value="Pengumuman"> Pengumuman</option>
                                                 <option value="Darurat"> Darurat</option>
-                                                <option value="Undangan"> Undangan</option>
-                                            </select>
-                                        </div>
-                                        
-                                        <!-- Jangkauan Publikasi -->
-                                        <div>
-                                            <label class="block text-sm font-semibold text-gray-700 mb-1">Jangkauan Publikasi <span class="text-red-500">*</span></label>
-                                            <select name="target_region_id" required class="w-full rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white focus:border-blue-500 focus:ring-blue-500 px-4 py-2.5 text-sm transition-colors">
-                                                @foreach($jangkauanOptions ?? [] as $opt)
-                                                    <option value="{{ $opt['id'] }}">{{ $opt['label'] }}</option>
+                                                <option value="Event"> Event / Acara</option>
+
+                                              </select>
+                                              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-400">
+                                                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                              </div>
+                                          </div>
+                                      </div>
+                                      
+                                      <!-- Jangkauan Publikasi -->
+                                      <div>
+                                          <label class="block text-[13px] font-semibold text-slate-600 mb-2">Jangkauan Publikasi <span class="text-red-500">*</span></label>
+                                          <div class="relative">
+                                              <select name="target_region_id" required class="appearance-none w-full rounded-2xl border-0 bg-slate-50 py-3.5 px-4 text-sm text-slate-700 focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all">
+                                                @foreach(\App\Models\Region::whereIn('id', array_merge([auth()->user()->region_id], \App\Models\Region::getDescendantIds(auth()->user()->region_id)))->get() as $region)
+                                                    <option value="{{ $region->id }}">{{ $region->name }}</option>
                                                 @endforeach
-                                            </select>
-                                            <p class="text-[10px] text-gray-500 mt-1">Pilih kepada siapa pengumuman ini disebarkan.</p>
-                                        </div>
-                                    </div>
 
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                        <!-- Tanggal Pelaksanaan -->
-                                        <div>
-                                            <label class="block text-sm font-semibold text-gray-700 mb-1">Tanggal Pelaksanaan <span class="text-gray-400 font-normal">(Opsional)</span></label>
-                                            <input type="datetime-local" name="event_date" class="w-full rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white focus:border-blue-500 focus:ring-blue-500 px-4 py-2.5 text-sm transition-colors">
-                                        </div>
-                                        
-                                        <!-- Lokasi -->
-                                        <div>
-                                            <label class="block text-sm font-semibold text-gray-700 mb-1">Lokasi Tempat <span class="text-gray-400 font-normal">(Opsional)</span></label>
-                                            <input type="text" name="location" placeholder="Contoh: Balai Desa, Lapangan RT 01" class="w-full rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white focus:border-blue-500 focus:ring-blue-500 px-4 py-2.5 text-sm transition-colors">
-                                        </div>
-                                    </div>
+                                              </select>
+                                              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-400">
+                                                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                              </div>
+                                          </div>
+                                          <p class="text-[11px] text-slate-400 mt-2">Pilih tingkat wilayah untuk mendistribusikan konten.</p>
+                                      </div>
+                                  </div>
 
-                                    <!-- Deskripsi -->
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-1">Isi Pengumuman / Deskripsi <span class="text-red-500">*</span></label>
-                                        <textarea name="description" rows="4" required class="w-full rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white focus:border-blue-500 focus:ring-blue-500 px-4 py-3 text-sm transition-colors" placeholder="Tuliskan isi pengumuman secara detail..."></textarea>
-                                    </div>
-
-                                    <!-- Upload Foto -->
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-1">Unggah Gambar/Poster <span class="text-gray-400 font-normal">(Opsional)</span></label>
-                                        <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-2xl hover:border-blue-400 transition-colors group bg-gray-50/30">
-                                            <div class="space-y-1 text-center">
-                                                <svg class="mx-auto h-10 w-10 text-gray-400 group-hover:text-blue-500 transition-colors" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
-                                                    <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                                                </svg>
-                                                <div class="flex text-sm text-gray-600 justify-center">
-                                                    <label for="image-upload" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none">
-                                                        <span>Pilih File Gambar</span>
-                                                        <input id="image-upload" name="image" type="file" class="sr-only" accept="image/jpeg,image/png,image/jpg">
-                                                    </label>
+                                  <!-- Upload Foto Utama -->
+                                  <div>
+                                      <label class="block text-[13px] font-semibold text-slate-600 mb-2">Gambar Utama (Cover) <span class="text-slate-400 font-normal">(Disarankan)</span></label>
+                                        <label for="image-upload-Pengumuman" class="mt-1 flex flex-col items-center justify-center p-6 border-2 border-gray-300 border-dashed rounded-xl relative hover:bg-gray-50 hover:border-gray-400 transition-all cursor-pointer group text-center overflow-hidden">
+                                            <div id="placeholder-Pengumuman" class="space-y-1 text-center w-full relative z-10">
+                                                <div class="mx-auto w-16 h-16 rounded-full bg-white flex items-center justify-center mb-3 shadow-sm text-slate-500 border border-slate-200 group-hover:scale-110 transition-transform duration-300">
+                                                    <svg class="h-8 w-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                                                    </svg>
                                                 </div>
-                                                <p class="text-xs text-gray-500">PNG, JPG maksimal 2MB</p>
+                                                <div class="flex flex-col text-center">
+                                                    <span class="font-bold text-gray-700 text-base">Pilih dari Penyimpanan</span>
+                                                    <input id="image-upload-Pengumuman" name="image" type="file" class="hidden sr-only" accept="image/jpeg,image/png,image/jpg" onchange="previewImagePengumuman(this)">
+                                                    <p class="text-xs text-gray-500 mt-1">PNG, JPG, JPEG up to 5MB</p>
+                                                </div>
                                             </div>
-                                        </div>
+                                            <div id="preview-container-Pengumuman" class="w-full relative z-20" style="display: none;">
+                                                  <img id="preview-img-Pengumuman" class="w-full h-auto rounded-lg object-contain" src="" alt="Preview">
+                                                  <button type="button" onclick="removePengumumanPhoto(event)" class="absolute top-2 right-2 w-8 h-8 bg-red-500/80 hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-opacity z-30">
+                                                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                                  </button>
+                                              </div>
+                                        </label>
                                     </div>
+                                    <script>
+                                        function previewImagePengumuman(input) {
+                                            if (input.files && input.files[0]) {
+                                                if (typeof initGlobalCropper === 'function') {
+                                                    initGlobalCropper(input, 'preview-img-Pengumuman', 16/9, true);
+                                                    document.getElementById('placeholder-Pengumuman').style.display = 'none';
+                                                    document.getElementById('preview-container-Pengumuman').style.display = 'block';
+                                                } else {
+                                                    const reader = new FileReader();
+                                                    reader.onload = function(e) {
+                                                        document.getElementById('preview-img-Pengumuman').src = e.target.result;
+                                                        document.getElementById('placeholder-Pengumuman').style.display = 'none';
+                                                        document.getElementById('preview-container-Pengumuman').style.display = 'block';
+                                                    };
+                                                    reader.readAsDataURL(input.files[0]);
+                                                }
+                                            }
+                                        }
 
-                                </div>
+                                        function removePengumumanPhoto(e) {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            document.getElementById('image-upload-Pengumuman').value = '';
+                                            document.getElementById('preview-container-Pengumuman').style.display = 'none';
+                                            document.getElementById('preview-img-Pengumuman').src = '';
+                                            document.getElementById('placeholder-Pengumuman').style.display = 'block';
+                                        }
+                                      </script>
+                                    
+    <!-- Deskripsi / Editor -->
+                                  <div>
+                                      <label class="block text-[13px] font-semibold text-slate-600 mb-2">Isi Pengumuman <span class="text-red-500">*</span></label>
+                                      <textarea name="description" rows="8" required class="w-full rounded-2xl border-0 bg-slate-50 py-4 px-4 text-sm text-slate-700 placeholder-slate-400 focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all" placeholder="Tuliskan isi pengumuman di sini..."></textarea>
+                                  </div>
+
+                              </div>
                             </div>
-                            <div class="bg-gray-50/80 px-6 py-5 sm:px-8 sm:flex sm:flex-row-reverse border-t border-gray-100">
-                                <button type="submit" class="w-full inline-flex justify-center rounded-xl border border-transparent shadow-sm px-6 py-2.5 bg-blue-600 text-base font-semibold text-white hover:bg-blue-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm transition-all">
-                                    Publikasikan
-                                </button>
-                                <button type="button" @click="isFormOpen = false" class="mt-3 w-full inline-flex justify-center rounded-xl border border-gray-300 shadow-sm px-6 py-2.5 bg-white text-base font-semibold text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm transition-all">
-                                    Batal
-                                </button>
-                            </div>
-                        </form>
-                  </div>
-              </div>
-        </div>
-    </section>
+                            <div class="mt-10 bg-slate-50 border-t border-slate-100 px-8 md:px-12 py-6 flex justify-end gap-3">
+                              <button type="button" @click="isFormOpen = false" class="px-6 py-3 rounded-full border border-slate-200 text-slate-600 bg-white hover:bg-slate-50 font-medium text-sm transition-colors shadow-sm">Batal</button>
+                              <button type="submit" class="px-6 py-3 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all focus:ring-4 focus:ring-blue-100 shadow-sm hover:shadow-md">Terbitkan Pengumuman</button>
+                          </div>
+                      </form>
+                    </div>
+                </div>
+            </div>
+      </section>
 </main>
 @endsection
 

@@ -205,7 +205,7 @@ Route::middleware('auth')->group(function () {
         ->middleware(['role:user', 'region.service:layanan-ambulans']);
         
     // Verifikasi Identitas
-    Route::get('/profile/verifikasi', [App\Http\Controllers\User\VerificationController::class, 'index'])->name('user.verifikasi.index');
+    Route::redirect('/profile/verifikasi', '/kyc', 301)->name('user.verifikasi.index');
     Route::post('/profile/verifikasi', [App\Http\Controllers\User\VerificationController::class, 'store'])->name('user.verifikasi.store');
     
     // Mutasi Penduduk (User)
@@ -761,7 +761,8 @@ Route::middleware(['auth', 'role:user'])->group(function () {
     });
 
     // Fitur Khusus Admin RT/RW di Frontend
-    Route::prefix('wilayah')->name('wilayah.')->middleware('role:admin_rt,admin_rw')->group(function () {
+    // TODO (KYC): Middleware CheckAdminWilayahKyc dimatikan sementara agar proses development tampilan tidak terhambat scan KTP.
+    Route::prefix('wilayah')->name('wilayah.')->middleware(['role:admin_rt,admin_rw'])->group(function () {
         Route::get('/laporan', [\App\Http\Controllers\User\WilayahAdminController::class, 'indexLaporan'])->name('laporan.index');
         Route::get('/laporan/{id}', [\App\Http\Controllers\User\WilayahAdminController::class, 'showLaporan'])->name('laporan.show');
         Route::post('/laporan/{id}/respond', [\App\Http\Controllers\User\WilayahAdminController::class, 'respondLaporan'])->name('laporan.respond');

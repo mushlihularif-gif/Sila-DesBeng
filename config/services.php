@@ -61,4 +61,15 @@ return [
         'server_key' => env('MIDTRANS_SERVER_KEY'),
         'is_production' => env('MIDTRANS_IS_PRODUCTION', false),
     ],
+
+    'ocr_space' => [
+        'api_key' => env('OCR_SPACE_API_KEY', 'helloworld'),
+    ],
+
+    // Gemini: dipakai chatbot warga dan sebagai cadangan pembacaan KTP
+    // kalau OCR.space gagal. Lihat OcrService::extractUsingGemini().
+    'gemini' => [
+        'api_key' => env('GEMINI_API_KEY'),
+        'model'   => env('GEMINI_MODEL', 'gemini-2.5-flash'),
+    ],
 ];

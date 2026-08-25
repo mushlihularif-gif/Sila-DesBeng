@@ -286,8 +286,17 @@ class AuthController extends Controller
             }
 
             $file = $request->file('profile');
-            $extension = $file->getClientOriginalExtension();
-            $filename = $user->id . '_' . time() . '.' . $extension;
+            $extension = strtolower($file->extension());
+            
+            $allowedExtensions = ['jpg', 'jpeg', 'png'];
+            if (!in_array($extension, $allowedExtensions)) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Format file profile tidak valid.'
+                ], 403);
+            }
+
+            $filename = $user->id . '_' . time() . '_' . \Illuminate\Support\Str::random(10) . '.' . $extension;
             $path = $file->storeAs('profiles', $filename, ['disk' => 'local']);
 
             $user->file()->create([

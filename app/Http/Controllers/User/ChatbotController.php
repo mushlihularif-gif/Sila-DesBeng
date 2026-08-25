@@ -16,8 +16,8 @@ class ChatbotController extends Controller
             'history' => 'nullable|array' // We can pass conversation history
         ]);
 
-        $apiKey = env('GEMINI_API_KEY');
-        $model = env('GEMINI_MODEL', 'gemini-2.5-flash');
+        $apiKey = config('services.gemini.api_key');
+        $model = config('services.gemini.model', 'gemini-2.5-flash');
         if (empty($apiKey)) {
             return response()->json(['error' => 'API Key tidak ditemukan. Hubungi administrator.'], 500);
         }
@@ -74,59 +74,90 @@ Gunakan bahasa Indonesia yang santai, profesional, dan membantu, disertai emoji 
             'parts' => [['text' => $userMessage]]
         ];
 
-        try {
-            $response = Http::withHeaders([
-                'Content-Type' => 'application/json',
-            ])->post("https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$apiKey}", [
-                'system_instruction' => [
-                    'parts' => [
-                        ['text' => $systemInstruction]
-                    ]
-                ],
-                'contents' => $contents,
-                'generationConfig' => [
-                    'temperature' => 0.7,
-                    'topK' => 40,
-                    'topP' => 0.95,
-                    'maxOutputTokens' => 1024,
+        $requestBody = [
+            'system_instruction' => [
+                'parts' => [
+                    ['text' => $systemInstruction]
                 ]
-            ]);
+            ],
+            'contents' => $contents,
+            'generationConfig' => [
+                'temperature' => 0.7,
+                'topK' => 40,
+                'topP' => 0.95,
+                'maxOutputTokens' => 1024,
+            ]
+        ];
 
-            if ($response->successful()) {
-                $data = $response->json();
-                $reply = $data['candidates'][0]['content']['parts'][0]['text'] ?? 'Maaf, saya tidak mengerti. Bisa ulangi pertanyaannya?';
-                
-                return response()->json([
-                    'reply' => $reply
-                ]);
-            } else {
-                Log::error('Gemini API Error: ' . $response->body());
-                
-                if ($response->status() == 429) {
-                    return response()->json([
-                        'error' => 'Maaf, Asisten kami sedang sibuk melayani banyak warga secara bersamaan. Silakan tunggu sekitar 1 menit dan coba tanya lagi ya 🙏'
-                    ], 429);
+        // Daftar model yang akan dicoba (primary -> fallback)
+        $models = [$model, 'gemini-2.0-flash-lite'];
+        $models = array_unique($models); // Hindari duplikat jika primary sudah lite
+
+        $lastError = null;
+
+        foreach ($models as $currentModel) {
+            $maxRetries = 2;
+            for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
+                try {
+                    $response = Http::withHeaders([
+                        'Content-Type' => 'application/json',
+                    ])->timeout(25)->post(
+                        "https://generativelanguage.googleapis.com/v1beta/models/{$currentModel}:generateContent?key={$apiKey}",
+                        $requestBody
+                    );
+
+                    if ($response->successful()) {
+                        $data = $response->json();
+                        $reply = $data['candidates'][0]['content']['parts'][0]['text'] ?? 'Maaf, saya tidak mengerti. Bisa ulangi pertanyaannya?';
+                        
+                        return response()->json([
+                            'reply' => $reply
+                        ]);
+                    }
+
+                    // Jika 429 atau 503, retry setelah delay
+                    if (in_array($response->status(), [429, 503]) && $attempt < $maxRetries) {
+                        Log::warning("Gemini API {$response->status()} on model {$currentModel}, attempt {$attempt}. Retrying...");
+                        sleep(2);
+                        continue;
+                    }
+
+                    // Jika masih gagal, coba model berikutnya
+                    $lastError = $response->body();
+                    Log::error("Gemini API Error ({$currentModel}, attempt {$attempt}): " . $response->body());
+                    break; // keluar dari retry loop, coba model berikutnya
+
+                } catch (\Exception $e) {
+                    $lastError = $e->getMessage();
+                    Log::error("Chatbot Exception ({$currentModel}, attempt {$attempt}): " . $e->getMessage());
+                    
+                    if ($attempt < $maxRetries) {
+                        sleep(1);
+                        continue;
+                    }
+                    break; // keluar dari retry loop, coba model berikutnya
                 }
-                
-                // Fallback otomatis jika API Key Gemini tidak valid (khusus untuk keperluan demo/screenshot)
-                $pesan = strtolower($userMessage);
-                $reply = 'Maaf, sistem AI sedang offline. Namun, untuk memesan layanan, silakan klik menu yang sesuai di Beranda.';
-                
-                if (strpos($pesan, 'sewa') !== false || strpos($pesan, 'alat') !== false) {
-                    $reply = 'Untuk menyewa alat (seperti tenda atau kursi), silakan menuju menu **Sewa Alat** di beranda. Pilih alat yang Anda butuhkan, tentukan tanggal, lalu klik tombol **Pesan Sekarang**. Jika butuh bantuan lebih lanjut, saya siap membantu! 😊';
-                } elseif (strpos($pesan, 'gas') !== false) {
-                    $reply = 'Untuk pembelian gas LPG, silakan masuk ke menu **Distribusi Gas LPG**. Pastikan Anda sudah melengkapi profil dengan NIK Anda ya agar kuota pembelian subsidi bisa disesuaikan.';
-                }
-                
-                return response()->json([
-                    'reply' => $reply
-                ]);
             }
-        } catch (\Exception $e) {
-            Log::error('Chatbot Controller Error: ' . $e->getMessage());
-            return response()->json([
-                'error' => 'Terjadi kesalahan sistem.'
-            ], 500);
         }
+
+        // Semua model dan retry gagal - gunakan fallback statis
+        Log::error('All Gemini models failed. Last error: ' . ($lastError ?? 'unknown'));
+
+        $pesan = strtolower($userMessage);
+        $reply = 'Maaf, sistem AI sedang sibuk saat ini. Namun, untuk memesan layanan, silakan klik menu yang sesuai di Beranda. 😊';
+        
+        if (strpos($pesan, 'sewa') !== false || strpos($pesan, 'alat') !== false) {
+            $reply = 'Untuk menyewa alat (seperti tenda atau kursi), silakan menuju menu **Sewa Alat** di beranda. Pilih alat yang Anda butuhkan, tentukan tanggal, lalu klik tombol **Pesan Sekarang**. Jika butuh bantuan lebih lanjut, saya siap membantu! 😊';
+        } elseif (strpos($pesan, 'gas') !== false) {
+            $reply = 'Untuk pembelian gas LPG, silakan masuk ke menu **Distribusi Gas LPG**. Pastikan Anda sudah melengkapi profil dengan NIK Anda ya agar kuota pembelian subsidi bisa disesuaikan.';
+        } elseif (strpos($pesan, 'lapor') !== false || strpos($pesan, 'keluhan') !== false) {
+            $reply = 'Untuk melaporkan keluhan, silakan gunakan menu **Pelaporan Warga** di beranda. Isi formulir laporan dan sertakan foto jika ada. Laporan Anda akan segera diproses oleh petugas terkait. 📝';
+        } elseif (strpos($pesan, 'halo') !== false || strpos($pesan, 'hai') !== false || strpos($pesan, 'hi') !== false) {
+            $reply = 'Halo! 👋 Saya SiladesBeng Assistant. Maaf, saat ini koneksi ke AI sedang terganggu. Tapi saya tetap bisa membantu! Silakan tanyakan seputar:\n\n• **Sewa Alat** - Penyewaan alat berat & pesta\n• **Gas LPG** - Pembelian gas subsidi & non-subsidi\n• **Pelaporan** - Laporan keluhan warga\n\nAtau coba lagi nanti ya! 🙏';
+        }
+        
+        return response()->json([
+            'reply' => $reply
+        ]);
     }
 }

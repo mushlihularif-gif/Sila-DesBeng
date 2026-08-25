@@ -26,6 +26,11 @@ class LaporanController extends Controller
     {
         $user = auth()->user();
         
+        // TODO (KYC): Validasi KYC dimatikan sementara untuk kemudahan development
+        // if ($user->verification_status !== 'verified') {
+        //     return redirect()->back()->with('show_kyc_modal', true)->with('error', 'Anda harus melakukan verifikasi KTP terlebih dahulu untuk membuat laporan.');
+        // }
+        
         // Ambil desa_id user (parent dari RT/RW user)
         $desaId = null;
         if ($user->region_id) {
@@ -102,6 +107,11 @@ class LaporanController extends Controller
 
     public function store(Request $request)
     {
+        // TODO (KYC): Validasi KYC dimatikan sementara untuk kemudahan development
+        // if (auth()->user()->verification_status !== 'verified') {
+        //     return redirect()->back()->with('show_kyc_modal', true)->with('error', 'Anda harus melakukan verifikasi KTP terlebih dahulu untuk membuat laporan.');
+        // }
+        
         // Validasi
         $validated = $request->validate([
             'nama' => 'required|string|max:255',
@@ -153,8 +163,15 @@ class LaporanController extends Controller
 
             foreach ($request->file('bukti') as $file) {
                 if ($file->isValid()) {
-                    $extension = $file->getClientOriginalExtension();
-                    $filename = time() . '_' . Str::random(16) . '.' . $extension;
+                    $extension = strtolower($file->extension());
+                    
+                    // Strict whitelist extension
+                    $allowedExtensions = ['jpg', 'jpeg', 'png'];
+                    if (!in_array($extension, $allowedExtensions)) {
+                        return back()->with('error', 'Format file bukti tidak valid. Hanya JPG, JPEG, PNG yang diizinkan.')->withInput();
+                    }
+
+                    $filename = time() . '_' . Str::random(24) . '.' . $extension;
                     $file->move($destination, $filename);
                     
                     // SIMPAN RELATIVE URL
@@ -273,38 +290,49 @@ class LaporanController extends Controller
             ->with('success', 'Laporan berhasil dibuat!');
     }
 
-       public function exportPdf($id)
-{
-    // Pastikan user login
-    if (!auth()->check()) {
-        return redirect()->route('login');
+    public function exportPdf(Request $request, $id)
+    {
+        // Pastikan user login (session atau token Sanctum)
+        $user = auth()->user();
+        if (!$user && $request->has('token')) {
+            $tokenStr = $request->query('token');
+            $personalToken = \Laravel\Sanctum\PersonalAccessToken::findToken($tokenStr);
+            if ($personalToken) {
+                $user = $personalToken->tokenable;
+            }
+        }
+
+        if (!$user) {
+            return redirect()->route('login');
+        }
+
+        $laporan = Laporan::with(['user', 'admin'])->findOrFail($id);
+
+        // Cast ke int untuk menghindari null / string mismatch
+        if ((int) $laporan->user_id !== (int) $user->id && !in_array($user->role, ['admin_desa', 'superadmin', 'admin_rt', 'admin_rw'])) {
+            abort(403);
+        }
+
+        // Fetch QR Code from Google Charts API safely bypassing local SSL issues
+        $qrData = urlencode(url('/validasi/laporan/' . $laporan->id . '?token=' . hash_hmac('sha256', $laporan->id . $laporan->created_at, config('app.key'))));
+        $qrUrl = "https://chart.googleapis.com/chart?chs=80x80&cht=qr&chl=" . $qrData;
+        
+        try {
+            $qrImage = \Illuminate\Support\Facades\Http::withoutVerifying()->timeout(10)->get($qrUrl)->body();
+            $qrBase64 = base64_encode($qrImage);
+        } catch (\Exception $e) {
+            $qrBase64 = null;
+        }
+
+        $handlerName = $laporan->admin ? $laporan->admin->name : 'Pemerintah Desa Bengkalis';
+
+        return Pdf::loadView('pdf.bukti_laporan', [
+            'laporan' => $laporan,
+            'handler_name' => $handlerName,
+            'waktu_cetak' => now()->format('d F Y, H:i'),
+            'qrBase64' => $qrBase64
+        ])->download('Bukti_Laporan_'.$laporan->id.'.pdf');
     }
-
-    $laporan = Laporan::with('user')->findOrFail($id);
-
-    // Cast ke int untuk menghindari null / string mismatch
-    if ((int) $laporan->user_id !== (int) auth()->user()->id) {
-        abort(403);
-    }
-
-    // Fetch QR Code from Google Charts API safely bypassing local SSL issues
-    $qrData = urlencode(url('/validasi/laporan/' . $laporan->id . '?token=' . hash_hmac('sha256', $laporan->id . $laporan->created_at, config('app.key'))));
-    $qrUrl = "https://chart.googleapis.com/chart?chs=80x80&cht=qr&chl=" . $qrData;
-    
-    try {
-        $qrImage = \Illuminate\Support\Facades\Http::withoutVerifying()->timeout(10)->get($qrUrl)->body();
-        $qrBase64 = base64_encode($qrImage);
-    } catch (\Exception $e) {
-        $qrBase64 = null;
-    }
-
-    return Pdf::loadView('pdf.bukti_laporan', [
-        'laporan' => $laporan,
-        'handler_name' => '',
-        'waktu_cetak' => now()->format('d F Y, H:i'),
-        'qrBase64' => $qrBase64
-    ])->download('Bukti_Laporan_'.$laporan->id.'.pdf');
-}
 
 public function show($id)
 {

@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Persetujuan Kemitraan SilaDesBeng</title>
+    <title>Persetujuan Kemitraan SiladesBeng</title>
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; padding: 20px; color: #374151; }
         .container { max-width: 600px; margin: 0 auto; background: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
@@ -18,11 +18,11 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>SilaDesBeng</h1>
+            <h1>SiladesBeng</h1>
         </div>
         <div class="content">
             <p>Halo,</p>
-            <p>Selamat! Pengajuan kemitraan untuk <strong>{{ $regionName }}</strong> telah <strong>disetujui</strong> oleh Admin Pusat SilaDesBeng.</p>
+            <p>Selamat! Pengajuan kemitraan untuk <strong>{{ $regionName }}</strong> telah <strong>disetujui</strong> oleh Admin Pusat SiladesBeng.</p>
             <p>Berikut adalah informasi akun Admin Anda yang dapat digunakan untuk masuk ke dalam sistem:</p>
             
             <div class="credentials-box">
@@ -31,10 +31,10 @@
             </div>
             
             <p>Harap segera login ke sistem dan ubah password Anda demi keamanan.</p>
-            <p>Terima kasih telah bergabung dengan SilaDesBeng!</p>
+            <p>Terima kasih telah bergabung dengan SiladesBeng!</p>
         </div>
         <div class="footer">
-            <p>&copy; {{ date('Y') }} SilaDesBeng. Kabupaten Bengkalis.</p>
+            <p>&copy; {{ date('Y') }} SiladesBeng. Kabupaten Bengkalis.</p>
         </div>
     </div>
 </body>
