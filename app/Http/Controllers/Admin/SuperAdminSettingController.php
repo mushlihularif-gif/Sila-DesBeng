@@ -102,16 +102,25 @@ class SuperAdminSettingController extends Controller
 
         Log::info("SuperAdmin: Kredensial [{$category}] ditimpa oleh " . auth()->user()->email);
 
-        // Midtrans diuji langsung ke servernya supaya salah ketik ketahuan di sini,
-        // bukan nanti ketika warga sudah berada di halaman pembayaran.
-        if ($category === 'midtrans' && ! empty($credentials['server_key'])) {
-            $uji = $this->ujiKoneksiMidtrans(
+        // Kredensial yang bisa diperiksa langsung ke penyedianya, diuji di sini.
+        // Prinsipnya: JANGAN menebak sah/tidaknya kunci dari bentuk teksnya —
+        // penyedia bisa mengubah format kapan saja (Midtrans membuang awalan
+        // "SB-", Google AI Studio berpindah dari "AIza" ke "AQ."). Satu-satunya
+        // jawaban yang bisa dipercaya datang dari server penyedianya sendiri.
+        $uji = match (true) {
+            $category === 'midtrans' && ! empty($credentials['server_key']) => $this->ujiKoneksiMidtrans(
                 $credentials['server_key'],
                 (bool) ($credentials['is_production'] ?? false)
-            );
+            ),
+            $category === 'gemini' && ! empty($credentials['api_key']) => $this->ujiKoneksiGemini(
+                $credentials['api_key']
+            ),
+            default => null,
+        };
 
+        if ($uji) {
             if ($uji['status'] !== 'valid') {
-                Log::warning("SuperAdmin: Uji kunci Midtrans gagal ({$uji['status']}) — " . $uji['pesan']);
+                Log::warning("SuperAdmin: Uji kredensial [{$category}] gagal ({$uji['status']}) — " . $uji['pesan']);
 
                 return redirect()
                     ->route('admin.sistem-platform.gateway')
@@ -243,6 +252,75 @@ class SuperAdminSettingController extends Controller
             \Midtrans\Config::$isProduction = $produksiAsal;
             \Midtrans\Config::$curlOptions = $curlOptionsAsal;
         }
+    }
+
+    /**
+     * Uji API key Gemini ke server Google.
+     *
+     * Sengaja TIDAK menebak dari awalan kunci: Google AI Studio menerbitkan
+     * format baru berawalan "AQ." sementara kunci lama berawalan "AIza", dan
+     * keduanya sah. Menebak dari bentuk teks pernah menolak kunci yang benar.
+     *
+     * Endpoint daftar model dipilih karena ringan, tidak memakai kuota
+     * pembuatan teks, dan cukup untuk membuktikan kunci diterima.
+     *
+     * @return array{status:string, pesan:string}
+     */
+    private function ujiKoneksiGemini(string $apiKey): array
+    {
+        $kunci = trim($apiKey);
+        $url = 'https://generativelanguage.googleapis.com/v1beta/models';
+
+        // DUA gaya autentikasi dicoba, karena Google memakai keduanya:
+        //   ?key=...                  -> API key klasik (AIza...)
+        //   Authorization: Bearer ... -> "auth key" format baru (AQ....)
+        // Mencoba keduanya membuat uji ini tidak ikut basi kalau Google
+        // mengubah format lagi.
+        $cara = [
+            'query'  => fn () => \Illuminate\Support\Facades\Http::timeout(10)->connectTimeout(5)
+                ->get($url, ['key' => $kunci]),
+            'bearer' => fn () => \Illuminate\Support\Facades\Http::timeout(10)->connectTimeout(5)
+                ->withToken($kunci)->get($url),
+        ];
+
+        $statusTerakhir = null;
+
+        foreach ($cara as $nama => $panggil) {
+            try {
+                $respon = $panggil();
+            } catch (\Throwable $e) {
+                return [
+                    'status' => 'tidak_terhubung',
+                    'pesan'  => 'Tidak bisa menghubungi server Google, jadi kunci belum bisa dipastikan benar. '
+                        . 'Periksa koneksi internet server.',
+                ];
+            }
+
+            if ($respon->successful()) {
+                $jumlah = count($respon->json('models') ?? []);
+                $gaya = $nama === 'query' ? 'API key' : 'auth key (Bearer)';
+
+                return [
+                    'status' => 'valid',
+                    'pesan'  => "Kunci diterima Google sebagai {$gaya} — {$jumlah} model tersedia.",
+                ];
+            }
+
+            $statusTerakhir = $respon->status();
+        }
+
+        if (in_array($statusTerakhir, [400, 401, 403], true)) {
+            return [
+                'status' => 'ditolak',
+                'pesan'  => 'Google MENOLAK kunci ini pada kedua cara autentikasi. Salin ulang langsung dari '
+                    . 'AI Studio (jangan diketik manual), dan pastikan Generative Language API aktif di project tersebut.',
+            ];
+        }
+
+        return [
+            'status' => 'tidak_pasti',
+            'pesan'  => 'Google menjawab dengan kode ' . $statusTerakhir . ', kunci belum bisa dipastikan benar.',
+        ];
     }
 
     /**
