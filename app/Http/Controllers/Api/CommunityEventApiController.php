@@ -18,6 +18,7 @@ class CommunityEventApiController extends Controller
             $event->is_joined = EventParticipant::where('event_id', $event->id)
                 ->where('user_id', $userId)
                 ->exists();
+            $event->is_creator = ($event->user_id == $userId);
             return $event;
         });
 
