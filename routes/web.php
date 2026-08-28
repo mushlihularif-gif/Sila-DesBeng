@@ -260,6 +260,7 @@ Route::middleware('auth')->prefix('pasar-daerah')->group(function () {
     Route::post('/order', [App\Http\Controllers\User\PasarDaerahController::class, 'placeOrder'])->name('pasar.order.store');
     Route::get('/payment/{id}', [App\Http\Controllers\User\PasarDaerahController::class, 'payment'])->name('pasar.payment');
     Route::post('/payment/{id}/simulate', [App\Http\Controllers\User\PasarDaerahController::class, 'simulatePayment'])->name('pasar.payment.simulate');
+    Route::post('/{id}/review', [App\Http\Controllers\User\PasarDaerahController::class, 'storeReview'])->name('pasar.review.store');
     
     // Taruh parameter di paling bawah supaya route lain tidak ketimpa
     Route::get('/{id}', [App\Http\Controllers\User\PasarDaerahController::class, 'show'])
@@ -606,6 +607,13 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
             Route::get('pasar-daerah/pesanan/{id}', [\App\Http\Controllers\Admin\UnitPasarDaerahController::class, 'pesananShow'])->name('admin.unit.pasar_daerah.pesanan.show');
             Route::put('pasar-daerah/pesanan/{id}', [\App\Http\Controllers\Admin\UnitPasarDaerahController::class, 'pesananUpdate'])->name('admin.unit.pasar_daerah.pesanan.update');
             Route::get('pasar-daerah/laporan/transaksi', [\App\Http\Controllers\Admin\UnitPasarDaerahController::class, 'laporan'])->name('admin.unit.pasar_daerah.laporan');
+            
+            // Profil Toko & Ulasan
+            Route::get('pasar-daerah/profile/edit', [\App\Http\Controllers\Admin\UnitPasarDaerahController::class, 'profile'])->name('admin.unit.pasar_daerah.profile');
+            Route::post('pasar-daerah/profile/edit', [\App\Http\Controllers\Admin\UnitPasarDaerahController::class, 'updateProfile'])->name('admin.unit.pasar_daerah.profile.update');
+            Route::get('pasar-daerah/reviews/list', [\App\Http\Controllers\Admin\UnitPasarDaerahController::class, 'reviews'])->name('admin.unit.pasar_daerah.reviews');
+            Route::post('pasar-daerah/reviews/{id}/reply', [\App\Http\Controllers\Admin\UnitPasarDaerahController::class, 'replyReview'])->name('admin.unit.pasar_daerah.reply_review');
+            Route::post('pasar-daerah/complaints/{id}/handle', [\App\Http\Controllers\Admin\UnitPasarDaerahController::class, 'handleComplaint'])->name('admin.unit.pasar_daerah.complaints.handle');
         });
     });
     

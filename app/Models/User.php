@@ -95,6 +95,8 @@ class User extends Authenticatable
         'ktp_photo_path',
         'face_photo_path',
         'ktp_rejection_reason',
+        'store_description',
+        'store_banner',
     ];
 
     /**

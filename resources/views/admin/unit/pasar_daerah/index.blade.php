@@ -66,6 +66,25 @@
                         <i class="bx bx-cog me-2"></i> Pengaturan Toko
                     </button>
                 </li>
+                <li class="nav-item">
+                    <button type="button" class="nav-link {{ $tab == 'profil' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-profil" aria-controls="navs-top-profil" aria-selected="{{ $tab == 'profil' ? 'true' : 'false' }}">
+                        <i class="bx bx-store me-2"></i> Profil Toko
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button type="button" class="nav-link {{ $tab == 'ulasan' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-ulasan" aria-controls="navs-top-ulasan" aria-selected="{{ $tab == 'ulasan' ? 'true' : 'false' }}">
+                        <i class="bx bx-star me-2"></i> Ulasan & Komentar
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button type="button" class="nav-link {{ $tab == 'komplain' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-komplain" aria-controls="navs-top-komplain" aria-selected="{{ $tab == 'komplain' ? 'true' : 'false' }}">
+                        <i class="bx bx-shield-quarter me-2"></i> Komplain & Retur
+                        @php $pendingComplaints = $complaints->where('status', 'pending')->count(); @endphp
+                        @if($pendingComplaints > 0)
+                            <span class="badge rounded-pill bg-danger ms-1">{{ $pendingComplaints }}</span>
+                        @endif
+                    </button>
+                </li>
             </ul>
             
             <div class="tab-content">
@@ -517,6 +536,503 @@
                                     </ul>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: PROFIL TOKO -->
+                <div class="tab-pane fade {{ $tab == 'profil' ? 'show active' : '' }}" id="navs-top-profil" role="tabpanel">
+                    <div class="card mb-4 border-0 shadow-sm rounded-4">
+                        <div class="card-header bg-white border-bottom pb-3 pt-4 px-4 d-flex align-items-center justify-content-between">
+                            <div>
+                                <h5 class="mb-0 fw-bold text-dark"><i class="bx bx-store text-primary me-2"></i>Profil Toko</h5>
+                                <small class="text-muted">Lengkapi informasi toko dan foto profil yang akan dilihat oleh pembeli.</small>
+                            </div>
+                        </div>
+                        <div class="card-body p-4">
+                            <form action="{{ route('admin.unit.pasar_daerah.profile.update') }}" method="POST" enctype="multipart/form-data">
+                                @csrf
+                                
+                                <div class="row mb-4">
+                                    <label class="col-sm-2 col-form-label fw-bold" for="avatar">Foto Profil Toko</label>
+                                    <div class="col-sm-10">
+                                        @if($admin->avatar)
+                                            <div class="mb-3">
+                                                <img src="{{ Storage::url($admin->avatar) }}" alt="Avatar" class="d-block rounded-circle border p-1" height="120" width="120" style="object-fit: cover;">
+                                            </div>
+                                        @else
+                                            <div class="mb-3">
+                                                <div class="d-flex align-items-center justify-content-center bg-light rounded-circle text-muted border p-1" style="height: 120px; width: 120px;">
+                                                    <i class="bx bx-image fs-1"></i>
+                                                </div>
+                                            </div>
+                                        @endif
+                                        <input class="form-control" type="file" id="avatar" name="avatar" accept="image/png, image/jpeg">
+                                        <small class="text-muted">Maksimal 2MB. Format: JPG/PNG.</small>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-4">
+                                    <label class="col-sm-2 col-form-label fw-bold" for="store_banner">Foto Sampul / Background Toko</label>
+                                    <div class="col-sm-10">
+                                        @if($admin->store_banner)
+                                            <div class="mb-3">
+                                                <img src="{{ Storage::url($admin->store_banner) }}" alt="Store Banner" class="d-block rounded-3 border p-1 w-100" style="height: 200px; object-fit: cover;">
+                                            </div>
+                                        @else
+                                            <div class="mb-3">
+                                                <div class="d-flex flex-column align-items-center justify-content-center bg-light rounded-3 text-muted border p-1 w-100" style="height: 200px;">
+                                                    <i class="bx bx-image-alt fs-1 mb-2"></i>
+                                                    <span>Belum ada foto sampul</span>
+                                                </div>
+                                            </div>
+                                        @endif
+                                        <input class="form-control" type="file" id="store_banner" name="store_banner" accept="image/png, image/jpeg">
+                                        <small class="text-muted">Maksimal 3MB. Rekomendasi ukuran: 1200x400 px. Format: JPG/PNG.</small>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-4">
+                                    <label class="col-sm-2 col-form-label fw-bold" for="store_description">Tentang Toko</label>
+                                    <div class="col-sm-10">
+                                        <textarea id="store_description" name="store_description" class="form-control" rows="6" placeholder="Ceritakan tentang toko Anda, produk unggulan, proses pembuatan, dsb.">{{ old('store_description', $admin->store_description) }}</textarea>
+                                        <small class="text-muted">Deskripsi ini akan tampil di halaman utama toko Anda.</small>
+                                    </div>
+                                </div>
+
+                                <div class="row justify-content-end">
+                                    <div class="col-sm-10">
+                                        <button type="submit" class="btn btn-primary rounded-pill px-4"><i class="bx bx-save me-1"></i> Simpan Profil</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: ULASAN & KOMENTAR -->
+                <div class="tab-pane fade {{ $tab == 'ulasan' ? 'show active' : '' }}" id="navs-top-ulasan" role="tabpanel">
+                    <div class="card border-0 shadow-sm rounded-4">
+                        <div class="card-header bg-white border-bottom pb-3 pt-4 px-4 d-flex align-items-center justify-content-between">
+                            <div>
+                                <h5 class="mb-0 fw-bold text-dark"><i class="bx bx-star text-warning me-2"></i>Ulasan & Komentar Pembeli</h5>
+                                <small class="text-muted">Kelola dan balas ulasan dari pembeli terhadap produk Anda.</small>
+                            </div>
+                        </div>
+                        <div class="table-responsive text-nowrap p-3">
+                            <table class="table table-hover border rounded-3 overflow-hidden">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Produk</th>
+                                        <th>Pembeli</th>
+                                        <th>Rating</th>
+                                        <th>Komentar</th>
+                                        <th>Balasan Anda</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($reviews as $review)
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                @if($review->produk->foto)
+                                                    <img src="{{ Storage::url($review->produk->foto) }}" class="rounded me-2" width="40" height="40" style="object-fit:cover">
+                                                @endif
+                                                <strong>{{ $review->produk->nama_produk ?? '-' }}</strong>
+                                            </div>
+                                        </td>
+                                        <td>{{ $review->user->name ?? 'Anonim' }}</td>
+                                        <td>
+                                            <span class="text-warning">
+                                                @for($i=1; $i<=5; $i++)
+                                                    <i class="bx {{ $i <= $review->rating ? 'bxs-star' : 'bx-star' }}"></i>
+                                                @endfor
+                                            </span>
+                                        </td>
+                                        <td style="white-space: normal; min-width: 250px;">
+                                            <div class="bg-light p-2 rounded text-wrap">{{ $review->comment ?: '(Hanya memberikan rating)' }}</div>
+                                        </td>
+                                        <td style="white-space: normal; min-width: 250px;">
+                                            @if($review->reply)
+                                                <div class="bg-success-subtle text-success p-2 rounded text-wrap border border-success-subtle">
+                                                    <em>"{{ $review->reply }}"</em>
+                                                </div>
+                                                <small class="text-muted mt-1 d-block"><i class="bx bx-time-five me-1"></i>{{ $review->replied_at->format('d M Y, H:i') }}</small>
+                                            @else
+                                                <span class="badge bg-label-secondary rounded-pill">Belum dibalas</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            <button type="button" class="btn btn-sm btn-outline-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#replyModal{{ $review->id }}">
+                                                <i class="bx bx-reply me-1"></i> Balas
+                                            </button>
+                                        </td>
+                                    </tr>
+
+                                    <!-- Modal Balas Ulasan -->
+                                    <div class="modal fade" id="replyModal{{ $review->id }}" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered" role="document">
+                                            <form action="{{ route('admin.unit.pasar_daerah.reply_review', $review->id) }}" method="POST">
+                                                @csrf
+                                                <div class="modal-content border-0 shadow-lg">
+                                                    <div class="modal-header border-bottom pb-3">
+                                                        <h5 class="modal-title fw-bold" id="exampleModalLabel1"><i class="bx bx-reply text-primary me-2"></i>Balas Ulasan</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body pt-4">
+                                                        <div class="mb-4 bg-light p-3 rounded-3 border">
+                                                            <div class="d-flex align-items-center mb-2">
+                                                                <span class="text-warning me-2">
+                                                                    @for($i=1; $i<=5; $i++)
+                                                                        <i class="bx {{ $i <= $review->rating ? 'bxs-star' : 'bx-star' }}"></i>
+                                                                    @endfor
+                                                                </span>
+                                                                <strong>{{ $review->user->name ?? 'Anonim' }}</strong>
+                                                            </div>
+                                                            <p class="mb-0 text-wrap">{{ $review->comment ?: '(Tidak ada teks komentar)' }}</p>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col mb-3">
+                                                                <label for="reply" class="form-label fw-bold">Komentar Balasan Anda</label>
+                                                                <textarea id="reply" name="reply" class="form-control" rows="4" placeholder="Terima kasih atas ulasannya... " required>{{ $review->reply }}</textarea>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer border-top pt-3">
+                                                        <button type="button" class="btn btn-outline-secondary rounded-pill" data-bs-dismiss="modal">Batal</button>
+                                                        <button type="submit" class="btn btn-primary rounded-pill"><i class="bx bx-send me-1"></i> Kirim Balasan</button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    @empty
+                                    <tr>
+                                        <td colspan="6" class="text-center py-5">
+                                            <div class="d-flex flex-column align-items-center">
+                                                <div class="bg-label-secondary rounded-circle p-3 mb-3">
+                                                    <i class="bx bx-star fs-1 text-muted"></i>
+                                                </div>
+                                                <h6 class="fw-bold mb-1">Belum ada ulasan</h6>
+                                                <p class="text-muted mb-0">Produk Anda belum menerima ulasan dari pembeli.</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 7: KOMPLAIN & RETUR -->
+                <div class="tab-pane fade {{ $tab == 'komplain' ? 'show active' : '' }}" id="navs-top-komplain" role="tabpanel">
+                    <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded-4 shadow-sm">
+                        <div class="d-flex align-items-center">
+                            <div class="avatar avatar-md bg-danger-subtle text-danger rounded-circle me-3 d-flex justify-content-center align-items-center">
+                                <i class="bx bx-shield-quarter fs-4"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-0 fw-bold">Komplain & Retur Barang</h5>
+                                <small class="text-muted">Kelola keluhan pembeli terkait barang rusak saat pengiriman, tidak sesuai, atau busuk/basi.</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Summary Cards -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-6 col-md-3">
+                            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar avatar-sm bg-label-primary rounded-circle me-2 d-flex align-items-center justify-content-center">
+                                        <i class="bx bx-list-ul"></i>
+                                    </div>
+                                    <div>
+                                        <small class="text-muted d-block">Total Komplain</small>
+                                        <h5 class="mb-0 fw-bold">{{ $complaints->count() }}</h5>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar avatar-sm bg-label-warning rounded-circle me-2 d-flex align-items-center justify-content-center">
+                                        <i class="bx bx-time-five"></i>
+                                    </div>
+                                    <div>
+                                        <small class="text-muted d-block">Menunggu Tindakan</small>
+                                        <h5 class="mb-0 fw-bold text-warning">{{ $complaints->where('status', 'pending')->count() }}</h5>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar avatar-sm bg-label-success rounded-circle me-2 d-flex align-items-center justify-content-center">
+                                        <i class="bx bx-check-circle"></i>
+                                    </div>
+                                    <div>
+                                        <small class="text-muted d-block">Disetujui (Ganti/Refund)</small>
+                                        <h5 class="mb-0 fw-bold text-success">{{ $complaints->whereIn('status', ['approved_replacement', 'approved_refund'])->count() }}</h5>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar avatar-sm bg-label-danger rounded-circle me-2 d-flex align-items-center justify-content-center">
+                                        <i class="bx bx-x-circle"></i>
+                                    </div>
+                                    <div>
+                                        <small class="text-muted d-block">Ditolak</small>
+                                        <h5 class="mb-0 fw-bold text-danger">{{ $complaints->where('status', 'rejected')->count() }}</h5>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Complaints Table -->
+                    <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="py-3 ps-4">No. Pesanan / Tanggal</th>
+                                        <th class="py-3">Pembeli</th>
+                                        <th class="py-3">Alasan & Solusi Diminta</th>
+                                        <th class="py-3">Bukti Foto</th>
+                                        <th class="py-3">Status</th>
+                                        <th class="py-3 text-center pe-4">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($complaints as $comp)
+                                    <tr>
+                                        <td class="ps-4">
+                                            <div class="d-flex flex-column">
+                                                <span class="fw-bold text-primary">#{{ $comp->order->order_number ?? 'PSR-' . $comp->pasar_order_id }}</span>
+                                                <small class="text-muted">{{ $comp->created_at->format('d M Y, H:i') }}</small>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar avatar-sm bg-label-secondary rounded-circle me-2 d-flex align-items-center justify-content-center fw-bold">
+                                                    {{ strtoupper(substr($comp->user->name ?? 'W', 0, 1)) }}
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-0 fw-semibold text-dark">{{ $comp->user->name ?? 'Warga' }}</h6>
+                                                    <small class="text-muted">{{ $comp->order->phone ?? $comp->user->phone ?? '-' }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div>
+                                                <span class="fw-bold text-dark d-block text-truncate" style="max-width: 220px;" title="{{ $comp->reason }}">{{ $comp->reason }}</span>
+                                                @if($comp->solution_requested === 'replacement')
+                                                    <span class="badge bg-label-info mt-1"><i class="bx bx-refresh me-1"></i> Ganti Barang Baru</span>
+                                                @else
+                                                    <span class="badge bg-label-warning mt-1"><i class="bx bx-money me-1"></i> Refund Dana</span>
+                                                @endif
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex gap-1">
+                                                @foreach([$comp->evidence_1, $comp->evidence_2, $comp->evidence_3] as $ev)
+                                                    @if($ev)
+                                                        <a href="{{ Storage::url($ev) }}" target="_blank" class="d-inline-block rounded-2 overflow-hidden border" style="width: 42px; height: 42px;">
+                                                            <img src="{{ Storage::url($ev) }}" alt="Bukti" class="w-full h-full object-fit-cover" style="width:100%; height:100%; object-fit:cover;">
+                                                        </a>
+                                                    @endif
+                                                @endforeach
+                                                @if(!$comp->evidence_1 && !$comp->evidence_2 && !$comp->evidence_3)
+                                                    <span class="text-muted text-xs">Tanpa foto</span>
+                                                @endif
+                                            </div>
+                                        </td>
+                                        <td>
+                                            @if($comp->status === 'pending')
+                                                <span class="badge bg-label-warning"><i class="bx bx-time-five me-1"></i> Menunggu Tindakan</span>
+                                            @elseif($comp->status === 'approved_replacement')
+                                                <span class="badge bg-label-info"><i class="bx bx-refresh me-1"></i> Disetujui Ganti Barang</span>
+                                            @elseif($comp->status === 'approved_refund')
+                                                <span class="badge bg-label-success"><i class="bx bx-check-circle me-1"></i> Disetujui Refund</span>
+                                            @elseif($comp->status === 'rejected')
+                                                <span class="badge bg-label-danger"><i class="bx bx-x-circle me-1"></i> Ditolak</span>
+                                            @endif
+                                        </td>
+                                        <td class="text-center pe-4">
+                                            <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#modalComplaint{{ $comp->id }}">
+                                                <i class="bx bx-edit-alt me-1"></i> Tinjau & Tindak
+                                            </button>
+                                        </td>
+                                    </tr>
+
+                                    <!-- Modal Tindakan Komplain -->
+                                    <div class="modal fade" id="modalComplaint{{ $comp->id }}" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered modal-lg">
+                                            <div class="modal-content rounded-4 border-0 shadow">
+                                                <form action="{{ route('admin.unit.pasar_daerah.complaints.handle', $comp->id) }}" method="POST">
+                                                    @csrf
+                                                    <div class="modal-header border-bottom py-3 px-4 bg-light">
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="avatar avatar-sm bg-danger-subtle text-danger rounded-circle me-2 d-flex align-items-center justify-content-center">
+                                                                <i class="bx bx-shield-quarter"></i>
+                                                            </div>
+                                                            <div>
+                                                                <h5 class="modal-title fw-bold text-dark mb-0">Tinjau Komplain Pesanan #{{ $comp->order->order_number ?? $comp->pasar_order_id }}</h5>
+                                                                <small class="text-muted">Diajukan oleh: {{ $comp->user->name ?? 'Warga' }} • {{ $comp->created_at->format('d M Y, H:i') }}</small>
+                                                            </div>
+                                                        </div>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    
+                                                    <div class="modal-body p-4">
+                                                        <!-- Ringkasan Masalah -->
+                                                        <div class="row g-3 mb-4">
+                                                            <div class="col-md-6">
+                                                                <div class="p-3 bg-light rounded-3 h-100">
+                                                                    <label class="form-label text-xs fw-bold text-muted uppercase">Alasan Komplain</label>
+                                                                    <div class="fw-bold text-dark fs-6">{{ $comp->reason }}</div>
+                                                                    <div class="mt-2">
+                                                                        <span class="text-xs text-muted">Solusi yang diminta:</span>
+                                                                        @if($comp->solution_requested === 'replacement')
+                                                                            <span class="badge bg-label-info ms-1">Ganti Barang Baru</span>
+                                                                        @else
+                                                                            <span class="badge bg-label-warning ms-1">Pengembalian Dana (Refund)</span>
+                                                                        @endif
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <div class="p-3 bg-light rounded-3 h-100">
+                                                                    <label class="form-label text-xs fw-bold text-muted uppercase">Rincian Barang yang Dipesan</label>
+                                                                    <div class="fw-bold text-dark">
+                                                                        @if($comp->order && $comp->order->items->isNotEmpty())
+                                                                            <ul class="list-unstyled mb-0 text-xs">
+                                                                                @foreach($comp->order->items as $item)
+                                                                                    <li>• {{ $item->produk->nama_produk ?? 'Produk' }} ({{ $item->quantity }}x) - Rp {{ number_format($item->price, 0, ',', '.') }}</li>
+                                                                                @endforeach
+                                                                            </ul>
+                                                                            <div class="mt-1 fw-bold text-primary">Total: Rp {{ number_format($comp->order->grand_total, 0, ',', '.') }}</div>
+                                                                        @else
+                                                                            <span class="text-muted text-xs">Informasi pesanan tidak ditemukan</span>
+                                                                        @endif
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Deskripsi Keluhan Warga -->
+                                                        <div class="mb-4">
+                                                            <label class="form-label text-xs fw-bold text-muted uppercase">Keterangan / Kronologi dari Pembeli</label>
+                                                            <div class="p-3 bg-light rounded-3 text-dark text-sm border">
+                                                                {{ $comp->description ?? 'Tidak ada keterangan tambahan.' }}
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Foto Bukti Kerusakan -->
+                                                        <div class="mb-4">
+                                                            <label class="form-label text-xs fw-bold text-muted uppercase">Foto Bukti Kerusakan / Unboxing</label>
+                                                            <div class="d-flex flex-wrap gap-2">
+                                                                @foreach([$comp->evidence_1, $comp->evidence_2, $comp->evidence_3] as $ev)
+                                                                    @if($ev)
+                                                                        <a href="{{ Storage::url($ev) }}" target="_blank" class="d-inline-block rounded-3 overflow-hidden border shadow-sm" style="width: 100px; height: 100px;">
+                                                                            <img src="{{ Storage::url($ev) }}" alt="Bukti" class="w-full h-full object-fit-cover" style="width:100%; height:100%; object-fit:cover;">
+                                                                        </a>
+                                                                    @endif
+                                                                @endforeach
+                                                                @if(!$comp->evidence_1 && !$comp->evidence_2 && !$comp->evidence_3)
+                                                                    <div class="text-muted text-xs p-2">Pembeli tidak melampirkan foto.</div>
+                                                                @endif
+                                                            </div>
+                                                            <small class="text-muted">Klik foto untuk melihat ukuran penuh.</small>
+                                                        </div>
+
+                                                        <!-- Info Rekening (Jika Refund) -->
+                                                        @if($comp->bank_name || $comp->bank_account_number)
+                                                            <div class="mb-4 p-3 bg-warning-subtle rounded-3 border border-warning">
+                                                                <label class="form-label text-xs fw-bold text-warning-emphasis uppercase mb-1"><i class="bx bx-credit-card me-1"></i> Rekening Tujuan Refund Pembeli</label>
+                                                                <div class="row text-xs">
+                                                                    <div class="col-sm-4"><strong>Bank / E-Wallet:</strong> {{ $comp->bank_name ?? '-' }}</div>
+                                                                    <div class="col-sm-4"><strong>No. Rekening:</strong> {{ $comp->bank_account_number ?? '-' }}</div>
+                                                                    <div class="col-sm-4"><strong>Atas Nama:</strong> {{ $comp->bank_account_name ?? '-' }}</div>
+                                                                </div>
+                                                            </div>
+                                                        @endif
+
+                                                        <hr class="my-3">
+
+                                                        <!-- Formulir Keputusan Admin Desa -->
+                                                        <div class="mb-3">
+                                                            <label class="form-label fw-bold text-dark">Pilih Tindakan Resmi Admin Desa <span class="text-danger">*</span></label>
+                                                            <div class="row g-2">
+                                                                <div class="col-md-4">
+                                                                    <input type="radio" class="btn-check" name="status" id="action_replace_{{ $comp->id }}" value="approved_replacement" {{ $comp->status === 'approved_replacement' ? 'checked' : '' }} required>
+                                                                    <label class="btn btn-outline-info w-100 p-2 text-start rounded-3" for="action_replace_{{ $comp->id }}">
+                                                                        <div class="fw-bold"><i class="bx bx-refresh me-1"></i> Ganti Barang Baru</div>
+                                                                        <small class="text-muted text-xs">Kirim ulang barang pengganti</small>
+                                                                    </label>
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    <input type="radio" class="btn-check" name="status" id="action_refund_{{ $comp->id }}" value="approved_refund" {{ $comp->status === 'approved_refund' ? 'checked' : '' }}>
+                                                                    <label class="btn btn-outline-success w-100 p-2 text-start rounded-3" for="action_refund_{{ $comp->id }}">
+                                                                        <div class="fw-bold"><i class="bx bx-check-circle me-1"></i> Setujui Refund Dana</div>
+                                                                        <small class="text-muted text-xs">Kembalikan dana ke rekening pembeli</small>
+                                                                    </label>
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    <input type="radio" class="btn-check" name="status" id="action_reject_{{ $comp->id }}" value="rejected" {{ $comp->status === 'rejected' ? 'checked' : '' }}>
+                                                                    <label class="btn btn-outline-danger w-100 p-2 text-start rounded-3" for="action_reject_{{ $comp->id }}">
+                                                                        <div class="fw-bold"><i class="bx bx-x-circle me-1"></i> Tolak Komplain</div>
+                                                                        <small class="text-muted text-xs">Bukti tidak valid atau tidak sesuai SOP</small>
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="mb-3">
+                                                            <label class="form-label fw-bold text-dark">Catatan & Instruksi Respon Admin Desa <span class="text-danger">*</span></label>
+                                                            <textarea name="admin_response" rows="3" class="form-control rounded-3" required placeholder="Contoh: Kami mohon maaf atas ketidaknyamanan ini. Barang pengganti akan kami kirimkan hari ini via kurir desa.">{{ $comp->admin_response }}</textarea>
+                                                            <small class="text-muted">Catatan ini akan langsung terbaca oleh pembeli di aplikasi mobile / web.</small>
+                                                        </div>
+
+                                                        @if($comp->resolved_at)
+                                                            <div class="p-2 bg-light rounded text-xs text-muted">
+                                                                Terakhir diproses oleh <strong>{{ $comp->handler->name ?? 'Admin' }}</strong> pada {{ $comp->resolved_at->format('d M Y, H:i') }}.
+                                                            </div>
+                                                        @endif
+                                                    </div>
+
+                                                    <div class="modal-footer border-top py-3 px-4 bg-light">
+                                                        <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Tutup</button>
+                                                        <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm">
+                                                            <i class="bx bx-check me-1"></i> Simpan & Kirim Tindakan
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    @empty
+                                    <tr>
+                                        <td colspan="6" class="text-center py-5">
+                                            <div class="d-flex flex-column align-items-center">
+                                                <div class="bg-label-success rounded-circle p-3 mb-3">
+                                                    <i class="bx bx-shield-quarter fs-1 text-success"></i>
+                                                </div>
+                                                <h6 class="fw-bold mb-1">Tidak Ada Komplain</h6>
+                                                <p class="text-muted mb-0">Semua pesanan berjalan lancar dan belum ada keluhan barang rusak / retur.</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>

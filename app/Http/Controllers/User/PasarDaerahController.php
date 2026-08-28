@@ -84,12 +84,42 @@ class PasarDaerahController extends Controller
     {
         $produk = PasarProduk::with('region')->findOrFail($id);
 
-        // Pastikan produk berasal dari desa pengguna (Hiper-Lokal)
-        if (Auth::check() && Auth::user()->region_id && $produk->region_id !== Auth::user()->region_id) {
-            abort(403, 'Anda hanya dapat melihat produk dari desa Anda sendiri.');
-        }
+        // Seller / Admin Desa info
+        $seller = \App\Models\User::where('region_id', $produk->region_id)
+            ->whereIn('role', ['admin_desa', 'admin'])
+            ->first();
 
-        return view('users.pasar-detail', compact('produk'));
+        // Reviews
+        $reviews = \App\Models\PasarReview::where('pasar_produk_id', $produk->id)
+            ->with('user')
+            ->latest()
+            ->get();
+
+        $averageRating = $reviews->isNotEmpty() ? round($reviews->avg('rating'), 1) : 5.0;
+
+        return view('users.pasar-detail', compact('produk', 'seller', 'reviews', 'averageRating'));
+    }
+
+    /**
+     * Simpan Ulasan Produk
+     */
+    public function storeReview(Request $request, $id)
+    {
+        $request->validate([
+            'rating' => 'required|integer|min:1|max:5',
+            'comment' => 'nullable|string|max:1000',
+        ]);
+
+        $produk = PasarProduk::findOrFail($id);
+
+        \App\Models\PasarReview::create([
+            'pasar_produk_id' => $produk->id,
+            'user_id' => Auth::id(),
+            'rating' => $request->rating,
+            'comment' => $request->comment,
+        ]);
+
+        return back()->with('success', 'Ulasan Anda berhasil dikirim!');
     }
 
     /**

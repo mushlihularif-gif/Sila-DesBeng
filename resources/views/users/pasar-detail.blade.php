@@ -468,15 +468,23 @@
 
                         <hr class="border-gray-100 mb-5">
 
-                        <!-- Seller Compact -->
-                        <div class="mb-5">
-                            <p class="text-xs text-gray-400 font-medium uppercase tracking-wider mb-2">Penjual</p>
-                            <div class="ps-seller-compact">
-                                <div class="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white flex-shrink-0">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                        <!-- Toko / BUMDes Profile Box -->
+                        <div class="mb-5 p-4 rounded-xl border border-gray-100 bg-gradient-to-r from-blue-50/50 via-slate-50/30 to-white relative overflow-hidden">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 rounded-xl bg-white border border-blue-200/80 shadow-sm overflow-hidden flex-shrink-0 flex items-center justify-center">
+                                    @if($seller && $seller->avatar)
+                                        <img src="{{ Storage::url($seller->avatar) }}" alt="{{ $produk->region->name ?? 'Toko' }}" class="w-full h-full object-cover">
+                                    @else
+                                        <svg class="w-6 h-6 text-[#115789]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                                    @endif
                                 </div>
-                                <span>{{ $produk->region->name ?? 'Wilayah Tidak Diketahui' }}</span>
-                                <div class="ps-seller-dot"></div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-1.5">
+                                        <h4 class="font-bold text-gray-900 text-sm truncate">BUMDes {{ $produk->region->name ?? 'Desa' }}</h4>
+                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-700">Resmi</span>
+                                    </div>
+                                    <p class="text-xs text-gray-500 truncate mt-0.5">{{ $seller->store_description ?? 'Unit Usaha Resmi BUMDes Bengkalis' }}</p>
+                                </div>
                             </div>
                         </div>
 
@@ -497,14 +505,20 @@
 
                         <hr class="border-gray-100 mb-5">
                         
-                        <!-- Tabbed Content (Detail & Ulasan) -->
-                        <div x-data="{ tab: 'detail' }" class="mb-4">
+                        <!-- Tabbed Content (Detail, Ulasan, & Info) -->
+                        <div x-data="{ tab: 'detail', showReviewForm: false, rating: 5 }" class="mb-4">
                             <!-- Tab Headers -->
                             <div class="flex border-b border-gray-200 mb-6 overflow-x-auto" style="-ms-overflow-style:none;scrollbar-width:none;">
                                 <button @click="tab = 'detail'" 
                                     :class="tab === 'detail' ? 'active-tab' : ''" 
                                     class="ps-tab-btn">
                                     Detail Produk
+                                </button>
+                                <button @click="tab = 'ulasan'" 
+                                    :class="tab === 'ulasan' ? 'active-tab' : ''" 
+                                    class="ps-tab-btn flex items-center gap-1.5">
+                                    <span>⭐ Ulasan</span>
+                                    <span class="px-1.5 py-0.2 rounded-full text-xs bg-amber-100 text-amber-800 font-bold">{{ $reviews->count() }}</span>
                                 </button>
                                 <button @click="tab = 'info'" 
                                     :class="tab === 'info' ? 'active-tab' : ''" 
@@ -513,12 +527,120 @@
                                 </button>
                             </div>
                             
-                            <!-- Tab Content -->
+                            <!-- Tab 1: Detail Produk -->
                             <div x-show="tab === 'detail'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" class="prose prose-sm md:prose-base prose-blue max-w-none text-gray-700">
                                 <div class="leading-relaxed whitespace-pre-line text-[15px]">{!! e($produk->deskripsi ?? 'Tidak ada deskripsi lengkap untuk produk ini.') !!}</div>
                             </div>
 
+                            <!-- Tab 2: Ulasan & Rating -->
+                            <div x-show="tab === 'ulasan'" x-cloak style="display: none;" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0">
+                                <!-- Summary & Tulis Ulasan Button -->
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-amber-50/50 border border-amber-100 mb-6">
+                                    <div class="flex items-center gap-3">
+                                        <div class="text-3xl font-black text-amber-500">{{ number_format($averageRating, 1) }}</div>
+                                        <div>
+                                            <div class="flex items-center text-amber-400">
+                                                @for($i = 1; $i <= 5; $i++)
+                                                    <svg class="w-4 h-4 {{ $i <= round($averageRating) ? 'fill-current' : 'text-gray-300 fill-current' }}" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                                                @endfor
+                                            </div>
+                                            <p class="text-xs text-gray-500 mt-0.5">{{ $reviews->count() }} ulasan dari pembeli</p>
+                                        </div>
+                                    </div>
 
+                                    @auth
+                                        <button @click="showReviewForm = !showReviewForm" type="button" class="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow-sm transition">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                            <span x-text="showReviewForm ? 'Tutup Form' : 'Tulis Ulasan'">Tulis Ulasan</span>
+                                        </button>
+                                    @else
+                                        <a href="{{ route('auth.login') }}" class="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow-sm transition">
+                                            Login untuk Beri Ulasan
+                                        </a>
+                                    @endauth
+                                </div>
+
+                                @auth
+                                    <!-- Form Tulis Ulasan -->
+                                    <div x-show="showReviewForm" x-collapse x-cloak class="mb-6 p-4 rounded-xl border border-gray-200 bg-white shadow-sm">
+                                        <h4 class="font-bold text-gray-800 text-sm mb-3">Bagikan Pengalaman Anda</h4>
+                                        <form action="{{ route('pasar.review.store', $produk->id) }}" method="POST">
+                                            @csrf
+                                            <!-- Rating Stars Selector -->
+                                            <div class="mb-3">
+                                                <label class="block text-xs font-semibold text-gray-600 mb-1.5">Rating Bintang</label>
+                                                <div class="flex items-center gap-2">
+                                                    <template x-for="star in [1,2,3,4,5]">
+                                                        <button type="button" @click="rating = star" class="p-1 focus:outline-none transition">
+                                                            <svg class="w-6 h-6 transition" :class="star <= rating ? 'text-amber-400 fill-current scale-110' : 'text-gray-300 fill-current'" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                                                        </button>
+                                                    </template>
+                                                    <input type="hidden" name="rating" :value="rating">
+                                                </div>
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label class="block text-xs font-semibold text-gray-600 mb-1">Komentar / Ulasan</label>
+                                                <textarea name="comment" rows="3" required class="w-full text-sm border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-amber-400 focus:border-amber-400" placeholder="Ceritakan kepuasan Anda terhadap produk ini..."></textarea>
+                                            </div>
+
+                                            <button type="submit" class="px-5 py-2 rounded-lg bg-[#115789] hover:bg-[#0d466e] text-white font-bold text-xs shadow-sm transition">
+                                                Kirim Ulasan
+                                            </button>
+                                        </form>
+                                    </div>
+                                @endauth
+
+                                <!-- Daftar Ulasan -->
+                                <div class="space-y-4">
+                                    @forelse($reviews as $rev)
+                                        <div class="p-4 rounded-xl border border-gray-100 bg-gray-50/50">
+                                            <div class="flex items-start justify-between">
+                                                <div class="flex items-center gap-3">
+                                                    <div class="w-8 h-8 rounded-full bg-blue-100 text-[#115789] font-bold text-xs flex items-center justify-center">
+                                                        {{ strtoupper(substr($rev->user->name ?? 'W', 0, 1)) }}
+                                                    </div>
+                                                    <div>
+                                                        <h5 class="font-bold text-gray-900 text-xs">{{ $rev->user->name ?? 'Warga' }}</h5>
+                                                        <p class="text-[10px] text-gray-400">{{ $rev->created_at->diffForHumans() }}</p>
+                                                    </div>
+                                                </div>
+                                                <div class="flex text-amber-400">
+                                                    @for($s = 1; $s <= 5; $s++)
+                                                        <svg class="w-3.5 h-3.5 {{ $s <= $rev->rating ? 'fill-current' : 'text-gray-300 fill-current' }}" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                                                    @endfor
+                                                </div>
+                                            </div>
+
+                                            @if($rev->comment)
+                                                <p class="text-xs text-gray-700 mt-2.5 leading-relaxed">{{ $rev->comment }}</p>
+                                            @endif
+
+                                            <!-- Balasan Admin Desa -->
+                                            @if($rev->reply)
+                                                <div class="mt-3 p-3 rounded-lg bg-emerald-50/70 border border-emerald-200/80">
+                                                    <div class="flex items-center gap-1.5 mb-1">
+                                                        <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                                                        <span class="font-bold text-emerald-800 text-[11px]">Respon Penjual (Admin Desa)</span>
+                                                        @if($rev->replied_at)
+                                                            <span class="text-[9px] text-emerald-600 ml-auto">{{ $rev->replied_at->diffForHumans() }}</span>
+                                                        @endif
+                                                    </div>
+                                                    <p class="text-xs text-emerald-900 leading-relaxed">{{ $rev->reply }}</p>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    @empty
+                                        <div class="text-center py-8">
+                                            <svg class="w-12 h-12 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                                            <p class="text-xs font-semibold text-gray-500">Belum ada ulasan untuk produk ini</p>
+                                            <p class="text-[11px] text-gray-400 mt-0.5">Jadilah yang pertama memberikan ulasan!</p>
+                                        </div>
+                                    @endforelse
+                                </div>
+                            </div>
+
+                            <!-- Tab 3: Info Penting -->
                             <div x-show="tab === 'info'" x-cloak style="display: none;" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0">
                                 <div class="space-y-4">
                                     <div class="flex">

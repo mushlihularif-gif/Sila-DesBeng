@@ -24,6 +24,8 @@ Route::get('/unit-pelayanan', [BerandaController::class, 'unitPelayanan']);
     // Pasar Daerah (Toko BUMDes)
     Route::get('/pasar-daerah/products', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'getProducts']);
     Route::get('/pasar-daerah/products/{id}', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'getProductDetail']);
+    Route::get('/pasar-daerah/products/{id}/reviews', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'getProductReviews']);
+    Route::get('/pasar-daerah/seller/{region_id}', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'getSellerProfile']);
     Route::get('/pasar-daerah/categories', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'getCategories']);
 
     // Wilayah (Regions) - Public for registration
@@ -74,6 +76,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/pasar-daerah/cart/remove', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'removeFromCart']);
     Route::post('/pasar-daerah/checkout', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'checkout']);
     Route::get('/pasar-daerah/orders/{id}/payment', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'getOrderPayment']);
+    Route::post('/pasar-daerah/products/{id}/reviews', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'addReview']);
+    Route::post('/pasar-daerah/orders/{id}/complaint', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'submitComplaint']);
+    Route::get('/pasar-daerah/orders/{id}/complaint', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'getComplaintDetail']);
 
     // Mutasi Domisili
     Route::get('/mutasi', [\App\Http\Controllers\Api\DomicileTransferApiController::class, 'index']);

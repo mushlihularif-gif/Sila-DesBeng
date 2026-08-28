@@ -56,8 +56,22 @@ class UnitPasarDaerahController extends Controller
         // Data Kecamatan
         $semuaKecamatan = Region::where('type', 'kecamatan')->orderBy('name', 'asc')->get();
 
+        // Data Ulasan
+        $reviews = \App\Models\PasarReview::whereHas('produk', function($query) use ($admin) {
+                $query->where('region_id', $admin->region_id);
+            })
+            ->with(['produk', 'user'])
+            ->latest()
+            ->get();
+
+        // Data Komplain & Retur
+        $complaints = \App\Models\PasarComplaint::where('region_id', $admin->region_id)
+            ->with(['order.items.produk', 'user', 'handler'])
+            ->latest()
+            ->get();
+
         return view('admin.unit.pasar_daerah.index', compact(
-            'produks', 'settings', 'pesanans', 'status', 'laporans', 'startDate', 'endDate', 'totalPendapatan', 'tab', 'semuaKecamatan'
+            'produks', 'settings', 'pesanans', 'status', 'laporans', 'startDate', 'endDate', 'totalPendapatan', 'tab', 'semuaKecamatan', 'admin', 'reviews', 'complaints'
         ));
     }
 
@@ -313,5 +327,119 @@ class UnitPasarDaerahController extends Controller
         $totalPendapatan = $laporans->sum('grand_total');
         
         return view('admin.unit.pasar_daerah.laporan', compact('laporans', 'startDate', 'endDate', 'totalPendapatan'));
+    }
+    /**
+     * Tampilkan Halaman Profil Toko
+     */
+    public function profile()
+    {
+        $user = Auth::user();
+        return view('admin.unit.pasar_daerah.profile', compact('user'));
+    }
+
+    /**
+     * Update Profil Toko
+     */
+    public function updateProfile(Request $request)
+    {
+        $user = Auth::user();
+
+        $validated = $request->validate([
+            'store_description' => 'nullable|string',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'store_banner' => 'nullable|image|mimes:jpeg,png,jpg|max:3072',
+        ]);
+
+        if ($request->hasFile('avatar')) {
+            if ($user->avatar) {
+                Storage::disk('public')->delete($user->avatar);
+            }
+            $user->avatar = $request->file('avatar')->store('avatars', 'public');
+        }
+
+        if ($request->hasFile('store_banner')) {
+            if ($user->store_banner) {
+                Storage::disk('public')->delete($user->store_banner);
+            }
+            $user->store_banner = $request->file('store_banner')->store('store_banners', 'public');
+        }
+
+        $user->store_description = $validated['store_description'];
+        $user->save();
+
+        return redirect()->back()->with('success', 'Profil Toko berhasil diperbarui.');
+    }
+
+    /**
+     * Tampilkan Halaman Ulasan
+     */
+    public function reviews()
+    {
+        $admin = Auth::user();
+        
+        $reviews = \App\Models\PasarReview::whereHas('produk', function($query) use ($admin) {
+                $query->where('region_id', $admin->region_id);
+            })
+            ->with(['produk', 'user'])
+            ->latest()
+            ->get();
+            
+        return view('admin.unit.pasar_daerah.reviews', compact('reviews'));
+    }
+
+    /**
+     * Balas Ulasan
+     */
+    public function replyReview(Request $request, $id)
+    {
+        $admin = Auth::user();
+        
+        $request->validate([
+            'reply' => 'required|string',
+        ]);
+
+        $review = \App\Models\PasarReview::whereHas('produk', function($query) use ($admin) {
+            $query->where('region_id', $admin->region_id);
+        })->findOrFail($id);
+
+        $review->reply = $request->reply;
+        $review->replied_at = now();
+        $review->save();
+
+        return redirect()->back()->with('success', 'Balasan ulasan berhasil dikirim.');
+    }
+
+    /**
+     * Proses Tindakan Komplain / Retur Barang dari Pembeli
+     */
+    public function handleComplaint(Request $request, $id)
+    {
+        $admin = Auth::user();
+        
+        $request->validate([
+            'status' => 'required|in:approved_replacement,approved_refund,rejected',
+            'admin_response' => 'required|string|max:1000',
+        ]);
+
+        $complaint = \App\Models\PasarComplaint::where('region_id', $admin->region_id)->findOrFail($id);
+        
+        $complaint->status = $request->status;
+        $complaint->admin_response = $request->admin_response;
+        $complaint->handled_by = $admin->id;
+        $complaint->resolved_at = now();
+        $complaint->save();
+
+        // Update status order jika relevan
+        if ($complaint->order) {
+            if ($request->status === 'approved_refund') {
+                $complaint->order->status = 'cancelled';
+                $complaint->order->admin_cancellation_response = 'Komplain disetujui untuk pengembalian dana: ' . $request->admin_response;
+            } elseif ($request->status === 'approved_replacement') {
+                $complaint->order->status = 'processing';
+            }
+            $complaint->order->save();
+        }
+
+        return redirect()->back()->with('success', 'Tindakan komplain berhasil diproses dan dikirim ke pembeli.');
     }
 }
