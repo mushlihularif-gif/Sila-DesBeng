@@ -21,9 +21,31 @@
     <meta name="turbo-cache-control" content="no-cache">
     <script type="module" src="https://cdn.jsdelivr.net/npm/@hotwired/turbo/+esm"></script>
     <style>
+        /* Custom Turbo Progress Bar (Bi-color Wobble) */
         .turbo-progress-bar {
-            height: 4px;
-            background-color: #45aaf2;
+            height: 5px !important;
+            background-color: rgba(0,0,0,0.05) !important;
+            width: 100% !important;
+            opacity: 1 !important;
+            transition: none !important; /* Mencegah konflik dengan animasi bawaan Turbo */
+        }
+        .turbo-progress-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 25%;
+            border-radius: 5px;
+            will-change: transform, background-color; /* Hardware Acceleration */
+            animation: customWobble 1.5s ease-in-out infinite;
+        }
+        @keyframes customWobble {
+            0% { transform: translateX(0%); background-color: #2f84f3; }
+            49.9% { transform: translateX(300%); background-color: #2f84f3; }
+            50% { transform: translateX(300%); background-color: #fdb824; }
+            99.9% { transform: translateX(0%); background-color: #fdb824; }
+            100% { transform: translateX(0%); background-color: #2f84f3; }
         }
     </style>
 
