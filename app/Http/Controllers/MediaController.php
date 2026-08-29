@@ -107,7 +107,7 @@ class MediaController extends Controller
                 $isFace = str_contains($fullPath, 'face');
 
                 if (!$isFace) {
-                    $watermarkPath = public_path('Admin/img/watermarkprivasi/WatermarkPrivasi.png');
+                    $watermarkPath = public_path('Admin/img/watermarkprivasi/WatermarkPrivasiFIX.png');
                     if (file_exists($watermarkPath)) {
                         $watermark = $manager->read($watermarkPath);
                         $watermarkWidth = intval($image->width() * 0.9);

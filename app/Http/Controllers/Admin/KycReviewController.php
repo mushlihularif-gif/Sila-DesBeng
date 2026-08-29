@@ -15,10 +15,10 @@ class KycReviewController extends Controller
 {
     public function index(Request $request)
     {
-        $all = KycVerification::with('user')->latest()->get();
-        $pending = KycVerification::with('user')->where('status', 'pending')->latest()->get();
-        $approved = KycVerification::with('user')->where('status', 'approved')->latest()->get();
-        $rejected = KycVerification::with('user')->where('status', 'rejected')->latest()->get();
+        $all = KycVerification::with('user')->whereNotNull('face_scan_data')->latest()->get();
+        $pending = KycVerification::with('user')->where('status', 'pending')->whereNotNull('face_scan_data')->latest()->get();
+        $approved = KycVerification::with('user')->where('status', 'approved')->whereNotNull('face_scan_data')->latest()->get();
+        $rejected = KycVerification::with('user')->where('status', 'rejected')->whereNotNull('face_scan_data')->latest()->get();
         
         $counts = [
             'all' => $all->count(),
