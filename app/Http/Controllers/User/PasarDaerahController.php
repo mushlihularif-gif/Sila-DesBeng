@@ -78,6 +78,61 @@ class PasarDaerahController extends Controller
     }
 
     /**
+     * Halaman Profil Toko / BUMDes
+     */
+    public function toko($id, Request $request)
+    {
+        $region = Region::findOrFail($id);
+
+        $seller = \App\Models\User::where('region_id', $id)
+            ->whereIn('role', ['admin_desa', 'admin'])
+            ->first();
+
+        $query = PasarProduk::where('region_id', $id)->where('status', 'tersedia');
+
+        if ($request->filled('kategori') && $request->kategori !== 'all') {
+            $query->where('kategori', $request->kategori);
+        }
+
+        if ($request->filled('search')) {
+            $query->where('nama_produk', 'like', '%' . $request->search . '%');
+        }
+
+        if ($request->get('sort') === 'termurah') {
+            $query->orderBy('harga', 'asc');
+        } elseif ($request->get('sort') === 'termahal') {
+            $query->orderBy('harga', 'desc');
+        } else {
+            $query->latest();
+        }
+
+        $produks = $query->paginate(12)->withQueryString();
+
+        // Ulasan untuk seluruh produk dari toko desa ini
+        $reviews = \App\Models\PasarReview::whereHas('produk', function($q) use ($id) {
+            $q->where('region_id', $id);
+        })->with(['produk', 'user'])->latest()->get();
+
+        $averageRating = $reviews->isNotEmpty() ? round($reviews->avg('rating'), 1) : 0;
+
+        $totalSales = \App\Models\PasarOrderItem::whereHas('produk', function($q) use ($id) {
+            $q->where('region_id', $id);
+        })->sum('quantity');
+
+        $totalProducts = PasarProduk::where('region_id', $id)->where('status', 'tersedia')->count();
+
+        $categories = PasarProduk::where('region_id', $id)
+            ->where('status', 'tersedia')
+            ->pluck('kategori')
+            ->unique()
+            ->filter();
+
+        return view('users.pasar-toko', compact(
+            'region', 'seller', 'produks', 'reviews', 'averageRating', 'totalSales', 'totalProducts', 'categories'
+        ));
+    }
+
+    /**
      * Detail produk
      */
     public function show($id)
@@ -95,9 +150,19 @@ class PasarDaerahController extends Controller
             ->latest()
             ->get();
 
-        $averageRating = $reviews->isNotEmpty() ? round($reviews->avg('rating'), 1) : 5.0;
+        $averageRating = $reviews->isNotEmpty() ? round($reviews->avg('rating'), 1) : 0;
 
-        return view('users.pasar-detail', compact('produk', 'seller', 'reviews', 'averageRating'));
+        $soldCount = \App\Models\PasarOrderItem::where('pasar_produk_id', $produk->id)->sum('quantity');
+
+        // Produk Terpopuler / Rekomendasi Lainnya
+        $popularProducts = PasarProduk::with('region')
+            ->where('id', '!=', $produk->id)
+            ->where('status', 'aktif')
+            ->orderByDesc('id')
+            ->take(4)
+            ->get();
+
+        return view('users.pasar-detail', compact('produk', 'seller', 'reviews', 'averageRating', 'soldCount', 'popularProducts'));
     }
 
     /**
@@ -180,7 +245,8 @@ class PasarDaerahController extends Controller
     {
         $validated = $request->validate([
             'pasar_produk_id' => 'required|exists:pasar_produks,id',
-            'quantity' => 'required|integer|min:1'
+            'quantity' => 'required|integer|min:1',
+            'is_direct_buy' => 'nullable|boolean'
         ]);
 
         $produk = PasarProduk::findOrFail($validated['pasar_produk_id']);
@@ -204,9 +270,12 @@ class PasarDaerahController extends Controller
             'pasar_produk_id' => $validated['pasar_produk_id']
         ]);
 
-        if ($cart->exists) {
+        $isDirectBuy = $request->boolean('is_direct_buy');
+
+        if ($cart->exists && !$isDirectBuy) {
             $cart->quantity += $validated['quantity'];
         } else {
+            // Jika Beli Langsung (Direct Buy) atau item baru, set sesuai kuantitas yang dipilih pembeli saat ini
             $cart->quantity = $validated['quantity'];
         }
 
@@ -299,8 +368,9 @@ class PasarDaerahController extends Controller
                 }
             }
         }
-        
-        return view('users.pasar-checkout', compact('carts', 'buyer', 'seller', 'ongkir'));
+
+        $region = $seller;
+        return view('users.pasar-checkout', compact('carts', 'buyer', 'seller', 'region', 'ongkir'));
     }
 
     /**
@@ -319,7 +389,7 @@ class PasarDaerahController extends Controller
 
         $validated = $request->validate([
             'delivery_method' => 'required|in:antar,jemput',
-            'payment_method' => 'required|in:tunai,transfer_manual,bank_transfer_bca,bank_transfer_bri,bank_transfer_bni,bank_transfer_mandiri,gopay,qris',
+            'payment_method' => 'required|in:tunai,bank_transfer,transfer_manual,bank_transfer_bca,bank_transfer_bri,bank_transfer_bni,bank_transfer_mandiri,gopay,qris,COD,virtual_account',
             'full_name' => 'required|string|max:255',
             'phone' => 'required|string',
             'delivery_address' => 'required_if:delivery_method,antar|string|nullable',
@@ -563,7 +633,7 @@ class PasarDaerahController extends Controller
 
     public function payment($id)
     {
-        $order = PasarOrder::findOrFail($id);
+        $order = PasarOrder::with('region', 'items.produk')->findOrFail($id);
         if ($order->user_id !== Auth::id() && !Auth::user()->is_admin) {
             abort(403);
         }

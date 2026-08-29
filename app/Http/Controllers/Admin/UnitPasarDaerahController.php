@@ -223,6 +223,17 @@ class UnitPasarDaerahController extends Controller
             'ongkir_luar_kecamatan' => 'nullable|numeric|min:0',
             'ongkir_kecamatan_khusus' => 'nullable|array',
             'ongkir_kecamatan_khusus.*' => 'nullable|numeric|min:0',
+            // Payment settings
+            'enable_cod' => 'nullable',
+            'enable_bank_transfer' => 'nullable',
+            'rekening_bank' => 'nullable|string|max:100',
+            'rekening_nomor' => 'nullable|string|max:50',
+            'rekening_nama' => 'nullable|string|max:100',
+            'enable_qris' => 'nullable',
+            'qris_image' => 'nullable|image|mimes:jpeg,png,jpg|max:3072',
+            'qris_ewallet_name' => 'nullable|string|max:100',
+            'qris_ewallet_number' => 'nullable|string|max:50',
+            'qris_ewallet_holder' => 'nullable|string|max:100',
         ]);
 
         $region = Region::findOrFail(Auth::user()->region_id);
@@ -248,11 +259,29 @@ class UnitPasarDaerahController extends Controller
             }
             $settings['ongkir_kecamatan_khusus'] = $khusus;
         }
+
+        // Simpan Pengaturan Pembayaran Toko
+        $settings['enable_cod'] = $request->has('enable_cod');
+        $settings['enable_bank_transfer'] = $request->has('enable_bank_transfer');
+        $settings['rekening_bank'] = $request->input('rekening_bank');
+        $settings['rekening_nomor'] = $request->input('rekening_nomor');
+        $settings['rekening_nama'] = $request->input('rekening_nama');
+        
+        $settings['enable_qris'] = $request->has('enable_qris');
+        if ($request->hasFile('qris_image')) {
+            if (!empty($settings['qris_image'])) {
+                Storage::disk('public')->delete($settings['qris_image']);
+            }
+            $settings['qris_image'] = $request->file('qris_image')->store('store_qris', 'public');
+        }
+        $settings['qris_ewallet_name'] = $request->input('qris_ewallet_name');
+        $settings['qris_ewallet_number'] = $request->input('qris_ewallet_number');
+        $settings['qris_ewallet_holder'] = $request->input('qris_ewallet_holder');
         
         $region->settings = $settings;
         $region->save();
 
-        return redirect()->back()->with('success', 'Pengaturan Toko Pasar Daerah berhasil diperbarui.');
+        return redirect()->back()->with('success', 'Pengaturan Toko & Metode Pembayaran berhasil diperbarui.');
     }
 
     /**

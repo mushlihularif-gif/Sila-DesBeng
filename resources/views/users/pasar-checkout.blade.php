@@ -284,7 +284,7 @@
 
         <!-- Header -->
         <div class="co-header animate-in">
-            <a href="{{ route('pasar.cart') }}" class="co-back-btn">
+            <a href="javascript:void(0)" onclick="if(window.history.length > 1){ window.history.back(); } else { window.location.href='{{ route('pasar.index') }}'; }" class="co-back-btn" title="Kembali">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
             </a>
             <div>
@@ -420,126 +420,123 @@
                             <span class="co-card-title">Metode Pembayaran</span>
                         </div>
                         <div class="co-card-body">
-                            <input type="hidden" name="payment_method" id="payment-method-hidden" value="tunai">
-                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-2">
-                                <!-- Tunai -->
-                                <button type="button" 
-                                        onclick="setPaymentMethod('tunai')"
-                                        id="btn-tunai"
-                                        class="payment-method-btn group relative py-4 px-2 rounded-2xl font-bold transition-all duration-300 active ring-2 ring-blue-500 bg-blue-50 shadow-md transform scale-105">
-                                    <div class="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                    <div class="flex flex-col items-center justify-center gap-2 text-center relative z-10">
-                                        <div class="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center transition-colors shadow-inner" id="icon-tunai">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
-                                            </svg>
-                                        </div>
-                                        <span class="text-[11px] uppercase tracking-wider text-blue-700" id="text-tunai">Bayar Tunai</span>
-                                    </div>
-                                </button>
+                            @php
+                                $isCod = $region->settings['enable_cod'] ?? true;
+                                $isBank = $region->settings['enable_bank_transfer'] ?? true;
+                                $bankName = $region->settings['rekening_bank'] ?? 'Bank Riau Kepri Syariah';
+                                $bankNumber = $region->settings['rekening_nomor'] ?? '';
+                                $bankHolder = $region->settings['rekening_nama'] ?? ('BUMDes ' . ($region->name ?? 'Desa'));
+                                $isQris = $region->settings['enable_qris'] ?? (!empty($region->settings['qris_image']) || !empty($region->settings['qris_ewallet_number']));
+                                $qrisImage = $region->settings['qris_image'] ?? null;
+                                $qrisNumber = $region->settings['qris_ewallet_number'] ?? '';
+                                $defaultMethod = $isCod ? 'tunai' : ($isBank ? 'bank_transfer' : ($isQris ? 'qris' : 'tunai'));
+                            @endphp
 
-                                <!-- Transfer Manual -->
-                                <button type="button" 
-                                        onclick="setPaymentMethod('transfer_manual')"
-                                        id="btn-transfer_manual"
-                                        class="payment-method-btn group relative py-4 px-2 rounded-2xl font-bold transition-all duration-300 bg-white shadow-sm border border-gray-100 hover:border-blue-300 hover:shadow-md hover:-translate-y-1">
-                                    <div class="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                    <div class="flex flex-col items-center justify-center gap-2 text-center relative z-10">
-                                        <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 group-hover:bg-blue-500 group-hover:text-white flex items-center justify-center transition-colors shadow-inner" id="icon-transfer_manual">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
-                                        </div>
-                                        <span class="text-[11px] uppercase tracking-wider text-gray-600 group-hover:text-blue-700" id="text-transfer_manual">Transfer Manual</span>
+                            <input type="hidden" name="payment_method" id="payment-method-hidden" value="{{ $defaultMethod }}">
+                            
+                            <div class="radio-grid">
+                                @if($isCod)
+                                <label class="radio-card payment-radio-card {{ $defaultMethod == 'tunai' ? 'selected' : '' }}" onclick="setPaymentMethod('tunai')">
+                                    <input type="radio" name="pay_radio" value="tunai" {{ $defaultMethod == 'tunai' ? 'checked' : '' }}>
+                                    <div class="radio-indicator"></div>
+                                    <div class="radio-icon" style="background: linear-gradient(135deg, #e0f2fe, #f0f9ff); color: #0284c7;">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                        </svg>
                                     </div>
-                                </button>
+                                    <div class="radio-info">
+                                        <div class="radio-title">Bayar Tunai (COD)</div>
+                                        <div class="radio-desc">Bayar tunai langsung saat barang sampai</div>
+                                        <span class="radio-badge" style="background: #e0f2fe; color: #0369a1;">TUNAI / COD</span>
+                                    </div>
+                                </label>
+                                @endif
 
-                                <!-- QRIS -->
-                                <button type="button" 
-                                        onclick="setPaymentMethod('qris')"
-                                        id="btn-qris"
-                                        class="payment-method-btn group relative py-4 px-2 rounded-2xl font-bold transition-all duration-300 bg-white shadow-sm border border-gray-100 hover:border-red-500 hover:shadow-md hover:-translate-y-1 overflow-hidden">
-                                    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(239,68,68,0.08)_0%,transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                                    
-                                    <div class="flex flex-col items-center justify-center gap-3 text-center h-full relative z-10">
-                                        <div class="bg-white p-1 rounded-lg shadow-sm group-hover:shadow border border-gray-50 transform group-hover:scale-110 transition-all">
-                                            <img src="{{ asset('admin/img/banks/qris.svg') }}" alt="QRIS" class="h-6 object-contain" onerror="this.src='{{ asset('admin/img/banks/dana.png') }}'">
-                                        </div>
-                                        <span class="text-[10px] uppercase tracking-widest text-gray-700 group-hover:text-red-600 font-black">All E-Wallet</span>
+                                @if($isBank)
+                                <label class="radio-card payment-radio-card {{ $defaultMethod == 'bank_transfer' ? 'selected' : '' }}" onclick="setPaymentMethod('bank_transfer')">
+                                    <input type="radio" name="pay_radio" value="bank_transfer" {{ $defaultMethod == 'bank_transfer' ? 'checked' : '' }}>
+                                    <div class="radio-indicator"></div>
+                                    <div class="radio-icon" style="background: linear-gradient(135deg, #ede9fe, #f5f3ff); color: #7c3aed;">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
                                     </div>
-                                </button>
-                                
-                                <!-- BCA VA -->
-                                <button type="button" 
-                                        onclick="setPaymentMethod('bank_transfer_bca')"
-                                        id="btn-bank_transfer_bca"
-                                        class="payment-method-btn group relative py-4 px-2 rounded-2xl font-bold transition-all duration-300 bg-white shadow-sm border border-gray-100 hover:border-blue-300 hover:shadow-md hover:-translate-y-1">
-                                    <div class="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                    <div class="flex flex-col items-center justify-center gap-3 text-center h-full relative z-10">
-                                        <img src="{{ asset('admin/img/banks/bca.png') }}" alt="BCA" class="h-6 object-contain transform group-hover:scale-110 transition-transform">
-                                        <span class="text-[10px] uppercase tracking-widest text-gray-700 group-hover:text-blue-600 font-bold">Virtual Account</span>
+                                    <div class="radio-info">
+                                        <div class="radio-title">Transfer Bank</div>
+                                        <div class="radio-desc">{{ $bankName }}</div>
+                                        <span class="radio-badge" style="background: #ede9fe; color: #6d28d9;">REKENING RESMI</span>
                                     </div>
-                                </button>
-                                
-                                <!-- BRI VA -->
-                                <button type="button" 
-                                        onclick="setPaymentMethod('bank_transfer_bri')"
-                                        id="btn-bank_transfer_bri"
-                                        class="payment-method-btn group relative py-4 px-2 rounded-2xl font-bold transition-all duration-300 bg-white shadow-sm border border-gray-100 hover:border-orange-300 hover:shadow-md hover:-translate-y-1">
-                                    <div class="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                    <div class="flex flex-col items-center justify-center gap-3 text-center h-full relative z-10">
-                                        <img src="{{ asset('admin/img/banks/bri.png') }}" alt="BRI" class="h-6 object-contain transform group-hover:scale-110 transition-transform">
-                                        <span class="text-[10px] uppercase tracking-widest text-gray-700 group-hover:text-orange-600 font-bold">Virtual Account</span>
+                                </label>
+                                @endif
+
+                                @if($isQris)
+                                <label class="radio-card payment-radio-card {{ $defaultMethod == 'qris' ? 'selected' : '' }}" onclick="setPaymentMethod('qris')">
+                                    <input type="radio" name="pay_radio" value="qris" {{ $defaultMethod == 'qris' ? 'checked' : '' }}>
+                                    <div class="radio-indicator"></div>
+                                    <div class="radio-icon" style="background: linear-gradient(135deg, #fee2e2, #fef2f2); color: #dc2626;">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
                                     </div>
-                                </button>
-                                
-                                <!-- Mandiri VA -->
-                                <button type="button" 
-                                        onclick="setPaymentMethod('bank_transfer_mandiri')"
-                                        id="btn-bank_transfer_mandiri"
-                                        class="payment-method-btn group relative py-4 px-2 rounded-2xl font-bold transition-all duration-300 bg-white shadow-sm border border-gray-100 hover:border-yellow-400 hover:shadow-md hover:-translate-y-1">
-                                    <div class="absolute inset-0 bg-gradient-to-br from-yellow-500/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                    <div class="flex flex-col items-center justify-center gap-3 text-center h-full relative z-10">
-                                        <img src="{{ asset('admin/img/banks/mandiri.png') }}" alt="Mandiri" class="h-6 object-contain transform group-hover:scale-110 transition-transform">
-                                        <span class="text-[10px] uppercase tracking-widest text-gray-700 group-hover:text-yellow-600 font-bold">Virtual Account</span>
+                                    <div class="radio-info">
+                                        <div class="radio-title">QRIS / E-Wallet</div>
+                                        <div class="radio-desc">DANA, GoPay, OVO, ShopeePay</div>
+                                        <span class="radio-badge" style="background: #fee2e2; color: #b91c1c;">SCAN QRIS</span>
                                     </div>
-                                </button>
-                                
-                                <!-- BNI VA -->
-                                <button type="button" 
-                                        onclick="setPaymentMethod('bank_transfer_bni')"
-                                        id="btn-bank_transfer_bni"
-                                        class="payment-method-btn group relative py-4 px-2 rounded-2xl font-bold transition-all duration-300 bg-white shadow-sm border border-gray-100 hover:border-orange-500 hover:shadow-md hover:-translate-y-1">
-                                    <div class="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                    <div class="flex flex-col items-center justify-center gap-3 text-center h-full relative z-10">
-                                        <img src="{{ asset('admin/img/banks/bni.png') }}" alt="BNI" class="h-6 object-contain transform group-hover:scale-110 transition-transform">
-                                        <span class="text-[10px] uppercase tracking-widest text-gray-700 group-hover:text-orange-600 font-bold">Virtual Account</span>
-                                    </div>
-                                </button>
+                                </label>
+                                @endif
                             </div>
 
-                            <!-- Transfer Manual Form -->
-                            <div id="manualTransferForm" style="display: none; margin-top: 20px; padding-top: 20px; border-top: 1px dashed #e2e8f0;">
-                                <div class="transfer-box">
-                                    <p style="font-size: 0.82rem; font-weight: 600; color: #1e40af; margin-bottom: 4px;">Instruksi Transfer</p>
-                                    <p style="font-size: 0.78rem; color: #3b82f6;">Transfer sejumlah <strong id="transferAmount" style="color: #1d4ed8;">Rp 0</strong> ke rekening berikut:</p>
-                                    <div class="bank-row">
-                                        <div>
-                                            <div class="bank-name">{{ $region->settings['rekening_bank'] ?? 'Bank Riau Kepri' }}</div>
-                                            <div class="bank-number">{{ $region->settings['rekening_nomor'] ?? '123-456-7890' }}</div>
-                                            <div class="bank-holder">a.n {{ $region->settings['rekening_nama'] ?? 'Pusat Layanan Daerah ' . $region->name }}</div>
-                                        </div>
-                                        <button type="button" onclick="navigator.clipboard.writeText('{{ $region->settings['rekening_nomor'] ?? '1234567890' }}'); showSiladesBengToast('success', 'Disalin!', 'Nomor rekening berhasil disalin.', 1500)" class="copy-btn">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-                                        </button>
-                                    </div>
+                            <!-- Detail Info Pembayaran Sesuai Pilihan -->
+                            <div id="payment-detail-tunai" class="mt-3 p-3 rounded-2xl border" style="background: #f8fafc; border-color: #e2e8f0; display: {{ $defaultMethod == 'tunai' ? 'block' : 'none' }};">
+                                <div class="flex items-center gap-2 mb-1" style="font-weight: 700; color: #1e293b; font-size: 0.84rem;">
+                                    <svg class="w-4 h-4 text-sky-600 inline flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    <span>Petunjuk Pembayaran Tunai (COD)</span>
                                 </div>
+                                <p class="text-xs text-slate-500 mb-0">Pembayaran dilakukan secara tunai langsung kepada kurir saat barang sampai atau saat Anda mengambil barang di toko BUMDes.</p>
+                            </div>
 
-                                <div class="co-input-group">
-                                    <label class="co-label">Upload Bukti Transfer <span class="required">*</span></label>
-                                    <div class="file-upload-area" id="uploadArea" onclick="document.getElementById('proof_of_payment').click()">
-                                        <svg class="w-8 h-8 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                        <p style="font-size: 0.82rem; font-weight: 600; color: #475569;" id="uploadLabel">Klik untuk upload bukti transfer</p>
-                                        <p style="font-size: 0.72rem; color: #94a3b8; margin-top: 4px;">JPG, PNG, PDF &bull; Maks 5MB</p>
-                                        <input type="file" name="proof_of_payment" id="proof_of_payment" accept="image/*,.pdf">
+                            <div id="payment-detail-bank_transfer" class="mt-3 transfer-box" style="display: {{ $defaultMethod == 'bank_transfer' ? 'block' : 'none' }}; margin-bottom: 0;">
+                                <div style="font-size: 0.82rem; font-weight: 700; color: #1e40af; display: flex; align-items: center; justify-content: space-between;">
+                                    <span class="flex items-center gap-1.5">
+                                        <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                                        Rekening Resmi BUMDes / Desa
+                                    </span>
+                                    <span class="text-[11px] font-semibold text-blue-700 bg-blue-100/80 px-2 py-0.5 rounded-md">{{ $bankName }}</span>
+                                </div>
+                                
+                                <div class="bank-row">
+                                    <div>
+                                        <div class="bank-name">{{ $bankName }}</div>
+                                        <div class="bank-number">{{ $bankNumber ?: '123-456-7890' }}</div>
+                                        <div class="bank-holder">a.n {{ $bankHolder }}</div>
+                                    </div>
+                                    @if($bankNumber)
+                                    <button type="button" onclick="navigator.clipboard.writeText('{{ $bankNumber }}'); showSiladesBengToast('success', 'Disalin!', 'Nomor rekening berhasil disalin.', 1500)" class="copy-btn" title="Salin Nomor Rekening">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                                    </button>
+                                    @endif
+                                </div>
+                                <p style="font-size: 0.75rem; color: #64748b; margin-top: 8px; margin-bottom: 0;">Transfer sesuai total tagihan belanjaan ke rekening resmi di atas.</p>
+                            </div>
+
+                            <div id="payment-detail-qris" class="mt-3 p-3 rounded-2xl border" style="background: #fff5f5; border-color: #fed7d7; display: {{ $defaultMethod == 'qris' ? 'block' : 'none' }};">
+                                <div style="font-size: 0.82rem; font-weight: 700; color: #9b2c2c; display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+                                    <span class="flex items-center gap-1.5">
+                                        <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+                                        QRIS &amp; E-Wallet Resmi Toko
+                                    </span>
+                                    <span class="text-[11px] font-semibold text-red-700 bg-red-100 px-2 py-0.5 rounded-md">Scan Barcode</span>
+                                </div>
+                                <div class="flex flex-col sm:flex-row items-center gap-3 bg-white p-3 rounded-xl border border-red-100">
+                                    @if(!empty($qrisImage))
+                                        <div class="w-28 h-28 border rounded-lg overflow-hidden p-1 bg-white flex-shrink-0">
+                                            <img src="{{ Storage::url($qrisImage) }}" alt="QRIS" class="w-full h-full object-contain">
+                                        </div>
+                                    @endif
+                                    <div class="flex-1 text-center sm:text-left">
+                                        <div class="text-xs font-bold text-gray-800 mb-1">Mendukung Semua Pembayaran:</div>
+                                        <div class="text-[11px] text-gray-500 mb-2">BCA Mobile, Livin, BRImo, DANA, GoPay, OVO, ShopeePay.</div>
+                                        @if(!empty($qrisNumber))
+                                            <div class="text-[11px] text-gray-500">Nomor HP E-Wallet:</div>
+                                            <div class="text-sm font-black text-gray-900 tracking-wider">{{ $qrisNumber }}</div>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
@@ -645,72 +642,31 @@
     // Payment Method Selection
     function setPaymentMethod(method) {
         // Update hidden input
-        document.getElementById('payment-method-hidden').value = method;
+        const hiddenInput = document.getElementById('payment-method-hidden');
+        if (hiddenInput) hiddenInput.value = method;
 
-        // Reset all buttons
-        document.querySelectorAll('.payment-method-btn').forEach(btn => {
-            btn.classList.remove('active', 'ring-2', 'ring-blue-500', 'bg-blue-50', 'shadow-md', 'scale-105');
-            btn.classList.add('bg-white', 'shadow-sm', 'border-gray-100');
-            btn.classList.remove('transform'); // Removing transform ensures scale-105 is fully removed
+        // Toggle checked on inputs & selected on radio-cards
+        document.querySelectorAll('.payment-radio-card').forEach(card => {
+            const radio = card.querySelector('input[type="radio"]');
+            if (radio) {
+                if (radio.value === method) {
+                    radio.checked = true;
+                    card.classList.add('selected');
+                } else {
+                    radio.checked = false;
+                    card.classList.remove('selected');
+                }
+            }
         });
 
-        // Reset specific icons for Tunai and Transfer Manual
-        const tunaiIcon = document.getElementById('icon-tunai');
-        const tunaiText = document.getElementById('text-tunai');
-        const tmIcon = document.getElementById('icon-transfer_manual');
-        const tmText = document.getElementById('text-transfer_manual');
-
-        if (tunaiIcon) {
-            tunaiIcon.className = "w-10 h-10 rounded-full bg-blue-100 text-blue-600 group-hover:bg-blue-500 group-hover:text-white flex items-center justify-center transition-colors shadow-inner";
-            tunaiText.className = "text-[11px] uppercase tracking-wider text-gray-600 group-hover:text-blue-700";
-        }
-        if (tmIcon) {
-            tmIcon.className = "w-10 h-10 rounded-full bg-blue-100 text-blue-600 group-hover:bg-blue-500 group-hover:text-white flex items-center justify-center transition-colors shadow-inner";
-            tmText.className = "text-[11px] uppercase tracking-wider text-gray-600 group-hover:text-blue-700";
-        }
-
-        // Set active state
-        const activeBtn = document.getElementById('btn-' + method);
-        if (activeBtn) {
-            activeBtn.classList.remove('bg-white', 'shadow-sm', 'border-gray-100');
-            activeBtn.classList.add('active', 'ring-2', 'ring-blue-500', 'bg-blue-50', 'shadow-md', 'transform', 'scale-105');
-        }
-
-        // Set active specific icons
-        if (method === 'tunai' && tunaiIcon) {
-            tunaiIcon.className = "w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center transition-colors shadow-inner";
-            tunaiText.className = "text-[11px] uppercase tracking-wider text-blue-700";
-        } else if (method === 'transfer_manual' && tmIcon) {
-            tmIcon.className = "w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center transition-colors shadow-inner";
-            tmText.className = "text-[11px] uppercase tracking-wider text-blue-700";
-        }
-
-        // Handle Transfer Manual visibility
-        const tmForm = document.getElementById('manualTransferForm');
-        const input = document.getElementById('proof_of_payment');
-        if (method === 'transfer_manual') {
-            tmForm.style.display = 'block';
-            input.required = true;
-        } else {
-            tmForm.style.display = 'none';
-            input.required = false;
-        }
+        // Toggle payment details container
+        ['tunai', 'bank_transfer', 'qris'].forEach(m => {
+            const detailEl = document.getElementById('payment-detail-' + m);
+            if (detailEl) {
+                detailEl.style.display = (m === method) ? 'block' : 'none';
+            }
+        });
     }
-
-    // File Upload Label
-    document.getElementById('proof_of_payment').addEventListener('change', function() {
-        const area = document.getElementById('uploadArea');
-        const label = document.getElementById('uploadLabel');
-        if (this.files.length > 0) {
-            area.classList.add('has-file');
-            label.textContent = this.files[0].name;
-            label.style.color = '#059669';
-        } else {
-            area.classList.remove('has-file');
-            label.textContent = 'Klik untuk upload bukti transfer';
-            label.style.color = '#475569';
-        }
-    });
 
     // Constants
     const baseTotal = {{ $totalAmount }};

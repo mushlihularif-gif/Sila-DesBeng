@@ -260,8 +260,13 @@ Route::middleware('auth')->prefix('pasar-daerah')->group(function () {
     Route::post('/order', [App\Http\Controllers\User\PasarDaerahController::class, 'placeOrder'])->name('pasar.order.store');
     Route::get('/payment/{id}', [App\Http\Controllers\User\PasarDaerahController::class, 'payment'])->name('pasar.payment');
     Route::post('/payment/{id}/simulate', [App\Http\Controllers\User\PasarDaerahController::class, 'simulatePayment'])->name('pasar.payment.simulate');
+    Route::get('/toko/{id}', [App\Http\Controllers\User\PasarDaerahController::class, 'toko'])
+        ->name('pasar.toko')
+        ->withoutMiddleware('auth')
+        ->middleware('role:user,guest');
+        
     Route::post('/{id}/review', [App\Http\Controllers\User\PasarDaerahController::class, 'storeReview'])->name('pasar.review.store');
-    
+
     // Taruh parameter di paling bawah supaya route lain tidak ketimpa
     Route::get('/{id}', [App\Http\Controllers\User\PasarDaerahController::class, 'show'])
         ->name('pasar.show')

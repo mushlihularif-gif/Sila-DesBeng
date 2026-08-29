@@ -207,7 +207,7 @@
                         @forelse($popularProducts as $item)
                         <!-- Product Card -->
                         <div class="flex flex-col items-center">
-                            <div onclick="window.location.href='{{ $item->link }}'"
+                            <div onclick="window.location.href='{{ $item->type === 'pasar' ? route('pasar.index') . '?product=' . $item->id : $item->link }}'"
                                 class="bg-white/80 backdrop-blur-sm rounded-lg border border-white shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer w-full max-w-[280px]">
                                 <div
                                     class="aspect-square p-4 flex items-center justify-center bg-gradient-to-br from-white/50 to-blue-50/30 relative">

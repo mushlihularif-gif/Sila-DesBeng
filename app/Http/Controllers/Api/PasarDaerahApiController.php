@@ -124,7 +124,7 @@ class PasarDaerahApiController extends Controller
                 ];
             });
 
-        $avgRating = $reviews->isNotEmpty() ? round($reviews->avg('rating'), 1) : 5.0;
+        $avgRating = $reviews->isNotEmpty() ? round($reviews->avg('rating'), 1) : 0;
 
         return response()->json([
             'status' => 'success',

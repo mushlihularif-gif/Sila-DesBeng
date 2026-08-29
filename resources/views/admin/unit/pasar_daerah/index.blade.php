@@ -412,7 +412,7 @@
                                     </div>
                                 </div>
                                 <div class="card-body p-4">
-                                    <form action="{{ route('admin.unit.pasar_daerah.sop') }}" method="POST">
+                                    <form action="{{ route('admin.unit.pasar_daerah.sop') }}" method="POST" enctype="multipart/form-data">
                                         @csrf
                                         <div class="mb-3">
                                             <label class="form-label text-dark fw-bold" for="ongkir_dalam_desa">Ongkir Dalam Desa (Satu Desa) <span class="text-danger">*</span></label>
@@ -514,6 +514,117 @@
                                                     </table>
                                                 </div>
                                                 <small class="text-danger mt-2 d-block"><i class="bx bx-info-circle me-1"></i>Kecamatan yang dimatikan (switch abu-abu) berarti toko Anda TIDAK melayani pengiriman ke daerah tersebut.</small>
+                                            </div>
+                                        </div>
+                                        
+                                        <hr class="my-4 text-light">
+
+                                        <!-- Section: Metode Pembayaran Toko -->
+                                        <div class="mb-4">
+                                            <div class="d-flex align-items-center mb-3">
+                                                <div class="avatar avatar-xs bg-label-success rounded-circle me-2 d-flex justify-content-center align-items-center">
+                                                    <i class="bx bx-credit-card"></i>
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-0 fw-bold text-dark">Metode Pembayaran yang Diterima Toko</h6>
+                                                    <small class="text-muted">Atur rekening bank, e-wallet, atau QRIS yang disediakan oleh BUMDes/Desa untuk pembeli.</small>
+                                                </div>
+                                            </div>
+
+                                            <!-- 1. COD / Bayar Tunai -->
+                                            <div class="p-3 border rounded-3 bg-white mb-3 shadow-sm">
+                                                <div class="d-flex align-items-center justify-content-between">
+                                                    <div class="d-flex align-items-center gap-3">
+                                                        <div class="avatar avatar-sm bg-label-info rounded-circle d-flex align-items-center justify-content-center">
+                                                            <i class="bx bx-money fs-4"></i>
+                                                        </div>
+                                                        <div>
+                                                            <div class="fw-bold text-dark">Bayar di Tempat / Tunai (COD)</div>
+                                                            <small class="text-muted">Pembeli membayar tunai saat barang diantar kurir atau diambil di toko.</small>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-check form-switch mb-0">
+                                                        <input class="form-check-input" type="checkbox" role="switch" name="enable_cod" id="enable_cod" value="1" {{ ($settings['enable_cod'] ?? true) ? 'checked' : '' }} style="transform: scale(1.3);">
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- 2. Transfer Bank -->
+                                            <div class="p-3 border rounded-3 bg-white mb-3 shadow-sm">
+                                                <div class="d-flex align-items-center justify-content-between mb-3">
+                                                    <div class="d-flex align-items-center gap-3">
+                                                        <div class="avatar avatar-sm bg-label-primary rounded-circle d-flex align-items-center justify-content-center">
+                                                            <i class="bx bxs-bank fs-4"></i>
+                                                        </div>
+                                                        <div>
+                                                            <div class="fw-bold text-dark">Transfer Bank (Rekening BUMDes / Desa)</div>
+                                                            <small class="text-muted">Pembeli dapat mentransfer langsung ke rekening bank resmi desa/toko Anda.</small>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-check form-switch mb-0">
+                                                        <input class="form-check-input" type="checkbox" role="switch" name="enable_bank_transfer" id="enable_bank_transfer" value="1" {{ ($settings['enable_bank_transfer'] ?? true) ? 'checked' : '' }} style="transform: scale(1.3);">
+                                                    </div>
+                                                </div>
+
+                                                <div class="row g-2 pt-2 border-top">
+                                                    <div class="col-md-4">
+                                                        <label class="form-label text-xs fw-bold text-dark">Nama Bank</label>
+                                                        <input type="text" class="form-control form-control-sm rounded-2" name="rekening_bank" list="bankList" placeholder="Contoh: Bank Riau Kepri Syariah / BRI" value="{{ $settings['rekening_bank'] ?? 'Bank Riau Kepri Syariah' }}">
+                                                        <datalist id="bankList">
+                                                            <option value="Bank Riau Kepri Syariah">
+                                                            <option value="Bank BRI">
+                                                            <option value="Bank Mandiri">
+                                                            <option value="Bank BCA">
+                                                            <option value="Bank BNI">
+                                                            <option value="Bank BSI">
+                                                        </datalist>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label class="form-label text-xs fw-bold text-dark">Nomor Rekening</label>
+                                                        <input type="text" class="form-control form-control-sm rounded-2" name="rekening_nomor" placeholder="Nomor rekening" value="{{ $settings['rekening_nomor'] ?? '' }}">
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label class="form-label text-xs fw-bold text-dark">Atas Nama Pemilik</label>
+                                                        <input type="text" class="form-control form-control-sm rounded-2" name="rekening_nama" placeholder="Contoh: BUMDes {{ $admin->region->name ?? 'Desa' }}" value="{{ $settings['rekening_nama'] ?? '' }}">
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- 3. QRIS & E-Wallet -->
+                                            <div class="p-3 border rounded-3 bg-white mb-3 shadow-sm">
+                                                <div class="d-flex align-items-center justify-content-between mb-3">
+                                                    <div class="d-flex align-items-center gap-3">
+                                                        <div class="avatar avatar-sm bg-label-danger rounded-circle d-flex align-items-center justify-content-center">
+                                                            <i class="bx bx-qr-scan fs-4"></i>
+                                                        </div>
+                                                        <div>
+                                                            <div class="fw-bold text-dark">QRIS &amp; E-Wallet (DANA / GoPay / OVO)</div>
+                                                            <small class="text-muted">Tampilkan barcode QRIS resmi toko Anda untuk scan pembayaran instan.</small>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-check form-switch mb-0">
+                                                        <input class="form-check-input" type="checkbox" role="switch" name="enable_qris" id="enable_qris" value="1" {{ ($settings['enable_qris'] ?? false) ? 'checked' : '' }} style="transform: scale(1.3);">
+                                                    </div>
+                                                </div>
+
+                                                <div class="row g-3 pt-2 border-top">
+                                                    <div class="col-md-6">
+                                                        <label class="form-label text-xs fw-bold text-dark">Upload Gambar QRIS (Barcode)</label>
+                                                        <input type="file" class="form-control form-control-sm rounded-2" name="qris_image" accept="image/*">
+                                                        @if(!empty($settings['qris_image']))
+                                                            <div class="mt-2 d-flex align-items-center gap-2">
+                                                                <a href="{{ Storage::url($settings['qris_image']) }}" target="_blank" class="d-inline-block border rounded p-1" style="width: 50px; height: 50px;">
+                                                                    <img src="{{ Storage::url($settings['qris_image']) }}" class="w-100 h-100 object-fit-contain">
+                                                                </a>
+                                                                <span class="text-xs text-success"><i class="bx bx-check-circle me-1"></i>QRIS aktif tersimpan</span>
+                                                            </div>
+                                                        @endif
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label text-xs fw-bold text-dark">Atau Nomor HP E-Wallet</label>
+                                                        <input type="text" class="form-control form-control-sm rounded-2" name="qris_ewallet_number" placeholder="Contoh: 0812-3456-7890 (DANA/GoPay)" value="{{ $settings['qris_ewallet_number'] ?? '' }}">
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                         
