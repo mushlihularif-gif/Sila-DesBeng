@@ -1,4 +1,4 @@
-@extends('layouts.user')
+﻿@extends('layouts.user')
 
 @php
     // Logika styling kartu (sama seperti penyewaan alat)
@@ -996,3 +996,4 @@
     });
 </script>
 @endpush
+

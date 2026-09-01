@@ -45,15 +45,21 @@ class MutasiAdminController extends Controller
     public function searchGlobal(Request $request)
     {
         $search = $request->get('q');
+        $region_id = $request->get('region_id');
+        
         if(!$search) return response()->json([]);
 
-        $users = User::where('role', 'warga')
+        $query = User::where('role', 'warga')
             ->where(function($q) use ($search) {
                 $q->where('nik', 'like', "%{$search}%")
                   ->orWhere('name', 'like', "%{$search}%");
-            })
-            ->limit(20)
-            ->get();
+            });
+
+        if ($region_id) {
+            $query->where('region_id', $region_id);
+        }
+
+        $users = $query->limit(20)->get();
 
         $result = [];
         foreach($users as $u) {

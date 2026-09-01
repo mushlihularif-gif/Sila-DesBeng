@@ -1,4 +1,4 @@
-@extends('layouts.user')
+﻿@extends('layouts.user')
 
 @section('title', 'Pembayaran Pasar Daerah - SiladesBeng')
 
@@ -172,18 +172,18 @@
         <!-- Progress Steps -->
         <div class="progress-steps">
             <div class="step-item">
-                <div class="step-circle done">✓</div>
+                <div class="step-circle done">âœ“</div>
                 <span class="step-label done">Keranjang</span>
             </div>
             <div class="step-line done"></div>
             <div class="step-item">
-                <div class="step-circle done">✓</div>
+                <div class="step-circle done">âœ“</div>
                 <span class="step-label done">Checkout</span>
             </div>
             <div class="step-line done"></div>
             <div class="step-item">
                 <div class="step-circle {{ $order->status === 'pending' ? 'active' : 'done' }}">
-                    {{ $order->status === 'pending' ? '3' : '✓' }}
+                    {{ $order->status === 'pending' ? '3' : 'âœ“' }}
                 </div>
                 <span class="step-label {{ $order->status === 'pending' ? 'active' : 'done' }}">Pembayaran</span>
             </div>
@@ -517,3 +517,4 @@
 </style>
 @endpush
 @endsection
+

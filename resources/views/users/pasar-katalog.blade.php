@@ -1,4 +1,4 @@
-@extends('layouts.user')
+﻿@extends('layouts.user')
 
 @section('title', 'Katalog Pasar Daerah - SiladesBeng')
 
@@ -1604,3 +1604,4 @@
     })();
 </script>
 @endpush
+

@@ -1,4 +1,4 @@
-@extends('layouts.user')
+﻿@extends('layouts.user')
 
 @php
     // Tentukan gaya latar belakang kartu berdasarkan pengaturan admin
@@ -1327,3 +1327,4 @@
 </script>
 
 @endpush
+

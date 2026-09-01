@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Http\Controllers\Admin;
 
@@ -476,7 +476,7 @@ public function index(Request $request)
                     'subtitle' => $item->position,
                     'description' => 'Anggota Struktur BUMDes',
                     'image' => $item->photo,
-                    'link' => route('admin.siladesbeng.bumdes.index'),
+                    'link' => route('admin.SiladesBeng.bumdes.index'),
                     'badge' => 'Profil Pemerintah Daerah',
                     'badge_color' => 'info'
                 ];

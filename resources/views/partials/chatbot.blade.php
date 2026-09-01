@@ -1,4 +1,4 @@
-{{-- HANYA TAMPIL JIKA BUKAN DI HALAMAN AUTH --}}
+﻿{{-- HANYA TAMPIL JIKA BUKAN DI HALAMAN AUTH --}}
 @if(!request()->is('auth*') && !request()->routeIs('login') && !request()->routeIs('register'))
 @push('styles')
 <style>
@@ -351,7 +351,7 @@
     <div class="chatbot-messages" id="chatbot-messages">
         <!-- Default Welcome Message -->
         <div class="msg-bubble msg-bot">
-            Halo! Saya SiladesBeng Assistant 👋<br><br>Ada yang bisa saya bantu hari ini tentang cara penyewaan alat, pembelian gas, pelaporan, atau layanan kami lainnya?
+            Halo! Saya SiladesBeng Assistant ðŸ‘‹<br><br>Ada yang bisa saya bantu hari ini tentang cara penyewaan alat, pembelian gas, pelaporan, atau layanan kami lainnya?
         </div>
     </div>
     
@@ -380,11 +380,11 @@
     let startX, startY, initialX, initialY;
     
     function saveHistory() {
-        sessionStorage.setItem('siladesbeng_chat_history', JSON.stringify(chatHistory));
+        sessionStorage.setItem('SiladesBeng_chat_history', JSON.stringify(chatHistory));
     }
 
     // Restore History
-    let savedHistory = sessionStorage.getItem('siladesbeng_chat_history');
+    let savedHistory = sessionStorage.getItem('SiladesBeng_chat_history');
     if (savedHistory) {
         try {
             chatHistory = JSON.parse(savedHistory);
@@ -403,7 +403,7 @@
     }
 
     // Restore Window State
-    let isChatOpen = sessionStorage.getItem('siladesbeng_chat_open') === 'true';
+    let isChatOpen = sessionStorage.getItem('SiladesBeng_chat_open') === 'true';
     if (isChatOpen) {
         windowEl.classList.add('active');
         badge.style.display = 'none';
@@ -542,12 +542,12 @@
             setTimeout(() => input.focus(), 300);
             scrollToBottom();
         }
-        sessionStorage.setItem('siladesbeng_chat_open', windowEl.classList.contains('active'));
+        sessionStorage.setItem('SiladesBeng_chat_open', windowEl.classList.contains('active'));
     });
 
     closeBtn.addEventListener('click', () => {
         windowEl.classList.remove('active');
-        sessionStorage.setItem('siladesbeng_chat_open', 'false');
+        sessionStorage.setItem('SiladesBeng_chat_open', 'false');
     });
 
     // Send Message
@@ -598,7 +598,7 @@
                 chatHistory.push({role: 'model', text: data.reply});
                 saveHistory();
             } else if (data.error) {
-                appendMessage("❌ Error: " + data.error, 'bot');
+                appendMessage("âŒ Error: " + data.error, 'bot');
             }
         })
         .catch(error => {
@@ -606,7 +606,7 @@
             removeLoading(loadingId);
             input.disabled = false;
             sendBtn.disabled = false;
-            appendMessage("❌ Maaf, koneksi terputus. Silakan periksa jaringan internet Anda.", 'bot');
+            appendMessage("âŒ Maaf, koneksi terputus. Silakan periksa jaringan internet Anda.", 'bot');
         });
     }
 
@@ -652,3 +652,4 @@
 </script>
 @endpush
 @endif
+

@@ -1,4 +1,4 @@
-@extends('layouts.user')
+﻿@extends('layouts.user')
 
 @section('title', $produk->nama_produk . ' - Pasar Daerah')
 
@@ -946,11 +946,11 @@
                         <div class="flex items-center gap-3 text-sm text-gray-500 mb-5">
                             @if($reviews->isNotEmpty())
                             <div class="flex items-center gap-1 font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-200/60 text-xs">
-                                <span>⭐</span>
+                                <span>â­</span>
                                 <span>{{ number_format($averageRating, 1) }}</span>
                                 <span class="text-gray-400 font-normal">({{ $reviews->count() }} ulasan)</span>
                             </div>
-                            <span class="text-gray-300">•</span>
+                            <span class="text-gray-300">â€¢</span>
                             @endif
                             <div class="flex items-center text-xs">
                                 <span class="text-slate-400 mr-1.5">Terjual</span>
@@ -1097,7 +1097,7 @@
                             <button @click="tab = 'ulasan'" 
                                 :class="tab === 'ulasan' ? 'active-tab' : ''" 
                                 class="ps-tab-btn text-sm sm:text-base pb-3 flex items-center gap-1.5">
-                                <span>⭐ Ulasan Pembeli</span>
+                                <span>â­ Ulasan Pembeli</span>
                                 <span class="px-2 py-0.5 rounded-full text-xs bg-amber-100 text-amber-800 font-bold">{{ $reviews->count() }}</span>
                             </button>
                             <button @click="tab = 'info'" 
@@ -1524,7 +1524,7 @@
 </div>
 
 <!-- Copy Toast -->
-<div id="copyToast" class="ps-copy-toast">✓ Link berhasil disalin!</div>
+<div id="copyToast" class="ps-copy-toast">âœ“ Link berhasil disalin!</div>
 
 <!-- ========================================================================= -->
 <!-- INTERACTIVE ORDER MODAL (POPUP ATUR JUMLAH & BELI LANGSUNG)               -->
@@ -1810,3 +1810,4 @@
 </script>
 @endpush
 @endsection
+

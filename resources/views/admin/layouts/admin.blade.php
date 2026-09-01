@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="{{ str_replace('_','-',app()->getLocale()) }}" translate="no" class="light-style layout-menu-fixed" dir="ltr" data-theme="theme-default"
     data-assets-path="{{ asset('Admin/') }}" data-template="vertical-menu-template-free">
 
@@ -715,19 +715,19 @@
 
 
                 <!-- Profil & Info (Dropdown) -->
-                <li class="menu-item {{ request()->is('admin/siladesbeng/profile*') || request()->is('admin/siladesbeng/developer*') || request()->routeIs('admin.siladesbeng.bumdes.index') || request()->routeIs('admin.siladesbeng.bumdes.*') ? 'open active show' : '' }}">
+                <li class="menu-item {{ request()->is('admin/SiladesBeng/profile*') || request()->is('admin/SiladesBeng/developer*') || request()->routeIs('admin.SiladesBeng.bumdes.index') || request()->routeIs('admin.SiladesBeng.bumdes.*') ? 'open active show' : '' }}">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
                         <i class="menu-icon tf-icons bx bx-info-circle"></i>
                         <div data-i18n="Profil & Info">Profil & Info</div>
                     </a>
                     <ul class="menu-sub">
-                        <li class="menu-item {{ request()->routeIs('admin.siladesbeng.profile') || request()->routeIs('admin.siladesbeng.developer.profile') ? 'active' : '' }}">
-                            <a href="{{ route('admin.siladesbeng.profile') }}" class="menu-link">
+                        <li class="menu-item {{ request()->routeIs('admin.SiladesBeng.profile') || request()->routeIs('admin.SiladesBeng.developer.profile') ? 'active' : '' }}">
+                            <a href="{{ route('admin.SiladesBeng.profile') }}" class="menu-link">
                                 <div>SiladesBeng</div>
                             </a>
                         </li>
-                        <li class="menu-item {{ request()->routeIs('admin.siladesbeng.bumdes.index') || request()->routeIs('admin.siladesbeng.bumdes.*') ? 'active' : '' }}">
-                            <a href="{{ route('admin.siladesbeng.bumdes.index') }}" class="menu-link">
+                        <li class="menu-item {{ request()->routeIs('admin.SiladesBeng.bumdes.index') || request()->routeIs('admin.SiladesBeng.bumdes.*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.SiladesBeng.bumdes.index') }}" class="menu-link">
                                 @php
                                     $sidebarRegionLabel = 'Pemerintah Desa';
                                     if(auth()->user()->role === 'admin_kecamatan') {
@@ -759,7 +759,7 @@
                             <div class="nav-item d-flex align-items-center position-relative">
                                 @if(!request()->routeIs(
                                     'admin.laporan.log',
-                                    'admin.siladesbeng.*',
+                                    'admin.SiladesBeng.*',
                                     'admin.kemitraan.*',
                                     'admin.manajemen-pengguna.*',
                                     'admin.system-settings.*',
@@ -1128,7 +1128,7 @@
                         });
                     });
                 });
-            // ⭐ Tangani Pesan Flash Sesi saat Halaman Dimuat
+            // â­ Tangani Pesan Flash Sesi saat Halaman Dimuat
             document.addEventListener('DOMContentLoaded', function() {
                 @if(session('success'))
                     showSiladesBengToast('success', 'Berhasil', {!! json_encode(session('success')) !!});
@@ -1254,3 +1254,5 @@
 </body>
 
 </html>
+
+

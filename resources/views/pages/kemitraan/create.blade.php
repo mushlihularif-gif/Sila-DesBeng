@@ -1,4 +1,4 @@
-@extends('layouts.user')
+﻿@extends('layouts.user')
 
 @section('title', 'Gabung Kemitraan - SiladesBeng')
 
@@ -70,7 +70,7 @@
                 </p>
             @else
                 <p class="text-gray-700 text-lg max-w-2xl mx-auto mb-6 animate-fade-in-up" style="animation-delay: 100ms;">
-                    Pemerintah Desa Anda sudah berpartisipasi dalam SilaDesBeng!
+                    Pemerintah Desa Anda sudah berpartisipasi dalam SiladesBeng!
                 </p>
                 
                 <p class="text-gray-500 text-sm max-w-2xl mx-auto mb-10 animate-fade-in-up bg-green-50/50 p-3 rounded-xl border border-green-200" style="animation-delay: 150ms;">
@@ -797,3 +797,4 @@
 @endif
 
 @endsection
+

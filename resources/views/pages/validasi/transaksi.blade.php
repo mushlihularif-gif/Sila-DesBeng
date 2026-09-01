@@ -1,4 +1,4 @@
-@extends('layouts.user')
+﻿@extends('layouts.user')
 
 @section('title', 'Validasi Dokumen - SiladesBeng')
 
@@ -94,3 +94,4 @@
     </section>
 </main>
 @endsection
+

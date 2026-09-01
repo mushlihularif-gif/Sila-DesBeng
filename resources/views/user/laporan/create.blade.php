@@ -1,4 +1,4 @@
-@extends('layouts.user')
+﻿@extends('layouts.user')
 
 @section('title', 'Buat Laporan Warga')
 
@@ -524,7 +524,7 @@
 
             document.getElementById("modal-address").innerText = address;
             document.getElementById("modal-coords").innerText  =
-                "Lat: " + lat.toFixed(6) + "  •  Lng: " + lng.toFixed(6);
+                "Lat: " + lat.toFixed(6) + "  â€¢  Lng: " + lng.toFixed(6);
 
             marker.setPosition({ lat: lat, lng: lng });
             marker.setAnimation(google.maps.Animation.BOUNCE);
@@ -544,7 +544,7 @@
         document.getElementById("lokasi-nama").classList.add("text-gray-800", "font-semibold");
 
         document.getElementById("lokasi-coords").innerText =
-            "Lat: " + pendingLat.toFixed(6) + "  •  Lng: " + pendingLng.toFixed(6);
+            "Lat: " + pendingLat.toFixed(6) + "  â€¢  Lng: " + pendingLng.toFixed(6);
         document.getElementById("lokasi-coords").classList.remove("hidden");
 
         document.getElementById("lokasi-display").classList.remove("border-gray-200", "bg-gray-50");
@@ -566,7 +566,7 @@
         }
     }
 
-    // ✅ Fix 2: Fungsi GPS Otomatis (Share Location)
+    // âœ… Fix 2: Fungsi GPS Otomatis (Share Location)
     function getMyLocation() {
         const btn = document.getElementById('btn-gps');
         const icon = document.getElementById('gps-icon');
@@ -734,7 +734,7 @@
         }
     </script>
 
-    {{-- Modal RTRW legacy telah dihapus — domisili kini dikelola oleh KYC KTP --}}
+    {{-- Modal RTRW legacy telah dihapus â€” domisili kini dikelola oleh KYC KTP --}}
 
     {{-- ===== SCRIPT SEARCHABLE DROPDOWN TUJUAN PELAPORAN ===== --}}
     <script>
@@ -805,7 +805,7 @@
                 if (item.has_admin) {
                     const statusBadge = document.createElement('span');
                     statusBadge.className = 'text-[10px] font-medium px-2 py-0.5 rounded bg-green-100 text-green-700 whitespace-nowrap';
-                    statusBadge.textContent = '✓ Aktif';
+                    statusBadge.textContent = 'âœ“ Aktif';
                     li.appendChild(statusBadge);
 
                     li.addEventListener('click', () => {
@@ -880,7 +880,7 @@
                     currentItems = allRTData.map(rt => ({
                         id: rt.id,
                         name: rt.name,
-                        label: rt.name + ' — ' + rt.rw_name,
+                        label: rt.name + ' â€” ' + rt.rw_name,
                         badge: rt.rw_name,
                         has_admin: rt.has_admin
                     }));
@@ -1183,3 +1183,4 @@
     }
 </script>
 @endpush
+

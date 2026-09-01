@@ -1,4 +1,4 @@
-@extends('layouts.user')
+﻿@extends('layouts.user')
 @section('title', 'Pengaduan Warga - Sistem SiladesBeng')
 @push('styles')
 <style>
@@ -815,6 +815,7 @@
     })();
 </script>
 @endpush
+
 
 
 

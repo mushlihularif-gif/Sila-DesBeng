@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Services;
 
@@ -102,3 +102,4 @@ class FonnteService
         return $number;
     }
 }
+

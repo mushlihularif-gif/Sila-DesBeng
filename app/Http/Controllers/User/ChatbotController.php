@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Http\Controllers\User;
 
@@ -168,16 +168,16 @@ Gunakan bahasa Indonesia yang santai, profesional, dan gunakan emoji secukupnya 
         Log::error('All Gemini models failed. Last error: ' . ($lastError ?? 'unknown'));
 
         $pesan = strtolower($userMessage);
-        $reply = 'Maaf, sistem AI sedang sibuk saat ini. Namun, untuk memesan layanan, silakan klik menu yang sesuai di Beranda. 😊';
+        $reply = 'Maaf, sistem AI sedang sibuk saat ini. Namun, untuk memesan layanan, silakan klik menu yang sesuai di Beranda. ðŸ˜Š';
         
         if (strpos($pesan, 'sewa') !== false || strpos($pesan, 'alat') !== false) {
-            $reply = 'Untuk menyewa alat (seperti tenda atau kursi), silakan menuju menu **Sewa Alat** di beranda. Pilih alat yang Anda butuhkan, tentukan tanggal, lalu klik tombol **Pesan Sekarang**. Jika butuh bantuan lebih lanjut, saya siap membantu! 😊';
+            $reply = 'Untuk menyewa alat (seperti tenda atau kursi), silakan menuju menu **Sewa Alat** di beranda. Pilih alat yang Anda butuhkan, tentukan tanggal, lalu klik tombol **Pesan Sekarang**. Jika butuh bantuan lebih lanjut, saya siap membantu! ðŸ˜Š';
         } elseif (strpos($pesan, 'gas') !== false) {
             $reply = 'Untuk pembelian gas LPG, silakan masuk ke menu **Distribusi Gas LPG**. Pastikan Anda sudah melengkapi profil dengan NIK Anda ya agar kuota pembelian subsidi bisa disesuaikan.';
         } elseif (strpos($pesan, 'lapor') !== false || strpos($pesan, 'keluhan') !== false) {
-            $reply = 'Untuk melaporkan keluhan, silakan gunakan menu **Pelaporan Warga** di beranda. Isi formulir laporan dan sertakan foto jika ada. Laporan Anda akan segera diproses oleh petugas terkait. 📝';
+            $reply = 'Untuk melaporkan keluhan, silakan gunakan menu **Pelaporan Warga** di beranda. Isi formulir laporan dan sertakan foto jika ada. Laporan Anda akan segera diproses oleh petugas terkait. ðŸ“';
         } elseif (strpos($pesan, 'halo') !== false || strpos($pesan, 'hai') !== false || strpos($pesan, 'hi') !== false) {
-            $reply = 'Halo! 👋 Saya SiladesBeng Assistant. Maaf, saat ini koneksi ke AI sedang terganggu. Tapi saya tetap bisa membantu! Silakan tanyakan seputar:\n\n• **Sewa Alat** - Penyewaan alat berat & pesta\n• **Gas LPG** - Pembelian gas subsidi & non-subsidi\n• **Pelaporan** - Laporan keluhan warga\n\nAtau coba lagi nanti ya! 🙏';
+            $reply = 'Halo! ðŸ‘‹ Saya SiladesBeng Assistant. Maaf, saat ini koneksi ke AI sedang terganggu. Tapi saya tetap bisa membantu! Silakan tanyakan seputar:\n\nâ€¢ **Sewa Alat** - Penyewaan alat berat & pesta\nâ€¢ **Gas LPG** - Pembelian gas subsidi & non-subsidi\nâ€¢ **Pelaporan** - Laporan keluhan warga\n\nAtau coba lagi nanti ya! ðŸ™';
         }
         
         return response()->json([
@@ -185,3 +185,4 @@ Gunakan bahasa Indonesia yang santai, profesional, dan gunakan emoji secukupnya 
         ]);
     }
 }
+

@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Http\Controllers\Admin;
 
@@ -171,3 +171,4 @@ class KycReviewController extends Controller
         }
     }
 }
+

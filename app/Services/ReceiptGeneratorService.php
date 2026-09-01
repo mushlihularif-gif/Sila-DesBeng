@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Services;
 
@@ -1132,5 +1132,6 @@ class ReceiptGeneratorService
         $this->addText($image, 'Platform E-Government Kab. Bengkalis', $descX, $yBranding + 35, $normalSize - 4, $black, $fontPath);
     }
 }
+
 
 

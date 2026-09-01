@@ -223,7 +223,7 @@
                         <label class="form-label fw-bold text-dark">Email Resmi / Pribadi</label>
                         <div class="input-group input-group-merge">
                             <span class="input-group-text"><i class="bx bx-envelope"></i></span>
-                            <input type="email" name="email" class="form-control" placeholder="rt01@siladesbeng.com" required>
+                            <input type="email" name="email" class="form-control" placeholder="rt01@SiladesBeng.com" required>
                         </div>
                     </div>
                     <div class="col-12 mb-2">
@@ -420,3 +420,5 @@
     @endif
 </script>
 @endsection
+
+

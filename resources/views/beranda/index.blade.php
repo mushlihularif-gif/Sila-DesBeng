@@ -1,4 +1,4 @@
-@extends('layouts.user')
+﻿@extends('layouts.user')
 
 @section('page')
     {{-- NAVIGASI --}}
@@ -252,7 +252,7 @@
                             <p class="text-gray-500">Pengumuman dan agenda terbaru</p>
                         </div>
                         <a href="{{ route('announcements.index') }}" class="hidden md:flex items-center gap-2 text-[#115789] font-semibold hover:text-blue-500 transition-colors">
-                            Lihat Semua <span class="text-xl">→</span>
+                            Lihat Semua <span class="text-xl">â†’</span>
                         </a>
                     </div>
 
@@ -266,9 +266,9 @@
                                     <img src="{{ Storage::url($item->images->first()->image_path) }}" alt="{{ $item->title }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
                                 @else
                                     <div class="w-full h-full flex items-center justify-center text-4xl bg-gradient-to-br from-[#115789]/10 to-blue-500/10">
-                                        @if($item->type == 'Pengumuman') 📢 
-                                        @elseif($item->type == 'Event') 🎉
-                                        @else 🤝
+                                        @if($item->type == 'Pengumuman') ðŸ“¢ 
+                                        @elseif($item->type == 'Event') ðŸŽ‰
+                                        @else ðŸ¤
                                         @endif
                                     </div>
                                 @endif
@@ -286,7 +286,7 @@
                             
                             <div class="p-5 flex flex-col flex-1">
                                 <div class="text-xs text-gray-500 mb-2 flex items-center justify-between">
-                                    <span>📅 {{ $item->created_at->format('d M Y') }}</span>
+                                    <span>ðŸ“… {{ $item->created_at->format('d M Y') }}</span>
                                     <span class="font-medium text-[#115789]">{{ $item->region->name ?? 'Pusat' }}</span>
                                 </div>
                                 <h3 class="font-bold text-gray-800 text-lg mb-2 line-clamp-2 group-hover:text-[#115789] transition-colors">{{ $item->title }}</h3>
@@ -1565,3 +1565,4 @@
         })();
     </script>
 @endpush
+

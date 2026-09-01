@@ -1,4 +1,4 @@
-@extends('layouts.user')
+﻿@extends('layouts.user')
 
 @php
     // Tentukan gaya latar belakang kartu berdasarkan pengaturan admin
@@ -1583,7 +1583,7 @@ function updateTotalsJemput() {
                 if(endCJ) endCJ.style.display = 'none';
                 if(endIJ) { endIJ.required = false; endIJ.value = ''; }
                 
-                // Hide delivery method toggle — borongan always uses antar (drop-off)
+                // Hide delivery method toggle â€” borongan always uses antar (drop-off)
                 if(deliveryMethodContainer) deliveryMethodContainer.style.display = 'none';
                 if(methodLabel) methodLabel.textContent = 'Sewa Borongan (Drop Off)';
                 
@@ -1603,6 +1603,7 @@ function updateTotalsJemput() {
 </script>
 
 @endpush
+
 
 
 
