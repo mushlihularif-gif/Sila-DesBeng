@@ -18,48 +18,96 @@
         height: 36px;
     }
 </style>
+<style>
+    .animate-fade-up { animation: fadeUp 0.5s ease-out forwards; }
+    @keyframes fadeUp {
+        0% { opacity: 0; transform: translateY(20px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+    .table-modern th {
+        font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; color: #a1acb8 !important; border-bottom: 2px solid #f0f2f4;
+    }
+    .table-modern td { vertical-align: middle; padding: 1rem 1.25rem; border-bottom: 1px solid #f0f2f4; transition: all 0.2s; }
+    .table-modern tbody tr:hover { background-color: #f8f9fa; transform: scale(1.001); }
+</style>
 @endsection
 
 @section('content')
-<div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Manajemen /</span> Admin RT & RW</h4>
+<div class="container-xxl flex-grow-1 container-p-y animate-fade-up">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+            <h4 class="fw-bold m-0"><span class="text-muted fw-light">Manajemen /</span> Admin RT & RW</h4>
+            <div class="d-flex flex-wrap gap-2 justify-content-md-end flex-shrink-0">
+                <button type="button" class="btn btn-outline-primary shadow-sm text-nowrap" data-bs-toggle="modal" data-bs-target="#modalTambahAdmin">
+                    <i class="bx bx-plus me-1"></i> Buat Akun Dinas
+                </button>
+                <button type="button" class="btn btn-primary shadow-sm text-nowrap" data-bs-toggle="modal" data-bs-target="#modalPromosiAdmin">
+                    <i class="bx bx-user-check me-1"></i> Jadikan Warga RT/RW
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Panduan -->
+    <div class="card bg-label-primary border-0 shadow-none mb-4" style="border-radius: 12px;">
+        <div class="card-body d-flex align-items-center p-4">
+            <div class="me-3">
+                <div class="bg-primary p-3 rounded-circle text-white d-flex align-items-center justify-content-center shadow-sm" style="width: 56px; height: 56px;">
+                    <i class="bx bx-building-house fs-3"></i>
+                </div>
+            </div>
+            <div>
+                <h5 class="fw-bold mb-1 text-primary">Manajemen Pejabat Kewilayahan</h5>
+                <p class="mb-0 text-primary" style="opacity: 0.85;">
+                    Kelola akun khusus untuk para ketua/pengurus RT dan RW. Sangat direkomendasikan untuk <b>Menjadikan Warga sebagai RT atau RW</b> (memilih langsung dari daftar warga yang sudah ada di sistem). Opsi <b>Akun Dinas</b> hanya digunakan jika pejabat terkait belum memiliki akun sama sekali (gaptek).
+                </p>
+            </div>
+        </div>
+    </div>
 
     {{-- Notifikasi --}}
     @if(session('success'))
-        <div class="alert alert-success alert-dismissible" role="alert">
+        <div class="alert alert-success alert-dismissible shadow-sm rounded-4 border-0 d-flex align-items-center" role="alert">
+            <i class="bx bx-check-circle fs-4 me-2"></i>
             {{ session('success') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
-    @if(session('error'))
-        <div class="alert alert-danger alert-dismissible" role="alert">
-            {{ session('error') }}
+    @if(session('duplicate_nik') || session('error'))
+        <div class="alert alert-danger alert-dismissible shadow-sm rounded-4 border-0 d-flex align-items-center" role="alert">
+            <i class="bx bx-error-circle fs-4 me-2"></i>
+            {{ session('duplicate_nik') ?? session('error') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
 
     <div class="row">
-        <!-- Tabel Pengajuan (Menunggu Persetujuan) -->
+        <!-- Pengajuan Warga -->
         <div class="col-12 mb-4">
-            <div class="card">
-                <h5 class="card-header bg-warning text-white">Menunggu Persetujuan (Pengajuan Warga)</h5>
+            <div class="card border-0 shadow-sm" style="border-radius: 16px; overflow: hidden;">
+                <div class="card-header bg-warning py-3">
+                    <h5 class="mb-0 text-white fw-bold d-flex align-items-center">
+                        <i class="bx bx-time-five fs-4 me-2"></i> Menunggu Persetujuan (Pengajuan Kemitraan)
+                    </h5>
+                </div>
                 <div class="table-responsive text-nowrap">
-                    <table class="table">
-                        <thead>
+                    <table class="table table-modern table-hover align-middle mb-0">
+                        <thead class="bg-light bg-opacity-50">
                             <tr>
-                                <th>Nama Warga</th>
-                                <th>Pengajuan Role</th>
-                                <th>Target Wilayah</th>
-                                <th>Aksi</th>
+                                <th class="py-3 ps-4">NAMA WARGA</th>
+                                <th class="py-3">PENGAJUAN ROLE</th>
+                                <th class="py-3">TARGET WILAYAH</th>
+                                <th class="py-3 text-end pe-4">AKSI</th>
                             </tr>
                         </thead>
                         <tbody class="table-border-bottom-0">
                             @forelse($applications as $app)
                                 <tr>
-                                    <td>{{ $app->applicant_name }}<br><small>{{ $app->contact_email }}</small></td>
+                                    <td class="ps-4">{{ $app->applicant_name }}<br><small>{{ $app->contact_email }}</small></td>
                                     <td><span class="badge bg-label-primary">Admin {{ strtoupper($app->region_type) }}</span></td>
                                     <td>{{ $app->region_name }}</td>
-                                    <td>
+                                    <td class="text-end pe-4">
                                         <form action="{{ route('admin.wilayah-admins.approve', $app->id) }}" method="POST" class="d-inline">
                                             @csrf
                                             <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Setujui pengajuan ini?')">Setujui</button>
@@ -72,7 +120,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="4" class="text-center">Tidak ada pengajuan baru.</td>
+                                    <td colspan="4" class="text-center py-4 text-muted">Tidak ada pengajuan baru.</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -83,53 +131,52 @@
 
         <!-- Daftar Admin RT/RW Aktif -->
         <div class="col-12 mb-4">
-            <div class="card">
-                <div class="card-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
-                    <h5 class="mb-0">Daftar Admin RT & RW Aktif</h5>
-                    <div class="d-flex flex-column flex-sm-row gap-2 w-100 w-md-auto">
-                        <button type="button" class="btn btn-primary btn-sm flex-grow-1" data-bs-toggle="modal" data-bs-target="#modalTambahAdmin">
-                            <i class="bx bx-plus me-1"></i> Buat Akun Dinas Baru
-                        </button>
-                        <button type="button" class="btn btn-info btn-sm flex-grow-1" data-bs-toggle="modal" data-bs-target="#modalPromosiAdmin">
-                            <i class="bx bx-user-check me-1"></i> Jadikan Warga sebagai RT/RW
-                        </button>
-                    </div>
+            <div class="card border-0 shadow-sm" style="border-radius: 16px;">
+                <div class="card-header bg-white border-bottom py-3 px-4">
+                    <h5 class="mb-0 fw-bold text-primary d-flex align-items-center">
+                        <i class="bx bx-list-check fs-4 me-2"></i> Daftar Admin RT & RW Aktif
+                    </h5>
                 </div>
                 <div class="table-responsive text-nowrap">
-                    <table class="table table-hover">
-                        <thead>
+                    <table class="table table-modern table-hover align-middle mb-0">
+                        <thead class="bg-light bg-opacity-50">
                             <tr>
-                                <th>Nama Pejabat</th>
-                                <th>Status KYC / NIK</th>
-                                <th>Role</th>
-                                <th>Wilayah Kerja</th>
-                                <th>Aksi</th>
+                                <th class="py-3 ps-4">NAMA PEJABAT</th>
+                                <th class="py-3">STATUS KYC / NIK</th>
+                                <th class="py-3">ROLE</th>
+                                <th class="py-3">WILAYAH KERJA</th>
+                                <th class="py-3 text-end pe-4">AKSI</th>
                             </tr>
                         </thead>
                         <tbody class="table-border-bottom-0">
                             @forelse($admins as $admin)
                                 <tr>
-                                    <td><strong>{{ $admin->name }}</strong><br><small>{{ $admin->email }}</small></td>
+                                    <td class="ps-4">
+                                        <span class="fw-bold text-dark d-block">{{ $admin->name }}</span>
+                                        <small class="text-muted"><i class="bx bx-envelope"></i> {{ $admin->email }}</small>
+                                    </td>
                                     <td>
                                         @if($admin->nik)
-                                            <span class="badge bg-label-success">NIK Terdata</span>
+                                            <span class="badge bg-label-success px-3 py-2 fw-semibold">NIK Terdata</span>
                                         @else
-                                            <span class="badge bg-label-warning">Akun Dinas (Tanpa NIK)</span>
+                                            <span class="badge bg-label-warning px-3 py-2 fw-semibold">Akun Dinas (Tanpa NIK)</span>
                                         @endif
                                     </td>
-                                    <td><span class="badge bg-label-primary">{{ strtoupper($admin->role) }}</span></td>
-                                    <td>{{ $admin->region->name }}</td>
-                                    <td>
+                                    <td><span class="badge bg-label-primary px-3 py-2 rounded-pill fw-semibold">{{ strtoupper($admin->role) }}</span></td>
+                                    <td><span class="fw-semibold text-dark">{{ $admin->region->name }}</span></td>
+                                    <td class="text-end pe-4">
                                         <form action="{{ route('admin.wilayah-admins.revoke', $admin->id) }}" method="POST" class="d-inline">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Cabut wewenang admin ini?')"><i class="bx bx-trash"></i></button>
+                                            <button type="submit" class="btn btn-sm btn-outline-danger shadow-sm" onclick="return confirm('PERINGATAN: Cabut wewenang admin wilayah ini? Data akun tidak dihapus, hanya role dikembalikan menjadi warga biasa.')">
+                                                <i class="bx bx-trash"></i>
+                                            </button>
                                         </form>
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5" class="text-center">Belum ada Admin RT/RW yang aktif.</td>
+                                    <td colspan="5" class="text-center py-4 text-muted">Belum ada Admin RT/RW yang aktif.</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -188,8 +235,8 @@
                         <label class="form-label fw-bold text-dark">Tingkat Jabatan (Role)</label>
                         <select name="role" id="roleTambah" class="form-select form-select-lg" required onchange="updateWilayahTambah()">
                             <option value="">-- Pilih Role --</option>
-                            <option value="admin_rw">🌟 Pengurus RW</option>
-                            <option value="admin_rt">⭐ Pengurus RT</option>
+                            <option value="admin_rw">Pengurus RW</option>
+                            <option value="admin_rt">Pengurus RT</option>
                         </select>
                     </div>
                     <div class="col-12 mb-2">
@@ -273,8 +320,8 @@
                         <label class="form-label fw-bold text-dark"><i class="bx bx-briefcase text-primary me-1"></i> 2. Tetapkan Jabatan Baru</label>
                         <select name="role" id="rolePromosi" class="form-select form-select-lg" required onchange="updateWilayahPromosi()">
                             <option value="">-- Pilih Tingkat Jabatan --</option>
-                            <option value="admin_rw">🌟 Pengurus RW (Ketua/Wakil)</option>
-                            <option value="admin_rt">⭐ Pengurus RT (Ketua/Wakil)</option>
+                            <option value="admin_rw">Pengurus RW (Ketua/Wakil)</option>
+                            <option value="admin_rt">Pengurus RT (Ketua/Wakil)</option>
                         </select>
                     </div>
                     <div class="col-12 mb-2">
