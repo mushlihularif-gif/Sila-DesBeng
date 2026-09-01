@@ -193,6 +193,18 @@ class LaporanController extends Controller
                     );
                 }
             }
+
+            // Notifikasi untuk User (Pelapor)
+            \App\Models\Notification::create([
+                'user_id' => $user->id,
+                'laporan_id' => $laporan->id,
+                'type' => 'status_berubah',
+                'title' => 'Laporan Berhasil Dibuat',
+                'message' => 'Laporan Anda (Kategori: ' . $laporan->kategori . ') telah berhasil dikirim dan sedang menunggu respon.',
+                'link' => '/pelaporan/riwayat',
+                'icon' => 'fas fa-check-circle text-green-500',
+            ]);
+
         } catch (\Exception $e) {
             Log::error('Notif error via API: ' . $e->getMessage());
         }

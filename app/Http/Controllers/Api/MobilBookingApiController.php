@@ -140,6 +140,16 @@ class MobilBookingApiController extends Controller
         // Kurangi stok
         $mobil->decreaseStock(1);
 
+        // Notifikasi untuk User
+        \App\Models\Notification::create([
+            'user_id' => $user->id,
+            'type' => 'status_berubah',
+            'title' => 'Pemesanan Berhasil',
+            'message' => 'Pemesanan Mobil (Order ID: ' . $booking->order_number . ') berhasil dibuat.',
+            'link' => '/unit-penyewaan/mobil',
+            'icon' => 'fas fa-car text-blue-500',
+        ]);
+
         return response()->json([
             'status' => 'success',
             'message' => 'Pemesanan kendaraan berhasil dibuat.',
