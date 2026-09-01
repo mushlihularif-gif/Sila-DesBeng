@@ -111,7 +111,19 @@ class GasBookingController extends Controller
 
         // Midtrans Integration using Core API
         if ($validated['payment_method'] !== 'tunai') {
-            SystemSetting::applyMidtransConfig();
+            // Kunci milik wilayah gasnya, bukan kunci platform - lihat catatan yang
+            // sama di User\GasBookingController.
+            if (! \App\Support\PenyediaPembayaran::terapkanMidtransWilayah($gas->region_id)) {
+                \Log::warning('Gateway API dilewati: wilayah belum siap', [
+                    'order_number' => $order->order_number,
+                    'region_id'    => $gas->region_id,
+                ]);
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Pembayaran otomatis untuk wilayah ini sedang tidak tersedia.',
+                ], 422);
+            }
 
             $paymentMethod = $validated['payment_method'];
             $paymentType = '';

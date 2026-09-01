@@ -23,7 +23,9 @@ class RentalUserController extends Controller
         $item = Barang::findOrFail($id);
         
         // Ambil pengaturan sistem untuk lokasi
-        $setting = \App\Models\SystemSetting::first();
+        // Rekening & metode pembayaran milik WILAYAH layanan ini, bukan rekening
+        // pusat. Pemasukan tiap daerah menjadi tanggung jawab daerahnya sendiri.
+        $setting = \App\Support\ProfilPembayaranWilayah::untuk($item->region_id);
         
         return view('users.rental-detail', compact('item', 'setting'));
     }

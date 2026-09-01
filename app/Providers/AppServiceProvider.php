@@ -114,7 +114,11 @@ class AppServiceProvider extends ServiceProvider
             $hasActiveServices = false;
             $activeServicesMenu = [];
             
-            if ($user && in_array($user->role, ['super_admin', 'admin', 'admin_kecamatan', 'admin_desa'])) {
+            // Role 'staff' WAJIB ikut di sini. Tanpa itu $hasActiveServices selalu
+            // false untuk staf, sehingga blok menu Unit Layanan tidak pernah
+            // dirender dan seluruh sistem izin unit jadi tidak berfungsi —
+            // staf hanya melihat Dashboard dan Profil.
+            if ($user && in_array($user->role, ['super_admin', 'admin', 'admin_kecamatan', 'admin_desa', 'staff'])) {
                 if ($user->role === 'super_admin' || $user->role === 'admin') {
                     // For super_admin, check if the system settings or top region has services enabled
                     $region = \App\Models\Region::with('services')->find($user->region_id);
@@ -123,7 +127,9 @@ class AppServiceProvider extends ServiceProvider
                         $activeServicesMenu = $region->services->pluck('name')->toArray();
                         $hasActiveServices = count($activeServicesMenu) > 0;
                     }
-                } else if (in_array($user->role, ['admin_kecamatan', 'admin_desa'])) {
+                } else if (in_array($user->role, ['admin_kecamatan', 'admin_desa', 'staff'])) {
+                    // Staf memakai region_id warisan pembuatnya, jadi cabang yang
+                    // sama dengan admin wilayah sudah tepat.
                     // For admin_kecamatan and admin_desa, check their own region_id
                     $region = \App\Models\Region::with('services')->find($user->region_id);
                     if ($region) {

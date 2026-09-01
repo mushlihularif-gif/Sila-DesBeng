@@ -109,8 +109,9 @@ class GasSalesUserController extends Controller
             $quantity = $item->stok;
         }
         
-        // Ambil pengaturan sistem untuk metode pembayaran dan detail bank
-        $setting = \App\Models\SystemSetting::first();
+        // Rekening & metode pembayaran milik WILAYAH gas ini, bukan rekening pusat.
+        // Pemasukan tiap daerah menjadi tanggung jawab daerahnya sendiri.
+        $setting = \App\Support\ProfilPembayaranWilayah::untuk($item->region_id);
         
         return view('users.gas-booking', compact('item', 'quantity', 'setting'));
     }

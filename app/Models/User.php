@@ -325,6 +325,29 @@ class User extends Authenticatable
         return $this->role === 'staff' && $this->bolehAksesPlatform();
     }
 
+    /** Kunci izin untuk staf UNIT LAYANAN, lawan dari IZIN_PLATFORM_GRUP. */
+    public const IZIN_UNIT = [
+        'gas', 'sewa_alat', 'sewa_mobil', 'fasilitas_umum',
+        'pasar_daerah', 'kabar_informasi', 'pelaporan_warga',
+    ];
+
+    /**
+     * True untuk staf yang memegang minimal satu unit layanan.
+     *
+     * Dipakai menampilkan grup menu tempat pekerjaan mereka sebenarnya berada:
+     * Permintaan & Pengajuan, Bukti Transaksi, dan laporan per unit. Tanpa
+     * penanda ini, staf unit hanya melihat halaman induk barangnya saja dan
+     * tidak punya jalan menuju pesanan yang harus mereka proses.
+     */
+    public function punyaIzinUnit(): bool
+    {
+        if ($this->role !== 'staff') {
+            return false;
+        }
+
+        return $this->staffPermissions()->whereIn('unit_key', self::IZIN_UNIT)->exists();
+    }
+
     /**
      * True kalau punya minimal satu dari sekumpulan izin platform.
      * Dipakai memutuskan apakah sebuah GRUP menu perlu ditampilkan.

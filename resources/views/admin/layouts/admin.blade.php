@@ -472,7 +472,9 @@
                     </li>
 
                 <!-- Unit Layanan (Dropdown) - bukan urusan Super Admin Sistem, ini katalog komersial per wilayah -->
-                @if(in_array(auth()->user()->role, ['admin', 'admin_kecamatan', 'admin_desa']))
+                {{-- Staf ikut di sini; tiap sub-menunya masih disaring lagi
+                     lewat hasUnitPermission() di bawah. --}}
+                @if(in_array(auth()->user()->role, ['admin', 'admin_kecamatan', 'admin_desa', 'staff']))
                     @if(isset($hasActiveServices) && $hasActiveServices)
                         <li class="menu-item {{ (request()->is('admin/unit*') && !request()->is('admin/unit/supir*')) || request()->routeIs('admin.announcements.*') ? 'open active show' : '' }}">
                             <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -480,35 +482,35 @@
                                 <div data-i18n="Unit Layanan">Unit Layanan</div>
                             </a>
                             <ul class="menu-sub">
-                                @if(in_array('Penyewaan Alat', $activeServicesMenu ?? []))
+                                @if(in_array('Penyewaan Alat', $activeServicesMenu ?? []) && auth()->user()->hasUnitPermission('sewa_alat'))
                                 <li class="menu-item {{ request()->is('admin/unit/penyewaan*') ? 'active' : '' }}">
                                     <a href="{{ route('admin.unit.penyewaan.index') }}" class="menu-link">
                                         <div data-i18n="Penyewaan Alat">Penyewaan Alat</div>
                                     </a>
                                 </li>
                                 @endif
-                                @if(in_array('Penjualan Gas', $activeServicesMenu ?? []))
+                                @if(in_array('Penjualan Gas', $activeServicesMenu ?? []) && auth()->user()->hasUnitPermission('gas'))
                                 <li class="menu-item {{ request()->is('admin/unit/gas*') ? 'active' : '' }}">
                                     <a href="{{ route('admin.unit.penjualan_gas.index') }}" class="menu-link">
                                         <div data-i18n="Penjualan Gas">Penjualan Gas</div>
                                     </a>
                                 </li>
                                 @endif
-                                @if(in_array('Penyewaan Mobil', $activeServicesMenu ?? []))
+                                @if(in_array('Penyewaan Mobil', $activeServicesMenu ?? []) && auth()->user()->hasUnitPermission('sewa_mobil'))
                                 <li class="menu-item {{ request()->is('admin/unit/mobil*') ? 'active' : '' }}">
                                     <a href="{{ route('admin.unit.mobil.index') }}" class="menu-link">
                                         <div data-i18n="Penyewaan Mobil">Penyewaan Mobil</div>
                                     </a>
                                 </li>
                                 @endif
-                                @if(in_array('Fasilitas Umum', $activeServicesMenu ?? []))
+                                @if(in_array('Fasilitas Umum', $activeServicesMenu ?? []) && auth()->user()->hasUnitPermission('fasilitas_umum'))
                                 <li class="menu-item {{ request()->is('admin/unit/fasilitas_umum*') ? 'active' : '' }}">
                                     <a href="{{ route('admin.unit.fasilitas_umum.index') }}" class="menu-link">
                                         <div data-i18n="Fasilitas Umum">Fasilitas Umum</div>
                                     </a>
                                 </li>
                                 @endif
-                                @if(in_array('Pasar Daerah', $activeServicesMenu ?? []))
+                                @if(in_array('Pasar Daerah', $activeServicesMenu ?? []) && auth()->user()->hasUnitPermission('pasar_daerah'))
                                 <li class="menu-item {{ request()->is('admin/unit/pasar-daerah*') ? 'active' : '' }}">
                                     <a href="{{ route('admin.unit.pasar_daerah.index') }}" class="menu-link">
                                         <div data-i18n="Pasar Daerah">Pasar Daerah</div>
@@ -516,11 +518,14 @@
                                 </li>
                                 @endif
 
+                                {{-- Tidak terikat layanan aktif wilayah, jadi cukup izinnya. --}}
+                                @if(auth()->user()->hasUnitPermission('kabar_informasi'))
                                 <li class="menu-item {{ request()->routeIs('admin.announcements.*') ? 'active' : '' }}">
                                     <a href="{{ route('admin.announcements.index') }}" class="menu-link">
                                         <div data-i18n="Kabar dan Informasi Daerah">Kabar dan Informasi Daerah</div>
                                     </a>
                                 </li>
+                                @endif
                             </ul>
                         </li>
                     @else
@@ -606,7 +611,7 @@
                 {{-- Seluruh isi grup ini operasional per wilayah. Setelah Persetujuan
                      Mitra tidak lagi untuk Super Admin, grup ini kosong bagi mereka —
                      jadi super_admin dikeluarkan supaya tidak muncul dropdown hampa. --}}
-                @if(in_array(auth()->user()->role, ['admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt']))
+                @if(in_array(auth()->user()->role, ['admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt']) || auth()->user()->punyaIzinUnit())
                 <li
                     class="menu-item {{ request()->is('admin/aktivitas/permintaan-pengajuan*') || request()->is('admin/aktivitas/bukti-transaksi*') || request()->is('admin/kemitraan*') || (request()->routeIs('admin.pelaporan.*') && !request()->routeIs('admin.pelaporan.archive')) ? 'open active show' : '' }}">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -614,8 +619,10 @@
                         <div data-i18n="Permintaan & Aktivitas">Permintaan & Aktivitas</div>
                     </a>
                     <ul class="menu-sub">
-                        {{-- Permintaan & Pengajuan, Bukti Transaksi, Pelaporan Warga: operasional per wilayah, bukan urusan Super Admin Sistem --}}
-                        @if(in_array(auth()->user()->role, ['admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt']))
+                        {{-- Di sinilah pekerjaan harian staf unit berada: pesanan masuk
+                             dan bukti bayar, keduanya sudah disaring per unit oleh
+                             RequestController dan TransactionController. --}}
+                        @if(in_array(auth()->user()->role, ['admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt']) || auth()->user()->punyaIzinUnit())
                         <li
                             class="menu-item {{ request()->is('admin/aktivitas/permintaan-pengajuan*') ? 'active' : '' }}">
                             <a href="{{ route('admin.aktivitas.permintaan-pengajuan.index') }}" class="menu-link">
@@ -653,7 +660,9 @@
                 {{-- Laporan operasional/keuangan per wilayah. Anak-anaknya disaring dengan
                      `role !== super_admin`, kondisi yang justru DILEWATI role staff —
                      itulah kenapa staf platform sempat melihat Laporan Transaksi dkk. --}}
-                @if(auth()->user()->role !== 'staff' || auth()->user()->bolehSalahSatu(\App\Models\User::kunciIzinGrup('Data & Laporan')))
+                @if(auth()->user()->role !== 'staff'
+                    || auth()->user()->punyaIzinUnit()
+                    || auth()->user()->bolehSalahSatu(\App\Models\User::kunciIzinGrup('Data & Laporan')))
                 <li class="menu-item {{ request()->routeIs('admin.laporan.*') || request()->routeIs('admin.pelaporan.archive') ? 'open active show' : '' }}">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
                         <i class="menu-icon tf-icons bx bx-bar-chart-alt-2"></i>

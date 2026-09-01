@@ -216,6 +216,59 @@ return [
         ],
     ],
 
+    'xendit' => [
+        'label'       => 'Payment Gateway — Xendit (xenPlatform)',
+        'icon'        => 'bx-transfer-alt',
+        'description' => 'Kredensial induk milik Diskominfotik. Tiap desa/kecamatan menjadi sub-akun dengan saldo dan rekening sendiri, tanpa perlu menyentuh kunci API.',
+        'console_url' => 'https://dashboard.xendit.co/settings/developers#api-keys',
+        'notes'       => [
+            'Dipakai untuk model "pemasukan dipegang daerah masing-masing": pembayaran dikirim dengan header for-user-id berisi ID sub-akun wilayah, sehingga dana langsung masuk ke saldo wilayah itu, bukan ke saldo induk.',
+            'Perangkat desa TIDAK pernah memasukkan kunci apa pun. Mereka hanya mengisi nomor rekening di halaman Pembayaran Wilayah, dan verifikasi sub-akunnya bisa diurus Diskominfotik atas nama desa.',
+            'Callback Xendit diverifikasi lewat header X-CALLBACK-TOKEN. Token ini berbeda dari Secret Key dan diambil dari menu Webhook di dashboard.',
+            'Kunci lingkungan uji dan produksi berbeda. Pastikan sakelar Mode Production di bawah sesuai dengan kunci yang dimasukkan.',
+            'URL callback yang didaftarkan di dashboard Xendit: {APP_URL}/api/payment/callback/xendit',
+        ],
+        'mode_field' => 'is_production',
+        'tautan' => [
+            [
+                'label'          => 'Buka Dashboard Xendit',
+                'ikon'           => 'bx-link-external',
+                'url_sandbox'    => 'https://dashboard.xendit.co/',
+                'url_production' => 'https://dashboard.xendit.co/',
+                'catatan'        => 'Tempat menyalin Secret Key dan Callback Token, serta mengelola sub-akun tiap wilayah.',
+            ],
+        ],
+        'fields' => [
+            'secret_key' => [
+                'label'       => 'Secret Key (API Key induk)',
+                'type'        => 'secret',
+                'min'         => 20,
+                'max'         => 255,
+                'placeholder' => 'xnd_...',
+                'hint'        => 'Awalan tidak dipaksakan — Xendit dapat mengubah formatnya. Keabsahannya diuji langsung ke Xendit saat disimpan.',
+                'config'      => 'services.xendit.secret_key',
+                'env'         => 'XENDIT_SECRET_KEY',
+            ],
+            'callback_token' => [
+                'label'       => 'Callback Token (X-CALLBACK-TOKEN)',
+                'type'        => 'secret',
+                'min'         => 10,
+                'max'         => 255,
+                'placeholder' => 'diambil dari menu Webhook di dashboard',
+                'hint'        => 'Dipakai memverifikasi bahwa callback benar-benar dari Xendit. BUKAN Secret Key.',
+                'config'      => 'services.xendit.callback_token',
+                'env'         => 'XENDIT_CALLBACK_TOKEN',
+            ],
+            'is_production' => [
+                'label'  => 'Aktifkan Mode Production',
+                'type'   => 'boolean',
+                'hint'   => 'Matikan selama masih memakai kunci lingkungan uji.',
+                'config' => 'services.xendit.is_production',
+                'env'    => 'XENDIT_IS_PRODUCTION',
+            ],
+        ],
+    ],
+
     'midtrans' => [
         'label'       => 'Payment Gateway — Midtrans',
         'icon'        => 'bx-credit-card',

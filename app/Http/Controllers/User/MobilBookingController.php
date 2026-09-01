@@ -26,7 +26,9 @@ class MobilBookingController extends Controller
             return redirect()->back()->with('error', 'Layanan khusus warga lokal. Silakan sesuaikan wilayah Anda.');
         }
         
-        $setting = SystemSetting::first();
+        // Rekening & metode pembayaran milik WILAYAH layanan ini, bukan rekening
+        // pusat. Pemasukan tiap daerah menjadi tanggung jawab daerahnya sendiri.
+        $setting = \App\Support\ProfilPembayaranWilayah::untuk($item->region_id);
         
         // Ambil SOP Penyewaan Mobil
         $region = \App\Models\Region::find(Auth::user()->region_id);
@@ -40,8 +42,29 @@ class MobilBookingController extends Controller
         $sop_mobil = $paymentInfo['sop_mobil_' . $activeSop] ?? ($activeSop == 'ditanggung' ? $defaultSopDitanggung : $defaultSopTidakDitanggung);
         
         $quantity = request()->get('quantity', 1);
-        
-        return view('users.mobil-rental-booking', compact('item', 'setting', 'quantity', 'sop_mobil'));
+
+        // Tarif borongan per wilayah. View sudah lama memakai $isWilayah,
+        // $tarifWilayah, dan $kecamatanKhusus, tetapi ketiganya tidak pernah
+        // dikirim dari sini sehingga halaman ini melempar "Undefined variable"
+        // begitu dibuka. Kolomnya juga tidak di-cast, jadi didekode di sini.
+        $tarifWilayah = json_decode($item->tarif_borongan_wilayah ?? '', true);
+        if (! is_array($tarifWilayah)) {
+            $tarifWilayah = [];
+        }
+
+        $isWilayah = ($item->tipe_tarif_borongan ?? null) === 'wilayah';
+
+        // Hanya kecamatan yang benar-benar punya tarif khusus yang ditawarkan,
+        // supaya daftar pilihannya tidak berisi wilayah tanpa harga.
+        $idKecamatanKhusus = array_keys($tarifWilayah['harga_kecamatan_khusus'] ?? []);
+        $kecamatanKhusus = $idKecamatanKhusus
+            ? \App\Models\Region::whereIn('id', $idKecamatanKhusus)->orderBy('name')->get()
+            : collect();
+
+        return view('users.mobil-rental-booking', compact(
+            'item', 'setting', 'quantity', 'sop_mobil',
+            'isWilayah', 'tarifWilayah', 'kecamatanKhusus'
+        ));
     }
 
     public function store(Request $request)
@@ -55,12 +78,17 @@ class MobilBookingController extends Controller
             'end_date' => 'nullable|date|after_or_equal:start_date',
             'distance_km' => 'nullable|integer|min:1',
             'tujuan_wilayah' => 'nullable|string',
-            'payment_method' => 'required|in:tunai',
+            // 'transfer' = transfer manual ke rekening wilayah, dibuktikan lewat
+            // unggahan yang ditinjau petugas. Sebelumnya terkunci 'tunai' saja,
+            // sehingga rekening wilayah tidak pernah bisa dipakai di unit ini.
+            'payment_method' => 'required|in:tunai,transfer',
             
             'recipient_name' => 'required|string|max:255',
             'delivery_address' => 'required|string',
             
-            'payment_proof' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
+            // Bukti wajib kalau warga memilih transfer - tanpa itu petugas tidak
+            // punya dasar untuk memverifikasi pembayarannya.
+            'payment_proof' => 'required_if:payment_method,transfer|nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
             
             'rental_purpose' => 'required|string|max:1000',
         ]);

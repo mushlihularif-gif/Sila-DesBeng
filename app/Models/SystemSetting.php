@@ -88,18 +88,4 @@ class SystemSetting extends Model
         return static::$memo = $baris;
     }
 
-    /**
-     * Terapkan kredensial Midtrans ke \Midtrans\Config.
-     *
-     * Nilainya diambil dari config('services.midtrans.*') yang sudah lebih dulu
-     * ditimpa oleh ApiCredential::applyToConfig() di AppServiceProvider — jadi
-     * urutannya: panel Super Admin (DB, terenkripsi) > .env sebagai fallback.
-     */
-    public static function applyMidtransConfig(): void
-    {
-        \Midtrans\Config::$serverKey = config('services.midtrans.server_key');
-        \Midtrans\Config::$isProduction = (bool) config('services.midtrans.is_production');
-        \Midtrans\Config::$isSanitized = true;
-        \Midtrans\Config::$is3ds = true;
-    }
 }

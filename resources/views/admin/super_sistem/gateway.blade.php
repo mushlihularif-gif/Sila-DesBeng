@@ -57,12 +57,13 @@
                         <div class="row g-4">
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold">Penyedia Gateway Aktif</label>
-                                <select name="gateway_provider" class="form-select">
-                                    <option value="">- Belum dipilih -</option>
-                                    <option value="midtrans" {{ old('gateway_provider', $settings->gateway_provider) === 'midtrans' ? 'selected' : '' }}>Midtrans</option>
-                                    <option value="xendit" {{ old('gateway_provider', $settings->gateway_provider) === 'xendit' ? 'selected' : '' }}>Xendit for Platforms</option>
-                                    <option value="oy" {{ old('gateway_provider', $settings->gateway_provider) === 'oy' ? 'selected' : '' }}>OY! Indonesia</option>
+                                <select name="gateway_provider" class="form-select" required>
+                                    <option value="midtrans" {{ old('gateway_provider', $penyedia) === 'midtrans' ? 'selected' : '' }}>Midtrans</option>
+                                    <option value="xendit" {{ old('gateway_provider', $penyedia) === 'xendit' ? 'selected' : '' }}>Xendit for Platforms</option>
                                 </select>
+                                <small class="text-muted d-block mt-1">
+                                    Pilihan ini berlaku seketika untuk seluruh transaksi warga di semua wilayah.
+                                </small>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold">Fee Platform (%) <span class="text-danger">*</span></label>
@@ -71,6 +72,90 @@
                                            class="form-control"
                                            value="{{ old('platform_fee_percentage', $settings->platform_fee_percentage ?? 0) }}" required>
                                     <span class="input-group-text">%</span>
+                                </div>
+                            </div>
+                            {{-- Akibat dari pilihan di atas. Tanpa bagian ini, dropdown
+                                 penyedia terlihat seperti catatan biasa: Super Admin tidak
+                                 tahu apa yang berubah bagi admin daerah saat ia menggantinya. --}}
+                            <div class="col-12">
+                                <div class="border rounded p-3 bg-light">
+                                    <div class="fw-semibold mb-2">
+                                        <i class="bx bx-git-branch me-1"></i>
+                                        Yang berlaku sekarang: {{ $labelPenyedia }}
+                                    </div>
+
+                                    @if($kunciDiWilayah)
+                                        <p class="mb-2 small">
+                                            Setiap desa/kecamatan memakai <strong>akun {{ $labelPenyedia }}-nya sendiri</strong>,
+                                            karena satu akun {{ $labelPenyedia }} hanya bisa punya satu rekening pencairan.
+                                            Kolom Server Key &amp; Client Key muncul di halaman
+                                            <em>Pengaturan Wilayah &rarr; Pembayaran</em> milik masing-masing admin daerah.
+                                        </p>
+                                    @else
+                                        <p class="mb-2 small">
+                                            Kredensial induk dipegang Diskominfotik dan melayani semua wilayah lewat
+                                            <strong>sub-akun</strong>. Admin daerah tidak mengisi API key apa pun —
+                                            mereka cukup mengisi rekening bank wilayahnya.
+                                        </p>
+
+                                        @if(! $platformSiap)
+                                            <div class="alert alert-warning py-2 px-3 mb-2 small">
+                                                <i class="bx bx-error me-1"></i>
+                                                Kredensial {{ $labelPenyedia }} induk belum diisi di kartu di bawah.
+                                                Selama itu kosong, tidak ada wilayah yang bisa menerima pembayaran otomatis.
+                                            </div>
+                                        @endif
+                                    @endif
+
+                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                        <span class="badge bg-{{ $jumlahSiap > 0 ? 'success' : 'secondary' }}">
+                                            {{ $jumlahSiap }} dari {{ $kesiapanWilayah->count() }} wilayah siap
+                                        </span>
+                                        <small class="text-muted">menerima pembayaran otomatis</small>
+                                    </div>
+
+                                    {{-- Supaya kartu yang hilang tidak terasa seperti fitur
+                                         yang raib. --}}
+                                    @if($kunciDiWilayah)
+                                        <p class="small text-muted mb-2">
+                                            <i class="bx bx-hide me-1"></i>
+                                            Tidak ada kartu kredensial di halaman ini selama {{ $labelPenyedia }} aktif.
+                                            Merchant ID, Server Key, Client Key <em>dan</em> mode Sandbox/Production
+                                            semuanya milik masing-masing wilayah, diisi admin daerah di
+                                            <em>Pengaturan Wilayah &rarr; Pembayaran</em>. Kunci {{ $labelPenyediaLain }}
+                                            yang pernah tersimpan tidak terhapus.
+                                        </p>
+                                    @else
+                                        <p class="small text-muted mb-2">
+                                            <i class="bx bx-hide me-1"></i>
+                                            Kartu kredensial <strong>{{ $labelPenyediaLain }}</strong> disembunyikan
+                                            selama {{ $labelPenyedia }} yang aktif. Kunci yang sudah tersimpan
+                                            tidak terhapus &mdash; pilih {{ $labelPenyediaLain }} di atas lalu simpan
+                                            untuk menampilkannya kembali.
+                                        </p>
+                                    @endif
+
+                                    @if($kesiapanWilayah->count())                                        <details>
+                                            <summary class="small text-primary" style="cursor: pointer;">
+                                                Lihat rincian per wilayah
+                                            </summary>
+                                            <div class="table-responsive mt-2" style="max-height: 260px; overflow-y: auto;">
+                                                <table class="table table-sm mb-0">
+                                                    <tbody>
+                                                        @foreach($kesiapanWilayah as $w)
+                                                            <tr>
+                                                                <td style="width: 1%;">
+                                                                    <i class="bx bx-{{ $w['siap'] ? 'check-circle text-success' : 'x-circle text-muted' }}"></i>
+                                                                </td>
+                                                                <td class="text-nowrap">{{ $w['nama'] }}</td>
+                                                                <td class="small text-muted">{{ $w['alasan'] }}</td>
+                                                            </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </details>
+                                    @endif
                                 </div>
                             </div>
                             <div class="col-12 text-end">

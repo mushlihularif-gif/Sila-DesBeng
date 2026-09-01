@@ -203,6 +203,99 @@
                     </div>
                     @endif
 
+                    @php
+                        // Fasilitas berbayar hanya ditagih untuk acara komersial;
+                        // acara sosial tetap gratis. Panel bayar karena itu muncul
+                        // mengikuti pilihan Kategori Acara, bukan langsung.
+                        $bisaBerbayar = $item->status_biaya === 'berbayar' && $item->harga_sewa > 0;
+
+                        // Transfer manual hanya ditawarkan kalau wilayah sudah
+                        // mengisi rekeningnya sendiri di panel admin daerah.
+                        $metodeWilayah = $setting?->payment_methods ?? [];
+                        $hasTransfer = in_array('transfer', is_array($metodeWilayah) ? $metodeWilayah : []);
+
+                        $bankLogos = [
+                            'Bank Syariah Indonesia' => 'admin/img/banks/bsi.png',
+                            'BSI' => 'admin/img/banks/bsi.png',
+                            'BRI' => 'admin/img/banks/bri.png',
+                            'Mandiri' => 'admin/img/banks/mandiri.png',
+                            'BNI' => 'admin/img/banks/bni.png',
+                            'BCA' => 'admin/img/banks/bca.png',
+                            'Bank Riau Kepri Syariah' => 'admin/img/banks/brk.png',
+                            'Bank Mega' => 'admin/img/banks/mega.png',
+                        ];
+                        $bankLogoPath = null;
+                        $namaBank = strtoupper($setting->bank_name ?? '');
+                        foreach ($bankLogos as $kunci => $jalur) {
+                            if ($namaBank !== '' && str_contains($namaBank, strtoupper($kunci))) {
+                                $bankLogoPath = $jalur;
+                                break;
+                            }
+                        }
+                    @endphp
+
+                    @if($bisaBerbayar)
+                    <div id="pembayaran-fasilitas" class="mb-6 hidden">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">Metode Pembayaran</h3>
+                        <input type="hidden" name="payment_method" id="payment-method-fasilitas" value="{{ $hasTransfer ? 'transfer' : 'tunai' }}">
+
+                        @if($hasTransfer)
+                        <div class="grid grid-cols-2 gap-3 mb-6">
+                            <button type="button" onclick="pilihMetodeFasilitas('transfer')" id="btn-fasilitas-transfer"
+                                    class="py-4 px-3 rounded-2xl font-bold border-2 border-blue-500 bg-blue-50 text-blue-700 transition-all">
+                                Transfer Bank
+                            </button>
+                            <button type="button" onclick="pilihMetodeFasilitas('tunai')" id="btn-fasilitas-tunai"
+                                    class="py-4 px-3 rounded-2xl font-bold border-2 border-gray-200 bg-white text-gray-600 transition-all">
+                                Bayar di Tempat
+                            </button>
+                        </div>
+
+                        <div id="transfer-payment-fasilitas">
+                            <div class="bg-white border-2 border-blue-50 rounded-2xl shadow-lg p-6">
+                                <h4 class="font-bold text-gray-800 mb-4">Transfer ke Rekening Berikut</h4>
+
+                                <div class="flex items-center gap-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-5 mb-4">
+                                    @if(!empty($bankLogoPath))
+                                        <img src="{{ asset($bankLogoPath) }}" alt="{{ $setting->bank_name }}" class="h-8 object-contain">
+                                    @endif
+                                    <div class="min-w-0">
+                                        <div class="text-xs uppercase tracking-wider text-gray-500">{{ $setting->bank_name ?: 'Bank' }}</div>
+                                        <div class="text-xl font-black tracking-wide text-gray-900 select-all break-all">
+                                            {{ $setting->bank_account_number ?: 'Belum diatur' }}
+                                        </div>
+                                        <div class="text-sm text-gray-600">a.n. {{ $setting->bank_account_holder ?: '-' }}</div>
+                                    </div>
+                                </div>
+
+                                <div class="bg-amber-50 border-l-4 border-amber-400 p-4 rounded-r-xl mb-5">
+                                    <p class="text-sm text-amber-800">
+                                        <strong>Gunakan bank yang sama ({{ $setting->bank_name ?: 'bank tujuan' }})</strong>
+                                        agar tidak dikenai biaya admin antarbank. Transfer dari bank lain tetap diterima,
+                                        tetapi biayanya ditanggung Anda.
+                                    </p>
+                                </div>
+
+                                <label class="block text-sm font-bold text-gray-700 mb-2">
+                                    Unggah Bukti Transfer <span class="text-red-500">*</span>
+                                </label>
+                                <input type="file" name="payment_proof" accept=".jpg,.jpeg,.png,.pdf"
+                                       class="block w-full text-sm text-gray-600 border-2 border-dashed border-blue-200 rounded-xl p-3
+                                              file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0
+                                              file:bg-blue-500 file:text-white file:font-semibold hover:file:bg-blue-600">
+                                <p class="text-xs text-gray-500 mt-2">
+                                    JPG, PNG, atau PDF. Maksimal 5 MB. Bukti Anda diperiksa petugas sebelum pesanan diproses.
+                                </p>
+                            </div>
+                        </div>
+                        @else
+                        <div class="bg-gray-50 border border-gray-200 rounded-2xl p-6">
+                            <p class="text-gray-700">Pembayaran dilakukan langsung di tempat saat pengambilan atau pengantaran.</p>
+                        </div>
+                        @endif
+                    </div>
+                    @endif
+                    @if(! $bisaBerbayar)
                     <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded-r-lg mt-6">
                         <div class="flex">
                             <div class="flex-shrink-0">
@@ -217,6 +310,7 @@
                             </div>
                         </div>
                     </div>
+                    @endif
 
                     @if(!empty($sop_fasilitas_umum))
                     <!-- SOP Section -->
@@ -364,6 +458,13 @@
                     suratContainer.classList.remove('hidden');
                 } else {
                     suratContainer.classList.add('hidden');
+                }
+
+                // Hanya acara komersial yang ditagih; acara sosial gratis,
+                // jadi panel bayarnya ikut disembunyikan beserta isiannya.
+                var panelBayar = document.getElementById('pembayaran-fasilitas');
+                if (panelBayar) {
+                    panelBayar.classList.toggle('hidden', this.value !== 'komersial');
                 }
             });
         });
@@ -514,5 +615,25 @@
             });
         }
     });
+    // Pemilih metode bayar fasilitas umum.
+    window.pilihMetodeFasilitas = function (metode) {
+        var input = document.getElementById('payment-method-fasilitas');
+        if (input) input.value = metode;
+
+        var panel = document.getElementById('transfer-payment-fasilitas');
+        if (panel) panel.classList.toggle('hidden', metode !== 'transfer');
+
+        [['btn-fasilitas-transfer', 'transfer'], ['btn-fasilitas-tunai', 'tunai']].forEach(function (pasangan) {
+            var el = document.getElementById(pasangan[0]);
+            if (!el) return;
+            var aktif = pasangan[1] === metode;
+            el.classList.toggle('border-blue-500', aktif);
+            el.classList.toggle('bg-blue-50', aktif);
+            el.classList.toggle('text-blue-700', aktif);
+            el.classList.toggle('border-gray-200', !aktif);
+            el.classList.toggle('bg-white', !aktif);
+            el.classList.toggle('text-gray-600', !aktif);
+        });
+    };
 </script>
 @endpush

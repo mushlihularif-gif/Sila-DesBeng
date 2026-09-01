@@ -31,7 +31,54 @@ class SuperAdminSettingController extends Controller
         $providers = config('api_providers', []);
         $tersimpan = ApiCredential::allCached();
 
-        return view('admin.super_sistem.gateway', compact('settings', 'providers', 'tersimpan'));
+        // Kesiapan tiap wilayah di bawah penyedia yang sedang aktif. Tanpa ini
+        // Super Admin memilih penyedia tanpa tahu akibatnya: berapa desa yang
+        // langsung bisa menerima pembayaran, dan berapa yang justru terhenti.
+        $penyedia      = \App\Support\PenyediaPembayaran::aktif();
+        $labelPenyedia = \App\Support\PenyediaPembayaran::label();
+        $kunciDiWilayah = \App\Support\PenyediaPembayaran::kunciDiisiOlehWilayah();
+        $platformSiap  = \App\Support\PenyediaPembayaran::platformSiap();
+
+        $kesiapanWilayah = \App\Models\Region::whereIn('type', ['desa', 'kecamatan'])
+            ->orderBy('name')
+            ->get()
+            ->map(function ($region) {
+                $status = \App\Support\PenyediaPembayaran::kesiapanWilayah($region->id);
+
+                return [
+                    'nama'   => $region->name,
+                    'tipe'   => $region->type,
+                    'siap'   => $status['siap'],
+                    'alasan' => $status['alasan'],
+                ];
+            });
+
+        $jumlahSiap = $kesiapanWilayah->where('siap', true)->count();
+
+        // Hanya kartu kredensial gateway yang SEDANG aktif yang ditampilkan.
+        // Menampilkan keduanya sekaligus menyesatkan: Super Admin bisa mengisi
+        // kunci Xendit dengan rapi lalu heran kenapa transaksinya tetap lewat
+        // Midtrans. Kartu penyedia lain tidak ikut disaring.
+        $penyediaLain = $penyedia === \App\Support\PenyediaPembayaran::MIDTRANS
+            ? \App\Support\PenyediaPembayaran::XENDIT
+            : \App\Support\PenyediaPembayaran::MIDTRANS;
+
+        $labelPenyediaLain = $providers[$penyediaLain]['label'] ?? ucfirst($penyediaLain);
+
+        unset($providers[$penyediaLain]);
+
+        // Midtrans tidak punya kredensial tingkat platform. Merchant ID, Server Key
+        // dan Client Key di sini tidak pernah dibaca oleh alur transaksi mana pun -
+        // yang dipakai adalah kunci milik tiap wilayah. Kartunya disembunyikan
+        // supaya tidak jadi jebakan: diisi rapi, dikira sudah terpasang, padahal
+        // tidak menyentuh apa pun.
+        unset($providers[\App\Support\PenyediaPembayaran::MIDTRANS]);
+
+        return view('admin.super_sistem.gateway', compact(
+            'settings', 'providers', 'tersimpan',
+            'penyedia', 'labelPenyedia', 'kunciDiWilayah', 'platformSiap',
+            'kesiapanWilayah', 'jumlahSiap', 'penyediaLain', 'labelPenyediaLain'
+        ));
     }
 
     /**
@@ -41,14 +88,21 @@ class SuperAdminSettingController extends Controller
     public function gatewayUpdate(Request $request)
     {
         $validated = $request->validateWithBag('umum', [
-            'gateway_provider'        => 'nullable|in:midtrans,xendit,oy',
+            // 'oy' dibuang dari pilihan: tidak ada implementasinya, dan
+            // PenyediaPembayaran::aktif() diam-diam jatuh ke Midtrans kalau
+            // nilainya di luar dua ini - Super Admin mengira memilih OY!
+            // padahal seluruh sistem tetap berjalan di atas Midtrans.
+            // Wajib diisi karena nilai kosong pun berakibat sama.
+            'gateway_provider'        => 'required|in:midtrans,xendit',
             'platform_fee_percentage' => 'required|numeric|min:0|max:100',
         ], [
+            'gateway_provider.required' => 'Penyedia gateway wajib dipilih.',
+            'gateway_provider.in'       => 'Penyedia yang didukung sistem baru Midtrans dan Xendit.',
             'platform_fee_percentage.required' => 'Fee platform wajib diisi.',
         ]);
 
         $settings = SystemSetting::instance();
-        $settings->gateway_provider = $validated['gateway_provider'] ?? null;
+        $settings->gateway_provider = $validated['gateway_provider'];
         $settings->platform_fee_percentage = $validated['platform_fee_percentage'];
         $settings->save();
 

@@ -150,9 +150,28 @@ class GasBookingController extends Controller
             'receipt_number' => $receipt->receipt_number,
         ];
 
-        // Midtrans Integration using Core API
-        if ($validated['payment_method'] !== 'tunai') {
-            SystemSetting::applyMidtransConfig();
+        // Gateway hanya dijalankan untuk metode otomatis. 'tunai' dan 'transfer'
+        // (transfer manual ke rekening wilayah, dibuktikan lewat unggahan) tidak
+        // melewati gateway sama sekali.
+        $lewatGateway = ! in_array($validated['payment_method'], ['tunai', 'transfer'], true);
+
+        if ($lewatGateway) {
+            // Kredensial WILAYAH, bukan kredensial platform. Kalau wilayah ini
+            // belum siap, gateway TIDAK dijalankan — lebih baik pesanan menunggu
+            // pembayaran manual daripada uang warga masuk ke rekening yang salah.
+            $siap = \App\Support\PenyediaPembayaran::terapkanMidtransWilayah($gas->region_id);
+
+            if (! $siap) {
+                \Illuminate\Support\Facades\Log::warning('Gateway dilewati: wilayah belum siap', [
+                    'region_id' => $gas->region_id,
+                    'alasan'    => \App\Support\PenyediaPembayaran::kesiapanWilayah($gas->region_id)['alasan'],
+                ]);
+
+                $lewatGateway = false;
+            }
+        }
+
+        if ($lewatGateway) {
 
             $paymentMethod = $validated['payment_method'];
             $paymentType = '';
@@ -349,7 +368,19 @@ class GasBookingController extends Controller
         // We do not change the local $order->order_number because it's used for display
         $midtransOrderId = $order->order_number . '-' . time();
 
-        SystemSetting::applyMidtransConfig();
+        // Kunci milik wilayah gasnya, bukan kunci platform. Kalau wilayahnya belum
+        // siap, jangan diteruskan: SDK akan memakai kunci sisa di Config dan uang
+        // warga mendarat di rekening wilayah lain.
+        if (! \App\Support\PenyediaPembayaran::terapkanMidtransWilayah($gas->region_id)) {
+            \Log::warning('Ganti metode bayar dilewati: wilayah belum siap', [
+                'order_number' => $order->order_number,
+                'region_id'    => $gas->region_id,
+            ]);
+
+            return redirect()->back()->with('error',
+                'Pembayaran otomatis untuk wilayah ini sedang tidak tersedia. '
+                . 'Silakan pilih pembayaran tunai atau transfer manual.');
+        }
 
         $paymentType = '';
         if (str_starts_with($newMethod, 'bank_transfer_')) {

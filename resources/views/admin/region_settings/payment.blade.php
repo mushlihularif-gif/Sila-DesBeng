@@ -228,32 +228,111 @@
                         </div>
 
                         <!-- Payment Gateway -->
+                        {{-- Isi kartu ini menyesuaikan penyedia yang dinyalakan Super Admin.
+                             Midtrans menuntut tiap wilayah punya akun sendiri, jadi kuncinya
+                             diisi di sini. Xendit memakai kredensial induk, jadi wilayah cukup
+                             punya sub-akun dan tidak perlu menyentuh kunci apa pun. --}}
                         <div class="card border border-warning shadow-none mb-3 bg-label-warning">
                             <div class="card-body p-3">
-                                <h6 class="fw-bold text-warning mb-2"><i class="bx bx-bolt-circle me-1"></i>Payment Gateway Otomatis</h6>
-                                <p class="text-warning small mb-2">
-                                    Aktifkan untuk menerima pembayaran otomatis (Midtrans VA/QRIS).
-                                </p>
-                                <div class="alert alert-danger p-2 mb-3 shadow-sm" style="font-size: 0.85rem; border-left: 4px solid #ff3e1d;">
-                                    <strong><i class="bx bx-error-circle me-1"></i>PENTING:</strong> Pastikan Daerah Anda Sudah Mendaftar Midtrans!
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h6 class="fw-bold text-warning mb-0">
+                                        <i class="bx bx-bolt-circle me-1"></i>Pembayaran Otomatis
+                                    </h6>
+                                    <span class="badge bg-label-secondary rounded-pill">{{ $labelPenyedia }}</span>
                                 </div>
+
+                                {{-- Status kesiapan: menjawab "kenapa pembayaran otomatis saya belum jalan" --}}
+                                <div class="alert {{ $kesiapan['siap'] ? 'alert-success' : 'alert-warning' }} p-2 mb-3" style="font-size: 0.82rem;">
+                                    <i class="bx {{ $kesiapan['siap'] ? 'bx-check-circle' : 'bx-error-circle' }} me-1"></i>
+                                    {{ $kesiapan['alasan'] }}
+                                </div>
+
                                 <div class="form-check form-switch mb-0 d-flex align-items-center">
-                                    <input class="form-check-input me-2" type="checkbox" name="payment_gateway_active" id="payment_gateway_active" value="1" style="width: 2.5em; height: 1.2em; cursor: pointer;" {{ (old('payment_gateway_active', $region->payment_info['payment_gateway_active'] ?? false)) ? 'checked' : '' }} onchange="document.getElementById('midtrans_fields').style.display = this.checked ? 'block' : 'none'">
-                                    <label class="form-check-label fw-semibold text-warning" for="payment_gateway_active" style="cursor: pointer;">Aktifkan Gateway</label>
+                                    <input class="form-check-input me-2" type="checkbox" name="payment_gateway_active" id="payment_gateway_active" value="1"
+                                           style="width: 2.5em; height: 1.2em; cursor: pointer;"
+                                           {{ old('payment_gateway_active', $region->payment_info['payment_gateway_active'] ?? false) ? 'checked' : '' }}
+                                           onchange="document.getElementById('gateway_fields').style.display = this.checked ? 'block' : 'none'">
+                                    <label class="form-check-label fw-semibold text-warning" for="payment_gateway_active" style="cursor: pointer;">
+                                        Aktifkan Pembayaran Otomatis
+                                    </label>
                                 </div>
-                                
-                                <div id="midtrans_fields" class="mt-3" style="display: {{ (old('payment_gateway_active', $region->payment_info['payment_gateway_active'] ?? false)) ? 'block' : 'none' }}; border-top: 1px dashed #ffab00; padding-top: 15px;">
-                                    <div class="alert alert-warning p-2 mb-3" style="font-size: 0.8rem;">
-                                        <i class="bx bx-info-circle me-1"></i>Masukkan kunci API Midtrans wilayah Anda. Jika dibiarkan kosong, pembayaran tidak akan diproses.
-                                    </div>
-                                    <div class="mb-2">
-                                        <label class="form-label text-warning fw-semibold" style="font-size: 0.8rem;">Midtrans Server Key</label>
-                                        <input type="text" name="midtrans_server_key" class="form-control form-control-sm border-warning bg-white" value="{{ old('midtrans_server_key', $region->payment_info['midtrans_server_key'] ?? '') }}" placeholder="SB-Mid-server-xxx">
-                                    </div>
-                                    <div class="mb-2">
-                                        <label class="form-label text-warning fw-semibold" style="font-size: 0.8rem;">Midtrans Client Key</label>
-                                        <input type="text" name="midtrans_client_key" class="form-control form-control-sm border-warning bg-white" value="{{ old('midtrans_client_key', $region->payment_info['midtrans_client_key'] ?? '') }}" placeholder="SB-Mid-client-xxx">
-                                    </div>
+
+                                <div id="gateway_fields" class="mt-3"
+                                     style="display: {{ old('payment_gateway_active', $region->payment_info['payment_gateway_active'] ?? false) ? 'block' : 'none' }}; border-top: 1px dashed #ffab00; padding-top: 15px;">
+
+                                    @if($kunciDiWilayah)
+                                        {{-- MIDTRANS: satu akun merchant = satu rekening pencairan,
+                                             jadi wilayah ini harus punya akun Midtrans sendiri. --}}
+                                        <div class="alert alert-warning p-2 mb-3" style="font-size: 0.8rem;">
+                                            <i class="bx bx-info-circle me-1"></i>
+                                            Wilayah Anda memerlukan <strong>akun Midtrans sendiri</strong>, karena satu akun
+                                            Midtrans hanya bisa mencairkan ke satu rekening. Dana akan masuk ke rekening
+                                            yang terdaftar di akun tersebut.
+                                        </div>
+
+                                        <div class="d-flex flex-wrap gap-2 mb-3">
+                                            <a href="https://dashboard.midtrans.com/register" target="_blank" rel="noopener noreferrer"
+                                               class="btn btn-sm btn-outline-warning">
+                                                <i class="bx bx-user-plus me-1"></i>Daftar Akun Midtrans
+                                            </a>
+                                            <a href="https://dashboard.midtrans.com/settings/config_info" target="_blank" rel="noopener noreferrer"
+                                               class="btn btn-sm btn-outline-warning">
+                                                <i class="bx bx-key me-1"></i>Ambil Kunci API
+                                            </a>
+                                        </div>
+
+                                        @php
+                                            $skAda = filled($region->payment_info['midtrans_server_key'] ?? null);
+                                            $ckAda = filled($region->payment_info['midtrans_client_key'] ?? null);
+                                        @endphp
+
+                                        <div class="mb-2">
+                                            <label class="form-label text-warning fw-semibold" style="font-size: 0.8rem;">Midtrans Server Key</label>
+                                            <input type="password" name="midtrans_server_key" autocomplete="off"
+                                                   class="form-control form-control-sm border-warning bg-white"
+                                                   placeholder="{{ $skAda ? '•••••••• (tersimpan)' : 'Belum diisi' }}">
+                                        </div>
+                                        <div class="mb-1">
+                                            <label class="form-label text-warning fw-semibold" style="font-size: 0.8rem;">Midtrans Client Key</label>
+                                            <input type="password" name="midtrans_client_key" autocomplete="off"
+                                                   class="form-control form-control-sm border-warning bg-white"
+                                                   placeholder="{{ $ckAda ? '•••••••• (tersimpan)' : 'Belum diisi' }}">
+                                        </div>
+                                        <small class="text-warning d-block mb-2" style="font-size: 0.72rem;">
+                                            Kosongkan bila tidak ingin mengubah kunci yang sudah tersimpan.
+                                        </small>
+
+                                        @php
+                                            $modeProduksi = (bool) ($region->payment_info['midtrans_is_production'] ?? false);
+                                        @endphp
+
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" role="switch"
+                                                   id="midtransModeProduksi" name="midtrans_is_production" value="1"
+                                                   {{ $modeProduksi ? 'checked' : '' }}>
+                                            <label class="form-check-label fw-semibold" for="midtransModeProduksi"
+                                                   style="font-size: 0.8rem;">
+                                                Mode Production
+                                                <span class="badge bg-{{ $modeProduksi ? 'success' : 'secondary' }} ms-1">
+                                                    {{ $modeProduksi ? 'PRODUCTION' : 'SANDBOX' }}
+                                                </span>
+                                            </label>
+                                        </div>
+                                        <small class="text-warning d-block" style="font-size: 0.72rem;">
+                                            Harus cocok dengan kunci di atas: kunci Sandbox hanya jalan di mode Sandbox,
+                                            kunci Production hanya jalan di mode Production. Nyalakan hanya kalau
+                                            wilayah Anda memang sudah siap menerima uang sungguhan.
+                                        </small>
+                                    @else
+                                        {{-- XENDIT: kredensial induk dipegang Diskominfotik. --}}
+                                        <div class="alert alert-warning p-2 mb-0" style="font-size: 0.8rem;">
+                                            <i class="bx bx-check-shield me-1"></i>
+                                            Pembayaran otomatis disiapkan oleh <strong>Diskominfotik</strong> lewat {{ $labelPenyedia }}.
+                                            Anda tidak perlu memasukkan kunci API apa pun.
+                                            Pastikan <strong>nomor rekening di sebelah kiri sudah benar</strong>,
+                                            karena ke situlah pemasukan wilayah Anda diteruskan.
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
                         </div>

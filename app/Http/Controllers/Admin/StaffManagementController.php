@@ -49,7 +49,53 @@ class StaffManagementController extends Controller
             return array_intersect_key(User::izinPlatform(), array_flip($miliknya));
         }
 
-        return $this->unitLayanan;
+        return $this->unitLayananWilayah($user);
+    }
+
+    /**
+     * Unit yang boleh dibagikan admin wilayah = LAYANAN YANG AKTIF di wilayahnya.
+     *
+     * Alasannya: menu staf nanti disaring dua kali — layanan aktif wilayah DAN
+     * izin yang dicentang. Menawarkan unit yang layanannya belum aktif hanya
+     * menghasilkan centang yang tidak berefek apa-apa dan membingungkan admin.
+     *
+     * "Kabar dan Informasi Daerah" selalu ikut karena menunya memang tidak
+     * terikat layanan aktif wilayah.
+     */
+    private function unitLayananWilayah(User $user): array
+    {
+        // Kabupaten/pusat tidak terikat satu wilayah: tawarkan semuanya.
+        if (in_array($user->role, ['admin'], true) || ! $user->region_id) {
+            return $this->unitLayanan;
+        }
+
+        $region = \App\Models\Region::with('services')->find($user->region_id);
+
+        if (! $region) {
+            return $this->unitLayanan;
+        }
+
+        // Nama layanan di tabel services -> kunci izin staf.
+        $peta = [
+            'Penyewaan Alat'  => 'sewa_alat',
+            'Penjualan Gas'   => 'gas',
+            'Penyewaan Mobil' => 'sewa_mobil',
+            'Fasilitas Umum'  => 'fasilitas_umum',
+            'Pasar Daerah'    => 'pasar_daerah',
+            'Pelaporan Warga' => 'pelaporan_warga',
+        ];
+
+        $aktif = [];
+
+        foreach ($region->services->pluck('name') as $nama) {
+            if (isset($peta[$nama], $this->unitLayanan[$peta[$nama]])) {
+                $aktif[$peta[$nama]] = $this->unitLayanan[$peta[$nama]];
+            }
+        }
+
+        $aktif['kabar_informasi'] = $this->unitLayanan['kabar_informasi'];
+
+        return $aktif;
     }
 
     /**

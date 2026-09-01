@@ -18,6 +18,70 @@ use App\Services\NotificationService;
 
 class RequestController extends Controller
 {
+    /**
+     * Jenis permintaan -> kunci izin unit staf.
+     * Nilai $type datang dari route {type} di admin.aktivitas.permintaan-pengajuan.*
+     */
+    private const IZIN_PER_TIPE = [
+        'rental'    => 'sewa_alat',
+        'gas'       => 'gas',
+        'mobil'     => 'sewa_mobil',
+        'fasilitas' => 'fasilitas_umum',
+    ];
+
+    /**
+     * Jenis permintaan -> [model, nama relasi yang memuat region_id].
+     * Nama relasinya harus sama persis dengan yang dipakai index(), supaya
+     * yang boleh DIPROSES tidak pernah lebih luas dari yang boleh DILIHAT.
+     */
+    private const WILAYAH_PER_TIPE = [
+        'rental'    => [RentalBooking::class, 'barang'],
+        'gas'       => [GasOrder::class, 'gas'],
+        'mobil'     => [MobilBooking::class, 'mobil'],
+        'fasilitas' => [FasilitasUmumBooking::class, 'fasilitas'],
+    ];
+
+    /**
+     * Penjaga untuk aksi yang mengubah data: setujui, tolak, ubah status.
+     *
+     * Menggantikan `abort_unless($user->role === 'admin')` yang dulu mengunci
+     * ketiganya ke satu role saja — kepala desa dan camat pun ikut kena 403 di
+     * dashboard mereka sendiri, dan staf unit hanya bisa menonton pesanan
+     * menumpuk tanpa bisa memprosesnya.
+     *
+     * Dua hal diperiksa, dan keduanya wajib:
+     *
+     * 1. IZIN UNIT — hasUnitPermission() otomatis true untuk admin kabupaten,
+     *    camat, dan kepala desa; untuk staf diperiksa dari centang izinnya.
+     *    Jadi staf gas tidak bisa memproses pesanan sewa alat.
+     *
+     * 2. KEPEMILIKAN WILAYAH — WAJIB ada sekarang. Dulu hanya admin kabupaten
+     *    yang bisa bertindak sehingga lintas wilayah bukan masalah. Begitu
+     *    kepala desa dan staf ikut bisa, tanpa pemeriksaan ini staf Desa A
+     *    dapat menyetujui pesanan Desa B cukup dengan mengganti id di URL.
+     */
+    private function pastikanBolehMenangani(string $type, $id): void
+    {
+        $user = auth()->user();
+
+        $izin = self::IZIN_PER_TIPE[$type] ?? null;
+        abort_if($izin === null, 404, 'Jenis permintaan tidak dikenal.');
+
+        abort_unless(
+            $user && $user->isAdmin() && $user->hasUnitPermission($izin),
+            403,
+            'Anda tidak memiliki izin untuk memproses permintaan unit ini.'
+        );
+
+        [$model, $relasi] = self::WILAYAH_PER_TIPE[$type];
+
+        $milikWilayahIni = $this->applyRegionFilter($model::withTrashed(), $relasi, true)
+            ->whereKey($id)
+            ->exists();
+
+        abort_unless($milikWilayahIni, 404, 'Permintaan tidak ditemukan di wilayah Anda.');
+    }
+
     public function index(Request $request)
     {
         // Ambil parameter filter
@@ -281,6 +345,12 @@ class RequestController extends Controller
 
     public function show($id, $type)
     {
+        // Aturannya sama dengan memproses: yang boleh dibuka detailnya hanya
+        // unit yang dipegang dan pesanan dari wilayah sendiri. Tanpa ini,
+        // findOrFail() polos membocorkan nama, alamat, dan telepon warga
+        // lintas desa hanya dengan mengganti id di URL.
+        $this->pastikanBolehMenangani($type, $id);
+
         if ($type === 'rental') {
             $request = RentalBooking::withTrashed()->with(['user', 'barang'])->findOrFail($id);
         } elseif ($type === 'mobil') {
@@ -296,7 +366,7 @@ class RequestController extends Controller
 
     public function approve(Request $request, $id, $type)
     {
-        abort_unless(auth()->user()->role === 'admin', 403, 'Unauthorized: Admin access required');
+        $this->pastikanBolehMenangani($type, $id);
 
         $notificationService = new NotificationService();
 
@@ -472,7 +542,7 @@ class RequestController extends Controller
 
     public function reject(Request $request, $id, $type)
     {
-        abort_unless(auth()->user()->role === 'admin', 403, 'Unauthorized: Admin access required');
+        $this->pastikanBolehMenangani($type, $id);
 
         $request->validate([
             'reason' => 'required|string|max:500',
@@ -565,7 +635,7 @@ class RequestController extends Controller
 
     public function updateStatus(Request $request, $type, $id)
     {
-        abort_unless(auth()->user()->role === 'admin', 403, 'Unauthorized: Admin access required');
+        $this->pastikanBolehMenangani($type, $id);
 
         $request->validate([
             'status' => 'required|string|in:confirmed,being_prepared,in_delivery,arrived,completed,approved',

@@ -20,7 +20,9 @@ class MobilRentalUserController extends Controller
     {
         $item = Mobil::findOrFail($id);
         
-        $setting = \App\Models\SystemSetting::first();
+        // Rekening & metode pembayaran milik WILAYAH layanan ini, bukan rekening
+        // pusat. Pemasukan tiap daerah menjadi tanggung jawab daerahnya sendiri.
+        $setting = \App\Support\ProfilPembayaranWilayah::untuk($item->region_id);
         
         return view('users.mobil-rental-detail', compact('item', 'setting'));
     }

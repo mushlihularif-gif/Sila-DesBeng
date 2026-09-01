@@ -38,7 +38,10 @@ abstract class Controller
                 });
             }
 
-            if (in_array($currentUser->role, ['admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'admin', 'super_admin'])) {
+            // 'staff' wajib ada di daftar ini. Tanpa itu query staf lolos tanpa
+            // filter sama sekali dan mereka melihat pesanan seluruh wilayah,
+            // bukan hanya wilayah tempat mereka ditugaskan.
+            if (in_array($currentUser->role, ['admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'admin', 'super_admin', 'staff'])) {
                 $allowedRegionIds = \App\Models\Region::getDescendantIds($regionId);
                 $allowedRegionIds[] = $regionId;
 
@@ -61,16 +64,67 @@ abstract class Controller
     {
         $currentUser = auth()->user();
 
-        if ($currentUser && in_array($currentUser->role, ['super_admin', 'admin', 'admin_kecamatan', 'admin_desa'])) {
-            $region = \App\Models\Region::with('services')->find($currentUser->region_id);
-            if (!$region && in_array($currentUser->role, ['super_admin', 'admin'])) {
-                $region = \App\Models\Region::first(); // Fallback untuk admin kabupaten & super_admin
-            }
-            if ($region) {
-                return $region->services->pluck('name')->toArray();
+        if (! $currentUser) {
+            return [];
+        }
+
+        // 'staff' harus ikut di sini. Sebelumnya perannya tidak terdaftar
+        // sehingga daftarnya selalu kosong dan setiap tab layanan disembunyikan
+        // dengan pesan "Layanan Belum Di Aktifkan", padahal wilayahnya sudah
+        // mengaktifkan layanan itu.
+        $peranBerwilayah = ['super_admin', 'admin', 'admin_kecamatan', 'admin_desa', 'staff'];
+
+        if (! in_array($currentUser->role, $peranBerwilayah)) {
+            return [];
+        }
+
+        $region = \App\Models\Region::with('services')->find($currentUser->region_id);
+        if (! $region && in_array($currentUser->role, ['super_admin', 'admin'])) {
+            $region = \App\Models\Region::first(); // Fallback untuk admin kabupaten & super_admin
+        }
+
+        if (! $region) {
+            return [];
+        }
+
+        $namaLayanan = $region->services->pluck('name')->toArray();
+
+        if ($currentUser->role !== 'staff') {
+            return $namaLayanan;
+        }
+
+        // Staf hanya melihat layanan yang memang dipercayakan kepadanya.
+        // Kalau tidak dipersempit, staf gas ikut melihat tab sewa alat dan
+        // mobil yang bukan urusannya.
+        $petaIzin = [
+            'gas'            => 'gas',
+            'sewa_alat'      => 'alat',
+            'sewa_mobil'     => 'mobil',
+            'fasilitas_umum' => 'fasilitas',
+            'pasar_daerah'   => 'pasar',
+            'pelaporan_warga' => 'pelapor',
+        ];
+
+        $izinStaf = $currentUser->staffPermissions()->pluck('unit_key')->all();
+        $kataKunci = [];
+        foreach ($izinStaf as $izin) {
+            if (isset($petaIzin[$izin])) {
+                $kataKunci[] = $petaIzin[$izin];
             }
         }
 
-        return [];
+        if (! $kataKunci) {
+            return [];
+        }
+
+        return array_values(array_filter($namaLayanan, function ($nama) use ($kataKunci) {
+            foreach ($kataKunci as $kata) {
+                if (str_contains(strtolower($nama), $kata)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }));
     }
 }

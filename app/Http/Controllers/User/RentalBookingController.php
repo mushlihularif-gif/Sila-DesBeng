@@ -30,8 +30,10 @@ class RentalBookingController extends Controller
             return redirect()->back()->with('error', 'Layanan khusus warga lokal. Silakan sesuaikan wilayah Anda.');
         }
         
-        // Ambil pengaturan sistem untuk rekening bank dan lokasi
-        $setting = SystemSetting::first();
+        // Rekening yang ditampilkan harus milik wilayah barangnya, bukan rekening
+        // pusat. Sejak pemasukan dipegang tiap daerah, SystemSetting::first()
+        // akan menampilkan rekening yang salah ke warga.
+        $setting = \App\Support\ProfilPembayaranWilayah::untuk($item->region_id);
         
         // Ambil SOP Penyewaan Alat
         $region = \App\Models\Region::find(Auth::user()->region_id);
@@ -62,14 +64,18 @@ class RentalBookingController extends Controller
             'quantity' => 'required|integer|min:1|max:50',
             'start_date' => 'required|date|after_or_equal:today',
             'end_date' => 'required|date|after_or_equal:start_date',
-            'payment_method' => 'required|in:tunai',
-            
+            // 'transfer' = transfer manual ke rekening wilayah, dibuktikan lewat
+            // unggahan yang ditinjau petugas. Sebelumnya terkunci 'tunai' saja,
+            // sehingga rekening wilayah tidak pernah bisa dipakai di unit ini.
+            'payment_method' => 'required|in:tunai,transfer',
+
             // Penerima & Alamat (Wajib untuk Antar & Jemput)
             'recipient_name' => 'required|string|max:255',
             'delivery_address' => 'required|string',
-            
-            // Untuk metode pembayaran 'transfer'
-            'payment_proof' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
+
+            // Bukti wajib kalau warga memilih transfer — tanpa itu petugas tidak
+            // punya dasar untuk memverifikasi pembayarannya.
+            'payment_proof' => 'required_if:payment_method,transfer|nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
             
             // Bidang Tujuan Baru
             'rental_purpose' => 'required|string|max:1000',

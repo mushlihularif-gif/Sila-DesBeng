@@ -325,13 +325,69 @@
                         </div>
                     </div>
 
-                    <!-- Payment Method (Fixed to Tunai) -->
+                    <!-- Metode Pembayaran -->
                     <div class="mb-6">
                         <h3 class="text-xl font-bold text-gray-800 mb-4">Metode Pembayaran</h3>
-                        <input type="hidden" name="payment_method" id="payment-method-hidden" value="tunai">
+                        {{-- $defaultMethod di sini adalah metode PENGIRIMAN (antar/jemput), ditetapkan ulang di atas. --}}
+                        <input type="hidden" name="payment_method" id="payment-method-hidden"
+                               value="{{ $hasTransfer && $defaultMethod === 'antar' ? 'transfer' : 'tunai' }}">
+
+                        @if($hasTransfer)
+                        {{-- Pilihan hanya muncul kalau wilayah sudah mengisi rekeningnya.
+                             Kalau belum, halaman tetap seperti semula: tunai saja. --}}
+                        <div class="grid grid-cols-2 gap-3 mb-6">
+                            <button type="button" onclick="pilihMetodeSewa('transfer')" id="btn-sewa-transfer"
+                                    class="metode-sewa-btn py-4 px-3 rounded-2xl font-bold border-2 border-blue-500 bg-blue-50 text-blue-700 transition-all">
+                                Transfer Bank
+                            </button>
+                            <button type="button" onclick="pilihMetodeSewa('tunai')" id="btn-sewa-tunai"
+                                    class="metode-sewa-btn py-4 px-3 rounded-2xl font-bold border-2 border-gray-200 bg-white text-gray-600 transition-all">
+                                Bayar di Tempat
+                            </button>
+                        </div>
+
+                        <!-- Transfer ke Rekening Wilayah -->
+                        <div id="transfer-payment-sewa" class="payment-content">
+                            <div class="bg-white border-2 border-blue-50 rounded-2xl shadow-lg p-6 sm:p-8">
+                                <h4 class="font-bold text-gray-800 mb-4">Transfer ke Rekening Berikut</h4>
+
+                                <div class="flex items-center gap-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-5 mb-4">
+                                    @if(!empty($bankLogoPath))
+                                        <img src="{{ asset($bankLogoPath) }}" alt="{{ $setting->bank_name }}" class="h-8 object-contain">
+                                    @endif
+                                    <div class="min-w-0">
+                                        <div class="text-xs uppercase tracking-wider text-gray-500">{{ $setting->bank_name ?: 'Bank' }}</div>
+                                        <div class="text-xl font-black tracking-wide text-gray-900 select-all break-all">
+                                            {{ $setting->bank_account_number ?: 'Belum diatur' }}
+                                        </div>
+                                        <div class="text-sm text-gray-600">a.n. {{ $setting->bank_account_holder ?: '-' }}</div>
+                                    </div>
+                                </div>
+
+                                <div class="bg-amber-50 border-l-4 border-amber-400 p-4 rounded-r-xl mb-5">
+                                    <p class="text-sm text-amber-800">
+                                        <strong>Gunakan bank yang sama ({{ $setting->bank_name ?: 'bank tujuan' }})</strong>
+                                        agar tidak dikenai biaya admin antarbank. Transfer dari bank lain tetap diterima,
+                                        tetapi biayanya ditanggung Anda.
+                                    </p>
+                                </div>
+
+                                <label class="block text-sm font-bold text-gray-700 mb-2">
+                                    Unggah Bukti Transfer <span class="text-red-500">*</span>
+                                </label>
+                                <input type="file" name="payment_proof" accept=".jpg,.jpeg,.png,.pdf"
+                                       class="block w-full text-sm text-gray-600 border-2 border-dashed border-blue-200 rounded-xl p-3
+                                              file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0
+                                              file:bg-blue-500 file:text-white file:font-semibold hover:file:bg-blue-600">
+                                <p class="text-xs text-gray-500 mt-2">
+                                    JPG, PNG, atau PDF. Maksimal 5 MB. Bukti Anda diperiksa petugas sebelum pesanan diproses.
+                                </p>
+                            </div>
+                        </div>
+                        @endif
 
                         <!-- Cash Payment Card -->
-                        <div id="cash-payment" class="payment-content">
+                        <div id="cash-payment" class="payment-content {{ $hasTransfer ? 'hidden' : '' }}">
                             <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl shadow-lg p-8">
                                 <h4 class="text-2xl font-bold text-center text-gray-800 mb-6">Silahkan Lakukan Pembayaran Ditempat</h4>
                                 
@@ -736,6 +792,56 @@
         </div>
     </div>
 </main>
+
+    {{-- Pemilih metode bayar sewa alat. Sengaja dipisah dari skrip pengiriman
+         form agar tidak mengganggu alur FormData yang sudah ada. --}}
+    <script>
+        window.pilihMetodeSewa = function (metode) {
+            var input = document.getElementById('payment-method-hidden');
+            if (input) input.value = metode;
+
+            var panelTransfer = document.getElementById('transfer-payment-sewa');
+            var panelTunai = document.getElementById('cash-payment');
+
+            if (panelTransfer) panelTransfer.classList.toggle('hidden', metode !== 'transfer');
+            if (panelTunai) panelTunai.classList.toggle('hidden', metode === 'transfer');
+
+            [['btn-sewa-transfer', 'transfer'], ['btn-sewa-tunai', 'tunai']].forEach(function (pasangan) {
+                var el = document.getElementById(pasangan[0]);
+                if (!el) return;
+                var aktif = pasangan[1] === metode;
+                el.classList.toggle('border-blue-500', aktif);
+                el.classList.toggle('bg-blue-50', aktif);
+                el.classList.toggle('text-blue-700', aktif);
+                el.classList.toggle('border-gray-200', !aktif);
+                el.classList.toggle('bg-white', !aktif);
+                el.classList.toggle('text-gray-600', !aktif);
+            });
+        };
+        // Dipanggil saat warga berpindah antara Antar dan Jemput.
+        // Jemput = ambil sendiri, bayarnya di tempat; panel transfer tidak ikut
+        // ditampilkan di sana sehingga metodenya dikunci ke tunai.
+        window.kunciMetodeBayarSewa = function (pengiriman) {
+            var input = document.getElementById(payment-method-hidden);
+            if (!input) return;
+
+            if (pengiriman === jemput) {
+                input.dataset.pilihanAntar = input.value;
+                input.value = tunai;
+                return;
+            }
+
+            input.value = input.dataset.pilihanAntar || input.value;
+        };
+
+        // Pilihan bawaan alur ANTAR diingat sejak awal, supaya warga yang mulai
+        // dari Jemput lalu pindah ke Antar tetap mendapat panel yang cocok
+        // dengan tombol yang tersorot.
+        (function () {
+            var input = document.getElementById('payment-method-hidden');
+            if (input) input.dataset.pilihanAntar = @json($hasTransfer ? 'transfer' : 'tunai');
+        })();
+    </script>
 @endsection
 
 @push('styles')
@@ -954,7 +1060,15 @@
                 this.classList.add('active');
                 
                 deliveryMethodInput.value = method;
-                
+
+                // Panel transfer hanya ada di alur ANTAR. Kalau warga pindah ke
+                // JEMPUT, metode bayar harus kembali ke tunai — kalau tidak,
+                // form mengirim payment_method=transfer tanpa bukti apa pun dan
+                // ditolak server tanpa ada kolom unggah yang terlihat.
+                if (typeof window.kunciMetodeBayarSewa === 'function') {
+                    window.kunciMetodeBayarSewa(method);
+                }
+
                 if (method === 'antar') {
                     antarForm.classList.remove('hidden');
                     jemputForm.classList.add('hidden');

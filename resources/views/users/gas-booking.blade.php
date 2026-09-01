@@ -382,6 +382,24 @@
                     @if($hasTransfer && $hasTunai)
                     <!-- Payment Methods -->
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                        @if($hasTransfer)
+                        {{-- Transfer ke rekening wilayah. Diletakkan pertama karena
+                             inilah cara bayar yang uangnya langsung masuk ke rekening
+                             desa penyelenggara layanan. --}}
+                        <button type="button"
+                                onclick="setPaymentMethod('transfer')"
+                                id="btn-transfer"
+                                class="payment-method-btn group relative py-4 px-2 rounded-2xl font-bold transition-all duration-300 {{ $defaultMethod === 'transfer' ? 'active ring-2 ring-blue-500 bg-blue-50 shadow-md transform scale-105' : 'bg-white text-gray-600 shadow-sm border border-gray-100 hover:border-blue-300 hover:shadow-md' }}">
+                            <div class="flex flex-col items-center justify-center gap-2 text-center relative z-10">
+                                <div class="w-10 h-10 rounded-full {{ $defaultMethod === 'transfer' ? 'bg-blue-500 text-white' : 'bg-indigo-100 text-indigo-600 group-hover:bg-blue-500 group-hover:text-white' }} flex items-center justify-center transition-colors shadow-inner">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                                    </svg>
+                                </div>
+                                <span class="text-[11px] uppercase tracking-wider {{ $defaultMethod === 'transfer' ? 'text-blue-700' : 'text-gray-600' }}">Transfer Bank</span>
+                            </div>
+                        </button>
+                        @endif
                         @if($hasTunai)
                         <!-- Tunai -->
                         <button type="button" 
@@ -469,6 +487,52 @@
                     </div>
                     @endif
                     <input type="hidden" name="payment_method" id="payment-method-hidden" value="{{ $defaultMethod }}">
+
+                    <!-- Transfer Manual ke Rekening Wilayah -->
+                    {{-- Hanya dirender kalau transfer memang tersedia. Menyembunyikannya
+                         dengan CSS saja tidak cukup: nomor rekening tetap terbaca di
+                         sumber halaman untuk wilayah yang sengaja mematikan transfer. --}}
+                    @if($hasTransfer)
+                    <div id="transfer-payment" class="payment-content {{ $defaultMethod === 'transfer' ? '' : 'hidden' }}">
+                        <div class="bg-white border-2 border-blue-50 rounded-2xl shadow-sm p-6 sm:p-8 mb-6">
+                            <h4 class="font-bold text-gray-800 mb-4">Transfer ke Rekening Berikut</h4>
+
+                            <div class="flex items-center gap-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-5 mb-4">
+                                @if($bankLogoPath)
+                                    <img src="{{ asset($bankLogoPath) }}" alt="{{ $setting->bank_name }}" class="h-8 object-contain">
+                                @endif
+                                <div class="min-w-0">
+                                    <div class="text-xs uppercase tracking-wider text-gray-500">{{ $setting->bank_name ?: 'Bank' }}</div>
+                                    <div class="text-xl font-black tracking-wide text-gray-900 select-all break-all">
+                                        {{ $setting->bank_account_number ?: 'Belum diatur' }}
+                                    </div>
+                                    <div class="text-sm text-gray-600">a.n. {{ $setting->bank_account_holder ?: '-' }}</div>
+                                </div>
+                            </div>
+
+                            {{-- Warga sering rugi biaya admin antarbank tanpa sadar. --}}
+                            <div class="bg-amber-50 border-l-4 border-amber-400 p-4 rounded-r-xl mb-5">
+                                <p class="text-sm text-amber-800">
+                                    <strong>Gunakan bank yang sama ({{ $setting->bank_name ?: 'bank tujuan' }})</strong>
+                                    agar tidak dikenai biaya admin antarbank. Transfer dari bank lain tetap diterima,
+                                    tetapi biayanya ditanggung Anda.
+                                </p>
+                            </div>
+
+                            <label class="block text-sm font-bold text-gray-700 mb-2">
+                                Unggah Bukti Transfer <span class="text-red-500">*</span>
+                            </label>
+                            <input type="file" name="payment_proof" accept=".jpg,.jpeg,.png,.pdf"
+                                   class="block w-full text-sm text-gray-600 border-2 border-dashed border-blue-200 rounded-xl p-3
+                                          file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0
+                                          file:bg-blue-500 file:text-white file:font-semibold hover:file:bg-blue-600">
+                            <p class="text-xs text-gray-500 mt-2">
+                                Format JPG, PNG, atau PDF. Maksimal 5 MB. Bukti Anda akan diperiksa petugas
+                                sebelum pesanan diproses.
+                            </p>
+                        </div>
+                    </div>
+                    @endif
 
                     <!-- Midtrans Payment Card -->
                     <div id="midtrans-payment" class="payment-content hidden">
@@ -802,14 +866,20 @@
 
             const midtransPaymentCard = document.getElementById('midtrans-payment');
             const cashPaymentCard = document.getElementById('cash-payment');
-            
-            if (midtransPaymentCard) midtransPaymentCard.classList.add('hidden');
-            if (cashPaymentCard) cashPaymentCard.classList.add('hidden');
+            const transferPaymentCard = document.getElementById('transfer-payment');
 
+            [midtransPaymentCard, cashPaymentCard, transferPaymentCard].forEach(function (el) {
+                if (el) el.classList.add('hidden');
+            });
+
+            // 'transfer' = ke rekening wilayah, ditangani manual dengan bukti bayar.
+            // Sisanya (VA/QRIS) lewat payment gateway.
             if (method === 'tunai') {
-                if(cashPaymentCard) cashPaymentCard.classList.remove('hidden');
+                if (cashPaymentCard) cashPaymentCard.classList.remove('hidden');
+            } else if (method === 'transfer') {
+                if (transferPaymentCard) transferPaymentCard.classList.remove('hidden');
             } else {
-                if(midtransPaymentCard) midtransPaymentCard.classList.remove('hidden');
+                if (midtransPaymentCard) midtransPaymentCard.classList.remove('hidden');
             }
         };
 
