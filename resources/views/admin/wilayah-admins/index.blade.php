@@ -1,4 +1,4 @@
-@extends('admin.layouts.admin')
+﻿@extends('admin.layouts.admin')
 
 @section('title', 'Manajemen Admin RT & RW')
 
@@ -19,7 +19,7 @@
     }
 </style>
 <style>
-    .animate-fade-up { animation: fadeUp 0.5s ease-out forwards; }
+    . { animation: fadeUp 0.5s ease-out forwards; }
     @keyframes fadeUp {
         0% { opacity: 0; transform: translateY(20px); }
         100% { opacity: 1; transform: translateY(0); }
@@ -33,12 +33,14 @@
 @endsection
 
 @section('content')
-<div class="container-xxl flex-grow-1 container-p-y animate-fade-up">
+<div class="container-xxl flex-grow-1 container-p-y ">
     <!-- Page Header -->
     <div class="row mb-4">
         <div class="col-12 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
-            <h4 class="fw-bold m-0"><span class="text-muted fw-light">Manajemen /</span> Admin RT & RW</h4>
-            <div class="d-flex flex-wrap gap-2 justify-content-md-end flex-shrink-0">
+            <div class="flex-grow-1">
+                <h4 class="fw-bold m-0"><span class="text-muted fw-light">Manajemen /</span> Admin RT & RW</h4>
+            </div>
+            <div class="d-flex flex-wrap gap-2 justify-content-md-end flex-shrink-0" style="position: relative; z-index: 10;">
                 <button type="button" class="btn btn-outline-primary shadow-sm text-nowrap" data-bs-toggle="modal" data-bs-target="#modalTambahAdmin">
                     <i class="bx bx-plus me-1"></i> Buat Akun Dinas
                 </button>
