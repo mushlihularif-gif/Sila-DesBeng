@@ -90,7 +90,7 @@
             <div class="tab-content">
                 <!-- TAB 1: DAFTAR PRODUK -->
                 <div class="tab-pane fade {{ $tab == 'produk' ? 'show active' : '' }}" id="navs-top-produk" role="tabpanel">
-                    <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded-4 shadow-sm">
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 bg-white p-3 rounded-4 shadow-sm gap-3">
                         <div class="d-flex align-items-center">
                             <div class="avatar avatar-md bg-success-subtle text-success rounded-circle me-3 d-flex justify-content-center align-items-center">
                                 <i class="bx bx-box fs-4"></i>
@@ -100,13 +100,13 @@
                                 <small class="text-muted">Kelola komoditas dan hasil tani yang akan dijual di platform Pasar Daerah.</small>
                             </div>
                         </div>
-                        <div>
-                            <a href="{{ route('admin.unit.pasar_daerah.create') }}" class="btn btn-success rounded-pill px-4 shadow-sm"><i class="bx bx-plus me-1"></i> Tambah Produk</a>
+                        <div class="w-100 w-md-auto text-end">
+                            <a href="{{ route('admin.unit.pasar_daerah.create') }}" class="btn btn-success rounded-pill px-4 shadow-sm w-100"><i class="bx bx-plus me-1"></i> Tambah Produk</a>
                         </div>
                     </div>
 
                     @if($produks->count() > 0)
-                        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+                        <div class="row row-cols-2 row-cols-md-3 row-cols-xl-4 g-2 g-md-3">
                             @foreach ($produks as $produk)
                                 <div class="col">
                                     <div class="card h-100 product-card">
@@ -117,21 +117,21 @@
                                                     <div class="carousel-item active">
                                                         <img src="{{ asset('storage/' . $produk->foto) }}" class="card-img-top"
                                                             alt="{{ $produk->nama_produk }}"
-                                                            style="height: 300px; object-fit: cover; object-position: center;">
+                                                            style="aspect-ratio: 1/1; object-fit: cover; object-position: center; width: 100%;">
                                                     </div>
                                                     @endif
                                                     @if ($produk->foto_2)
                                                         <div class="carousel-item {{ !$produk->foto ? 'active' : '' }}">
                                                             <img src="{{ asset('storage/' . $produk->foto_2) }}" class="card-img-top"
                                                                 alt="{{ $produk->nama_produk }}"
-                                                                style="height: 300px; object-fit: cover; object-position: center;">
+                                                                style="aspect-ratio: 1/1; object-fit: cover; object-position: center; width: 100%;">
                                                         </div>
                                                     @endif
                                                     @if ($produk->foto_3)
                                                         <div class="carousel-item {{ !$produk->foto && !$produk->foto_2 ? 'active' : '' }}">
                                                             <img src="{{ asset('storage/' . $produk->foto_3) }}" class="card-img-top"
                                                                 alt="{{ $produk->nama_produk }}"
-                                                                style="height: 300px; object-fit: cover; object-position: center;">
+                                                                style="aspect-ratio: 1/1; object-fit: cover; object-position: center; width: 100%;">
                                                         </div>
                                                     @endif
                                                 </div>
@@ -164,20 +164,18 @@
                                                 <span class="text-muted small">/ {{ $produk->satuan }}</span>
                                             </div>
                                             
-                                            <div class="d-flex align-items-center mb-3 text-muted small bg-light p-2 rounded-3">
+                                            <div class="d-flex align-items-center mb-3 text-muted">
                                                 <i class="bx bx-package me-2 text-primary"></i> Sisa Stok: <strong class="ms-1 text-dark">{{ $produk->stok }}</strong>
                                             </div>
-
-                                            <p class="card-text text-muted flex-grow-1" style="font-size: 0.85rem;">{{ Str::limit($produk->deskripsi, 80) }}</p>
                                             
                                             <div class="mt-4 pt-3 border-top d-flex justify-content-end gap-2">
                                                 <a href="{{ route('admin.unit.pasar_daerah.edit', $produk->id) }}"
-                                                    class="btn btn-sm btn-light border text-warning shadow-sm rounded-pill px-3"><i class="bx bx-edit me-1"></i>Ubah</a>
+                                                    class="btn btn-sm btn-light border text-warning shadow-sm rounded-pill px-3"><i class="bx bx-edit me-1"></i><i class="bx bx-edit"></i></a>
                                                 <form action="{{ route('admin.unit.pasar_daerah.destroy', $produk->id) }}" method="POST"
                                                     onsubmit="return confirm('Apakah Anda yakin ingin menghapus produk ini?');">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-light border text-danger shadow-sm rounded-pill px-3"><i class="bx bx-trash me-1"></i>Hapus</button>
+                                                    <button type="submit" class="btn btn-sm btn-light border text-danger shadow-sm rounded-pill px-3"><i class="bx bx-trash me-1"></i><i class="bx bx-trash"></i></button>
                                                 </form>
                                             </div>
                                         </div>

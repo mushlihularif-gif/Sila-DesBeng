@@ -2,9 +2,9 @@
 
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Unit Layanan /</span> Penjualan Gas</h4>
-            <div class="d-flex gap-2">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
+            <h4 class="fw-bold m-0"><span class="text-muted fw-light">Unit Layanan /</span> Penjualan Gas</h4>
+            <div class="d-flex flex-wrap flex-sm-nowrap gap-2 justify-content-md-end flex-shrink-0">
                 @php
                     $admin = auth()->user();
                     $region = \App\Models\Region::find($admin->region_id);
@@ -13,11 +13,13 @@
                     $quotaLimit = $settings['gas_quota_limit'] ?? 1;
                     $quotaDays = $settings['gas_quota_days'] ?? 7;
                 @endphp
-                <button type="button" class="btn {{ $isCrisisMode ? 'btn-danger' : 'btn-outline-danger' }}" data-bs-toggle="modal" data-bs-target="#crisisModeModal">
-                    <i class='bx {{ $isCrisisMode ? 'bx-error-circle' : 'bx-shield-quarter' }}'></i> 
-                    {{ $isCrisisMode ? 'MODE KRISIS AKTIF' : 'Pengaturan Mode Krisis' }}
+                <button type="button" class="btn {{ $isCrisisMode ? 'btn-danger' : 'btn-outline-danger' }} flex-grow-1 flex-sm-grow-0 text-nowrap" data-bs-toggle="modal" data-bs-target="#crisisModeModal">
+                    <i class='bx {{ $isCrisisMode ? 'bx-error-circle' : 'bx-shield-quarter' }} me-1'></i> 
+                    Mode Krisis
                 </button>
-                <a href="{{ route('admin.unit.penjualan_gas.create') }}" class="btn btn-primary">Tambah Gas</a>
+                <a href="{{ route('admin.unit.penjualan_gas.create') }}" class="btn btn-primary flex-grow-1 flex-sm-grow-0 text-nowrap">
+                    <i class="bx bx-plus me-1"></i> Tambah Gas
+                </a>
             </div>
         </div>
 
@@ -36,7 +38,7 @@
 
         <!-- Products Grid -->
         @if($gases->count() > 0)
-            <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+            <div class="row row-cols-2 row-cols-md-3 row-cols-xl-4 g-2 g-md-3">
                 @foreach ($gases as $gas)
                     <div class="col">
                         <div class="card h-100 product-card">
@@ -46,20 +48,20 @@
                                         <div class="carousel-item active">
                                             <img src="{{ asset('storage/' . $gas->foto) }}" class="card-img-top"
                                                 alt="{{ $gas->jenis_gas }}"
-                                                style="height: 300px; object-fit: cover; object-position: center;">
+                                                style="aspect-ratio: 1/1; object-fit: cover; object-position: center; width: 100%;">
                                         </div>
                                         @if ($gas->foto_2)
                                             <div class="carousel-item">
                                                 <img src="{{ asset('storage/' . $gas->foto_2) }}" class="card-img-top"
                                                     alt="{{ $gas->jenis_gas }}"
-                                                    style="height: 300px; object-fit: cover; object-position: center;">
+                                                    style="aspect-ratio: 1/1; object-fit: cover; object-position: center; width: 100%;">
                                             </div>
                                         @endif
                                         @if ($gas->foto_3)
                                             <div class="carousel-item">
                                                 <img src="{{ asset('storage/' . $gas->foto_3) }}" class="card-img-top"
                                                     alt="{{ $gas->jenis_gas }}"
-                                                    style="height: 300px; object-fit: cover; object-position: center;">
+                                                    style="aspect-ratio: 1/1; object-fit: cover; object-position: center; width: 100%;">
                                             </div>
                                         @endif
                                     </div>
@@ -79,22 +81,21 @@
                             </div>
                             <div class="card-body">
                                 <h5 class="card-title">{{ $gas->jenis_gas }}</h5>
-                                <p class="card-text">{{ Str::limit($gas->deskripsi, 100) }}</p>
-                                <div class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-3">
                                     <span class="badge bg-primary">Rp.
                                         {{ number_format($gas->harga_satuan, 0, ',', '.') }}</span>
                                     <span class="badge bg-success">{{ $gas->stok }} {{ Str::upper($gas->satuan) }}</span>
                                 </div>
-                                <div class="mt-3 d-flex gap-2">
+                                <div class="mt-3 d-flex gap-1 flex-nowrap justify-content-center">
                                     <a href="{{ route('admin.unit.penjualan_gas.show', $gas->id) }}"
-                                        class="btn btn-sm btn-outline-info">Detail</a>
+                                        class="btn btn-sm btn-outline-info flex-grow-1"><i class="bx bx-info-circle"></i></a>
                                     <a href="{{ route('admin.unit.penjualan_gas.edit', $gas->id) }}"
-                                        class="btn btn-sm btn-outline-warning">Ubah</a>
+                                        class="btn btn-sm btn-outline-warning flex-grow-1"><i class="bx bx-edit"></i></a>
                                     <form action="{{ route('admin.unit.penjualan_gas.destroy', $gas->id) }}" method="POST"
-                                        onsubmit="return confirm('Apakah Anda yakin ingin menghapus gas ini?');">
+                                        onsubmit="return confirm('Apakah Anda yakin ingin menghapus gas ini?');" class="d-flex flex-grow-1 m-0 p-0">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-outline-danger">Hapus</button>
+                                        <button type="submit" class="btn btn-sm btn-outline-danger w-100"><i class="bx bx-trash"></i></button>
                                     </form>
                                 </div>
                             </div>

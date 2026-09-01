@@ -17,13 +17,13 @@ class MutasiAdminController extends Controller
         // Hanya membatasi jika admin desa. Super admin bebas.
         $region_id = in_array($admin->role, ['admin_desa', 'admin_rt', 'admin_rw']) ? $admin->region_id : null;
         
-        // Pengajuan Keluar (Handshake menunggu approve dari KITA)
+        // Pengajuan Keluar = Warga KITA yang sedang dalam proses KELUAR
         $pengajuanKeluar = MutasiPenduduk::with(['user', 'toRegion'])
             ->where('from_region_id', $region_id)
             ->where('status', 'pending')
             ->get();
             
-        // Pengajuan Masuk (Handshake menunggu approve dari DESA LAMA)
+        // Pengajuan Masuk = Warga LUAR yang sedang dalam proses MASUK
         $pengajuanMasuk = MutasiPenduduk::with(['user', 'fromRegion'])
             ->where('to_region_id', $region_id)
             ->where('status', 'pending')
@@ -42,6 +42,54 @@ class MutasiAdminController extends Controller
         return view('admin.warga.mutasi', compact('pengajuanKeluar', 'pengajuanMasuk', 'riwayat'));
     }
 
+    public function searchGlobal(Request $request)
+    {
+        $search = $request->get('q');
+        if(!$search) return response()->json([]);
+
+        $users = User::where('role', 'warga')
+            ->where(function($q) use ($search) {
+                $q->where('nik', 'like', "%{$search}%")
+                  ->orWhere('name', 'like', "%{$search}%");
+            })
+            ->limit(20)
+            ->get();
+
+        $result = [];
+        foreach($users as $u) {
+            $result[] = [
+                'id' => $u->nik, // Use NIK as ID for the existing logic
+                'text' => $u->nik . ' - ' . $u->name
+            ];
+        }
+        return response()->json(['results' => $result]);
+    }
+
+    public function searchLocal(Request $request)
+    {
+        $search = $request->get('q');
+        $admin = Auth::user();
+        if(!$search) return response()->json([]);
+
+        $users = User::where('role', 'warga')
+            ->where('region_id', $admin->region_id)
+            ->where(function($q) use ($search) {
+                $q->where('nik', 'like', "%{$search}%")
+                  ->orWhere('name', 'like', "%{$search}%");
+            })
+            ->limit(20)
+            ->get();
+
+        $result = [];
+        foreach($users as $u) {
+            $result[] = [
+                'id' => $u->id, // Use User ID for push
+                'text' => $u->nik . ' - ' . $u->name
+            ];
+        }
+        return response()->json(['results' => $result]);
+    }
+
     public function tarikWarga(Request $request)
     {
         $request->validate([
@@ -50,23 +98,13 @@ class MutasiAdminController extends Controller
         ]);
 
         $admin = Auth::user();
-        
-        // Cari warga berdasarkan NIK
         $user = User::where('nik', $request->nik)->first();
         
-        if (!$user) {
-            return redirect()->back()->with('error', 'Warga dengan NIK tersebut tidak ditemukan di sistem.');
-        }
-        
-        if ($user->region_id == $admin->region_id) {
-            return redirect()->back()->with('error', 'Warga ini sudah terdaftar di desa Anda.');
-        }
+        if (!$user) return redirect()->back()->with('error', 'Warga tidak ditemukan.');
+        if ($user->region_id == $admin->region_id) return redirect()->back()->with('error', 'Warga ini sudah di desa Anda.');
 
-        // Cek apakah sudah ada pending
         $existing = MutasiPenduduk::where('user_id', $user->id)->where('status', 'pending')->first();
-        if ($existing) {
-            return redirect()->back()->with('error', 'Warga ini sedang dalam proses mutasi (Pending).');
-        }
+        if ($existing) return redirect()->back()->with('error', 'Warga ini sedang dalam proses mutasi.');
 
         MutasiPenduduk::create([
             'user_id' => $user->id,
@@ -77,7 +115,36 @@ class MutasiAdminController extends Controller
             'reason' => $request->reason,
         ]);
 
-        return redirect()->back()->with('success', 'Berhasil melakukan request penarikan. Silakan tunggu persetujuan (Handshake) dari Kepala Desa asal warga tersebut.');
+        return redirect()->back()->with('success', 'Berhasil menarik data. Menunggu persetujuan desa asal.');
+    }
+
+    public function pushWarga(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'to_region_id' => 'required|exists:regions,id',
+            'reason' => 'required|string'
+        ]);
+
+        $admin = Auth::user();
+        $user = User::findOrFail($request->user_id);
+
+        if ($user->region_id != $admin->region_id) return redirect()->back()->with('error', 'Warga ini bukan penduduk desa Anda.');
+        if ($request->to_region_id == $admin->region_id) return redirect()->back()->with('error', 'Desa tujuan tidak boleh sama dengan desa asal.');
+
+        $existing = MutasiPenduduk::where('user_id', $user->id)->where('status', 'pending')->first();
+        if ($existing) return redirect()->back()->with('error', 'Warga ini sedang dalam proses mutasi.');
+
+        MutasiPenduduk::create([
+            'user_id' => $user->id,
+            'from_region_id' => $admin->region_id,
+            'to_region_id' => $request->to_region_id,
+            'status' => 'pending',
+            'requested_by' => 'admin_asal',
+            'reason' => $request->reason,
+        ]);
+
+        return redirect()->back()->with('success', 'Berhasil melempar data warga. Menunggu persetujuan desa tujuan.');
     }
 
     public function approve($id)
@@ -85,72 +152,71 @@ class MutasiAdminController extends Controller
         $mutasi = MutasiPenduduk::findOrFail($id);
         $admin = Auth::user();
 
-        // Hanya desa asal yang berhak approve pelepasannya (Handshake awal)
-        if ($mutasi->from_region_id != $admin->region_id && !in_array($admin->role, ['super_admin', 'admin_kecamatan'])) {
-            abort(403, 'Anda tidak berhak menyetujui pelepasan ini.');
+        $berhakApprove = false;
+        if ($mutasi->requested_by == 'admin_asal') {
+            if ($mutasi->to_region_id == $admin->region_id) $berhakApprove = true;
+        } else {
+            if ($mutasi->from_region_id == $admin->region_id) $berhakApprove = true;
         }
+        if (in_array($admin->role, ['super_admin', 'admin_kecamatan'])) $berhakApprove = true;
+
+        if (!$berhakApprove) abort(403, 'Anda tidak berhak menyetujui mutasi ini.');
 
         $mutasi->status = 'approved';
-        
-        // PRIVACY RULE: Burn after reading
         if ($mutasi->ktp_image_path) {
             \Illuminate\Support\Facades\Storage::disk('private')->delete($mutasi->ktp_image_path);
             $mutasi->ktp_image_path = null;
         }
         $mutasi->save();
 
-        // Pindahkan user ke desa baru
         $user = User::findOrFail($mutasi->user_id);
         $user->region_id = $mutasi->to_region_id;
         if ($mutasi->alamat_baru) $user->address = $mutasi->alamat_baru;
-        // Kita juga bisa update RT RW jika ada kolomnya di users table
         $user->save();
 
-        return redirect()->back()->with('success', "Pelepasan disetujui. Warga {$user->name} telah resmi berpindah ke desa tujuan.");
+        return redirect()->back()->with('success', "Mutasi disetujui. Warga {$user->name} telah resmi berpindah.");
     }
 
     public function reject(Request $request, $id)
     {
         $request->validate(['rejection_reason' => 'required|string']);
-        
         $mutasi = MutasiPenduduk::findOrFail($id);
         $admin = Auth::user();
 
-        if ($mutasi->from_region_id != $admin->region_id && !in_array($admin->role, ['super_admin', 'admin_kecamatan'])) {
-            abort(403);
+        $berhakApprove = false;
+        if ($mutasi->requested_by == 'admin_asal') {
+            if ($mutasi->to_region_id == $admin->region_id) $berhakApprove = true;
+        } else {
+            if ($mutasi->from_region_id == $admin->region_id) $berhakApprove = true;
         }
+        if (in_array($admin->role, ['super_admin', 'admin_kecamatan'])) $berhakApprove = true;
+
+        if (!$berhakApprove) abort(403, 'Anda tidak berhak menolak mutasi ini.');
 
         $mutasi->status = 'rejected';
         $mutasi->rejection_reason = $request->rejection_reason;
         
-        // PRIVACY RULE: Burn after reading even if rejected
         if ($mutasi->ktp_image_path) {
             \Illuminate\Support\Facades\Storage::disk('private')->delete($mutasi->ktp_image_path);
             $mutasi->ktp_image_path = null;
         }
-        
         $mutasi->save();
 
-        return redirect()->back()->with('success', 'Mutasi ditolak dan dikembalikan.');
+        return redirect()->back()->with('success', 'Mutasi ditolak dan dibatalkan.');
     }
+
     public function showKtp($id)
     {
         $mutasi = MutasiPenduduk::findOrFail($id);
         $admin = Auth::user();
 
-        // Check auth
         if ($mutasi->from_region_id != $admin->region_id && $mutasi->to_region_id != $admin->region_id && !in_array($admin->role, ['super_admin', 'admin_kecamatan'])) {
             abort(403);
         }
-
-        if (!$mutasi->ktp_image_path) {
-            abort(404, 'KTP tidak ditemukan atau sudah dihapus.');
-        }
+        if (!$mutasi->ktp_image_path) abort(404, 'KTP tidak ditemukan atau sudah dihapus.');
 
         $path = storage_path('app/private/' . $mutasi->ktp_image_path);
-        if (!file_exists($path)) {
-            abort(404, 'File fisik tidak ditemukan.');
-        }
+        if (!file_exists($path)) abort(404, 'File fisik tidak ditemukan.');
 
         return response()->file($path);
     }

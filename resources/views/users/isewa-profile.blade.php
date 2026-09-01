@@ -225,7 +225,7 @@
                                 <div class="relative mb-4">
                                     <div class="p-1 rounded-full" style="background: linear-gradient(135deg, #3B82F6 0%, #60a5fa 50%, #FCD34D 100%);">
                                         <div class="w-32 h-32 rounded-full overflow-hidden bg-white p-1">
-                                            <img src="{{ asset('User/img/avatars/ken2.png') }}" 
+                                            <img src="{{ asset('User/img/teamsukses/KEN-FOTO.png') }}" 
                                                  alt="Rizqy Hamadi Ken" 
                                                  class="w-full h-full object-cover rounded-full">
                                         </div>
@@ -245,7 +245,7 @@
                                 <div class="relative mb-4">
                                     <div class="p-1 rounded-full" style="background: linear-gradient(135deg, #3B82F6 0%, #60a5fa 50%, #FCD34D 100%);">
                                         <div class="w-32 h-32 rounded-full overflow-hidden bg-white p-1">
-                                            <img src="{{ asset('User/img/avatars/ayep123.jpg') }}" 
+                                            <img src="{{ asset('User/img/teamsukses/ARIF-FOTO.png') }}" 
                                                  alt="Mushlihul Arif" 
                                                  class="w-full h-full object-cover rounded-full">
                                         </div>
@@ -265,7 +265,7 @@
                                 <div class="relative mb-4">
                                     <div class="p-1 rounded-full" style="background: linear-gradient(135deg, #3B82F6 0%, #60a5fa 50%, #FCD34D 100%);">
                                         <div class="w-32 h-32 rounded-full overflow-hidden bg-white p-1">
-                                            <img src="{{ asset('User/img/avatars/diki.png') }}" 
+                                            <img src="{{ asset('User/img/teamsukses/DIKI-FOTO.png') }}" 
                                                  alt="Dicki Wahyudi" 
                                                  class="w-full h-full object-cover rounded-full">
                                         </div>

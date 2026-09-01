@@ -40,23 +40,44 @@
 </style>
 
 <div class="container-xxl flex-grow-1 container-p-y animate-fade-up">
+    <!-- Page Header -->
     <div class="row mb-4">
-        <div class="col-12 d-flex justify-content-between align-items-center">
-            <h4 class="fw-bold py-3 mb-0"><span class="text-muted fw-light">Sistem /</span> Manajemen Staf</h4>
-            <a href="{{ route('admin.staff.create') }}" class="btn btn-primary">
+        <div class="col-12 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+            <h4 class="fw-bold m-0"><span class="text-muted fw-light">Manajemen /</span> Staf Layanan</h4>
+            <a href="{{ route('admin.staff.create') }}" class="btn btn-primary shadow-sm text-nowrap">
                 <i class="bx bx-plus me-1"></i> Tambah Staf Baru
             </a>
         </div>
     </div>
 
+    <!-- Panduan -->
+    <div class="card bg-label-primary border-0 shadow-none mb-4" style="border-radius: 12px;">
+        <div class="card-body d-flex align-items-center p-4">
+            <div class="me-3">
+                <div class="bg-primary p-3 rounded-circle text-white d-flex align-items-center justify-content-center shadow-sm" style="width: 56px; height: 56px;">
+                    <i class="bx bx-support fs-3"></i>
+                </div>
+            </div>
+            <div>
+                <h5 class="fw-bold mb-1 text-primary">Manajemen Staf Layanan</h5>
+                <p class="mb-0 text-primary" style="opacity: 0.85;">
+                    Halaman ini digunakan untuk mengelola akun petugas atau staf operasional (misal: Petugas Penjualan Gas, Petugas Pasar, dsb). 
+                    Staf yang ditambahkan di sini akan diberikan hak akses terbatas hanya untuk mengelola unit layanan yang ditugaskan kepadanya.
+                </p>
+            </div>
+        </div>
+    </div>
+
     @if(session('success'))
-        <div class="alert alert-success alert-dismissible" role="alert">
+        <div class="alert alert-success alert-dismissible shadow-sm rounded-4 border-0 d-flex align-items-center" role="alert">
+            <i class="bx bx-check-circle fs-4 me-2"></i>
             {{ session('success') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
     @if(session('error'))
-        <div class="alert alert-danger alert-dismissible" role="alert">
+        <div class="alert alert-danger alert-dismissible shadow-sm rounded-4 border-0 d-flex align-items-center" role="alert">
+            <i class="bx bx-error-circle fs-4 me-2"></i>
             {{ session('error') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>

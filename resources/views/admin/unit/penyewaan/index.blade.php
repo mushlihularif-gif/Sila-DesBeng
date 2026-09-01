@@ -2,23 +2,23 @@
 
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h4 class="fw-bold py-3 mb-2"><span class="text-muted fw-light">Unit Layanan /</span> Penyewaan Alat</h4>
-                <div class="alert alert-warning d-flex align-items-center p-2 mb-0 text-dark" style="font-size: 0.85rem; border-left: 4px solid #ffab00;">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
+            <div class="flex-grow-1">
+                <h4 class="fw-bold m-0 mb-2"><span class="text-muted fw-light">Unit Layanan /</span> Penyewaan Alat</h4>
+                <div class="alert alert-warning d-inline-flex align-items-center p-2 mb-0 text-dark" style="font-size: 0.85rem; border-left: 4px solid #ffab00;">
                     <i class="bx bx-error me-2 fs-5"></i>
                     <div><strong>PENTING:</strong> Tentukan dan Pastikan Ketentuan SOP sesuai dengan ketentuan daerah anda.</div>
                 </div>
             </div>
-            <div>
-                <a href="{{ route('admin.unit.penyewaan.sop') }}" class="btn btn-outline-info me-2">Manajemen SOP</a>
-                <a href="{{ route('admin.unit.penyewaan.create') }}" class="btn btn-primary">Tambah Alat</a>
+            <div class="d-flex flex-wrap flex-sm-nowrap gap-2 justify-content-md-end flex-shrink-0">
+                <a href="{{ route('admin.unit.penyewaan.sop') }}" class="btn btn-outline-info flex-grow-1 flex-sm-grow-0 text-nowrap"><i class="bx bx-cog me-1"></i> SOP</a>
+                <a href="{{ route('admin.unit.penyewaan.create') }}" class="btn btn-primary flex-grow-1 flex-sm-grow-0 text-nowrap"><i class="bx bx-plus me-1"></i> Tambah</a>
             </div>
         </div>
 
         <!-- Products Grid -->
         @if($barangs->count() > 0)
-            <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+            <div class="row row-cols-2 row-cols-md-3 row-cols-xl-4 g-2 g-md-3">
                 @foreach ($barangs as $barang)
                     <div class="col">
                         <div class="card h-100 product-card">
@@ -28,20 +28,20 @@
                                         <div class="carousel-item active">
                                             <img src="{{ asset('storage/' . $barang->foto) }}" class="card-img-top"
                                                 alt="{{ $barang->nama_barang }}"
-                                                style="height: 300px; object-fit: cover; object-position: center;">
+                                                style="aspect-ratio: 1/1; object-fit: cover; object-position: center; width: 100%;">
                                         </div>
                                         @if ($barang->foto_2)
                                             <div class="carousel-item">
                                                 <img src="{{ asset('storage/' . $barang->foto_2) }}" class="card-img-top"
                                                     alt="{{ $barang->nama_barang }}"
-                                                    style="height: 300px; object-fit: cover; object-position: center;">
+                                                    style="aspect-ratio: 1/1; object-fit: cover; object-position: center; width: 100%;">
                                             </div>
                                         @endif
                                         @if ($barang->foto_3)
                                             <div class="carousel-item">
                                                 <img src="{{ asset('storage/' . $barang->foto_3) }}" class="card-img-top"
                                                     alt="{{ $barang->nama_barang }}"
-                                                    style="height: 300px; object-fit: cover; object-position: center;">
+                                                    style="aspect-ratio: 1/1; object-fit: cover; object-position: center; width: 100%;">
                                             </div>
                                         @endif
                                     </div>
@@ -59,22 +59,22 @@
                             </div>
                             <div class="card-body">
                                 <h5 class="card-title">{{ $barang->nama_barang }}</h5>
-                                <p class="card-text">{{ Str::limit($barang->deskripsi, 100) }}</p>
-                                <div class="d-flex justify-content-between align-items-center">
+                                
+                                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-3">
                                     <span class="badge bg-primary">Rp.
                                         {{ number_format($barang->harga_sewa, 0, ',', '.') }}</span>
                                     <span class="badge bg-success">{{ $barang->stok }} {{ $barang->satuan }}</span>
                                 </div>
-                                <div class="mt-3 d-flex gap-2">
+                                <div class="mt-3 d-flex gap-1 flex-nowrap justify-content-center">
                                     <a href="{{ route('admin.unit.penyewaan.show', $barang->id) }}"
-                                        class="btn btn-sm btn-outline-info">Detail</a>
+                                        class="btn btn-sm btn-outline-info flex-grow-1"><i class="bx bx-info-circle"></i></a>
                                     <a href="{{ route('admin.unit.penyewaan.edit', $barang->id) }}"
-                                        class="btn btn-sm btn-outline-warning">Ubah</a>
+                                        class="btn btn-sm btn-outline-warning flex-grow-1"><i class="bx bx-edit"></i></a>
                                     <form action="{{ route('admin.unit.penyewaan.destroy', $barang->id) }}" method="POST"
-                                        onsubmit="return confirm('Apakah Anda yakin ingin menghapus alat ini?');">
+                                        onsubmit="return confirm('Apakah Anda yakin ingin menghapus alat ini?');" class="d-flex flex-grow-1 m-0 p-0">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-outline-danger">Hapus</button>
+                                        <button type="submit" class="btn btn-sm btn-outline-danger w-100"><i class="bx bx-trash"></i></button>
                                     </form>
                                 </div>
                             </div>

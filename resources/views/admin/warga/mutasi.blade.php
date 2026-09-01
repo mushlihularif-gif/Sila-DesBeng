@@ -64,13 +64,18 @@
 </style>
 
 <div class="container-xxl flex-grow-1 container-p-y animate-fade-up">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4 class="fw-bold py-3 mb-0">
-            <span class="text-muted fw-light">Warga /</span> Mutasi Penduduk (Handshake)
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
+        <h4 class="fw-bold m-0">
+            <span class="text-muted fw-light">Warga /</span> Mutasi Penduduk
         </h4>
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tarikWargaModal">
-            <i class='bx bx-user-plus'></i> Tarik Warga (Lansia/Pindahan)
-        </button>
+        <div class="w-100 w-md-auto d-flex flex-column flex-sm-row justify-content-end gap-2">
+            <button type="button" class="btn btn-warning text-dark w-100" data-bs-toggle="modal" data-bs-target="#dorongWargaModal">
+                <i class='bx bx-export me-1'></i> Mutasi Keluar
+            </button>
+            <button type="button" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#tarikWargaModal">
+                <i class='bx bx-user-plus me-1'></i> Tarik Data Warga
+            </button>
+        </div>
     </div>
 
     @if(session('success'))
@@ -84,6 +89,7 @@
         {{ session('error') }}
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
+
     @endif
 
     <!-- TABS BUTTONS -->
@@ -142,8 +148,10 @@
                                 <td>
                                     @if($p->requested_by == 'user')
                                     <span class="badge bg-label-info">Warga Sendiri</span>
+                                    @elseif($p->requested_by == 'admin_asal')
+                                    <span class="badge bg-label-warning">Anda (Ekspor)</span>
                                     @else
-                                    <span class="badge bg-label-primary">Kades Tujuan</span>
+                                    <span class="badge bg-label-primary">Desa Tujuan</span>
                                     @endif
                                 </td>
                                 <td style="max-width:200px; white-space:pre-wrap;">
@@ -156,6 +164,7 @@
                                 </td>
                                 <td>
                                     <div class="d-flex gap-2">
+                                        @if($p->requested_by != 'admin_asal')
                                         <form action="{{ route('admin.warga.mutasi.approve', $p->id) }}" method="POST">
                                             @csrf
                                             <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Anda yakin melepaskan warga ini? NIK akan dipindah ke desa tujuan.')">
@@ -163,6 +172,9 @@
                                             </button>
                                         </form>
                                         <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#rejectModal{{ $p->id }}">Tahan</button>
+                                        @else
+                                        <span class="badge bg-label-warning"><i class='bx bx-time'></i> Menunggu Desa Tujuan</span>
+                                        @endif
                                     </div>
                                     
                                     <!-- Reject Modal -->
@@ -201,7 +213,7 @@
             <!-- TAB: PENGAJUAN MASUK -->
             <div class="tab-pane fade" id="navs-masuk" role="tabpanel">
                 <div class="alert alert-warning">
-                    <i class='bx bx-time'></i> Daftar warga yang ingin masuk ke desa Anda namun masih menunggu desa lamanya melepaskan data (menunggu Handshake Kades lama).
+                    <i class='bx bx-time'></i> Ini adalah daftar pengajuan mutasi MASUK ke desa Anda. Termasuk warga yang Anda tarik atau warga yang diekspor oleh desa asalnya (menunggu Handshake persetujuan).
                 </div>
                 <div class="table-responsive text-nowrap mt-3">
                     <table class="table table-modern align-middle w-100">
@@ -225,6 +237,8 @@
                                 <td>
                                     @if($p->requested_by == 'user')
                                     <span class="badge bg-label-info">Warga Sendiri</span>
+                                    @elseif($p->requested_by == 'admin_asal')
+                                    <span class="badge bg-label-warning">Desa Asal</span>
                                     @else
                                     <span class="badge bg-label-primary">Anda (Ditarik)</span>
                                     @endif
@@ -238,8 +252,42 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <span class="spinner-border spinner-border-sm text-warning" role="status"></span>
-                                    <span class="text-warning fw-bold ms-1">Menunggu Kades Asal</span>
+                                    @if($p->requested_by == 'admin_asal')
+                                        <div class="d-flex gap-2">
+                                            <form action="{{ route('admin.warga.mutasi.approve', $p->id) }}" method="POST">
+                                                @csrf
+                                                <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Anda yakin menerima warga ini?')">
+                                                    Terima Warga
+                                                </button>
+                                            </form>
+                                            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#rejectModalMasuk{{ $p->id }}">Tolak</button>
+                                        </div>
+                                        @push('modals')
+                                        <div class="modal fade" id="rejectModalMasuk{{ $p->id }}" tabindex="-1" aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-centered">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title">Tolak Masuk: {{ $p->user->name }}</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                    </div>
+                                                    <form action="{{ route('admin.warga.mutasi.reject', $p->id) }}" method="POST">
+                                                        @csrf
+                                                        <div class="modal-body">
+                                                            <label class="form-label">Alasan Penolakan</label>
+                                                            <input type="text" name="rejection_reason" class="form-control" required placeholder="Contoh: Warga tidak melapor ke aparat RT/RW setempat">
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="submit" class="btn btn-danger">Tolak Perpindahan</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        @endpush
+                                    @else
+                                        <span class="spinner-border spinner-border-sm text-warning" role="status"></span>
+                                        <span class="text-warning fw-bold ms-1">Menunggu Desa Asal</span>
+                                    @endif
                                 </td>
                             </tr>
                             @empty
@@ -297,7 +345,7 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Tarik NIK Warga (Untuk Lansia / Pindahan)</h5>
+                <h5 class="modal-title">Tarik Data Warga (Mutasi Masuk)</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form action="{{ route('admin.warga.mutasi.tarik') }}" method="POST">
@@ -308,20 +356,134 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">NIK Warga</label>
-                        <input type="text" name="nik" class="form-control" required placeholder="Masukkan 16 digit NIK">
+                        <select name="nik" class="form-select select2-global" style="width: 100%;" required><option value="">Ketik nama atau NIK...</option></select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Alasan Penarikan</label>
+                        <label class="form-label">Alasan Mutasi Masuk</label>
                         <input type="text" name="reason" class="form-control" required placeholder="Contoh: Warga lansia pindah domisili ikut anaknya">
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary">Lacak & Tarik NIK</button>
+                    <button type="submit" class="btn btn-primary">Lacak & Tarik Data</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+<!-- Modal Mutasi Keluar -->
+<div class="modal fade" id="dorongWargaModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Mutasi Keluar (Ekspor Warga)</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ route('admin.warga.mutasi.push') }}" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <div class="alert alert-warning py-2 mb-4">
+                        Fitur ini melempar data warga Anda ke desa lain. Kepala Desa tujuan harus mengonfirmasi (Handshake) untuk menerima warga ini.
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Cari Warga (Nama/NIK)</label>
+                        <select name="user_id" class="form-select select2-local" style="width: 100%;" required>
+                            <option value="">Ketik nama atau NIK...</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Desa Tujuan</label>
+                        <select name="to_region_id" class="form-select select2-region" style="width: 100%;" required>
+                            <option value="">Pilih Desa Tujuan...</option>
+                            @foreach(\App\Models\Region::where('type', 'desa')->orderBy('name')->get() as $r)
+                                <option value="{{ $r->id }}">{{ $r->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Alasan Mutasi Keluar</label>
+                        <input type="text" name="reason" class="form-control" required placeholder="Contoh: Warga pindah tugas">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-warning text-dark">Ekspor Warga</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@push('styles')
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<style>
+    .select2-container--default .select2-selection--single {
+        height: 38px;
+        border: 1px solid #d9dee3;
+        border-radius: 0.375rem;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 36px;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 36px;
+    }
+</style>
+@endpush
+
+@push('scripts')
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('.select2-global').select2({
+            dropdownParent: $('#tarikWargaModal'),
+            placeholder: 'Ketik nama atau NIK warga...',
+            ajax: {
+                url: '{{ route("admin.warga.mutasi.search-global") }}',
+                dataType: 'json',
+                delay: 250,
+                processResults: function (data) {
+                    return { results: data.results };
+                },
+                cache: true
+            },
+            minimumInputLength: 3
+        });
+
+        $('.select2-local').select2({
+            dropdownParent: $('#dorongWargaModal'),
+            placeholder: 'Ketik nama atau NIK warga...',
+            ajax: {
+                url: '{{ route("admin.warga.mutasi.search-local") }}',
+                dataType: 'json',
+                delay: 250,
+                processResults: function (data) {
+                    return { results: data.results };
+                },
+                cache: true
+            },
+            minimumInputLength: 3
+        });
+        
+        $('.select2-region').select2({
+            dropdownParent: $('#dorongWargaModal'),
+            placeholder: 'Pilih Desa Tujuan...'
+        });
+    });
+</script>
+@endpush
 @endpush
 @endsection
+
+
+
+
+
+
+
+
+
+
+
+

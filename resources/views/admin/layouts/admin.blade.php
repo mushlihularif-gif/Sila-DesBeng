@@ -502,7 +502,7 @@
                                 </li>
                                 @endif
                                 @if(in_array('Fasilitas Umum', $activeServicesMenu ?? []))
-                                <li class="menu-item {{ request()->is('admin/unit/fasilitas_umum*') ? 'active' : '' }}">
+                                <li class="menu-item {{ request()->is('admin/unit/fasilitas_umum*') || request()->is('admin/unit/ambulans*') ? 'active' : '' }}">
                                     <a href="{{ route('admin.unit.fasilitas_umum.index') }}" class="menu-link">
                                         <div data-i18n="Fasilitas Umum">Fasilitas Umum</div>
                                     </a>
@@ -538,7 +538,7 @@
                 @endif
 
                 <!-- Manajemen (Dropdown) -->
-                <li class="menu-item {{ request()->is('admin/manajemen-pengguna*') || request()->is('admin/kelola-wilayah*') || request()->is('admin/banners*') || request()->routeIs('admin.warga.mutasi.*') || request()->routeIs('admin.kyc.*') || request()->routeIs('admin.staff.*') ? 'open active show' : '' }}">
+                <li class="menu-item {{ request()->is('admin/manajemen-pengguna*') || request()->is('admin/kelola-wilayah*') || request()->is('admin/banners*') || request()->routeIs('admin.warga.mutasi.*') || request()->routeIs('admin.kyc.*') || request()->routeIs('admin.staff.*') || request()->routeIs('admin.wilayah-admins.*') ? 'open active show' : '' }}">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
                         <i class="menu-icon tf-icons bx bx-briefcase"></i>
                         <div data-i18n="Manajemen">Manajemen</div>
@@ -552,9 +552,16 @@
                         </li>
                         <li class="menu-item {{ request()->routeIs('admin.staff.*') ? 'active' : '' }}">
                             <a href="{{ route('admin.staff.index') }}" class="menu-link">
-                                <div>Kelola Staf</div>
+                                <div>Staf Layanan</div>
                             </a>
                         </li>
+                        @if(auth()->user()->role === 'admin_desa')
+                        <li class="menu-item {{ request()->routeIs('admin.wilayah-admins.*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.wilayah-admins.index') }}" class="menu-link">
+                                <div>Admin RT & RW</div>
+                            </a>
+                        </li>
+                        @endif
                         <li class="menu-item {{ request()->routeIs('admin.kyc.*') ? 'active' : '' }}">
                             <a href="{{ route('admin.kyc.index') }}" class="menu-link">
                                 <div>Verifikasi Identitas</div>

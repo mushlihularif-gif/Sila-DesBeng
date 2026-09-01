@@ -93,8 +93,8 @@
                                                 <div id="preview_foto" class="preview-container">
                                                     <img src="{{ asset('storage/' . $barang->foto) }}" alt="{{ $barang->nama_barang }}" class="preview-image" />
                                                     <button type="button" class="btn-remove-image" onclick="event.stopPropagation(); clearFile('foto', 'preview_foto')">
-                                                        <i class='bx bx-x'></i>
-                                                    </button>
+                                                    <span style="font-size: 24px; font-weight: bold; line-height: 1; color: white;">&times;</span>
+                                                </button>
                                                 </div>
                                                 <div id="placeholder_foto" class="upload-placeholder" style="display:none;">
                                                     <i class='bx bx-cloud-upload' style="font-size: 48px;"></i>
@@ -105,8 +105,8 @@
                                                 <div id="preview_foto" class="preview-container" style="display:none;">
                                                     <img src="#" alt="Preview" class="preview-image" />
                                                     <button type="button" class="btn-remove-image" onclick="event.stopPropagation(); clearFile('foto', 'preview_foto')">
-                                                        <i class='bx bx-x'></i>
-                                                    </button>
+                                                    <span style="font-size: 24px; font-weight: bold; line-height: 1; color: white;">&times;</span>
+                                                </button>
                                                 </div>
                                                 <div id="placeholder_foto" class="upload-placeholder">
                                                     <i class='bx bx-cloud-upload' style="font-size: 48px;"></i>
@@ -128,8 +128,8 @@
                                                 <div id="preview_foto_2" class="preview-container">
                                                     <img src="{{ asset('storage/' . $barang->foto_2) }}" alt="{{ $barang->nama_barang }}" class="preview-image" />
                                                     <button type="button" class="btn-remove-image" onclick="event.stopPropagation(); clearFile('foto_2', 'preview_foto_2')">
-                                                        <i class='bx bx-x'></i>
-                                                    </button>
+                                                    <span style="font-size: 24px; font-weight: bold; line-height: 1; color: white;">&times;</span>
+                                                </button>
                                                 </div>
                                                 <div id="placeholder_foto_2" class="upload-placeholder" style="display:none;">
                                                     <i class='bx bx-cloud-upload' style="font-size: 48px;"></i>
@@ -140,8 +140,8 @@
                                                 <div id="preview_foto_2" class="preview-container" style="display:none;">
                                                     <img src="#" alt="Preview" class="preview-image" />
                                                     <button type="button" class="btn-remove-image" onclick="event.stopPropagation(); clearFile('foto_2', 'preview_foto_2')">
-                                                        <i class='bx bx-x'></i>
-                                                    </button>
+                                                    <span style="font-size: 24px; font-weight: bold; line-height: 1; color: white;">&times;</span>
+                                                </button>
                                                 </div>
                                                 <div id="placeholder_foto_2" class="upload-placeholder">
                                                     <i class='bx bx-cloud-upload' style="font-size: 48px;"></i>
@@ -163,8 +163,8 @@
                                                 <div id="preview_foto_3" class="preview-container">
                                                     <img src="{{ asset('storage/' . $barang->foto_3) }}" alt="{{ $barang->nama_barang }}" class="preview-image" />
                                                     <button type="button" class="btn-remove-image" onclick="event.stopPropagation(); clearFile('foto_3', 'preview_foto_3')">
-                                                        <i class='bx bx-x'></i>
-                                                    </button>
+                                                    <span style="font-size: 24px; font-weight: bold; line-height: 1; color: white;">&times;</span>
+                                                </button>
                                                 </div>
                                                 <div id="placeholder_foto_3" class="upload-placeholder" style="display:none;">
                                                     <i class='bx bx-cloud-upload' style="font-size: 48px;"></i>
@@ -175,8 +175,8 @@
                                                 <div id="preview_foto_3" class="preview-container" style="display:none;">
                                                     <img src="#" alt="Preview" class="preview-image" />
                                                     <button type="button" class="btn-remove-image" onclick="event.stopPropagation(); clearFile('foto_3', 'preview_foto_3')">
-                                                        <i class='bx bx-x'></i>
-                                                    </button>
+                                                    <span style="font-size: 24px; font-weight: bold; line-height: 1; color: white;">&times;</span>
+                                                </button>
                                                 </div>
                                                 <div id="placeholder_foto_3" class="upload-placeholder">
                                                     <i class='bx bx-cloud-upload' style="font-size: 48px;"></i>
@@ -756,19 +756,15 @@
 
             if (typeof initGlobalCropper === 'function') {
                 initGlobalCropper(input, img || previewId, NaN, true);
-
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                if (img) img.src = e.target.result;
                 if (preview) preview.style.display = 'block';
                 if (placeholder) placeholder.style.display = 'none';
-            } else {
-                // Fallback jika cropper belum dimuat
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    if (img) img.src = e.target.result;
-                    if (preview) preview.style.display = 'block';
-                    if (placeholder) placeholder.style.display = 'none';
-                };
-                reader.readAsDataURL(input.files[0]);
-            }
+            };
+            reader.readAsDataURL(input.files[0]);
         }
     }
 

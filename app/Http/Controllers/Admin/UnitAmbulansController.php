@@ -40,6 +40,7 @@ class UnitAmbulansController extends Controller
             'nama_supir' => 'required|string|max:255',
             'kontak_supir' => 'required|string|max:255',
             'nomor_plat' => 'nullable|string|max:20',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
         
         $validated['kategori'] = 'ambulans';
@@ -47,12 +48,16 @@ class UnitAmbulansController extends Controller
         $validated['harga_sewa'] = 0;
         
         // Simpan nomor plat ke dalam deskripsi atau tambah kolom khusus. 
-        // Jika belum ada kolom nomor_plat, masukkan ke deskripsi sementara
         $validated['deskripsi'] = "Plat: " . ($request->nomor_plat ?? '-');
+        
+        if ($request->hasFile('foto')) {
+            $path = $request->file('foto')->store('unit_layanan/mobil', 'public');
+            $validated['foto'] = $path;
+        }
         
         Mobil::create($validated);
         
-        return redirect()->route('admin.unit.ambulans.index')->with('success', 'Ambulans berhasil ditambahkan');
+        return redirect()->route('admin.unit.ambulans.index')->with('success', 'Kendaraan berhasil ditambahkan');
     }
 
     public function edit($id)
@@ -70,13 +75,22 @@ class UnitAmbulansController extends Controller
             'nama_supir' => 'required|string|max:255',
             'kontak_supir' => 'required|string|max:255',
             'nomor_plat' => 'nullable|string|max:20',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
         
         $validated['deskripsi'] = "Plat: " . ($request->nomor_plat ?? '-');
         
+        if ($request->hasFile('foto')) {
+            if ($ambulans->foto && \Storage::disk('public')->exists($ambulans->foto)) {
+                \Storage::disk('public')->delete($ambulans->foto);
+            }
+            $path = $request->file('foto')->store('unit_layanan/mobil', 'public');
+            $validated['foto'] = $path;
+        }
+        
         $ambulans->update($validated);
         
-        return redirect()->route('admin.unit.ambulans.index')->with('success', 'Ambulans berhasil diubah');
+        return redirect()->route('admin.unit.ambulans.index')->with('success', 'Kendaraan berhasil diubah');
     }
 
     public function destroy($id)

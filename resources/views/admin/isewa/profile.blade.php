@@ -281,10 +281,10 @@
             <!-- Card 1: Rizqy Hamadi Ken -->
             <div class="col-sm-6 col-md-4">
                 <div class="card border-0 shadow-sm dev-card">
-                    <div class="card-body p-4">
+                    <div class="card-body p-4 text-center">
                         <div class="avatar-ring">
                             <div class="avatar-inner">
-                                <img src="{{ asset('User/img/avatars/ken2.png') }}" alt="Rizqy Hamadi Ken">
+                                <img src="{{ asset('User/img/teamsukses/KEN-FOTO.png') }}" alt="Rizqy Hamadi Ken">
                             </div>
                         </div>
                         <h5 class="fw-bold text-dark mb-1">Rizqy Hamadi Ken</h5>
@@ -296,10 +296,10 @@
             <!-- Card 2: Mushlihul Arif -->
             <div class="col-sm-6 col-md-4">
                 <div class="card border-0 shadow-sm dev-card">
-                    <div class="card-body p-4">
+                    <div class="card-body p-4 text-center">
                         <div class="avatar-ring">
                             <div class="avatar-inner">
-                                <img src="{{ asset('User/img/avatars/ayep123.jpg') }}" alt="Mushlihul Arif">
+                                <img src="{{ asset('User/img/teamsukses/ARIF-FOTO.png') }}" alt="Mushlihul Arif">
                             </div>
                         </div>
                         <h5 class="fw-bold text-dark mb-1">Mushlihul Arif</h5>
@@ -311,10 +311,10 @@
             <!-- Card 3: Dicki Wahyudi -->
             <div class="col-sm-6 col-md-4">
                 <div class="card border-0 shadow-sm dev-card">
-                    <div class="card-body p-4">
+                    <div class="card-body p-4 text-center">
                         <div class="avatar-ring">
                             <div class="avatar-inner">
-                                <img src="{{ asset('User/img/avatars/diki.png') }}" alt="Dicki Wahyudi">
+                                <img src="{{ asset('User/img/teamsukses/DIKI-FOTO.png') }}" alt="Dicki Wahyudi">
                             </div>
                         </div>
                         <h5 class="fw-bold text-dark mb-1">Dicki Wahyudi</h5>

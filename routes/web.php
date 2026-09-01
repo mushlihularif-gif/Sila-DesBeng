@@ -425,6 +425,15 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
     Route::get('/kemitraan/{id}/document', [\App\Http\Controllers\Admin\PartnerApplicationController::class, 'document'])->name('admin.kemitraan.document');
     Route::post('/kemitraan/{id}/approve', [\App\Http\Controllers\Admin\PartnerApplicationController::class, 'approve'])->name('admin.kemitraan.approve');
     Route::post('/kemitraan/{id}/reject', [\App\Http\Controllers\Admin\PartnerApplicationController::class, 'reject'])->name('admin.kemitraan.reject');
+
+    // Manajemen Admin Wilayah (RT/RW)
+    Route::get('/wilayah-admins', [\App\Http\Controllers\Admin\RegionAdminManagementController::class, 'index'])->name('admin.wilayah-admins.index');
+    Route::post('/wilayah-admins/store', [\App\Http\Controllers\Admin\RegionAdminManagementController::class, 'store'])->name('admin.wilayah-admins.store');
+    Route::post('/wilayah-admins/promote', [\App\Http\Controllers\Admin\RegionAdminManagementController::class, 'promote'])->name('admin.wilayah-admins.promote');
+    Route::post('/wilayah-admins/{id}/approve', [\App\Http\Controllers\Admin\RegionAdminManagementController::class, 'approveApplication'])->name('admin.wilayah-admins.approve');
+    Route::post('/wilayah-admins/{id}/reject', [\App\Http\Controllers\Admin\RegionAdminManagementController::class, 'rejectApplication'])->name('admin.wilayah-admins.reject');
+    Route::delete('/wilayah-admins/{id}/revoke', [\App\Http\Controllers\Admin\RegionAdminManagementController::class, 'revoke'])->name('admin.wilayah-admins.revoke');
+
     
     // Pengaturan
     Route::get('/settings', [SettingController::class, 'index'])->name('admin.settings');
@@ -465,7 +474,10 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
 
     // Mutasi Penduduk
     Route::get('/warga/mutasi', [\App\Http\Controllers\Admin\MutasiAdminController::class, 'index'])->name('admin.warga.mutasi.index');
+    Route::get('/warga/mutasi/search-global', [\App\Http\Controllers\Admin\MutasiAdminController::class, 'searchGlobal'])->name('admin.warga.mutasi.search-global');
+    Route::get('/warga/mutasi/search-local', [\App\Http\Controllers\Admin\MutasiAdminController::class, 'searchLocal'])->name('admin.warga.mutasi.search-local');
     Route::post('/warga/mutasi/tarik', [\App\Http\Controllers\Admin\MutasiAdminController::class, 'tarikWarga'])->name('admin.warga.mutasi.tarik');
+    Route::post('/warga/mutasi/push', [\App\Http\Controllers\Admin\MutasiAdminController::class, 'pushWarga'])->name('admin.warga.mutasi.push');
     Route::post('/warga/mutasi/{id}/approve', [\App\Http\Controllers\Admin\MutasiAdminController::class, 'approve'])->name('admin.warga.mutasi.approve');
     Route::post('/warga/mutasi/{id}/reject', [\App\Http\Controllers\Admin\MutasiAdminController::class, 'reject'])->name('admin.warga.mutasi.reject');
 
@@ -912,3 +924,4 @@ Route::get('/run-encrypt', function() { \Illuminate\Support\Facades\Artisan::cal
 
 
 Route::get('/test-berita-view', function() { return view('user.wilayah.berita', ['beritas' => collect(), 'jangkauanOptions' => []]); });
+

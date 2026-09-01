@@ -66,7 +66,7 @@
             <div class="tab-content">
                 <!-- TAB 1: KENDARAAN OPERASIONAL -->
                 <div class="tab-pane fade {{ $tab == 'kendaraan' ? 'show active' : '' }}" id="navs-top-kendaraan" role="tabpanel">
-                    <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded-4 shadow-sm">
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 bg-white p-3 rounded-4 shadow-sm gap-3">
                         <div class="d-flex align-items-center">
                             <div class="avatar avatar-md bg-info-subtle text-info rounded-circle me-3 d-flex justify-content-center align-items-center">
                                 <i class="bx bx-car fs-4"></i>
@@ -76,13 +76,13 @@
                                 <small class="text-muted">Ambulans Darurat, Mobil Siaga, Truk Sampah, dll</small>
                             </div>
                         </div>
-                        <div>
-                            <a href="{{ route('admin.unit.ambulans.create') }}" class="btn btn-primary rounded-pill px-4 shadow-sm"><i class="bx bx-plus me-1"></i> Tambah Kendaraan</a>
+                        <div class="w-100 w-md-auto text-end">
+                            <a href="{{ route('admin.unit.ambulans.create') }}" class="btn btn-primary rounded-pill px-4 shadow-sm w-100"><i class="bx bx-plus me-1"></i> Tambah Kendaraan</a>
                         </div>
                     </div>
 
                     @if($mobils->count() > 0)
-                        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+                        <div class="row row-cols-2 row-cols-md-3 row-cols-xl-4 g-2 g-md-3">
                             @foreach ($mobils as $mobil)
                                 <div class="col">
                                     <div class="card h-100 product-card">
@@ -93,21 +93,21 @@
                                                     <div class="carousel-item active">
                                                         <img src="{{ asset('storage/' . $mobil->foto) }}" class="card-img-top"
                                                             alt="{{ $mobil->nama_mobil }}"
-                                                            style="height: 300px; object-fit: cover; object-position: center;">
+                                                            style="aspect-ratio: 1/1; object-fit: cover; object-position: center; width: 100%;">
                                                     </div>
                                                     @endif
                                                     @if ($mobil->foto_2)
                                                         <div class="carousel-item {{ !$mobil->foto ? 'active' : '' }}">
                                                             <img src="{{ asset('storage/' . $mobil->foto_2) }}" class="card-img-top"
                                                                 alt="{{ $mobil->nama_mobil }}"
-                                                                style="height: 300px; object-fit: cover; object-position: center;">
+                                                                style="aspect-ratio: 1/1; object-fit: cover; object-position: center; width: 100%;">
                                                         </div>
                                                     @endif
                                                     @if ($mobil->foto_3)
                                                         <div class="carousel-item {{ !$mobil->foto && !$mobil->foto_2 ? 'active' : '' }}">
                                                             <img src="{{ asset('storage/' . $mobil->foto_3) }}" class="card-img-top"
                                                                 alt="{{ $mobil->nama_mobil }}"
-                                                                style="height: 300px; object-fit: cover; object-position: center;">
+                                                                style="aspect-ratio: 1/1; object-fit: cover; object-position: center; width: 100%;">
                                                         </div>
                                                     @endif
                                                 </div>
@@ -124,20 +124,21 @@
                                             </div>
                                         </div>
                                         <div class="card-body d-flex flex-column">
-                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
                                                 <h5 class="card-title fw-bold text-capitalize mb-0">{{ $mobil->nama_mobil }}</h5>
-                                                <span class="badge bg-label-info rounded-pill px-3">{{ $mobil->kategori }}</span>
+                                                <span class="badge bg-label-info rounded-pill px-3 text-nowrap">{{ $mobil->kategori }}</span>
                                             </div>
-                                            <p class="card-text text-muted flex-grow-1" style="font-size: 0.9rem;">{{ Str::limit($mobil->deskripsi, 80) }}</p>
                                             
-                                            <div class="mt-4 pt-3 border-top d-flex justify-content-end gap-2">
+                                            <div class="mt-4 pt-3 border-top d-flex gap-1 flex-nowrap justify-content-center">
+                                                <a href="{{ route('admin.unit.ambulans.show', $mobil->id) }}"
+                                                    class="btn btn-sm btn-outline-info flex-grow-1"><i class="bx bx-info-circle"></i></a>
                                                 <a href="{{ route('admin.unit.ambulans.edit', $mobil->id) }}"
-                                                    class="btn btn-sm btn-light border text-warning shadow-sm rounded-pill px-3"><i class="bx bx-edit me-1"></i>Ubah</a>
+                                                    class="btn btn-sm btn-outline-warning flex-grow-1"><i class="bx bx-edit"></i></a>
                                                 <form action="{{ route('admin.unit.ambulans.destroy', $mobil->id) }}" method="POST"
-                                                    onsubmit="return confirm('Apakah Anda yakin ingin menghapus kendaraan ini?');">
+                                                    onsubmit="return confirm('Apakah Anda yakin ingin menghapus kendaraan ini?');" class="d-flex flex-grow-1 m-0 p-0">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-light border text-danger shadow-sm rounded-pill px-3"><i class="bx bx-trash me-1"></i>Hapus</button>
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger w-100"><i class="bx bx-trash"></i></button>
                                                 </form>
                                             </div>
                                         </div>
@@ -171,7 +172,7 @@
 
                 <!-- TAB 2: GEDUNG & RUANG PUBLIK -->
                 <div class="tab-pane fade {{ $tab == 'gedung' ? 'show active' : '' }}" id="navs-top-gedung" role="tabpanel">
-                    <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded-4 shadow-sm">
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 bg-white p-3 rounded-4 shadow-sm gap-3">
                         <div class="d-flex align-items-center">
                             <div class="avatar avatar-md bg-success-subtle text-success rounded-circle me-3 d-flex justify-content-center align-items-center">
                                 <i class="bx bx-building-house fs-4"></i>
@@ -181,13 +182,13 @@
                                 <small class="text-muted">Gedung Serbaguna, Balai Pertemuan, Lapangan, dll</small>
                             </div>
                         </div>
-                        <div>
-                            <a href="{{ route('admin.unit.fasilitas_umum.create') }}" class="btn btn-success rounded-pill px-4 shadow-sm"><i class="bx bx-plus me-1"></i> Tambah Gedung</a>
+                        <div class="w-100 w-md-auto text-end">
+                            <a href="{{ route('admin.unit.fasilitas_umum.create') }}" class="btn btn-success rounded-pill px-4 shadow-sm w-100"><i class="bx bx-plus me-1"></i> Tambah Gedung</a>
                         </div>
                     </div>
 
                     @if($fasilitas->count() > 0)
-                        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+                        <div class="row row-cols-2 row-cols-md-3 row-cols-xl-4 g-2 g-md-3">
                             @foreach ($fasilitas as $item)
                                 <div class="col">
                                     <div class="card h-100 product-card">
@@ -198,21 +199,21 @@
                                                     <div class="carousel-item active">
                                                         <img src="{{ asset('storage/' . $item->foto) }}" class="card-img-top"
                                                             alt="{{ $item->nama_fasilitas }}"
-                                                            style="height: 300px; object-fit: cover; object-position: center;">
+                                                            style="aspect-ratio: 1/1; object-fit: cover; object-position: center; width: 100%;">
                                                     </div>
                                                     @endif
                                                     @if ($item->foto_2)
                                                         <div class="carousel-item {{ !$item->foto ? 'active' : '' }}">
                                                             <img src="{{ asset('storage/' . $item->foto_2) }}" class="card-img-top"
                                                                 alt="{{ $item->nama_fasilitas }}"
-                                                                style="height: 300px; object-fit: cover; object-position: center;">
+                                                                style="aspect-ratio: 1/1; object-fit: cover; object-position: center; width: 100%;">
                                                         </div>
                                                     @endif
                                                     @if ($item->foto_3)
                                                         <div class="carousel-item {{ !$item->foto && !$item->foto_2 ? 'active' : '' }}">
                                                             <img src="{{ asset('storage/' . $item->foto_3) }}" class="card-img-top"
                                                                 alt="{{ $item->nama_fasilitas }}"
-                                                                style="height: 300px; object-fit: cover; object-position: center;">
+                                                                style="aspect-ratio: 1/1; object-fit: cover; object-position: center; width: 100%;">
                                                         </div>
                                                     @endif
                                                 </div>
@@ -229,20 +230,21 @@
                                             </div>
                                         </div>
                                         <div class="card-body d-flex flex-column">
-                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
                                                 <h5 class="card-title fw-bold text-capitalize mb-0">{{ $item->nama_fasilitas }}</h5>
-                                                <span class="badge bg-label-success rounded-pill px-3">{{ $item->kategori }}</span>
+                                                <span class="badge bg-label-success rounded-pill px-3 text-nowrap">{{ $item->kategori }}</span>
                                             </div>
-                                            <p class="card-text text-muted flex-grow-1" style="font-size: 0.9rem;">{{ Str::limit($item->deskripsi, 80) }}</p>
                                             
-                                            <div class="mt-4 pt-3 border-top d-flex justify-content-end gap-2">
+                                            <div class="mt-4 pt-3 border-top d-flex gap-1 flex-nowrap justify-content-center">
+                                                <a href="{{ route('admin.unit.fasilitas_umum.show', $item->id) }}"
+                                                    class="btn btn-sm btn-outline-info flex-grow-1"><i class="bx bx-info-circle"></i></a>
                                                 <a href="{{ route('admin.unit.fasilitas_umum.edit', $item->id) }}"
-                                                    class="btn btn-sm btn-light border text-warning shadow-sm rounded-pill px-3"><i class="bx bx-edit me-1"></i>Ubah</a>
+                                                    class="btn btn-sm btn-outline-warning flex-grow-1"><i class="bx bx-edit"></i></a>
                                                 <form action="{{ route('admin.unit.fasilitas_umum.destroy', $item->id) }}" method="POST"
-                                                    onsubmit="return confirm('Apakah Anda yakin ingin menghapus gedung/fasilitas ini?');">
+                                                    onsubmit="return confirm('Apakah Anda yakin ingin menghapus gedung/fasilitas ini?');" class="d-flex flex-grow-1 m-0 p-0">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-light border text-danger shadow-sm rounded-pill px-3"><i class="bx bx-trash me-1"></i>Hapus</button>
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger w-100"><i class="bx bx-trash"></i></button>
                                                 </form>
                                             </div>
                                         </div>
