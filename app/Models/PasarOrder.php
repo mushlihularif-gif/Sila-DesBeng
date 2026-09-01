@@ -83,6 +83,11 @@ class PasarOrder extends Model
         return $this->hasMany(PasarOrderItem::class, 'pasar_order_id');
     }
 
+    public function complaint()
+    {
+        return $this->hasOne(PasarComplaint::class, 'pasar_order_id');
+    }
+
     public static function generateOrderNumber()
     {
         do {

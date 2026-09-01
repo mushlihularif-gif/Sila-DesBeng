@@ -72,7 +72,8 @@ class OcrService
             $imageContent = base64_encode(file_get_contents($imagePath));
             $prompt = 'Ekstrak data dari foto KTP Indonesia ini dan kembalikan HANYA dalam format JSON murni tanpa markdown/backticks: {"nik": "16 digit angka", "name": "nama lengkap", "address": "alamat jalan", "rt": "nomor rt misal 001", "rw": "nomor rw misal 002", "desa": "nama kelurahan/desa", "kecamatan": "nama kecamatan", "gender": "laki-laki/perempuan"}';
 
-            $response = Http::post("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={$geminiApiKey}", [
+            $model = env('GEMINI_MODEL', 'gemini-1.5-flash');
+            $response = Http::post("https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$geminiApiKey}", [
                 'contents' => [
                     [
                         'parts' => [

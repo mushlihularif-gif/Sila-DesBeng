@@ -120,6 +120,38 @@
                 </form>
             </div>
             
+            @if(request('region_id'))
+                @php
+                    $activeRegion = \App\Models\Region::find(request('region_id'));
+                @endphp
+                @if($activeRegion)
+                <div class="mb-6 p-4 bg-gradient-to-r from-blue-50 via-sky-50 to-white rounded-2xl border border-blue-100 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-section">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h3 class="font-bold text-gray-900 text-base">Toko {{ $activeRegion->name }}</h3>
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-100 text-blue-700 uppercase">Toko Resmi</span>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-0.5">Menampilkan seluruh katalog produk dari unit usaha BUMDes {{ $activeRegion->name }}.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 self-start sm:self-auto">
+                        <a href="{{ route('pasar.toko', $activeRegion->id) }}" class="inline-flex items-center justify-center gap-1 px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-xs font-bold text-white transition shadow-sm">
+                            <span>Profil Toko</span>
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        </a>
+                        <a href="{{ route('pasar.index') }}" class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-gray-200 text-xs font-bold text-gray-700 hover:bg-gray-50 transition shadow-sm">
+                            <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            <span>Semua Toko</span>
+                        </a>
+                    </div>
+                </div>
+                @endif
+            @endif
+
             <div class="mb-6 animate-section text-gray-600 font-medium text-sm flex items-center">
                 <svg class="w-5 h-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg> 
                 Menampilkan {{ $produks->count() }} produk untuk Anda
@@ -138,10 +170,10 @@
                 @else
                 
                 <!-- ULFA UI GRID -->
-                <div class="products-grid stagger-children" id="productsGrid">
+                <div class="products-grid" id="productsGrid">
                     @foreach($produks as $produk)
-                    <div class="product-card reveal" data-product-id="{{ $produk->id }}">
-                        <div class="product-image-wrapper">
+                    <div class="product-card" data-product-id="{{ $produk->id }}">
+                        <div class="product-image-wrapper" style="cursor: pointer;" onclick="openOrderModal({{ $produk->id }}, '{{ addslashes($produk->nama_produk) }}', '{{ $produk->foto ? Storage::url($produk->foto) : '' }}', '{{ addslashes($produk->deskripsi ?? 'Tidak ada deskripsi.') }}', {{ $produk->harga }}, {{ $produk->stok ?? 10 }}, 'Toko BUMDes {{ addslashes($produk->region->name ?? 'Desa') }}', '{{ route('pasar.toko', $produk->region_id ?? 1) }}')">
                             @if($produk->foto)
                                 <img src="{{ Storage::url($produk->foto) }}" alt="{{ $produk->nama_produk }}">
                             @else
@@ -155,13 +187,13 @@
                             @endif
                             
                             <div class="product-actions-overlay">
-                                <button class="product-action-btn" title="Lihat Detail" onclick="openOrderModal({{ $produk->id }}, '{{ addslashes($produk->nama_produk) }}', '{{ $produk->foto ? Storage::url($produk->foto) : '' }}', '{{ addslashes($produk->deskripsi ?? 'Tidak ada deskripsi.') }}', {{ $produk->harga }})">
+                                <button type="button" class="product-action-btn" title="Lihat Detail" onclick="event.stopPropagation(); openOrderModal({{ $produk->id }}, '{{ addslashes($produk->nama_produk) }}', '{{ $produk->foto ? Storage::url($produk->foto) : '' }}', '{{ addslashes($produk->deskripsi ?? 'Tidak ada deskripsi.') }}', {{ $produk->harga }}, {{ $produk->stok ?? 10 }}, 'Toko BUMDes {{ addslashes($produk->region->name ?? 'Desa') }}', '{{ route('pasar.toko', $produk->region_id ?? 1) }}')">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                                 </button>
                                 
                                 @auth
                                     @if($produk->stok > 0)
-                                        <button class="product-action-btn" title="Tambah ke Keranjang" onclick="addToCartUI({{ $produk->id }}, '{{ addslashes($produk->nama_produk) }}', '{{ $produk->foto ? Storage::url($produk->foto) : '' }}', {{ $produk->harga }})">
+                                        <button type="button" class="product-action-btn" title="Tambah ke Keranjang" onclick="event.stopPropagation(); addToCartUI({{ $produk->id }}, '{{ addslashes($produk->nama_produk) }}', '{{ $produk->foto ? Storage::url($produk->foto) : '' }}', {{ $produk->harga }})">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
                                         </button>
                                     @endif
@@ -169,18 +201,18 @@
                             </div>
                         </div>
                         <div class="product-info">
-                            <h3 class="product-name" style="font-size: 1.1rem; line-height: 1.4; margin-bottom: 8px;">{{ $produk->nama_produk }}</h3>
+                            <h3 class="product-name" style="font-size: 1.1rem; line-height: 1.4; margin-bottom: 8px; cursor: pointer;" onclick="openOrderModal({{ $produk->id }}, '{{ addslashes($produk->nama_produk) }}', '{{ $produk->foto ? Storage::url($produk->foto) : '' }}', '{{ addslashes($produk->deskripsi ?? 'Tidak ada deskripsi.') }}', {{ $produk->harga }}, {{ $produk->stok ?? 10 }}, 'Toko BUMDes {{ addslashes($produk->region->name ?? 'Desa') }}', '{{ route('pasar.toko', $produk->region_id ?? 1) }}')">{{ $produk->nama_produk }}</h3>
                             <p class="product-desc" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">{{ $produk->deskripsi ?? 'Produk khas daerah Bengkalis.' }}</p>
                             <div class="product-price-row">
                                 <span class="product-price">Rp {{ number_format($produk->harga, 0, ',', '.') }}</span>
                                 
                                 @auth
                                     @if($produk->stok > 0)
-                                        <button class="btn-add-cart" onclick="addToCartUI({{ $produk->id }}, '{{ addslashes($produk->nama_produk) }}', '{{ $produk->foto ? Storage::url($produk->foto) : '' }}', {{ $produk->harga }})">
+                                        <button type="button" class="btn-add-cart" onclick="openOrderModal({{ $produk->id }}, '{{ addslashes($produk->nama_produk) }}', '{{ $produk->foto ? Storage::url($produk->foto) : '' }}', '{{ addslashes($produk->deskripsi ?? 'Tidak ada deskripsi.') }}', {{ $produk->harga }}, {{ $produk->stok ?? 10 }}, 'Toko BUMDes {{ addslashes($produk->region->name ?? 'Desa') }}', '{{ route('pasar.toko', $produk->region_id ?? 1) }}')">
                                             + Keranjang
                                         </button>
                                     @else
-                                        <button class="btn-add-cart" style="background:#e5e7eb; color:#9ca3af; cursor:not-allowed;" disabled>
+                                        <button type="button" class="btn-add-cart" style="background:#e5e7eb; color:#9ca3af; cursor:not-allowed;" disabled>
                                             Habis
                                         </button>
                                     @endif
@@ -207,30 +239,36 @@
          ============================================ -->
     <div class="cart-overlay" id="cartOverlay"></div>
     <div class="cart-sidebar" id="cartSidebar">
-        <div class="cart-header">
-            <h3>
-                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
-                Keranjang Belanja
-            </h3>
-            <button class="cart-close" id="closeCartBtn">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        <div class="cart-header" style="display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; border-bottom: 1px solid #e2e8f0; background: #ffffff;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 38px; height: 38px; border-radius: 12px; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; border: 1px solid #bae6fd;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+                </div>
+                <div>
+                    <h3 style="font-size: 15px; font-weight: 800; color: #0f172a; margin: 0; line-height: 1.2;">Keranjang Belanja</h3>
+                    <p style="font-size: 11px; color: #64748b; margin: 2px 0 0 0;" id="cartHeaderSubtitle">Produk Desa Pilihan</p>
+                </div>
+            </div>
+            <button class="cart-close" id="closeCartBtn" title="Tutup Keranjang" style="width: 32px; height: 32px; border-radius: 50%; background: #f1f5f9; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #64748b; transition: all 0.2s;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
         </div>
-        <div class="cart-items" id="cartItems">
+        <div class="cart-items" id="cartItems" style="padding: 16px; background: #f8fafc; overflow-y: auto; flex: 1;">
             <!-- Cart items will be rendered here by JS -->
         </div>
-        <div class="cart-footer" id="cartFooter" style="display: none;">
-            <div class="cart-subtotal">
+        <div class="cart-footer" id="cartFooter" style="display: none; background: #ffffff; border-top: 1px solid #e2e8f0; padding: 16px 20px;">
+            <div class="cart-subtotal" style="display: flex; justify-content: space-between; font-size: 13px; color: #64748b; margin-bottom: 6px;">
                 <span>Subtotal (<span id="cartTotalItems">0</span> item)</span>
-                <span id="cartSubtotal">Rp 0</span>
+                <span id="cartSubtotal" style="font-weight: 700; color: #1e293b;">Rp 0</span>
             </div>
-            <div class="cart-total">
-                <span>Total</span>
-                <span id="cartTotal">Rp 0</span>
+            <div class="cart-total" style="display: flex; justify-content: space-between; font-size: 16px; font-weight: 800; color: #0f172a; margin-bottom: 16px;">
+                <span>Total Belanja</span>
+                <span id="cartTotal" style="color: #115789;">Rp 0</span>
             </div>
-            <a href="{{ route('pasar.cart') }}" class="btn-checkout" style="text-align: center; display: block; background: linear-gradient(135deg, #a78bfa, #7c3aed); text-decoration: none;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                Lanjut Pembayaran
+            <a href="{{ route('pasar.checkout') }}" class="btn-checkout" style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 13px 16px; background: linear-gradient(135deg, #115789, #0284c7); color: white; font-weight: 700; font-size: 14px; border-radius: 12px; text-decoration: none; box-shadow: 0 4px 14px rgba(17, 87, 137, 0.25); transition: all 0.2s;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+                <span>Lanjut ke Checkout</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
             </a>
         </div>
     </div>
@@ -238,60 +276,109 @@
     <!-- ============================================
          ORDER MODAL
          ============================================ -->
+    <!-- ============================================
+         ORDER MODAL (MODERN MARKETPLACE REDESIGN)
+         ============================================ -->
     <div class="modal-overlay" id="orderModalOverlay">
-        <div class="modal" id="orderModal">
-            <div class="modal-header">
-                <h3>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-                    Detail Produk
-                </h3>
-                <button class="modal-close" id="closeModalBtn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        <div class="ps-quick-modal" id="orderModal">
+            <!-- Modal Header -->
+            <div class="ps-modal-header">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-blue-50 text-[#115789] flex items-center justify-center flex-shrink-0 shadow-sm border border-blue-100/80">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-900 text-lg leading-tight">Detail Produk</h3>
+                        <p class="text-xs text-gray-500 mt-0.5">Atur jumlah pesanan ke keranjang belanja</p>
+                    </div>
+                </div>
+                <button type="button" class="ps-modal-close-btn" id="closeModalBtn" title="Tutup Modal">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
             </div>
-            <div class="modal-body">
-                <div class="modal-product">
-                    <div class="modal-product-image">
-                        <img id="modalProductImage" src="" alt="">
+
+            <!-- Modal Body -->
+            <div class="ps-modal-body">
+                <!-- Product Card Preview -->
+                <div class="ps-modal-product-card">
+                    <div class="ps-modal-product-img-wrap">
+                        <img id="modalProductImage" src="" alt="Produk">
                     </div>
-                    <div class="modal-product-info">
-                        <h4 id="modalProductName"></h4>
-                        <p class="modal-product-desc" id="modalProductDesc"></p>
-                        <p class="modal-product-price" id="modalProductPrice"></p>
-                    </div>
-                </div>
-                <div class="modal-qty-section">
-                    <label>Jumlah Pesanan</label>
-                    <div class="modal-qty-controls">
-                        <button onclick="changeModalQty(-1)">-</button>
-                        <span id="modalQty">1</span>
-                        <button onclick="changeModalQty(1)">+</button>
+                    <div class="flex-1 min-w-0">
+                        <h4 id="modalProductName" class="font-extrabold text-gray-900 text-base leading-snug line-clamp-1"></h4>
+                        <p class="text-xs text-gray-500 line-clamp-2 mt-1 leading-relaxed" id="modalProductDesc"></p>
+                        <div class="mt-2 flex items-baseline gap-2">
+                            <span class="text-lg font-black text-[#115789]" id="modalProductPrice">Rp 0</span>
+                        </div>
                     </div>
                 </div>
-                <div class="modal-calculation" id="modalCalcSection">
-                    <div class="modal-calc-row">
-                        <span class="calc-label">Harga Satuan</span>
-                        <span id="modalUnitPrice">Rp 0</span>
+
+                <!-- Clickable Store Bar -->
+                <a id="modalStoreLink" href="#" class="ps-modal-store-bar" title="Kunjungi Toko">
+                    <div class="ps-modal-store-left">
+                        <div class="ps-modal-store-icon">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                        </div>
+                        <div class="min-w-0">
+                            <span class="ps-modal-store-label">Toko Penjual</span>
+                            <span id="modalStoreName" class="ps-modal-store-name">Toko BUMDes</span>
+                        </div>
                     </div>
-                    <div class="modal-calc-row">
-                        <span class="calc-label">Jumlah</span>
-                        <span id="modalQtyDisplay">x 1</span>
+                    <div class="ps-modal-store-arrow">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
                     </div>
-                    <div class="modal-calc-row">
-                        <span>Total Harga</span>
-                        <span id="modalTotalPrice">Rp 0</span>
+                </a>
+
+                <!-- Quantity Control -->
+                <div class="ps-modal-qty-box">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <span class="text-xs font-bold uppercase tracking-wider text-gray-500">Jumlah Pesanan</span>
+                            <p class="text-[11px] text-gray-400">Atur kuantitas barang</p>
+                        </div>
+                        <div class="ps-modal-stepper">
+                            <button type="button" onclick="changeModalQty(-1)" class="ps-modal-step-btn" title="Kurang">-</button>
+                            <span id="modalQty" class="ps-modal-step-val">1</span>
+                            <button type="button" onclick="changeModalQty(1)" class="ps-modal-step-btn" title="Tambah">+</button>
+                        </div>
                     </div>
                 </div>
-                <div class="modal-footer">
+
+                <!-- Calculation Card -->
+                <div class="ps-modal-calc-card" id="modalCalcSection">
+                    <div class="flex justify-between items-center text-xs text-gray-600">
+                        <span>Harga Satuan</span>
+                        <span id="modalUnitPrice" class="font-semibold text-gray-800">Rp 0</span>
+                    </div>
+                    <div class="flex justify-between items-center text-xs text-gray-600">
+                        <span>Jumlah</span>
+                        <span id="modalQtyDisplay" class="font-semibold text-gray-800">x 1</span>
+                    </div>
+                    <div class="pt-2.5 mt-1 border-t border-blue-100/80 flex justify-between items-center">
+                        <span class="font-bold text-gray-800 text-sm">Total Harga</span>
+                        <span id="modalTotalPrice" class="font-black text-lg text-[#115789]">Rp 0</span>
+                    </div>
+                </div>
+
+                <!-- Footer Buttons -->
+                <div class="ps-modal-actions">
+                    <button type="button" class="ps-modal-btn-cancel" onclick="closeOrderModal()">
+                        Batal
+                    </button>
                     @auth
-                    <button class="btn btn-gradient" onclick="addToCartFromModal()">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
-                        Tambah ke Keranjang
+                    <button type="button" class="ps-modal-btn-cart" onclick="addToCartFromModal(false)">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+                        + Keranjang
+                    </button>
+                    <button type="button" class="ps-modal-btn-buy" onclick="addToCartFromModal(true)">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                        Beli Langsung
                     </button>
                     @else
-                    <a href="javascript:void(0)" onclick="document.getElementById('btn-open-login').click(); closeOrderModal();" class="btn btn-gradient">Login untuk Beli</a>
+                    <a href="javascript:void(0)" onclick="document.getElementById('btn-open-login').click(); closeOrderModal();" class="ps-modal-btn-buy text-center" style="text-decoration:none;">
+                        Login untuk Beli
+                    </a>
                     @endauth
-                    <button class="btn btn-outline-primary" onclick="closeOrderModal()" style="color:#7c3aed; border-color:#7c3aed; background:transparent;">Batal</button>
                 </div>
             </div>
         </div>
@@ -309,6 +396,18 @@
 <link rel="stylesheet" href="{{ asset('css/pasar-daerah.css') }}">
 <style>
     * { font-family: 'Inter', sans-serif; }
+    
+    /* Instant Rendering - Eliminasi Blank / Delay Putih */
+    .animate-section {
+        opacity: 1 !important;
+        transform: none !important;
+        animation: none !important;
+    }
+    .product-card {
+        opacity: 1 !important;
+        transform: none !important;
+        visibility: visible !important;
+    }
     
     /* Premium UI Styles for Pasar Daerah (Marketplace Style) */
     .ps-marketplace-header {
@@ -549,6 +648,7 @@
         margin-bottom: 8px;
         display: -webkit-box;
         -webkit-line-clamp: 2;
+        line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
         text-decoration: none;
@@ -631,6 +731,291 @@
         box-shadow: none;
         transform: none;
     }
+
+    /* ===== MODERN ORDER MODAL STYLING ===== */
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.65);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        padding: 16px;
+    }
+    .modal-overlay.open {
+        opacity: 1;
+        visibility: visible;
+    }
+    .ps-quick-modal {
+        background: #ffffff;
+        border-radius: 1.5rem;
+        width: 100%;
+        max-width: 480px;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        transform: scale(0.92) translateY(20px);
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .modal-overlay.open .ps-quick-modal {
+        transform: scale(1) translateY(0);
+    }
+    .ps-modal-header {
+        padding: 1.25rem 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid #f1f5f9;
+        background: #ffffff;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+    .ps-modal-close-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 9999px;
+        background: #f1f5f9;
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .ps-modal-close-btn:hover {
+        background: #fee2e2;
+        color: #ef4444;
+        transform: rotate(90deg);
+    }
+    .ps-modal-body {
+        padding: 1.5rem;
+    }
+    .ps-modal-product-card {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        background: #f8fafc;
+        padding: 1rem;
+        border-radius: 1rem;
+        border: 1px solid #e2e8f0;
+        margin-bottom: 1.25rem;
+    }
+    .ps-modal-product-img-wrap {
+        width: 76px;
+        height: 76px;
+        border-radius: 0.75rem;
+        background: #ffffff;
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .ps-modal-product-img-wrap img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .ps-modal-store-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 14px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 1rem;
+        margin-bottom: 1.25rem;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+    .ps-modal-store-bar:hover {
+        background: #f0f9ff;
+        border-color: #bae6fd;
+        transform: translateY(-1px);
+    }
+    .ps-modal-store-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+    }
+    .ps-modal-store-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 0.65rem;
+        background: #e0f2fe;
+        color: #0369a1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        transition: all 0.2s ease;
+    }
+    .ps-modal-store-bar:hover .ps-modal-store-icon {
+        background: #115789;
+        color: #ffffff;
+    }
+    .ps-modal-store-label {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: #94a3b8;
+        display: block;
+        line-height: 1.2;
+    }
+    .ps-modal-store-name {
+        font-size: 13px;
+        font-weight: 800;
+        color: #1e293b;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        transition: color 0.2s ease;
+    }
+    .ps-modal-store-bar:hover .ps-modal-store-name {
+        color: #115789;
+    }
+    .ps-modal-store-arrow {
+        color: #94a3b8;
+        display: flex;
+        align-items: center;
+        flex-shrink: 0;
+        transition: transform 0.2s ease, color 0.2s ease;
+    }
+    .ps-modal-store-bar:hover .ps-modal-store-arrow {
+        color: #115789;
+        transform: translateX(3px);
+    }
+    .ps-modal-qty-box {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        padding: 0.875rem 1rem;
+        border-radius: 1rem;
+        margin-bottom: 1.25rem;
+    }
+    .ps-modal-stepper {
+        display: inline-flex;
+        align-items: center;
+        border: 1.5px solid #cbd5e1;
+        border-radius: 0.75rem;
+        overflow: hidden;
+        background: #ffffff;
+    }
+    .ps-modal-step-btn {
+        width: 36px;
+        height: 36px;
+        border: none;
+        background: #f8fafc;
+        color: #334155;
+        font-weight: bold;
+        font-size: 1.125rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.15s;
+    }
+    .ps-modal-step-btn:hover {
+        background: #e2e8f0;
+        color: #115789;
+    }
+    .ps-modal-step-val {
+        width: 44px;
+        text-align: center;
+        font-weight: 800;
+        font-size: 0.9375rem;
+        color: #0f172a;
+    }
+    .ps-modal-calc-card {
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        border: 1px solid #bae6fd;
+        border-radius: 1rem;
+        padding: 1.125rem 1.25rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    .ps-modal-actions {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+    }
+    .ps-modal-btn-cancel {
+        padding: 0.75rem 1rem;
+        border-radius: 0.75rem;
+        border: 1.5px solid #e2e8f0;
+        background: #ffffff;
+        color: #64748b;
+        font-weight: 700;
+        font-size: 0.8125rem;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .ps-modal-btn-cancel:hover {
+        background: #f8fafc;
+        color: #1e293b;
+        border-color: #cbd5e1;
+    }
+    .ps-modal-btn-cart {
+        flex: 1;
+        padding: 0.75rem 1rem;
+        border-radius: 0.75rem;
+        border: 1.5px solid #0284c7;
+        background: #f0f9ff;
+        color: #0284c7;
+        font-weight: 700;
+        font-size: 0.8125rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.35rem;
+        transition: all 0.2s;
+    }
+    .ps-modal-btn-cart:hover {
+        background: #e0f2fe;
+        border-color: #0369a1;
+        color: #0369a1;
+        transform: translateY(-1px);
+    }
+    .ps-modal-btn-buy {
+        flex: 1.15;
+        padding: 0.75rem 1rem;
+        border-radius: 0.75rem;
+        border: none;
+        background: linear-gradient(135deg, #115789 0%, #0284c7 100%);
+        color: #ffffff;
+        font-weight: 700;
+        font-size: 0.8125rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.35rem;
+        box-shadow: 0 4px 14px rgba(17, 87, 137, 0.3);
+        transition: all 0.25s;
+    }
+    .ps-modal-btn-buy:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(17, 87, 137, 0.4);
+    }
+    .ps-modal-btn-buy:active {
+        transform: translateY(0);
+    }
 </style>
 @endpush
 
@@ -705,36 +1090,64 @@
     function fetchCartItems() {
         const cartItemsContainer = document.getElementById('cartItems');
         const cartFooter = document.getElementById('cartFooter');
+        const subtitle = document.getElementById('cartHeaderSubtitle');
         
-        cartItemsContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #64748b;">Loading...</div>';
+        cartItemsContainer.innerHTML = `
+            <div style="padding: 40px 20px; text-align: center; color: #64748b; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
+                <div class="ps-spinner" style="width: 32px; height: 32px; border: 3px solid #e2e8f0; border-top-color: #115789; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 12px;"></div>
+                <p style="font-size: 13px; font-weight: 500; color: #64748b; margin: 0;">Memuat keranjang...</p>
+            </div>
+        `;
         
         fetch("{{ route('pasar.cart.api') }}")
             .then(res => res.json())
             .then(data => {
                 if(data.success) {
                     if(data.items.length === 0) {
+                        if (subtitle) subtitle.textContent = '0 Produk';
                         cartItemsContainer.innerHTML = `
-                            <div style="padding: 40px 20px; text-align: center; color: #94a3b8; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
-                                <svg style="width: 48px; height: 48px; margin-bottom: 16px; opacity: 0.5;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                                <p>Keranjang Anda masih kosong</p>
+                            <div style="padding: 48px 20px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
+                                <div style="width: 68px; height: 68px; border-radius: 20px; background: #e0f2fe; border: 1px solid #bae6fd; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; color: #0284c7;">
+                                    <svg style="width: 32px; height: 32px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                                </div>
+                                <h4 style="font-size: 15px; font-weight: 700; color: #0f172a; margin-bottom: 6px;">Keranjang Masih Kosong</h4>
+                                <p style="font-size: 12px; color: #64748b; margin-bottom: 20px; max-width: 220px; line-height: 1.5;">Pilih produk unggulan desa dan masukkan ke keranjang belanja.</p>
+                                <button type="button" onclick="closeCart()" style="background: #115789; color: white; font-size: 12px; font-weight: 700; padding: 9px 20px; border-radius: 10px; border: none; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 8px rgba(17, 87, 137, 0.25);">
+                                    Mulai Belanja
+                                </button>
                             </div>
                         `;
                         cartFooter.style.display = 'none';
                     } else {
+                        if (subtitle) subtitle.textContent = `${data.total_items} Produk Terpilih`;
                         let html = '';
                         data.items.forEach(item => {
                             let imageHtml = item.foto_url 
-                                ? `<img src="${item.foto_url}" alt="${item.nama_produk}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">`
-                                : `<div style="width: 60px; height: 60px; background: #f1f5f9; border-radius: 8px; display: flex; align-items: center; justify-content: center;"><svg style="width: 24px; height: 24px; color: #cbd5e1;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></div>`;
+                                ? `<img src="${item.foto_url}" alt="${escapeHtml(item.nama_produk)}" style="width: 100%; height: 100%; object-fit: cover;">`
+                                : `<div style="width: 100%; height: 100%; background: #f1f5f9; display: flex; align-items: center; justify-content: center;"><svg style="width: 24px; height: 24px; color: #cbd5e1;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></div>`;
                                 
                             html += `
-                                <div class="cart-item" style="display: flex; gap: 16px; padding: 16px; border-bottom: 1px solid #f1f5f9;">
-                                    ${imageHtml}
-                                    <div style="flex: 1;">
-                                        <h4 style="font-size: 14px; font-weight: 600; color: #1e293b; margin-bottom: 4px; line-height: 1.4;">${item.nama_produk}</h4>
-                                        <div style="font-size: 14px; font-weight: 700; color: #3b82f6; margin-bottom: 8px;">${formatRupiah(item.harga)}</div>
-                                        <div style="display: flex; align-items: center; justify-content: space-between;">
-                                            <div style="font-size: 13px; color: #64748b;">Kuantitas: ${item.quantity}</div>
+                                <div class="drawer-cart-card" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 12px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); display: flex; gap: 12px; align-items: flex-start; transition: all 0.2s;">
+                                    <div style="width: 64px; height: 64px; border-radius: 10px; overflow: hidden; background: #f8fafc; border: 1px solid #e2e8f0; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
+                                        ${imageHtml}
+                                    </div>
+                                    <div style="flex: 1; min-width: 0;">
+                                        <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 6px;">
+                                            <h4 style="font-size: 13px; font-weight: 700; color: #1e293b; line-height: 1.35; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml(item.nama_produk)}</h4>
+                                            <button type="button" onclick="removeFromDrawerCart(${item.id})" style="background: none; border: none; padding: 2px 4px; color: #94a3b8; cursor: pointer; border-radius: 6px; transition: color 0.2s;" title="Hapus item" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#94a3b8'">
+                                                <svg style="width: 15px; height: 15px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                            </button>
+                                        </div>
+                                        <div style="font-size: 13px; font-weight: 800; color: #115789; margin: 3px 0;">${formatRupiah(item.harga)}</div>
+                                        <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 6px;">
+                                            <div style="display: inline-flex; align-items: center; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; background: #f8fafc;">
+                                                <button type="button" onclick="updateDrawerQty(${item.id}, ${item.quantity - 1})" style="width: 24px; height: 24px; border: none; background: #ffffff; color: #475569; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 13px; transition: background 0.15s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#ffffff'">-</button>
+                                                <span style="min-width: 26px; text-align: center; font-size: 12px; font-weight: 700; color: #1e293b;">${item.quantity}</span>
+                                                <button type="button" onclick="updateDrawerQty(${item.id}, ${item.quantity + 1})" style="width: 24px; height: 24px; border: none; background: #ffffff; color: #475569; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 13px; transition: background 0.15s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#ffffff'">+</button>
+                                            </div>
+                                            <div style="font-size: 11px; color: #64748b;">
+                                                Subtotal: <strong style="color: #0f172a; font-weight: 700;">${formatRupiah(item.harga * item.quantity)}</strong>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -758,8 +1171,60 @@
                 }
             })
             .catch(err => {
-                cartItemsContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #ef4444;">Gagal memuat keranjang.</div>';
+                cartItemsContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #ef4444; font-size: 13px;">Gagal memuat keranjang.</div>';
             });
+    }
+
+    function updateDrawerQty(cartId, newQty) {
+        if (newQty < 1) {
+            removeFromDrawerCart(cartId);
+            return;
+        }
+
+        fetch("{{ route('pasar.cart.update') }}", {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": "{{ csrf_token() }}"
+            },
+            body: JSON.stringify({
+                cart_id: cartId,
+                quantity: newQty
+            })
+        }).then(res => res.json())
+          .then(data => {
+            if(data.success) {
+                fetchCartItems();
+            } else {
+                showToast(data.message || 'Gagal mengubah kuantitas.');
+            }
+        }).catch(err => {
+            showToast('Terjadi kesalahan jaringan.');
+        });
+    }
+
+    function removeFromDrawerCart(cartId) {
+        fetch(`{{ url('/pasar-daerah/cart/remove') }}/${cartId}`, {
+            method: "DELETE",
+            headers: {
+                "X-CSRF-TOKEN": "{{ csrf_token() }}"
+            }
+        }).then(res => res.json())
+          .then(data => {
+            if(data.success) {
+                showToast('Item berhasil dihapus dari keranjang.');
+                fetchCartItems();
+            }
+        }).catch(err => {
+            showToast('Gagal menghapus item.');
+        });
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 
     // Replace the header cart link behavior
@@ -777,8 +1242,8 @@
     // ============================================
     // ORDER MODAL
     // ============================================
-    function openOrderModal(id, name, img, desc, price) {
-        currentModalProduct = { id, name, img, desc, price };
+    function openOrderModal(id, name, img, desc, price, stock = 10, storeName = '', storeUrl = '') {
+        currentModalProduct = { id, name, img, desc, price, stock, storeName, storeUrl };
         modalQty = 1;
 
         const imgEl = document.getElementById('modalProductImage');
@@ -793,6 +1258,18 @@
         document.getElementById('modalProductName').textContent = name;
         document.getElementById('modalProductDesc').textContent = desc;
         document.getElementById('modalProductPrice').textContent = formatRupiah(price);
+
+        const storeLinkEl = document.getElementById('modalStoreLink');
+        const storeNameEl = document.getElementById('modalStoreName');
+        if (storeLinkEl && storeNameEl) {
+            if (storeName && storeUrl) {
+                storeNameEl.textContent = storeName;
+                storeLinkEl.href = storeUrl;
+                storeLinkEl.style.display = 'flex';
+            } else {
+                storeLinkEl.style.display = 'none';
+            }
+        }
 
         updateModalCalc();
 
@@ -824,10 +1301,12 @@
         document.getElementById('modalTotalPrice').textContent = formatRupiah(total);
     }
 
-    function addToCartFromModal() {
+    function addToCartFromModal(isDirectBuy = false) {
         if (!currentModalProduct) return;
 
-        showToast(`${currentModalProduct.name} (${modalQty}x) ditambahkan ke keranjang!`);
+        if (!isDirectBuy) {
+            showToast(`${currentModalProduct.name} (${modalQty}x) ditambahkan ke keranjang!`);
+        }
         
         fetch("{{ route('pasar.cart.add') }}", {
             method: "POST",
@@ -837,11 +1316,21 @@
             },
             body: JSON.stringify({
                 pasar_produk_id: currentModalProduct.id,
-                quantity: modalQty
+                quantity: modalQty,
+                is_direct_buy: isDirectBuy ? 1 : 0
             })
-        }).then(res => {
+        }).then(res => res.json())
+          .then(data => {
             closeOrderModal();
-            fetchCartItems(); 
+            if (isDirectBuy) {
+                window.location.href = "{{ route('pasar.checkout') }}";
+            } else {
+                fetchCartItems(); 
+            }
+        }).catch(err => {
+            if (isDirectBuy) {
+                window.location.href = "{{ route('pasar.checkout') }}";
+            }
         });
     }
 
@@ -849,6 +1338,22 @@
     document.getElementById('orderModalOverlay')?.addEventListener('click', function(e) {
         if (e.target === this) closeOrderModal();
     });
+
+    // Auto-open modal if ?product=ID is present in URL (e.g. from Beranda popular section)
+    (() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const targetProductId = urlParams.get('product');
+        if (targetProductId) {
+            const targetCard = document.querySelector(`.product-card[data-product-id="${targetProductId}"]`);
+            if (targetCard) {
+                targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                const actionBtn = targetCard.querySelector('.product-action-btn[title="Lihat Detail"]') || targetCard;
+                if (actionBtn) {
+                    setTimeout(() => actionBtn.click(), 400);
+                }
+            }
+        }
+    })();
 
     // ============================================
     // SCROLL REVEAL ANIMATION (ULFA)

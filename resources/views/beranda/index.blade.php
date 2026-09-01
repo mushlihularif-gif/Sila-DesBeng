@@ -59,10 +59,10 @@
                     <div id="carousel-slides" class="flex transition-transform duration-500 ease-out w-full">
                         <!-- Default Fallback Slides (Selalu Tampil sebagai Slide 1 & 2) -->
                         <div class="carousel-slide w-full min-w-full flex-shrink-0 relative">
-                            <img src="{{ asset('User/img/elemen/kuncislide1r.png') }}" class="w-full object-cover object-center" style="height: 500px; max-height: 60vh; min-height: 250px;">
+                            <img src="{{ asset('User/img/elemen/kuncislide1r.png') }}" class="w-full h-auto object-contain object-top" style="max-height: 500px;">
                         </div>
                         <div class="carousel-slide w-full min-w-full flex-shrink-0 relative">
-                            <img src="{{ asset('User/img/elemen/kuncislide2r.png') }}" class="w-full object-cover object-center" style="height: 500px; max-height: 60vh; min-height: 250px;">
+                            <img src="{{ asset('User/img/elemen/kuncislide2r.png') }}" class="w-full h-auto object-contain object-top" style="max-height: 500px;">
                         </div>
 
                         <!-- Banner Dinamis dari Admin (Tampil sebagai Slide 3 dst) -->
@@ -75,7 +75,7 @@
                                 @endif
                                     <img src="{{ Storage::url($banner->image_path) }}" alt="{{ $banner->title ?? 'Banner Tambahan ' . ($index + 1) }}"
                                         loading="lazy"
-                                        class="w-full object-cover object-center" style="height: 500px; max-height: 60vh; min-height: 250px;">
+                                        class="w-full h-auto object-contain object-top" style="max-height: 500px;">
                                 @if($banner->target_url)
                                 </a>
                                 @endif
@@ -207,7 +207,7 @@
                         @forelse($popularProducts as $item)
                         <!-- Product Card -->
                         <div class="flex flex-col items-center">
-                            <div onclick="window.location.href='{{ $item->link }}'"
+                            <div onclick="window.location.href='{{ $item->type === 'pasar' ? route('pasar.index') . '?product=' . $item->id : $item->link }}'"
                                 class="bg-white/80 backdrop-blur-sm rounded-lg border border-white shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer w-full max-w-[280px]">
                                 <div
                                     class="aspect-square p-4 flex items-center justify-center bg-gradient-to-br from-white/50 to-blue-50/30 relative">
@@ -240,7 +240,7 @@
             @if(isset($recentAnnouncements) && $recentAnnouncements->count() > 0)
             <div id="kabar-daerah-section" class="max-w-7xl mx-auto px-6 py-12 relative">
                 <!-- Decorative background elements -->
-                <div class="absolute top-0 right-0 w-64 h-64 bg-yellow-400/5 rounded-full filter blur-3xl"></div>
+                <div class="absolute top-0 right-0 w-32 h-32 md:w-64 md:h-64 bg-yellow-400/5 rounded-full filter blur-3xl"></div>
                 <div class="absolute bottom-0 left-0 w-80 h-80 bg-[#115789]/5 rounded-full filter blur-3xl"></div>
                 
                 <div class="max-w-7xl mx-auto relative z-10">
@@ -483,7 +483,7 @@
                             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-5">
                                 <h3 class="text-xl font-bold text-gray-800 mb-3 md:mb-0">Kinerja Layanan</h3>
                             </div>
-                            <div class="bg-white/30 backdrop-blur-sm rounded-2xl p-5 border border-white/20">
+                            <div class="bg-white/30 backdrop-blur-sm rounded-2xl p-2 md:p-5 border border-white/20 max-w-full overflow-hidden">
                                 <div id="kinerjaChart" class="w-full min-h-[300px]" data-chart='@json($kinerjaData)'></div>
                             </div>
                         </div>

@@ -8,6 +8,18 @@
 
     .cart-page { min-height: 80vh; position: relative; }
 
+    /* Responsive Navbar Wrapper */
+    .cart-page-wrapper {
+        padding-top: 145px;
+        transition: padding-top 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    body.navbar-is-hidden .cart-page-wrapper {
+        padding-top: 50px;
+    }
+    body.navbar-is-hidden #summary-card {
+        top: 25px !important;
+    }
+
     /* Animated Background */
     .cart-bg {
         position: fixed; inset: 0; z-index: 0;
@@ -320,9 +332,7 @@
 @endpush
 
 @section('page')
-<div class="cart-bg"></div>
-
-<div id="main-content" class="cart-page relative z-10 pb-20" style="transition: padding-top 0.3s ease-in-out; padding-top: 50px;">
+<div id="main-content" class="cart-page cart-page-wrapper relative z-10 pb-20">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
 
         @if(session('error'))
@@ -387,14 +397,23 @@
                     </div>
 
                     @foreach($groupedCarts as $storeName => $storeCarts)
-                    <div>
+                        @php
+                            $firstCart = $storeCarts->first();
+                            $regionId = $firstCart->produk->region_id ?? null;
+                            $storeUrl = $regionId ? route('pasar.toko', $regionId) : '#';
+                        @endphp
+                        <div>
                         <!-- Store Header -->
-                        <div class="store-header">
-                            <div class="store-icon">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                        <div class="store-header flex items-center justify-between">
+                            <div class="flex items-center gap-2.5">
+                                <div class="store-icon">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                                </div>
+                                <a href="{{ $storeUrl }}" class="store-name hover:text-[#115789] transition-colors" title="Kunjungi Toko {{ $storeName }}">
+                                    {{ $storeName }}
+                                </a>
+                                <span class="store-badge">Toko Resmi</span>
                             </div>
-                            <span class="store-name">{{ $storeName }}</span>
-                            <span class="store-badge">Toko Resmi</span>
                         </div>
 
                         <!-- Items -->
@@ -454,20 +473,6 @@
             <div class="w-full lg:w-[38%] animate-in" style="animation-delay: 0.2s;">
                 <div id="summary-card" class="sticky" style="top: 20px; transition: top 0.3s ease-in-out;">
 
-                    <!-- Promo Card -->
-                    <div class="promo-card">
-                        <div class="promo-left">
-                            <div class="promo-icon">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path></svg>
-                            </div>
-                            <div>
-                                <div class="promo-text">Makin hemat pakai promo</div>
-                                <div class="promo-sub">Cek voucher tersedia</div>
-                            </div>
-                        </div>
-                        <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                    </div>
-
                     <!-- Summary -->
                     <div class="summary-card">
                         <div class="summary-header">
@@ -495,7 +500,6 @@
                             </div>
 
                             <a href="{{ route('pasar.checkout') }}" class="summary-checkout-btn">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
                                 Lanjut Bayar ({{ $carts->sum('quantity') }})
                             </a>
                         </div>
@@ -515,15 +519,28 @@
 @endsection
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     function updateItem(cartId, change, maxStok) {
         const input = document.getElementById(`qty_${cartId}`);
         let current = parseInt(input.value);
         let next = current + change;
 
-        if (next < 1) next = 1;
+        if (next < 1) {
+            removeItem(cartId);
+            return;
+        }
         if (next > maxStok) {
-            showSiladesBengToast('error', 'Stok Habis', 'Stok tidak mencukupi!');
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Stok Terbatas',
+                    text: `Stok hanya tersedia ${maxStok} barang.`,
+                    confirmButtonColor: '#115789'
+                });
+            } else {
+                alert(`Stok tidak mencukupi! Maksimal ${maxStok}`);
+            }
             return;
         }
 
@@ -534,7 +551,8 @@
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
             },
             body: JSON.stringify({
                 cart_id: cartId,
@@ -546,71 +564,80 @@
             if (data.success) {
                 location.reload();
             } else {
-                showSiladesBengToast('error', 'Gagal', data.message || 'Gagal update keranjang');
+                alert(data.message || 'Gagal update keranjang');
                 location.reload();
             }
+        })
+        .catch(err => {
+            console.error(err);
+            location.reload();
         });
     }
 
     function removeItem(cartId) {
-        Swal.fire({
-            title: 'Hapus Produk?',
-            text: "Produk ini akan dihapus dari keranjang belanja Anda.",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#ef4444',
-            cancelButtonColor: '#64748b',
-            confirmButtonText: 'Ya, hapus!',
-            cancelButtonText: 'Batal',
-            customClass: { popup: 'rounded-2xl' }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                fetch(`/pasar-daerah/cart/remove/${cartId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        location.reload();
-                    }
-                });
+        const doDelete = () => {
+            fetch(`/pasar-daerah/cart/remove/${cartId}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert(data.message || 'Gagal menghapus produk dari keranjang');
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                location.reload();
+            });
+        };
+
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: 'Hapus Produk?',
+                text: "Produk ini akan dihapus dari keranjang belanja Anda.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal',
+                customClass: { popup: 'rounded-2xl' }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    doDelete();
+                }
+            });
+        } else {
+            if (confirm('Hapus produk ini dari keranjang belanja?')) {
+                doDelete();
             }
-        });
+        }
     }
 
-    // Sync Summary Card and Main Content with Header visibility
-    document.addEventListener('DOMContentLoaded', function() {
-        const header = document.getElementById('master-navbar');
-        const summaryCard = document.getElementById('summary-card');
-        const mainContent = document.getElementById('main-content');
+    // Dynamic top spacing for collapsible master navbar
+    (() => {
+        const updateNavSpacing = () => {
+            const navbar = document.getElementById('master-navbar');
+            if (navbar && navbar.classList.contains('hidden-nav')) {
+                document.body.classList.add('navbar-is-hidden');
+            } else {
+                document.body.classList.remove('navbar-is-hidden');
+            }
+        };
 
-        if (header) {
-            const updatePositions = () => {
-                const isHidden = header.classList.contains('hidden-nav');
+        updateNavSpacing();
 
-                if (summaryCard) {
-                    summaryCard.style.top = isHidden ? '20px' : '100px';
-                }
-                if (mainContent) {
-                    mainContent.style.paddingTop = isHidden ? '0px' : '50px';
-                }
-            };
-
-            updatePositions();
-
-            const observer = new MutationObserver((mutations) => {
-                mutations.forEach((mutation) => {
-                    if (mutation.attributeName === 'class') {
-                        updatePositions();
-                    }
-                });
-            });
-
-            observer.observe(header, { attributes: true });
+        const navbar = document.getElementById('master-navbar');
+        if (navbar) {
+            const observer = new MutationObserver(updateNavSpacing);
+            observer.observe(navbar, { attributes: true, attributeFilter: ['class'] });
         }
-    });
+    })();
 </script>
 @endpush

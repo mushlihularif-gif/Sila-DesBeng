@@ -246,8 +246,8 @@
                     </div>
 
                     <!-- Payment Information / Instructions -->
-                    <div class="bg-slate-50 border border-slate-100 rounded-2xl p-5 md:p-6 mb-6">
-                        <h3 class="font-bold text-gray-800 text-sm tracking-wider uppercase mb-4 pb-2 border-b border-slate-200/60 flex items-center gap-2">
+                    <div class="bg-slate-50 rounded-2xl p-5 md:p-6 mb-6" style="border: 1px solid #e2e8f0;">
+                        <h3 class="font-bold text-gray-800 text-sm tracking-wider uppercase mb-4 pb-2 flex items-center gap-2" style="border-bottom: 1px solid #e2e8f0;">
                             <svg class="w-4 h-4 text-[#115789]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                             Instruksi Pembayaran
                         </h3>
@@ -264,24 +264,81 @@
                                     </p>
                                 </div>
                             </div>
-                        @elseif(strtolower($order->payment_method) === 'transfer manual' || strtolower($order->payment_method) === 'transfer_manual')
-                            <div class="flex items-start">
-                                <div class="w-10 h-10 rounded-xl bg-blue-100/80 flex items-center justify-center text-blue-600 mr-4 flex-shrink-0">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                        @elseif(in_array(strtolower($order->payment_method), ['bank_transfer', 'transfer_bank', 'transfer manual', 'transfer_manual']))
+                            @php
+                                $regionSettings = $order->region ? $order->region->settings : [];
+                                $bankName = $regionSettings['rekening_bank'] ?? 'Bank Riau Kepri Syariah';
+                                $bankNum = $regionSettings['rekening_nomor'] ?? '';
+                                $bankHolder = $regionSettings['rekening_nama'] ?? ('BUMDes ' . ($order->region->name ?? 'Desa'));
+                            @endphp
+                            <div class="space-y-4">
+                                <div class="flex justify-between items-center text-xs pb-2" style="border-bottom: 1px solid #e2e8f0;">
+                                    <span class="text-slate-400 font-medium">Metode Pembayaran</span>
+                                    <span class="font-bold text-[#115789] uppercase tracking-wide bg-blue-50 px-2.5 py-1 rounded-md" style="border: 1px solid #bae6fd;">
+                                        Transfer Bank ({{ $bankName }})
+                                    </span>
                                 </div>
-                                <div class="flex-1">
-                                    <p class="font-bold text-gray-900 text-sm">Transfer Manual ke Pengelola Layanan</p>
-                                    <p class="text-xs text-gray-500 mt-2 leading-relaxed">
-                                        Anda telah mengunggah bukti transfer saat melakukan checkout. Pembayaran Anda akan divalidasi oleh tim admin dalam waktu maksimal <strong class="text-gray-900">1x24 jam kerja</strong>. Anda dapat melihat status transaksi secara berkala di halaman Aktivitas.
-                                    </p>
+
+                                <div>
+                                    <label class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Nomor Rekening Resmi Toko / BUMDes</label>
+                                    <div class="va-display-box">
+                                        <div>
+                                            <span class="font-mono text-lg md:text-xl font-black text-slate-800 tracking-wider" id="vaNumber">
+                                                {{ $bankNum ?: '123-456-7890' }}
+                                            </span>
+                                            <div class="text-xs text-gray-500 mt-1">Bank <strong>{{ $bankName }}</strong> &bull; a.n <strong>{{ $bankHolder }}</strong></div>
+                                        </div>
+                                        @if($bankNum)
+                                        <button type="button" onclick="copyToClipboard('{{ $bankNum }}', 'Nomor Rekening')" class="btn-copy">
+                                            <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 00-2 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                                            Salin
+                                        </button>
+                                        @endif
+                                    </div>
+                                </div>
+                                <p class="text-xs text-slate-500 leading-relaxed">
+                                    Silakan transfer sejumlah <strong class="text-gray-900 font-bold">Rp {{ number_format($order->grand_total, 0, ',', '.') }}</strong> ke rekening resmi di atas. Pesanan akan segera dikonfirmasi dan diproses oleh toko/BUMDes.
+                                </p>
+                            </div>
+                        @elseif(strtolower($order->payment_method) === 'qris')
+                            @php
+                                $regionSettings = $order->region ? $order->region->settings : [];
+                                $qrisImg = $regionSettings['qris_image'] ?? null;
+                                $qrisNum = $regionSettings['qris_ewallet_number'] ?? '';
+                            @endphp
+                            <div class="space-y-4">
+                                <div class="flex justify-between items-center text-xs pb-2" style="border-bottom: 1px solid #e2e8f0;">
+                                    <span class="text-slate-400 font-medium">Metode Pembayaran</span>
+                                    <span class="font-bold text-red-600 uppercase tracking-wide bg-red-50 px-2.5 py-1 rounded-md" style="border: 1px solid #fecaca;">
+                                        QRIS / E-Wallet
+                                    </span>
+                                </div>
+                                <div class="text-center pt-2">
+                                    <p class="text-xs text-slate-500 font-semibold uppercase tracking-wider mb-3">Scan Kode QRIS di Bawah Ini</p>
+                                    <div class="inline-block p-4 bg-white rounded-2xl shadow-sm relative group overflow-hidden" style="border: 2px solid #e2e8f0;">
+                                        @if($qrisImg)
+                                            <img src="{{ Storage::url($qrisImg) }}" alt="QRIS Code" class="w-48 h-48 mx-auto object-contain">
+                                        @elseif($order->payment_qr_url && $order->payment_qr_url !== 'DUMMY_QR_CODE')
+                                            <img src="{{ $order->payment_qr_url }}" alt="QRIS Code" class="w-48 h-48 mx-auto">
+                                        @else
+                                            <div class="w-48 h-48 bg-slate-100 flex flex-col items-center justify-center text-slate-400 font-mono text-xs border-4 border-dashed border-slate-200 p-4">
+                                                <svg class="w-8 h-8 mb-2 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                                [ QRIS Toko Desa ]
+                                            </div>
+                                        @endif
+                                    </div>
+                                    @if($qrisNum)
+                                        <div class="mt-3 text-xs text-slate-600">Nomor HP E-Wallet: <strong class="text-slate-900 font-bold font-mono">{{ $qrisNum }}</strong></div>
+                                    @endif
+                                    <p class="text-xs text-slate-400 mt-2 max-w-sm mx-auto">Gunakan aplikasi e-wallet Anda (DANA, Gopay, OVO, ShopeePay) atau m-Banking untuk memindai.</p>
                                 </div>
                             </div>
                         @else
-                            <!-- Midtrans Payment Options -->
+                            <!-- Virtual Account / Lainnya -->
                             <div class="space-y-4">
-                                <div class="flex justify-between items-center text-xs border-b border-slate-200/40 pb-2">
+                                <div class="flex justify-between items-center text-xs pb-2" style="border-bottom: 1px solid #e2e8f0;">
                                     <span class="text-slate-400 font-medium">Metode Pembayaran</span>
-                                    <span class="font-bold text-[#115789] uppercase tracking-wide bg-blue-50 px-2.5 py-1 rounded-md border border-blue-100">
+                                    <span class="font-bold text-[#115789] uppercase tracking-wide bg-blue-50 px-2.5 py-1 rounded-md" style="border: 1px solid #bae6fd;">
                                         {{ str_replace('_', ' ', $order->payment_method) }}
                                     </span>
                                 </div>
@@ -298,24 +355,6 @@
                                                 Salin
                                             </button>
                                         </div>
-                                    </div>
-                                @elseif($order->payment_qr_url)
-                                    <div class="text-center pt-2">
-                                        <p class="text-xs text-slate-500 font-semibold uppercase tracking-wider mb-3">Scan Kode QRIS di Bawah Ini</p>
-                                        <div class="inline-block p-4 bg-white border-2 border-slate-100 rounded-2xl shadow-sm relative group overflow-hidden">
-                                            @if($order->payment_qr_url === 'DUMMY_QR_CODE')
-                                                <div class="w-48 h-48 bg-slate-100 flex flex-col items-center justify-center text-slate-400 font-mono text-xs border-4 border-dashed border-slate-200 p-4">
-                                                    <svg class="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                                    [ SIMULASI QRIS ]<br>DUMMY QR CODE
-                                                </div>
-                                            @else
-                                                <img src="{{ $order->payment_qr_url }}" alt="QRIS Code" class="w-48 h-48 mx-auto">
-                                            @endif
-                                            
-                                            <!-- Scan line overlay animation -->
-                                            <div class="absolute inset-x-0 top-0 h-1 bg-green-500 opacity-60 shadow-lg group-hover:animate-pulse" style="animation: scan 2s linear infinite;"></div>
-                                        </div>
-                                        <p class="text-xs text-slate-400 mt-3 max-w-sm mx-auto">Gunakan aplikasi e-wallet Anda (Gopay, OVO, Dana, LinkAja) atau m-Banking untuk memindai.</p>
                                     </div>
                                 @endif
                             </div>
@@ -360,7 +399,7 @@
                 @endif
                 
                 <!-- Order Details Section -->
-                <div class="border-t border-slate-100 pt-6 mt-6">
+                <div class="pt-6 mt-6" style="border-top: 1px solid #e2e8f0;">
                     <h3 class="font-bold text-gray-800 text-sm tracking-wider uppercase mb-4 flex items-center gap-2">
                         <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
                         Detail Pesanan
@@ -383,7 +422,7 @@
             </div>
             
             <!-- Footer Action Panel -->
-            <div class="bg-slate-50 px-6 py-5 border-t border-slate-100 flex flex-col sm:flex-row gap-4 justify-between items-center">
+            <div class="bg-slate-50 px-6 py-5 flex flex-col sm:flex-row gap-4 justify-between items-center" style="border-top: 1px solid #e2e8f0;">
                 <a href="{{ route('pasar.index') }}" class="text-[#115789] hover:text-[#0c4066] font-bold text-xs md:text-sm flex items-center gap-1.5 transition">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7 m0 0l7-7 m-7 7h18"></path></svg>
                     Kembali ke Katalog
