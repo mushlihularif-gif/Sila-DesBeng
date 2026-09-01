@@ -124,6 +124,16 @@ class RentalBookingApiController extends Controller
         // Kurangi stok
         $barang->decreaseStock($request->quantity);
 
+        // Notifikasi untuk User
+        \App\Models\Notification::create([
+            'user_id' => $user->id,
+            'type' => 'status_berubah',
+            'title' => 'Pemesanan Berhasil',
+            'message' => 'Pemesanan Alat Sewa (Order ID: ' . $booking->order_number . ') berhasil dibuat.',
+            'link' => '/unit-penyewaan/alat',
+            'icon' => 'fas fa-tools text-purple-500',
+        ]);
+
         return response()->json([
             'status' => 'success',
             'message' => 'Pemesanan alat sewa berhasil dibuat.',

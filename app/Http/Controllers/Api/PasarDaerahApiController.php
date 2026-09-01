@@ -449,6 +449,27 @@ class PasarDaerahApiController extends Controller
             // Clear Cart
             PasarCart::where('user_id', $user->id)->delete();
 
+            // Admin Notification
+            \App\Models\AdminNotification::create([
+                'type' => 'pasar_order',
+                'reference_id' => $order->id,
+                'region_id' => $user->region_id,
+                'title' => 'Pesanan Pasar Daerah Baru (Via Mobile)',
+                'message' => 'Pesanan Rp ' . number_format($totalAmount, 0, ',', '.') . ' dari ' . $user->name,
+                'is_read' => false,
+            ]);
+
+            // User Notification
+            \App\Models\Notification::create([
+                'user_id' => $user->id,
+                'type' => 'status_berubah',
+                'title' => 'Pesanan Berhasil Dibuat',
+                'message' => 'Pesanan Pasar Daerah (Order ID: ' . $order->order_number . ') berhasil dibuat.',
+                'is_read' => false,
+                'link' => '/pasar-daerah/riwayat',
+                'icon' => 'fas fa-shopping-bag text-blue-500'
+            ]);
+
             DB::commit();
 
             return response()->json([
