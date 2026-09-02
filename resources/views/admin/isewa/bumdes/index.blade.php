@@ -1,4 +1,4 @@
-@extends('admin.layouts.admin')
+﻿@extends('admin.layouts.admin')
 
 @section('title', 'Profil Pemerintah Daerah')
 
@@ -28,10 +28,10 @@
                                 
                                 <!-- ACTION BUTTONS -->
                                 <div class="d-flex justify-content-center gap-2">
-                                    <a href="{{ route('admin.siladesbeng.bumdes.edit', $member->id) }}" class="btn btn-sm btn-outline-primary px-4 rounded-pill" style="font-weight: 500;">
+                                    <a href="{{ route('admin.SiladesBeng.bumdes.edit', $member->id) }}" class="btn btn-sm btn-outline-primary px-4 rounded-pill" style="font-weight: 500;">
                                         <i class="bi bi-pencil"></i> Edit
                                     </a>
-                                    <form action="{{ route('admin.siladesbeng.bumdes.destroy', $member->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus {{ $member->name }}?');" class="d-inline">
+                                    <form action="{{ route('admin.SiladesBeng.bumdes.destroy', $member->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus {{ $member->name }}?');" class="d-inline">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-sm btn-outline-danger px-4 rounded-pill" style="font-weight: 500;">
@@ -47,7 +47,7 @@
 
             <!-- TOMBOL TAMBAH ANGGOTA -->
             <div class="mt-4 text-center">
-                <a href="{{ route('admin.siladesbeng.bumdes.create') }}" class="btn btn-primary px-4 py-2 fw-bold">
+                <a href="{{ route('admin.SiladesBeng.bumdes.create') }}" class="btn btn-primary px-4 py-2 fw-bold">
                     <i class="bi bi-plus"></i> Tambah Anggota
                 </a>
             </div>
@@ -82,7 +82,7 @@
         });
 
         // Sidebar Active
-        const sidebarLink = document.querySelector('a[href="{{ route("admin.siladesbeng.bumdes.index") }}"]');
+        const sidebarLink = document.querySelector('a[href="{{ route("admin.SiladesBeng.bumdes.index") }}"]');
         if (sidebarLink) {
             const listItem = sidebarLink.closest('li');
             if (listItem) {
@@ -92,3 +92,4 @@
     });
 </script>
 @endsection
+

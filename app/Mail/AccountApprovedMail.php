@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Mail;
 
@@ -57,3 +57,4 @@ class AccountApprovedMail extends Mailable
         return [];
     }
 }
+

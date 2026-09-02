@@ -62,8 +62,8 @@
     }
 </style>
 
-<div class="w-100 px-3">
-    <table class="table table-modern table-hover align-middle mb-0">
+<div class="table-responsive w-100 px-0">
+    <table class="table table-modern table-hover align-middle mb-0 text-nowrap">
         <thead class="bg-light bg-opacity-50">
             <tr>
                 <th class="py-3 ps-4">PROFIL STAF</th>
@@ -149,7 +149,7 @@
                         <div class="bg-label-primary p-4 rounded-circle mb-3">
                             <i class="bx bx-user-x fs-1 text-primary"></i>
                         </div>
-                        <h6 class="fw-bold mb-1">Belum Ada Staf</h6>
+                        <h6 class="fw-bold mb-1">Belum Ada Staf Layanan</h6>
                         <p class="text-muted mb-3 text-wrap" style="max-width: 400px; text-align: center;">Sistem belum memiliki data staf terdaftar atau tidak ada kecocokan pencarian.</p>
                         <a href="{{ route('admin.staff.create') }}" class="btn btn-sm btn-primary">
                             <i class="bx bx-plus me-1"></i> Tambah Sekarang

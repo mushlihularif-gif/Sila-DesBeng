@@ -1,4 +1,4 @@
-@extends('layouts.user')
+﻿@extends('layouts.user')
 
 @php
     $cleanRegionName = preg_replace('/^Desa\s+/i', '', $region->name ?? 'Bengkalis');
@@ -1260,7 +1260,7 @@
                         <img src="{{ Storage::url($seller->avatar) }}" alt="{{ $cleanRegionName }}" class="w-9 h-9 rounded-full object-cover border-2 border-white/80 shadow-sm">
                     @else
                         <div class="w-9 h-9 rounded-full bg-white/20 text-white font-bold flex items-center justify-center border-2 border-white/80 shadow-sm text-sm">
-                            🏬
+                            ðŸ¬
                         </div>
                     @endif
                     <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-400 border-2 border-white rounded-full"></span>
@@ -1288,10 +1288,10 @@
 
         <!-- Quick Reply Chips -->
         <div class="toko-chat-quick-replies" id="tokoQuickReplies">
-            <button type="button" class="toko-chip-btn" onclick="sendTokoQuickReply('Halo, apakah stok produk masih ready?')">📦 Stok ready?</button>
-            <button type="button" class="toko-chip-btn" onclick="sendTokoQuickReply('Bisa dikirim ke desa atau kecamatan saya?')">🚚 Kirim antar-desa?</button>
-            <button type="button" class="toko-chip-btn" onclick="sendTokoQuickReply('Berapa estimasi biaya ongkir?')">💰 Tarif ongkir?</button>
-            <button type="button" class="toko-chip-btn" onclick="sendTokoQuickReply('Bisa bayar COD saat barang sampai?')">💵 Bayar COD?</button>
+            <button type="button" class="toko-chip-btn" onclick="sendTokoQuickReply('Halo, apakah stok produk masih ready?')">ðŸ“¦ Stok ready?</button>
+            <button type="button" class="toko-chip-btn" onclick="sendTokoQuickReply('Bisa dikirim ke desa atau kecamatan saya?')">ðŸšš Kirim antar-desa?</button>
+            <button type="button" class="toko-chip-btn" onclick="sendTokoQuickReply('Berapa estimasi biaya ongkir?')">ðŸ’° Tarif ongkir?</button>
+            <button type="button" class="toko-chip-btn" onclick="sendTokoQuickReply('Bisa bayar COD saat barang sampai?')">ðŸ’µ Bayar COD?</button>
         </div>
 
         <!-- Chat Stream Body -->
@@ -1709,3 +1709,4 @@
     }
 </script>
 @endpush
+

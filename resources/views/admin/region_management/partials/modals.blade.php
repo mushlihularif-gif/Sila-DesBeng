@@ -1,4 +1,4 @@
-<!-- Modal Edit Region -->
+﻿<!-- Modal Edit Region -->
 <div class="modal fade text-start" id="editRegionModal{{ $region->id }}" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-sm" role="document">
         <div class="modal-content">
@@ -43,7 +43,7 @@
                         </div>
                         <div class="col-12">
                             <label class="form-label">Email <span class="text-danger">*</span></label>
-                            <input type="email" name="email" class="form-control" placeholder="Contoh: {{ strtolower(str_replace(' ', '', $region->name)) }}@siladesbeng.com" required>
+                            <input type="email" name="email" class="form-control" placeholder="Contoh: {{ strtolower(str_replace(' ', '', $region->name)) }}@SiladesBeng.com" required>
                             <div class="form-text">Bisa menggunakan email asli atau email khusus untuk akun ini.</div>
                         </div>
                         <div class="col-12">
@@ -60,3 +60,5 @@
         </div>
     </div>
 </div>
+
+

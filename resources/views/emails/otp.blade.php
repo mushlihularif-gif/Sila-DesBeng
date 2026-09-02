@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
@@ -78,7 +78,7 @@
 <body>
     <div class="email-container">
         <div class="header">
-            <h1>🔐 Kode Verifikasi OTP</h1>
+            <h1>ðŸ” Kode Verifikasi OTP</h1>
         </div>
         <div class="content">
             <p>Halo,</p>
@@ -92,7 +92,7 @@
             <p style="color: #888; font-size: 14px;">Kode ini akan kedaluwarsa dalam <strong>5 menit</strong>.</p>
             
             <div class="warning">
-                <p><strong>⚠️ Perhatian:</strong></p>
+                <p><strong>âš ï¸ Perhatian:</strong></p>
                 <p>Jangan bagikan kode ini kepada siapa pun. Tim SiladesBeng tidak akan pernah meminta kode OTP Anda.</p>
             </div>
             
@@ -106,3 +106,4 @@
     </div>
 </body>
 </html>
+

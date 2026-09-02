@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Http\Controllers\Admin;
 
@@ -61,7 +61,7 @@ class BumdesController extends Controller
 
         $member->save();
 
-        return redirect()->route('admin.siladesbeng.bumdes.index')->with('success', 'Pengurus berhasil ditambahkan.');
+        return redirect()->route('admin.SiladesBeng.bumdes.index')->with('success', 'Pengurus berhasil ditambahkan.');
     }
 
     public function edit($id)
@@ -121,7 +121,7 @@ class BumdesController extends Controller
 
         $member->save();
 
-        return redirect()->route('admin.siladesbeng.bumdes.index')->with('success', 'Pengurus berhasil diperbarui.');
+        return redirect()->route('admin.SiladesBeng.bumdes.index')->with('success', 'Pengurus berhasil diperbarui.');
     }
 
     public function destroy($id)
@@ -144,6 +144,6 @@ class BumdesController extends Controller
         }
         $member->delete();
 
-        return redirect()->route('admin.siladesbeng.bumdes.index')->with('success', 'Pengurus berhasil dihapus.');
+        return redirect()->route('admin.SiladesBeng.bumdes.index')->with('success', 'Pengurus berhasil dihapus.');
     }
 }

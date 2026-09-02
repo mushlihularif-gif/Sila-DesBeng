@@ -775,3 +775,54 @@ AI mengetahui 3 metode bayar yang tersedia bagi warga:
 
 ### 5. Arsitektur Model AI
 - Model Primer yang digunakan beralih ke **gemini-3.5-flash-lite** menyesuaikan dengan perubahan *Deprecation* pada Google API v1beta di tahun 2026.
+
+
+### 8.9 Arsitektur Hybrid Akun Dinas (RT/RW) & Mode Krisis Gas (PENTING)
+- **Latar Belakang:** Admin Desa dapat membuatkan akun Admin RT/RW secara manual untuk pejabat yang gaptek. Namun, muncul konflik: Bagaimana dengan aturan 1 NIK = 1 Akun? Dan bagaimana jika akun pejabat (tanpa NIK) mencoba membeli gas saat Mode Krisis (yang mewajibkan scan KK)?
+- **Solusi Arsitektur (Hybrid Logic):**
+  1. **Logika Transaksi Gas (Dinamis):**
+     - Kondisi Normal: Akun RT/RW bebas membeli gas.
+     - Kondisi Mode Krisis (Dibatasi per KK): Sistem mendeteksi keberadaan NIK pada akun yang login. Jika ada NIK (hasil promosi akun warga), transaksi dilanjutkan ke Scan KK. Jika **TIDAK ADA NIK** (karena akun tersebut adalah murni *Akun Dinas*), transaksi diblokir dengan peringatan: *"Ini adalah akun khusus pemerintahan. Silakan login menggunakan akun warga pribadi Anda yang memiliki NIK untuk membeli gas subsidi."*
+  2. **Logika Pembuatan Akun di Admin Desa (Validasi NIK Pintar):**
+     - Admin Desa mengisi form pembuatan RT/RW (Kolom NIK berstatus **Wajib**).
+     - Saat *Submit*, sistem mengecek NIK. Jika NIK **Belum Terdaftar**, akun dibuat lengkap dengan NIK (Terverifikasi penuh, menolong pejabat gaptek agar punya 1 akun serbaguna).
+     - Jika NIK **Sudah Terdaftar**, sistem memblokir form dan memunculkan *alert*: *"NIK sudah terdaftar di akun warga! Silakan cari akun tersebut dan ubah rolenya (Promosi), ATAU kosongkan kolom NIK ini jika ingin tetap membuat Akun Dinas terpisah."* (Status NIK berubah menjadi Opsional).
+- **Kesimpulan:** Logika ini menyelesaikan 3 masalah besar sekaligus (Warga Gaptek, Pencegahan NIK Ganda, dan Kebocoran Kuota Gas Subsidi) tanpa mengurangi fleksibilitas operasional pemerintahan desa.
+
+### 8.10 Logika Dinamis Form Kemitraan Pejabat Wilayah (RT/RW)
+Formulir Kemitraan memiliki logika *smart-rendering* berbasis status domisili user untuk mencegah tumpang tindih pendaftaran, dengan aturan:
+- **Jika Desa BELUM Terdaftar (Belum ada Admin Desa):**
+  Sistem menampilkan ajakan pendaftaran desa. Di dalam formulir, pilihan tingkat jabatan mencakup 3 opsi lengkap: **Pemerintah Desa**, **Pengurus RW**, dan **Pengurus RT**.
+- **Jika Desa SUDAH Terdaftar (Sudah ada Admin Desa):**
+  Tombol Kemitraan *tetap dimunculkan*, namun teks otomatis berubah menjadi instruksi khusus bagi Pejabat RT/RW ("Klaim hak akses wilayah"). Di dalam formulir, opsi "Pemerintah Desa" **dihilangkan secara dinamis**, sehingga warga hanya bisa memilih mendaftar sebagai **Pengurus RW** atau **Pengurus RT**.
+Logika ini memastikan alur pendaftaran hierarki kewilayahan berjalan tanpa celah, menggantikan logika lama di mana tombol pendaftaran hilang total jika desa sudah bergabung.
+
+## 9. Rencana Proyek KMIPN & Proposal Skripsi Tim
+
+### 9.1 Fokus Keamanan: M. MUSHLIHUL ARIF (Implementasi Keamanan)
+**Peran dalam Tim:** Implementasi Keamanan Sistem (Security Implementation)
+
+**Status Infrastruktur Keamanan SilaDesBeng Saat Ini:**
+- Telah menerapkan algoritma **AES-256** untuk kerahasiaan data berat (Confidentiality).
+- Telah menerapkan algoritma **ChaCha20** untuk enkripsi arus data (Stream Cipher).
+- Telah menerapkan prinsip privasi *Burn After Reading* (penghancuran otomatis file sensitif/KTP pasca verifikasi).
+- *QR Code Eksisting:* Sistem telah dapat mencetak QR Code verifikasi pada Bukti Transaksi & Pelaporan, namun masih menggunakan mesin *HMAC (Symmetric Hash)* bawaan framework yang rentan dipalsukan jika `app.key` pada server bocor.
+
+**Rencana Puncak Trisula Keamanan (CIA Triad - Integrity & Non-Repudiation):**
+Untuk menyempurnakan keamanan sistem agar berstandar *Enterprise*, M. Mushlihul Arif akan mencabut mesin HMAC lama dan mengimplementasikan **Tanda Tangan Digital (Digital Signature)** murni menggunakan **Kriptografi Asimetris (Algoritma RSA)**.
+
+**Konsep & Alur Implementasi (Invisible Security):**
+* Tampilan UI/UX pemindaian QR Code dipertahankan agar tidak merepotkan pengguna.
+* Di belakang layar, **Private Key** (Kunci Rahasia) milik sistem digunakan secara otomatis untuk membubuhkan Tanda Tangan Digital secara matematis saat mencetak struk *Bukti Transaksi (Penyewaan/Gas)* dan *Bukti Pelaporan*.
+* Masyarakat atau Pengecer Gas mengecek keaslian struk menggunakan kamera HP. Sistem memverifikasi QR Code tersebut menggunakan **Public Key**.
+* **Keuntungan Mutlak:** Sekalipun *database* atau server diretas (file .env bocor), peretas secara matematis tetap mustahil bisa memalsukan struk bukti transaksi karena mereka tidak memegang *Private Key* asli.
+
+**Ide Judul Skripsi / Topik KMIPN Final:**
+> *"Penerapan Tanda Tangan Digital (Algoritma RSA) Berbasis QR Code untuk Verifikasi Keaslian Bukti Transaksi dan Pelaporan pada Sistem Layanan Daerah Kabupaten Bengkalis"*
+
+**⚠️ STRATEGI EKSEKUSI (PENTING: KMIPN vs SEMPRO/SKRIPSI) ⚠️**
+* **Fase KMIPN (Kompetisi):** Implementasi Kriptografi RSA **TIDAK BOLEH** dikerjakan sekarang. QR Code pada sistem dibiarkan menggunakan algoritma bawaan Laravel (*HMAC Symmetric*). Di depan juri KMIPN, sistem sudah terlihat canggih karena QR Code sudah bisa di-scan. Jika ditanya juri, jawab: *"Saat ini menggunakan Symmetric Hashing, untuk Future Work akan di-upgrade ke Asymmetric RSA"*.
+* **Fase Sempro & Skripsi (Penelitian):** Mesin HMAC baru dibongkar dan diganti dengan algoritma RSA murni pada fase ini. Hal ini dilakukan untuk **melindungi kebaruan (novelty) skripsi**, agar saat Sempro nanti dosen penguji tidak menolak judul dengan alasan *"Aplikasinya kan sudah jadi dan aman, lalu apa yang mau diteliti lagi?"*.
+
+---
+*(Catatan Distribusi Tim KMIPN: 1 Anggota fokus Penetration Testing, 1 Anggota fokus Liveness Detection & OCR KYC, 1 Anggota fokus Integrasi Payment Gateway BUMDes).*

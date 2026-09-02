@@ -1,4 +1,4 @@
-@extends('admin.layouts.admin')
+﻿@extends('admin.layouts.admin')
 
 @section('title', 'Tambah Pemerintah Daerah')
 
@@ -14,7 +14,7 @@
                     </h4>
                     <p class="text-muted mb-0">Tambahkan anggota baru untuk ditampilkan di halaman Profil Pemerintah</p>
                 </div>
-                <a href="{{ route('admin.siladesbeng.bumdes.index') }}" class="btn btn-outline-secondary">
+                <a href="{{ route('admin.SiladesBeng.bumdes.index') }}" class="btn btn-outline-secondary">
                     <i class="bx bx-arrow-left me-1"></i> Kembali
                 </a>
             </div>
@@ -22,7 +22,7 @@
             <!-- Main Card -->
             <div class="card border-0 shadow-sm">
                 <div class="card-body p-4">
-                    <form action="{{ route('admin.siladesbeng.bumdes.store') }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('admin.SiladesBeng.bumdes.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
 
                         <div class="row">
@@ -127,7 +127,7 @@
                                     <!-- Action Buttons -->
                                     <div class="col-12">
                                         <div class="d-flex gap-2 justify-content-end pt-3 border-top">
-                                            <a href="{{ route('admin.siladesbeng.bumdes.index') }}" 
+                                            <a href="{{ route('admin.SiladesBeng.bumdes.index') }}" 
                                                class="btn btn-light modern-btn-secondary px-4">
                                                 <i class="bx bx-x me-1"></i> Batal
                                             </a>
@@ -309,3 +309,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 @endsection
+

@@ -139,6 +139,16 @@ class FasilitasBookingApiController extends Controller
             $fasilitas->decreaseStock($request->quantity ?? 1);
         }
 
+        // Notifikasi untuk User
+        \App\Models\Notification::create([
+            'user_id' => $user->id,
+            'type' => 'status_berubah',
+            'title' => 'Pemesanan Berhasil',
+            'message' => 'Pemesanan Fasilitas (Order ID: ' . $booking->order_number . ') berhasil dibuat.',
+            'link' => '/unit-penyewaan/fasilitas',
+            'icon' => 'fas fa-calendar-check text-green-500',
+        ]);
+
         return response()->json([
             'status' => 'success',
             'message' => 'Pemesanan fasilitas berhasil dibuat.',

@@ -101,7 +101,7 @@ class AnnouncementController extends Controller
         }
         
         $user = auth()->user();
-        $regions = Region::whereNotIn('type', ['rw', 'rt'])->get();
+        $regions = Region::where('type', '!=', 'rt')->get();
         
         $userRole = $user->role;
         
@@ -201,7 +201,7 @@ class AnnouncementController extends Controller
             }
         }
             
-        $regions = Region::whereNotIn('type', ['rw', 'rt'])->get();
+        $regions = Region::where('type', '!=', 'rt')->get();
         $userRole = $user->role;
 
         $regions->transform(function ($region) {
@@ -259,6 +259,11 @@ class AnnouncementController extends Controller
                 Storage::disk('public')->delete($announcement->image_path);
             }
             $data['image_path'] = ImageCompressorService::compressAndStore($request->file('image'), 'announcements');
+        } elseif ($category === 'Pengumuman' && $request->input('delete_single_image') == '1') {
+            if ($announcement->image_path && Storage::disk('public')->exists($announcement->image_path)) {
+                Storage::disk('public')->delete($announcement->image_path);
+            }
+            $data['image_path'] = null;
         }
 
         $announcement->update($data);

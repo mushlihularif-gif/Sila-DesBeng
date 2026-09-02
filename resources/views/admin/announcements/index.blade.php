@@ -77,7 +77,7 @@
                     </div>
                 </div>
 
-                <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded-4 shadow-sm">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 bg-white p-3 rounded-4 shadow-sm gap-3">
                     <div class="d-flex align-items-center">
                         <div class="avatar avatar-md bg-primary-subtle text-primary rounded-circle me-3 d-flex justify-content-center align-items-center">
                             <i class="bx bx-news fs-4"></i>
@@ -87,8 +87,8 @@
                             <small class="text-muted">Dokumentasi kegiatan dan informasi publik lintas wilayah.</small>
                         </div>
                     </div>
-                    <div>
-                        <a href="{{ route('admin.announcements.create', ['category' => 'Berita']) }}" class="btn btn-primary rounded-pill px-4 shadow-sm"><i class="bx bx-plus me-1"></i> Buat Berita</a>
+                    <div class="w-100 w-md-auto text-end">
+                        <a href="{{ route('admin.announcements.create', ['category' => 'Berita']) }}" class="btn btn-primary rounded-pill px-4 shadow-sm w-100"><i class="bx bx-plus me-1"></i> Buat Berita</a>
                     </div>
                 </div>
                 
@@ -131,7 +131,7 @@
                     </div>
                 </div>
 
-                <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded-4 shadow-sm">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 bg-white p-3 rounded-4 shadow-sm gap-3">
                     <div class="d-flex align-items-center">
                         <div class="avatar avatar-md bg-warning-subtle text-warning rounded-circle me-3 d-flex justify-content-center align-items-center">
                             <i class="bx bx-bell fs-4"></i>
@@ -141,8 +141,8 @@
                             <small class="text-muted">Informasi teknis dan instruksi yang ditujukan untuk wilayah spesifik.</small>
                         </div>
                     </div>
-                    <div>
-                        <a href="{{ route('admin.announcements.create', ['category' => 'Pengumuman']) }}" class="btn btn-warning rounded-pill px-4 shadow-sm text-dark"><i class="bx bx-plus me-1"></i> Buat Pengumuman</a>
+                    <div class="w-100 w-md-auto text-end">
+                        <a href="{{ route('admin.announcements.create', ['category' => 'Pengumuman']) }}" class="btn btn-warning rounded-pill px-4 shadow-sm text-dark w-100"><i class="bx bx-plus me-1"></i> Buat Pengumuman</a>
                     </div>
                 </div>
 

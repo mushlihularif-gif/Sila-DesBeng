@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Mail;
 
@@ -53,3 +53,4 @@ class OtpMail extends Mailable
         return [];
     }
 }
+

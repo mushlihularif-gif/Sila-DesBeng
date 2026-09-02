@@ -1,4 +1,4 @@
-@extends('layouts.user')
+﻿@extends('layouts.user')
 
 @section('title', 'Checkout - Pasar Daerah')
 
@@ -825,3 +825,4 @@
     });
 </script>
 @endpush
+

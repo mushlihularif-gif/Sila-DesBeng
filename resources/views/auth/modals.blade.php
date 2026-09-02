@@ -1,4 +1,4 @@
-{{-- Include Custom CSS for Placeholders --}}
+﻿{{-- Include Custom CSS for Placeholders --}}
 <style>
     .custom-placeholder { opacity: 0; pointer-events: none; transition: opacity 0.2s ease-in-out; }
     .input-with-placeholder:placeholder-shown + .custom-placeholder { opacity: 1; }
@@ -722,3 +722,4 @@
         }
     }
 </style>
+

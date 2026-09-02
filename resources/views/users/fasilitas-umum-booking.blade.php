@@ -1,4 +1,4 @@
-@extends('layouts.user')
+﻿@extends('layouts.user')
 
 @section('page')
 <main class="flex-grow relative w-full">
@@ -637,3 +637,4 @@
     };
 </script>
 @endpush
+

@@ -1,4 +1,4 @@
-<style>
+﻿<style>
     .footer-logo-1 { width: 18rem; }
     .footer-logo-2 { width: 20rem; margin-top: -1.5rem; margin-left: -10px; }
     @media (min-width: 640px) {
@@ -38,7 +38,7 @@
                         class="text-base sm:text-lg font-medium hover:text-blue-300 transition-colors duration-200">
                         Tentang Layanan
                     </a>
-                    <a href="{{ route('siladesbeng.profile') }}"
+                    <a href="{{ route('SiladesBeng.profile') }}"
                         class="text-base sm:text-lg font-medium hover:text-blue-300 transition-colors duration-200">
                         Profil SiladesBeng
                     </a>
@@ -69,8 +69,8 @@
                                 d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
                     </div>
-                    <a href="mailto:siladesbengdigital@gmail.com"
-                        class="text-sm sm:text-[15px] hover:text-blue-300 transition-colors">siladesbengdigital@gmail.com</a>
+                    <a href="mailto:SiladesBengdigital@gmail.com"
+                        class="text-sm sm:text-[15px] hover:text-blue-300 transition-colors">SiladesBengdigital@gmail.com</a>
                 </div>
 
                 {{-- Phone --}}

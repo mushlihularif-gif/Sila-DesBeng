@@ -1,4 +1,4 @@
-@extends('layouts.user')
+﻿@extends('layouts.user')
 
 @section('title', 'Gabung Kemitraan - SiladesBeng')
 
@@ -61,9 +61,22 @@
             </h1>
 
             @if(!$isJoined)
-            <p class="text-gray-700 text-lg max-w-2xl mx-auto mb-10 animate-fade-in-up" style="animation-delay: 100ms;">
-                Desa / Kelurahan Anda belum bergabung? Daftarkan sekarang!
-            </p>
+                <p class="text-gray-700 text-lg max-w-2xl mx-auto mb-6 animate-fade-in-up" style="animation-delay: 100ms;">
+                    Desa / Kelurahan Anda belum bergabung? Daftarkan sekarang!
+                </p>
+                
+                <p class="text-gray-500 text-sm max-w-2xl mx-auto mb-10 animate-fade-in-up bg-blue-50/50 p-3 rounded-xl border border-blue-100" style="animation-delay: 150ms;">
+                    <span class="font-bold text-blue-600">Info:</span> Anda yang menjabat sebagai <strong>Ketua RT</strong> atau <strong>Ketua RW</strong> juga dapat menggunakan form ini untuk mengeklaim hak akses Admin di wilayah Anda.
+                </p>
+            @else
+                <p class="text-gray-700 text-lg max-w-2xl mx-auto mb-6 animate-fade-in-up" style="animation-delay: 100ms;">
+                    Pemerintah Desa Anda sudah berpartisipasi dalam SiladesBeng!
+                </p>
+                
+                <p class="text-gray-500 text-sm max-w-2xl mx-auto mb-10 animate-fade-in-up bg-green-50/50 p-3 rounded-xl border border-green-200" style="animation-delay: 150ms;">
+                    <span class="font-bold text-green-700">Pemberitahuan Khusus Pejabat:</span> Jika Anda adalah <strong>Ketua RT</strong> atau <strong>Ketua RW</strong>, silakan daftar untuk mendapatkan hak akses pengelolaan warga di wilayah Anda.
+                </p>
+            @endif
             
             <div class="animate-fade-in-up" style="animation-delay: 200ms;">
                 @guest
@@ -94,15 +107,31 @@
                         } else if(document.getElementById('btn-open-login-mobile')) {
                             document.getElementById('btn-open-login-mobile').click();
                         }" class="btn-outline shadow-sm hover:shadow-lg">
-                        <span>Daftarkan Desa / Kelurahan Anda</span>
+                        <span>Daftarkan Jabatan Kewilayahan Anda</span>
                     </button>
                 @else
-                    <button onclick="openModal()" class="btn-outline shadow-sm hover:shadow-lg">
-                        <span>Daftarkan Desa / Kelurahan Anda</span>
-                    </button>
+                    @if(auth()->user()->verification_status !== 'verified')
+                        <button onclick="
+                            const t = document.createElement('div');
+                            t.style.position = 'fixed'; t.style.top = '24px'; t.style.right = '30px'; t.style.zIndex = '2147483647';
+                            t.style.transform = 'translateX(150%)'; t.style.opacity = '0'; t.style.transition = 'all 0.5s ease';
+                            t.className = 'px-5 py-3.5 rounded-xl shadow-2xl flex items-center gap-3 bg-amber-500 text-white font-medium';
+                            t.innerHTML = `<svg class='w-6 h-6 flex-shrink-0' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z'></path></svg><span>Anda harus verifikasi KTP Warga terlebih dahulu!</span>`;
+                            document.body.appendChild(t);
+                            t.offsetHeight;
+                            t.style.transform = 'translateX(0)'; t.style.opacity = '1';
+                            setTimeout(() => { t.style.transform = 'translateX(150%)'; t.style.opacity = '0'; setTimeout(() => t.remove(), 500); }, 3000);
+                            setTimeout(() => { window.location.href = '{{ route('user.verifikasi.index') }}'; }, 1500);
+                        " class="btn-outline shadow-sm hover:shadow-lg">
+                            <span>Daftarkan Jabatan Kewilayahan Anda</span>
+                        </button>
+                    @else
+                        <button onclick="openModal()" class="btn-outline shadow-sm hover:shadow-lg">
+                            <span>Daftarkan Jabatan Kewilayahan Anda</span>
+                        </button>
+                    @endif
                 @endguest
             </div>
-            @endif
         </div>
     </section>
 
@@ -382,62 +411,91 @@
                         <form action="{{ route('kemitraan.store') }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             
-                            {{-- Baris 1: Data Pribadi (4 kolom) --}}
+                            {{-- Baris 1: Data Pribadi & Jabatan (4 kolom) --}}
                             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
                                 <div>
-                                    <label for="applicant_name" class="block text-sm font-semibold text-gray-700 mb-1">Nama Lengkap Pendaftar</label>
-                                    <input type="text" name="applicant_name" id="applicant_name" value="{{ old('applicant_name') }}" class="py-2 px-3 block w-full border border-gray-200 rounded-lg bg-gray-50 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#115789]/30 focus:border-[#115789] transition-colors" style="outline: none;" required placeholder="Budi Santoso">
+                                    <label for="applicant_name" class="block text-sm font-semibold text-gray-700 mb-1">Nama Lengkap (Sesuai KTP)</label>
+                                    <input type="text" name="applicant_name" id="applicant_name" value="{{ auth()->check() ? auth()->user()->name : old('applicant_name') }}" class="py-2 px-3 block w-full border border-gray-200 rounded-lg bg-gray-200 text-gray-900 text-sm focus:outline-none" readonly>
                                 </div>
                                 <div>
-                                    <label for="position" class="block text-sm font-semibold text-gray-700 mb-1">Jabatan</label>
-                                    <input type="text" name="position" id="position" value="{{ old('position') }}" class="py-2 px-3 block w-full border border-gray-200 rounded-lg bg-gray-50 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#115789]/30 focus:border-[#115789] transition-colors" style="outline: none;" required placeholder="Kepala Desa">
+                                    <label for="region_type" class="block text-sm font-semibold text-gray-700 mb-1">Tingkat Jabatan</label>
+                                    <select id="region_type" name="region_type" class="py-2 px-3 block w-full border border-gray-300 rounded-lg bg-white text-gray-900 text-sm focus:ring-2 focus:ring-[#115789]/30 focus:border-[#115789]" required onchange="updateJabatanOptions()">
+                                        <option value="" disabled selected>Pilih Tingkat</option>
+                                        @if(!$isJoined)
+                                        <option value="desa">Pemerintah Desa / Kelurahan</option>
+                                        @endif
+                                        <option value="rw">Pengurus RW</option>
+                                        <option value="rt">Pengurus RT</option>
+                                    </select>
                                 </div>
                                 <div>
-                                    <label for="contact_phone" class="block text-sm font-semibold text-gray-700 mb-1">Nomor WhatsApp</label>
-                                    <input type="text" name="contact_phone" id="contact_phone" value="{{ old('contact_phone') }}" class="py-2 px-3 block w-full border border-gray-200 rounded-lg bg-gray-50 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#115789]/30 focus:border-[#115789] transition-colors" style="outline: none;" required placeholder="08123456789">
+                                    <label for="position" class="block text-sm font-semibold text-gray-700 mb-1">Jabatan Spesifik</label>
+                                    <select id="position" name="position" class="py-2 px-3 block w-full border border-gray-300 rounded-lg bg-white text-gray-900 text-sm focus:ring-2 focus:ring-[#115789]/30 focus:border-[#115789]" required>
+                                        <option value="" disabled selected>Pilih Tingkat Jabatan Dulu</option>
+                                    </select>
                                 </div>
                                 <div>
-                                    <label for="contact_email" class="block text-sm font-semibold text-gray-700 mb-1">Email Kontak</label>
-                                    <input type="email" name="contact_email" id="contact_email" value="{{ old('contact_email') }}" class="py-2 px-3 block w-full border border-gray-200 rounded-lg bg-gray-50 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#115789]/30 focus:border-[#115789] transition-colors" style="outline: none;" required placeholder="email@desa.id">
-                                    <p class="text-xs mt-2.5 italic font-medium" style="color: #2f80ed;">* Email dan Sandi akun Anda akan dikirim melalui email ini. Pastikan email aktif.</p>
+                                    <label for="contact_phone" class="block text-sm font-semibold text-gray-700 mb-1">Nomor WhatsApp Aktif</label>
+                                    <input type="text" name="contact_phone" id="contact_phone" value="{{ auth()->check() ? auth()->user()->phone : old('contact_phone') }}" class="py-2 px-3 block w-full border border-gray-200 rounded-lg bg-gray-50 text-gray-900 text-sm focus:ring-2 focus:ring-[#115789]/30 focus:border-[#115789]" required placeholder="0812...">
+                                </div>
+                            </div>
+                            
+                            {{-- Email Alert (Baris 1.5) --}}
+                            <div class="mb-5 bg-blue-50/50 p-3 rounded-lg border border-blue-100 flex items-start gap-3">
+                                <svg class="w-5 h-5 text-blue-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <div>
+                                    <p class="text-xs text-gray-700">Email pemberitahuan akan dikirimkan ke: <span class="font-bold text-blue-700">{{ auth()->check() ? auth()->user()->email : '' }}</span>. Pastikan akun ini adalah akun permanen Anda.</p>
+                                    <input type="hidden" name="contact_email" value="{{ auth()->check() ? auth()->user()->email : old('contact_email') }}">
                                 </div>
                             </div>
 
                             {{-- Divider Informasi Wilayah --}}
                             <div class="flex items-center gap-2 mb-5">
                                 <svg class="w-6 h-6 shrink-0" style="color: #2f80ed;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                                <h4 class="font-bold text-gray-800 text-sm ml-1">Informasi Wilayah</h4>
+                                <h4 class="font-bold text-gray-800 text-sm ml-1">Informasi Wilayah Anda</h4>
                                 <div class="flex-1 border-b border-gray-200"></div>
                             </div>
 
-                            {{-- Baris 2: Informasi Wilayah (3 kolom) --}}
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-6">
-                                {{-- Hidden Input for region_type --}}
-                                <input type="hidden" name="region_type" value="desa">
-
+                            {{-- Baris 2: Informasi Wilayah Dinamis --}}
+                            <div class="grid grid-cols-1 sm:grid-cols-4 gap-5 mb-6" id="region_selectors">
                                 {{-- Kabupaten (Fixed) --}}
                                 <div>
-                                    <div class="py-2.5 px-4 w-full border border-gray-300 rounded-lg bg-white text-[#1f2937] text-[15px] font-bold shadow-sm flex items-center h-full">
-                                        Kabupaten Bengkalis
+                                    <label class="block text-xs font-semibold text-gray-500 mb-1 uppercase">Kabupaten</label>
+                                    <div class="py-2.5 px-4 w-full border border-gray-300 rounded-lg bg-gray-100 text-gray-600 text-[15px] font-bold shadow-sm">
+                                        Bengkalis
                                     </div>
                                 </div>
                                 
-                                {{-- Kecamatan Dropdown --}}
+                                {{-- Kecamatan --}}
                                 <div>
-                                    <select id="parent_region_id" name="parent_region_id" class="py-2.5 px-4 block w-full border border-gray-300 rounded-lg bg-white text-[#1f2937] text-[15px] font-bold shadow-sm focus:ring-2 focus:ring-[#115789]/30 focus:border-[#115789] transition-colors cursor-pointer h-full" required onchange="updateDesaDropdown()">
-                                        <option value="" disabled selected>Semua Kecamatan</option>
+                                    <label class="block text-xs font-semibold text-gray-500 mb-1 uppercase">Kecamatan</label>
+                                    <select id="sel_kecamatan" class="py-2 px-3 block w-full border border-gray-300 rounded-lg bg-white text-[#1f2937] text-sm font-semibold shadow-sm focus:ring-2 focus:ring-[#115789]/30" required onchange="onKecamatanChange()">
+                                        <option value="" disabled selected>Pilih Kecamatan</option>
                                         @foreach($kecamatans as $kecamatan)
-                                            <option value="{{ $kecamatan->id }}" {{ old('parent_region_id') == $kecamatan->id ? 'selected' : '' }}>{{ $kecamatan->name }}</option>
+                                            <option value="{{ $kecamatan->id }}">{{ $kecamatan->name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
 
-                                {{-- Kelurahan/Desa Dropdown --}}
+                                {{-- Kelurahan/Desa --}}
                                 <div>
-                                    <select id="region_name" name="region_name" class="py-2.5 px-4 block w-full border border-gray-300 rounded-lg bg-white text-[#1f2937] text-[15px] font-bold shadow-sm focus:ring-2 focus:ring-[#115789]/30 focus:border-[#115789] transition-colors cursor-pointer h-full" required>
-                                        <option value="" disabled selected>Semua Kelurahan/Desa</option>
+                                    <label class="block text-xs font-semibold text-gray-500 mb-1 uppercase">Desa/Kelurahan</label>
+                                    <select id="sel_desa" class="py-2 px-3 block w-full border border-gray-300 rounded-lg bg-gray-100 text-gray-500 text-sm font-semibold shadow-sm focus:ring-2 focus:ring-[#115789]/30" disabled onchange="onDesaChange()">
+                                        <option value="" disabled selected>Pilih Desa</option>
                                     </select>
                                 </div>
+
+                                {{-- RT/RW (Tergantung Pilihan Tingkat) --}}
+                                <div id="container_rtrw" style="display: none;">
+                                    <label id="label_rtrw" class="block text-xs font-semibold text-gray-500 mb-1 uppercase">Pilih RT/RW</label>
+                                    <select id="sel_rtrw" class="py-2 px-3 block w-full border border-gray-300 rounded-lg bg-gray-100 text-gray-500 text-sm font-semibold shadow-sm focus:ring-2 focus:ring-[#115789]/30" disabled onchange="onRtRwChange()">
+                                        <option value="" disabled selected>-</option>
+                                    </select>
+                                </div>
+
+                                {{-- Hidden Inputs untuk Submit ke Backend --}}
+                                <input type="hidden" name="parent_region_id" id="form_parent_region_id">
+                                <input type="hidden" name="region_name" id="form_region_name">
                             </div>
 
                             {{-- Baris 3: Upload & Pesan (2 kolom sejajar) --}}
@@ -534,45 +592,138 @@
 @endpush
 
 <script>
-    // Data Desa per Kecamatan
-    const desaData = {
-        @foreach($kecamatans as $kecamatan)
-            "{{ $kecamatan->id }}": [
-                @foreach($kecamatan->children as $desa)
-                    { id: "{{ $desa->id }}", name: "{{ $desa->name }}" },
-                @endforeach
-            ],
-        @endforeach
-    };
-
-    function updateDesaDropdown() {
-        const kecamatanId = document.getElementById('parent_region_id').value;
-        const desaDropdown = document.getElementById('region_name');
-        
-        desaDropdown.innerHTML = '<option value="" disabled selected>Semua Kelurahan/Desa</option>';
-        
-        if (kecamatanId && desaData[kecamatanId]) {
-            desaData[kecamatanId].forEach(desa => {
-                const option = document.createElement('option');
-                option.value = desa.name;
-                option.textContent = desa.name;
-                desaDropdown.appendChild(option);
-            });
-        }
+    const allRegions = @json($regions);
+    
+    function getChildren(parentId) {
+        return allRegions.filter(r => r.parent_id == parentId);
     }
 
-    // Trigger on load if old value exists
-    document.addEventListener('DOMContentLoaded', function() {
-        if (document.getElementById('parent_region_id').value) {
-            updateDesaDropdown();
-            // Need to set timeout so it sets value after dropdown is populated
-            setTimeout(() => {
-                @if(old('region_name'))
-                    document.getElementById('region_name').value = "{{ old('region_name') }}";
-                @endif
-            }, 100);
+    const selKec = document.getElementById('sel_kecamatan');
+    const selDesa = document.getElementById('sel_desa');
+    const selRtRw = document.getElementById('sel_rtrw');
+    const containerRtRw = document.getElementById('container_rtrw');
+    const labelRtRw = document.getElementById('label_rtrw');
+    const selRegionType = document.getElementById('region_type');
+    
+    function updateJabatanOptions() {
+        const type = selRegionType.value;
+        const positionSel = document.getElementById('position');
+        positionSel.innerHTML = '<option value="" disabled selected>Pilih Jabatan</option>';
+        
+        let options = [];
+        if(type === 'desa') options = ['Kepala Desa', 'Sekretaris Desa', 'BPD', 'Admin BUMDes', 'Lainnya'];
+        else if(type === 'rw') options = ['Ketua RW', 'Sekretaris RW', 'Lainnya'];
+        else if(type === 'rt') options = ['Ketua RT', 'Sekretaris RT', 'Lainnya'];
+        
+        options.forEach(opt => {
+            const el = document.createElement('option');
+            el.value = opt; el.textContent = opt;
+            positionSel.appendChild(el);
+        });
+
+        // Reset Wilayah selectors
+        selDesa.disabled = true; selDesa.innerHTML = '<option value="" disabled selected>Pilih Desa</option>';
+        selRtRw.disabled = true; selRtRw.innerHTML = '<option value="" disabled selected>-</option>';
+        containerRtRw.style.display = 'none';
+        
+        if(selKec.value) onKecamatanChange(); // trigger if kec is already selected
+    }
+
+    function onKecamatanChange() {
+        const kecId = selKec.value;
+        selDesa.innerHTML = '<option value="" disabled selected>Pilih Desa/Kelurahan</option>';
+        selDesa.disabled = !kecId;
+        selRtRw.disabled = true;
+        
+        if (kecId) {
+            const desas = getChildren(kecId).filter(r => r.type === 'desa');
+            desas.forEach(d => {
+                const opt = document.createElement('option');
+                opt.value = d.id; opt.textContent = d.name;
+                selDesa.appendChild(opt);
+            });
         }
-    });
+        updateFormHiddenValues();
+    }
+
+    function onDesaChange() {
+        const desaId = selDesa.value;
+        const type = selRegionType.value;
+        
+        selRtRw.innerHTML = '<option value="" disabled selected>-</option>';
+        selRtRw.disabled = !desaId;
+        
+        if(type === 'desa') {
+            containerRtRw.style.display = 'none';
+        } else if(type === 'rw') {
+            containerRtRw.style.display = 'block';
+            labelRtRw.textContent = 'Pilih RW';
+            const rws = getChildren(desaId).filter(r => r.type === 'rw');
+            if(rws.length === 0) selRtRw.innerHTML = '<option value="" disabled selected>Belum ada RW terdaftar di desa ini</option>';
+            else {
+                selRtRw.innerHTML = '<option value="" disabled selected>Pilih RW</option>';
+                rws.forEach(r => {
+                    const opt = document.createElement('option');
+                    opt.value = r.id; opt.textContent = r.name;
+                    selRtRw.appendChild(opt);
+                });
+            }
+        } else if(type === 'rt') {
+            containerRtRw.style.display = 'block';
+            labelRtRw.textContent = 'Pilih RW -> RT';
+            // Need grouped dropdown
+            const rws = getChildren(desaId).filter(r => r.type === 'rw');
+            if(rws.length === 0) selRtRw.innerHTML = '<option value="" disabled selected>Belum ada RW terdaftar di desa ini</option>';
+            else {
+                selRtRw.innerHTML = '<option value="" disabled selected>Pilih RT</option>';
+                rws.forEach(rw => {
+                    const group = document.createElement('optgroup');
+                    group.label = rw.name;
+                    const rts = getChildren(rw.id).filter(r => r.type === 'rt');
+                    rts.forEach(rt => {
+                        const opt = document.createElement('option');
+                        opt.value = rt.id; opt.textContent = rt.name;
+                        group.appendChild(opt);
+                    });
+                    if(rts.length === 0) {
+                        const opt = document.createElement('option');
+                        opt.disabled = true; opt.textContent = 'Belum ada RT';
+                        group.appendChild(opt);
+                    }
+                    selRtRw.appendChild(group);
+                });
+            }
+        }
+        updateFormHiddenValues();
+    }
+    
+    function onRtRwChange() {
+        updateFormHiddenValues();
+    }
+    
+    function updateFormHiddenValues() {
+        const type = selRegionType.value;
+        const hiddenParent = document.getElementById('form_parent_region_id');
+        const hiddenName = document.getElementById('form_region_name');
+        
+        if(type === 'desa') {
+            hiddenParent.value = selKec.value;
+            hiddenName.value = selDesa.options[selDesa.selectedIndex]?.text || '';
+        } else if(type === 'rw') {
+            hiddenParent.value = selDesa.value;
+            hiddenName.value = selRtRw.options[selRtRw.selectedIndex]?.text || '';
+        } else if(type === 'rt') {
+            // Wait, parent of RT is RW. We need the RW ID!
+            // But select option value is RT's ID.
+            // Let's get the parent of this RT from allRegions
+            const rtId = selRtRw.value;
+            if(rtId) {
+                const rtObj = allRegions.find(r => r.id == rtId);
+                hiddenParent.value = rtObj ? rtObj.parent_id : '';
+                hiddenName.value = rtObj ? rtObj.name : '';
+            }
+        }
+    }
 
     // Modal logic
     function openModal() {
@@ -581,9 +732,7 @@
         const content = document.getElementById('modal-content');
         
         modal.classList.remove('hidden');
-        // document.body.style.overflow = 'hidden'; // Removed to keep scrollbar visible
         
-        // Trigger reflow
         void modal.offsetWidth;
         
         // Animate in
@@ -659,3 +808,4 @@
 @endif
 
 @endsection
+

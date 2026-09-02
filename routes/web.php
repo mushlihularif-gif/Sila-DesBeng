@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 use Illuminate\Support\Facades\Route;
 
@@ -74,8 +74,8 @@ Route::get('/layanandaerah/{slug}', [App\Http\Controllers\User\BumdesUserControl
     ->middleware('role:user,guest');
 
 
-Route::get('/profil-siladesbeng', [App\Http\Controllers\User\IsewaProfileController::class, 'index'])
-    ->name('siladesbeng.profile')
+Route::get('/profil-SiladesBeng', [App\Http\Controllers\User\IsewaProfileController::class, 'index'])
+    ->name('SiladesBeng.profile')
     ->middleware('role:user,guest');
 
 Route::get('/kemitraan/gabung', [App\Http\Controllers\PartnerApplicationController::class, 'create'])
@@ -426,6 +426,15 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
     Route::get('/kemitraan/{id}/document', [\App\Http\Controllers\Admin\PartnerApplicationController::class, 'document'])->name('admin.kemitraan.document');
     Route::post('/kemitraan/{id}/approve', [\App\Http\Controllers\Admin\PartnerApplicationController::class, 'approve'])->name('admin.kemitraan.approve');
     Route::post('/kemitraan/{id}/reject', [\App\Http\Controllers\Admin\PartnerApplicationController::class, 'reject'])->name('admin.kemitraan.reject');
+
+    // Manajemen Admin Wilayah (RT/RW)
+    Route::get('/wilayah-admins', [\App\Http\Controllers\Admin\RegionAdminManagementController::class, 'index'])->name('admin.wilayah-admins.index');
+    Route::post('/wilayah-admins/store', [\App\Http\Controllers\Admin\RegionAdminManagementController::class, 'store'])->name('admin.wilayah-admins.store');
+    Route::post('/wilayah-admins/promote', [\App\Http\Controllers\Admin\RegionAdminManagementController::class, 'promote'])->name('admin.wilayah-admins.promote');
+    Route::post('/wilayah-admins/{id}/approve', [\App\Http\Controllers\Admin\RegionAdminManagementController::class, 'approveApplication'])->name('admin.wilayah-admins.approve');
+    Route::post('/wilayah-admins/{id}/reject', [\App\Http\Controllers\Admin\RegionAdminManagementController::class, 'rejectApplication'])->name('admin.wilayah-admins.reject');
+    Route::delete('/wilayah-admins/{id}/revoke', [\App\Http\Controllers\Admin\RegionAdminManagementController::class, 'revoke'])->name('admin.wilayah-admins.revoke');
+
     
     // Pengaturan
     Route::get('/settings', [SettingController::class, 'index'])->name('admin.settings');
@@ -466,7 +475,10 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
 
     // Mutasi Penduduk
     Route::get('/warga/mutasi', [\App\Http\Controllers\Admin\MutasiAdminController::class, 'index'])->name('admin.warga.mutasi.index');
+    Route::get('/warga/mutasi/search-global', [\App\Http\Controllers\Admin\MutasiAdminController::class, 'searchGlobal'])->name('admin.warga.mutasi.search-global');
+    Route::get('/warga/mutasi/search-local', [\App\Http\Controllers\Admin\MutasiAdminController::class, 'searchLocal'])->name('admin.warga.mutasi.search-local');
     Route::post('/warga/mutasi/tarik', [\App\Http\Controllers\Admin\MutasiAdminController::class, 'tarikWarga'])->name('admin.warga.mutasi.tarik');
+    Route::post('/warga/mutasi/push', [\App\Http\Controllers\Admin\MutasiAdminController::class, 'pushWarga'])->name('admin.warga.mutasi.push');
     Route::post('/warga/mutasi/{id}/approve', [\App\Http\Controllers\Admin\MutasiAdminController::class, 'approve'])->name('admin.warga.mutasi.approve');
     Route::post('/warga/mutasi/{id}/reject', [\App\Http\Controllers\Admin\MutasiAdminController::class, 'reject'])->name('admin.warga.mutasi.reject');
 
@@ -705,20 +717,20 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
     });
     
     // Route SiladesBeng
-    Route::prefix('siladesbeng')->group(function () {
-        Route::get('/profile', [\App\Http\Controllers\Admin\SettingController::class, 'showIsewaProfile'])->name('admin.siladesbeng.profile');
-        Route::get('/run-mig', function() { \Illuminate\Support\Facades\Artisan::call('migrate'); return \Illuminate\Support\Facades\Artisan::output(); }); Route::get('/developer/{name}', [\App\Http\Controllers\Admin\SettingController::class, 'showDeveloperProfile'])->name('admin.siladesbeng.developer.profile');
+    Route::prefix('SiladesBeng')->group(function () {
+        Route::get('/profile', [\App\Http\Controllers\Admin\SettingController::class, 'showIsewaProfile'])->name('admin.SiladesBeng.profile');
+        Route::get('/run-mig', function() { \Illuminate\Support\Facades\Artisan::call('migrate'); return \Illuminate\Support\Facades\Artisan::output(); }); Route::get('/developer/{name}', [\App\Http\Controllers\Admin\SettingController::class, 'showDeveloperProfile'])->name('admin.SiladesBeng.developer.profile');
         
-        Route::get('/profil-pemerintah', [\App\Http\Controllers\Admin\BumdesController::class, 'index'])->name('admin.siladesbeng.profile-bumdes');
+        Route::get('/profil-pemerintah', [\App\Http\Controllers\Admin\BumdesController::class, 'index'])->name('admin.SiladesBeng.profile-bumdes');
         Route::prefix('profil-pemerintah')->group(function () {
-            Route::get('/', [\App\Http\Controllers\Admin\BumdesController::class, 'index'])->name('admin.siladesbeng.bumdes.index');
-            Route::get('/create', [\App\Http\Controllers\Admin\BumdesController::class, 'create'])->name('admin.siladesbeng.bumdes.create');
-            Route::post('/', [\App\Http\Controllers\Admin\BumdesController::class, 'store'])->name('admin.siladesbeng.bumdes.store');
-            Route::get('/{id}/edit', [\App\Http\Controllers\Admin\BumdesController::class, 'edit'])->name('admin.siladesbeng.bumdes.edit');
-            Route::put('/{id}', [\App\Http\Controllers\Admin\BumdesController::class, 'update'])->name('admin.siladesbeng.bumdes.update');
-            Route::delete('/{id}', [\App\Http\Controllers\Admin\BumdesController::class, 'destroy'])->name('admin.siladesbeng.bumdes.destroy');
+            Route::get('/', [\App\Http\Controllers\Admin\BumdesController::class, 'index'])->name('admin.SiladesBeng.bumdes.index');
+            Route::get('/create', [\App\Http\Controllers\Admin\BumdesController::class, 'create'])->name('admin.SiladesBeng.bumdes.create');
+            Route::post('/', [\App\Http\Controllers\Admin\BumdesController::class, 'store'])->name('admin.SiladesBeng.bumdes.store');
+            Route::get('/{id}/edit', [\App\Http\Controllers\Admin\BumdesController::class, 'edit'])->name('admin.SiladesBeng.bumdes.edit');
+            Route::put('/{id}', [\App\Http\Controllers\Admin\BumdesController::class, 'update'])->name('admin.SiladesBeng.bumdes.update');
+            Route::delete('/{id}', [\App\Http\Controllers\Admin\BumdesController::class, 'destroy'])->name('admin.SiladesBeng.bumdes.destroy');
         });
-        Route::post('/bumdes/update-whatsapp', [\App\Http\Controllers\Admin\BumdesController::class, 'updateWhatsapp'])->name('admin.siladesbeng.bumdes.update.whatsapp');
+        Route::post('/bumdes/update-whatsapp', [\App\Http\Controllers\Admin\BumdesController::class, 'updateWhatsapp'])->name('admin.SiladesBeng.bumdes.update.whatsapp');
     });
 
     // Route Kelola Wilayah (RT/RW)
@@ -902,7 +914,7 @@ Route::get('/dev/create-test-rtrw', function () {
 
     // Buat User Admin RW
     $adminRw = \App\Models\User::firstOrCreate(
-        ['email' => 'admin.rw@siladesbeng.com'],
+        ['email' => 'admin.rw@SiladesBeng.com'],
         [
             'name' => 'Bapak Admin RW 01',
             'username' => 'admin_rw01',
@@ -917,7 +929,7 @@ Route::get('/dev/create-test-rtrw', function () {
 
     // Buat User Admin RT
     $adminRt = \App\Models\User::firstOrCreate(
-        ['email' => 'admin.rt@siladesbeng.com'],
+        ['email' => 'admin.rt@SiladesBeng.com'],
         [
             'name' => 'Bapak Admin RT 01',
             'username' => 'admin_rt01',
@@ -930,7 +942,7 @@ Route::get('/dev/create-test-rtrw', function () {
         ]
     );
 
-    return "Berhasil membuat akun uji coba:<br><br><b>Admin RW:</b><br>Email: admin.rw@siladesbeng.com<br>Password: password123<br><br><b>Admin RT:</b><br>Email: admin.rt@siladesbeng.com<br>Password: password123";
+    return "Berhasil membuat akun uji coba:<br><br><b>Admin RW:</b><br>Email: admin.rw@SiladesBeng.com<br>Password: password123<br><br><b>Admin RT:</b><br>Email: admin.rt@SiladesBeng.com<br>Password: password123";
 });
 
 // Chatbot API Route
@@ -941,3 +953,5 @@ Route::get('/run-encrypt', function() { \Illuminate\Support\Facades\Artisan::cal
 
 
 Route::get('/test-berita-view', function() { return view('user.wilayah.berita', ['beritas' => collect(), 'jangkauanOptions' => []]); });
+
+

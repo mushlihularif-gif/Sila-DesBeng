@@ -14,39 +14,39 @@ class VillageSeeder extends Seeder
     {
         $villagesData = [
             'Bengkalis' => [
-                'desa' => ['Air Putih', 'Damai', 'Kelapapati', 'Kelebuk', 'Kelemantan', 'Kelemantan Barat', 'Ketam Putih', 'Kuala Alam', 'Meskom', 'Palkun', 'Pangkalan Batang', 'Pangkalan Batang Barat', 'Pedekik', 'Pematang Duku', 'Pematang Duku Timur', 'Penampi', 'Penebal', 'Prapat Tunggal', 'Sebauk', 'Sei Alam', 'Sekodi', 'Senderek', 'Senggoro', 'Simpang Ayam', 'Sungai batang', 'Teluk Latak', 'Temeran', 'Wonosari'],
+                'desa' => ['Air Putih', 'Damai', 'Kelapapati', 'Kelebuk', 'Kelemantan', 'Kelemantan Barat', 'Ketam Putih', 'Kuala Alam', 'Meskom', 'Palkun', 'Pangkalan Batang', 'Pangkalan Batang Barat', 'Pedekik', 'Pematang Duku', 'Pematang Duku Timur', 'Penampi', 'Penebal', 'Prapat Tunggal', 'Sebauk', 'Sei Alam', 'Sekodi', 'Senderak', 'Senggoro', 'Simpang Ayam', 'Sungai Batang', 'Teluk Latak', 'Tameran', 'Wonosari'],
                 'kelurahan' => ['Bengkalis Kota', 'Damon', 'Rimba Sekampung']
             ],
             'Bantan' => [
-                'desa' => ['Bantan Air', 'Bantan Sari', 'Bantan Tengah', 'Bantan Timur', 'Bantan Tua', 'Berancah', 'Deluk', 'Jangkang', 'Kembung Baru', 'Kembung Luar', 'Mentayan', 'Muntai', 'Muntai Barat', 'Pampang Baru', 'Pampang Pesisir', 'Pasiran', 'Resam Lapis', 'Selat Baru', 'Sukamaju', 'Teluklancar', 'Telukpambang', 'Telukpapal', 'Ulu Pulau'],
+                'desa' => ['Bantan Tengah', 'Bantan Air', 'Bantan Tua', 'Teluk Pambang', 'Selat Baru', 'Teluk Lancar', 'Kembung Luar', 'Jangkang', 'Muntai', 'Resam Lapis', 'Berancah', 'Ulu Pulau', 'Mentayan', 'Pambang Pesisir', 'Sukamaju', 'Pambang Baru', 'Kembung Baru', 'Pasiran', 'Bantan Sari', 'Bantan Timur', 'Teluk Papal', 'Muntai Barat', 'Deluk'],
                 'kelurahan' => []
             ],
             'Bukit Batu' => [
-                'desa' => ['Batang Duku', 'Bukit Batu', 'Buruk Bakul', 'Dompas', 'Pangkalan Jambi', 'Pakning Asal', 'Sejangat', 'Sukajadi', 'Sungai Selari'],
+                'desa' => ['Sejangat', 'Dompas', 'Pangkalan Jambi', 'Sungai Selari', 'Buruk Bakul', 'Bukit Batu', 'Sukajadi', 'Batang Duku', 'Pakning Asal'],
                 'kelurahan' => ['Sungai Pakning']
             ],
             'Mandau' => [
                 'desa' => ['Bathin Betuah', 'Harapan Baru'],
-                'kelurahan' => ['Air Jamban', 'Babussalam', 'Balik Alam', 'Batang Serosa', 'Duri Barat', 'Duri Timur', 'Gajah Sakti', 'Pematang Pudu', 'Makeruh (Talang Mandi)']
+                'kelurahan' => ['Air Jamban', 'Babussalam', 'Balik Alam', 'Batang Serosa', 'Duri Barat', 'Duri Timur', 'Gajah Sakti', 'Pematang Pudu', 'Talang Mandi']
             ],
             'Rupat' => [
-                'desa' => ['Darul Aman', 'Dungun Baru', 'Hutan Panjang', 'Makeruh', 'Pancur Jaya', 'Pangkalan Nyirih', 'Pangkalan Pinang', 'Parit Kebumen', 'Sri Tanjung', 'Sukarjo Mesin', 'Sungai Cingam', 'Teluk Lecah'],
+                'desa' => ['Darul Aman', 'Dungun Baru', 'Hutan Panjang', 'Makeruh', 'Pancur Jaya', 'Pangkalan Nyirih', 'Pangkalan Pinang', 'Parit Kebumen', 'Sri Tanjung', 'Sukarjo Mesim', 'Sungai Cingam', 'Teluk Lecah'],
                 'kelurahan' => ['Batu Panjang', 'Pergam', 'Tanjung Kapal', 'Terkul']
             ],
             'Rupat Utara' => [
-                'desa' => ['Hutan Ayu', 'Kadur', 'Suka Damai', 'Puteri Sembilan', 'Tanjung Medang', 'Tanjung Punak', 'Teluk Rhu', 'Titi Akar'],
+                'desa' => ['Tanjung Medang', 'Teluk Rhu', 'Tanjung Punak', 'Titi Akar', 'Kadur', 'Hutan Ayu', 'Suka Damai', 'Puteri Sembilan'],
                 'kelurahan' => []
             ],
             'Siak Kecil' => [
-                'desa' => ['Bandar Jaya', 'Koto Raja', 'Langkat', 'Liang Banir', 'Lubuk Garam', 'Lubuk Gaung', 'Lubuk Muda', 'Muara Dua', 'Sadar Jaya', 'Sepotong', 'Sumber Jaya', 'Sungainibung', 'Sungai Limau', 'Sungai Siput', 'Tanjung Belit', 'Tanjung Damai', 'Tanjungdatuk'],
+                'desa' => ['Lubuk Muda', 'Tanjung Belit', 'Sumber Jaya', 'Sungai Siput', 'Sepotong', 'Lubuk Garam', 'Lubuk Gaung', 'Tanjung Damai', 'Langkat', 'Sadar Jaya', 'Sungai Linau', 'Muara Dua', 'Bandar Jaya', 'Tanjung Datuk', 'Liang Banir', 'Koto Raja', 'Sungai Nibung'],
                 'kelurahan' => []
             ],
             'Pinggir' => [
-                'desa' => ['Balai Pungut', 'Buluh Apo', 'Muara Basung', 'Pangkalan Libut', 'Pinggir', 'Semunai', 'Sungaimeranti', 'Tengganau'],
+                'desa' => ['Balai Pungut', 'Muara Basung', 'Pinggir', 'Semunai', 'Sungai Meranti', 'Tengganau', 'Buluh Apo', 'Pangkalan Libut'],
                 'kelurahan' => ['Balai Raja', 'Titian Antui']
             ],
             'Bandar Laksamana' => [
-                'desa' => ['Api-Api', 'Bukitkerikil', 'Paritsatuapi-api', 'Sepahat', 'Tanjungleban', 'Temiang', 'Tenggayun'],
+                'desa' => ['Parit I Api Api', 'Temiang', 'Api Api', 'Tenggayun', 'Sepahat', 'Bukit Kerikil', 'Tanjung Leban'],
                 'kelurahan' => []
             ],
             'Talang Muandau' => [
@@ -54,7 +54,7 @@ class VillageSeeder extends Seeder
                 'kelurahan' => []
             ],
             'Bathin Solapan' => [
-                'desa' => ['Air Kulim', 'Balai Makam', 'Bathin Sobanga', 'Boncah Mahang', 'Buluh Manis', 'Bumbung', 'Kesumbo Ampai', 'Pamesi', 'Pematang Obo', 'Petani', 'Sebangar', 'Simpang Padang', 'Tambusai Batang Dui'],
+                'desa' => ['Air Kulim', 'Balai Makam', 'Bathin Sobanga', 'Boncah Mahang', 'Buluh Manis', 'Bumbung', 'Kesumboampai', 'Pamesi', 'Pematang Obo', 'Petani', 'Sebangar', 'Simpang Padang', 'Tambusai Batang Dui'],
                 'kelurahan' => []
             ]
         ];

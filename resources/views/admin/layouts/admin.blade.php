@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="{{ str_replace('_','-',app()->getLocale()) }}" translate="no" class="light-style layout-menu-fixed" dir="ltr" data-theme="theme-default"
     data-assets-path="{{ asset('Admin/') }}" data-template="vertical-menu-template-free">
 
@@ -503,8 +503,11 @@
                                     </a>
                                 </li>
                                 @endif
+                                {{-- Unit Ambulans bernaung di bawah Fasilitas Umum, jadi ikut
+                                     menyalakan penanda menu ini. Penjagaan izin unitnya tetap:
+                                     staf tanpa izin fasilitas_umum tidak melihat menu ini. --}}
                                 @if(in_array('Fasilitas Umum', $activeServicesMenu ?? []) && auth()->user()->hasUnitPermission('fasilitas_umum'))
-                                <li class="menu-item {{ request()->is('admin/unit/fasilitas_umum*') ? 'active' : '' }}">
+                                <li class="menu-item {{ request()->is('admin/unit/fasilitas_umum*') || request()->is('admin/unit/ambulans*') ? 'active' : '' }}">
                                     <a href="{{ route('admin.unit.fasilitas_umum.index') }}" class="menu-link">
                                         <div data-i18n="Fasilitas Umum">Fasilitas Umum</div>
                                     </a>
@@ -546,7 +549,7 @@
                 {{-- Seluruh isinya data warga/wilayah; staf platform tidak punya satu pun
                      anak menu di sini, jadi grupnya disembunyikan agar tidak jadi dropdown hampa. --}}
                 @if(auth()->user()->role !== 'staff' || auth()->user()->bolehSalahSatu(\App\Models\User::kunciIzinGrup('Manajemen')))
-                <li class="menu-item {{ request()->is('admin/manajemen-pengguna*') || request()->is('admin/kelola-wilayah*') || request()->is('admin/banners*') || request()->routeIs('admin.warga.mutasi.*') || request()->routeIs('admin.kyc.*') || request()->routeIs('admin.staff.*') ? 'open active show' : '' }}">
+                <li class="menu-item {{ request()->is('admin/manajemen-pengguna*') || request()->is('admin/kelola-wilayah*') || request()->is('admin/banners*') || request()->routeIs('admin.warga.mutasi.*') || request()->routeIs('admin.kyc.*') || request()->routeIs('admin.staff.*') || request()->routeIs('admin.wilayah-admins.*') ? 'open active show' : '' }}">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
                         <i class="menu-icon tf-icons bx bx-briefcase"></i>
                         <div data-i18n="Manajemen">Manajemen</div>
@@ -567,11 +570,22 @@
                         @if(auth()->user()->bolehMenu(['super_admin', 'admin', 'admin_kecamatan', 'admin_desa'], 'platform_staf'))
                         <li class="menu-item {{ request()->routeIs('admin.staff.*') ? 'active' : '' }}">
                             <a href="{{ route('admin.staff.index') }}" class="menu-link">
-                                <div>Kelola Staf</div>
+                                <div>Staf Layanan</div>
                             </a>
                         </li>
                         @endif
 
+                        {{-- Admin RT & RW: hanya kepala desa yang mengangkatnya. --}}
+                        @if(auth()->user()->role === 'admin_desa')
+                        <li class="menu-item {{ request()->routeIs('admin.wilayah-admins.*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.wilayah-admins.index') }}" class="menu-link">
+                                <div>Admin RT & RW</div>
+                            </a>
+                        </li>
+                        @endif
+
+                        {{-- Verifikasi Identitas berdiri sendiri: ini urusan data warga,
+                             bukan turunan dari izin mengelola staf. --}}
                         @if(in_array(auth()->user()->role, ['admin', 'admin_kecamatan', 'admin_desa']))
                         <li class="menu-item {{ request()->routeIs('admin.kyc.*') ? 'active' : '' }}">
                             <a href="{{ route('admin.kyc.index') }}" class="menu-link">
@@ -805,19 +819,19 @@
                 @endif
 
                 <!-- Profil & Info (Dropdown) -->
-                <li class="menu-item {{ request()->is('admin/siladesbeng/profile*') || request()->is('admin/siladesbeng/developer*') || request()->routeIs('admin.siladesbeng.bumdes.index') || request()->routeIs('admin.siladesbeng.bumdes.*') ? 'open active show' : '' }}">
+                <li class="menu-item {{ request()->is('admin/SiladesBeng/profile*') || request()->is('admin/SiladesBeng/developer*') || request()->routeIs('admin.SiladesBeng.bumdes.index') || request()->routeIs('admin.SiladesBeng.bumdes.*') ? 'open active show' : '' }}">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
                         <i class="menu-icon tf-icons bx bx-info-circle"></i>
                         <div data-i18n="Profil & Info">Profil & Info</div>
                     </a>
                     <ul class="menu-sub">
-                        <li class="menu-item {{ request()->routeIs('admin.siladesbeng.profile') || request()->routeIs('admin.siladesbeng.developer.profile') ? 'active' : '' }}">
-                            <a href="{{ route('admin.siladesbeng.profile') }}" class="menu-link">
+                        <li class="menu-item {{ request()->routeIs('admin.SiladesBeng.profile') || request()->routeIs('admin.SiladesBeng.developer.profile') ? 'active' : '' }}">
+                            <a href="{{ route('admin.SiladesBeng.profile') }}" class="menu-link">
                                 <div>SiladesBeng</div>
                             </a>
                         </li>
-                        <li class="menu-item {{ request()->routeIs('admin.siladesbeng.bumdes.index') || request()->routeIs('admin.siladesbeng.bumdes.*') ? 'active' : '' }}">
-                            <a href="{{ route('admin.siladesbeng.bumdes.index') }}" class="menu-link">
+                        <li class="menu-item {{ request()->routeIs('admin.SiladesBeng.bumdes.index') || request()->routeIs('admin.SiladesBeng.bumdes.*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.SiladesBeng.bumdes.index') }}" class="menu-link">
                                 @php
                                     $sidebarRegionLabel = 'Pemerintah Desa';
                                     if(auth()->user()->role === 'admin_kecamatan') {
@@ -849,7 +863,7 @@
                             <div class="nav-item d-flex align-items-center position-relative">
                                 @if(!request()->routeIs(
                                     'admin.laporan.log',
-                                    'admin.siladesbeng.*',
+                                    'admin.SiladesBeng.*',
                                     'admin.kemitraan.*',
                                     'admin.manajemen-pengguna.*',
                                     'admin.system-settings.*',
@@ -1218,7 +1232,7 @@
                         });
                     });
                 });
-            // ⭐ Tangani Pesan Flash Sesi saat Halaman Dimuat
+            // â­ Tangani Pesan Flash Sesi saat Halaman Dimuat
             document.addEventListener('DOMContentLoaded', function() {
                 @if(session('success'))
                     showSiladesBengToast('success', 'Berhasil', {!! json_encode(session('success')) !!});
@@ -1355,3 +1369,5 @@
 </body>
 
 </html>
+
+
