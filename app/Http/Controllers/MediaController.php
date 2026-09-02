@@ -138,4 +138,9 @@ class MediaController extends Controller
         }
         return response($imageContent)->header('Content-Type', 'image/jpeg');
     }
+
+    public function secureFaceImage($filename)
+    {
+        return $this->secureKtpImage($filename);
+    }
 }

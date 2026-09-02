@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Log;
 
 use App\Models\PasarReview;
 use App\Models\PasarComplaint;
+use App\Models\PasarChatSession;
+use App\Models\PasarChatMessage;
 use App\Models\User;
 use App\Models\Region;
 use Illuminate\Support\Facades\Storage;
@@ -592,6 +594,292 @@ class PasarDaerahApiController extends Controller
                 'handler_name' => $complaint->handler ? $complaint->handler->name : null,
                 'resolved_at' => $complaint->resolved_at ? $complaint->resolved_at->format('d M Y, H:i') : null,
                 'created_at' => $complaint->created_at->format('d M Y, H:i'),
+            ]
+        ]);
+    }
+
+    /**
+     * Konfirmasi Pesanan Diterima oleh User (+ Upload Foto Bukti Sampai)
+     */
+    public function confirmReceived(Request $request, $orderId)
+    {
+        $user = $request->user();
+
+        $order = PasarOrder::where('id', $orderId)
+            ->where('user_id', $user->id)
+            ->first();
+
+        if (!$order) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Pesanan tidak ditemukan'
+            ], 404);
+        }
+
+        if ($order->status === 'completed') {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Pesanan ini sudah selesai.'
+            ], 400);
+        }
+
+        $request->validate([
+            'delivery_proof_image' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
+            'proof_image' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
+        ]);
+
+        // Support both field names
+        $photoField = $request->hasFile('delivery_proof_image') ? 'delivery_proof_image' : ($request->hasFile('proof_image') ? 'proof_image' : null);
+
+        if ($photoField) {
+            $path = $request->file($photoField)->store('pasar_orders/proofs', 'public');
+            $order->delivery_proof_image = $path;
+        }
+
+        $order->status = 'completed';
+        $order->completion_time = now();
+        $order->save();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Pesanan berhasil dikonfirmasi selesai. Terima kasih!',
+            'data' => [
+                'id' => $order->id,
+                'order_number' => $order->order_number,
+                'status' => $order->status,
+                'delivery_proof_image' => $order->delivery_proof_image ? url('storage/' . $order->delivery_proof_image) : null,
+                'completion_time' => $order->completion_time ? $order->completion_time->format('Y-m-d H:i:s') : null,
+            ]
+        ]);
+    }
+
+    /**
+     * Get Chat History for API
+     */
+    public function getChatHistory(Request $request, $region_id)
+    {
+        $user = $request->user();
+        $sessionToken = $request->header('X-Chat-Session-Token') ?: $request->get('session_token');
+
+        $query = PasarChatSession::where('region_id', $region_id);
+
+        if ($user) {
+            $query->where(function($q) use ($user, $sessionToken) {
+                $q->where('user_id', $user->id);
+                if ($sessionToken) {
+                    $q->orWhere('session_token', $sessionToken);
+                }
+            });
+        } else {
+            if (!$sessionToken) {
+                return response()->json([
+                    'status' => 'success',
+                    'data' => [
+                        'session' => null,
+                        'messages' => [],
+                    ]
+                ]);
+            }
+            $query->where('session_token', $sessionToken);
+        }
+
+        $session = $query->with(['messages'])->latest()->first();
+
+        if ($session && $user && !$session->user_id) {
+            $session->update([
+                'user_id' => $user->id,
+                'user_name' => $user->name,
+            ]);
+        }
+
+        if ($session) {
+            $session->update(['unread_user_count' => 0]);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'data' => [
+                'session' => $session,
+                'messages' => $session ? $session->messages : [],
+            ]
+        ]);
+    }
+
+    /**
+     * Send Chat Message for API
+     */
+    public function sendChatMessage(Request $request, $region_id)
+    {
+        $request->validate([
+            'message' => 'required|string|max:1000',
+            'session_token' => 'nullable|string|max:64',
+        ]);
+
+        $user = $request->user();
+        $sessionToken = $request->session_token ?: ($request->header('X-Chat-Session-Token') ?: \Illuminate\Support\Str::random(32));
+        $region = Region::findOrFail($region_id);
+
+        $session = null;
+        if ($user) {
+            $session = PasarChatSession::where('region_id', $region_id)
+                ->where(function($q) use ($user, $sessionToken) {
+                    $q->where('user_id', $user->id)
+                      ->orWhere('session_token', $sessionToken);
+                })
+                ->whereIn('status', ['bot', 'escalated'])
+                ->latest()
+                ->first();
+        } else {
+            $session = PasarChatSession::where('region_id', $region_id)
+                ->where('session_token', $sessionToken)
+                ->whereIn('status', ['bot', 'escalated'])
+                ->latest()
+                ->first();
+        }
+
+        if (!$session) {
+            $session = PasarChatSession::create([
+                'region_id' => $region_id,
+                'user_id' => $user ? $user->id : null,
+                'user_name' => $user ? $user->name : 'Pengguna Aplikasi',
+                'session_token' => $sessionToken,
+                'status' => 'bot',
+                'last_message' => $request->message,
+                'last_message_at' => now(),
+                'unread_admin_count' => 0,
+                'unread_user_count' => 0,
+            ]);
+        }
+
+        // Simpan pesan user
+        $userMsg = PasarChatMessage::create([
+            'session_id' => $session->id,
+            'sender_type' => 'user',
+            'sender_id' => $user ? $user->id : null,
+            'message' => $request->message,
+            'is_read' => true,
+        ]);
+
+        $botReply = null;
+        $isEscalated = ($session->status === 'escalated');
+
+        if (!$isEscalated) {
+            $q = strtolower($request->message);
+            $cleanRegionName = str_ireplace(['desa ', 'kelurahan '], '', $region->name);
+
+            if (str_contains($q, 'menanyakan tentang produk') || str_contains($q, 'produk:')) {
+                $botReply = "Tentu Kak! Produk tersebut saat ini tercatat ready di etalase Toko BUMDes {$cleanRegionName} dan siap dipesan. Kakak bisa langsung menambahkannya ke keranjang belanja atau tanyakan jika butuh informasi spesifikasi lainnya.";
+            } elseif (str_contains($q, 'stok') || str_contains($q, 'ready') || str_contains($q, 'ada')) {
+                $botReply = "Stok produk di Toko BUMDes {$cleanRegionName} selalu terpantau ready dan siap segera dikemas.";
+            } elseif (str_contains($q, 'kirim') || str_contains($q, 'antar') || str_contains($q, 'desa') || str_contains($q, 'kecamatan')) {
+                $botReply = "Tentu bisa! Kami melayani pengiriman kurir lokal antar-desa dan antar-kecamatan se-Kabupaten Bengkalis.";
+            } elseif (str_contains($q, 'ongkir') || str_contains($q, 'biaya') || str_contains($q, 'tarif')) {
+                $botReply = "Ongkir dalam satu desa flat Rp 5.000 (bahkan gratis promo tertentu). Pengiriman antar-desa sekitar Rp 10.000.";
+            } elseif (str_contains($q, 'cod') || str_contains($q, 'bayar') || str_contains($q, 'transfer') || str_contains($q, 'qris')) {
+                $botReply = "Bisa bayar COD tunai saat kurir tiba, atau lewat QRIS dan Transfer Bank Virtual Account saat checkout.";
+            } elseif (str_contains($q, 'retur') || str_contains($q, 'rusak') || str_contains($q, 'garansi') || str_contains($q, 'komplain')) {
+                $botReply = "Jika produk tidak sesuai atau terdapat kerusakan saat diterima, Kakak bisa langsung mengajukan komplain & retur di menu riwayat transaksi. Kami menjamin penggantian barang baru atau pengembalian dana 100%.";
+            } elseif (str_contains($q, 'lokasi') || str_contains($q, 'alamat') || str_contains($q, 'ambil')) {
+                $botReply = "Kantor Toko BUMDes kami berlokasi di Desa {$cleanRegionName}. Kakak juga bisa memilih opsi 'Ambil Sendiri' saat checkout gratis ongkir.";
+            } else {
+                $botReply = "Maaf Kak, asisten otomatis kami belum memahami pertanyaan tersebut. Silakan klik tombol 'Chat Pengelola Toko' di atas agar pesan Kakak langsung diteruskan ke petugas Pengelola Toko BUMDes.";
+            }
+
+            $botMsg = PasarChatMessage::create([
+                'session_id' => $session->id,
+                'sender_type' => 'bot',
+                'sender_id' => null,
+                'message' => $botReply,
+                'is_read' => true,
+            ]);
+
+            $session->update([
+                'last_message' => $botReply,
+                'last_message_at' => now(),
+            ]);
+        } else {
+            $session->update([
+                'last_message' => $request->message,
+                'last_message_at' => now(),
+                'unread_admin_count' => $session->unread_admin_count + 1,
+            ]);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'data' => [
+                'session_token' => $sessionToken,
+                'session' => $session->fresh(),
+                'user_message' => $userMsg,
+                'bot_message' => isset($botMsg) ? $botMsg : null,
+                'is_escalated' => $isEscalated,
+            ]
+        ]);
+    }
+
+    /**
+     * Escalate to Admin for API
+     */
+    public function escalateToAdmin(Request $request, $region_id)
+    {
+        $user = $request->user();
+        $sessionToken = $request->session_token ?: $request->header('X-Chat-Session-Token');
+        $region = Region::findOrFail($region_id);
+
+        $session = null;
+        if ($user) {
+            $session = PasarChatSession::where('region_id', $region_id)
+                ->where(function($q) use ($user, $sessionToken) {
+                    $q->where('user_id', $user->id)
+                      ->orWhere('session_token', $sessionToken);
+                })
+                ->latest()
+                ->first();
+        } elseif ($sessionToken) {
+            $session = PasarChatSession::where('region_id', $region_id)
+                ->where('session_token', $sessionToken)
+                ->latest()
+                ->first();
+        }
+
+        if (!$session) {
+            $sessionToken = $sessionToken ?: \Illuminate\Support\Str::random(32);
+            $session = PasarChatSession::create([
+                'region_id' => $region_id,
+                'user_id' => $user ? $user->id : null,
+                'user_name' => $user ? $user->name : 'Pengguna Aplikasi',
+                'session_token' => $sessionToken,
+                'status' => 'escalated',
+                'last_message' => 'Meminta bantuan Pengelola Toko',
+                'last_message_at' => now(),
+                'unread_admin_count' => 1,
+                'unread_user_count' => 0,
+            ]);
+        } else {
+            $session->update([
+                'status' => 'escalated',
+                'unread_admin_count' => $session->unread_admin_count + 1,
+                'last_message_at' => now(),
+            ]);
+        }
+
+        $cleanRegionName = str_ireplace(['desa ', 'kelurahan '], '', $region->name);
+        $escalateNotice = "Percakapan Kakak telah dialihkan ke Pengelola Toko BUMDes {$cleanRegionName}. Pengelola toko akan segera membaca dan membalas pesan Kakak di sini.";
+
+        $botMsg = PasarChatMessage::create([
+            'session_id' => $session->id,
+            'sender_type' => 'bot',
+            'sender_id' => null,
+            'message' => $escalateNotice,
+            'is_read' => true,
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'data' => [
+                'session_token' => $session->session_token,
+                'session' => $session->fresh(),
+                'system_message' => $botMsg,
             ]
         ]);
     }

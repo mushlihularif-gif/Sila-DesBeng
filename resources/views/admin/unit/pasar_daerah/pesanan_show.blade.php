@@ -52,6 +52,30 @@
             </div>
             @endif
 
+            <!-- ALERT KOMPLAIN WARGA -->
+            @if($pesanan->complaint)
+            <div class="alert alert-danger border-0 shadow-sm rounded-4 mb-4 d-flex align-items-center" role="alert">
+                <i class="bx bx-error-alt fs-1 me-3 text-danger"></i>
+                <div class="flex-grow-1">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <h5 class="alert-heading fw-bold mb-0 text-danger">Komplain / Retur Warga</h5>
+                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-3">
+                            Status: {{ ucfirst($pesanan->complaint->status ?? 'pending') }}
+                        </span>
+                    </div>
+                    <p class="mb-1 text-dark">Alasan Komplain: <strong>"{{ $pesanan->complaint->reason ?? 'Produk bermasalah' }}"</strong></p>
+                    @if($pesanan->complaint->description)
+                        <small class="text-muted d-block">Catatan: {{ $pesanan->complaint->description }}</small>
+                    @endif
+                </div>
+                @if($pesanan->complaint->proof_image)
+                <a href="{{ asset('storage/' . $pesanan->complaint->proof_image) }}" target="_blank" class="btn btn-outline-danger btn-sm rounded-pill px-3 ms-2">
+                    <i class="bx bx-image me-1"></i> Lihat Bukti Komplain
+                </a>
+                @endif
+            </div>
+            @endif
+
             <div class="row g-4">
                 <!-- LEFT COLUMN -->
                 <div class="col-lg-8">
@@ -341,6 +365,24 @@
                             </a>
                             <a href="{{ asset('storage/' . $pesanan->payment_proof) }}" download class="btn btn-outline-primary btn-sm rounded-pill px-4">
                                 <i class="bx bx-download me-1"></i> Unduh Bukti
+                            </a>
+                        </div>
+                    </div>
+                    @endif
+
+                    @if($pesanan->delivery_proof_image)
+                    <!-- DELIVERY PROOF CARD -->
+                    <div class="card shadow-sm border-0 rounded-4 mb-4">
+                        <div class="card-header bg-white border-bottom py-3">
+                            <h6 class="mb-0 fw-bold"><i class="bx bx-camera text-success me-2"></i>Foto Bukti Barang Diterima</h6>
+                        </div>
+                        <div class="card-body p-4 text-center">
+                            <a href="{{ asset('storage/' . $pesanan->delivery_proof_image) }}" target="_blank" class="d-block border rounded-3 overflow-hidden shadow-sm hover-shadow transition-all mb-3">
+                                <img src="{{ asset('storage/' . $pesanan->delivery_proof_image) }}" alt="Bukti Penerimaan" class="img-fluid w-100" style="object-fit: cover; max-height: 250px;">
+                            </a>
+                            <small class="text-muted d-block mb-3">Diunggah oleh pelanggan saat mengonfirmasi pesanan diterima di aplikasi mobile.</small>
+                            <a href="{{ asset('storage/' . $pesanan->delivery_proof_image) }}" download class="btn btn-outline-success btn-sm rounded-pill px-4">
+                                <i class="bx bx-download me-1"></i> Unduh Foto Bukti
                             </a>
                         </div>
                     </div>

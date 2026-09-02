@@ -85,6 +85,14 @@
                         @endif
                     </button>
                 </li>
+                <li class="nav-item">
+                    <button type="button" class="nav-link {{ $tab == 'chat' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-chat" aria-controls="navs-top-chat" aria-selected="{{ $tab == 'chat' ? 'true' : 'false' }}">
+                        <i class="bx bx-chat me-2"></i> Chat Pengelola Toko
+                        @if(isset($totalUnreadChats) && $totalUnreadChats > 0)
+                            <span class="badge rounded-pill bg-danger ms-1">{{ $totalUnreadChats }}</span>
+                        @endif
+                    </button>
+                </li>
             </ul>
             
             <div class="tab-content">
@@ -1145,6 +1153,124 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- TAB 8: CHAT PENGELOLA TOKO -->
+                <div class="tab-pane fade {{ $tab == 'chat' ? 'show active' : '' }}" id="navs-top-chat" role="tabpanel">
+                    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+                        <div class="card-header bg-white border-bottom py-3 px-4 d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="fw-bold mb-1"><i class="bx bx-chat me-2 text-primary"></i> Chat & Bantuan Pengelola Toko</h5>
+                                <p class="text-muted small mb-0">Kelola obrolan langsung dari pembeli yang memerlukan respon pengelola Toko BUMDes.</p>
+                            </div>
+                            <div>
+                                <span class="badge bg-label-primary rounded-pill px-3 py-2">
+                                    <i class="bx bx-bot me-1"></i> Mode Hybrid: Bot + Pengelola
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="row g-0" style="min-height: 580px;">
+                                <!-- Left Panel: Chat List -->
+                                <div class="col-md-5 col-lg-4 border-end" style="background: #fdfdfd;">
+                                    <div class="p-3 border-bottom bg-light">
+                                        <div class="input-group input-group-merge">
+                                            <span class="input-group-text"><i class="bx bx-search"></i></span>
+                                            <input type="text" id="searchChatInput" class="form-control" placeholder="Cari pembeli..." onkeyup="filterAdminChats()">
+                                        </div>
+                                    </div>
+                                    <div class="overflow-auto" id="adminChatListContainer" style="max-height: 510px;">
+                                        @forelse($chats as $chat)
+                                        <div class="admin-chat-item p-3 border-bottom d-flex align-items-center gap-3 cursor-pointer" 
+                                             id="chatItem_{{ $chat->id }}"
+                                             onclick="loadAdminChat({{ $chat->id }})"
+                                             data-user-name="{{ strtolower($chat->user_name ?? ($chat->user->name ?? 'Pembeli')) }}"
+                                             style="transition: all 0.2s; cursor: pointer;">
+                                            <div class="avatar avatar-md rounded-circle bg-label-primary d-flex align-items-center justify-content-center flex-shrink-0 fw-bold">
+                                                {{ strtoupper(substr($chat->user_name ?? ($chat->user->name ?? 'P'), 0, 1)) }}
+                                            </div>
+                                            <div class="flex-grow-1 min-w-0">
+                                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                                    <h6 class="mb-0 fw-bold text-truncate" style="max-width: 140px;">
+                                                        {{ $chat->user_name ?? ($chat->user->name ?? 'Pembeli') }}
+                                                    </h6>
+                                                    <small class="text-muted" style="font-size: 11px;">
+                                                        {{ $chat->last_message_at ? $chat->last_message_at->format('H:i') : '' }}
+                                                    </small>
+                                                </div>
+                                                <p class="mb-0 text-muted small text-truncate" style="max-width: 180px;" id="chatPreview_{{ $chat->id }}">
+                                                    {{ $chat->last_message ?? 'Memulai percakapan...' }}
+                                                </p>
+                                                <div class="mt-1 d-flex gap-1 align-items-center">
+                                                    @if($chat->status === 'escalated')
+                                                        <span class="badge bg-label-warning py-0 px-2" style="font-size: 10px;" id="chatBadge_{{ $chat->id }}">Perlu Balasan</span>
+                                                    @elseif($chat->status === 'resolved')
+                                                        <span class="badge bg-label-success py-0 px-2" style="font-size: 10px;" id="chatBadge_{{ $chat->id }}">Selesai</span>
+                                                    @else
+                                                        <span class="badge bg-label-secondary py-0 px-2" style="font-size: 10px;" id="chatBadge_{{ $chat->id }}">Bot</span>
+                                                    @endif
+
+                                                    @if($chat->unread_admin_count > 0)
+                                                        <span class="badge bg-danger rounded-pill ms-auto py-0 px-2" style="font-size: 10px;" id="chatUnread_{{ $chat->id }}">
+                                                            {{ $chat->unread_admin_count }} baru
+                                                        </span>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </div>
+                                        @empty
+                                        <div class="text-center py-5 text-muted">
+                                            <i class="bx bx-conversation fs-1 text-secondary mb-2"></i>
+                                            <p class="mb-0 small">Belum ada obrolan masuk dari pembeli.</p>
+                                        </div>
+                                        @endforelse
+                                    </div>
+                                </div>
+
+                                <!-- Right Panel: Chat Stream & Reply Box -->
+                                <div class="col-md-7 col-lg-8 d-flex flex-column bg-white">
+                                    <!-- Chat Header -->
+                                    <div class="p-3 border-bottom d-flex justify-content-between align-items-center" id="adminActiveChatHeader" style="background: #fafafa;">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="avatar avatar-sm rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold" id="adminActiveUserAvatar">
+                                                -
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-0 fw-bold" id="adminActiveUserName">Pilih Obrolan</h6>
+                                                <small class="text-muted" id="adminActiveUserStatus">Klik salah satu pembeli di sebelah kiri</small>
+                                            </div>
+                                        </div>
+                                        <div id="adminChatActions" style="display: none;">
+                                            <button type="button" class="btn btn-sm btn-outline-success rounded-pill px-3" onclick="resolveAdminActiveChat()">
+                                                <i class="bx bx-check me-1"></i> Tandai Selesai
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Chat Stream Messages -->
+                                    <div class="flex-grow-1 p-4 overflow-auto d-flex flex-column gap-3" id="adminChatMessagesStream" style="max-height: 440px; min-height: 380px; background: #f8fafc;">
+                                        <div class="d-flex flex-column align-items-center justify-content-center h-100 text-muted py-5 my-auto" id="adminEmptyChatPlaceholder">
+                                            <i class="bx bx-message-dots fs-1 mb-2 text-primary" style="opacity: 0.5;"></i>
+                                            <h6 class="fw-bold">Belum Memilih Obrolan</h6>
+                                            <p class="small mb-0 text-center" style="max-width: 320px;">Pilih salah satu sesi obrolan di samping kiri untuk membaca riwayat dan membalas pesan pembeli.</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Chat Input Area -->
+                                    <div class="p-3 border-top bg-white" id="adminChatInputContainer" style="display: none;">
+                                        <form id="adminReplyForm" onsubmit="event.preventDefault(); sendAdminReply();">
+                                            <div class="input-group">
+                                                <input type="text" id="adminReplyMessage" class="form-control" placeholder="Tulis balasan resmi Pengelola Toko..." autocomplete="off">
+                                                <button class="btn btn-primary px-4 shadow-sm" type="submit" id="adminSendBtn">
+                                                    <i class="bx bx-send me-1"></i> Kirim Balasan
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -1209,6 +1335,214 @@
             label.classList.add('text-muted');
             label.classList.remove('text-dark');
         }
+    }
+
+    // =========================================================================
+    // ADMIN CHAT PENGELOLA TOKO LOGIC
+    // =========================================================================
+    let currentAdminActiveChatId = null;
+    let adminChatPollInterval = null;
+
+    function filterAdminChats() {
+        const query = document.getElementById('searchChatInput').value.toLowerCase();
+        const items = document.querySelectorAll('.admin-chat-item');
+        items.forEach(item => {
+            const name = item.getAttribute('data-user-name') || '';
+            if (name.includes(query)) {
+                item.style.display = 'flex';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+
+    function loadAdminChat(sessionId, isSilent = false) {
+        currentAdminActiveChatId = sessionId;
+
+        // Highlight selected
+        document.querySelectorAll('.admin-chat-item').forEach(el => el.classList.remove('bg-label-primary'));
+        const activeItem = document.getElementById(`chatItem_${sessionId}`);
+        if (activeItem) {
+            activeItem.classList.add('bg-label-primary');
+            const unreadBadge = document.getElementById(`chatUnread_${sessionId}`);
+            if (unreadBadge) unreadBadge.style.display = 'none';
+        }
+
+        // Show inputs & actions
+        document.getElementById('adminChatActions').style.display = 'block';
+        document.getElementById('adminChatInputContainer').style.display = 'block';
+
+        if (!isSilent) {
+            document.getElementById('adminChatMessagesStream').innerHTML = `
+                <div class="d-flex justify-content-center align-items-center h-100 py-5">
+                    <div class="spinner-border text-primary" role="status"></div>
+                </div>
+            `;
+        }
+
+        fetch(`{{ url('admin/unit/pasar-daerah/chats') }}/${sessionId}/messages`, {
+            headers: {
+                'Accept': 'application/json'
+            }
+        })
+        .then(res => res.json())
+        .then(res => {
+            if (res.status === 'success') {
+                const session = res.data.session;
+                const messages = res.data.messages || [];
+
+                const name = session.user_name || (session.user ? session.user.name : 'Pembeli');
+                document.getElementById('adminActiveUserName').textContent = name;
+                document.getElementById('adminActiveUserAvatar').textContent = name.charAt(0).toUpperCase();
+                
+                let statusLabel = 'Asisten Bot';
+                if (session.status === 'escalated') statusLabel = 'Perlu Balasan Pengelola';
+                if (session.status === 'resolved') statusLabel = 'Selesai';
+                document.getElementById('adminActiveUserStatus').textContent = `Status: ${statusLabel}`;
+
+                renderAdminChatMessages(messages);
+            }
+        })
+        .catch(err => console.error(err));
+    }
+
+    function formatChatContentAdmin(rawText) {
+        if (!rawText) return '';
+        const prodRegex = /\[PRODUK\|(.*?)\|(.*?)\|(.*?)\]/g;
+        if (prodRegex.test(rawText)) {
+            return rawText.replace(/\[PRODUK\|(.*?)\|(.*?)\|(.*?)\]/g, (match, img, name, price) => {
+                const imgHtml = img ? `<img src="${escapeHtmlAdmin(img)}" style="width: 44px; height: 44px; border-radius: 8px; object-fit: cover; background: #fff; flex-shrink: 0; border: 1px solid #e2e8f0;" alt="${escapeHtmlAdmin(name)}">` : '';
+                return `
+                    <div style="display: flex; align-items: center; gap: 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 8px 10px; margin-bottom: 8px;">
+                        ${imgHtml}
+                        <div style="min-width: 0; flex: 1;">
+                            <div style="font-weight: 800; font-size: 12px; color: #1e293b; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtmlAdmin(name)}</div>
+                            <div style="font-size: 11px; font-weight: 700; color: #0284c7; margin-top: 2px;">${escapeHtmlAdmin(price)}</div>
+                        </div>
+                    </div>
+                `;
+            }).replace(/\n/g, '<br>');
+        }
+        return escapeHtmlAdmin(rawText).replace(/\n/g, '<br>');
+    }
+
+    function renderAdminChatMessages(messages) {
+        const stream = document.getElementById('adminChatMessagesStream');
+        stream.innerHTML = '';
+
+        if (messages.length === 0) {
+            stream.innerHTML = '<div class="text-center text-muted my-auto py-4">Belum ada riwayat pesan.</div>';
+            return;
+        }
+
+        messages.forEach(msg => {
+            const timeStr = msg.created_at ? new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
+            const msgEl = document.createElement('div');
+            
+            if (msg.sender_type === 'admin') {
+                msgEl.className = 'd-flex justify-content-end mb-2';
+                msgEl.innerHTML = `
+                    <div class="bg-primary text-white p-3 rounded-4 shadow-sm" style="max-width: 75%; border-bottom-right-radius: 4px !important;">
+                        <div class="fw-bold small text-white-50 mb-1" style="font-size: 11px;">Pengelola Toko (Anda)</div>
+                        <div style="font-size: 13px; line-height: 1.45;">${formatChatContentAdmin(msg.message)}</div>
+                        <div class="text-end text-white-50 mt-1" style="font-size: 10px;">${timeStr}</div>
+                    </div>
+                `;
+            } else if (msg.sender_type === 'user') {
+                msgEl.className = 'd-flex justify-content-start mb-2';
+                msgEl.innerHTML = `
+                    <div class="bg-white text-dark p-3 rounded-4 border shadow-sm" style="max-width: 75%; border-bottom-left-radius: 4px !important;">
+                        <div class="fw-bold small text-primary mb-1" style="font-size: 11px;">Pembeli</div>
+                        <div style="font-size: 13px; line-height: 1.45;">${formatChatContentAdmin(msg.message)}</div>
+                        <div class="text-end text-muted mt-1" style="font-size: 10px;">${timeStr}</div>
+                    </div>
+                `;
+            } else {
+                // bot
+                msgEl.className = 'd-flex justify-content-start mb-2';
+                msgEl.innerHTML = `
+                    <div class="bg-light text-secondary p-2 px-3 rounded-3 border" style="max-width: 75%; font-size: 12px;">
+                        <div class="fw-bold text-muted mb-0.5" style="font-size: 10px;"><i class="bx bx-bot me-1"></i> Asisten Bot Toko</div>
+                        <div>${formatChatContentAdmin(msg.message)}</div>
+                        <div class="text-end text-muted mt-1" style="font-size: 9px;">${timeStr}</div>
+                    </div>
+                `;
+            }
+
+            stream.appendChild(msgEl);
+        });
+
+        stream.scrollTop = stream.scrollHeight;
+    }
+
+    function sendAdminReply() {
+        if (!currentAdminActiveChatId) return;
+
+        const input = document.getElementById('adminReplyMessage');
+        const text = input.value.trim();
+        if (!text) return;
+
+        input.value = '';
+        const btn = document.getElementById('adminSendBtn');
+        btn.disabled = true;
+
+        fetch(`{{ url('admin/unit/pasar-daerah/chats') }}/${currentAdminActiveChatId}/reply`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ message: text })
+        })
+        .then(res => res.json())
+        .then(res => {
+            btn.disabled = false;
+            if (res.status === 'success') {
+                loadAdminChat(currentAdminActiveChatId, true);
+                
+                // Update preview in left list
+                const previewEl = document.getElementById(`chatPreview_${currentAdminActiveChatId}`);
+                if (previewEl) previewEl.textContent = text;
+            }
+        })
+        .catch(err => {
+            btn.disabled = false;
+            console.error(err);
+        });
+    }
+
+    function resolveAdminActiveChat() {
+        if (!currentAdminActiveChatId) return;
+        if (!confirm('Tandai sesi obrolan ini telah selesai?')) return;
+
+        fetch(`{{ url('admin/unit/pasar-daerah/chats') }}/${currentAdminActiveChatId}/resolve`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
+            }
+        })
+        .then(res => res.json())
+        .then(res => {
+            if (res.status === 'success') {
+                const badgeEl = document.getElementById(`chatBadge_${currentAdminActiveChatId}`);
+                if (badgeEl) {
+                    badgeEl.className = 'badge bg-label-success py-0 px-2';
+                    badgeEl.textContent = 'Selesai';
+                }
+                loadAdminChat(currentAdminActiveChatId, true);
+            }
+        })
+        .catch(err => console.error(err));
+    }
+
+    function escapeHtmlAdmin(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 </script>
 @endsection

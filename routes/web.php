@@ -24,6 +24,10 @@ Route::get('/media/secure/ktp/{filename}', [MediaController::class, 'secureKtpIm
     ->name('media.secure.ktp')
     ->middleware('auth');
 
+Route::get('/media/secure/face/{filename}', [MediaController::class, 'secureFaceImage'])
+    ->name('media.secure.face')
+    ->middleware('auth');
+
 Route::get('/', function () {
     return redirect('beranda');
 });
@@ -264,7 +268,19 @@ Route::middleware('auth')->prefix('pasar-daerah')->group(function () {
         ->name('pasar.toko')
         ->withoutMiddleware('auth')
         ->middleware('role:user,guest');
+
+    Route::get('/toko/{id}/chat/history', [App\Http\Controllers\User\PasarDaerahController::class, 'getChatHistory'])
+        ->name('pasar.chat.history')
+        ->withoutMiddleware('auth');
+    Route::post('/toko/{id}/chat/send', [App\Http\Controllers\User\PasarDaerahController::class, 'sendChatMessage'])
+        ->name('pasar.chat.send')
+        ->withoutMiddleware('auth');
+    Route::post('/toko/{id}/chat/escalate', [App\Http\Controllers\User\PasarDaerahController::class, 'escalateToAdmin'])
+        ->name('pasar.chat.escalate')
+        ->withoutMiddleware('auth');
         
+    Route::post('/order/{id}/confirm-received', [App\Http\Controllers\User\PasarDaerahController::class, 'confirmReceived'])->name('pasar.order.confirm_received');
+    Route::post('/order/{id}/complaint', [App\Http\Controllers\User\PasarDaerahController::class, 'storeComplaint'])->name('pasar.order.complaint.store');
     Route::post('/{id}/review', [App\Http\Controllers\User\PasarDaerahController::class, 'storeReview'])->name('pasar.review.store');
 
     // Taruh parameter di paling bawah supaya route lain tidak ketimpa
@@ -631,6 +647,12 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
             Route::get('pasar-daerah/reviews/list', [\App\Http\Controllers\Admin\UnitPasarDaerahController::class, 'reviews'])->name('admin.unit.pasar_daerah.reviews');
             Route::post('pasar-daerah/reviews/{id}/reply', [\App\Http\Controllers\Admin\UnitPasarDaerahController::class, 'replyReview'])->name('admin.unit.pasar_daerah.reply_review');
             Route::post('pasar-daerah/complaints/{id}/handle', [\App\Http\Controllers\Admin\UnitPasarDaerahController::class, 'handleComplaint'])->name('admin.unit.pasar_daerah.complaints.handle');
+            
+            // Chat Pengelola Toko
+            Route::get('pasar-daerah/chats/list', [\App\Http\Controllers\Admin\UnitPasarDaerahController::class, 'chats'])->name('admin.unit.pasar_daerah.chats');
+            Route::get('pasar-daerah/chats/{id}/messages', [\App\Http\Controllers\Admin\UnitPasarDaerahController::class, 'chatMessages'])->name('admin.unit.pasar_daerah.chat_messages');
+            Route::post('pasar-daerah/chats/{id}/reply', [\App\Http\Controllers\Admin\UnitPasarDaerahController::class, 'replyChat'])->name('admin.unit.pasar_daerah.reply_chat');
+            Route::post('pasar-daerah/chats/{id}/resolve', [\App\Http\Controllers\Admin\UnitPasarDaerahController::class, 'resolveChat'])->name('admin.unit.pasar_daerah.resolve_chat');
         });
     });
     

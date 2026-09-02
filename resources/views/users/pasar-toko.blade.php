@@ -1,4 +1,4 @@
-﻿@extends('layouts.user')
+@extends('layouts.user')
 
 @php
     $cleanRegionName = preg_replace('/^Desa\s+/i', '', $region->name ?? 'Bengkalis');
@@ -101,13 +101,15 @@
         justify-content: center;
     }
 
-    /* Promo Banner Toko (Opsi A) */
     .shopee-promo-banner {
         border-radius: 1.25rem;
         overflow: hidden;
         margin-bottom: 24px;
         box-shadow: 0 4px 20px -2px rgba(17, 87, 137, 0.12);
         border: 1px solid rgba(226, 232, 240, 0.8);
+        height: 250px;
+        position: relative;
+        background-color: #1e293b;
     }
     .promo-banner-card {
         background: linear-gradient(135deg, #0f4c75 0%, #115789 50%, #0284c7 100%);
@@ -199,9 +201,22 @@
     }
     .promo-banner-custom-img {
         width: 100%;
-        max-height: 220px;
+        height: 100%;
+        object-fit: contain;
+        position: relative;
+        z-index: 2;
+    }
+
+    .promo-banner-bg-blur {
+        position: absolute;
+        top: -10%;
+        left: -10%;
+        width: 120%;
+        height: 120%;
         object-fit: cover;
-        display: block;
+        filter: blur(20px) brightness(0.8);
+        z-index: 1;
+        opacity: 0.6;
     }
 
     .shopee-badge-mall {
@@ -290,14 +305,93 @@
         visibility: visible;
     }
     .toko-chat-header {
-        background: linear-gradient(135deg, #115789 0%, #0284c7 100%);
+        background: linear-gradient(135deg, #0f4c75 0%, #115789 50%, #0284c7 100%);
         color: white;
-        padding: 14px 18px;
+        padding: 12px 16px;
         display: flex;
         align-items: center;
         justify-content: space-between;
+        gap: 12px;
         flex-shrink: 0;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    .toko-chat-header-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+        flex: 1;
+    }
+    .toko-chat-avatar-wrap {
+        position: relative;
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        flex-shrink: 0;
+    }
+    .toko-chat-avatar {
+        width: 40px !important;
+        height: 40px !important;
+        min-width: 40px !important;
+        max-width: 40px !important;
+        max-height: 40px !important;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid rgba(255, 255, 255, 0.9);
+        display: block;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        background: #ffffff;
+    }
+    .toko-chat-status-dot {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 10px;
+        height: 10px;
+        background: #34d399;
+        border: 2px solid #ffffff;
+        border-radius: 50%;
+    }
+    .toko-chat-header-text {
+        min-width: 0;
+        flex: 1;
+    }
+    .toko-chat-header-title {
+        font-weight: 800;
+        font-size: 13px;
+        color: #ffffff;
+        line-height: 1.25;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .toko-chat-header-subtitle {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 11px;
+        color: #e0f2fe;
+        font-weight: 600;
+        margin-top: 2px;
+    }
+    .toko-chat-close-btn {
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        color: rgba(255, 255, 255, 0.85);
+        background: rgba(255, 255, 255, 0.1);
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s;
+        flex-shrink: 0;
+    }
+    .toko-chat-close-btn:hover {
+        color: #ffffff;
+        background: rgba(255, 255, 255, 0.25);
+        transform: scale(1.05);
     }
     .toko-chat-privacy {
         background: #f0fdf4;
@@ -366,6 +460,80 @@
         border-bottom-left-radius: 4px;
         border: 1px solid #e2e8f0;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    }
+    .toko-chat-bubble.admin {
+        background: #f0f9ff;
+        color: #0f172a;
+        align-self: flex-start;
+        border-bottom-left-radius: 4px;
+        border: 1px solid #bae6fd;
+        box-shadow: 0 2px 6px rgba(2, 132, 199, 0.08);
+    }
+    .toko-chat-admin-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+        color: #0284c7;
+        margin-bottom: 4px;
+    }
+    .toko-chat-escalate-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 8px;
+        padding: 6px 14px;
+        border-radius: 999px;
+        background: #0284c7;
+        color: #ffffff;
+        font-size: 11px;
+        font-weight: 700;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .toko-chat-escalate-btn:hover {
+        background: #0369a1;
+        transform: translateY(-1px);
+    }
+    /* Product Snippet Attachment Card in Chat */
+    .toko-chat-product-card {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: rgba(255, 255, 255, 0.18);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 12px;
+        padding: 8px 10px;
+        margin-bottom: 8px;
+        backdrop-filter: blur(4px);
+    }
+    .toko-chat-product-thumb {
+        width: 44px;
+        height: 44px;
+        border-radius: 8px;
+        object-fit: cover;
+        background: #ffffff;
+        flex-shrink: 0;
+        border: 1px solid rgba(255, 255, 255, 0.5);
+    }
+    .toko-chat-product-title {
+        font-weight: 800;
+        font-size: 12px;
+        color: #ffffff;
+        line-height: 1.3;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 170px;
+    }
+    .toko-chat-product-price {
+        font-size: 11px;
+        font-weight: 700;
+        color: #e0f2fe;
+        margin-top: 2px;
     }
     .toko-chat-bubble.user {
         background: #115789;
@@ -747,6 +915,28 @@
         overflow: hidden;
         text-overflow: ellipsis;
     }
+    .ps-modal-btn-chat {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 8px;
+        background: #f0f9ff;
+        color: #0369a1;
+        border: 1px solid #bae6fd;
+        font-size: 11px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+        flex-shrink: 0;
+        text-decoration: none;
+    }
+    .ps-modal-btn-chat:hover {
+        background: #e0f2fe;
+        color: #0284c7;
+        border-color: #7dd3fc;
+        transform: translateY(-1px);
+    }
 </style>
 @endpush
 
@@ -766,52 +956,63 @@
         <!-- ========================================================================= -->
         <!-- SHOPEE STYLE STORE HEADER CARD                                            -->
         <!-- ========================================================================= -->
-        <div class="shopee-store-header">
-            <div class="shopee-header-grid">
+        <div class="shopee-store-header" style="position: relative; overflow: hidden; border-radius: 20px; box-shadow: 0 4px 20px -2px rgba(17, 87, 137, 0.12);">
+            <!-- COVER PHOTO (BANNER) -->
+            @if($seller && $seller->store_banner)
+            <div class="w-full relative bg-slate-900" style="height: 180px;">
+                <img src="{{ Storage::url($seller->store_banner) }}" alt="Cover Toko" class="absolute inset-0 w-full h-full object-cover opacity-90 z-10">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-10 pointer-events-none"></div>
+            </div>
+            @else
+            <!-- Placeholder Cover -->
+            <div class="w-full relative bg-gradient-to-r from-blue-700 to-sky-500" style="height: 140px;">
+            </div>
+            @endif
+
+            <div class="shopee-header-grid" style="position: relative; z-index: 20; background: white;">
                 
                 <!-- Left Panel: Store Identity & Fast Actions -->
-                <div class="shopee-left-profile">
-                    <div>
-                        <div class="shopee-avatar-wrapper mb-3">
-                            @if($seller && $seller->avatar)
-                                <img src="{{ Storage::url($seller->avatar) }}" alt="{{ $cleanRegionName }}" class="shopee-avatar">
-                            @else
-                                <div class="shopee-avatar flex items-center justify-center bg-blue-600 text-white font-black text-2xl">
-                                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
-                                </div>
-                            @endif
-
-                            <div>
-                                <div class="flex items-center gap-2 mb-1.5">
-                                    <h1 class="text-base sm:text-lg font-black text-slate-900 leading-tight">
-                                        Toko BUMDes {{ $cleanRegionName }}
-                                    </h1>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <span class="shopee-badge-mall">
-                                        <svg class="w-3 h-3 fill-current" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
-                                        Resmi Desa
-                                    </span>
-                                    <span class="text-xs font-bold text-emerald-600 flex items-center gap-1">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
-                                        Online
-                                    </span>
-                                </div>
+                <div class="shopee-left-profile" style="position: relative; padding-top: 16px; padding-left: 28px;">
+                    
+                    <!-- Avatar Melayang Absolute (Overlap Cover) -->
+                    <div style="position: absolute; top: -38px; left: 28px; z-index: 30;">
+                        @if($seller && $seller->avatar)
+                            <img src="{{ Storage::url($seller->avatar) }}" alt="{{ $cleanRegionName }}" class="shopee-avatar" style="width: 84px; height: 84px; border-width: 4px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); background: white;">
+                        @else
+                            <div class="shopee-avatar flex items-center justify-center bg-blue-600 text-white font-black text-3xl" style="width: 84px; height: 84px; border-width: 4px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
                             </div>
-                        </div>
+                        @endif
                     </div>
 
-                    <!-- Action Buttons -->
-                    <div class="flex items-center gap-2 pt-2">
-                        <button type="button" onclick="openTokoChat()" class="shopee-btn-chat" title="Chat langsung dengan Toko BUMDes (Privasi Terjaga)">
-                            <svg class="w-3.5 h-3.5 fill-none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
-                            <span>Chat Toko</span>
-                        </button>
+                    <!-- Teks Informasi Toko -->
+                    <div style="margin-left: 104px;">
+                        <h1 class="text-base sm:text-lg font-black text-slate-900 leading-tight mb-2">
+                            Toko BUMDes {{ $cleanRegionName }}
+                        </h1>
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="shopee-badge-mall">
+                                <svg class="w-3 h-3 fill-current" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                                Resmi Desa
+                            </span>
+                            <span class="text-xs font-bold text-emerald-600 flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
+                                Online
+                            </span>
+                        </div>
+                        
+                        <!-- Action Buttons aligned with text -->
+                        <div class="flex items-center gap-2 pt-2">
+                            <button type="button" onclick="openTokoChat()" class="shopee-btn-chat" title="Chat langsung dengan Toko BUMDes (Privasi Terjaga)">
+                                <svg class="w-3.5 h-3.5 fill-none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                                <span>Chat Toko</span>
+                            </button>
 
-                        <button type="button" onclick="navigator.clipboard.writeText(window.location.href); showToast('Link toko berhasil disalin!');" class="shopee-btn-share">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
-                            <span>Bagikan</span>
-                        </button>
+                            <button type="button" onclick="navigator.clipboard.writeText(window.location.href); showToast('Link toko berhasil disalin!');" class="shopee-btn-share">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
+                                <span>Bagikan</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -864,15 +1065,6 @@
 
             </div>
         </div>
-
-        <!-- ========================================================================= -->
-        <!-- PROMO BANNER TOKO (HANYA MUNCUL JIKA SUDAH DIUNGGAH ADMIN DESA)           -->
-        <!-- ========================================================================= -->
-        @if($seller && $seller->store_banner)
-        <div class="shopee-promo-banner">
-            <img src="{{ Storage::url($seller->store_banner) }}" alt="Banner Toko {{ $cleanRegionName }}" class="promo-banner-custom-img">
-        </div>
-        @endif
 
         <!-- ========================================================================= -->
         <!-- SHOPEE TABS BAR                                                           -->
@@ -1226,8 +1418,9 @@
 
                 <!-- Footer Buttons -->
                 <div class="ps-modal-actions">
-                    <button type="button" class="ps-modal-btn-cancel" onclick="closeOrderModal()">
-                        Batal
+                    <button type="button" class="ps-modal-btn-chat-action" onclick="chatAboutCurrentProduct()" title="Tanya Produk ke Pengelola Toko">
+                        <svg class="w-4 h-4 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                        <span>Chat</span>
                     </button>
                     @auth
                     <button type="button" class="ps-modal-btn-cart" onclick="addToCartFromModal(false)">
@@ -1254,51 +1447,51 @@
     <div class="toko-chat-widget" id="tokoChatWidget">
         <!-- Header -->
         <div class="toko-chat-header">
-            <div class="flex items-center gap-2.5 min-w-0">
-                <div class="relative">
+            <div class="toko-chat-header-info">
+                <div class="toko-chat-avatar-wrap">
                     @if($seller && $seller->avatar)
-                        <img src="{{ Storage::url($seller->avatar) }}" alt="{{ $cleanRegionName }}" class="w-9 h-9 rounded-full object-cover border-2 border-white/80 shadow-sm">
+                        <img src="{{ Storage::url($seller->avatar) }}" alt="{{ $cleanRegionName }}" class="toko-chat-avatar">
                     @else
-                        <div class="w-9 h-9 rounded-full bg-white/20 text-white font-bold flex items-center justify-center border-2 border-white/80 shadow-sm text-sm">
-                            ðŸ¬
+                        <div class="toko-chat-avatar flex items-center justify-center bg-sky-600 text-white font-black text-sm">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
                         </div>
                     @endif
-                    <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-400 border-2 border-white rounded-full"></span>
+                    <span class="toko-chat-status-dot"></span>
                 </div>
-                <div class="min-w-0">
-                    <h4 class="font-bold text-white text-sm leading-tight truncate">Toko BUMDes {{ $cleanRegionName }}</h4>
-                    <div class="flex items-center gap-1 text-[11px] text-blue-100 font-medium">
-                        <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                <div class="toko-chat-header-text">
+                    <div class="toko-chat-header-title">Toko BUMDes {{ $cleanRegionName }}</div>
+                    <div class="toko-chat-header-subtitle">
+                        <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
                         <span>Resmi BUMDes &bull; Online</span>
                     </div>
                 </div>
             </div>
-            <div class="flex items-center gap-1">
-                <button type="button" onclick="closeTokoChat()" class="text-white/80 hover:text-white hover:bg-white/10 p-1.5 rounded-lg transition" title="Tutup Chat">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
-            </div>
+            <button type="button" onclick="closeTokoChat()" class="toko-chat-close-btn" title="Tutup Chat">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
         </div>
 
         <!-- Privacy Shield Notice -->
         <div class="toko-chat-privacy">
             <svg class="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-            <span>Privasi Terjaga: Nomor HP & identitas aman dalam sistem.</span>
+            <span>Privasi Terjaga: Identitas Anda aman terlindungi</span>
         </div>
 
         <!-- Quick Reply Chips -->
         <div class="toko-chat-quick-replies" id="tokoQuickReplies">
-            <button type="button" class="toko-chip-btn" onclick="sendTokoQuickReply('Halo, apakah stok produk masih ready?')">ðŸ“¦ Stok ready?</button>
-            <button type="button" class="toko-chip-btn" onclick="sendTokoQuickReply('Bisa dikirim ke desa atau kecamatan saya?')">ðŸšš Kirim antar-desa?</button>
-            <button type="button" class="toko-chip-btn" onclick="sendTokoQuickReply('Berapa estimasi biaya ongkir?')">ðŸ’° Tarif ongkir?</button>
-            <button type="button" class="toko-chip-btn" onclick="sendTokoQuickReply('Bisa bayar COD saat barang sampai?')">ðŸ’µ Bayar COD?</button>
+            <button type="button" class="toko-chip-btn bg-blue-50 text-blue-700 border-blue-200 font-bold" onclick="escalateToPengelola()">Chat Pengelola Toko</button>
+            <button type="button" class="toko-chip-btn" onclick="sendTokoQuickReply('Halo, apakah stok produk masih ready?')">Stok ready?</button>
+            <button type="button" class="toko-chip-btn" onclick="sendTokoQuickReply('Bisa dikirim ke desa atau kecamatan saya?')">Kirim antar-desa?</button>
+            <button type="button" class="toko-chip-btn" onclick="sendTokoQuickReply('Berapa estimasi biaya ongkir?')">Tarif ongkir?</button>
+            <button type="button" class="toko-chip-btn" onclick="sendTokoQuickReply('Bisa bayar COD saat barang sampai?')">Bayar COD?</button>
         </div>
+
 
         <!-- Chat Stream Body -->
         <div class="toko-chat-body" id="tokoChatMessages">
             <!-- Greeting Bubble from Toko -->
             <div class="toko-chat-bubble toko">
-                <div>Halo{{ Auth::check() ? ' Kak ' . Auth::user()->name : ' Kak' }}! Selamat datang di layanan chat resmi <strong>Toko BUMDes {{ $cleanRegionName }}</strong>. Ada yang bisa kami bantu seputar produk atau pengiriman pesanan Anda?</div>
+                <div>Halo{{ Auth::check() ? ' Kak ' . Auth::user()->name : ' Kak' }}! Selamat datang di layanan pesan resmi <strong>Toko BUMDes {{ $cleanRegionName }}</strong>. Ada yang bisa kami bantu seputar produk atau pengiriman pesanan Anda?</div>
                 <div class="toko-chat-time">{{ date('H:i') }}</div>
             </div>
         </div>
@@ -1317,7 +1510,9 @@
         <div class="toko-chat-footer">
             <input type="text" id="tokoChatInput" class="toko-chat-input" placeholder="Tulis pesan ke Toko BUMDes..." autocomplete="off" onkeypress="if(event.key==='Enter') sendTokoMessage()">
             <button type="button" onclick="sendTokoMessage()" class="toko-chat-send-btn" title="Kirim Pesan">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                <svg class="w-4 h-4" style="margin-left: 2px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"></path>
+                </svg>
             </button>
         </div>
     </div>
@@ -1445,6 +1640,28 @@
     .ps-modal-btn-cancel:hover {
         background: #f8fafc; color: #1e293b; border-color: #cbd5e1;
     }
+    .ps-modal-btn-chat-action {
+        padding: 0.75rem 1rem;
+        border-radius: 0.75rem;
+        border: 1.5px solid #cbd5e1;
+        background: #ffffff;
+        color: #0369a1;
+        font-weight: 700;
+        font-size: 0.8125rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.35rem;
+        transition: all 0.2s;
+        flex-shrink: 0;
+    }
+    .ps-modal-btn-chat-action:hover {
+        background: #f0f9ff;
+        color: #0284c7;
+        border-color: #7dd3fc;
+        transform: translateY(-1px);
+    }
     .ps-modal-btn-cart {
         flex: 1; padding: 0.75rem 1rem;
         border-radius: 0.75rem;
@@ -1541,6 +1758,24 @@
         currentModalProduct = null;
     }
 
+    function chatAboutCurrentProduct() {
+        if (!currentModalProduct) return;
+        const prodName = currentModalProduct.name || 'produk ini';
+        const prodPrice = formatRupiah(currentModalProduct.price || 0);
+        const prodImg = currentModalProduct.img || '';
+
+        closeOrderModal();
+        openTokoChat();
+
+        setTimeout(() => {
+            const input = document.getElementById('tokoChatInput');
+            if (input) {
+                input.value = `[PRODUK|${prodImg}|${prodName}|${prodPrice}]\nHalo, saya ingin menanyakan tentang produk ini. Apakah stoknya masih tersedia?`;
+                sendTokoMessage();
+            }
+        }, 250);
+    }
+
     function changeModalQty(delta) {
         modalQty += delta;
         if (modalQty < 1) modalQty = 1;
@@ -1597,8 +1832,14 @@
     });
 
     // =========================================================================
-    // TOKO CHAT IN-APP SYSTEM (PRIVASI TERJAGA - TANPA WA)
+    // TOKO CHAT HYBRID SYSTEM (BOT + ESKALASI PENGELOLA TOKO)
     // =========================================================================
+    const regionId = {{ $seller->region_id ?? 0 }};
+    const chatStorageKey = `siladesbeng_chat_token_${regionId}`;
+    let chatSessionToken = localStorage.getItem(chatStorageKey) || '';
+    let chatPollTimer = null;
+    let isChatEscalated = false;
+
     function openTokoChat() {
         const widget = document.getElementById('tokoChatWidget');
         if (widget) {
@@ -1607,6 +1848,10 @@
                 document.getElementById('tokoChatInput')?.focus();
                 scrollTokoChatToBottom();
             }, 100);
+            
+            // Load history from backend
+            loadChatHistory();
+            startChatPolling();
         }
     }
 
@@ -1614,6 +1859,23 @@
         const widget = document.getElementById('tokoChatWidget');
         if (widget) {
             widget.classList.remove('active');
+            stopChatPolling();
+        }
+    }
+
+    function startChatPolling() {
+        stopChatPolling();
+        chatPollTimer = setInterval(() => {
+            if (isChatEscalated) {
+                loadChatHistory(true);
+            }
+        }, 4000);
+    }
+
+    function stopChatPolling() {
+        if (chatPollTimer) {
+            clearInterval(chatPollTimer);
+            chatPollTimer = null;
         }
     }
 
@@ -1624,11 +1886,120 @@
         }
     }
 
-    function getCurrentTimeStr() {
-        const now = new Date();
-        const h = String(now.getHours()).padStart(2, '0');
-        const m = String(now.getMinutes()).padStart(2, '0');
-        return `${h}:${m}`;
+    function formatChatTime(dateStr) {
+        if (!dateStr) {
+            const now = new Date();
+            return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+        }
+        const d = new Date(dateStr);
+        return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+    }
+
+    function formatChatContent(rawText) {
+        if (!rawText) return '';
+        const prodRegex = /\[PRODUK\|(.*?)\|(.*?)\|(.*?)\]/g;
+        if (prodRegex.test(rawText)) {
+            return rawText.replace(/\[PRODUK\|(.*?)\|(.*?)\|(.*?)\]/g, (match, img, name, price) => {
+                const imgHtml = img ? `<img src="${escapeHtml(img)}" class="toko-chat-product-thumb" alt="${escapeHtml(name)}">` : '';
+                return `
+                    <div class="toko-chat-product-card">
+                        ${imgHtml}
+                        <div class="min-w-0 flex-1">
+                            <div class="toko-chat-product-title">${escapeHtml(name)}</div>
+                            <div class="toko-chat-product-price">${escapeHtml(price)}</div>
+                        </div>
+                    </div>
+                `;
+            }).replace(/\n/g, '<br>');
+        }
+        return escapeHtml(rawText).replace(/\n/g, '<br>');
+    }
+
+    function renderMessageBubble(msg) {
+        const timeStr = formatChatTime(msg.created_at);
+        const container = document.getElementById('tokoChatMessages');
+        const bubble = document.createElement('div');
+
+        if (msg.sender_type === 'user') {
+            bubble.className = 'toko-chat-bubble user';
+            bubble.innerHTML = `
+                <div>${formatChatContent(msg.message)}</div>
+                <div class="toko-chat-time">${timeStr}</div>
+            `;
+        } else if (msg.sender_type === 'admin') {
+            bubble.className = 'toko-chat-bubble admin';
+            bubble.innerHTML = `
+                <div class="toko-chat-admin-badge">
+                    <svg class="w-3 h-3 text-sky-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                    <span>Pengelola Toko</span>
+                </div>
+                <div>${formatChatContent(msg.message)}</div>
+                <div class="toko-chat-time" style="color: #0369a1;">${timeStr}</div>
+            `;
+        } else {
+            // bot
+            bubble.className = 'toko-chat-bubble toko';
+            let content = `<div>${formatChatContent(msg.message)}</div>`;
+            if (msg.message && msg.message.includes('Chat Pengelola Toko') && !isChatEscalated) {
+                content += `
+                    <div>
+                        <button type="button" class="toko-chat-escalate-btn" onclick="escalateToPengelola()">
+                            <span>Chat Pengelola Toko</span>
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        </button>
+                    </div>
+                `;
+            }
+            bubble.innerHTML = `
+                ${content}
+                <div class="toko-chat-time">${timeStr}</div>
+            `;
+        }
+
+        container.appendChild(bubble);
+        scrollTokoChatToBottom();
+    }
+
+    function loadChatHistory(isSilent = false) {
+        if (!regionId) return;
+
+        let url = `{{ url('/pasar-daerah/toko') }}/${regionId}/chat/history`;
+        if (chatSessionToken) {
+            url += `?session_token=${encodeURIComponent(chatSessionToken)}`;
+        }
+
+        fetch(url, {
+            headers: {
+                'X-Chat-Session-Token': chatSessionToken,
+                'Accept': 'application/json'
+            }
+        })
+        .then(res => res.json())
+        .then(res => {
+            if (res.status === 'success' && res.data.session) {
+                const session = res.data.session;
+                isChatEscalated = (session.status === 'escalated');
+                if (session.session_token && !chatSessionToken) {
+                    chatSessionToken = session.session_token;
+                    localStorage.setItem(chatStorageKey, chatSessionToken);
+                }
+
+                const messages = res.data.messages || [];
+                const container = document.getElementById('tokoChatMessages');
+                
+                // If not silent or message count changed
+                if (!isSilent || container.children.length !== (messages.length + 1)) {
+                    container.innerHTML = `
+                        <div class="toko-chat-bubble toko">
+                            <div>Halo{{ Auth::check() ? ' Kak ' . Auth::user()->name : ' Kak' }}! Selamat datang di layanan pesan resmi <strong>Toko BUMDes {{ $cleanRegionName }}</strong>. Ada yang bisa kami bantu seputar produk atau pengiriman pesanan Anda?</div>
+                            <div class="toko-chat-time">{{ date('H:i') }}</div>
+                        </div>
+                    `;
+                    messages.forEach(msg => renderMessageBubble(msg));
+                }
+            }
+        })
+        .catch(err => console.log(err));
     }
 
     function sendTokoQuickReply(text) {
@@ -1645,64 +2016,86 @@
         if (!text) return;
 
         input.value = '';
-        const timeStr = getCurrentTimeStr();
-        const container = document.getElementById('tokoChatMessages');
-
-        // Add user bubble
-        const userBubble = document.createElement('div');
-        userBubble.className = 'toko-chat-bubble user';
-        userBubble.innerHTML = `
-            <div>${escapeHtml(text)}</div>
-            <div class="toko-chat-time">${timeStr}</div>
-        `;
-        container.appendChild(userBubble);
-        scrollTokoChatToBottom();
-
-        // Simulate Toko Reply
-        simulateTokoReply(text);
-    }
-
-    function simulateTokoReply(userQuery) {
         const typingEl = document.getElementById('tokoTypingIndicator');
         if (typingEl) typingEl.style.display = 'block';
-        scrollTokoChatToBottom();
 
-        setTimeout(() => {
+        // Render user message immediately
+        renderMessageBubble({
+            sender_type: 'user',
+            message: text,
+            created_at: new Date().toISOString()
+        });
+
+        fetch(`{{ url('/pasar-daerah/toko') }}/${regionId}/chat/send`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'X-Chat-Session-Token': chatSessionToken,
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                message: text,
+                session_token: chatSessionToken
+            })
+        })
+        .then(res => res.json())
+        .then(res => {
             if (typingEl) typingEl.style.display = 'none';
-
-            let replyText = 'Baik Kak! ';
-            const q = userQuery.toLowerCase();
-
-            if (q.includes('stok') || q.includes('ready') || q.includes('ada')) {
-                replyText += 'Stok produk di Toko BUMDes {{ $cleanRegionName }} selalu terpantau ready dan siap segera dikemas.';
-            } else if (q.includes('kirim') || q.includes('antar') || q.includes('desa') || q.includes('kecamatan')) {
-                replyText += 'Tentu bisa! Kami melayani pengiriman kurir lokal antar-desa dan antar-kecamatan se-Kabupaten Bengkalis.';
-            } else if (q.includes('ongkir') || q.includes('biaya') || q.includes('tarif')) {
-                replyText += 'Ongkir dalam satu desa flat Rp 5.000 (bahkan gratis promo tertentu). Pengiriman antar-desa sekitar Rp 10.000.';
-            } else if (q.includes('cod') || q.includes('bayar') || q.includes('transfer') || q.includes('qris')) {
-                replyText += 'Bisa bayar COD tunai saat kurir tiba, atau lewat QRIS dan Transfer Bank Virtual Account saat checkout.';
-            } else if (q.includes('retur') || q.includes('rusak') || q.includes('garansi') || q.includes('komplain')) {
-                replyText += 'Jika produk tidak sesuai atau terdapat kerusakan saat diterima, Kakak bisa langsung mengajukan komplain & retur di menu riwayat transaksi. Kami menjamin penggantian barang baru atau pengembalian dana 100%.';
-            } else if (q.includes('lokasi') || q.includes('alamat') || q.includes('ambil')) {
-                replyText += 'Kantor Toko BUMDes kami berlokasi di Desa {{ $cleanRegionName }}. Kakak juga bisa memilih opsi "Ambil Sendiri" saat checkout gratis ongkir.';
-            } else {
-                replyText += 'Terima kasih sudah menghubungi Toko BUMDes {{ $cleanRegionName }}. Pertanyaan atau pesanan Kakak siap kami layani dengan senang hati!';
+            if (res.status === 'success') {
+                if (res.data.session_token) {
+                    chatSessionToken = res.data.session_token;
+                    localStorage.setItem(chatStorageKey, chatSessionToken);
+                }
+                isChatEscalated = res.data.is_escalated;
+                if (res.data.bot_message) {
+                    renderMessageBubble(res.data.bot_message);
+                }
             }
+        })
+        .catch(err => {
+            if (typingEl) typingEl.style.display = 'none';
+        });
+    }
 
-            const timeStr = getCurrentTimeStr();
-            const container = document.getElementById('tokoChatMessages');
-            const tokoBubble = document.createElement('div');
-            tokoBubble.className = 'toko-chat-bubble toko';
-            tokoBubble.innerHTML = `
-                <div>${escapeHtml(replyText)}</div>
-                <div class="toko-chat-time">${timeStr}</div>
-            `;
-            container.appendChild(tokoBubble);
-            scrollTokoChatToBottom();
-        }, 1100);
+    function escalateToPengelola() {
+        const typingEl = document.getElementById('tokoTypingIndicator');
+        if (typingEl) typingEl.style.display = 'block';
+
+        fetch(`{{ url('/pasar-daerah/toko') }}/${regionId}/chat/escalate`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'X-Chat-Session-Token': chatSessionToken,
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                session_token: chatSessionToken
+            })
+        })
+        .then(res => res.json())
+        .then(res => {
+            if (typingEl) typingEl.style.display = 'none';
+            if (res.status === 'success') {
+                if (res.data.session_token) {
+                    chatSessionToken = res.data.session_token;
+                    localStorage.setItem(chatStorageKey, chatSessionToken);
+                }
+                isChatEscalated = true;
+                if (res.data.system_message) {
+                    renderMessageBubble(res.data.system_message);
+                }
+                startChatPolling();
+            }
+        })
+        .catch(err => {
+            if (typingEl) typingEl.style.display = 'none';
+        });
     }
 
     function escapeHtml(text) {
+        if (!text) return '';
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
