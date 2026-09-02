@@ -692,11 +692,18 @@
                                 <div data-i18n="Laporan Pendapatan">Laporan Pendapatan</div>
                             </a>
                         </li>
+                        {{-- Laporan Wilayah adalah rekap lintas unit milik pemerintah
+                             wilayah, bukan pekerjaan staf layanan. Datanya memang sudah
+                             disaring per izin unit di ReportController, tetapi bagi staf
+                             gas halaman ini hanya menampilkan rekap wilayah dengan semua
+                             unit lain bernilai nol - membingungkan dan bukan urusannya. --}}
+                        @unless(auth()->user()->isStaff())
                         <li class="menu-item {{ request()->routeIs('admin.laporan.wilayah') ? 'active' : '' }}">
                             <a href="{{ route('admin.laporan.wilayah') }}" class="menu-link">
                                 <div data-i18n="Laporan Wilayah">Laporan Wilayah</div>
                             </a>
                         </li>
+                        @endunless
                         @endif
                         @if(auth()->user()->bolehMenu(['super_admin', 'admin', 'admin_kecamatan'], 'platform_aktivitas'))
                         <li class="menu-item {{ request()->routeIs('admin.laporan.log') ? 'active' : '' }}">

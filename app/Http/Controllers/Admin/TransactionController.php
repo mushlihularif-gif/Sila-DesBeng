@@ -14,6 +14,77 @@ use App\Models\ActivityLog;
 
 class TransactionController extends Controller
 {
+    /**
+     * Jenis transaksi -> kunci izin unit staf.
+     * Nilai $type datang dari route {type} di admin.aktivitas.bukti-transaksi.*
+     *
+     * Pasar Daerah sengaja tidak ada di sini: pesanannya tidak punya kolom
+     * bukti bayar dan sudah punya modul peninjauannya sendiri di
+     * admin/unit/pasar-daerah. Dulu $type yang tidak dikenal - termasuk
+     * 'pasar' - diam-diam jatuh ke GasOrder lewat cabang else, sehingga
+     * tindakan atas pesanan pasar justru mengubah pesanan gas bernomor sama.
+     */
+    private const IZIN_PER_TIPE = [
+        'rental'    => 'sewa_alat',
+        'gas'       => 'gas',
+        'mobil'     => 'sewa_mobil',
+        'fasilitas' => 'fasilitas_umum',
+    ];
+
+    /**
+     * Jenis transaksi -> [model, nama relasi yang memuat region_id].
+     * Nama relasinya sama persis dengan yang dipakai index(), supaya yang boleh
+     * DIPROSES tidak pernah lebih luas dari yang boleh DILIHAT.
+     */
+    private const WILAYAH_PER_TIPE = [
+        'rental'    => [RentalBooking::class, 'barang'],
+        'gas'       => [GasOrder::class, 'gas'],
+        'mobil'     => [MobilBooking::class, 'mobil'],
+        'fasilitas' => [FasilitasUmumBooking::class, 'fasilitas'],
+    ];
+
+    /**
+     * Penjaga untuk semua tindakan atas bukti pembayaran.
+     *
+     * Menggantikan `abort_unless($user->role === 'admin')` yang membandingkan
+     * peran secara harfiah. Peran yang benar-benar ada adalah admin_desa,
+     * admin_kecamatan, super_admin, dan staff - ketiganya kena 403, sehingga
+     * bukti transfer yang diunggah warga bisa dilihat tetapi tidak pernah bisa
+     * dinyatakan lunas maupun ditolak oleh siapa pun yang memegang uangnya.
+     *
+     * Dua hal diperiksa, keduanya wajib:
+     *
+     * 1. IZIN UNIT - staf gas tidak boleh menyentuh bukti bayar sewa alat.
+     * 2. KEPEMILIKAN WILAYAH - tanpa ini, melonggarkan peran justru membuka
+     *    celah baru: admin Desa A tinggal mengganti id di URL untuk
+     *    memverifikasi uang Desa B.
+     *
+     * Dipakai juga oleh downloadProof(), yang sebelumnya sama sekali tidak
+     * punya pemeriksaan apa pun padahal berkasnya memuat nama pengirim,
+     * nominal, dan nomor rekening.
+     */
+    private function pastikanBolehMenangani(string $type, $id): void
+    {
+        $user = auth()->user();
+
+        $izin = self::IZIN_PER_TIPE[$type] ?? null;
+        abort_if($izin === null, 404, 'Jenis transaksi tidak dikenal.');
+
+        abort_unless(
+            $user && $user->isAdmin() && $user->hasUnitPermission($izin),
+            403,
+            'Anda tidak memiliki izin untuk memproses bukti pembayaran unit ini.'
+        );
+
+        [$model, $relasi] = self::WILAYAH_PER_TIPE[$type];
+
+        $milikWilayahIni = $this->applyRegionFilter($model::withTrashed(), $relasi, true)
+            ->whereKey($id)
+            ->exists();
+
+        abort_unless($milikWilayahIni, 404, 'Transaksi tidak ditemukan di wilayah Anda.');
+    }
+
     public function index(Request $request)
     {
         // Get filter parameters
@@ -212,7 +283,7 @@ class TransactionController extends Controller
 
     public function verify(Request $request, $id, $type)
     {
-        abort_unless(auth()->user()->role === 'admin', 403, 'Unauthorized: Admin access required');
+        $this->pastikanBolehMenangani($type, $id);
 
         if ($type === 'rental') {
             $model = RentalBooking::withTrashed()->findOrFail($id);
@@ -266,7 +337,7 @@ class TransactionController extends Controller
 
     public function reject(Request $request, $id, $type)
     {
-        abort_unless(auth()->user()->role === 'admin', 403, 'Unauthorized: Admin access required');
+        $this->pastikanBolehMenangani($type, $id);
 
         $request->validate([
             'reason' => 'required|string|max:500',
@@ -311,7 +382,7 @@ class TransactionController extends Controller
 
     public function updateStatus(Request $request, $id, $type, $status)
     {
-        abort_unless(auth()->user()->role === 'admin', 403, 'Unauthorized: Admin access required');
+        $this->pastikanBolehMenangani($type, $id);
 
         // Validasi status yang diperbolehkan
         $allowedStatuses = ['being_prepared', 'in_delivery', 'arrived', 'completed', 'approved'];
@@ -379,6 +450,8 @@ class TransactionController extends Controller
 
     public function downloadProof($id, $type)
     {
+        $this->pastikanBolehMenangani($type, $id);
+
         if ($type === 'rental') {
             $model = RentalBooking::withTrashed()->findOrFail($id);
         } elseif ($type === 'mobil') {

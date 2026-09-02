@@ -668,7 +668,10 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
         Route::post('/permintaan-pengajuan/{type}/{id}/cancellation/{action}', [\App\Http\Controllers\Admin\RequestController::class, 'handleCancellation'])->name('admin.aktivitas.cancellation');
 
         Route::get('/bukti-transaksi', [\App\Http\Controllers\Admin\TransactionController::class, 'index'])->name('admin.aktivitas.bukti-transaksi.index');
-        Route::get('/bukti-transaksi/{id}/{type}', [\App\Http\Controllers\Admin\TransactionController::class, 'show'])->name('admin.aktivitas.bukti-transaksi.show');
+        // Rute 'show' dihapus: TransactionController tidak punya method show()
+        // sehingga membukanya selalu error, dan tidak ada satu pun tautan
+        // yang menunjuk ke sana. Halaman rinciannya sudah disediakan
+        // admin.aktivitas.permintaan-pengajuan.show.
         Route::post('/bukti-transaksi/{id}/{type}/verify', [\App\Http\Controllers\Admin\TransactionController::class, 'verify'])->name('admin.aktivitas.bukti-transaksi.verify');
         Route::post('/bukti-transaksi/{id}/{type}/reject', [\App\Http\Controllers\Admin\TransactionController::class, 'reject'])->name('admin.aktivitas.bukti-transaksi.reject');
         Route::post('/bukti-transaksi/{id}/{type}/update-status/{status}', [\App\Http\Controllers\Admin\TransactionController::class, 'updateStatus'])->name('admin.aktivitas.bukti-transaksi.update-status');

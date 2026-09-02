@@ -363,6 +363,11 @@ class ReportController extends Controller
      */
     public function wilayah(Request $request)
     {
+        // Menyembunyikan menunya saja tidak cukup: middleware rutenya 'role:admin',
+        // dan itu peran semu yang ikut meloloskan staff. Tanpa penjaga ini,
+        // halamannya tetap bisa dibuka dengan mengetik URL-nya langsung.
+        abort_if(auth()->user()?->isStaff(), 403, 'Laporan wilayah bukan bagian dari tugas staf layanan.');
+
         // Parameter filter
         $year = $request->input('year', now()->year);
         $month = $request->input('month', now()->month);
