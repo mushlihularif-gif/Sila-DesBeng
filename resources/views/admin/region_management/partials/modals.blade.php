@@ -1,4 +1,4 @@
-﻿<!-- Modal Edit Region -->
+<!-- Modal Edit Region -->
 <div class="modal fade text-start" id="editRegionModal{{ $region->id }}" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-sm" role="document">
         <div class="modal-content">

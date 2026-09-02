@@ -37,70 +37,111 @@
         @endif
 
         <style>
-            .nav-pills .nav-link { color: #6c757d; font-weight: 600; padding: 0.6rem 1.2rem; transition: all 0.3s; border-radius: 50rem; }
-            .nav-pills .nav-link:hover { background-color: #f8f9fa; color: #566a7f; }
-            .nav-pills .nav-link.active { background-color: #696cff; color: #fff; box-shadow: 0 4px 6px rgba(105, 108, 255, 0.2); }
+            .nav-pills-scrollable {
+                display: flex;
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                padding: 4px 6px;
+                gap: 0.4rem;
+                scrollbar-width: none;
+            }
+            .nav-pills-scrollable::-webkit-scrollbar {
+                display: none;
+            }
+            .nav-pills-scrollable .nav-item {
+                flex: 1 1 0px;
+                min-width: fit-content;
+            }
+            .nav-pills-scrollable .nav-link { 
+                width: 100%;
+                justify-content: center;
+                white-space: nowrap;
+                color: #64748b; 
+                font-weight: 600; 
+                padding: 0.55rem 0.85rem; 
+                font-size: 0.875rem;
+                transition: all 0.25s ease; 
+                border-radius: 50rem; 
+                display: inline-flex;
+                align-items: center;
+                border: 1px solid #e2e8f0;
+                background-color: #ffffff;
+            }
+            .nav-pills-scrollable .nav-link:hover { 
+                background-color: #f8fafc; 
+                color: #334155; 
+                border-color: #cbd5e1;
+            }
+            .nav-pills-scrollable .nav-link.active { 
+                background-color: #696cff; 
+                color: #fff; 
+                border-color: #696cff;
+                box-shadow: 0 4px 10px rgba(105, 108, 255, 0.25); 
+            }
             .product-card { transition: all 0.3s ease; border: none; box-shadow: 0 0.125rem 0.25rem rgba(161, 172, 184, 0.2); border-radius: 1rem; }
             .product-card:hover { transform: translateY(-5px); box-shadow: 0 0.5rem 1rem rgba(161, 172, 184, 0.15); }
         </style>
 
         <div class="nav-align-top mb-4">
-            <ul class="nav nav-pills gap-2 mb-4" role="tablist">
-                <li class="nav-item">
-                    <button type="button" class="nav-link {{ $tab == 'produk' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-produk" aria-controls="navs-top-produk" aria-selected="{{ $tab == 'produk' ? 'true' : 'false' }}">
-                        <i class="bx bx-box me-2"></i> Daftar Produk
-                    </button>
-                </li>
-                <li class="nav-item">
-                    <button type="button" class="nav-link {{ $tab == 'pesanan' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-pesanan" aria-controls="navs-top-pesanan" aria-selected="{{ $tab == 'pesanan' ? 'true' : 'false' }}">
-                        <i class="bx bx-cart me-2"></i> Daftar Pesanan
-                    </button>
-                </li>
-                <li class="nav-item">
-                    <button type="button" class="nav-link {{ $tab == 'laporan' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-laporan" aria-controls="navs-top-laporan" aria-selected="{{ $tab == 'laporan' ? 'true' : 'false' }}">
-                        <i class="bx bx-line-chart me-2"></i> Laporan
-                    </button>
-                </li>
-                <li class="nav-item">
-                    <button type="button" class="nav-link {{ $tab == 'pengaturan' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-pengaturan" aria-controls="navs-top-pengaturan" aria-selected="{{ $tab == 'pengaturan' ? 'true' : 'false' }}">
-                        <i class="bx bx-cog me-2"></i> Pengaturan Toko
-                    </button>
-                </li>
-                <li class="nav-item">
-                    <button type="button" class="nav-link {{ $tab == 'profil' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-profil" aria-controls="navs-top-profil" aria-selected="{{ $tab == 'profil' ? 'true' : 'false' }}">
-                        <i class="bx bx-store me-2"></i> Profil Toko
-                    </button>
-                </li>
-                <li class="nav-item">
-                    <button type="button" class="nav-link {{ $tab == 'ulasan' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-ulasan" aria-controls="navs-top-ulasan" aria-selected="{{ $tab == 'ulasan' ? 'true' : 'false' }}">
-                        <i class="bx bx-star me-2"></i> Ulasan & Komentar
-                    </button>
-                </li>
-                <li class="nav-item">
-                    <button type="button" class="nav-link {{ $tab == 'komplain' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-komplain" aria-controls="navs-top-komplain" aria-selected="{{ $tab == 'komplain' ? 'true' : 'false' }}">
-                        <i class="bx bx-shield-quarter me-2"></i> Komplain & Retur
-                        @php $pendingComplaints = $complaints->where('status', 'pending')->count(); @endphp
-                        @if($pendingComplaints > 0)
-                            <span class="badge rounded-pill bg-danger ms-1">{{ $pendingComplaints }}</span>
-                        @endif
-                    </button>
-                </li>
-                <li class="nav-item">
-                    <button type="button" class="nav-link {{ $tab == 'chat' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-chat" aria-controls="navs-top-chat" aria-selected="{{ $tab == 'chat' ? 'true' : 'false' }}">
-                        <i class="bx bx-chat me-2"></i> Chat Pengelola Toko
-                        @if(isset($totalUnreadChats) && $totalUnreadChats > 0)
-                            <span class="badge rounded-pill bg-danger ms-1">{{ $totalUnreadChats }}</span>
-                        @endif
-                    </button>
-                </li>
-            </ul>
+            <div class="bg-light p-1 rounded-pill mb-4 border border-light-subtle shadow-sm">
+                <ul class="nav nav-pills nav-pills-scrollable mb-0" role="tablist">
+                    <li class="nav-item">
+                        <button type="button" class="nav-link {{ $tab == 'produk' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-produk" aria-controls="navs-top-produk" aria-selected="{{ $tab == 'produk' ? 'true' : 'false' }}">
+                            <i class="bx bx-box me-1"></i> Produk
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button type="button" class="nav-link {{ $tab == 'pesanan' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-pesanan" aria-controls="navs-top-pesanan" aria-selected="{{ $tab == 'pesanan' ? 'true' : 'false' }}">
+                            <i class="bx bx-cart me-1"></i> Pesanan
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button type="button" class="nav-link {{ $tab == 'chat' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-chat" aria-controls="navs-top-chat" aria-selected="{{ $tab == 'chat' ? 'true' : 'false' }}">
+                            <i class="bx bx-chat me-1"></i> Chat Toko
+                            @if(isset($totalUnreadChats) && $totalUnreadChats > 0)
+                                <span class="badge rounded-pill bg-danger ms-1 px-1 py-0" style="font-size: 0.7rem;">{{ $totalUnreadChats }}</span>
+                            @endif
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button type="button" class="nav-link {{ $tab == 'komplain' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-komplain" aria-controls="navs-top-komplain" aria-selected="{{ $tab == 'komplain' ? 'true' : 'false' }}">
+                            <i class="bx bx-shield-quarter me-1"></i> Komplain
+                            @php $pendingComplaints = $complaints->where('status', 'pending')->count(); @endphp
+                            @if($pendingComplaints > 0)
+                                <span class="badge rounded-pill bg-danger ms-1 px-1 py-0" style="font-size: 0.7rem;">{{ $pendingComplaints }}</span>
+                            @endif
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button type="button" class="nav-link {{ $tab == 'ulasan' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-ulasan" aria-controls="navs-top-ulasan" aria-selected="{{ $tab == 'ulasan' ? 'true' : 'false' }}">
+                            <i class="bx bx-star me-1"></i> Ulasan
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button type="button" class="nav-link {{ $tab == 'laporan' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-laporan" aria-controls="navs-top-laporan" aria-selected="{{ $tab == 'laporan' ? 'true' : 'false' }}">
+                            <i class="bx bx-line-chart me-1"></i> Laporan
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button type="button" class="nav-link {{ $tab == 'profil' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-profil" aria-controls="navs-top-profil" aria-selected="{{ $tab == 'profil' ? 'true' : 'false' }}">
+                            <i class="bx bx-store me-1"></i> Profil Toko
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button type="button" class="nav-link {{ $tab == 'pengaturan' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-pengaturan" aria-controls="navs-top-pengaturan" aria-selected="{{ $tab == 'pengaturan' ? 'true' : 'false' }}">
+                            <i class="bx bx-cog me-1"></i> Pengaturan
+                        </button>
+                    </li>
+                </ul>
+            </div>
             
             <div class="tab-content">
                 <!-- TAB 1: DAFTAR PRODUK -->
                 <div class="tab-pane fade {{ $tab == 'produk' ? 'show active' : '' }}" id="navs-top-produk" role="tabpanel">
-                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 bg-white p-3 rounded-4 shadow-sm gap-3">
-                        <div class="d-flex align-items-center">
-                            <div class="avatar avatar-md bg-success-subtle text-success rounded-circle me-3 d-flex justify-content-center align-items-center">
+                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-4 bg-white p-3 rounded-4 shadow-sm gap-3">
+                        <div class="d-flex align-items-center me-3">
+                            <div class="avatar avatar-md bg-success-subtle text-success rounded-circle me-3 d-flex justify-content-center align-items-center flex-shrink-0">
                                 <i class="bx bx-box fs-4"></i>
                             </div>
                             <div>
@@ -108,8 +149,10 @@
                                 <small class="text-muted">Kelola komoditas dan hasil tani yang akan dijual di platform Pasar Daerah.</small>
                             </div>
                         </div>
-                        <div class="w-100 w-md-auto text-end">
-                            <a href="{{ route('admin.unit.pasar_daerah.create') }}" class="btn btn-success rounded-pill px-4 shadow-sm w-100"><i class="bx bx-plus me-1"></i> Tambah Produk</a>
+                        <div class="flex-shrink-0 ms-auto">
+                            <a href="{{ route('admin.unit.pasar_daerah.create') }}" class="btn btn-success rounded-pill px-4 py-2 shadow-sm d-inline-flex align-items-center fw-semibold">
+                                <i class="bx bx-plus me-1 fs-5"></i> Tambah Produk
+                            </a>
                         </div>
                     </div>
 
@@ -1256,7 +1299,63 @@
                                     </div>
 
                                     <!-- Chat Input Area -->
-                                    <div class="p-3 border-top bg-white" id="adminChatInputContainer" style="display: none;">
+                                    <div class="p-3 border-top bg-white position-relative" id="adminChatInputContainer" style="display: none;">
+                                        <!-- Drawer Panel Rekomendasi Produk (Inline di dalam chat, tanpa modal & tanpa backdrop) -->
+                                        <div id="adminProductRecommendationDrawer" class="border rounded-4 p-3 mb-3 bg-light shadow-sm" style="display: none; max-height: 280px; overflow-y: auto;">
+                                            <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <i class="bx bx-package text-primary fs-5"></i>
+                                                    <span class="fw-bold text-dark small">Pilih Produk Rekomendasi Pengganti (Stok Ready)</span>
+                                                </div>
+                                                <button type="button" class="btn-close" style="font-size: 10px;" onclick="toggleRecommendationDrawer(false)" aria-label="Tutup"></button>
+                                            </div>
+                                            <div class="mb-2">
+                                                <input type="text" id="searchDrawerProdukInput" class="form-control form-control-sm rounded-pill" placeholder="Cari nama produk..." onkeyup="filterDrawerProduk()">
+                                            </div>
+                                            <div class="row row-cols-1 row-cols-sm-2 g-2 overflow-auto" id="listDrawerProduk" style="max-height: 180px;">
+                                                @forelse($produks->where('stok', '>', 0) as $p)
+                                                    @php
+                                                        $imgUrl = $p->foto ? asset('storage/' . $p->foto) : asset('assets/img/elements/1.jpg');
+                                                        $hargaFormatted = 'Rp ' . number_format($p->harga, 0, ',', '.');
+                                                    @endphp
+                                                    <div class="col item-drawer-produk" data-name="{{ strtolower($p->nama_produk) }}" data-kategori="{{ strtolower($p->kategori ?? '') }}">
+                                                        <div class="p-2 bg-white rounded-3 border d-flex align-items-center justify-content-between gap-2 h-100 shadow-xs">
+                                                            <div class="d-flex align-items-center gap-2 min-w-0">
+                                                                <img src="{{ $imgUrl }}" style="width: 42px; height: 42px; object-fit: cover; border-radius: 6px; flex-shrink: 0;" alt="{{ $p->nama_produk }}">
+                                                                <div class="min-w-0">
+                                                                    <div class="fw-bold text-dark text-truncate small" style="max-width: 140px;">{{ $p->nama_produk }}</div>
+                                                                    <div class="d-flex align-items-center gap-1">
+                                                                        <span class="text-primary fw-bold" style="font-size: 11px;">{{ $hargaFormatted }}</span>
+                                                                        <span class="badge bg-label-success" style="font-size: 9px;">Stok: {{ $p->stok }} {{ $p->satuan }}</span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <button type="button" class="btn btn-xs btn-primary rounded-pill px-2 py-1 flex-shrink-0" onclick="sisipkanRekomendasiProduk('{{ $imgUrl }}', '{{ addslashes($p->nama_produk) }}', '{{ $hargaFormatted }}')">
+                                                                <i class="bx bx-plus me-1"></i> Sisipkan
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                @empty
+                                                    <div class="col-12 text-center py-3 text-muted small">
+                                                        Tidak ada produk dengan stok tersedia saat ini.
+                                                    </div>
+                                                @endforelse
+                                            </div>
+                                        </div>
+
+                                        <!-- Quick Recommendation & Template Bar -->
+                                        <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                                            <button type="button" class="btn btn-xs btn-outline-primary rounded-pill px-3 py-1 shadow-none d-inline-flex align-items-center fw-semibold" onclick="toggleRecommendationDrawer()">
+                                                <i class="bx bx-package me-1"></i> Rekomendasikan Produk Sejenis
+                                            </button>
+                                            <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill px-3 py-1 shadow-none" onclick="insertQuickReplyAdmin('Mohon maaf Kak, untuk produk yang ditanyakan saat ini sedang kosong/habis stoknya.')">
+                                                <i class="bx bx-time me-1"></i> Info Barang Kosong
+                                            </button>
+                                            <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill px-3 py-1 shadow-none" onclick="insertQuickReplyAdmin('Halo Kak! Stok produk ini masih tersedia ready di etalase dan siap segera dikemas.')">
+                                                <i class="bx bx-check me-1"></i> Info Stok Ready
+                                            </button>
+                                        </div>
+
                                         <form id="adminReplyForm" onsubmit="event.preventDefault(); sendAdminReply();">
                                             <div class="input-group">
                                                 <input type="text" id="adminReplyMessage" class="form-control" placeholder="Tulis balasan resmi Pengelola Toko..." autocomplete="off">
@@ -1543,6 +1642,56 @@
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+
+    function insertQuickReplyAdmin(text) {
+        const input = document.getElementById('adminReplyMessage');
+        if (input) {
+            input.value = text;
+            input.focus();
+        }
+    }
+
+    function toggleRecommendationDrawer(forceState) {
+        const drawer = document.getElementById('adminProductRecommendationDrawer');
+        if (!drawer) return;
+        if (typeof forceState === 'boolean') {
+            drawer.style.display = forceState ? 'block' : 'none';
+        } else {
+            drawer.style.display = (drawer.style.display === 'none' || drawer.style.display === '') ? 'block' : 'none';
+        }
+        if (drawer.style.display === 'block') {
+            const searchInput = document.getElementById('searchDrawerProdukInput');
+            if (searchInput) {
+                searchInput.value = '';
+                filterDrawerProduk();
+                searchInput.focus();
+            }
+        }
+    }
+
+    function sisipkanRekomendasiProduk(imgUrl, prodName, prodPrice) {
+        const input = document.getElementById('adminReplyMessage');
+        if (input) {
+            const cardTag = `[PRODUK|${imgUrl}|${prodName}|${prodPrice}]\n`;
+            input.value = `${cardTag}Halo Kak, untuk produk yang sebelumnya ditanyakan stoknya sedang kosong. Sebagai alternatif terbaik, kami merekomendasikan produk ini yang ready di etalase:`;
+            input.focus();
+        }
+        toggleRecommendationDrawer(false);
+    }
+
+    function filterDrawerProduk() {
+        const query = (document.getElementById('searchDrawerProdukInput')?.value || '').toLowerCase();
+        const items = document.querySelectorAll('.item-drawer-produk');
+        items.forEach(item => {
+            const name = item.getAttribute('data-name') || '';
+            const kat = item.getAttribute('data-kategori') || '';
+            if (name.includes(query) || kat.includes(query)) {
+                item.style.display = '';
+            } else {
+                item.style.display = 'none';
+            }
+        });
     }
 </script>
 @endsection

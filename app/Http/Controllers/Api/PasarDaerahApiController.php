@@ -768,7 +768,69 @@ class PasarDaerahApiController extends Controller
             $cleanRegionName = str_ireplace(['desa ', 'kelurahan '], '', $region->name);
 
             if (str_contains($q, 'menanyakan tentang produk') || str_contains($q, 'produk:')) {
-                $botReply = "Tentu Kak! Produk tersebut saat ini tercatat ready di etalase Toko BUMDes {$cleanRegionName} dan siap dipesan. Kakak bisa langsung menambahkannya ke keranjang belanja atau tanyakan jika butuh informasi spesifikasi lainnya.";
+                // Ekstraksi nama produk dari pesan
+                $targetProduct = null;
+                $extractedName = null;
+
+                if (preg_match('/\[PRODUK\|.*?\|(.*?)\|.*?\]/', $request->message, $m)) {
+                    $extractedName = trim($m[1]);
+                } elseif (preg_match('/menanyakan tentang produk:\s*(.*?)\.\s*Apakah/i', $request->message, $m)) {
+                    $extractedName = trim($m[1]);
+                } elseif (preg_match('/produk:\s*(.*?)(?:\.|$)/i', $request->message, $m)) {
+                    $extractedName = trim($m[1]);
+                }
+
+                if ($extractedName) {
+                    $targetProduct = PasarProduk::where('region_id', $region->id)
+                        ->where('nama_produk', 'like', "%{$extractedName}%")
+                        ->first();
+                }
+
+                if ($targetProduct) {
+                    $isHabis = ($targetProduct->stok <= 0 || strtolower($targetProduct->status) === 'habis');
+                    if ($isHabis) {
+                        // Cari produk sejenis yang ready di kategori yang sama
+                        $similarProducts = PasarProduk::where('region_id', $region->id)
+                            ->where('id', '!=', $targetProduct->id)
+                            ->where('kategori', $targetProduct->kategori)
+                            ->where('stok', '>', 0)
+                            ->where(function($sq) {
+                                $sq->whereNull('status')->orWhere('status', '!=', 'habis');
+                            })
+                            ->take(2)
+                            ->get();
+
+                        // Jika tidak ada di kategori yang sama, cari produk lain yang ready di toko yang sama
+                        if ($similarProducts->isEmpty()) {
+                            $similarProducts = PasarProduk::where('region_id', $region->id)
+                                ->where('id', '!=', $targetProduct->id)
+                                ->where('stok', '>', 0)
+                                ->where(function($sq) {
+                                    $sq->whereNull('status')->orWhere('status', '!=', 'habis');
+                                })
+                                ->take(2)
+                                ->get();
+                        }
+
+                        $botReply = "Mohon maaf Kak, saat ini stok untuk produk *{$targetProduct->nama_produk}* sedang habis di Toko BUMDes {$cleanRegionName}.";
+
+                        if ($similarProducts->isNotEmpty()) {
+                            $botReply .= "\n\nNamun jangan khawatir, kami merekomendasikan produk sejenis lainnya yang saat ini ready dan bisa langsung Kakak pesan:";
+                            foreach ($similarProducts as $sim) {
+                                $simImg = $sim->foto ? asset('storage/' . $sim->foto) : '';
+                                $simPrice = 'Rp ' . number_format($sim->harga, 0, ',', '.');
+                                $botReply .= "\n\n[PRODUK|{$simImg}|{$sim->nama_produk}|{$simPrice}]\n(Stok Ready: {$sim->stok} {$sim->satuan})";
+                            }
+                            $botReply .= "\n\nKakak juga bisa klik tombol 'Chat Pengelola Toko' untuk menanyakan estimasi jadwal restock barang ini.";
+                        } else {
+                            $botReply .= "\n\nSilakan klik tombol 'Chat Pengelola Toko' di bawah untuk menanyakan langsung jadwal restock barang ini ke pengelola kami.";
+                        }
+                    } else {
+                        $botReply = "Tentu Kak! Produk *{$targetProduct->nama_produk}* saat ini tercatat ready (stok: {$targetProduct->stok} {$targetProduct->satuan}) di etalase Toko BUMDes {$cleanRegionName} dan siap dipesan. Kakak bisa langsung menambahkannya ke keranjang belanja!";
+                    }
+                } else {
+                    $botReply = "Tentu Kak! Produk tersebut saat ini tercatat ready di etalase Toko BUMDes {$cleanRegionName} dan siap dipesan. Kakak bisa langsung menambahkannya ke keranjang belanja atau tanyakan jika butuh informasi spesifikasi lainnya.";
+                }
             } elseif (str_contains($q, 'stok') || str_contains($q, 'ready') || str_contains($q, 'ada')) {
                 $botReply = "Stok produk di Toko BUMDes {$cleanRegionName} selalu terpantau ready dan siap segera dikemas.";
             } elseif (str_contains($q, 'kirim') || str_contains($q, 'antar') || str_contains($q, 'desa') || str_contains($q, 'kecamatan')) {
