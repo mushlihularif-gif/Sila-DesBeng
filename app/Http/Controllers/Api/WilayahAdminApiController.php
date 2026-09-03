@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Laporan;
 use App\Models\User;
 use App\Models\Announcement;
+use Illuminate\Support\Facades\Storage;
 
 class WilayahAdminApiController extends Controller
 {
@@ -61,10 +62,12 @@ class WilayahAdminApiController extends Controller
         // Ambil data laporan terbaru (Feed/Aktivitas)
         $laporanTerbaru = (clone $laporanQuery)->with('user:id,name,avatar')->orderBy('created_at', 'desc')->take(5)->get();
 
-        $user->load('region');
+        $user->load(['region', 'file']);
         $avatarUrl = null;
         if ($user->avatar) {
             $avatarUrl = str_starts_with($user->avatar, 'http') ? $user->avatar : url('storage/' . $user->avatar);
+        } elseif ($user->file && Storage::disk('local')->exists($user->file->path)) {
+            $avatarUrl = route('media.profile', ['filename' => $user->file->filename]);
         }
 
         $desaName = $user->region ? $user->region->name : 'Desa Pematang';

@@ -78,18 +78,31 @@ class KycController extends Controller
     {
         $request->validate([
             'kyc_id' => 'required|exists:kyc_verifications,id',
-            'face_data' => 'required|array', 
+            'face_data' => 'required', // Now can be string or array
+            'face_image' => 'nullable|image|max:5120',
         ]);
 
-        // Catatan: Pada submit API, sepertinya tidak menerima face_image, hanya face_data.
-        // Jika API ini tidak mengupload foto face (hanya JSON array titik wajah), maka tidak perlu enkripsi image.
-        
         $kyc = KycVerification::where('id', $request->kyc_id)
             ->where('user_id', $request->user()->id)
             ->firstOrFail();
 
-        $updateData = ['face_scan_data' => $request->face_data];
+        // Handle face_data whether it's array or string (from multipart form data)
+        $faceData = is_string($request->face_data) ? json_decode($request->face_data, true) : $request->face_data;
+        $updateData = ['face_scan_data' => $faceData];
         
+        // Handle face image if uploaded
+        if ($request->hasFile('face_image')) {
+            $faceFile = $request->file('face_image');
+            $fileContent = $faceFile->get();
+            $encryptedContent = \App\Services\FileEncryptionService::encrypt($fileContent);
+            
+            $fileName = 'face_' . uniqid() . '.enc';
+            $path = 'kyc/face/' . $fileName;
+            Storage::disk('private')->put($path, $encryptedContent);
+            
+            $updateData['face_image_path'] = $path;
+        }
+
         if ($request->has('nik')) $updateData['nik_from_ocr'] = $request->nik;
         if ($request->has('name')) $updateData['name_from_ocr'] = $request->name;
         if ($request->has('address')) $updateData['address_from_ocr'] = $request->address;

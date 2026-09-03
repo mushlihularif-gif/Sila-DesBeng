@@ -34,15 +34,22 @@
 
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Foto Scan Wajah (Selfie)</h6>
+                </div>
+                <div class="card-body text-center">
+                    @if($kyc->face_image_path)
+                        <img src="{{ route('media.secure.face', basename($kyc->face_image_path)) }}" class="img-fluid rounded border p-1 mb-3" alt="Scan Wajah {{ $kyc->user->name }}">
+                        <a href="{{ route('media.secure.face', basename($kyc->face_image_path)) }}" target="_blank" class="btn btn-sm btn-outline-primary d-block mb-3"><i class="fas fa-search-plus"></i> Perbesar Foto Wajah</a>
+                    @endif
 
                     @if($kyc->face_scan_data)
-                        <div class="alert alert-success text-left">
-                            <i class="fas fa-check-circle"></i> Data Liveness terdeteksi 
-                            ({{ count($kyc->face_scan_data) }} frame terekam).
+                        <div class="alert alert-success text-left mb-2">
+                            <i class="fas fa-check-circle"></i> Liveness Passed 
+                            ({{ count($kyc->face_scan_data) }} check terekam).
                         </div>
-                        <p class="small text-muted text-left">Sistem otomatis mendeteksi kedipan mata dan gerakan kepala sebelum mengirimkan form ini.</p>
+                        <p class="small text-muted text-left mb-0">Sistem otomatis memverifikasi kedipan mata dan gerakan kepala (anti-spoofing).</p>
                     @else
-                        <div class="alert alert-danger text-left">
+                        <div class="alert alert-danger text-left mb-0">
                             <i class="fas fa-times-circle"></i> Tidak ada data liveness.
                         </div>
                     @endif

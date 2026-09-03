@@ -27,6 +27,9 @@ Route::get('/unit-pelayanan', [BerandaController::class, 'unitPelayanan']);
     Route::get('/pasar-daerah/products/{id}/reviews', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'getProductReviews']);
     Route::get('/pasar-daerah/seller/{region_id}', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'getSellerProfile']);
     Route::get('/pasar-daerah/categories', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'getCategories']);
+    Route::get('/pasar-daerah/seller/{region_id}/chat/history', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'getChatHistory']);
+    Route::post('/pasar-daerah/seller/{region_id}/chat/send', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'sendChatMessage']);
+    Route::post('/pasar-daerah/seller/{region_id}/chat/escalate', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'escalateToAdmin']);
 
     // Wilayah (Regions) - Public for registration
     Route::get('/kemitraan/regions', [\App\Http\Controllers\Api\PartnerApplicationApiController::class, 'getRegions']);
@@ -79,6 +82,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/pasar-daerah/products/{id}/reviews', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'addReview']);
     Route::post('/pasar-daerah/orders/{id}/complaint', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'submitComplaint']);
     Route::get('/pasar-daerah/orders/{id}/complaint', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'getComplaintDetail']);
+    Route::post('/pasar-daerah/orders/{id}/confirm-received', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'confirmReceived']);
 
     // Mutasi Domisili
     Route::get('/mutasi', [\App\Http\Controllers\Api\DomicileTransferApiController::class, 'index']);

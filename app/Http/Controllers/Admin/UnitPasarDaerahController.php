@@ -70,8 +70,15 @@ class UnitPasarDaerahController extends Controller
             ->latest()
             ->get();
 
+        // Data Chat Pengelola Toko
+        $chats = \App\Models\PasarChatSession::where('region_id', $admin->region_id)
+            ->with(['user'])
+            ->orderBy('last_message_at', 'desc')
+            ->get();
+        $totalUnreadChats = $chats->sum('unread_admin_count');
+
         return view('admin.unit.pasar_daerah.index', compact(
-            'produks', 'settings', 'pesanans', 'status', 'laporans', 'startDate', 'endDate', 'totalPendapatan', 'tab', 'semuaKecamatan', 'admin', 'reviews', 'complaints'
+            'produks', 'settings', 'pesanans', 'status', 'laporans', 'startDate', 'endDate', 'totalPendapatan', 'tab', 'semuaKecamatan', 'admin', 'reviews', 'complaints', 'chats', 'totalUnreadChats'
         ));
     }
 
@@ -308,7 +315,10 @@ class UnitPasarDaerahController extends Controller
     public function pesananShow($id)
     {
         $admin = Auth::user();
-        $pesanan = \App\Models\PasarOrder::where('id', $id)->where('region_id', $admin->region_id)->with('items.produk', 'user')->firstOrFail();
+        $pesanan = \App\Models\PasarOrder::where('id', $id)
+            ->where('region_id', $admin->region_id)
+            ->with(['items.produk', 'user', 'complaint'])
+            ->firstOrFail();
         
         return view('admin.unit.pasar_daerah.pesanan_show', compact('pesanan'));
     }
@@ -470,5 +480,89 @@ class UnitPasarDaerahController extends Controller
         }
 
         return redirect()->back()->with('success', 'Tindakan komplain berhasil diproses dan dikirim ke pembeli.');
+    }
+
+    /**
+     * Detail Pesan Chat untuk Admin
+     */
+    public function chatMessages($id)
+    {
+        $admin = Auth::user();
+        $session = \App\Models\PasarChatSession::where('region_id', $admin->region_id)->findOrFail($id);
+        
+        // Reset unread count for admin
+        $session->update(['unread_admin_count' => 0]);
+        
+        $messages = $session->messages()->with('sender')->get();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => [
+                'session' => $session,
+                'messages' => $messages,
+            ]
+        ]);
+    }
+
+    /**
+     * Balas Chat dari Admin ke Pembeli
+     */
+    public function replyChat(Request $request, $id)
+    {
+        $admin = Auth::user();
+        $request->validate([
+            'message' => 'required|string|max:1000',
+        ]);
+
+        $session = \App\Models\PasarChatSession::where('region_id', $admin->region_id)->findOrFail($id);
+
+        $msg = \App\Models\PasarChatMessage::create([
+            'session_id' => $session->id,
+            'sender_type' => 'admin',
+            'sender_id' => $admin->id,
+            'message' => $request->message,
+            'is_read' => false,
+        ]);
+
+        $session->update([
+            'last_message' => $request->message,
+            'last_message_at' => now(),
+            'unread_user_count' => $session->unread_user_count + 1,
+            'status' => 'escalated',
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Pesan balasan berhasil dikirim.',
+            'data' => [
+                'chat_message' => $msg,
+            ]
+        ]);
+    }
+
+    /**
+     * Tandai Sesi Chat Selesai
+     */
+    public function resolveChat($id)
+    {
+        $admin = Auth::user();
+        $session = \App\Models\PasarChatSession::where('region_id', $admin->region_id)->findOrFail($id);
+
+        $session->update([
+            'status' => 'resolved',
+        ]);
+
+        \App\Models\PasarChatMessage::create([
+            'session_id' => $session->id,
+            'sender_type' => 'bot',
+            'sender_id' => null,
+            'message' => 'Sesi obrolan ini telah ditandai selesai oleh Pengelola Toko BUMDes. Terima kasih sudah menghubungi kami!',
+            'is_read' => true,
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Sesi obrolan berhasil ditandai selesai.',
+        ]);
     }
 }
