@@ -685,7 +685,7 @@
                                                     <h6 class="mb-0 fw-bold">Sewa Tanpa Supir (Bawa Sendiri)</h6>
                                                 </div>
                                                 <div class="form-check form-switch fs-5 mb-0">
-                                                    <input class="form-check-input cursor-pointer" type="checkbox" id="switch_tanpa_supir_borongan" onchange="updateSupirStatusBorongan()" {{ (old('opsi_supir_borongan', ''_borongan) == 'Lepas Kunci' || old('opsi_supir_borongan', ''_borongan) == 'Bebas Pilih') ? 'checked' : '' }}>
+                                                    <input class="form-check-input cursor-pointer" type="checkbox" id="switch_tanpa_supir_borongan" onchange="updateSupirStatusBorongan()" {{ (old('opsi_supir_borongan', $mobil->opsi_supir_borongan ?? '') == 'Lepas Kunci' || old('opsi_supir_borongan', $mobil->opsi_supir_borongan ?? '') == 'Bebas Pilih') ? 'checked' : '' }}>
                                                 </div>
                                             </div>
                                             <div class="text-muted small mb-0 fw-semibold" id="status_tanpa_supir_borongan">Tidak Aktif</div>
@@ -701,7 +701,7 @@
                                                     <h6 class="mb-0 fw-bold">Sewa Dengan Supir Pengelola</h6>
                                                 </div>
                                                 <div class="form-check form-switch fs-5 mb-0">
-                                                    <input class="form-check-input cursor-pointer" type="checkbox" id="switch_dengan_supir_borongan" onchange="updateSupirStatusBorongan()" {{ (old('opsi_supir_borongan', ''_borongan) == 'Dengan Supir' || old('opsi_supir_borongan', ''_borongan) == 'Bebas Pilih') ? 'checked' : '' }}>
+                                                    <input class="form-check-input cursor-pointer" type="checkbox" id="switch_dengan_supir_borongan" onchange="updateSupirStatusBorongan()" {{ (old('opsi_supir_borongan', $mobil->opsi_supir_borongan ?? '') == 'Dengan Supir' || old('opsi_supir_borongan', $mobil->opsi_supir_borongan ?? '') == 'Bebas Pilih') ? 'checked' : '' }}>
                                                 </div>
                                             </div>
                                             <div class="text-muted small mb-0 fw-semibold" id="status_dengan_supir_borongan">Tidak Aktif</div>
@@ -711,11 +711,11 @@
                                               <div id="form_supir_details_borongan" class="mt-3 p-3 bg-light border rounded" style="display: none;">
                                                   <div class="mb-3">
                                                       <label class="form-label small fw-bold">Nama Supir Borongan (Opsional)</label>
-                                                      <input type="text" class="form-control" name="nama_supir_borongan" id="nama_supir_borongan" placeholder="Contoh: Pak Budi" value="{{ isset($mobil) ? ''_borongan : old('nama_supir_borongan') }}">
+                                                      <input type="text" class="form-control" name="nama_supir_borongan" id="nama_supir_borongan" placeholder="Contoh: Pak Budi" value="{{ old('nama_supir_borongan', $mobil->nama_supir_borongan ?? '') }}">
                                                   </div>
                                                   <div class="mb-0">
                                                       <label class="form-label small fw-bold">Kontak Supir Borongan (WhatsApp)</label>
-                                                      <input type="text" class="form-control" name="kontak_supir_borongan" id="kontak_supir_borongan" placeholder="Contoh: 08123456789" value="{{ isset($mobil) ? ''_borongan : old('kontak_supir_borongan') }}">
+                                                      <input type="text" class="form-control" name="kontak_supir_borongan" id="kontak_supir_borongan" placeholder="Contoh: 08123456789" value="{{ old('kontak_supir_borongan', $mobil->kontak_supir_borongan ?? '') }}">
                                                   </div>
                                               </div>
                                             
@@ -723,7 +723,7 @@
                                     </div>
                                 </div>
                                 
-                                <input type="hidden" name="opsi_supir_borongan" id="opsi_supir_borongan" value="{{ old('opsi_supir_borongan', ''_borongan) }}" required>
+                                <input type="hidden" name="opsi_supir_borongan" id="opsi_supir_borongan" value="{{ old('opsi_supir_borongan', $mobil->opsi_supir_borongan ?? '') }}" required>
 
                                 <hr class="my-4 text-muted">
                                 
@@ -1276,7 +1276,6 @@
             animation: fadeInUp 0.5s ease;
         }
     
-<style>
     .wizard-steps .nav-link {
         border-radius: 0.5rem;
         color: #6c757d;
@@ -1293,8 +1292,6 @@
         font-size: 1.25rem;
         vertical-align: middle;
     }
-</style>
-
 </style>
 @endsection
 

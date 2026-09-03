@@ -658,7 +658,6 @@
             animation: fadeInUp 0.5s ease;
         }
     
-<style>
     .wizard-steps .nav-link {
         border-radius: 0.5rem;
         color: #6c757d;
@@ -675,8 +674,6 @@
         font-size: 1.25rem;
         vertical-align: middle;
     }
-</style>
-
 </style>
 @endsection
 
