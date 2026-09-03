@@ -30,12 +30,6 @@ class Mobil extends Model
         'batas_km_luar_desa',
         'harga_luar_kota',
         'bbm_ditanggung',
-        'opsi_supir',
-        'nama_supir',
-        'kontak_supir',
-        'opsi_supir_borongan',
-        'nama_supir_borongan',
-        'kontak_supir_borongan',
         'bbm_ditanggung_borongan',
         'is_harian_active',
         'is_borongan_active'
@@ -49,6 +43,11 @@ class Mobil extends Model
         'is_harian_active' => 'boolean',
         'is_borongan_active' => 'boolean',
     ];
+
+    public function supirs()
+    {
+        return $this->belongsToMany(Supir::class, 'mobil_supir', 'mobil_id', 'supir_id');
+    }
 
     public function bookings()
     {

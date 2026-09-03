@@ -118,13 +118,24 @@
                     <!-- Opt-in Layanan Card -->
                     <div class="card border-0 shadow-sm rounded-4 mb-4">
                         <div class="card-body p-4">
-                            <div class="d-flex align-items-center mb-3 border-bottom pb-3">
+                            <div class="d-flex align-items-center mb-3">
                                 <div class="avatar avatar-sm bg-warning-subtle text-warning rounded-circle me-3 d-flex justify-content-center align-items-center">
                                     <i class="bx bx-layer fs-5"></i>
                                 </div>
-                                <h6 class="fw-bold mb-0">Layanan yang Tersedia</h6>
+                                <h6 class="fw-bold mb-0">2. HAK AKSES UNIT LAYANAN</h6>
                             </div>
-                            <p class="text-muted small mb-4">Centang layanan yang ingin Anda aktifkan. Warga hanya dapat mengakses layanan yang dicentang di bawah ini.</p>
+                            
+                            <!-- Panduan UI -->
+                            <div class="alert bg-label-warning border-0 rounded-3 mb-4 d-flex align-items-start p-3">
+                                <i class="bx bx-error-circle fs-4 me-3 text-warning mt-1"></i>
+                                <div>
+                                    <strong class="d-block mb-1 text-dark">PENTING: Panduan Pengaturan Layanan!</strong>
+                                    <p class="mb-0 text-dark" style="font-size: 0.85rem;">
+                                        Silakan aktifkan unit layanan yang ingin dibuka untuk warga. 
+                                        Anda juga dapat mengatur <strong>Hak Akses Eksklusif</strong> agar layanan tersebut hanya bisa dinikmati oleh warga lokal desa Anda. Layanan publik seperti <em>Pasar Daerah</em> dan <em>Berita Daerah</em> secara otomatis terbuka untuk umum dan tidak dapat dieksklusifkan.
+                                    </p>
+                                </div>
+                            </div>
                             
                             <div class="row g-3">
                             @foreach($allServices as $service)
@@ -137,6 +148,9 @@
                                                 $iconPath = 'User/img/elemen/fasilitas.png';
                                                 $descText = 'yang dapat mengakses layanan ini.';
                                                 $sName = strtolower($service->name);
+                                                $isPasar = strpos($sName, 'pasar') !== false;
+                                                $isPengumuman = strpos($sName, 'pengumuman') !== false;
+                                                $displayName = $service->name;
                                                 
                                                 if (strpos($sName, 'mobil') !== false) {
                                                     $iconPath = 'User/img/elemen/mobil.png';
@@ -150,7 +164,7 @@
                                                     $iconPath = 'User/img/elemen/F2.png';
                                                     $descText = 'yang dapat memesan tabung gas.';
                                                 }
-                                                elseif (strpos($sName, 'pasar') !== false) {
+                                                elseif ($isPasar) {
                                                     $iconPath = 'Admin/img/pasardaerah/PasarDaerah2.png';
                                                     $descText = 'yang dapat mendaftar sewa kios.';
                                                 }
@@ -158,40 +172,81 @@
                                                     $iconPath = 'User/img/elemen/lapor.png';
                                                     $descText = 'yang dapat membuat laporan.';
                                                 }
-                                                elseif (strpos($sName, 'pengumuman') !== false) {
+                                                elseif ($isPengumuman) {
                                                     $iconPath = 'User/img/elemen/KabardanInformasiDaerah.png';
-                                                    $descText = 'yang dapat melihat pengumuman daerah.';
+                                                    $descText = 'yang dapat melihat pengumuman daerah ini.';
+                                                    $displayName = "Kabar dan Informasi Daerah";
                                                 }
                                             @endphp
 
-                                            <div class="d-flex align-items-center mb-3">
+                                            <div class="d-flex align-items-center mb-2">
                                                 <div class="bg-white rounded p-2 me-3 shadow-sm d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
-                                                    <img src="{{ asset($iconPath) }}" alt="{{ $service->name }}" class="w-100 h-100 object-contain" style="object-fit: contain;">
+                                                    <img src="{{ asset($iconPath) }}" alt="{{ $displayName }}" class="w-100 h-100 object-contain" style="object-fit: contain;">
                                                 </div>
                                                 <div class="flex-grow-1">
-                                                    <span class="fw-bold d-block text-dark">{{ $service->name }}</span>
+                                                    <span class="fw-bold d-block text-dark" style="font-size: 0.95rem;">{{ $displayName }}</span>
                                                     <div class="form-check form-switch mb-0 mt-1">
-                                                        @if(isset($isNews) && $isNews)
-                                                            <input type="hidden" name="services[]" value="{{ $service->id }}">
-                                                            <input type="checkbox" class="form-check-input" checked disabled style="cursor: not-allowed; transform: scale(1.2);">
-                                                            <label class="form-check-label small fw-bold mt-1 text-primary">Wajib (Default)</label>
-                                                        @else
-                                                            <input type="checkbox" name="services[]" value="{{ $service->id }}" class="form-check-input service-main-toggle" style="cursor: pointer; transform: scale(1.2);" {{ in_array($service->id, $activeServices) ? 'checked' : '' }}>
-                                                            <label class="form-check-label small fw-bold mt-1 status-label-main {{ in_array($service->id, $activeServices) ? 'text-primary' : 'text-secondary' }}">{{ in_array($service->id, $activeServices) ? 'Layanan Aktif' : 'Layanan Nonaktif' }}</label>
-                                                        @endif
+                                                        <input type="checkbox" name="services[]" value="{{ $service->id }}" class="form-check-input service-main-toggle" style="cursor: pointer; transform: scale(1.2);" {{ in_array($service->id, $activeServices) ? 'checked' : '' }}>
+                                                        <label class="form-check-label small fw-bold mt-1 ms-1 status-label-main {{ in_array($service->id, $activeServices) ? 'text-primary' : 'text-secondary' }}">{{ in_array($service->id, $activeServices) ? 'Layanan Aktif' : 'Layanan Nonaktif' }}</label>
                                                     </div>
                                                 </div>
+                                            </div>
+                                            <div class="mb-3 ps-5 ms-3">
+                                                <small class="status-desc-text {{ in_array($service->id, $activeServices) ? 'text-success' : 'text-danger' }}" style="font-size: 0.75rem;">
+                                                    {{ in_array($service->id, $activeServices) ? 'Layanan ini muncul di beranda warga.' : 'Layanan ini disembunyikan sepenuhnya.' }}
+                                                </small>
                                             </div>
 
                                             <div class="border-top pt-2 mt-2">
                                                 <label class="form-label text-dark fw-bold small mb-2 d-flex align-items-center">
                                                     <i class="bx bx-shield-quarter text-warning me-1"></i> Hak Akses Eksklusif
                                                 </label>
-                                                <div class="form-check form-switch mb-1">
-                                                    <input type="checkbox" name="exclusive_services[]" value="{{ $service->id }}" class="form-check-input exclusive-toggle" style="cursor: pointer; border-color: #ffab00;" {{ in_array($service->id, $exclusiveServices) ? 'checked' : '' }}>
-                                                    <label class="form-check-label small text-dark">Eksklusif Warga Lokal</label>
-                                                </div>
-                                                <small class="text-muted" style="font-size: 0.75rem;">Hanya warga domisili {{ $region->name }} {{ $descText }}</small>
+                                                
+                                                @if($isPengumuman)
+                                                    <div class="bg-white border rounded-3 p-3 mt-2">
+                                                        <!-- Berita Block (Locked) -->
+                                                        <div class="d-flex align-items-start mb-3 pb-3 border-bottom">
+                                                            <div class="bg-info-subtle text-info rounded p-2 me-3 d-flex justify-content-center align-items-center">
+                                                                <i class="bx bx-news fs-4"></i>
+                                                            </div>
+                                                            <div class="flex-grow-1">
+                                                                <span class="fw-bold d-block text-dark" style="font-size: 0.85rem;">Berita Daerah</span>
+                                                                <small class="text-primary fw-semibold" style="font-size: 0.75rem;"><i class="bx bx-world me-1"></i>Publik (Terbuka Umum)</small>
+                                                                <small class="text-muted d-block mt-1" style="font-size: 0.7rem;">Berita otomatis dapat dilihat oleh seluruh warga desa lain.</small>
+                                                            </div>
+                                                            <i class="bx bxs-lock-alt text-secondary mt-1" title="Tidak dapat diubah"></i>
+                                                        </div>
+                                                        
+                                                        <!-- Pengumuman Block (Toggleable) -->
+                                                        <div class="d-flex align-items-start">
+                                                            <div class="bg-warning-subtle text-warning rounded p-2 me-3 d-flex justify-content-center align-items-center">
+                                                                <i class="bx bx-broadcast fs-4"></i>
+                                                            </div>
+                                                            <div class="flex-grow-1">
+                                                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                                                    <span class="fw-bold d-block text-dark" style="font-size: 0.85rem;">Pengumuman Desa</span>
+                                                                    <div class="form-check form-switch mb-0">
+                                                                        <input type="checkbox" name="exclusive_services[]" value="{{ $service->id }}" class="form-check-input exclusive-toggle" style="cursor: pointer; border-color: #ffab00;" {{ in_array($service->id, $exclusiveServices) ? 'checked' : '' }}>
+                                                                    </div>
+                                                                </div>
+                                                                <label class="form-check-label small fw-bold text-dark exclusive-label-main d-block mb-1" style="font-size: 0.75rem;">
+                                                                    {{ in_array($service->id, $exclusiveServices) ? 'Eksklusif Warga Lokal' : 'Publik (Terbuka Umum)' }}
+                                                                </label>
+                                                                <small class="exclusive-desc-text {{ in_array($service->id, $exclusiveServices) ? 'text-warning' : 'text-primary' }} d-block lh-sm" style="font-size: 0.7rem;">
+                                                                    {{ in_array($service->id, $exclusiveServices) ? 'Pengumuman HANYA tampil untuk warga domisili '.$region->name.'.' : 'Pengumuman dapat dilihat oleh semua warga termasuk dari desa lain.' }}
+                                                                </small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                @else
+                                                    <div class="form-check form-switch mb-1">
+                                                        <input type="checkbox" name="exclusive_services[]" value="{{ $service->id }}" class="form-check-input exclusive-toggle" style="cursor: pointer; border-color: #ffab00;" {{ in_array($service->id, $exclusiveServices) ? 'checked' : '' }}>
+                                                        <label class="form-check-label small fw-bold text-dark exclusive-label-main">{{ in_array($service->id, $exclusiveServices) ? 'Eksklusif Warga Lokal' : 'Publik (Terbuka Umum)' }}</label>
+                                                    </div>
+                                                    <small class="exclusive-desc-text {{ in_array($service->id, $exclusiveServices) ? 'text-warning' : 'text-primary' }} d-block" style="font-size: 0.75rem;">
+                                                        {{ in_array($service->id, $exclusiveServices) ? 'Hanya warga domisili '.$region->name.' '.$descText : 'Semua warga termasuk dari luar desa dapat mengakses layanan ini.' }}
+                                                    </small>
+                                                @endif
                                             </div>
 
                                         </div>
@@ -277,8 +332,13 @@
                                                 <div class="bg-light p-3 rounded-4 border">
     <div class="d-flex justify-content-between align-items-center">
         <div class="flex-grow-1 pe-3">
-            <span class="text-dark fw-semibold d-block">Layanan Antar (Diantar Petugas)</span>
-            <span class="text-muted small d-block mb-1">Mobil desa diantarkan langsung ke titik lokasi penyewa</span>
+            <div class="d-flex align-items-center mb-2">
+                <img src="{{ asset('Admin/img/elements/antar.png') }}" alt="Layanan Antar (Diantar Petugas)" style="width: 45px; height: 45px; object-fit: contain;" class="me-3">
+                <div>
+                    <span class="text-dark fw-bold d-block" style="font-size: 1.05rem;">Layanan Antar (Diantar Petugas)</span>
+                    <span class="text-muted small d-block mb-0">Mobil desa diantarkan langsung ke titik lokasi penyewa</span>
+                </div>
+            </div>
             <div class="dynamic-keterangan mt-2" style="display: none;">
                 <div class="d-flex align-items-start rounded-3 p-2 border" style="background-color: #e7f1ff; border-color: #b8daff; color: #004085;">
                     <i class="bx bx-check-circle me-2 mt-1"></i>
@@ -295,8 +355,13 @@
                                                 <div class="bg-light p-3 rounded-4 border">
     <div class="d-flex justify-content-between align-items-center">
         <div class="flex-grow-1 pe-3">
-            <span class="text-dark fw-semibold d-block">Ambil / Jemput Sendiri</span>
-            <span class="text-muted small d-block mb-1">Penyewa datang menjemput mobil di kantor atau garasi desa</span>
+            <div class="d-flex align-items-center mb-2">
+                <img src="{{ asset('Admin/img/elements/jemput.png') }}" alt="Ambil / Jemput Sendiri" style="width: 45px; height: 45px; object-fit: contain;" class="me-3">
+                <div>
+                    <span class="text-dark fw-bold d-block" style="font-size: 1.05rem;">Ambil / Jemput Sendiri</span>
+                    <span class="text-muted small d-block mb-0">Penyewa datang menjemput mobil di kantor atau garasi desa</span>
+                </div>
+            </div>
             <div class="dynamic-keterangan mt-2" style="display: none;">
                 <div class="d-flex align-items-start rounded-3 p-2 border" style="background-color: #e7f1ff; border-color: #b8daff; color: #004085;">
                     <i class="bx bx-check-circle me-2 mt-1"></i>
@@ -327,8 +392,13 @@
                                                 <div class="bg-light p-3 rounded-4 border">
     <div class="d-flex justify-content-between align-items-center">
         <div class="flex-grow-1 pe-3">
-            <span class="text-dark fw-semibold d-block">Layanan Antar ke Lokasi</span>
-            <span class="text-muted small d-block mb-1">Mobil desa / petugas mengantar ke lokasi warga</span>
+            <div class="d-flex align-items-center mb-2">
+                <img src="{{ asset('Admin/img/elements/antar.png') }}" alt="Layanan Antar ke Lokasi" style="width: 45px; height: 45px; object-fit: contain;" class="me-3">
+                <div>
+                    <span class="text-dark fw-bold d-block" style="font-size: 1.05rem;">Layanan Antar ke Lokasi</span>
+                    <span class="text-muted small d-block mb-0">Mobil desa / petugas mengantar ke lokasi warga</span>
+                </div>
+            </div>
             <div class="dynamic-keterangan mt-2" style="display: none;">
                 <div class="d-flex align-items-start rounded-3 p-2 border" style="background-color: #e7f1ff; border-color: #b8daff; color: #004085;">
                     <i class="bx bx-check-circle me-2 mt-1"></i>
@@ -345,8 +415,13 @@
                                                 <div class="bg-light p-3 rounded-4 border">
     <div class="d-flex justify-content-between align-items-center">
         <div class="flex-grow-1 pe-3">
-            <span class="text-dark fw-semibold d-block">Ambil Sendiri</span>
-            <span class="text-muted small d-block mb-1">Warga mengambil alat langsung ke kantor/gudang</span>
+            <div class="d-flex align-items-center mb-2">
+                <img src="{{ asset('Admin/img/elements/jemput.png') }}" alt="Ambil Sendiri" style="width: 45px; height: 45px; object-fit: contain;" class="me-3">
+                <div>
+                    <span class="text-dark fw-bold d-block" style="font-size: 1.05rem;">Ambil Sendiri</span>
+                    <span class="text-muted small d-block mb-0">Warga mengambil alat langsung ke kantor/gudang</span>
+                </div>
+            </div>
             <div class="dynamic-keterangan mt-2" style="display: none;">
                 <div class="d-flex align-items-start rounded-3 p-2 border" style="background-color: #e7f1ff; border-color: #b8daff; color: #004085;">
                     <i class="bx bx-check-circle me-2 mt-1"></i>
@@ -376,8 +451,13 @@
                                                 <div class="bg-light p-3 rounded-4 border">
     <div class="d-flex justify-content-between align-items-center">
         <div class="flex-grow-1 pe-3">
-            <span class="text-dark fw-semibold d-block">Layanan Antar (Kurir Desa)</span>
-            <span class="text-muted small d-block mb-1">Gas diantar ke rumah warga</span>
+            <div class="d-flex align-items-center mb-2">
+                <img src="{{ asset('Admin/img/elements/antar.png') }}" alt="Layanan Antar (Kurir Desa)" style="width: 45px; height: 45px; object-fit: contain;" class="me-3">
+                <div>
+                    <span class="text-dark fw-bold d-block" style="font-size: 1.05rem;">Layanan Antar (Kurir Desa)</span>
+                    <span class="text-muted small d-block mb-0">Gas diantar ke rumah warga</span>
+                </div>
+            </div>
             <div class="dynamic-keterangan mt-2" style="display: none;">
                 <div class="d-flex align-items-start rounded-3 p-2 border" style="background-color: #e7f1ff; border-color: #b8daff; color: #004085;">
                     <i class="bx bx-check-circle me-2 mt-1"></i>
@@ -394,8 +474,13 @@
                                                 <div class="bg-light p-3 rounded-4 border">
     <div class="d-flex justify-content-between align-items-center">
         <div class="flex-grow-1 pe-3">
-            <span class="text-dark fw-semibold d-block">Beli di Pangkalan (Ambil Sendiri)</span>
-            <span class="text-muted small d-block mb-1">Warga datang menukar tabung ke pangkalan</span>
+            <div class="d-flex align-items-center mb-2">
+                <img src="{{ asset('Admin/img/elements/jemput.png') }}" alt="Beli di Pangkalan (Ambil Sendiri)" style="width: 45px; height: 45px; object-fit: contain;" class="me-3">
+                <div>
+                    <span class="text-dark fw-bold d-block" style="font-size: 1.05rem;">Beli di Pangkalan (Ambil Sendiri)</span>
+                    <span class="text-muted small d-block mb-0">Warga datang menukar tabung ke pangkalan</span>
+                </div>
+            </div>
             <div class="dynamic-keterangan mt-2" style="display: none;">
                 <div class="d-flex align-items-start rounded-3 p-2 border" style="background-color: #e7f1ff; border-color: #b8daff; color: #004085;">
                     <i class="bx bx-check-circle me-2 mt-1"></i>
@@ -425,8 +510,13 @@
                                                 <div class="bg-light p-3 rounded-4 border">
     <div class="d-flex justify-content-between align-items-center">
         <div class="flex-grow-1 pe-3">
-            <span class="text-dark fw-semibold d-block">Layanan Antar (Kurir/Armada)</span>
-            <span class="text-muted small d-block mb-1">Produk diantar ke rumah warga (dengan ongkos kirim otomatis)</span>
+            <div class="d-flex align-items-center mb-2">
+                <img src="{{ asset('Admin/img/elements/antar.png') }}" alt="Layanan Antar (Kurir/Armada)" style="width: 45px; height: 45px; object-fit: contain;" class="me-3">
+                <div>
+                    <span class="text-dark fw-bold d-block" style="font-size: 1.05rem;">Layanan Antar (Kurir/Armada)</span>
+                    <span class="text-muted small d-block mb-0">Produk diantar ke rumah warga (dengan ongkos kirim otomatis)</span>
+                </div>
+            </div>
             <div class="dynamic-keterangan mt-2" style="display: none;">
                 <div class="d-flex align-items-start rounded-3 p-2 border" style="background-color: #e7f1ff; border-color: #b8daff; color: #004085;">
                     <i class="bx bx-check-circle me-2 mt-1"></i>
@@ -443,8 +533,13 @@
                                                 <div class="bg-light p-3 rounded-4 border">
     <div class="d-flex justify-content-between align-items-center">
         <div class="flex-grow-1 pe-3">
-            <span class="text-dark fw-semibold d-block">Jemput Sendiri / Pick-up (Gratis)</span>
-            <span class="text-muted small d-block mb-1">Warga dapat memilih untuk menjemput produk langsung di toko</span>
+            <div class="d-flex align-items-center mb-2">
+                <img src="{{ asset('Admin/img/elements/jemput.png') }}" alt="Jemput Sendiri / Pick-up (Gratis)" style="width: 45px; height: 45px; object-fit: contain;" class="me-3">
+                <div>
+                    <span class="text-dark fw-bold d-block" style="font-size: 1.05rem;">Jemput Sendiri / Pick-up (Gratis)</span>
+                    <span class="text-muted small d-block mb-0">Warga dapat memilih untuk menjemput produk langsung di toko</span>
+                </div>
+            </div>
             <div class="dynamic-keterangan mt-2" style="display: none;">
                 <div class="d-flex align-items-start rounded-3 p-2 border" style="background-color: #e7f1ff; border-color: #b8daff; color: #004085;">
                     <i class="bx bx-check-circle me-2 mt-1"></i>
@@ -475,8 +570,13 @@
                                                 <div class="bg-light p-3 rounded-4 border">
     <div class="d-flex justify-content-between align-items-center">
         <div class="flex-grow-1 pe-3">
-            <span class="text-dark fw-semibold d-block">Layanan Kunjungan / Antar / Panggilan</span>
-            <span class="text-muted small d-block mb-1">Fasilitas (seperti ambulans, kursi/tenda) atau petugas datang ke titik lokasi warga</span>
+            <div class="d-flex align-items-center mb-2">
+                <img src="{{ asset('Admin/img/elements/antar.png') }}" alt="Layanan Kunjungan / Antar / Panggilan" style="width: 45px; height: 45px; object-fit: contain;" class="me-3">
+                <div>
+                    <span class="text-dark fw-bold d-block" style="font-size: 1.05rem;">Layanan Kunjungan / Antar / Panggilan</span>
+                    <span class="text-muted small d-block mb-0">Fasilitas (seperti ambulans, dan transportasi lain) atau petugas datang ke titik lokasi warga</span>
+                </div>
+            </div>
             <div class="dynamic-keterangan mt-2" style="display: none;">
                 <div class="d-flex align-items-start rounded-3 p-2 border" style="background-color: #e7f1ff; border-color: #b8daff; color: #004085;">
                     <i class="bx bx-check-circle me-2 mt-1"></i>
@@ -493,8 +593,13 @@
                                                 <div class="bg-light p-3 rounded-4 border">
     <div class="d-flex justify-content-between align-items-center">
         <div class="flex-grow-1 pe-3">
-            <span class="text-dark fw-semibold d-block">Gunakan di Tempat / Ambil Sendiri</span>
-            <span class="text-muted small d-block mb-1">Warga mendatangi lokasi fasilitas (gedung, balai) atau mengambil sendiri barang</span>
+            <div class="d-flex align-items-center mb-2">
+                <img src="{{ asset('Admin/img/elements/jemput.png') }}" alt="Gunakan di Tempat / Ambil Sendiri" style="width: 45px; height: 45px; object-fit: contain;" class="me-3">
+                <div>
+                    <span class="text-dark fw-bold d-block" style="font-size: 1.05rem;">Gunakan di Tempat / Ambil Sendiri</span>
+                    <span class="text-muted small d-block mb-0">Warga mendatangi lokasi fasilitas (gedung, balai) atau mengambil sendiri barang</span>
+                </div>
+            </div>
             <div class="dynamic-keterangan mt-2" style="display: none;">
                 <div class="d-flex align-items-start rounded-3 p-2 border" style="background-color: #e7f1ff; border-color: #b8daff; color: #004085;">
                     <i class="bx bx-check-circle me-2 mt-1"></i>
@@ -559,9 +664,9 @@
 </div>
 
 <!-- Floating Banner for Unsaved Changes -->
-<div id="unsaved-changes-banner" class="position-fixed bottom-0 start-50 translate-middle-x mb-4 bg-dark text-white rounded-pill px-4 py-3 shadow-lg d-flex align-items-center" style="z-index: 1050; display: none; transform: translateY(100px); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
-    <i class="bx bx-info-circle fs-4 me-3 text-warning"></i>
-    <span class="fw-semibold">Jika ada perubahan, pastikan klik tombol "Simpan Pengaturan" di bawah.</span>
+<div id="unsaved-changes-banner" class="position-fixed bottom-0 start-50 translate-middle-x mb-4 bg-dark text-white rounded-3 px-3 py-2 shadow-lg d-flex align-items-center" style="z-index: 1050; display: none; width: 90%; max-width: 400px; transform: translateY(100px); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+    <i class="bx bx-info-circle fs-4 me-2 text-warning"></i>
+    <span class="fw-semibold" style="font-size: 0.85rem; line-height: 1.2;">Jangan lupa klik "Simpan Pengaturan" setelah mengubah data.</span>
 </div>
 
 <style>
@@ -704,6 +809,8 @@
         const updateServiceCard = (el) => {
             const label = el.nextElementSibling;
             const card = el.closest('.card-service-item');
+            const descContainer = card.querySelector('.status-desc-text');
+            
             if(label && label.classList.contains('status-label-main')) {
                 if(el.checked) {
                     label.innerText = 'Layanan Aktif';
@@ -711,17 +818,77 @@
                     label.classList.add('text-primary');
                     card.classList.remove('border-secondary', 'bg-light');
                     card.classList.add('border-primary', 'shadow-sm', 'bg-label-primary');
+                    if(descContainer) {
+                        descContainer.innerText = 'Layanan ini muncul di beranda warga.';
+                        descContainer.classList.remove('text-danger');
+                        descContainer.classList.add('text-success');
+                    }
                 } else {
                     label.innerText = 'Layanan Nonaktif';
                     label.classList.remove('text-primary');
                     label.classList.add('text-secondary');
                     card.classList.remove('border-primary', 'shadow-sm', 'bg-label-primary');
                     card.classList.add('border-secondary', 'bg-light');
+                    if(descContainer) {
+                        descContainer.innerText = 'Layanan ini disembunyikan sepenuhnya.';
+                        descContainer.classList.remove('text-success');
+                        descContainer.classList.add('text-danger');
+                    }
                 }
             }
         };
         updateServiceCard(toggle);
         toggle.addEventListener('change', function() { updateServiceCard(this); });
+    });
+
+    // Logika Hak Akses Eksklusif Toggle
+    const exclusiveToggles = document.querySelectorAll('.exclusive-toggle');
+    exclusiveToggles.forEach(toggle => {
+        const updateExclusiveCard = (el) => {
+            const label = el.closest('.flex-grow-1') ? el.closest('.flex-grow-1').querySelector('.exclusive-label-main') : el.nextElementSibling;
+            const card = el.closest('.card-service-item');
+            const descContainer = el.closest('.flex-grow-1') ? el.closest('.flex-grow-1').querySelector('.exclusive-desc-text') : card.querySelector('.exclusive-desc-text');
+            const isPengumuman = card.querySelector('span.fw-bold') && card.querySelector('span.fw-bold').innerText.includes('Kabar dan Informasi');
+            const descTextRaw = descContainer ? descContainer.getAttribute('data-desc') || '' : '';
+            const regionName = "{{ $region->name }}";
+            
+            if(label && label.classList.contains('exclusive-label-main')) {
+                if(el.checked) {
+                    label.innerText = 'Eksklusif Warga Lokal';
+                    if(descContainer) {
+                        descContainer.classList.remove('text-primary');
+                        descContainer.classList.add('text-warning');
+                        if (isPengumuman) {
+                            descContainer.innerText = 'Pengumuman HANYA tampil untuk warga domisili ' + regionName + '.';
+                        } else {
+                            // Extract action text from original text if needed, or fallback
+                            const action = descContainer.innerText.split(regionName)[1] || ' mengakses layanan ini.';
+                            descContainer.innerText = 'Hanya warga domisili ' + regionName + action;
+                        }
+                    }
+                } else {
+                    label.innerText = 'Publik (Terbuka Umum)';
+                    if(descContainer) {
+                        descContainer.classList.remove('text-warning');
+                        descContainer.classList.add('text-primary');
+                        if (isPengumuman) {
+                            descContainer.innerText = 'Pengumuman dapat dilihat oleh semua warga termasuk dari desa lain.';
+                        } else {
+                            descContainer.innerText = 'Semua warga termasuk dari luar desa dapat mengakses layanan ini.';
+                        }
+                    }
+                }
+            }
+        };
+        
+        // Save original action text to data attribute on first run
+        const descC = toggle.closest('.card-service-item').querySelector('.exclusive-desc-text');
+        if (descC && !descC.hasAttribute('data-desc')) {
+            descC.setAttribute('data-desc', descC.innerText);
+        }
+        
+        updateExclusiveCard(toggle);
+        toggle.addEventListener('change', function() { updateExclusiveCard(this); });
     });
 })();
 </script>

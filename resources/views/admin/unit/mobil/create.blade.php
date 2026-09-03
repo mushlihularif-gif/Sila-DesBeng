@@ -278,7 +278,7 @@
                                     <p class="text-muted small mb-3">Aktifkan layanan yang ingin Anda sediakan untuk unit penyewaan ini (Berlaku untuk Sewa Harian).</p>
                                     
                                     <div class="row g-3">
-                                        <!-- Opsi Tanpa Supir -->
+                                        <div style="display:none;"><!-- Opsi Tanpa Supir -->
                                         <div class="col-md-6">
                                             <div class="p-3 border rounded bg-white">
                                                 <div class="d-flex justify-content-between align-items-center mb-2">
@@ -325,7 +325,7 @@
                                         </div>
                                     </div>
                                     
-                                    <input type="hidden" name="opsi_supir" id="opsi_supir" required>
+                                    <input type="hidden" name="opsi_supir" id="opsi_supir" value="Lepas Kunci"></div>
 
                                     <hr class="my-4 text-muted">
                                     
@@ -620,7 +620,7 @@
                                 <p class="text-muted small mb-3">Aktifkan layanan yang ingin Anda sediakan untuk unit penyewaan ini (Berlaku untuk Sewa Borongan).</p>
                                 
                                 <div class="row g-3">
-                                    <!-- Opsi Tanpa Supir Borongan -->
+                                    <div style="display:none;"><!-- Opsi Tanpa Supir Borongan -->
                                     <div class="col-md-6">
                                         <div class="p-3 border rounded bg-white">
                                             <div class="d-flex justify-content-between align-items-center mb-2">
@@ -667,7 +667,7 @@
                                     </div>
                                 </div>
                                 
-                                <input type="hidden" name="opsi_supir_borongan" id="opsi_supir_borongan" required>
+                                <input type="hidden" name="opsi_supir_borongan" id="opsi_supir_borongan" value="Lepas Kunci"></div>
 
                                 <hr class="my-4 text-muted">
                                 

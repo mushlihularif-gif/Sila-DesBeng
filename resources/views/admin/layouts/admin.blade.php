@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="{{ str_replace('_','-',app()->getLocale()) }}" translate="no" class="light-style layout-menu-fixed" dir="ltr" data-theme="theme-default"
     data-assets-path="{{ asset('Admin/') }}" data-template="vertical-menu-template-free">
 

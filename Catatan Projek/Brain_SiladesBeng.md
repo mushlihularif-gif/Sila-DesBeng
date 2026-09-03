@@ -826,3 +826,18 @@ Untuk menyempurnakan keamanan sistem agar berstandar *Enterprise*, M. Mushlihul 
 
 ---
 *(Catatan Distribusi Tim KMIPN: 1 Anggota fokus Penetration Testing, 1 Anggota fokus Liveness Detection & OCR KYC, 1 Anggota fokus Integrasi Payment Gateway BUMDes).*
+
+### 9.2 Ide Integrasi AI Keamanan (Tugas Mata Kuliah Kecerdasan Buatan)
+Sebagai bagian dari tugas akademik dan wawasan untuk *Future Work*, sistem SilaDesBeng juga dapat mengintegrasikan lapisan **Kecerdasan Buatan (AI) untuk Keamanan Infrastruktur Skala Kabupaten** dengan konsep sebagai berikut:
+
+1. **Perlindungan Jalur Masuk via QR Code (Metode: *Payload Analysis*)**
+   - **Alur:** Saat kamera memindai QR Code surat/dokumen desa, AI mencegat isi QR tersebut sebelum diproses sistem kriptografi. AI bertugas mendeteksi sisipan tautan penipuan (*Quishing*) atau skrip perusak (*SQL Injection/XSS*).
+   - **Algoritma:** Menggunakan *Machine Learning* seperti **Random Forest** atau **Naive Bayes** untuk mengklasifikasikan (membedakan) teks *payload* yang aman vs. teks serangan siber.
+
+2. **Pencegahan Pencurian Data Pribadi (Metode: *User Behavior Analytics* / UBA)**
+   - **Alur:** AI memantau pola dan kebiasaan wajar seluruh Admin Desa. Jika ada Admin yang tiba-tiba mengunduh (*download*) ribuan data KTP/NIK secara masif pada tengah malam, AI mendeteksinya sebagai pencurian data oleh orang dalam (*insider threat*) dan langsung mengunci akun tersebut.
+   - **Algoritma:** Menggunakan **Isolation Forest**, yaitu algoritma cerdas pendeteksi anomali (aktivitas yang menyimpang tajam dari kebiasaan normal).
+
+3. **Perlindungan Infrastruktur dan File Konfigurasi (Metode: *AI-based WAF / IPS*)**
+   - **Alur:** AI membaca lalu lintas jaringan menuju server kabupaten secara *real-time*. Jika mendeteksi ada pengunjung yang berulang kali mencoba menebak rute folder (*directory traversal*) untuk mencuri *file* .env, AI otomatis memblokir IP peretas secara permanen.
+   - **Algoritma:** Menggunakan *Deep Learning* seperti **LSTM (Long Short-Term Memory)** atau **CNN** yang pintar menganalisis pola rentetan jejak aktivitas (*log server*) untuk mengenali serangan otomatis (*bots/brute-force*).

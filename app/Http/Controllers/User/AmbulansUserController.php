@@ -20,7 +20,8 @@ class AmbulansUserController extends Controller
         }
 
         // Ambil data ambulans saja
-        $ambulansList = Mobil::where('region_id', $region->id)
+        $ambulansList = Mobil::with('supirs')
+                             ->where('region_id', $region->id)
                              ->where('kategori', 'ambulans')
                              ->where('status', '!=', 'rusak')
                              ->get();

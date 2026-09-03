@@ -137,10 +137,10 @@ class UnitFasilitasUmumController extends Controller
             'foto_utama' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
             'foto_2' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
             'foto_3' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
-            'opsi_supir' => 'nullable|string|in:Sediakan Supir Sendiri,Disediakan',
+            
             'bbm_ditanggung' => 'nullable|string|in:Ditanggung Pengguna,Disediakan',
-            'nama_supir' => 'nullable|string|max:255',
-            'kontak_supir' => 'nullable|string|max:255',
+            
+            
             'status_biaya' => 'required|in:gratis,berbayar',
             'harga_sewa' => 'nullable|string',
         ]);
@@ -159,10 +159,10 @@ class UnitFasilitasUmumController extends Controller
             'lokasi' => $request->lokasi,
             'latitude' => $request->latitude,
             'longitude' => $request->longitude,
-            'opsi_supir' => $request->opsi_supir,
+            
             'bbm_ditanggung' => $request->bbm_ditanggung,
-            'nama_supir' => $request->nama_supir,
-            'kontak_supir' => $request->kontak_supir,
+            
+            
             'status_biaya' => $request->status_biaya,
             'harga_sewa' => $hargaBersih > 0 ? $hargaBersih : null,
         ];
@@ -232,10 +232,10 @@ class UnitFasilitasUmumController extends Controller
             'foto_utama' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'foto_2' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'foto_3' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'opsi_supir' => 'nullable|string|in:Sediakan Supir Sendiri,Disediakan',
+            
             'bbm_ditanggung' => 'nullable|string|in:Ditanggung Pengguna,Disediakan',
-            'nama_supir' => 'nullable|string|max:255',
-            'kontak_supir' => 'nullable|string|max:255',
+            
+            
             'status_biaya' => 'required|in:gratis,berbayar',
             'harga_sewa' => 'nullable|string',
         ]);
@@ -256,10 +256,10 @@ class UnitFasilitasUmumController extends Controller
             'lokasi' => $request->lokasi,
             'latitude' => $request->latitude,
             'longitude' => $request->longitude,
-            'opsi_supir' => $request->opsi_supir,
+            
             'bbm_ditanggung' => $request->bbm_ditanggung,
-            'nama_supir' => $request->nama_supir,
-            'kontak_supir' => $request->kontak_supir,
+            
+            
             'status_biaya' => $request->status_biaya,
             'harga_sewa' => $hargaBersih > 0 ? $hargaBersih : null,
         ];

@@ -60,23 +60,24 @@
                         <hr class="my-4">
                         <h6 class="fw-semibold text-dark mb-3"><i class="bx bx-user-pin me-2"></i>Data Supir / Penanggung Jawab</h6>
 
-                        <!-- Nama Supir -->
+                        <!-- Supir Dropdown -->
                         <div class="mb-4">
-                            <label class="form-label fw-semibold text-dark">Nama Lengkap Supir</label>
-                            <div class="input-group input-group-merge">
+                            <label class="form-label fw-semibold text-dark">Pilih Supir <span class="text-danger">*</span></label>
+                            <div class="input-group">
                                 <span class="input-group-text"><i class="bx bx-user"></i></span>
-                                <input type="text" class="form-control" name="nama_supir" placeholder="Ketik nama lengkap supir..." required>
+                                <select name="supir_ids[]" class="form-select" multiple required style="height: 120px;">
+                                    <option value="" disabled>-- Tahan CTRL untuk memilih lebih dari 1 supir --</option>
+                                    @foreach($supirs as $supir)
+                                        <option value="{{ $supir->id }}">{{ $supir->nama }} ({{ $supir->kontak ?? 'Tanpa Kontak' }})</option>
+                                    @endforeach
+                                </select>
                             </div>
-                        </div>
-
-                        <!-- Kontak Supir -->
-                        <div class="mb-4">
-                            <label class="form-label fw-semibold text-dark">Nomor WhatsApp Supir</label>
-                            <div class="input-group input-group-merge">
-                                <span class="input-group-text"><i class="bx bxl-whatsapp text-success"></i></span>
-                                <input type="number" class="form-control" name="kontak_supir" placeholder="Misal: 081234567890" required>
+                            <div class="form-text mt-2">
+                                Supir belum didaftarkan? 
+                                <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#addSupirModal" class="fw-bold text-primary">
+                                    <i class="bx bx-plus-circle"></i> Tambah Supir Baru
+                                </a>
                             </div>
-                            <div class="form-text">Nomor ini akan digunakan warga untuk komunikasi atau penjemputan.</div>
                         </div>
                         
                         <div class="d-flex justify-content-end mt-4 pt-3 border-top">
@@ -175,5 +176,77 @@
         preview.style.display = 'none';
         placeholder.style.display = 'block';
     }
+
+    document.getElementById('addSupirForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const form = this;
+        const btn = document.getElementById('btnSaveSupir');
+        btn.innerHTML = 'Menyimpan...';
+        btn.disabled = true;
+
+        fetch(form.action, {
+            method: 'POST',
+            body: new FormData(form),
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.success) {
+                // Tambahkan option baru ke select
+                const select = document.querySelector('select[name="supir_id"]');
+                const option = new Option(data.supir.nama + ' (' + (data.supir.kontak || 'Tanpa Kontak') + ')', data.supir.id, true, true);
+                select.add(option);
+                
+                // Tutup modal
+                bootstrap.Modal.getInstance(document.getElementById('addSupirModal')).hide();
+                form.reset();
+            } else {
+                alert('Gagal menyimpan supir.');
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert('Terjadi kesalahan server.');
+        })
+        .finally(() => {
+            btn.innerHTML = 'Simpan & Gunakan';
+            btn.disabled = false;
+        });
+    });
 </script>
 @endsection
+
+@push('modals')
+<!-- Add Supir Modal -->
+<div class="modal fade" id="addSupirModal">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Tambah Supir Baru</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="addSupirForm" action="{{ route('supir.store') }}" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Nama Supir / Petugas <span class="text-danger">*</span></label>
+                        <input type="text" name="nama" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">No. WhatsApp / Kontak</label>
+                        <input type="text" name="kontak" class="form-control">
+                    </div>
+                    <input type="hidden" name="status" value="Tersedia">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary" id="btnSaveSupir">Simpan & Gunakan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endpush

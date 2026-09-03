@@ -5,14 +5,16 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Mobil;
 use App\Models\Region;
+use App\Models\Supir;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class UnitAmbulansController extends Controller
 {
     public function index()
     {
         $admin = auth()->user();
-        $query = Mobil::where('kategori', 'ambulans');
+        $query = Mobil::where('kategori', 'ambulans')->with('supirs');
         
         if ($admin->region_id) {
             $query->where('region_id', $admin->region_id);
@@ -30,40 +32,60 @@ class UnitAmbulansController extends Controller
 
     public function create()
     {
-        return view('admin.unit.ambulans.create');
+        $user = Auth::user();
+        if ($user->role === 'admin_desa') {
+            $supirs = Supir::where('region_id', $user->region_id)->where('is_fasilitas_umum', 1)->get();
+        } else {
+            $supirs = Supir::where('is_fasilitas_umum', 1)->get();
+        }
+
+        return view('admin.unit.ambulans.create', compact('supirs'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
             'nama_mobil' => 'required|string|max:255',
-            'nama_supir' => 'required|string|max:255',
-            'kontak_supir' => 'required|string|max:255',
+            'supir_ids' => 'nullable|array',
+            'supir_ids.*' => 'exists:supirs,id',
             'nomor_plat' => 'nullable|string|max:20',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
         
-        $validated['kategori'] = 'ambulans';
-        $validated['region_id'] = auth()->user()->region_id;
-        $validated['harga_sewa'] = 0;
-        
-        // Simpan nomor plat ke dalam deskripsi atau tambah kolom khusus. 
-        $validated['deskripsi'] = "Plat: " . ($request->nomor_plat ?? '-');
+        $data = [
+            'nama_mobil' => $validated['nama_mobil'],
+            'kategori' => 'ambulans',
+            'region_id' => auth()->user()->region_id,
+            'harga_sewa' => 0,
+            'deskripsi' => "Plat: " . ($request->nomor_plat ?? '-'),
+        ];
         
         if ($request->hasFile('foto')) {
             $path = $request->file('foto')->store('unit_layanan/mobil', 'public');
-            $validated['foto'] = $path;
+            $data['foto'] = $path;
         }
         
-        Mobil::create($validated);
+        $mobil = Mobil::create($data);
         
-        return redirect()->route('admin.unit.ambulans.index')->with('success', 'Kendaraan berhasil ditambahkan');
+        if (isset($validated['supir_ids'])) {
+            $mobil->supirs()->sync($validated['supir_ids']);
+        }
+        
+        return redirect()->route('admin.unit.ambulans.index')->with('success', 'Kendaraan Ambulans berhasil ditambahkan');
     }
 
     public function edit($id)
     {
         $ambulans = Mobil::where('kategori', 'ambulans')->findOrFail($id);
-        return view('admin.unit.ambulans.edit', compact('ambulans'));
+        
+        $user = Auth::user();
+        if ($user->role === 'admin_desa') {
+            $supirs = Supir::where('region_id', $user->region_id)->where('is_fasilitas_umum', 1)->get();
+        } else {
+            $supirs = Supir::where('is_fasilitas_umum', 1)->get();
+        }
+
+        return view('admin.unit.ambulans.edit', compact('ambulans', 'supirs'));
     }
 
     public function update(Request $request, $id)
@@ -72,30 +94,40 @@ class UnitAmbulansController extends Controller
         
         $validated = $request->validate([
             'nama_mobil' => 'required|string|max:255',
-            'nama_supir' => 'required|string|max:255',
-            'kontak_supir' => 'required|string|max:255',
+            'supir_ids' => 'nullable|array',
+            'supir_ids.*' => 'exists:supirs,id',
             'nomor_plat' => 'nullable|string|max:20',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
         
-        $validated['deskripsi'] = "Plat: " . ($request->nomor_plat ?? '-');
+        $data = [
+            'nama_mobil' => $validated['nama_mobil'],
+            'deskripsi' => "Plat: " . ($request->nomor_plat ?? '-'),
+        ];
         
         if ($request->hasFile('foto')) {
             if ($ambulans->foto && \Storage::disk('public')->exists($ambulans->foto)) {
                 \Storage::disk('public')->delete($ambulans->foto);
             }
             $path = $request->file('foto')->store('unit_layanan/mobil', 'public');
-            $validated['foto'] = $path;
+            $data['foto'] = $path;
         }
         
-        $ambulans->update($validated);
+        $ambulans->update($data);
         
-        return redirect()->route('admin.unit.ambulans.index')->with('success', 'Kendaraan berhasil diubah');
+        if (isset($validated['supir_ids'])) {
+            $ambulans->supirs()->sync($validated['supir_ids']);
+        } else {
+            $ambulans->supirs()->sync([]);
+        }
+        
+        return redirect()->route('admin.unit.ambulans.index')->with('success', 'Kendaraan Ambulans berhasil diubah');
     }
 
     public function destroy($id)
     {
         $ambulans = Mobil::where('kategori', 'ambulans')->findOrFail($id);
+        $ambulans->supirs()->detach();
         $ambulans->delete();
         
         return redirect()->route('admin.unit.ambulans.index')->with('success', 'Ambulans berhasil dihapus');

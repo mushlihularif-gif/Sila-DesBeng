@@ -666,12 +666,12 @@
                                     <label class="col-sm-2 col-form-label fw-bold" for="avatar">Foto Profil Toko</label>
                                     <div class="col-sm-10">
                                         @if($admin->avatar)
-                                            <div class="mb-3" id="avatar_preview_wrapper">
-                                                <img src="{{ Storage::url($admin->avatar) }}"  id="preview_avatar" alt="Avatar" class="d-block rounded-circle border p-1" height="120" width="120" style="object-fit: cover;">
+                                            <div class="mb-3">
+                                                <img src="{{ Storage::url($admin->avatar) }}" alt="Avatar" class="d-block rounded-circle border p-1" height="120" width="120" style="object-fit: cover;">
                                             </div>
                                         @else
-                                            <div class="mb-3" id="avatar_preview_wrapper">
-                                                <div class="d-flex align-items-center justify-content-center bg-light rounded-circle text-muted border p-1"  id="preview_avatar_placeholder" style="height: 120px; width: 120px;">
+                                            <div class="mb-3">
+                                                <div class="d-flex align-items-center justify-content-center bg-light rounded-circle text-muted border p-1" style="height: 120px; width: 120px;">
                                                     <i class="bx bx-image fs-1"></i>
                                                 </div>
                                             </div>
@@ -685,12 +685,12 @@
                                     <label class="col-sm-2 col-form-label fw-bold" for="store_banner">Foto Sampul / Background Toko</label>
                                     <div class="col-sm-10">
                                         @if($admin->store_banner)
-                                            <div class="mb-3" id="banner_preview_wrapper">
-                                                <img src="{{ Storage::url($admin->store_banner) }}"  id="preview_banner" alt="Store Banner" class="d-block rounded-3 border p-1 w-100" style="height: 200px; object-fit: cover;">
+                                            <div class="mb-3">
+                                                <img src="{{ Storage::url($admin->store_banner) }}" alt="Store Banner" class="d-block rounded-3 border p-1 w-100" style="height: 200px; object-fit: cover;">
                                             </div>
                                         @else
-                                            <div class="mb-3" id="banner_preview_wrapper">
-                                                <div class="d-flex flex-column align-items-center justify-content-center bg-light rounded-3 text-muted border p-1 w-100"  id="preview_banner_placeholder" style="height: 200px;">
+                                            <div class="mb-3">
+                                                <div class="d-flex flex-column align-items-center justify-content-center bg-light rounded-3 text-muted border p-1 w-100" style="height: 200px;">
                                                     <i class="bx bx-image-alt fs-1 mb-2"></i>
                                                     <span>Belum ada foto sampul</span>
                                                 </div>
@@ -1148,6 +1148,43 @@
             </div>
         </div>
     </div>
+<script>
+    function handleImagePreview(input, previewId, wrapperId, ratio, imgClasses, width, height) {
+        if (!input.files || !input.files[0]) return;
+        
+        let wrapper = document.getElementById(wrapperId);
+        let preview = document.getElementById(previewId);
+        
+        // Ensure there is an img tag to preview and pass to cropper
+        if (!preview) {
+            // Remove placeholder if it exists
+            let placeholder = document.getElementById(previewId + '_placeholder');
+            if (placeholder) {
+                placeholder.remove();
+            }
+            // Create new img element
+            preview = document.createElement('img');
+            preview.id = previewId;
+            preview.className = 'd-block ' + imgClasses;
+            preview.style.width = width;
+            preview.style.height = height;
+            preview.style.objectFit = 'cover';
+            wrapper.appendChild(preview);
+        }
+        
+        // Pass to Global Cropper
+        if (typeof initGlobalCropper === 'function') {
+            initGlobalCropper(input, previewId, ratio, true);
+        } else {
+            // Fallback preview
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+</script>
 @endsection
 
 @section('scripts')
@@ -1211,9 +1248,8 @@
         }
     }
 </script>
-
 <script>
-    window.handleImagePreview = function(input, previewId, wrapperId, ratio, imgClasses, width, height) {
+    function handleImagePreview(input, previewId, wrapperId, ratio, imgClasses, width, height) {
         if (!input.files || !input.files[0]) return;
         
         let wrapper = document.getElementById(wrapperId);
@@ -1237,9 +1273,7 @@
         }
         
         // Pass to Global Cropper
-        if (typeof window.initGlobalCropper === 'function') {
-            window.initGlobalCropper(input, previewId, ratio, true);
-        } else if (typeof initGlobalCropper === 'function') {
+        if (typeof initGlobalCropper === 'function') {
             initGlobalCropper(input, previewId, ratio, true);
         } else {
             // Fallback preview
@@ -1249,24 +1283,7 @@
             }
             reader.readAsDataURL(input.files[0]);
         }
-    };
-
-    document.addEventListener('DOMContentLoaded', function() {
-        const avatarInput = document.getElementById('avatar');
-        const bannerInput = document.getElementById('store_banner');
-        
-        if (avatarInput) {
-            avatarInput.addEventListener('change', function() {
-                window.handleImagePreview(this, 'preview_avatar', 'avatar_preview_wrapper', 1, 'rounded-circle border p-1', '120px', '120px');
-            });
-        }
-        
-        if (bannerInput) {
-            bannerInput.addEventListener('change', function() {
-                window.handleImagePreview(this, 'preview_banner', 'banner_preview_wrapper', 3, 'rounded-3 border p-1 w-100', '100%', '200px');
-            });
-        }
-    });
+    }
 </script>
 @endsection
 
@@ -1293,4 +1310,41 @@
         }
     }
 </style>
+<script>
+    function handleImagePreview(input, previewId, wrapperId, ratio, imgClasses, width, height) {
+        if (!input.files || !input.files[0]) return;
+        
+        let wrapper = document.getElementById(wrapperId);
+        let preview = document.getElementById(previewId);
+        
+        // Ensure there is an img tag to preview and pass to cropper
+        if (!preview) {
+            // Remove placeholder if it exists
+            let placeholder = document.getElementById(previewId + '_placeholder');
+            if (placeholder) {
+                placeholder.remove();
+            }
+            // Create new img element
+            preview = document.createElement('img');
+            preview.id = previewId;
+            preview.className = 'd-block ' + imgClasses;
+            preview.style.width = width;
+            preview.style.height = height;
+            preview.style.objectFit = 'cover';
+            wrapper.appendChild(preview);
+        }
+        
+        // Pass to Global Cropper
+        if (typeof initGlobalCropper === 'function') {
+            initGlobalCropper(input, previewId, ratio, true);
+        } else {
+            // Fallback preview
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+</script>
 @endsection
