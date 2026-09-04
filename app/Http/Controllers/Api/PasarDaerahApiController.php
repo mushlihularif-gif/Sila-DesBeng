@@ -508,6 +508,23 @@ class PasarDaerahApiController extends Controller
             ], 404);
         }
 
+        if ($order->status === 'completed') {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Pesanan sudah selesai. Hak komplain telah hangus.'
+            ], 400);
+        }
+
+        if ($order->delivered_at) {
+            $hoursPassed = now()->diffInHours($order->delivered_at);
+            if ($hoursPassed >= 2) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Batas waktu pengajuan komplain (2 Jam setelah barang diterima) telah habis.'
+                ], 400);
+            }
+        }
+
         $request->validate([
             'reason' => 'required|string',
             'solution_requested' => 'required|in:refund,replacement',
@@ -515,9 +532,12 @@ class PasarDaerahApiController extends Controller
             'bank_name' => 'nullable|string|max:100',
             'bank_account_number' => 'nullable|string|max:50',
             'bank_account_name' => 'nullable|string|max:100',
-            'evidence_1' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
-            'evidence_2' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
-            'evidence_3' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
+            'evidence_1' => 'required|image|mimes:jpeg,png,jpg|max:10240',
+            'evidence_2' => 'required|image|mimes:jpeg,png,jpg|max:10240',
+            'evidence_3' => 'required|image|mimes:jpeg,png,jpg|max:10240',
+            'evidence_4' => 'required|image|mimes:jpeg,png,jpg|max:10240',
+            'evidence_5' => 'required|image|mimes:jpeg,png,jpg|max:10240',
+            'evidence_video' => 'required|mimes:mp4,mov,ogg,qt|max:30720',
         ]);
 
         // Cek jika sudah pernah komplain yang masih pending
@@ -530,7 +550,8 @@ class PasarDaerahApiController extends Controller
         }
 
         $evidencePaths = [];
-        foreach (['evidence_1', 'evidence_2', 'evidence_3'] as $evKey) {
+        $evidenceKeys = ['evidence_1', 'evidence_2', 'evidence_3', 'evidence_4', 'evidence_5', 'evidence_video'];
+        foreach ($evidenceKeys as $evKey) {
             if ($request->hasFile($evKey)) {
                 $evidencePaths[$evKey] = $request->file($evKey)->store('pasar_complaints', 'public');
             }
@@ -546,6 +567,9 @@ class PasarDaerahApiController extends Controller
             'evidence_1' => $evidencePaths['evidence_1'] ?? null,
             'evidence_2' => $evidencePaths['evidence_2'] ?? null,
             'evidence_3' => $evidencePaths['evidence_3'] ?? null,
+            'evidence_4' => $evidencePaths['evidence_4'] ?? null,
+            'evidence_5' => $evidencePaths['evidence_5'] ?? null,
+            'evidence_video' => $evidencePaths['evidence_video'] ?? null,
             'bank_name' => $request->bank_name,
             'bank_account_number' => $request->bank_account_number,
             'bank_account_name' => $request->bank_account_name,
@@ -589,6 +613,9 @@ class PasarDaerahApiController extends Controller
                 'evidence_1' => $complaint->evidence_1 ? url('storage/' . $complaint->evidence_1) : null,
                 'evidence_2' => $complaint->evidence_2 ? url('storage/' . $complaint->evidence_2) : null,
                 'evidence_3' => $complaint->evidence_3 ? url('storage/' . $complaint->evidence_3) : null,
+                'evidence_4' => $complaint->evidence_4 ? url('storage/' . $complaint->evidence_4) : null,
+                'evidence_5' => $complaint->evidence_5 ? url('storage/' . $complaint->evidence_5) : null,
+                'evidence_video' => $complaint->evidence_video ? url('storage/' . $complaint->evidence_video) : null,
                 'status' => $complaint->status,
                 'admin_response' => $complaint->admin_response,
                 'handler_name' => $complaint->handler ? $complaint->handler->name : null,

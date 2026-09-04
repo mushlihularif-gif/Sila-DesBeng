@@ -63,8 +63,15 @@ class UnitFasilitasUmumController extends Controller
         
         $default_ditanggung = $this->defaultSopDitanggung;
         $default_tidak_ditanggung = $this->defaultSopTidakDitanggung;
+
+        $chats = \App\Models\UnitChatSession::where('region_id', $user ? $user->region_id : null)
+            ->where('service_type', 'fasilitas_umum')
+            ->with('user')
+            ->orderBy('last_message_at', 'desc')
+            ->get();
+        $totalUnreadChats = $chats->sum('unread_admin_count');
         
-        return view('admin.unit.fasilitas_umum.index', compact('fasilitas', 'mobils', 'tab', 'search', 'sop_active', 'sop_ditanggung', 'sop_tidak_ditanggung', 'default_ditanggung', 'default_tidak_ditanggung', 'regionSettings'));
+        return view('admin.unit.fasilitas_umum.index', compact('fasilitas', 'mobils', 'tab', 'search', 'sop_active', 'sop_ditanggung', 'sop_tidak_ditanggung', 'default_ditanggung', 'default_tidak_ditanggung', 'regionSettings', 'chats', 'totalUnreadChats'));
     }
 
     public function sop()

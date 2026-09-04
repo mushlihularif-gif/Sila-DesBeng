@@ -68,11 +68,20 @@
                         <small class="text-muted d-block">Catatan: {{ $pesanan->complaint->description }}</small>
                     @endif
                 </div>
-                @if($pesanan->complaint->proof_image)
-                <a href="{{ asset('storage/' . $pesanan->complaint->proof_image) }}" target="_blank" class="btn btn-outline-danger btn-sm rounded-pill px-3 ms-2">
-                    <i class="bx bx-image me-1"></i> Lihat Bukti Komplain
-                </a>
+                <div class="d-flex flex-wrap gap-2 ms-3">
+                @foreach(['evidence_1', 'evidence_2', 'evidence_3', 'evidence_4', 'evidence_5'] as $ev)
+                    @if($pesanan->complaint->$ev)
+                        <a href="{{ asset('storage/' . $pesanan->complaint->$ev) }}" target="_blank" class="btn btn-outline-danger btn-sm rounded-pill px-3">
+                            <i class="bx bx-image me-1"></i> Foto {{ substr($ev, -1) }}
+                        </a>
+                    @endif
+                @endforeach
+                @if($pesanan->complaint->evidence_video)
+                        <a href="{{ asset('storage/' . $pesanan->complaint->evidence_video) }}" target="_blank" class="btn btn-danger btn-sm rounded-pill px-3">
+                            <i class="bx bx-video me-1"></i> Video
+                        </a>
                 @endif
+                </div>
             </div>
             @endif
 
@@ -225,29 +234,51 @@
                                     </div>
                                 </div>
 
-                                <!-- Step 3: Completed -->
-                                <div class="d-flex gap-3 position-relative">
+                                <!-- Step 3: Delivered (Sampai) -->
+                                <div class="d-flex gap-3 position-relative pb-4">
                                     <div class="d-flex flex-column align-items-center" style="width: 40px; min-width: 40px;">
-                                        <div class="rounded-circle {{ $pesanan->status == 'completed' ? 'bg-success text-white' : ($pesanan->status == 'in_delivery' ? 'bg-primary text-white animate-pulse' : 'bg-white border text-secondary') }} d-flex align-items-center justify-content-center shadow-sm" style="width: 32px; height: 32px; z-index: 2;">
-                                            <i class="bx bx-check-double fs-4"></i>
+                                        <div class="rounded-circle {{ in_array($pesanan->status, ['delivered', 'completed']) ? 'bg-success text-white' : ($pesanan->status == 'in_delivery' ? 'bg-primary text-white animate-pulse' : 'bg-white border text-secondary') }} d-flex align-items-center justify-content-center shadow-sm" style="width: 32px; height: 32px; z-index: 2;">
+                                            <i class="bx bx-home-alt fs-4"></i>
                                         </div>
+                                        <div class="h-100 border-start border-2 border-primary-subtle position-absolute" style="left: 19px; top: 32px; bottom: 0;"></div>
                                     </div>
-                                    <div class="flex-grow-1">
-                                        <div class="card border-0 {{ $pesanan->status == 'completed' ? 'bg-success-subtle bg-opacity-10' : ($pesanan->status == 'in_delivery' ? 'bg-white border border-primary border-2 shadow-sm' : 'bg-light') }} rounded-3">
+                                    <div class="flex-grow-1 pb-4">
+                                        <div class="card border-0 {{ in_array($pesanan->status, ['delivered', 'completed']) ? 'bg-success-subtle bg-opacity-10' : ($pesanan->status == 'in_delivery' ? 'bg-white border border-primary border-2 shadow-sm' : 'bg-light') }} rounded-3">
                                             <div class="card-body p-3 d-flex justify-content-between align-items-center flex-wrap gap-3">
                                                 <div>
-                                                    <h6 class="fw-bold {{ $pesanan->status == 'completed' ? 'text-success' : 'text-dark' }} mb-1">Pesanan Selesai</h6>
+                                                    <h6 class="fw-bold {{ in_array($pesanan->status, ['delivered', 'completed']) ? 'text-success' : 'text-dark' }} mb-1">Telah Sampai Tujuan</h6>
                                                 </div>
                                                 @if($pesanan->status == 'in_delivery')
                                                     <form action="{{ route('admin.unit.pasar_daerah.pesanan.update', $pesanan->id) }}" method="POST" class="d-inline">
                                                         @csrf
                                                         @method('PUT')
-                                                        <input type="hidden" name="status" value="completed">
-                                                        <button type="submit" class="btn btn-success rounded-pill px-4">
-                                                            <i class="bx bx-check-double me-2"></i>Selesai
+                                                        <input type="hidden" name="status" value="delivered">
+                                                        <button type="submit" class="btn btn-primary rounded-pill px-4">
+                                                            <i class="bx bx-home-alt me-2"></i>Tandai Sampai
                                                         </button>
                                                     </form>
                                                 @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Step 4: Completed -->
+                                <div class="d-flex gap-3 position-relative">
+                                    <div class="d-flex flex-column align-items-center" style="width: 40px; min-width: 40px;">
+                                        <div class="rounded-circle {{ $pesanan->status == 'completed' ? 'bg-success text-white' : ($pesanan->status == 'delivered' ? 'bg-primary text-white animate-pulse' : 'bg-white border text-secondary') }} d-flex align-items-center justify-content-center shadow-sm" style="width: 32px; height: 32px; z-index: 2;">
+                                            <i class="bx bx-check-double fs-4"></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <div class="card border-0 {{ $pesanan->status == 'completed' ? 'bg-success-subtle bg-opacity-10' : ($pesanan->status == 'delivered' ? 'bg-white border border-primary border-2 shadow-sm' : 'bg-light') }} rounded-3">
+                                            <div class="card-body p-3 d-flex justify-content-between align-items-center flex-wrap gap-3">
+                                                <div>
+                                                    <h6 class="fw-bold {{ $pesanan->status == 'completed' ? 'text-success' : 'text-dark' }} mb-1">Pesanan Selesai</h6>
+                                                    @if($pesanan->status == 'delivered')
+                                                        <small class="text-muted">Menunggu User menekan tombol "Terima", atau akan selesai otomatis dalam 2 jam.</small>
+                                                    @endif
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

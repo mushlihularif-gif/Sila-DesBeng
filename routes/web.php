@@ -652,6 +652,13 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
             Route::post('pasar-daerah/chats/{id}/reply', [\App\Http\Controllers\Admin\UnitPasarDaerahController::class, 'replyChat'])->name('admin.unit.pasar_daerah.reply_chat');
             Route::post('pasar-daerah/chats/{id}/resolve', [\App\Http\Controllers\Admin\UnitPasarDaerahController::class, 'resolveChat'])->name('admin.unit.pasar_daerah.resolve_chat');
         });
+
+        // Chat Layanan Terpisah (Gas, Sewa Alat, Sewa Mobil, Fasilitas Umum)
+        Route::prefix('chat-service')->group(function () {
+            Route::get('{service}/{id}/messages', [\App\Http\Controllers\Admin\UnitChatController::class, 'getMessages'])->name('admin.unit.chat.messages');
+            Route::post('{service}/{id}/reply', [\App\Http\Controllers\Admin\UnitChatController::class, 'replyChat'])->name('admin.unit.chat.reply');
+            Route::post('{service}/{id}/resolve', [\App\Http\Controllers\Admin\UnitChatController::class, 'resolveChat'])->name('admin.unit.chat.resolve');
+        });
     });
     
     // Route Aktivitas

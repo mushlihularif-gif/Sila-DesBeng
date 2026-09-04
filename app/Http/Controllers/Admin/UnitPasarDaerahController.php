@@ -346,10 +346,13 @@ class UnitPasarDaerahController extends Controller
         $pesanan = \App\Models\PasarOrder::where('id', $id)->where('region_id', $admin->region_id)->firstOrFail();
         
         $validated = $request->validate([
-            'status' => 'required|in:pending,paid,confirmed,in_delivery,completed,cancelled,rejected',
+            'status' => 'required|in:pending,paid,confirmed,in_delivery,delivered,completed,cancelled,rejected',
         ]);
         
         $pesanan->status = $validated['status'];
+        if ($validated['status'] === 'delivered' && empty($pesanan->delivered_at)) {
+            $pesanan->delivered_at = now();
+        }
         $pesanan->handled_by = auth()->id();
         $pesanan->save();
         

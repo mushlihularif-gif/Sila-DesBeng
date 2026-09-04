@@ -61,6 +61,14 @@
                         <i class="bx bx-cog me-2"></i> Pengaturan & SOP
                     </button>
                 </li>
+                <li class="nav-item">
+                    <button type="button" class="nav-link {{ $tab == 'chat' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-chat" aria-controls="navs-top-chat" aria-selected="{{ $tab == 'chat' ? 'true' : 'false' }}">
+                        <i class="bx bx-chat me-2"></i> Layanan Pesan
+                        @if(isset($totalUnreadChats) && $totalUnreadChats > 0)
+                            <span class="badge rounded-pill bg-danger ms-1 px-2 py-0" style="font-size: 0.75rem;">{{ $totalUnreadChats }}</span>
+                        @endif
+                    </button>
+                </li>
             </ul>
             
             <div class="tab-content">
@@ -76,8 +84,10 @@
                                 <small class="text-muted">Ambulans Darurat, Mobil Siaga, Truk Sampah, dll</small>
                             </div>
                         </div>
-                        <div class="w-100 w-md-auto text-end">
-                            <a href="{{ route('admin.unit.ambulans.create') }}" class="btn btn-primary rounded-pill px-4 shadow-sm w-100"><i class="bx bx-plus me-1"></i> Tambah Kendaraan</a>
+                        <div class="flex-shrink-0 ms-md-auto">
+                            <a href="{{ route('admin.unit.ambulans.create') }}" class="btn btn-primary rounded-pill px-4 py-2 shadow-sm d-inline-flex align-items-center fw-semibold">
+                                <i class="bx bx-plus me-1 fs-5"></i> Tambah Kendaraan
+                            </a>
                         </div>
                     </div>
 
@@ -208,8 +218,10 @@
                                 <small class="text-muted">Gedung Serbaguna, Balai Pertemuan, Lapangan, dll</small>
                             </div>
                         </div>
-                        <div class="w-100 w-md-auto text-end">
-                            <a href="{{ route('admin.unit.fasilitas_umum.create') }}" class="btn btn-success rounded-pill px-4 shadow-sm w-100"><i class="bx bx-plus me-1"></i> Tambah Gedung</a>
+                        <div class="flex-shrink-0 ms-md-auto">
+                            <a href="{{ route('admin.unit.fasilitas_umum.create') }}" class="btn btn-success rounded-pill px-4 py-2 shadow-sm d-inline-flex align-items-center fw-semibold">
+                                <i class="bx bx-plus me-1 fs-5"></i> Tambah Gedung
+                            </a>
                         </div>
                     </div>
 
@@ -413,6 +425,15 @@
                             </div>
                         </div>
                     </form>
+                </div>
+
+                <!-- TAB 4: CHAT WARGA FASILITAS -->
+                <div class="tab-pane fade {{ $tab == 'chat' ? 'show active' : '' }}" id="navs-top-chat" role="tabpanel">
+                    @include('admin.unit.partials.unit_chat_panel', [
+                        'serviceType' => 'fasilitas_umum',
+                        'chatServiceTitle' => 'Fasilitas Umum & Ruang Publik',
+                        'chats' => $chats
+                    ])
                 </div>
             </div>
         </div>
