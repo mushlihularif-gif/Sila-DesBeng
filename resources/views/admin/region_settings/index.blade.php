@@ -86,26 +86,46 @@
                                 <h6 class="fw-bold mb-0">Informasi Kontak Wilayah</h6>
                             </div>
                             
-                            <div class="card bg-label-success border-0 shadow-none rounded-3 mt-4">
-                                <div class="card-body p-3">
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <h6 class="fw-bold text-success mb-0 d-flex align-items-center">
-                                            <i class="bx bxl-whatsapp me-2 fs-4"></i> WhatsApp Layanan
-                                        </h6>
-                                        <div class="form-check form-switch mb-0">
-                                            <input class="form-check-input" style="cursor:pointer;" type="checkbox" name="whatsapp_active" id="whatsapp_active" onchange="document.getElementById('wa_fields').style.display = this.checked ? 'block' : 'none'" {{ !empty($region->payment_info['whatsapp_active']) ? 'checked' : '' }}>
-                                        </div>
-                                    </div>
-                                    <p class="text-success small mb-3 opacity-75">Kontak WA ini akan dihubungkan ke tombol chat otomatis di aplikasi untuk melayani warga.</p>
-                                    
-                                    <div id="wa_fields" style="{{ empty($region->payment_info['whatsapp_active']) ? 'display: none;' : '' }}">
-                                        <div class="row g-3">
-                                            <div class="col-md-6">
-                                                <label class="form-label fw-semibold text-success small">Nama Kontak WA</label>
-                                                <input type="text" name="whatsapp_name" value="{{ old('whatsapp_name', $region->payment_info['whatsapp_name'] ?? '') }}" class="form-control border-success text-success bg-white" placeholder="Cth: Admin Desa">
-                                            </div>
-                                            <div class="col-md-6">
-                                                <label class="form-label fw-semibold text-success small">Nomor WhatsApp</label>
+                                                          @php
+                                  $isWaActive = !empty($region->payment_info['whatsapp_active']);
+                              @endphp
+                              <div id="wa_card_wrapper" class="card {{ $isWaActive ? 'bg-label-success' : 'bg-label-secondary' }} border-0 shadow-none rounded-3 mt-4" style="transition: all 0.3s ease;">
+                                  <div class="card-body p-4">
+                                      <div class="d-flex justify-content-between align-items-center mb-3">
+                                          <div>
+                                              <h6 class="fw-bold {{ $isWaActive ? 'text-success' : 'text-secondary' }} mb-1 d-flex align-items-center" id="wa_title">
+                                                  <i class="bx bxl-whatsapp me-2 fs-3"></i> Layanan Chat WhatsApp
+                                              </h6>
+                                              
+                                              <!-- Keterangan dinamis -->
+                                              <div id="wa_desc_active" class="text-success small" style="display: {{ $isWaActive ? 'block' : 'none' }};">
+                                                  <i class="bx bx-check-circle me-1"></i> <strong>Aktif:</strong> Tombol chat WA akan muncul di aplikasi warga untuk melayani secara langsung.
+                                              </div>
+                                              <div id="wa_desc_inactive" class="text-secondary small" style="display: {{ !$isWaActive ? 'block' : 'none' }};">
+                                                  <i class="bx bx-info-circle me-1"></i> <strong>Tidak Aktif:</strong> Tombol chat WA disembunyikan dari aplikasi warga.
+                                              </div>
+                                          </div>
+                                          
+                                          <div class="d-flex align-items-center gap-4 me-2">
+                                              <!-- Badge Status -->
+                                              <span class="badge bg-success" id="wa_status_badge" style="display: {{ $isWaActive ? 'inline-block' : 'none' }}">AKTIF</span>
+                                              <span class="badge bg-secondary" id="wa_status_badge_off" style="display: {{ !$isWaActive ? 'inline-block' : 'none' }}">TIDAK AKTIF</span>
+                                              
+                                              <!-- Switch Toggle (diperbesar dengan transform) -->
+                                              <div class="form-check form-switch mb-0 ms-2" style="transform: scale(1.5); transform-origin: right center;">
+                                                  <input class="form-check-input shadow-sm" style="cursor:pointer;" type="checkbox" name="whatsapp_active" id="whatsapp_active" onchange="toggleWaStatus(this)" {{ $isWaActive ? 'checked' : '' }}>
+                                              </div>
+                                          </div>
+                                      </div>
+                                      
+                                      <div id="wa_fields" class="mt-3 pt-3 border-top border-success-subtle" style="{{ !$isWaActive ? 'display: none;' : '' }}">
+                                          <div class="row g-3">
+                                              <div class="col-md-6">
+                                                  <label class="form-label fw-semibold text-success small" id="wa_label_nama">Nama Kontak WA</label>
+                                                  <input type="text" name="whatsapp_name" id="wa_input_nama" value="{{ old('whatsapp_name', $region->payment_info['whatsapp_name'] ?? '') }}" class="form-control border-success text-success bg-white" placeholder="Cth: Admin Desa">
+                                              </div>
+                                              <div class="col-md-6">
+                                                  <label class="form-label fw-semibold text-success small" id="wa_label_nomor">Nomor WhatsApp</label>
                                                 <input type="text" name="contact_phone" value="{{ old('contact_phone', $region->contact_phone) }}" class="form-control border-success text-success bg-white" placeholder="Cth: 081234567890">
                                             </div>
                                         </div>
@@ -375,6 +395,30 @@
         </div>
     </div>
 </div>
+
+                                                <div class="bg-light p-3 rounded-4 border mt-4">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <div class="flex-grow-1 pe-3">
+                                                            <div class="d-flex align-items-center mb-2">
+                                                                <img src="{{ asset('Admin/img/elements/antar.png') }}" alt="Antar Khusus Lepas Kunci" style="width: 45px; height: 45px; object-fit: contain; filter: hue-rotate(180deg);" class="me-3">
+                                                                <div>
+                                                                    <span class="text-dark fw-bold d-block" style="font-size: 1.05rem;">Antar Khusus "Lepas Kunci"</span>
+                                                                    <span class="text-muted small d-block mb-0">Izinkan opsi mobil diantar meskipun warga menyewa tanpa supir (Lepas Kunci)</span>
+                                                                </div>
+                                                            </div>
+                                                            <div class="dynamic-keterangan mt-2" style="display: none;">
+                                                                <div class="d-flex align-items-start rounded-3 p-2 border" style="background-color: #e7f1ff; border-color: #b8daff; color: #004085;">
+                                                                    <i class="bx bx-check-circle me-2 mt-1"></i>
+                                                                    <span class="small fw-semibold">Aktif: Warga yang menyewa Lepas Kunci dapat meminta mobil diantar.</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-check form-switch mb-0 d-flex flex-column align-items-center justify-content-center" style="min-width: 80px;">
+                                                            <input class="form-check-input toggle-status m-0" style="transform: scale(1.3); cursor: pointer; float: none;" type="checkbox" name="mobil_lepas_kunci_antar_active" {{ isset($region->payment_info['mobil_lepas_kunci_antar_active']) ? ($region->payment_info['mobil_lepas_kunci_antar_active'] ? 'checked' : '') : 'checked' }}>
+                                                            <span class="status-label mt-2 small fw-bold text-center"></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
 
                                         </div>
@@ -891,5 +935,52 @@
         toggle.addEventListener('change', function() { updateExclusiveCard(this); });
     });
 })();
+</script>
+<script>
+    function toggleWaStatus(checkbox) {
+        const isChecked = checkbox.checked;
+        const cardWrapper = document.getElementById('wa_card_wrapper');
+        const title = document.getElementById('wa_title');
+        const descActive = document.getElementById('wa_desc_active');
+        const descInactive = document.getElementById('wa_desc_inactive');
+        const badgeActive = document.getElementById('wa_status_badge');
+        const badgeInactive = document.getElementById('wa_status_badge_off');
+        const fieldsWrapper = document.getElementById('wa_fields');
+        const labelNama = document.getElementById('wa_label_nama');
+        const labelNomor = document.getElementById('wa_label_nomor');
+        const inputNama = document.getElementById('wa_input_nama');
+        
+        if (isChecked) {
+            // State: Aktif
+            cardWrapper.classList.remove('bg-label-secondary');
+            cardWrapper.classList.add('bg-label-success');
+            
+            title.classList.remove('text-secondary');
+            title.classList.add('text-success');
+            
+            descActive.style.display = 'block';
+            descInactive.style.display = 'none';
+            
+            badgeActive.style.display = 'inline-block';
+            badgeInactive.style.display = 'none';
+            
+            fieldsWrapper.style.display = 'block';
+        } else {
+            // State: Tidak Aktif
+            cardWrapper.classList.remove('bg-label-success');
+            cardWrapper.classList.add('bg-label-secondary');
+            
+            title.classList.remove('text-success');
+            title.classList.add('text-secondary');
+            
+            descActive.style.display = 'none';
+            descInactive.style.display = 'block';
+            
+            badgeActive.style.display = 'none';
+            badgeInactive.style.display = 'inline-block';
+            
+            fieldsWrapper.style.display = 'none';
+        }
+    }
 </script>
 @endsection

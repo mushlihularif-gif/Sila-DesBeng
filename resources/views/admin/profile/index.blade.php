@@ -90,13 +90,43 @@
                                 </div>
                                 
                                 @if($user && $user->region)
-                                <div class="col-md-6">
-                                    <label for="region" class="form-label fw-semibold mb-2">
-                                        <i class="bx bx-map-pin me-1"></i>Wilayah Tugas ({{ ucfirst($user->region->type) }})
+                                @php
+                                    $desaStr = '';
+                                    $kecStr = '';
+                                    $kabStr = '';
+                                    $curr = $user->region;
+                                    while($curr) {
+                                        if(in_array(strtolower($curr->type), ['desa', 'kelurahan'])) $desaStr = $curr->name;
+                                        if(strtolower($curr->type) == 'kecamatan') $kecStr = $curr->name;
+                                        if(in_array(strtolower($curr->type), ['kabupaten', 'kota'])) $kabStr = $curr->name;
+                                        $curr = $curr->parent;
+                                    }
+                                @endphp
+                                <div class="col-12 mt-3">
+                                    <label class="form-label fw-semibold mb-2">
+                                        <i class="bx bx-map-pin me-1"></i>Wilayah Tugas Penempatan
                                     </label>
-                                    <input type="text" class="form-control form-control-lg" id="region" name="region"
-                                        value="{{ $user->region->full_path }}" disabled style="background-color: #f3f4f6;" />
-                                    <small class="text-muted mt-2 d-block">Wilayah tugas sesuai penempatan akun</small>
+                                    <div class="row g-2">
+                                        <div class="col-md-4">
+                                            <div class="input-group input-group-lg">
+                                                <span class="input-group-text bg-light text-muted" style="font-size: 0.85rem;">Desa</span>
+                                                <input type="text" class="form-control form-control-lg text-dark" value="{{ $desaStr ?: '-' }}" disabled style="background-color: #f3f4f6;" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="input-group input-group-lg">
+                                                <span class="input-group-text bg-light text-muted" style="font-size: 0.85rem;">Kec.</span>
+                                                <input type="text" class="form-control form-control-lg text-dark" value="{{ $kecStr ?: '-' }}" disabled style="background-color: #f3f4f6;" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="input-group input-group-lg">
+                                                <span class="input-group-text bg-light text-muted" style="font-size: 0.85rem;">Kab.</span>
+                                                <input type="text" class="form-control form-control-lg text-dark" value="{{ $kabStr ?: '-' }}" disabled style="background-color: #f3f4f6;" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <small class="text-muted mt-2 d-block">Wilayah tugas sesuai penempatan akun (diambil otomatis dari sistem struktur region)</small>
                                 </div>
                                 @endif
 

@@ -91,6 +91,10 @@
             @if(count($childrenRegions) > 0)
                 <div class="accordion mt-3" id="regionAccordion">
                     @foreach($childrenRegions as $index => $child)
+                        @php
+                            $adminRoles = ['admin_rt', 'admin_rw', 'admin_desa', 'admin_kecamatan', 'super_admin', 'admin'];
+                            $childAdmins = $child->users->whereIn('role', $adminRoles);
+                        @endphp
                         <div class="accordion-item card mb-3 shadow-sm border-0">
                             <h2 class="accordion-header" id="heading{{ $child->id }}">
                                 <button class="accordion-button collapsed py-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ $child->id }}" aria-expanded="false" aria-controls="collapse{{ $child->id }}">
@@ -106,7 +110,7 @@
                                             @if($child->type != 'rt')
                                                 <span class="badge bg-label-info px-3 py-2 rounded-pill d-inline-flex align-items-center justify-content-center">{{ $child->children->count() }} Sub-Wilayah Terdaftar</span>
                                             @endif
-                                            @if($child->users->count() > 0)
+                                            @if($childAdmins->count() > 0)
                                                 <span class="badge bg-label-success px-3 py-2 rounded-pill d-inline-flex align-items-center justify-content-center"><i class='bx bx-check-circle me-1'></i> Akun Aktif</span>
                                             @else
                                                 <span class="badge bg-label-warning px-3 py-2 rounded-pill d-inline-flex align-items-center justify-content-center"><i class='bx bx-error-circle me-1'></i> Belum Ada Akun</span>
@@ -125,12 +129,14 @@
                                             <h6 class="fw-semibold mb-3"><i class="bx bx-user-circle text-primary me-1"></i> Informasi Kepengurusan {{ strtoupper($child->type) }}</h6>
                                             
                                             <div class="admin-info-box mb-3">
-                                                @if($child->users->count() > 0)
-                                                    @foreach($child->users as $admin)
+                                                @if($childAdmins->count() > 0)
+                                                    @foreach($childAdmins as $admin)
                                                         <div class="d-flex align-items-start mb-3">
                                                             <div class="avatar avatar-md me-3 shadow-sm rounded-circle overflow-hidden" style="width: 50px; height: 50px;">
                                                                 @if ($admin->file)
                                                                     <img src="{{ $admin->file->file_stream }}" alt="Avatar" class="w-100 h-100" style="object-fit: cover;">
+                                                                @elseif ($admin->avatar)
+                                                                    <img src="{{ asset('storage/' . $admin->avatar) }}" alt="Avatar" class="w-100 h-100" style="object-fit: cover;">
                                                                 @else
                                                                     <span class="avatar-initial rounded-circle bg-primary text-white fs-4"><i class="bx bx-user"></i></span>
                                                                 @endif
@@ -178,7 +184,7 @@
                                                         <div class="border rounded-3 p-3 text-center h-100" style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);">
                                                             <i class="bx bx-group text-success fs-3 mb-1 d-block"></i>
                                                             <small class="text-muted d-block mb-1">Status Akun</small>
-                                                            @if($child->users->count() > 0)
+                                                            @if($childAdmins->count() > 0)
                                                                 <span class="fw-bold text-success">Aktif</span>
                                                             @else
                                                                 <span class="fw-bold text-warning">Belum Ada</span>
@@ -226,12 +232,14 @@
                                             <h6 class="fw-semibold mb-3">Informasi Kepengurusan {{ strtoupper($child->type) }}</h6>
                                             
                                             <div class="admin-info-box mb-3">
-                                                @if($child->users->count() > 0)
-                                                    @foreach($child->users as $admin)
+                                                @if($childAdmins->count() > 0)
+                                                    @foreach($childAdmins as $admin)
                                                         <div class="d-flex align-items-start mb-3">
                                                             <div class="avatar avatar-md me-3 shadow-sm rounded-circle overflow-hidden" style="width: 50px; height: 50px;">
                                                                 @if ($admin->file)
                                                                     <img src="{{ $admin->file->file_stream }}" alt="Avatar" class="w-100 h-100" style="object-fit: cover;">
+                                                                @elseif ($admin->avatar)
+                                                                    <img src="{{ asset('storage/' . $admin->avatar) }}" alt="Avatar" class="w-100 h-100" style="object-fit: cover;">
                                                                 @else
                                                                     <span class="avatar-initial rounded-circle bg-primary text-white fs-4"><i class="bx bx-user"></i></span>
                                                                 @endif
@@ -303,32 +311,37 @@
                                                 @if($child->children->count() > 0)
                                                     <div class="list-group list-group-flush">
                                                         @foreach($child->children as $sub)
+                                                            @php
+                                                                $subAdmin = $sub->users->whereIn('role', $adminRoles)->first();
+                                                            @endphp
                                                             <div class="list-group-item d-flex justify-content-between align-items-center p-3 region-card mb-2 rounded-3">
                                                                 <div class="d-flex align-items-center">
                                                                     <!-- Avatar Sub -->
                                                                     <div class="avatar avatar-sm me-3 shadow-sm rounded-circle overflow-hidden">
-                                                                        @if ($sub->users->count() > 0 && $sub->users->first()->file)
-                                                                            <img src="{{ $sub->users->first()->file->file_stream }}" alt="Avatar" class="w-100 h-100" style="object-fit: cover;">
+                                                                        @if ($subAdmin && $subAdmin->file)
+                                                                            <img src="{{ $subAdmin->file->file_stream }}" alt="Avatar" class="w-100 h-100" style="object-fit: cover;">
+                                                                        @elseif ($subAdmin && $subAdmin->avatar)
+                                                                            <img src="{{ asset('storage/' . $subAdmin->avatar) }}" alt="Avatar" class="w-100 h-100" style="object-fit: cover;">
                                                                         @else
                                                                             <span class="avatar-initial rounded-circle bg-label-secondary text-primary"><i class="bx bx-user"></i></span>
                                                                         @endif
                                                                     </div>
                                                                     <div>
                                                                         <h6 class="mb-0 text-dark">{{ $sub->name }}</h6>
-                                                                        @if($sub->users->count() > 0)
-                                                                            <small class="text-success"><i class='bx bx-check-circle'></i> Ada Pengurus ({{ $sub->users->first()->name }})</small>
+                                                                        @if($subAdmin)
+                                                                            <small class="text-success"><i class='bx bx-check-circle'></i> Ada Pengurus ({{ $subAdmin->name }})</small>
                                                                         @else
                                                                             <small class="text-warning"><i class='bx bx-error-circle'></i> Belum Ada Akun</small>
                                                                         @endif
                                                                     </div>
                                                                 </div>
                                                                 <div class="d-flex gap-2">
-                                                                    @if($sub->users->count() == 0)
+                                                                    @if(!$subAdmin)
                                                                         <button type="button" class="btn btn-sm rounded-circle px-2" style="background: #e8f0fe; color: #0d6efd; border: none;" data-bs-toggle="modal" data-bs-target="#generateAdminModal{{ $sub->id }}" title="Buat Akun">
                                                                             <i class="bx bx-user-plus"></i>
                                                                         </button>
                                                                     @else
-                                                                        <form action="{{ route('admin.kelola-wilayah.destroy-admin', $sub->users->first()->id) }}" method="POST" onsubmit="return confirm('Yakin hapus akun pengurus ini?');">
+                                                                        <form action="{{ route('admin.kelola-wilayah.destroy-admin', $subAdmin->id) }}" method="POST" onsubmit="return confirm('Yakin hapus akun pengurus ini?');">
                                                                             @csrf @method('DELETE')
                                                                             <button type="submit" class="btn btn-sm rounded-circle px-2" style="background: #ffe0db; color: #ff3e1d; border: none;" title="Hapus Akun"><i class="bx bx-user-x"></i></button>
                                                                         </form>

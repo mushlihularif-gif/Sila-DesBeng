@@ -231,8 +231,8 @@
                                             Status Pembiayaan <span class="text-danger">*</span>
                                         </label>
                                         <select class="form-select modern-input" id="status_biaya" name="status_biaya" required onchange="toggleHargaSewa()">
-                                            <option value="gratis" {{ old('status_biaya', $fasilitas->status_biaya ?? 'gratis') == 'gratis' ? 'selected' : '' }}>Gratis Sepenuhnya (Kegiatan Sosial/Pendidikan)</option>
-                                            <option value="berbayar" {{ old('status_biaya', $fasilitas->status_biaya ?? 'gratis') == 'berbayar' ? 'selected' : '' }}>Bisa Disewakan (Komersial/Pribadi)</option>
+                                            <option value="gratis" {{ old('status_biaya', $fasilitas->status_biaya ?? 'gratis') == 'gratis' ? 'selected' : '' }}>Gratis Sepenuhnya (Hanya untuk Kegiatan Sosial)</option>
+                                            <option value="berbayar" {{ old('status_biaya', $fasilitas->status_biaya ?? 'gratis') == 'berbayar' ? 'selected' : '' }}>Multifungsi (Gratis untuk Sosial, Berbayar untuk Pribadi)</option>
                                         </select>
                                     </div>
                                     <div class="col-md-6" id="harga_sewa_container" style="display: {{ old('status_biaya', $fasilitas->status_biaya ?? 'gratis') == 'berbayar' ? 'block' : 'none' }};">
@@ -392,26 +392,7 @@
                                 <!-- STEP 3: PENGATURAN & SIMPAN -->
                                 <div class="tab-pane fade" id="step3" role="tabpanel" aria-labelledby="step3-tab">
                                 
-                                    <!-- PENGATURAN PENGIRIMAN GLOBAL -->
-                                    <div class="form-section mb-4 border border-info rounded p-3 bg-light">
-                                        <h6 class="section-title text-info mb-3"><i class='bx bx-sync me-2'></i>Pengaturan Pengiriman (Global)</h6>
-                                        <p class="text-muted small">Fitur ini terhubung langsung dengan Pengaturan Wilayah. Perubahan di sini otomatis tersimpan dan memengaruhi seluruh layanan <b>Fasilitas Umum</b>.</p>
-                                        <div class="row g-3">
-                                            <div class="col-md-6">
-                                                <div class="form-check form-switch form-switch-md">
-                                                    <input class="form-check-input delivery-toggle" type="checkbox" id="delivery_antar" data-field="fasilitas_delivery_antar_active" {{ !empty($paymentInfo['fasilitas_delivery_antar_active']) ? 'checked' : '' }}>
-                                                    <label class="form-check-label fw-bold ms-2" for="delivery_antar">Sediakan Jasa Diantar</label>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="form-check form-switch form-switch-md">
-                                                    <input class="form-check-input delivery-toggle" type="checkbox" id="delivery_jemput" data-field="fasilitas_delivery_jemput_active" {{ !empty($paymentInfo['fasilitas_delivery_jemput_active']) ? 'checked' : '' }}>
-                                                    <label class="form-check-label fw-bold ms-2" for="delivery_jemput">Bisa Jemput Sendiri (Self-Pickup)</label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-<!-- Section: Status & Lokasi -->
+                                    <!-- Section: Status & Lokasi -->
                             <div class="form-section mb-4">
                                 <h6 class="section-title mb-3">
                                     <i class='bx bx-map me-2'></i>Status & Lokasi
@@ -468,15 +449,7 @@
                                                 <input type="text" class="form-control modern-input" id="lokasi" 
                                                        name="lokasi" value="{{ old('lokasi', $fasilitas->lokasi ?? 'Desa Pematang Duku Timur') }}" required />
                                             </div>
-                                            <div class="col-md-6">
-                                                <label class="form-label fw-semibold" for="latitude">Latitude (Opsional)</label>
-                                                <input type="text" class="form-control modern-input" id="latitude" name="latitude" value="{{ old('latitude', $fasilitas->latitude) }}" placeholder="-6.200000" />
                                             </div>
-                                            <div class="col-md-6">
-                                                <label class="form-label fw-semibold" for="longitude">Longitude (Opsional)</label>
-                                                <input type="text" class="form-control modern-input" id="longitude" name="longitude" value="{{ old('longitude', $fasilitas->longitude) }}" placeholder="106.816666" />
-                                            </div>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1139,16 +1112,16 @@
             newContainer.style.display = 'none';
             if(select) {
                 inputLokasi.readOnly = true;
-                inputLat.readOnly = true;
-                inputLng.readOnly = true;
+                if(inputLat) inputLat.readOnly = true;
+                if(inputLng) inputLng.readOnly = true;
                 fillLocationData(select);
             }
         } else {
             if(savedContainer) savedContainer.style.display = 'none';
             newContainer.style.display = 'block';
             inputLokasi.readOnly = false;
-            inputLat.readOnly = false;
-            inputLng.readOnly = false;
+            if(inputLat) inputLat.readOnly = false;
+            if(inputLng) inputLng.readOnly = false;
         }
     }
 
@@ -1156,12 +1129,12 @@
         const option = select.options[select.selectedIndex];
         if (option && option.value !== '') {
             document.getElementById('lokasi').value = option.value;
-            document.getElementById('latitude').value = option.dataset.lat || '';
-            document.getElementById('longitude').value = option.dataset.lng || '';
+            let latEl = document.getElementById('latitude'); if(latEl) latEl.value = option.dataset.lat || '';
+            let lngEl = document.getElementById('longitude'); if(lngEl) lngEl.value = option.dataset.lng || '';
         } else {
             document.getElementById('lokasi').value = '';
-            document.getElementById('latitude').value = '';
-            document.getElementById('longitude').value = '';
+            let latEl2 = document.getElementById('latitude'); if(latEl2) latEl2.value = '';
+            let lngEl2 = document.getElementById('longitude'); if(lngEl2) lngEl2.value = '';
         }
     }
 

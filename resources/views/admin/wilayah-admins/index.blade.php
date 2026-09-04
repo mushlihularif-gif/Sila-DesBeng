@@ -106,9 +106,34 @@
                         <tbody class="table-border-bottom-0">
                             @forelse($applications as $app)
                                 <tr>
-                                    <td class="ps-4">{{ $app->applicant_name }}<br><small>{{ $app->contact_email }}</small></td>
-                                    <td><span class="badge bg-label-primary">Admin {{ strtoupper($app->region_type) }}</span></td>
-                                    <td>{{ $app->region_name }}</td>
+                                    <td class="ps-4">
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar avatar-md me-3 flex-shrink-0">
+                                                @if ($app->user && $app->user->file)
+                                                    <img src="{{ $app->user->file->file_stream }}" alt="{{ $app->applicant_name }}" class="rounded-circle shadow-sm" style="width: 44px; height: 44px; object-fit: cover;">
+                                                @elseif ($app->user && $app->user->avatar)
+                                                    <img src="{{ asset('storage/' . $app->user->avatar) }}" alt="{{ $app->applicant_name }}" class="rounded-circle shadow-sm" style="width: 44px; height: 44px; object-fit: cover;">
+                                                @else
+                                                    <span class="avatar-initial rounded-circle bg-label-warning shadow-sm fw-bold" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;">
+                                                        {{ strtoupper(substr($app->applicant_name, 0, 2)) }}
+                                                    </span>
+                                                @endif
+                                            </div>
+                                            <div>
+                                                <span class="fw-bold text-dark d-block fs-6">{{ $app->applicant_name }}</span>
+                                                <small class="text-muted"><i class="bx bx-envelope me-1"></i>{{ $app->contact_email }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span class="badge bg-label-primary px-3 py-2 rounded-pill fw-semibold">Admin {{ strtoupper($app->region_type) }}</span></td>
+                                    <td>
+                                        <span class="fw-bold text-dark d-block">{{ $app->region_name }}</span>
+                                        @if($app->region_type === 'rt' && $app->parentRegion)
+                                            <small class="text-primary fw-semibold"><i class="bx bx-subdirectory-right me-1"></i>Di bawah {{ $app->parentRegion->name }}</small>
+                                        @elseif($app->region_type === 'rw')
+                                            <small class="text-muted"><i class="bx bx-buildings me-1"></i>Tingkat RW</small>
+                                        @endif
+                                    </td>
                                     <td class="text-end pe-4">
                                         <form action="{{ route('admin.wilayah-admins.approve', $app->id) }}" method="POST" class="d-inline">
                                             @csrf
@@ -134,10 +159,25 @@
         <!-- Daftar Admin RT/RW Aktif -->
         <div class="col-12 mb-4">
             <div class="card border-0 shadow-sm" style="border-radius: 16px;">
-                <div class="card-header bg-white border-bottom py-3 px-4">
-                    <h5 class="mb-0 fw-bold text-primary d-flex align-items-center">
-                        <i class="bx bx-list-check fs-4 me-2"></i> Daftar Admin RT & RW Aktif
-                    </h5>
+                <div class="card-header bg-white border-bottom py-3 px-4 d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3">
+                    <div>
+                        <h5 class="mb-0 fw-bold text-primary d-flex align-items-center">
+                            <i class="bx bx-list-check fs-4 me-2"></i> Daftar Admin RT & RW Aktif
+                        </h5>
+                        <small class="text-muted">Data terkelompok berdasarkan Rukun Warga (RW) dan Rukun Tetangga (RT) binaan.</small>
+                    </div>
+                    <div class="d-flex align-items-center gap-2 w-100 w-md-auto flex-wrap">
+                        <div class="input-group input-group-merge input-group-sm shadow-none" style="min-width: 210px;">
+                            <span class="input-group-text bg-light border-0"><i class="bx bx-search text-muted"></i></span>
+                            <input type="text" id="searchAdminTable" class="form-control form-control-sm bg-light border-0" placeholder="Cari nama, email, RT/RW...">
+                        </div>
+                        <select id="filterRwTable" class="form-select form-select-sm bg-light border-0" style="min-width: 140px;">
+                            <option value="">Semua RW</option>
+                            @foreach($rws as $rw)
+                                <option value="{{ $rw->name }}">{{ $rw->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
                 <div class="table-responsive text-nowrap">
                     <table class="table table-modern table-hover align-middle mb-0">
@@ -150,28 +190,93 @@
                                 <th class="py-3 text-end pe-4">AKSI</th>
                             </tr>
                         </thead>
-                        <tbody class="table-border-bottom-0">
+                        <tbody class="table-border-bottom-0" id="adminTableBody">
+                            @php
+                                $currentRwGroup = null;
+                            @endphp
                             @forelse($admins as $admin)
-                                <tr>
+                                @php
+                                    $isRw = $admin->role === 'admin_rw';
+                                    $rwParentName = $isRw 
+                                        ? ($admin->region->name ?? 'RW') 
+                                        : ($admin->region && $admin->region->parent ? $admin->region->parent->name : 'RW Lainnya');
+                                @endphp
+
+                                {{-- Baris Pemisah Pengelompokan RW --}}
+                                @if($currentRwGroup !== $rwParentName)
+                                    @php $currentRwGroup = $rwParentName; @endphp
+                                    <tr class="rw-group-header bg-light bg-opacity-75" data-group-rw="{{ $rwParentName }}">
+                                        <td colspan="5" class="py-2 ps-4">
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <div class="d-flex align-items-center text-primary fw-bold" style="font-size: 0.85rem; letter-spacing: 0.5px;">
+                                                    <i class="bx bx-buildings fs-5 me-2"></i>
+                                                    <span>WILAYAH BINAAN: {{ strtoupper($rwParentName) }}</span>
+                                                </div>
+                                                <span class="badge bg-label-primary rounded-pill px-2 py-1" style="font-size: 0.75rem;">
+                                                    Lingkup {{ $rwParentName }}
+                                                </span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endif
+
+                                <tr class="admin-data-row" data-rw-name="{{ $rwParentName }}" data-search="{{ strtolower($admin->name . ' ' . $admin->email . ' ' . ($admin->region->name ?? '') . ' ' . $rwParentName) }}">
                                     <td class="ps-4">
-                                        <span class="fw-bold text-dark d-block">{{ $admin->name }}</span>
-                                        <small class="text-muted"><i class="bx bx-envelope"></i> {{ $admin->email }}</small>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar avatar-md me-3 flex-shrink-0">
+                                                @if ($admin->file)
+                                                    <img src="{{ $admin->file->file_stream }}" alt="{{ $admin->name }}" class="rounded-circle shadow-sm" style="width: 44px; height: 44px; object-fit: cover;">
+                                                @elseif ($admin->avatar)
+                                                    <img src="{{ asset('storage/' . $admin->avatar) }}" alt="{{ $admin->name }}" class="rounded-circle shadow-sm" style="width: 44px; height: 44px; object-fit: cover;">
+                                                @else
+                                                    <span class="avatar-initial rounded-circle {{ $isRw ? 'bg-label-primary' : 'bg-label-success' }} shadow-sm fw-bold" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;">
+                                                        {{ strtoupper(substr($admin->name, 0, 2)) }}
+                                                    </span>
+                                                @endif
+                                            </div>
+                                            <div>
+                                                <span class="fw-bold text-dark d-block fs-6">{{ $admin->name }}</span>
+                                                <small class="text-muted"><i class="bx bx-envelope me-1"></i>{{ $admin->email }}</small>
+                                            </div>
+                                        </div>
                                     </td>
                                     <td>
                                         @if($admin->nik)
-                                            <span class="badge bg-label-success px-3 py-2 fw-semibold">NIK Terdata</span>
+                                            <span class="badge bg-label-success px-3 py-2 fw-semibold"><i class="bx bx-check-shield me-1"></i> NIK Terdata</span>
                                         @else
-                                            <span class="badge bg-label-warning px-3 py-2 fw-semibold">Akun Dinas (Tanpa NIK)</span>
+                                            <span class="badge bg-label-warning px-3 py-2 fw-semibold"><i class="bx bx-info-circle me-1"></i> Akun Dinas (Tanpa NIK)</span>
                                         @endif
                                     </td>
-                                    <td><span class="badge bg-label-primary px-3 py-2 rounded-pill fw-semibold">{{ strtoupper($admin->role) }}</span></td>
-                                    <td><span class="fw-semibold text-dark">{{ $admin->region->name }}</span></td>
+                                    <td>
+                                        @if($isRw)
+                                            <span class="badge bg-label-primary px-3 py-2 rounded-pill fw-semibold"><i class="bx bx-shield-quarter me-1"></i>ADMIN RW</span>
+                                        @else
+                                            <span class="badge bg-label-success px-3 py-2 rounded-pill fw-semibold"><i class="bx bx-shield me-1"></i>ADMIN RT</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if($isRw)
+                                            <div class="d-flex flex-column">
+                                                <span class="fw-bold text-dark fs-6">{{ $admin->region->name ?? '-' }}</span>
+                                                <small class="text-muted mt-1"><i class="bx bx-home-alt me-1"></i>Wilayah RW Induk</small>
+                                            </div>
+                                        @else
+                                            <div class="d-flex flex-column">
+                                                <span class="fw-bold text-dark fs-6">{{ $admin->region->name ?? '-' }}</span>
+                                                <div class="mt-1">
+                                                    <span class="badge bg-label-info rounded-pill px-2 py-1" style="font-size: 0.78rem;">
+                                                        <i class="bx bx-subdirectory-right me-1"></i>Bagian dari {{ $rwParentName }}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        @endif
+                                    </td>
                                     <td class="text-end pe-4">
                                         <form action="{{ route('admin.wilayah-admins.revoke', $admin->id) }}" method="POST" class="d-inline">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-outline-danger shadow-sm" onclick="return confirm('PERINGATAN: Cabut wewenang admin wilayah ini? Data akun tidak dihapus, hanya role dikembalikan menjadi warga biasa.')">
-                                                <i class="bx bx-trash"></i>
+                                            <button type="submit" class="btn btn-sm btn-outline-danger shadow-sm" onclick="return confirm('PERINGATAN: Cabut wewenang admin wilayah ini? Data akun tidak dihapus, hanya role dikembalikan menjadi warga biasa.')" title="Cabut Wewenang">
+                                                <i class="bx bx-user-x me-1"></i> Cabut Akses
                                             </button>
                                         </form>
                                     </td>
@@ -291,7 +396,10 @@
                         <select name="user_email" id="selectWarga" class="form-select" required onchange="showWargaDetails()">
                             <option value="">Pilih Warga...</option>
                             @foreach($wargaList as $warga)
-                                <option value="{{ $warga->email }}" data-name="{{ $warga->name }}" data-phone="{{ $warga->phone }}" data-nik="{{ $warga->nik ? 'Terverifikasi (KTP)' : 'Belum Verifikasi' }}" data-photo="{{ $warga->avatar ? asset('storage/'.$warga->avatar) : asset('Admin/img/avatars/1.png') }}">
+                                @php
+                                    $photo = $warga->file ? $warga->file->file_stream : ($warga->avatar ? asset('storage/'.$warga->avatar) : asset('Admin/img/avatars/1.png'));
+                                @endphp
+                                <option value="{{ $warga->email }}" data-name="{{ $warga->name }}" data-phone="{{ $warga->phone }}" data-nik="{{ $warga->nik ? 'Terverifikasi (KTP)' : 'Belum Verifikasi' }}" data-photo="{{ $photo }}">
                                     {{ $warga->name }} ({{ $warga->email }} | {{ $warga->phone ?? 'Tanpa No. HP' }})
                                 </option>
                             @endforeach
@@ -418,6 +526,48 @@
         nikHelper.innerHTML = "<span class='text-danger fw-bold'>* Peringatan NIK Ganda terpicu. Kolom NIK ini sekarang berstatus Opsional. Kosongkan untuk melanjutkan membuat Akun Dinas terpisah.</span>";
     });
     @endif
+
+    // Filter dan Search Tabel Admin RT/RW
+    const searchInput = document.getElementById('searchAdminTable');
+    const filterRwSelect = document.getElementById('filterRwTable');
+    
+    function filterAdminTable() {
+        if (!searchInput || !filterRwSelect) return;
+        const query = searchInput.value.toLowerCase().trim();
+        const selectedRw = filterRwSelect.value.trim();
+        
+        const rows = document.querySelectorAll('.admin-data-row');
+        const headers = document.querySelectorAll('.rw-group-header');
+        
+        const visibleGroups = new Set();
+
+        rows.forEach(row => {
+            const searchData = (row.getAttribute('data-search') || '').toLowerCase();
+            const rowRw = row.getAttribute('data-rw-name') || '';
+            
+            const matchesQuery = !query || searchData.includes(query);
+            const matchesRw = !selectedRw || rowRw === selectedRw;
+            
+            if (matchesQuery && matchesRw) {
+                row.style.display = '';
+                visibleGroups.add(rowRw);
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        headers.forEach(header => {
+            const groupRw = header.getAttribute('data-group-rw');
+            if (visibleGroups.has(groupRw)) {
+                header.style.display = '';
+            } else {
+                header.style.display = 'none';
+            }
+        });
+    }
+
+    if (searchInput) searchInput.addEventListener('input', filterAdminTable);
+    if (filterRwSelect) filterRwSelect.addEventListener('change', filterAdminTable);
 </script>
 @endsection
 

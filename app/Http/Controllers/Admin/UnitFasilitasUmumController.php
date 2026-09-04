@@ -25,26 +25,33 @@ class UnitFasilitasUmumController extends Controller
             return $splash;
         }
 
+        $user = auth()->user();
         $search = $request->get('search');
         $tab = $request->get('tab', 'kendaraan'); // default tab
         
         $fasilitas = FasilitasUmum::query()
+            ->when($user->region_id, function($q, $regionId) {
+                return $q->where('region_id', $regionId);
+            })
             ->when($search, function ($query, $search) {
                 return $query->searchWhereLike(['nama_fasilitas', 'kategori'], $search);
             })
             ->paginate(6, ['*'], 'page_gedung')
             ->appends(['search' => $search, 'tab' => 'gedung']);
             
-        // Ambil kendaraan publik (Ambulans, dsb)
+        // Ambil kendaraan publik (Ambulans, Kendaraan Operasional, dsb)
         $mobils = Mobil::query()
-            ->where('kategori', 'ambulans') // Untuk saat ini, kendaraan publik = ambulans
+            ->whereIn('kategori', ['ambulans', 'kendaraan_operasional'])
+            ->when($user->region_id, function($q, $regionId) {
+                return $q->where('region_id', $regionId);
+            })
+            ->with('supirs')
             ->when($search, function ($query, $search) {
                 return $query->searchWhereLike(['nama_mobil', 'kategori'], $search);
             })
             ->paginate(6, ['*'], 'page_kendaraan')
             ->appends(['search' => $search, 'tab' => 'kendaraan']);
             
-        $user = auth()->user();
         $region = Region::find($user->region_id);
         
         $paymentInfo = $region->payment_info ?? [];

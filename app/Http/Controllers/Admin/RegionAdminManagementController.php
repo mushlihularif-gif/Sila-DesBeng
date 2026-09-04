@@ -35,13 +35,35 @@ class RegionAdminManagementController extends Controller
         // Active Admins
         $admins = User::whereIn('region_id', $regionIds)
             ->whereIn('role', ['admin_rw', 'admin_rt'])
-            ->with('region')
+            ->with(['region.parent', 'file'])
             ->get();
+
+        // Urutkan admin terstruktur: Kelompok RW, Admin RW di atas, disusul Admin RT
+        $admins = $admins->sort(function ($a, $b) {
+            $rwA = $a->region ? ($a->region->type === 'rw' ? $a->region->name : ($a->region->parent->name ?? '')) : '';
+            $rwB = $b->region ? ($b->region->type === 'rw' ? $b->region->name : ($b->region->parent->name ?? '')) : '';
+            
+            if ($rwA !== $rwB) {
+                return strnatcasecmp($rwA, $rwB);
+            }
+            
+            // RW admin di atas (0), lalu RT admin (1)
+            $roleOrderA = $a->role === 'admin_rw' ? 0 : 1;
+            $roleOrderB = $b->role === 'admin_rw' ? 0 : 1;
+            if ($roleOrderA !== $roleOrderB) {
+                return $roleOrderA <=> $roleOrderB;
+            }
+            
+            $nameA = $a->region->name ?? '';
+            $nameB = $b->region->name ?? '';
+            return strnatcasecmp($nameA, $nameB);
+        })->values();
 
         // Pending Applications
         $applications = PartnerApplication::whereIn('region_type', ['rw', 'rt'])
             ->whereIn('parent_region_id', array_merge([$desaId], $rwIds))
             ->where('status', 'pending')
+            ->with(['user.file', 'parentRegion'])
             ->get();
 
         // Daftar RW dan RT untuk form pembuatan
@@ -51,6 +73,7 @@ class RegionAdminManagementController extends Controller
         // Daftar Warga untuk form promosi (Hanya warga dari desa ini)
         $wargaList = User::whereIn('role', ['user', 'warga'])
             ->where('region_id', $desaId)
+            ->with('file')
             ->get(['id', 'name', 'email', 'phone', 'nik', 'avatar', 'ktp_photo_path']);
 
         return view('admin.wilayah-admins.index', compact('admins', 'applications', 'rws', 'rts', 'wargaList'));
@@ -195,6 +218,7 @@ class RegionAdminManagementController extends Controller
         
         if (in_array($user->role, ['admin_rw', 'admin_rt'])) {
             $user->role = 'user';
+            $user->region_id = $admin->region_id;
             $user->save();
             return back()->with('success', 'Akses admin dicabut. Akun kembali menjadi warga biasa.');
         }

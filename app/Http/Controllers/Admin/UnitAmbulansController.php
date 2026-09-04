@@ -13,30 +13,16 @@ class UnitAmbulansController extends Controller
 {
     public function index()
     {
-        $admin = auth()->user();
-        $query = Mobil::where('kategori', 'ambulans')->with('supirs');
-        
-        if ($admin->region_id) {
-            $query->where('region_id', $admin->region_id);
-        }
-        
-        $ambulansList = $query->paginate(10);
-        
-        $regionSettings = null;
-        if ($admin->region_id) {
-            $regionSettings = Region::find($admin->region_id);
-        }
-        
-        return view('admin.unit.ambulans.index', compact('ambulansList', 'regionSettings'));
+        return redirect()->route('admin.unit.fasilitas_umum.index', ['tab' => 'kendaraan']);
     }
 
     public function create()
     {
         $user = Auth::user();
         if ($user->role === 'admin_desa') {
-            $supirs = Supir::where('region_id', $user->region_id)->where('is_fasilitas_umum', 1)->get();
+            $supirs = Supir::where('region_id', $user->region_id)->where('is_fasilitas_umum', 1)->with('ambulans')->get();
         } else {
-            $supirs = Supir::where('is_fasilitas_umum', 1)->get();
+            $supirs = Supir::where('is_fasilitas_umum', 1)->with('ambulans')->get();
         }
 
         return view('admin.unit.ambulans.create', compact('supirs'));
@@ -46,43 +32,52 @@ class UnitAmbulansController extends Controller
     {
         $validated = $request->validate([
             'nama_mobil' => 'required|string|max:255',
+            'kategori' => 'nullable|string|in:ambulans,kendaraan_operasional',
             'supir_ids' => 'nullable|array',
             'supir_ids.*' => 'exists:supirs,id',
             'nomor_plat' => 'nullable|string|max:20',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:8192',
+            'foto_2' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:8192',
+            'foto_3' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:8192',
         ]);
         
+        $kategori = $request->kategori ?? 'ambulans';
         $data = [
             'nama_mobil' => $validated['nama_mobil'],
-            'kategori' => 'ambulans',
+            'kategori' => $kategori,
             'region_id' => auth()->user()->region_id,
             'harga_sewa' => 0,
             'deskripsi' => "Plat: " . ($request->nomor_plat ?? '-'),
         ];
         
         if ($request->hasFile('foto')) {
-            $path = $request->file('foto')->store('unit_layanan/mobil', 'public');
-            $data['foto'] = $path;
+            $data['foto'] = $request->file('foto')->store('unit_layanan/mobil', 'public');
+        }
+        if ($request->hasFile('foto_2')) {
+            $data['foto_2'] = $request->file('foto_2')->store('unit_layanan/mobil', 'public');
+        }
+        if ($request->hasFile('foto_3')) {
+            $data['foto_3'] = $request->file('foto_3')->store('unit_layanan/mobil', 'public');
         }
         
         $mobil = Mobil::create($data);
         
-        if (isset($validated['supir_ids'])) {
+        if ($kategori === 'ambulans' && isset($validated['supir_ids'])) {
             $mobil->supirs()->sync($validated['supir_ids']);
         }
         
-        return redirect()->route('admin.unit.ambulans.index')->with('success', 'Kendaraan Ambulans berhasil ditambahkan');
+        return redirect()->route('admin.unit.fasilitas_umum.index', ['tab' => 'kendaraan'])->with('success', 'Kendaraan Operasional berhasil ditambahkan');
     }
 
     public function edit($id)
     {
-        $ambulans = Mobil::where('kategori', 'ambulans')->findOrFail($id);
+        $ambulans = Mobil::whereIn('kategori', ['ambulans', 'kendaraan_operasional'])->findOrFail($id);
         
         $user = Auth::user();
         if ($user->role === 'admin_desa') {
-            $supirs = Supir::where('region_id', $user->region_id)->where('is_fasilitas_umum', 1)->get();
+            $supirs = Supir::where('region_id', $user->region_id)->where('is_fasilitas_umum', 1)->with('ambulans')->get();
         } else {
-            $supirs = Supir::where('is_fasilitas_umum', 1)->get();
+            $supirs = Supir::where('is_fasilitas_umum', 1)->with('ambulans')->get();
         }
 
         return view('admin.unit.ambulans.edit', compact('ambulans', 'supirs'));
@@ -90,65 +85,94 @@ class UnitAmbulansController extends Controller
 
     public function update(Request $request, $id)
     {
-        $ambulans = Mobil::where('kategori', 'ambulans')->findOrFail($id);
+        $ambulans = Mobil::whereIn('kategori', ['ambulans', 'kendaraan_operasional'])->findOrFail($id);
         
         $validated = $request->validate([
             'nama_mobil' => 'required|string|max:255',
+            'kategori' => 'nullable|string|in:ambulans,kendaraan_operasional',
             'supir_ids' => 'nullable|array',
             'supir_ids.*' => 'exists:supirs,id',
             'nomor_plat' => 'nullable|string|max:20',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:8192',
+            'foto_2' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:8192',
+            'foto_3' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:8192',
         ]);
         
+        $kategori = $request->kategori ?? $ambulans->kategori;
         $data = [
             'nama_mobil' => $validated['nama_mobil'],
+            'kategori' => $kategori,
             'deskripsi' => "Plat: " . ($request->nomor_plat ?? '-'),
         ];
         
+        // Foto Utama
+        if ($request->input('delete_foto') == '1') {
+            if ($ambulans->foto && \Storage::disk('public')->exists($ambulans->foto)) {
+                \Storage::disk('public')->delete($ambulans->foto);
+            }
+            $data['foto'] = null;
+        }
         if ($request->hasFile('foto')) {
             if ($ambulans->foto && \Storage::disk('public')->exists($ambulans->foto)) {
                 \Storage::disk('public')->delete($ambulans->foto);
             }
-            $path = $request->file('foto')->store('unit_layanan/mobil', 'public');
-            $data['foto'] = $path;
+            $data['foto'] = $request->file('foto')->store('unit_layanan/mobil', 'public');
+        }
+
+        // Foto Tambahan 1
+        if ($request->input('delete_foto_2') == '1') {
+            if ($ambulans->foto_2 && \Storage::disk('public')->exists($ambulans->foto_2)) {
+                \Storage::disk('public')->delete($ambulans->foto_2);
+            }
+            $data['foto_2'] = null;
+        }
+        if ($request->hasFile('foto_2')) {
+            if ($ambulans->foto_2 && \Storage::disk('public')->exists($ambulans->foto_2)) {
+                \Storage::disk('public')->delete($ambulans->foto_2);
+            }
+            $data['foto_2'] = $request->file('foto_2')->store('unit_layanan/mobil', 'public');
+        }
+
+        // Foto Tambahan 2
+        if ($request->input('delete_foto_3') == '1') {
+            if ($ambulans->foto_3 && \Storage::disk('public')->exists($ambulans->foto_3)) {
+                \Storage::disk('public')->delete($ambulans->foto_3);
+            }
+            $data['foto_3'] = null;
+        }
+        if ($request->hasFile('foto_3')) {
+            if ($ambulans->foto_3 && \Storage::disk('public')->exists($ambulans->foto_3)) {
+                \Storage::disk('public')->delete($ambulans->foto_3);
+            }
+            $data['foto_3'] = $request->file('foto_3')->store('unit_layanan/mobil', 'public');
         }
         
         $ambulans->update($data);
         
-        if (isset($validated['supir_ids'])) {
+        if ($kategori === 'ambulans' && isset($validated['supir_ids'])) {
             $ambulans->supirs()->sync($validated['supir_ids']);
         } else {
             $ambulans->supirs()->sync([]);
         }
         
-        return redirect()->route('admin.unit.ambulans.index')->with('success', 'Kendaraan Ambulans berhasil diubah');
+        return redirect()->route('admin.unit.fasilitas_umum.index', ['tab' => 'kendaraan'])->with('success', 'Kendaraan Operasional berhasil diubah');
     }
 
     public function destroy($id)
     {
-        $ambulans = Mobil::where('kategori', 'ambulans')->findOrFail($id);
+        $ambulans = Mobil::whereIn('kategori', ['ambulans', 'kendaraan_operasional'])->findOrFail($id);
+        if ($ambulans->foto && \Storage::disk('public')->exists($ambulans->foto)) {
+            \Storage::disk('public')->delete($ambulans->foto);
+        }
+        if ($ambulans->foto_2 && \Storage::disk('public')->exists($ambulans->foto_2)) {
+            \Storage::disk('public')->delete($ambulans->foto_2);
+        }
+        if ($ambulans->foto_3 && \Storage::disk('public')->exists($ambulans->foto_3)) {
+            \Storage::disk('public')->delete($ambulans->foto_3);
+        }
         $ambulans->supirs()->detach();
         $ambulans->delete();
         
-        return redirect()->route('admin.unit.ambulans.index')->with('success', 'Ambulans berhasil dihapus');
-    }
-
-    public function updateSop(Request $request)
-    {
-        $admin = auth()->user();
-        if (!$admin->region_id) {
-            return redirect()->back()->with('error', 'Anda harus terhubung dengan suatu wilayah untuk mengatur SOP');
-        }
-
-        $region = Region::find($admin->region_id);
-        $settings = $region->settings ?? [];
-        
-        $settings['sop_ambulans'] = $request->input('sop_ambulans');
-        $settings['kontak_ambulans'] = $request->input('kontak_ambulans');
-        
-        $region->settings = $settings;
-        $region->save();
-
-        return redirect()->back()->with('success', 'Pengaturan Ambulans Darurat berhasil disimpan.');
+        return redirect()->route('admin.unit.fasilitas_umum.index', ['tab' => 'kendaraan'])->with('success', 'Kendaraan Operasional berhasil dihapus');
     }
 }

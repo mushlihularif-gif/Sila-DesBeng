@@ -797,6 +797,50 @@ Formulir Kemitraan memiliki logika *smart-rendering* berbasis status domisili us
   Tombol Kemitraan *tetap dimunculkan*, namun teks otomatis berubah menjadi instruksi khusus bagi Pejabat RT/RW ("Klaim hak akses wilayah"). Di dalam formulir, opsi "Pemerintah Desa" **dihilangkan secara dinamis**, sehingga warga hanya bisa memilih mendaftar sebagai **Pengurus RW** atau **Pengurus RT**.
 Logika ini memastikan alur pendaftaran hierarki kewilayahan berjalan tanpa celah, menggantikan logika lama di mana tombol pendaftaran hilang total jika desa sudah bergabung.
 
+### 8.11 Alur Penugasan Supir & Integrasi Chat Internal (Order Assignment Flow)
+- **Konteks Masalah:** Warga yang memesan layanan seperti Sewa Mobil atau Ambulans sering kali kesulitan berkoordinasi langsung dengan supir/petugas di lapangan jika sistem hanya menautkan nomor kontak admin utama (Pihak Pengelola). Admin juga akan kewalahan menjadi perantara komunikasi.
+- **Solusi Arsitektur (Kontak Dinamis ala Ride-Hailing):**
+  1. **Kebijakan Lepas Kunci Fleksibel:** Pada menu Admin, Pengelola dapat mengatur kebijakan pesanan "Lepas Kunci" sesuai kemampuan unit (Bisa memilih antara: *Wajib Jemput Sendiri ke Kantor* ATAU *Bisa Diantar ke Lokasi Warga*).
+  2. **Penugasan Supir oleh Admin:** Saat pesanan Kendaraan (Mobil/Fasilitas Umum) disetujui, Admin wajib menugaskan nama Supir beserta **Tugas Spesifiknya** dari database. Contoh Tugas:
+     - *Mengantar Kendaraan Saja* (Untuk sewa lepas kunci yang minta diantar).
+     - *Menjadi Supir Sewa* (Untuk sewa harian/borongan).
+     - *Supir Ambulans* (Untuk layanan fasilitas umum sosial).
+  3. **Tampilan Dinamis di Menu Aktivitas Warga & Struk:** 
+     - Jika Warga menjemput sendiri: Tombol WA mengarah ke kontak **Pengurus Unit / Admin**.
+     - Jika ditugaskan Supir: Sistem **otomatis mengganti tombol WA menjadi nomor pribadi Supir** yang ditugaskan.
+     - Di detail aktivitas dan bukti transaksi (PDF), wajib dicetak secara transparan: **Nama Supir, Tugasnya, Plat Nomor Kendaraan, dan Tombol Chat WA Supir**.
+- **Efisiensi:** Mengamankan transaksi tetap di dalam sistem (tidak *bypass*), meringankan beban kerja admin sebagai *dispatcher*, namun tetap menjamin komunikasi pengiriman yang *real-time* dan transparan antara warga dengan petugas lapangan.
+
+  - **Alasan Penggunaan Chat Internal (Menggantikan WA Admin):**
+    - **Menjaga Privasi & Mencegah Spam:** Mencegah tercampurnya komplain layanan publik (misal: keluhan karet tabung gas hilang/kosong) dengan chat pribadi di nomor WhatsApp pribadi staf pengelola.
+    - **Menghindari Pesan Tenggelam:** Komplain warga via WA rawan tertumpuk dan tidak terbalas. Dengan *chat* internal, keluhan terpusat di satu *dashboard* profesional.
+    - **Context-Aware Complaint:** Saat warga *chat* dari menu detail pesanannya, Admin langsung mengetahui secara spesifik pesanan mana yang bermasalah tanpa perlu menanyakan ulang identitas atau nomor struk pesanan.
+
+### 8.12 Arsitektur UI/UX Layanan Tambahan Kendaraan (Dual Supir & Dual BBM)
+**Tanggal Pembaruan:** 4 September 2026  
+**Status:** SELESAI DIEKSEKUSI OLEH TIM
+
+1. **Dual Pilihan Supir (Lepas Kunci & Supir Pengelola):**
+   - **Sewa Harian & Sewa Borongan:** Pengelola kini dapat mengaktifkan **Sewa Tanpa Supir (Lepas Kunci / Bawa Sendiri)** (`supirsendiri.png`), **Sewa Dengan Supir Pengelola** (`disediakansupir.png`), atau **keduanya sekaligus (`Bebas Pilih`)**.
+   - **Fleksibilitas Pelanggan:** Jika kedua opsi diaktifkan oleh pengelola, warga di portal penyewaan memiliki kebebasan memilih menyewa lepas kunci atau didampingi supir resmi pengelola.
+   - **Kejelasan Keterangan Operasional:** Setiap opsi dilengkapi badge status dinamis (`Aktif` vs `Tidak Aktif`) serta deskripsi penjelas yang mendidik pengelola mengenai hak penyewa dan tanggung jawab pihak pengelola saat opsi diaktifkan/dinonaktifkan.
+
+2. **Dual Pilihan Ketentuan Bahan Bakar (BBM):**
+   - **BBM Disediakan Pengelola vs BBM Ditanggung Penyewa:** Disediakan kartu interaktif dengan ikon visual terverifikasi (`bbmdisediakan.png` dan `bbmditanggungpengguna.png`).
+   - Kartu dirancang interaktif (seluruh kartu dapat diklik) untuk mencegah ilusi antarmuka beku (*freeze*), disertai *highlight border* dan deskripsi hak tanggungan biaya bensin selama masa sewa.
+
+3. **Pemisahan Data Armada dan Penugasan Personel:**
+   - Input teks statis `nama_supir` dan `kontak_supir` telah sepenuhnya dihilangkan dari form unit kendaraan (`create.blade.php` & `edit.blade.php`).
+   - Supir dikelola terpusat pada menu **Data Supir & Petugas** dan ditugaskan secara dinamis (*dynamic dispatch*) oleh admin saat menyetujui pesanan warga di menu Aktivitas/Pesanan.
+
+4. **Modernisasi Alur Pemesanan Sisi Warga (User Portal Booking Overhaul):**
+   - **Pencabutan Konsep Warisan Alat Sewa:** Seluruh terminologi "Antar Jemput Alat Sewa" dan kartu bergambar truk/gudang telah dicabut dari `users/mobil-rental-booking.blade.php`.
+   - **Logika Logistik Otomatis Berdasarkan Opsi Supir:**
+     - **Jika Memilih Supir Sendiri (Lepas Kunci):** Mode logistik otomatis disetel ke pengambilan mandiri (`jemput`). Form langsung menampilkan detail Kantor Pengelola, jam operasional, dan peringatan serah terima kunci serta verifikasi fisik SIM & KTP asli. Tidak ada form alamat pengantaran yang membingungkan.
+     - **Jika Memilih Dengan Supir Pengelola:** Mode logistik otomatis disetel ke penjemputan alamat (`antar`). Form langsung meminta titik kumpul/penjemputan rombongan dengan catatan bahwa supir pengelola akan hadir menjemput sesuai jadwal.
+   - **Ketentuan BBM Terbuka & Jelas:** Kartu informasi BBM tampil otomatis sesuai pengaturan unit kendaraan (Harian maupun Borongan), mengedukasi warga apakah bahan bakar ditanggung mandiri atau sudah termasuk layanan pengelola.
+   - **Integrasi Respons AJAX & Notifikasi Admin:** Submisi formulir booking mobil kini mengembalikan respons JSON yang presisi dengan `receipt_id`, membuka modal sukses, dan memicu notifikasi pemesanan baru (`AdminNotification`) secara instan ke admin daerah.
+
 ## 9. Rencana Proyek KMIPN & Proposal Skripsi Tim
 
 ### 9.1 Fokus Keamanan: M. MUSHLIHUL ARIF (Implementasi Keamanan)
@@ -825,7 +869,7 @@ Untuk menyempurnakan keamanan sistem agar berstandar *Enterprise*, M. Mushlihul 
 * **Fase Sempro & Skripsi (Penelitian):** Mesin HMAC baru dibongkar dan diganti dengan algoritma RSA murni pada fase ini. Hal ini dilakukan untuk **melindungi kebaruan (novelty) skripsi**, agar saat Sempro nanti dosen penguji tidak menolak judul dengan alasan *"Aplikasinya kan sudah jadi dan aman, lalu apa yang mau diteliti lagi?"*.
 
 ---
-*(Catatan Distribusi Tim KMIPN: 1 Anggota fokus Penetration Testing, 1 Anggota fokus Liveness Detection & OCR KYC, 1 Anggota fokus Integrasi Payment Gateway BUMDes).*
+*(Catatan Distribusi Tim KMIPN: 1 Anggota fokus Penetration Testing, 1 Anggota fokus Liveness Detection & OCR KYC, 1 Anggota fokus Integrasi Payment Gateway Layanan Daerah).*
 
 ### 9.2 Ide Integrasi AI Keamanan (Tugas Mata Kuliah Kecerdasan Buatan)
 Sebagai bagian dari tugas akademik dan wawasan untuk *Future Work*, sistem SilaDesBeng juga dapat mengintegrasikan lapisan **Kecerdasan Buatan (AI) untuk Keamanan Infrastruktur Skala Kabupaten** dengan konsep sebagai berikut:
@@ -841,3 +885,5 @@ Sebagai bagian dari tugas akademik dan wawasan untuk *Future Work*, sistem SilaD
 3. **Perlindungan Infrastruktur dan File Konfigurasi (Metode: *AI-based WAF / IPS*)**
    - **Alur:** AI membaca lalu lintas jaringan menuju server kabupaten secara *real-time*. Jika mendeteksi ada pengunjung yang berulang kali mencoba menebak rute folder (*directory traversal*) untuk mencuri *file* .env, AI otomatis memblokir IP peretas secara permanen.
    - **Algoritma:** Menggunakan *Deep Learning* seperti **LSTM (Long Short-Term Memory)** atau **CNN** yang pintar menganalisis pola rentetan jejak aktivitas (*log server*) untuk mengenali serangan otomatis (*bots/brute-force*).
+ 
+ 

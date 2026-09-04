@@ -176,21 +176,15 @@
                                             </button>
                                         </div>
                                     </div>
-                                    <div class="col-md-12 mt-3">
-                                        <label class="form-label fw-semibold" for="plat_nomor">
-                                            Plat Nomor Kendaraan (Opsional)
-                                        </label>
-                                        <input type="text" class="form-control modern-input" id="plat_nomor" 
-                                               name="plat_nomor" placeholder="Contoh: BM 1234 XY" value="{{ isset($fasilitas) ? $fasilitas->plat_nomor : old('plat_nomor') }}" />
-                                    </div>
+                                    
                                     
                                     <div class="col-md-6">
                                         <label class="form-label fw-semibold" for="status_biaya">
                                             Status Pembiayaan <span class="text-danger">*</span>
                                         </label>
                                         <select class="form-select modern-input" id="status_biaya" name="status_biaya" required onchange="toggleHargaSewa()">
-                                            <option value="gratis" selected>Gratis Sepenuhnya (Kegiatan Sosial/Pendidikan)</option>
-                                            <option value="berbayar">Bisa Disewakan (Komersial/Pribadi)</option>
+                                            <option value="gratis" selected>Gratis Sepenuhnya (Hanya untuk Kegiatan Sosial)</option>
+                                            <option value="berbayar">Multifungsi (Gratis untuk Sosial, Berbayar untuk Pribadi)</option>
                                         </select>
                                     </div>
                                     <div class="col-md-6" id="harga_sewa_container" style="display: none;">
@@ -408,15 +402,7 @@
                                                 <input type="text" class="form-control modern-input" id="lokasi" 
                                                        name="lokasi" value="Desa Pematang Duku Timur" required />
                                             </div>
-                                            <div class="col-md-6">
-                                                <label class="form-label fw-semibold" for="latitude">Latitude (Opsional)</label>
-                                                <input type="text" class="form-control modern-input" id="latitude" name="latitude" placeholder="-6.200000" />
                                             </div>
-                                            <div class="col-md-6">
-                                                <label class="form-label fw-semibold" for="longitude">Longitude (Opsional)</label>
-                                                <input type="text" class="form-control modern-input" id="longitude" name="longitude" placeholder="106.816666" />
-                                            </div>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1075,16 +1061,16 @@
             newContainer.style.display = 'none';
             if(select) {
                 inputLokasi.readOnly = true;
-                inputLat.readOnly = true;
-                inputLng.readOnly = true;
+                if(inputLat) inputLat.readOnly = true;
+                if(inputLng) inputLng.readOnly = true;
                 fillLocationData(select);
             }
         } else {
             if(savedContainer) savedContainer.style.display = 'none';
             newContainer.style.display = 'block';
             inputLokasi.readOnly = false;
-            inputLat.readOnly = false;
-            inputLng.readOnly = false;
+            if(inputLat) inputLat.readOnly = false;
+            if(inputLng) inputLng.readOnly = false;
             inputLokasi.value = '';
             inputLat.value = '';
             inputLng.value = '';
@@ -1095,12 +1081,12 @@
         const option = select.options[select.selectedIndex];
         if (option && option.value !== '') {
             document.getElementById('lokasi').value = option.value;
-            document.getElementById('latitude').value = option.dataset.lat || '';
-            document.getElementById('longitude').value = option.dataset.lng || '';
+            let latEl = document.getElementById('latitude'); if(latEl) latEl.value = option.dataset.lat || '';
+            let lngEl = document.getElementById('longitude'); if(lngEl) lngEl.value = option.dataset.lng || '';
         } else {
             document.getElementById('lokasi').value = '';
-            document.getElementById('latitude').value = '';
-            document.getElementById('longitude').value = '';
+            let latEl2 = document.getElementById('latitude'); if(latEl2) latEl2.value = '';
+            let lngEl2 = document.getElementById('longitude'); if(lngEl2) lngEl2.value = '';
         }
     }
 

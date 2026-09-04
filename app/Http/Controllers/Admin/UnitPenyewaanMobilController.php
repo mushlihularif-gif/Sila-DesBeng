@@ -133,13 +133,9 @@ class UnitPenyewaanMobilController extends Controller
             'harga_kecamatan_khusus' => 'nullable|array',
             'harga_kecamatan_khusus.*' => 'nullable|string',
             'bbm_ditanggung' => 'required|string|in:Pengelola,Penyewa',
-            
-            'nama_supir' => 'nullable|string|max:255',
-            'kontak_supir' => 'nullable|string|max:255',
-            
-            'nama_supir_borongan' => 'nullable|string|max:255',
-            'kontak_supir_borongan' => 'nullable|string|max:255',
-            'bbm_ditanggung_borongan' => 'required|string|in:Pengelola,Penyewa',
+            'opsi_supir' => 'nullable|string|in:Lepas Kunci,Dengan Supir,Bebas Pilih',
+            'bbm_ditanggung_borongan' => 'required|string|in:Pengelola,Pemerintah Desa,Penyewa',
+            'opsi_supir_borongan' => 'nullable|string|in:Lepas Kunci,Dengan Supir,Bebas Pilih',
         ]);
 
         $hargaBersih = (int) preg_replace('/[^0-9]/', '', $request->harga_sewa);
@@ -194,13 +190,9 @@ class UnitPenyewaanMobilController extends Controller
             'tipe_tarif_borongan' => $request->tipe_tarif_borongan ?? 'jarak',
             'tarif_borongan_wilayah' => $tarifBoronganWilayah ? json_encode($tarifBoronganWilayah) : null,
             'bbm_ditanggung' => $request->bbm_ditanggung,
-            
-            'nama_supir' => $request->nama_supir,
-            'kontak_supir' => $request->kontak_supir,
-            
-            'nama_supir_borongan' => $request->nama_supir_borongan,
-            'kontak_supir_borongan' => $request->kontak_supir_borongan,
+            'opsi_supir' => $request->opsi_supir ?? 'Lepas Kunci',
             'bbm_ditanggung_borongan' => $request->bbm_ditanggung_borongan,
+            'opsi_supir_borongan' => $request->opsi_supir_borongan ?? 'Lepas Kunci',
             'is_harian_active' => $request->has('is_harian_active') ? 1 : 0,
             'is_borongan_active' => $request->has('is_borongan_active') ? 1 : 0,
         ];
@@ -288,11 +280,9 @@ class UnitPenyewaanMobilController extends Controller
             'harga_kecamatan_khusus' => 'nullable|array',
             'harga_kecamatan_khusus.*' => 'nullable|string',
             'bbm_ditanggung' => 'required|string|in:Pengelola,Penyewa',
-            
-            
-            
-            
-            'bbm_ditanggung_borongan' => 'required|string|in:Pengelola,Penyewa',
+            'opsi_supir' => 'nullable|string|in:Lepas Kunci,Dengan Supir,Bebas Pilih',
+            'bbm_ditanggung_borongan' => 'required|string|in:Pengelola,Pemerintah Desa,Penyewa',
+            'opsi_supir_borongan' => 'nullable|string|in:Lepas Kunci,Dengan Supir,Bebas Pilih',
         ]);
 
         $hargaBersih = (int) preg_replace('/[^0-9]/', '', $request->harga_sewa);
@@ -352,15 +342,9 @@ class UnitPenyewaanMobilController extends Controller
             'tipe_tarif_borongan' => $request->tipe_tarif_borongan ?? 'jarak',
             'tarif_borongan_wilayah' => $tarifBoronganWilayah ? json_encode($tarifBoronganWilayah) : null,
             'bbm_ditanggung' => $request->bbm_ditanggung,
-            
-            
-            
-            
-            
-            
-            
-            
+            'opsi_supir' => $request->opsi_supir ?? 'Lepas Kunci',
             'bbm_ditanggung_borongan' => $request->bbm_ditanggung_borongan,
+            'opsi_supir_borongan' => $request->opsi_supir_borongan ?? 'Lepas Kunci',
             'is_harian_active' => $request->has('is_harian_active') ? 1 : 0,
             'is_borongan_active' => $request->has('is_borongan_active') ? 1 : 0,
         ];

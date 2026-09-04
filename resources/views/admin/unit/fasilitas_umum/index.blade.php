@@ -124,21 +124,47 @@
                                             </div>
                                         </div>
                                         <div class="card-body d-flex flex-column">
-                                            <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+                                            <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-2">
                                                 <h5 class="card-title fw-bold text-capitalize mb-0">{{ $mobil->nama_mobil }}</h5>
-                                                <span class="badge bg-label-info rounded-pill px-3 text-nowrap">{{ $mobil->kategori }}</span>
+                                                @if($mobil->kategori === 'ambulans')
+                                                    <span class="badge bg-label-danger rounded-pill px-3 py-1 text-nowrap"><i class="bx bx-plus-medical me-1"></i>Ambulans</span>
+                                                @else
+                                                    <span class="badge bg-label-secondary rounded-pill px-3 py-1 text-nowrap"><i class="bx bx-car me-1"></i>Operasional</span>
+                                                @endif
                                             </div>
+
+                                            @php
+                                                $plat = str_replace('Plat: ', '', $mobil->deskripsi);
+                                            @endphp
+                                            @if($plat && $plat !== '-')
+                                                <div class="mb-2">
+                                                    <span class="badge bg-light text-dark border font-monospace px-2 py-1"><i class="bx bx-barcode me-1"></i>{{ $plat }}</span>
+                                                </div>
+                                            @endif
+
+                                            @if($mobil->kategori === 'ambulans')
+                                                <div class="mt-1 mb-2">
+                                                    <small class="text-muted d-block mb-1 fw-semibold"><i class="bx bx-user-pin me-1"></i>Supir Siaga:</small>
+                                                    @if($mobil->supirs && $mobil->supirs->count() > 0)
+                                                        <div class="d-flex flex-wrap gap-1">
+                                                            @foreach($mobil->supirs as $supir)
+                                                                <span class="badge bg-label-primary px-2 py-1" style="font-size: 0.75rem;" title="{{ $supir->kontak }}">{{ $supir->nama }}</span>
+                                                            @endforeach
+                                                        </div>
+                                                    @else
+                                                        <span class="badge bg-label-warning px-2 py-1" style="font-size: 0.75rem;">Belum ada supir siaga</span>
+                                                    @endif
+                                                </div>
+                                            @endif
                                             
-                                            <div class="mt-4 pt-3 border-top d-flex gap-1 flex-nowrap justify-content-center">
-                                                <a href="{{ route('admin.unit.ambulans.show', $mobil->id) }}"
-                                                    class="btn btn-sm btn-outline-info flex-grow-1"><i class="bx bx-info-circle"></i></a>
+                                            <div class="mt-auto pt-3 border-top d-flex gap-2 flex-nowrap justify-content-center">
                                                 <a href="{{ route('admin.unit.ambulans.edit', $mobil->id) }}"
-                                                    class="btn btn-sm btn-outline-warning flex-grow-1"><i class="bx bx-edit"></i></a>
+                                                    class="btn btn-sm btn-outline-warning flex-grow-1"><i class="bx bx-edit me-1"></i> Edit</a>
                                                 <form action="{{ route('admin.unit.ambulans.destroy', $mobil->id) }}" method="POST"
                                                     onsubmit="return confirm('Apakah Anda yakin ingin menghapus kendaraan ini?');" class="d-flex flex-grow-1 m-0 p-0">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger w-100"><i class="bx bx-trash"></i></button>
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger w-100"><i class="bx bx-trash me-1"></i> Hapus</button>
                                                 </form>
                                             </div>
                                         </div>
@@ -279,26 +305,6 @@
                         
                         <div class="row">
                             <div class="col-xl-8">
-                                <!-- Info Card -->
-                                <div class="card border-0 shadow-sm rounded-4 mb-4">
-                                    <div class="card-header bg-white border-bottom p-4">
-                                        <div class="d-flex align-items-center">
-                                            <div class="avatar avatar-sm bg-label-primary rounded-circle me-3 d-flex justify-content-center align-items-center"><i class="bx bx-phone-call"></i></div>
-                                            <h5 class="mb-0 fw-bold">Kontak Layanan</h5>
-                                        </div>
-                                    </div>
-                                    <div class="card-body p-4">
-                                        <div class="mb-2">
-                                            <label class="form-label text-dark fw-bold">Nomor WhatsApp Pengurus Fasilitas Umum & Ambulans</label>
-                                            <div class="input-group input-group-merge border-light-subtle shadow-sm rounded-3">
-                                                <span class="input-group-text"><i class="bx bxl-whatsapp text-success"></i></span>
-                                                <input type="text" class="form-control" name="kontak_aula" value="{{ $regionSettings['kontak_aula'] ?? '' }}" placeholder="Contoh: 08123456789">
-                                            </div>
-                                            <small class="text-muted mt-2 d-block">Nomor ini akan dihubungi warga jika ada pertanyaan seputar peminjaman fasilitas.</small>
-                                        </div>
-                                    </div>
-                                </div>
-
                                 <!-- SOP Card -->
                                 <div class="card border-0 shadow-sm rounded-4 mb-4">
                                     <div class="card-header bg-white border-bottom p-4">

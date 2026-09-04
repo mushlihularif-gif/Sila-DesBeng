@@ -54,7 +54,21 @@ class UnitPasarDaerahController extends Controller
         $tab = $request->get('tab', 'produk');
 
         // Data Kecamatan
-        $semuaKecamatan = Region::where('type', 'kecamatan')->orderBy('name', 'asc')->get();
+                $adminKecamatanId = null;
+        $currRegion = auth()->user()->region;
+        while ($currRegion) {
+            if (strtolower($currRegion->type) === 'kecamatan') {
+                $adminKecamatanId = $currRegion->id;
+                break;
+            }
+            $currRegion = $currRegion->parent;
+        }
+
+        $queryKecamatan = Region::where('type', 'kecamatan')->orderBy('name', 'asc');
+        if ($adminKecamatanId) {
+            $queryKecamatan->where('id', '!=', $adminKecamatanId);
+        }
+        $semuaKecamatan = $queryKecamatan->get();
 
         // Data Ulasan
         $reviews = \App\Models\PasarReview::whereHas('produk', function($query) use ($admin) {

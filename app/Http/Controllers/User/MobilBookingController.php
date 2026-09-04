@@ -40,8 +40,12 @@ class MobilBookingController extends Controller
         $sop_mobil = $paymentInfo['sop_mobil_' . $activeSop] ?? ($activeSop == 'ditanggung' ? $defaultSopDitanggung : $defaultSopTidakDitanggung);
         
         $quantity = request()->get('quantity', 1);
+
+        $isWilayah = ($item->tipe_tarif_borongan ?? 'jarak') === 'wilayah';
+        $tarifWilayah = json_decode($item->tarif_borongan_wilayah, true) ?? [];
+        $kecamatanKhusus = \App\Models\Region::where('type', 'kecamatan')->orderBy('name', 'asc')->get();
         
-        return view('users.mobil-rental-booking', compact('item', 'setting', 'quantity', 'sop_mobil'));
+        return view('users.mobil-rental-booking', compact('item', 'setting', 'quantity', 'sop_mobil', 'isWilayah', 'tarifWilayah', 'kecamatanKhusus'));
     }
 
     public function store(Request $request)
@@ -49,7 +53,9 @@ class MobilBookingController extends Controller
         $validated = $request->validate([
             'mobil_id' => 'required|exists:mobils,id',
             'jenis_sewa' => 'required|in:harian,borongan',
-            'delivery_method' => 'required|in:antar,jemput',
+            'opsi_layanan_supir' => 'nullable|in:sendiri,pengelola',
+            'delivery_method' => 'nullable|in:antar,jemput',
+            'dengan_supir' => 'nullable|boolean',
             'quantity' => 'required|integer|min:1|max:50',
             'start_date' => 'required|date|after_or_equal:today',
             'end_date' => 'nullable|date|after_or_equal:start_date',
@@ -58,7 +64,7 @@ class MobilBookingController extends Controller
             'payment_method' => 'required|in:tunai',
             
             'recipient_name' => 'required|string|max:255',
-            'delivery_address' => 'required|string',
+            'delivery_address' => 'required|string|max:1000',
             
             'payment_proof' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
             
@@ -74,6 +80,12 @@ class MobilBookingController extends Controller
                 'message' => "Mohon maaf, mobil sedang tidak tersedia saat ini."
             ], 400);
         }
+
+        // Tentukan nilai dengan_supir & delivery_method berdasarkan opsi_layanan_supir
+        $denganSupir = ($request->input('opsi_layanan_supir') === 'pengelola') 
+            || $request->boolean('dengan_supir') 
+            || ($request->input('delivery_method') === 'antar');
+        $deliveryMethod = $denganSupir ? 'antar' : 'jemput';
 
         // Hitung totalAmount berdasarkan jenis sewa
         if ($validated['jenis_sewa'] === 'harian') {
@@ -126,16 +138,18 @@ class MobilBookingController extends Controller
         $booking = MobilBooking::create([
             'user_id' => Auth::id(),
             'mobil_id' => $validated['mobil_id'],
+            'region_id' => $item->region_id ?? Auth::user()->region_id,
             'jenis_sewa' => $validated['jenis_sewa'],
-            'delivery_method' => $validated['delivery_method'],
+            'dengan_supir' => $denganSupir,
+            'delivery_method' => $deliveryMethod,
             'rental_purpose' => $validated['rental_purpose'],
             'quantity' => $validated['quantity'],
             'start_date' => $validated['start_date'],
             'end_date' => $validated['end_date'],
             'distance_km' => $validated['distance_km'] ?? 1,
             'tujuan_wilayah' => $validated['tujuan_wilayah'] ?? null,
-            'recipient_name' => $validated['recipient_name'] ?? null,
-            'delivery_address' => $validated['delivery_address'] ?? null,
+            'recipient_name' => $validated['recipient_name'],
+            'delivery_address' => $validated['delivery_address'],
             'payment_method' => $validated['payment_method'],
             'payment_proof' => $paymentProofPath,
             'total_amount' => $totalAmount,
@@ -152,6 +166,26 @@ class MobilBookingController extends Controller
         ]);
 
         $booking->update(['receipt_path' => $receipt->receipt_number]);
+
+        // Buat notifikasi admin
+        \App\Models\AdminNotification::create([
+            'type' => 'rental_request',
+            'reference_id' => $booking->id,
+            'region_id' => $item->region_id,
+            'title' => 'Permintaan Penyewaan Mobil Baru',
+            'message' => 'Permintaan sewa mobil ' . ($item->nama_mobil ?? $item->nama_barang) . ' (' . ($denganSupir ? 'Dengan Supir' : 'Lepas Kunci') . ') dari ' . Auth::user()->name,
+            'is_read' => false,
+        ]);
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Pemesanan Mobil berhasil dibuat! Menunggu konfirmasi admin.',
+                'booking_id' => $booking->id,
+                'receipt_id' => $booking->id,
+                'receipt_number' => $receipt->receipt_number,
+            ]);
+        }
 
         return redirect()->route('user.dashboard')
             ->with('success', 'Pemesanan Mobil berhasil dibuat! Menunggu konfirmasi admin.')

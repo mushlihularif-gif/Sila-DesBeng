@@ -611,9 +611,7 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
             ]);
         });
 
-        // Ambulans Darurat
-        Route::get('ambulans/sop', [\App\Http\Controllers\Admin\UnitAmbulansController::class, 'sop'])->name('admin.unit.ambulans.sop');
-        Route::post('ambulans/sop', [\App\Http\Controllers\Admin\UnitAmbulansController::class, 'updateSop'])->name('admin.unit.ambulans.sop.update');
+        // Ambulans Darurat & Kendaraan Operasional
         Route::resource('ambulans', \App\Http\Controllers\Admin\UnitAmbulansController::class)->names([
             'index' => 'admin.unit.ambulans.index',
             'create' => 'admin.unit.ambulans.create',
