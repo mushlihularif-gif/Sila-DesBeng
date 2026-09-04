@@ -43,7 +43,15 @@ class UnitPenyewaanController extends Controller
             ->paginate(6)
             ->appends(['search' => $search]);
         
-        return view('admin.unit.penyewaan.index', compact('barangs', 'search', 'sop_penyewaan_alat'));
+        $tab = $request->get('tab', 'katalog');
+        $chats = \App\Models\UnitChatSession::where('region_id', $user ? $user->region_id : null)
+            ->where('service_type', 'penyewaan')
+            ->with('user')
+            ->orderBy('last_message_at', 'desc')
+            ->get();
+        $totalUnreadChats = $chats->sum('unread_admin_count');
+        
+        return view('admin.unit.penyewaan.index', compact('barangs', 'search', 'sop_penyewaan_alat', 'chats', 'totalUnreadChats', 'tab'));
     }
 
     /**

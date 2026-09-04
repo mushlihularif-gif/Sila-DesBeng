@@ -105,10 +105,10 @@
                                                 @endforeach
                                             @else
                                                 <div class="carousel-item active" data-bs-interval="3000">
-                                                    <img src="{{ asset('User/img/elemen/kuncislide1r.png') }}" class="d-block w-100 rounded-3" alt="Slide 1">
+                                                    <img src="{{ asset('User/img/slidebanner/kuncislide1r.png') }}?v={{ time() }}" class="d-block w-100 rounded-3" alt="Slide 1">
                                                 </div>
                                                 <div class="carousel-item" data-bs-interval="3000">
-                                                    <img src="{{ asset('User/img/elemen/kuncislide2r.png') }}" class="d-block w-100 rounded-3" alt="Slide 2">
+                                                    <img src="{{ asset('User/img/slidebanner/kuncislide2r.png') }}?v={{ time() }}" class="d-block w-100 rounded-3" alt="Slide 2">
                                                 </div>
                                             @endif
                                         </div>

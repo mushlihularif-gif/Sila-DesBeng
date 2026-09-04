@@ -87,8 +87,10 @@
                             <small class="text-muted">Dokumentasi kegiatan dan informasi publik lintas wilayah.</small>
                         </div>
                     </div>
-                    <div class="w-100 w-md-auto text-end">
-                        <a href="{{ route('admin.announcements.create', ['category' => 'Berita']) }}" class="btn btn-primary rounded-pill px-4 shadow-sm w-100"><i class="bx bx-plus me-1"></i> Buat Berita</a>
+                    <div class="flex-shrink-0 ms-md-auto">
+                        <a href="{{ route('admin.announcements.create', ['category' => 'Berita']) }}" class="btn btn-primary rounded-pill px-4 py-2 shadow-sm d-inline-flex align-items-center fw-semibold">
+                            <i class="bx bx-plus me-1 fs-5"></i> Buat Berita
+                        </a>
                     </div>
                 </div>
                 
@@ -141,8 +143,10 @@
                             <small class="text-muted">Informasi teknis dan instruksi yang ditujukan untuk wilayah spesifik.</small>
                         </div>
                     </div>
-                    <div class="w-100 w-md-auto text-end">
-                        <a href="{{ route('admin.announcements.create', ['category' => 'Pengumuman']) }}" class="btn btn-warning rounded-pill px-4 shadow-sm text-dark w-100"><i class="bx bx-plus me-1"></i> Buat Pengumuman</a>
+                    <div class="flex-shrink-0 ms-md-auto">
+                        <a href="{{ route('admin.announcements.create', ['category' => 'Pengumuman']) }}" class="btn btn-warning rounded-pill px-4 py-2 shadow-sm text-dark d-inline-flex align-items-center fw-semibold">
+                            <i class="bx bx-plus me-1 fs-5"></i> Buat Pengumuman
+                        </a>
                     </div>
                 </div>
 

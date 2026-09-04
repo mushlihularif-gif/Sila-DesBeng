@@ -127,3 +127,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/logout', [AuthController::class, 'logout']);
 });
+
+// Chat Unit Layanan Terpisah (Gas, Sewa Alat, Sewa Mobil, Fasilitas Umum)
+Route::prefix('unit-chat')->group(function () {
+    Route::get('/unread-counts', [\App\Http\Controllers\Api\UnitChatApiController::class, 'getUnreadCounts']);
+    Route::get('/{service}/history', [\App\Http\Controllers\Api\UnitChatApiController::class, 'getChatHistory']);
+    Route::post('/{service}/send', [\App\Http\Controllers\Api\UnitChatApiController::class, 'sendChatMessage']);
+    Route::post('/{service}/escalate', [\App\Http\Controllers\Api\UnitChatApiController::class, 'escalateChat']);
+});

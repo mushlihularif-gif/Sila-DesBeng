@@ -23,16 +23,25 @@ class GasController extends Controller
         }
 
         $search = $request->get('search');
-        
         $gases = Gas::query()
             ->when($search, function ($query, $search) {
-                return $query->searchWhereLike(['jenis_gas', 'kategori'], $search);
+                return $query->where('jenis_gas', 'LIKE', "%{$search}%")
+                           ->orWhere('kategori', 'LIKE', "%{$search}%");
             })
             ->orderBy('created_at', 'desc')
             ->paginate(9)
             ->appends(['search' => $search]);
 
-        return view('admin.unit.penjualan_gas.index', compact('gases', 'search'));
+        $tab = $request->get('tab', 'katalog');
+        $admin = auth()->user();
+        $chats = \App\Models\UnitChatSession::where('region_id', $admin ? $admin->region_id : null)
+            ->where('service_type', 'gas')
+            ->with('user')
+            ->orderBy('last_message_at', 'desc')
+            ->get();
+        $totalUnreadChats = $chats->sum('unread_admin_count');
+
+        return view('admin.unit.penjualan_gas.index', compact('gases', 'search', 'chats', 'totalUnreadChats', 'tab'));
     }
 
 

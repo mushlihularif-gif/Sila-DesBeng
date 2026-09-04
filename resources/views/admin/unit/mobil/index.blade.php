@@ -16,10 +16,30 @@
             </div>
         </div>
 
-        <!-- Products Grid -->
-        @if($mobils->count() > 0)
-            <div class="row row-cols-2 row-cols-md-3 row-cols-xl-4 g-2 g-md-3">
-                @foreach ($mobils as $mobil)
+        <div class="nav-align-top mb-4">
+            <ul class="nav nav-pills gap-2 mb-4" role="tablist">
+                <li class="nav-item">
+                    <button type="button" class="nav-link {{ $tab == 'katalog' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-mobil-katalog" aria-controls="navs-mobil-katalog" aria-selected="{{ $tab == 'katalog' ? 'true' : 'false' }}">
+                        <i class="bx bx-car me-1"></i> Daftar Mobil
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button type="button" class="nav-link {{ $tab == 'chat' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-mobil-chat" aria-controls="navs-mobil-chat" aria-selected="{{ $tab == 'chat' ? 'true' : 'false' }}">
+                        <i class="bx bx-chat me-1"></i> Layanan Pesan
+                        @if(isset($totalUnreadChats) && $totalUnreadChats > 0)
+                            <span class="badge rounded-pill bg-danger ms-1 px-2 py-0" style="font-size: 0.75rem;">{{ $totalUnreadChats }}</span>
+                        @endif
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content bg-transparent p-0 border-0 shadow-none">
+                <!-- TAB 1: DAFTAR MOBIL -->
+                <div class="tab-pane fade {{ $tab == 'katalog' ? 'show active' : '' }}" id="navs-mobil-katalog" role="tabpanel">
+                    <!-- Products Grid -->
+                    @if($mobils->count() > 0)
+                        <div class="row row-cols-2 row-cols-md-3 row-cols-xl-4 g-2 g-md-3">
+                            @foreach ($mobils as $mobil)
                     <div class="col">
                         <div class="card h-100 product-card">
                             <div class="position-relative">
@@ -150,11 +170,26 @@
                 </nav>
             </div>
         @endif
+                </div>
+
+                <!-- TAB 2: CHAT WARGA MOBIL -->
+                <div class="tab-pane fade {{ $tab == 'chat' ? 'show active' : '' }}" id="navs-mobil-chat" role="tabpanel">
+                    @include('admin.unit.partials.unit_chat_panel', [
+                        'serviceType' => 'mobil',
+                        'chatServiceTitle' => 'Penyewaan Mobil / Kendaraan',
+                        'chats' => $chats
+                    ])
+                </div>
+            </div>
+        </div>
     </div>
 @endsection
 
 @push('styles')
 <style>
+    .nav-pills .nav-link { color: #6c757d; font-weight: 600; padding: 0.6rem 1.2rem; transition: all 0.3s; border-radius: 50rem; }
+    .nav-pills .nav-link:hover { background-color: #f8f9fa; color: #566a7f; }
+    .nav-pills .nav-link.active { background-color: #696cff; color: #fff; box-shadow: 0 4px 6px rgba(105, 108, 255, 0.2); }
     
     .card {
         transition: transform 0.2s ease;

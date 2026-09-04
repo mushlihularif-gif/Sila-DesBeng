@@ -53,6 +53,7 @@ class PasarOrder extends Model
         'admin_cancellation_response',
         'delivery_proof_image',
         'receipt_path',
+        'delivered_at',
     ];
 
     protected $casts = [
@@ -64,6 +65,7 @@ class PasarOrder extends Model
         'distance_km' => 'decimal:2',
         'payment_expiry_time' => 'datetime',
         'confirmed_at' => 'datetime',
+        'delivered_at' => 'datetime',
         'completion_time' => 'datetime',
         'cancellation_requested_at' => 'datetime',
     ];

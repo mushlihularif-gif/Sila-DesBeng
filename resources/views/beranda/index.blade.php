@@ -57,31 +57,13 @@
                 <div class="relative overflow-hidden group">
                     <!-- Wadah Slide -->
                     <div id="carousel-slides" class="flex transition-transform duration-500 ease-out w-full">
-                        <!-- Default Fallback Slides (Selalu Tampil sebagai Slide 1 & 2) -->
+                        <!-- Default Slides (Terkunci 2 Slide Bawaan Sistem) -->
                         <div class="carousel-slide w-full min-w-full flex-shrink-0 relative">
-                            <img src="{{ asset('User/img/elemen/kuncislide1r.png') }}" class="w-full h-auto object-contain object-top" style="max-height: 500px;">
+                            <img src="{{ asset('User/img/slidebanner/kuncislide1r.png') }}?v={{ time() }}" class="w-full h-auto object-contain object-top" style="max-height: 500px;" alt="Slide 1">
                         </div>
                         <div class="carousel-slide w-full min-w-full flex-shrink-0 relative">
-                            <img src="{{ asset('User/img/elemen/kuncislide2r.png') }}" class="w-full h-auto object-contain object-top" style="max-height: 500px;">
+                            <img src="{{ asset('User/img/slidebanner/kuncislide2r.png') }}?v={{ time() }}" class="w-full h-auto object-contain object-top" style="max-height: 500px;" alt="Slide 2">
                         </div>
-
-                        <!-- Banner Dinamis dari Admin (Tampil sebagai Slide 3 dst) -->
-                        @if(isset($activeBanners) && $activeBanners->count() > 0)
-                            @foreach($activeBanners as $index => $banner)
-                            <div class="carousel-slide w-full min-w-full flex-shrink-0 relative">
-                                <!-- Banner Image -->
-                                @if($banner->target_url)
-                                <a href="{{ $banner->target_url }}" target="_blank">
-                                @endif
-                                    <img src="{{ Storage::url($banner->image_path) }}" alt="{{ $banner->title ?? 'Banner Tambahan ' . ($index + 1) }}"
-                                        loading="lazy"
-                                        class="w-full h-auto object-contain object-top" style="max-height: 500px;">
-                                @if($banner->target_url)
-                                </a>
-                                @endif
-                            </div>
-                            @endforeach
-                        @endif
                     </div>
 
                     <!-- Navigation Buttons -->
@@ -99,12 +81,9 @@
                         </svg>
                     </button>
 
-                    <!-- Indicators -->
+                    <!-- Indicators (Terkunci 2 Slide) -->
                     <div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2.5 z-10">
-                        @php
-                            $slideCount = 2 + ((isset($activeBanners) && $activeBanners->count() > 0) ? $activeBanners->count() : 0);
-                        @endphp
-                        @for($i = 0; $i < $slideCount; $i++)
+                        @for($i = 0; $i < 2; $i++)
                         <button
                             class="carousel-indicator {{ $i == 0 ? 'w-8 h-2.5 bg-white' : 'w-2.5 h-2.5 bg-white/50 hover:bg-white/75' }} rounded-full shadow-md transition-all duration-300"
                             data-slide="{{ $i }}"></button>
@@ -1124,7 +1103,7 @@
                 let indicators = document.querySelectorAll('.carousel-indicator');
 
                 let currentSlide = 0;
-                const totalSlides = {{ isset($activeBanners) && $activeBanners->count() > 0 ? $activeBanners->count() : 2 }};
+                const totalSlides = 2;
                 let autoSlideInterval;
                 const autoSlideDelay = 7000; // 7 Seconds
 

@@ -151,6 +151,7 @@
             @endif
         </div>
     </section>
+    @include('users.partials.service_chat_widget', ['serviceType' => 'fasilitas_umum', 'serviceTitle' => 'Fasilitas Umum'])
 </main>
 @endsection
 
