@@ -216,7 +216,10 @@ class UnitPenyewaanMobilController extends Controller
             $data['foto_3'] = ImageCompressorService::compressAndStore($request->file('foto_3'), 'mobils');
         }
 
-        Mobil::create($data);
+        $mobil = Mobil::create($data);
+
+        // Broadcast armada mobil baru ke warga
+        \App\Services\NotificationService::broadcastNewProduct('Sewa Mobil', $mobil->nama_mobil, $mobil->region_id, route('mobil.index'));
 
         return redirect()->route('admin.unit.mobil.index')->with('success', 'Mobil berhasil ditambahkan.');
     }

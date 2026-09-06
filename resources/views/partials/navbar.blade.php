@@ -90,8 +90,51 @@
             .sd-nav-links, .sd-nav-auth { display: none !important; }
             .sd-nav-mobile { display: block !important; }
         }
+
+        /* Bulatan Merah Lencana Notifikasi */
+        .sd-notif-circle {
+            width: 20px !important;
+            height: 20px !important;
+            min-width: 20px !important;
+            min-height: 20px !important;
+            max-width: 20px !important;
+            max-height: 20px !important;
+            border-radius: 50% !important;
+            background-color: #ef4444 !important;
+            color: #ffffff !important;
+            font-size: 11px !important;
+            font-weight: 700 !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            text-align: center !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            box-sizing: border-box !important;
+            line-height: 1 !important;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+            user-select: none !important;
+        }
+        .sd-notif-circle-avatar {
+            position: absolute !important;
+            top: 0px !important;
+            right: 0px !important;
+            pointer-events: none !important;
+            z-index: 10 !important;
+        }
+        .sd-notif-circle span {
+            display: block !important;
+            line-height: 1 !important;
+            transform: translateY(0.5px) !important;
+        }
     </style>
 @endpush
+
+@php
+    $navUnreadNotifs = auth()->check()
+        ? \App\Models\Notification::where('user_id', auth()->id())->where('is_read', false)->count()
+        : 0;
+@endphp
 
 <!-- ==================== SILA DESBENG NAVBAR ==================== -->
 <nav class="sd-navbar" id="master-navbar">
@@ -184,13 +227,18 @@
                             </svg>
                             @endif
                         </span>
-                        <div class="w-11 h-11 rounded-full overflow-hidden bg-[#D1D5DB] flex-shrink-0 shadow-md">
-                            @if (auth()->user()->file)
-                                <img src="{{ auth()->user()->file->file_stream }}" alt="Avatar" class="w-full h-full object-cover">
-                            @else
-                                <div class="w-full h-full flex items-center justify-center">
-                                    <svg class="w-7 h-7 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-                                </div>
+                        <div class="relative w-11 h-11 rounded-full bg-[#D1D5DB] flex-shrink-0 shadow-md">
+                            <div class="w-full h-full rounded-full overflow-hidden">
+                                @if (auth()->user()->file)
+                                    <img src="{{ auth()->user()->file->file_stream }}" alt="Avatar" class="w-full h-full object-cover">
+                                @else
+                                    <div class="w-full h-full flex items-center justify-center">
+                                        <svg class="w-7 h-7 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                                    </div>
+                                @endif
+                            </div>
+                            @if($navUnreadNotifs > 0)
+                                <span class="sd-notif-circle sd-notif-circle-avatar" style="position: absolute; top: 0px; right: 0px; width: 20px; height: 20px; min-width: 20px; min-height: 20px; max-width: 20px; max-height: 20px; border-radius: 50%; background-color: #ef4444; color: #ffffff; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; text-align: center; padding: 0; line-height: 1; pointer-events: none; z-index: 10; box-shadow: 0 1px 3px rgba(0,0,0,0.2);"><span>{{ $navUnreadNotifs > 9 ? '9+' : $navUnreadNotifs }}</span></span>
                             @endif
                         </div>
                     </button>
@@ -226,7 +274,12 @@
                                 </a>
                                 <div class="h-px bg-gray-100 mx-3 my-1"></div>
                                 <a href="{{ route('user.notifications') }}" class="block px-4 py-2.5 text-gray-800 hover:bg-blue-50 hover:border-l-[3px] hover:border-l-blue-500 transition-all duration-150 border-l-[3px] border-l-transparent">
-                                    <span class="text-[15px] font-normal text-center block">Notifikasi</span>
+                                    <span class="text-[15px] font-normal flex items-center justify-center gap-2">
+                                        <span>Notifikasi</span>
+                                        @if($navUnreadNotifs > 0)
+                                            <span class="sd-notif-circle" style="width: 20px; height: 20px; min-width: 20px; min-height: 20px; max-width: 20px; max-height: 20px; border-radius: 50%; background-color: #ef4444; color: #ffffff; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; text-align: center; padding: 0; line-height: 1; flex-shrink: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.2);"><span>{{ $navUnreadNotifs > 9 ? '9+' : $navUnreadNotifs }}</span></span>
+                                        @endif
+                                    </span>
                                 </a>
                                 <div class="h-px bg-gray-100 mx-3 my-1"></div>
                                 <button type="button" id="btn-open-logout" class="block w-full px-4 py-2.5 text-red-600 hover:bg-red-50 hover:border-l-[3px] hover:border-l-red-500 transition-all duration-150 bg-transparent border-none outline-none cursor-pointer border-l-[3px] border-l-transparent">
@@ -393,15 +446,20 @@
     <div class="px-5 py-6 border-t mt-2">
         @auth
             <div class="flex items-center gap-3 mb-4 pb-4 border-b">
-                <div class="w-12 h-12 rounded-full overflow-hidden bg-[#D1D5DB] flex-shrink-0">
-                    @if (auth()->user()->file)
-                        <img src="{{ auth()->user()->file->file_stream }}" alt="Avatar" class="w-full h-full object-cover">
-                    @else
-                        <div class="w-full h-full flex items-center justify-center">
-                            <svg class="w-7 h-7 text-white" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                            </svg>
-                        </div>
+                <div class="relative w-12 h-12 rounded-full bg-[#D1D5DB] flex-shrink-0">
+                    <div class="w-full h-full rounded-full overflow-hidden">
+                        @if (auth()->user()->file)
+                            <img src="{{ auth()->user()->file->file_stream }}" alt="Avatar" class="w-full h-full object-cover">
+                        @else
+                            <div class="w-full h-full flex items-center justify-center">
+                                <svg class="w-7 h-7 text-white" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                                </svg>
+                            </div>
+                        @endif
+                    </div>
+                    @if($navUnreadNotifs > 0)
+                        <span class="sd-notif-circle sd-notif-circle-avatar" style="position: absolute; top: 0px; right: 0px; width: 20px; height: 20px; min-width: 20px; min-height: 20px; max-width: 20px; max-height: 20px; border-radius: 50%; background-color: #ef4444; color: #ffffff; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; text-align: center; padding: 0; line-height: 1; pointer-events: none; z-index: 10; box-shadow: 0 1px 3px rgba(0,0,0,0.2);"><span>{{ $navUnreadNotifs > 9 ? '9+' : $navUnreadNotifs }}</span></span>
                     @endif
                 </div>
                 <div>
@@ -428,6 +486,12 @@
                 </a>
                 <a href="{{ route('user.activity') }}" class="block w-full text-center px-4 py-2.5 rounded-lg font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition">
                     Aktivitas
+                </a>
+                <a href="{{ route('user.notifications') }}" class="block w-full text-center px-4 py-2.5 rounded-lg font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition flex items-center justify-center gap-2">
+                    <span>Notifikasi</span>
+                    @if($navUnreadNotifs > 0)
+                        <span class="sd-notif-circle" style="width: 20px; height: 20px; min-width: 20px; min-height: 20px; max-width: 20px; max-height: 20px; border-radius: 50%; background-color: #ef4444; color: #ffffff; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; text-align: center; padding: 0; line-height: 1; flex-shrink: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.2);"><span>{{ $navUnreadNotifs > 9 ? '9+' : $navUnreadNotifs }}</span></span>
+                    @endif
                 </a>
                 <button type="button" id="btn-open-logout-mobile" class="block w-full text-center px-4 py-2.5 rounded-lg font-medium bg-red-50 text-red-600 hover:bg-red-100 transition border-none outline-none cursor-pointer">
                     Keluar

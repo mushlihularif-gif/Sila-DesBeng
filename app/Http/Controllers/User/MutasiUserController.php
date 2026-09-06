@@ -67,6 +67,9 @@ class MutasiUserController extends Controller
             'is_read' => false,
         ]);
 
+        // Notifikasi ke warga pemohon
+        \App\Services\NotificationService::notifyMutasiSubmitted($mutasi);
+
         return redirect()->back()->with('success', 'Pengajuan pindah desa berhasil dikirim ke Admin Desa Anda untuk persetujuan (Handshake Protocol).');
     }
 }

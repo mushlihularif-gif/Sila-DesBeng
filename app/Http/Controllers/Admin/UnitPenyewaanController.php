@@ -179,7 +179,10 @@ class UnitPenyewaanController extends Controller
             $data['foto_3'] = ImageCompressorService::compressAndStore($request->file('foto_3'), 'barang');
         }
 
-        Barang::create($data);
+        $barang = Barang::create($data);
+
+        // Broadcast produk baru ke warga
+        \App\Services\NotificationService::broadcastNewProduct('Penyewaan Alat', $barang->nama_barang, $barang->region_id, route('rental.index'));
 
         return redirect()->route('admin.unit.penyewaan.index')->with('success', 'Barang berhasil ditambahkan.');
     }

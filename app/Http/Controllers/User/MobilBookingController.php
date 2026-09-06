@@ -177,6 +177,9 @@ class MobilBookingController extends Controller
             'is_read' => false,
         ]);
 
+        // Notifikasi ke pemesan
+        \App\Services\NotificationService::notifyOrderCreated('mobil', $booking, ($item->nama_mobil ?? $item->nama_barang));
+
         if ($request->wantsJson() || $request->ajax()) {
             return response()->json([
                 'success' => true,

@@ -49,14 +49,17 @@ class PartnerApplicationController extends Controller
         $application = \App\Models\PartnerApplication::create($validated);
 
         if (auth()->check()) {
-            Notification::create([
-                'user_id' => auth()->id(),
+            \App\Services\NotificationService::notifyPartnerApplicationSubmitted($application);
+        }
+
+        if ($validated['parent_region_id']) {
+            \App\Models\AdminNotification::create([
                 'type' => 'kemitraan',
-                'title' => 'Pengajuan Terkirim',
-                'message' => 'Pengajuan kemitraan Anda terkirim, silakan tunggu notifikasi selanjutnya.',
-                'link' => null,
-                'icon' => 'bx bx-paper-plane',
-                'is_read' => false
+                'reference_id' => $application->id,
+                'region_id' => $validated['parent_region_id'],
+                'title' => 'Pengajuan Pengurus RT/RW Baru',
+                'message' => "Warga {$validated['applicant_name']} mengajukan pendaftaran pengurus {$validated['region_name']} ({$validated['position']}).",
+                'is_read' => false,
             ]);
         }
 

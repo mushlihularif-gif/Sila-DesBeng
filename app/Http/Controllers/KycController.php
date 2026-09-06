@@ -107,91 +107,103 @@ class KycController extends Controller
     {
         $request->validate([
             'kyc_id' => 'required|exists:kyc_verifications,id',
-            'face_data' => 'required|array',
-            'face_image' => 'required|string', // Base64 image
-            'edited_nik' => 'nullable|string|max:16',
+            'face_data' => 'nullable|array',
+            'face_image' => 'nullable|string', // Base64 image (opsional jika perangkat terkendala)
+            'edited_nik' => 'nullable|string|max:30',
             'edited_nama' => 'nullable|string|max:255',
             'edited_alamat' => 'nullable|string',
-            'edited_rt' => 'nullable|string|max:10',
-            'edited_rw' => 'nullable|string|max:10',
+            'edited_rt' => 'nullable|string|max:20',
+            'edited_rw' => 'nullable|string|max:20',
             'edited_desa' => 'nullable|string|max:255',
             'edited_kecamatan' => 'nullable|string|max:255',
         ]);
 
-        $kyc = KycVerification::where('id', $request->kyc_id)
-            ->where('user_id', Auth::id())
-            ->firstOrFail();
+        try {
+            $kyc = KycVerification::where('id', $request->kyc_id)
+                ->where('user_id', Auth::id())
+                ->firstOrFail();
 
-        // Process base64 face_image
-        $imagePath = null;
-        if ($request->face_image) {
-            $image_parts = explode(";base64,", $request->face_image);
-            if (count($image_parts) == 2) {
-                $image_base64 = base64_decode($image_parts[1]);
-                
-                // --- BACA SELFIE ---
-                $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
-                $image = $manager->read($image_base64);
-                
-                $watermarkedFace = (string) $image->encodeByExtension('jpg', 80);
+            // Process base64 face_image
+            $imagePath = null;
+            if ($request->face_image) {
+                $image_parts = explode(";base64,", $request->face_image);
+                if (count($image_parts) == 2) {
+                    $image_base64 = base64_decode($image_parts[1]);
+                    
+                    // --- BACA SELFIE ---
+                    $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
+                    $image = $manager->read($image_base64);
+                    
+                    $watermarkedFace = (string) $image->encodeByExtension('jpg', 80);
 
-                // Enkripsi isi gambar menggunakan ChaCha20
-                $encryptedFace = \App\Services\FileEncryptionService::encrypt($watermarkedFace);
-                
-                $fileName = 'face_' . uniqid() . '.enc';
-                $imagePath = 'kyc/face/' . $fileName;
-                
-                // Simpan ke disk private
-                Storage::disk('private')->put($imagePath, $encryptedFace);
+                    // Enkripsi isi gambar menggunakan ChaCha20
+                    $encryptedFace = \App\Services\FileEncryptionService::encrypt($watermarkedFace);
+                    
+                    $fileName = 'face_' . uniqid() . '.enc';
+                    $imagePath = 'kyc/face/' . $fileName;
+                    
+                    // Simpan ke disk private
+                    Storage::disk('private')->put($imagePath, $encryptedFace);
+                }
             }
-        }
 
-        $updateData = [
-            'face_scan_data' => $request->face_data,
-            'face_image_path' => $imagePath,
-            'status' => 'pending', // Status resmi diajukan setelah scan wajah lengkap
-        ];
-        
-        if ($request->filled('edited_nik')) {
-            $updateData['nik_from_ocr'] = $request->edited_nik;
-        }
-        if ($request->filled('edited_nama')) {
-            $updateData['name_from_ocr'] = $request->edited_nama;
-        }
-        if ($request->filled('edited_alamat')) {
-            $updateData['address_from_ocr'] = $request->edited_alamat;
-        }
-        if ($request->filled('edited_rt')) {
-            $updateData['rt_from_ocr'] = $request->edited_rt;
-        }
-        if ($request->filled('edited_rw')) {
-            $updateData['rw_from_ocr'] = $request->edited_rw;
-        }
-        if ($request->filled('edited_desa')) {
-            $updateData['desa_from_ocr'] = $request->edited_desa;
-        }
-        if ($request->filled('edited_kecamatan')) {
-            $updateData['kecamatan_from_ocr'] = $request->edited_kecamatan;
-        }
+            $updateData = [
+                'face_scan_data' => $request->face_data ?? [],
+                'face_image_path' => $imagePath,
+                'status' => 'pending', // Status resmi diajukan setelah scan wajah lengkap
+            ];
+            
+            if ($request->filled('edited_nik')) {
+                $cleanNik = preg_replace('/[^0-9]/', '', $request->edited_nik);
+                $updateData['nik_from_ocr'] = !empty($cleanNik) ? $cleanNik : $request->edited_nik;
+            }
+            if ($request->filled('edited_nama')) {
+                $updateData['name_from_ocr'] = $request->edited_nama;
+            }
+            if ($request->filled('edited_alamat')) {
+                $updateData['address_from_ocr'] = $request->edited_alamat;
+            }
+            if ($request->filled('edited_rt')) {
+                $updateData['rt_from_ocr'] = $request->edited_rt;
+            }
+            if ($request->filled('edited_rw')) {
+                $updateData['rw_from_ocr'] = $request->edited_rw;
+            }
+            if ($request->filled('edited_desa')) {
+                $updateData['desa_from_ocr'] = $request->edited_desa;
+            }
+            if ($request->filled('edited_kecamatan')) {
+                $updateData['kecamatan_from_ocr'] = $request->edited_kecamatan;
+            }
 
-        $kyc->update($updateData);
+            $kyc->update($updateData);
 
-        $user = Auth::user();
-        $user->update(['verification_status' => 'pending']);
+            $user = Auth::user();
+            $user->update(['verification_status' => 'pending']);
 
-        // Buat AdminNotification untuk dropdown navbar & dashboard (HANYA saat sudah submit lengkap)
-        \App\Models\AdminNotification::create([
-            'type' => 'kyc',
-            'reference_id' => $kyc->id,
-            'region_id' => $user->region_id,
-            'title' => 'Pengajuan Verifikasi Identitas (KYC)',
-            'message' => "Warga " . ($user->name ?? 'Warga') . " mengajukan verifikasi data e-KTP dan scan wajah.",
-            'is_read' => false,
-        ]);
+            // Buat AdminNotification untuk dropdown navbar & dashboard (HANYA saat sudah submit lengkap)
+            \App\Models\AdminNotification::create([
+                'type' => 'kyc',
+                'reference_id' => $kyc->id,
+                'region_id' => $user->region_id,
+                'title' => 'Pengajuan Verifikasi Identitas (KYC)',
+                'message' => "Warga " . ($user->name ?? 'Warga') . " mengajukan verifikasi data e-KTP dan scan wajah.",
+                'is_read' => false,
+            ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Data verifikasi berhasil dikirim dan menunggu persetujuan Admin.'
-        ]);
+            // Buat notifikasi untuk warga pemohon
+            \App\Services\NotificationService::notifyKycSubmitted($user);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Data verifikasi berhasil dikirim dan menunggu persetujuan Admin.'
+            ]);
+        } catch (\Throwable $e) {
+            \Log::error('KYC Submit Error: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal memproses data verifikasi: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

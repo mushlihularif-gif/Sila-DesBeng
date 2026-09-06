@@ -349,6 +349,9 @@ class RegionAdminManagementController extends Controller
         $application->status = 'approved';
         $application->save();
 
+        // Notifikasi ke warga pemohon
+        \App\Services\NotificationService::notifyPartnerApplicationApproved($application, $targetRegion->name);
+
         return back()->with('success', "Pengajuan disetujui. {$user->name} kini menjadi " . strtoupper($user->role) . ".");
     }
     
@@ -367,6 +370,9 @@ class RegionAdminManagementController extends Controller
 
         $application->status = 'rejected';
         $application->save();
+
+        // Notifikasi ke warga pemohon
+        \App\Services\NotificationService::notifyPartnerApplicationRejected($application);
 
         return back()->with('success', 'Pengajuan berhasil ditolak.');
     }
@@ -408,6 +414,10 @@ class RegionAdminManagementController extends Controller
         $user->region_id = $targetRegion->id;
         $user->save();
 
+        // Notifikasi ke warga yang diangkat
+        $roleTitle = ($user->role === 'admin_rt' ? 'Pengurus RT' : 'Pengurus RW');
+        \App\Services\NotificationService::notifyRoleAssigned($user, $roleTitle, $targetRegion->name);
+
         return back()->with('success', "Akun {$user->name} berhasil diangkat menjadi " . strtoupper($user->role) . " ({$targetRegion->name}).");
     }
     
@@ -425,6 +435,10 @@ class RegionAdminManagementController extends Controller
             $user->role = 'user';
             $user->region_id = $admin->region_id;
             $user->save();
+
+            // Notifikasi ke warga yang dicabut akses jabatannya
+            \App\Services\NotificationService::notifyRoleRevoked($user);
+
             return back()->with('success', 'Akses admin dicabut. Akun kembali menjadi warga biasa.');
         }
         

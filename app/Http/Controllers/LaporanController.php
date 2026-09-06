@@ -292,6 +292,9 @@ class LaporanController extends Controller
                 'message' => "Laporan baru dari {$user->name} ({$regionName}) - Kategori: {$laporan->kategori}",
                 'is_read' => false,
             ]);
+
+            // Kirim notifikasi ke warga pelapor
+            \App\Services\NotificationService::notifyLaporanSubmitted($laporan);
         } catch (\Exception $e) {
             Log::error('Notif error: ' . $e->getMessage());
         }

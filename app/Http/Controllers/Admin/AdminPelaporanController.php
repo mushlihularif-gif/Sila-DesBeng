@@ -185,6 +185,9 @@ class AdminPelaporanController extends Controller
         $laporan->admin_id = $user->id;
         $laporan->escalateTo($user->id, $request->catatan);
 
+        // Kirim notifikasi ke pelapor
+        $this->notifyReporter($laporan, 'Laporan Anda telah diteruskan ke tingkat "' . ucfirst($laporan->escalation_level) . '" untuk penanganan lebih lanjut.', 'laporan_eskalasi');
+
         return back()->with('success', 'Laporan berhasil di-eskalasi ke tingkat "' . ucfirst($laporan->escalation_level) . '".');
     }
 

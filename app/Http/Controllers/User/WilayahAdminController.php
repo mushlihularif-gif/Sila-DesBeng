@@ -140,17 +140,20 @@ class WilayahAdminController extends Controller
             $imagePath = $request->file('image')->store('announcements', 'public');
         }
 
-        \App\Models\Announcement::create([
+        $announcement = \App\Models\Announcement::create([
             'admin_id' => $user->id,
             'region_id' => $request->target_region_id,
             'title' => $request->title,
             'type' => $request->type,
+            'post_category' => 'Pengumuman',
             'event_date' => $request->event_date,
             'location' => $request->location,
             'description' => $request->description,
             'image_path' => $imagePath,
             'is_active' => true, // Langsung aktif
         ]);
+
+        \App\Services\NotificationService::broadcastAnnouncement($announcement);
 
         return back()->with('success', 'Pengumuman baru berhasil dipublikasikan!');
     }
@@ -220,17 +223,20 @@ class WilayahAdminController extends Controller
             $imagePath = $request->file('image')->store('announcements', 'public');
         }
 
-        \App\Models\Announcement::create([
+        $berita = \App\Models\Announcement::create([
             'admin_id' => $user->id,
             'region_id' => $request->target_region_id,
             'title' => $request->title,
             'type' => $request->type,
+            'post_category' => 'Berita',
             'event_date' => $request->event_date,
             'location' => $request->location,
             'description' => $request->description,
             'image_path' => $imagePath,
             'is_active' => true, // Langsung aktif
         ]);
+
+        \App\Services\NotificationService::broadcastAnnouncement($berita);
 
         return back()->with('success', 'Berita baru berhasil dipublikasikan!');
     }
@@ -303,6 +309,9 @@ class WilayahAdminController extends Controller
         $laporan->status = 'Proses';
         $laporan->save();
 
+        // Notifikasi ke warga pelapor
+        \App\Services\NotificationService::notifyLaporanResponded($laporan, strtoupper($currentAdminLevel), $request->catatan);
+
         return back()->with('success', 'Tanggapan berhasil dikirim dan status diubah menjadi Proses.');
     }
 
@@ -332,6 +341,9 @@ class WilayahAdminController extends Controller
 
         // Lakukan eskalasi manual
         $laporan->escalateTo($user->id, $request->catatan);
+
+        // Notifikasi ke warga pelapor
+        \App\Services\NotificationService::notifyLaporanEscalated($laporan, $laporan->escalation_level ?? 'atas');
 
         return back()->with('success', 'Laporan berhasil di-eskalasi ke tingkat atasnya.');
     }
@@ -367,6 +379,9 @@ class WilayahAdminController extends Controller
 
         $laporan->status = 'Selesai';
         $laporan->save();
+
+        // Notifikasi ke warga pelapor
+        \App\Services\NotificationService::notifyLaporanResolved($laporan, $request->catatan);
 
         return back()->with('success', 'Laporan berhasil diselesaikan!');
     }

@@ -314,6 +314,9 @@ class MutasiAdminController extends Controller
         if ($mutasi->alamat_baru) $user->address = $mutasi->alamat_baru;
         $user->save();
 
+        // Notifikasi ke warga pemohon
+        \App\Services\NotificationService::notifyMutasiApproved($mutasi);
+
         return redirect()->back()->with('success', "Mutasi disetujui. Warga {$user->name} telah resmi berpindah.");
     }
 
@@ -341,6 +344,9 @@ class MutasiAdminController extends Controller
             $mutasi->ktp_image_path = null;
         }
         $mutasi->save();
+
+        // Notifikasi ke warga pemohon
+        \App\Services\NotificationService::notifyMutasiRejected($mutasi, $request->rejection_reason);
 
         return redirect()->back()->with('success', 'Mutasi ditolak dan dibatalkan.');
     }

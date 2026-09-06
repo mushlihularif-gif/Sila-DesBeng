@@ -167,14 +167,7 @@ class PartnerApplicationController extends Controller
         $application->update(['status' => 'approved']);
 
         if ($application->user_id) {
-            Notification::create([
-                'user_id' => $application->user_id,
-                'type' => 'kemitraan',
-                'title' => 'Pengajuan Disetujui',
-                'message' => 'Pengajuan kemitraan untuk ' . $region->name . ' telah disetujui. Alasan/Catatan: ' . $request->reason,
-                'icon' => 'bx bx-check-circle text-success',
-                'is_read' => false
-            ]);
+            \App\Services\NotificationService::notifyPartnerApplicationApproved($application, $region->name, $request->reason);
         }
 
         // Send Email to Applicant
@@ -213,14 +206,7 @@ class PartnerApplicationController extends Controller
         $application->update(['status' => 'rejected']);
 
         if ($application->user_id) {
-            Notification::create([
-                'user_id' => $application->user_id,
-                'type' => 'kemitraan',
-                'title' => 'Pengajuan Ditolak',
-                'message' => 'Mohon maaf, pengajuan kemitraan untuk ' . $application->region_name . ' ditolak. Alasan: ' . $request->reason,
-                'icon' => 'bx bx-x-circle text-danger',
-                'is_read' => false
-            ]);
+            \App\Services\NotificationService::notifyPartnerApplicationRejected($application, $request->reason);
         }
 
         return back()->with('success', 'Permohonan kemitraan ditolak.');

@@ -145,13 +145,21 @@
                                     <div class="grid grid-cols-[100px_1fr]">
                                         <span class="text-blue-700 font-bold">NAMA</span>
                                         <span class="uppercase font-bold flex items-center gap-1">
-                                            {{ $user->name }}
+                                            @php
+                                                $nameParts = explode(' ', trim($user->name));
+                                                $maskedName = implode(' ', array_map(function($w) {
+                                                    $l = strlen($w);
+                                                    if ($l <= 2) return $w;
+                                                    return substr($w, 0, 1) . str_repeat('*', $l - 2) . substr($w, -1);
+                                                }, $nameParts));
+                                            @endphp
+                                            {{ $maskedName }}
                                             <i class='bx bxs-badge-check text-blue-500 text-lg' title="Terverifikasi"></i>
                                         </span>
                                     </div>
                                     <div class="grid grid-cols-[100px_1fr]">
                                         <span class="text-blue-700 font-bold">ALAMAT</span>
-                                        <span>RT {{ $user->rt }}/RW {{ $user->rw }} - (Disensor)</span>
+                                        <span>RT {{ $user->rt ?? '000' }}/RW {{ $user->rw ?? '000' }} - {{ $user->region->name ?? 'Desa' }} (Disensor)</span>
                                     </div>
                                 </div>
                             </div>

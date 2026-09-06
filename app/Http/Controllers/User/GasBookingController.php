@@ -126,6 +126,9 @@ class GasBookingController extends Controller
             'is_read' => false,
         ]);
 
+        // Notifikasi ke pembeli
+        \App\Services\NotificationService::notifyOrderCreated('gas', $order, $gas->jenis_gas . ' (' . $validated['quantity'] . ' tabung)');
+
         $response = [
             'success' => true,
             'message' => 'Pembelian gas berhasil dibuat!',

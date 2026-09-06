@@ -191,7 +191,10 @@ class UnitFasilitasUmumController extends Controller
             $data['foto_3'] = ImageCompressorService::compressAndStore($request->file('foto_3'), 'fasilitas_umum');
         }
 
-        FasilitasUmum::create($data);
+        $fasilitas = FasilitasUmum::create($data);
+
+        // Broadcast fasilitas umum baru ke warga
+        \App\Services\NotificationService::broadcastNewProduct('Fasilitas Umum', $fasilitas->nama_fasilitas, $fasilitas->region_id, route('fasilitas.index'));
 
         return redirect()->route('admin.unit.fasilitas_umum.index')->with('success', 'Fasilitas Umum berhasil ditambahkan.');
     }

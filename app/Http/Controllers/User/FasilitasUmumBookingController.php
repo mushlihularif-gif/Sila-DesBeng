@@ -116,6 +116,9 @@ class FasilitasUmumBookingController extends Controller
             'is_read' => false,
         ]);
 
+        // Notifikasi ke pemohon
+        \App\Services\NotificationService::notifyOrderCreated('fasilitas', $booking, ($item->nama_fasilitas ?? 'Fasilitas Umum'));
+
         // We can just rely on the normal flow for now, the user can check their activity dashboard
         // If we want a separate payment page, we can build it later.
         

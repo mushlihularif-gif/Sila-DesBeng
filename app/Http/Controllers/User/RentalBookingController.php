@@ -139,6 +139,9 @@ class RentalBookingController extends Controller
             'is_read' => false,
         ]);
 
+        // Notifikasi ke penyewa
+        \App\Services\NotificationService::notifyOrderCreated('rental', $booking, $item->nama_barang);
+
         return response()->json([
             'success' => true,
             'message' => 'Pemesanan berhasil dibuat!',

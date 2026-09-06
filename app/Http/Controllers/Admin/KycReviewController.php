@@ -17,9 +17,6 @@ class KycReviewController extends Controller
     {
         $pending = KycVerification::with('user')
             ->where('status', 'pending')
-            ->where(function($q) {
-                $q->whereNotNull('face_scan_data')->orWhereNotNull('face_image_path');
-            })
             ->latest()
             ->get();
             
@@ -35,12 +32,6 @@ class KycReviewController extends Controller
             
         $all = KycVerification::with('user')
             ->whereIn('status', ['pending', 'approved', 'rejected'])
-            ->where(function($q) {
-                $q->where('status', '!=', 'pending')
-                  ->orWhere(function($sub) {
-                      $sub->whereNotNull('face_scan_data')->orWhereNotNull('face_image_path');
-                  });
-            })
             ->latest()
             ->get();
         
@@ -58,11 +49,6 @@ class KycReviewController extends Controller
     {
         $kyc = KycVerification::with('user')->findOrFail($id);
         
-        // Tolak akses jika pengajuan masih draft atau belum menyelesaikan scan wajah/selfie
-        if ($kyc->status === 'draft' || ($kyc->status === 'pending' && !$kyc->face_scan_data && !$kyc->face_image_path)) {
-            return redirect()->route('admin.kyc.index')->with('error', 'Pengajuan verifikasi belum lengkap (warga belum menyelesaikan scan wajah/selfie).');
-        }
-
         return view('admin.kyc.show', compact('kyc'));
     }
 
@@ -89,44 +75,23 @@ class KycReviewController extends Controller
                 }
             }
             
-            // Get real data before masking
+            // Sinkronisasi data identitas terverifikasi ke profil pengguna
             $realNik = $kyc->nik_from_ocr ?? $user->nik;
             $realName = $kyc->name_from_ocr ?? $user->name;
-            
-            // Compute real hash before masking NIK
-            $realNikHash = null;
+
             if ($realNik) {
-                $realNikHash = hash_hmac('sha256', $realNik, config('app.key'));
+                $user->nik = $realNik;
             }
-
-            // Masking NIK (4 front, 4 back)
-            $maskedNik = $realNik;
-            if ($realNik && strlen($realNik) >= 16) {
-                $maskedNik = substr($realNik, 0, 4) . str_repeat('*', strlen($realNik) - 8) . substr($realNik, -4);
+            if ($realName) {
+                $user->name = $realName;
             }
-            
-            // Masking Name (1 front, 1 mid, 1 back)
-            $maskedName = $realName;
-            if ($realName && strlen($realName) > 3) {
-                $len = strlen($realName);
-                $mid = (int)($len / 2);
-                $maskedName = substr($realName, 0, 1) . str_repeat('*', $mid - 1) . substr($realName, $mid, 1) . str_repeat('*', $len - $mid - 2) . substr($realName, -1);
-            }
-
-            // Temporarily unguard to set nik_hash directly
-            $user->nik = $maskedNik;
-            $user->name = $maskedName;
             $user->gender = $kyc->gender_from_ocr ?? $user->gender;
             $user->address = $kyc->address_from_ocr ?? $user->address;
             $user->rt = $kyc->rt_from_ocr ?? $user->rt;
             $user->rw = $kyc->rw_from_ocr ?? $user->rw;
             $user->verification_status = 'verified';
             $user->verified_at = now();
-            
-            if ($realNikHash) {
-                $user->nik_hash = $realNikHash;
-            }
-            
+
             $user->save();
             
             // Hapus file fisik secara permanen untuk privasi!
@@ -143,6 +108,9 @@ class KycReviewController extends Controller
                 'face_image_path' => null,
                 'face_scan_data' => null
             ]);
+
+            // Kirim notifikasi ke akun warga
+            \App\Services\NotificationService::notifyKycApproved($user);
 
             DB::commit();
 
@@ -189,6 +157,9 @@ class KycReviewController extends Controller
                 'face_image_path' => null,
                 'face_scan_data' => null
             ]);
+
+            // Kirim notifikasi ke akun warga
+            \App\Services\NotificationService::notifyKycRejected($user, $request->admin_notes);
 
             DB::commit();
 

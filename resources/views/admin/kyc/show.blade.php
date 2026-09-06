@@ -120,6 +120,24 @@
         </div>
     @endif
 
+    @if($kyc->status === 'approved')
+        <div class="alert alert-success border-success-subtle rounded-3 mb-4 d-flex align-items-center gap-3 py-3 px-4">
+            <i class="bx bx-shield-check fs-2 text-success flex-shrink-0"></i>
+            <div>
+                <div class="fw-bold text-dark">Verifikasi Selesai & Berkas Fisik Dimusnahkan (Kepatuhan Privasi UU PDP)</div>
+                <div class="small text-muted">Pengajuan ini telah disetujui resmi. Demi melindungi privasi warga dan mencegah ancaman kebocoran data (zero footprint), seluruh file fisik foto e-KTP dan foto wajah/biometrik telah dihapus permanen secara otomatis dari server.</div>
+            </div>
+        </div>
+    @elseif(!$kyc->face_image_path)
+        <div class="alert alert-warning border-warning-subtle rounded-3 mb-4 d-flex align-items-center gap-3 py-3 px-4">
+            <i class="bx bx-info-circle fs-2 text-warning flex-shrink-0"></i>
+            <div>
+                <div class="fw-bold text-dark">Informasi Peninjauan: Pengajuan Berkas KTP</div>
+                <div class="small text-muted">Warga mengajukan verifikasi tanpa melampirkan foto scan wajah/selfie (misalnya kendala perangkat kamera atau jaringan). Anda tetap dapat meninjau keabsahan berkas e-KTP dan data kependudukan secara langsung, kemudian memberikan persetujuan atau meminta perbaikan berkas.</div>
+            </div>
+        </div>
+    @endif
+
     <div class="row g-4">
         <!-- Kolom Kiri: Dokumen Visual (Foto KTP & Foto Biometrik) -->
         <div class="col-12 col-lg-5">
@@ -130,7 +148,11 @@
                         <i class="bx bx-id-card text-primary fs-4 me-2"></i>
                         <h6 class="mb-0 fw-bold text-dark">Dokumen e-KTP</h6>
                     </div>
-                    <span class="badge bg-label-secondary rounded-pill px-2 py-1">e-KTP Asli</span>
+                    @if($kyc->status === 'approved')
+                        <span class="badge bg-label-success rounded-pill px-2 py-1"><i class="bx bx-check-shield me-1"></i> Terverifikasi</span>
+                    @else
+                        <span class="badge bg-label-secondary rounded-pill px-2 py-1">e-KTP Asli</span>
+                    @endif
                 </div>
                 <div class="card-body pt-4">
                     @if($kyc->ktp_image_path)
@@ -145,6 +167,14 @@
                                 <i class="bx bx-link-external me-1"></i> Buka Tab Baru
                             </a>
                         </div>
+                    @elseif($kyc->status === 'approved')
+                        <div class="text-center py-4">
+                            <div class="mx-auto mb-2 rounded-circle d-flex align-items-center justify-content-center bg-label-success" style="width: 60px; height: 60px;">
+                                <i class="bx bx-shield-quarter fs-2 text-success"></i>
+                            </div>
+                            <p class="text-dark small mb-0 fw-bold">Berkas e-KTP Telah Dihapus</p>
+                            <small class="text-muted" style="font-size: 0.75rem;">Dimusnahkan otomatis dari server demi keamanan dan privasi warga (UU PDP).</small>
+                        </div>
                     @else
                         <div class="text-center py-4">
                             <i class="bx bx-image-alt text-muted" style="font-size: 3rem; opacity: 0.5;"></i>
@@ -154,43 +184,95 @@
                 </div>
             </div>
 
-            <!-- Card Foto Scan Wajah & Liveness -->
+            <!-- Card Foto Wajah / Selfie & Biometrik -->
             <div class="card kyc-card mb-4">
                 <div class="card-header d-flex align-items-center justify-content-between py-3 border-bottom bg-light">
                     <div class="d-flex align-items-center">
-                        <i class="bx bx-scan text-primary fs-4 me-2"></i>
-                        <h6 class="mb-0 fw-bold text-dark">Biometrik & Liveness</h6>
+                        @if($kyc->status === 'approved')
+                            <i class="bx bx-shield-check text-success fs-4 me-2"></i>
+                            <h6 class="mb-0 fw-bold text-dark">Foto Wajah / Biometrik</h6>
+                        @elseif($kyc->face_scan_data && count($kyc->face_scan_data) > 0)
+                            <i class="bx bx-scan text-success fs-4 me-2"></i>
+                            <h6 class="mb-0 fw-bold text-dark">Hasil Scan Wajah (Biometrik)</h6>
+                        @elseif($kyc->face_image_path)
+                            <i class="bx bx-camera text-primary fs-4 me-2"></i>
+                            <h6 class="mb-0 fw-bold text-dark">Foto Wajah / Selfie</h6>
+                        @else
+                            <i class="bx bx-user-x text-warning fs-4 me-2"></i>
+                            <h6 class="mb-0 fw-bold text-dark">Foto Wajah / Biometrik</h6>
+                        @endif
                     </div>
-                    <span class="badge bg-label-info rounded-pill px-2 py-1">Face Scan</span>
+                    @if($kyc->status === 'approved')
+                        <span class="badge bg-label-success rounded-pill px-2 py-1"><i class="bx bx-check-shield me-1"></i> Terverifikasi</span>
+                    @elseif($kyc->face_scan_data && count($kyc->face_scan_data) > 0)
+                        <span class="badge bg-label-success rounded-pill px-2 py-1"><i class="bx bx-scan me-1"></i> Scan Kamera AI (Liveness)</span>
+                    @elseif($kyc->face_image_path)
+                        <span class="badge bg-label-primary rounded-pill px-2 py-1"><i class="bx bx-camera me-1"></i> Foto Selfie (Unggah)</span>
+                    @else
+                        <span class="badge bg-label-warning rounded-pill px-2 py-1"><i class="bx bx-user-x me-1"></i> Belum Ada Foto</span>
+                    @endif
                 </div>
                 <div class="card-body pt-4">
                     @if($kyc->face_image_path)
-                        <div class="text-center mb-3">
-                            <div class="d-inline-block rounded-circle p-1 border shadow-xs" style="width: 105px; height: 105px; background: #fff;">
-                                <img src="{{ route('media.secure.face', basename($kyc->face_image_path)) }}" class="rounded-circle w-100 h-100" style="object-fit: cover;" alt="Scan Wajah {{ $kyc->user->name ?? 'Warga' }}">
+                        <div class="ktp-preview-container mb-3" style="max-height: 290px; display: flex; align-items: center; justify-content: center;">
+                            <img src="{{ route('media.secure.face', basename($kyc->face_image_path)) }}" class="ktp-preview-img" style="max-height: 260px;" alt="Foto Wajah / Selfie {{ $kyc->user->name ?? 'Warga' }}">
+                        </div>
+                        <div class="d-flex justify-content-center gap-2 flex-wrap mb-3">
+                            <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm fw-semibold" data-bs-toggle="modal" data-bs-target="#faceModal">
+                                <i class="bx bx-zoom-in me-1"></i> Perbesar Foto Wajah
+                            </button>
+                            <a href="{{ route('media.secure.face', basename($kyc->face_image_path)) }}" target="_blank" class="btn btn-sm btn-outline-secondary rounded-pill px-3 shadow-none">
+                                <i class="bx bx-link-external me-1"></i> Buka Tab Baru
+                            </a>
+                        </div>
+                    @elseif($kyc->status === 'approved')
+                        <div class="text-center py-4 mb-3 bg-light rounded-3 border">
+                            <div class="mx-auto mb-2 rounded-circle d-flex align-items-center justify-content-center bg-label-success" style="width: 60px; height: 60px;">
+                                <i class="bx bx-shield-check fs-2 text-success"></i>
                             </div>
-                            <div class="mt-2">
-                                <a href="{{ route('media.secure.face', basename($kyc->face_image_path)) }}" target="_blank" class="btn btn-sm btn-outline-secondary rounded-pill px-3 shadow-none" style="font-size: 0.78rem;">
-                                    <i class="bx bx-zoom-in me-1"></i> Perbesar Foto Wajah
-                                </a>
+                            <p class="text-dark small mb-0 fw-bold">Foto Wajah Telah Dihapus</p>
+                            <small class="text-muted" style="font-size: 0.75rem;">Dokumen biometrik fisik telah dimusnahkan secara aman dari server.</small>
+                        </div>
+                    @else
+                        <div class="text-center py-4 mb-3 bg-light rounded-3 border">
+                            <div class="mx-auto mb-2 rounded-circle d-flex align-items-center justify-content-center bg-white border shadow-xs text-muted" style="width: 60px; height: 60px;">
+                                <i class="bx bx-user-x fs-2 text-warning"></i>
                             </div>
+                            <p class="text-dark small mb-0 fw-semibold">Foto Wajah / Selfie Tidak Dilampirkan</p>
+                            <small class="text-muted" style="font-size: 0.75rem;">(Kendala kamera perangkat / pengajuan hanya melampirkan e-KTP)</small>
                         </div>
                     @endif
 
-                    @if($kyc->face_scan_data && count($kyc->face_scan_data) > 0)
+                    @if($kyc->status === 'approved')
+                        <div class="p-3 rounded-3 bg-label-success border border-success-subtle d-flex align-items-start gap-3">
+                            <i class="bx bx-shield-quarter text-success fs-3 flex-shrink-0 mt-1"></i>
+                            <div>
+                                <h6 class="mb-1 fw-bold text-success" style="font-size: 0.9rem;">Status: Terverifikasi & Dilindungi</h6>
+                                <p class="mb-0 text-muted small" style="line-height: 1.45;">Identitas warga telah terverifikasi resmi. Seluruh data kependudukan tersimpan terenkripsi dengan algoritma ChaCha20-Poly1305 dan blind indexing SHA-256.</p>
+                            </div>
+                        </div>
+                    @elseif($kyc->face_scan_data && count($kyc->face_scan_data) > 0)
                         <div class="p-3 rounded-3 bg-label-success border border-success-subtle d-flex align-items-start gap-3">
                             <i class="bx bx-check-shield text-success fs-3 flex-shrink-0 mt-1"></i>
                             <div>
-                                <h6 class="mb-1 fw-bold text-success" style="font-size: 0.9rem;">Liveness Detection Valid</h6>
-                                <p class="mb-0 text-muted small" style="line-height: 1.45;">Sistem otomatis memvalidasi keaslian wajah, kedipan mata, dan gerakan anti-spoofing ({{ count($kyc->face_scan_data) }} frame data biometrik terekam).</p>
+                                <h6 class="mb-1 fw-bold text-success" style="font-size: 0.9rem;">Liveness Detection Valid (Scan AI)</h6>
+                                <p class="mb-0 text-muted small" style="line-height: 1.45;">Sistem otomatis memvalidasi keaslian wajah, kedipan mata, dan gerakan anti-spoofing via kamera langsung ({{ count($kyc->face_scan_data) }} frame biometrik terekam).</p>
+                            </div>
+                        </div>
+                    @elseif($kyc->face_image_path)
+                        <div class="p-3 rounded-3 bg-label-primary border border-primary-subtle d-flex align-items-start gap-3">
+                            <i class="bx bx-camera text-primary fs-3 flex-shrink-0 mt-1"></i>
+                            <div>
+                                <h6 class="mb-1 fw-bold text-primary" style="font-size: 0.9rem;">Metode: Unggah Foto Wajah / Selfie</h6>
+                                <p class="mb-0 text-muted small" style="line-height: 1.45;">Warga melampirkan foto wajah / selfie langsung dari perangkat. Silakan cocokkan kesesuaian wajah pada foto selfie ini dengan foto pada e-KTP di atas.</p>
                             </div>
                         </div>
                     @else
                         <div class="p-3 rounded-3 bg-label-warning border border-warning-subtle d-flex align-items-start gap-3">
                             <i class="bx bx-info-circle text-warning fs-3 flex-shrink-0 mt-1"></i>
                             <div>
-                                <h6 class="mb-1 fw-bold text-warning" style="font-size: 0.9rem;">Data Liveness Tidak Tersedia</h6>
-                                <p class="mb-0 text-muted small" style="line-height: 1.45;">Pengajuan tidak menyertakan rekaman liveness biometrik. Verifikasi dilakukan manual melalui pencocokan foto e-KTP.</p>
+                                <h6 class="mb-1 fw-bold text-warning" style="font-size: 0.9rem;">Foto Wajah Tidak Tersedia</h6>
+                                <p class="mb-0 text-muted small" style="line-height: 1.45;">Pengajuan tidak menyertakan foto wajah atau rekaman biometrik. Peninjauan dilakukan manual melalui pencocokan berkas dokumen e-KTP.</p>
                             </div>
                         </div>
                     @endif
@@ -281,13 +363,20 @@
                             <div class="col-12 col-sm-6">
                                 <div class="data-box data-box-user">
                                     <small class="text-muted d-block mb-1" style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Data Akun Awal</small>
-                                    <span class="fw-semibold text-dark font-monospace" style="font-size: 0.88rem;">{{ $sensorNik($userNik) }}</span>
+                                    <span class="fw-semibold text-dark font-monospace" id="user-nik-val" style="font-size: 0.88rem;">{{ $sensorNik($userNik) }}</span>
                                 </div>
                             </div>
                             <div class="col-12 col-sm-6">
                                 <div class="data-box data-box-ocr">
-                                    <small class="text-muted d-block mb-1" style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Data e-KTP (OCR)</small>
-                                    <span class="fw-bold text-dark font-monospace" style="font-size: 0.88rem;">{{ $ocrNik ?? 'Tidak terdeteksi' }}</span>
+                                    <div class="d-flex align-items-center justify-content-between mb-1">
+                                        <small class="text-muted" style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Data e-KTP (OCR)</small>
+                                        @if($ocrNik)
+                                            <button type="button" class="btn btn-xs p-0 text-primary border-0 bg-transparent shadow-none" onclick="toggleNikSensor()" title="Tampilkan / Sembunyikan Sensor NIK" style="font-size: 0.75rem; text-decoration: none;">
+                                                <i class="bx bx-show me-1" id="nik-toggle-icon"></i><span id="nik-toggle-text">Buka Sensor</span>
+                                            </button>
+                                        @endif
+                                    </div>
+                                    <span class="fw-bold text-dark font-monospace" id="ocr-nik-val" style="font-size: 0.88rem;">{{ $sensorNik($ocrNik) }}</span>
                                 </div>
                             </div>
                         </div>
@@ -475,6 +564,29 @@
 </div>
 @endif
 
+<!-- Modal Perbesar Foto Wajah / Selfie -->
+@if($kyc->face_image_path)
+<div class="modal fade" id="faceModal" tabindex="-1" aria-labelledby="faceModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content rounded-4 border-0 shadow-lg overflow-hidden">
+            <div class="modal-header border-bottom py-3 px-4 bg-light">
+                <h5 class="modal-title fw-bold text-dark" id="faceModalLabel">
+                    <i class="bx bx-face text-primary me-2"></i> Foto Wajah / Selfie Pemohon
+                </h5>
+                <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-3 text-center bg-dark">
+                <img src="{{ route('media.secure.face', basename($kyc->face_image_path)) }}" class="img-fluid rounded-3" alt="Foto Wajah" style="max-height: 75vh; width: auto; object-fit: contain;">
+            </div>
+            <div class="modal-footer border-top py-2 px-4 bg-light d-flex justify-content-between">
+                <small class="text-muted">Dokumen biometrik tersimpan terenkripsi secara aman.</small>
+                <button type="button" class="btn btn-secondary btn-sm rounded-pill px-4" data-bs-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
+
 <!-- Modal Tolak Pengajuan -->
 <div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -536,6 +648,25 @@
                 document.getElementById('form-approve').submit();
             }
         }
+    }
+
+    let isNikSensorOpen = false;
+    const fullOcrNik = "{{ $ocrNik }}";
+    const maskedOcrNik = "{{ $sensorNik($ocrNik) }}";
+    const fullUserNik = "{{ $userNik }}";
+    const maskedUserNik = "{{ $sensorNik($userNik) }}";
+
+    function toggleNikSensor() {
+        isNikSensorOpen = !isNikSensorOpen;
+        const ocrEl = document.getElementById('ocr-nik-val');
+        const userEl = document.getElementById('user-nik-val');
+        const iconEl = document.getElementById('nik-toggle-icon');
+        const textEl = document.getElementById('nik-toggle-text');
+
+        if (ocrEl) ocrEl.innerText = isNikSensorOpen ? fullOcrNik : maskedOcrNik;
+        if (userEl) userEl.innerText = isNikSensorOpen ? fullUserNik : maskedUserNik;
+        if (iconEl) iconEl.className = isNikSensorOpen ? 'bx bx-hide me-1' : 'bx bx-show me-1';
+        if (textEl) textEl.innerText = isNikSensorOpen ? 'Tutup Sensor' : 'Buka Sensor';
     }
 </script>
 @endpush
