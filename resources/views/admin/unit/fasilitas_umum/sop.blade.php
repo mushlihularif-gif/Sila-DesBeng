@@ -107,9 +107,14 @@
     };
 
     function resetSop(type) {
-        if (confirm('Apakah Anda yakin ingin mereset teks SOP ini ke versi bawaan?')) {
-            document.getElementById('sop_' + type + '_text').value = defaultSops[type];
-        }
+        konfirmasi({
+            judul: 'Reset Teks SOP',
+            pesan: 'Teks SOP akan dikembalikan ke versi bawaan. Perubahan yang belum disimpan akan hilang.',
+            jenis: 'bahaya',
+            tombolYa: 'Ya, Reset'
+        }).then(function (setuju) {
+            if (setuju) document.getElementById('sop_' + type + '_text').value = defaultSops[type];
+        });
     }
 
     // Ubah style card jika radio button diklik

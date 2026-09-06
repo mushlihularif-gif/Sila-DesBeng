@@ -1,4 +1,4 @@
-﻿@extends('layouts.user')
+@extends('layouts.user')
 
 @section('page')
 <main class="flex-grow relative w-full">
@@ -164,7 +164,12 @@
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-1">Nama Penerima <span class="text-red-500">*</span></label>
-                                <input type="text" name="recipient_name" id="recipient-name" value="{{ Auth::user()->name }}" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
+                                @include('partials.pilih-alamat', [
+    'alamatTersimpan' => $alamatTersimpan ?? collect(),
+    'idNama'   => 'recipient-name',
+    'idAlamat' => 'delivery-address',
+])
+<input type="text" name="recipient_name" id="recipient-name" value="{{ Auth::user()->name }}" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-1">Alamat Lengkap Tujuan <span class="text-red-500">*</span></label>

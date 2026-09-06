@@ -65,7 +65,7 @@
                         </td>
                         <td>
                             <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#editCategoryModal{{ $category->id }}">Edit</button>
-                            <form action="{{ route('admin.categories.destroy', $category->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus kategori ini? Produk yang sudah ada tidak akan terhapus.');">
+                            <form action="{{ route('admin.categories.destroy', $category->id) }}" method="POST" class="d-inline" data-konfirmasi="Apakah Anda yakin ingin menghapus kategori ini? Produk yang sudah ada tidak akan terhapus.">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-sm btn-danger">Hapus</button>

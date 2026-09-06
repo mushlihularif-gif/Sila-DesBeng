@@ -1,4 +1,4 @@
-﻿{{-- ========================================
+{{-- ========================================
     PROFILE CHANGE PASSWORD MODALS
     - Modal 1: Input 3 passwords (Current, New, Confirm)
     - Modal 2: OTP Verification (4 digit)

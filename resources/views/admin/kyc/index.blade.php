@@ -116,8 +116,12 @@
             <div>
                 <h5 class="fw-bold mb-1 text-primary">Panduan Verifikasi Identitas</h5>
                 <p class="mb-0 text-primary" style="opacity: 0.85;">
-                    Periksa kesesuaian data KTP yang diunggah warga dengan NIK yang terbaca oleh sistem. 
+                    Periksa kesesuaian data KTP yang diunggah warga dengan NIK yang terbaca oleh sistem.
                     Pilih <strong>Tinjau</strong> pada pengajuan yang berstatus <span class="badge bg-warning text-dark py-1 px-2 mx-1 rounded-pill" style="font-size: 0.7rem;">Menunggu</span> untuk melakukan persetujuan atau penolakan.
+                </p>
+                <p class="mb-0 mt-2 text-primary" style="opacity: 0.85; font-size: 0.85rem;">
+                    <i class="bx bx-map-alt"></i>
+                    Anda meninjau pengajuan dari <strong>{{ $lingkup }}</strong>.
                 </p>
             </div>
         </div>

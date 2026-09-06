@@ -1,4 +1,4 @@
-﻿{{-- HANYA TAMPIL JIKA BUKAN DI HALAMAN AUTH --}}
+{{-- HANYA TAMPIL JIKA BUKAN DI HALAMAN AUTH --}}
 @if(!request()->is('auth*') && !request()->routeIs('login') && !request()->routeIs('register'))
 @push('styles')
 <style>

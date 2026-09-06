@@ -895,8 +895,8 @@
                                         <select class="form-select modern-input" id="saved_lokasi" onchange="fillLocationData(this)">
                                             <option value="">-- Pilih Lokasi --</option>
                                             @foreach($savedLocations as $loc)
-                                                <option value="{{ $loc->lokasi }}" data-lat="{{ $loc->latitude }}" data-lng="{{ $loc->longitude }}">
-                                                    {{ $loc->lokasi }}
+                                                <option value="{{ $loc->nama }}" data-lat="{{ $loc->latitude }}" data-lng="{{ $loc->longitude }}">
+                                                    {{ $loc->nama }}
                                                 </option>
                                             @endforeach
                                         </select>
@@ -1478,16 +1478,16 @@
                     bootstrap.Modal.getOrCreateInstance(document.getElementById('addCategoryModal'))?.hide();
                     document.getElementById('new_kategori').value = '';
                 } else {
-                    alert('Gagal menyimpan kategori.');
+                    showSiladesBengToast('error', 'Gagal', 'Gagal menyimpan kategori.');
                 }
             })
             .catch(err => {
                 saveBtn.innerHTML = originalText;
                 saveBtn.disabled = false;
-                alert('Terjadi kesalahan jaringan.');
+                showSiladesBengToast('error', 'Gagal', 'Terjadi kesalahan jaringan.');
             });
         } else {
-            alert('Silakan masukkan nama kategori.');
+            showSiladesBengToast('warning', 'Perhatian', 'Silakan masukkan nama kategori.');
         }
     });
 
@@ -1504,7 +1504,7 @@
             bootstrap.Modal.getOrCreateInstance(document.getElementById('addSatuanModal'))?.hide();
             document.getElementById('new_satuan').value = '';
         } else {
-            alert('Silakan masukkan nama satuan.');
+            showSiladesBengToast('warning', 'Perhatian', 'Silakan masukkan nama satuan.');
         }
     });
     
@@ -1563,18 +1563,20 @@
                         document.body.appendChild(toast);
                         setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 500); }, 3000);
                     } else {
-                        alert(data.message);
+                        showSiladesBengToast('info', 'Informasi', data.message);
                         this.checked = !this.checked; 
                     }
                 })
                 .catch(err => {
                     this.disabled = false;
-                    alert('Terjadi kesalahan jaringan.');
+                    showSiladesBengToast('error', 'Gagal', 'Terjadi kesalahan jaringan.');
                     this.checked = !this.checked; 
                 });
             });
         });
     });
+
+    let lokasiSebelumnya = null;
 
     function toggleLokasiMode(mode) {
         const savedContainer = document.getElementById('saved_location_container');
@@ -1584,7 +1586,20 @@
         const inputLat = document.getElementById('latitude');
         const inputLng = document.getElementById('longitude');
 
+        // Nilai yang diketik/dimuat sebelum beralih ke daftar tersimpan diingat
+        // dulu. Tanpa ini, membuka mode "Lokasi Tersimpan" memanggil
+        // fillLocationData() dengan pilihan kosong, isian lokasi terhapus, dan
+        // kembali ke mode manual meninggalkan kolom yang tadinya terisi jadi
+        // kosong - pada halaman Ubah itu berarti lokasi produk hilang.
         if (mode === 'saved') {
+            if (typeof lokasiSebelumnya === 'undefined' || lokasiSebelumnya === null) {
+                lokasiSebelumnya = {
+                    nama: inputLokasi.value,
+                    lat: inputLat.value,
+                    lng: inputLng.value,
+                };
+            }
+
             if(savedContainer) savedContainer.style.display = 'block';
             newContainer.style.display = 'none';
             if(select) {
@@ -1599,6 +1614,16 @@
             inputLokasi.readOnly = false;
             inputLat.readOnly = false;
             inputLng.readOnly = false;
+
+            // Pulihkan hanya kalau kolomnya memang kosong akibat peralihan tadi;
+            // kalau petugas sudah memilih lokasi tersimpan lalu ingin menyuntingnya,
+            // pilihan itu yang dipertahankan.
+            if (typeof lokasiSebelumnya !== 'undefined' && lokasiSebelumnya && !inputLokasi.value) {
+                inputLokasi.value = lokasiSebelumnya.nama;
+                inputLat.value = lokasiSebelumnya.lat;
+                inputLng.value = lokasiSebelumnya.lng;
+            }
+            lokasiSebelumnya = null;
         }
     }
 
@@ -1621,7 +1646,7 @@
         
         // Cek agar tidak dua-duanya nonaktif
         if (!isHarian && !isBorongan) {
-            alert('Minimal harus ada satu layanan (Harian atau Borongan) yang diaktifkan.');
+            showSiladesBengToast('warning', 'Perhatian', 'Minimal harus ada satu layanan (Harian atau Borongan) yang diaktifkan.');
             if (type === 'harian') {
                 document.getElementById('is_harian_active').checked = true;
             } else {

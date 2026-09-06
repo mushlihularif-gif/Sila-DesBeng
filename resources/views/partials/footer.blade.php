@@ -1,4 +1,4 @@
-﻿<style>
+<style>
     .footer-logo-1 { width: 18rem; }
     .footer-logo-2 { width: 20rem; margin-top: -1.5rem; margin-left: -10px; }
     @media (min-width: 640px) {

@@ -87,19 +87,24 @@ class PaymentCallbackController extends Controller
             // Dana tetap berstatus "ditahan" (belum dicairkan ke BUM Desa) sampai
             // pesanan dikonfirmasi selesai/diterima - webhook ini hanya memastikan
             // uangnya benar-benar sudah dibayar (verified) atau batal (rejected).
-            $walletTx = WalletTransaction::where('reference_type', $orderType)
-                ->where('reference_id', $order->id)
-                ->where('source', 'gateway')
-                ->latest()
-                ->first();
-
-            if ($walletTx) {
-                if (in_array($order->status, ['confirmed'])) {
-                    $walletTx->status = 'verified';
-                } elseif (in_array($order->status, ['cancelled'])) {
-                    $walletTx->status = 'rejected';
-                }
-                $walletTx->save();
+            // Menyentuh SELURUH baris pesanan ini, bukan latest()->first():
+            // pesanan pada unit yang dikelola mitra punya dua baris (porsi
+            // wilayah + porsi mitra), dan dulu hanya satu yang ikut berubah —
+            // menyisakan separuh uang berstatus salah.
+            if ($order->status === 'confirmed') {
+                WalletTransaction::where('reference_type', $orderType)
+                    ->where('reference_id', $order->id)
+                    ->where('source', 'gateway')
+                    ->where('status', 'pending')
+                    ->update(['status' => 'verified']);
+            } elseif ($order->status === 'cancelled') {
+                // Kedaluwarsa/gagal di sisi Midtrans. Kalau uangnya terlanjur
+                // terbayar, dikembalikan ke dompet warga — bukan dihilangkan.
+                WalletTransaction::batalkanDanRefund(
+                    $orderType,
+                    $order->id,
+                    'Pembayaran dibatalkan/kedaluwarsa di Midtrans.'
+                );
             }
 
             return response()->json([

@@ -481,6 +481,20 @@ class PasarDaerahController extends Controller
                 'status' => 'pending',
             ]);
 
+            // Catat pergerakan dana ke ledger wilayah - sebelumnya tidak tercatat
+            // sama sekali di sini, lihat catatan yang sama di RentalBookingController.
+            // Dipanggil dengan nilai payment_method MENTAH (sebelum di-ucfirst di
+            // atas), karena itulah yang dikenali WalletTransaction::catatPemasukan()
+            // untuk membedakan tunai/transfer manual dari gateway.
+            \App\Models\WalletTransaction::catatPemasukan(
+                regionId: $region_id,
+                referenceType: 'pasar',
+                referenceId: $order->id,
+                amount: $grandTotal,
+                paymentMethod: $validated['payment_method'],
+                proofPath: $paymentProofPath,
+            );
+
             // Create Order Items & Reduce Stock
             foreach ($carts as $cart) {
                 PasarOrderItem::create([

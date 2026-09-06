@@ -172,7 +172,7 @@
                                                 <a href="{{ route('admin.unit.pasar_daerah.edit', $produk->id) }}"
                                                     class="btn btn-sm btn-light border text-warning shadow-sm rounded-pill px-3"><i class="bx bx-edit me-1"></i><i class="bx bx-edit"></i></a>
                                                 <form action="{{ route('admin.unit.pasar_daerah.destroy', $produk->id) }}" method="POST"
-                                                    onsubmit="return confirm('Apakah Anda yakin ingin menghapus produk ini?');">
+                                                    data-konfirmasi="Apakah Anda yakin ingin menghapus produk ini?">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="btn btn-sm btn-light border text-danger shadow-sm rounded-pill px-3"><i class="bx bx-trash me-1"></i><i class="bx bx-trash"></i></button>

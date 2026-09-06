@@ -110,6 +110,17 @@ class ProfilPembayaranWilayah
             $metode[] = 'transfer';
         }
 
+        // E-Wallet manual milik wilayah. Perlakuannya sama dengan transfer —
+        // warga mengirim ke nomor DANA/OVO desa lalu mengunggah bukti — dan
+        // sakelarnya ewallet_active di Pengaturan Pembayaran Wilayah. Sebelum
+        // ini kepala desa bisa mengisi nomornya sampai lengkap tetapi metodenya
+        // tidak pernah muncul di halaman pemesanan mana pun.
+        $ewalletAktif = $info['ewallet_active'] ?? false;
+
+        if ($ewalletAktif && $this->punyaEwalletSendiri()) {
+            $metode[] = 'ewallet';
+        }
+
         // Tunai selalu tersedia. Selain memang lazim di layanan desa, ini juga
         // jaring pengaman: wilayah yang belum mengisi rekening tetap punya satu
         // cara membayar, sehingga halaman pemesanannya tidak buntu.
@@ -124,6 +135,14 @@ class ProfilPembayaranWilayah
         $info = $this->region?->payment_info ?? [];
 
         return filled($info['bank_name'] ?? null) && filled($info['account_number'] ?? null);
+    }
+
+    /** Wilayah ini sudah mengisi e-wallet-nya sendiri? */
+    public function punyaEwalletSendiri(): bool
+    {
+        $info = $this->region?->payment_info ?? [];
+
+        return filled($info['ewallet_name'] ?? null) && filled($info['ewallet_number'] ?? null);
     }
 
     /** Wilayah ini menyalakan pembayaran otomatis? */

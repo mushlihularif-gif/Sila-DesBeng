@@ -1,4 +1,4 @@
-﻿@extends('layouts.user')
+@extends('layouts.user')
 
 @php
     $cleanRegionName = preg_replace('/^Desa\s+/i', '', $region->name ?? 'Bengkalis');

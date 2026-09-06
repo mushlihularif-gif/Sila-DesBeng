@@ -148,7 +148,7 @@
                         </span>
                     </div>
 
-                    <form action="{{ route('admin.manajemen-pengguna.toggle-status', $user->id) }}" method="POST" onsubmit="return confirm('Yakin ingin mengubah status akun ini?')">
+                    <form action="{{ route('admin.manajemen-pengguna.toggle-status', $user->id) }}" method="POST" data-konfirmasi="Yakin ingin mengubah status akun ini?">
                         @csrf
                         @method('PUT')
                         @if($user->status === 'aktif')

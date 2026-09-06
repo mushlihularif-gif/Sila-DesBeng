@@ -125,14 +125,14 @@
                         <a href="{{ route('admin.staff.edit', $stf->id) }}" class="btn-icon-soft edit text-muted" data-bs-toggle="tooltip" title="Edit Staf">
                             <i class="bx bx-edit-alt"></i>
                         </a>
-                        <form action="{{ route('admin.staff.toggle-status', $stf->id) }}" method="POST" onsubmit="return confirm('Yakin ingin mengubah status akun ini?')">
+                        <form action="{{ route('admin.staff.toggle-status', $stf->id) }}" method="POST" data-konfirmasi="Yakin ingin mengubah status akun ini?">
                             @csrf
                             @method('PUT')
                             <button type="submit" class="btn-icon-soft {{ $stf->status === 'aktif' ? 'suspend' : 'activate' }} text-muted" data-bs-toggle="tooltip" title="{{ $stf->status === 'aktif' ? 'Blokir Akses' : 'Buka Blokir' }}">
                                 <i class="bx {{ $stf->status === 'aktif' ? 'bx-block' : 'bx-check-circle' }}"></i>
                             </button>
                         </form>
-                        <form action="{{ route('admin.staff.destroy', $stf->id) }}" method="POST" onsubmit="return confirm('PERINGATAN: Yakin ingin menghapus akun staf ini secara permanen? Data yang dihapus tidak bisa dikembalikan.')">
+                        <form action="{{ route('admin.staff.destroy', $stf->id) }}" method="POST" data-konfirmasi="PERINGATAN: Yakin ingin menghapus akun staf ini secara permanen? Data yang dihapus tidak bisa dikembalikan.">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="btn-icon-soft delete text-muted" data-bs-toggle="tooltip" title="Hapus Permanen">

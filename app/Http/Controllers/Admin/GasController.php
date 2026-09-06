@@ -32,7 +32,13 @@ class GasController extends Controller
             ->paginate(9)
             ->appends(['search' => $search]);
 
-        return view('admin.unit.penjualan_gas.index', compact('gases', 'search'));
+        // Lokasi layanan ikut dikirim supaya petugas bisa mendaftarkannya
+        // langsung dari halaman ini — daftar yang kosong berarti pilihan
+        // "Lokasi Tersimpan" di formulir produk juga kosong, dan itu perlu
+        // terlihat sebelum ia menekan Tambah Gas.
+        $lokasiLayanan = \App\Models\LokasiLayanan::untukWilayah(auth()->user()->region_id);
+
+        return view('admin.unit.penjualan_gas.index', compact('gases', 'search', 'lokasiLayanan'));
     }
 
 
@@ -41,11 +47,12 @@ class GasController extends Controller
     // ===========================
     public function create()
     {
-        $savedLocations = Gas::select('lokasi', 'latitude', 'longitude')
-            ->whereNotNull('lokasi')
-            ->where('lokasi', '!=', '')
-            ->distinct()
-            ->get();
+        // Lokasi diambil dari daftar milik WILAYAH, bukan lagi SELECT DISTINCT
+        // pada tabel produk unit ini. Query lama tidak menyaring region_id sama
+        // sekali, sehingga admin satu desa ikut melihat nama lokasi desa lain;
+        // selain itu lokasinya lenyap begitu produk terakhir yang memakainya
+        // dihapus, dan koordinatnya harus diketik ulang tiap kali.
+        $savedLocations = \App\Models\LokasiLayanan::untukWilayah(auth()->user()->region_id);
             
         $categories = Category::where('region_id', auth()->user()->region_id)
             ->where(function($q) {
@@ -125,11 +132,12 @@ class GasController extends Controller
     public function edit($id)
     {
         $gas = Gas::findOrFail($id);
-        $savedLocations = Gas::select('lokasi', 'latitude', 'longitude')
-            ->whereNotNull('lokasi')
-            ->where('lokasi', '!=', '')
-            ->distinct()
-            ->get();
+        // Lokasi diambil dari daftar milik WILAYAH, bukan lagi SELECT DISTINCT
+        // pada tabel produk unit ini. Query lama tidak menyaring region_id sama
+        // sekali, sehingga admin satu desa ikut melihat nama lokasi desa lain;
+        // selain itu lokasinya lenyap begitu produk terakhir yang memakainya
+        // dihapus, dan koordinatnya harus diketik ulang tiap kali.
+        $savedLocations = \App\Models\LokasiLayanan::untukWilayah(auth()->user()->region_id);
             
         $categories = Category::where('region_id', auth()->user()->region_id)
             ->where(function($q) {

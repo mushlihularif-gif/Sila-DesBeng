@@ -1,4 +1,4 @@
-﻿@extends('layouts.user')
+@extends('layouts.user')
 
 @section('title', 'Verifikasi KTP & Wajah')
 
@@ -566,44 +566,89 @@ function onResults(results) {
     canvasCtx.restore();
 }
 
+// Penanda agar pendengar 'change' hanya dipasang sekali. Sebelumnya blok yang
+// sama disalin di tiga tempat, sehingga saat kamera gagal LALU pengguna menekan
+// tautan manual, berkas yang sama diproses berkali-kali.
+let modeManualSiap = false;
+
+/**
+ * Alihkan langkah 2 ke pengambilan selfie manual.
+ *
+ * Dulu logika ini tersebar di tiga tempat dan tidak konsisten: dua cabang
+ * kegagalan kamera memasang pendengar berkas, sedangkan tombol "Unggah manual
+ * di sini" HANYA membuka panelnya. Akibatnya, kalau kamera sebenarnya menyala
+ * tetapi gambarnya hitam, pengguna masuk mode manual lewat tautan itu dan
+ * memilih foto - tetapi tidak ada yang menanggapi, tombol Kirim Data tetap mati.
+ *
+ * @param {boolean} bukaPemilih langsung tampilkan dialog pilih berkas
+ */
+function aktifkanModeManual(bukaPemilih = false) {
+    if (camera) { try { camera.stop(); } catch (e) {} }
+
+    const instructionEl = document.getElementById('liveness-instruction');
+    const animationEl   = document.getElementById('liveness-animation');
+    const statusEl      = document.getElementById('liveness-status');
+    const manualInput   = document.getElementById('manual_selfie_input');
+    const manualBox     = document.getElementById('manual-selfie-container');
+
+    if (instructionEl) instructionEl.style.display = 'none';
+    if (animationEl)   animationEl.style.display = 'none';
+    // Lencana "Mendeteksi Wajah" ikut disembunyikan: tanpa ini ia terus berkedip
+    // di bawah panel manual seolah kameranya masih bekerja.
+    if (statusEl)      statusEl.style.display = 'none';
+    if (manualBox)     manualBox.classList.remove('hidden');
+
+    if (manualInput && !modeManualSiap) {
+        modeManualSiap = true;
+        manualInput.addEventListener('change', function (e) {
+            if (!e.target.files || !e.target.files[0]) return;
+
+            const reader = new FileReader();
+            reader.onload = function (evt) {
+                const preview = document.getElementById('manual-selfie-preview');
+                preview.src = evt.target.result;
+                preview.classList.remove('hidden');
+
+                faceSnapshot = evt.target.result;
+
+                // BUKAN array kosong. Server memvalidasi face_data dengan
+                // 'required|array', dan aturan required menolak array kosong,
+                // sehingga kiriman mode manual selalu dibalas 422 "The face
+                // data field is required." - yang di layar hanya muncul sebagai
+                // "Gagal menyimpan data." tanpa keterangan apa pun.
+                //
+                // Penandanya sekaligus memberi tahu peninjau bahwa uji
+                // kehidupan (kedip & menoleh) TIDAK dijalankan untuk berkas ini.
+                collectedFaceData = {
+                    mode: 'manual',
+                    liveness: false,
+                    alasan: 'kamera tidak tersedia',
+                    waktu: new Date().toISOString()
+                };
+
+                const submit = document.getElementById('btn-submit-kyc');
+                submit.disabled = false;
+                submit.classList.remove('cursor-not-allowed');
+
+                showToast('Foto selfie siap. Silakan tekan Kirim Data.', 'success');
+            };
+            reader.readAsDataURL(e.target.files[0]);
+        });
+    }
+
+    if (bukaPemilih && manualInput) {
+        manualInput.click();
+    }
+}
+
 function startLivenessDetection() {
     const videoElement = document.getElementById('webcam');
     const canvasElement = document.getElementById('output_canvas');
-    
+
     // Check if running on insecure context (HTTP without localhost)
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         showToast('Browser memblokir kamera karena koneksi tidak aman (HTTP). Menggunakan mode manual.', 'warning');
-        
-        // Hide camera UI, show manual fallback UI
-        const instructionEl = document.getElementById('liveness-instruction');
-        const animationEl = document.getElementById('liveness-animation');
-        const manualContainer = document.getElementById('manual-selfie-container');
-        
-        if(instructionEl) instructionEl.style.display = 'none';
-        if(animationEl) animationEl.style.display = 'none';
-        if(manualContainer) manualContainer.classList.remove('hidden');
-        
-        // Setup manual file input listener
-        const manualInput = document.getElementById('manual_selfie_input');
-        if (manualInput) {
-            manualInput.addEventListener('change', function(e) {
-                if (e.target.files && e.target.files[0]) {
-                    const reader = new FileReader();
-                    reader.onload = function(evt) {
-                        const preview = document.getElementById('manual-selfie-preview');
-                        preview.src = evt.target.result;
-                        preview.classList.remove('hidden');
-                        
-                        faceSnapshot = evt.target.result;
-                        collectedFaceData = []; // empty array for manual fallback
-                        
-                        document.getElementById('btn-submit-kyc').disabled = false;
-                        document.getElementById('btn-submit-kyc').classList.remove('cursor-not-allowed');
-                    };
-                    reader.readAsDataURL(e.target.files[0]);
-                }
-            });
-        }
+        aktifkanModeManual();
         return;
     }
 
@@ -626,31 +671,7 @@ function startLivenessDetection() {
     }).catch((err) => {
         console.error(err);
         showToast('Kamera diblokir browser atau perangkat rusak. Menggunakan mode manual.', 'warning');
-        
-        // Hide camera UI, show manual fallback UI
-        document.getElementById('liveness-instruction').style.display = 'none';
-        document.getElementById('liveness-animation').style.display = 'none';
-        document.getElementById('manual-selfie-container').classList.remove('hidden');
-        
-        // Setup manual file input listener
-        document.getElementById('manual_selfie_input').addEventListener('change', function(e) {
-            if (e.target.files && e.target.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(evt) {
-                    const preview = document.getElementById('manual-selfie-preview');
-                    preview.src = evt.target.result;
-                    preview.classList.remove('hidden');
-                    
-                    // Assign to global variables for submission
-                    faceSnapshot = evt.target.result;
-                    collectedFaceData = []; // empty array for manual fallback
-                    
-                    document.getElementById('btn-submit-kyc').disabled = false;
-                    document.getElementById('btn-submit-kyc').classList.remove('cursor-not-allowed');
-                };
-                reader.readAsDataURL(e.target.files[0]);
-            }
-        });
+        aktifkanModeManual();
     });
 }
 
@@ -678,11 +699,10 @@ function initKycPage() {
 
     const btnForce = document.getElementById('btn-force-manual');
     if(btnForce) btnForce.addEventListener('click', () => {
-        if(camera) camera.stop();
-        document.getElementById('liveness-instruction').style.display = 'none';
-        document.getElementById('liveness-animation').style.display = 'none';
-        document.getElementById('manual-selfie-container').classList.remove('hidden');
-        showToast('Mode manual diaktifkan', 'info');
+        // Langsung buka pemilih berkas. Sebelumnya tombol ini hanya menampilkan
+        // panel manual - padahal saat kamera gagal panel itu SUDAH tampil,
+        // sehingga menekannya tidak menimbulkan perubahan apa pun di layar.
+        aktifkanModeManual(true);
     });
     
     document.getElementById('btn-confirm-ktp').addEventListener('click', () => {

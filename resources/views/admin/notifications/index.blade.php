@@ -16,7 +16,7 @@
                 <a href="{{ route('admin.notifications.create') }}" class="btn btn-primary rounded-pill px-4 shadow-sm">
                     <i class="bx bx-plus me-1"></i> Buat Notifikasi Baru
                 </a>
-                <form action="{{ route('admin.notifications.mark-all-read') }}" method="POST" class="d-inline" onsubmit="return confirm('Tandai semua sebagai dibaca?')">
+                <form action="{{ route('admin.notifications.mark-all-read') }}" method="POST" class="d-inline" data-konfirmasi="Tandai semua sebagai dibaca?">
                     @csrf
                     @method('PUT')
                     <button type="submit" class="btn btn-outline-secondary rounded-pill px-4 shadow-sm">

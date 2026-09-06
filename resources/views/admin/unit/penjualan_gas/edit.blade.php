@@ -359,8 +359,8 @@
                                         <select class="form-select modern-input" id="saved_lokasi" onchange="fillLocationData(this)">
                                             <option value="">-- Pilih Lokasi --</option>
                                             @foreach($savedLocations as $loc)
-                                                <option value="{{ $loc->lokasi }}" data-lat="{{ $loc->latitude }}" data-lng="{{ $loc->longitude }}">
-                                                    {{ $loc->lokasi }}
+                                                <option value="{{ $loc->nama }}" data-lat="{{ $loc->latitude }}" data-lng="{{ $loc->longitude }}">
+                                                    {{ $loc->nama }}
                                                 </option>
                                             @endforeach
                                         </select>
@@ -372,16 +372,60 @@
                                                 <label class="form-label fw-semibold" for="lokasi">
                                                     Lokasi <span class="text-danger">*</span>
                                                 </label>
-                                                <input type="text" class="form-control modern-input" id="lokasi" 
-                                                       name="lokasi" value="{{ old('lokasi', $gas->lokasi ?? 'Desa Pematang Duku Timur') }}" required />
+                                                {{-- Nilai bawaannya dulu dipaku "Desa Pematang Duku Timur",
+                                                     nama satu desa tertentu — salah untuk wilayah lain. --}}
+                                                <input type="text" class="form-control modern-input" id="lokasi"
+                                                       name="lokasi" value="{{ old('lokasi', $gas->lokasi ?? (auth()->user()->region->name ?? '')) }}" required />
                                             </div>
+
+                                            @if(config('services.google_maps.api_key'))
+                                            <div class="col-md-12">
+                                                <label class="form-label fw-semibold d-flex justify-content-between align-items-center">
+                                                    <span>Titik Peta <span class="text-muted fw-normal">(opsional)</span></span>
+                                                    <span class="text-muted fw-normal" style="font-size:.78rem;">Klik peta atau geser penanda</span>
+                                                </label>
+                                                {{-- Sengaja BUKAN .input-group: kalau Places API tersedia,
+                                                     <input> di bawah ditukar dengan elemen kustom
+                                                     <gmp-place-autocomplete> milik Google, dan elemen itu
+                                                     memutus tata letak input-group. --}}
+                                                <div class="d-flex align-items-center gap-2 mb-2">
+                                                    <div class="flex-grow-1 wadah-cari-alamat">
+                                                        <input type="text" class="form-control" id="cariAlamatGas"
+                                                               placeholder="Cari nama tempat atau alamat...">
+                                                    </div>
+                                                    <button class="btn btn-outline-secondary flex-shrink-0" type="button" id="btnPosisiSayaGas"
+                                                            title="Pakai posisi saya sekarang">
+                                                        <i class="bx bx-current-location"></i>
+                                                    </button>
+                                                </div>
+                                                <div id="petaGas" class="rounded-3 border" style="width:100%; height:280px; background:#f5f5f9;"></div>
+                                            </div>
+                                            @endif
+
                                             <div class="col-md-6">
                                                 <label class="form-label fw-semibold" for="latitude">Latitude (Opsional)</label>
-                                                <input type="text" class="form-control modern-input" id="latitude" name="latitude" value="{{ old('latitude', $gas->latitude) }}" placeholder="-6.200000" />
+                                                <input type="text" class="form-control modern-input" id="latitude" name="latitude" value="{{ old('latitude', $gas->latitude) }}" placeholder="1.4854" />
                                             </div>
                                             <div class="col-md-6">
                                                 <label class="form-label fw-semibold" for="longitude">Longitude (Opsional)</label>
-                                                <input type="text" class="form-control modern-input" id="longitude" name="longitude" value="{{ old('longitude', $gas->longitude) }}" placeholder="106.816666" />
+                                                <input type="text" class="form-control modern-input" id="longitude" name="longitude" value="{{ old('longitude', $gas->longitude) }}" placeholder="102.1512" />
+                                            </div>
+
+                                            {{-- Menyimpan lokasi ini ke daftar wilayah, supaya lain kali
+                                                 tinggal dipilih dari "Lokasi Tersimpan" — dan ikut terpakai
+                                                 di unit lain (sewa alat, mobil, fasilitas, pasar). --}}
+                                            <div class="col-md-12">
+                                                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 p-3 rounded-3"
+                                                     style="background: rgba(105,108,255,.06);">
+                                                    <div class="small text-muted">
+                                                        <i class="bx bx-bookmark-plus"></i>
+                                                        Simpan lokasi ini agar bisa dipilih ulang di semua unit tanpa mengetik lagi.
+                                                    </div>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill"
+                                                            id="btnSimpanLokasi">
+                                                        <i class="bx bx-save me-1"></i> Simpan sebagai Lokasi Tersimpan
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -814,16 +858,16 @@
                     bootstrap.Modal.getOrCreateInstance(document.getElementById('addCategoryModal'))?.hide();
                     document.getElementById('new_kategori').value = '';
                 } else {
-                    alert('Gagal menyimpan kategori.');
+                    showSiladesBengToast('error', 'Gagal', 'Gagal menyimpan kategori.');
                 }
             })
             .catch(err => {
                 saveBtn.innerHTML = originalText;
                 saveBtn.disabled = false;
-                alert('Terjadi kesalahan jaringan.');
+                showSiladesBengToast('error', 'Gagal', 'Terjadi kesalahan jaringan.');
             });
         } else {
-            alert('Silakan masukkan nama kategori.');
+            showSiladesBengToast('warning', 'Perhatian', 'Silakan masukkan nama kategori.');
         }
     });
 
@@ -840,7 +884,7 @@
             bootstrap.Modal.getOrCreateInstance(document.getElementById('addSatuanModal'))?.hide();
             document.getElementById('new_satuan').value = '';
         } else {
-            alert('Silakan masukkan nama satuan.');
+            showSiladesBengToast('warning', 'Perhatian', 'Silakan masukkan nama satuan.');
         }
     });
     
@@ -894,18 +938,20 @@
                         document.body.appendChild(toast);
                         setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 500); }, 3000);
                     } else {
-                        alert(data.message);
+                        showSiladesBengToast('info', 'Informasi', data.message);
                         this.checked = !this.checked; 
                     }
                 })
                 .catch(err => {
                     this.disabled = false;
-                    alert('Terjadi kesalahan jaringan.');
+                    showSiladesBengToast('error', 'Gagal', 'Terjadi kesalahan jaringan.');
                     this.checked = !this.checked; 
                 });
             });
         });
     });
+
+    let lokasiSebelumnya = null;
 
     function toggleLokasiMode(mode) {
         const savedContainer = document.getElementById('saved_location_container');
@@ -915,7 +961,20 @@
         const inputLat = document.getElementById('latitude');
         const inputLng = document.getElementById('longitude');
 
+        // Nilai yang diketik/dimuat sebelum beralih ke daftar tersimpan diingat
+        // dulu. Tanpa ini, membuka mode "Lokasi Tersimpan" memanggil
+        // fillLocationData() dengan pilihan kosong, isian lokasi terhapus, dan
+        // kembali ke mode manual meninggalkan kolom yang tadinya terisi jadi
+        // kosong - pada halaman Ubah itu berarti lokasi produk hilang.
         if (mode === 'saved') {
+            if (typeof lokasiSebelumnya === 'undefined' || lokasiSebelumnya === null) {
+                lokasiSebelumnya = {
+                    nama: inputLokasi.value,
+                    lat: inputLat.value,
+                    lng: inputLng.value,
+                };
+            }
+
             if(savedContainer) savedContainer.style.display = 'block';
             newContainer.style.display = 'none';
             if(select) {
@@ -930,6 +989,16 @@
             inputLokasi.readOnly = false;
             inputLat.readOnly = false;
             inputLng.readOnly = false;
+
+            // Pulihkan hanya kalau kolomnya memang kosong akibat peralihan tadi;
+            // kalau petugas sudah memilih lokasi tersimpan lalu ingin menyuntingnya,
+            // pilihan itu yang dipertahankan.
+            if (typeof lokasiSebelumnya !== 'undefined' && lokasiSebelumnya && !inputLokasi.value) {
+                inputLokasi.value = lokasiSebelumnya.nama;
+                inputLat.value = lokasiSebelumnya.lat;
+                inputLng.value = lokasiSebelumnya.lng;
+            }
+            lokasiSebelumnya = null;
         }
     }
 
@@ -946,5 +1015,148 @@
         }
     }
 
+    // ====================================================================
+    // Pemilih titik peta + simpan lokasi ke daftar wilayah
+    // Sama dengan halaman Tambah; halaman Ubah sebelumnya tidak punya peta
+    // sama sekali, jadi koordinat hanya bisa diketik manual.
+    // ====================================================================
+    (function () {
+        const wadah  = document.getElementById('petaGas');
+        const inLat  = document.getElementById('latitude');
+        const inLng  = document.getElementById('longitude');
+        const inNama = document.getElementById('lokasi');
+
+        const TITIK_AWAL = { lat: 1.4854, lng: 102.1512 };
+
+        let peta = null, penanda = null, saranTerpasang = false;
+
+        function pasangPeta() {
+            if (!wadah || typeof google === 'undefined' || !google.maps || peta) return;
+
+            const lat = parseFloat(inLat.value), lng = parseFloat(inLng.value);
+            const titik = (!isNaN(lat) && !isNaN(lng)) ? { lat, lng } : TITIK_AWAL;
+
+            peta = new google.maps.Map(wadah, {
+                zoom: 15, center: titik, mapTypeId: 'roadmap',
+                streetViewControl: false, fullscreenControl: true,
+            });
+            penanda = new google.maps.Marker({
+                position: titik, map: peta, draggable: true,
+                title: 'Geser penanda atau klik peta untuk menentukan titik',
+            });
+
+            peta.addListener('click', (e) => pindah(e.latLng));
+            penanda.addListener('dragend', (e) => pindah(e.latLng));
+        }
+
+        function pindah(latLng) {
+            penanda.setPosition(latLng);
+            inLat.value = latLng.lat().toFixed(7);
+            inLng.value = latLng.lng().toFixed(7);
+        }
+
+        function pasangSaran() {
+            if (saranTerpasang) return;
+            const cari = document.getElementById('cariAlamatGas');
+            if (!cari || typeof pasangSaranAlamat !== 'function' || typeof google === 'undefined') return;
+
+            saranTerpasang = true;
+            pasangSaranAlamat(cari, function (t) {
+                const titik = new google.maps.LatLng(t.lat, t.lng);
+                if (peta) { peta.setCenter(titik); peta.setZoom(17); }
+                pindah(titik);
+
+                // Nama tempat dari Google TIDAK menimpa lokasi produk yang sudah
+                // tersimpan — di halaman Ubah kolom itu hampir selalu sudah terisi
+                // dan nilainya milik petugas, bukan tebakan Google.
+                if (t.nama && !inNama.value.trim()) inNama.value = t.nama;
+            });
+        }
+
+        window.pasangPetaGas = function () { pasangPeta(); pasangSaran(); };
+
+        document.addEventListener('DOMContentLoaded', function () {
+            setTimeout(function () { pasangPeta(); pasangSaran(); }, 600);
+
+            const btnPos = document.getElementById('btnPosisiSayaGas');
+            if (btnPos) {
+                btnPos.addEventListener('click', function () {
+                    if (!navigator.geolocation) {
+                        showSiladesBengToast('warning', 'Tidak Didukung',
+                            'Perangkat ini tidak mendukung penentuan lokasi otomatis.');
+                        return;
+                    }
+                    navigator.geolocation.getCurrentPosition(
+                        (pos) => {
+                            const t = new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
+                            peta.setCenter(t); peta.setZoom(17); pindah(t);
+                        },
+                        () => showSiladesBengToast('error', 'Gagal',
+                            'Tidak bisa membaca posisi Anda. Pastikan izin lokasi diberikan.')
+                    );
+                });
+            }
+
+            const btnSimpan = document.getElementById('btnSimpanLokasi');
+            if (btnSimpan) {
+                btnSimpan.addEventListener('click', async function () {
+                    const nama = inNama.value.trim();
+                    if (!nama) {
+                        showSiladesBengToast('warning', 'Perhatian', 'Isi dulu nama lokasinya.');
+                        inNama.focus();
+                        return;
+                    }
+
+                    this.disabled = true;
+                    try {
+                        const res = await fetch(@json(route('admin.lokasi-layanan.simpan-cepat')), {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            },
+                            body: JSON.stringify({
+                                nama: nama,
+                                latitude: inLat.value || null,
+                                longitude: inLng.value || null,
+                            }),
+                        });
+                        const data = await res.json();
+
+                        if (data.success) {
+                            showSiladesBengToast('success', 'Tersimpan', data.message);
+
+                            const pilih = document.getElementById('saved_lokasi');
+                            if (pilih) {
+                                const opt = document.createElement('option');
+                                opt.value = data.lokasi.nama;
+                                opt.textContent = data.lokasi.nama;
+                                opt.dataset.lat = data.lokasi.latitude ?? '';
+                                opt.dataset.lng = data.lokasi.longitude ?? '';
+                                pilih.appendChild(opt);
+                            }
+                        } else {
+                            showSiladesBengToast('error', 'Gagal',
+                                data.message || 'Lokasi tidak dapat disimpan.');
+                        }
+                    } catch (err) {
+                        // 422 dari validasi (mis. nama sudah dipakai) mendarat di sini.
+                        showSiladesBengToast('error', 'Gagal',
+                            'Lokasi tidak dapat disimpan. Kemungkinan namanya sudah dipakai di wilayah Anda.');
+                    } finally {
+                        this.disabled = false;
+                    }
+                });
+            }
+        });
+    })();
+
 </script>
+
+@if(config('services.google_maps.api_key'))
+    @include('partials.saran-alamat')
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google_maps.api_key') }}&libraries=places&loading=async&callback=pasangPetaGas"></script>
+@endif
 @endsection

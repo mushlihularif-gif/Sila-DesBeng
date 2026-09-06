@@ -121,8 +121,18 @@
         }
 
         window.showToast = function(message, type = 'success') {
+            // Urutan argumen dibuat bebas: sisi admin memakai
+            // showToast(jenis, pesan) sedangkan di sini showToast(pesan, jenis).
+            // Nama fungsinya sama, jadi kode yang dipindahkan antar sisi dulu
+            // diam-diam menukar isi pesan dengan jenisnya.
+            const JENIS = ['success', 'error', 'warning', 'info', 'danger'];
+            if (JENIS.indexOf(message) !== -1 && JENIS.indexOf(type) === -1) {
+                const tukar = message; message = type; type = tukar;
+            }
+            if (type === 'danger') type = 'error';
+
             const toast = document.createElement('div');
-            
+
             let bgClass = 'bg-green-500';
             if (type === 'error') bgClass = 'bg-red-500';
             else if (type === 'warning') bgClass = 'bg-yellow-500';

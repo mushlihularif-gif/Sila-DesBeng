@@ -17,6 +17,17 @@
                     <i class='bx {{ $isCrisisMode ? 'bx-error-circle' : 'bx-shield-quarter' }} me-1'></i> 
                     Mode Krisis
                 </button>
+                {{-- Lokasi layanan bisa didaftarkan langsung dari sini, tanpa
+                     pindah halaman. Setelah tersimpan, lokasinya langsung muncul
+                     sebagai pilihan "Lokasi Tersimpan" di formulir Tambah Gas —
+                     dan di unit lain juga, karena daftarnya milik wilayah. --}}
+                <button type="button" class="btn btn-outline-primary flex-grow-1 flex-sm-grow-0 text-nowrap"
+                        data-bs-toggle="modal" data-bs-target="#modalLokasi" onclick="siapkanFormulir()">
+                    <i class="bx bx-map-pin me-1"></i> Lokasi Layanan
+                    @if(isset($lokasiLayanan) && $lokasiLayanan->count())
+                        <span class="badge bg-primary rounded-pill ms-1">{{ $lokasiLayanan->count() }}</span>
+                    @endif
+                </button>
                 <a href="{{ route('admin.unit.penjualan_gas.create') }}" class="btn btn-primary flex-grow-1 flex-sm-grow-0 text-nowrap">
                     <i class="bx bx-plus me-1"></i> Tambah Gas
                 </a>
@@ -29,6 +40,44 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         @endif
+
+        {{-- Ringkasan lokasi yang sudah terdaftar. Selalu dirender walau kosong:
+             justru keadaan kosong itu yang perlu terlihat, karena kalau daftarnya
+             kosong maka pilihan "Lokasi Tersimpan" di formulir produk juga kosong. --}}
+        @isset($lokasiLayanan)
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-body p-3 d-flex align-items-center flex-wrap gap-3">
+                <span class="ikon-bulat rounded-circle bg-primary-subtle text-primary"
+                      style="width: 38px; height: 38px;">
+                    <i class="bx bx-map-pin fs-5"></i>
+                </span>
+
+                <div class="flex-grow-1 min-w-0">
+                    <div class="fw-semibold small mb-1">Lokasi Layanan Wilayah</div>
+                    @if($lokasiLayanan->isEmpty())
+                        <div class="text-muted" style="font-size: .82rem;">
+                            Belum ada. Daftarkan gudang atau pangkalan Anda dulu, lalu saat menambah produk
+                            tinggal pilih <strong>Gunakan Lokasi Tersimpan</strong>.
+                        </div>
+                    @else
+                        <div class="d-flex flex-wrap gap-2">
+                            @foreach($lokasiLayanan as $l)
+                                <span class="badge {{ $l->punyaTitik() ? 'bg-label-primary' : 'bg-label-warning' }} rounded-pill"
+                                      title="{{ $l->punyaTitik() ? 'Titik peta sudah ditentukan' : 'Titik peta belum ditentukan' }}">
+                                    <i class="bx {{ $l->punyaTitik() ? 'bx-map-pin' : 'bx-map' }}"></i>
+                                    {{ $l->nama }}
+                                </span>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+
+                <a href="{{ route('admin.lokasi-layanan.index') }}" class="btn btn-sm btn-label-primary rounded-pill text-nowrap">
+                    Kelola
+                </a>
+            </div>
+        </div>
+        @endisset
         @if(session('error'))
             <div class="alert alert-danger alert-dismissible" role="alert">
                 {{ session('error') }}
@@ -92,7 +141,7 @@
                                     <a href="{{ route('admin.unit.penjualan_gas.edit', $gas->id) }}"
                                         class="btn btn-sm btn-outline-warning flex-grow-1"><i class="bx bx-edit"></i></a>
                                     <form action="{{ route('admin.unit.penjualan_gas.destroy', $gas->id) }}" method="POST"
-                                        onsubmit="return confirm('Apakah Anda yakin ingin menghapus gas ini?');" class="d-flex flex-grow-1 m-0 p-0">
+                                        data-konfirmasi="Apakah Anda yakin ingin menghapus gas ini?" class="d-flex flex-grow-1 m-0 p-0">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-sm btn-outline-danger w-100"><i class="bx bx-trash"></i></button>
@@ -345,3 +394,6 @@
     }
 </style>
 @endsection
+
+{{-- Modal Lokasi Layanan: tombol di header memanggil siapkanFormulir(). --}}
+@include("admin.lokasi_layanan._modal")

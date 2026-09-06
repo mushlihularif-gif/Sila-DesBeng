@@ -392,8 +392,8 @@
                                         <select class="form-select modern-input" id="saved_lokasi" onchange="fillLocationData(this)">
                                             <option value="">-- Pilih Lokasi --</option>
                                             @foreach($savedLocations as $loc)
-                                                <option value="{{ $loc->lokasi }}" data-lat="{{ $loc->latitude }}" data-lng="{{ $loc->longitude }}">
-                                                    {{ $loc->lokasi }}
+                                                <option value="{{ $loc->nama }}" data-lat="{{ $loc->latitude }}" data-lng="{{ $loc->longitude }}">
+                                                    {{ $loc->nama }}
                                                 </option>
                                             @endforeach
                                         </select>
@@ -950,16 +950,16 @@
                     $('#addCategoryModal').modal('hide');
                     document.getElementById('new_kategori').value = '';
                 } else {
-                    alert('Gagal menyimpan kategori.');
+                    showSiladesBengToast('error', 'Gagal', 'Gagal menyimpan kategori.');
                 }
             })
             .catch(err => {
                 saveBtn.innerHTML = originalText;
                 saveBtn.disabled = false;
-                alert('Terjadi kesalahan jaringan.');
+                showSiladesBengToast('error', 'Gagal', 'Terjadi kesalahan jaringan.');
             });
         } else {
-            alert('Silakan masukkan nama kategori.');
+            showSiladesBengToast('warning', 'Perhatian', 'Silakan masukkan nama kategori.');
         }
     });
 
@@ -976,7 +976,7 @@
             $('#addSatuanModal').modal('hide');
             document.getElementById('new_satuan').value = '';
         } else {
-            alert('Silakan masukkan nama satuan.');
+            showSiladesBengToast('warning', 'Perhatian', 'Silakan masukkan nama satuan.');
         }
     });
 
@@ -1052,18 +1052,20 @@
                         document.body.appendChild(toast);
                         setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 500); }, 3000);
                     } else {
-                        alert(data.message);
+                        showSiladesBengToast('info', 'Informasi', data.message);
                         this.checked = !this.checked; 
                     }
                 })
                 .catch(err => {
                     this.disabled = false;
-                    alert('Terjadi kesalahan jaringan.');
+                    showSiladesBengToast('error', 'Gagal', 'Terjadi kesalahan jaringan.');
                     this.checked = !this.checked; 
                 });
             });
         });
     });
+
+    let lokasiSebelumnya = null;
 
     function toggleLokasiMode(mode) {
         const savedContainer = document.getElementById('saved_location_container');
@@ -1073,7 +1075,12 @@
         const inputLat = document.getElementById('latitude');
         const inputLng = document.getElementById('longitude');
 
+        // Nilai sebelum beralih diingat dulu: fillLocationData() di bawah
+        // mengosongkan ketiga kolom saat pilihannya masih '-- Pilih Lokasi --'.
         if (mode === 'saved') {
+            if (!lokasiSebelumnya) {
+                lokasiSebelumnya = { nama: inputLokasi.value, lat: inputLat.value, lng: inputLng.value };
+            }
             if(savedContainer) savedContainer.style.display = 'block';
             newContainer.style.display = 'none';
             if(select) {
@@ -1088,9 +1095,17 @@
             inputLokasi.readOnly = false;
             inputLat.readOnly = false;
             inputLng.readOnly = false;
-            inputLokasi.value = '';
-            inputLat.value = '';
-            inputLng.value = '';
+
+            // Dulu ketiganya dikosongkan tanpa syarat, sehingga sekadar
+            // melirik daftar "Lokasi Tersimpan" lalu kembali ke sini
+            // menghapus isian yang sudah ada. Sekarang nilai sebelum
+            // peralihan dipulihkan.
+            if (lokasiSebelumnya) {
+                inputLokasi.value = lokasiSebelumnya.nama;
+                inputLat.value = lokasiSebelumnya.lat;
+                inputLng.value = lokasiSebelumnya.lng;
+            }
+            lokasiSebelumnya = null;
         }
     }
 

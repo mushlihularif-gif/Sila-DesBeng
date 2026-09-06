@@ -298,6 +298,15 @@ class TransactionController extends Controller
         $oldStatus = $model->status;
         $model->update(['status' => 'completed']);
 
+        // Ikut tandai baris ledgernya terverifikasi. Sebelumnya hanya webhook
+        // gateway (Midtrans/Xendit) yang pernah menyentuh status ini, sehingga
+        // transfer manual/tunai yang ditinjau lewat tombol ini tidak pernah
+        // beranjak dari 'pending' walau petugas sudah menyatakan lunas di sini.
+        \App\Models\WalletTransaction::where('reference_type', $type === 'gas' ? 'gas' : $type)
+            ->where('reference_id', $model->id)
+            ->where('status', 'pending')
+            ->update(['status' => 'verified', 'verified_by' => auth()->id()]);
+
         // Kembalikan stok barang jika status sebelumnya belum selesai
         if ($type === 'rental' && $oldStatus !== 'completed') {
             if (!$model->relationLoaded('barang')) $model->load('barang');
@@ -357,6 +366,14 @@ class TransactionController extends Controller
             'status' => 'rejected',
             'rejection_reason' => $request->reason,
         ]);
+
+        // Sekaligus mengembalikan uangnya ke dompet warga kalau pembayarannya
+        // memang sudah terverifikasi — lihat WalletTransaction::batalkanDanRefund().
+        \App\Models\WalletTransaction::batalkanDanRefund(
+            $type === 'gas' ? 'gas' : $type,
+            $model->id,
+            'Bukti pembayaran ditolak admin: ' . $request->reason
+        );
 
         // Trigger notifikasi: Bukti Pembayaran Ditolak
         $notification = new Notification();

@@ -77,7 +77,7 @@
                                 </span>
                             @else
                                 <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#editBannerModal{{ $banner->id }}">Edit</button>
-                                <form action="{{ route('admin.banners.destroy', $banner->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus banner ini?');">
+                                <form action="{{ route('admin.banners.destroy', $banner->id) }}" method="POST" class="d-inline" data-konfirmasi="Apakah Anda yakin ingin menghapus banner ini?">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-sm btn-danger">Hapus</button>

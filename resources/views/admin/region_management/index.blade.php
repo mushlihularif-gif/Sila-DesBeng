@@ -141,7 +141,7 @@
                                                                 <span class="badge bg-label-success px-3 py-2 mt-2 rounded-pill"><i class='bx bx-shield-quarter me-1'></i>{{ strtoupper(str_replace('_', ' ', $admin->role)) }}</span>
                                                             </div>
                                                         </div>
-                                                        <form action="{{ route('admin.kelola-wilayah.destroy-admin', $admin->id) }}" method="POST" class="mt-3" onsubmit="return confirm('Apakah Anda yakin ingin menghapus akun pengurus ini secara permanen? Wilayah tetap dipertahankan.');">
+                                                        <form action="{{ route('admin.kelola-wilayah.destroy-admin', $admin->id) }}" method="POST" class="mt-3" data-konfirmasi="Apakah Anda yakin ingin menghapus akun pengurus ini secara permanen? Wilayah tetap dipertahankan.">
                                                             @csrf
                                                             @method('DELETE')
                                                             <button type="submit" class="btn btn-sm rounded-pill w-100" style="background: #ffe0db; color: #ff3e1d; border: none; font-weight: 500;">
@@ -207,7 +207,7 @@
                                                         <i class="bx bx-edit-alt me-1"></i> Edit Nama
                                                     </button>
                                                     @if($child->users->count() == 0 && $child->children()->count() == 0)
-                                                        <form action="{{ route('admin.kelola-wilayah.destroy', $child->id) }}" method="POST" class="d-inline flex-grow-1" onsubmit="return confirm('Apakah Anda yakin ingin menghapus struktur wilayah ini?');">
+                                                        <form action="{{ route('admin.kelola-wilayah.destroy', $child->id) }}" method="POST" class="d-inline flex-grow-1" data-konfirmasi="Apakah Anda yakin ingin menghapus struktur wilayah ini?">
                                                             @csrf
                                                             @method('DELETE')
                                                             <button type="submit" class="btn btn-sm rounded-pill w-100" style="background: #ffe0db; color: #ff3e1d; border: none; font-weight: 500;">
@@ -242,7 +242,7 @@
                                                                 <span class="badge bg-label-success px-3 py-2 mt-2 rounded-pill"><i class='bx bx-shield-quarter me-1'></i>{{ strtoupper(str_replace('_', ' ', $admin->role)) }}</span>
                                                             </div>
                                                         </div>
-                                                        <form action="{{ route('admin.kelola-wilayah.destroy-admin', $admin->id) }}" method="POST" class="mt-3" onsubmit="return confirm('Apakah Anda yakin ingin menghapus akun pengurus ini secara permanen? Wilayah tetap dipertahankan.');">
+                                                        <form action="{{ route('admin.kelola-wilayah.destroy-admin', $admin->id) }}" method="POST" class="mt-3" data-konfirmasi="Apakah Anda yakin ingin menghapus akun pengurus ini secara permanen? Wilayah tetap dipertahankan.">
                                                             @csrf
                                                             @method('DELETE')
                                                             <button type="submit" class="btn btn-sm rounded-pill w-100" style="background: #ffe0db; color: #ff3e1d; border: none; font-weight: 500;">
@@ -267,7 +267,7 @@
                                                     <i class="bx bx-edit-alt me-1"></i> Edit Nama
                                                 </button>
                                                 @if($child->users->count() == 0 && $child->children()->count() == 0)
-                                                    <form action="{{ route('admin.kelola-wilayah.destroy', $child->id) }}" method="POST" class="d-inline flex-grow-1" onsubmit="return confirm('Apakah Anda yakin ingin menghapus struktur wilayah ini?');">
+                                                    <form action="{{ route('admin.kelola-wilayah.destroy', $child->id) }}" method="POST" class="d-inline flex-grow-1" data-konfirmasi="Apakah Anda yakin ingin menghapus struktur wilayah ini?">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit" class="btn btn-sm rounded-pill w-100" style="background: #ffe0db; color: #ff3e1d; border: none; font-weight: 500;">
@@ -328,7 +328,7 @@
                                                                             <i class="bx bx-user-plus"></i>
                                                                         </button>
                                                                     @else
-                                                                        <form action="{{ route('admin.kelola-wilayah.destroy-admin', $sub->users->first()->id) }}" method="POST" onsubmit="return confirm('Yakin hapus akun pengurus ini?');">
+                                                                        <form action="{{ route('admin.kelola-wilayah.destroy-admin', $sub->users->first()->id) }}" method="POST" data-konfirmasi="Yakin hapus akun pengurus ini?">
                                                                             @csrf @method('DELETE')
                                                                             <button type="submit" class="btn btn-sm rounded-circle px-2" style="background: #ffe0db; color: #ff3e1d; border: none;" title="Hapus Akun"><i class="bx bx-user-x"></i></button>
                                                                         </form>
@@ -339,7 +339,7 @@
                                                                    </button>
 
                                                                     @if($sub->users->count() == 0 && $sub->children()->count() == 0)
-                                                                    <form action="{{ route('admin.kelola-wilayah.destroy', $sub->id) }}" method="POST" onsubmit="return confirm('Hapus struktur wilayah ini?');">
+                                                                    <form action="{{ route('admin.kelola-wilayah.destroy', $sub->id) }}" method="POST" data-konfirmasi="Hapus struktur wilayah ini?">
                                                                         @csrf @method('DELETE')
                                                                         <button type="submit" class="btn btn-sm rounded-circle px-2" style="background: #ffe0db; color: #ff3e1d; border: none;" title="Hapus Wilayah"><i class="bx bx-trash"></i></button>
                                                                     </form>

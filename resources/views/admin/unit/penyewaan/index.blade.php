@@ -71,7 +71,7 @@
                                     <a href="{{ route('admin.unit.penyewaan.edit', $barang->id) }}"
                                         class="btn btn-sm btn-outline-warning flex-grow-1"><i class="bx bx-edit"></i></a>
                                     <form action="{{ route('admin.unit.penyewaan.destroy', $barang->id) }}" method="POST"
-                                        onsubmit="return confirm('Apakah Anda yakin ingin menghapus alat ini?');" class="d-flex flex-grow-1 m-0 p-0">
+                                        data-konfirmasi="Apakah Anda yakin ingin menghapus alat ini?" class="d-flex flex-grow-1 m-0 p-0">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-sm btn-outline-danger w-100"><i class="bx bx-trash"></i></button>

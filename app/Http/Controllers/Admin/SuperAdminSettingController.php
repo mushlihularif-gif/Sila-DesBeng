@@ -67,13 +67,6 @@ class SuperAdminSettingController extends Controller
 
         unset($providers[$penyediaLain]);
 
-        // Midtrans tidak punya kredensial tingkat platform. Merchant ID, Server Key
-        // dan Client Key di sini tidak pernah dibaca oleh alur transaksi mana pun -
-        // yang dipakai adalah kunci milik tiap wilayah. Kartunya disembunyikan
-        // supaya tidak jadi jebakan: diisi rapi, dikira sudah terpasang, padahal
-        // tidak menyentuh apa pun.
-        unset($providers[\App\Support\PenyediaPembayaran::MIDTRANS]);
-
         return view('admin.super_sistem.gateway', compact(
             'settings', 'providers', 'tersimpan',
             'penyedia', 'labelPenyedia', 'kunciDiWilayah', 'platformSiap',
@@ -503,7 +496,12 @@ class SuperAdminSettingController extends Controller
         }
 
         $walletHealth = [
-            'total_tertahan' => WalletTransaction::where('type', 'ditahan')->where('status', 'pending')->count(),
+            // sum(), bukan count() - sebelumnya menghitung JUMLAH BARIS, jadi
+            // angkanya kebetulan cocok dengan rupiah hanya kalau tiap transaksi
+            // pas Rp 1. Sejak Midtrans dipusatkan di akun Diskominfotik, angka
+            // ini bukan lagi sekadar indikator kesehatan sistem - ini rupiah
+            // sungguhan yang jadi tanggung jawab Diskominfotik mencairkannya.
+            'total_tertahan' => (float) WalletTransaction::where('type', 'ditahan')->where('status', 'pending')->sum('amount'),
             'total_gagal_verifikasi' => WalletTransaction::where('status', 'rejected')->count(),
             'jumlah_region_aktif' => WalletTransaction::distinct('region_id')->count('region_id'),
         ];

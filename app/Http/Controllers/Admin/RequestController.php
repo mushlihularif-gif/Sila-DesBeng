@@ -591,13 +591,16 @@ class RequestController extends Controller
             ]);
         }
 
-        // Tandai dana tertahan di ledger sebagai ditolak/perlu-refund, supaya tidak
-        // ada dana yang "nyangkut" tanpa status jelas saat pesanan tidak jadi diproses.
+        // Batalkan pemasukannya DAN kembalikan uangnya ke dompet warga bila
+        // pesanan ini sudah terbayar. Dulu di sini hanya ditandai 'rejected' —
+        // uangnya lenyap dari saldo wilayah tanpa pernah menjadi milik siapa pun,
+        // padahal fisiknya ada di rekening Midtrans Diskominfotik.
         $walletRefType = $type === 'gas' ? 'gas' : $type;
-        \App\Models\WalletTransaction::where('reference_type', $walletRefType)
-            ->where('reference_id', $model->id)
-            ->whereIn('status', ['pending', 'verified'])
-            ->update(['status' => 'rejected', 'notes' => 'Pesanan ditolak admin: ' . $request->reason]);
+        \App\Models\WalletTransaction::batalkanDanRefund(
+            $walletRefType,
+            $model->id,
+            'Pesanan ditolak admin: ' . $request->reason
+        );
 
         // Otomatis bebaskan Supir jika order ditolak
         if (in_array($type, ['mobil', 'fasilitas']) && isset($model->assigned_supir_id)) {

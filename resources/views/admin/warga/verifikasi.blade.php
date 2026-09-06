@@ -1,4 +1,7 @@
-@extends('layouts.admin')
+{{-- 'layouts.admin' tidak pernah ada di resources/views/layouts/ (isinya hanya
+     app dan user), jadi halaman ini selalu balas HTTP 500 "View not found".
+     Layout admin yang benar ada di admin/layouts/admin.blade.php. --}}
+@extends('admin.layouts.admin')
 
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
@@ -69,7 +72,7 @@
                             <div class="d-flex gap-2">
                                 <form action="{{ route('admin.warga.verifikasi.approve', $u->id) }}" method="POST">
                                     @csrf
-                                    <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Apakah Anda yakin data ini valid dan menyetujuinya?')">
+                                    <button type="submit" class="btn btn-sm btn-success" data-konfirmasi="Apakah Anda yakin data ini valid dan menyetujuinya?">
                                         <i class='bx bx-check'></i> Setujui
                                     </button>
                                 </form>
@@ -171,7 +174,7 @@
     document.addEventListener('contextmenu', function(e) {
         if (e.target.tagName === 'IMG') {
             e.preventDefault();
-            alert('⚠️ PERINGATAN KEAMANAN\n\nAnda tidak diizinkan menyimpan atau menyalin foto identitas warga.\nSeluruh aktivitas Anda pada halaman ini tercatat dalam sistem audit.');
+            showSiladesBengToast('error', 'Peringatan Keamanan', '⚠️ PERINGATAN KEAMANAN<br><br>Anda tidak diizinkan menyimpan atau menyalin foto identitas warga.<br>Seluruh aktivitas Anda pada halaman ini tercatat dalam sistem audit.', 12000);
             return false;
         }
     });
@@ -187,7 +190,7 @@
     // Peringatan jika mendeteksi PrintScreen (hanya edukasi, tidak bisa benar-benar mencegah)
     document.addEventListener('keyup', function(e) {
         if (e.key === 'PrintScreen') {
-            alert('⚠️ PERINGATAN KEAMANAN\n\nScreenshot terdeteksi!\nSeluruh foto identitas sudah dilindungi watermark.\nPenyalahgunaan data warga adalah pelanggaran hukum (UU PDP No. 27/2022).');
+            showSiladesBengToast('error', 'Peringatan Keamanan', '⚠️ PERINGATAN KEAMANAN<br><br>Screenshot terdeteksi!<br>Seluruh foto identitas sudah dilindungi watermark.<br>Penyalahgunaan data warga adalah pelanggaran hukum (UU PDP No. 27/2022).', 12000);
         }
     });
 </script>

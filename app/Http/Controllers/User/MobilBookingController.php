@@ -22,7 +22,7 @@ class MobilBookingController extends Controller
         $item = Mobil::findOrFail($itemId);
 
         // Validasi: Warga hanya bisa memesan layanan di wilayahnya sendiri
-        if (Auth::user()->region_id != $item->region_id) {
+        if (! in_array($item->region_id, \App\Models\Region::wilayahLayananTerlihat(Auth::user()->region_id, 'Penyewaan Mobil'))) {
             return redirect()->back()->with('error', 'Layanan khusus warga lokal. Silakan sesuaikan wilayah Anda.');
         }
         
@@ -61,9 +61,17 @@ class MobilBookingController extends Controller
             ? \App\Models\Region::whereIn('id', $idKecamatanKhusus)->orderBy('name')->get()
             : collect();
 
+
+        // Buku alamat warga, supaya alamat pengiriman tidak perlu diketik ulang
+        // di setiap unit layanan.
+        $alamatTersimpan = \App\Models\AlamatWarga::milik(auth()->id())
+            ->with('region')
+            ->orderByDesc('is_utama')
+            ->orderBy('id')
+            ->get();
         return view('users.mobil-rental-booking', compact(
             'item', 'setting', 'quantity', 'sop_mobil',
-            'isWilayah', 'tarifWilayah', 'kecamatanKhusus'
+            'isWilayah', 'tarifWilayah', 'kecamatanKhusus', 'alamatTersimpan'
         ));
     }
 
@@ -169,6 +177,17 @@ class MobilBookingController extends Controller
             'total_amount' => $totalAmount,
             'status' => 'pending',
         ]);
+
+        // Catat pergerakan dana ke ledger wilayah — sebelumnya tidak tercatat
+        // sama sekali di sini, lihat catatan yang sama di RentalBookingController.
+        \App\Models\WalletTransaction::catatPemasukan(
+            regionId: $item->region_id,
+            referenceType: 'mobil',
+            referenceId: $booking->id,
+            amount: $totalAmount,
+            paymentMethod: $validated['payment_method'],
+            proofPath: $paymentProofPath,
+        );
 
         $receipt = \App\Models\TransactionReceipt::create([
             'booking_type' => 'mobil',

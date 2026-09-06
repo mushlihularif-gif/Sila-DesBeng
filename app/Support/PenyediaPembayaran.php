@@ -17,12 +17,16 @@ use App\Services\XenditService;
  *
  * Perbedaan mendasar antara kedua penyedia menentukan di mana kuncinya disimpan:
  *
- *  MIDTRANS — satu akun merchant hanya bisa punya satu rekening pencairan.
- *             Karena itu tiap wilayah harus punya akun Midtrans SENDIRI, dan
- *             kuncinya disimpan per wilayah di regions.payment_info — berikut
- *             lingkungannya (Sandbox/Production), karena kunci dan lingkungan
- *             hanya sah kalau berpasangan. Tidak ada kredensial Midtrans di
- *             tingkat platform.
+ *  MIDTRANS — satu akun merchant milik Diskominfotik untuk seluruh wilayah.
+ *             Satu akun Midtrans memang hanya bisa punya satu rekening
+ *             pencairan, dan itulah rekening Diskominfotik. Uang warga dari
+ *             semua desa mendarat di sana, lalu dibukukan sebagai SALDO tiap
+ *             wilayah di wallet_transactions. Wilayah mencairkannya lewat
+ *             pengajuan penarikan yang disetujui Diskominfotik.
+ *
+ *             Transfer manual TIDAK lewat jalur ini: uangnya langsung masuk
+ *             ke rekening wilayah, jadi tidak menambah saldo yang perlu
+ *             dicairkan.
  *
  *  XENDIT   — kredensial induk milik Diskominfotik melayani semua wilayah lewat
  *             sub-akun. Kunci disimpan sekali di panel Super Admin; yang
@@ -57,7 +61,10 @@ class PenyediaPembayaran
      */
     public static function kunciDiisiOlehWilayah(): bool
     {
-        return self::aktif() === self::MIDTRANS;
+        // Sejak Midtrans dipusatkan di Diskominfotik, tidak ada lagi penyedia
+        // yang menuntut wilayah mengisi kunci API sendiri. Dipertahankan
+        // sebagai satu tempat keputusan kalau nanti ada penyedia yang begitu.
+        return false;
     }
 
     /**
@@ -68,9 +75,7 @@ class PenyediaPembayaran
     {
         return match (self::aktif()) {
             self::XENDIT => filled(config('services.xendit.secret_key')),
-            // Midtrans tidak punya kredensial tingkat platform lagi: tiap
-            // wilayah memakai akunnya sendiri, jadi platform selalu 'siap'.
-            default      => true,
+            default      => filled(config('services.midtrans.server_key')),
         };
     }
 
@@ -117,16 +122,20 @@ class PenyediaPembayaran
             return ['siap' => true, 'sakelar' => true, 'alasan' => 'Siap menerima pembayaran lewat Xendit.'];
         }
 
-        // Midtrans: kunci milik wilayah sendiri.
-        if (! filled($info['midtrans_server_key'] ?? null) || ! filled($info['midtrans_client_key'] ?? null)) {
+        // Midtrans terpusat: yang perlu ada hanyalah kunci milik Diskominfotik.
+        if (! self::platformSiap()) {
             return [
                 'siap' => false,
                 'sakelar' => true,
-                'alasan' => 'Kunci Midtrans wilayah ini belum diisi. Isi di halaman Pembayaran Wilayah.',
+                'alasan' => 'Kredensial Midtrans induk belum diisi di panel Super Admin.',
             ];
         }
 
-        return ['siap' => true, 'sakelar' => true, 'alasan' => 'Siap menerima pembayaran lewat Midtrans.'];
+        return [
+            'siap' => true,
+            'sakelar' => true,
+            'alasan' => 'Siap. Pemasukan dibukukan sebagai saldo wilayah.',
+        ];
     }
 
     /**
@@ -177,16 +186,15 @@ class PenyediaPembayaran
             ];
         }
 
+        // Kunci Midtrans milik Diskominfotik, sama untuk semua wilayah.
+        // region_id tetap dibawa karena dipakai membukukan pemasukan ke
+        // saldo wilayah yang benar setelah pembayaran dikonfirmasi.
         return [
-            'penyedia'   => self::MIDTRANS,
-            'server_key' => $info['midtrans_server_key'],
-            'client_key' => $info['midtrans_client_key'],
-            // Lingkungan menempel pada kuncinya. Kunci Sandbox hanya sah di
-            // api.sandbox.midtrans.com dan kunci Production hanya sah di
-            // api.midtrans.com, jadi keduanya harus berpindah bersama-sama.
-            // Sebelumnya sakelar ini milik platform: satu wilayah go-live
-            // membuat semua wilayah lain yang masih Sandbox ikut gagal.
-            'is_production' => (bool) ($info['midtrans_is_production'] ?? false),
+            'penyedia'      => self::MIDTRANS,
+            'server_key'    => (string) config('services.midtrans.server_key'),
+            'client_key'    => (string) config('services.midtrans.client_key'),
+            'is_production' => (bool) config('services.midtrans.is_production'),
+            'region_id'     => $regionId,
         ];
     }
 }

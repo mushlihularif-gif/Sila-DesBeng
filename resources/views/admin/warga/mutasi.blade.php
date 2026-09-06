@@ -186,7 +186,7 @@
                                         @if($p->requested_by != 'admin_asal')
                                         <form action="{{ route('admin.warga.mutasi.approve', $p->id) }}" method="POST">
                                             @csrf
-                                            <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Anda yakin melepaskan warga ini? NIK akan dipindah ke desa tujuan.')">
+                                            <button type="submit" class="btn btn-sm btn-success" data-konfirmasi="Anda yakin melepaskan warga ini? NIK akan dipindah ke desa tujuan.">
                                                 Lepaskan
                                             </button>
                                         </form>
@@ -272,7 +272,7 @@
                                         <div class="d-flex gap-2">
                                             <form action="{{ route('admin.warga.mutasi.approve', $p->id) }}" method="POST">
                                                 @csrf
-                                                <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Anda yakin menerima warga ini?')">
+                                                <button type="submit" class="btn btn-sm btn-success" data-konfirmasi="Anda yakin menerima warga ini?">
                                                     Terima Warga
                                                 </button>
                                             </form>

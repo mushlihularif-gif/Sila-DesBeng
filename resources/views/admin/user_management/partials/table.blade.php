@@ -63,7 +63,7 @@
                         <a href="{{ route('admin.manajemen-pengguna.show', $user->id) }}" class="btn btn-sm btn-icon btn-outline-primary" data-bs-toggle="tooltip" title="Lihat Detail">
                             <i class="bx bx-show"></i>
                         </a>
-                        <form action="{{ route('admin.manajemen-pengguna.toggle-status', $user->id) }}" method="POST" onsubmit="return confirm('Yakin ingin mengubah status akun ini?')">
+                        <form action="{{ route('admin.manajemen-pengguna.toggle-status', $user->id) }}" method="POST" data-konfirmasi="Yakin ingin mengubah status akun ini?">
                             @csrf
                             @method('PUT')
                             <button type="submit" class="btn btn-sm btn-icon {{ $user->status === 'aktif' ? 'btn-outline-danger' : 'btn-outline-success' }}" data-bs-toggle="tooltip" title="{{ $user->status === 'aktif' ? 'Blokir' : 'Buka Blokir' }}">
@@ -71,7 +71,7 @@
                             </button>
                         </form>
                         @if($user->role === 'user')
-                        <form action="{{ route('admin.manajemen-pengguna.kick', $user->id) }}" method="POST" onsubmit="return confirm('Yakin ingin mengeluarkan pengguna ini dari wilayah Anda? Akun akan tetap ada namun tidak lagi terikat pada wilayah ini.')">
+                        <form action="{{ route('admin.manajemen-pengguna.kick', $user->id) }}" method="POST" data-konfirmasi="Yakin ingin mengeluarkan pengguna ini dari wilayah Anda? Akun akan tetap ada namun tidak lagi terikat pada wilayah ini.">
                             @csrf
                             @method('PUT')
                             <button type="submit" class="btn btn-sm btn-icon btn-outline-warning" data-bs-toggle="tooltip" title="Keluarkan dari Wilayah">

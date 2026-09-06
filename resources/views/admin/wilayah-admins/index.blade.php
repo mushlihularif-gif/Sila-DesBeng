@@ -1,4 +1,4 @@
-﻿@extends('admin.layouts.admin')
+@extends('admin.layouts.admin')
 
 @section('title', 'Manajemen Admin RT & RW')
 
@@ -112,11 +112,11 @@
                                     <td class="text-end pe-4">
                                         <form action="{{ route('admin.wilayah-admins.approve', $app->id) }}" method="POST" class="d-inline">
                                             @csrf
-                                            <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Setujui pengajuan ini?')">Setujui</button>
+                                            <button type="submit" class="btn btn-sm btn-success" data-konfirmasi="Setujui pengajuan ini?">Setujui</button>
                                         </form>
                                         <form action="{{ route('admin.wilayah-admins.reject', $app->id) }}" method="POST" class="d-inline">
                                             @csrf
-                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Tolak pengajuan ini?')">Tolak</button>
+                                            <button type="submit" class="btn btn-sm btn-danger" data-konfirmasi="Tolak pengajuan ini?">Tolak</button>
                                         </form>
                                     </td>
                                 </tr>
@@ -170,7 +170,7 @@
                                         <form action="{{ route('admin.wilayah-admins.revoke', $admin->id) }}" method="POST" class="d-inline">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-outline-danger shadow-sm" onclick="return confirm('PERINGATAN: Cabut wewenang admin wilayah ini? Data akun tidak dihapus, hanya role dikembalikan menjadi warga biasa.')">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger shadow-sm" data-konfirmasi="PERINGATAN: Cabut wewenang admin wilayah ini? Data akun tidak dihapus, hanya role dikembalikan menjadi warga biasa.">
                                                 <i class="bx bx-trash"></i>
                                             </button>
                                         </form>

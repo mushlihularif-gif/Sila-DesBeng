@@ -1,4 +1,4 @@
-﻿@extends('admin.layouts.admin')
+@extends('admin.layouts.admin')
 
 @section('title', 'Tambah Pemerintah Daerah')
 
@@ -260,14 +260,14 @@ function previewImage(event) {
 
         if (input.files && input.files[0]) {
             if (input.files[0].size > 8 * 1024 * 1024) {
-                alert('Ukuran file terlalu besar! Maksimal 8MB.');
+                showSiladesBengToast('error', 'Gagal', 'Ukuran file terlalu besar! Maksimal 8MB.');
                 input.value = '';
                 return;
             }
 
             const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
             if (!validTypes.includes(input.files[0].type)) {
-                alert('Format file tidak didukung! Gunakan JPG, PNG, atau GIF.');
+                showSiladesBengToast('error', 'Gagal', 'Format file tidak didukung! Gunakan JPG, PNG, atau GIF.');
                 input.value = '';
                 return;
             }

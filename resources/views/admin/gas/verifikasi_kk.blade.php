@@ -57,7 +57,7 @@
 
                         <div class="d-flex justify-content-between mt-4 pt-3 border-top">
                             <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#rejectModal-{{ $p->id }}">Tolak (Buram)</button>
-                            <button type="submit" class="btn btn-success" onclick="return confirm('Anda yakin data ini sudah benar? Foto KK akan langsung dihapus setelah disetujui.')">Setujui & Hapus Foto</button>
+                            <button type="submit" class="btn btn-success" data-konfirmasi="Anda yakin data ini sudah benar? Foto KK akan langsung dihapus setelah disetujui.">Setujui & Hapus Foto</button>
                         </div>
                     </form>
                 </div>

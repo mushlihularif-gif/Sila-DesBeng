@@ -21,7 +21,10 @@ class GasSalesUserController extends Controller
         // Validasi: Warga hanya bisa melihat gas dari desa/wilayahnya sendiri
         if (auth()->check() && auth()->user()->role === 'user') {
             $user = auth()->user();
-            $query->where('region_id', $user->region_id);
+            // Terbuka secara bawaan. Yang membatasi adalah sakelar "Eksklusif
+            // Warga Lokal" milik tiap wilayah: kalau menyala, hanya warga wilayah
+            // itu dan wilayah di bawahnya yang boleh melihatnya.
+            $query->whereIn('region_id', \App\Models\Region::wilayahLayananTerlihat($user->region_id, 'Penjualan Gas'));
             
             // Cek mode krisis gas
             $region = \App\Models\Region::find($user->region_id);
@@ -85,7 +88,7 @@ class GasSalesUserController extends Controller
         }
 
         // Validasi: Warga hanya bisa memesan layanan di wilayahnya sendiri
-        if ($user->region_id != $item->region_id) {
+        if (! in_array($item->region_id, \App\Models\Region::wilayahLayananTerlihat($user->region_id, 'Penjualan Gas'))) {
             return redirect()->back()->with('error', 'Layanan khusus warga lokal. Silakan sesuaikan wilayah Anda.');
         }
 
@@ -115,7 +118,37 @@ class GasSalesUserController extends Controller
         // Rekening & metode pembayaran milik WILAYAH gas ini, bukan rekening pusat.
         // Pemasukan tiap daerah menjadi tanggung jawab daerahnya sendiri.
         $setting = \App\Support\ProfilPembayaranWilayah::untuk($item->region_id);
-        
-        return view('users.gas-booking', compact('item', 'quantity', 'setting'));
+
+        // Lokasi layanan produk INI. Sebelumnya halaman pembelian hanya membaca
+        // $setting->location_name / address / latitude / longitude, yang berasal
+        // dari profil pembayaran wilayah maupun SystemSetting platform — bukan
+        // dari produknya. Akibatnya kotak "Alamat Pusat Layanan" kosong meski
+        // petugas sudah mengisi lokasi beserta titik petanya, dan tombol
+        // "Lihat lokasi" jatuh ke tautan Google Maps yang dipaku di view.
+        $lokasiLayanan = $item->lokasi
+            ? \App\Models\LokasiLayanan::where('region_id', $item->region_id)
+                ->where('nama', $item->lokasi)
+                ->first()
+            : null;
+
+        // Produk lama bisa punya lokasi yang belum terdaftar di daftar wilayah;
+        // koordinat pada barisnya sendiri tetap dipakai supaya petanya muncul.
+        if (! $lokasiLayanan && $item->lokasi) {
+            $lokasiLayanan = new \App\Models\LokasiLayanan([
+                'nama'      => $item->lokasi,
+                'latitude'  => $item->latitude,
+                'longitude' => $item->longitude,
+            ]);
+        }
+
+
+        // Buku alamat warga, supaya alamat pengiriman tidak perlu diketik ulang
+        // di setiap unit layanan.
+        $alamatTersimpan = \App\Models\AlamatWarga::milik(auth()->id())
+            ->with('region')
+            ->orderByDesc('is_utama')
+            ->orderBy('id')
+            ->get();
+        return view('users.gas-booking', compact('item', 'quantity', 'setting', 'lokasiLayanan', 'alamatTersimpan'));
     }
 }

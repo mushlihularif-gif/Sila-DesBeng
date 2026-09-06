@@ -85,6 +85,15 @@
                                 JPG, PNG (Max 8MB)
                             </p>
 
+                            {{-- Memotong foto belum berarti menyimpannya. Tombol di dalam
+                                 pemotong berbunyi "Simpan Foto", jadi sangat mudah dikira
+                                 sudah selesai — padahal fotonya baru menempel di formulir
+                                 dan hilang begitu halaman dimuat ulang. --}}
+                            <p id="belum-tersimpan"
+                               class="hidden mt-2.5 text-center text-xs font-semibold text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                                Foto belum tersimpan — tekan <strong>Simpan</strong> di bawah.
+                            </p>
+
                             <p id="client-error-profile" class="mt-2 text-sm text-red-600 text-center font-medium hidden"></p>
 
                             @error('profile')
@@ -134,8 +143,21 @@
                                 <span class="bg-blue-600 text-white text-xs px-3 py-1 rounded-full font-bold shadow">TERVERIFIKASI</span>
                             </div>
                             <div class="flex gap-6 items-center">
-                                <div class="w-24 h-32 rounded-lg border-2 border-blue-300 overflow-hidden shadow-md shrink-0">
-                                    <img src="{{ $user->file ? $user->file->file_stream : asset('Admin/img/avatars/1.png') }}" class="w-full h-full object-cover">
+                                {{-- Cadangannya dulu menunjuk Admin/img/avatars/1.png, berkas
+                                     yang tidak ada di public/ — sehingga warga tanpa foto profil
+                                     melihat ikon gambar rusak di kartu KTP-nya. Diganti penampung
+                                     yang memang dirancang untuk keadaan kosong. --}}
+                                <div class="w-24 h-32 rounded-lg border-2 border-blue-300 overflow-hidden shadow-md shrink-0 bg-blue-50">
+                                    @if($user->file)
+                                        <img src="{{ $user->file->file_stream }}" alt="Foto profil" class="w-full h-full object-cover">
+                                    @else
+                                        <div class="w-full h-full flex flex-col items-center justify-center text-blue-300 gap-1">
+                                            <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+                                            </svg>
+                                            <span class="text-[9px] text-center leading-tight px-1">Belum ada foto</span>
+                                        </div>
+                                    @endif
                                 </div>
                                 <div class="flex-1 space-y-2 text-sm text-blue-900 font-medium">
                                     <div class="grid grid-cols-[100px_1fr]">
@@ -263,18 +285,34 @@
                                    class="w-full px-4 py-2.5 bg-white/60 border border-white/40 rounded-xl text-gray-700 cursor-not-allowed glass-input text-sm">
                         </div>
 
-                        {{-- RW --}}
+                        {{-- RW & RT bisa disunting.
+                             Kecamatan dan desa di atas memang dikunci — keduanya
+                             ditetapkan lewat verifikasi KTP dan diubah lewat
+                             pengajuan mutasi, bukan diketik sendiri. Tetapi RW dan
+                             RT dulu ikut terkunci, padahal tidak ada jalur lain
+                             untuk mengisinya: updateRtRw() menuntut RW dan RT ada
+                             sebagai baris `regions`, sedangkan pohon wilayah belum
+                             memuat satu pun. Akibatnya warga yang RT/RW-nya tidak
+                             terbaca OCR tidak akan pernah bisa melengkapinya —
+                             padahal laporan warga disalurkan berdasarkan RT/RW. --}}
                         <div>
                             <label class="block text-sm font-bold text-gray-800 mb-2">RW</label>
-                            <input type="text" value="{{ $rw_name }}" disabled 
-                                   class="w-full px-4 py-2.5 bg-white/60 border border-white/40 rounded-xl text-gray-700 cursor-not-allowed glass-input text-sm">
+                            <input type="text" name="rw" value="{{ old('rw', $user->rw) }}"
+                                   placeholder="Contoh: 005" maxlength="10"
+                                   class="w-full px-4 py-2.5 bg-white/80 border border-white/60 rounded-xl focus:border-blue-400 focus:ring-2 focus:ring-blue-200/50 outline-none transition glass-input text-gray-800 text-sm">
+                            @error('rw')
+                            <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                            @enderror
                         </div>
 
-                        {{-- RT --}}
                         <div>
                             <label class="block text-sm font-bold text-gray-800 mb-2">RT</label>
-                            <input type="text" value="{{ $rt_name }}" disabled 
-                                   class="w-full px-4 py-2.5 bg-white/60 border border-white/40 rounded-xl text-gray-700 cursor-not-allowed glass-input text-sm">
+                            <input type="text" name="rt" value="{{ old('rt', $user->rt) }}"
+                                   placeholder="Contoh: 013" maxlength="10"
+                                   class="w-full px-4 py-2.5 bg-white/80 border border-white/60 rounded-xl focus:border-blue-400 focus:ring-2 focus:ring-blue-200/50 outline-none transition glass-input text-gray-800 text-sm">
+                            @error('rt')
+                            <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                            @enderror
                         </div>
                     </div>
 
@@ -332,7 +370,7 @@
                 </div>
             @else
                 <p class="text-gray-600 text-sm mb-4">Jika Anda berpindah domisili ke desa lain, Anda bisa mengajukan perpindahan data secara digital. Kades asal harus menyetujui pelepasan data Anda.</p>
-                <form action="{{ route('user.mutasi.store') }}" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-4" onsubmit="return confirm('Apakah Anda yakin ingin mengajukan pindah desa? Anda tidak dapat memesan fasilitas desa hingga proses ini selesai.')">
+                <form action="{{ route('user.mutasi.store') }}" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-4" data-konfirmasi="Apakah Anda yakin ingin mengajukan pindah desa? Anda tidak dapat memesan fasilitas desa hingga proses ini selesai.">
                     @csrf
                     <div>
                         <label class="block text-sm font-bold text-gray-800 mb-2">Pilih Desa Tujuan</label>
@@ -406,12 +444,19 @@
         const deleteAvatarInput = document.getElementById('delete_avatar');
         const uploadHint = document.getElementById('upload-hint');
 
-        if (profileInput) {
-            // Hapus listener lama jika ada (untuk mencegah double listener dari turbo:load)
-            const newProfileInput = profileInput.cloneNode(true);
-            profileInput.parentNode.replaceChild(newProfileInput, profileInput);
-            
-            newProfileInput.addEventListener('change', function(e) {
+        // Penanda, BUKAN cloneNode.
+        //
+        // Sebelumnya input berkas diganti salinannya setiap initProfilePage
+        // berjalan, untuk mencegah pendengar ganda. Masalahnya halaman ini
+        // memuat Turbo, sehingga fungsi itu berjalan pada DOMContentLoaded
+        // MAUPUN turbo:load — dan cloneNode() TIDAK ikut membawa berkas yang
+        // sudah dipilih. Setiap kali itu terjadi setelah foto dipilih, fotonya
+        // lenyap diam-diam: pratinjau tetap terlihat karena memakai blob, tetapi
+        // formulir mengirim input yang sudah kosong, jadi tidak ada yang tersimpan.
+        if (profileInput && !profileInput.dataset.siap) {
+            profileInput.dataset.siap = '1';
+
+            profileInput.addEventListener('change', function(e) {
                 const file = e.target.files[0];
                 const clientErrorProfile = document.getElementById('client-error-profile');
 
@@ -439,11 +484,10 @@
         }
 
         // Tangani Tombol Hapus Foto (Ditunda)
-        if (deletePhotoBtn) {
-            const newDeleteBtn = deletePhotoBtn.cloneNode(true);
-            deletePhotoBtn.parentNode.replaceChild(newDeleteBtn, deletePhotoBtn);
+        if (deletePhotoBtn && !deletePhotoBtn.dataset.siap) {
+            deletePhotoBtn.dataset.siap = '1';
 
-            newDeleteBtn.addEventListener('click', function() {
+            deletePhotoBtn.addEventListener('click', function() {
                 // Setel flag untuk menghapus saat disimpan
                  if(deleteAvatarInput) deleteAvatarInput.value = '1';
                 

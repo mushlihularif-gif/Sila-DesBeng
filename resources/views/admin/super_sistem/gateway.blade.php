@@ -84,27 +84,29 @@
                                         Yang berlaku sekarang: {{ $labelPenyedia }}
                                     </div>
 
-                                    @if($kunciDiWilayah)
-                                        <p class="mb-2 small">
-                                            Setiap desa/kecamatan memakai <strong>akun {{ $labelPenyedia }}-nya sendiri</strong>,
-                                            karena satu akun {{ $labelPenyedia }} hanya bisa punya satu rekening pencairan.
-                                            Kolom Server Key &amp; Client Key muncul di halaman
-                                            <em>Pengaturan Wilayah &rarr; Pembayaran</em> milik masing-masing admin daerah.
-                                        </p>
-                                    @else
-                                        <p class="mb-2 small">
-                                            Kredensial induk dipegang Diskominfotik dan melayani semua wilayah lewat
-                                            <strong>sub-akun</strong>. Admin daerah tidak mengisi API key apa pun —
-                                            mereka cukup mengisi rekening bank wilayahnya.
-                                        </p>
-
-                                        @if(! $platformSiap)
-                                            <div class="alert alert-warning py-2 px-3 mb-2 small">
-                                                <i class="bx bx-error me-1"></i>
-                                                Kredensial {{ $labelPenyedia }} induk belum diisi di kartu di bawah.
-                                                Selama itu kosong, tidak ada wilayah yang bisa menerima pembayaran otomatis.
-                                            </div>
+                                    {{-- Sejak Midtrans dipusatkan (satu akun Diskominfotik, dana wilayah
+                                         dibukukan sebagai saldo lalu dicairkan lewat pengajuan penarikan),
+                                         kedua penyedia sama-sama tidak menuntut kunci dari wilayah. --}}
+                                    <p class="mb-2 small">
+                                        Kredensial induk dipegang Diskominfotik dan melayani semua wilayah.
+                                        Admin daerah tidak mengisi API key apa pun — mereka cukup mengisi
+                                        rekening bank wilayahnya.
+                                        @if($penyedia === \App\Support\PenyediaPembayaran::MIDTRANS)
+                                            Pemasukan gateway dibukukan sebagai <strong>saldo wilayah</strong> dan
+                                            dicairkan lewat menu <em>Sistem Platform &rarr; Penarikan Saldo Wilayah</em>
+                                            setelah admin daerah mengajukan.
+                                        @else
+                                            Wilayah menjadi <strong>sub-akun</strong> dengan saldo dan pencairannya
+                                            sendiri, tidak lewat pengajuan manual.
                                         @endif
+                                    </p>
+
+                                    @if(! $platformSiap)
+                                        <div class="alert alert-warning py-2 px-3 mb-2 small">
+                                            <i class="bx bx-error me-1"></i>
+                                            Kredensial {{ $labelPenyedia }} induk belum diisi di kartu di bawah.
+                                            Selama itu kosong, tidak ada wilayah yang bisa menerima pembayaran otomatis.
+                                        </div>
                                     @endif
 
                                     <div class="d-flex align-items-center gap-2 mb-2">
@@ -116,26 +118,16 @@
 
                                     {{-- Supaya kartu yang hilang tidak terasa seperti fitur
                                          yang raib. --}}
-                                    @if($kunciDiWilayah)
-                                        <p class="small text-muted mb-2">
-                                            <i class="bx bx-hide me-1"></i>
-                                            Tidak ada kartu kredensial di halaman ini selama {{ $labelPenyedia }} aktif.
-                                            Merchant ID, Server Key, Client Key <em>dan</em> mode Sandbox/Production
-                                            semuanya milik masing-masing wilayah, diisi admin daerah di
-                                            <em>Pengaturan Wilayah &rarr; Pembayaran</em>. Kunci {{ $labelPenyediaLain }}
-                                            yang pernah tersimpan tidak terhapus.
-                                        </p>
-                                    @else
-                                        <p class="small text-muted mb-2">
-                                            <i class="bx bx-hide me-1"></i>
-                                            Kartu kredensial <strong>{{ $labelPenyediaLain }}</strong> disembunyikan
-                                            selama {{ $labelPenyedia }} yang aktif. Kunci yang sudah tersimpan
-                                            tidak terhapus &mdash; pilih {{ $labelPenyediaLain }} di atas lalu simpan
-                                            untuk menampilkannya kembali.
-                                        </p>
-                                    @endif
+                                    <p class="small text-muted mb-2">
+                                        <i class="bx bx-hide me-1"></i>
+                                        Kartu kredensial <strong>{{ $labelPenyediaLain }}</strong> disembunyikan
+                                        selama {{ $labelPenyedia }} yang aktif. Kunci yang sudah tersimpan
+                                        tidak terhapus &mdash; pilih {{ $labelPenyediaLain }} di atas lalu simpan
+                                        untuk menampilkannya kembali.
+                                    </p>
 
-                                    @if($kesiapanWilayah->count())                                        <details>
+                                    @if($kesiapanWilayah->count())
+                                        <details>
                                             <summary class="small text-primary" style="cursor: pointer;">
                                                 Lihat rincian per wilayah
                                             </summary>
@@ -352,7 +344,9 @@
                         @if($baris)
                             <hr class="my-3">
                             <form action="{{ route('admin.sistem-platform.credential.destroy', $category) }}" method="POST"
-                                  onsubmit="return confirm('Hapus kredensial {{ $provider['label'] }}? Sistem akan kembali memakai nilai dari file .env.');">
+                                  data-konfirmasi="Hapus kredensial {{ $provider['label'] }}? Sistem akan kembali memakai nilai dari file .env."
+                                  data-konfirmasi-judul="Hapus Kredensial"
+                                  data-konfirmasi-ya="Ya, Hapus">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-sm btn-outline-danger">

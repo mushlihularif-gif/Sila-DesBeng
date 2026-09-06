@@ -8,7 +8,11 @@
 
     <div class="alert alert-info d-flex align-items-center mb-4">
         <i class="bx bx-info-circle me-2 fs-5"></i>
-        <div>Halaman ini menampilkan <strong>kesehatan sistem</strong> (jumlah &amp; status transaksi lintas desa), bukan nominal keuangan tiap desa. Rincian saldo/Rupiah tetap kewenangan bendahara BUM Desa masing-masing.</div>
+        <div>
+            Halaman ini menampilkan <strong>kesehatan sistem</strong> (jumlah &amp; status transaksi lintas desa).
+            Sejak Midtrans dipusatkan di akun Diskominfotik, dana gateway wilayah mendarat di sini dulu -
+            rinciannya per wilayah ada di <a href="{{ route('admin.sistem-platform.penarikan.index') }}">Penarikan Saldo Wilayah</a>.
+        </div>
     </div>
 
     <div class="row g-4 mb-2">
@@ -20,7 +24,7 @@
                     </span>
                 </div>
                 <div>
-                    <h6 class="mb-0 fw-bold text-dark">{{ $walletHealth['total_tertahan'] }}</h6>
+                    <h6 class="mb-0 fw-bold text-dark">Rp {{ number_format($walletHealth['total_tertahan'], 0, ',', '.') }}</h6>
                     <small class="text-muted">Dana tertahan (belum dicairkan)</small>
                 </div>
             </div>

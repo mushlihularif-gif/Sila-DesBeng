@@ -135,7 +135,7 @@
                                                 <a href="{{ route('admin.unit.ambulans.edit', $mobil->id) }}"
                                                     class="btn btn-sm btn-outline-warning flex-grow-1"><i class="bx bx-edit"></i></a>
                                                 <form action="{{ route('admin.unit.ambulans.destroy', $mobil->id) }}" method="POST"
-                                                    onsubmit="return confirm('Apakah Anda yakin ingin menghapus kendaraan ini?');" class="d-flex flex-grow-1 m-0 p-0">
+                                                    data-konfirmasi="Apakah Anda yakin ingin menghapus kendaraan ini?" class="d-flex flex-grow-1 m-0 p-0">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="btn btn-sm btn-outline-danger w-100"><i class="bx bx-trash"></i></button>
@@ -241,7 +241,7 @@
                                                 <a href="{{ route('admin.unit.fasilitas_umum.edit', $item->id) }}"
                                                     class="btn btn-sm btn-outline-warning flex-grow-1"><i class="bx bx-edit"></i></a>
                                                 <form action="{{ route('admin.unit.fasilitas_umum.destroy', $item->id) }}" method="POST"
-                                                    onsubmit="return confirm('Apakah Anda yakin ingin menghapus gedung/fasilitas ini?');" class="d-flex flex-grow-1 m-0 p-0">
+                                                    data-konfirmasi="Apakah Anda yakin ingin menghapus gedung/fasilitas ini?" class="d-flex flex-grow-1 m-0 p-0">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="btn btn-sm btn-outline-danger w-100"><i class="bx bx-trash"></i></button>
@@ -422,9 +422,14 @@
     };
 
     function resetSop(type) {
-        if (confirm('Apakah Anda yakin ingin mereset teks SOP ini ke versi bawaan?')) {
-            document.getElementById('sop_' + type + '_text').value = defaultSops[type];
-        }
+        konfirmasi({
+            judul: 'Reset Teks SOP',
+            pesan: 'Teks SOP akan dikembalikan ke versi bawaan. Perubahan yang belum disimpan akan hilang.',
+            jenis: 'bahaya',
+            tombolYa: 'Ya, Reset'
+        }).then(function (setuju) {
+            if (setuju) document.getElementById('sop_' + type + '_text').value = defaultSops[type];
+        });
     }
 
     // Interactive Card selection

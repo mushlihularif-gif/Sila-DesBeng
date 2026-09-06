@@ -42,18 +42,37 @@ class OcrService
 
             if (isset($result['ParsedResults'][0]['ParsedText'])) {
                 $rawText = $result['ParsedResults'][0]['ParsedText'];
-                $parsed = $this->parseKtpText($rawText);
-                
+
+                // Penguraian dipisahkan dari panggilan HTTP. Sebelumnya keduanya
+                // satu try/catch, sehingga kesalahan di parser dicatat sebagai
+                // "OCR.space HTTP Error" - jejak yang menyesatkan justru saat
+                // masalahnya ada di kode sendiri, bukan di layanan luar.
+                try {
+                    $parsed = $this->parseKtpText($rawText);
+                } catch (\Throwable $e) {
+                    Log::error('OCR: penguraian teks KTP gagal (bug parser, bukan layanan luar): ' . $e->getMessage());
+                    $parsed = [];
+                }
+
                 // If NIK successfully parsed, return it
                 if (!empty($parsed['nik'])) {
                     return $parsed;
                 }
+
+                Log::warning('OCR.space membaca teks tetapi NIK tidak ditemukan. Mencoba Gemini...', [
+                    'panjang_teks' => strlen($rawText),
+                ]);
+
+                return $this->extractUsingGemini($imagePath);
             }
 
-            Log::warning('OCR.space returned empty/unparsed NIK. Trying Gemini AI fallback...');
+            Log::warning('OCR.space tidak mengembalikan teks sama sekali. Mencoba Gemini...', [
+                'error' => $result['ErrorMessage'] ?? null,
+            ]);
+
             return $this->extractUsingGemini($imagePath);
         } catch (\Exception $e) {
-            Log::error('OCR.space HTTP Error: ' . $e->getMessage() . '. Falling back to Gemini AI...');
+            Log::error('OCR.space gagal dihubungi: ' . $e->getMessage() . '. Beralih ke Gemini...');
             return $this->extractUsingGemini($imagePath);
         }
     }
@@ -72,7 +91,11 @@ class OcrService
             $imageContent = base64_encode(file_get_contents($imagePath));
             $prompt = 'Ekstrak data dari foto KTP Indonesia ini dan kembalikan HANYA dalam format JSON murni tanpa markdown/backticks: {"nik": "16 digit angka", "name": "nama lengkap", "address": "alamat jalan", "rt": "nomor rt misal 001", "rw": "nomor rw misal 002", "desa": "nama kelurahan/desa", "kecamatan": "nama kecamatan", "gender": "laki-laki/perempuan"}';
 
-            $model = env('GEMINI_MODEL', 'gemini-1.5-flash');
+            // config(), bukan env(): setelah `artisan config:cache` di server,
+            // env() mengembalikan null sehingga model jatuh ke gemini-1.5-flash
+            // yang sudah dipensiunkan Google - endpoint-nya membalas 404 dan
+            // jalur cadangan ini ikut mati.
+            $model = config('services.gemini.model', 'gemini-2.5-flash');
             $response = Http::post("https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$geminiApiKey}", [
                 'contents' => [
                     [
@@ -167,29 +190,51 @@ class OcrService
         }
         
         // Extract RT / RW using regex anywhere in the text
-        if (preg_match('/RT[\/\\]?RW\s*[:;=]?\s*([0-9]{1,3})\s*[\/\\]\s*([0-9]{1,3})/i', $fullText, $m)) {
+        //
+        // Kelas karakternya dulu ditulis [\/\\]. Di dalam string berkutip
+        // tunggal, '\\' menjadi SATU backslash, sehingga polanya sampai ke PCRE
+        // sebagai [\/\] - tanda kurung siku penutupnya ikut ter-escape, kelasnya
+        // tidak pernah tertutup, dan preg_match() gagal dikompilasi:
+        //
+        //   preg_match(): Compilation failed: unmatched closing parenthesis
+        //
+        // ErrorException-nya tertangkap catch(\Exception) di extractKtpData(),
+        // dicatat sebagai "OCR.space HTTP Error" yang menyesatkan, lalu jatuh ke
+        // Gemini. Akibatnya SETIAP unggahan KTP ditolak "bukan e-KTP yang valid"
+        // sebagus apa pun fotonya. Sekarang pemisahnya memakai delimiter ~ agar
+        // garis miring tidak perlu di-escape sama sekali.
+        if (preg_match('~RT[/\\\\]?RW\s*[:;=]?\s*([0-9]{1,3})\s*[/\\\\]\s*([0-9]{1,3})~i', $fullText, $m)) {
             $data['rt'] = str_pad($m[1], 3, '0', STR_PAD_LEFT);
             $data['rw'] = str_pad($m[2], 3, '0', STR_PAD_LEFT);
-        } elseif (preg_match('/([0-9]{1,3})\s*[\/\\]\s*([0-9]{1,3})/', $fullText, $m)) {
+        } elseif (preg_match('~([0-9]{1,3})\s*[/\\\\]\s*([0-9]{1,3})~', $fullText, $m)) {
             $data['rt'] = str_pad($m[1], 3, '0', STR_PAD_LEFT);
             $data['rw'] = str_pad($m[2], 3, '0', STR_PAD_LEFT);
         }
 
         // Extract Desa/Kelurahan
-        if (preg_match('/(?:KEL|DESA).*?[:;=]\s*([A-Z0-9\s]+)/i', $fullText, $m)) {
-            $data['desa'] = trim(preg_replace('/[Kk][Ee][Cc].*$/i', '', $m[1]));
+        //
+        // Labelnya dibatasi \b: pola lama (?:KEL|DESA) ikut cocok di tengah kata
+        // "JENIS KELAMIN", lalu [:;=] menyambar titik dua baris itu, sehingga
+        // desa terbaca "LAKI". Nilai itu kemudian dipakai
+        // KycReviewController::approve() untuk menentukan wilayah warga.
+        //
+        // Tangkapannya juga dibatasi satu baris ([^\r\n]+): kelas [A-Z0-9\s]
+        // memuat \s yang mencakup baris baru, jadi bisa melahap beberapa baris
+        // sekaligus.
+        if (preg_match('~\b(?:KEL(?:URAHAN)?|DESA)\b[^:\r\n]*[:;=]\s*([^\r\n]+)~i', $fullText, $m)) {
+            $data['desa'] = trim(preg_replace('~\bKEC\b.*$~i', '', $m[1]));
         }
 
         // Extract Kecamatan
-        if (preg_match('/KECAMATAN.*?[:;=]\s*([A-Z0-9\s]+)/i', $fullText, $m)) {
-            $data['kecamatan'] = trim(preg_replace('/(?:AGAMA|STATUS).*$/i', '', $m[1]));
+        if (preg_match('~\bKECAMATAN\b[^:\r\n]*[:;=]\s*([^\r\n]+)~i', $fullText, $m)) {
+            $data['kecamatan'] = trim(preg_replace('~\b(?:AGAMA|STATUS)\b.*$~i', '', $m[1]));
         }
 
         // Extract Alamat
-        if (preg_match('/ALAMAT.*?[:;=]\s*([A-Z0-9\.\-\s]+)/i', $fullText, $m)) {
+        if (preg_match('~\bALAMAT\b[^:\r\n]*[:;=]\s*([^\r\n]+)~i', $fullText, $m)) {
             $alamat = trim($m[1]);
             // Remove RT/RW from alamat if it captured too much
-            $alamat = preg_replace('/(?:RT|RW).*$/i', '', $alamat);
+            $alamat = preg_replace('~\b(?:RT|RW)\b.*$~i', '', $alamat);
             if (strlen($alamat) > 2) {
                 $data['address'] = trim($alamat);
             }

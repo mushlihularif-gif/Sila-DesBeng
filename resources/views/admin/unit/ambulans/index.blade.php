@@ -48,7 +48,7 @@
                                 <td>{{ $amb->kontak_supir }}</td>
                                 <td>
                                     <a href="{{ route('admin.unit.ambulans.edit', $amb->id) }}" class="btn btn-sm btn-warning"><i class="bx bx-edit"></i> Edit</a>
-                                    <form action="{{ route('admin.unit.ambulans.destroy', $amb->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin hapus?');">
+                                    <form action="{{ route('admin.unit.ambulans.destroy', $amb->id) }}" method="POST" class="d-inline" data-konfirmasi="Yakin hapus?">
                                         @csrf @method('DELETE')
                                         <button class="btn btn-sm btn-danger"><i class="bx bx-trash"></i> Hapus</button>
                                     </form>

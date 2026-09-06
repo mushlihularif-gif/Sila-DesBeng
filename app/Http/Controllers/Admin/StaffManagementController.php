@@ -248,6 +248,12 @@ class StaffManagementController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
             'units' => 'array',
+            // Mitra = pihak ketiga yang mengelola unit sebagai usahanya sendiri.
+            // Wajib diisi saat MITRA dinyalakan. Kalau dibiarkan kosong,
+            // nilainya jatuh ke 0 dan desa diam-diam tidak mendapat apa pun
+            // dari unit itu - kekeliruan yang baru ketahuan setelah uangnya
+            // terlanjur terbagi salah di ledger.
+        ], [
         ]);
 
         $staff = new User();
@@ -295,7 +301,9 @@ class StaffManagementController extends Controller
         $grupIzin = $this->grupIzin($availableUnits);
         $activeUnits = $staff->staffPermissions->pluck('unit_key')->toArray();
 
-        return view('admin.staff.edit', compact('staff', 'availableUnits', 'grupIzin', 'activeUnits'));
+        return view('admin.staff.edit', compact(
+            'staff', 'availableUnits', 'grupIzin', 'activeUnits'
+        ));
     }
 
     public function update(Request $request, $id)
@@ -316,6 +324,12 @@ class StaffManagementController extends Controller
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($staff->id)],
             'password' => 'nullable|string|min:8|confirmed',
             'units' => 'array',
+            // Mitra = pihak ketiga yang mengelola unit sebagai usahanya sendiri.
+            // Wajib diisi saat MITRA dinyalakan. Kalau dibiarkan kosong,
+            // nilainya jatuh ke 0 dan desa diam-diam tidak mendapat apa pun
+            // dari unit itu - kekeliruan yang baru ketahuan setelah uangnya
+            // terlanjur terbagi salah di ledger.
+        ], [
         ]);
 
         $staff->name = $request->name;

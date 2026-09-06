@@ -26,7 +26,7 @@ class RentalBookingController extends Controller
         }
 
         // Validasi: Warga hanya bisa memesan layanan di wilayahnya sendiri
-        if (Auth::user()->region_id != $item->region_id) {
+        if (! in_array($item->region_id, \App\Models\Region::wilayahLayananTerlihat(Auth::user()->region_id, 'Penyewaan Alat'))) {
             return redirect()->back()->with('error', 'Layanan khusus warga lokal. Silakan sesuaikan wilayah Anda.');
         }
         
@@ -49,7 +49,15 @@ class RentalBookingController extends Controller
         // Ambil jumlah dari permintaan (dari halaman detail)
         $quantity = request()->get('quantity', 1);
         
-        return view('users.rental-booking', compact('item', 'setting', 'quantity', 'sop_penyewaan_alat'));
+
+        // Buku alamat warga, supaya alamat pengiriman tidak perlu diketik ulang
+        // di setiap unit layanan.
+        $alamatTersimpan = \App\Models\AlamatWarga::milik(auth()->id())
+            ->with('region')
+            ->orderByDesc('is_utama')
+            ->orderBy('id')
+            ->get();
+        return view('users.rental-booking', compact('item', 'setting', 'quantity', 'sop_penyewaan_alat', 'alamatTersimpan'));
     }
 
     /**
@@ -122,6 +130,18 @@ class RentalBookingController extends Controller
             'total_amount' => $totalAmount,
             'status' => 'pending',
         ]);
+
+        // Catat pergerakan dana ke ledger wilayah. Sebelumnya tidak tercatat sama
+        // sekali di sini — hanya GasBookingController yang menulis ke ledger —
+        // sehingga saldo wilayah tidak pernah mencerminkan pemasukan sewa alat.
+        \App\Models\WalletTransaction::catatPemasukan(
+            regionId: $item->region_id,
+            referenceType: 'rental',
+            referenceId: $booking->id,
+            amount: $totalAmount,
+            paymentMethod: $validated['payment_method'],
+            proofPath: $paymentProofPath,
+        );
 
         // Buat bukti transaksi
         $receipt = \App\Models\TransactionReceipt::create([

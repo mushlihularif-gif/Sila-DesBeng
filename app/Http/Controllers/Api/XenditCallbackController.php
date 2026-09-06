@@ -128,17 +128,25 @@ class XenditCallbackController extends Controller
      */
     private function sinkronkanBukuBesar($model, string $jenis, string $statusBaru): void
     {
-        $tx = WalletTransaction::where('reference_type', $jenis)
-            ->where('reference_id', $model->id)
-            ->where('source', 'gateway')
-            ->latest()
-            ->first();
+        // Menyentuh SELURUH baris pesanan ini, bukan latest()->first(): pesanan
+        // pada unit yang dikelola mitra punya dua baris (porsi wilayah + porsi
+        // mitra), dan dulu hanya satu yang ikut berubah.
+        if ($statusBaru === 'confirmed') {
+            WalletTransaction::where('reference_type', $jenis)
+                ->where('reference_id', $model->id)
+                ->where('source', 'gateway')
+                ->where('status', 'pending')
+                ->update(['status' => 'verified']);
 
-        if (! $tx) {
             return;
         }
 
-        $tx->status = $statusBaru === 'confirmed' ? 'verified' : 'rejected';
-        $tx->save();
+        // Kedaluwarsa/gagal. Kalau uangnya terlanjur terbayar, dikembalikan ke
+        // dompet warga — bukan dihilangkan begitu saja dari pembukuan.
+        WalletTransaction::batalkanDanRefund(
+            $jenis,
+            $model->id,
+            'Pembayaran dibatalkan/kedaluwarsa di Xendit.'
+        );
     }
 }

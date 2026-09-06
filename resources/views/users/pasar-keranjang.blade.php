@@ -539,7 +539,7 @@
                     confirmButtonColor: '#115789'
                 });
             } else {
-                alert(`Stok tidak mencukupi! Maksimal ${maxStok}`);
+                showSiladesBengToast('error', 'Gagal', `Stok tidak mencukupi! Maksimal ${maxStok}`);
             }
             return;
         }
@@ -564,7 +564,7 @@
             if (data.success) {
                 location.reload();
             } else {
-                alert(data.message || 'Gagal update keranjang');
+                showSiladesBengToast('error', 'Gagal', data.message || 'Gagal update keranjang');
                 location.reload();
             }
         })
@@ -588,7 +588,7 @@
                 if (data.success) {
                     location.reload();
                 } else {
-                    alert(data.message || 'Gagal menghapus produk dari keranjang');
+                    showSiladesBengToast('error', 'Gagal', data.message || 'Gagal menghapus produk dari keranjang');
                 }
             })
             .catch(err => {
@@ -597,27 +597,17 @@
             });
         };
 
-        if (typeof Swal !== 'undefined') {
-            Swal.fire({
-                title: 'Hapus Produk?',
-                text: "Produk ini akan dihapus dari keranjang belanja Anda.",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#ef4444',
-                cancelButtonColor: '#64748b',
-                confirmButtonText: 'Ya, hapus!',
-                cancelButtonText: 'Batal',
-                customClass: { popup: 'rounded-2xl' }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    doDelete();
-                }
-            });
-        } else {
-            if (confirm('Hapus produk ini dari keranjang belanja?')) {
-                doDelete();
-            }
-        }
+        // Dulu bercabang: SweetAlert kalau tersedia, window.confirm kalau tidak -
+        // dua tampilan berbeda untuk tindakan yang sama, dan yang kedua di luar
+        // desain situs. Sekarang satu dialog milik sendiri, selalu tersedia.
+        konfirmasi({
+            judul: 'Hapus Produk?',
+            pesan: 'Produk ini akan dihapus dari keranjang belanja Anda.',
+            jenis: 'bahaya',
+            tombolYa: 'Ya, Hapus'
+        }).then(function (setuju) {
+            if (setuju) doDelete();
+        });
     }
 
     // Dynamic top spacing for collapsible master navbar

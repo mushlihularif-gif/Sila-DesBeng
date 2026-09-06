@@ -62,6 +62,62 @@ class Region extends Model
         return $ids;
     }
 
+    /**
+     * Garis wilayah seorang warga: wilayahnya sendiri + seluruh induk di atasnya.
+     *
+     * Warga Desa Pematang Duku Timur bernaung di Kecamatan Bengkalis dan
+     * Kabupaten Bengkalis, jadi ketiganya ada di garisnya. Desa lain dan
+     * kecamatan lain TIDAK. Ini kebalikan getDescendantIds() yang dipakai sisi
+     * admin (melihat ke bawah untuk mengawasi).
+     *
+     * @return array<int> selalu memuat $regionId sendiri
+     */
+    public static function garisLayananUntukWarga(?int $regionId): array
+    {
+        if (! $regionId) {
+            return [];
+        }
+
+        return array_values(array_unique(
+            array_merge([$regionId], self::getAncestorIds($regionId))
+        ));
+    }
+
+    /**
+     * Wilayah mana saja yang layanannya boleh DILIHAT warga ini.
+     *
+     * Batasan wilayah TIDAK berlaku otomatis. Tiap wilayah punya sakelar
+     * "Eksklusif Warga Lokal" per layanan (region_services.is_exclusive):
+     *
+     *   tidak eksklusif -> terbuka untuk warga mana pun
+     *   eksklusif       -> hanya warga wilayah itu dan wilayah di bawahnya
+     *
+     * Aturan yang sama sudah lebih dulu dipakai middleware CheckRegionService;
+     * fungsi ini membawanya ke tingkat DAFTAR supaya warga tidak lagi melihat
+     * barang yang nanti ditolak saat dipesan.
+     *
+     * @return array<int> region_id yang layanannya aktif dan boleh dilihat
+     */
+    public static function wilayahLayananTerlihat(?int $userRegionId, string $namaLayanan): array
+    {
+        $layanan = Service::where('name', $namaLayanan)->first();
+
+        if (! $layanan) {
+            return [];
+        }
+
+        $garis = self::garisLayananUntukWarga($userRegionId);
+
+        return RegionService::where('service_id', $layanan->id)
+            ->where('is_active', true)
+            ->where(function ($q) use ($garis) {
+                $q->where('is_exclusive', false)
+                  ->orWhereIn('region_id', $garis);
+            })
+            ->pluck('region_id')
+            ->all();
+    }
+
     public function getFullPathAttribute()
     {
         $path = $this->name;

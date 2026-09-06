@@ -374,13 +374,20 @@
 
 <script>
 function showCancellationRejectModal(id, type) {
-    alert("Fitur penolakan pembatalan belum diimplementasikan di view ini.");
+    showSiladesBengToast('warning', 'Perhatian', "Fitur penolakan pembatalan belum diimplementasikan di view ini.");
 }
 function handleCancellation(id, type, action) {
-    if(confirm("Apakah Anda yakin ingin menyetujui pembatalan ini?")) {
-        // Implementasi backend jika diperlukan
-        alert("Fitur ini perlu dihubungkan ke backend.");
-    }
+    konfirmasi({
+        judul: 'Setujui Pembatalan',
+        pesan: 'Apakah Anda yakin ingin menyetujui pembatalan pesanan ini?',
+        jenis: 'peringatan',
+        tombolYa: 'Ya, Setujui'
+    }).then(function (setuju) {
+        if (! setuju) return;
+        // Fungsi ini masih rintisan: belum ada pemanggilan ke server.
+        showSiladesBengToast('warning', 'Belum Tersedia',
+            'Persetujuan pembatalan belum terhubung ke server.');
+    });
 }
 </script>
 @endsection

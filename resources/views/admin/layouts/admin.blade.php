@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="{{ str_replace('_','-',app()->getLocale()) }}" translate="no" class="light-style layout-menu-fixed" dir="ltr" data-theme="theme-default"
     data-assets-path="{{ asset('Admin/') }}" data-template="vertical-menu-template-free">
 
@@ -463,7 +463,6 @@
                 </div>
                 <div class="menu-inner-shadow"></div>
                 <ul class="menu-inner py-1">
-                    <!-- Dashboard -->
                     <li class="menu-item {{ request()->is('admin/dashboard') ? 'active' : '' }}">
                         <a href="{{ route('admin.dashboard') }}" class="menu-link">
                             <i class="menu-icon tf-icons bx bx-home-circle"></i>
@@ -547,14 +546,17 @@
 
                 <!-- Manajemen (Dropdown) -->
                 {{-- Seluruh isinya data warga/wilayah; staf platform tidak punya satu pun
-                     anak menu di sini, jadi grupnya disembunyikan agar tidak jadi dropdown hampa. --}}
+                     anak menu di sini, jadi grupnya disembunyikan agar tidak jadi dropdown hampa.
+                     Mitra ikut masuk grup ini karena keuangan & rekeningnya juga
+                     bersifat pengelolaan, bukan operasional harian. --}}
                 @if(auth()->user()->role !== 'staff' || auth()->user()->bolehSalahSatu(\App\Models\User::kunciIzinGrup('Manajemen')))
-                <li class="menu-item {{ request()->is('admin/manajemen-pengguna*') || request()->is('admin/kelola-wilayah*') || request()->is('admin/banners*') || request()->routeIs('admin.warga.mutasi.*') || request()->routeIs('admin.kyc.*') || request()->routeIs('admin.staff.*') || request()->routeIs('admin.wilayah-admins.*') ? 'open active show' : '' }}">
+                <li class="menu-item {{ request()->is('admin/manajemen-pengguna*') || request()->is('admin/kelola-wilayah*') || request()->is('admin/banners*') || request()->routeIs('admin.warga.mutasi.*') || request()->routeIs('admin.kyc.*') || request()->routeIs('admin.staff.*') || request()->routeIs('admin.wilayah-admins.*') || request()->routeIs('admin.keuangan.*') || request()->routeIs('admin.lokasi-layanan.*') ? 'open active show' : '' }}">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
                         <i class="menu-icon tf-icons bx bx-briefcase"></i>
                         <div data-i18n="Manajemen">Manajemen</div>
                     </a>
                     <ul class="menu-sub">
+
                         {{-- Pengguna: data warga per wilayah. Staf platform bisa diberi izin khusus. --}}
                         @if(in_array(auth()->user()->role, ['admin', 'admin_kecamatan', 'admin_desa']))
                         <li class="menu-item {{ request()->routeIs('admin.manajemen-pengguna.*') ? 'active' : '' }}">
@@ -580,6 +582,28 @@
                         <li class="menu-item {{ request()->routeIs('admin.wilayah-admins.*') ? 'active' : '' }}">
                             <a href="{{ route('admin.wilayah-admins.index') }}" class="menu-link">
                                 <div>Admin RT & RW</div>
+                            </a>
+                        </li>
+                        @endif
+
+                        {{-- Keuangan: saldo Midtrans wilayah & pencairannya. Uang wilayah
+                             adalah tanggung jawab kepala desa/camat, jadi staf unit tidak
+                             melihat menu ini (penjaganya juga ada di controller). --}}
+                        @if(in_array(auth()->user()->role, ['admin', 'admin_kecamatan', 'admin_desa']))
+                        <li class="menu-item {{ request()->routeIs('admin.keuangan.*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.keuangan.index') }}" class="menu-link">
+                                <div>Keuangan</div>
+                            </a>
+                        </li>
+                        @endif
+
+                        {{-- Lokasi Layanan: gudang, kantor desa, pangkalan gas. Satu
+                             daftar milik wilayah yang dipakai semua unit, jadi staf unit
+                             ikut melihatnya — merekalah yang mengisi lokasi tiap produk. --}}
+                        @if(in_array(auth()->user()->role, ['admin', 'admin_kecamatan', 'admin_desa', 'staff']))
+                        <li class="menu-item {{ request()->routeIs('admin.lokasi-layanan.*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.lokasi-layanan.index') }}" class="menu-link">
+                                <div>Lokasi Layanan</div>
                             </a>
                         </li>
                         @endif
@@ -793,6 +817,22 @@
                             </a>
                         </li>
                         @endif
+                        @if(auth()->user()->hasPlatformPermission('platform_penarikan'))
+                        <li class="menu-item {{ request()->routeIs('admin.sistem-platform.penarikan.*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.sistem-platform.penarikan.index') }}" class="menu-link">
+                                <div>Penarikan Saldo Wilayah</div>
+                            </a>
+                        </li>
+                        @endif
+                        {{-- Peta wilayah: kewenangan Super Admin saja, tidak
+                             dibagikan lewat izin staf platform. --}}
+                        @if(auth()->user()->role === 'super_admin')
+                        <li class="menu-item {{ request()->routeIs('admin.sistem-platform.wilayah.*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.sistem-platform.wilayah.index') }}" class="menu-link">
+                                <div>Peta Wilayah</div>
+                            </a>
+                        </li>
+                        @endif
                         @if(auth()->user()->hasPlatformPermission('platform_monitoring'))
                         <li class="menu-item {{ request()->routeIs('admin.sistem-platform.monitoring') ? 'active' : '' }}">
                             <a href="{{ route('admin.sistem-platform.monitoring') }}" class="menu-link">
@@ -928,7 +968,8 @@
                                             <button class="btn btn-sm btn-outline-secondary rounded-pill me-2 notif-filter-btn fw-medium" data-filter="gas">Gas LPG</button>
                                             <button class="btn btn-sm btn-outline-secondary rounded-pill me-2 notif-filter-btn fw-medium" data-filter="pasar">Pasar Desa</button>
                                             <button class="btn btn-sm btn-outline-secondary rounded-pill me-2 notif-filter-btn fw-medium" data-filter="mutasi">Administrasi</button>
-                                            <button class="btn btn-sm btn-outline-secondary rounded-pill notif-filter-btn fw-medium" data-filter="laporan">Laporan Warga</button>
+                                            <button class="btn btn-sm btn-outline-secondary rounded-pill me-2 notif-filter-btn fw-medium" data-filter="laporan">Laporan Warga</button>
+                                            <button class="btn btn-sm btn-outline-secondary rounded-pill notif-filter-btn fw-medium" data-filter="keuangan">Keuangan</button>
                                         </div>
                                     </li>
                                     <li>
@@ -956,9 +997,24 @@
                                                     $cat = 'mutasi'; $icon = 'bx-id-card'; $color = 'secondary'; $bg = 'rgba(133, 146, 163, 0.08)';
                                                 } elseif (in_array($notif->type, ['laporan', 'pengumuman'])) {
                                                     $cat = 'laporan'; $icon = 'bx-message-square-error'; $color = 'danger'; $bg = 'rgba(255, 62, 29, 0.08)';
+                                                } elseif ($notif->type === 'penarikan_saldo') {
+                                                    $cat = 'keuangan'; $icon = 'bx-money-withdraw'; $color = 'success'; $bg = 'rgba(113, 221, 55, 0.08)';
+                                                } elseif ($notif->type === 'penarikan_saldo_terlambat') {
+                                                    $cat = 'keuangan'; $icon = 'bx-alarm-exclamation'; $color = 'danger'; $bg = 'rgba(255, 62, 29, 0.08)';
+                                                }
+
+                                                // Tautan notifikasi dulu selalu ke Permintaan & Pengajuan, apa pun
+                                                // jenisnya. Untuk penarikan saldo itu salah alamat, dan tujuannya
+                                                // pun berbeda menurut siapa yang membaca: Diskominfotik menyetujui
+                                                // di panel platform, admin wilayah melihatnya di halaman Keuangan.
+                                                $notifLink = route('admin.aktivitas.permintaan-pengajuan.index');
+                                                if (in_array($notif->type, ['penarikan_saldo', 'penarikan_saldo_terlambat'])) {
+                                                    $notifLink = in_array(auth()->user()->role, ['super_admin', 'admin'])
+                                                        ? route('admin.sistem-platform.penarikan.index')
+                                                        : route('admin.keuangan.index');
                                                 }
                                             @endphp
-                                            <a href="{{ route('admin.aktivitas.permintaan-pengajuan.index') }}" class="dropdown-item notif-item d-flex align-items-start gap-3 py-3 px-4 border-bottom" data-category="{{ $cat }}" style="white-space: normal; {{ !$notif->is_read ? 'background-color: '.$bg.';' : '' }} transition: all 0.2s;">
+                                            <a href="{{ $notifLink }}" class="dropdown-item notif-item d-flex align-items-start gap-3 py-3 px-4 border-bottom" data-category="{{ $cat }}" style="white-space: normal; {{ !$notif->is_read ? 'background-color: '.$bg.';' : '' }} transition: all 0.2s;">
                                                 <div class="flex-shrink-0 mt-1">
                                                     <div class="rounded-circle d-flex align-items-center justify-content-center shadow-sm {{ !$notif->is_read ? 'bg-'.$color : 'bg-label-secondary' }}" style="width: 42px; height: 42px;">
                                                         <i class="bx {{ $icon }} fs-4 {{ !$notif->is_read ? 'text-white' : 'text-secondary' }}"></i>
@@ -1189,7 +1245,18 @@
             <!-- Skrip untuk animasi dan fungsionalitas -->
             <script>
                 // Wrapper: showToast sekarang memanggil showSiladesBengToast
+                //
+                // Urutan argumennya sengaja dibuat bebas. Sisi admin memakai
+                // showToast(jenis, pesan) sementara sisi warga di
+                // auth/scripts.blade.php memakai showToast(pesan, jenis) —
+                // nama sama, urutan terbalik. Kode yang dipindahkan antar sisi
+                // dulu diam-diam menukar judul dengan isi pesan.
                 function showToast(type, message) {
+                    const JENIS = ['success', 'error', 'warning', 'info', 'danger'];
+                    if (JENIS.indexOf(message) !== -1 && JENIS.indexOf(type) === -1) {
+                        const tukar = type; type = message; message = tukar;
+                    }
+
                     const mappedType = type === 'danger' ? 'error' : type;
                     const titleMap = { success: 'Berhasil', error: 'Peringatan', warning: 'Perhatian', info: 'Informasi' };
                     showSiladesBengToast(mappedType, titleMap[mappedType] || 'Notifikasi', message);
@@ -1366,6 +1433,8 @@
             @include('admin.partials.inbox-rail')
         @endif
     @endauth
+    {{-- Dialog konfirmasi bergaya situs, pengganti window.confirm() --}}
+    @include('partials.dialog-konfirmasi')
 </body>
 
 </html>

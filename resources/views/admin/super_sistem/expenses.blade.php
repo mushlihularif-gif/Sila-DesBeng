@@ -68,7 +68,7 @@
                                             </button>
                                         </form>
                                         @endif
-                                        <form action="{{ route('admin.sistem-platform.expenses.destroy', $expense) }}" method="POST" class="d-inline" onsubmit="return confirm('Hapus item ini?')">
+                                        <form action="{{ route('admin.sistem-platform.expenses.destroy', $expense) }}" method="POST" class="d-inline" data-konfirmasi="Hapus item ini?">
                                             @csrf @method('DELETE')
                                             <button type="submit" class="btn btn-sm btn-outline-danger" title="Hapus">
                                                 <i class="bx bx-trash"></i>

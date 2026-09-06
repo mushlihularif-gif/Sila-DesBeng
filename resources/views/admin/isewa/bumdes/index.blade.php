@@ -1,4 +1,4 @@
-﻿@extends('admin.layouts.admin')
+@extends('admin.layouts.admin')
 
 @section('title', 'Profil Pemerintah Daerah')
 
@@ -31,7 +31,7 @@
                                     <a href="{{ route('admin.SiladesBeng.bumdes.edit', $member->id) }}" class="btn btn-sm btn-outline-primary px-4 rounded-pill" style="font-weight: 500;">
                                         <i class="bi bi-pencil"></i> Edit
                                     </a>
-                                    <form action="{{ route('admin.SiladesBeng.bumdes.destroy', $member->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus {{ $member->name }}?');" class="d-inline">
+                                    <form action="{{ route('admin.SiladesBeng.bumdes.destroy', $member->id) }}" method="POST" data-konfirmasi="Yakin ingin menghapus {{ $member->name }}?" class="d-inline">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-sm btn-outline-danger px-4 rounded-pill" style="font-weight: 500;">

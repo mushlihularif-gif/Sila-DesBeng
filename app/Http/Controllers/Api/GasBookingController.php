@@ -25,6 +25,10 @@ class GasBookingController extends Controller
             'delivery_method' => 'required|in:antar,jemput',
             'buyer_name' => 'required|string|max:255',
             'buyer_address' => 'required|string',
+            // Titik antar hanya terisi bila warga memilih diantar; kolomnya
+            // memang boleh kosong untuk pesanan yang diambil sendiri.
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
             'quantity' => 'required|integer|min:1|max:100',
             'payment_method' => 'required|in:tunai,bank_transfer_bca,bank_transfer_bri,bank_transfer_bni,bank_transfer_mandiri,gopay,qris',
             'payment_proof' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
@@ -73,11 +77,25 @@ class GasBookingController extends Controller
             'delivery_method' => $validated['delivery_method'],
             'payment_method' => ucfirst($validated['payment_method']),
             'address' => $validated['buyer_address'],
+            'latitude' => $validated['latitude'] ?? null,
+            'longitude' => $validated['longitude'] ?? null,
             'full_name' => $validated['buyer_name'],
             'email' => $user->email,
             'status' => 'pending',
             'proof_of_payment' => $paymentProofPath,
         ]);
+
+        // Catat pergerakan dana ke ledger wilayah - endpoint API ini sebelumnya
+        // tidak pernah menulis ke ledger sama sekali, terpisah dari endpoint
+        // User\GasBookingController yang sudah dibenahi.
+        \App\Models\WalletTransaction::catatPemasukan(
+            regionId: $gas->region_id,
+            referenceType: 'gas',
+            referenceId: $order->id,
+            amount: $totalAmount,
+            paymentMethod: $validated['payment_method'],
+            proofPath: $paymentProofPath,
+        );
 
         // Create transaction receipt
         $receipt = TransactionReceipt::create([

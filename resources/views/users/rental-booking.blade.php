@@ -1,4 +1,4 @@
-﻿@extends('layouts.user')
+@extends('layouts.user')
 
 @php
     // Tentukan gaya latar belakang kartu berdasarkan pengaturan admin
@@ -206,7 +206,12 @@
                         </div>
                         
                         <div class="space-y-4">
-                            <input type="text" 
+                            @include('partials.pilih-alamat', [
+    'alamatTersimpan' => $alamatTersimpan ?? collect(),
+    'idNama'   => 'recipient-name',
+    'idAlamat' => 'delivery-address',
+])
+<input type="text" 
                                    name="recipient_name" 
                                    id="recipient-name"
                                    placeholder="Nama Lengkap" 

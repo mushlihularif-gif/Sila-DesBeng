@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 use Illuminate\Support\Facades\Route;
 
@@ -366,6 +366,22 @@ Route::get('/auth/register-google', [App\Http\Controllers\Auth\GoogleController:
 Route::post('/auth/register-google', [App\Http\Controllers\Auth\GoogleController::class, 'completeRegistration'])->name('register.google.complete');
 
 
+// Saldo warga: uang pengembalian dari pesanan yang dibatalkan setelah dibayar.
+// Pembukuannya sudah lama berjalan lewat DompetWarga, tetapi sebelum rute ini
+// ada, warga tidak punya satu pun halaman untuk melihat apalagi mencairkannya.
+Route::middleware(['auth', 'role:user'])->group(function () {
+    Route::get('/saldo', [\App\Http\Controllers\User\SaldoWargaController::class, 'index'])->name('user.saldo.index');
+    Route::post('/saldo/tarik', [\App\Http\Controllers\User\SaldoWargaController::class, 'tarik'])->name('user.saldo.tarik');
+    Route::post('/saldo/{saldo}/batal', [\App\Http\Controllers\User\SaldoWargaController::class, 'batal'])->name('user.saldo.batal');
+
+    // Buku alamat warga: simpan sekali, pakai berulang saat memesan. Sehalaman
+    // dengan saldo karena keduanya sama-sama "data saya" milik warga.
+    Route::post('/alamat', [\App\Http\Controllers\User\AlamatWargaController::class, 'store'])->name('user.alamat.store');
+    Route::put('/alamat/{alamat}', [\App\Http\Controllers\User\AlamatWargaController::class, 'update'])->name('user.alamat.update');
+    Route::post('/alamat/{alamat}/utama', [\App\Http\Controllers\User\AlamatWargaController::class, 'utama'])->name('user.alamat.utama');
+    Route::delete('/alamat/{alamat}', [\App\Http\Controllers\User\AlamatWargaController::class, 'destroy'])->name('user.alamat.destroy');
+});
+
 // KYC Routes
 Route::middleware(['auth', 'role:user'])->group(function () {
     Route::get('/kyc', [\App\Http\Controllers\KycController::class, 'index'])->name('kyc.index');
@@ -444,11 +460,25 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
     Route::post('/settings/notifications', [DashboardController::class, 'notificationsUpdate'])->name('admin.settings.notifications.update');
     
     // Pengaturan Wilayah & Layanan (Kas Independen)
+    // Lokasi layanan milik wilayah (gudang, kantor desa, pangkalan gas).
+    // Satu daftar dipakai bersama semua unit; penjaga perannya ada di controller.
+    Route::get('/lokasi-layanan', [\App\Http\Controllers\Admin\LokasiLayananController::class, 'index'])->name('admin.lokasi-layanan.index');
+    Route::post('/lokasi-layanan', [\App\Http\Controllers\Admin\LokasiLayananController::class, 'store'])->name('admin.lokasi-layanan.store');
+    Route::post('/lokasi-layanan/simpan-cepat', [\App\Http\Controllers\Admin\LokasiLayananController::class, 'simpanCepat'])->name('admin.lokasi-layanan.simpan-cepat');
+    Route::put('/lokasi-layanan/{lokasiLayanan}', [\App\Http\Controllers\Admin\LokasiLayananController::class, 'update'])->name('admin.lokasi-layanan.update');
+    Route::delete('/lokasi-layanan/{lokasiLayanan}', [\App\Http\Controllers\Admin\LokasiLayananController::class, 'destroy'])->name('admin.lokasi-layanan.destroy');
+
     Route::get('/region-settings', [\App\Http\Controllers\Admin\RegionSettingController::class, 'index'])->name('admin.region-settings.index');
     Route::post('/region-settings', [\App\Http\Controllers\Admin\RegionSettingController::class, 'update'])->name('admin.region-settings.update');
     Route::post('/region-settings/toggle-delivery', [\App\Http\Controllers\Admin\RegionSettingController::class, 'toggleDelivery'])->name('admin.region-settings.toggle-delivery');
     Route::get('/pengaturan-pembayaran-wilayah', [\App\Http\Controllers\Admin\RegionSettingController::class, 'paymentIndex'])->name('admin.region-settings.payment');
     Route::put('/pengaturan-pembayaran-wilayah', [\App\Http\Controllers\Admin\RegionSettingController::class, 'paymentUpdate'])->name('admin.region-settings.payment.update');
+    // Keuangan wilayah: saldo Midtrans & pencairannya. Dipisah dari Pengaturan
+    // karena ini pekerjaan berulang (lihat uang masuk, cairkan), bukan
+    // konfigurasi sekali-atur seperti nomor rekening.
+    Route::get('/keuangan', [\App\Http\Controllers\Admin\KeuanganController::class, 'index'])->name('admin.keuangan.index');
+    Route::post('/keuangan/tarik-saldo', [\App\Http\Controllers\Admin\KeuanganController::class, 'tarikSaldo'])->name('admin.keuangan.tarik');
+    Route::post('/keuangan/penarikan/{penarikan}/batal', [\App\Http\Controllers\Admin\KeuanganController::class, 'batalkanPenarikan'])->name('admin.keuangan.batal');
     
     // Manajemen Banner / Iklan
     Route::get('/banners', [\App\Http\Controllers\Admin\BannerController::class, 'index'])->name('admin.banners.index')->middleware('staff.permission:platform_banner');
@@ -549,6 +579,19 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
         // di config/api_providers.php, tanpa menambah route.
         Route::put('/gateway/kredensial/{category}', [SuperAdminSettingController::class, 'credentialUpdate'])->name('admin.sistem-platform.credential.update')->middleware('platform.permission:platform_integrasi');
         Route::delete('/gateway/kredensial/{category}', [SuperAdminSettingController::class, 'credentialDestroy'])->name('admin.sistem-platform.credential.destroy')->middleware('platform.permission:platform_integrasi');
+        // Persetujuan penarikan saldo wilayah. Terpisah dari platform_integrasi
+        // karena ini pekerjaan operasional harian (mengecek & mengACC pengajuan),
+        // bukan sekali-setting seperti kredensial gateway - staf yang mengurus
+        // keduanya bisa jadi orang yang berbeda.
+        Route::get('/penarikan-saldo', [\App\Http\Controllers\Admin\PenarikanSaldoController::class, 'index'])->name('admin.sistem-platform.penarikan.index')->middleware('platform.permission:platform_penarikan');
+        Route::post('/penarikan-saldo/{penarikan}/approve', [\App\Http\Controllers\Admin\PenarikanSaldoController::class, 'approve'])->name('admin.sistem-platform.penarikan.approve')->middleware('platform.permission:platform_penarikan');
+        Route::post('/penarikan-saldo/{penarikan}/reject', [\App\Http\Controllers\Admin\PenarikanSaldoController::class, 'reject'])->name('admin.sistem-platform.penarikan.reject')->middleware('platform.permission:platform_penarikan');
+        // Peta wilayah se-kabupaten. Dikunci role:super_admin, BUKAN
+        // platform.permission: susunan wilayah dipakai sebagai rujukan oleh KYC,
+        // jalur laporan, pembukuan saldo, dan eksklusivitas layanan, jadi
+        // kewenangan mengubahnya tidak didelegasikan ke staf platform.
+        Route::get('/wilayah', [\App\Http\Controllers\Admin\WilayahPlatformController::class, 'index'])->name('admin.sistem-platform.wilayah.index')->middleware('role:super_admin');
+        Route::post('/wilayah', [\App\Http\Controllers\Admin\WilayahPlatformController::class, 'store'])->name('admin.sistem-platform.wilayah.store')->middleware('role:super_admin');
         Route::get('/monitoring', [SuperAdminSettingController::class, 'monitoring'])->name('admin.sistem-platform.monitoring')->middleware('platform.permission:platform_monitoring');
         Route::get('/log-keamanan', [SuperAdminSettingController::class, 'securityLog'])->name('admin.sistem-platform.security-log')->middleware('platform.permission:platform_keamanan');
         Route::get('/biaya-operasional', [SuperAdminSettingController::class, 'expenses'])->name('admin.sistem-platform.expenses')->middleware('platform.permission:platform_biaya');

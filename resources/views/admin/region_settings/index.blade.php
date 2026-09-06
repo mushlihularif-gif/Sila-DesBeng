@@ -287,7 +287,7 @@
             </div>
         </div>
         <div class="form-check form-switch mb-0 d-flex flex-column align-items-center justify-content-center" style="min-width: 80px;">
-            <input class="form-check-input toggle-status m-0" style="transform: scale(1.3); cursor: pointer; float: none;" type="checkbox" name="mobil_delivery_antar_active" {{ isset($region->payment_info['mobil_delivery_antar_active']) ? ($region->payment_info['mobil_delivery_antar_active'] ? 'checked' : '') : 'checked' }}>
+            <input class="form-check-input toggle-status m-0" style="transform: scale(1.3); cursor: pointer; float: none;" type="checkbox" name="mobil_rental_delivery_antar_active" {{ isset($region->payment_info['mobil_rental_delivery_antar_active']) ? ($region->payment_info['mobil_rental_delivery_antar_active'] ? 'checked' : '') : 'checked' }}>
             <span class="status-label mt-2 small fw-bold text-center"></span>
         </div>
     </div>
@@ -305,7 +305,7 @@
             </div>
         </div>
         <div class="form-check form-switch mb-0 d-flex flex-column align-items-center justify-content-center" style="min-width: 80px;">
-            <input class="form-check-input toggle-status m-0" style="transform: scale(1.3); cursor: pointer; float: none;" type="checkbox" name="mobil_delivery_jemput_active" {{ isset($region->payment_info['mobil_delivery_jemput_active']) ? ($region->payment_info['mobil_delivery_jemput_active'] ? 'checked' : '') : 'checked' }}>
+            <input class="form-check-input toggle-status m-0" style="transform: scale(1.3); cursor: pointer; float: none;" type="checkbox" name="mobil_rental_delivery_jemput_active" {{ isset($region->payment_info['mobil_rental_delivery_jemput_active']) ? ($region->payment_info['mobil_rental_delivery_jemput_active'] ? 'checked' : '') : 'checked' }}>
             <span class="status-label mt-2 small fw-bold text-center"></span>
         </div>
     </div>

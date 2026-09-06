@@ -21,7 +21,7 @@ class FasilitasUmumBookingController extends Controller
         $item = FasilitasUmum::findOrFail($itemId);
 
         // Validasi: Warga hanya bisa memesan layanan di wilayahnya sendiri
-        if (Auth::user()->region_id != $item->region_id) {
+        if (! in_array($item->region_id, \App\Models\Region::wilayahLayananTerlihat(Auth::user()->region_id, 'Fasilitas Umum'))) {
             return redirect()->back()->with('error', 'Layanan khusus warga lokal. Silakan sesuaikan wilayah Anda.');
         }
         
@@ -42,7 +42,15 @@ class FasilitasUmumBookingController extends Controller
         
         $quantity = request()->get('quantity', 1);
         
-        return view('users.fasilitas-umum-booking', compact('item', 'setting', 'quantity', 'sop_fasilitas', 'region'));
+
+        // Buku alamat warga, supaya alamat pengiriman tidak perlu diketik ulang
+        // di setiap unit layanan.
+        $alamatTersimpan = \App\Models\AlamatWarga::milik(auth()->id())
+            ->with('region')
+            ->orderByDesc('is_utama')
+            ->orderBy('id')
+            ->get();
+        return view('users.fasilitas-umum-booking', compact('item', 'setting', 'quantity', 'sop_fasilitas', 'region', 'alamatTersimpan'));
     }
 
     public function store(Request $request)
@@ -122,6 +130,20 @@ class FasilitasUmumBookingController extends Controller
             'status' => 'pending',
             'region_id' => $item->region_id,
         ]);
+
+        // Catat pergerakan dana ke ledger wilayah - hanya untuk peminjaman
+        // berbayar. Peminjaman gratis (acara sosial) tidak menghasilkan
+        // pemasukan apa pun, jadi tidak ada yang perlu dibukukan.
+        if ($totalAmount > 0) {
+            \App\Models\WalletTransaction::catatPemasukan(
+                regionId: $item->region_id,
+                referenceType: 'fasilitas',
+                referenceId: $booking->id,
+                amount: $totalAmount,
+                paymentMethod: $metodeBayar,
+                proofPath: $buktiBayar,
+            );
+        }
 
         // We can just rely on the normal flow for now, the user can check their activity dashboard
         // If we want a separate payment page, we can build it later.

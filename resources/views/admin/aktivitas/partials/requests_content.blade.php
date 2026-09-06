@@ -278,7 +278,7 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                                                             <form action="{{ route('admin.aktivitas.update-status', ['type' => 'rental', 'id' => $req->id]) }}" method="POST" class="d-inline">
                                                                 @csrf
                                                                 <input type="hidden" name="status" value="being_prepared">
-                                                                <button type="submit" class="btn btn-sm btn-outline-warning shadow-sm rounded-pill px-3" onclick="return confirm('Mulai siapkan pesanan ini?')">
+                                                                <button type="submit" class="btn btn-sm btn-outline-warning shadow-sm rounded-pill px-3" data-konfirmasi="Mulai siapkan pesanan ini?">
                                                                     <i class="bx bx-package me-1"></i>Proses
                                                                 </button>
                                                             </form>
@@ -286,7 +286,7 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                                                             <form action="{{ route('admin.aktivitas.update-status', ['type' => 'rental', 'id' => $req->id]) }}" method="POST" class="d-inline">
                                                                 @csrf
                                                                 <input type="hidden" name="status" value="in_delivery">
-                                                                <button type="submit" class="btn btn-sm btn-outline-info shadow-sm rounded-pill px-3" onclick="return confirm('Mulai kirim pesanan ini?')">
+                                                                <button type="submit" class="btn btn-sm btn-outline-info shadow-sm rounded-pill px-3" data-konfirmasi="Mulai kirim pesanan ini?">
                                                                     <i class="bx bx-truck me-1"></i>Kirim
                                                                 </button>
                                                             </form>
@@ -419,7 +419,7 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                                                      <form action="{{ route('admin.aktivitas.update-status', ['id' => $order->id, 'type' => 'gas']) }}" method="POST" class="d-inline">
                                                         @csrf
                                                         <input type="hidden" name="status" value="completed">
-                                                        <button type="submit" class="btn btn-sm btn-outline-success shadow-sm rounded-pill px-3" onclick="return confirm('Apakah Anda yakin ingin menyelesaikan pesanan ini?')">
+                                                        <button type="submit" class="btn btn-sm btn-outline-success shadow-sm rounded-pill px-3" data-konfirmasi="Apakah Anda yakin ingin menyelesaikan pesanan ini?">
                                                             <i class="bx bx-check-circle me-1"></i>Selesaikan
                                                         </button>
                                                     </form>
@@ -523,7 +523,7 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                                                             <form action="{{ route('admin.aktivitas.update-status', ['type' => 'mobil', 'id' => $req->id]) }}" method="POST" class="d-inline">
                                                                 @csrf
                                                                 <input type="hidden" name="status" value="process">
-                                                                <button type="submit" class="btn btn-sm btn-outline-warning shadow-sm rounded-pill px-3" onclick="return confirm('Mulai siapkan mobil ini?')">
+                                                                <button type="submit" class="btn btn-sm btn-outline-warning shadow-sm rounded-pill px-3" data-konfirmasi="Mulai siapkan mobil ini?">
                                                                     <i class="bx bx-package me-1"></i>Proses
                                                                 </button>
                                                             </form>
@@ -531,7 +531,7 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                                                             <form action="{{ route('admin.aktivitas.update-status', ['type' => 'mobil', 'id' => $req->id]) }}" method="POST" class="d-inline">
                                                                 @csrf
                                                                 <input type="hidden" name="status" value="delivering">
-                                                                <button type="submit" class="btn btn-sm btn-outline-info shadow-sm rounded-pill px-3" onclick="return confirm('Mulai jalan / kirim mobil?')">
+                                                                <button type="submit" class="btn btn-sm btn-outline-info shadow-sm rounded-pill px-3" data-konfirmasi="Mulai jalan / kirim mobil?">
                                                                     <i class="bx bx-car me-1"></i>Kirim
                                                                 </button>
                                                             </form>
@@ -539,7 +539,7 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                                                             <form action="{{ route('admin.aktivitas.update-status', ['type' => 'mobil', 'id' => $req->id]) }}" method="POST" class="d-inline">
                                                                 @csrf
                                                                 <input type="hidden" name="status" value="arrived">
-                                                                <button type="submit" class="btn btn-sm btn-outline-primary shadow-sm rounded-pill px-3" onclick="return confirm('Konfirmasi tiba?')">
+                                                                <button type="submit" class="btn btn-sm btn-outline-primary shadow-sm rounded-pill px-3" data-konfirmasi="Konfirmasi tiba?">
                                                                     <i class="bx bx-check me-1"></i>Tiba
                                                                 </button>
                                                             </form>
@@ -547,7 +547,7 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                                                             <form action="{{ route('admin.aktivitas.update-status', ['type' => 'mobil', 'id' => $req->id]) }}" method="POST" class="d-inline">
                                                                 @csrf
                                                                 <input type="hidden" name="status" value="completed">
-                                                                <button type="submit" class="btn btn-sm btn-outline-success shadow-sm rounded-pill px-3" onclick="return confirm('Selesaikan penyewaan ini?')">
+                                                                <button type="submit" class="btn btn-sm btn-outline-success shadow-sm rounded-pill px-3" data-konfirmasi="Selesaikan penyewaan ini?">
                                                                     <i class="bx bx-check-circle me-1"></i>Selesai
                                                                 </button>
                                                             </form>
@@ -557,7 +557,7 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                                                             <form action="{{ route('admin.aktivitas.update-status', ['type' => 'mobil', 'id' => $req->id]) }}" method="POST" class="d-inline">
                                                                 @csrf
                                                                 <input type="hidden" name="status" value="completed">
-                                                                <button type="submit" class="btn btn-sm btn-outline-success shadow-sm rounded-pill px-3" onclick="return confirm('Serahkan Kunci / Selesaikan penyewaan ini?')">
+                                                                <button type="submit" class="btn btn-sm btn-outline-success shadow-sm rounded-pill px-3" data-konfirmasi="Serahkan Kunci / Selesaikan penyewaan ini?">
                                                                     <i class="bx bx-key me-1"></i>Serahkan & Selesai
                                                                 </button>
                                                             </form>
@@ -647,7 +647,7 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                                                             <form action="{{ route('admin.aktivitas.update-status', ['type' => 'fasilitas', 'id' => $req->id]) }}" method="POST" class="d-inline">
                                                                 @csrf
                                                                 <input type="hidden" name="status" value="delivering">
-                                                                <button type="submit" class="btn btn-sm btn-outline-info shadow-sm rounded-pill px-3" onclick="return confirm('Mulai jalan / kirim?')">
+                                                                <button type="submit" class="btn btn-sm btn-outline-info shadow-sm rounded-pill px-3" data-konfirmasi="Mulai jalan / kirim?">
                                                                     <i class="bx bx-truck me-1"></i>Kirim/Berangkat
                                                                 </button>
                                                             </form>
@@ -655,7 +655,7 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                                                             <form action="{{ route('admin.aktivitas.update-status', ['type' => 'fasilitas', 'id' => $req->id]) }}" method="POST" class="d-inline">
                                                                 @csrf
                                                                 <input type="hidden" name="status" value="arrived">
-                                                                <button type="submit" class="btn btn-sm btn-outline-primary shadow-sm rounded-pill px-3" onclick="return confirm('Konfirmasi tiba/digunakan?')">
+                                                                <button type="submit" class="btn btn-sm btn-outline-primary shadow-sm rounded-pill px-3" data-konfirmasi="Konfirmasi tiba/digunakan?">
                                                                     <i class="bx bx-check me-1"></i>Tiba
                                                                 </button>
                                                             </form>
@@ -663,7 +663,7 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                                                             <form action="{{ route('admin.aktivitas.update-status', ['type' => 'fasilitas', 'id' => $req->id]) }}" method="POST" class="d-inline">
                                                                 @csrf
                                                                 <input type="hidden" name="status" value="completed">
-                                                                <button type="submit" class="btn btn-sm btn-outline-success shadow-sm rounded-pill px-3" onclick="return confirm('Selesaikan penyewaan ini?')">
+                                                                <button type="submit" class="btn btn-sm btn-outline-success shadow-sm rounded-pill px-3" data-konfirmasi="Selesaikan penyewaan ini?">
                                                                     <i class="bx bx-check-circle me-1"></i>Selesai
                                                                 </button>
                                                             </form>
@@ -673,7 +673,7 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                                                             <form action="{{ route('admin.aktivitas.update-status', ['type' => 'fasilitas', 'id' => $req->id]) }}" method="POST" class="d-inline">
                                                                 @csrf
                                                                 <input type="hidden" name="status" value="completed">
-                                                                <button type="submit" class="btn btn-sm btn-outline-success shadow-sm rounded-pill px-3" onclick="return confirm('Selesaikan peminjaman ini?')">
+                                                                <button type="submit" class="btn btn-sm btn-outline-success shadow-sm rounded-pill px-3" data-konfirmasi="Selesaikan peminjaman ini?">
                                                                     <i class="bx bx-check-circle me-1"></i>Selesai
                                                                 </button>
                                                             </form>

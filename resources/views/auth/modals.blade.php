@@ -1,4 +1,4 @@
-﻿{{-- Include Custom CSS for Placeholders --}}
+{{-- Include Custom CSS for Placeholders --}}
 <style>
     .custom-placeholder { opacity: 0; pointer-events: none; transition: opacity 0.2s ease-in-out; }
     .input-with-placeholder:placeholder-shown + .custom-placeholder { opacity: 1; }
@@ -374,7 +374,7 @@
                                 confirmButtonText: 'Tutup'
                             });
                         } else {
-                            alert("SANDBOX OTP (Demo)\n\nKode OTP Anda adalah: {{ session('otp_demo_sandbox_code') }}");
+                            showSiladesBengToast('info', 'Kode OTP (Demo)', "SANDBOX OTP (Demo)<br><br>Kode OTP Anda adalah: {{ session('otp_demo_sandbox_code') }}", 20000);
                         }
                     });
                 </script>

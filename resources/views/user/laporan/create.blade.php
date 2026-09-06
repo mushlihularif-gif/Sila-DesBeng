@@ -1,4 +1,4 @@
-﻿@extends('layouts.user')
+@extends('layouts.user')
 
 @section('title', 'Buat Laporan Warga')
 
@@ -595,7 +595,7 @@
         const text = document.getElementById('gps-text');
 
         if (!navigator.geolocation) {
-            alert('Browser Anda tidak mendukung fitur GPS/Geolocation.');
+            showSiladesBengToast('error', 'Gagal', 'Browser Anda tidak mendukung fitur GPS/Geolocation.');
             return;
         }
 
@@ -640,7 +640,7 @@
                     default:
                         msg += 'Terjadi kesalahan yang tidak diketahui.';
                 }
-                alert(msg);
+                showSiladesBengToast('info', 'Informasi', msg);
 
                 // Reset tombol
                 btn.disabled = false;
@@ -677,7 +677,7 @@
 
             // Check if adding these files exceeds maxFiles
             if (selectedFiles.length + files.length > maxFiles) {
-                alert(`Anda hanya dapat mengunggah maksimal ${maxFiles} foto.`);
+                showSiladesBengToast('warning', 'Perhatian', `Anda hanya dapat mengunggah maksimal ${maxFiles} foto.`);
                 event.target.value = ''; // Reset input
                 return;
             }
@@ -686,7 +686,7 @@
             let validFilesAdded = false;
             files.forEach(file => {
                 if (file.size > 2 * 1024 * 1024) {
-                    alert(`File ${file.name} terlalu besar. Maksimal 2MB.`);
+                    showSiladesBengToast('error', 'Gagal', `File ${file.name} terlalu besar. Maksimal 2MB.`);
                 } else {
                     selectedFiles.push(file);
                     dataTransfer.items.add(file);

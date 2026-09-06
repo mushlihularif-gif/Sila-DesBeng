@@ -16,10 +16,60 @@ use App\Models\Notification;
 
 class PartnerApplicationController extends Controller
 {
+    /** Tipe wilayah yang sah berada di bawah tipe induk tertentu. */
+    private const TURUNAN = [
+        'kabupaten' => ['kecamatan'],
+        'kecamatan' => ['desa', 'kelurahan'],
+        'desa'      => ['rw'],
+        'kelurahan' => ['rw'],
+        'rw'        => ['rt'],
+        'rt'        => [],
+    ];
+
+    /** Sebutan tingkat wilayah untuk pesan ke pengguna (ucfirst membuat "Rt"). */
+    private const LABEL_TINGKAT = [
+        'kabupaten' => 'Kabupaten',
+        'kecamatan' => 'Kecamatan',
+        'desa'      => 'Desa',
+        'kelurahan' => 'Kelurahan',
+        'rw'        => 'RW',
+        'rt'        => 'RT',
+    ];
+
+    /** Role yang diberikan untuk tiap tingkat wilayah. */
+    private const PETA_ROLE = [
+        'kabupaten' => 'super_admin',
+        'kecamatan' => 'admin_kecamatan',
+        'desa'      => 'admin_desa',
+        'kelurahan' => 'admin_desa',
+        'rw'        => 'admin_rw',
+        'rt'        => 'admin_rt',
+    ];
+
+    /**
+     * Menyetujui kemitraan berarti membuat wilayah baru DAN mencetak akun admin
+     * untuknya - kewenangan pimpinan wilayah, bukan pekerjaan staf unit.
+     *
+     * Penjaga ini perlu karena grup rute memakai `role:admin`, dan pseudo-role
+     * itu di CheckRole ikut meloloskan 'staff'. Modul admin lain menutupinya
+     * dengan middleware staff.permission; modul kemitraan satu-satunya yang
+     * tidak, sehingga staf unit mana pun bisa menerbitkan akun admin desa.
+     */
+    private function pastikanPeninjau(): void
+    {
+        abort_unless(
+            in_array(auth()->user()?->role, ['super_admin', 'admin', 'admin_kecamatan', 'admin_desa'], true),
+            403,
+            'Peninjauan kemitraan hanya untuk admin wilayah dan Super Admin.'
+        );
+    }
+
     public function index()
     {
+        $this->pastikanPeninjau();
+
         $user = auth()->user();
-        
+
         // Filter applications based on the admin's region
         if ($user->role === 'super_admin') {
             // Super Admin sees ALL pending applications, especially Kabupaten/Kecamatan
@@ -37,8 +87,10 @@ class PartnerApplicationController extends Controller
 
     public function document($id)
     {
+        $this->pastikanPeninjau();
+
         $application = PartnerApplication::findOrFail($id);
-        
+
         $user = auth()->user();
         if ($user->role !== 'super_admin' && $application->parent_region_id !== $user->region_id) {
             abort(403);
@@ -72,13 +124,58 @@ class PartnerApplicationController extends Controller
 
     public function approve(Request $request, $id)
     {
+        $this->pastikanPeninjau();
+
         $request->validate(['reason' => 'required|string']);
         $application = PartnerApplication::findOrFail($id);
-        
+
         // Security check
         $user = auth()->user();
         if ($user->role !== 'super_admin' && $application->parent_region_id !== $user->region_id) {
             return back()->with('error', 'Anda tidak memiliki akses untuk menyetujui aplikasi ini.');
+        }
+
+        // Role tiap tingkat wilayah. Sebelumnya ada fallback `?? 'admin'`, jadi
+        // tingkat yang tak dikenali justru mendapat role Admin Pusat - kegagalan
+        // yang mengarah ke atas, bukan ke bawah. Sekarang ditolak.
+        $role = self::PETA_ROLE[$application->region_type] ?? null;
+
+        if (! $role) {
+            return back()->with('error', 'Tingkat wilayah "' . $application->region_type . '" tidak dikenali, pengajuan tidak dapat disetujui.');
+        }
+
+        // Hierarki diperiksa ULANG di sini, tidak cukup mengandalkan formulir
+        // pemohon: parent_region_id hanya divalidasi `exists`, sehingga kiriman
+        // POST langsung bisa menaruh desa di bawah RT.
+        $induk = Region::find($application->parent_region_id);
+
+        if (! $induk) {
+            return back()->with('error', 'Wilayah induk pada pengajuan ini sudah tidak ada.');
+        }
+
+        if (! in_array($application->region_type, self::TURUNAN[$induk->type] ?? [], true)) {
+            return back()->with('error', 'Pengajuan tidak sah: '
+                . (self::LABEL_TINGKAT[$application->region_type] ?? $application->region_type)
+                . ' tidak boleh berada di bawah ' . $induk->name . '.');
+        }
+
+        // Menyetujui akan MENIMPA role akun yang emailnya tercantum. Karena
+        // contact_email diisi bebas oleh pemohon, tanpa penjagaan ini pengajuan
+        // desa yang memakai email Super Admin akan menurunkannya jadi admin
+        // desa dan memindahkan wilayahnya - Kominfo terkunci dari sistemnya
+        // sendiri. Hanya akun warga biasa yang boleh diangkat.
+        $existingUser = User::where('email', $application->contact_email)->first();
+
+        if ($existingUser && $existingUser->role !== 'user') {
+            $sudahSesuai = $existingUser->role === $role
+                && (int) $existingUser->region_id === (int) $application->parent_region_id;
+
+            if (! $sudahSesuai) {
+                return back()->with('error',
+                    'Email ' . $application->contact_email . ' sudah dipakai akun dengan hak akses '
+                    . $existingUser->labelRole() . '. Menyetujui pengajuan ini akan mengubah hak akses akun tersebut, '
+                    . 'jadi dihentikan. Minta pemohon memakai email lain, atau ubah akun itu lewat Manajemen Pengguna.');
+            }
         }
 
         // Create or Find Region to prevent duplicates (dengan SANITASI KETAT agar tidak double)
@@ -104,11 +201,20 @@ class PartnerApplicationController extends Controller
         );
 
         // If Desa/Kelurahan, auto-activate services (Penyewaan, Gas, Pelaporan)
-        if ($application->region_type === 'desa') {
-            $services = Service::all();
-            foreach ($services as $service) {
-                $region->services()->attach($service->id, ['is_active' => true]);
-            }
+        //
+        // syncWithoutDetaching, bukan attach: firstOrCreate di atas sering
+        // MENEMUKAN wilayah yang sudah ada (formulir pemohon memilih desa dari
+        // daftar, bukan mengetik nama baru). attach() akan menambah satu baris
+        // pivot lagi untuk tiap layanan yang sudah terdaftar, sehingga
+        // region_services berisi duplikat dan hitungan layanan jadi berlipat.
+        // Layanan yang sudah sengaja dimatikan wilayah juga tidak dinyalakan
+        // paksa - hanya yang belum ada yang ditambahkan.
+        if (in_array($application->region_type, ['desa', 'kelurahan'], true)) {
+            $baru = Service::whereNotIn('id', $region->services()->pluck('services.id'))->pluck('id');
+
+            $region->services()->syncWithoutDetaching(
+                $baru->mapWithKeys(fn ($id) => [$id => ['is_active' => true]])->all()
+            );
         }
 
         // Generate Username and Password
@@ -120,19 +226,9 @@ class PartnerApplicationController extends Controller
             $counter++;
         }
         
-        // Determine Role
-        $roleMap = [
-            'kabupaten' => 'super_admin',
-            'kecamatan' => 'admin_kecamatan',
-            'desa' => 'admin_desa',
-            'rw' => 'admin_rw',
-            'rt' => 'admin_rt',
-        ];
-        $role = $roleMap[$application->region_type] ?? 'admin';
-
-        // Check if user already exists
-        $existingUser = User::where('email', $application->contact_email)->first();
-
+        // $role dan $existingUser sudah ditetapkan & diperiksa di awal method,
+        // sebelum wilayah dibuat - supaya pengajuan yang ditolak tidak sempat
+        // meninggalkan wilayah baru yang tidak terpakai.
         if ($existingUser) {
             // Upgrade existing user
             $existingUser->update([
@@ -202,6 +298,8 @@ class PartnerApplicationController extends Controller
 
     public function reject(Request $request, $id)
     {
+        $this->pastikanPeninjau();
+
         $request->validate(['reason' => 'required|string']);
         $application = PartnerApplication::findOrFail($id);
         

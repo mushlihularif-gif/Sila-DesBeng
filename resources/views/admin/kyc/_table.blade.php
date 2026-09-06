@@ -4,6 +4,7 @@
             <tr>
                 <th>KTP</th>
                 <th>PENGGUNA</th>
+                <th>WILAYAH</th>
                 <th>PENGAJUAN</th>
                 <th>PERBANDINGAN NIK</th>
                 <th>STATUS</th>
@@ -43,12 +44,42 @@
                         <div class="d-flex flex-column">
                             <span class="fw-bold text-dark">{{ $kyc->user->name }}</span>
                             <small class="text-muted">{{ $kyc->user->email ?? $kyc->user->phone }}</small>
+                            {{-- Selfie yang diunggah manual (kamera warga tidak
+                                 berfungsi) tidak melewati uji kedip & menoleh,
+                                 jadi bukti kehidupannya lebih lemah. Peninjau
+                                 perlu tahu supaya bisa memeriksa lebih teliti. --}}
+                            @if(is_array($kyc->face_scan_data) && ($kyc->face_scan_data['mode'] ?? null) === 'manual')
+                                <span class="badge bg-label-warning rounded-pill mt-1 align-self-start" style="font-size: 0.65rem;"
+                                      title="Selfie diunggah manual, tanpa uji kedip &amp; menoleh">
+                                    <i class="bx bx-error-circle"></i> Tanpa uji kehidupan
+                                </span>
+                            @endif
                         </div>
                     </div>
                 </td>
+                {{-- Asal wilayah pemohon. Peninjau di tingkat kecamatan melihat
+                     pengajuan seluruh desa bawahannya, jadi perlu tahu mana yang
+                     warganya sendiri dan mana yang datang dari bawah. --}}
                 <td>
+                    @php $asal = $kyc->user->region; @endphp
+                    @if($asal)
+                        <div class="fw-semibold text-dark">{{ $asal->name }}</div>
+                        @if(isset($wilayahSendiri) && $asal->id == $wilayahSendiri)
+                            <span class="badge bg-label-primary rounded-pill" style="font-size: 0.65rem;">Wilayah Anda</span>
+                        @else
+                            <span class="badge bg-label-secondary rounded-pill" style="font-size: 0.65rem;">Wilayah bawahan</span>
+                        @endif
+                    @else
+                        <span class="badge bg-label-danger rounded-pill" style="font-size: 0.65rem;">Belum berwilayah</span>
+                    @endif
+                </td>
+                <td>
+                    @php $umur = $kyc->created_at->diffInDays(now()); @endphp
                     <div class="fw-semibold text-dark">{{ $kyc->created_at->format('d M Y') }}</div>
                     <small class="text-muted"><i class="bx bx-time-five"></i> {{ $kyc->created_at->format('H:i') }} WIB</small>
+                    @if($kyc->status === 'pending' && $umur >= 3)
+                        <div><small class="text-danger fw-semibold"><i class="bx bx-error-circle"></i> menunggu {{ (int) $umur }} hari</small></div>
+                    @endif
                 </td>
                 <td>
                     @php
@@ -75,7 +106,7 @@
             </tr>
             @empty
             <tr>
-                <td colspan="6" class="text-center py-5 bg-transparent border-0">
+                <td colspan="7" class="text-center py-5 bg-transparent border-0">
                     <div class="bg-white p-4 rounded-circle d-inline-block shadow-sm mb-3 border">
                         <i class="bx bx-folder-open fs-1 text-muted"></i>
                     </div>

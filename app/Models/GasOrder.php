@@ -49,6 +49,8 @@ class GasOrder extends Model
         'delivery_method',
         'payment_method',
         'address',
+        'latitude',
+        'longitude',
         'full_name',
         'email',
         'nomor_kk',

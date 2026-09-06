@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 namespace App\Http\Controllers\Admin;
 
@@ -13,13 +13,86 @@ use Illuminate\Support\Facades\DB;
 
 class KycReviewController extends Controller
 {
+    /**
+     * Meninjau KTP dan foto wajah warga adalah kewenangan pemerintah wilayah.
+     *
+     * Grup rute memakai `role:admin`, dan pseudo-role itu di CheckRole ikut
+     * meloloskan 'staff' - tanpa penjaga ini setiap staf unit (gas, sewa alat)
+     * bisa membuka dan menyetujui berkas identitas warga se-kabupaten.
+     */
+    private function pastikanPeninjau(): void
+    {
+        abort_unless(
+            in_array(auth()->user()?->role, ['super_admin', 'admin', 'admin_kecamatan', 'admin_desa'], true),
+            403,
+            'Peninjauan verifikasi identitas hanya untuk admin wilayah dan Super Admin.'
+        );
+    }
+
+    /**
+     * Wilayah yang pengajuannya boleh ditinjau akun ini.
+     *
+     * Rantainya menurun: admin desa meninjau warganya sendiri, admin kecamatan
+     * ikut melihat seluruh desa di bawahnya (jadi desa yang belum punya admin
+     * atau yang pengajuannya menggantung tetap ada yang mengurus), dan Kominfo
+     * melihat semuanya sebagai jaring terakhir.
+     *
+     * @return array<int>|null null berarti tanpa batas wilayah
+     */
+    private function wilayahDitinjau(): ?array
+    {
+        $admin = Auth::user();
+
+        // Kominfo, dan akun pusat yang memang tidak ditempatkan di wilayah mana pun.
+        if ($admin->role === 'super_admin' || ($admin->role === 'admin' && ! $admin->region_id)) {
+            return null;
+        }
+
+        if (! $admin->region_id) {
+            return [];
+        }
+
+        return array_merge([$admin->region_id], Region::getDescendantIds($admin->region_id));
+    }
+
+    /** Tolak pengajuan milik wilayah di luar jangkauan peninjau. */
+    private function pastikanDalamJangkauan(KycVerification $kyc): void
+    {
+        $wilayah = $this->wilayahDitinjau();
+
+        if ($wilayah === null) {
+            return;
+        }
+
+        abort_unless(
+            in_array($kyc->user?->region_id, $wilayah),
+            403,
+            'Pengajuan ini milik warga wilayah lain.'
+        );
+    }
+
     public function index(Request $request)
     {
-        $all = KycVerification::with('user')->whereNotNull('face_scan_data')->latest()->get();
-        $pending = KycVerification::with('user')->where('status', 'pending')->whereNotNull('face_scan_data')->latest()->get();
-        $approved = KycVerification::with('user')->where('status', 'approved')->whereNotNull('face_scan_data')->latest()->get();
-        $rejected = KycVerification::with('user')->where('status', 'rejected')->whereNotNull('face_scan_data')->latest()->get();
-        
+        $this->pastikanPeninjau();
+
+        $wilayah = $this->wilayahDitinjau();
+
+        // Sebelumnya daftar ini diambil tanpa syarat wilayah sama sekali,
+        // sehingga admin desa mana pun melihat - dan bisa menyetujui - berkas
+        // KTP warga seluruh kabupaten.
+        $dasar = fn () => KycVerification::with('user.region')
+            ->whereNotNull('face_scan_data')
+            ->when($wilayah !== null, fn ($q) => $q->whereHas(
+                'user',
+                fn ($u) => $u->whereIn('region_id', $wilayah)
+            ))
+            ->latest();
+
+        $all      = $dasar()->get();
+        $pending  = $dasar()->where('status', 'pending')->get();
+        $approved = $dasar()->where('status', 'approved')->get();
+        $rejected = $dasar()->where('status', 'rejected')->get();
+
         $counts = [
             'all' => $all->count(),
             'pending' => $pending->count(),
@@ -27,18 +100,35 @@ class KycReviewController extends Controller
             'rejected' => $rejected->count(),
         ];
 
-        return view('admin.kyc.index', compact('all', 'pending', 'approved', 'rejected', 'counts'));
+        // Dipakai tabel untuk menandai mana warga wilayah sendiri dan mana yang
+        // berasal dari wilayah bawahan.
+        $wilayahSendiri = Auth::user()->region_id;
+        $lingkup = $wilayah === null
+            ? 'seluruh kabupaten'
+            : (Region::find($wilayahSendiri)?->name ?? 'wilayah Anda') . ' dan wilayah di bawahnya';
+
+        return view('admin.kyc.index', compact(
+            'all', 'pending', 'approved', 'rejected', 'counts', 'wilayahSendiri', 'lingkup'
+        ));
     }
 
     public function show($id)
     {
-        $kyc = KycVerification::with('user')->findOrFail($id);
+        $this->pastikanPeninjau();
+
+        $kyc = KycVerification::with('user.region')->findOrFail($id);
+        $this->pastikanDalamJangkauan($kyc);
+
         return view('admin.kyc.show', compact('kyc'));
     }
 
     public function approve(Request $request, $id, FonnteService $fonnte)
     {
+        $this->pastikanPeninjau();
+
         $kyc = KycVerification::with('user')->findOrFail($id);
+        $this->pastikanDalamJangkauan($kyc);
+
         $user = $kyc->user;
 
         DB::beginTransaction();
@@ -127,9 +217,13 @@ class KycReviewController extends Controller
 
     public function reject(Request $request, $id, FonnteService $fonnte)
     {
+        $this->pastikanPeninjau();
+
         $request->validate(['admin_notes' => 'required|string']);
 
-        $kyc = KycVerification::findOrFail($id);
+        $kyc = KycVerification::with('user')->findOrFail($id);
+        $this->pastikanDalamJangkauan($kyc);
+
         $user = $kyc->user;
 
         DB::beginTransaction();

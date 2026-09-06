@@ -373,6 +373,44 @@
                             <div class="mb-3">
                                 <small class="text-muted d-block uppercase ls-1 mb-1">Alamat</small>
                                 <p class="fw-medium text-dark mb-0">{{ $request->address ?? $request->delivery_address }}</p>
+
+                                {{-- Titik antar. Nama kolomnya berbeda antar unit:
+                                     pasar_orders memakai delivery_latitude, unit lain
+                                     memakai latitude — jadi keduanya diperiksa.
+                                     Hanya ditampilkan untuk pesanan yang diantar;
+                                     pesanan yang diambil sendiri memang tidak punya. --}}
+                                @php
+                                    $tLat = $request->latitude ?? $request->delivery_latitude ?? null;
+                                    $tLng = $request->longitude ?? $request->delivery_longitude ?? null;
+                                    $diantar = ($request->delivery_method ?? null) === 'antar';
+                                @endphp
+
+                                @if($tLat && $tLng)
+                                    <div class="mt-2">
+                                        <a href="https://www.google.com/maps/search/?api=1&query={{ $tLat }},{{ $tLng }}"
+                                           target="_blank" rel="noopener"
+                                           class="btn btn-sm btn-outline-primary rounded-pill">
+                                            <i class="bx bx-map-pin"></i> Buka Titik Antar di Peta
+                                        </a>
+                                        <div class="small text-muted mt-1">
+                                            {{ number_format((float) $tLat, 6) }}, {{ number_format((float) $tLng, 6) }}
+                                        </div>
+                                    </div>
+
+                                    @if(config('services.google_maps.api_key'))
+                                        <div class="mt-2 rounded-3 border overflow-hidden"
+                                             id="peta-titik-pesanan" style="height: 220px; background:#f5f5f9;"
+                                             data-lat="{{ $tLat }}" data-lng="{{ $tLng }}"></div>
+                                    @endif
+                                @elseif($diantar)
+                                    {{-- Dikatakan terus terang. Pesanan lama dibuat sebelum
+                                         kolom koordinat ada, dan petugas perlu tahu bahwa
+                                         yang kosong itu memang tidak pernah terisi. --}}
+                                    <div class="small text-warning mt-2">
+                                        <i class="bx bx-error-circle"></i>
+                                        Titik antar tidak disertakan pemesan.
+                                    </div>
+                                @endif
                             </div>
 
                             @if($request->notes)
@@ -992,3 +1030,32 @@ if (returnForm) {
         </div>
     </div>
 </div>
+
+@push('scripts')
+{{-- Peta kecil titik antar. Hanya dimuat kalau petanya memang dirender, supaya
+     halaman detail pesanan yang diambil sendiri tidak memanggil Google Maps
+     tanpa keperluan. --}}
+@if(config('services.google_maps.api_key'))
+<script>
+    window.pasangPetaPesanan = function () {
+        const el = document.getElementById('peta-titik-pesanan');
+        if (!el || typeof google === 'undefined' || !google.maps) return;
+
+        const titik = {
+            lat: parseFloat(el.dataset.lat),
+            lng: parseFloat(el.dataset.lng),
+        };
+        if (isNaN(titik.lat) || isNaN(titik.lng)) return;
+
+        const peta = new google.maps.Map(el, {
+            zoom: 17, center: titik, mapTypeId: 'roadmap',
+            streetViewControl: false, mapTypeControl: false,
+            gestureHandling: 'cooperative',
+        });
+        new google.maps.Marker({ position: titik, map: peta, title: 'Titik antar pemesan' });
+    };
+</script>
+<script async defer
+    src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google_maps.api_key') }}&loading=async&callback=pasangPetaPesanan"></script>
+@endif
+@endpush

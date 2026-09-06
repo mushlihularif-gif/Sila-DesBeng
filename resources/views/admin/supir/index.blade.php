@@ -182,7 +182,7 @@
                                 <button type="button" class="btn btn-sm btn-icon btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editSupirModal{{ $supir->id }}">
                                     <i class="bx bx-edit-alt"></i>
                                 </button>
-                                <form action="{{ route('supir.destroy', $supir->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus supir ini?');">
+                                <form action="{{ route('supir.destroy', $supir->id) }}" method="POST" class="d-inline" data-konfirmasi="Apakah Anda yakin ingin menghapus supir ini?">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-sm btn-icon btn-outline-danger">
@@ -248,7 +248,7 @@
                                 <button type="button" class="btn btn-sm btn-icon btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editSupirModal{{ $supir->id }}">
                                     <i class="bx bx-edit-alt"></i>
                                 </button>
-                                <form action="{{ route('supir.destroy', $supir->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus supir ini?');">
+                                <form action="{{ route('supir.destroy', $supir->id) }}" method="POST" class="d-inline" data-konfirmasi="Apakah Anda yakin ingin menghapus supir ini?">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-sm btn-icon btn-outline-danger">

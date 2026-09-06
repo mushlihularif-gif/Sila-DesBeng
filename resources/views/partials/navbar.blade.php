@@ -1,4 +1,4 @@
-﻿{{-- ================================================ --}}
+{{-- ================================================ --}}
 {{-- NAVBAR UTAMA --}}
 {{-- ================================================ --}}
 @push('styles')
@@ -199,15 +199,32 @@
                     <div class="absolute top-full right-0 pt-2 z-[60] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                         <div class="w-56 bg-white rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.1)] border border-gray-200 overflow-hidden">
                             <div class="py-1.5">
-                                @if(auth()->user()->verification_status !== 'verified')
-                                <a href="{{ route('kyc.index') }}" class="block px-4 py-2.5 text-amber-600 hover:bg-amber-50 hover:border-l-[3px] hover:border-l-amber-500 transition-all duration-150 border-l-[3px] border-l-transparent bg-amber-50/50">
+                                {{-- Selalu tampil. Dulu dibungkus @if(!= 'verified'), sehingga
+                                     menunya lenyap begitu warga selesai diverifikasi — padahal
+                                     ia masih perlu melihat statusnya dan kapan disetujui.
+                                     Yang berubah kini hanya warna dan sebutannya. --}}
+                                @php $sudahVerif = auth()->user()->verification_status === 'verified'; @endphp
+                                <a href="{{ route('kyc.index') }}"
+                                   class="block px-4 py-2.5 transition-all duration-150 border-l-[3px] border-l-transparent {{ $sudahVerif ? 'text-green-600 hover:bg-green-50 hover:border-l-green-500' : 'text-amber-600 hover:bg-amber-50 hover:border-l-amber-500 bg-amber-50/50' }}">
                                     <span class="text-[15px] font-medium flex items-center justify-center gap-2 whitespace-nowrap">
                                         <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
-                                        Verifikasi Akun
+                                        {{ $sudahVerif ? 'Status Verifikasi' : 'Verifikasi Akun' }}
+                                    </span>
+                                </a>
+
+                                {{-- Saldo hasil pengembalian dana. --}}
+                                @php $saldoWarga = \App\Support\DompetWarga::saldo(auth()->id()); @endphp
+                                <a href="{{ route('user.saldo.index') }}" class="block px-4 py-2.5 text-gray-800 hover:bg-blue-50 hover:border-l-[3px] hover:border-l-blue-500 transition-all duration-150 border-l-[3px] border-l-transparent">
+                                    <span class="text-[15px] font-normal flex items-center justify-center gap-2 whitespace-nowrap">
+                                        Saldo &amp; Alamat
+                                        @if($saldoWarga > 0)
+                                            <span class="text-[11px] font-bold text-green-700 bg-green-100 rounded-full px-2 py-0.5">
+                                                Rp {{ number_format($saldoWarga, 0, ',', '.') }}
+                                            </span>
+                                        @endif
                                     </span>
                                 </a>
                                 <div class="h-px bg-gray-100 mx-3 my-1"></div>
-                                @endif
                                 <a href="{{ route('profile') }}" class="block px-4 py-2.5 text-gray-800 hover:bg-blue-50 hover:border-l-[3px] hover:border-l-blue-500 transition-all duration-150 border-l-[3px] border-l-transparent">
                                     <span class="text-[15px] font-normal text-center block">Profil</span>
                                 </a>
@@ -417,12 +434,20 @@
                 </div>
             </div>
             <div class="space-y-2">
-                @if(auth()->user()->verification_status !== 'verified')
-                <a href="{{ route('kyc.index') }}" class="block w-full text-center px-4 py-2.5 rounded-lg font-medium bg-amber-100 text-amber-700 hover:bg-amber-200 transition flex items-center justify-center gap-2">
+                {{-- Sama seperti dropdown desktop: selalu tampil, hanya warnanya
+                     yang membedakan sudah atau belum terverifikasi. --}}
+                @php $sudahVerifMobile = auth()->user()->verification_status === 'verified'; @endphp
+                <a href="{{ route('kyc.index') }}" class="block w-full text-center px-4 py-2.5 rounded-lg font-medium transition flex items-center justify-center gap-2 {{ $sudahVerifMobile ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-amber-100 text-amber-700 hover:bg-amber-200' }}">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
-                    Verifikasi Akun
+                    {{ $sudahVerifMobile ? 'Status Verifikasi' : 'Verifikasi Akun' }}
                 </a>
-                @endif
+                @php $saldoWargaMobile = \App\Support\DompetWarga::saldo(auth()->id()); @endphp
+                <a href="{{ route('user.saldo.index') }}" class="block w-full text-center px-4 py-2.5 rounded-lg font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition">
+                    Saldo &amp; Alamat
+                    @if($saldoWargaMobile > 0)
+                        <span class="ml-1 text-xs font-bold text-green-700">Rp {{ number_format($saldoWargaMobile, 0, ',', '.') }}</span>
+                    @endif
+                </a>
                 <a href="{{ route('profile') }}" class="block w-full text-center px-4 py-2.5 rounded-lg font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition">
                     Profil Saya
                 </a>

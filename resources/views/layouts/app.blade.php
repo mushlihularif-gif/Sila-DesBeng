@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="{{ str_replace('_','-',app()->getLocale()) }}">
 <head>
     <meta charset="UTF-8">
@@ -247,6 +247,8 @@
     <script>document.addEventListener('DOMContentLoaded', function(){ showSiladesBengToast('info', 'Informasi', {!! json_encode(session('info')) !!}); });</script>
     @endif
     @include('components.cropper-modal')
+    {{-- Dialog konfirmasi bergaya situs, pengganti window.confirm() --}}
+    @include('partials.dialog-konfirmasi')
 </body>
 </html>
 

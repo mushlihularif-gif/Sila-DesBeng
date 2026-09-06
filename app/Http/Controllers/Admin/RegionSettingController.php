@@ -9,6 +9,24 @@ use App\Models\Service;
 
 class RegionSettingController extends Controller
 {
+    /**
+     * Halaman pembayaran wilayah - rekening bank dan sakelar gateway -
+     * menentukan ke mana uang wilayah mendarat, bukan sekadar operasional unit.
+     * Sidebar sudah menyembunyikannya dari staf, tapi route-nya sendiri hanya
+     * dijaga 'role:admin' pseudo-role yang IKUT meloloskan staff (lihat
+     * CheckRole::handle). Tanpa penjaga ini, staf gas bisa membuka
+     * /pengaturan-pembayaran-wilayah lewat URL langsung dan mengganti rekening
+     * tujuan pencairan - keputusan yang seharusnya hanya milik kepala desa/camat.
+     */
+    private function pastikanAdminWilayah(): void
+    {
+        abort_unless(
+            in_array(auth()->user()?->role, ['admin', 'admin_kecamatan', 'admin_desa', 'super_admin'], true),
+            403,
+            'Halaman ini khusus admin wilayah.'
+        );
+    }
+
     public function index()
     {
         $user = auth()->user();
@@ -149,6 +167,7 @@ class RegionSettingController extends Controller
 
     public function paymentIndex()
     {
+        $this->pastikanAdminWilayah();
         $user = auth()->user();
         $region = Region::find($user->region_id);
         
@@ -164,6 +183,9 @@ class RegionSettingController extends Controller
         $kunciDiWilayah = \App\Support\PenyediaPembayaran::kunciDiisiOlehWilayah();
         $kesiapan   = \App\Support\PenyediaPembayaran::kesiapanWilayah($region->id);
 
+        // Saldo dan pencairannya sudah pindah ke Manajemen → Keuangan
+        // (App\Http\Controllers\Admin\KeuanganController). Halaman ini tinggal
+        // mengurus konfigurasinya saja: rekening tujuan & sakelar gateway.
         return view('admin.region_settings.payment', compact(
             'region', 'penyedia', 'labelPenyedia', 'kunciDiWilayah', 'kesiapan'
         ));
@@ -171,6 +193,7 @@ class RegionSettingController extends Controller
 
     public function paymentUpdate(Request $request)
     {
+        $this->pastikanAdminWilayah();
         $user = auth()->user();
         $region = Region::find($user->region_id);
 
@@ -205,28 +228,18 @@ class RegionSettingController extends Controller
         $paymentInfo['cash_only_active'] = $request->has('cash_only_active');
         $paymentInfo['payment_gateway_active'] = $request->has('payment_gateway_active');
 
-        // Kunci gateway hanya disimpan kalau penyedia aktif memang menuntut tiap
-        // wilayah punya akun sendiri (Midtrans). Saat Xendit yang aktif, kunci
-        // milik platform dan wilayah tidak perlu — kalau ada sisa dari sebelumnya,
-        // dibuang supaya tidak ada rahasia menganggur di database.
-        if (\App\Support\PenyediaPembayaran::kunciDiisiOlehWilayah()) {
-            foreach (['midtrans_server_key', 'midtrans_client_key'] as $kunci) {
-                // Kosongkan field = pertahankan yang tersimpan, supaya admin tidak
-                // perlu mengetik ulang kunci panjang tiap kali menyimpan halaman.
-                if ($request->filled($kunci)) {
-                    $paymentInfo[$kunci] = trim($request->input($kunci));
-                }
-            }
-
-            // Lingkungan disimpan bersama kuncinya, bukan di panel platform.
-            $paymentInfo['midtrans_is_production'] = $request->has('midtrans_is_production');
-        } else {
-            unset(
-                $paymentInfo['midtrans_server_key'],
-                $paymentInfo['midtrans_client_key'],
-                $paymentInfo['midtrans_is_production'],
-            );
-        }
+        // Midtrans dan Xendit sama-sama kredensial platform sekarang (satu akun
+        // Diskominfotik untuk semua wilayah) — form ini tidak lagi menawarkan
+        // kolom kunci apa pun. Baris ini hanya membuang sisa kunci per-wilayah
+        // dari masa sebelum sentralisasi, supaya tidak ada rahasia menganggur
+        // di payment_info. PenyediaPembayaran::kunciDiisiOlehWilayah() tersisa
+        // sebagai satu tempat keputusan kalau nanti ada penyedia yang kembali
+        // menuntut kunci per wilayah.
+        unset(
+            $paymentInfo['midtrans_server_key'],
+            $paymentInfo['midtrans_client_key'],
+            $paymentInfo['midtrans_is_production'],
+        );
 
         $region->update([
             'payment_info' => $paymentInfo,

@@ -20,15 +20,34 @@ class KycController extends Controller
     public function index()
     {
         $user = Auth::user();
+
+        // Warga yang sudah terverifikasi dulu dilempar balik ke beranda, sehingga
+        // halaman ini lenyap begitu prosesnya selesai — bersama menunya di
+        // dropdown profil. Padahal setelah terverifikasi pun warga masih perlu
+        // melihat statusnya, kapan disetujui, dan data apa yang tersimpan.
         if ($user->verification_status === 'verified') {
-            return redirect()->route('beranda')->with('info', 'Akun Anda sudah diverifikasi.');
+            return view('kyc.selesai', [
+                'kyc' => \App\Models\KycVerification::where('user_id', $user->id)
+                    ->where('status', 'approved')
+                    ->latest()
+                    ->first(),
+            ]);
         }
 
         if ($user->verification_status === 'pending') {
             return view('kyc.pending');
         }
 
-        return view('kyc.index');
+        // Ditolak: warga perlu tahu alasannya sebelum mengulang, bukan langsung
+        // disodori formulir unggah lagi tanpa penjelasan.
+        $penolakan = $user->verification_status === 'rejected'
+            ? \App\Models\KycVerification::where('user_id', $user->id)
+                ->where('status', 'rejected')
+                ->latest()
+                ->first()
+            : null;
+
+        return view('kyc.index', compact('penolakan'));
     }
 
     public function process(Request $request)

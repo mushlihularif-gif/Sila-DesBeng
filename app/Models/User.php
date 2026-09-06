@@ -120,6 +120,12 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            // Waktu KYC disetujui. Tanpa cast ini nilainya kembali sebagai string
+            // mentah, sehingga pemanggilan ->format()/->translatedFormat() di view
+            // gagal dengan "Call to a member function ... on string" — dan hanya
+            // pada akun yang memang sudah terverifikasi, karena akun yang belum
+            // bernilai null dan diam saja.
+            'verified_at' => 'datetime',
             'otp_expires_at' => 'datetime',    // ✅ TAMBAH INI
             'reset_token_expires_at' => 'datetime', // ✅ TAMBAH INI
             'password' => 'hashed',
@@ -234,6 +240,7 @@ class User extends Authenticatable
     public const IZIN_PLATFORM_GRUP = [
         'Sistem Platform' => [
             'platform_integrasi'  => ['Integrasi Payment Gateway', 'bx-plug'],
+            'platform_penarikan'  => ['Persetujuan Penarikan Saldo', 'bx-money-withdraw'],
             'platform_monitoring' => ['Monitoring Transaksi', 'bx-line-chart'],
             'platform_keamanan'   => ['Log Keamanan & Audit', 'bx-shield-quarter'],
             'platform_biaya'      => ['Biaya Server & Domain', 'bx-server'],
