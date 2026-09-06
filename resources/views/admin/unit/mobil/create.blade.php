@@ -54,7 +54,7 @@
                             
                             
                             <!-- STEPS NAVIGATION -->
-                            <ul class="nav nav-pills nav-fill mb-4 wizard-steps flex-column flex-sm-row gap-2" id="formWizard" role="tablist">
+                            <ul class="nav nav-pills nav-justified flex-nowrap mb-4 wizard-steps gap-1 gap-sm-2" id="formWizard" role="tablist">
                                 <li class="nav-item" role="presentation">
                                     <button class="nav-link active" id="step1-tab" data-bs-toggle="pill" data-bs-target="#step1" type="button" role="tab" aria-controls="step1" aria-selected="true">
                                         <span class="step-icon"><i class='bx bx-info-circle'></i></span>
@@ -89,19 +89,19 @@
                                 <h6 class="section-title mb-3">
                                     <i class='bx bx-image me-2'></i>Foto Produk
                                 </h6>
-                                <div class="row g-3">
+                                <div class="row g-2 g-sm-3">
                                     <!-- Foto Utama -->
-                                    <div class="col-md-4">
+                                    <div class="col-6 col-md-4">
                                         <label class="form-label fw-semibold" for="foto">Foto Utama</label>
                                         <div class="upload-box" onclick="document.getElementById('foto').click()">
                                             <div id="preview_foto" class="preview-container" style="display:none;">
                                                 <img src="#" alt="Preview" class="preview-image" />
                                                 <button type="button" class="btn-remove-image" onclick="event.stopPropagation(); clearFile('foto', 'preview_foto')">
-                                                    <span style="font-size: 24px; font-weight: bold; line-height: 1; color: white;">&times;</span>
+                                                    <span style="font-size: 20px; font-weight: bold; line-height: 1; color: white;">&times;</span>
                                                 </button>
                                             </div>
                                             <div id="placeholder_foto" class="upload-placeholder">
-                                                <i class='bx bx-cloud-upload' style="font-size: 48px;"></i>
+                                                <i class='bx bx-cloud-upload' style="font-size: 40px;"></i>
                                                 <p class="mb-0 mt-2">Klik untuk upload</p>
                                                 <small class="text-muted">JPG, PNG (Max 8MB)</small>
                                             </div>
@@ -111,17 +111,17 @@
                                     </div>
 
                                     <!-- Foto Tambahan 1 -->
-                                    <div class="col-md-4">
+                                    <div class="col-6 col-md-4">
                                         <label class="form-label fw-semibold" for="foto_2">Foto Tambahan 1</label>
                                         <div class="upload-box" onclick="document.getElementById('foto_2').click()">
                                             <div id="preview_foto_2" class="preview-container" style="display:none;">
                                                 <img src="#" alt="Preview" class="preview-image" />
                                                 <button type="button" class="btn-remove-image" onclick="event.stopPropagation(); clearFile('foto_2', 'preview_foto_2')">
-                                                    <span style="font-size: 24px; font-weight: bold; line-height: 1; color: white;">&times;</span>
+                                                    <span style="font-size: 20px; font-weight: bold; line-height: 1; color: white;">&times;</span>
                                                 </button>
                                             </div>
                                             <div id="placeholder_foto_2" class="upload-placeholder">
-                                                <i class='bx bx-cloud-upload' style="font-size: 48px;"></i>
+                                                <i class='bx bx-cloud-upload' style="font-size: 40px;"></i>
                                                 <p class="mb-0 mt-2">Klik untuk upload</p>
                                                 <small class="text-muted">JPG, PNG (Max 8MB)</small>
                                             </div>
@@ -131,17 +131,17 @@
                                     </div>
 
                                     <!-- Foto Tambahan 2 -->
-                                    <div class="col-md-4">
+                                    <div class="col-6 col-md-4">
                                         <label class="form-label fw-semibold" for="foto_3">Foto Tambahan 2</label>
                                         <div class="upload-box" onclick="document.getElementById('foto_3').click()">
                                             <div id="preview_foto_3" class="preview-container" style="display:none;">
                                                 <img src="#" alt="Preview" class="preview-image" />
                                                 <button type="button" class="btn-remove-image" onclick="event.stopPropagation(); clearFile('foto_3', 'preview_foto_3')">
-                                                    <span style="font-size: 24px; font-weight: bold; line-height: 1; color: white;">&times;</span>
+                                                    <span style="font-size: 20px; font-weight: bold; line-height: 1; color: white;">&times;</span>
                                                 </button>
                                             </div>
                                             <div id="placeholder_foto_3" class="upload-placeholder">
-                                                <i class='bx bx-cloud-upload' style="font-size: 48px;"></i>
+                                                <i class='bx bx-cloud-upload' style="font-size: 40px;"></i>
                                                 <p class="mb-0 mt-2">Klik untuk upload</p>
                                                 <small class="text-muted">JPG, PNG (Max 8MB)</small>
                                             </div>
@@ -222,8 +222,8 @@
                             </div>
 
                             
-                                    <div class="d-flex justify-content-end mt-4">
-                                        <button type="button" class="btn btn-primary" onclick="nextStep('step2-tab')">Selanjutnya <i class='bx bx-right-arrow-alt'></i></button>
+                                    <div class="d-flex justify-content-end mt-4 pt-3 border-top">
+                                        <button type="button" class="btn btn-primary flex-grow-1 flex-sm-grow-0" onclick="nextStep('step2-tab')">Selanjutnya <i class='bx bx-right-arrow-alt ms-1'></i></button>
                                     </div>
                                 </div>
                                 
@@ -232,10 +232,13 @@
 
                             <!-- Section: Pengaturan Sewa Harian -->
                             <div class="form-section mb-4">
-                                <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
-                                    <h6 class="section-title mb-0 mt-1">
-                                        <i class='bx bx-car me-2'></i><span class="badge bg-primary me-2">SEWA HARIAN</span> Pengaturan Sewa Harian
-                                    </h6>
+                                <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-3 gap-2">
+                                    <div>
+                                        <span class="badge bg-primary mb-1">SEWA HARIAN</span>
+                                        <h6 class="section-title mb-0">
+                                            <i class='bx bx-car me-1'></i>Pengaturan Sewa Harian
+                                        </h6>
+                                    </div>
                                     <div class="bg-white p-2 px-3 rounded shadow-sm border d-flex align-items-center mb-0">
                                         <div class="form-check form-switch fs-4 mb-0">
                                             <input class="form-check-input cursor-pointer mt-1" style="margin-left: -2em;" type="checkbox" name="is_harian_active" id="is_harian_active" checked onchange="toggleLayanan('harian')">
@@ -409,9 +412,9 @@
                                 <input type="hidden" name="bbm_ditanggung" id="bbm_ditanggung" value="Penyewa" required>
                             </div>
 
-                                    <div class="d-flex justify-content-between mt-4">
-                                        <button type="button" class="btn btn-secondary" onclick="prevStep('step1-tab')"><i class='bx bx-left-arrow-alt'></i> Sebelumnya</button>
-                                        <button type="button" class="btn btn-primary" onclick="nextStep('step3-tab')">Selanjutnya <i class='bx bx-right-arrow-alt'></i></button>
+                                    <div class="d-flex justify-content-between gap-2 mt-4 pt-3 border-top">
+                                        <button type="button" class="btn btn-secondary flex-grow-1 flex-sm-grow-0" onclick="prevStep('step1-tab')"><i class='bx bx-left-arrow-alt me-1'></i> Sebelumnya</button>
+                                        <button type="button" class="btn btn-primary flex-grow-1 flex-sm-grow-0" onclick="nextStep('step3-tab')">Selanjutnya <i class='bx bx-right-arrow-alt ms-1'></i></button>
                                     </div>
                                 </div>
                                 </div> <!-- End Step 2: Sewa Harian -->
@@ -420,10 +423,13 @@
                                 <div class="tab-pane fade" id="step3" role="tabpanel" aria-labelledby="step3-tab">
 
                                     <div class="form-section mb-4">
-                                        <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
-                                            <h6 class="section-title mb-0 mt-1">
-                                                <i class='bx bx-money me-2'></i><span class="badge bg-success me-2">SEWA BORONGAN (DROP OFF)</span> Pengaturan Tarif Wilayah
-                                            </h6>
+                                        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-3 gap-2">
+                                            <div>
+                                                <span class="badge bg-success mb-1">SEWA BORONGAN (DROP OFF)</span>
+                                                <h6 class="section-title mb-0">
+                                                    <i class='bx bx-money me-1'></i>Pengaturan Tarif Wilayah
+                                                </h6>
+                                            </div>
                                             <div class="bg-white p-2 px-3 rounded shadow-sm border d-flex align-items-center mb-0">
                                                 <div class="form-check form-switch fs-4 mb-0">
                                                     <input class="form-check-input cursor-pointer mt-1" style="margin-left: -2em;" type="checkbox" name="is_borongan_active" id="is_borongan_active" checked onchange="toggleLayanan('borongan')">
@@ -686,9 +692,9 @@
                                             </div> <!-- End form-section supir & bbm --> <!-- End form-section supir & bbm -->
                                         </div> <!-- End borongan_content_wrapper -->
 
-                                        <div class="d-flex justify-content-between mt-4">
-                                            <button type="button" class="btn btn-secondary" onclick="prevStep('step2-tab')"><i class='bx bx-left-arrow-alt'></i> Sebelumnya</button>
-                                            <button type="button" class="btn btn-primary" onclick="nextStep('step4-tab')">Selanjutnya <i class='bx bx-right-arrow-alt'></i></button>
+                                        <div class="d-flex justify-content-between gap-2 mt-4 pt-3 border-top">
+                                            <button type="button" class="btn btn-secondary flex-grow-1 flex-sm-grow-0" onclick="prevStep('step2-tab')"><i class='bx bx-left-arrow-alt me-1'></i> Sebelumnya</button>
+                                            <button type="button" class="btn btn-primary flex-grow-1 flex-sm-grow-0" onclick="nextStep('step4-tab')">Selanjutnya <i class='bx bx-right-arrow-alt ms-1'></i></button>
                                         </div>
                                     </div> <!-- End form-section mb-4 -->
                                 </div> <!-- End Step 3: Sewa Borongan -->
@@ -714,7 +720,7 @@
                                             </div>
                                             <div class="col-md-12 mt-3">
                                                 <label class="form-label fw-semibold">Pilih Metode Lokasi <span class="text-danger">*</span></label>
-                                                <div class="d-flex gap-3 mb-3">
+                                                <div class="d-flex flex-column flex-sm-row gap-2 gap-sm-3 mb-3">
                                                     @if($savedLocations->count() > 0)
                                                     <div class="form-check">
                                                         <input class="form-check-input" type="radio" name="lokasi_mode" id="mode_saved" value="saved" onchange="toggleLokasiMode(this.value)">
@@ -758,11 +764,11 @@
                                         </div>
                                     </div>
 
-                                    <div class="d-flex justify-content-between mt-4">
-                                        <button type="button" class="btn btn-secondary" onclick="prevStep('step3-tab')"><i class='bx bx-left-arrow-alt'></i> Sebelumnya</button>
-                                        <div>
-                                            <a href="{{ route('admin.unit.mobil.index') }}" class="btn btn-light me-2 border">Batal</a>
-                                            <button type="submit" class="btn btn-success"><i class='bx bx-save'></i> Simpan Data</button>
+                                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-stretch align-items-sm-center gap-2 mt-4 pt-3 border-top">
+                                        <button type="button" class="btn btn-secondary" onclick="prevStep('step3-tab')"><i class='bx bx-left-arrow-alt me-1'></i> Sebelumnya</button>
+                                        <div class="d-flex gap-2">
+                                            <a href="{{ route('admin.unit.mobil.index') }}" class="btn btn-light border flex-grow-1 flex-sm-grow-0 text-center">Batal</a>
+                                            <button type="submit" class="btn btn-success flex-grow-1 flex-sm-grow-0"><i class='bx bx-save me-1'></i> Simpan Data</button>
                                         </div>
                                     </div>
                                 </div> <!-- End Step 4 -->
@@ -1054,10 +1060,10 @@
 
         .btn-remove-image {
             position: absolute;
-            top: -10px;
-            right: -10px;
-            width: 32px;
-            height: 32px;
+            top: 6px;
+            right: 6px;
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
             background: #dc3545;
             color: white;
@@ -1068,11 +1074,54 @@
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+            z-index: 5;
         }
 
         .btn-remove-image:hover {
             background: #bb2d3b;
             transform: scale(1.1);
+        }
+
+        /* Mobile Optimization */
+        @media (max-width: 767.98px) {
+            .form-section {
+                padding: 16px 12px !important;
+                margin-bottom: 1rem !important;
+            }
+            .upload-box {
+                padding: 10px 4px !important;
+                border-radius: 8px !important;
+            }
+            .upload-placeholder i {
+                font-size: 26px !important;
+            }
+            .upload-placeholder p {
+                font-size: 11px !important;
+                margin-top: 4px !important;
+                line-height: 1.2 !important;
+            }
+            .upload-placeholder small {
+                font-size: 9px !important;
+                display: block !important;
+            }
+            .btn-remove-image {
+                width: 24px !important;
+                height: 24px !important;
+                top: 4px !important;
+                right: 4px !important;
+            }
+            .btn-remove-image span {
+                font-size: 16px !important;
+            }
+        }
+
+        @media (max-width: 575.98px) {
+            .card-body.p-4 {
+                padding: 1rem !important;
+            }
+            .wizard-steps .nav-link {
+                padding: 0.5rem 0.25rem !important;
+            }
         }
 
         /* Modern Alert */
@@ -1114,10 +1163,17 @@
         font-weight: 500;
         padding: 0.75rem 1rem;
         transition: all 0.2s ease;
+        background-color: #f8f9fa;
+        border: 1px solid #e9ecef;
+    }
+    .wizard-steps .nav-link:hover {
+        background-color: #e9ecef;
+        color: #495057;
     }
     .wizard-steps .nav-link.active {
         background-color: #0d6efd;
         color: white;
+        border-color: #0d6efd;
         box-shadow: 0 4px 6px rgba(13, 110, 253, 0.2);
     }
     .step-icon {

@@ -13,12 +13,20 @@
     }
     .filter-btn {
         border-radius: 50rem;
-        padding: 0.6rem 1.2rem;
+        padding: 0.45rem 0.9rem;
+        font-size: 0.85rem;
         font-weight: 600;
         transition: all 0.2s;
         border: 1px solid transparent;
         text-decoration: none;
         background: transparent;
+        white-space: nowrap;
+    }
+    @media (min-width: 768px) {
+        .filter-btn {
+            padding: 0.6rem 1.2rem;
+            font-size: 0.9375rem;
+        }
     }
     .filter-btn-secondary.active {
         background-color: #697a8d !important;
@@ -107,83 +115,83 @@
 
     @if(!isset($isArchive) || !$isArchive)
     <!-- Statistik -->
-    <div class="row g-3 mb-4 row-cols-2 row-cols-md-3 row-cols-lg-6">
+    <div class="row g-2 g-md-3 mb-4 row-cols-2 row-cols-md-3 row-cols-lg-6">
         <!-- Total Laporan -->
         <div class="col">
             <div class="card border-0 shadow-sm h-100 rounded-4">
-                <div class="card-body p-3 d-flex flex-column align-items-center justify-content-center text-center">
+                <div class="card-body p-2 p-md-3 d-flex flex-column align-items-center justify-content-center text-center">
                     <div class="avatar avatar-md bg-secondary-subtle text-secondary rounded-circle p-2 mb-2">
                         <i class="bx bx-folder fs-3"></i>
                     </div>
-                    <small class="text-muted text-uppercase fw-bold ls-1 mb-1" style="font-size: 0.65rem;">Total Laporan</small>
-                    <h3 class="fw-bold mb-0 text-dark">{{ number_format($stats['total']) }}</h3>
+                    <small class="text-muted text-uppercase fw-bold ls-1 mb-1 text-truncate w-100" style="font-size: 0.65rem;">Total Laporan</small>
+                    <h4 class="fw-bold mb-0 text-dark">{{ number_format($stats['total']) }}</h4>
                 </div>
             </div>
         </div>
         <!-- Pending -->
         <div class="col">
             <div class="card border-0 shadow-sm h-100 rounded-4">
-                <div class="card-body p-3 d-flex flex-column align-items-center justify-content-center text-center">
+                <div class="card-body p-2 p-md-3 d-flex flex-column align-items-center justify-content-center text-center">
                     <div class="avatar avatar-md bg-warning-subtle text-warning rounded-circle p-2 mb-2">
                         <i class="bx bx-time fs-3"></i>
                     </div>
-                    <small class="text-muted text-uppercase fw-bold ls-1 mb-1" style="font-size: 0.65rem;">Pending</small>
-                    <h3 class="fw-bold mb-0 text-dark">{{ number_format($stats['pending']) }}</h3>
+                    <small class="text-muted text-uppercase fw-bold ls-1 mb-1 text-truncate w-100" style="font-size: 0.65rem;">Pending</small>
+                    <h4 class="fw-bold mb-0 text-dark">{{ number_format($stats['pending']) }}</h4>
                 </div>
             </div>
         </div>
         <!-- Proses -->
         <div class="col">
             <div class="card border-0 shadow-sm h-100 rounded-4">
-                <div class="card-body p-3 d-flex flex-column align-items-center justify-content-center text-center">
+                <div class="card-body p-2 p-md-3 d-flex flex-column align-items-center justify-content-center text-center">
                     <div class="avatar avatar-md bg-info-subtle text-info rounded-circle p-2 mb-2">
                         <i class="bx bx-cog fs-3"></i>
                     </div>
-                    <small class="text-muted text-uppercase fw-bold ls-1 mb-1" style="font-size: 0.65rem;">Sedang Proses</small>
-                    <h3 class="fw-bold mb-0 text-dark">{{ number_format($stats['proses']) }}</h3>
+                    <small class="text-muted text-uppercase fw-bold ls-1 mb-1 text-truncate w-100" style="font-size: 0.65rem;">Sedang Proses</small>
+                    <h4 class="fw-bold mb-0 text-dark">{{ number_format($stats['proses']) }}</h4>
                 </div>
             </div>
         </div>
         <!-- Dilanjutkan -->
         <div class="col">
             <div class="card border-0 shadow-sm h-100 rounded-4">
-                <div class="card-body p-3 d-flex flex-column align-items-center justify-content-center text-center">
+                <div class="card-body p-2 p-md-3 d-flex flex-column align-items-center justify-content-center text-center">
                     <div class="avatar avatar-md bg-primary-subtle text-primary rounded-circle p-2 mb-2">
                         <i class="bx bx-right-arrow-alt fs-3"></i>
                     </div>
-                    <small class="text-muted text-uppercase fw-bold ls-1 mb-1" style="font-size: 0.65rem;">Eskalasi</small>
-                    <h3 class="fw-bold mb-0 text-dark">{{ number_format($stats['dilanjutkan']) }}</h3>
+                    <small class="text-muted text-uppercase fw-bold ls-1 mb-1 text-truncate w-100" style="font-size: 0.65rem;">Eskalasi</small>
+                    <h4 class="fw-bold mb-0 text-dark">{{ number_format($stats['dilanjutkan']) }}</h4>
                 </div>
             </div>
         </div>
         <!-- Selesai -->
         <div class="col">
             <div class="card border-0 shadow-sm h-100 rounded-4">
-                <div class="card-body p-3 d-flex flex-column align-items-center justify-content-center text-center">
+                <div class="card-body p-2 p-md-3 d-flex flex-column align-items-center justify-content-center text-center">
                     <div class="avatar avatar-md bg-success-subtle text-success rounded-circle p-2 mb-2">
                         <i class="bx bx-check-circle fs-3"></i>
                     </div>
-                    <small class="text-muted text-uppercase fw-bold ls-1 mb-1" style="font-size: 0.65rem;">Selesai</small>
-                    <h3 class="fw-bold mb-0 text-dark">{{ number_format($stats['selesai']) }}</h3>
+                    <small class="text-muted text-uppercase fw-bold ls-1 mb-1 text-truncate w-100" style="font-size: 0.65rem;">Selesai</small>
+                    <h4 class="fw-bold mb-0 text-dark">{{ number_format($stats['selesai']) }}</h4>
                 </div>
             </div>
         </div>
         <!-- SLA Terlewat -->
         <div class="col">
             <div class="card border-0 shadow-sm h-100 rounded-4">
-                <div class="card-body p-3 d-flex flex-column align-items-center justify-content-center text-center">
+                <div class="card-body p-2 p-md-3 d-flex flex-column align-items-center justify-content-center text-center">
                     <div class="avatar avatar-md bg-danger-subtle text-danger rounded-circle p-2 mb-2">
                         <i class="bx bx-error fs-3"></i>
                     </div>
-                    <small class="text-muted text-uppercase fw-bold ls-1 mb-1" style="font-size: 0.65rem;">SLA Terlewat</small>
-                    <h3 class="fw-bold mb-0 text-danger">{{ number_format($stats['overdue']) }}</h3>
+                    <small class="text-muted text-uppercase fw-bold ls-1 mb-1 text-truncate w-100" style="font-size: 0.65rem;">SLA Terlewat</small>
+                    <h4 class="fw-bold mb-0 text-danger">{{ number_format($stats['overdue']) }}</h4>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Filter Buttons (Pills) -->
-    <ul class="nav nav-pills mb-4 d-flex flex-nowrap overflow-auto gap-2 pb-2" style="scrollbar-width: thin;">
+    <ul class="nav nav-pills mb-4 d-flex flex-wrap gap-2">
         <li class="nav-item">
             <button type="button" class="nav-link filter-btn filter-status-btn filter-btn-secondary {{ !request('status') ? 'active' : '' }}" data-status-filter="all">
                 <i class="bx bx-list-ul me-1"></i> Semua
@@ -219,28 +227,22 @@
 
     <!-- Filter Form & Table -->
     <div class="card border-0 shadow-sm rounded-4">
-        <div class="card-header bg-white border-bottom p-4">
-            <form action="{{ route('admin.pelaporan.index') }}" method="GET" class="row g-3 align-items-center">
-                @if(isset($isArchive) && $isArchive)
-                    <input type="hidden" name="status" value="Selesai">
-                @else
-                    @if(request('status'))
-                        <input type="hidden" name="status" value="{{ request('status') }}">
-                    @endif
-                @endif
+        <div class="card-header bg-white border-bottom p-3 p-md-4">
+            <form id="filter-form" action="{{ isset($isArchive) && $isArchive ? route('admin.pelaporan.archive') : route('admin.pelaporan.index') }}" method="GET" class="row g-3 align-items-center">
+                <input type="hidden" name="status" id="filter-status" value="{{ request('status') }}">
 
                 <div class="col-12 col-md-5">
                     <div class="input-group input-group-merge shadow-sm" style="border-radius: 8px; overflow: hidden; border: 1px solid #d9dee3;">
                         <span class="input-group-text bg-white border-0"><i class="bx bx-search text-muted"></i></span>
-                        <input type="text" name="search" class="form-control bg-white border-0 ps-0 shadow-none" placeholder="Cari nama pelapor atau deskripsi keluhan..." value="{{ request('search') }}">
+                        <input type="text" name="search" id="filter-search" class="form-control bg-white border-0 ps-0 shadow-none" placeholder="Cari nama pelapor atau deskripsi keluhan..." value="{{ request('search') }}">
                     </div>
                 </div>
                 
                 <div class="col-12 col-md-4">
                     <div class="input-group input-group-merge shadow-sm" style="border-radius: 8px; overflow: hidden; border: 1px solid #d9dee3;">
                         <span class="input-group-text bg-white border-0"><i class="bx bx-category text-muted"></i></span>
-                        <select name="kategori" class="form-select bg-white border-0 text-capitalize shadow-none" {{ $kategoriList->isEmpty() ? 'disabled' : '' }}>
-                            <option value="">{{ $kategoriList->isEmpty() ? 'Belum Ada Kategori' : 'Semua Kategori Keluhan' }}</option>
+                        <select name="kategori" id="filter-kategori" class="form-select bg-white border-0 text-capitalize shadow-none">
+                            <option value="">Semua Kategori Keluhan</option>
                             @foreach($kategoriList as $kat)
                                 <option value="{{ $kat }}" {{ request('kategori') == $kat ? 'selected' : '' }}>{{ $kat }}</option>
                             @endforeach
@@ -251,107 +253,14 @@
                 <div class="col-12 col-md-3">
                     <div class="d-flex gap-2 w-100">
                         <button type="submit" class="btn btn-primary shadow-sm flex-grow-1" style="border-radius: 8px;"><i class="bx bx-filter-alt me-2"></i>Filter Data</button>
-                        <a href="{{ isset($isArchive) && $isArchive ? route('admin.pelaporan.archive') : route('admin.pelaporan.index') }}" class="btn btn-light shadow-sm border px-3" style="border-radius: 8px;" title="Reset Filter"><i class="bx bx-reset text-secondary"></i></a>
+                        <button type="button" id="btn-reset-filter" class="btn btn-light shadow-sm border px-3" style="border-radius: 8px;" title="Reset Filter"><i class="bx bx-reset text-secondary"></i></button>
                     </div>
                 </div>
             </form>
         </div>
 
-        <div class="card-body p-0">
-            <div class="table-responsive px-4 pb-4">
-                <table class="table table-modern table-hover w-100">
-                    <thead class="bg-transparent text-uppercase small text-muted">
-                        <tr>
-                            <th class="border-bottom pb-3">Pelapor</th>
-                            <th class="border-bottom pb-3">Kategori</th>
-                            <th class="border-bottom pb-3">Lokasi</th>
-                            <th class="border-bottom pb-3">Tingkat Penanganan</th>
-                            <th class="border-bottom pb-3">Status</th>
-                            <th class="border-bottom pb-3 text-end">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($laporans as $laporan)
-                        <tr data-status="{{ $laporan->status }}" class="pelaporan-row">
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    <div class="avatar avatar-sm me-3">
-                                        <span class="avatar-initial rounded-circle bg-label-primary">{{ substr($laporan->user->name ?? 'A', 0, 1) }}</span>
-                                    </div>
-                                    <div>
-                                        <h6 class="mb-0 text-dark fw-semibold">{{ $laporan->nama }}</h6>
-                                        <small class="text-muted">{{ $laporan->created_at->diffForHumans() }}</small>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <span class="badge bg-label-dark">{{ $laporan->kategori }}</span>
-                            </td>
-                            <td>
-                                <div class="text-truncate" style="max-width: 200px;" title="{{ $laporan->lokasi }}">
-                                    <i class="bx bx-map text-danger me-1"></i>{{ $laporan->lokasi }}
-                                </div>
-                            </td>
-                            <td>
-                                <span class="badge bg-label-secondary text-capitalize">
-                                    <i class="bx bx-building-house me-1"></i>{{ $laporan->escalation_level }}
-                                </span>
-                            </td>
-                            <td>
-                                @if($laporan->status === 'Pending')
-                                    <span class="badge bg-label-warning">Pending</span>
-                                @elseif($laporan->status === 'Proses')
-                                    <span class="badge bg-label-info">Proses</span>
-                                @elseif($laporan->status === 'Dilanjutkan')
-                                    <span class="badge bg-label-primary">Dilanjutkan</span>
-                                @elseif($laporan->status === 'Selesai')
-                                    <span class="badge bg-label-success">Selesai</span>
-                                @elseif($laporan->status === 'Ditolak')
-                                    <span class="badge bg-label-danger">Ditolak</span>
-                                @endif
-                                
-                                @if($laporan->isOverdue())
-                                    <i class="bx bx-error text-danger ms-1" title="SLA Terlewat"></i>
-                                @endif
-                            </td>
-                            <td class="text-end">
-                                <a href="{{ route('admin.pelaporan.show', $laporan->id) }}" class="btn btn-sm btn-label-primary rounded-pill px-3">
-                                    <i class="bx bx-show me-1"></i> Detail
-                                </a>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="6" class="p-0 border-0">
-                                <div class="text-center py-5 my-4" style="background: rgba(105, 122, 141, 0.02); border-radius: 12px; border: 2px dashed rgba(105, 122, 141, 0.1);">
-                                    <div class="d-inline-flex align-items-center justify-content-center bg-white shadow-sm rounded-circle mb-4" style="width: 100px; height: 100px;">
-                                        <i class="bx bx-folder-open text-primary" style="font-size: 3.5rem;"></i>
-                                    </div>
-                                    <h5 class="fw-bold text-dark mb-2">Belum Ada Data Laporan</h5>
-                                    <p class="text-muted mb-0 mx-auto" style="max-width: 400px; line-height: 1.6;">
-                                        @if(request('search') || request('kategori') || request('status'))
-                                            Tidak ada laporan yang sesuai dengan filter atau kata kunci pencarian Anda. Silakan coba atur ulang filter.
-                                        @else
-                                            Saat ini belum ada keluhan atau pelaporan warga yang masuk ke dalam sistem. Laporan yang diajukan warga akan otomatis muncul di sini.
-                                        @endif
-                                    </p>
-                                    @if(request('search') || request('kategori') || request('status'))
-                                        <a href="{{ isset($isArchive) && $isArchive ? route('admin.pelaporan.archive') : route('admin.pelaporan.index') }}" class="btn btn-label-primary mt-4 rounded-pill px-4 shadow-sm">
-                                            <i class="bx bx-reset me-2"></i>Reset Pencarian
-                                        </a>
-                                    @endif
-                                </div>
-                            </td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Pagination -->
-            <div class="px-4 py-3 border-top">
-                {{ $laporans->links() }}
-            </div>
+        <div id="table-container" class="card-body p-0 position-relative" style="transition: opacity 0.2s ease;">
+            @include('admin.pelaporan.partials.table')
         </div>
     </div>
 </div>
@@ -360,46 +269,184 @@
 @section('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Client-side status filtering logic
-        const statusFilters = document.querySelectorAll('.filter-status-btn');
-        statusFilters.forEach(btn => {
+        const tableContainer = document.getElementById('table-container');
+        const filterForm = document.getElementById('filter-form');
+        const searchInput = document.getElementById('filter-search');
+        const kategoriSelect = document.getElementById('filter-kategori');
+        const statusInput = document.getElementById('filter-status');
+        const statusButtons = document.querySelectorAll('.filter-status-btn');
+        const resetBtn = document.getElementById('btn-reset-filter');
+        const baseRoute = "{{ isset($isArchive) && $isArchive ? route('admin.pelaporan.archive') : route('admin.pelaporan.index') }}";
+
+        // Main AJAX fetch function
+        function fetchLaporan(url) {
+            if (!tableContainer) return;
+            
+            tableContainer.style.opacity = '0.4';
+            tableContainer.style.pointerEvents = 'none';
+
+            fetch(url, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Gagal mengambil data laporan');
+                return response.text();
+            })
+            .then(html => {
+                tableContainer.innerHTML = html;
+                tableContainer.style.opacity = '1';
+                tableContainer.style.pointerEvents = 'auto';
+                
+                // Re-bind pagination & empty state reset button
+                attachTableEvents();
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+                tableContainer.style.opacity = '1';
+                tableContainer.style.pointerEvents = 'auto';
+            });
+        }
+
+        // Build target URL from current filter state
+        function buildFilterUrl(page = null) {
+            const url = new URL(baseRoute, window.location.origin);
+            
+            if (searchInput && searchInput.value.trim() !== '') {
+                url.searchParams.set('search', searchInput.value.trim());
+            }
+            if (kategoriSelect && kategoriSelect.value !== '') {
+                url.searchParams.set('kategori', kategoriSelect.value);
+            }
+            if (statusInput && statusInput.value !== '' && statusInput.value !== 'all') {
+                url.searchParams.set('status', statusInput.value);
+            }
+            if (page) {
+                url.searchParams.set('page', page);
+            }
+            return url.toString();
+        }
+
+        // Handle Status Pill clicks
+        statusButtons.forEach(btn => {
             btn.addEventListener('click', function(e) {
                 e.preventDefault();
                 
-                // Update active state visually
-                statusFilters.forEach(b => b.classList.remove('active'));
+                // Switch active pill immediately
+                statusButtons.forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
                 
                 const filterValue = this.getAttribute('data-status-filter');
+                if (statusInput) {
+                    statusInput.value = (filterValue === 'all') ? '' : filterValue;
+                }
                 
-                // Update URL parameter without reloading
-                let url = new URL(window.location.href);
-                if (filterValue === 'all') {
-                    url.searchParams.delete('status');
+                const targetUrl = buildFilterUrl();
+                window.history.pushState({}, '', targetUrl);
+                fetchLaporan(targetUrl);
+            });
+        });
+
+        // Handle Search Form submit
+        if (filterForm) {
+            filterForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const targetUrl = buildFilterUrl();
+                window.history.pushState({}, '', targetUrl);
+                fetchLaporan(targetUrl);
+            });
+        }
+
+        // Handle Category dropdown change
+        if (kategoriSelect) {
+            kategoriSelect.addEventListener('change', function() {
+                const targetUrl = buildFilterUrl();
+                window.history.pushState({}, '', targetUrl);
+                fetchLaporan(targetUrl);
+            });
+        }
+
+        // Handle live search with debounce
+        let searchTimeout = null;
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    const targetUrl = buildFilterUrl();
+                    window.history.pushState({}, '', targetUrl);
+                    fetchLaporan(targetUrl);
+                }, 400);
+            });
+        }
+
+        // Reset Filter handler
+        function resetFilters(e) {
+            if (e) e.preventDefault();
+            if (searchInput) searchInput.value = '';
+            if (kategoriSelect) kategoriSelect.value = '';
+            if (statusInput) statusInput.value = '';
+            
+            // Set "Semua" pill as active
+            statusButtons.forEach(b => {
+                if (b.getAttribute('data-status-filter') === 'all') {
+                    b.classList.add('active');
                 } else {
-                    url.searchParams.set('status', filterValue);
+                    b.classList.remove('active');
                 }
-                window.history.replaceState({}, '', url);
+            });
 
-                // Update hidden input in form if it exists
-                const hiddenInput = document.querySelector('input[name="status"]');
-                if (hiddenInput && filterValue !== 'all') {
-                    hiddenInput.value = filterValue;
-                } else if (hiddenInput && filterValue === 'all') {
-                    hiddenInput.value = '';
-                }
+            window.history.pushState({}, '', baseRoute);
+            fetchLaporan(baseRoute);
+        }
 
-                // Filter rows in table
-                document.querySelectorAll('.pelaporan-row').forEach(row => {
-                    if (filterValue === 'all') {
-                        row.style.display = '';
-                        return;
+        if (resetBtn) {
+            resetBtn.addEventListener('click', resetFilters);
+        }
+
+        // Attach events to dynamic table content (Pagination & Empty State Reset)
+        function attachTableEvents() {
+            // Pagination click without reload
+            const paginationLinks = tableContainer.querySelectorAll('.pagination a, .page-link');
+            paginationLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const url = this.getAttribute('href');
+                    if (url && url !== '#') {
+                        window.history.pushState({}, '', url);
+                        fetchLaporan(url);
                     }
-                    
-                    const rowStatus = row.getAttribute('data-status');
-                    row.style.display = (rowStatus === filterValue) ? '' : 'none';
                 });
             });
+
+            // Reset button inside empty state
+            const emptyResetBtn = tableContainer.querySelector('.btn-reset-filter');
+            if (emptyResetBtn) {
+                emptyResetBtn.addEventListener('click', resetFilters);
+            }
+        }
+
+        // Initial binding for first load
+        attachTableEvents();
+
+        // Support browser Back/Forward buttons
+        window.addEventListener('popstate', function() {
+            const currentUrl = new URL(window.location.href);
+            const statusVal = currentUrl.searchParams.get('status') || 'all';
+            
+            statusButtons.forEach(b => {
+                if (b.getAttribute('data-status-filter') === statusVal) {
+                    b.classList.add('active');
+                } else {
+                    b.classList.remove('active');
+                }
+            });
+
+            if (statusInput) statusInput.value = (statusVal === 'all') ? '' : statusVal;
+            if (searchInput) searchInput.value = currentUrl.searchParams.get('search') || '';
+            if (kategoriSelect) kategoriSelect.value = currentUrl.searchParams.get('kategori') || '';
+
+            fetchLaporan(window.location.href);
         });
     });
 </script>

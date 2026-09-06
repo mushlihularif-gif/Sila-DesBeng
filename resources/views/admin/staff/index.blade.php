@@ -84,7 +84,7 @@
     @endif
 
     <div class="card staff-card mt-2">
-        <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center py-3 px-4">
+        <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center py-3 px-3 px-sm-4 flex-wrap gap-2">
             <h5 class="mb-0 fw-bold d-flex align-items-center text-primary">
                 <i class="bx bx-group fs-4 me-2"></i> Daftar Akun Staf
             </h5>
@@ -92,13 +92,13 @@
                 {{ $staffUsers->total() }} Total Staf
             </span>
         </div>
-        <div class="card-body border-bottom pt-3 pb-3 px-4 bg-light bg-opacity-25">
+        <div class="card-body border-bottom pt-3 pb-3 px-3 px-sm-4 bg-light bg-opacity-25">
             <form id="filter-form" class="row g-3 align-items-center" method="GET" action="{{ route('admin.staff.index') }}">
-                <div class="col-md-5 col-sm-8">
+                <div class="col-12 col-md-6 col-lg-5">
                     <div class="input-group modern-search shadow-sm bg-white rounded">
                         <span class="input-group-text text-muted"><i class="bx bx-search"></i></span>
                         <input type="text" id="search" name="search" class="form-control" placeholder="Cari nama atau email staf..." value="{{ $search }}">
-                        <button class="btn btn-primary px-4" type="submit">Cari</button>
+                        <button class="btn btn-primary px-3 px-sm-4" type="submit">Cari</button>
                     </div>
                 </div>
             </form>

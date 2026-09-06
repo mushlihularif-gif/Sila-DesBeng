@@ -12,16 +12,16 @@
         </div>
 
         <!-- Panduan -->
-        <div class="card bg-label-secondary border-0 shadow-none mb-4" style="border-radius: 12px;">
-            <div class="card-body d-flex align-items-center p-4">
-                <div class="me-3">
-                    <div class="bg-secondary p-3 rounded-circle text-white d-flex align-items-center justify-content-center shadow-sm" style="width: 56px; height: 56px;">
-                        <i class="bx bx-building fs-3"></i>
+        <div class="card bg-label-secondary border-0 shadow-none mb-3 mb-sm-4" style="border-radius: 12px;">
+            <div class="card-body d-flex align-items-center p-3 p-sm-4">
+                <div class="me-2 me-sm-3 flex-shrink-0">
+                    <div class="bg-secondary rounded-circle text-white d-flex align-items-center justify-content-center shadow-sm unit-icon-circle">
+                        <i class="bx bx-building fs-4 fs-sm-3"></i>
                     </div>
                 </div>
                 <div>
-                    <h5 class="fw-bold mb-1 text-secondary">Manajemen Fasilitas Umum & Aset</h5>
-                    <p class="mb-0 text-secondary" style="opacity: 0.85;">
+                    <h5 class="fw-bold mb-0 mb-sm-1 text-secondary fs-6 fs-sm-5">Manajemen Fasilitas Umum & Aset</h5>
+                    <p class="mb-0 text-secondary small" style="opacity: 0.85; font-size: 0.8rem;">
                         Kelola data kendaraan operasional (Ambulans, Truk Sampah) dan fasilitas publik (Gedung Serbaguna, Lapangan) yang dapat diakses oleh warga.
                     </p>
                 </div>
@@ -37,55 +37,114 @@
         @endif
 
         <style>
-            .nav-pills .nav-link { color: #6c757d; font-weight: 600; padding: 0.6rem 1.2rem; transition: all 0.3s; border-radius: 50rem; }
-            .nav-pills .nav-link:hover { background-color: #f8f9fa; color: #566a7f; }
-            .nav-pills .nav-link.active { background-color: #696cff; color: #fff; box-shadow: 0 4px 6px rgba(105, 108, 255, 0.2); }
+            .unit-icon-circle {
+                width: 40px;
+                height: 40px;
+                min-width: 40px;
+            }
+            @media (min-width: 576px) {
+                .unit-icon-circle {
+                    width: 52px;
+                    height: 52px;
+                    min-width: 52px;
+                }
+            }
+            .nav-pills-scrollable {
+                display: flex;
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                padding: 4px 6px;
+                gap: 0.35rem;
+                scrollbar-width: none;
+            }
+            .nav-pills-scrollable::-webkit-scrollbar {
+                display: none;
+            }
+            .nav-pills-scrollable .nav-item {
+                flex: 1 1 0px;
+                min-width: fit-content;
+            }
+            .nav-pills-scrollable .nav-link { 
+                width: 100%;
+                justify-content: center;
+                white-space: nowrap;
+                color: #64748b; 
+                font-weight: 600; 
+                padding: 0.45rem 0.75rem; 
+                font-size: 0.82rem;
+                transition: all 0.25s ease; 
+                border-radius: 50rem; 
+                display: inline-flex;
+                align-items: center;
+                border: 1px solid #e2e8f0;
+                background-color: #ffffff;
+            }
+            @media (min-width: 576px) {
+                .nav-pills-scrollable .nav-link {
+                    padding: 0.55rem 0.85rem; 
+                    font-size: 0.875rem;
+                }
+            }
+            .nav-pills-scrollable .nav-link:hover { 
+                background-color: #f8fafc; 
+                color: #334155; 
+                border-color: #cbd5e1;
+            }
+            .nav-pills-scrollable .nav-link.active { 
+                background-color: #696cff; 
+                color: #fff; 
+                border-color: #696cff;
+                box-shadow: 0 4px 10px rgba(105, 108, 255, 0.25); 
+            }
             .product-card { transition: all 0.3s ease; border: none; box-shadow: 0 0.125rem 0.25rem rgba(161, 172, 184, 0.2); border-radius: 1rem; }
             .product-card:hover { transform: translateY(-5px); box-shadow: 0 0.5rem 1rem rgba(161, 172, 184, 0.15); }
         </style>
 
-        <div class="nav-align-top mb-4">
-            <ul class="nav nav-pills gap-2 mb-4" role="tablist">
-                <li class="nav-item">
-                    <button type="button" class="nav-link {{ $tab == 'kendaraan' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-kendaraan" aria-controls="navs-top-kendaraan" aria-selected="{{ $tab == 'kendaraan' ? 'true' : 'false' }}">
-                        <i class="bx bx-car me-2"></i> Kendaraan Operasional
-                    </button>
-                </li>
-                <li class="nav-item">
-                    <button type="button" class="nav-link {{ $tab == 'gedung' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-gedung" aria-controls="navs-top-gedung" aria-selected="{{ $tab == 'gedung' ? 'true' : 'false' }}">
-                        <i class="bx bx-building-house me-2"></i> Gedung & Ruang Publik
-                    </button>
-                </li>
-                <li class="nav-item">
-                    <button type="button" class="nav-link" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-pengaturan" aria-controls="navs-top-pengaturan" aria-selected="false">
-                        <i class="bx bx-cog me-2"></i> Pengaturan & SOP
-                    </button>
-                </li>
-                <li class="nav-item">
-                    <button type="button" class="nav-link {{ $tab == 'chat' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-chat" aria-controls="navs-top-chat" aria-selected="{{ $tab == 'chat' ? 'true' : 'false' }}">
-                        <i class="bx bx-chat me-2"></i> Layanan Pesan
-                        @if(isset($totalUnreadChats) && $totalUnreadChats > 0)
-                            <span class="badge rounded-pill bg-danger ms-1 px-2 py-0" style="font-size: 0.75rem;">{{ $totalUnreadChats }}</span>
-                        @endif
-                    </button>
-                </li>
-            </ul>
+        <div class="nav-align-top mb-3 mb-sm-4">
+            <div class="bg-light p-1 rounded-pill mb-3 mb-sm-4 border border-light-subtle shadow-sm">
+                <ul class="nav nav-pills nav-pills-scrollable mb-0" role="tablist">
+                    <li class="nav-item">
+                        <button type="button" class="nav-link {{ $tab == 'kendaraan' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-kendaraan" aria-controls="navs-top-kendaraan" aria-selected="{{ $tab == 'kendaraan' ? 'true' : 'false' }}">
+                            <i class="bx bx-car me-1"></i> Kendaraan
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button type="button" class="nav-link {{ $tab == 'gedung' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-gedung" aria-controls="navs-top-gedung" aria-selected="{{ $tab == 'gedung' ? 'true' : 'false' }}">
+                            <i class="bx bx-building-house me-1"></i> Gedung & Ruang Publik
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button type="button" class="nav-link" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-pengaturan" aria-controls="navs-top-pengaturan" aria-selected="false">
+                            <i class="bx bx-cog me-1"></i> Pengaturan & SOP
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button type="button" class="nav-link {{ $tab == 'chat' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-chat" aria-controls="navs-top-chat" aria-selected="{{ $tab == 'chat' ? 'true' : 'false' }}">
+                            <i class="bx bx-chat me-1"></i> Layanan Pesan
+                            @if(isset($totalUnreadChats) && $totalUnreadChats > 0)
+                                <span class="badge rounded-pill bg-danger ms-1 px-1 py-0" style="font-size: 0.7rem;">{{ $totalUnreadChats }}</span>
+                            @endif
+                        </button>
+                    </li>
+                </ul>
+            </div>
             
             <div class="tab-content">
                 <!-- TAB 1: KENDARAAN OPERASIONAL -->
                 <div class="tab-pane fade {{ $tab == 'kendaraan' ? 'show active' : '' }}" id="navs-top-kendaraan" role="tabpanel">
-                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 bg-white p-3 rounded-4 shadow-sm gap-3">
-                        <div class="d-flex align-items-center">
-                            <div class="avatar avatar-md bg-info-subtle text-info rounded-circle me-3 d-flex justify-content-center align-items-center">
-                                <i class="bx bx-car fs-4"></i>
+                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-3 mb-sm-4 bg-white p-3 rounded-4 shadow-sm gap-2 gap-sm-3">
+                        <div class="d-flex align-items-center me-sm-3">
+                            <div class="avatar avatar-sm bg-info-subtle text-info rounded-circle me-2 me-sm-3 d-flex justify-content-center align-items-center flex-shrink-0" style="width: 38px; height: 38px;">
+                                <i class="bx bx-car fs-5"></i>
                             </div>
                             <div>
-                                <h5 class="mb-0 fw-bold">Daftar Kendaraan Layanan Masyarakat</h5>
-                                <small class="text-muted">Ambulans Darurat, Mobil Siaga, Truk Sampah, dll</small>
+                                <h5 class="mb-0 fw-bold fs-6 fs-sm-5">Daftar Kendaraan Layanan Masyarakat</h5>
+                                <small class="text-muted d-none d-sm-block">Ambulans Darurat, Mobil Siaga, Truk Sampah, dll</small>
                             </div>
                         </div>
-                        <div class="flex-shrink-0 ms-md-auto">
-                            <a href="{{ route('admin.unit.ambulans.create') }}" class="btn btn-primary rounded-pill px-4 py-2 shadow-sm d-inline-flex align-items-center fw-semibold">
+                        <div class="w-100 w-sm-auto">
+                            <a href="{{ route('admin.unit.ambulans.create') }}" class="btn btn-primary rounded-pill px-3 px-sm-4 py-2 shadow-sm d-flex d-sm-inline-flex align-items-center justify-content-center fw-semibold w-100 w-sm-auto text-nowrap">
                                 <i class="bx bx-plus me-1 fs-5"></i> Tambah Kendaraan
                             </a>
                         </div>
@@ -208,18 +267,18 @@
 
                 <!-- TAB 2: GEDUNG & RUANG PUBLIK -->
                 <div class="tab-pane fade {{ $tab == 'gedung' ? 'show active' : '' }}" id="navs-top-gedung" role="tabpanel">
-                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 bg-white p-3 rounded-4 shadow-sm gap-3">
-                        <div class="d-flex align-items-center">
-                            <div class="avatar avatar-md bg-success-subtle text-success rounded-circle me-3 d-flex justify-content-center align-items-center">
-                                <i class="bx bx-building-house fs-4"></i>
+                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-3 mb-sm-4 bg-white p-3 rounded-4 shadow-sm gap-2 gap-sm-3">
+                        <div class="d-flex align-items-center me-sm-3">
+                            <div class="avatar avatar-sm bg-success-subtle text-success rounded-circle me-2 me-sm-3 d-flex justify-content-center align-items-center flex-shrink-0" style="width: 38px; height: 38px;">
+                                <i class="bx bx-building-house fs-5"></i>
                             </div>
                             <div>
-                                <h5 class="mb-0 fw-bold">Daftar Gedung & Infrastruktur Publik</h5>
-                                <small class="text-muted">Gedung Serbaguna, Balai Pertemuan, Lapangan, dll</small>
+                                <h5 class="mb-0 fw-bold fs-6 fs-sm-5">Daftar Gedung & Infrastruktur Publik</h5>
+                                <small class="text-muted d-none d-sm-block">Gedung Serbaguna, Balai Pertemuan, Lapangan, dll</small>
                             </div>
                         </div>
-                        <div class="flex-shrink-0 ms-md-auto">
-                            <a href="{{ route('admin.unit.fasilitas_umum.create') }}" class="btn btn-success rounded-pill px-4 py-2 shadow-sm d-inline-flex align-items-center fw-semibold">
+                        <div class="w-100 w-sm-auto">
+                            <a href="{{ route('admin.unit.fasilitas_umum.create') }}" class="btn btn-success rounded-pill px-3 px-sm-4 py-2 shadow-sm d-flex d-sm-inline-flex align-items-center justify-content-center fw-semibold w-100 w-sm-auto text-nowrap">
                                 <i class="bx bx-plus me-1 fs-5"></i> Tambah Gedung
                             </a>
                         </div>

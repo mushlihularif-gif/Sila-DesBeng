@@ -4,39 +4,40 @@
 
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3 mb-4">
         <div>
             <h4 class="fw-bold mb-1"><span class="text-muted fw-light">Pengaturan /</span> Data Supir & Petugas</h4>
-            <p class="text-muted mb-0">Kelola data supir yang tersedia untuk ditugaskan pada pesanan rental maupun ambulans darurat.</p>
+            <p class="text-muted mb-0 small">Kelola data supir yang tersedia untuk ditugaskan pada pesanan rental maupun ambulans darurat.</p>
         </div>
-        <button type="button" class="btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#addSupirModal">
+        <button type="button" class="btn btn-primary shadow-sm rounded-pill px-4 py-2 flex-shrink-0" data-bs-toggle="modal" data-bs-target="#addSupirModal">
             <i class="bx bx-plus-circle me-1"></i> Tambah Supir Baru
         </button>
     </div>
 
     <!-- Alert Penjelasan Sistem -->
-    <div class="alert alert-info d-flex align-items-center border-0 shadow-sm rounded-3 mb-4" role="alert">
+    <div class="alert alert-info d-flex align-items-center border-0 shadow-sm rounded-3 mb-4 p-3" role="alert">
         <span class="badge bg-white text-info rounded-circle p-2 me-3 shadow-sm flex-shrink-0">
             <i class="bx bx-bulb fs-4"></i>
         </span>
         <div>
             <h6 class="alert-heading fw-bold mb-1">Penting: Sistem Penugasan Baru</h6>
-            <p class="mb-0" style="font-size: 0.85rem;">
+            <p class="mb-0" style="font-size: 0.85rem; line-height: 1.45;">
                 Supir tidak lagi diikat secara permanen pada satu mobil. Cukup tentukan <strong>Kategori Layanan</strong> supir (Rental Mobil atau Ambulans/Fasilitas). Anda akan memilih supir secara spesifik <strong>pada saat mengonfirmasi pesanan dari warga</strong>.
             </p>
         </div>
     </div>
 
-    <div class="card border-0 shadow-sm rounded-4">
+    <!-- Tampilan Desktop (Tabel) -->
+    <div class="card border-0 shadow-sm rounded-4 d-none d-md-block">
         <div class="table-responsive text-nowrap">
-            <table class="table table-hover">
+            <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
                         <th class="ps-4">Profil Supir</th>
                         <th>Kontak & Akun</th>
                         <th>Kategori Layanan</th>
                         <th>Status</th>
-                        <th class="text-center">Aksi</th>
+                        <th class="text-center pe-4">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="table-border-bottom-0">
@@ -44,11 +45,11 @@
                     <tr>
                         <td class="ps-4">
                             <div class="d-flex align-items-center">
-                                <div class="avatar avatar-md me-3">
+                                <div class="avatar avatar-md me-3 flex-shrink-0">
                                     @if($supir->foto)
                                         <img src="{{ asset('storage/' . $supir->foto) }}" alt="Avatar" class="rounded-circle object-fit-cover shadow-sm border" style="width: 40px; height: 40px;">
                                     @else
-                                        <span class="avatar-initial rounded-circle bg-label-primary shadow-sm border fw-bold">{{ substr($supir->nama, 0, 1) }}</span>
+                                        <span class="avatar-initial rounded-circle bg-label-primary shadow-sm border fw-bold">{{ strtoupper(substr($supir->nama, 0, 1)) }}</span>
                                     @endif
                                 </div>
                                 <div>
@@ -91,17 +92,17 @@
                                 <span class="badge bg-label-secondary"><i class="bx bx-minus-circle me-1"></i> Tidak Aktif</span>
                             @endif
                         </td>
-                        <td class="text-center">
-                            <button type="button" class="btn btn-sm btn-icon btn-outline-secondary me-1" data-bs-toggle="modal" data-bs-target="#detailSupirModal{{ $supir->id }}" title="Lihat Detail Profil">
+                        <td class="text-center pe-4">
+                            <button type="button" class="btn btn-sm btn-icon btn-outline-secondary me-1 shadow-none" data-bs-toggle="modal" data-bs-target="#detailSupirModal{{ $supir->id }}" title="Lihat Detail Profil">
                                 <i class="bx bx-show"></i>
                             </button>
-                            <button type="button" class="btn btn-sm btn-icon btn-outline-primary me-1" data-bs-toggle="modal" data-bs-target="#editSupirModal{{ $supir->id }}" title="Edit Data Supir">
+                            <button type="button" class="btn btn-sm btn-icon btn-outline-primary me-1 shadow-none" data-bs-toggle="modal" data-bs-target="#editSupirModal{{ $supir->id }}" title="Edit Data Supir">
                                 <i class="bx bx-edit-alt"></i>
                             </button>
                             <form action="{{ route('supir.destroy', $supir->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data supir ini?');">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-icon btn-outline-danger" title="Hapus Supir">
+                                <button type="submit" class="btn btn-sm btn-icon btn-outline-danger shadow-none" title="Hapus Supir">
                                     <i class="bx bx-trash"></i>
                                 </button>
                             </form>
@@ -122,6 +123,96 @@
             </table>
         </div>
     </div>
+
+    <!-- Tampilan Mobile (Card View) -->
+    <div class="d-block d-md-none">
+        @forelse($supirs as $supir)
+        <div class="card border-0 shadow-sm rounded-4 mb-3">
+            <div class="card-body p-3">
+                <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
+                    <div class="d-flex align-items-center overflow-hidden">
+                        <div class="avatar avatar-md me-2 flex-shrink-0">
+                            @if($supir->foto)
+                                <img src="{{ asset('storage/' . $supir->foto) }}" alt="Avatar" class="rounded-circle object-fit-cover shadow-sm border" style="width: 42px; height: 42px;">
+                            @else
+                                <span class="avatar-initial rounded-circle bg-label-primary shadow-sm border fw-bold d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">{{ strtoupper(substr($supir->nama, 0, 1)) }}</span>
+                            @endif
+                        </div>
+                        <div class="overflow-hidden">
+                            <h6 class="mb-0 fw-bold text-dark text-truncate" style="font-size: 0.95rem;">{{ $supir->nama }}</h6>
+                            <small class="text-muted d-block">ID: #{{ str_pad($supir->id, 4, '0', STR_PAD_LEFT) }}</small>
+                        </div>
+                    </div>
+                    <div>
+                        @if($supir->status == 'Tersedia')
+                            <span class="badge bg-label-success rounded-pill px-2.5 py-1" style="font-size: 0.72rem;"><i class="bx bx-check-circle me-1"></i>Tersedia</span>
+                        @elseif($supir->status == 'Sedang Bertugas')
+                            <span class="badge bg-label-warning rounded-pill px-2.5 py-1" style="font-size: 0.72rem;"><i class="bx bx-run me-1"></i>Bertugas</span>
+                        @else
+                            <span class="badge bg-label-secondary rounded-pill px-2.5 py-1" style="font-size: 0.72rem;"><i class="bx bx-minus-circle me-1"></i>Nonaktif</span>
+                        @endif
+                    </div>
+                </div>
+
+                <div class="mb-2">
+                    <div class="d-flex align-items-center mb-1">
+                        <i class="bx bxl-whatsapp text-success me-2 fs-5"></i>
+                        <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $supir->kontak ?? '') }}" target="_blank" class="fw-semibold text-dark small text-decoration-none">
+                            {{ $supir->kontak ?? '-' }}
+                        </a>
+                    </div>
+                    <div>
+                        @if($supir->user_id)
+                            <span class="badge bg-label-info rounded-pill px-2.5 py-1" style="font-size: 0.7rem;"><i class="bx bx-link me-1"></i>Tertaut: {{ $supir->user->name }}</span>
+                        @else
+                            <span class="badge bg-label-secondary rounded-pill px-2.5 py-1" style="font-size: 0.7rem;"><i class="bx bx-unlink me-1"></i>Belum tertaut akun</span>
+                        @endif
+                    </div>
+                </div>
+
+                <div class="mb-3 pt-2 border-top">
+                    <span class="text-muted d-block mb-1" style="font-size: 0.72rem;">Kategori Layanan:</span>
+                    <div class="d-flex flex-wrap gap-1">
+                        @if($supir->is_sewa_mobil)
+                            <span class="badge bg-label-primary rounded-pill px-2.5 py-1" style="font-size: 0.72rem;"><i class="bx bx-car me-1"></i>Rental Mobil</span>
+                        @endif
+                        @if($supir->is_fasilitas_umum)
+                            <span class="badge bg-label-danger rounded-pill px-2.5 py-1" style="font-size: 0.72rem;"><i class="bx bx-plus-medical me-1"></i>Ambulans & Fasilitas</span>
+                        @endif
+                        @if(!$supir->is_sewa_mobil && !$supir->is_fasilitas_umum)
+                            <span class="text-muted fst-italic small">Belum ada kategori</span>
+                        @endif
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 pt-2 border-top">
+                    <button type="button" class="btn btn-sm btn-outline-secondary flex-grow-1 rounded-pill d-flex align-items-center justify-content-center gap-1" data-bs-toggle="modal" data-bs-target="#detailSupirModal{{ $supir->id }}">
+                        <i class="bx bx-show fs-6"></i> Detail
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-primary flex-grow-1 rounded-pill d-flex align-items-center justify-content-center gap-1" data-bs-toggle="modal" data-bs-target="#editSupirModal{{ $supir->id }}">
+                        <i class="bx bx-edit-alt fs-6"></i> Edit
+                    </button>
+                    <form action="{{ route('supir.destroy', $supir->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data supir ini?');">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle p-2 d-flex align-items-center justify-content-center" title="Hapus Supir">
+                            <i class="bx bx-trash fs-6"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        @empty
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body text-center py-5">
+                <i class="bx bx-user-x fs-1 text-muted mb-3 d-block"></i>
+                <h6>Belum ada data supir/petugas.</h6>
+                <p class="text-muted small mb-0">Klik tombol "Tambah Supir Baru" di atas untuk mulai.</p>
+            </div>
+        </div>
+        @endforelse
+    </div>
+</div>
 </div>
 @endsection
 
@@ -195,9 +286,9 @@
                         
                         <div class="mb-4 bg-label-info p-3 rounded-4 border-0">
                             <label class="form-label text-uppercase fw-bold text-info mb-1" style="font-size: 0.75rem;"><i class="bx bx-link-alt me-1"></i>Tautkan Akun Aplikasi (Opsional)</label>
-                            <p class="text-info mb-2" style="font-size: 0.75rem;">Notifikasi *in-app* akan dikirimkan ke akun ini saat bertugas.</p>
-                            <select name="user_id" class="form-select border-info shadow-none select2-users">
-                                <option value="">-- Tidak Ditautkan --</option>
+                            <p class="text-info mb-2" style="font-size: 0.75rem;">Notifikasi <em>in-app</em> akan dikirimkan ke akun ini saat bertugas.</p>
+                            <select name="user_id" class="form-select bg-white border-info text-dark shadow-none py-2" style="cursor: pointer; font-size: 0.88rem;">
+                                <option value="">-- Tidak Ditautkan (Hanya Data Profil) --</option>
                                 @foreach($users as $u)
                                     <option value="{{ $u->id }}" {{ $supir->user_id == $u->id ? 'selected' : '' }}>{{ $u->name }} ({{ $u->email }})</option>
                                 @endforeach
@@ -367,8 +458,8 @@
                     
                     <div class="mb-4 bg-label-info p-3 rounded-4 border-0">
                         <label class="form-label text-uppercase fw-bold text-info mb-1" style="font-size: 0.75rem;"><i class="bx bx-link-alt me-1"></i>Tautkan Akun Aplikasi (Opsional)</label>
-                        <p class="text-info mb-2" style="font-size: 0.75rem;">Notifikasi *in-app* akan dikirimkan ke akun ini saat bertugas.</p>
-                        <select name="user_id" class="form-select border-info shadow-none select2-users">
+                        <p class="text-info mb-2" style="font-size: 0.75rem;">Notifikasi <em>in-app</em> akan dikirimkan ke akun ini saat bertugas.</p>
+                        <select name="user_id" class="form-select bg-white border-info text-dark shadow-none py-2" style="cursor: pointer; font-size: 0.88rem;">
                             <option value="" selected>-- Tidak Ditautkan (Hanya Data Profil) --</option>
                             @foreach($users as $u)
                                 <option value="{{ $u->id }}">{{ $u->name }} ({{ $u->email }})</option>
@@ -446,42 +537,5 @@ function previewImage(input, previewId, filenameId) {
         filename.textContent = "Tidak ada file dipilih";
     }
 }
-</script>
-<!-- Select2 CSS -->
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-<style>
-    /* Override Select2 Styling to match Sneat Template */
-    .select2-container .select2-selection--single {
-        height: 38px !important;
-        border: 1px solid #00cfe8 !important; /* using border-info color */
-        border-radius: 0.375rem !important;
-        background-color: #fff !important;
-    }
-    .select2-container--default .select2-selection--single .select2-selection__rendered {
-        line-height: 36px !important;
-        padding-left: 14px !important;
-        color: #697a8d !important;
-    }
-    .select2-container--default .select2-selection--single .select2-selection__arrow {
-        height: 36px !important;
-        right: 8px !important;
-    }
-    .select2-container {
-        width: 100% !important;
-    }
-</style>
-
-<!-- Select2 JS -->
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-<script>
-    $(document).ready(function() {
-        $('.select2-users').each(function() {
-            var modalId = $(this).closest('.modal').attr('id');
-            $(this).select2({
-                dropdownParent: $('#' + modalId),
-                width: '100%'
-            });
-        });
-    });
 </script>
 @endpush

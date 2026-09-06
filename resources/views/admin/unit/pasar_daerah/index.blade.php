@@ -12,16 +12,16 @@
         </div>
 
         <!-- Panduan -->
-        <div class="card bg-label-success border-0 shadow-none mb-4" style="border-radius: 12px;">
-            <div class="card-body d-flex align-items-center p-4">
-                <div class="me-3">
-                    <div class="bg-success p-3 rounded-circle text-white d-flex align-items-center justify-content-center shadow-sm" style="width: 56px; height: 56px;">
-                        <i class="bx bx-store-alt fs-3"></i>
+        <div class="card bg-label-success border-0 shadow-none mb-3 mb-sm-4" style="border-radius: 12px;">
+            <div class="card-body d-flex align-items-center p-3 p-sm-4">
+                <div class="me-2 me-sm-3 flex-shrink-0">
+                    <div class="bg-success rounded-circle text-white d-flex align-items-center justify-content-center shadow-sm unit-icon-circle">
+                        <i class="bx bx-store-alt fs-4 fs-sm-3"></i>
                     </div>
                 </div>
                 <div>
-                    <h5 class="fw-bold mb-1 text-success">Manajemen Pasar Daerah</h5>
-                    <p class="mb-0 text-success" style="opacity: 0.85;">
+                    <h5 class="fw-bold mb-0 mb-sm-1 text-success fs-6 fs-sm-5">Manajemen Pasar Daerah</h5>
+                    <p class="mb-0 text-success small" style="opacity: 0.85; font-size: 0.8rem;">
                         Kelola etalase produk-produk hasil bumi, kerajinan, dan komoditas unggulan desa yang akan dijual ke publik.
                     </p>
                 </div>
@@ -37,13 +37,25 @@
         @endif
 
         <style>
+            .unit-icon-circle {
+                width: 40px;
+                height: 40px;
+                min-width: 40px;
+            }
+            @media (min-width: 576px) {
+                .unit-icon-circle {
+                    width: 52px;
+                    height: 52px;
+                    min-width: 52px;
+                }
+            }
             .nav-pills-scrollable {
                 display: flex;
                 flex-wrap: nowrap;
                 overflow-x: auto;
                 -webkit-overflow-scrolling: touch;
                 padding: 4px 6px;
-                gap: 0.4rem;
+                gap: 0.35rem;
                 scrollbar-width: none;
             }
             .nav-pills-scrollable::-webkit-scrollbar {
@@ -59,14 +71,20 @@
                 white-space: nowrap;
                 color: #64748b; 
                 font-weight: 600; 
-                padding: 0.55rem 0.85rem; 
-                font-size: 0.875rem;
+                padding: 0.45rem 0.75rem; 
+                font-size: 0.82rem;
                 transition: all 0.25s ease; 
                 border-radius: 50rem; 
                 display: inline-flex;
                 align-items: center;
                 border: 1px solid #e2e8f0;
                 background-color: #ffffff;
+            }
+            @media (min-width: 576px) {
+                .nav-pills-scrollable .nav-link {
+                    padding: 0.55rem 0.85rem; 
+                    font-size: 0.875rem;
+                }
             }
             .nav-pills-scrollable .nav-link:hover { 
                 background-color: #f8fafc; 
@@ -139,18 +157,18 @@
             <div class="tab-content">
                 <!-- TAB 1: DAFTAR PRODUK -->
                 <div class="tab-pane fade {{ $tab == 'produk' ? 'show active' : '' }}" id="navs-top-produk" role="tabpanel">
-                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-4 bg-white p-3 rounded-4 shadow-sm gap-3">
-                        <div class="d-flex align-items-center me-3">
-                            <div class="avatar avatar-md bg-success-subtle text-success rounded-circle me-3 d-flex justify-content-center align-items-center flex-shrink-0">
-                                <i class="bx bx-box fs-4"></i>
+                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-3 mb-sm-4 bg-white p-3 rounded-4 shadow-sm gap-2 gap-sm-3">
+                        <div class="d-flex align-items-center me-sm-3">
+                            <div class="avatar avatar-sm bg-success-subtle text-success rounded-circle me-2 me-sm-3 d-flex justify-content-center align-items-center flex-shrink-0" style="width: 38px; height: 38px;">
+                                <i class="bx bx-box fs-5"></i>
                             </div>
                             <div>
-                                <h5 class="mb-0 fw-bold">Daftar Produk Pasar Daerah</h5>
-                                <small class="text-muted">Kelola komoditas dan hasil tani yang akan dijual di platform Pasar Daerah.</small>
+                                <h5 class="mb-0 fw-bold fs-6 fs-sm-5">Daftar Produk Pasar Daerah</h5>
+                                <small class="text-muted d-none d-sm-block">Kelola komoditas dan hasil tani yang akan dijual di platform Pasar Daerah.</small>
                             </div>
                         </div>
-                        <div class="flex-shrink-0 ms-auto">
-                            <a href="{{ route('admin.unit.pasar_daerah.create') }}" class="btn btn-success rounded-pill px-4 py-2 shadow-sm d-inline-flex align-items-center fw-semibold">
+                        <div class="w-100 w-sm-auto">
+                            <a href="{{ route('admin.unit.pasar_daerah.create') }}" class="btn btn-success rounded-pill px-3 px-sm-4 py-2 shadow-sm d-flex d-sm-inline-flex align-items-center justify-content-center fw-semibold w-100 w-sm-auto text-nowrap">
                                 <i class="bx bx-plus me-1 fs-5"></i> Tambah Produk
                             </a>
                         </div>
@@ -198,35 +216,35 @@
                                                 </button>
                                             </div>
                                         </div>
-                                        <div class="card-body d-flex flex-column">
+                                        <div class="card-body d-flex flex-column p-2.5 p-sm-3">
                                             <div class="d-flex justify-content-between mb-2">
-                                                <span class="badge bg-label-success rounded-pill px-3">{{ $produk->kategori ?? 'Lainnya' }}</span>
+                                                <span class="badge bg-label-success rounded-pill px-2 px-sm-3" style="font-size: 0.75rem;">{{ $produk->kategori ?? 'Lainnya' }}</span>
                                                 @if($produk->status == 'tersedia')
-                                                    <span class="badge bg-success shadow-sm rounded-pill px-3">Tersedia</span>
+                                                    <span class="badge bg-success shadow-sm rounded-pill px-2 px-sm-3" style="font-size: 0.75rem;">Tersedia</span>
                                                 @elseif($produk->status == 'habis')
-                                                    <span class="badge bg-danger shadow-sm rounded-pill px-3">Habis</span>
+                                                    <span class="badge bg-danger shadow-sm rounded-pill px-2 px-sm-3" style="font-size: 0.75rem;">Habis</span>
                                                 @else
-                                                    <span class="badge bg-secondary shadow-sm rounded-pill px-3">Nonaktif</span>
+                                                    <span class="badge bg-secondary shadow-sm rounded-pill px-2 px-sm-3" style="font-size: 0.75rem;">Nonaktif</span>
                                                 @endif
                                             </div>
-                                            <h5 class="card-title fw-bold text-capitalize mb-1">{{ $produk->nama_produk }}</h5>
-                                            <div class="d-flex align-items-center mb-2">
-                                                <span class="text-success fw-bold fs-5 me-1">Rp {{ number_format($produk->harga, 0, ',', '.') }}</span>
+                                            <h6 class="card-title fw-bold text-capitalize mb-1 text-truncate" title="{{ $produk->nama_produk }}">{{ $produk->nama_produk }}</h6>
+                                            <div class="d-flex align-items-center mb-2 flex-wrap">
+                                                <span class="text-success fw-bold fs-6 fs-sm-5 me-1">Rp {{ number_format($produk->harga, 0, ',', '.') }}</span>
                                                 <span class="text-muted small">/ {{ $produk->satuan }}</span>
                                             </div>
                                             
-                                            <div class="d-flex align-items-center mb-3 text-muted">
-                                                <i class="bx bx-package me-2 text-primary"></i> Sisa Stok: <strong class="ms-1 text-dark">{{ $produk->stok }}</strong>
+                                            <div class="d-flex align-items-center mb-3 text-muted small">
+                                                <i class="bx bx-package me-1 text-primary"></i> Stok: <strong class="ms-1 text-dark">{{ $produk->stok }}</strong>
                                             </div>
                                             
-                                            <div class="mt-4 pt-3 border-top d-flex justify-content-end gap-2">
+                                            <div class="mt-auto pt-2 border-top d-flex justify-content-end gap-1 gap-sm-2">
                                                 <a href="{{ route('admin.unit.pasar_daerah.edit', $produk->id) }}"
-                                                    class="btn btn-sm btn-light border text-warning shadow-sm rounded-pill px-3"><i class="bx bx-edit me-1"></i><i class="bx bx-edit"></i></a>
+                                                    class="btn btn-sm btn-light border text-warning shadow-sm rounded-pill px-2 px-sm-3"><i class="bx bx-edit"></i></a>
                                                 <form action="{{ route('admin.unit.pasar_daerah.destroy', $produk->id) }}" method="POST"
                                                     onsubmit="return confirm('Apakah Anda yakin ingin menghapus produk ini?');">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-light border text-danger shadow-sm rounded-pill px-3"><i class="bx bx-trash me-1"></i><i class="bx bx-trash"></i></button>
+                                                    <button type="submit" class="btn btn-sm btn-light border text-danger shadow-sm rounded-pill px-2 px-sm-3"><i class="bx bx-trash"></i></button>
                                                 </form>
                                             </div>
                                         </div>
@@ -235,13 +253,13 @@
                             @endforeach
                         </div>
                     @else
-                        <div class="card border-0 shadow-sm rounded-4 text-center py-5">
+                        <div class="card border-0 shadow-sm rounded-4 text-center py-4 py-sm-5">
                             <div class="card-body">
-                                <div class="mb-4">
-                                    <i class="bx bx-store-alt text-success" style="font-size: 80px; opacity: 0.5;"></i>
+                                <div class="mb-3">
+                                    <i class="bx bx-store-alt text-success" style="font-size: 48px; opacity: 0.5;"></i>
                                 </div>
-                                <h4 class="fw-bold">Belum Ada Produk</h4>
-                                <p class="text-muted mb-4">Mulai tambahkan produk atau komoditas hasil desa yang siap dipasarkan.</p>
+                                <h5 class="fw-bold mb-1">Belum Ada Produk</h5>
+                                <p class="text-muted small mb-3">Mulai tambahkan produk atau komoditas hasil desa yang siap dipasarkan.</p>
                                 <a href="{{ route('admin.unit.pasar_daerah.create') }}" class="btn btn-success rounded-pill px-4 shadow-sm">
                                     <i class="bx bx-plus me-1"></i> Tambah Produk Pertama
                                 </a>
@@ -253,19 +271,19 @@
 
                 <!-- TAB 2: DAFTAR PESANAN -->
                 <div class="tab-pane fade {{ $tab == 'pesanan' ? 'show active' : '' }}" id="navs-top-pesanan" role="tabpanel">
-                    <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded-4 shadow-sm">
-                        <div class="d-flex align-items-center">
-                            <div class="avatar avatar-md bg-info-subtle text-info rounded-circle me-3 d-flex justify-content-center align-items-center">
-                                <i class="bx bx-cart fs-4"></i>
+                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-3 mb-sm-4 bg-white p-3 rounded-4 shadow-sm gap-2 gap-sm-3">
+                        <div class="d-flex align-items-center me-sm-3">
+                            <div class="avatar avatar-sm bg-info-subtle text-info rounded-circle me-2 me-sm-3 d-flex justify-content-center align-items-center flex-shrink-0" style="width: 38px; height: 38px;">
+                                <i class="bx bx-cart fs-5"></i>
                             </div>
                             <div>
-                                <h5 class="mb-0 fw-bold">Daftar Pesanan Pasar Daerah</h5>
-                                <small class="text-muted">Kelola pesanan dari warga</small>
+                                <h5 class="mb-0 fw-bold fs-6 fs-sm-5">Daftar Pesanan Pasar Daerah</h5>
+                                <small class="text-muted d-none d-sm-block">Kelola pesanan dari warga</small>
                             </div>
                         </div>
-                        <div>
-                            <form action="{{ route('admin.unit.pasar_daerah.index') . '?tab=pesanan' }}" method="GET" class="d-flex gap-2">
-                                <select name="status" class="form-select border-light-subtle shadow-sm rounded-pill px-3" onchange="this.form.submit()">
+                        <div class="w-100 w-sm-auto">
+                            <form action="{{ route('admin.unit.pasar_daerah.index') . '?tab=pesanan' }}" method="GET" class="d-flex gap-2 w-100">
+                                <select name="status" class="form-select border-light-subtle shadow-sm rounded-pill px-3 w-100" onchange="this.form.submit()">
                                     <option value="all" {{ $status == 'all' ? 'selected' : '' }}>Semua Status</option>
                                     <option value="pending" {{ $status == 'pending' ? 'selected' : '' }}>Pending (Menunggu Bayar)</option>
                                     <option value="paid" {{ $status == 'paid' ? 'selected' : '' }}>Paid (Sudah Bayar)</option>
@@ -352,23 +370,23 @@
                     <div class="row mb-4">
                         <div class="col-xl-8">
                             <div class="card bg-primary text-white border-0 shadow-sm rounded-4 h-100">
-                                <div class="card-body d-flex align-items-center justify-content-between p-4">
+                                <div class="card-body d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between p-3 p-sm-4 gap-3">
                                     <div class="d-flex align-items-center gap-3">
-                                        <div class="avatar avatar-md bg-white rounded-circle p-2 text-primary d-flex align-items-center justify-content-center shadow-sm" style="width: 60px; height: 60px;">
-                                            <i class="bx bx-wallet fs-2"></i>
+                                        <div class="avatar avatar-md bg-white rounded-circle p-2 text-primary d-flex align-items-center justify-content-center shadow-sm flex-shrink-0" style="width: 48px; height: 48px;">
+                                            <i class="bx bx-wallet fs-3"></i>
                                         </div>
                                         <div>
                                             <h6 class="mb-1 text-white fw-medium" style="opacity: 0.9;">Total Pendapatan Bersih</h6>
                                             <small style="opacity: 0.75;">Dari {{ count($laporans) }} transaksi yang telah selesai</small>
                                         </div>
                                     </div>
-                                    <h3 class="mb-0 text-white fw-bold">Rp {{ number_format($totalPendapatan, 0, ',', '.') }}</h3>
+                                    <h3 class="mb-0 text-white fw-bold fs-4 fs-sm-3">Rp {{ number_format($totalPendapatan, 0, ',', '.') }}</h3>
                                 </div>
                             </div>
                         </div>
                         <div class="col-xl-4 mt-4 mt-xl-0">
                             <div class="card border-0 shadow-sm rounded-4 h-100">
-                                <div class="card-body p-4">
+                                <div class="card-body p-3 p-sm-4">
                                     <form action="{{ route('admin.unit.pasar_daerah.index') . '?tab=laporan' }}" method="GET" class="h-100 d-flex flex-column justify-content-center">
                                         <div class="input-group input-group-sm mb-3 border-light-subtle shadow-sm rounded-3">
                                             <span class="input-group-text bg-light"><i class="bx bx-calendar"></i></span>
@@ -390,9 +408,9 @@
 
                     <!-- Table Laporan -->
                     <div class="card border-0 shadow-sm rounded-4">
-                        <div class="card-header bg-white border-bottom p-4 d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0 fw-bold">Daftar Transaksi Selesai</h5>
-                            <button onclick="window.print()" class="btn btn-sm btn-secondary rounded-pill px-3 shadow-sm"><i class="bx bx-printer me-1"></i> Cetak Laporan</button>
+                        <div class="card-header bg-white border-bottom p-3 p-sm-4 d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
+                            <h5 class="mb-0 fw-bold fs-6 fs-sm-5">Daftar Transaksi Selesai</h5>
+                            <button onclick="window.print()" class="btn btn-sm btn-secondary rounded-pill px-3 shadow-sm w-100 w-sm-auto"><i class="bx bx-printer me-1"></i> Cetak Laporan</button>
                         </div>
                         <div class="table-responsive text-nowrap">
                             <table class="table table-hover align-middle">
@@ -773,10 +791,10 @@
                 <!-- TAB: ULASAN & KOMENTAR -->
                 <div class="tab-pane fade {{ $tab == 'ulasan' ? 'show active' : '' }}" id="navs-top-ulasan" role="tabpanel">
                     <div class="card border-0 shadow-sm rounded-4">
-                        <div class="card-header bg-white border-bottom pb-3 pt-4 px-4 d-flex align-items-center justify-content-between">
+                        <div class="card-header bg-white border-bottom pb-3 pt-3 pt-sm-4 px-3 px-sm-4 d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between gap-2">
                             <div>
-                                <h5 class="mb-0 fw-bold text-dark"><i class="bx bx-star text-warning me-2"></i>Ulasan & Komentar Pembeli</h5>
-                                <small class="text-muted">Kelola dan balas ulasan dari pembeli terhadap produk Anda.</small>
+                                <h5 class="mb-0 fw-bold text-dark fs-6 fs-sm-5"><i class="bx bx-star text-warning me-2"></i>Ulasan & Komentar Pembeli</h5>
+                                <small class="text-muted d-none d-sm-block">Kelola dan balas ulasan dari pembeli terhadap produk Anda.</small>
                             </div>
                         </div>
                         <div class="table-responsive text-nowrap p-3">
@@ -888,14 +906,14 @@
 
                 <!-- TAB 7: KOMPLAIN & RETUR -->
                 <div class="tab-pane fade {{ $tab == 'komplain' ? 'show active' : '' }}" id="navs-top-komplain" role="tabpanel">
-                    <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded-4 shadow-sm">
-                        <div class="d-flex align-items-center">
-                            <div class="avatar avatar-md bg-danger-subtle text-danger rounded-circle me-3 d-flex justify-content-center align-items-center">
-                                <i class="bx bx-shield-quarter fs-4"></i>
+                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-3 mb-sm-4 bg-white p-3 rounded-4 shadow-sm gap-2 gap-sm-3">
+                        <div class="d-flex align-items-center me-sm-3">
+                            <div class="avatar avatar-sm bg-danger-subtle text-danger rounded-circle me-2 me-sm-3 d-flex justify-content-center align-items-center flex-shrink-0" style="width: 38px; height: 38px;">
+                                <i class="bx bx-shield-quarter fs-5"></i>
                             </div>
                             <div>
-                                <h5 class="mb-0 fw-bold">Komplain & Retur Barang</h5>
-                                <small class="text-muted">Kelola keluhan pembeli terkait barang rusak saat pengiriman, tidak sesuai, atau busuk/basi.</small>
+                                <h5 class="mb-0 fw-bold fs-6 fs-sm-5">Komplain & Retur Barang</h5>
+                                <small class="text-muted d-none d-sm-block">Kelola keluhan pembeli terkait barang rusak saat pengiriman, tidak sesuai, atau busuk/basi.</small>
                             </div>
                         </div>
                     </div>
@@ -1200,13 +1218,13 @@
                 <!-- TAB 8: CHAT PENGELOLA TOKO -->
                 <div class="tab-pane fade {{ $tab == 'chat' ? 'show active' : '' }}" id="navs-top-chat" role="tabpanel">
                     <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
-                        <div class="card-header bg-white border-bottom py-3 px-4 d-flex justify-content-between align-items-center">
+                        <div class="card-header bg-white border-bottom py-2.5 py-sm-3 px-3 px-sm-4 d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
                             <div>
-                                <h5 class="fw-bold mb-1"><i class="bx bx-chat me-2 text-primary"></i> Chat & Bantuan Pengelola Toko</h5>
-                                <p class="text-muted small mb-0">Kelola obrolan langsung dari pembeli yang memerlukan respon pengelola Toko BUMDes.</p>
+                                <h5 class="fw-bold mb-1 fs-6 fs-sm-5"><i class="bx bx-chat me-2 text-primary"></i> Chat & Bantuan Pengelola Toko</h5>
+                                <p class="text-muted small mb-0 d-none d-sm-block">Kelola obrolan langsung dari pembeli yang memerlukan respon pengelola Toko BUMDes.</p>
                             </div>
-                            <div>
-                                <span class="badge bg-label-primary rounded-pill px-3 py-2">
+                            <div class="flex-shrink-0">
+                                <span class="badge bg-label-primary rounded-pill px-3 py-1.5 py-sm-2 text-nowrap">
                                     <i class="bx bx-bot me-1"></i> Mode Hybrid: Bot + Pengelola
                                 </span>
                             </div>

@@ -53,7 +53,7 @@ abstract class Controller
 
     /**
      * Mendapatkan daftar nama layanan yang aktif untuk region admin saat ini.
-     * Jika super_admin, kembalikan semua layanan.
+     * Jika super_admin atau admin, kembalikan semua layanan.
      * 
      * @return array
      */
@@ -62,10 +62,12 @@ abstract class Controller
         $currentUser = auth()->user();
 
         if ($currentUser && in_array($currentUser->role, ['super_admin', 'admin', 'admin_kecamatan', 'admin_desa'])) {
-            $region = \App\Models\Region::with('services')->find($currentUser->region_id);
-            if (!$region && in_array($currentUser->role, ['super_admin', 'admin'])) {
-                $region = \App\Models\Region::first(); // Fallback untuk admin kabupaten & super_admin
+            // Super Admin dan Admin Kabupaten mengelola seluruh layanan di sistem
+            if (in_array($currentUser->role, ['super_admin', 'admin'])) {
+                return \App\Models\Service::pluck('name')->toArray();
             }
+
+            $region = \App\Models\Region::with('services')->find($currentUser->region_id);
             if ($region) {
                 return $region->services->pluck('name')->toArray();
             }

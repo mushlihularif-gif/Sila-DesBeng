@@ -4,53 +4,114 @@
 
 @section('content')
 <style>
-    .nav-pills .nav-link.active, .nav-pills .show > .nav-link {
-        background-color: #0095ff !important;
-        color: #fff !important;
-        box-shadow: 0 4px 10px rgba(0, 149, 255, 0.3) !important;
+    .animate-fade-up {
+        animation: fadeUp 0.5s ease-out forwards;
+    }
+    @keyframes fadeUp {
+        0% { opacity: 0; transform: translateY(20px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+    .tabs-scroll-wrapper {
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        padding-bottom: 4px;
+    }
+    .tabs-scroll-wrapper::-webkit-scrollbar {
+        display: none;
     }
     .nav-pills .nav-link {
         color: #64748b;
-        transition: all 0.3s ease;
+        font-size: 0.85rem;
+        transition: all 0.25s ease;
+        border: 1px solid rgba(100, 116, 139, 0.15);
+        background-color: #fff;
+    }
+    @media (min-width: 768px) {
+        .nav-pills .nav-link {
+            font-size: 0.9rem;
+        }
     }
     .nav-pills .nav-link:hover {
         background-color: #eff6ff !important;
         color: #0095ff !important;
+        border-color: rgba(0, 149, 255, 0.3);
+    }
+    .nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+        background-color: #0095ff !important;
+        color: #fff !important;
+        border-color: #0095ff !important;
+        box-shadow: 0 4px 10px rgba(0, 149, 255, 0.25) !important;
     }
     .nav-pills .nav-link.active .badge.bg-white {
         color: #0095ff !important;
     }
+    .stat-card {
+        border-radius: 14px;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+    }
+    .stat-icon {
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        font-size: 1.2rem;
+        flex-shrink: 0;
+    }
+    .stat-number {
+        font-size: 1.2rem;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+    @media (min-width: 992px) {
+        .stat-icon {
+            width: 42px;
+            height: 42px;
+            font-size: 1.35rem;
+        }
+        .stat-number {
+            font-size: 1.45rem;
+        }
+    }
 </style>
-<div class="container-fluid py-4">
-    
+
+<div class="container-xxl flex-grow-1 container-p-y animate-fade-up">
     <!-- Page Header -->
-    <div class="row mb-4">
-        <div class="col-12 d-flex justify-content-between align-items-center">
-            <h4 class="fw-bold py-3 mb-0">
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3 mb-4">
+        <div>
+            <h4 class="fw-bold mb-0">
                 <span class="text-muted fw-light">Data & Laporan /</span> Laporan Transaksi
             </h4>
-            <div class="d-flex gap-2">
-                <button class="btn btn-white border shadow-sm rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#filterModal">
-                    <i class="bx bx-filter-alt me-2"></i>Filter
-                </button>
-                <button class="btn btn-primary shadow-sm rounded-pill px-4" onclick="window.print()">
-                    <i class="bx bx-printer me-2"></i>Cetak
-                </button>
-            </div>
+        </div>
+        <div class="d-flex gap-2 w-100 w-sm-auto justify-content-start justify-content-sm-end">
+            <button class="btn btn-white border shadow-sm rounded-pill px-3 px-sm-4 flex-grow-1 flex-sm-grow-0" data-bs-toggle="modal" data-bs-target="#filterModal">
+                <i class="bx bx-filter-alt me-2"></i>Filter
+            </button>
+            <button class="btn btn-primary shadow-sm rounded-pill px-3 px-sm-4 flex-grow-1 flex-sm-grow-0" onclick="window.print()">
+                <i class="bx bx-printer me-2"></i>Cetak
+            </button>
         </div>
     </div>
 
-    <!-- Panduan -->
+    <!-- Panduan Banner -->
     <div class="card bg-label-primary border-0 shadow-none mb-4" style="border-radius: 12px;">
-        <div class="card-body d-flex align-items-center p-4">
+        <div class="card-body d-flex align-items-center p-3 p-md-4">
             <div class="me-3">
-                <div class="bg-primary p-3 rounded-circle text-white d-flex align-items-center justify-content-center shadow-sm" style="width: 56px; height: 56px;">
-                    <i class="bx bx-line-chart fs-3"></i>
+                <div class="bg-primary p-2 p-md-3 rounded-circle text-white d-flex align-items-center justify-content-center shadow-sm" style="width: 48px; height: 48px;">
+                    <i class="bx bx-line-chart fs-4 fs-md-3"></i>
                 </div>
             </div>
             <div>
-                <h5 class="fw-bold mb-1 text-primary">Laporan Transaksi</h5>
-                <p class="mb-0 text-primary" style="opacity: 0.85;">
+                <h5 class="fw-bold mb-1 text-primary fs-6 fs-md-5">Laporan Transaksi</h5>
+                <p class="mb-0 text-primary small" style="opacity: 0.85;">
                     Rekapitulasi lengkap seluruh transaksi yang tercatat di {{ auth()->user()->role === 'admin' ? 'Kabupaten Bengkalis' : (auth()->user()->region->name ?? 'Anda') }}.
                 </p>
             </div>
@@ -104,25 +165,8 @@
     </div>
 </div>
 @endpush
-
-<style>
-    /* Custom Tab Styling */
-    .nav-pills .nav-link {
-        color: #6c757d;
-        background-color: transparent;
-        transition: all 0.3s ease;
-    }
-    .nav-pills .nav-link:hover {
-        background-color: #f8f9fa;
-        color: #0d6efd;
-    }
-    .nav-pills .nav-link.active {
-        background-color: #0d6efd;
-        color: #fff;
-        box-shadow: 0 4px 6px rgba(13, 110, 253, 0.2);
-    }
-</style>
 @endsection
+
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -139,6 +183,10 @@ document.addEventListener('DOMContentLoaded', function() {
         container.style.opacity = '0.5';
         container.style.pointerEvents = 'none';
 
+        // Remember currently active tab
+        const activeTab = document.querySelector('#reportTabs .nav-link.active');
+        const activeTabId = activeTab ? activeTab.getAttribute('id') : null;
+
         fetch(url, {
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
         })
@@ -148,6 +196,20 @@ document.addEventListener('DOMContentLoaded', function() {
             container.style.opacity = '1';
             container.style.pointerEvents = 'auto';
             if (bsModal) bsModal.hide();
+
+            // Restore active tab
+            if (activeTabId) {
+                const targetTabBtn = container.querySelector('#' + activeTabId);
+                if (targetTabBtn) {
+                    const tabTrigger = new bootstrap.Tab(targetTabBtn);
+                    tabTrigger.show();
+                }
+            }
+
+            // Animate count-up if available
+            if (typeof window.animateCountUp === 'function') {
+                window.animateCountUp('.count-up', false);
+            }
         })
         .catch(error => {
             console.error('Error fetching data:', error);

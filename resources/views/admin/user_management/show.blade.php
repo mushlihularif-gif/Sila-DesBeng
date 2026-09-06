@@ -73,25 +73,37 @@
     
     .nav-tabs-modern {
         border-bottom: 2px solid #f0f2f4;
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+    .nav-tabs-modern::-webkit-scrollbar {
+        display: none;
+    }
+    .nav-tabs-modern .nav-item {
+        flex: 0 0 auto;
     }
     .nav-tabs-modern .nav-link {
         border: none;
         color: #697a8d;
         font-weight: 600;
         padding: 0.75rem 0.9rem;
-        font-size: 0.9rem;
+        font-size: 0.88rem;
         border-radius: 8px 8px 0 0;
-        margin-right: 0.2rem;
+        margin-right: 0.25rem;
         transition: all 0.2s;
         position: relative;
         white-space: nowrap;
+        background: transparent !important;
     }
     .nav-tabs-modern .nav-link:hover {
         color: #696cff;
     }
     .nav-tabs-modern .nav-link.active {
         color: #696cff;
-        background: transparent;
+        background: transparent !important;
     }
     .nav-tabs-modern .nav-link.active::after {
         content: '';
@@ -103,13 +115,20 @@
         background: #696cff;
         border-radius: 3px 3px 0 0;
     }
+    @media (min-width: 992px) {
+        .profile-sidebar-card {
+            position: sticky;
+            top: 24px;
+            z-index: 10;
+        }
+    }
 </style>
 
 <div class="container-xxl flex-grow-1 container-p-y animate-fade-up">
     <!-- Header -->
     <div class="row mb-4">
-        <div class="col-12 d-flex justify-content-between align-items-center">
-            <h4 class="fw-bold py-3 mb-0">
+        <div class="col-12 d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <h4 class="fw-bold py-2 mb-0" style="font-size: 1.25rem;">
                 <span class="text-muted fw-light">Sistem / Manajemen Pengguna /</span> Detail Profil
             </h4>
             <a href="{{ route('admin.manajemen-pengguna.index') }}" class="btn btn-label-secondary shadow-sm">
@@ -121,7 +140,7 @@
     <div class="row">
         <!-- Sidebar Kiri: Info Singkat & Aksi -->
         <div class="col-xl-4 col-lg-5 col-md-12 mb-4">
-            <div class="card border-0 shadow-sm text-center" style="border-radius: 16px; overflow: hidden; position: sticky; top: 24px; z-index: 10;">
+            <div class="card border-0 shadow-sm text-center profile-sidebar-card" style="border-radius: 16px; overflow: hidden;">
                 <!-- Background Banner -->
                 <div style="height: 100px; background: linear-gradient(135deg, #696cff 0%, #00d4ff 100%);"></div>
                 
@@ -236,7 +255,7 @@
                         <!-- Tab Penyewaan -->
                         <div class="tab-pane fade show active" id="tab-penyewaan" role="tabpanel">
                             @if($user->rentalTransactions->count() > 0)
-                            <div class="w-100">
+                            <div class="table-responsive w-100">
                                 <table class="table table-modern align-middle">
                                     <thead class="text-muted" style="font-size: 0.75rem; letter-spacing: 1px;">
                                         <tr>
@@ -272,7 +291,7 @@
                         <!-- Tab Gas -->
                         <div class="tab-pane fade" id="tab-gas" role="tabpanel">
                             @if($user->gasTransactions->count() > 0)
-                            <div class="w-100">
+                            <div class="table-responsive w-100">
                                 <table class="table table-modern align-middle">
                                     <thead class="text-muted" style="font-size: 0.75rem; letter-spacing: 1px;">
                                         <tr>
@@ -310,7 +329,7 @@
                         <!-- Tab Mobil -->
                         <div class="tab-pane fade" id="tab-mobil" role="tabpanel">
                             @if($user->mobilTransactions->count() > 0)
-                            <div class="w-100">
+                            <div class="table-responsive w-100">
                                 <table class="table table-modern align-middle">
                                     <thead class="text-muted" style="font-size: 0.75rem; letter-spacing: 1px;">
                                         <tr>
@@ -346,7 +365,7 @@
                         <!-- Tab Fasilitas -->
                         <div class="tab-pane fade" id="tab-fasilitas" role="tabpanel">
                             @if($user->fasilitasTransactions->count() > 0)
-                            <div class="w-100">
+                            <div class="table-responsive w-100">
                                 <table class="table table-modern align-middle">
                                     <thead class="text-muted" style="font-size: 0.75rem; letter-spacing: 1px;">
                                         <tr>
@@ -382,7 +401,7 @@
                         <!-- Tab Pasar -->
                         <div class="tab-pane fade" id="tab-pasar" role="tabpanel">
                             @if($user->pasarTransactions->count() > 0)
-                            <div class="w-100">
+                            <div class="table-responsive w-100">
                                 <table class="table table-modern align-middle">
                                     <thead class="text-muted" style="font-size: 0.75rem; letter-spacing: 1px;">
                                         <tr>
@@ -418,7 +437,7 @@
                         <!-- Tab Laporan -->
                         <div class="tab-pane fade" id="tab-laporan" role="tabpanel">
                             @if($user->laporans->count() > 0)
-                            <div class="w-100">
+                            <div class="table-responsive w-100">
                                 <table class="table table-modern align-middle">
                                     <thead class="text-muted" style="font-size: 0.75rem; letter-spacing: 1px;">
                                         <tr>
@@ -454,8 +473,6 @@
                     </div>
                 </div>
             </div>
-        </div>
-
         </div>
     </div>
 </div>

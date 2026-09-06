@@ -241,4 +241,21 @@ class User extends Authenticatable
     {
         return $this->hasOne(KycVerification::class)->latest();
     }
+
+    /**
+     * URL Foto Profil Pengguna
+     */
+    public function getProfilePhotoUrlAttribute(): ?string
+    {
+        if (!empty($this->avatar)) {
+            if (\Illuminate\Support\Str::startsWith($this->avatar, ['http://', 'https://'])) {
+                return $this->avatar;
+            }
+            return route('media.avatar', ['filename' => basename($this->avatar)]);
+        }
+        if ($this->relationLoaded('file') ? $this->file : $this->file()->first()) {
+            return route('media.avatar', ['filename' => basename($this->file->path)]);
+        }
+        return null;
+    }
 }

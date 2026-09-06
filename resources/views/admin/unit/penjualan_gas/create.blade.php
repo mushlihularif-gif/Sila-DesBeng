@@ -54,7 +54,7 @@
                             
                             
                             <!-- STEPS NAVIGATION -->
-                            <ul class="nav nav-pills nav-justified mb-4 wizard-steps" id="formWizard" role="tablist">
+                            <ul class="nav nav-pills nav-justified flex-nowrap mb-4 wizard-steps gap-1 gap-sm-2" id="formWizard" role="tablist">
                                 <li class="nav-item" role="presentation">
                                     <button class="nav-link active" id="step1-tab" data-bs-toggle="pill" data-bs-target="#step1" type="button" role="tab" aria-controls="step1" aria-selected="true">
                                         <span class="step-icon"><i class='bx bx-info-circle'></i></span>
@@ -83,19 +83,19 @@
                                 <h6 class="section-title mb-3">
                                     <i class='bx bx-image me-2'></i>Foto Produk
                                 </h6>
-                                <div class="row g-3">
+                                <div class="row g-2 g-sm-3">
                                     <!-- Foto Utama -->
-                                    <div class="col-md-4">
+                                    <div class="col-6 col-md-4">
                                         <label class="form-label fw-semibold" for="foto">Foto Utama</label>
                                         <div class="upload-box" onclick="document.getElementById('foto').click()">
                                             <div id="preview_foto" class="preview-container" style="display:none;">
                                                 <img src="#" alt="Preview" class="preview-image" />
                                                 <button type="button" class="btn-remove-image" onclick="event.stopPropagation(); clearFile('foto', 'preview_foto')">
-                                                    <span style="font-size: 24px; font-weight: bold; line-height: 1; color: white;">&times;</span>
+                                                    <span style="font-size: 20px; font-weight: bold; line-height: 1; color: white;">&times;</span>
                                                 </button>
                                             </div>
                                             <div id="placeholder_foto" class="upload-placeholder">
-                                                <i class='bx bx-cloud-upload' style="font-size: 48px;"></i>
+                                                <i class='bx bx-cloud-upload' style="font-size: 40px;"></i>
                                                 <p class="mb-0 mt-2">Klik untuk upload</p>
                                                 <small class="text-muted">JPG, PNG (Max 8MB)</small>
                                             </div>
@@ -105,17 +105,17 @@
                                     </div>
 
                                     <!-- Foto Tambahan 1 -->
-                                    <div class="col-md-4">
+                                    <div class="col-6 col-md-4">
                                         <label class="form-label fw-semibold" for="foto_2">Foto Tambahan 1</label>
                                         <div class="upload-box" onclick="document.getElementById('foto_2').click()">
                                             <div id="preview_foto_2" class="preview-container" style="display:none;">
                                                 <img src="#" alt="Preview" class="preview-image" />
                                                 <button type="button" class="btn-remove-image" onclick="event.stopPropagation(); clearFile('foto_2', 'preview_foto_2')">
-                                                    <span style="font-size: 24px; font-weight: bold; line-height: 1; color: white;">&times;</span>
+                                                    <span style="font-size: 20px; font-weight: bold; line-height: 1; color: white;">&times;</span>
                                                 </button>
                                             </div>
                                             <div id="placeholder_foto_2" class="upload-placeholder">
-                                                <i class='bx bx-cloud-upload' style="font-size: 48px;"></i>
+                                                <i class='bx bx-cloud-upload' style="font-size: 40px;"></i>
                                                 <p class="mb-0 mt-2">Klik untuk upload</p>
                                                 <small class="text-muted">JPG, PNG (Max 8MB)</small>
                                             </div>
@@ -125,17 +125,17 @@
                                     </div>
 
                                     <!-- Foto Tambahan 2 -->
-                                    <div class="col-md-4">
+                                    <div class="col-6 col-md-4">
                                         <label class="form-label fw-semibold" for="foto_3">Foto Tambahan 2</label>
                                         <div class="upload-box" onclick="document.getElementById('foto_3').click()">
                                             <div id="preview_foto_3" class="preview-container" style="display:none;">
                                                 <img src="#" alt="Preview" class="preview-image" />
                                                 <button type="button" class="btn-remove-image" onclick="event.stopPropagation(); clearFile('foto_3', 'preview_foto_3')">
-                                                    <span style="font-size: 24px; font-weight: bold; line-height: 1; color: white;">&times;</span>
+                                                    <span style="font-size: 20px; font-weight: bold; line-height: 1; color: white;">&times;</span>
                                                 </button>
                                             </div>
                                             <div id="placeholder_foto_3" class="upload-placeholder">
-                                                <i class='bx bx-cloud-upload' style="font-size: 48px;"></i>
+                                                <i class='bx bx-cloud-upload' style="font-size: 40px;"></i>
                                                 <p class="mb-0 mt-2">Klik untuk upload</p>
                                                 <small class="text-muted">JPG, PNG (Max 8MB)</small>
                                             </div>
@@ -187,8 +187,8 @@
                             </div>
 
                             
-                                    <div class="d-flex justify-content-end mt-4">
-                                        <button type="button" class="btn btn-primary" onclick="nextStep('step2-tab')">Selanjutnya <i class='bx bx-right-arrow-alt'></i></button>
+                                    <div class="d-flex justify-content-end mt-4 pt-3 border-top">
+                                        <button type="button" class="btn btn-primary flex-grow-1 flex-sm-grow-0" onclick="nextStep('step2-tab')">Selanjutnya <i class='bx bx-right-arrow-alt ms-1'></i></button>
                                     </div>
                                 </div>
                                 
@@ -199,8 +199,8 @@
                                 <h6 class="section-title mb-3">
                                     <i class='bx bx-money me-2'></i>Harga & Stok
                                 </h6>
-                                <div class="row g-3">
-                                    <div class="col-md-4">
+                                <div class="row g-2 g-sm-3">
+                                    <div class="col-12 col-md-4">
                                         <label class="form-label fw-semibold" for="harga_satuan">
                                             Harga Satuan <span class="text-danger">*</span>
                                         </label>
@@ -211,14 +211,14 @@
                                         </div>
                                         <small class="form-text text-muted">Masukkan angka tanpa titik atau koma</small>
                                     </div>
-                                    <div class="col-md-4">
+                                    <div class="col-6 col-md-4">
                                         <label class="form-label fw-semibold" for="stok">
                                             Stok Tersedia <span class="text-danger">*</span>
                                         </label>
                                         <input type="number" class="form-control modern-input" id="stok" 
                                                name="stok" placeholder="50" min="0" required />
                                     </div>
-                                    <div class="col-md-4">
+                                    <div class="col-6 col-md-4">
                                         <label class="form-label fw-semibold" for="satuan">
                                             Satuan <span class="text-danger">*</span>
                                         </label>
@@ -239,9 +239,9 @@
                             </div>
 
                             
-                                    <div class="d-flex justify-content-between mt-4">
-                                        <button type="button" class="btn btn-secondary" onclick="prevStep('step1-tab')"><i class='bx bx-left-arrow-alt'></i> Sebelumnya</button>
-                                        <button type="button" class="btn btn-primary" onclick="nextStep('step3-tab')">Selanjutnya <i class='bx bx-right-arrow-alt'></i></button>
+                                    <div class="d-flex justify-content-between gap-2 mt-4 pt-3 border-top">
+                                        <button type="button" class="btn btn-secondary flex-grow-1 flex-sm-grow-0" onclick="prevStep('step1-tab')"><i class='bx bx-left-arrow-alt me-1'></i> Sebelumnya</button>
+                                        <button type="button" class="btn btn-primary flex-grow-1 flex-sm-grow-0" onclick="nextStep('step3-tab')">Selanjutnya <i class='bx bx-right-arrow-alt ms-1'></i></button>
                                     </div>
                                 </div>
                                 
@@ -266,7 +266,7 @@
                                     </div>
                                     <div class="col-md-12 mt-3">
                                         <label class="form-label fw-semibold">Pilih Metode Lokasi <span class="text-danger">*</span></label>
-                                        <div class="d-flex gap-3 mb-3">
+                                        <div class="d-flex flex-column flex-sm-row gap-2 gap-sm-3 mb-3">
                                             @if($savedLocations->count() > 0)
                                             <div class="form-check">
                                                 <input class="form-check-input" type="radio" name="lokasi_mode" id="mode_saved" value="saved" onchange="toggleLokasiMode(this.value)">
@@ -314,11 +314,11 @@
 
 
                             
-                                    <div class="d-flex justify-content-between mt-4">
-                                        <button type="button" class="btn btn-secondary" onclick="prevStep('step2-tab')"><i class='bx bx-left-arrow-alt'></i> Sebelumnya</button>
-                                        <div>
-                                            <a href="{{ route('admin.unit.penjualan_gas.index') }}" class="btn btn-light me-2 border">Batal</a>
-                                            <button type="submit" class="btn btn-success"><i class='bx bx-save'></i> Simpan Data</button>
+                                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-stretch align-items-sm-center gap-2 mt-4 pt-3 border-top">
+                                        <button type="button" class="btn btn-secondary" onclick="prevStep('step2-tab')"><i class='bx bx-left-arrow-alt me-1'></i> Sebelumnya</button>
+                                        <div class="d-flex gap-2">
+                                            <a href="{{ route('admin.unit.penjualan_gas.index') }}" class="btn btn-light border flex-grow-1 flex-sm-grow-0 text-center">Batal</a>
+                                            <button type="submit" class="btn btn-success flex-grow-1 flex-sm-grow-0"><i class='bx bx-save me-1'></i> Simpan Data</button>
                                         </div>
                                     </div>
                                 </div> <!-- End step 3 -->
@@ -529,17 +529,20 @@
         .upload-box {
             border: 2px dashed var(--border-color);
             border-radius: 12px;
-            padding: 24px;
+            padding: 20px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
             background: #ffffff;
             aspect-ratio: 4/3;
-            min-height: 220px;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
+            overflow: hidden;
         }
 
         .upload-box:hover {
@@ -549,6 +552,7 @@
 
         .upload-placeholder {
             color: #6c757d;
+            max-width: 100%;
         }
 
         .upload-placeholder i {
@@ -558,7 +562,7 @@
 
         .upload-box:hover .upload-placeholder i {
             color: var(--primary-color);
-            transform: translateY(-5px) scale(1.05);
+            transform: translateY(-3px) scale(1.05);
         }
 
         .preview-container {
@@ -577,10 +581,10 @@
 
         .btn-remove-image {
             position: absolute;
-            top: -10px;
-            right: -10px;
-            width: 32px;
-            height: 32px;
+            top: 6px;
+            right: 6px;
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
             background: #dc3545;
             color: white;
@@ -591,11 +595,55 @@
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+            z-index: 5;
         }
 
         .btn-remove-image:hover {
             background: #bb2d3b;
             transform: scale(1.1);
+        }
+
+        /* Mobile Optimization */
+        @media (max-width: 767.98px) {
+            .form-section {
+                padding: 16px 12px !important;
+                margin-bottom: 1rem !important;
+            }
+            .upload-box {
+                padding: 10px 4px !important;
+                aspect-ratio: 4/3 !important;
+                border-radius: 8px !important;
+            }
+            .upload-placeholder i {
+                font-size: 26px !important;
+            }
+            .upload-placeholder p {
+                font-size: 11px !important;
+                margin-top: 4px !important;
+                line-height: 1.2 !important;
+            }
+            .upload-placeholder small {
+                font-size: 9px !important;
+                display: block !important;
+            }
+            .btn-remove-image {
+                width: 24px !important;
+                height: 24px !important;
+                top: 4px !important;
+                right: 4px !important;
+            }
+            .btn-remove-image span {
+                font-size: 16px !important;
+            }
+        }
+
+        @media (max-width: 575.98px) {
+            .card-body.p-4 {
+                padding: 1rem !important;
+            }
+            .wizard-steps .nav-link {
+                padding: 0.5rem 0.25rem !important;
+            }
         }
 
         /* Modern Alert */
@@ -637,10 +685,17 @@
         font-weight: 500;
         padding: 0.75rem 1rem;
         transition: all 0.2s ease;
+        background-color: #f8f9fa;
+        border: 1px solid #e9ecef;
+    }
+    .wizard-steps .nav-link:hover {
+        background-color: #e9ecef;
+        color: #495057;
     }
     .wizard-steps .nav-link.active {
         background-color: #0d6efd;
         color: white;
+        border-color: #0d6efd;
         box-shadow: 0 4px 6px rgba(13, 110, 253, 0.2);
     }
     .step-icon {

@@ -14,58 +14,160 @@ class MutasiAdminController extends Controller
     {
         $admin = Auth::user();
         
-        // Hanya membatasi jika admin desa. Super admin bebas.
+        // Hanya membatasi jika admin desa/rt/rw. Super admin bebas.
         $region_id = in_array($admin->role, ['admin_desa', 'admin_rt', 'admin_rw']) ? $admin->region_id : null;
         
         // Pengajuan Keluar = Warga KITA yang sedang dalam proses KELUAR
-        $pengajuanKeluar = MutasiPenduduk::with(['user', 'toRegion'])
-            ->where('from_region_id', $region_id)
+        $pengajuanKeluar = MutasiPenduduk::with(['user', 'toRegion', 'fromRegion'])
+            ->when($region_id, function($q) use ($region_id) {
+                $q->where('from_region_id', $region_id);
+            })
             ->where('status', 'pending')
+            ->orderBy('created_at', 'desc')
             ->get();
             
         // Pengajuan Masuk = Warga LUAR yang sedang dalam proses MASUK
-        $pengajuanMasuk = MutasiPenduduk::with(['user', 'fromRegion'])
-            ->where('to_region_id', $region_id)
+        $pengajuanMasuk = MutasiPenduduk::with(['user', 'fromRegion', 'toRegion'])
+            ->when($region_id, function($q) use ($region_id) {
+                $q->where('to_region_id', $region_id);
+            })
             ->where('status', 'pending')
+            ->orderBy('created_at', 'desc')
             ->get();
 
-        // Riwayat
+        // Riwayat (Disetujui / Ditolak)
         $riwayat = MutasiPenduduk::with(['user', 'fromRegion', 'toRegion'])
-            ->where(function($q) use ($region_id) {
-                $q->where('from_region_id', $region_id)
-                  ->orWhere('to_region_id', $region_id);
+            ->when($region_id, function($q) use ($region_id) {
+                $q->where(function($sub) use ($region_id) {
+                    $sub->where('from_region_id', $region_id)
+                        ->orWhere('to_region_id', $region_id);
+                });
             })
             ->whereIn('status', ['approved', 'rejected'])
             ->orderBy('updated_at', 'desc')
-            ->paginate(10);
+            ->paginate(10, ['*'], 'riwayat_page');
 
-        return view('admin.warga.mutasi', compact('pengajuanKeluar', 'pengajuanMasuk', 'riwayat'));
+        // Semua Mutasi (Pengajuan Aktif + Riwayat)
+        $semuaMutasi = MutasiPenduduk::with(['user', 'fromRegion', 'toRegion'])
+            ->when($region_id, function($q) use ($region_id) {
+                $q->where(function($sub) use ($region_id) {
+                    $sub->where('from_region_id', $region_id)
+                        ->orWhere('to_region_id', $region_id);
+                });
+            })
+            ->orderBy('created_at', 'desc')
+            ->paginate(15, ['*'], 'semua_page');
+
+        // Daftar warga desa admin untuk mutasi keluar (ekspor)
+        $regionIds = $region_id ? array_merge([(int)$region_id], \App\Models\Region::getDescendantIds($region_id)) : [];
+        $wargaDesa = User::whereIn('role', ['user', 'warga'])
+            ->when($region_id, function($q) use ($regionIds) {
+                $q->whereIn('region_id', $regionIds);
+            })
+            ->get()
+            ->sortBy(function($u) {
+                return strtolower($u->name ?? '');
+            });
+
+        $counts = [
+            'semua' => MutasiPenduduk::when($region_id, function($q) use ($region_id) {
+                $q->where(function($sub) use ($region_id) {
+                    $sub->where('from_region_id', $region_id)
+                        ->orWhere('to_region_id', $region_id);
+                });
+            })->count(),
+            'keluar' => $pengajuanKeluar->count(),
+            'masuk' => $pengajuanMasuk->count(),
+            'riwayat' => MutasiPenduduk::when($region_id, function($q) use ($region_id) {
+                $q->where(function($sub) use ($region_id) {
+                    $sub->where('from_region_id', $region_id)
+                        ->orWhere('to_region_id', $region_id);
+                });
+            })->whereIn('status', ['approved', 'rejected'])->count(),
+        ];
+
+        return view('admin.warga.mutasi', compact(
+            'pengajuanKeluar', 
+            'pengajuanMasuk', 
+            'riwayat', 
+            'semuaMutasi', 
+            'counts',
+            'wargaDesa'
+        ));
     }
 
     public function searchGlobal(Request $request)
     {
-        $search = $request->get('q');
+        $search = trim($request->get('q', ''));
         $region_id = $request->get('region_id');
         
-        if(!$search) return response()->json([]);
-
-        $query = User::where('role', 'warga')
-            ->where(function($q) use ($search) {
-                $q->where('nik', 'like', "%{$search}%")
-                  ->orWhere('name', 'like', "%{$search}%");
-            });
+        $query = User::whereIn('role', ['user', 'warga'])->with('region.parent');
 
         if ($region_id) {
-            $query->where('region_id', $region_id);
+            $regionIds = array_merge([(int)$region_id], \App\Models\Region::getDescendantIds($region_id));
+            $query->whereIn('region_id', $regionIds);
         }
 
-        $users = $query->limit(20)->get();
+        // Jangan sertakan warga dari desa admin sendiri (karena sudah berada di desa admin)
+        $admin = Auth::user();
+        if ($admin && $admin->region_id) {
+            $adminRegionIds = array_merge([(int)$admin->region_id], \App\Models\Region::getDescendantIds($admin->region_id));
+            $query->whereNotIn('region_id', $adminRegionIds);
+        }
+
+        if ($search !== '') {
+            $users = $query->get()->filter(function($u) use ($search) {
+                $nik = (string)($u->nik ?? '');
+                $name = (string)($u->name ?? '');
+                return (stripos($nik, $search) !== false) || (stripos($name, $search) !== false);
+            })->take(25);
+        } else {
+            $users = $query->take(25)->get();
+        }
 
         $result = [];
         foreach($users as $u) {
+            $nikDisplay = $u->nik ? $u->nik : 'Tanpa NIK';
+
+            // Dapatkan info desa dan kecamatan asal warga
+            $desaName = '';
+            $desaId = null;
+            $kecName = '';
+            $kecId = null;
+
+            if ($u->region) {
+                if ($u->region->type === 'desa') {
+                    $desaName = $u->region->name;
+                    $desaId = $u->region->id;
+                    if ($u->region->parent && $u->region->parent->type === 'kecamatan') {
+                        $kecName = $u->region->parent->name;
+                        $kecId = $u->region->parent->id;
+                    }
+                } elseif (in_array($u->region->type, ['rw', 'rt'])) {
+                    $curr = $u->region->parent;
+                    while ($curr && $curr->type !== 'desa' && $curr->parent) {
+                        $curr = $curr->parent;
+                    }
+                    if ($curr && $curr->type === 'desa') {
+                        $desaName = $curr->name;
+                        $desaId = $curr->id;
+                        if ($curr->parent && $curr->parent->type === 'kecamatan') {
+                            $kecName = $curr->parent->name;
+                            $kecId = $curr->parent->id;
+                        }
+                    }
+                }
+            }
+
             $result[] = [
-                'id' => $u->nik, // Use NIK as ID for the existing logic
-                'text' => $u->nik . ' - ' . $u->name
+                'id' => $u->nik ?: $u->id,
+                'nik' => $u->nik ?: 'Tanpa NIK',
+                'name' => $u->name,
+                'text' => $nikDisplay . ' - ' . $u->name,
+                'desa_id' => $desaId,
+                'desa_name' => $desaName,
+                'kec_id' => $kecId,
+                'kec_name' => $kecName,
             ];
         }
         return response()->json(['results' => $result]);
@@ -73,24 +175,28 @@ class MutasiAdminController extends Controller
 
     public function searchLocal(Request $request)
     {
-        $search = $request->get('q');
+        $search = trim($request->get('q', ''));
         $admin = Auth::user();
-        if(!$search) return response()->json([]);
+        if(!$search) return response()->json(['results' => []]);
 
-        $users = User::where('role', 'warga')
-            ->where('region_id', $admin->region_id)
-            ->where(function($q) use ($search) {
-                $q->where('nik', 'like', "%{$search}%")
-                  ->orWhere('name', 'like', "%{$search}%");
+        $regionIds = array_merge([(int)$admin->region_id], \App\Models\Region::getDescendantIds($admin->region_id));
+
+        $users = User::whereIn('role', ['user', 'warga'])
+            ->whereIn('region_id', $regionIds)
+            ->get()
+            ->filter(function($u) use ($search) {
+                $nik = (string)($u->nik ?? '');
+                $name = (string)($u->name ?? '');
+                return (stripos($nik, $search) !== false) || (stripos($name, $search) !== false);
             })
-            ->limit(20)
-            ->get();
+            ->take(20);
 
         $result = [];
         foreach($users as $u) {
+            $nikDisplay = $u->nik ? $u->nik : 'Tanpa NIK';
             $result[] = [
-                'id' => $u->id, // Use User ID for push
-                'text' => $u->nik . ' - ' . $u->name
+                'id' => $u->id,
+                'text' => $nikDisplay . ' - ' . $u->name
             ];
         }
         return response()->json(['results' => $result]);
@@ -104,7 +210,17 @@ class MutasiAdminController extends Controller
         ]);
 
         $admin = Auth::user();
+        
+        // Cari user berdasarkan NIK atau ID, dan fallback ke dekripsi jika perlu
         $user = User::where('nik', $request->nik)->first();
+        if (!$user && is_numeric($request->nik)) {
+            $user = User::find($request->nik);
+        }
+        if (!$user) {
+            $user = User::all()->first(function($u) use ($request) {
+                return $u->nik === $request->nik;
+            });
+        }
         
         if (!$user) return redirect()->back()->with('error', 'Warga tidak ditemukan.');
         if ($user->region_id == $admin->region_id) return redirect()->back()->with('error', 'Warga ini sudah di desa Anda.');
@@ -112,13 +228,22 @@ class MutasiAdminController extends Controller
         $existing = MutasiPenduduk::where('user_id', $user->id)->where('status', 'pending')->first();
         if ($existing) return redirect()->back()->with('error', 'Warga ini sedang dalam proses mutasi.');
 
-        MutasiPenduduk::create([
+        $mutasi = MutasiPenduduk::create([
             'user_id' => $user->id,
             'from_region_id' => $user->region_id,
             'to_region_id' => $admin->region_id,
             'status' => 'pending',
             'requested_by' => 'admin',
             'reason' => $request->reason,
+        ]);
+
+        \App\Models\AdminNotification::create([
+            'type' => 'mutasi',
+            'title' => 'Permintaan Tarik Warga',
+            'message' => 'Desa pemohon mengajukan penarikan data warga ' . ($user->name ?? 'Warga') . '.',
+            'reference_id' => $mutasi->id,
+            'region_id' => $user->region_id,
+            'is_read' => false,
         ]);
 
         return redirect()->back()->with('success', 'Berhasil menarik data. Menunggu persetujuan desa asal.');
@@ -141,13 +266,22 @@ class MutasiAdminController extends Controller
         $existing = MutasiPenduduk::where('user_id', $user->id)->where('status', 'pending')->first();
         if ($existing) return redirect()->back()->with('error', 'Warga ini sedang dalam proses mutasi.');
 
-        MutasiPenduduk::create([
+        $mutasi = MutasiPenduduk::create([
             'user_id' => $user->id,
             'from_region_id' => $admin->region_id,
             'to_region_id' => $request->to_region_id,
             'status' => 'pending',
             'requested_by' => 'admin_asal',
             'reason' => $request->reason,
+        ]);
+
+        \App\Models\AdminNotification::create([
+            'type' => 'mutasi',
+            'title' => 'Pengajuan Mutasi Masuk',
+            'message' => 'Pengajuan pemindahan data warga ' . ($user->name ?? 'Warga') . ' ke desa Anda.',
+            'reference_id' => $mutasi->id,
+            'region_id' => $request->to_region_id,
+            'is_read' => false,
         ]);
 
         return redirect()->back()->with('success', 'Berhasil melempar data warga. Menunggu persetujuan desa tujuan.');

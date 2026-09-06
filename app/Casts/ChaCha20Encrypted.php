@@ -50,6 +50,11 @@ class ChaCha20Encrypted implements CastsAttributes
             return $value;
         }
 
+        if (!function_exists('sodium_crypto_aead_chacha20poly1305_ietf_decrypt')) {
+            Log::warning("ChaCha20: Libsodium extension tidak aktif di PHP environment ini.");
+            return $value;
+        }
+
         try {
             $encryptionKey = $this->deriveKey();
 
@@ -114,6 +119,11 @@ class ChaCha20Encrypted implements CastsAttributes
 
         // Cegah double-encryption
         if (str_starts_with($value, self::ENCRYPTED_PREFIX)) {
+            return $value;
+        }
+
+        if (!function_exists('sodium_crypto_aead_chacha20poly1305_ietf_encrypt')) {
+            Log::warning("ChaCha20: Libsodium extension tidak aktif di PHP environment ini.");
             return $value;
         }
 

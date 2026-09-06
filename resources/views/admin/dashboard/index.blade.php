@@ -1,5 +1,121 @@
 @extends('admin.layouts.admin')
 @section('content')
+<style>
+    .unit-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .unit-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+    }
+    .unit-avatar {
+        width: 44px;
+        height: 44px;
+    }
+    .unit-title {
+        font-size: 0.72rem;
+        line-height: 1.25;
+        min-height: 2.5em;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .unit-count {
+        font-size: 1.05rem;
+    }
+    .unit-label {
+        font-size: 0.7rem;
+        font-weight: 500;
+    }
+
+    @media (min-width: 576px) {
+        .unit-avatar {
+            width: 54px;
+            height: 54px;
+        }
+        .unit-title {
+            font-size: 0.8rem;
+            min-height: 2.4em;
+        }
+        .unit-count {
+            font-size: 1.25rem;
+        }
+        .unit-label {
+            font-size: 0.78rem;
+        }
+    }
+
+    @media (min-width: 992px) {
+        .unit-avatar {
+            width: 66px;
+            height: 66px;
+        }
+        .unit-title {
+            font-size: 0.85rem;
+        }
+        .unit-count {
+            font-size: 1.35rem;
+        }
+    }
+
+    .notif-request-card {
+        border-radius: 14px;
+        border: 1px solid #eef2f6;
+        background: #ffffff;
+        box-shadow: 0 2px 6px rgba(67, 89, 113, 0.04);
+        transition: all 0.2s ease-in-out;
+    }
+    .notif-request-card:hover {
+        border-color: #d2d8e0;
+        box-shadow: 0 6px 20px rgba(67, 89, 113, 0.09);
+        transform: translateY(-2px);
+    }
+    .notif-request-avatar {
+        width: 44px;
+        height: 44px;
+        min-width: 44px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    .notif-actions {
+        width: 100%;
+        padding-top: 10px;
+        border-top: 1px solid #f1f4f8;
+    }
+    .notif-meta-name {
+        max-width: 180px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    @media (min-width: 576px) {
+        .notif-meta-name {
+            max-width: 300px;
+        }
+    }
+    @media (min-width: 768px) {
+        .notif-actions {
+            width: auto;
+            padding-top: 0;
+            border-top: none;
+        }
+    }
+    @media (max-width: 575.98px) {
+        .notif-request-card {
+            padding: 12px 14px !important;
+        }
+        .notif-request-avatar {
+            width: 40px;
+            height: 40px;
+            min-width: 40px;
+            border-radius: 10px;
+        }
+    }
+</style>
     <div class="content-wrapper">
         <div class="container-xxl flex-grow-1 container-p-y">
 
@@ -276,52 +392,37 @@
                         if(isset($unitConfigs[$s])) $validServiceCount++;
                     }
                     
-                    $colClass = 'col-md-6';
-                    $isSquare = false;
+                    $colClass = 'col-6 col-md-6';
+                    $isSquare = true;
                     
                     if ($validServiceCount == 3) {
-                        $colClass = 'col-lg-4 col-md-6';
+                        $colClass = 'col-6 col-md-4 col-lg-4';
                         $isSquare = true;
                     } elseif ($validServiceCount >= 4) {
-                        $colClass = 'col-lg-3 col-md-4 col-sm-6';
+                        $colClass = 'col-6 col-md-4 col-lg-3';
                         $isSquare = true;
                     }
                 @endphp
             @if(in_array(auth()->user()->role, ['admin_desa', 'admin_rt', 'admin_rw']))
-            <div class="row mb-4">
+            <div class="row g-2 g-sm-3 mb-4">
                 @foreach($activeServicesList as $serviceName)
                     @if(isset($unitConfigs[$serviceName]))
                         @php $config = $unitConfigs[$serviceName]; @endphp
-                        <div class="{{ $colClass }} mb-4">
-                            <div class="card unit-card h-100 border-{{ $config['color'] }} hover-lift" style="border-top: 3px solid; cursor: pointer;"
+                        <div class="{{ $colClass }}">
+                            <div class="card unit-card h-100 border-{{ $config['color'] }} hover-lift shadow-sm rounded-3" style="border-top: 3px solid; cursor: pointer;"
                                 onclick="window.location='{{ $config['route'] }}'">
-                                
-                                @if($isSquare)
-                                    <!-- Layout Kotak (Vertical) -->
-                                    <div class="card-body p-4 d-flex flex-column align-items-center justify-content-center text-center">
-                                        <div class="avatar mb-3" style="width: 70px; height: 70px;">
-                                            <img src="{{ $config['image'] }}" alt="{{ $config['title'] }}" class="rounded w-100" />
-                                        </div>
-                                        <div class="mt-2">
-                                            <span class="fw-semibold d-block mb-2 text-muted" style="font-size: 0.85rem; line-height: 1.2; min-height: 2em;">{{ $config['title'] }}</span>
-                                            <h4 class="card-title mb-0 text-{{ $config['color'] }}"><span class="count-up fw-bold" data-value="{{ $config['count'] }}">0</span> <span class="fs-6 text-body">{{ $config['label'] }}</span></h4>
-                                        </div>
+                                <div class="card-body p-2 p-sm-3 p-md-4 d-flex flex-column align-items-center justify-content-center text-center">
+                                    <div class="avatar mb-2 mb-sm-3 unit-avatar">
+                                        <img src="{{ $config['image'] }}" alt="{{ $config['title'] }}" class="rounded w-100 h-100 object-fit-contain" />
                                     </div>
-                                @else
-                                    <!-- Layout Memanjang (Horizontal) -->
-                                    <div class="card-body p-4 d-flex align-items-center">
-                                        <div class="avatar flex-shrink-0 me-3" style="width: 65px; height: 65px;">
-                                            <img src="{{ $config['image'] }}" alt="{{ $config['title'] }}" class="rounded w-100" />
-                                        </div>
-                                        <div class="flex-grow-1">
-                                            <span class="fw-semibold d-block mb-1 text-muted">{{ $config['title'] }}</span>
-                                            <h4 class="card-title mb-0"><span class="count-up" data-value="{{ $config['count'] }}">0</span> {{ $config['label'] }}</h4>
-                                        </div>
-                                        <div class="d-flex align-items-center justify-content-center bg-label-{{ $config['color'] }} rounded ms-3 flex-shrink-0" style="width: 36px; height: 36px;">
-                                            <i class="bx bx-chevron-right text-{{ $config['color'] }}"></i>
-                                        </div>
+                                    <div class="mt-1 w-100">
+                                        <span class="fw-semibold d-block mb-1 text-muted unit-title">{{ $config['title'] }}</span>
+                                        <h4 class="card-title mb-0 text-{{ $config['color'] }} unit-count">
+                                            <span class="count-up fw-bold" data-value="{{ $config['count'] }}">0</span> 
+                                            <span class="unit-label text-body">{{ $config['label'] }}</span>
+                                        </h4>
                                     </div>
-                                @endif
+                                </div>
                             </div>
                         </div>
                     @endif
@@ -332,107 +433,128 @@
                 <!-- Bagian Notifikasi -->
                 <div class="row mb-4">
                     <div class="col-12">
-                        <div class="card shadow-sm border-0 rounded-4">
-                            <div class="card-header bg-white py-3 border-bottom px-4">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <h5 class="mb-1 fw-bold d-flex align-items-center text-primary">
-                                            <span class="badge badge-center rounded-pill bg-primary-subtle text-primary me-2"
-                                                style="width: 32px; height: 32px;">
-                                                <i class="bx bx-bell fs-5"></i>
-                                            </span>
+                        <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
+                            <div class="card-header bg-white py-3 border-bottom px-3 px-sm-4">
+                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="badge badge-center rounded-pill bg-label-primary text-primary"
+                                            style="width: 32px; height: 32px;">
+                                            <i class="bx bx-bell fs-6"></i>
+                                        </span>
+                                        <h5 class="mb-0 fw-bold text-dark fs-6 fs-sm-5">
                                             Notifikasi Permintaan
                                         </h5>
                                     </div>
-                                    <a href="{{ route('admin.aktivitas.permintaan-pengajuan.index') }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                    <a href="{{ route('admin.aktivitas.permintaan-pengajuan.index') }}" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-semibold shadow-none" style="font-size: 0.8rem;">
                                         Lihat Semua <i class="bx bx-right-arrow-alt ms-1"></i>
                                     </a>
                                 </div>
                             </div>
-                            <div class="card-body p-0">
-                                <div class="list-group list-group-flush border-0">
-                                    @forelse($latestRequests as $request)
-                                        @php
-                                            $icon = 'bx-bell';
-                                            $bgClass = 'bg-primary-subtle text-primary';
-                                            $badgeClass = 'bg-primary text-white';
-                                            $serviceName = 'Umum';
-                                            $detailLink = route('admin.aktivitas.permintaan-pengajuan.show', [$request->id, $request->type ?? 'rental']);
-                                            $canQuickAction = in_array($request->type, ['rental', 'gas', 'mobil', 'fasilitas_umum']);
-                                            
-                                            if ($request->type == 'rental') {
-                                                $icon = 'bx-wrench'; $bgClass = 'bg-warning-subtle text-warning'; $badgeClass = 'bg-warning text-white'; $serviceName = 'Penyewaan Alat';
-                                            } elseif ($request->type == 'gas') {
-                                                $icon = 'bxs-gas-pump'; $bgClass = 'bg-danger-subtle text-danger'; $badgeClass = 'bg-danger text-white'; $serviceName = 'Penjualan Gas';
-                                            } elseif ($request->type == 'mobil') {
-                                                $icon = 'bx-car'; $bgClass = 'bg-info-subtle text-info'; $badgeClass = 'bg-info text-white'; $serviceName = 'Penyewaan Mobil';
-                                            } elseif ($request->type == 'fasilitas_umum') {
-                                                $icon = 'bx-building-house'; $bgClass = 'bg-success-subtle text-success'; $badgeClass = 'bg-success text-white'; $serviceName = 'Fasilitas Umum';
-                                            } elseif ($request->type == 'pasar_daerah') {
-                                                $icon = 'bx-store-alt'; $bgClass = 'bg-primary-subtle text-primary'; $badgeClass = 'bg-primary text-white'; $serviceName = 'Pasar Daerah';
-                                                $detailLink = Route::has('admin.unit.pasar_daerah.pesanan.show') ? route('admin.unit.pasar_daerah.pesanan.show', $request->id) : '#';
-                                            } elseif ($request->type == 'laporan') {
-                                                $icon = 'bx-message-error'; $bgClass = 'bg-dark-subtle text-dark'; $badgeClass = 'bg-dark text-white'; $serviceName = 'Pelaporan Warga';
-                                                $detailLink = Route::has('admin.laporan.show') ? route('admin.laporan.show', $request->id) : '#';
-                                            }
-                                            
-                                            $requestName = $request->full_name ?? $request->recipient_name ?? $request->user->name ?? 'User';
-                                        @endphp
+                            <div class="card-body p-3 p-sm-4" style="background-color: #fbfcfd;">
+                                @forelse($latestRequests as $request)
+                                    @php
+                                        $icon = 'bx-bell';
+                                        $bgClass = 'bg-label-primary text-primary';
+                                        $badgeClass = 'bg-label-primary';
+                                        $serviceName = 'Umum';
+                                        $detailLink = route('admin.aktivitas.permintaan-pengajuan.show', [$request->id, $request->type ?? 'rental']);
+                                        $canQuickAction = in_array($request->type, ['rental', 'gas', 'mobil', 'fasilitas_umum']);
                                         
-                                        <div class="list-group-item list-group-item-action d-flex align-items-center p-4 border-bottom-0 border-top" style="gap: 1.25rem; transition: all 0.2s ease;">
-                                            <!-- Icon / Avatar -->
-                                            <div class="avatar flex-shrink-0" style="width: 48px; height: 48px;">
-                                                <span class="avatar-initial rounded-circle {{ $bgClass }} shadow-sm">
+                                        if ($request->type == 'rental') {
+                                            $icon = 'bx-wrench'; $bgClass = 'bg-label-warning text-warning'; $badgeClass = 'bg-label-warning'; $serviceName = 'Penyewaan Alat';
+                                        } elseif ($request->type == 'gas') {
+                                            $icon = 'bxs-gas-pump'; $bgClass = 'bg-label-danger text-danger'; $badgeClass = 'bg-label-danger'; $serviceName = 'Penjualan Gas';
+                                        } elseif ($request->type == 'mobil') {
+                                            $icon = 'bx-car'; $bgClass = 'bg-label-info text-info'; $badgeClass = 'bg-label-info'; $serviceName = 'Penyewaan Mobil';
+                                        } elseif ($request->type == 'fasilitas_umum') {
+                                            $icon = 'bx-building-house'; $bgClass = 'bg-label-success text-success'; $badgeClass = 'bg-label-success'; $serviceName = 'Fasilitas Umum';
+                                        } elseif ($request->type == 'pasar_daerah') {
+                                            $icon = 'bx-store-alt'; $bgClass = 'bg-label-primary text-primary'; $badgeClass = 'bg-label-primary'; $serviceName = 'Pasar Daerah';
+                                            $detailLink = Route::has('admin.unit.pasar_daerah.pesanan.show') ? route('admin.unit.pasar_daerah.pesanan.show', $request->id) : '#';
+                                        } elseif ($request->type == 'laporan') {
+                                            $icon = 'bx-message-error'; $bgClass = 'bg-label-secondary text-secondary'; $badgeClass = 'bg-label-secondary'; $serviceName = 'Pelaporan Warga';
+                                            $detailLink = Route::has('admin.pelaporan.show') ? route('admin.pelaporan.show', $request->id) : (Route::has('admin.laporan.show') ? route('admin.laporan.show', $request->id) : '#');
+                                        } elseif ($request->type == 'kyc') {
+                                            $icon = 'bx-id-card'; $bgClass = 'bg-label-info text-info'; $badgeClass = 'bg-label-info'; $serviceName = 'Verifikasi Identitas';
+                                            $detailLink = route('admin.kyc.show', $request->id);
+                                        } elseif ($request->type == 'mutasi') {
+                                            $icon = 'bx-user-pin'; $bgClass = 'bg-label-secondary text-secondary'; $badgeClass = 'bg-label-secondary'; $serviceName = 'Mutasi Penduduk';
+                                            $detailLink = route('admin.warga.mutasi.index');
+                                        }
+                                        
+                                        $requestName = $request->full_name ?? $request->recipient_name ?? $request->name_from_ocr ?? $request->user->name ?? 'Warga';
+                                    @endphp
+                                    
+                                    <div class="notif-request-card p-3 p-sm-3 {{ !$loop->last ? 'mb-3' : '' }}">
+                                        <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3">
+                                            <!-- Bagian Kiri: Avatar + Detail Pengajuan -->
+                                            <div class="d-flex align-items-start align-items-sm-center gap-3 min-w-0 w-100 flex-grow-1">
+                                                <!-- Avatar Icon -->
+                                                <div class="notif-request-avatar {{ $bgClass }} shadow-xs">
                                                     <i class="bx {{ $icon }} fs-4"></i>
-                                                </span>
+                                                </div>
+                                                
+                                                <!-- Info Teks -->
+                                                <div class="min-w-0 flex-grow-1">
+                                                    <div class="d-flex align-items-center flex-wrap gap-2 mb-1">
+                                                        <h6 class="mb-0 fw-bold text-dark text-break" style="font-size: 0.92rem; line-height: 1.35;">
+                                                            {{ $request->item_name }}
+                                                        </h6>
+                                                        <span class="badge {{ $badgeClass }} rounded-pill px-2 py-1 shadow-none" style="font-size: 0.68rem; font-weight: 700; letter-spacing: 0.3px;">
+                                                            {{ strtoupper($serviceName) }}
+                                                        </span>
+                                                        @if(isset($request->cancellation_status) && $request->cancellation_status == 'pending')
+                                                            <span class="badge bg-label-danger rounded-pill px-2 py-1 shadow-none" style="font-size: 0.68rem; font-weight: 700;">
+                                                                <i class="bx bx-error-circle me-1"></i>MINTA BATAL
+                                                            </span>
+                                                        @endif
+                                                    </div>
+                                                    
+                                                    <div class="d-flex align-items-center flex-wrap gap-2 gap-sm-3 text-muted" style="font-size: 0.8rem;">
+                                                        <span class="d-inline-flex align-items-center text-secondary text-break">
+                                                            <i class="bx bx-user me-1 text-secondary fs-6"></i>
+                                                            <span class="fw-semibold text-secondary notif-meta-name">{{ $requestName }}</span>
+                                                        </span>
+                                                        <span class="d-inline-flex align-items-center text-muted">
+                                                            <i class="bx bx-time-five me-1 text-secondary fs-6"></i>
+                                                            <span>{{ $request->created_at->diffForHumans() }}</span>
+                                                        </span>
+                                                    </div>
+                                                </div>
                                             </div>
                                             
-                                            <!-- Info -->
-                                            <div class="flex-grow-1" style="min-width: 0;">
-                                                <div class="d-flex align-items-center mb-1 gap-2 flex-wrap">
-                                                    <h6 class="mb-0 fw-bold text-dark text-truncate">{{ $request->item_name }}</h6>
-                                                    <span class="badge {{ $badgeClass }} rounded-pill px-2 shadow-sm" style="font-size: 0.65rem; letter-spacing: 0.5px;">
-                                                        {{ strtoupper($serviceName) }}
-                                                    </span>
-                                                    @if(isset($request->cancellation_status) && $request->cancellation_status == 'pending')
-                                                        <span class="badge bg-danger rounded-pill px-2 shadow-sm" style="font-size: 0.65rem; letter-spacing: 0.5px;"><i class="bx bx-error-circle me-1"></i>MINTA BATAL</span>
-                                                    @endif
-                                                </div>
-                                                <div class="d-flex align-items-center text-muted small gap-3 flex-wrap">
-                                                    <span class="d-flex align-items-center"><i class="bx bx-user me-1 text-secondary"></i> <span class="fw-medium">{{ $requestName }}</span></span>
-                                                    <span class="d-flex align-items-center"><i class="bx bx-time-five me-1 text-secondary"></i> {{ $request->created_at->diffForHumans() }}</span>
-                                                </div>
-                                            </div>
-                                            
-                                            <!-- Action Buttons -->
-                                            <div class="d-flex gap-2 flex-shrink-0">
-                                                <a href="{{ $detailLink }}" class="btn btn-sm btn-white rounded-pill px-3 shadow-sm text-primary fw-bold border">
-                                                    Lihat Detail <i class="bx bx-right-arrow-alt ms-1"></i>
+                                            <!-- Bagian Kanan: Tombol Aksi -->
+                                            <div class="notif-actions d-flex align-items-center justify-content-end gap-2 flex-shrink-0">
+                                                <a href="{{ $detailLink }}" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-semibold shadow-none d-inline-flex align-items-center" style="font-size: 0.78rem;">
+                                                    <span>Lihat Detail</span>
+                                                    <i class="bx bx-right-arrow-alt ms-1 fs-6"></i>
                                                 </a>
                                                 
                                                 @if($canQuickAction)
                                                     @if(isset($request->cancellation_status) && $request->cancellation_status == 'pending')
-                                                        <button type="button" class="btn btn-sm btn-success rounded-pill px-3 shadow-sm fw-bold" onclick="handleCancellation({{ $request->id }}, '{{ $request->type }}', 'approve')">
-                                                            <i class="bx bx-check me-1"></i> Setujui Batal
+                                                        <button type="button" class="btn btn-sm btn-success rounded-pill px-3 fw-bold shadow-sm d-inline-flex align-items-center" style="font-size: 0.78rem;" onclick="handleCancellation({{ $request->id }}, '{{ $request->type }}', 'approve')">
+                                                            <i class="bx bx-check me-1 fs-6"></i>
+                                                            <span>Setujui Batal</span>
                                                         </button>
                                                     @elseif($request->status == 'pending' || $request->status == 'waiting')
-                                                        <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm fw-bold" onclick="approveRequest({{ $request->id }}, '{{ $request->type }}')">
-                                                            <i class="bx bx-check me-1"></i> Proses
+                                                        <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 fw-bold shadow-sm d-inline-flex align-items-center" style="font-size: 0.78rem;" onclick="approveRequest({{ $request->id }}, '{{ $request->type }}')">
+                                                            <i class="bx bx-check me-1 fs-6"></i>
+                                                            <span>Proses</span>
                                                         </button>
                                                     @endif
                                                 @endif
                                             </div>
                                         </div>
-                                    @empty
-                                        <div class="p-5 text-center">
-                                            <div class="bg-label-primary rounded-circle d-inline-flex p-4 mb-3 shadow-sm">
-                                                <i class="bx bx-bell-off fs-1 text-primary"></i>
-                                            </div>
-                                            <h5 class="fw-bold text-dark mb-1">Belum Ada Notifikasi</h5>
-                                            <p class="text-muted mb-0">Saat ini tidak ada permintaan layanan yang perlu diproses.</p>
+                                    </div>
+                                @empty
+                                    <div class="py-5 px-3 text-center bg-white rounded-3 border">
+                                        <div class="bg-label-primary rounded-circle d-inline-flex p-3 mb-3 shadow-sm">
+                                            <i class="bx bx-bell-off fs-2 text-primary"></i>
                                         </div>
-                                    @endforelse
-                                </div>
+                                        <h6 class="fw-bold text-dark mb-1">Belum Ada Notifikasi</h6>
+                                        <p class="text-muted mb-0 small">Saat ini tidak ada permintaan layanan yang perlu diproses.</p>
+                                    </div>
+                                @endforelse
                             </div>
                         </div>
                     </div>

@@ -36,6 +36,7 @@ class ManualReport extends Model
         'payment_method',
         'transaction_date',
         'created_by',
+        'region_id',
         'proof_image'
     ];
 
@@ -109,7 +110,10 @@ class ManualReport extends Model
         $badges = [
             'penyewaan' => 'warning',
             'gas' => 'danger',
-            'lainnya' => 'info'
+            'mobil' => 'primary',
+            'fasilitas' => 'info',
+            'pasar' => 'success',
+            'lainnya' => 'secondary'
         ];
 
         return $badges[$this->category] ?? 'secondary';
@@ -123,9 +127,12 @@ class ManualReport extends Model
         $labels = [
             'penyewaan' => 'Penyewaan Alat',
             'gas' => 'Penjualan Gas',
-            'lainnya' => 'Lainnya'
+            'mobil' => 'Penyewaan Mobil',
+            'fasilitas' => 'Fasilitas Umum',
+            'pasar' => 'Pasar Daerah',
+            'lainnya' => 'Pendapatan Lainnya'
         ];
 
-        return $labels[$this->category] ?? $this->category;
+        return $labels[$this->category] ?? ucfirst($this->category);
     }
 }

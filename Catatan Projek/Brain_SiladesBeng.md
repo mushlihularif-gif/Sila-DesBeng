@@ -885,5 +885,22 @@ Sebagai bagian dari tugas akademik dan wawasan untuk *Future Work*, sistem SilaD
 3. **Perlindungan Infrastruktur dan File Konfigurasi (Metode: *AI-based WAF / IPS*)**
    - **Alur:** AI membaca lalu lintas jaringan menuju server kabupaten secara *real-time*. Jika mendeteksi ada pengunjung yang berulang kali mencoba menebak rute folder (*directory traversal*) untuk mencuri *file* .env, AI otomatis memblokir IP peretas secara permanen.
    - **Algoritma:** Menggunakan *Deep Learning* seperti **LSTM (Long Short-Term Memory)** atau **CNN** yang pintar menganalisis pola rentetan jejak aktivitas (*log server*) untuk mengenali serangan otomatis (*bots/brute-force*).
- 
- 
+
+### 8.13 Siklus Hidup Verifikasi Identitas (KYC) & Proteksi Data Anti-Kebocoran
+**Tanggal Penetapan:** 6 September 2026  
+**Status:** SELESAI & AKTIF
+
+1. **Prinsip Nol Data Mengendap (Zero-Leak Lifecycle):**
+   - Pengajuan verifikasi identitas memiliki siklus status bertahap: `draft` -> `pending` -> `approved` / `rejected`.
+   - **Langkah 1 (Scan KTP):** Saat warga mengunggah e-KTP dan sistem melakukan OCR, status data dicatat sebagai `draft`. Pada fase ini, data **BELUM DITERIMA** sebagai permohonan aktif, **TIDAK MUNCUL** di halaman Verifikasi Identitas Admin (`/admin/kyc`), **TIDAK MASUK** ke Notifikasi Navbar (`AdminNotification`), dan **TIDAK MUNCUL** pada antrean permintaan di Beranda Dashboard.
+   - **Langkah 2 (Scan Wajah / Selfie & Kirim):** Hanya ketika warga telah menuntaskan pemindaian wajah / deteksi keaslian (liveness) dan menekan tombol kirim formulir (`submit`), status data beralih menjadi `pending` dan notifikasi resmi baru diterbitkan ke admin desa terkait.
+
+2. **Pembersihan Otomatis Berkas Draf Terbengkalai:**
+   - Apabila warga mengulang proses atau keluar sebelum menyelesaikan scan wajah, sistem otomatis menghapus rekaman draf sebelumnya beserta berkas fisik terenkripsi (`Storage::disk('private')->delete()`).
+   - Terdapat perintah otomatis terjadwal (`kyc:clean-drafts`) yang dieksekusi secara berkala (hourly) untuk menghancurkan berkas dan data draf yang terbengkalai lebih dari 2 jam guna mencegah penumpukan data di server dan meniadakan celah pencurian data pribadi.
+
+3. **Prinsip Burn After Reading (Pasca Verifikasi):**
+   - Begitu admin menyetujui (`approve`) atau menolak (`reject`) permohonan verifikasi:
+     - Berkas foto fisik e-KTP dan foto wajah terenkripsi langsung dihapus permanen dari penyimpanan server.
+     - Kolom path foto dan data frame biometrik (`face_scan_data`) dikosongkan (`null`).
+     - Data pribadi warga (NIK dan Nama) langsung disensor/masking dan dienkripsi kuat menggunakan ChaCha20 dengan blind indexing SHA-256 (`nik_hash`).

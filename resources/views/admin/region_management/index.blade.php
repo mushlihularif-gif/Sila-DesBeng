@@ -13,7 +13,7 @@
     }
     .accordion-button:not(.collapsed) {
         background-color: #f8f9fa;
-        color: #0d6efd; /* Adjusted to true blue */
+        color: #0d6efd;
         font-weight: 600;
         box-shadow: none;
     }
@@ -37,6 +37,26 @@
         border-left: 4px solid #0d6efd;
         box-shadow: 0 4px 12px rgba(0,0,0,0.03);
     }
+    @media (min-width: 768px) {
+        .border-start-md {
+            border-left: 1px solid #e9ecef !important;
+        }
+        .border-top-md-0 {
+            border-top: 0 !important;
+        }
+        .banner-add-btn {
+            width: auto !important;
+            white-space: nowrap;
+        }
+    }
+    @media (max-width: 767.98px) {
+        .border-start-md {
+            border-left: 0 !important;
+        }
+        .banner-add-btn {
+            width: 100% !important;
+        }
+    }
 </style>
 @endsection
 
@@ -58,32 +78,35 @@
 
     <!-- Banner Modern -->
     <div class="card bg-label-primary border-0 shadow-none mb-4" style="border-radius: 12px;">
-        <div class="card-body d-flex align-items-center justify-content-between p-4 flex-wrap gap-3">
-            <div class="d-flex align-items-center">
-                <div class="me-3">
-                    <div class="bg-primary p-3 rounded-circle text-white d-flex align-items-center justify-content-center shadow-sm" style="width: 56px; height: 56px;">
-                        <i class="bx bx-map-alt fs-3"></i>
+        <div class="card-body p-3 p-md-4">
+            <div class="row align-items-center g-3">
+                <div class="col-12 col-md d-flex align-items-center">
+                    <div class="me-3 flex-shrink-0">
+                        <div class="bg-primary p-2 p-md-3 rounded-circle text-white d-flex align-items-center justify-content-center shadow-sm" style="width: 52px; height: 52px;">
+                            <i class="bx bx-map-alt fs-3"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-1 text-primary">Manajemen Wilayah: {{ $parentRegion->name }}</h5>
+                        @php
+                            $childLevelText = '';
+                            if($parentRegion->type == 'kabupaten') $childLevelText = '(Kecamatan)';
+                            elseif($parentRegion->type == 'kecamatan') $childLevelText = '(Desa/Kelurahan)';
+                            elseif(in_array($parentRegion->type, ['desa', 'kelurahan'])) $childLevelText = '(Dusun/RW)';
+                            elseif($parentRegion->type == 'rw') $childLevelText = '(RT)';
+                            else $childLevelText = 'di bawahnya';
+                        @endphp
+                        <p class="mb-0 text-primary small" style="opacity: 0.85;">
+                            Kelola hierarki wilayah {{ $childLevelText }} beserta akun kepengurusannya secara terpusat.
+                        </p>
                     </div>
                 </div>
-                <div>
-                    <h5 class="fw-bold mb-1 text-primary">Manajemen Wilayah: {{ $parentRegion->name }}</h5>
-                    @php
-                        $childLevelText = '';
-                        if($parentRegion->type == 'kabupaten') $childLevelText = '(Kecamatan)';
-                        elseif($parentRegion->type == 'kecamatan') $childLevelText = '(Desa/Kelurahan)';
-                        elseif(in_array($parentRegion->type, ['desa', 'kelurahan'])) $childLevelText = '(Dusun/RW)';
-                        elseif($parentRegion->type == 'rw') $childLevelText = '(RT)';
-                        else $childLevelText = 'di bawahnya';
-                    @endphp
-                    <p class="mb-0 text-primary" style="opacity: 0.85;">
-                        Kelola hierarki wilayah {{ $childLevelText }} beserta akun kepengurusannya secara terpusat.
-                    </p>
+                <div class="col-12 col-md-auto text-md-end">
+                    <button type="button" class="btn btn-primary rounded-pill px-4 shadow-sm banner-add-btn" data-bs-toggle="modal" data-bs-target="#addRegionModal">
+                        <i class="bx bx-plus me-1"></i> Tambah Wilayah
+                    </button>
                 </div>
             </div>
-            
-            <button type="button" class="btn btn-primary rounded-pill px-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#addRegionModal">
-                <i class="bx bx-plus me-1"></i> Tambah Wilayah
-            </button>
         </div>
     </div>
 
@@ -97,30 +120,40 @@
                         @endphp
                         <div class="accordion-item card mb-3 shadow-sm border-0">
                             <h2 class="accordion-header" id="heading{{ $child->id }}">
-                                <button class="accordion-button collapsed py-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ $child->id }}" aria-expanded="false" aria-controls="collapse{{ $child->id }}">
-                                    <div class="d-flex align-items-center w-100 pe-3">
-                                        <div class="avatar avatar-sm me-3">
-                                            <span class="avatar-initial rounded-circle bg-label-primary"><i class="bx bx-map"></i></span>
+                                <button class="accordion-button collapsed py-3 px-3 px-sm-4" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ $child->id }}" aria-expanded="false" aria-controls="collapse{{ $child->id }}">
+                                    <div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between w-100 pe-2 pe-sm-3 gap-2">
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar avatar-sm me-2 me-sm-3 flex-shrink-0">
+                                                <span class="avatar-initial rounded-circle bg-label-primary"><i class="bx bx-map"></i></span>
+                                            </div>
+                                            <div>
+                                                <div class="d-flex align-items-center gap-2 flex-wrap">
+                                                    <h6 class="mb-0 text-dark fw-bold text-nowrap">{{ $child->name }}</h6>
+                                                    <span class="badge bg-label-secondary text-uppercase px-2 py-0" style="font-size: 0.68rem; line-height: 1.4;">{{ $child->type }}</span>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="me-auto">
-                                            <h6 class="mb-0 text-dark">{{ $child->name }}</h6>
-                                            <small class="text-muted text-uppercase">{{ $child->type }}</small>
-                                        </div>
-                                        <div class="d-flex gap-2">
+                                        <div class="d-flex flex-wrap gap-2 align-items-center ms-sm-auto mt-1 mt-sm-0">
                                             @if($child->type != 'rt')
-                                                <span class="badge bg-label-info px-3 py-2 rounded-pill d-inline-flex align-items-center justify-content-center">{{ $child->children->count() }} Sub-Wilayah Terdaftar</span>
+                                                <span class="badge bg-label-info px-2 px-sm-3 py-1 py-sm-2 rounded-pill d-inline-flex align-items-center" style="font-size: 0.75rem;">
+                                                    <i class='bx bx-sitemap me-1 d-none d-sm-inline'></i>{{ $child->children->count() }} Sub-Wilayah
+                                                </span>
                                             @endif
                                             @if($childAdmins->count() > 0)
-                                                <span class="badge bg-label-success px-3 py-2 rounded-pill d-inline-flex align-items-center justify-content-center"><i class='bx bx-check-circle me-1'></i> Akun Aktif</span>
+                                                <span class="badge bg-label-success px-2 px-sm-3 py-1 py-sm-2 rounded-pill d-inline-flex align-items-center" style="font-size: 0.75rem;">
+                                                    <i class='bx bx-check-circle me-1'></i> Akun Aktif
+                                                </span>
                                             @else
-                                                <span class="badge bg-label-warning px-3 py-2 rounded-pill d-inline-flex align-items-center justify-content-center"><i class='bx bx-error-circle me-1'></i> Belum Ada Akun</span>
+                                                <span class="badge bg-label-warning px-2 px-sm-3 py-1 py-sm-2 rounded-pill d-inline-flex align-items-center" style="font-size: 0.75rem;">
+                                                    <i class='bx bx-error-circle me-1'></i> Belum Ada Akun
+                                                </span>
                                             @endif
                                         </div>
                                     </div>
                                 </button>
                             </h2>
                             <div id="collapse{{ $child->id }}" class="accordion-collapse collapse" aria-labelledby="heading{{ $child->id }}" data-bs-parent="#regionAccordion">
-                                <div class="accordion-body border-top p-4">
+                                <div class="accordion-body border-top p-3 p-md-4">
                                     
                                     <div class="row">
                                         @if($child->type == 'rt')
@@ -167,7 +200,7 @@
                                             </div>
                                         </div>
 
-                                        <div class="col-md-6 border-start">
+                                        <div class="col-md-6 border-start-md border-top border-top-md-0 pt-4 pt-md-0 mt-3 mt-md-0">
                                             <div class="ps-md-3">
                                                 <h6 class="fw-semibold mb-3"><i class="bx bx-info-circle text-primary me-1"></i> Detail Wilayah</h6>
                                                 
@@ -288,78 +321,77 @@
 
                                         <!-- Kolom Kanan: Daftar Sub-Wilayah -->
                                         @php
-                                            $subType = '';
-                                            if($child->type == 'kabupaten') $subType = 'kecamatan';
-                                            elseif($child->type == 'kecamatan') $subType = 'desa';
-                                            elseif(in_array($child->type, ['desa', 'kelurahan'])) $subType = 'rw';
-                                            elseif($child->type == 'rw') $subType = 'rt';
-                                        @endphp
-                                        <div class="col-md-7 border-start">
-                                            <div class="d-flex align-items-center justify-content-between mb-3 ps-md-3">
-                                                <h6 class="fw-semibold mb-0">Daftar Sub-Wilayah ({{ strtoupper($subType) }})</h6>
-                                                <div class="d-flex gap-2">
-                                                    <a href="{{ route('admin.kelola-wilayah.index', $child->id) }}" class="btn btn-sm btn-outline-primary rounded-pill">
-                                                        <i class="bx bx-show me-1"></i> Lihat Detail
-                                                    </a>
-                                                    <button type="button" class="btn btn-sm btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#addRegionModal{{ $child->id }}">
-                                                        <i class="bx bx-plus me-1"></i> Tambah {{ strtoupper($subType) }}
-                                                    </button>
-                                                </div>
-                                            </div>
+                                             $subType = '';
+                                             if($child->type == 'kabupaten') $subType = 'kecamatan';
+                                             elseif($child->type == 'kecamatan') $subType = 'desa';
+                                             elseif(in_array($child->type, ['desa', 'kelurahan'])) $subType = 'rw';
+                                             elseif($child->type == 'rw') $subType = 'rt';
+                                         @endphp
+                                         <div class="col-md-7 border-start-md border-top border-top-md-0 pt-4 pt-md-0 mt-3 mt-md-0 ps-md-3">
+                                             <div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between gap-2 mb-3">
+                                                 <h6 class="fw-semibold mb-0">Daftar Sub-Wilayah ({{ strtoupper($subType) }})</h6>
+                                                 <div class="d-flex gap-2 w-100 w-sm-auto">
+                                                     <a href="{{ route('admin.kelola-wilayah.index', $child->id) }}" class="btn btn-sm btn-outline-primary rounded-pill flex-fill flex-sm-grow-0 text-nowrap">
+                                                         <i class="bx bx-show me-1"></i> Lihat Detail
+                                                     </a>
+                                                     <button type="button" class="btn btn-sm btn-primary rounded-pill flex-fill flex-sm-grow-0 text-nowrap" data-bs-toggle="modal" data-bs-target="#addRegionModal{{ $child->id }}">
+                                                         <i class="bx bx-plus me-1"></i> Tambah {{ strtoupper($subType) }}
+                                                     </button>
+                                                 </div>
+                                             </div>
 
-                                            <div class="ps-md-3">
-                                                @if($child->children->count() > 0)
-                                                    <div class="list-group list-group-flush">
-                                                        @foreach($child->children as $sub)
-                                                            @php
-                                                                $subAdmin = $sub->users->whereIn('role', $adminRoles)->first();
-                                                            @endphp
-                                                            <div class="list-group-item d-flex justify-content-between align-items-center p-3 region-card mb-2 rounded-3">
-                                                                <div class="d-flex align-items-center">
-                                                                    <!-- Avatar Sub -->
-                                                                    <div class="avatar avatar-sm me-3 shadow-sm rounded-circle overflow-hidden">
-                                                                        @if ($subAdmin && $subAdmin->file)
-                                                                            <img src="{{ $subAdmin->file->file_stream }}" alt="Avatar" class="w-100 h-100" style="object-fit: cover;">
-                                                                        @elseif ($subAdmin && $subAdmin->avatar)
-                                                                            <img src="{{ asset('storage/' . $subAdmin->avatar) }}" alt="Avatar" class="w-100 h-100" style="object-fit: cover;">
-                                                                        @else
-                                                                            <span class="avatar-initial rounded-circle bg-label-secondary text-primary"><i class="bx bx-user"></i></span>
-                                                                        @endif
-                                                                    </div>
-                                                                    <div>
-                                                                        <h6 class="mb-0 text-dark">{{ $sub->name }}</h6>
-                                                                        @if($subAdmin)
-                                                                            <small class="text-success"><i class='bx bx-check-circle'></i> Ada Pengurus ({{ $subAdmin->name }})</small>
-                                                                        @else
-                                                                            <small class="text-warning"><i class='bx bx-error-circle'></i> Belum Ada Akun</small>
-                                                                        @endif
-                                                                    </div>
-                                                                </div>
-                                                                <div class="d-flex gap-2">
-                                                                    @if(!$subAdmin)
-                                                                        <button type="button" class="btn btn-sm rounded-circle px-2" style="background: #e8f0fe; color: #0d6efd; border: none;" data-bs-toggle="modal" data-bs-target="#generateAdminModal{{ $sub->id }}" title="Buat Akun">
-                                                                            <i class="bx bx-user-plus"></i>
-                                                                        </button>
-                                                                    @else
-                                                                        <form action="{{ route('admin.kelola-wilayah.destroy-admin', $subAdmin->id) }}" method="POST" onsubmit="return confirm('Yakin hapus akun pengurus ini?');">
-                                                                            @csrf @method('DELETE')
-                                                                            <button type="submit" class="btn btn-sm rounded-circle px-2" style="background: #ffe0db; color: #ff3e1d; border: none;" title="Hapus Akun"><i class="bx bx-user-x"></i></button>
-                                                                        </form>
-                                                                    @endif
-                                                                    
-                                                                    <button type="button" class="btn btn-sm rounded-circle px-2" style="background: #e8f0fe; color: #0d6efd; border: none;" data-bs-toggle="modal" data-bs-target="#editRegionModal{{ $sub->id }}" title="Edit Nama">
-                                                                        <i class="bx bx-edit-alt"></i>
-                                                                   </button>
+                                             <div>
+                                                 @if($child->children->count() > 0)
+                                                     <div class="list-group list-group-flush">
+                                                         @foreach($child->children as $sub)
+                                                             @php
+                                                                 $subAdmin = $sub->users->whereIn('role', $adminRoles)->first();
+                                                             @endphp
+                                                             <div class="list-group-item d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2 p-3 region-card mb-2 rounded-3">
+                                                                 <div class="d-flex align-items-center">
+                                                                     <!-- Avatar Sub -->
+                                                                     <div class="avatar avatar-sm me-3 shadow-sm rounded-circle overflow-hidden flex-shrink-0">
+                                                                         @if ($subAdmin && $subAdmin->file)
+                                                                             <img src="{{ $subAdmin->file->file_stream }}" alt="Avatar" class="w-100 h-100" style="object-fit: cover;">
+                                                                         @elseif ($subAdmin && $subAdmin->avatar)
+                                                                             <img src="{{ asset('storage/' . $subAdmin->avatar) }}" alt="Avatar" class="w-100 h-100" style="object-fit: cover;">
+                                                                         @else
+                                                                             <span class="avatar-initial rounded-circle bg-label-secondary text-primary"><i class="bx bx-user"></i></span>
+                                                                         @endif
+                                                                     </div>
+                                                                     <div>
+                                                                         <h6 class="mb-0 text-dark">{{ $sub->name }}</h6>
+                                                                         @if($subAdmin)
+                                                                             <small class="text-success"><i class='bx bx-check-circle me-1'></i>Ada Pengurus ({{ $subAdmin->name }})</small>
+                                                                         @else
+                                                                             <small class="text-warning"><i class='bx bx-error-circle me-1'></i>Belum Ada Akun</small>
+                                                                         @endif
+                                                                     </div>
+                                                                 </div>
+                                                                 <div class="d-flex gap-2 ms-auto ms-sm-0 mt-1 mt-sm-0">
+                                                                     @if(!$subAdmin)
+                                                                         <button type="button" class="btn btn-sm rounded-circle px-2" style="background: #e8f0fe; color: #0d6efd; border: none;" data-bs-toggle="modal" data-bs-target="#generateAdminModal{{ $sub->id }}" title="Buat Akun">
+                                                                             <i class="bx bx-user-plus"></i>
+                                                                         </button>
+                                                                     @else
+                                                                         <form action="{{ route('admin.kelola-wilayah.destroy-admin', $subAdmin->id) }}" method="POST" onsubmit="return confirm('Yakin hapus akun pengurus ini?');">
+                                                                             @csrf @method('DELETE')
+                                                                             <button type="submit" class="btn btn-sm rounded-circle px-2" style="background: #ffe0db; color: #ff3e1d; border: none;" title="Hapus Akun"><i class="bx bx-user-x"></i></button>
+                                                                         </form>
+                                                                     @endif
+                                                                     
+                                                                     <button type="button" class="btn btn-sm rounded-circle px-2" style="background: #e8f0fe; color: #0d6efd; border: none;" data-bs-toggle="modal" data-bs-target="#editRegionModal{{ $sub->id }}" title="Edit Nama">
+                                                                         <i class="bx bx-edit-alt"></i>
+                                                                    </button>
 
-                                                                    @if($sub->users->count() == 0 && $sub->children()->count() == 0)
-                                                                    <form action="{{ route('admin.kelola-wilayah.destroy', $sub->id) }}" method="POST" onsubmit="return confirm('Hapus struktur wilayah ini?');">
-                                                                        @csrf @method('DELETE')
-                                                                        <button type="submit" class="btn btn-sm rounded-circle px-2" style="background: #ffe0db; color: #ff3e1d; border: none;" title="Hapus Wilayah"><i class="bx bx-trash"></i></button>
-                                                                    </form>
-                                                                    @endif
-                                                                </div>
-                                                            </div>
-                                                            
+                                                                     @if($sub->users->count() == 0 && $sub->children()->count() == 0)
+                                                                     <form action="{{ route('admin.kelola-wilayah.destroy', $sub->id) }}" method="POST" onsubmit="return confirm('Hapus struktur wilayah ini?');">
+                                                                         @csrf @method('DELETE')
+                                                                         <button type="submit" class="btn btn-sm rounded-circle px-2" style="background: #ffe0db; color: #ff3e1d; border: none;" title="Hapus Wilayah"><i class="bx bx-trash"></i></button>
+                                                                     </form>
+                                                                     @endif
+                                                                 </div>
+                                                             </div>
                                                             <!-- Include Modals for Sub -->
                                                             @push('modals')
                                                                 @include('admin.region_management.partials.modals', ['region' => $sub])

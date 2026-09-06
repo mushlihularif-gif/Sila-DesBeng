@@ -68,10 +68,20 @@ class KycController extends Controller
             ], 400);
         }
 
-        // Hapus verifikasi yang pending/rejected sebelumnya (jika ada)
-        KycVerification::where('user_id', $user->id)->whereIn('status', ['pending', 'rejected'])->delete();
+        // Hapus verifikasi yang draft/pending/rejected sebelumnya beserta file fisik & notifikasinya
+        $oldKycs = KycVerification::where('user_id', $user->id)->whereIn('status', ['draft', 'pending', 'rejected'])->get();
+        foreach ($oldKycs as $oldKyc) {
+            if ($oldKyc->ktp_image_path && Storage::disk('private')->exists($oldKyc->ktp_image_path)) {
+                Storage::disk('private')->delete($oldKyc->ktp_image_path);
+            }
+            if ($oldKyc->face_image_path && Storage::disk('private')->exists($oldKyc->face_image_path)) {
+                Storage::disk('private')->delete($oldKyc->face_image_path);
+            }
+            \App\Models\AdminNotification::where('type', 'kyc')->where('reference_id', $oldKyc->id)->delete();
+            $oldKyc->delete();
+        }
 
-        // Buat record KYC baru
+        // Buat record KYC baru dengan status draft (belum selesai verifikasi scan wajah)
         $kyc = KycVerification::create([
             'user_id' => $user->id,
             'ktp_image_path' => $path,
@@ -83,7 +93,7 @@ class KycController extends Controller
             'kecamatan_from_ocr' => $ocrData['kecamatan'] ?? null,
             'desa_from_ocr' => $ocrData['desa'] ?? null,
             'gender_from_ocr' => $ocrData['gender'] ?? null,
-            'status' => 'pending' 
+            'status' => 'draft' 
         ]);
 
         return response()->json([
@@ -139,6 +149,7 @@ class KycController extends Controller
         $updateData = [
             'face_scan_data' => $request->face_data,
             'face_image_path' => $imagePath,
+            'status' => 'pending', // Status resmi diajukan setelah scan wajah lengkap
         ];
         
         if ($request->filled('edited_nik')) {
@@ -167,6 +178,16 @@ class KycController extends Controller
 
         $user = Auth::user();
         $user->update(['verification_status' => 'pending']);
+
+        // Buat AdminNotification untuk dropdown navbar & dashboard (HANYA saat sudah submit lengkap)
+        \App\Models\AdminNotification::create([
+            'type' => 'kyc',
+            'reference_id' => $kyc->id,
+            'region_id' => $user->region_id,
+            'title' => 'Pengajuan Verifikasi Identitas (KYC)',
+            'message' => "Warga " . ($user->name ?? 'Warga') . " mengajukan verifikasi data e-KTP dan scan wajah.",
+            'is_read' => false,
+        ]);
 
         return response()->json([
             'success' => true,

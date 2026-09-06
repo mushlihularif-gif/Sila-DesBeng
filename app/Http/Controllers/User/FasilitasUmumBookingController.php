@@ -106,6 +106,16 @@ class FasilitasUmumBookingController extends Controller
             'region_id' => $item->region_id,
         ]);
 
+        // Buat notifikasi admin
+        \App\Models\AdminNotification::create([
+            'type' => 'fasilitas_order',
+            'reference_id' => $booking->id,
+            'region_id' => $item->region_id,
+            'title' => 'Peminjaman Fasilitas Umum Baru',
+            'message' => 'Permohonan peminjaman ' . ($item->nama_fasilitas ?? 'Fasilitas Umum') . ' dari ' . (Auth::user()->name ?? 'Warga'),
+            'is_read' => false,
+        ]);
+
         // We can just rely on the normal flow for now, the user can check their activity dashboard
         // If we want a separate payment page, we can build it later.
         

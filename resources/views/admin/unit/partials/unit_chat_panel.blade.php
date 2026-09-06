@@ -5,13 +5,13 @@
 @endphp
 
 <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
-    <div class="card-header bg-white border-bottom py-3 px-4 d-flex justify-content-between align-items-center">
+    <div class="card-header bg-white border-bottom py-2.5 py-sm-3 px-3 px-sm-4 d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
         <div>
-            <h5 class="fw-bold mb-1"><i class="bx bx-chat me-2 text-primary"></i> Chat Warga - {{ $chatServiceTitle }}</h5>
-            <p class="text-muted small mb-0">Komunikasi langsung dengan warga seputar {{ strtolower($chatServiceTitle) }} (Privasi terjaga, tanpa nomor HP)</p>
+            <h5 class="fw-bold mb-1 fs-6 fs-sm-5"><i class="bx bx-chat me-2 text-primary"></i> Chat Warga - {{ $chatServiceTitle }}</h5>
+            <p class="text-muted small mb-0 d-none d-sm-block">Komunikasi langsung dengan warga seputar {{ strtolower($chatServiceTitle) }} (Privasi terjaga, tanpa nomor HP)</p>
         </div>
-        <div class="d-flex align-items-center gap-2">
-            <span class="badge bg-label-primary px-3 py-2 rounded-pill font-semibold">
+        <div class="d-flex align-items-center gap-2 flex-shrink-0">
+            <span class="badge bg-label-primary px-3 py-1.5 py-sm-2 rounded-pill font-semibold text-nowrap">
                 Total Sesi: {{ count($chats ?? []) }}
             </span>
         </div>

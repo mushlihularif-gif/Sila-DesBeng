@@ -37,8 +37,26 @@ public function index(Request $request)
         ->distinct()
         ->pluck('year')
         ->toArray();
+
+    $mobilYears = \App\Models\MobilBooking::withTrashed()
+        ->selectRaw('YEAR(created_at) as year')
+        ->distinct()
+        ->pluck('year')
+        ->toArray();
+
+    $fasilitasYears = \App\Models\FasilitasUmumBooking::withTrashed()
+        ->selectRaw('YEAR(created_at) as year')
+        ->distinct()
+        ->pluck('year')
+        ->toArray();
+
+    $pasarYears = \App\Models\PasarOrder::withTrashed()
+        ->selectRaw('YEAR(created_at) as year')
+        ->distinct()
+        ->pluck('year')
+        ->toArray();
         
-    $availableYears = array_unique(array_merge($rentalYears, $gasYears, [now()->year]));
+    $availableYears = array_unique(array_merge($rentalYears, $gasYears, $mobilYears, $fasilitasYears, $pasarYears, [now()->year]));
     rsort($availableYears);
 
     $baseRental = $this->applyRegionFilter(RentalBooking::withTrashed());
@@ -47,6 +65,7 @@ public function index(Request $request)
     $baseFasilitas = $this->applyRegionFilter(\App\Models\FasilitasUmumBooking::withTrashed());
     $basePasar = $this->applyRegionFilter(\App\Models\PasarOrder::withTrashed());
     $baseLaporan = $this->applyRegionFilter(\App\Models\Laporan::query(), 'user');
+    $baseKyc = $this->applyRegionFilter(\App\Models\KycVerification::query(), 'user');
 
     // Filter by specific region if requested
     $selectedKecamatanId = request('kecamatan_id');
@@ -60,6 +79,7 @@ public function index(Request $request)
         $baseFasilitas->whereHas('user', $userFilter);
         $basePasar->whereHas('user', $userFilter);
         $baseLaporan->whereHas('user', $userFilter);
+        $baseKyc->whereHas('user', $userFilter);
     } elseif ($selectedKecamatanId && $selectedKecamatanId !== 'all') {
         $desaIdsUnderKecamatan = \App\Models\Region::where('parent_id', $selectedKecamatanId)->pluck('id')->toArray();
         $desaIdsUnderKecamatan[] = $selectedKecamatanId;
@@ -71,12 +91,13 @@ public function index(Request $request)
         $baseFasilitas->whereHas('user', $userFilter);
         $basePasar->whereHas('user', $userFilter);
         $baseLaporan->whereHas('user', $userFilter);
+        $baseKyc->whereHas('user', $userFilter);
     }
 
     $latestRequests = collect();
     $totalPending = 0;
 
-    if (in_array(auth()->user()->role, ['admin_desa', 'admin_rw', 'admin_rt'])) {
+    if (in_array(auth()->user()->role, ['admin_desa', 'admin_rw', 'admin_rt', 'admin_kecamatan', 'admin', 'super_admin'])) {
         $rentalRequests = $baseRental->clone()->with(['user', 'barang'])->where(function($q) { $q->where('status', 'pending')->orWhere('cancellation_status', 'pending'); })->get()->map(function ($i) { $i->type = 'rental'; $i->item_name = $i->barang->nama_barang ?? 'Alat'; return $i; });
         $gasRequests = $baseGas->clone()->with('user')->where(function($q) { $q->where('status', 'pending')->orWhere('cancellation_status', 'pending'); })->get()->map(function ($i) { $i->type = 'gas'; $i->item_name = $i->item_name ?? 'Tabung Gas'; return $i; });
         
@@ -88,18 +109,75 @@ public function index(Request $request)
         
         $laporanRequests = $baseLaporan->clone()->with('user')->where('status', 'Pending')->get()->map(function ($i) { $i->type = 'laporan'; $i->item_name = 'Laporan Warga'; return $i; });
         
-        $latestRequests = collect()->concat($rentalRequests)->concat($gasRequests)->concat($mobilRequests)->concat($fasilitasRequests)->concat($pasarRequests)->concat($laporanRequests)->sortByDesc('created_at')->take(10);
+        $kycRequests = $baseKyc->clone()->with('user')
+            ->where('status', 'pending')
+            ->where(function($q) {
+                $q->whereNotNull('face_scan_data')->orWhereNotNull('face_image_path');
+            })
+            ->get()->map(function ($i) { $i->type = 'kyc'; $i->item_name = 'Verifikasi Identitas (KYC)'; return $i; });
+
+        $baseMutasi = \App\Models\MutasiPenduduk::query();
+        $adminUser = auth()->user();
+        if ($adminUser && in_array($adminUser->role, ['admin_desa', 'admin_rw', 'admin_rt', 'admin_kecamatan'])) {
+            $mutasiRegionIds = array_merge([(int)$adminUser->region_id], \App\Models\Region::getDescendantIds($adminUser->region_id));
+            $baseMutasi->where(function($q) use ($mutasiRegionIds) {
+                $q->whereIn('from_region_id', $mutasiRegionIds)
+                  ->orWhereIn('to_region_id', $mutasiRegionIds);
+            });
+        }
+        if ($selectedDesaId && $selectedDesaId !== 'all') {
+            $baseMutasi->where(function($q) use ($selectedDesaId) {
+                $q->where('from_region_id', $selectedDesaId)
+                  ->orWhere('to_region_id', $selectedDesaId);
+            });
+        } elseif ($selectedKecamatanId && $selectedKecamatanId !== 'all') {
+            $baseMutasi->where(function($q) use ($desaIdsUnderKecamatan) {
+                $q->whereIn('from_region_id', $desaIdsUnderKecamatan)
+                  ->orWhereIn('to_region_id', $desaIdsUnderKecamatan);
+            });
+        }
+        $mutasiRequests = $baseMutasi->clone()->with('user')->where('status', 'pending')->get()->map(function ($i) {
+            $i->type = 'mutasi';
+            $i->item_name = 'Pengajuan Mutasi Domisili';
+            return $i;
+        });
+
+        $latestRequests = collect()
+            ->concat($rentalRequests)
+            ->concat($gasRequests)
+            ->concat($mobilRequests)
+            ->concat($fasilitasRequests)
+            ->concat($pasarRequests)
+            ->concat($laporanRequests)
+            ->concat($kycRequests)
+            ->concat($mutasiRequests)
+            ->sortByDesc('created_at')
+            ->take(10);
         
-        $totalPending = $rentalRequests->count() + $gasRequests->count() + $mobilRequests->count() + $fasilitasRequests->count() + $pasarRequests->count() + $laporanRequests->count();
+        $totalPending = $rentalRequests->count() 
+            + $gasRequests->count() 
+            + $mobilRequests->count() 
+            + $fasilitasRequests->count() 
+            + $pasarRequests->count() 
+            + $laporanRequests->count()
+            + $kycRequests->count()
+            + $mutasiRequests->count();
     }
 
-    // Hitung statistik nyata
-    $totalOrders = $baseRental->clone()->count() + $baseGas->clone()->count();
+    // Hitung statistik nyata (semua unit layanan aktif)
+    $totalOrders = $baseRental->clone()->count() 
+        + $baseGas->clone()->count() 
+        + $baseMobil->clone()->count() 
+        + $baseFasilitas->clone()->count() 
+        + $basePasar->clone()->count();
     
     // Hitung total order selesai/sukses
     $completedRentals = $baseRental->clone()->where('status', 'completed')->count();
     $completedGas = $baseGas->clone()->where('status', 'completed')->count();
-    $completedOrders = $completedRentals + $completedGas;
+    $completedMobil = $baseMobil->clone()->whereIn('status', ['completed', 'resolved'])->count();
+    $completedFasilitas = $baseFasilitas->clone()->whereIn('status', ['completed', 'resolved'])->count();
+    $completedPasar = $basePasar->clone()->where('status', 'completed')->count();
+    $completedOrders = $completedRentals + $completedGas + $completedMobil + $completedFasilitas + $completedPasar;
 
     // Hitung statistik untuk Donut Chart (Total Transaksi per Kategori) - Filter Tahun Ini & Tidak Cancel
     $rentalCount = $baseRental->clone()->whereYear('created_at', $selectedYear)
@@ -114,7 +192,13 @@ public function index(Request $request)
         ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
         ->count();
 
-    
+    $fasilitasCount = $baseFasilitas->clone()->whereYear('created_at', $selectedYear)
+        ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
+        ->count();
+
+    $pasarCount = $basePasar->clone()->whereYear('created_at', $selectedYear)
+        ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
+        ->count();
 
     // ========================================
     // PERHITUNGAN DATA NYATA UNTUK GRAFIK
@@ -137,8 +221,33 @@ public function index(Request $request)
         ->groupBy('month')
         ->pluck('count', 'month');
 
+    $mobilCounts = $baseMobil->clone()
+        ->selectRaw('MONTH(created_at) as month, COUNT(*) as count')
+        ->whereYear('created_at', $selectedYear)
+        ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
+        ->groupBy('month')
+        ->pluck('count', 'month');
+
+    $fasilitasCounts = $baseFasilitas->clone()
+        ->selectRaw('MONTH(created_at) as month, COUNT(*) as count')
+        ->whereYear('created_at', $selectedYear)
+        ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
+        ->groupBy('month')
+        ->pluck('count', 'month');
+
+    $pasarCounts = $basePasar->clone()
+        ->selectRaw('MONTH(created_at) as month, COUNT(*) as count')
+        ->whereYear('created_at', $selectedYear)
+        ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
+        ->groupBy('month')
+        ->pluck('count', 'month');
+
     for ($month = 1; $month <= 12; $month++) {
-        $monthlyPerformance[$month - 1] = ($rentalCounts[$month] ?? 0) + ($gasCounts[$month] ?? 0);
+        $monthlyPerformance[$month - 1] = ($rentalCounts[$month] ?? 0) 
+            + ($gasCounts[$month] ?? 0) 
+            + ($mobilCounts[$month] ?? 0) 
+            + ($fasilitasCounts[$month] ?? 0) 
+            + ($pasarCounts[$month] ?? 0);
     }
     
     // Hitung pendapatan dan pengeluaran bulanan (SAMA SEPERTI ReportController)

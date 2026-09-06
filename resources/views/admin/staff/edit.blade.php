@@ -190,9 +190,9 @@
                         </div>
 
                         <div class="pt-4 border-top">
-                            <div class="d-flex justify-content-end gap-3">
-                                <a href="{{ route('admin.staff.index') }}" class="btn btn-label-secondary btn-lg px-4">Batal</a>
-                                <button type="submit" class="btn btn-primary btn-lg px-5 shadow-sm"><i class="bx bx-save me-2"></i> Perbarui Staf</button>
+                            <div class="d-flex flex-column-reverse flex-sm-row justify-content-end gap-2 gap-sm-3">
+                                <a href="{{ route('admin.staff.index') }}" class="btn btn-label-secondary btn-lg px-4 text-center">Batal</a>
+                                <button type="submit" class="btn btn-primary btn-lg px-4 px-sm-5 shadow-sm"><i class="bx bx-save me-2"></i> Perbarui Staf</button>
                             </div>
                         </div>
                     </form>

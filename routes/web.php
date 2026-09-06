@@ -449,6 +449,9 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
     Route::post('/wilayah-admins/{id}/approve', [\App\Http\Controllers\Admin\RegionAdminManagementController::class, 'approveApplication'])->name('admin.wilayah-admins.approve');
     Route::post('/wilayah-admins/{id}/reject', [\App\Http\Controllers\Admin\RegionAdminManagementController::class, 'rejectApplication'])->name('admin.wilayah-admins.reject');
     Route::delete('/wilayah-admins/{id}/revoke', [\App\Http\Controllers\Admin\RegionAdminManagementController::class, 'revoke'])->name('admin.wilayah-admins.revoke');
+    Route::post('/wilayah-admins/region', [\App\Http\Controllers\Admin\RegionAdminManagementController::class, 'storeRegion'])->name('admin.wilayah-admins.region.store');
+    Route::put('/wilayah-admins/region/{id}', [\App\Http\Controllers\Admin\RegionAdminManagementController::class, 'updateRegion'])->name('admin.wilayah-admins.region.update');
+    Route::delete('/wilayah-admins/region/{id}', [\App\Http\Controllers\Admin\RegionAdminManagementController::class, 'destroyRegion'])->name('admin.wilayah-admins.region.destroy');
 
     
     // Pengaturan

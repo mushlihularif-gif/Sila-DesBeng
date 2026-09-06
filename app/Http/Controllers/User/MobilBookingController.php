@@ -169,7 +169,7 @@ class MobilBookingController extends Controller
 
         // Buat notifikasi admin
         \App\Models\AdminNotification::create([
-            'type' => 'rental_request',
+            'type' => 'mobil_order',
             'reference_id' => $booking->id,
             'region_id' => $item->region_id,
             'title' => 'Permintaan Penyewaan Mobil Baru',

@@ -302,14 +302,17 @@
                             $isServiceActive = function($unitName) use ($isLoggedInWithRegion, $activeServices) {
                                 if (!$isLoggedInWithRegion) return true;
                                 
+                                // Pasar Daerah dan Kabar & Informasi Daerah bersifat publik sentral se-Kabupaten
+                                if (in_array($unitName, ['Pasar Daerah', 'Pengumuman dan Event'])) {
+                                    return true;
+                                }
+
                                 $map = [
                                     'Unit Penyewaan Alat' => 'Penyewaan Alat',
                                     'Unit Penjualan Gas' => 'Penjualan Gas',
                                     'Unit Penyewaan Mobil' => 'Penyewaan Mobil',
                                     'Unit Peminjaman Fasilitas Umum' => 'Fasilitas Umum',
-                                    'Pasar Daerah' => 'Pasar Daerah',
-                                    'Pelaporan Warga' => 'Pelaporan Warga',
-                                    'Pengumuman dan Event' => 'Pengumuman'
+                                    'Pelaporan Warga' => 'Pelaporan Warga'
                                 ];
                                 
                                 return in_array($map[$unitName] ?? $unitName, $activeServices ?? []);

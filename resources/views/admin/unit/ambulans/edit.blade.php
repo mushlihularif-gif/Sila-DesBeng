@@ -137,9 +137,9 @@
                                 <span class="badge bg-label-info font-11">Bisa 1 s/d 3 Foto</span>
                             </div>
                             
-                            <div class="row g-3">
+                            <div class="row g-2 g-sm-3">
                                 <!-- Foto Utama -->
-                                <div class="col-md-4">
+                                <div class="col-6 col-md-4">
                                     <label class="form-label fw-semibold text-dark" for="foto">
                                         Foto Utama <span class="text-danger">*</span>
                                     </label>
@@ -147,7 +147,7 @@
                                         <div id="preview_foto" class="preview-container" style="{{ $existingPhotoUrl ? 'display:block;' : 'display:none;' }}">
                                             <img src="{{ $existingPhotoUrl ?? '#' }}" alt="Preview Foto Utama" class="preview-image" />
                                             <button type="button" class="btn-remove-image" title="Hapus Foto" onclick="event.stopPropagation(); clearFile('foto', 'preview_foto')">
-                                                <span style="font-size: 24px; font-weight: bold; line-height: 1; color: white;">&times;</span>
+                                                <span style="font-size: 20px; font-weight: bold; line-height: 1; color: white;">&times;</span>
                                             </button>
                                         </div>
                                         <div id="placeholder_foto" class="upload-placeholder py-2" style="{{ $existingPhotoUrl ? 'display:none;' : 'display:block;' }}">
@@ -166,7 +166,7 @@
                                 </div>
 
                                 <!-- Foto Tambahan 1 -->
-                                <div class="col-md-4">
+                                <div class="col-6 col-md-4">
                                     <label class="form-label fw-semibold text-dark" for="foto_2">
                                         Foto Tambahan 1 <small class="text-muted fw-normal">(Opsional)</small>
                                     </label>
@@ -174,7 +174,7 @@
                                         <div id="preview_foto_2" class="preview-container" style="{{ $existingPhoto2Url ? 'display:block;' : 'display:none;' }}">
                                             <img src="{{ $existingPhoto2Url ?? '#' }}" alt="Preview Foto Tambahan 1" class="preview-image" />
                                             <button type="button" class="btn-remove-image" title="Hapus Foto" onclick="event.stopPropagation(); clearFile('foto_2', 'preview_foto_2')">
-                                                <span style="font-size: 24px; font-weight: bold; line-height: 1; color: white;">&times;</span>
+                                                <span style="font-size: 20px; font-weight: bold; line-height: 1; color: white;">&times;</span>
                                             </button>
                                         </div>
                                         <div id="placeholder_foto_2" class="upload-placeholder py-2" style="{{ $existingPhoto2Url ? 'display:none;' : 'display:block;' }}">
@@ -193,7 +193,7 @@
                                 </div>
 
                                 <!-- Foto Tambahan 2 -->
-                                <div class="col-md-4">
+                                <div class="col-6 col-md-4">
                                     <label class="form-label fw-semibold text-dark" for="foto_3">
                                         Foto Tambahan 2 <small class="text-muted fw-normal">(Opsional)</small>
                                     </label>
@@ -201,7 +201,7 @@
                                         <div id="preview_foto_3" class="preview-container" style="{{ $existingPhoto3Url ? 'display:block;' : 'display:none;' }}">
                                             <img src="{{ $existingPhoto3Url ?? '#' }}" alt="Preview Foto Tambahan 2" class="preview-image" />
                                             <button type="button" class="btn-remove-image" title="Hapus Foto" onclick="event.stopPropagation(); clearFile('foto_3', 'preview_foto_3')">
-                                                <span style="font-size: 24px; font-weight: bold; line-height: 1; color: white;">&times;</span>
+                                                <span style="font-size: 20px; font-weight: bold; line-height: 1; color: white;">&times;</span>
                                             </button>
                                         </div>
                                         <div id="placeholder_foto_3" class="upload-placeholder py-2" style="{{ $existingPhoto3Url ? 'display:none;' : 'display:block;' }}">
@@ -450,8 +450,8 @@
                         </div>
 
                         <!-- TOMBOL SUBMIT FORM -->
-                        <div class="d-flex align-items-center justify-content-between pt-3 border-top mt-4">
-                            <a href="{{ route('admin.unit.fasilitas_umum.index', ['tab' => 'kendaraan']) }}" class="btn btn-outline-secondary px-4">
+                        <div class="d-flex flex-column-reverse flex-sm-row align-items-stretch align-items-sm-center justify-content-between gap-2 pt-3 border-top mt-4">
+                            <a href="{{ route('admin.unit.fasilitas_umum.index', ['tab' => 'kendaraan']) }}" class="btn btn-outline-secondary px-4 text-center">
                                 <i class="bx bx-x me-1"></i> Batal
                             </a>
                             <button type="submit" class="btn btn-primary px-4 shadow-sm" id="btnSubmitForm">

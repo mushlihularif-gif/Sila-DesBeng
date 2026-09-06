@@ -17,117 +17,116 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
         <p class="text-muted mb-0">Silakan aktifkan setidaknya satu layanan pada menu Pengaturan Wilayah.</p>
     </div>
 @else
-    <div class="row g-3 mb-4">
-        <div class="col-md-4 col-6">
-            <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden position-relative">
-                <div class="card-body p-3">
-                    <div class="d-flex align-items-center mb-2">
-                        <div class="avatar avatar-md bg-primary-subtle text-primary rounded-3 p-2 me-3">
-                            <i class="bx bx-receipt fs-3"></i>
-                        </div>
-                        <div>
-                            <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Total Transaksi</small>
-                            <h4 class="fw-bold mb-0 text-dark"><span class="count-up" data-value="{{ $rentalRequests->count() + $gasOrders->count() + $mobilBookings->count() + $fasilitasBookings->count() + $pasarOrders->count() }}">0</span></h4>
-                        </div>
+    <div class="row g-2 g-md-3 mb-4">
+        <!-- Total Transaksi -->
+        <div class="col-6 col-md-3 col-lg">
+            <div class="card border-0 shadow-sm h-100 rounded-4 stat-card">
+                <div class="card-body p-2 p-md-3 d-flex flex-column align-items-center justify-content-center text-center">
+                    <div class="stat-icon bg-primary-subtle text-primary mb-1 mx-auto">
+                        <i class="bx bx-receipt"></i>
+                    </div>
+                    <small class="text-muted text-uppercase fw-bold ls-1 mb-1 text-truncate w-100" style="font-size: 0.65rem;">Total Transaksi</small>
+                    <div class="stat-number text-dark">
+                        <span class="count-up" data-value="{{ $rentalRequests->count() + $gasOrders->count() + $mobilBookings->count() + $fasilitasBookings->count() + $pasarOrders->count() }}">0</span>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-4 col-6">
-            <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden position-relative">
-                <div class="card-body p-3">
-                    <div class="d-flex align-items-center mb-2">
-                        <div class="avatar avatar-md bg-success-subtle text-success rounded-3 p-2 me-3">
-                            <i class="bx bx-check-double fs-3"></i>
-                        </div>
-                        <div>
-                            <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Selesai</small>
-                            <h4 class="fw-bold mb-0 text-dark"><span class="count-up" data-value="{{ $rentalRequests->where('status', 'completed')->count() + $gasOrders->where('status', 'completed')->count() + $mobilBookings->where('status', 'completed')->count() + $fasilitasBookings->where('status', 'completed')->count() + $pasarOrders->where('status', 'completed')->count() }}">0</span></h4>
-                        </div>
+
+        <!-- Selesai -->
+        <div class="col-6 col-md-3 col-lg">
+            <div class="card border-0 shadow-sm h-100 rounded-4 stat-card">
+                <div class="card-body p-2 p-md-3 d-flex flex-column align-items-center justify-content-center text-center">
+                    <div class="stat-icon bg-success-subtle text-success mb-1 mx-auto">
+                        <i class="bx bx-check-double"></i>
+                    </div>
+                    <small class="text-muted text-uppercase fw-bold ls-1 mb-1 text-truncate w-100" style="font-size: 0.65rem;">Selesai</small>
+                    <div class="stat-number text-dark">
+                        <span class="count-up" data-value="{{ $rentalRequests->where('status', 'completed')->count() + $gasOrders->where('status', 'completed')->count() + $mobilBookings->where('status', 'completed')->count() + $fasilitasBookings->where('status', 'completed')->count() + $pasarOrders->where('status', 'completed')->count() }}">0</span>
                     </div>
                 </div>
             </div>
         </div>
+
         @if($isRentalActive)
-        <div class="col-md-4 col-6">
-            <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden position-relative">
-                <div class="card-body p-3">
-                    <div class="d-flex align-items-center mb-2">
-                         <div class="avatar avatar-md bg-info-subtle rounded-3 p-2 me-3 d-flex align-items-center justify-content-center">
-                            <img src="{{ asset('User/img/elemen/F1.png') }}" style="width: 44px; height: 44px; object-fit: contain;">
-                        </div>
-                        <div>
-                            <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Penyewaan</small>
-                            <h4 class="fw-bold mb-0 text-dark"><span class="count-up" data-value="{{ $rentalRequests->count() }}">0</span></h4>
-                        </div>
+        <!-- Penyewaan Alat -->
+        <div class="col-6 col-md-3 col-lg">
+            <div class="card border-0 shadow-sm h-100 rounded-4 stat-card">
+                <div class="card-body p-2 p-md-3 d-flex flex-column align-items-center justify-content-center text-center">
+                    <div class="stat-icon bg-info-subtle mb-1 mx-auto d-flex align-items-center justify-content-center">
+                        <img src="{{ asset('User/img/elemen/F1.png') }}" style="width: 24px; height: 24px; object-fit: contain;">
+                    </div>
+                    <small class="text-muted text-uppercase fw-bold ls-1 mb-1 text-truncate w-100" style="font-size: 0.65rem;">Penyewaan</small>
+                    <div class="stat-number text-dark">
+                        <span class="count-up" data-value="{{ $rentalRequests->count() }}">0</span>
                     </div>
                 </div>
             </div>
         </div>
         @endif
+
         @if($isGasActive)
-        <div class="col-md-4 col-6">
-             <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden position-relative">
-                <div class="card-body p-3">
-                    <div class="d-flex align-items-center mb-2">
-                         <div class="avatar avatar-md bg-success-subtle rounded-3 p-2 me-3 d-flex align-items-center justify-content-center">
-                            <img src="{{ asset('User/img/elemen/F2.png') }}" style="width: 44px; height: 44px; object-fit: contain;">
-                        </div>
-                        <div>
-                            <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Gas</small>
-                            <h4 class="fw-bold mb-0 text-dark"><span class="count-up" data-value="{{ $gasOrders->count() }}">0</span></h4>
-                        </div>
+        <!-- Pembelian Gas -->
+        <div class="col-6 col-md-3 col-lg">
+            <div class="card border-0 shadow-sm h-100 rounded-4 stat-card">
+                <div class="card-body p-2 p-md-3 d-flex flex-column align-items-center justify-content-center text-center">
+                    <div class="stat-icon bg-success-subtle mb-1 mx-auto d-flex align-items-center justify-content-center">
+                        <img src="{{ asset('User/img/elemen/F2.png') }}" style="width: 24px; height: 24px; object-fit: contain;">
+                    </div>
+                    <small class="text-muted text-uppercase fw-bold ls-1 mb-1 text-truncate w-100" style="font-size: 0.65rem;">Gas LPG</small>
+                    <div class="stat-number text-dark">
+                        <span class="count-up" data-value="{{ $gasOrders->count() }}">0</span>
                     </div>
                 </div>
             </div>
         </div>
         @endif
+
         @if($isMobilActive)
-        <div class="col-md-4 col-6">
-             <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden position-relative">
-                <div class="card-body p-3">
-                    <div class="d-flex align-items-center mb-2">
-                         <div class="avatar avatar-md bg-primary-subtle rounded-3 p-2 me-3 d-flex align-items-center justify-content-center">
-                            <img src="{{ asset('User/img/elemen/mobil.png') }}" style="width: 44px; height: 44px; object-fit: contain;">
-                        </div>
-                        <div>
-                            <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Sewa Mobil</small>
-                            <h4 class="fw-bold mb-0 text-dark"><span class="count-up" data-value="{{ $mobilBookings->count() }}">0</span></h4>
-                        </div>
+        <!-- Sewa Mobil -->
+        <div class="col-6 col-md-4 col-lg">
+            <div class="card border-0 shadow-sm h-100 rounded-4 stat-card">
+                <div class="card-body p-2 p-md-3 d-flex flex-column align-items-center justify-content-center text-center">
+                    <div class="stat-icon bg-primary-subtle mb-1 mx-auto d-flex align-items-center justify-content-center">
+                        <img src="{{ asset('User/img/elemen/mobil.png') }}" style="width: 24px; height: 24px; object-fit: contain;">
+                    </div>
+                    <small class="text-muted text-uppercase fw-bold ls-1 mb-1 text-truncate w-100" style="font-size: 0.65rem;">Sewa Mobil</small>
+                    <div class="stat-number text-dark">
+                        <span class="count-up" data-value="{{ $mobilBookings->count() }}">0</span>
                     </div>
                 </div>
             </div>
         </div>
         @endif
+
         @if($isFasilitasActive)
-        <div class="col-md-4 col-6">
-             <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden position-relative">
-                <div class="card-body p-3">
-                    <div class="d-flex align-items-center mb-2">
-                         <div class="avatar avatar-md bg-warning-subtle rounded-3 p-2 me-3 d-flex align-items-center justify-content-center">
-                            <img src="{{ asset('User/img/elemen/fasilitas.png') }}" style="width: 44px; height: 44px; object-fit: contain;">
-                        </div>
-                        <div>
-                            <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Fasilitas Umum</small>
-                            <h4 class="fw-bold mb-0 text-dark"><span class="count-up" data-value="{{ $fasilitasBookings->count() }}">0</span></h4>
-                        </div>
+        <!-- Fasilitas Umum -->
+        <div class="col-6 col-md-4 col-lg">
+            <div class="card border-0 shadow-sm h-100 rounded-4 stat-card">
+                <div class="card-body p-2 p-md-3 d-flex flex-column align-items-center justify-content-center text-center">
+                    <div class="stat-icon bg-warning-subtle mb-1 mx-auto d-flex align-items-center justify-content-center">
+                        <img src="{{ asset('User/img/elemen/fasilitas.png') }}" style="width: 24px; height: 24px; object-fit: contain;">
+                    </div>
+                    <small class="text-muted text-uppercase fw-bold ls-1 mb-1 text-truncate w-100" style="font-size: 0.65rem;">Fasilitas Umum</small>
+                    <div class="stat-number text-dark">
+                        <span class="count-up" data-value="{{ $fasilitasBookings->count() }}">0</span>
                     </div>
                 </div>
             </div>
         </div>
         @endif
+
         @if($isPasarActive)
-        <div class="col-md-4 col-6">
-             <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden position-relative">
-                <div class="card-body p-3">
-                    <div class="d-flex align-items-center mb-2">
-                         <div class="avatar avatar-md bg-secondary-subtle rounded-3 p-2 me-3 d-flex align-items-center justify-content-center">
-                            <img src="{{ asset('Admin/img/pasardaerah/PasarDaerah2.png') }}" style="width: 44px; height: 44px; object-fit: contain;">
-                        </div>
-                        <div>
-                            <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Pasar Daerah</small>
-                            <h4 class="fw-bold mb-0 text-dark"><span class="count-up" data-value="{{ $pasarOrders->count() }}">0</span></h4>
-                        </div>
+        <!-- Pasar Daerah -->
+        <div class="col-12 col-md-4 col-lg">
+            <div class="card border-0 shadow-sm h-100 rounded-4 stat-card">
+                <div class="card-body p-2 p-md-3 d-flex flex-column align-items-center justify-content-center text-center">
+                    <div class="stat-icon bg-secondary-subtle mb-1 mx-auto d-flex align-items-center justify-content-center">
+                        <img src="{{ asset('Admin/img/pasardaerah/PasarDaerah2.png') }}" style="width: 24px; height: 24px; object-fit: contain;">
+                    </div>
+                    <small class="text-muted text-uppercase fw-bold ls-1 mb-1 text-truncate w-100" style="font-size: 0.65rem;">Pasar Daerah</small>
+                    <div class="stat-number text-dark">
+                        <span class="count-up" data-value="{{ $pasarOrders->count() }}">0</span>
                     </div>
                 </div>
             </div>
@@ -137,49 +136,51 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
 
     <!-- Main Content Tabs -->
     <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-        <div class="card-header bg-white border-bottom py-3 px-4">
-             <ul class="nav nav-pills card-header-pills gap-2" id="reportTabs" role="tablist">
-                @if($isRentalActive)
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link {{ $totalActive > 0 ? 'active' : '' }} rounded-pill px-4 fw-semibold" id="rental-tab" data-bs-toggle="tab" data-bs-target="#rental-pane" type="button" role="tab">
-                        <img src="{{ asset('User/img/elemen/F1.png') }}" class="me-2" style="width: 24px; height: 24px; object-fit: contain;">Penyewaan Alat
-                        <span class="badge bg-white text-primary ms-2 shadow-sm">{{ $rentalRequests->count() }}</span>
-                    </button>
-                </li>
-                @endif
-                @if($isGasActive)
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link {{ !$isRentalActive ? 'active' : '' }} rounded-pill px-4 fw-semibold" id="gas-tab" data-bs-toggle="tab" data-bs-target="#gas-pane" type="button" role="tab">
-                        <img src="{{ asset('User/img/elemen/F2.png') }}" class="me-2" style="width: 24px; height: 24px; object-fit: contain;">Pembelian Gas
-                        <span class="badge bg-white text-primary ms-2 shadow-sm">{{ $gasOrders->count() }}</span>
-                    </button>
-                </li>
-                @endif
-                @if($isMobilActive)
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link {{ !$isRentalActive && !$isGasActive ? 'active' : '' }} rounded-pill px-4 fw-semibold" id="mobil-tab" data-bs-toggle="tab" data-bs-target="#mobil-pane" type="button" role="tab">
-                        <img src="{{ asset('User/img/elemen/mobil.png') }}" class="me-2" style="width: 24px; height: 24px; object-fit: contain;">Sewa Mobil
-                        <span class="badge bg-white text-primary ms-2 shadow-sm">{{ $mobilBookings->count() }}</span>
-                    </button>
-                </li>
-                @endif
-                @if($isFasilitasActive)
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link {{ !$isRentalActive && !$isGasActive && !$isMobilActive ? 'active' : '' }} rounded-pill px-4 fw-semibold" id="fasilitas-tab" data-bs-toggle="tab" data-bs-target="#fasilitas-pane" type="button" role="tab">
-                        <img src="{{ asset('User/img/elemen/fasilitas.png') }}" class="me-2" style="width: 24px; height: 24px; object-fit: contain;">Fasilitas Umum
-                        <span class="badge bg-white text-primary ms-2 shadow-sm">{{ $fasilitasBookings->count() }}</span>
-                    </button>
-                </li>
-                @endif
-                @if($isPasarActive)
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link {{ !$isRentalActive && !$isGasActive && !$isMobilActive && !$isFasilitasActive ? 'active' : '' }} rounded-pill px-4 fw-semibold" id="pasar-tab" data-bs-toggle="tab" data-bs-target="#pasar-pane" type="button" role="tab">
-                        <img src="{{ asset('Admin/img/pasardaerah/PasarDaerah2.png') }}" class="me-2" style="width: 24px; height: 24px; object-fit: contain;">Pasar Daerah
-                        <span class="badge bg-white text-primary ms-2 shadow-sm">{{ $pasarOrders->count() }}</span>
-                    </button>
-                </li>
-                @endif
-            </ul>
+        <div class="card-header bg-white border-bottom py-3 px-3 px-md-4">
+             <div class="tabs-scroll-wrapper">
+                 <ul class="nav nav-pills card-header-pills flex-nowrap flex-md-wrap gap-2 mb-0" id="reportTabs" role="tablist">
+                    @if($isRentalActive)
+                    <li class="nav-item flex-shrink-0" role="presentation">
+                        <button class="nav-link {{ $totalActive > 0 ? 'active' : '' }} rounded-pill px-3 py-2 fw-semibold text-nowrap" id="rental-tab" data-bs-toggle="tab" data-bs-target="#rental-pane" type="button" role="tab">
+                            <img src="{{ asset('User/img/elemen/F1.png') }}" class="me-2" style="width: 20px; height: 20px; object-fit: contain;">Penyewaan Alat
+                            <span class="badge bg-white text-primary ms-2 shadow-sm">{{ $rentalRequests->count() }}</span>
+                        </button>
+                    </li>
+                    @endif
+                    @if($isGasActive)
+                    <li class="nav-item flex-shrink-0" role="presentation">
+                        <button class="nav-link {{ !$isRentalActive ? 'active' : '' }} rounded-pill px-3 py-2 fw-semibold text-nowrap" id="gas-tab" data-bs-toggle="tab" data-bs-target="#gas-pane" type="button" role="tab">
+                            <img src="{{ asset('User/img/elemen/F2.png') }}" class="me-2" style="width: 20px; height: 20px; object-fit: contain;">Pembelian Gas
+                            <span class="badge bg-white text-primary ms-2 shadow-sm">{{ $gasOrders->count() }}</span>
+                        </button>
+                    </li>
+                    @endif
+                    @if($isMobilActive)
+                    <li class="nav-item flex-shrink-0" role="presentation">
+                        <button class="nav-link {{ !$isRentalActive && !$isGasActive ? 'active' : '' }} rounded-pill px-3 py-2 fw-semibold text-nowrap" id="mobil-tab" data-bs-toggle="tab" data-bs-target="#mobil-pane" type="button" role="tab">
+                            <img src="{{ asset('User/img/elemen/mobil.png') }}" class="me-2" style="width: 20px; height: 20px; object-fit: contain;">Sewa Mobil
+                            <span class="badge bg-white text-primary ms-2 shadow-sm">{{ $mobilBookings->count() }}</span>
+                        </button>
+                    </li>
+                    @endif
+                    @if($isFasilitasActive)
+                    <li class="nav-item flex-shrink-0" role="presentation">
+                        <button class="nav-link {{ !$isRentalActive && !$isGasActive && !$isMobilActive ? 'active' : '' }} rounded-pill px-3 py-2 fw-semibold text-nowrap" id="fasilitas-tab" data-bs-toggle="tab" data-bs-target="#fasilitas-pane" type="button" role="tab">
+                            <img src="{{ asset('User/img/elemen/fasilitas.png') }}" class="me-2" style="width: 20px; height: 20px; object-fit: contain;">Fasilitas Umum
+                            <span class="badge bg-white text-primary ms-2 shadow-sm">{{ $fasilitasBookings->count() }}</span>
+                        </button>
+                    </li>
+                    @endif
+                    @if($isPasarActive)
+                    <li class="nav-item flex-shrink-0" role="presentation">
+                        <button class="nav-link {{ !$isRentalActive && !$isGasActive && !$isMobilActive && !$isFasilitasActive ? 'active' : '' }} rounded-pill px-3 py-2 fw-semibold text-nowrap" id="pasar-tab" data-bs-toggle="tab" data-bs-target="#pasar-pane" type="button" role="tab">
+                            <img src="{{ asset('Admin/img/pasardaerah/PasarDaerah2.png') }}" class="me-2" style="width: 20px; height: 20px; object-fit: contain;">Pasar Daerah
+                            <span class="badge bg-white text-primary ms-2 shadow-sm">{{ $pasarOrders->count() }}</span>
+                        </button>
+                    </li>
+                    @endif
+                </ul>
+             </div>
         </div>
         
         <div class="card-body p-0">
@@ -511,4 +512,3 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
         </div>
     </div>
     @endif
-</div>

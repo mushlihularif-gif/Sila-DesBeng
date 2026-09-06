@@ -10,4 +10,5 @@ Artisan::command('inspire', function () {
 
 Schedule::command('pasar:auto-complete')->everyMinute();
 Schedule::command('chat:clean-old --days=3')->daily(); 
+Schedule::command('kyc:clean-drafts')->hourly(); 
  

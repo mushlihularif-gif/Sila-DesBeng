@@ -16,8 +16,8 @@
             </div>
         </div>
 
-        <div class="nav-align-top mb-4">
-            <ul class="nav nav-pills gap-2 mb-4" role="tablist">
+        <div class="nav-align-top mb-3 mb-sm-4">
+            <ul class="nav nav-pills nav-justified gap-2 mb-3 mb-sm-4" role="tablist">
                 <li class="nav-item">
                     <button type="button" class="nav-link {{ $tab == 'katalog' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-penyewaan-katalog" aria-controls="navs-penyewaan-katalog" aria-selected="{{ $tab == 'katalog' ? 'true' : 'false' }}">
                         <i class="bx bx-grid-alt me-1"></i> Katalog Alat

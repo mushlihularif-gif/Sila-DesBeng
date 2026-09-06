@@ -11,34 +11,65 @@
         0% { opacity: 0; transform: translateY(20px); }
         100% { opacity: 1; transform: translateY(0); }
     }
+    .nav-pills-scrollable {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 8px;
+        gap: 0.5rem;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+    .nav-pills-scrollable::-webkit-scrollbar {
+        display: none;
+    }
+    .nav-pills-scrollable .nav-item {
+        flex-shrink: 0;
+    }
+    @media (min-width: 992px) {
+        .nav-pills-scrollable {
+            flex-wrap: wrap;
+            overflow-x: visible;
+        }
+    }
+
     .filter-btn {
         border-radius: 50rem;
-        padding: 0.6rem 1.2rem;
+        padding: 0.55rem 1.1rem;
         font-weight: 600;
-        transition: all 0.2s;
-        border: 1px solid transparent;
+        font-size: 0.85rem;
+        transition: all 0.2s ease;
+        border: 1px solid #e0e4e8;
+        background-color: #ffffff;
         text-decoration: none;
-        background: transparent;
+        white-space: nowrap;
+        display: inline-flex;
+        align-items: center;
     }
     
     /* Warna khusus untuk setiap status saat active */
     .filter-btn-primary.active {
         background-color: #0d6efd !important;
+        border-color: #0d6efd !important;
         color: white !important;
         box-shadow: 0 4px 10px rgba(13, 110, 253, 0.25) !important;
     }
     .filter-btn-warning.active {
         background-color: #ffab00 !important;
+        border-color: #ffab00 !important;
         color: white !important;
         box-shadow: 0 4px 10px rgba(255, 171, 0, 0.25) !important;
     }
     .filter-btn-success.active {
         background-color: #71dd37 !important;
+        border-color: #71dd37 !important;
         color: white !important;
         box-shadow: 0 4px 10px rgba(113, 221, 55, 0.25) !important;
     }
     .filter-btn-danger.active {
         background-color: #ff3e1d !important;
+        border-color: #ff3e1d !important;
         color: white !important;
         box-shadow: 0 4px 10px rgba(255, 62, 29, 0.25) !important;
     }
@@ -53,10 +84,14 @@
     .filter-btn-danger.active .badge { color: #ff3e1d !important; }
 
     .filter-btn:not(.active) {
-        color: #697a8d !important;
+        color: #566a7f !important;
+        background-color: #ffffff !important;
+        border-color: #e0e4e8 !important;
     }
     .filter-btn:not(.active):hover {
-        background-color: rgba(13, 110, 253, 0.08) !important;
+        background-color: #f8f9fa !important;
+        color: #384554 !important;
+        border-color: #cbd5e1 !important;
     }
 
     .table-modern {
@@ -87,7 +122,7 @@
     <div class="row mb-4">
         <div class="col-12 d-flex justify-content-between align-items-center">
             <h4 class="fw-bold py-3 mb-0">
-                <span class="text-muted fw-light">Sistem / Permintaan /</span> Verifikasi Identitas
+                <span class="text-muted fw-light">Permintaan & Aktivitas /</span> Verifikasi Identitas
             </h4>
         </div>
     </div>
@@ -107,7 +142,7 @@
 
     <!-- Panduan -->
     <div class="card bg-label-primary border-0 shadow-none mb-4" style="border-radius: 12px;">
-        <div class="card-body d-flex align-items-center p-4">
+        <div class="card-body d-flex align-items-center p-3 p-md-4">
             <div class="me-3">
                 <div class="bg-primary p-3 rounded-circle text-white d-flex align-items-center justify-content-center shadow-sm" style="width: 56px; height: 56px;">
                     <i class="bx bx-shield-quarter fs-3"></i>
@@ -124,7 +159,7 @@
     </div>
 
     <!-- TABS BUTTONS -->
-    <ul class="nav nav-pills d-flex flex-wrap gap-2 mb-4" role="tablist" style="border: none;">
+    <ul class="nav nav-pills nav-pills-scrollable mb-4" role="tablist" style="border: none;">
         <li class="nav-item" role="presentation">
             <button type="button" class="nav-link filter-btn filter-btn-primary active" role="tab" data-bs-toggle="pill" data-bs-target="#navs-all">
                 <i class="bx bx-list-ul me-1"></i> Semua Data
@@ -153,10 +188,10 @@
 
     <!-- TABS CONTENT -->
     <div class="card border-0 shadow-sm" style="border-radius: 16px;">
-        <div class="card-header bg-white pt-4 pb-0 border-bottom-0">
-            <h5 class="mb-4 fw-bold text-primary"><i class="bx bx-id-card fs-4 me-2 align-middle"></i> Daftar Pengajuan Verifikasi</h5>
+        <div class="card-header bg-white p-3 pb-0 p-md-4 pb-md-0 border-bottom-0">
+            <h5 class="mb-3 mb-md-4 fw-bold text-primary"><i class="bx bx-id-card fs-4 me-2 align-middle"></i> Daftar Pengajuan Verifikasi</h5>
         </div>
-        <div class="card-body bg-light bg-opacity-25 pt-4">
+        <div class="card-body bg-light bg-opacity-25 p-3 p-md-4">
             <div class="tab-content p-0 m-0 border-0 shadow-none bg-transparent">
                 <!-- TAB: ALL -->
                 <div class="tab-pane fade show active" id="navs-all" role="tabpanel">

@@ -15,10 +15,34 @@ class KycReviewController extends Controller
 {
     public function index(Request $request)
     {
-        $all = KycVerification::with('user')->whereNotNull('face_scan_data')->latest()->get();
-        $pending = KycVerification::with('user')->where('status', 'pending')->whereNotNull('face_scan_data')->latest()->get();
-        $approved = KycVerification::with('user')->where('status', 'approved')->whereNotNull('face_scan_data')->latest()->get();
-        $rejected = KycVerification::with('user')->where('status', 'rejected')->whereNotNull('face_scan_data')->latest()->get();
+        $pending = KycVerification::with('user')
+            ->where('status', 'pending')
+            ->where(function($q) {
+                $q->whereNotNull('face_scan_data')->orWhereNotNull('face_image_path');
+            })
+            ->latest()
+            ->get();
+            
+        $approved = KycVerification::with('user')
+            ->where('status', 'approved')
+            ->latest()
+            ->get();
+            
+        $rejected = KycVerification::with('user')
+            ->where('status', 'rejected')
+            ->latest()
+            ->get();
+            
+        $all = KycVerification::with('user')
+            ->whereIn('status', ['pending', 'approved', 'rejected'])
+            ->where(function($q) {
+                $q->where('status', '!=', 'pending')
+                  ->orWhere(function($sub) {
+                      $sub->whereNotNull('face_scan_data')->orWhereNotNull('face_image_path');
+                  });
+            })
+            ->latest()
+            ->get();
         
         $counts = [
             'all' => $all->count(),
@@ -33,6 +57,12 @@ class KycReviewController extends Controller
     public function show($id)
     {
         $kyc = KycVerification::with('user')->findOrFail($id);
+        
+        // Tolak akses jika pengajuan masih draft atau belum menyelesaikan scan wajah/selfie
+        if ($kyc->status === 'draft' || ($kyc->status === 'pending' && !$kyc->face_scan_data && !$kyc->face_image_path)) {
+            return redirect()->route('admin.kyc.index')->with('error', 'Pengajuan verifikasi belum lengkap (warga belum menyelesaikan scan wajah/selfie).');
+        }
+
         return view('admin.kyc.show', compact('kyc'));
     }
 

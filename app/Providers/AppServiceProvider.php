@@ -110,14 +110,16 @@ class AppServiceProvider extends ServiceProvider
                     if (!$region) $region = \App\Models\Region::first();
                     if ($region) {
                         $activeServicesMenu = $region->services->pluck('name')->toArray();
-                        $hasActiveServices = count($activeServicesMenu) > 0;
+                        $operationalServices = ['Penyewaan Alat', 'Penjualan Gas', 'Penyewaan Mobil', 'Fasilitas Umum', 'Pelaporan Warga'];
+                        $hasActiveServices = count(array_intersect($activeServicesMenu, $operationalServices)) > 0;
                     }
                 } else if (in_array($user->role, ['admin_kecamatan', 'admin_desa'])) {
                     // For admin_kecamatan and admin_desa, check their own region_id
                     $region = \App\Models\Region::with('services')->find($user->region_id);
                     if ($region) {
                         $activeServicesMenu = $region->services->pluck('name')->toArray();
-                        $hasActiveServices = count($activeServicesMenu) > 0;
+                        $operationalServices = ['Penyewaan Alat', 'Penjualan Gas', 'Penyewaan Mobil', 'Fasilitas Umum', 'Pelaporan Warga'];
+                        $hasActiveServices = count(array_intersect($activeServicesMenu, $operationalServices)) > 0;
                     }
                 }
             }

@@ -49,7 +49,17 @@ class KycController extends Controller
             ], 400);
         }
 
-        KycVerification::where('user_id', $user->id)->whereIn('status', ['pending', 'rejected'])->delete();
+        $oldKycs = KycVerification::where('user_id', $user->id)->whereIn('status', ['draft', 'pending', 'rejected'])->get();
+        foreach ($oldKycs as $oldKyc) {
+            if ($oldKyc->ktp_image_path && Storage::disk('private')->exists($oldKyc->ktp_image_path)) {
+                Storage::disk('private')->delete($oldKyc->ktp_image_path);
+            }
+            if ($oldKyc->face_image_path && Storage::disk('private')->exists($oldKyc->face_image_path)) {
+                Storage::disk('private')->delete($oldKyc->face_image_path);
+            }
+            \App\Models\AdminNotification::where('type', 'kyc')->where('reference_id', $oldKyc->id)->delete();
+            $oldKyc->delete();
+        }
 
         $kyc = KycVerification::create([
             'user_id' => $user->id,
@@ -62,7 +72,7 @@ class KycController extends Controller
             'kecamatan_from_ocr' => $request->kecamatan ?? $ocrData['kecamatan'] ?? null,
             'desa_from_ocr' => $request->desa ?? $ocrData['desa'] ?? null,
             'gender_from_ocr' => $ocrData['gender'] ?? null,
-            'status' => 'pending' 
+            'status' => 'draft' 
         ]);
 
         return response()->json([
@@ -88,7 +98,10 @@ class KycController extends Controller
 
         // Handle face_data whether it's array or string (from multipart form data)
         $faceData = is_string($request->face_data) ? json_decode($request->face_data, true) : $request->face_data;
-        $updateData = ['face_scan_data' => $faceData];
+        $updateData = [
+            'face_scan_data' => $faceData,
+            'status' => 'pending',
+        ];
         
         // Handle face image if uploaded
         if ($request->hasFile('face_image')) {
@@ -115,6 +128,16 @@ class KycController extends Controller
 
         $user = $request->user();
         $user->update(['verification_status' => 'pending']);
+
+        // Buat AdminNotification saat pengajuan lengkap
+        \App\Models\AdminNotification::create([
+            'type' => 'kyc',
+            'reference_id' => $kyc->id,
+            'region_id' => $user->region_id,
+            'title' => 'Pengajuan Verifikasi Identitas (KYC)',
+            'message' => "Warga " . ($user->name ?? 'Warga') . " mengajukan verifikasi data e-KTP dan scan wajah.",
+            'is_read' => false,
+        ]);
 
         return response()->json([
             'success' => true,

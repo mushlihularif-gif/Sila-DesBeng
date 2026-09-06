@@ -102,13 +102,19 @@ class AdminPelaporanController extends Controller
 
         $laporans = $query->paginate(15)->appends($request->query());
 
-        // Dropdown filter options
-        $kategoriList = Laporan::whereIn('region_id', $allowedRegionIds)
+        // Dropdown filter options (kategori standar sistem + kategori dari database jika ada)
+        $defaultCategories = ['Infrastruktur', 'Kebersihan', 'Keamanan', 'Fasilitas', 'Lingkungan', 'Pelayanan Publik', 'Administrasi', 'Lainnya'];
+        $dbCategories = Laporan::whereIn('region_id', $allowedRegionIds)
             ->select('kategori')
             ->whereNotNull('kategori')
             ->distinct()
-            ->orderBy('kategori')
-            ->pluck('kategori');
+            ->pluck('kategori')
+            ->toArray();
+        $kategoriList = collect(array_unique(array_merge($defaultCategories, $dbCategories)))->sort()->values();
+
+        if ($request->ajax()) {
+            return view('admin.pelaporan.partials.table', compact('laporans', 'isArchive'))->render();
+        }
 
         return view('admin.pelaporan.index', compact('laporans', 'stats', 'kategoriList', 'isArchive'));
     }

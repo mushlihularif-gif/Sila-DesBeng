@@ -282,6 +282,16 @@ class LaporanController extends Controller
                     'icon' => 'fas fa-file-alt',
                 ]);
             }
+
+            // Buat AdminNotification untuk dropdown navbar & dashboard
+            \App\Models\AdminNotification::create([
+                'type' => 'laporan',
+                'reference_id' => $laporan->id,
+                'region_id' => $targetRegionId,
+                'title' => 'Laporan Warga Baru',
+                'message' => "Laporan baru dari {$user->name} ({$regionName}) - Kategori: {$laporan->kategori}",
+                'is_read' => false,
+            ]);
         } catch (\Exception $e) {
             Log::error('Notif error: ' . $e->getMessage());
         }

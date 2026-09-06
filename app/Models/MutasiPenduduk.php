@@ -17,6 +17,10 @@ class MutasiPenduduk extends Model
         'requested_by',
         'reason',
         'rejection_reason',
+        'alamat_baru',
+        'rt_baru',
+        'rw_baru',
+        'ktp_image_path',
     ];
 
     public function user()
