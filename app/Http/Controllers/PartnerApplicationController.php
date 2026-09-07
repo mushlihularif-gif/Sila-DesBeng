@@ -25,11 +25,33 @@ class PartnerApplicationController extends Controller
         return view('pages.kemitraan.create', compact('regions', 'kecamatans'));
     }
 
+    /** Sebutan tingkat wilayah untuk pesan ke pemohon (ucfirst membuat "Rt"). */
+    private const LABEL_TINGKAT = [
+        'kecamatan' => 'Kecamatan',
+        'desa'      => 'Desa',
+        'kelurahan' => 'Kelurahan',
+        'rw'        => 'RW',
+        'rt'        => 'RT',
+    ];
+
+    /** Tipe wilayah yang sah berada di bawah tipe induk tertentu. */
+    private const TURUNAN = [
+        'kabupaten' => ['kecamatan'],
+        'kecamatan' => ['desa', 'kelurahan'],
+        'desa'      => ['rw'],
+        'kelurahan' => ['rw'],
+        'rw'        => ['rt'],
+        'rt'        => [],
+    ];
+
     public function store(Request $request)
     {
         $validated = $request->validate([
             'applicant_name' => 'required|string|max:255',
             'position' => 'required|string|max:255',
+            // Belum memuat 'kelurahan': kolomnya masih enum('kecamatan','desa',
+            // 'rw','rt') di database, jadi nilai itu akan gagal saat disimpan.
+            // Formulir mengarahkan pemohon kelurahan memakai pilihan 'desa'.
             'region_type' => 'required|in:kecamatan,desa,rw,rt',
             'region_name' => 'required|string|max:255',
             'parent_region_id' => 'required|exists:regions,id',
@@ -38,6 +60,20 @@ class PartnerApplicationController extends Controller
             'reason' => 'required|string',
             'document' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120', // 5MB max
         ]);
+
+        // Formulirnya memang menuntun pemohon lewat dropdown berjenjang, tetapi
+        // parent_region_id di atas hanya diperiksa keberadaannya. Tanpa
+        // pemeriksaan ini, kiriman POST langsung bisa mengajukan "desa" yang
+        // induknya sebuah RT, dan bentuk pohon wilayah jadi rusak begitu
+        // pengajuannya disetujui.
+        $induk = \App\Models\Region::find($validated['parent_region_id']);
+
+        if (! in_array($validated['region_type'], self::TURUNAN[$induk->type] ?? [], true)) {
+            return back()->withInput()->withErrors([
+                'parent_region_id' => (self::LABEL_TINGKAT[$validated['region_type']] ?? $validated['region_type'])
+                    . ' tidak dapat berada di bawah ' . $induk->name . '. Silakan pilih ulang wilayahnya.',
+            ]);
+        }
 
         if ($request->hasFile('document')) {
             $path = $request->file('document')->store('partner_applications', 'public');

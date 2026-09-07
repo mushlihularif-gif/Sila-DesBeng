@@ -45,6 +45,16 @@ return [
         'api_key' => env('GOOGLE_MAPS_API_KEY'),
     ],
 
+    // Kotak masuk Gmail via IMAP (baca-saja) untuk panel kanan dashboard admin.
+    // Nilai email & app_password normalnya diisi lewat panel Super Admin dan
+    // menimpa nilai .env ini; lihat config/api_providers.php kategori gmail_imap.
+    'gmail_inbox' => [
+        'email'        => env('GMAIL_INBOX_EMAIL'),
+        'app_password' => env('GMAIL_INBOX_APP_PASSWORD'),
+        'host'         => env('GMAIL_INBOX_HOST', 'imap.gmail.com'),
+        'port'         => env('GMAIL_INBOX_PORT', 993),
+    ],
+
     'midtrans' => [
         'merchant_id' => env('MIDTRANS_MERCHANT_ID'),
         'client_key' => env('MIDTRANS_CLIENT_KEY'),
@@ -54,5 +64,22 @@ return [
 
     'ocr_space' => [
         'api_key' => env('OCR_SPACE_API_KEY', 'helloworld'),
+    ],
+
+    // Xendit xenPlatform. Kredensial INDUK dipegang Diskominfotik; dana tiap
+    // wilayah diarahkan ke sub-akunnya lewat header for-user-id saat transaksi
+    // dibuat, sehingga pemasukan langsung menjadi saldo wilayah bersangkutan.
+    // ID sub-akun disimpan per wilayah di regions.payment_info, bukan di sini.
+    'xendit' => [
+        'secret_key'     => env('XENDIT_SECRET_KEY'),
+        'callback_token' => env('XENDIT_CALLBACK_TOKEN'),
+        'is_production'  => env('XENDIT_IS_PRODUCTION', false),
+    ],
+
+    // Gemini: dipakai chatbot warga dan sebagai cadangan pembacaan KTP
+    // kalau OCR.space gagal. Lihat OcrService::extractUsingGemini().
+    'gemini' => [
+        'api_key' => env('GEMINI_API_KEY'),
+        'model'   => env('GEMINI_MODEL', 'gemini-2.5-flash'),
     ],
 ];

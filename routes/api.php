@@ -4,6 +4,24 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BerandaController;
 
+/*
+ * Callback pembayaran dari penyedia gateway.
+ *
+ * WAJIB berada di luar autentikasi: yang memanggil adalah server Midtrans/Xendit,
+ * bukan pengguna yang login. Keasliannya diperiksa di dalam controller
+ * masing-masing — Xendit lewat header X-CALLBACK-TOKEN, Midtrans lewat
+ * penanyaan balik status ke servernya.
+ *
+ * Route Midtrans sebelumnya TIDAK PERNAH terdaftar, sehingga notifikasinya tidak
+ * punya pintu masuk dan status pesanan tidak pernah berubah otomatis.
+ * CSRF sudah dikecualikan untuk 'payment/callback' di bootstrap/app.php.
+ */
+Route::post('/payment/callback', [\App\Http\Controllers\Api\PaymentCallbackController::class, 'handleNotification'])
+    ->name('payment.callback.midtrans');
+
+Route::post('/payment/callback/xendit', [\App\Http\Controllers\Api\XenditCallbackController::class, 'handle'])
+    ->name('payment.callback.xendit');
+
 // Public Routes (Bisa diakses tanpa login)
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/login/google', [AuthController::class, 'loginGoogle']);

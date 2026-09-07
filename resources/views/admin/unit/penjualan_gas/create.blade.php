@@ -289,8 +289,8 @@
                                         <select class="form-select modern-input" id="saved_lokasi" onchange="fillLocationData(this)">
                                             <option value="">-- Pilih Lokasi --</option>
                                             @foreach($savedLocations as $loc)
-                                                <option value="{{ $loc->lokasi }}" data-lat="{{ $loc->latitude }}" data-lng="{{ $loc->longitude }}">
-                                                    {{ $loc->lokasi }}
+                                                <option value="{{ $loc->nama }}" data-lat="{{ $loc->latitude }}" data-lng="{{ $loc->longitude }}">
+                                                    {{ $loc->nama }}
                                                 </option>
                                             @endforeach
                                         </select>

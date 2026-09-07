@@ -16,8 +16,8 @@ class ChatbotController extends Controller
             'history' => 'nullable|array' // We can pass conversation history
         ]);
 
-        $apiKey = env('GEMINI_API_KEY');
-        $model = env('GEMINI_MODEL', 'gemini-2.5-flash');
+        $apiKey = config('services.gemini.api_key');
+        $model = config('services.gemini.model', 'gemini-2.5-flash');
         if (empty($apiKey)) {
             return response()->json(['error' => 'API Key tidak ditemukan. Hubungi administrator.'], 500);
         }

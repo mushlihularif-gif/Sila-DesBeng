@@ -121,7 +121,7 @@
         
         const file = inputElement.files[0];
         if (!file.type.startsWith('image/')) {
-            alert('File harus berupa gambar');
+            showSiladesBengToast('warning', 'Perhatian', 'File harus berupa gambar');
             return;
         }
 
@@ -216,7 +216,28 @@
                 const url = URL.createObjectURL(blob);
                 if (window.globalCropperPreview.tagName === 'IMG') {
                     window.globalCropperPreview.src = url;
-                    window.globalCropperPreview.classList.remove('d-none');
+
+                    // Dua kelas, bukan satu: pemotong ini dipakai di KEDUA sisi
+                    // aplikasi. Sisi admin memakai Bootstrap ('d-none'), sisi
+                    // warga memakai Tailwind ('hidden'). Sebelumnya hanya
+                    // 'd-none' yang dilepas, sehingga di halaman profil warga
+                    // gambarnya tetap tersembunyi setelah dipotong — foto yang
+                    // sudah dipilih seolah tidak muncul sama sekali.
+                    window.globalCropperPreview.classList.remove('d-none', 'hidden');
+
+                    // Penampung sementara ikut disembunyikan, dengan nama id yang
+                    // dipakai halaman profil warga.
+                    const placeholder = document.getElementById('avatar-placeholder');
+                    if (placeholder) {
+                        placeholder.classList.add('hidden', 'd-none');
+                    }
+
+                    // Ingatkan bahwa fotonya baru menempel, belum tersimpan.
+                    const belum = document.getElementById('belum-tersimpan');
+                    if (belum) {
+                        belum.classList.remove('hidden');
+                    }
+
                     // Hide icon if exists
                     const parent = window.globalCropperPreview.parentElement;
                     if(parent) {

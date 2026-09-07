@@ -374,7 +374,7 @@
                                 confirmButtonText: 'Tutup'
                             });
                         } else {
-                            alert("SANDBOX OTP (Demo)\n\nKode OTP Anda adalah: {{ session('otp_demo_sandbox_code') }}");
+                            showSiladesBengToast('info', 'Kode OTP (Demo)', "SANDBOX OTP (Demo)<br><br>Kode OTP Anda adalah: {{ session('otp_demo_sandbox_code') }}", 20000);
                         }
                     });
                 </script>

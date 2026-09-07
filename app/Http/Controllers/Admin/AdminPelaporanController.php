@@ -20,6 +20,20 @@ class AdminPelaporanController extends Controller
     private function getAllowedRegionIds(): array
     {
         $user = auth()->user();
+
+        // Kominfo mengawasi seluruh kabupaten. Ditulis eksplisit, bukan
+        // menumpang pada Region::getDescendantIds(null) yang kebetulan
+        // mengembalikan seluruh pohon karena where('parent_id', null) menjadi
+        // IS NULL — perilaku yang sama juga membuat admin biasa tanpa wilayah
+        // ikut melihat semuanya.
+        if ($user->role === 'super_admin') {
+            return Region::pluck('id')->all();
+        }
+
+        if (! $user->region_id) {
+            return [];
+        }
+
         $allowedIds = Region::getDescendantIds($user->region_id);
         $allowedIds[] = $user->region_id;
         return $allowedIds;

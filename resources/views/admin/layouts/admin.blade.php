@@ -1646,6 +1646,12 @@
             @stack('modals')
             @yield('scripts')
             @stack('scripts')
+
+    {{-- Dialog konfirmasi bergaya situs, pengganti window.confirm().
+         Dipasang di sini karena halaman-halaman admin lain menandai aksi
+         berbahayanya dengan atribut data-konfirmasi; tanpa partial ini
+         atribut itu tidak berarti apa-apa dan tombol hapus langsung jalan. --}}
+    @include('partials.dialog-konfirmasi')
     @include('components.cropper-modal')
     <!-- Select2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>

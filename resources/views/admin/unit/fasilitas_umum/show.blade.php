@@ -96,7 +96,7 @@
                                         <i class="bx bx-edit-alt me-1"></i> Ubah
                                     </a>
                                     <form action="{{ route('admin.unit.fasilitas_umum.destroy', $fasilitas->id) }}" method="POST"
-                                        onsubmit="return confirm('Apakah Anda yakin ingin menghapus fasilitas ini?');">
+                                        data-konfirmasi="Apakah Anda yakin ingin menghapus fasilitas ini?">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-danger px-4">

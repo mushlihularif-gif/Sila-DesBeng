@@ -21,11 +21,13 @@ class FasilitasUmumBookingController extends Controller
         $item = FasilitasUmum::findOrFail($itemId);
 
         // Validasi: Warga hanya bisa memesan layanan di wilayahnya sendiri
-        if (Auth::user()->region_id != $item->region_id) {
+        if (! in_array($item->region_id, \App\Models\Region::wilayahLayananTerlihat(Auth::user()->region_id, 'Fasilitas Umum'))) {
             return redirect()->back()->with('error', 'Layanan khusus warga lokal. Silakan sesuaikan wilayah Anda.');
         }
         
-        $setting = SystemSetting::first();
+        // Rekening & metode pembayaran milik WILAYAH layanan ini, bukan rekening
+        // pusat. Pemasukan tiap daerah menjadi tanggung jawab daerahnya sendiri.
+        $setting = \App\Support\ProfilPembayaranWilayah::untuk($item->region_id);
         
         // Ambil SOP Fasilitas Umum
         $region = \App\Models\Region::find(Auth::user()->region_id);
@@ -40,7 +42,15 @@ class FasilitasUmumBookingController extends Controller
         
         $quantity = request()->get('quantity', 1);
         
-        return view('users.fasilitas-umum-booking', compact('item', 'setting', 'quantity', 'sop_fasilitas', 'region'));
+
+        // Buku alamat warga, supaya alamat pengiriman tidak perlu diketik ulang
+        // di setiap unit layanan.
+        $alamatTersimpan = \App\Models\AlamatWarga::milik(auth()->id())
+            ->with('region')
+            ->orderByDesc('is_utama')
+            ->orderBy('id')
+            ->get();
+        return view('users.fasilitas-umum-booking', compact('item', 'setting', 'quantity', 'sop_fasilitas', 'region', 'alamatTersimpan'));
     }
 
     public function store(Request $request)
@@ -56,6 +66,12 @@ class FasilitasUmumBookingController extends Controller
             'surat_pengantar' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
             'recipient_name' => 'nullable|string|max:255',
             'delivery_address' => 'nullable|string',
+
+            // Acara komersial di fasilitas berbayar menagih uang sungguhan.
+            // Sebelumnya kolom payment_method/payment_proof ada di tabel tetapi
+            // tidak pernah diisi, sehingga tagihannya tidak punya jejak bayar.
+            'payment_method' => 'nullable|in:tunai,transfer',
+            'payment_proof' => 'required_if:payment_method,transfer|nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
         ]);
 
         if ($validated['delivery_method'] == 'antar') {
@@ -88,10 +104,19 @@ class FasilitasUmumBookingController extends Controller
             $suratPath = $request->file('surat_pengantar')->store('surat_pengantar', 'public');
         }
 
+        // Metode bayar hanya bermakna kalau pesanannya memang ditagih.
+        $metodeBayar = $totalAmount > 0 ? ($validated['payment_method'] ?? 'tunai') : null;
+        $buktiBayar = null;
+        if ($metodeBayar === 'transfer' && $request->hasFile('payment_proof')) {
+            $buktiBayar = $request->file('payment_proof')->store('payment_proofs', 'public');
+        }
+
         $booking = FasilitasUmumBooking::create([
             'user_id' => Auth::id(),
             'fasilitas_id' => $validated['fasilitas_id'],
             'delivery_method' => $validated['delivery_method'],
+            'payment_method' => $metodeBayar,
+            'payment_proof' => $buktiBayar,
             'recipient_name' => $validated['recipient_name'] ?? null,
             'delivery_address' => $validated['delivery_address'] ?? null,
             'quantity' => $validated['quantity'],
@@ -105,6 +130,20 @@ class FasilitasUmumBookingController extends Controller
             'status' => 'pending',
             'region_id' => $item->region_id,
         ]);
+
+        // Catat pergerakan dana ke ledger wilayah - hanya untuk peminjaman
+        // berbayar. Peminjaman gratis (acara sosial) tidak menghasilkan
+        // pemasukan apa pun, jadi tidak ada yang perlu dibukukan.
+        if ($totalAmount > 0) {
+            \App\Models\WalletTransaction::catatPemasukan(
+                regionId: $item->region_id,
+                referenceType: 'fasilitas',
+                referenceId: $booking->id,
+                amount: $totalAmount,
+                paymentMethod: $metodeBayar,
+                proofPath: $buktiBayar,
+            );
+        }
 
         // Buat notifikasi admin
         \App\Models\AdminNotification::create([

@@ -32,6 +32,12 @@ class GasController extends Controller
             ->paginate(9)
             ->appends(['search' => $search]);
 
+        // Lokasi layanan ikut dikirim supaya petugas bisa mendaftarkannya
+        // langsung dari halaman ini — daftar yang kosong berarti pilihan
+        // "Lokasi Tersimpan" di formulir produk juga kosong, dan itu perlu
+        // terlihat sebelum ia menekan Tambah Gas.
+        $lokasiLayanan = \App\Models\LokasiLayanan::untukWilayah(auth()->user()->region_id);
+
         $tab = $request->get('tab', 'katalog');
         $admin = auth()->user();
         $chats = \App\Models\UnitChatSession::where('region_id', $admin ? $admin->region_id : null)
@@ -41,7 +47,7 @@ class GasController extends Controller
             ->get();
         $totalUnreadChats = $chats->sum('unread_admin_count');
 
-        return view('admin.unit.penjualan_gas.index', compact('gases', 'search', 'chats', 'totalUnreadChats', 'tab'));
+        return view('admin.unit.penjualan_gas.index', compact('gases', 'search', 'chats', 'totalUnreadChats', 'tab', 'lokasiLayanan'));
     }
 
 
@@ -50,11 +56,12 @@ class GasController extends Controller
     // ===========================
     public function create()
     {
-        $savedLocations = Gas::select('lokasi', 'latitude', 'longitude')
-            ->whereNotNull('lokasi')
-            ->where('lokasi', '!=', '')
-            ->distinct()
-            ->get();
+        // Lokasi diambil dari daftar milik WILAYAH, bukan lagi SELECT DISTINCT
+        // pada tabel produk unit ini. Query lama tidak menyaring region_id sama
+        // sekali, sehingga admin satu desa ikut melihat nama lokasi desa lain;
+        // selain itu lokasinya lenyap begitu produk terakhir yang memakainya
+        // dihapus, dan koordinatnya harus diketik ulang tiap kali.
+        $savedLocations = \App\Models\LokasiLayanan::untukWilayah(auth()->user()->region_id);
             
         $categories = Category::where('region_id', auth()->user()->region_id)
             ->where(function($q) {
@@ -137,11 +144,12 @@ class GasController extends Controller
     public function edit($id)
     {
         $gas = Gas::findOrFail($id);
-        $savedLocations = Gas::select('lokasi', 'latitude', 'longitude')
-            ->whereNotNull('lokasi')
-            ->where('lokasi', '!=', '')
-            ->distinct()
-            ->get();
+        // Lokasi diambil dari daftar milik WILAYAH, bukan lagi SELECT DISTINCT
+        // pada tabel produk unit ini. Query lama tidak menyaring region_id sama
+        // sekali, sehingga admin satu desa ikut melihat nama lokasi desa lain;
+        // selain itu lokasinya lenyap begitu produk terakhir yang memakainya
+        // dihapus, dan koordinatnya harus diketik ulang tiap kali.
+        $savedLocations = \App\Models\LokasiLayanan::untukWilayah(auth()->user()->region_id);
             
         $categories = Category::where('region_id', auth()->user()->region_id)
             ->where(function($q) {

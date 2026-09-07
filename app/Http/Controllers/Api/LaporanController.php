@@ -87,14 +87,12 @@ class LaporanController extends Controller
 
                 $filename = time() . '_' . Str::random(24) . '.' . $extension;
         
-                // PATH KE ROOT SUBDOMAIN (Sesuai Web)
-                $destination = $_SERVER['DOCUMENT_ROOT'] . '/storage/laporan';
-                if (!is_dir($destination)) {
-                    mkdir($destination, 0755, true);
-                }
-        
-                $file->move($destination, $filename);
-        
+                // Lewat disk 'public', bukan $_SERVER['DOCUMENT_ROOT'] — nilai itu
+                // kosong di luar request web sehingga tujuannya jatuh ke
+                // '/storage/laporan' di akar drive. Jalur yang disimpan tetap
+                // 'laporan/xxx.jpg', jadi asset('storage/'.$p) tidak berubah.
+                $file->storeAs('laporan', $filename, 'public');
+
                 // SIMPAN RELATIVE URL
                 $data['bukti'] = 'laporan/' . $filename;
             }
@@ -307,6 +305,38 @@ class LaporanController extends Controller
     /**
      * Get comprehensive report detail by ID
      */
+    /**
+     * Siapa yang boleh membuka satu laporan lewat API.
+     *
+     * Sebelumnya cukup dicek perannya: admin RT/RW mana pun bisa membaca laporan
+     * siapa saja di seluruh kabupaten, lengkap dengan nama dan alamat pelapor —
+     * dua kolom yang justru sengaja dienkripsi di basis data. Daftarnya juga
+     * menyebut 'superadmin', peran yang tidak ada di sistem ini.
+     */
+    private function bolehMelihatLaporan(Laporan $laporan, $user): bool
+    {
+        if ((int) $laporan->user_id === (int) $user->id) {
+            return true;
+        }
+
+        if ($user->role === 'super_admin') {
+            return true;
+        }
+
+        $peranWilayah = ['admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'staff'];
+
+        // Tanpa wilayah tidak ada yang terjangkau. Region::getDescendantIds(null)
+        // justru mengembalikan seluruh pohon wilayah.
+        if (! in_array($user->role, $peranWilayah, true) || ! $user->region_id) {
+            return false;
+        }
+
+        $jangkauan = Region::getDescendantIds($user->region_id);
+        $jangkauan[] = $user->region_id;
+
+        return in_array((int) $laporan->region_id, array_map('intval', $jangkauan), true);
+    }
+
     public function show($id)
     {
         $user = auth('sanctum')->user();
@@ -320,7 +350,7 @@ class LaporanController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Laporan tidak ditemukan'], 404);
         }
 
-        if ((int) $laporan->user_id !== (int) $user->id && !in_array($user->role, ['admin_desa', 'superadmin', 'admin_rt', 'admin_rw'])) {
+        if (! $this->bolehMelihatLaporan($laporan, $user)) {
             return response()->json(['status' => 'error', 'message' => 'Akses ditolak'], 403);
         }
 
