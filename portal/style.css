@@ -421,6 +421,15 @@ ul { list-style: none; }
     color: var(--teks-lembut);
     line-height: 1.3;
 }
+.kk-grid .kk-item:last-child {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    padding: 11px 10px;
+}
+.kk-grid .kk-item:last-child img { height: 26px; margin: 0; }
 
 /* ---------- Bilah statistik ---------- */
 .statistik {
@@ -561,6 +570,7 @@ ul { list-style: none; }
 .papan-kisi div:hover { transform: translateY(-3px); background: #fff; }
 .papan-kisi img { width: 30px; height: 30px; object-fit: contain; flex-shrink: 0; }
 .papan-kisi span { font-size: 12.5px; font-weight: 600; color: var(--teks); line-height: 1.35; }
+.papan-kisi div:last-child { grid-column: 1 / -1; }
 
 .tempel-tentang {
     margin-top: 18px;
