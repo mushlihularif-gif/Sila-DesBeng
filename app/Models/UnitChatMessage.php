@@ -16,12 +16,14 @@ class UnitChatMessage extends Model
         'sender_type',
         'sender_id',
         'message',
+        'item_data',
         'attachment_url',
         'is_read',
     ];
 
     protected $casts = [
         'is_read' => 'boolean',
+        'item_data' => 'array',
     ];
 
     public function session()

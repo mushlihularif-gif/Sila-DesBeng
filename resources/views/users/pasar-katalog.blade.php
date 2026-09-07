@@ -4,10 +4,7 @@
 
 @section('page')
 <main class="flex-grow relative w-full bg-gray-50/50">
-    {{-- Custom Vector Abstract Background (Kabar Daerah Style) --}}
-    <div class="fixed inset-0 overflow-hidden z-0" id="premium-bg">
-        <canvas id="abstract-canvas" class="w-full h-full absolute inset-0"></canvas>
-    </div>
+    @include('partials.abstract-bg')
     
     <section class="relative z-20 min-h-screen pt-32 pb-16">
 
@@ -47,7 +44,7 @@
                             <!-- Filter Toggle Button -->
                             <button type="button" onclick="toggleFilterMenu()" class="ps-header-cart" title="Filter Pencarian">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
-                                @if(request('kategori') && request('kategori') != 'all' || request('kecamatan_id') && request('kecamatan_id') != 'all' || request('sort') && request('sort') != 'terbaru')
+                                @if((request('kategori') && request('kategori') != 'all') || (request('kecamatan_id') && request('kecamatan_id') != 'all') || (request('desa_id') && request('desa_id') != 'all') || (request('region_id') && request('region_id') != 'all') || (request('sort') && request('sort') != 'terbaru'))
                                     <span class="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
                                 @endif
                             </button>
@@ -77,11 +74,11 @@
                                 </button>
                             </div>
 
-                            <div class="p-5 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                            <div class="p-5 max-h-[65vh] overflow-y-auto custom-scrollbar">
                                 
                                 <!-- Urutkan Harga -->
-                                <div class="mb-6">
-                                    <h4 class="text-sm font-bold text-gray-800 mb-3 flex items-center">
+                                <div class="mb-5">
+                                    <h4 class="text-sm font-bold text-gray-800 mb-2.5 flex items-center">
                                         <svg class="w-4 h-4 mr-1.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"></path></svg>
                                         Urutkan
                                     </h4>
@@ -94,10 +91,10 @@
                                 </div>
 
                                 <!-- Kategori -->
-                                <div class="mb-6">
-                                    <h4 class="text-sm font-bold text-gray-800 mb-3 flex items-center">
+                                <div class="mb-5">
+                                    <h4 class="text-sm font-bold text-gray-800 mb-2.5 flex items-center">
                                         <svg class="w-4 h-4 mr-1.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
-                                        Kategori
+                                        Kategori Produk
                                     </h4>
                                     <div class="flex flex-wrap gap-2">
                                         <button type="button" onclick="selectCategory(this, 'all')" class="ps-filter-pill {{ request('kategori', 'all') == 'all' ? 'active' : '' }}">Semua</button>
@@ -106,6 +103,53 @@
                                         @endforeach
                                     </div>
                                     <input type="hidden" name="kategori" id="kategoriInput" value="{{ request('kategori', 'all') }}">
+                                </div>
+
+                                <!-- Wilayah Asal Produk (Kecamatan & Desa di Bengkalis) -->
+                                <div class="mb-3">
+                                    <h4 class="text-sm font-bold text-gray-800 mb-2.5 flex items-center">
+                                        <svg class="w-4 h-4 mr-1.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        </svg>
+                                        Wilayah Bengkalis
+                                    </h4>
+                                    
+                                    <!-- Kecamatan -->
+                                    <div class="mb-3">
+                                        <label class="block text-xs font-semibold text-gray-600 mb-1">Kecamatan</label>
+                                        <div class="relative">
+                                            <select name="kecamatan_id" id="filterKecamatanSelect" onchange="onFilterKecamatanChange(this.value)" class="w-full appearance-none px-3.5 py-2.5 pr-9 text-xs sm:text-sm border border-gray-200 rounded-xl bg-gray-50 text-gray-800 font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all shadow-sm">
+                                                <option value="all">Semua Kecamatan di Bengkalis</option>
+                                                @foreach($kecamatans as $kec)
+                                                    <option value="{{ $kec->id }}" {{ request('kecamatan_id') == $kec->id ? 'selected' : '' }}>
+                                                        {{ $kec->name }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">
+                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Desa / Kelurahan -->
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-600 mb-1">Desa / Kelurahan</label>
+                                        <div class="relative">
+                                            <select name="desa_id" id="filterDesaSelect" class="w-full appearance-none px-3.5 py-2.5 pr-9 text-xs sm:text-sm border border-gray-200 rounded-xl bg-gray-50 text-gray-800 font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all shadow-sm">
+                                                <option value="all">Semua Desa / Kelurahan</option>
+                                                @foreach($desas as $desa)
+                                                    <option value="{{ $desa->id }}" data-parent="{{ $desa->parent_id }}" {{ request('desa_id') == $desa->id ? 'selected' : '' }}>
+                                                        {{ $desa->name }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">
+                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
 
                             </div>
@@ -120,36 +164,59 @@
                 </form>
             </div>
             
-            @if(request('region_id'))
-                @php
-                    $activeRegion = \App\Models\Region::find(request('region_id'));
-                @endphp
-                @if($activeRegion)
-                <div class="mb-6 p-4 bg-gradient-to-r from-blue-50 via-sky-50 to-white rounded-2xl border border-blue-100 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-section">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
-                        </div>
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <h3 class="font-bold text-gray-900 text-base">Toko {{ $activeRegion->name }}</h3>
-                                <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-100 text-blue-700 uppercase">Toko Resmi</span>
-                            </div>
-                            <p class="text-xs text-gray-500 mt-0.5">Menampilkan seluruh katalog produk dari unit usaha BUMDes {{ $activeRegion->name }}.</p>
-                        </div>
+            @php
+                $activeDesa = (request('desa_id') && request('desa_id') != 'all') ? \App\Models\Region::with('parent')->find(request('desa_id')) : null;
+                $activeKecamatan = (request('kecamatan_id') && request('kecamatan_id') != 'all') ? \App\Models\Region::find(request('kecamatan_id')) : null;
+                $activeRegion = (request('region_id') && request('region_id') != 'all') ? \App\Models\Region::with('parent')->find(request('region_id')) : null;
+            @endphp
+
+            @if($activeRegion || $activeDesa || $activeKecamatan)
+            <div class="mb-6 p-4 bg-gradient-to-r from-blue-50 via-sky-50 to-white rounded-2xl border border-blue-100 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-section">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                     </div>
-                    <div class="flex items-center gap-2 self-start sm:self-auto">
-                        <a href="{{ route('pasar.toko', $activeRegion->id) }}" class="inline-flex items-center justify-center gap-1 px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-xs font-bold text-white transition shadow-sm">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h3 class="font-bold text-gray-900 text-base">
+                                @if($activeDesa)
+                                    Desa {{ $activeDesa->name }}
+                                    @if($activeDesa->parent)
+                                        <span class="text-gray-500 font-normal text-xs">(Kec. {{ $activeDesa->parent->name }})</span>
+                                    @endif
+                                @elseif($activeKecamatan)
+                                    Kecamatan {{ $activeKecamatan->name }}
+                                @elseif($activeRegion)
+                                    Toko {{ $activeRegion->name }}
+                                @endif
+                            </h3>
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-100 text-blue-700 uppercase">Filter Wilayah</span>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-0.5">
+                            @if($activeDesa)
+                                Menampilkan produk asli daerah dari unit usaha di Desa {{ $activeDesa->name }}.
+                            @elseif($activeKecamatan)
+                                Menampilkan seluruh produk dari unit usaha di wilayah Kecamatan {{ $activeKecamatan->name }}.
+                            @elseif($activeRegion)
+                                Menampilkan seluruh katalog produk dari unit usaha BUMDes {{ $activeRegion->name }}.
+                            @endif
+                        </p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 self-start sm:self-auto">
+                    @if($activeRegion || $activeDesa)
+                        @php $tokoId = $activeRegion ? $activeRegion->id : $activeDesa->id; @endphp
+                        <a href="{{ route('pasar.toko', $tokoId) }}" class="inline-flex items-center justify-center gap-1 px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-xs font-bold text-white transition shadow-sm">
                             <span>Profil Toko</span>
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                         </a>
-                        <a href="{{ route('pasar.index') }}" class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-gray-200 text-xs font-bold text-gray-700 hover:bg-gray-50 transition shadow-sm">
-                            <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                            <span>Semua Toko</span>
-                        </a>
-                    </div>
+                    @endif
+                    <a href="{{ route('pasar.index', array_filter(request()->except(['kecamatan_id', 'desa_id', 'region_id', 'page']))) }}" class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-gray-200 text-xs font-bold text-gray-700 hover:bg-gray-50 transition shadow-sm">
+                        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        <span>Semua Wilayah</span>
+                    </a>
                 </div>
-                @endif
+            </div>
             @endif
 
             <div class="mb-6 animate-section text-gray-600 font-medium text-sm flex items-center">
@@ -202,7 +269,20 @@
                         </div>
                         <div class="product-info">
                             <h3 class="product-name" style="font-size: 1.1rem; line-height: 1.4; margin-bottom: 8px; cursor: pointer;" onclick="openOrderModal({{ $produk->id }}, '{{ addslashes($produk->nama_produk) }}', '{{ $produk->foto ? Storage::url($produk->foto) : '' }}', '{{ addslashes($produk->deskripsi ?? 'Tidak ada deskripsi.') }}', {{ $produk->harga }}, {{ $produk->stok ?? 10 }}, 'Toko BUMDes {{ addslashes($produk->region->name ?? 'Desa') }}', '{{ route('pasar.toko', $produk->region_id ?? 1) }}')">{{ $produk->nama_produk }}</h3>
-                            <p class="product-desc" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">{{ $produk->deskripsi ?? 'Produk khas daerah Bengkalis.' }}</p>
+                            <p class="product-desc" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 8px;">{{ $produk->deskripsi ?? 'Produk khas daerah Bengkalis.' }}</p>
+                            
+                            <div style="display: flex; align-items: center; gap: 5px; margin-bottom: 12px; font-size: 11px; color: #64748b;">
+                                <svg xmlns="http://www.w3.org/2000/svg" style="width: 13px; height: 13px; color: #0284c7; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                    <circle cx="12" cy="10" r="3"></circle>
+                                </svg>
+                                <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                    {{ $produk->region ? $produk->region->name : 'Bengkalis' }}
+                                    @if($produk->region && $produk->region->parent)
+                                        <span style="color: #94a3b8;">&bull; Kec. {{ $produk->region->parent->name }}</span>
+                                    @endif
+                                </span>
+                            </div>
                             <div class="product-price-row">
                                 <span class="product-price">Rp {{ number_format($produk->harga, 0, ',', '.') }}</span>
                                 
@@ -1424,27 +1504,71 @@
         document.getElementById('kategoriInput').value = category;
     }
 
-    function selectLocation(kecId, desaId, text) {
-        // Update inputs
-        document.getElementById('hiddenKecId').value = kecId;
-        document.getElementById('hiddenDesaId').value = desaId;
+    function onFilterKecamatanChange(kecId, keepSelection = false) {
+        const desaSelect = document.getElementById('filterDesaSelect');
+        if (!desaSelect) return;
         
-        // Update text
-        document.getElementById('customLocationText').innerText = text;
-        
-        // Hide menu
-        document.getElementById('customLocationMenu').classList.add('hidden');
-        
-        // Update active class
-        const opts = document.querySelectorAll('.custom-opt');
-        opts.forEach(opt => opt.classList.remove('active'));
-        event.currentTarget.classList.add('active');
+        const options = desaSelect.querySelectorAll('option');
+        const currentDesa = desaSelect.value;
+        let isCurrentVisible = false;
+
+        options.forEach(opt => {
+            if (opt.value === 'all') {
+                opt.hidden = false;
+                opt.style.display = '';
+                return;
+            }
+            
+            const parentId = opt.getAttribute('data-parent');
+            if (!kecId || kecId === 'all' || parentId === String(kecId)) {
+                opt.hidden = false;
+                opt.style.display = '';
+                if (opt.value === currentDesa) {
+                    isCurrentVisible = true;
+                }
+            } else {
+                opt.hidden = true;
+                opt.style.display = 'none';
+            }
+        });
+
+        if (!keepSelection && !isCurrentVisible && currentDesa !== 'all') {
+            desaSelect.value = 'all';
+        }
     }
+
+    function initFilterDesaOptions() {
+        const kecSelect = document.getElementById('filterKecamatanSelect');
+        if (kecSelect) {
+            onFilterKecamatanChange(kecSelect.value, true);
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initFilterDesaOptions);
+    } else {
+        initFilterDesaOptions();
+    }
+    document.addEventListener('turbo:load', initFilterDesaOptions);
+    document.addEventListener('turbo:render', initFilterDesaOptions);
     
     function resetFilters() {
-        document.getElementById('sortInput').value = 'terbaru';
-        document.getElementById('kategoriInput').value = 'all';
-        document.getElementById('filterForm').submit();
+        const sortInput = document.getElementById('sortInput');
+        if (sortInput) sortInput.value = 'terbaru';
+        
+        const catInput = document.getElementById('kategoriInput');
+        if (catInput) catInput.value = 'all';
+        
+        const kecSelect = document.getElementById('filterKecamatanSelect');
+        if (kecSelect) kecSelect.value = 'all';
+        
+        const desaSelect = document.getElementById('filterDesaSelect');
+        if (desaSelect) desaSelect.value = 'all';
+        
+        onFilterKecamatanChange('all');
+
+        const form = document.getElementById('filterForm');
+        if (form) form.submit();
     }
 
     @auth
@@ -1475,133 +1599,6 @@
         });
     }
     @endauth
-
-    // Canvas Background Animation Script (Identical to Kabar Daerah)
-    (function() {
-        const initCanvas = function() {
-            const canvas = document.getElementById('abstract-canvas');
-            if (!canvas) return;
-            const ctx = canvas.getContext('2d');
-            let width, height;
-            let waves = [];
-            let scrollY = window.scrollY;
-            let mouse = { x: 0, y: 0 };
-            let targetMouse = { x: 0, y: 0 };
-
-            function resize() {
-                width = window.innerWidth;
-                height = window.innerHeight;
-                canvas.width = width;
-                canvas.height = height;
-                initWaves();
-            }
-
-            window.addEventListener('resize', resize);
-            
-            document.addEventListener('mousemove', (e) => {
-                targetMouse.x = e.clientX;
-                targetMouse.y = e.clientY;
-            });
-
-            window.addEventListener('scroll', () => {
-                scrollY = window.scrollY;
-            });
-
-            class Wave {
-                constructor(colorFunc, heightPercent, amplitude, speed, offset) {
-                    this.colorFunc = colorFunc;
-                    this.heightPercent = heightPercent;
-                    this.amplitude = amplitude;
-                    this.speed = speed;
-                    this.offset = offset;
-                    this.points = [];
-                    this.time = 0;
-                }
-                init() {
-                    this.points = [];
-                    for(let i = 0; i <= width + 50; i += 50) {
-                        this.points.push(i);
-                    }
-                }
-                update() {
-                    this.time += this.speed;
-                }
-                draw() {
-                    ctx.beginPath();
-                    ctx.moveTo(0, height);
-                    for(let i = 0; i < this.points.length; i++) {
-                        let x = this.points[i];
-                        let dx = x - mouse.x;
-                        let dy = (height * this.heightPercent) - mouse.y;
-                        let dist = Math.sqrt(dx*dx + dy*dy);
-                        let repel = 0;
-                        
-                        if(dist < 400) {
-                            repel = (400 - dist) * 0.15;
-                        }
-
-                        let y = height * this.heightPercent 
-                              + Math.sin(this.time + (x * 0.005) + this.offset) * this.amplitude
-                              + repel;
-                        ctx.lineTo(x, y);
-                    }
-                    ctx.lineTo(width, height);
-                    ctx.fillStyle = this.colorFunc(ctx, width, height);
-                    ctx.fill();
-                }
-            }
-
-            function initWaves() {
-                waves = [
-                    new Wave((ctx, w, h) => {
-                        let grad = ctx.createLinearGradient(0, h*0.5, 0, h);
-                        grad.addColorStop(0, 'rgba(230, 240, 255, 1)');
-                        grad.addColorStop(1, 'rgba(255, 255, 255, 1)');
-                        return grad;
-                    }, 0.65, 20, 0.005, 0),
-
-                    new Wave((ctx, w, h) => {
-                        let grad = ctx.createLinearGradient(0, h*0.6, 0, h*1.2);
-                        grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
-                        grad.addColorStop(1, 'rgba(245, 250, 255, 0.5)');
-                        return grad;
-                    }, 0.75, 30, 0.003, 500),
-
-                    new Wave((ctx, w, h) => {
-                        let grad = ctx.createLinearGradient(0, h*0.7, 0, h*1.1);
-                        grad.addColorStop(0, 'rgba(245, 225, 130, 0.5)');
-                        grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
-                        return grad;
-                    }, 0.85, 45, 0.007, 700)
-                ];
-                waves.forEach(w => w.init());
-            }
-
-            function animate() {
-                mouse.x += (targetMouse.x - mouse.x) * 0.1;
-                mouse.y += (targetMouse.y - mouse.y) * 0.1;
-                ctx.fillStyle = '#e8eff5'; 
-                ctx.fillRect(0, 0, width, height);
-                ctx.save();
-                ctx.translate(0, -scrollY * 0.4); 
-                let glowX = width * 0.15;
-                let glowY = height * 0.4;
-                let gradGlow = ctx.createRadialGradient(glowX, glowY, 0, glowX, glowY, width * 0.3);
-                gradGlow.addColorStop(0, 'rgba(245, 235, 150, 0.15)');
-                gradGlow.addColorStop(1, 'rgba(245, 235, 150, 0)');
-                ctx.fillStyle = gradGlow;
-                ctx.beginPath();
-                ctx.arc(glowX, glowY, width * 0.3, 0, Math.PI*2);
-                ctx.fill();
-                waves.forEach(w => { w.update(); w.draw(); });
-                ctx.restore();
-                requestAnimationFrame(animate);
-            }
-            resize();
-            animate();
-        };
-        if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', initCanvas); } else { initCanvas(); }
-    })();
 </script>
 @endpush
 

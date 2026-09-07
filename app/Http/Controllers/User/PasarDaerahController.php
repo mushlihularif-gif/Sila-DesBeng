@@ -51,12 +51,22 @@ class PasarDaerahController extends Controller
             $query->where('nama_produk', 'like', '%' . $request->search . '%');
         }
 
-        // Filter produk (Publik, bisa dilihat siapa saja)
-        if ($request->filled('region_id') && $request->region_id !== 'all') {
-            $query->where('region_id', $request->region_id);
-        } else {
-            // Default: Prioritaskan produk dari desa pengguna (jika login), jika tidak, tampilkan semua
-            // atau jika public, biarkan kosong agar menampilkan semua.
+        // Filter berdasarkan Wilayah (Kecamatan dan Desa di Bengkalis)
+        if ($request->filled('desa_id') && $request->desa_id !== 'all') {
+            $query->where('region_id', $request->desa_id);
+        } elseif ($request->filled('kecamatan_id') && $request->kecamatan_id !== 'all') {
+            $desaIds = Region::where('parent_id', $request->kecamatan_id)->pluck('id')->toArray();
+            $desaIds[] = (int) $request->kecamatan_id;
+            $query->whereIn('region_id', $desaIds);
+        } elseif ($request->filled('region_id') && $request->region_id !== 'all') {
+            $selectedRegion = Region::find($request->region_id);
+            if ($selectedRegion && strtolower($selectedRegion->type) === 'kecamatan') {
+                $desaIds = Region::where('parent_id', $selectedRegion->id)->pluck('id')->toArray();
+                $desaIds[] = $selectedRegion->id;
+                $query->whereIn('region_id', $desaIds);
+            } else {
+                $query->where('region_id', $request->region_id);
+            }
         }
 
         if ($request->filled('sort')) {
@@ -71,10 +81,10 @@ class PasarDaerahController extends Controller
             $query->latest();
         }
 
-        $produks = $query->with('region')->paginate(12)->withQueryString();
+        $produks = $query->with(['region.parent'])->paginate(12)->withQueryString();
         
-        $kecamatans = Region::where('type', 'kecamatan')->get();
-        $desas = Region::where('type', 'desa')->get(); // Di frontend nanti difilter via JS
+        $kecamatans = Region::where('type', 'kecamatan')->orderBy('name', 'asc')->get();
+        $desas = Region::where('type', 'desa')->orderBy('name', 'asc')->get();
 
         return view('users.pasar-katalog', compact('produks', 'kecamatans', 'desas'));
     }

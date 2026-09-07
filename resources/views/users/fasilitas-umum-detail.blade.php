@@ -206,11 +206,17 @@
                                 </button>
                             </div>
 
+                            <!-- Chat Button -->
+                            <button type="button" onclick="chatAboutCurrentItem()" class="flex-shrink-0 bg-white text-blue-500 border border-blue-500 hover:bg-blue-50 hover:text-blue-600 font-bold py-3 px-5 rounded-full transition-all duration-300 shadow-md flex items-center justify-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                                Chat
+                            </button>
+
                             <!-- Rent Button -->
                             <a href="{{ route('user.fasilitas-umum.book', $item->id) }}?quantity={{ $item->stok > 0 ? 1 : 0 }}" 
                                id="rent-button"
                                class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-full transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-center">
-                                Pinjam
+                                Booking
                             </a>
                         </div>
                     </div>
@@ -221,6 +227,15 @@
 </main>
 
 
+    <x-unit-chat-widget 
+        service="fasilitas_umum" 
+        title="Layanan Fasilitas Umum" 
+        :regionId="$item->region_id" 
+        :regionName="$item->region->name ?? ''"
+        :itemName="$item->nama_fasilitas"
+        :itemPrice="'Rp ' . number_format($item->harga_sewa, 0, ',', '.') . ' / ' . $item->satuan"
+        :itemImage="$item->foto ? url('storage/' . $item->foto) : ''"
+    />
 @endsection
 
 @push('styles')

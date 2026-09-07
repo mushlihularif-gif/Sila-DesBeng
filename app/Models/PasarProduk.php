@@ -49,6 +49,11 @@ class PasarProduk extends Model
         return $this->hasMany(PasarOrderItem::class, 'pasar_produk_id');
     }
 
+    public function reviews()
+    {
+        return $this->hasMany(PasarReview::class, 'pasar_produk_id');
+    }
+
     /**
      * Check if product has enough stock
      */

@@ -7,19 +7,6 @@
 <style>
     * { font-family: 'Inter', sans-serif; }
 
-    /* Background */
-    .checkout-bg {
-        position: fixed; inset: 0; z-index: 0;
-        background: linear-gradient(135deg, #f0f7ff 0%, #fafbff 40%, #fff8f0 100%);
-    }
-    .checkout-bg::before {
-        content: ''; position: absolute; top: -50%; right: -30%; width: 80%; height: 80%;
-        background: radial-gradient(circle, rgba(17,87,137,0.04) 0%, transparent 70%); border-radius: 50%;
-    }
-    .checkout-bg::after {
-        content: ''; position: absolute; bottom: -30%; left: -20%; width: 60%; height: 60%;
-        background: radial-gradient(circle, rgba(245,158,11,0.04) 0%, transparent 70%); border-radius: 50%;
-    }
 
     /* Header */
     .co-header { display: flex; align-items: center; gap: 16px; margin-bottom: 12px; }
@@ -277,9 +264,9 @@
 @endpush
 
 @section('page')
-<div class="checkout-bg"></div>
+@include('partials.abstract-bg')
 
-<div id="main-content" class="relative z-10 min-h-[80vh] pb-20" style="transition: padding-top 0.3s ease-in-out; padding-top: 50px;">
+<div id="main-content" class="relative z-10 min-h-[80vh] pb-20" style="transition: padding-top 0.3s ease-in-out; padding-top: 140px;">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
 
         <!-- Header -->
@@ -354,7 +341,7 @@
                         </div>
                         <div class="co-card-body">
                             <div class="radio-grid">
-                                <label class="radio-card selected">
+                                <label class="radio-card delivery-radio-card selected" onclick="toggleDelivery('jemput')">
                                     <input type="radio" name="delivery_method" value="jemput" checked onchange="toggleDelivery(this.value)">
                                     <div class="radio-indicator"></div>
                                     <div class="radio-icon" style="background: linear-gradient(135deg, #d1fae5, #ecfdf5); color: #059669;">
@@ -367,7 +354,7 @@
                                     </div>
                                 </label>
 
-                                <label class="radio-card">
+                                <label class="radio-card delivery-radio-card" onclick="toggleDelivery('antar')">
                                     <input type="radio" name="delivery_method" value="antar" onchange="toggleDelivery(this.value)">
                                     <div class="radio-indicator"></div>
                                     <div class="radio-icon" style="background: linear-gradient(135deg, #dbeafe, #eff6ff); color: #2563eb;">
@@ -715,6 +702,20 @@
     }
 
     function toggleDelivery(method) {
+        // Toggle selected class and radio checked state
+        document.querySelectorAll('.delivery-radio-card').forEach(card => {
+            const radio = card.querySelector('input[name="delivery_method"]');
+            if (radio) {
+                if (radio.value === method) {
+                    radio.checked = true;
+                    card.classList.add('selected');
+                } else {
+                    radio.checked = false;
+                    card.classList.remove('selected');
+                }
+            }
+        });
+
         const form = document.getElementById('deliveryForm');
         if (method === 'antar') {
             form.style.display = 'block';
@@ -810,7 +811,7 @@
             const updatePositions = () => {
                 const isHidden = header.classList.contains('hidden-nav');
                 if (summaryCard) summaryCard.style.top = isHidden ? '20px' : '100px';
-                if (mainContent) mainContent.style.paddingTop = isHidden ? '0px' : '50px';
+                if (mainContent) mainContent.style.paddingTop = isHidden ? '40px' : '140px';
             };
             updatePositions();
             new MutationObserver(mutations => {

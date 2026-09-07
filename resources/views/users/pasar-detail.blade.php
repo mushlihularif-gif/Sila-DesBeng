@@ -850,7 +850,9 @@
 @endpush
 
 @section('page')
-<main id="main-content" class="flex-grow bg-gray-50/50 pb-16 detail-container detail-page-wrapper">
+@include('partials.abstract-bg')
+
+<div id="main-content" class="relative z-10 flex-grow pb-16 detail-container detail-page-wrapper">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Breadcrumb -->
         <nav class="flex mb-6 text-sm text-gray-500 mt-4">
@@ -1516,7 +1518,7 @@
         </div>
 
     </div>
-</main>
+</div>
 
 <!-- Lightbox Overlay -->
 <div id="lightbox" class="ps-lightbox" style="display:none;" onclick="closeLightbox()">

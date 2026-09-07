@@ -6,19 +6,6 @@
 <style>
     * { font-family: 'Inter', sans-serif; }
 
-    /* Background styling consistent with checkout */
-    .checkout-bg {
-        position: fixed; inset: 0; z-index: 0;
-        background: linear-gradient(135deg, #f0f7ff 0%, #fafbff 40%, #fff8f0 100%);
-    }
-    .checkout-bg::before {
-        content: ''; position: absolute; top: -50%; right: -30%; width: 80%; height: 80%;
-        background: radial-gradient(circle, rgba(17,87,137,0.04) 0%, transparent 70%); border-radius: 50%;
-    }
-    .checkout-bg::after {
-        content: ''; position: absolute; bottom: -30%; left: -20%; width: 60%; height: 60%;
-        background: radial-gradient(circle, rgba(245,158,11,0.04) 0%, transparent 70%); border-radius: 50%;
-    }
 
     /* Header styling consistent with checkout */
     .co-header { display: flex; align-items: center; gap: 16px; margin-bottom: 12px; }
@@ -153,10 +140,9 @@
 @endpush
 
 @section('page')
-<!-- Background elements -->
-<div class="checkout-bg"></div>
+@include('partials.abstract-bg')
 
-<main id="main-content" class="relative z-10 flex-grow py-12 md:py-16" style="transition: padding-top 0.3s ease-in-out; padding-top: 50px;">
+<div id="main-content" class="relative z-10 flex-grow py-12 md:py-16" style="transition: padding-top 0.3s ease-in-out; padding-top: 140px;">
     <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <!-- Header -->
@@ -433,7 +419,7 @@
             </div>
         </div>
     </div>
-</main>
+</div>
 
 @push('scripts')
 <script>
@@ -489,7 +475,7 @@
         if (header && mainContent) {
             const updatePositions = () => {
                 const isHidden = header.classList.contains('hidden-nav');
-                mainContent.style.paddingTop = isHidden ? '0px' : '50px';
+                mainContent.style.paddingTop = isHidden ? '40px' : '140px';
             };
             
             updatePositions();
@@ -502,7 +488,7 @@
                 });
             });
             
-            observer.observe(header, { attributes: true });
+                observer.observe(header, { attributes: true });
         }
     });
 </script>
