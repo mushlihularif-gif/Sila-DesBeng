@@ -25,6 +25,10 @@ Route::get('/media/secure/ktp/{filename}', [MediaController::class, 'secureKtpIm
     ->name('media.secure.ktp')
     ->middleware('auth');
 
+Route::get('/media/secure/face/{filename}', [MediaController::class, 'secureFaceImage'])
+    ->name('media.secure.face')
+    ->middleware('auth');
+
 Route::get('/', function () {
     return redirect('beranda');
 });
@@ -265,7 +269,19 @@ Route::middleware('auth')->prefix('pasar-daerah')->group(function () {
         ->name('pasar.toko')
         ->withoutMiddleware('auth')
         ->middleware('role:user,guest');
+
+    Route::get('/toko/{id}/chat/history', [App\Http\Controllers\User\PasarDaerahController::class, 'getChatHistory'])
+        ->name('pasar.chat.history')
+        ->withoutMiddleware('auth');
+    Route::post('/toko/{id}/chat/send', [App\Http\Controllers\User\PasarDaerahController::class, 'sendChatMessage'])
+        ->name('pasar.chat.send')
+        ->withoutMiddleware('auth');
+    Route::post('/toko/{id}/chat/escalate', [App\Http\Controllers\User\PasarDaerahController::class, 'escalateToAdmin'])
+        ->name('pasar.chat.escalate')
+        ->withoutMiddleware('auth');
         
+    Route::post('/order/{id}/confirm-received', [App\Http\Controllers\User\PasarDaerahController::class, 'confirmReceived'])->name('pasar.order.confirm_received');
+    Route::post('/order/{id}/complaint', [App\Http\Controllers\User\PasarDaerahController::class, 'storeComplaint'])->name('pasar.order.complaint.store');
     Route::post('/{id}/review', [App\Http\Controllers\User\PasarDaerahController::class, 'storeReview'])->name('pasar.review.store');
 
     // Taruh parameter di paling bawah supaya route lain tidak ketimpa
@@ -450,6 +466,9 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
     Route::post('/wilayah-admins/{id}/approve', [\App\Http\Controllers\Admin\RegionAdminManagementController::class, 'approveApplication'])->name('admin.wilayah-admins.approve');
     Route::post('/wilayah-admins/{id}/reject', [\App\Http\Controllers\Admin\RegionAdminManagementController::class, 'rejectApplication'])->name('admin.wilayah-admins.reject');
     Route::delete('/wilayah-admins/{id}/revoke', [\App\Http\Controllers\Admin\RegionAdminManagementController::class, 'revoke'])->name('admin.wilayah-admins.revoke');
+    Route::post('/wilayah-admins/region', [\App\Http\Controllers\Admin\RegionAdminManagementController::class, 'storeRegion'])->name('admin.wilayah-admins.region.store');
+    Route::put('/wilayah-admins/region/{id}', [\App\Http\Controllers\Admin\RegionAdminManagementController::class, 'updateRegion'])->name('admin.wilayah-admins.region.update');
+    Route::delete('/wilayah-admins/region/{id}', [\App\Http\Controllers\Admin\RegionAdminManagementController::class, 'destroyRegion'])->name('admin.wilayah-admins.region.destroy');
 
     
     // Pengaturan
@@ -664,9 +683,7 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
             ]);
         });
 
-        // Ambulans Darurat
-        Route::get('ambulans/sop', [\App\Http\Controllers\Admin\UnitAmbulansController::class, 'sop'])->name('admin.unit.ambulans.sop');
-        Route::post('ambulans/sop', [\App\Http\Controllers\Admin\UnitAmbulansController::class, 'updateSop'])->name('admin.unit.ambulans.sop.update');
+        // Ambulans Darurat & Kendaraan Operasional
         Route::resource('ambulans', \App\Http\Controllers\Admin\UnitAmbulansController::class)->names([
             'index' => 'admin.unit.ambulans.index',
             'create' => 'admin.unit.ambulans.create',
@@ -700,6 +717,19 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
             Route::get('pasar-daerah/reviews/list', [\App\Http\Controllers\Admin\UnitPasarDaerahController::class, 'reviews'])->name('admin.unit.pasar_daerah.reviews');
             Route::post('pasar-daerah/reviews/{id}/reply', [\App\Http\Controllers\Admin\UnitPasarDaerahController::class, 'replyReview'])->name('admin.unit.pasar_daerah.reply_review');
             Route::post('pasar-daerah/complaints/{id}/handle', [\App\Http\Controllers\Admin\UnitPasarDaerahController::class, 'handleComplaint'])->name('admin.unit.pasar_daerah.complaints.handle');
+            
+            // Chat Pengelola Toko
+            Route::get('pasar-daerah/chats/list', [\App\Http\Controllers\Admin\UnitPasarDaerahController::class, 'chats'])->name('admin.unit.pasar_daerah.chats');
+            Route::get('pasar-daerah/chats/{id}/messages', [\App\Http\Controllers\Admin\UnitPasarDaerahController::class, 'chatMessages'])->name('admin.unit.pasar_daerah.chat_messages');
+            Route::post('pasar-daerah/chats/{id}/reply', [\App\Http\Controllers\Admin\UnitPasarDaerahController::class, 'replyChat'])->name('admin.unit.pasar_daerah.reply_chat');
+            Route::post('pasar-daerah/chats/{id}/resolve', [\App\Http\Controllers\Admin\UnitPasarDaerahController::class, 'resolveChat'])->name('admin.unit.pasar_daerah.resolve_chat');
+        });
+
+        // Chat Layanan Terpisah (Gas, Sewa Alat, Sewa Mobil, Fasilitas Umum)
+        Route::prefix('chat-service')->group(function () {
+            Route::get('{service}/{id}/messages', [\App\Http\Controllers\Admin\UnitChatController::class, 'getMessages'])->name('admin.unit.chat.messages');
+            Route::post('{service}/{id}/reply', [\App\Http\Controllers\Admin\UnitChatController::class, 'replyChat'])->name('admin.unit.chat.reply');
+            Route::post('{service}/{id}/resolve', [\App\Http\Controllers\Admin\UnitChatController::class, 'resolveChat'])->name('admin.unit.chat.resolve');
         });
     });
     
@@ -801,12 +831,20 @@ Route::get('/pelaporan-warga', function () {
 Route::middleware(['auth', 'role:user'])->group(function () {
     Route::prefix('user/laporan')->name('user.laporan.')->group(function () {
         Route::get('/', [\App\Http\Controllers\LaporanController::class, 'index'])->name('index');
-        Route::get('/create', [\App\Http\Controllers\LaporanController::class, 'create'])->name('create');
-        Route::post('/', [\App\Http\Controllers\LaporanController::class, 'store'])->name('store');
+        // Membuat laporan menuruti sakelar layanan wilayah. Sebelumnya middleware
+        // ini cuma menempel di halaman landing, sehingga wilayah yang mematikan
+        // Pelaporan Warga tetap menerima laporan lewat form ini. Melihat dan
+        // menghapus laporan lama sengaja dibiarkan lolos: warga tetap berhak atas
+        // riwayatnya sendiri meski layanannya kemudian dimatikan.
+        Route::get('/create', [\App\Http\Controllers\LaporanController::class, 'create'])
+            ->name('create')->middleware('region.service:pelaporan-warga');
+        Route::post('/', [\App\Http\Controllers\LaporanController::class, 'store'])
+            ->name('store')->middleware('region.service:pelaporan-warga');
         Route::get('/export/{id}', [\App\Http\Controllers\LaporanController::class, 'exportPdf'])->name('export');
         Route::get('/{laporan}', [\App\Http\Controllers\LaporanController::class, 'show'])->name('show');
-        Route::get('/{laporan}/edit', [\App\Http\Controllers\LaporanController::class, 'edit'])->name('edit');
-        Route::put('/{laporan}', [\App\Http\Controllers\LaporanController::class, 'update'])->name('update');
+        // Rute edit/update dihapus: LaporanController tidak punya method edit()
+        // maupun update(), tidak ada view user/laporan/edit.blade.php, dan tidak
+        // satu pun halaman menautnya — membukanya selalu berakhir 500.
         Route::delete('/{laporan}', [\App\Http\Controllers\LaporanController::class, 'destroy'])->name('destroy');
     });
 

@@ -20,6 +20,20 @@ class AdminPelaporanController extends Controller
     private function getAllowedRegionIds(): array
     {
         $user = auth()->user();
+
+        // Kominfo mengawasi seluruh kabupaten. Ditulis eksplisit, bukan
+        // menumpang pada Region::getDescendantIds(null) yang kebetulan
+        // mengembalikan seluruh pohon karena where('parent_id', null) menjadi
+        // IS NULL — perilaku yang sama juga membuat admin biasa tanpa wilayah
+        // ikut melihat semuanya.
+        if ($user->role === 'super_admin') {
+            return Region::pluck('id')->all();
+        }
+
+        if (! $user->region_id) {
+            return [];
+        }
+
         $allowedIds = Region::getDescendantIds($user->region_id);
         $allowedIds[] = $user->region_id;
         return $allowedIds;
@@ -102,13 +116,19 @@ class AdminPelaporanController extends Controller
 
         $laporans = $query->paginate(15)->appends($request->query());
 
-        // Dropdown filter options
-        $kategoriList = Laporan::whereIn('region_id', $allowedRegionIds)
+        // Dropdown filter options (kategori standar sistem + kategori dari database jika ada)
+        $defaultCategories = ['Infrastruktur', 'Kebersihan', 'Keamanan', 'Fasilitas', 'Lingkungan', 'Pelayanan Publik', 'Administrasi', 'Lainnya'];
+        $dbCategories = Laporan::whereIn('region_id', $allowedRegionIds)
             ->select('kategori')
             ->whereNotNull('kategori')
             ->distinct()
-            ->orderBy('kategori')
-            ->pluck('kategori');
+            ->pluck('kategori')
+            ->toArray();
+        $kategoriList = collect(array_unique(array_merge($defaultCategories, $dbCategories)))->sort()->values();
+
+        if ($request->ajax()) {
+            return view('admin.pelaporan.partials.table', compact('laporans', 'isArchive'))->render();
+        }
 
         return view('admin.pelaporan.index', compact('laporans', 'stats', 'kategoriList', 'isArchive'));
     }
@@ -178,6 +198,9 @@ class AdminPelaporanController extends Controller
         $laporan->catatan_admin = $request->catatan;
         $laporan->admin_id = $user->id;
         $laporan->escalateTo($user->id, $request->catatan);
+
+        // Kirim notifikasi ke pelapor
+        $this->notifyReporter($laporan, 'Laporan Anda telah diteruskan ke tingkat "' . ucfirst($laporan->escalation_level) . '" untuk penanganan lebih lanjut.', 'laporan_eskalasi');
 
         return back()->with('success', 'Laporan berhasil di-eskalasi ke tingkat "' . ucfirst($laporan->escalation_level) . '".');
     }

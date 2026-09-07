@@ -11,14 +11,56 @@
         0% { opacity: 0; transform: translateY(20px); }
         100% { opacity: 1; transform: translateY(0); }
     }
+    .stat-card {
+        border-radius: 12px;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+    }
+    .stat-icon {
+        width: 38px;
+        height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        font-size: 1.25rem;
+        flex-shrink: 0;
+    }
+    .stat-number {
+        font-size: 1.25rem;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+    @media (min-width: 992px) {
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .stat-number {
+            font-size: 1.65rem;
+        }
+    }
     .filter-btn {
         border-radius: 50rem;
-        padding: 0.6rem 1.2rem;
+        padding: 0.45rem 0.9rem;
+        font-size: 0.85rem;
         font-weight: 600;
         transition: all 0.2s;
         border: 1px solid transparent;
         text-decoration: none;
         background: transparent;
+        white-space: nowrap;
+    }
+    @media (min-width: 768px) {
+        .filter-btn {
+            padding: 0.6rem 1.2rem;
+            font-size: 0.9375rem;
+        }
     }
     .filter-btn-primary.active {
         background-color: #0d6efd !important;
@@ -75,6 +117,12 @@
     }
     .table-modern td:first-child { border-radius: 8px 0 0 8px; }
     .table-modern td:last-child { border-radius: 0 8px 8px 0; }
+
+    @media (max-width: 767.98px) {
+        .table-modern td {
+            padding: 0.75rem 0.75rem;
+        }
+    }
 </style>
 <div class="container-xxl flex-grow-1 container-p-y animate-fade-up">
     @php

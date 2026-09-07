@@ -31,14 +31,13 @@ class Mobil extends Model
         'harga_luar_kota',
         'bbm_ditanggung',
         'opsi_supir',
-        'nama_supir',
-        'kontak_supir',
-        'opsi_supir_borongan',
-        'nama_supir_borongan',
-        'kontak_supir_borongan',
         'bbm_ditanggung_borongan',
+        'opsi_supir_borongan',
         'is_harian_active',
-        'is_borongan_active'
+        'is_borongan_active',
+        'opsi_lepas_kunci',
+        'tipe_tarif_borongan',
+        'tarif_borongan_wilayah',
     ];
 
     protected $casts = [
@@ -48,7 +47,13 @@ class Mobil extends Model
         'harga_luar_kota' => 'decimal:2',
         'is_harian_active' => 'boolean',
         'is_borongan_active' => 'boolean',
+        'opsi_lepas_kunci' => 'boolean',
     ];
+
+    public function supirs()
+    {
+        return $this->belongsToMany(Supir::class, 'mobil_supir', 'mobil_id', 'supir_id');
+    }
 
     public function bookings()
     {
@@ -68,7 +73,7 @@ class Mobil extends Model
     public function decreaseStock($quantity)
     {
         if (!$this->hasStock($quantity)) {
-            throw new \Exception("Stok tidak mencukupi.");
+            throw new \Exception('Stok tidak mencukupi.');
         }
         $this->stok -= $quantity;
         $this->save();

@@ -68,11 +68,11 @@
 <div class="container-xxl flex-grow-1 container-p-y animate-fade-up">
     <!-- Breadcrumb -->
     <h4 class="fw-bold py-3 mb-4">
-        <span class="text-muted fw-light">Sistem / <a href="{{ route('admin.pelaporan.index') }}" class="text-muted">Pelaporan Warga</a> /</span> Detail Laporan #{{ $laporan->id }}
+        <span class="text-muted fw-light">Sistem / <a href="{{ url()->previous() != url()->current() ? url()->previous() : route('admin.pelaporan.index') }}" class="text-muted">{{ str_contains(url()->previous(), 'arsip') ? 'Bukti Pelaporan Warga (Arsip)' : 'Pelaporan Warga' }}</a> /</span> Detail Laporan #{{ $laporan->id }}
     </h4>
     
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <a href="{{ route('admin.pelaporan.index') }}" class="btn btn-secondary">
+        <a href="{{ url()->previous() != url()->current() ? url()->previous() : route('admin.pelaporan.index') }}" class="btn btn-secondary">
             <i class="bx bx-arrow-back me-1"></i> Kembali
         </a>
     </div>

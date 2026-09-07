@@ -182,6 +182,9 @@ class AnnouncementController extends Controller
             }
         }
 
+        // Broadcast notifikasi ke warga sasaran
+        \App\Services\NotificationService::broadcastAnnouncement($announcement);
+
         return redirect()->route('admin.announcements.index', ['tab' => strtolower($category)])->with('success', $category . ' berhasil dipublikasikan.');
     }
 

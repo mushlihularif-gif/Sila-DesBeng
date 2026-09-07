@@ -3,7 +3,7 @@
 @section('title', 'Log Aktivitas')
 
 @section('content')
-<div class="container-fluid py-4">
+<div class="container-xxl flex-grow-1 container-p-y animate-fade-up">
     
     <!-- Filter & Search -->
     <div class="card border-0 shadow-sm rounded-4 mb-4">

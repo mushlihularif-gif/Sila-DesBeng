@@ -12,15 +12,6 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col mb-3">
-                            <label class="form-label">Kategori Layanan <span class="text-danger">*</span></label>
-                            <select name="layanan" class="form-select" required>
-                                <option value="Penyewaan Mobil" {{ $supir->layanan == 'Penyewaan Mobil' ? 'selected' : '' }}>Penyewaan Mobil</option>
-                                <option value="Fasilitas Umum" {{ $supir->layanan == 'Fasilitas Umum' ? 'selected' : '' }}>Fasilitas Umum (Ambulance, dll)</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col mb-3">
                             <label class="form-label">Nama Supir / Petugas <span class="text-danger">*</span></label>
                             <input type="text" name="nama" class="form-control" value="{{ $supir->nama }}" required>
                         </div>

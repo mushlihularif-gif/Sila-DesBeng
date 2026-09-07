@@ -22,23 +22,23 @@ class RegionManagementController extends Controller
         }
 
         if ($region_id) {
-            $parentRegion = Region::with(['children.users'])->find($region_id);
+            $parentRegion = Region::with(['children.users.file'])->find($region_id);
         } elseif ($isSuperAdmin) {
             // Admin Kabupaten: Tampilkan Kabupaten Bengkalis (root region)
-            $parentRegion = Region::with(['children.users'])->whereNull('parent_id')->orWhere('parent_id', 0)->first();
+            $parentRegion = Region::with(['children.users.file'])->whereNull('parent_id')->orWhere('parent_id', 0)->first();
             if (!$parentRegion) {
-                $parentRegion = Region::with(['children.users'])->where('type', 'kabupaten')->first();
+                $parentRegion = Region::with(['children.users.file'])->where('type', 'kabupaten')->first();
             }
         } else {
             // Admin tingkat lain (Kecamatan, Desa, RW, dll)
-            $parentRegion = Region::with(['children.users'])->find($user->region_id);
+            $parentRegion = Region::with(['children.users.file'])->find($user->region_id);
         }
         
         if (!$parentRegion && !$isSuperAdmin) {
             return redirect()->back()->with('error', 'Wilayah Anda tidak ditemukan.');
         }
 
-        $childrenQuery = Region::with(['users', 'children.users'])->orderBy('name', 'asc');
+        $childrenQuery = Region::with(['users.file', 'children.users.file'])->orderBy('name', 'asc');
 
         if ($parentRegion) {
             $childrenRegions = $childrenQuery->where('parent_id', $parentRegion->id)->get();

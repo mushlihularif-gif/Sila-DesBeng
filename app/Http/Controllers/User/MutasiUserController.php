@@ -45,7 +45,7 @@ class MutasiUserController extends Controller
             $ktpPath = $request->file('ktp_image')->store('mutasi_ktp', 'private');
         }
 
-        MutasiPenduduk::create([
+        $mutasi = MutasiPenduduk::create([
             'user_id' => $user->id,
             'from_region_id' => $user->region_id,
             'to_region_id' => $request->to_region_id,
@@ -57,6 +57,18 @@ class MutasiUserController extends Controller
             'rw_baru' => $request->rw_baru,
             'ktp_image_path' => $ktpPath,
         ]);
+
+        \App\Models\AdminNotification::create([
+            'type' => 'mutasi',
+            'title' => 'Pengajuan Mutasi Penduduk',
+            'message' => ($user->name ?? 'Warga') . ' mengajukan permohonan pindah domisili.',
+            'reference_id' => $mutasi->id,
+            'region_id' => $user->region_id,
+            'is_read' => false,
+        ]);
+
+        // Notifikasi ke warga pemohon
+        \App\Services\NotificationService::notifyMutasiSubmitted($mutasi);
 
         return redirect()->back()->with('success', 'Pengajuan pindah desa berhasil dikirim ke Admin Desa Anda untuk persetujuan (Handshake Protocol).');
     }

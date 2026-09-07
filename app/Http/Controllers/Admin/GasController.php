@@ -23,10 +23,10 @@ class GasController extends Controller
         }
 
         $search = $request->get('search');
-        
         $gases = Gas::query()
             ->when($search, function ($query, $search) {
-                return $query->searchWhereLike(['jenis_gas', 'kategori'], $search);
+                return $query->where('jenis_gas', 'LIKE', "%{$search}%")
+                           ->orWhere('kategori', 'LIKE', "%{$search}%");
             })
             ->orderBy('created_at', 'desc')
             ->paginate(9)
@@ -38,7 +38,16 @@ class GasController extends Controller
         // terlihat sebelum ia menekan Tambah Gas.
         $lokasiLayanan = \App\Models\LokasiLayanan::untukWilayah(auth()->user()->region_id);
 
-        return view('admin.unit.penjualan_gas.index', compact('gases', 'search', 'lokasiLayanan'));
+        $tab = $request->get('tab', 'katalog');
+        $admin = auth()->user();
+        $chats = \App\Models\UnitChatSession::where('region_id', $admin ? $admin->region_id : null)
+            ->where('service_type', 'gas')
+            ->with('user')
+            ->orderBy('last_message_at', 'desc')
+            ->get();
+        $totalUnreadChats = $chats->sum('unread_admin_count');
+
+        return view('admin.unit.penjualan_gas.index', compact('gases', 'search', 'chats', 'totalUnreadChats', 'tab', 'lokasiLayanan'));
     }
 
 
@@ -114,6 +123,9 @@ class GasController extends Controller
 
         $gas->save();
 
+        // Broadcast produk gas baru ke warga
+        \App\Services\NotificationService::broadcastNewProduct('Gas LPG', $gas->jenis_gas, $gas->region_id, route('gas.index'));
+
         return redirect()->route('admin.unit.penjualan_gas.index')->with('success', 'Gas berhasil ditambahkan.');
     }
 
@@ -176,6 +188,7 @@ class GasController extends Controller
 
         // Cari data gas
         $gas = Gas::findOrFail($id);
+        $oldStock = $gas->stok;
 
         // Siapkan data untuk update
         $dataUpdate = [
@@ -226,6 +239,17 @@ class GasController extends Controller
 
         // Eksekusi Update Satu Kali
         $gas->update($dataUpdate);
+
+        // Jika stok bertambah (restock), broadcast notifikasi ke warga
+        if ($validated['stok'] > $oldStock) {
+            \App\Services\NotificationService::broadcastStockUpdate(
+                $gas->jenis_gas,
+                $gas->stok,
+                $gas->satuan ?? 'tabung',
+                $gas->region_id,
+                route('gas.index')
+            );
+        }
 
         return redirect()->route('admin.unit.penjualan_gas.index')->with('success', 'Gas berhasil diubah.');
     }

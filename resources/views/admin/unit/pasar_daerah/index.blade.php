@@ -12,16 +12,16 @@
         </div>
 
         <!-- Panduan -->
-        <div class="card bg-label-success border-0 shadow-none mb-4" style="border-radius: 12px;">
-            <div class="card-body d-flex align-items-center p-4">
-                <div class="me-3">
-                    <div class="bg-success p-3 rounded-circle text-white d-flex align-items-center justify-content-center shadow-sm" style="width: 56px; height: 56px;">
-                        <i class="bx bx-store-alt fs-3"></i>
+        <div class="card bg-label-success border-0 shadow-none mb-3 mb-sm-4" style="border-radius: 12px;">
+            <div class="card-body d-flex align-items-center p-3 p-sm-4">
+                <div class="me-2 me-sm-3 flex-shrink-0">
+                    <div class="bg-success rounded-circle text-white d-flex align-items-center justify-content-center shadow-sm unit-icon-circle">
+                        <i class="bx bx-store-alt fs-4 fs-sm-3"></i>
                     </div>
                 </div>
                 <div>
-                    <h5 class="fw-bold mb-1 text-success">Manajemen Pasar Daerah</h5>
-                    <p class="mb-0 text-success" style="opacity: 0.85;">
+                    <h5 class="fw-bold mb-0 mb-sm-1 text-success fs-6 fs-sm-5">Manajemen Pasar Daerah</h5>
+                    <p class="mb-0 text-success small" style="opacity: 0.85; font-size: 0.8rem;">
                         Kelola etalase produk-produk hasil bumi, kerajinan, dan komoditas unggulan desa yang akan dijual ke publik.
                     </p>
                 </div>
@@ -37,71 +37,140 @@
         @endif
 
         <style>
-            .nav-pills .nav-link { color: #6c757d; font-weight: 600; padding: 0.6rem 1.2rem; transition: all 0.3s; border-radius: 50rem; }
-            .nav-pills .nav-link:hover { background-color: #f8f9fa; color: #566a7f; }
-            .nav-pills .nav-link.active { background-color: #696cff; color: #fff; box-shadow: 0 4px 6px rgba(105, 108, 255, 0.2); }
+            .unit-icon-circle {
+                width: 40px;
+                height: 40px;
+                min-width: 40px;
+            }
+            @media (min-width: 576px) {
+                .unit-icon-circle {
+                    width: 52px;
+                    height: 52px;
+                    min-width: 52px;
+                }
+            }
+            .nav-pills-scrollable {
+                display: flex;
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                padding: 4px 6px;
+                gap: 0.35rem;
+                scrollbar-width: none;
+            }
+            .nav-pills-scrollable::-webkit-scrollbar {
+                display: none;
+            }
+            .nav-pills-scrollable .nav-item {
+                flex: 1 1 0px;
+                min-width: fit-content;
+            }
+            .nav-pills-scrollable .nav-link { 
+                width: 100%;
+                justify-content: center;
+                white-space: nowrap;
+                color: #64748b; 
+                font-weight: 600; 
+                padding: 0.45rem 0.75rem; 
+                font-size: 0.82rem;
+                transition: all 0.25s ease; 
+                border-radius: 50rem; 
+                display: inline-flex;
+                align-items: center;
+                border: 1px solid #e2e8f0;
+                background-color: #ffffff;
+            }
+            @media (min-width: 576px) {
+                .nav-pills-scrollable .nav-link {
+                    padding: 0.55rem 0.85rem; 
+                    font-size: 0.875rem;
+                }
+            }
+            .nav-pills-scrollable .nav-link:hover { 
+                background-color: #f8fafc; 
+                color: #334155; 
+                border-color: #cbd5e1;
+            }
+            .nav-pills-scrollable .nav-link.active { 
+                background-color: #696cff; 
+                color: #fff; 
+                border-color: #696cff;
+                box-shadow: 0 4px 10px rgba(105, 108, 255, 0.25); 
+            }
             .product-card { transition: all 0.3s ease; border: none; box-shadow: 0 0.125rem 0.25rem rgba(161, 172, 184, 0.2); border-radius: 1rem; }
             .product-card:hover { transform: translateY(-5px); box-shadow: 0 0.5rem 1rem rgba(161, 172, 184, 0.15); }
         </style>
 
         <div class="nav-align-top mb-4">
-            <ul class="nav nav-pills gap-2 mb-4" role="tablist">
-                <li class="nav-item">
-                    <button type="button" class="nav-link {{ $tab == 'produk' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-produk" aria-controls="navs-top-produk" aria-selected="{{ $tab == 'produk' ? 'true' : 'false' }}">
-                        <i class="bx bx-box me-2"></i> Daftar Produk
-                    </button>
-                </li>
-                <li class="nav-item">
-                    <button type="button" class="nav-link {{ $tab == 'pesanan' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-pesanan" aria-controls="navs-top-pesanan" aria-selected="{{ $tab == 'pesanan' ? 'true' : 'false' }}">
-                        <i class="bx bx-cart me-2"></i> Daftar Pesanan
-                    </button>
-                </li>
-                <li class="nav-item">
-                    <button type="button" class="nav-link {{ $tab == 'laporan' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-laporan" aria-controls="navs-top-laporan" aria-selected="{{ $tab == 'laporan' ? 'true' : 'false' }}">
-                        <i class="bx bx-line-chart me-2"></i> Laporan
-                    </button>
-                </li>
-                <li class="nav-item">
-                    <button type="button" class="nav-link {{ $tab == 'pengaturan' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-pengaturan" aria-controls="navs-top-pengaturan" aria-selected="{{ $tab == 'pengaturan' ? 'true' : 'false' }}">
-                        <i class="bx bx-cog me-2"></i> Pengaturan Toko
-                    </button>
-                </li>
-                <li class="nav-item">
-                    <button type="button" class="nav-link {{ $tab == 'profil' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-profil" aria-controls="navs-top-profil" aria-selected="{{ $tab == 'profil' ? 'true' : 'false' }}">
-                        <i class="bx bx-store me-2"></i> Profil Toko
-                    </button>
-                </li>
-                <li class="nav-item">
-                    <button type="button" class="nav-link {{ $tab == 'ulasan' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-ulasan" aria-controls="navs-top-ulasan" aria-selected="{{ $tab == 'ulasan' ? 'true' : 'false' }}">
-                        <i class="bx bx-star me-2"></i> Ulasan & Komentar
-                    </button>
-                </li>
-                <li class="nav-item">
-                    <button type="button" class="nav-link {{ $tab == 'komplain' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-komplain" aria-controls="navs-top-komplain" aria-selected="{{ $tab == 'komplain' ? 'true' : 'false' }}">
-                        <i class="bx bx-shield-quarter me-2"></i> Komplain & Retur
-                        @php $pendingComplaints = $complaints->where('status', 'pending')->count(); @endphp
-                        @if($pendingComplaints > 0)
-                            <span class="badge rounded-pill bg-danger ms-1">{{ $pendingComplaints }}</span>
-                        @endif
-                    </button>
-                </li>
-            </ul>
+            <div class="bg-light p-1 rounded-pill mb-4 border border-light-subtle shadow-sm">
+                <ul class="nav nav-pills nav-pills-scrollable mb-0" role="tablist">
+                    <li class="nav-item">
+                        <button type="button" class="nav-link {{ $tab == 'produk' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-produk" aria-controls="navs-top-produk" aria-selected="{{ $tab == 'produk' ? 'true' : 'false' }}">
+                            <i class="bx bx-box me-1"></i> Produk
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button type="button" class="nav-link {{ $tab == 'pesanan' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-pesanan" aria-controls="navs-top-pesanan" aria-selected="{{ $tab == 'pesanan' ? 'true' : 'false' }}">
+                            <i class="bx bx-cart me-1"></i> Pesanan
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button type="button" class="nav-link {{ $tab == 'chat' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-chat" aria-controls="navs-top-chat" aria-selected="{{ $tab == 'chat' ? 'true' : 'false' }}">
+                            <i class="bx bx-chat me-1"></i> Chat Toko
+                            @if(isset($totalUnreadChats) && $totalUnreadChats > 0)
+                                <span class="badge rounded-pill bg-danger ms-1 px-1 py-0" style="font-size: 0.7rem;">{{ $totalUnreadChats }}</span>
+                            @endif
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button type="button" class="nav-link {{ $tab == 'komplain' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-komplain" aria-controls="navs-top-komplain" aria-selected="{{ $tab == 'komplain' ? 'true' : 'false' }}">
+                            <i class="bx bx-shield-quarter me-1"></i> Komplain
+                            @php $pendingComplaints = $complaints->where('status', 'pending')->count(); @endphp
+                            @if($pendingComplaints > 0)
+                                <span class="badge rounded-pill bg-danger ms-1 px-1 py-0" style="font-size: 0.7rem;">{{ $pendingComplaints }}</span>
+                            @endif
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button type="button" class="nav-link {{ $tab == 'ulasan' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-ulasan" aria-controls="navs-top-ulasan" aria-selected="{{ $tab == 'ulasan' ? 'true' : 'false' }}">
+                            <i class="bx bx-star me-1"></i> Ulasan
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button type="button" class="nav-link {{ $tab == 'laporan' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-laporan" aria-controls="navs-top-laporan" aria-selected="{{ $tab == 'laporan' ? 'true' : 'false' }}">
+                            <i class="bx bx-line-chart me-1"></i> Laporan
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button type="button" class="nav-link {{ $tab == 'profil' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-profil" aria-controls="navs-top-profil" aria-selected="{{ $tab == 'profil' ? 'true' : 'false' }}">
+                            <i class="bx bx-store me-1"></i> Profil Toko
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button type="button" class="nav-link {{ $tab == 'pengaturan' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-pengaturan" aria-controls="navs-top-pengaturan" aria-selected="{{ $tab == 'pengaturan' ? 'true' : 'false' }}">
+                            <i class="bx bx-cog me-1"></i> Pengaturan
+                        </button>
+                    </li>
+                </ul>
+            </div>
             
             <div class="tab-content">
                 <!-- TAB 1: DAFTAR PRODUK -->
                 <div class="tab-pane fade {{ $tab == 'produk' ? 'show active' : '' }}" id="navs-top-produk" role="tabpanel">
-                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 bg-white p-3 rounded-4 shadow-sm gap-3">
-                        <div class="d-flex align-items-center">
-                            <div class="avatar avatar-md bg-success-subtle text-success rounded-circle me-3 d-flex justify-content-center align-items-center">
-                                <i class="bx bx-box fs-4"></i>
+                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-3 mb-sm-4 bg-white p-3 rounded-4 shadow-sm gap-2 gap-sm-3">
+                        <div class="d-flex align-items-center me-sm-3">
+                            <div class="avatar avatar-sm bg-success-subtle text-success rounded-circle me-2 me-sm-3 d-flex justify-content-center align-items-center flex-shrink-0" style="width: 38px; height: 38px;">
+                                <i class="bx bx-box fs-5"></i>
                             </div>
                             <div>
-                                <h5 class="mb-0 fw-bold">Daftar Produk Pasar Daerah</h5>
-                                <small class="text-muted">Kelola komoditas dan hasil tani yang akan dijual di platform Pasar Daerah.</small>
+                                <h5 class="mb-0 fw-bold fs-6 fs-sm-5">Daftar Produk Pasar Daerah</h5>
+                                <small class="text-muted d-none d-sm-block">Kelola komoditas dan hasil tani yang akan dijual di platform Pasar Daerah.</small>
                             </div>
                         </div>
-                        <div class="w-100 w-md-auto text-end">
-                            <a href="{{ route('admin.unit.pasar_daerah.create') }}" class="btn btn-success rounded-pill px-4 shadow-sm w-100"><i class="bx bx-plus me-1"></i> Tambah Produk</a>
+                        <div class="w-100 w-sm-auto">
+                            <a href="{{ route('admin.unit.pasar_daerah.create') }}" class="btn btn-success rounded-pill px-3 px-sm-4 py-2 shadow-sm d-flex d-sm-inline-flex align-items-center justify-content-center fw-semibold w-100 w-sm-auto text-nowrap">
+                                <i class="bx bx-plus me-1 fs-5"></i> Tambah Produk
+                            </a>
                         </div>
                     </div>
 
@@ -147,35 +216,35 @@
                                                 </button>
                                             </div>
                                         </div>
-                                        <div class="card-body d-flex flex-column">
+                                        <div class="card-body d-flex flex-column p-2.5 p-sm-3">
                                             <div class="d-flex justify-content-between mb-2">
-                                                <span class="badge bg-label-success rounded-pill px-3">{{ $produk->kategori ?? 'Lainnya' }}</span>
+                                                <span class="badge bg-label-success rounded-pill px-2 px-sm-3" style="font-size: 0.75rem;">{{ $produk->kategori ?? 'Lainnya' }}</span>
                                                 @if($produk->status == 'tersedia')
-                                                    <span class="badge bg-success shadow-sm rounded-pill px-3">Tersedia</span>
+                                                    <span class="badge bg-success shadow-sm rounded-pill px-2 px-sm-3" style="font-size: 0.75rem;">Tersedia</span>
                                                 @elseif($produk->status == 'habis')
-                                                    <span class="badge bg-danger shadow-sm rounded-pill px-3">Habis</span>
+                                                    <span class="badge bg-danger shadow-sm rounded-pill px-2 px-sm-3" style="font-size: 0.75rem;">Habis</span>
                                                 @else
-                                                    <span class="badge bg-secondary shadow-sm rounded-pill px-3">Nonaktif</span>
+                                                    <span class="badge bg-secondary shadow-sm rounded-pill px-2 px-sm-3" style="font-size: 0.75rem;">Nonaktif</span>
                                                 @endif
                                             </div>
-                                            <h5 class="card-title fw-bold text-capitalize mb-1">{{ $produk->nama_produk }}</h5>
-                                            <div class="d-flex align-items-center mb-2">
-                                                <span class="text-success fw-bold fs-5 me-1">Rp {{ number_format($produk->harga, 0, ',', '.') }}</span>
+                                            <h6 class="card-title fw-bold text-capitalize mb-1 text-truncate" title="{{ $produk->nama_produk }}">{{ $produk->nama_produk }}</h6>
+                                            <div class="d-flex align-items-center mb-2 flex-wrap">
+                                                <span class="text-success fw-bold fs-6 fs-sm-5 me-1">Rp {{ number_format($produk->harga, 0, ',', '.') }}</span>
                                                 <span class="text-muted small">/ {{ $produk->satuan }}</span>
                                             </div>
                                             
-                                            <div class="d-flex align-items-center mb-3 text-muted">
-                                                <i class="bx bx-package me-2 text-primary"></i> Sisa Stok: <strong class="ms-1 text-dark">{{ $produk->stok }}</strong>
+                                            <div class="d-flex align-items-center mb-3 text-muted small">
+                                                <i class="bx bx-package me-1 text-primary"></i> Stok: <strong class="ms-1 text-dark">{{ $produk->stok }}</strong>
                                             </div>
                                             
-                                            <div class="mt-4 pt-3 border-top d-flex justify-content-end gap-2">
+                                            <div class="mt-auto pt-2 border-top d-flex justify-content-end gap-1 gap-sm-2">
                                                 <a href="{{ route('admin.unit.pasar_daerah.edit', $produk->id) }}"
-                                                    class="btn btn-sm btn-light border text-warning shadow-sm rounded-pill px-3"><i class="bx bx-edit me-1"></i><i class="bx bx-edit"></i></a>
+                                                    class="btn btn-sm btn-light border text-warning shadow-sm rounded-pill px-2 px-sm-3"><i class="bx bx-edit"></i></a>
                                                 <form action="{{ route('admin.unit.pasar_daerah.destroy', $produk->id) }}" method="POST"
                                                     data-konfirmasi="Apakah Anda yakin ingin menghapus produk ini?">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-light border text-danger shadow-sm rounded-pill px-3"><i class="bx bx-trash me-1"></i><i class="bx bx-trash"></i></button>
+                                                    <button type="submit" class="btn btn-sm btn-light border text-danger shadow-sm rounded-pill px-2 px-sm-3"><i class="bx bx-trash"></i></button>
                                                 </form>
                                             </div>
                                         </div>
@@ -184,13 +253,13 @@
                             @endforeach
                         </div>
                     @else
-                        <div class="card border-0 shadow-sm rounded-4 text-center py-5">
+                        <div class="card border-0 shadow-sm rounded-4 text-center py-4 py-sm-5">
                             <div class="card-body">
-                                <div class="mb-4">
-                                    <i class="bx bx-store-alt text-success" style="font-size: 80px; opacity: 0.5;"></i>
+                                <div class="mb-3">
+                                    <i class="bx bx-store-alt text-success" style="font-size: 48px; opacity: 0.5;"></i>
                                 </div>
-                                <h4 class="fw-bold">Belum Ada Produk</h4>
-                                <p class="text-muted mb-4">Mulai tambahkan produk atau komoditas hasil desa yang siap dipasarkan.</p>
+                                <h5 class="fw-bold mb-1">Belum Ada Produk</h5>
+                                <p class="text-muted small mb-3">Mulai tambahkan produk atau komoditas hasil desa yang siap dipasarkan.</p>
                                 <a href="{{ route('admin.unit.pasar_daerah.create') }}" class="btn btn-success rounded-pill px-4 shadow-sm">
                                     <i class="bx bx-plus me-1"></i> Tambah Produk Pertama
                                 </a>
@@ -202,19 +271,19 @@
 
                 <!-- TAB 2: DAFTAR PESANAN -->
                 <div class="tab-pane fade {{ $tab == 'pesanan' ? 'show active' : '' }}" id="navs-top-pesanan" role="tabpanel">
-                    <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded-4 shadow-sm">
-                        <div class="d-flex align-items-center">
-                            <div class="avatar avatar-md bg-info-subtle text-info rounded-circle me-3 d-flex justify-content-center align-items-center">
-                                <i class="bx bx-cart fs-4"></i>
+                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-3 mb-sm-4 bg-white p-3 rounded-4 shadow-sm gap-2 gap-sm-3">
+                        <div class="d-flex align-items-center me-sm-3">
+                            <div class="avatar avatar-sm bg-info-subtle text-info rounded-circle me-2 me-sm-3 d-flex justify-content-center align-items-center flex-shrink-0" style="width: 38px; height: 38px;">
+                                <i class="bx bx-cart fs-5"></i>
                             </div>
                             <div>
-                                <h5 class="mb-0 fw-bold">Daftar Pesanan Pasar Daerah</h5>
-                                <small class="text-muted">Kelola pesanan dari warga</small>
+                                <h5 class="mb-0 fw-bold fs-6 fs-sm-5">Daftar Pesanan Pasar Daerah</h5>
+                                <small class="text-muted d-none d-sm-block">Kelola pesanan dari warga</small>
                             </div>
                         </div>
-                        <div>
-                            <form action="{{ route('admin.unit.pasar_daerah.index') . '?tab=pesanan' }}" method="GET" class="d-flex gap-2">
-                                <select name="status" class="form-select border-light-subtle shadow-sm rounded-pill px-3" onchange="this.form.submit()">
+                        <div class="w-100 w-sm-auto">
+                            <form action="{{ route('admin.unit.pasar_daerah.index') . '?tab=pesanan' }}" method="GET" class="d-flex gap-2 w-100">
+                                <select name="status" class="form-select border-light-subtle shadow-sm rounded-pill px-3 w-100" onchange="this.form.submit()">
                                     <option value="all" {{ $status == 'all' ? 'selected' : '' }}>Semua Status</option>
                                     <option value="pending" {{ $status == 'pending' ? 'selected' : '' }}>Pending (Menunggu Bayar)</option>
                                     <option value="paid" {{ $status == 'paid' ? 'selected' : '' }}>Paid (Sudah Bayar)</option>
@@ -301,23 +370,23 @@
                     <div class="row mb-4">
                         <div class="col-xl-8">
                             <div class="card bg-primary text-white border-0 shadow-sm rounded-4 h-100">
-                                <div class="card-body d-flex align-items-center justify-content-between p-4">
+                                <div class="card-body d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between p-3 p-sm-4 gap-3">
                                     <div class="d-flex align-items-center gap-3">
-                                        <div class="avatar avatar-md bg-white rounded-circle p-2 text-primary d-flex align-items-center justify-content-center shadow-sm" style="width: 60px; height: 60px;">
-                                            <i class="bx bx-wallet fs-2"></i>
+                                        <div class="avatar avatar-md bg-white rounded-circle p-2 text-primary d-flex align-items-center justify-content-center shadow-sm flex-shrink-0" style="width: 48px; height: 48px;">
+                                            <i class="bx bx-wallet fs-3"></i>
                                         </div>
                                         <div>
                                             <h6 class="mb-1 text-white fw-medium" style="opacity: 0.9;">Total Pendapatan Bersih</h6>
                                             <small style="opacity: 0.75;">Dari {{ count($laporans) }} transaksi yang telah selesai</small>
                                         </div>
                                     </div>
-                                    <h3 class="mb-0 text-white fw-bold">Rp {{ number_format($totalPendapatan, 0, ',', '.') }}</h3>
+                                    <h3 class="mb-0 text-white fw-bold fs-4 fs-sm-3">Rp {{ number_format($totalPendapatan, 0, ',', '.') }}</h3>
                                 </div>
                             </div>
                         </div>
                         <div class="col-xl-4 mt-4 mt-xl-0">
                             <div class="card border-0 shadow-sm rounded-4 h-100">
-                                <div class="card-body p-4">
+                                <div class="card-body p-3 p-sm-4">
                                     <form action="{{ route('admin.unit.pasar_daerah.index') . '?tab=laporan' }}" method="GET" class="h-100 d-flex flex-column justify-content-center">
                                         <div class="input-group input-group-sm mb-3 border-light-subtle shadow-sm rounded-3">
                                             <span class="input-group-text bg-light"><i class="bx bx-calendar"></i></span>
@@ -339,9 +408,9 @@
 
                     <!-- Table Laporan -->
                     <div class="card border-0 shadow-sm rounded-4">
-                        <div class="card-header bg-white border-bottom p-4 d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0 fw-bold">Daftar Transaksi Selesai</h5>
-                            <button onclick="window.print()" class="btn btn-sm btn-secondary rounded-pill px-3 shadow-sm"><i class="bx bx-printer me-1"></i> Cetak Laporan</button>
+                        <div class="card-header bg-white border-bottom p-3 p-sm-4 d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
+                            <h5 class="mb-0 fw-bold fs-6 fs-sm-5">Daftar Transaksi Selesai</h5>
+                            <button onclick="window.print()" class="btn btn-sm btn-secondary rounded-pill px-3 shadow-sm w-100 w-sm-auto"><i class="bx bx-printer me-1"></i> Cetak Laporan</button>
                         </div>
                         <div class="table-responsive text-nowrap">
                             <table class="table table-hover align-middle">
@@ -666,12 +735,12 @@
                                     <label class="col-sm-2 col-form-label fw-bold" for="avatar">Foto Profil Toko</label>
                                     <div class="col-sm-10">
                                         @if($admin->avatar)
-                                            <div class="mb-3">
-                                                <img src="{{ Storage::url($admin->avatar) }}" alt="Avatar" class="d-block rounded-circle border p-1" height="120" width="120" style="object-fit: cover;">
+                                            <div class="mb-3" id="avatar_preview_wrapper">
+                                                <img src="{{ Storage::url($admin->avatar) }}"  id="preview_avatar" alt="Avatar" class="d-block rounded-circle border p-1" height="120" width="120" style="object-fit: cover;">
                                             </div>
                                         @else
-                                            <div class="mb-3">
-                                                <div class="d-flex align-items-center justify-content-center bg-light rounded-circle text-muted border p-1" style="height: 120px; width: 120px;">
+                                            <div class="mb-3" id="avatar_preview_wrapper">
+                                                <div class="d-flex align-items-center justify-content-center bg-light rounded-circle text-muted border p-1"  id="preview_avatar_placeholder" style="height: 120px; width: 120px;">
                                                     <i class="bx bx-image fs-1"></i>
                                                 </div>
                                             </div>
@@ -685,12 +754,12 @@
                                     <label class="col-sm-2 col-form-label fw-bold" for="store_banner">Foto Sampul / Background Toko</label>
                                     <div class="col-sm-10">
                                         @if($admin->store_banner)
-                                            <div class="mb-3">
-                                                <img src="{{ Storage::url($admin->store_banner) }}" alt="Store Banner" class="d-block rounded-3 border p-1 w-100" style="height: 200px; object-fit: cover;">
+                                            <div class="mb-3" id="banner_preview_wrapper">
+                                                <img src="{{ Storage::url($admin->store_banner) }}"  id="preview_banner" alt="Store Banner" class="d-block rounded-3 border p-1 w-100" style="height: 200px; object-fit: cover;">
                                             </div>
                                         @else
-                                            <div class="mb-3">
-                                                <div class="d-flex flex-column align-items-center justify-content-center bg-light rounded-3 text-muted border p-1 w-100" style="height: 200px;">
+                                            <div class="mb-3" id="banner_preview_wrapper">
+                                                <div class="d-flex flex-column align-items-center justify-content-center bg-light rounded-3 text-muted border p-1 w-100"  id="preview_banner_placeholder" style="height: 200px;">
                                                     <i class="bx bx-image-alt fs-1 mb-2"></i>
                                                     <span>Belum ada foto sampul</span>
                                                 </div>
@@ -722,10 +791,10 @@
                 <!-- TAB: ULASAN & KOMENTAR -->
                 <div class="tab-pane fade {{ $tab == 'ulasan' ? 'show active' : '' }}" id="navs-top-ulasan" role="tabpanel">
                     <div class="card border-0 shadow-sm rounded-4">
-                        <div class="card-header bg-white border-bottom pb-3 pt-4 px-4 d-flex align-items-center justify-content-between">
+                        <div class="card-header bg-white border-bottom pb-3 pt-3 pt-sm-4 px-3 px-sm-4 d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between gap-2">
                             <div>
-                                <h5 class="mb-0 fw-bold text-dark"><i class="bx bx-star text-warning me-2"></i>Ulasan & Komentar Pembeli</h5>
-                                <small class="text-muted">Kelola dan balas ulasan dari pembeli terhadap produk Anda.</small>
+                                <h5 class="mb-0 fw-bold text-dark fs-6 fs-sm-5"><i class="bx bx-star text-warning me-2"></i>Ulasan & Komentar Pembeli</h5>
+                                <small class="text-muted d-none d-sm-block">Kelola dan balas ulasan dari pembeli terhadap produk Anda.</small>
                             </div>
                         </div>
                         <div class="table-responsive text-nowrap p-3">
@@ -837,14 +906,14 @@
 
                 <!-- TAB 7: KOMPLAIN & RETUR -->
                 <div class="tab-pane fade {{ $tab == 'komplain' ? 'show active' : '' }}" id="navs-top-komplain" role="tabpanel">
-                    <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded-4 shadow-sm">
-                        <div class="d-flex align-items-center">
-                            <div class="avatar avatar-md bg-danger-subtle text-danger rounded-circle me-3 d-flex justify-content-center align-items-center">
-                                <i class="bx bx-shield-quarter fs-4"></i>
+                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-3 mb-sm-4 bg-white p-3 rounded-4 shadow-sm gap-2 gap-sm-3">
+                        <div class="d-flex align-items-center me-sm-3">
+                            <div class="avatar avatar-sm bg-danger-subtle text-danger rounded-circle me-2 me-sm-3 d-flex justify-content-center align-items-center flex-shrink-0" style="width: 38px; height: 38px;">
+                                <i class="bx bx-shield-quarter fs-5"></i>
                             </div>
                             <div>
-                                <h5 class="mb-0 fw-bold">Komplain & Retur Barang</h5>
-                                <small class="text-muted">Kelola keluhan pembeli terkait barang rusak saat pengiriman, tidak sesuai, atau busuk/basi.</small>
+                                <h5 class="mb-0 fw-bold fs-6 fs-sm-5">Komplain & Retur Barang</h5>
+                                <small class="text-muted d-none d-sm-block">Kelola keluhan pembeli terkait barang rusak saat pengiriman, tidak sesuai, atau busuk/basi.</small>
                             </div>
                         </div>
                     </div>
@@ -1145,6 +1214,180 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- TAB 8: CHAT PENGELOLA TOKO -->
+                <div class="tab-pane fade {{ $tab == 'chat' ? 'show active' : '' }}" id="navs-top-chat" role="tabpanel">
+                    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+                        <div class="card-header bg-white border-bottom py-2.5 py-sm-3 px-3 px-sm-4 d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
+                            <div>
+                                <h5 class="fw-bold mb-1 fs-6 fs-sm-5"><i class="bx bx-chat me-2 text-primary"></i> Chat & Bantuan Pengelola Toko</h5>
+                                <p class="text-muted small mb-0 d-none d-sm-block">Kelola obrolan langsung dari pembeli yang memerlukan respon pengelola Toko BUMDes.</p>
+                            </div>
+                            <div class="flex-shrink-0">
+                                <span class="badge bg-label-primary rounded-pill px-3 py-1.5 py-sm-2 text-nowrap">
+                                    <i class="bx bx-bot me-1"></i> Mode Hybrid: Bot + Pengelola
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="row g-0" style="min-height: 580px;">
+                                <!-- Left Panel: Chat List -->
+                                <div class="col-md-5 col-lg-4 border-end" style="background: #fdfdfd;">
+                                    <div class="p-3 border-bottom bg-light">
+                                        <div class="input-group input-group-merge">
+                                            <span class="input-group-text"><i class="bx bx-search"></i></span>
+                                            <input type="text" id="searchChatInput" class="form-control" placeholder="Cari pembeli..." onkeyup="filterAdminChats()">
+                                        </div>
+                                    </div>
+                                    <div class="overflow-auto" id="adminChatListContainer" style="max-height: 510px;">
+                                        @forelse($chats as $chat)
+                                        <div class="admin-chat-item p-3 border-bottom d-flex align-items-center gap-3 cursor-pointer" 
+                                             id="chatItem_{{ $chat->id }}"
+                                             onclick="loadAdminChat({{ $chat->id }})"
+                                             data-user-name="{{ strtolower($chat->user_name ?? ($chat->user->name ?? 'Pembeli')) }}"
+                                             style="transition: all 0.2s; cursor: pointer;">
+                                            <div class="avatar avatar-md rounded-circle bg-label-primary d-flex align-items-center justify-content-center flex-shrink-0 fw-bold">
+                                                {{ strtoupper(substr($chat->user_name ?? ($chat->user->name ?? 'P'), 0, 1)) }}
+                                            </div>
+                                            <div class="flex-grow-1 min-w-0">
+                                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                                    <h6 class="mb-0 fw-bold text-truncate" style="max-width: 140px;">
+                                                        {{ $chat->user_name ?? ($chat->user->name ?? 'Pembeli') }}
+                                                    </h6>
+                                                    <small class="text-muted" style="font-size: 11px;">
+                                                        {{ $chat->last_message_at ? $chat->last_message_at->format('H:i') : '' }}
+                                                    </small>
+                                                </div>
+                                                <p class="mb-0 text-muted small text-truncate" style="max-width: 180px;" id="chatPreview_{{ $chat->id }}">
+                                                    {{ $chat->last_message ?? 'Memulai percakapan...' }}
+                                                </p>
+                                                <div class="mt-1 d-flex gap-1 align-items-center">
+                                                    @if($chat->status === 'escalated')
+                                                        <span class="badge bg-label-warning py-0 px-2" style="font-size: 10px;" id="chatBadge_{{ $chat->id }}">Perlu Balasan</span>
+                                                    @elseif($chat->status === 'resolved')
+                                                        <span class="badge bg-label-success py-0 px-2" style="font-size: 10px;" id="chatBadge_{{ $chat->id }}">Selesai</span>
+                                                    @else
+                                                        <span class="badge bg-label-secondary py-0 px-2" style="font-size: 10px;" id="chatBadge_{{ $chat->id }}">Bot</span>
+                                                    @endif
+
+                                                    @if($chat->unread_admin_count > 0)
+                                                        <span class="badge bg-danger rounded-pill ms-auto py-0 px-2" style="font-size: 10px;" id="chatUnread_{{ $chat->id }}">
+                                                            {{ $chat->unread_admin_count }} baru
+                                                        </span>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </div>
+                                        @empty
+                                        <div class="text-center py-5 text-muted">
+                                            <i class="bx bx-conversation fs-1 text-secondary mb-2"></i>
+                                            <p class="mb-0 small">Belum ada obrolan masuk dari pembeli.</p>
+                                        </div>
+                                        @endforelse
+                                    </div>
+                                </div>
+
+                                <!-- Right Panel: Chat Stream & Reply Box -->
+                                <div class="col-md-7 col-lg-8 d-flex flex-column bg-white">
+                                    <!-- Chat Header -->
+                                    <div class="p-3 border-bottom d-flex justify-content-between align-items-center" id="adminActiveChatHeader" style="background: #fafafa;">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="avatar avatar-sm rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold" id="adminActiveUserAvatar">
+                                                -
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-0 fw-bold" id="adminActiveUserName">Pilih Obrolan</h6>
+                                                <small class="text-muted" id="adminActiveUserStatus">Klik salah satu pembeli di sebelah kiri</small>
+                                            </div>
+                                        </div>
+                                        <div id="adminChatActions" style="display: none;">
+                                            <button type="button" class="btn btn-sm btn-outline-success rounded-pill px-3" onclick="resolveAdminActiveChat()">
+                                                <i class="bx bx-check me-1"></i> Tandai Selesai
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Chat Stream Messages -->
+                                    <div class="flex-grow-1 p-4 overflow-auto d-flex flex-column gap-3" id="adminChatMessagesStream" style="max-height: 440px; min-height: 380px; background: #f8fafc;">
+                                        <div class="d-flex flex-column align-items-center justify-content-center h-100 text-muted py-5 my-auto" id="adminEmptyChatPlaceholder">
+                                            <i class="bx bx-message-dots fs-1 mb-2 text-primary" style="opacity: 0.5;"></i>
+                                            <h6 class="fw-bold">Belum Memilih Obrolan</h6>
+                                            <p class="small mb-0 text-center" style="max-width: 320px;">Pilih salah satu sesi obrolan di samping kiri untuk membaca riwayat dan membalas pesan pembeli.</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Chat Input Area -->
+                                    <div class="p-3 border-top bg-white position-relative" id="adminChatInputContainer" style="display: none;">
+                                        <!-- Drawer Panel Rekomendasi Produk (Inline di dalam chat, tanpa modal & tanpa backdrop) -->
+                                        <div id="adminProductRecommendationDrawer" class="border rounded-4 p-3 mb-3 bg-light shadow-sm" style="display: none; max-height: 280px; overflow-y: auto;">
+                                            <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <i class="bx bx-package text-primary fs-5"></i>
+                                                    <span class="fw-bold text-dark small">Pilih Produk Rekomendasi Pengganti (Stok Ready)</span>
+                                                </div>
+                                                <button type="button" class="btn-close" style="font-size: 10px;" onclick="toggleRecommendationDrawer(false)" aria-label="Tutup"></button>
+                                            </div>
+                                            <div class="mb-2">
+                                                <input type="text" id="searchDrawerProdukInput" class="form-control form-control-sm rounded-pill" placeholder="Cari nama produk..." onkeyup="filterDrawerProduk()">
+                                            </div>
+                                            <div class="row row-cols-1 row-cols-sm-2 g-2 overflow-auto" id="listDrawerProduk" style="max-height: 180px;">
+                                                @forelse($produks->where('stok', '>', 0) as $p)
+                                                    @php
+                                                        $imgUrl = $p->foto ? asset('storage/' . $p->foto) : asset('assets/img/elements/1.jpg');
+                                                        $hargaFormatted = 'Rp ' . number_format($p->harga, 0, ',', '.');
+                                                    @endphp
+                                                    <div class="col item-drawer-produk" data-name="{{ strtolower($p->nama_produk) }}" data-kategori="{{ strtolower($p->kategori ?? '') }}">
+                                                        <div class="p-2 bg-white rounded-3 border d-flex align-items-center justify-content-between gap-2 h-100 shadow-xs">
+                                                            <div class="d-flex align-items-center gap-2 min-w-0">
+                                                                <img src="{{ $imgUrl }}" style="width: 42px; height: 42px; object-fit: cover; border-radius: 6px; flex-shrink: 0;" alt="{{ $p->nama_produk }}">
+                                                                <div class="min-w-0">
+                                                                    <div class="fw-bold text-dark text-truncate small" style="max-width: 140px;">{{ $p->nama_produk }}</div>
+                                                                    <div class="d-flex align-items-center gap-1">
+                                                                        <span class="text-primary fw-bold" style="font-size: 11px;">{{ $hargaFormatted }}</span>
+                                                                        <span class="badge bg-label-success" style="font-size: 9px;">Stok: {{ $p->stok }} {{ $p->satuan }}</span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <button type="button" class="btn btn-xs btn-primary rounded-pill px-2 py-1 flex-shrink-0" onclick="sisipkanRekomendasiProduk('{{ $imgUrl }}', '{{ addslashes($p->nama_produk) }}', '{{ $hargaFormatted }}')">
+                                                                <i class="bx bx-plus me-1"></i> Sisipkan
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                @empty
+                                                    <div class="col-12 text-center py-3 text-muted small">
+                                                        Tidak ada produk dengan stok tersedia saat ini.
+                                                    </div>
+                                                @endforelse
+                                            </div>
+                                        </div>
+
+                                        <!-- Quick Recommendation & Template Bar -->
+                                        <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                                            <button type="button" class="btn btn-xs btn-outline-primary rounded-pill px-3 py-1 shadow-none d-inline-flex align-items-center fw-semibold" onclick="toggleRecommendationDrawer()">
+                                                <i class="bx bx-package me-1"></i> Rekomendasikan Produk Sejenis
+                                            </button>
+                                            <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill px-3 py-1 shadow-none" onclick="insertQuickReplyAdmin('Mohon maaf Kak, untuk produk yang ditanyakan saat ini sedang kosong/habis stoknya.')">
+                                                <i class="bx bx-time me-1"></i> Info Barang Kosong
+                                            </button>
+                                            <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill px-3 py-1 shadow-none" onclick="insertQuickReplyAdmin('Halo Kak! Stok produk ini masih tersedia ready di etalase dan siap segera dikemas.')">
+                                                <i class="bx bx-check me-1"></i> Info Stok Ready
+                                            </button>
+                                        </div>
+
+                                        <form id="adminReplyForm" onsubmit="event.preventDefault(); sendAdminReply();">
+                                            <div class="input-group">
+                                                <input type="text" id="adminReplyMessage" class="form-control" placeholder="Tulis balasan resmi Pengelola Toko..." autocomplete="off">
+                                                <button class="btn btn-primary px-4 shadow-sm" type="submit" id="adminSendBtn">
+                                                    <i class="bx bx-send me-1"></i> Kirim Balasan
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -1210,6 +1453,321 @@
             label.classList.remove('text-dark');
         }
     }
+
+    // =========================================================================
+    // ADMIN CHAT PENGELOLA TOKO LOGIC
+    // =========================================================================
+    let currentAdminActiveChatId = null;
+    let adminChatPollInterval = null;
+
+    function filterAdminChats() {
+        const query = document.getElementById('searchChatInput').value.toLowerCase();
+        const items = document.querySelectorAll('.admin-chat-item');
+        items.forEach(item => {
+            const name = item.getAttribute('data-user-name') || '';
+            if (name.includes(query)) {
+                item.style.display = 'flex';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+
+    function loadAdminChat(sessionId, isSilent = false) {
+        currentAdminActiveChatId = sessionId;
+
+        // Highlight selected
+        document.querySelectorAll('.admin-chat-item').forEach(el => el.classList.remove('bg-label-primary'));
+        const activeItem = document.getElementById(`chatItem_${sessionId}`);
+        if (activeItem) {
+            activeItem.classList.add('bg-label-primary');
+            const unreadBadge = document.getElementById(`chatUnread_${sessionId}`);
+            if (unreadBadge) unreadBadge.style.display = 'none';
+        }
+
+        // Show inputs & actions
+        document.getElementById('adminChatActions').style.display = 'block';
+        document.getElementById('adminChatInputContainer').style.display = 'block';
+
+        if (!isSilent) {
+            document.getElementById('adminChatMessagesStream').innerHTML = `
+                <div class="d-flex justify-content-center align-items-center h-100 py-5">
+                    <div class="spinner-border text-primary" role="status"></div>
+                </div>
+            `;
+        }
+
+        fetch(`{{ url('admin/unit/pasar-daerah/chats') }}/${sessionId}/messages`, {
+            headers: {
+                'Accept': 'application/json'
+            }
+        })
+        .then(res => res.json())
+        .then(res => {
+            if (res.status === 'success') {
+                const session = res.data.session;
+                const messages = res.data.messages || [];
+
+                const name = session.user_name || (session.user ? session.user.name : 'Pembeli');
+                document.getElementById('adminActiveUserName').textContent = name;
+                document.getElementById('adminActiveUserAvatar').textContent = name.charAt(0).toUpperCase();
+                
+                let statusLabel = 'Asisten Bot';
+                if (session.status === 'escalated') statusLabel = 'Perlu Balasan Pengelola';
+                if (session.status === 'resolved') statusLabel = 'Selesai';
+                document.getElementById('adminActiveUserStatus').textContent = `Status: ${statusLabel}`;
+
+                renderAdminChatMessages(messages);
+            }
+        })
+        .catch(err => console.error(err));
+    }
+
+    function formatChatContentAdmin(rawText) {
+        if (!rawText) return '';
+        const prodRegex = /\[PRODUK\|(.*?)\|(.*?)\|(.*?)\]/g;
+        if (prodRegex.test(rawText)) {
+            return rawText.replace(/\[PRODUK\|(.*?)\|(.*?)\|(.*?)\]/g, (match, img, name, price) => {
+                const imgHtml = img ? `<img src="${escapeHtmlAdmin(img)}" style="width: 44px; height: 44px; border-radius: 8px; object-fit: cover; background: #fff; flex-shrink: 0; border: 1px solid #e2e8f0;" alt="${escapeHtmlAdmin(name)}">` : '';
+                return `
+                    <div style="display: flex; align-items: center; gap: 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 8px 10px; margin-bottom: 8px;">
+                        ${imgHtml}
+                        <div style="min-width: 0; flex: 1;">
+                            <div style="font-weight: 800; font-size: 12px; color: #1e293b; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtmlAdmin(name)}</div>
+                            <div style="font-size: 11px; font-weight: 700; color: #0284c7; margin-top: 2px;">${escapeHtmlAdmin(price)}</div>
+                        </div>
+                    </div>
+                `;
+            }).replace(/\n/g, '<br>');
+        }
+        return escapeHtmlAdmin(rawText).replace(/\n/g, '<br>');
+    }
+
+    function renderAdminChatMessages(messages) {
+        const stream = document.getElementById('adminChatMessagesStream');
+        stream.innerHTML = '';
+
+        if (messages.length === 0) {
+            stream.innerHTML = '<div class="text-center text-muted my-auto py-4">Belum ada riwayat pesan.</div>';
+            return;
+        }
+
+        messages.forEach(msg => {
+            const timeStr = msg.created_at ? new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
+            const msgEl = document.createElement('div');
+            
+            if (msg.sender_type === 'admin') {
+                msgEl.className = 'd-flex justify-content-end mb-2';
+                msgEl.innerHTML = `
+                    <div class="bg-primary text-white p-3 rounded-4 shadow-sm" style="max-width: 75%; border-bottom-right-radius: 4px !important;">
+                        <div class="fw-bold small text-white-50 mb-1" style="font-size: 11px;">Pengelola Toko (Anda)</div>
+                        <div style="font-size: 13px; line-height: 1.45;">${formatChatContentAdmin(msg.message)}</div>
+                        <div class="text-end text-white-50 mt-1" style="font-size: 10px;">${timeStr}</div>
+                    </div>
+                `;
+            } else if (msg.sender_type === 'user') {
+                msgEl.className = 'd-flex justify-content-start mb-2';
+                msgEl.innerHTML = `
+                    <div class="bg-white text-dark p-3 rounded-4 border shadow-sm" style="max-width: 75%; border-bottom-left-radius: 4px !important;">
+                        <div class="fw-bold small text-primary mb-1" style="font-size: 11px;">Pembeli</div>
+                        <div style="font-size: 13px; line-height: 1.45;">${formatChatContentAdmin(msg.message)}</div>
+                        <div class="text-end text-muted mt-1" style="font-size: 10px;">${timeStr}</div>
+                    </div>
+                `;
+            } else {
+                // bot
+                msgEl.className = 'd-flex justify-content-start mb-2';
+                msgEl.innerHTML = `
+                    <div class="bg-light text-secondary p-2 px-3 rounded-3 border" style="max-width: 75%; font-size: 12px;">
+                        <div class="fw-bold text-muted mb-0.5" style="font-size: 10px;"><i class="bx bx-bot me-1"></i> Asisten Bot Toko</div>
+                        <div>${formatChatContentAdmin(msg.message)}</div>
+                        <div class="text-end text-muted mt-1" style="font-size: 9px;">${timeStr}</div>
+                    </div>
+                `;
+            }
+
+            stream.appendChild(msgEl);
+        });
+
+        stream.scrollTop = stream.scrollHeight;
+    }
+
+    function sendAdminReply() {
+        if (!currentAdminActiveChatId) return;
+
+        const input = document.getElementById('adminReplyMessage');
+        const text = input.value.trim();
+        if (!text) return;
+
+        input.value = '';
+        const btn = document.getElementById('adminSendBtn');
+        btn.disabled = true;
+
+        fetch(`{{ url('admin/unit/pasar-daerah/chats') }}/${currentAdminActiveChatId}/reply`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ message: text })
+        })
+        .then(res => res.json())
+        .then(res => {
+            btn.disabled = false;
+            if (res.status === 'success') {
+                loadAdminChat(currentAdminActiveChatId, true);
+                
+                // Update preview in left list
+                const previewEl = document.getElementById(`chatPreview_${currentAdminActiveChatId}`);
+                if (previewEl) previewEl.textContent = text;
+            }
+        })
+        .catch(err => {
+            btn.disabled = false;
+            console.error(err);
+        });
+    }
+
+    function resolveAdminActiveChat() {
+        if (!currentAdminActiveChatId) return;
+        if (!confirm('Tandai sesi obrolan ini telah selesai?')) return;
+
+        fetch(`{{ url('admin/unit/pasar-daerah/chats') }}/${currentAdminActiveChatId}/resolve`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
+            }
+        })
+        .then(res => res.json())
+        .then(res => {
+            if (res.status === 'success') {
+                const badgeEl = document.getElementById(`chatBadge_${currentAdminActiveChatId}`);
+                if (badgeEl) {
+                    badgeEl.className = 'badge bg-label-success py-0 px-2';
+                    badgeEl.textContent = 'Selesai';
+                }
+                loadAdminChat(currentAdminActiveChatId, true);
+            }
+        })
+        .catch(err => console.error(err));
+    }
+
+    function escapeHtmlAdmin(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function insertQuickReplyAdmin(text) {
+        const input = document.getElementById('adminReplyMessage');
+        if (input) {
+            input.value = text;
+            input.focus();
+        }
+    }
+
+    function toggleRecommendationDrawer(forceState) {
+        const drawer = document.getElementById('adminProductRecommendationDrawer');
+        if (!drawer) return;
+        if (typeof forceState === 'boolean') {
+            drawer.style.display = forceState ? 'block' : 'none';
+        } else {
+            drawer.style.display = (drawer.style.display === 'none' || drawer.style.display === '') ? 'block' : 'none';
+        }
+        if (drawer.style.display === 'block') {
+            const searchInput = document.getElementById('searchDrawerProdukInput');
+            if (searchInput) {
+                searchInput.value = '';
+                filterDrawerProduk();
+                searchInput.focus();
+            }
+        }
+    }
+
+    function sisipkanRekomendasiProduk(imgUrl, prodName, prodPrice) {
+        const input = document.getElementById('adminReplyMessage');
+        if (input) {
+            const cardTag = `[PRODUK|${imgUrl}|${prodName}|${prodPrice}]\n`;
+            input.value = `${cardTag}Halo Kak, untuk produk yang sebelumnya ditanyakan stoknya sedang kosong. Sebagai alternatif terbaik, kami merekomendasikan produk ini yang ready di etalase:`;
+            input.focus();
+        }
+        toggleRecommendationDrawer(false);
+    }
+
+    function filterDrawerProduk() {
+        const query = (document.getElementById('searchDrawerProdukInput')?.value || '').toLowerCase();
+        const items = document.querySelectorAll('.item-drawer-produk');
+        items.forEach(item => {
+            const name = item.getAttribute('data-name') || '';
+            const kat = item.getAttribute('data-kategori') || '';
+            if (name.includes(query) || kat.includes(query)) {
+                item.style.display = '';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+</script>
+
+<script>
+    window.handleImagePreview = function(input, previewId, wrapperId, ratio, imgClasses, width, height) {
+        if (!input.files || !input.files[0]) return;
+        
+        let wrapper = document.getElementById(wrapperId);
+        let preview = document.getElementById(previewId);
+        
+        // Ensure there is an img tag to preview and pass to cropper
+        if (!preview) {
+            // Remove placeholder if it exists
+            let placeholder = document.getElementById(previewId + '_placeholder');
+            if (placeholder) {
+                placeholder.remove();
+            }
+            // Create new img element
+            preview = document.createElement('img');
+            preview.id = previewId;
+            preview.className = 'd-block ' + imgClasses;
+            preview.style.width = width;
+            preview.style.height = height;
+            preview.style.objectFit = 'cover';
+            wrapper.appendChild(preview);
+        }
+        
+        // Pass to Global Cropper
+        if (typeof window.initGlobalCropper === 'function') {
+            window.initGlobalCropper(input, previewId, ratio, true);
+        } else if (typeof initGlobalCropper === 'function') {
+            initGlobalCropper(input, previewId, ratio, true);
+        } else {
+            // Fallback preview
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const avatarInput = document.getElementById('avatar');
+        const bannerInput = document.getElementById('store_banner');
+        
+        if (avatarInput) {
+            avatarInput.addEventListener('change', function() {
+                window.handleImagePreview(this, 'preview_avatar', 'avatar_preview_wrapper', 1, 'rounded-circle border p-1', '120px', '120px');
+            });
+        }
+        
+        if (bannerInput) {
+            bannerInput.addEventListener('change', function() {
+                window.handleImagePreview(this, 'preview_banner', 'banner_preview_wrapper', 3, 'rounded-3 border p-1 w-100', '100%', '200px');
+            });
+        }
+    });
 </script>
 @endsection
 

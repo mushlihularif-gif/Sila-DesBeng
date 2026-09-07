@@ -102,6 +102,169 @@
             transform: translateY(-3px);
         }
 
+        /* Notifikasi Dropdown Styles & Responsive Optimization */
+        .notif-dropdown-menu {
+            max-height: 560px !important;
+            border-radius: 16px !important;
+            box-shadow: 0 12px 42px rgba(67, 89, 113, 0.16) !important;
+            overflow: hidden !important;
+            border: 1px solid rgba(67, 89, 113, 0.12) !important;
+            background: #ffffff !important;
+        }
+
+        @media (min-width: 576px) {
+            .notif-dropdown-menu {
+                width: 420px !important;
+                max-width: 92vw !important;
+                right: 0 !important;
+                left: auto !important;
+                transform: none !important;
+            }
+        }
+
+        @media (max-width: 575.98px) {
+            .notif-dropdown-menu {
+                position: fixed !important;
+                top: 64px !important;
+                left: 10px !important;
+                right: 10px !important;
+                width: auto !important;
+                max-width: none !important;
+                min-width: 0 !important;
+                margin: 0 !important;
+                transform: none !important;
+                max-height: 84vh !important;
+                z-index: 1090 !important;
+                border-radius: 14px !important;
+            }
+        }
+
+        /* Filter Scroll Container with Drag & Scroll */
+        .notif-filter-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .notif-filter-scroll {
+            white-space: nowrap;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            -webkit-overflow-scrolling: touch;
+            display: flex;
+            gap: 7px;
+            padding: 4px 2px 6px 2px;
+            cursor: grab;
+            scroll-behavior: smooth;
+            user-select: none;
+            width: 100%;
+        }
+
+        .notif-filter-scroll.dragging {
+            cursor: grabbing !important;
+            scroll-behavior: auto !important;
+        }
+
+        .notif-filter-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .notif-scroll-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 1px solid #d9dfe7;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.14);
+            color: #566a7f;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            padding: 0;
+            font-size: 1.15rem;
+            transition: all 0.2s ease;
+        }
+
+        .notif-scroll-arrow:hover {
+            background: #696cff;
+            color: #ffffff;
+            border-color: #696cff;
+        }
+
+        .notif-scroll-prev {
+            left: -4px;
+        }
+
+        .notif-scroll-next {
+            right: -4px;
+        }
+
+        .notif-filter-btn {
+            font-size: 0.76rem !important;
+            padding: 5px 13px !important;
+            border-radius: 50px !important;
+            white-space: nowrap !important;
+            transition: all 0.2s ease !important;
+            flex-shrink: 0 !important;
+            border: 1px solid transparent !important;
+            font-weight: 600 !important;
+            background-color: #f1f3f6 !important;
+            color: #566a7f !important;
+        }
+
+        .notif-filter-btn:hover {
+            background-color: #e6e9ef !important;
+            color: #384554 !important;
+        }
+
+        .notif-filter-btn.active {
+            background-color: #696cff !important;
+            color: #ffffff !important;
+            box-shadow: 0 3px 10px rgba(105, 108, 255, 0.35) !important;
+        }
+
+        .notif-item {
+            border-bottom: 1px solid #f2f4f7;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: flex-start;
+            padding: 14px 18px;
+            position: relative;
+        }
+
+        .notif-item:hover {
+            background-color: #f8fafc !important;
+        }
+
+        .notif-item.is-unread {
+            background-color: rgba(105, 108, 255, 0.035);
+            border-left: 3.5px solid #696cff;
+        }
+
+        .notif-item.is-unread.category-rental { border-left-color: #ffab00; background-color: rgba(255, 171, 0, 0.035); }
+        .notif-item.is-unread.category-mobil { border-left-color: #03c3ec; background-color: rgba(3, 195, 236, 0.035); }
+        .notif-item.is-unread.category-fasilitas { border-left-color: #71dd37; background-color: rgba(113, 221, 55, 0.035); }
+        .notif-item.is-unread.category-gas { border-left-color: #ff3e1d; background-color: rgba(255, 62, 29, 0.035); }
+        .notif-item.is-unread.category-kyc { border-left-color: #03c3ec; background-color: rgba(3, 195, 236, 0.035); }
+        .notif-item.is-unread.category-laporan { border-left-color: #ff3e1d; background-color: rgba(255, 62, 29, 0.035); }
+        .notif-item.is-unread.category-mutasi { border-left-color: #8592a3; background-color: rgba(133, 146, 163, 0.035); }
+
+        .notif-item-desc {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.45;
+            color: #697a8d;
+        }
+
         .nav-link {
             transition: all 0.3s ease;
         }
@@ -432,6 +595,9 @@
     <!-- Custom Page Styles -->
     @yield('styles')
     @stack('styles')
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
 </head>
 
 <body>
@@ -463,6 +629,7 @@
                 </div>
                 <div class="menu-inner-shadow"></div>
                 <ul class="menu-inner py-1">
+                    <!-- Dashboard -->
                     <li class="menu-item {{ request()->is('admin/dashboard') ? 'active' : '' }}">
                         <a href="{{ route('admin.dashboard') }}" class="menu-link">
                             <i class="menu-icon tf-icons bx bx-home-circle"></i>
@@ -470,10 +637,8 @@
                         </a>
                     </li>
 
-                <!-- Unit Layanan (Dropdown) - bukan urusan Super Admin Sistem, ini katalog komersial per wilayah -->
-                {{-- Staf ikut di sini; tiap sub-menunya masih disaring lagi
-                     lewat hasUnitPermission() di bawah. --}}
-                @if(in_array(auth()->user()->role, ['admin', 'admin_kecamatan', 'admin_desa', 'staff']))
+                <!-- Unit Layanan (Dropdown) -->
+                @if(in_array(auth()->user()->role, ['super_admin', 'admin', 'admin_kecamatan', 'admin_desa']))
                     @if(isset($hasActiveServices) && $hasActiveServices)
                         <li class="menu-item {{ (request()->is('admin/unit*') && !request()->is('admin/unit/supir*')) || request()->routeIs('admin.announcements.*') ? 'open active show' : '' }}">
                             <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -481,38 +646,35 @@
                                 <div data-i18n="Unit Layanan">Unit Layanan</div>
                             </a>
                             <ul class="menu-sub">
-                                @if(in_array('Penyewaan Alat', $activeServicesMenu ?? []) && auth()->user()->hasUnitPermission('sewa_alat'))
+                                @if(in_array('Penyewaan Alat', $activeServicesMenu ?? []))
                                 <li class="menu-item {{ request()->is('admin/unit/penyewaan*') ? 'active' : '' }}">
                                     <a href="{{ route('admin.unit.penyewaan.index') }}" class="menu-link">
                                         <div data-i18n="Penyewaan Alat">Penyewaan Alat</div>
                                     </a>
                                 </li>
                                 @endif
-                                @if(in_array('Penjualan Gas', $activeServicesMenu ?? []) && auth()->user()->hasUnitPermission('gas'))
+                                @if(in_array('Penjualan Gas', $activeServicesMenu ?? []))
                                 <li class="menu-item {{ request()->is('admin/unit/gas*') ? 'active' : '' }}">
                                     <a href="{{ route('admin.unit.penjualan_gas.index') }}" class="menu-link">
                                         <div data-i18n="Penjualan Gas">Penjualan Gas</div>
                                     </a>
                                 </li>
                                 @endif
-                                @if(in_array('Penyewaan Mobil', $activeServicesMenu ?? []) && auth()->user()->hasUnitPermission('sewa_mobil'))
+                                @if(in_array('Penyewaan Mobil', $activeServicesMenu ?? []))
                                 <li class="menu-item {{ request()->is('admin/unit/mobil*') ? 'active' : '' }}">
                                     <a href="{{ route('admin.unit.mobil.index') }}" class="menu-link">
                                         <div data-i18n="Penyewaan Mobil">Penyewaan Mobil</div>
                                     </a>
                                 </li>
                                 @endif
-                                {{-- Unit Ambulans bernaung di bawah Fasilitas Umum, jadi ikut
-                                     menyalakan penanda menu ini. Penjagaan izin unitnya tetap:
-                                     staf tanpa izin fasilitas_umum tidak melihat menu ini. --}}
-                                @if(in_array('Fasilitas Umum', $activeServicesMenu ?? []) && auth()->user()->hasUnitPermission('fasilitas_umum'))
+                                @if(in_array('Fasilitas Umum', $activeServicesMenu ?? []))
                                 <li class="menu-item {{ request()->is('admin/unit/fasilitas_umum*') || request()->is('admin/unit/ambulans*') ? 'active' : '' }}">
                                     <a href="{{ route('admin.unit.fasilitas_umum.index') }}" class="menu-link">
                                         <div data-i18n="Fasilitas Umum">Fasilitas Umum</div>
                                     </a>
                                 </li>
                                 @endif
-                                @if(in_array('Pasar Daerah', $activeServicesMenu ?? []) && auth()->user()->hasUnitPermission('pasar_daerah'))
+                                @if(in_array('Pasar Daerah', $activeServicesMenu ?? []))
                                 <li class="menu-item {{ request()->is('admin/unit/pasar-daerah*') ? 'active' : '' }}">
                                     <a href="{{ route('admin.unit.pasar_daerah.index') }}" class="menu-link">
                                         <div data-i18n="Pasar Daerah">Pasar Daerah</div>
@@ -520,8 +682,7 @@
                                 </li>
                                 @endif
 
-                                {{-- Tidak terikat layanan aktif wilayah, jadi cukup izinnya. --}}
-                                @if(auth()->user()->hasUnitPermission('kabar_informasi'))
+                                @if(in_array('Pengumuman', $activeServicesMenu ?? []) || in_array('Kabar dan Informasi Daerah', $activeServicesMenu ?? []))
                                 <li class="menu-item {{ request()->routeIs('admin.announcements.*') ? 'active' : '' }}">
                                     <a href="{{ route('admin.announcements.index') }}" class="menu-link">
                                         <div data-i18n="Kabar dan Informasi Daerah">Kabar dan Informasi Daerah</div>
@@ -536,97 +697,52 @@
                             @php
                                 $settingsRoute = in_array(auth()->user()->role, ['super_admin', 'admin']) ? route('admin.system-settings.index') : route('admin.region-settings.index');
                             @endphp
-                            <a href="{{ $settingsRoute }}" class="menu-link text-warning">
-                                <i class="menu-icon tf-icons bx bx-building-house"></i>
-                                <div>Ayo aktifkan layanan daerah mu!</div>
+                            <a href="{{ $settingsRoute }}" class="menu-link text-warning d-flex align-items-center justify-content-between" style="background: rgba(255, 171, 0, 0.08); border: 1px dashed rgba(255, 171, 0, 0.4); border-radius: 8px; margin: 4px 12px; padding: 10px 12px;">
+                                <div class="d-flex align-items-center overflow-hidden">
+                                    <i class="menu-icon tf-icons bx bx-lock-alt text-warning me-2" style="font-size: 1.25rem;"></i>
+                                    <div class="fw-semibold text-warning" style="font-size: 0.82rem; line-height: 1.2;">Ayo aktifkan layanan!</div>
+                                </div>
+                                <span class="badge bg-label-warning rounded-pill px-2 py-1" style="font-size: 0.65rem;">Terkunci</span>
                             </a>
                         </li>
                     @endif
                 @endif
 
                 <!-- Manajemen (Dropdown) -->
-                {{-- Seluruh isinya data warga/wilayah; staf platform tidak punya satu pun
-                     anak menu di sini, jadi grupnya disembunyikan agar tidak jadi dropdown hampa.
-                     Mitra ikut masuk grup ini karena keuangan & rekeningnya juga
-                     bersifat pengelolaan, bukan operasional harian. --}}
-                @if(auth()->user()->role !== 'staff' || auth()->user()->bolehSalahSatu(\App\Models\User::kunciIzinGrup('Manajemen')))
-                <li class="menu-item {{ request()->is('admin/manajemen-pengguna*') || request()->is('admin/kelola-wilayah*') || request()->is('admin/banners*') || request()->routeIs('admin.warga.mutasi.*') || request()->routeIs('admin.kyc.*') || request()->routeIs('admin.staff.*') || request()->routeIs('admin.wilayah-admins.*') || request()->routeIs('admin.keuangan.*') || request()->routeIs('admin.lokasi-layanan.*') ? 'open active show' : '' }}">
+                <li class="menu-item {{ request()->is('admin/manajemen-pengguna*') || request()->is('admin/kelola-wilayah*') || request()->is('admin/banners*') || request()->routeIs('admin.warga.mutasi.*') || request()->routeIs('admin.staff.*') || request()->routeIs('admin.wilayah-admins.*') ? 'open active show' : '' }}">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
                         <i class="menu-icon tf-icons bx bx-briefcase"></i>
                         <div data-i18n="Manajemen">Manajemen</div>
                     </a>
                     <ul class="menu-sub">
-
-                        {{-- Pengguna: data warga per wilayah. Staf platform bisa diberi izin khusus. --}}
-                        @if(in_array(auth()->user()->role, ['admin', 'admin_kecamatan', 'admin_desa']))
+                        @if(in_array(auth()->user()->role, ['super_admin', 'admin', 'admin_kecamatan', 'admin_desa']))
                         <li class="menu-item {{ request()->routeIs('admin.manajemen-pengguna.*') ? 'active' : '' }}">
                             <a href="{{ route('admin.manajemen-pengguna.index') }}" class="menu-link">
                                 <div>Pengguna</div>
                             </a>
                         </li>
-                        @endif
-
-                        {{-- Kelola Staf: mendaftarkan akun operator supaya bisa login.
-                             Super Admin Sistem ikut berwenang di sini karena ini
-                             urusan akses ke aplikasi, bukan data warga per wilayah. --}}
-                        @if(auth()->user()->bolehMenu(['super_admin', 'admin', 'admin_kecamatan', 'admin_desa'], 'platform_staf'))
                         <li class="menu-item {{ request()->routeIs('admin.staff.*') ? 'active' : '' }}">
                             <a href="{{ route('admin.staff.index') }}" class="menu-link">
                                 <div>Staf Layanan</div>
                             </a>
                         </li>
-                        @endif
-
-                        {{-- Admin RT & RW: hanya kepala desa yang mengangkatnya. --}}
                         @if(auth()->user()->role === 'admin_desa')
                         <li class="menu-item {{ request()->routeIs('admin.wilayah-admins.*') ? 'active' : '' }}">
                             <a href="{{ route('admin.wilayah-admins.index') }}" class="menu-link">
-                                <div>Admin RT & RW</div>
+                                <div>Wilayah & RT/RW</div>
                             </a>
                         </li>
                         @endif
-
-                        {{-- Keuangan: saldo Midtrans wilayah & pencairannya. Uang wilayah
-                             adalah tanggung jawab kepala desa/camat, jadi staf unit tidak
-                             melihat menu ini (penjaganya juga ada di controller). --}}
-                        @if(in_array(auth()->user()->role, ['admin', 'admin_kecamatan', 'admin_desa']))
-                        <li class="menu-item {{ request()->routeIs('admin.keuangan.*') ? 'active' : '' }}">
-                            <a href="{{ route('admin.keuangan.index') }}" class="menu-link">
-                                <div>Keuangan</div>
-                            </a>
-                        </li>
                         @endif
 
-                        {{-- Lokasi Layanan: gudang, kantor desa, pangkalan gas. Satu
-                             daftar milik wilayah yang dipakai semua unit, jadi staf unit
-                             ikut melihatnya — merekalah yang mengisi lokasi tiap produk. --}}
-                        @if(in_array(auth()->user()->role, ['admin', 'admin_kecamatan', 'admin_desa', 'staff']))
-                        <li class="menu-item {{ request()->routeIs('admin.lokasi-layanan.*') ? 'active' : '' }}">
-                            <a href="{{ route('admin.lokasi-layanan.index') }}" class="menu-link">
-                                <div>Lokasi Layanan</div>
-                            </a>
-                        </li>
-                        @endif
-
-                        {{-- Verifikasi Identitas berdiri sendiri: ini urusan data warga,
-                             bukan turunan dari izin mengelola staf. --}}
-                        @if(in_array(auth()->user()->role, ['admin', 'admin_kecamatan', 'admin_desa']))
-                        <li class="menu-item {{ request()->routeIs('admin.kyc.*') ? 'active' : '' }}">
-                            <a href="{{ route('admin.kyc.index') }}" class="menu-link">
-                                <div>Verifikasi Identitas</div>
-                            </a>
-                        </li>
-                        @endif
-
-                        @if(auth()->user()->bolehMenu(['super_admin', 'admin', 'admin_kecamatan'], 'platform_banner'))
+                        @if(in_array(auth()->user()->role, ['super_admin', 'admin', 'admin_kecamatan']))
                         <li class="menu-item {{ request()->routeIs('admin.banners.*') ? 'active' : '' }}">
                             <a href="{{ route('admin.banners.index') }}" class="menu-link">
                                 <div>Banner</div>
                             </a>
                         </li>
                         @endif
-                        {{-- Mutasi Penduduk & Kelola Wilayah: administrasi kependudukan/wilayah, bukan urusan Super Admin Sistem --}}
-                        @if(in_array(auth()->user()->role, ['admin', 'admin_kecamatan', 'admin_desa']))
+                        @if(in_array(auth()->user()->role, ['super_admin', 'admin', 'admin_kecamatan', 'admin_desa']))
                         <li class="menu-item {{ request()->routeIs('admin.warga.mutasi.*') ? 'active' : '' }}">
                             <a href="{{ route('admin.warga.mutasi.index') }}" class="menu-link">
                                 <div>Mutasi Penduduk</div>
@@ -634,7 +750,7 @@
                         </li>
                         @endif
 
-                        @if(in_array(auth()->user()->role, ['admin', 'admin_kecamatan', 'admin_desa', 'admin_rw']))
+                        @if(in_array(auth()->user()->role, ['super_admin', 'admin', 'admin_kecamatan', 'admin_rw']))
                         <li class="menu-item {{ request()->routeIs('admin.kelola-wilayah.*') ? 'active' : '' }}">
                             <a href="{{ route('admin.kelola-wilayah.index') }}" class="menu-link">
                                 <div>Kelola Wilayah</div>
@@ -643,83 +759,61 @@
                         @endif
                     </ul>
                 </li>
-                @endif
 
                 <!-- Aktivitas -->
-                {{-- Seluruh isi grup ini operasional per wilayah. Setelah Persetujuan
-                     Mitra tidak lagi untuk Super Admin, grup ini kosong bagi mereka —
-                     jadi super_admin dikeluarkan supaya tidak muncul dropdown hampa. --}}
-                @if(in_array(auth()->user()->role, ['admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt']) || auth()->user()->punyaIzinUnit())
+                @if(in_array(auth()->user()->role, ['super_admin', 'admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt']))
                 <li
-                    class="menu-item {{ request()->is('admin/aktivitas/permintaan-pengajuan*') || request()->is('admin/aktivitas/bukti-transaksi*') || request()->is('admin/kemitraan*') || (request()->routeIs('admin.pelaporan.*') && !request()->routeIs('admin.pelaporan.archive')) ? 'open active show' : '' }}">
+                    class="menu-item {{ request()->is('admin/aktivitas/permintaan-pengajuan*') || request()->is('admin/aktivitas/bukti-transaksi*') || request()->is('admin/kemitraan*') || request()->routeIs('admin.kyc.*') || (request()->routeIs('admin.pelaporan.*') && !request()->routeIs('admin.pelaporan.archive')) ? 'open active show' : '' }}">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
                         <i class="menu-icon tf-icons bx bx-time"></i>
                         <div data-i18n="Permintaan & Aktivitas">Permintaan & Aktivitas</div>
                     </a>
                     <ul class="menu-sub">
-                        {{-- Di sinilah pekerjaan harian staf unit berada: pesanan masuk
-                             dan bukti bayar, keduanya sudah disaring per unit oleh
-                             RequestController dan TransactionController. --}}
-                        @if(in_array(auth()->user()->role, ['admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt']) || auth()->user()->punyaIzinUnit())
                         <li
                             class="menu-item {{ request()->is('admin/aktivitas/permintaan-pengajuan*') ? 'active' : '' }}">
                             <a href="{{ route('admin.aktivitas.permintaan-pengajuan.index') }}" class="menu-link">
                                 <div data-i18n="Permintaan & Pengajuan">Permintaan & Pengajuan</div>
                             </a>
                         </li>
+                        @if(in_array(auth()->user()->role, ['super_admin', 'admin', 'admin_kecamatan', 'admin_desa']))
+                        <li class="menu-item {{ request()->routeIs('admin.kyc.*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.kyc.index') }}" class="menu-link">
+                                <div data-i18n="Verifikasi Identitas">Verifikasi Identitas</div>
+                            </a>
+                        </li>
+                        @endif
                         <li class="menu-item {{ request()->is('admin/aktivitas/bukti-transaksi*') ? 'active' : '' }}">
                             <a href="{{ route('admin.aktivitas.bukti-transaksi.index') }}" class="menu-link">
                                 <div data-i18n="Bukti Transaksi">Bukti Transaksi</div>
                             </a>
                         </li>
-                        @endif
-                        {{-- Persetujuan Mitra: kewenangan pemerintahan berjenjang
-                             (kabupaten, kecamatan, desa). Super Admin Sistem
-                             (Diskominfotik) mengurus platform, bukan menyetujui
-                             mitra per wilayah. --}}
-                        @if(in_array(auth()->user()->role, ['admin', 'admin_kecamatan', 'admin_desa']))
+                        @if(in_array(auth()->user()->role, ['super_admin', 'admin', 'admin_kecamatan']))
                         <li class="menu-item {{ request()->routeIs('admin.kemitraan.*') ? 'active' : '' }}">
                             <a href="{{ route('admin.kemitraan.index') }}" class="menu-link">
                                 <div class="notranslate" translate="no">Persetujuan Mitra</div>
                             </a>
                         </li>
                         @endif
-                        @if(in_array(auth()->user()->role, ['admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt']))
                         <li class="menu-item {{ request()->routeIs('admin.pelaporan.*') && !request()->routeIs('admin.pelaporan.archive') ? 'active' : '' }}">
                             <a href="{{ Route::has('admin.pelaporan.index') ? route('admin.pelaporan.index') : '#' }}" class="menu-link">
                                 <div>Pelaporan Warga</div>
                             </a>
                         </li>
-                        @endif
                     </ul>
                 </li>
                 @endif
                 <!-- Data & Laporan (Dropdown) -->
-                {{-- Laporan operasional/keuangan per wilayah. Anak-anaknya disaring dengan
-                     `role !== super_admin`, kondisi yang justru DILEWATI role staff —
-                     itulah kenapa staf platform sempat melihat Laporan Transaksi dkk. --}}
-                @if(auth()->user()->role !== 'staff'
-                    || auth()->user()->punyaIzinUnit()
-                    || auth()->user()->bolehSalahSatu(\App\Models\User::kunciIzinGrup('Data & Laporan')))
                 <li class="menu-item {{ request()->routeIs('admin.laporan.*') || request()->routeIs('admin.pelaporan.archive') ? 'open active show' : '' }}">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
                         <i class="menu-icon tf-icons bx bx-bar-chart-alt-2"></i>
                         <div data-i18n="Data & Laporan">Data & Laporan</div>
                     </a>
                     <ul class="menu-sub">
-                        {{-- Bukti Pelaporan Warga tetap khusus admin wilayah: route arsipnya
-                             dijaga staff.permission:pelaporan_warga, jadi menampilkannya untuk
-                             staf platform hanya akan berujung ditolak. --}}
-                        @if(auth()->user()->bolehMenu(['admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt'], 'pelaporan_warga'))
                         <li class="menu-item {{ request()->routeIs('admin.pelaporan.archive') ? 'active' : '' }}">
                             <a href="{{ route('admin.pelaporan.archive') }}" class="menu-link">
                                 <div data-i18n="Bukti Pelaporan Warga">Bukti Pelaporan Warga</div>
                             </a>
                         </li>
-                        @endif
-
-                        {{-- Laporan transaksi/pendapatan/wilayah: boleh dibuka staf platform berizin --}}
-                        @if(auth()->user()->role !== 'super_admin' && ! auth()->user()->hanyaPlatform())
                         <li class="menu-item {{ request()->routeIs('admin.laporan.transaksi') ? 'active' : '' }}">
                             <a href="{{ route('admin.laporan.transaksi') }}" class="menu-link">
                                 <div data-i18n="Laporan Transaksi">Laporan Transaksi</div>
@@ -730,20 +824,12 @@
                                 <div data-i18n="Laporan Pendapatan">Laporan Pendapatan</div>
                             </a>
                         </li>
-                        {{-- Laporan Wilayah adalah rekap lintas unit milik pemerintah
-                             wilayah, bukan pekerjaan staf layanan. Datanya memang sudah
-                             disaring per izin unit di ReportController, tetapi bagi staf
-                             gas halaman ini hanya menampilkan rekap wilayah dengan semua
-                             unit lain bernilai nol - membingungkan dan bukan urusannya. --}}
-                        @unless(auth()->user()->isStaff())
                         <li class="menu-item {{ request()->routeIs('admin.laporan.wilayah') ? 'active' : '' }}">
                             <a href="{{ route('admin.laporan.wilayah') }}" class="menu-link">
                                 <div data-i18n="Laporan Wilayah">Laporan Wilayah</div>
                             </a>
                         </li>
-                        @endunless
-                        @endif
-                        @if(auth()->user()->bolehMenu(['super_admin', 'admin', 'admin_kecamatan'], 'platform_aktivitas'))
+                        @if(in_array(auth()->user()->role, ['super_admin', 'admin', 'admin_kecamatan']))
                         <li class="menu-item {{ request()->routeIs('admin.laporan.log') ? 'active' : '' }}">
                             <a href="{{ route('admin.laporan.log') }}" class="menu-link">
                                 <div data-i18n="Log Aktivitas">Log Aktivitas</div>
@@ -752,10 +838,9 @@
                         @endif
                     </ul>
                 </li>
-                @endif
 
-                <!-- Pengaturan (Dropdown) - layanan & pembayaran milik entitas kabupaten/kecamatan/desa sendiri, sudah digantikan "Sistem Platform" untuk Super Admin Sistem -->
-                @if(in_array(auth()->user()->role, ['admin', 'admin_kecamatan', 'admin_desa']))
+                <!-- Pengaturan (Dropdown) -->
+                @if(in_array(auth()->user()->role, ['super_admin', 'admin', 'admin_kecamatan', 'admin_desa']))
                 <li class="menu-item {{ request()->routeIs('admin.system-settings.*') || request()->routeIs('admin.region-settings.*') || request()->is('admin/unit/supir*') ? 'open active show' : '' }}">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
                         <i class="menu-icon tf-icons bx bx-cog"></i>
@@ -801,62 +886,6 @@
                 </li>
                 @endif
 
-                <!-- Sistem Platform. Tampil untuk Super Admin Sistem dan akun staf
-                     platform yang diberi izin; tiap item disaring per izinnya. -->
-                @if(auth()->user()->bolehAksesPlatform())
-                <li class="menu-item {{ request()->routeIs('admin.sistem-platform.*') ? 'open active show' : '' }}">
-                    <a href="javascript:void(0);" class="menu-link menu-toggle">
-                        <i class="menu-icon tf-icons bx bx-server"></i>
-                        <div data-i18n="Sistem Platform">Sistem Platform</div>
-                    </a>
-                    <ul class="menu-sub">
-                        @if(auth()->user()->hasPlatformPermission('platform_integrasi'))
-                        <li class="menu-item {{ request()->routeIs('admin.sistem-platform.gateway') ? 'active' : '' }}">
-                            <a href="{{ route('admin.sistem-platform.gateway') }}" class="menu-link">
-                                <div>Integrasi Payment Gateway</div>
-                            </a>
-                        </li>
-                        @endif
-                        @if(auth()->user()->hasPlatformPermission('platform_penarikan'))
-                        <li class="menu-item {{ request()->routeIs('admin.sistem-platform.penarikan.*') ? 'active' : '' }}">
-                            <a href="{{ route('admin.sistem-platform.penarikan.index') }}" class="menu-link">
-                                <div>Penarikan Saldo Wilayah</div>
-                            </a>
-                        </li>
-                        @endif
-                        {{-- Peta wilayah: kewenangan Super Admin saja, tidak
-                             dibagikan lewat izin staf platform. --}}
-                        @if(auth()->user()->role === 'super_admin')
-                        <li class="menu-item {{ request()->routeIs('admin.sistem-platform.wilayah.*') ? 'active' : '' }}">
-                            <a href="{{ route('admin.sistem-platform.wilayah.index') }}" class="menu-link">
-                                <div>Peta Wilayah</div>
-                            </a>
-                        </li>
-                        @endif
-                        @if(auth()->user()->hasPlatformPermission('platform_monitoring'))
-                        <li class="menu-item {{ request()->routeIs('admin.sistem-platform.monitoring') ? 'active' : '' }}">
-                            <a href="{{ route('admin.sistem-platform.monitoring') }}" class="menu-link">
-                                <div>Monitoring Transaksi</div>
-                            </a>
-                        </li>
-                        @endif
-                        @if(auth()->user()->hasPlatformPermission('platform_keamanan'))
-                        <li class="menu-item {{ request()->routeIs('admin.sistem-platform.security-log') ? 'active' : '' }}">
-                            <a href="{{ route('admin.sistem-platform.security-log') }}" class="menu-link">
-                                <div>Log Keamanan & Audit</div>
-                            </a>
-                        </li>
-                        @endif
-                        @if(auth()->user()->hasPlatformPermission('platform_biaya'))
-                        <li class="menu-item {{ request()->routeIs('admin.sistem-platform.expenses') ? 'active' : '' }}">
-                            <a href="{{ route('admin.sistem-platform.expenses') }}" class="menu-link">
-                                <div>Biaya Server & Domain</div>
-                            </a>
-                        </li>
-                        @endif
-                    </ul>
-                </li>
-                @endif
 
                 <!-- Profil & Info (Dropdown) -->
                 <li class="menu-item {{ request()->is('admin/SiladesBeng/profile*') || request()->is('admin/SiladesBeng/developer*') || request()->routeIs('admin.SiladesBeng.bumdes.index') || request()->routeIs('admin.SiladesBeng.bumdes.*') ? 'open active show' : '' }}">
@@ -934,17 +963,40 @@
                                 @endif
                             </div>
                         </div>
+                        @if(isset($hasActiveServices) && !$hasActiveServices && in_array(auth()->user()->role, ['super_admin', 'admin', 'admin_kecamatan', 'admin_desa']))
+                            @php
+                                $settingsRoute = in_array(auth()->user()->role, ['super_admin', 'admin']) ? route('admin.system-settings.index') : route('admin.region-settings.index');
+                            @endphp
+                            <div class="ms-auto me-3 d-none d-md-block">
+                                <a href="{{ $settingsRoute }}" class="btn btn-sm btn-outline-warning d-flex align-items-center rounded-pill px-3 py-1 shadow-none" style="font-size: 0.78rem; font-weight: 600;">
+                                    <i class="bx bx-lock-alt me-1 fs-6"></i>
+                                    <span>Layanan Terkunci &bull; Ayo Aktifkan Layanan!</span>
+                                </a>
+                            </div>
+                        @endif
                         <ul class="navbar-nav flex-row align-items-center ms-auto">
                             <!-- Notifikasi Bell Icon -->
-                            <li class="nav-item dropdown me-3">
-                                <a class="nav-link dropdown-toggle hide-arrow position-relative" href="javascript:void(0);" data-bs-toggle="dropdown" data-bs-auto-close="outside">
+                            <li class="nav-item dropdown me-3 position-static position-sm-relative">
+                                <a class="nav-link dropdown-toggle hide-arrow position-relative" href="javascript:void(0);" data-bs-toggle="dropdown" data-bs-display="static" data-bs-auto-close="outside">
                                     <i class="bx bx-bell bx-sm"></i>
                                     @php
                                         $notifQuery = \App\Models\AdminNotification::query();
-                                        if (in_array(auth()->user()->role, ['super_admin', 'admin'])) {
-                                            $notifQuery->whereNull('region_id');
-                                        } else {
-                                            $notifQuery->where('region_id', auth()->user()->region_id);
+                                        $currentUser = auth()->user();
+                                        if ($currentUser) {
+                                            if (in_array($currentUser->role, ['super_admin'])) {
+                                                // Super Admin melihat semua notifikasi
+                                            } else {
+                                                $userRegionId = $currentUser->region_id;
+                                                if ($userRegionId) {
+                                                    $allowedRegionIds = \App\Models\Region::getDescendantIds($userRegionId);
+                                                    $allowedRegionIds[] = $userRegionId;
+                                                    $notifQuery->where(function($q) use ($allowedRegionIds) {
+                                                        $q->whereIn('region_id', $allowedRegionIds)->orWhereNull('region_id');
+                                                    });
+                                                } else {
+                                                    $notifQuery->whereNull('region_id');
+                                                }
+                                            }
                                         }
                                         $unreadCount = (clone $notifQuery)->where('is_read', false)->count();
                                     @endphp
@@ -952,86 +1004,95 @@
                                     <span class="badge bg-danger rounded-pill badge-notifications position-absolute" style="top: -2px; right: -6px; font-size: 10px; min-width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;">{{ $unreadCount > 99 ? '99+' : $unreadCount }}</span>
                                     @endif
                                 </a>
-                                <ul class="dropdown-menu dropdown-menu-end py-0" style="width: 420px; max-height: 520px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); overflow: hidden;">
-                                    <li class="dropdown-menu-header border-bottom bg-light">
-                                        <div class="dropdown-header d-flex align-items-center justify-content-between py-3 px-4">
+                                <ul class="dropdown-menu dropdown-menu-end py-0 notif-dropdown-menu">
+                                    <li class="dropdown-menu-header border-bottom bg-white">
+                                        <div class="dropdown-header d-flex align-items-center justify-content-between py-3 px-3 px-sm-4">
                                             <h6 class="mb-0 fw-bold text-dark fs-5">Notifikasi</h6>
                                             @if($unreadCount > 0)
-                                            <span class="badge rounded-pill bg-primary px-3 py-2 shadow-sm">{{ $unreadCount }} Baru</span>
+                                            <span class="badge bg-label-primary rounded-pill px-3 py-1 fw-bold fs-7">{{ $unreadCount }} Baru</span>
                                             @endif
                                         </div>
-                                        <!-- Pill Tabs for 6 Layanan -->
-                                        <div class="px-4 pb-3 overflow-auto d-flex align-items-center" style="white-space: nowrap; scrollbar-width: none;">
-                                            <button class="btn btn-sm btn-primary rounded-pill me-2 notif-filter-btn active fw-semibold shadow-sm" data-filter="all">Semua</button>
-                                            <button class="btn btn-sm btn-outline-secondary rounded-pill me-2 notif-filter-btn fw-medium" data-filter="mobil">Sewa Mobil</button>
-                                            <button class="btn btn-sm btn-outline-secondary rounded-pill me-2 notif-filter-btn fw-medium" data-filter="fasilitas">Fasilitas Umum</button>
-                                            <button class="btn btn-sm btn-outline-secondary rounded-pill me-2 notif-filter-btn fw-medium" data-filter="gas">Gas LPG</button>
-                                            <button class="btn btn-sm btn-outline-secondary rounded-pill me-2 notif-filter-btn fw-medium" data-filter="pasar">Pasar Desa</button>
-                                            <button class="btn btn-sm btn-outline-secondary rounded-pill me-2 notif-filter-btn fw-medium" data-filter="mutasi">Administrasi</button>
-                                            <button class="btn btn-sm btn-outline-secondary rounded-pill me-2 notif-filter-btn fw-medium" data-filter="laporan">Laporan Warga</button>
-                                            <button class="btn btn-sm btn-outline-secondary rounded-pill notif-filter-btn fw-medium" data-filter="keuangan">Keuangan</button>
+                                        <!-- Pill Tabs untuk Semua Layanan -->
+                                        <div class="px-3 px-sm-4 pb-3">
+                                            <div class="notif-filter-wrapper">
+                                                <button type="button" class="notif-scroll-arrow notif-scroll-prev d-none" aria-label="Geser ke kiri">
+                                                    <i class="bx bx-chevron-left"></i>
+                                                </button>
+                                                <div class="notif-filter-scroll">
+                                                    <button type="button" class="btn btn-sm notif-filter-btn active" data-filter="all">Semua</button>
+                                                    <button type="button" class="btn btn-sm notif-filter-btn" data-filter="rental">Sewa Alat</button>
+                                                    <button type="button" class="btn btn-sm notif-filter-btn" data-filter="mobil">Sewa Mobil</button>
+                                                    <button type="button" class="btn btn-sm notif-filter-btn" data-filter="fasilitas">Fasilitas Umum</button>
+                                                    <button type="button" class="btn btn-sm notif-filter-btn" data-filter="gas">Gas LPG</button>
+                                                    <button type="button" class="btn btn-sm notif-filter-btn" data-filter="pasar">Pasar Desa</button>
+                                                    <button type="button" class="btn btn-sm notif-filter-btn" data-filter="kyc">Verifikasi Identitas</button>
+                                                    <button type="button" class="btn btn-sm notif-filter-btn" data-filter="laporan">Laporan Warga</button>
+                                                    <button type="button" class="btn btn-sm notif-filter-btn" data-filter="mutasi">Mutasi Penduduk</button>
+                                                </div>
+                                                <button type="button" class="notif-scroll-arrow notif-scroll-next" aria-label="Geser ke kanan">
+                                                    <i class="bx bx-chevron-right"></i>
+                                                </button>
+                                            </div>
                                         </div>
                                     </li>
                                     <li>
-                                        <div class="notif-list-container" style="max-height: 350px; overflow-y: auto;">
+                                        <div class="notif-list-container" style="max-height: 360px; overflow-y: auto;">
                                             @php
                                                 $recentNotifications = (clone $notifQuery)->latest()->take(30)->get();
                                             @endphp
                                             @forelse($recentNotifications as $notif)
                                             @php
-                                                // Mapping icon and category
+                                                // Mapping icon, category, dan link tujuan
                                                 $cat = 'lainnya';
                                                 $icon = 'bx-bell';
                                                 $color = 'primary';
-                                                $bg = 'rgba(105, 108, 255, 0.08)';
 
-                                                if (in_array($notif->type, ['cancellation_request', 'mobil_order', 'rental_mobil'])) {
-                                                    $cat = 'mobil'; $icon = 'bx-car'; $color = 'info'; $bg = 'rgba(3, 195, 236, 0.08)';
-                                                } elseif (in_array($notif->type, ['fasilitas_order', 'rental_fasilitas'])) {
-                                                    $cat = 'fasilitas'; $icon = 'bx-building-house'; $color = 'success'; $bg = 'rgba(113, 221, 55, 0.08)';
-                                                } elseif ($notif->type === 'gas_order') {
-                                                    $cat = 'gas'; $icon = 'bx-gas-pump'; $color = 'warning'; $bg = 'rgba(255, 171, 0, 0.08)';
-                                                } elseif (in_array($notif->type, ['pasar_order', 'pasar'])) {
-                                                    $cat = 'pasar'; $icon = 'bx-store-alt'; $color = 'danger'; $bg = 'rgba(255, 62, 29, 0.08)';
+                                                if (in_array($notif->type, ['rental_request', 'rental_order', 'rental'])) {
+                                                    $cat = 'rental'; $icon = 'bx-wrench'; $color = 'warning';
+                                                    $targetUrl = route('admin.aktivitas.permintaan-pengajuan.index');
+                                                } elseif (in_array($notif->type, ['cancellation_request', 'mobil_order', 'rental_mobil', 'mobil'])) {
+                                                    $cat = 'mobil'; $icon = 'bx-car'; $color = 'info';
+                                                    $targetUrl = route('admin.aktivitas.permintaan-pengajuan.index');
+                                                } elseif (in_array($notif->type, ['fasilitas_order', 'rental_fasilitas', 'fasilitas'])) {
+                                                    $cat = 'fasilitas'; $icon = 'bx-building-house'; $color = 'success';
+                                                    $targetUrl = route('admin.aktivitas.permintaan-pengajuan.index');
+                                                } elseif (in_array($notif->type, ['gas_order', 'gas'])) {
+                                                    $cat = 'gas'; $icon = 'bxs-gas-pump'; $color = 'danger';
+                                                    $targetUrl = route('admin.aktivitas.permintaan-pengajuan.index');
+                                                } elseif (in_array($notif->type, ['pasar_order', 'pasar', 'pasar_daerah'])) {
+                                                    $cat = 'pasar'; $icon = 'bx-store-alt'; $color = 'primary';
+                                                    $targetUrl = Route::has('admin.unit.pasar_daerah.pesanan.index') ? route('admin.unit.pasar_daerah.pesanan.index') : route('admin.aktivitas.permintaan-pengajuan.index');
+                                                } elseif (in_array($notif->type, ['kyc', 'kyc_verification'])) {
+                                                    $cat = 'kyc'; $icon = 'bx-id-card'; $color = 'info';
+                                                    $targetUrl = ($notif->reference_id && Route::has('admin.kyc.show')) ? route('admin.kyc.show', $notif->reference_id) : route('admin.kyc.index');
                                                 } elseif ($notif->type === 'mutasi') {
-                                                    $cat = 'mutasi'; $icon = 'bx-id-card'; $color = 'secondary'; $bg = 'rgba(133, 146, 163, 0.08)';
+                                                    $cat = 'mutasi'; $icon = 'bx-user-pin'; $color = 'secondary';
+                                                    $targetUrl = route('admin.warga.mutasi.index');
                                                 } elseif (in_array($notif->type, ['laporan', 'pengumuman'])) {
-                                                    $cat = 'laporan'; $icon = 'bx-message-square-error'; $color = 'danger'; $bg = 'rgba(255, 62, 29, 0.08)';
-                                                } elseif ($notif->type === 'penarikan_saldo') {
-                                                    $cat = 'keuangan'; $icon = 'bx-money-withdraw'; $color = 'success'; $bg = 'rgba(113, 221, 55, 0.08)';
-                                                } elseif ($notif->type === 'penarikan_saldo_terlambat') {
-                                                    $cat = 'keuangan'; $icon = 'bx-alarm-exclamation'; $color = 'danger'; $bg = 'rgba(255, 62, 29, 0.08)';
-                                                }
-
-                                                // Tautan notifikasi dulu selalu ke Permintaan & Pengajuan, apa pun
-                                                // jenisnya. Untuk penarikan saldo itu salah alamat, dan tujuannya
-                                                // pun berbeda menurut siapa yang membaca: Diskominfotik menyetujui
-                                                // di panel platform, admin wilayah melihatnya di halaman Keuangan.
-                                                $notifLink = route('admin.aktivitas.permintaan-pengajuan.index');
-                                                if (in_array($notif->type, ['penarikan_saldo', 'penarikan_saldo_terlambat'])) {
-                                                    $notifLink = in_array(auth()->user()->role, ['super_admin', 'admin'])
-                                                        ? route('admin.sistem-platform.penarikan.index')
-                                                        : route('admin.keuangan.index');
+                                                    $cat = 'laporan'; $icon = 'bx-message-square-error'; $color = 'danger';
+                                                    $targetUrl = ($notif->reference_id && Route::has('admin.pelaporan.show')) ? route('admin.pelaporan.show', $notif->reference_id) : (Route::has('admin.pelaporan.index') ? route('admin.pelaporan.index') : route('admin.aktivitas.permintaan-pengajuan.index'));
+                                                } else {
+                                                    $targetUrl = route('admin.aktivitas.permintaan-pengajuan.index');
                                                 }
                                             @endphp
-                                            <a href="{{ $notifLink }}" class="dropdown-item notif-item d-flex align-items-start gap-3 py-3 px-4 border-bottom" data-category="{{ $cat }}" style="white-space: normal; {{ !$notif->is_read ? 'background-color: '.$bg.';' : '' }} transition: all 0.2s;">
+                                            <a href="{{ $targetUrl }}" class="dropdown-item notif-item {{ !$notif->is_read ? 'is-unread category-'.$cat : '' }} gap-3" data-category="{{ $cat }}">
                                                 <div class="flex-shrink-0 mt-1">
-                                                    <div class="rounded-circle d-flex align-items-center justify-content-center shadow-sm {{ !$notif->is_read ? 'bg-'.$color : 'bg-label-secondary' }}" style="width: 42px; height: 42px;">
-                                                        <i class="bx {{ $icon }} fs-4 {{ !$notif->is_read ? 'text-white' : 'text-secondary' }}"></i>
+                                                    <div class="rounded-circle d-flex align-items-center justify-content-center shadow-xs {{ !$notif->is_read ? 'bg-label-'.$color : 'bg-light' }}" style="width: 40px; height: 40px;">
+                                                        <i class="bx {{ $icon }} fs-5 {{ !$notif->is_read ? 'text-'.$color : 'text-secondary' }}"></i>
                                                     </div>
                                                 </div>
-                                                <div class="flex-grow-1">
-                                                    <h6 class="mb-1 fw-bold {{ !$notif->is_read ? 'text-dark' : 'text-muted' }}">{{ $notif->title }}</h6>
-                                                    <p class="mb-2 {{ !$notif->is_read ? 'text-body' : 'text-muted' }} small" style="line-height: 1.5;">{{ Str::limit($notif->message, 80) }}</p>
-                                                    <small class="text-muted d-flex align-items-center fw-medium" style="font-size: 0.75rem;">
+                                                <div class="flex-grow-1" style="min-width: 0;">
+                                                    <div class="d-flex align-items-center justify-content-between mb-1">
+                                                        <h6 class="mb-0 fw-bold {{ !$notif->is_read ? 'text-dark' : 'text-secondary' }} text-truncate" style="font-size: 0.88rem;">{{ $notif->title }}</h6>
+                                                        @if(!$notif->is_read)
+                                                            <span class="badge badge-dot bg-{{ $color }} ms-2 flex-shrink-0" style="width: 8px; height: 8px;"></span>
+                                                        @endif
+                                                    </div>
+                                                    <p class="notif-item-desc mb-1 small">{{ $notif->message }}</p>
+                                                    <small class="text-muted d-flex align-items-center fw-medium" style="font-size: 0.72rem;">
                                                         <i class="bx bx-time-five me-1"></i> {{ $notif->created_at->diffForHumans() }}
                                                     </small>
                                                 </div>
-                                                @if(!$notif->is_read)
-                                                <div class="flex-shrink-0 align-self-center">
-                                                    <span class="badge badge-dot bg-{{ $color }} shadow-sm p-1"></span>
-                                                </div>
-                                                @endif
                                             </a>
                                             @empty
                                             <div class="text-center py-5 notif-empty-state">
@@ -1052,9 +1113,9 @@
                                             </div>
                                         </div>
                                     </li>
-                                    <li class="dropdown-menu-footer border-top bg-light">
-                                        <a href="{{ route('admin.aktivitas.permintaan-pengajuan.index') }}" class="dropdown-item text-center py-3 text-primary fw-bold">
-                                            <i class="bx bx-list-ul me-2"></i>Lihat Semua Aktivitas
+                                    <li class="dropdown-menu-footer border-top bg-white">
+                                        <a href="{{ route('admin.aktivitas.permintaan-pengajuan.index') }}" class="dropdown-item text-center py-3 text-primary fw-bold d-flex align-items-center justify-content-center" style="font-size: 0.84rem;">
+                                            <i class="bx bx-list-ul me-2 fs-5"></i> Lihat Semua Aktivitas
                                         </a>
                                     </li>
                                 </ul>
@@ -1075,7 +1136,7 @@
                                             'user' => 'Pengguna',
                                         ];
                                     @endphp
-                                    {{ Auth::user()->labelRole() }}
+                                    {{ $roleLabels[Auth::user()->role] ?? ucfirst(Auth::user()->role) }}
                                 </small>
                             </li>
                             <!-- Profil Admin -->
@@ -1147,6 +1208,25 @@
 
                 <!-- Content wrapper -->
                 <div class="content-wrapper">
+
+                    @if(isset($hasActiveServices) && !$hasActiveServices && in_array(auth()->user()->role, ['super_admin', 'admin', 'admin_kecamatan', 'admin_desa']) && !request()->routeIs('admin.region-settings.*') && !request()->routeIs('admin.system-settings.*'))
+                    <div class="container-xxl pt-3">
+                        <div class="alert alert-warning alert-dismissible shadow-sm rounded-4 border-0 d-flex align-items-center mb-0" role="alert">
+                            <i class="bx bx-lock-alt fs-3 me-3 text-warning flex-shrink-0"></i>
+                            <div class="flex-grow-1">
+                                <strong class="d-block">Unit Layanan Wilayah Sedang Terkunci</strong>
+                                <span class="small">Seluruh unit layanan wilayah Anda saat ini nonaktif. Warga tidak dapat melihat atau mengakses layanan di beranda.</span>
+                                @php
+                                    $settingsRoute = in_array(auth()->user()->role, ['super_admin', 'admin']) ? route('admin.system-settings.index') : route('admin.region-settings.index');
+                                @endphp
+                                <a href="{{ $settingsRoute }}" class="btn btn-sm btn-warning rounded-pill px-3 ms-2 py-1 fw-bold shadow-none" style="font-size: 0.75rem;">
+                                    Ayo Aktifkan Layanan Sekarang
+                                </a>
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    </div>
+                    @endif
 
                     @yield('content')
                     
@@ -1245,18 +1325,7 @@
             <!-- Skrip untuk animasi dan fungsionalitas -->
             <script>
                 // Wrapper: showToast sekarang memanggil showSiladesBengToast
-                //
-                // Urutan argumennya sengaja dibuat bebas. Sisi admin memakai
-                // showToast(jenis, pesan) sementara sisi warga di
-                // auth/scripts.blade.php memakai showToast(pesan, jenis) —
-                // nama sama, urutan terbalik. Kode yang dipindahkan antar sisi
-                // dulu diam-diam menukar judul dengan isi pesan.
                 function showToast(type, message) {
-                    const JENIS = ['success', 'error', 'warning', 'info', 'danger'];
-                    if (JENIS.indexOf(message) !== -1 && JENIS.indexOf(type) === -1) {
-                        const tukar = type; type = message; message = tukar;
-                    }
-
                     const mappedType = type === 'danger' ? 'error' : type;
                     const titleMap = { success: 'Berhasil', error: 'Peringatan', warning: 'Perhatian', info: 'Informasi' };
                     showSiladesBengToast(mappedType, titleMap[mappedType] || 'Notifikasi', message);
@@ -1415,26 +1484,187 @@
 
                     animateCountUp('.count-up', false);
                     animateCountUp('.count-up-rupiah', true);
+
+                    // Filter Interaktif Notifikasi Navbar & Drag/Scroll Handler
+                    const notifDropdownEl = document.querySelector('.notif-dropdown-menu');
+                    const filterScroll = document.querySelector('.notif-filter-scroll');
+                    const prevArrow = document.querySelector('.notif-scroll-prev');
+                    const nextArrow = document.querySelector('.notif-scroll-next');
+                    let hasDragged = false;
+
+                    function updateScrollArrows() {
+                        if (!filterScroll) return;
+                        const maxScroll = filterScroll.scrollWidth - filterScroll.clientWidth;
+                        if (maxScroll <= 5) {
+                            if (prevArrow) prevArrow.classList.add('d-none');
+                            if (nextArrow) nextArrow.classList.add('d-none');
+                            return;
+                        }
+                        if (prevArrow) {
+                            if (filterScroll.scrollLeft > 8) {
+                                prevArrow.classList.remove('d-none');
+                            } else {
+                                prevArrow.classList.add('d-none');
+                            }
+                        }
+                        if (nextArrow) {
+                            if (filterScroll.scrollLeft < maxScroll - 8) {
+                                nextArrow.classList.remove('d-none');
+                            } else {
+                                nextArrow.classList.add('d-none');
+                            }
+                        }
+                    }
+
+                    if (filterScroll) {
+                        let isDown = false;
+                        let startX = 0;
+                        let scrollStart = 0;
+
+                        filterScroll.addEventListener('mousedown', function(e) {
+                            // Jangan drag jika yang diklik tombol navigasi panah
+                            if (e.target.closest('.notif-scroll-arrow')) return;
+                            isDown = true;
+                            hasDragged = false;
+                            filterScroll.classList.add('dragging');
+                            startX = e.pageX - filterScroll.offsetLeft;
+                            scrollStart = filterScroll.scrollLeft;
+                        });
+
+                        window.addEventListener('mouseup', function() {
+                            if (isDown) {
+                                isDown = false;
+                                filterScroll.classList.remove('dragging');
+                            }
+                        });
+
+                        filterScroll.addEventListener('mouseleave', function() {
+                            if (isDown) {
+                                isDown = false;
+                                filterScroll.classList.remove('dragging');
+                            }
+                        });
+
+                        filterScroll.addEventListener('mousemove', function(e) {
+                            if (!isDown) return;
+                            e.preventDefault();
+                            const x = e.pageX - filterScroll.offsetLeft;
+                            const walk = (x - startX) * 1.5;
+                            if (Math.abs(walk) > 4) {
+                                hasDragged = true;
+                            }
+                            filterScroll.scrollLeft = scrollStart - walk;
+                            updateScrollArrows();
+                        });
+
+                        // Mouse wheel horizontal scroll di desktop
+                        filterScroll.addEventListener('wheel', function(e) {
+                            if (e.deltaY !== 0) {
+                                e.preventDefault();
+                                filterScroll.scrollLeft += e.deltaY * 0.9;
+                                updateScrollArrows();
+                            }
+                        }, { passive: false });
+
+                        filterScroll.addEventListener('scroll', updateScrollArrows);
+
+                        if (prevArrow) {
+                            prevArrow.addEventListener('click', function(e) {
+                                e.stopPropagation();
+                                e.preventDefault();
+                                filterScroll.scrollBy({ left: -140, behavior: 'smooth' });
+                                setTimeout(updateScrollArrows, 250);
+                            });
+                        }
+
+                        if (nextArrow) {
+                            nextArrow.addEventListener('click', function(e) {
+                                e.stopPropagation();
+                                e.preventDefault();
+                                filterScroll.scrollBy({ left: 140, behavior: 'smooth' });
+                                setTimeout(updateScrollArrows, 250);
+                            });
+                        }
+                    }
+
+                    document.querySelectorAll('.notif-filter-btn').forEach(function(btn) {
+                        btn.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            e.preventDefault();
+
+                            // Jika barusan selesai drag/geser mouse, abaikan klik
+                            if (hasDragged) {
+                                hasDragged = false;
+                                return;
+                            }
+
+                            document.querySelectorAll('.notif-filter-btn').forEach(function(b) {
+                                b.classList.remove('active');
+                            });
+                            this.classList.add('active');
+
+                            const filter = this.getAttribute('data-filter');
+                            const items = document.querySelectorAll('.notif-item');
+                            const filteredEmpty = document.querySelector('.notif-filtered-empty');
+                            let visibleCount = 0;
+
+                            items.forEach(function(item) {
+                                const cat = item.getAttribute('data-category');
+                                if (filter === 'all' || cat === filter) {
+                                    item.style.setProperty('display', 'flex', 'important');
+                                    visibleCount++;
+                                } else {
+                                    item.style.setProperty('display', 'none', 'important');
+                                }
+                            });
+
+                            if (filteredEmpty) {
+                                if (visibleCount === 0 && items.length > 0) {
+                                    filteredEmpty.classList.remove('d-none');
+                                } else {
+                                    filteredEmpty.classList.add('d-none');
+                                }
+                            }
+                        });
+                    });
+
+                    // Reset posisi scroll pill filter & update panah saat notifikasi dibuka
+                    if (notifDropdownEl) {
+                        const parentDrop = notifDropdownEl.closest('.dropdown');
+                        if (parentDrop) {
+                            parentDrop.addEventListener('shown.bs.dropdown', function() {
+                                if (filterScroll) {
+                                    filterScroll.scrollLeft = 0;
+                                    updateScrollArrows();
+                                }
+                            });
+                        }
+                    }
                 });
             </script>
             @yield('modals')
             @stack('modals')
             @yield('scripts')
             @stack('scripts')
-    @include('components.cropper-modal')
 
-    {{-- Panel kotak masuk Gmail. Ditaruh di layout, bukan di halaman dashboard,
-         karena super_admin justru dialihkan dari dashboard ke Monitoring
-         (lihat DashboardController::index) sehingga panel tidak akan pernah
-         terlihat kalau menumpang di sana. Partial-nya mandiri (style & script
-         inline), jadi aman di-include setelah @stack('styles') dirender. --}}
-    @auth
-        @if(auth()->user()->hasPlatformPermission('platform_inbox'))
-            @include('admin.partials.inbox-rail')
-        @endif
-    @endauth
-    {{-- Dialog konfirmasi bergaya situs, pengganti window.confirm() --}}
+    {{-- Dialog konfirmasi bergaya situs, pengganti window.confirm().
+         Dipasang di sini karena halaman-halaman admin lain menandai aksi
+         berbahayanya dengan atribut data-konfirmasi; tanpa partial ini
+         atribut itu tidak berarti apa-apa dan tombol hapus langsung jalan. --}}
     @include('partials.dialog-konfirmasi')
+    @include('components.cropper-modal')
+    <!-- Select2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            if (typeof $.fn.select2 !== 'undefined') {
+                $('.select2').select2({
+                    theme: 'bootstrap-5',
+                    width: '100%'
+                });
+            }
+        });
+    </script>
 </body>
 
 </html>

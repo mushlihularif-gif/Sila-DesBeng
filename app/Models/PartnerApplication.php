@@ -18,4 +18,9 @@ class PartnerApplication extends Model
     {
         return $this->belongsTo(Region::class, 'parent_region_id');
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 }

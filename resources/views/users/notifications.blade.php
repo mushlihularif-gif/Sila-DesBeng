@@ -69,6 +69,25 @@
                                                 $bgClass = 'bg-gradient-to-br from-purple-100 to-purple-200';
                                                 $iconSvg = '<svg class="w-12 h-12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 13.5997 2.37562 15.1116 3.04346 16.4525C3.22094 16.8088 3.28001 17.2161 3.17712 17.6006L2.58151 19.8267C2.32295 20.793 3.20701 21.677 4.17335 21.4185L6.39939 20.8229C6.78393 20.72 7.19121 20.7791 7.54753 20.9565C8.88837 21.6244 10.4003 22 12 22Z" fill="url(#grad1)"/><path d="M8 12H8.01M12 12H12.01M16 12H16.01" stroke="white" stroke-width="2" stroke-linecap="round"/><defs><linearGradient id="grad1" x1="2" y1="2" x2="22" y2="22"><stop offset="0%" stop-color="#9333EA"/><stop offset="100%" stop-color="#C084FC"/></linearGradient></defs></svg>';
                                                 break;
+                                            case 'kyc_submission':
+                                                $bgClass = 'bg-gradient-to-br from-amber-100 to-amber-200';
+                                                $iconSvg = '<svg class="w-12 h-12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="4" width="18" height="16" rx="3" fill="url(#grad_kyc)"/><circle cx="8.5" cy="10" r="2.5" fill="white"/><path d="M5 16C5 14.5 6.5 13.5 8.5 13.5C10.5 13.5 12 14.5 12 16" stroke="white" stroke-width="1.5" stroke-linecap="round"/><line x1="14" y1="9" x2="19" y2="9" stroke="white" stroke-width="1.5" stroke-linecap="round"/><line x1="14" y1="12" x2="18" y2="12" stroke="white" stroke-width="1.5" stroke-linecap="round"/><line x1="14" y1="15" x2="17" y2="15" stroke="white" stroke-width="1.5" stroke-linecap="round"/><defs><linearGradient id="grad_kyc" x1="3" y1="4" x2="21" y2="20"><stop offset="0%" stop-color="#F59E0B"/><stop offset="100%" stop-color="#D97706"/></linearGradient></defs></svg>';
+                                                break;
+                                            case 'kyc_approved':
+                                            case 'kemitraan_approved':
+                                            case 'role_promoted':
+                                            case 'mutasi_approved':
+                                            case 'laporan_selesai':
+                                                $bgClass = 'bg-gradient-to-br from-green-100 to-emerald-200';
+                                                $iconSvg = '<svg class="w-12 h-12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" fill="url(#grad2)"/><path d="M8 12.5L10.5 15L16 9" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><defs><linearGradient id="grad2" x1="2" y1="2" x2="22" y2="22"><stop offset="0%" stop-color="#10B981"/><stop offset="100%" stop-color="#34D399"/></linearGradient></defs></svg>';
+                                                break;
+                                            case 'kyc_rejected':
+                                            case 'kemitraan_rejected':
+                                            case 'mutasi_rejected':
+                                            case 'laporan_ditolak':
+                                                $bgClass = 'bg-gradient-to-br from-red-100 to-rose-200';
+                                                $iconSvg = '<svg class="w-12 h-12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" fill="url(#grad_reject)"/><path d="M8 8L16 16M16 8L8 16" stroke="white" stroke-width="2.5" stroke-linecap="round"/><defs><linearGradient id="grad_reject" x1="2" y1="2" x2="22" y2="22"><stop offset="0%" stop-color="#DC2626"/><stop offset="100%" stop-color="#F87171"/></linearGradient></defs></svg>';
+                                                break;
                                             case 'status_berubah':
                                                 // Check if it's a rejection based on title/message
                                                 if (stripos($notification->title, 'ditolak') !== false || stripos($notification->message, 'ditolak') !== false) {
@@ -83,6 +102,7 @@
                                                 $bgClass = 'bg-gradient-to-br from-green-100 to-emerald-200';
                                                 $iconSvg = '<svg class="w-12 h-12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" fill="url(#grad2)"/><path d="M8 12.5L10.5 15L16 9" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><defs><linearGradient id="grad2" x1="2" y1="2" x2="22" y2="22"><stop offset="0%" stop-color="#10B981"/><stop offset="100%" stop-color="#34D399"/></linearGradient></defs></svg>';
                                                 break;
+                                            case 'order_created':
                                             case 'delivery_proof':
                                                 $bgClass = 'bg-gradient-to-br from-blue-100 to-cyan-200';
                                                 $iconSvg = '<svg class="w-12 h-12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="6" width="15" height="12" rx="2" fill="url(#grad3)"/><path d="M16 8V18H18C19.1046 18 20 17.1046 20 16V10C20 8.89543 19.1046 8 18 8H16Z" fill="url(#grad3)"/><circle cx="6" cy="19" r="2" fill="white"/><circle cx="18" cy="19" r="2" fill="white"/><defs><linearGradient id="grad3" x1="1" y1="6" x2="20" y2="19"><stop offset="0%" stop-color="#3B82F6"/><stop offset="100%" stop-color="#06B6D4"/></linearGradient></defs></svg>';
@@ -125,7 +145,14 @@
                                 </p>
 
                                 <!-- Action Buttons -->
-                                <div class="flex items-center gap-3 mt-4">
+                                <div class="flex flex-wrap items-center gap-3 mt-4">
+                                    @if(!empty($notification->link))
+                                    <a href="{{ $notification->link }}" class="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-semibold hover:bg-blue-600 transition-colors duration-200 inline-flex items-center gap-1.5 shadow-sm">
+                                        <span>Buka Detail</span>
+                                        <i class="fas fa-arrow-right text-xs"></i>
+                                    </a>
+                                    @endif
+
                                     @if(!$notification->is_read)
                                     <form action="{{ route('user.notifications.read', $notification->id) }}" method="POST" class="inline-block">
                                         @csrf

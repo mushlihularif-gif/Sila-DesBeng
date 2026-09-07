@@ -14,7 +14,7 @@ class VillageSeeder extends Seeder
     {
         $villagesData = [
             'Bengkalis' => [
-                'desa' => ['Air Putih', 'Damai', 'Kelapapati', 'Kelebuk', 'Kelemantan', 'Kelemantan Barat', 'Ketam Putih', 'Kuala Alam', 'Meskom', 'Palkun', 'Pangkalan Batang', 'Pangkalan Batang Barat', 'Pedekik', 'Pematang Duku', 'Pematang Duku Timur', 'Penampi', 'Penebal', 'Prapat Tunggal', 'Sebauk', 'Sei Alam', 'Sekodi', 'Senderak', 'Senggoro', 'Simpang Ayam', 'Sungai Batang', 'Teluk Latak', 'Tameran', 'Wonosari'],
+                'desa' => ['Air Putih', 'Damai', 'Kelapapati', 'Kelebuk', 'Kelemantan', 'Kelemantan Barat', 'Ketam Putih', 'Kuala Alam', 'Meskom', 'Palkun', 'Pangkalan Batang', 'Pangkalan Batang Barat', 'Pedekik', 'Pematang Duku', 'Pematang Duku Timur', 'Penampi', 'Penebal', 'Prapat Tunggal', 'Sebauk', 'Sungai Alam', 'Sekodi', 'Senderak', 'Senggoro', 'Simpang Ayam', 'Sungai Batang', 'Teluk Latak', 'Tameran', 'Wonosari'],
                 'kelurahan' => ['Bengkalis Kota', 'Damon', 'Rimba Sekampung']
             ],
             'Bantan' => [
@@ -22,7 +22,7 @@ class VillageSeeder extends Seeder
                 'kelurahan' => []
             ],
             'Bukit Batu' => [
-                'desa' => ['Sejangat', 'Dompas', 'Pangkalan Jambi', 'Sungai Selari', 'Buruk Bakul', 'Bukit Batu', 'Sukajadi', 'Batang Duku', 'Pakning Asal'],
+                'desa' => ['Sejangat', 'Dompas', 'Pangkalan Jambi', 'Sungai Selari', 'Buruk Bakul', 'Bukit Kerikil', 'Sukajadi', 'Batang Duku', 'Pakning Asal'],
                 'kelurahan' => ['Sungai Pakning']
             ],
             'Mandau' => [

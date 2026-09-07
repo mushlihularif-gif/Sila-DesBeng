@@ -3,14 +3,16 @@
         // Jika tidak ada region spesifik (misal diakses manual), tampilkan semua
         if (!$region) return true; 
         
+        // Pengumuman dan Pasar bersifat publik sentral
+        if (in_array($name, ['Pengumuman dan Event', 'Pasar Daerah'])) return true;
+
         // Mapping nama tampilan ke nama layanan di database
         $map = [
             'Unit Penyewaan Alat' => 'Penyewaan Alat',
             'Unit Penjualan Gas' => 'Penjualan Gas',
             'Unit Penyewaan Mobil' => 'Penyewaan Mobil',
             'Unit Peminjaman Fasilitas Umum' => 'Peminjaman Fasilitas Umum',
-            'Pelaporan Warga' => 'Pelaporan Warga',
-            'Pengumuman dan Event' => 'Pengumuman dan Event'
+            'Pelaporan Warga' => 'Pelaporan Warga'
         ];
         
         $dbName = $map[$name] ?? $name;

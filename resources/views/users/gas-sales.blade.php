@@ -267,6 +267,7 @@
     }
 </script>
 @endif
+@include('users.partials.service_chat_widget', ['serviceType' => 'gas', 'serviceTitle' => 'Penjualan Gas LPG'])
 
 </main>
 @endsection

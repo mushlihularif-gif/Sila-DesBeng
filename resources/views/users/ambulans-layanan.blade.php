@@ -68,21 +68,37 @@
                             @endif
                         </div>
                         
-                        <div class="space-y-3 mb-6">
-                            <div class="flex items-center text-gray-700">
-                                <i class='bx bx-user-circle text-xl text-gray-400 w-8'></i>
-                                <div>
-                                    <p class="text-xs text-gray-500 font-semibold uppercase">Nama Supir</p>
-                                    <p class="font-medium">{{ $amb->nama_supir }}</p>
+                        <div class="mb-5">
+                            <h4 class="text-sm text-gray-500 font-bold uppercase mb-3"><i class="bx bx-user-pin me-1"></i> Tim Supir / Penanggung Jawab</h4>
+                            @if($amb->supirs->count() > 0)
+                                <div class="space-y-3">
+                                    @foreach($amb->supirs as $supir)
+                                    <div class="flex items-center bg-gray-50 rounded-xl p-3 border border-gray-100 hover:bg-red-50 transition-colors">
+                                        @if($supir->foto)
+                                            <img src="{{ asset('storage/' . $supir->foto) }}" class="w-12 h-12 rounded-full object-cover shadow-sm border-2 border-white me-3">
+                                        @else
+                                            <div class="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center font-bold text-lg shadow-sm border-2 border-white me-3">
+                                                {{ substr($supir->nama, 0, 1) }}
+                                            </div>
+                                        @endif
+                                        <div class="flex-grow">
+                                            <p class="font-bold text-gray-900 leading-tight mb-1">{{ $supir->nama }}</p>
+                                            @if($supir->kontak)
+                                                <a href="https://wa.me/{{ preg_replace('/^0/', '62', $supir->kontak) }}" target="_blank" class="inline-flex items-center text-xs font-bold text-green-600 hover:text-green-700 bg-green-100 hover:bg-green-200 px-2 py-1 rounded-md transition-colors">
+                                                    <i class="bx bxl-whatsapp text-sm me-1"></i> Hubungi WA
+                                                </a>
+                                            @else
+                                                <span class="text-xs text-gray-400 italic">Tidak ada kontak</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                    @endforeach
                                 </div>
-                            </div>
-                            <div class="flex items-center text-gray-700">
-                                <i class='bx bxl-whatsapp text-xl text-gray-400 w-8'></i>
-                                <div>
-                                    <p class="text-xs text-gray-500 font-semibold uppercase">Kontak Supir</p>
-                                    <p class="font-medium">{{ $amb->kontak_supir }}</p>
+                            @else
+                                <div class="bg-gray-50 p-3 rounded-lg text-center border border-dashed border-gray-200">
+                                    <span class="text-sm text-gray-500 italic">Belum ada supir ditugaskan</span>
                                 </div>
-                            </div>
+                            @endif
                         </div>
 
                         <a href="{{ route('mobil.rental.booking', $amb->id) }}" class="block w-full py-3 bg-gray-900 hover:bg-gray-800 text-white font-bold text-center rounded-xl transition-colors">

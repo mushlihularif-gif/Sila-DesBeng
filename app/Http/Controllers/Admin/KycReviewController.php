@@ -77,22 +77,35 @@ class KycReviewController extends Controller
 
         $wilayah = $this->wilayahDitinjau();
 
-        // Sebelumnya daftar ini diambil tanpa syarat wilayah sama sekali,
-        // sehingga admin desa mana pun melihat - dan bisa menyetujui - berkas
-        // KTP warga seluruh kabupaten.
-        $dasar = fn () => KycVerification::with('user.region')
-            ->whereNotNull('face_scan_data')
-            ->when($wilayah !== null, fn ($q) => $q->whereHas(
-                'user',
-                fn ($u) => $u->whereIn('region_id', $wilayah)
-            ))
-            ->latest();
+        // Keempat kueri di bawah datang dari main dan dibiarkan apa adanya.
+        // Yang ditambahkan hanya batas wilayahnya: sebelumnya daftar ini
+        // diambil tanpa syarat wilayah sama sekali, sehingga admin desa mana
+        // pun melihat - dan bisa menyetujui - berkas KTP warga sekabupaten.
+        $batasWilayah = fn ($q) => $q->when($wilayah !== null, fn ($k) => $k->whereHas(
+            'user',
+            fn ($u) => $u->whereIn('region_id', $wilayah)
+        ));
 
-        $all      = $dasar()->get();
-        $pending  = $dasar()->where('status', 'pending')->get();
-        $approved = $dasar()->where('status', 'approved')->get();
-        $rejected = $dasar()->where('status', 'rejected')->get();
-
+        $pending = $batasWilayah(KycVerification::with('user'))
+            ->where('status', 'pending')
+            ->latest()
+            ->get();
+            
+        $approved = $batasWilayah(KycVerification::with('user'))
+            ->where('status', 'approved')
+            ->latest()
+            ->get();
+            
+        $rejected = $batasWilayah(KycVerification::with('user'))
+            ->where('status', 'rejected')
+            ->latest()
+            ->get();
+            
+        $all = $batasWilayah(KycVerification::with('user'))
+            ->whereIn('status', ['pending', 'approved', 'rejected'])
+            ->latest()
+            ->get();
+        
         $counts = [
             'all' => $all->count(),
             'pending' => $pending->count(),
@@ -116,9 +129,8 @@ class KycReviewController extends Controller
     {
         $this->pastikanPeninjau();
 
-        $kyc = KycVerification::with('user.region')->findOrFail($id);
+        $kyc = KycVerification::with('user')->findOrFail($id);
         $this->pastikanDalamJangkauan($kyc);
-
         return view('admin.kyc.show', compact('kyc'));
     }
 
@@ -149,44 +161,23 @@ class KycReviewController extends Controller
                 }
             }
             
-            // Get real data before masking
+            // Sinkronisasi data identitas terverifikasi ke profil pengguna
             $realNik = $kyc->nik_from_ocr ?? $user->nik;
             $realName = $kyc->name_from_ocr ?? $user->name;
-            
-            // Compute real hash before masking NIK
-            $realNikHash = null;
+
             if ($realNik) {
-                $realNikHash = hash_hmac('sha256', $realNik, config('app.key'));
+                $user->nik = $realNik;
             }
-
-            // Masking NIK (4 front, 4 back)
-            $maskedNik = $realNik;
-            if ($realNik && strlen($realNik) >= 16) {
-                $maskedNik = substr($realNik, 0, 4) . str_repeat('*', strlen($realNik) - 8) . substr($realNik, -4);
+            if ($realName) {
+                $user->name = $realName;
             }
-            
-            // Masking Name (1 front, 1 mid, 1 back)
-            $maskedName = $realName;
-            if ($realName && strlen($realName) > 3) {
-                $len = strlen($realName);
-                $mid = (int)($len / 2);
-                $maskedName = substr($realName, 0, 1) . str_repeat('*', $mid - 1) . substr($realName, $mid, 1) . str_repeat('*', $len - $mid - 2) . substr($realName, -1);
-            }
-
-            // Temporarily unguard to set nik_hash directly
-            $user->nik = $maskedNik;
-            $user->name = $maskedName;
             $user->gender = $kyc->gender_from_ocr ?? $user->gender;
             $user->address = $kyc->address_from_ocr ?? $user->address;
             $user->rt = $kyc->rt_from_ocr ?? $user->rt;
             $user->rw = $kyc->rw_from_ocr ?? $user->rw;
             $user->verification_status = 'verified';
             $user->verified_at = now();
-            
-            if ($realNikHash) {
-                $user->nik_hash = $realNikHash;
-            }
-            
+
             $user->save();
             
             // Hapus file fisik secara permanen untuk privasi!
@@ -203,6 +194,9 @@ class KycReviewController extends Controller
                 'face_image_path' => null,
                 'face_scan_data' => null
             ]);
+
+            // Kirim notifikasi ke akun warga
+            \App\Services\NotificationService::notifyKycApproved($user);
 
             DB::commit();
 
@@ -253,6 +247,9 @@ class KycReviewController extends Controller
                 'face_image_path' => null,
                 'face_scan_data' => null
             ]);
+
+            // Kirim notifikasi ke akun warga
+            \App\Services\NotificationService::notifyKycRejected($user, $request->admin_notes);
 
             DB::commit();
 

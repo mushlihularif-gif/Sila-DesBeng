@@ -25,26 +25,33 @@ class UnitFasilitasUmumController extends Controller
             return $splash;
         }
 
+        $user = auth()->user();
         $search = $request->get('search');
         $tab = $request->get('tab', 'kendaraan'); // default tab
         
         $fasilitas = FasilitasUmum::query()
+            ->when($user->region_id, function($q, $regionId) {
+                return $q->where('region_id', $regionId);
+            })
             ->when($search, function ($query, $search) {
                 return $query->searchWhereLike(['nama_fasilitas', 'kategori'], $search);
             })
             ->paginate(6, ['*'], 'page_gedung')
             ->appends(['search' => $search, 'tab' => 'gedung']);
             
-        // Ambil kendaraan publik (Ambulans, dsb)
+        // Ambil kendaraan publik (Ambulans, Kendaraan Operasional, dsb)
         $mobils = Mobil::query()
-            ->where('kategori', 'ambulans') // Untuk saat ini, kendaraan publik = ambulans
+            ->whereIn('kategori', ['ambulans', 'kendaraan_operasional'])
+            ->when($user->region_id, function($q, $regionId) {
+                return $q->where('region_id', $regionId);
+            })
+            ->with('supirs')
             ->when($search, function ($query, $search) {
                 return $query->searchWhereLike(['nama_mobil', 'kategori'], $search);
             })
             ->paginate(6, ['*'], 'page_kendaraan')
             ->appends(['search' => $search, 'tab' => 'kendaraan']);
             
-        $user = auth()->user();
         $region = Region::find($user->region_id);
         
         $paymentInfo = $region->payment_info ?? [];
@@ -56,8 +63,15 @@ class UnitFasilitasUmumController extends Controller
         
         $default_ditanggung = $this->defaultSopDitanggung;
         $default_tidak_ditanggung = $this->defaultSopTidakDitanggung;
+
+        $chats = \App\Models\UnitChatSession::where('region_id', $user ? $user->region_id : null)
+            ->where('service_type', 'fasilitas_umum')
+            ->with('user')
+            ->orderBy('last_message_at', 'desc')
+            ->get();
+        $totalUnreadChats = $chats->sum('unread_admin_count');
         
-        return view('admin.unit.fasilitas_umum.index', compact('fasilitas', 'mobils', 'tab', 'search', 'sop_active', 'sop_ditanggung', 'sop_tidak_ditanggung', 'default_ditanggung', 'default_tidak_ditanggung', 'regionSettings'));
+        return view('admin.unit.fasilitas_umum.index', compact('fasilitas', 'mobils', 'tab', 'search', 'sop_active', 'sop_ditanggung', 'sop_tidak_ditanggung', 'default_ditanggung', 'default_tidak_ditanggung', 'regionSettings', 'chats', 'totalUnreadChats'));
     }
 
     public function sop()
@@ -138,10 +152,10 @@ class UnitFasilitasUmumController extends Controller
             'foto_utama' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
             'foto_2' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
             'foto_3' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
-            'opsi_supir' => 'nullable|string|in:Sediakan Supir Sendiri,Disediakan',
+            
             'bbm_ditanggung' => 'nullable|string|in:Ditanggung Pengguna,Disediakan',
-            'nama_supir' => 'nullable|string|max:255',
-            'kontak_supir' => 'nullable|string|max:255',
+            
+            
             'status_biaya' => 'required|in:gratis,berbayar',
             'harga_sewa' => 'nullable|string',
         ]);
@@ -160,10 +174,10 @@ class UnitFasilitasUmumController extends Controller
             'lokasi' => $request->lokasi,
             'latitude' => $request->latitude,
             'longitude' => $request->longitude,
-            'opsi_supir' => $request->opsi_supir,
+            
             'bbm_ditanggung' => $request->bbm_ditanggung,
-            'nama_supir' => $request->nama_supir,
-            'kontak_supir' => $request->kontak_supir,
+            
+            
             'status_biaya' => $request->status_biaya,
             'harga_sewa' => $hargaBersih > 0 ? $hargaBersih : null,
         ];
@@ -178,7 +192,10 @@ class UnitFasilitasUmumController extends Controller
             $data['foto_3'] = ImageCompressorService::compressAndStore($request->file('foto_3'), 'fasilitas_umum');
         }
 
-        FasilitasUmum::create($data);
+        $fasilitas = FasilitasUmum::create($data);
+
+        // Broadcast fasilitas umum baru ke warga
+        \App\Services\NotificationService::broadcastNewProduct('Fasilitas Umum', $fasilitas->nama_fasilitas, $fasilitas->region_id, route('fasilitas.index'));
 
         return redirect()->route('admin.unit.fasilitas_umum.index')->with('success', 'Fasilitas Umum berhasil ditambahkan.');
     }
@@ -234,10 +251,10 @@ class UnitFasilitasUmumController extends Controller
             'foto_utama' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'foto_2' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'foto_3' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'opsi_supir' => 'nullable|string|in:Sediakan Supir Sendiri,Disediakan',
+            
             'bbm_ditanggung' => 'nullable|string|in:Ditanggung Pengguna,Disediakan',
-            'nama_supir' => 'nullable|string|max:255',
-            'kontak_supir' => 'nullable|string|max:255',
+            
+            
             'status_biaya' => 'required|in:gratis,berbayar',
             'harga_sewa' => 'nullable|string',
         ]);
@@ -258,10 +275,10 @@ class UnitFasilitasUmumController extends Controller
             'lokasi' => $request->lokasi,
             'latitude' => $request->latitude,
             'longitude' => $request->longitude,
-            'opsi_supir' => $request->opsi_supir,
+            
             'bbm_ditanggung' => $request->bbm_ditanggung,
-            'nama_supir' => $request->nama_supir,
-            'kontak_supir' => $request->kontak_supir,
+            
+            
             'status_biaya' => $request->status_biaya,
             'harga_sewa' => $hargaBersih > 0 ? $hargaBersih : null,
         ];

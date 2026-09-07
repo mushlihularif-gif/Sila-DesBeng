@@ -15738,8 +15738,8 @@ html:not(.layout-footer-fixed) .content-wrapper {
 }
 .avatar {
   position: relative;
-  width: 8.375rem;
-  height: 6.375rem;
+  width: 2.375rem;
+  height: 2.375rem;
   cursor: pointer;
 }
 .avatar img {

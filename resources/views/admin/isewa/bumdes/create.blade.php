@@ -7,14 +7,14 @@
     <div class="row">
         <div class="col-12">
             <!-- Header -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3 mb-4">
                 <div>
                     <h4 class="fw-bold mb-1">
                         <span class="text-muted fw-light">Profil & Info / Pemerintah /</span> Tambah Anggota
                     </h4>
                     <p class="text-muted mb-0">Tambahkan anggota baru untuk ditampilkan di halaman Profil Pemerintah</p>
                 </div>
-                <a href="{{ route('admin.SiladesBeng.bumdes.index') }}" class="btn btn-outline-secondary">
+                <a href="{{ route('admin.SiladesBeng.bumdes.index') }}" class="btn btn-outline-secondary w-100 w-sm-auto">
                     <i class="bx bx-arrow-left me-1"></i> Kembali
                 </a>
             </div>

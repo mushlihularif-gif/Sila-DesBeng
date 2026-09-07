@@ -12,6 +12,7 @@ class KycVerification extends Model
     protected $fillable = [
         'user_id',
         'ktp_image_path',
+        'face_image_path',
         'face_scan_data',
         'nik_from_ocr',
         'name_from_ocr',

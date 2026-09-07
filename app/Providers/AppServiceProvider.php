@@ -125,7 +125,8 @@ class AppServiceProvider extends ServiceProvider
                     if (!$region) $region = \App\Models\Region::first();
                     if ($region) {
                         $activeServicesMenu = $region->services->pluck('name')->toArray();
-                        $hasActiveServices = count($activeServicesMenu) > 0;
+                        $operationalServices = ['Penyewaan Alat', 'Penjualan Gas', 'Penyewaan Mobil', 'Fasilitas Umum', 'Pelaporan Warga'];
+                        $hasActiveServices = count(array_intersect($activeServicesMenu, $operationalServices)) > 0;
                     }
                 } else if (in_array($user->role, ['admin_kecamatan', 'admin_desa', 'staff'])) {
                     // Staf memakai region_id warisan pembuatnya, jadi cabang yang
@@ -134,7 +135,8 @@ class AppServiceProvider extends ServiceProvider
                     $region = \App\Models\Region::with('services')->find($user->region_id);
                     if ($region) {
                         $activeServicesMenu = $region->services->pluck('name')->toArray();
-                        $hasActiveServices = count($activeServicesMenu) > 0;
+                        $operationalServices = ['Penyewaan Alat', 'Penjualan Gas', 'Penyewaan Mobil', 'Fasilitas Umum', 'Pelaporan Warga'];
+                        $hasActiveServices = count(array_intersect($activeServicesMenu, $operationalServices)) > 0;
                     }
                 }
             }
