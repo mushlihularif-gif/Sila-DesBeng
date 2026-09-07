@@ -74,9 +74,20 @@ class NewsApiController extends Controller
 
         // Also include CommunityEvent if querying for Pengumuman or all
         if (!$request->filled('post_category') || $request->post_category === 'Pengumuman') {
-            $eventQuery = \App\Models\CommunityEvent::query();
+            $user = auth('sanctum')->user();
+            
+            // Hanya tampilkan event komunitas (pengumuman RT/RW) jika user sudah login
+            if ($user) {
+                $eventQuery = \App\Models\CommunityEvent::query();
 
-            if ($request->filled('type') && $request->type !== 'Semua') {
+                // Optional: Filter by user's RT/RW
+                // if ($user->rt) {
+                //     $eventQuery->where(function($q) use ($user) {
+                //         $q->whereNull('rt')->orWhere('rt', $user->rt);
+                //     });
+                // }
+
+                if ($request->filled('type') && $request->type !== 'Semua') {
                 $type = $request->type;
                 if ($type === 'Acara / Event' || $type === 'Event' || $type === 'Acara') {
                     $eventQuery->whereIn('tipe', ['kegiatan_sosial', 'acara', 'Event']);
@@ -125,7 +136,8 @@ class NewsApiController extends Controller
                 ];
             })->toArray();
 
-            $formatted = array_merge($formatted, $eventItems);
+                $formatted = array_merge($formatted, $eventItems);
+            }
         }
 
         return response()->json([

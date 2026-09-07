@@ -26,7 +26,10 @@ class PasarDaerahApiController extends Controller
      */
     public function getProducts(Request $request)
     {
-        $query = PasarProduk::with('region')->where('status', 'tersedia');
+        $query = PasarProduk::with('region')
+            ->withCount('reviews')
+            ->withAvg('reviews', 'rating')
+            ->where('status', 'tersedia');
 
         // Filter by category
         if ($request->has('category') && $request->category !== 'Semua') {
@@ -58,6 +61,8 @@ class PasarDaerahApiController extends Controller
                 $product->foto_2 ? url('storage/' . $product->foto_2) : null,
                 $product->foto_3 ? url('storage/' . $product->foto_3) : null,
             ]));
+            $product->rating = $product->reviews_avg_rating ? round($product->reviews_avg_rating, 1) : null;
+            $product->reviews_count = (int) ($product->reviews_count ?? 0);
             return $product;
         });
 

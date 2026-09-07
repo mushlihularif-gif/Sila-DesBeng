@@ -17,7 +17,7 @@ class UnitChatApiController extends Controller
      */
     public function getChatHistory(Request $request, $service)
     {
-        $user = Auth::guard('sanctum')->user();
+        $user = Auth::guard('sanctum')->user() ?: Auth::guard('web')->user();
         $sessionToken = $request->header('X-Chat-Session-Token') ?: $request->get('session_token');
         $regionId = $request->get('region_id') ?: ($user ? $user->region_id : null);
 
@@ -92,7 +92,7 @@ class UnitChatApiController extends Controller
             'message' => 'required|string|max:1000',
         ]);
 
-        $user = Auth::guard('sanctum')->user();
+        $user = Auth::guard('sanctum')->user() ?: Auth::guard('web')->user();
         $sessionToken = $request->header('X-Chat-Session-Token') ?: $request->get('session_token');
         $regionId = $request->get('region_id') ?: ($user ? $user->region_id : null);
         $itemRef = $request->get('item_reference');
@@ -140,6 +140,7 @@ class UnitChatApiController extends Controller
             'sender_type' => 'user',
             'sender_id' => $user ? $user->id : null,
             'message' => $request->message,
+            'item_data' => $request->get('item_data'),
             'is_read' => false,
         ]);
 
@@ -156,7 +157,7 @@ class UnitChatApiController extends Controller
         if ($isEscalateRequest && $session->status !== 'escalated') {
             $session->update(['status' => 'escalated']);
 
-            $botReply = "Percakapan Anda telah dialihkan langsung ke Petugas Layanan BUMDes. Petugas akan segera membaca dan merespons pesan Anda di sini. Mohon ditunggu.";
+            $botReply = "Petugas akan segera membalas chat ini.";
             $botMsg = UnitChatMessage::create([
                 'session_id' => $session->id,
                 'sender_type' => 'bot',
@@ -214,7 +215,7 @@ class UnitChatApiController extends Controller
      */
     public function escalateChat(Request $request, $service)
     {
-        $user = Auth::guard('sanctum')->user();
+        $user = Auth::guard('sanctum')->user() ?: Auth::guard('web')->user();
         $sessionToken = $request->header('X-Chat-Session-Token') ?: $request->get('session_token');
         $regionId = $request->get('region_id') ?: ($user ? $user->region_id : null);
 
@@ -248,7 +249,7 @@ class UnitChatApiController extends Controller
                 'session_id' => $session->id,
                 'sender_type' => 'bot',
                 'sender_id' => null,
-                'message' => "Percakapan telah dialihkan ke Petugas Layanan BUMDes. Petugas akan segera membalas di room chat ini.",
+                'message' => "Petugas akan segera membalas chat ini.",
                 'is_read' => true,
             ]);
 
@@ -270,7 +271,7 @@ class UnitChatApiController extends Controller
      */
     public function getUnreadCounts(Request $request)
     {
-        $user = Auth::guard('sanctum')->user();
+        $user = Auth::guard('sanctum')->user() ?: Auth::guard('web')->user();
         $sessionToken = $request->header('X-Chat-Session-Token') ?: $request->get('session_token');
 
         $counts = [

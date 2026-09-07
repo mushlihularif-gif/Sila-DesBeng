@@ -16,6 +16,13 @@ class CommunityEvent extends Model
         'peralatan' => 'array',
     ];
 
+    protected $appends = ['poster_url'];
+
+    public function getPosterUrlAttribute()
+    {
+        return $this->poster_path ? url('storage/' . $this->poster_path) : null;
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);

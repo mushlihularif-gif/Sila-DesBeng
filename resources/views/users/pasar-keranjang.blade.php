@@ -20,21 +20,6 @@
         top: 25px !important;
     }
 
-    /* Animated Background */
-    .cart-bg {
-        position: fixed; inset: 0; z-index: 0;
-        background: linear-gradient(135deg, #f0f7ff 0%, #fafbff 40%, #fff8f0 100%);
-    }
-    .cart-bg::before {
-        content: ''; position: absolute; top: -50%; right: -30%; width: 80%; height: 80%;
-        background: radial-gradient(circle, rgba(17,87,137,0.04) 0%, transparent 70%);
-        border-radius: 50%;
-    }
-    .cart-bg::after {
-        content: ''; position: absolute; bottom: -30%; left: -20%; width: 60%; height: 60%;
-        background: radial-gradient(circle, rgba(245,158,11,0.04) 0%, transparent 70%);
-        border-radius: 50%;
-    }
 
     /* Header Breadcrumb */
     .cart-header {
@@ -332,6 +317,8 @@
 @endpush
 
 @section('page')
+@include('partials.abstract-bg')
+
 <div id="main-content" class="cart-page cart-page-wrapper relative z-10 pb-20">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
 
