@@ -34,3 +34,6 @@ Thumbs.db
 .env.production
 .env.staging
 security/*.log
+
+# Arsip vendor untuk unggahan manual, jangan pernah masuk repo
+vendor.zip

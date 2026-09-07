@@ -1,0 +1,12 @@
+---
+# Resep deploy cPanel — dijalankan saat menekan "Deploy HEAD Commit"
+# di Git Version Control. Path harus absolut, dan cp ditulis lengkap
+# /bin/cp karena PATH saat deploy tidak dijamin.
+deployment:
+  tasks:
+    # Portal statis -> document root subdomain portal.inovasia.site
+    - export DEPLOYPATH=/home/inon1796/public_html/portal.inovasia.site/
+    - /bin/cp -R portal/index.html $DEPLOYPATH
+    - /bin/cp -R portal/style.css $DEPLOYPATH
+    - /bin/cp -R portal/script.js $DEPLOYPATH
+    - /bin/cp -R portal/assets $DEPLOYPATH
