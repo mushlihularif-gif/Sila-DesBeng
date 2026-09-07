@@ -23,7 +23,7 @@ deployment:
     # isi public/ disalin ke sana, sementara kode aplikasi tetap di
     # ~/repositories/Sila-DesBeng (di luar jangkauan web).
     - export APPPATH=/home/inon1796/repositories/Sila-DesBeng
-    - export WEBROOT=/home/inon1796/public_html/app.inovasia.site
+    - export WEBROOT=/home/inon1796/public_html/siladesbeng.inovasia.site
     - /bin/cp -R $APPPATH/public/. $WEBROOT/
     # index.php bawaan menunjuk ../vendor dan ../bootstrap yang tidak ada
     # di document root. Versi hosting ini memakai path absolut.

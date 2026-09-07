@@ -13,7 +13,9 @@
 /.zed
 /auth.json
 /node_modules
-/public/build
+# /public/build sengaja TIDAK diabaikan.
+# Hosting tidak punya Node, jadi hasil npm run build harus ikut repo
+# supaya Vite manifest tersedia setelah git pull / deploy.
 /public/hot
 /public/storage
 /storage/*.key
