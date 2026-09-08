@@ -1,12 +1,35 @@
 ---
 # Resep deploy cPanel — dijalankan saat menekan "Deploy HEAD Commit"
-# di Git Version Control. Path harus absolut, dan cp ditulis lengkap
-# /bin/cp karena PATH saat deploy tidak dijamin.
+# di Git Version Control.
+#
+# Catatan yang menyelamatkan waktu:
+#   - path harus absolut
+#   - tulis /bin/cp lengkap; PATH saat deploy tidak dijamin
+#   - perintah ini MENYALIN dan MENIMPA, tidak menghapus.
+#     Berkas yang dihapus dari repo tetap tertinggal di server.
+#
+# GANTI dua baris DEPLOYPATH / WEBROOT kalau nama subdomainnya berbeda.
 deployment:
   tasks:
-    # Portal statis -> document root subdomain portal.inovasia.site
+    # ---------- 1. Portal statis ----------
     - export DEPLOYPATH=/home/inon1796/public_html/portal.inovasia.site/
     - /bin/cp -R portal/index.html $DEPLOYPATH
     - /bin/cp -R portal/style.css $DEPLOYPATH
     - /bin/cp -R portal/script.js $DEPLOYPATH
     - /bin/cp -R portal/assets $DEPLOYPATH
+
+    # ---------- 2. Aplikasi Laravel ----------
+    # Document Root subdomain tidak boleh keluar dari public_html, jadi
+    # isi public/ disalin ke sana, sementara kode aplikasi tetap di
+    # ~/repositories/Sila-DesBeng (di luar jangkauan web).
+    - export APPPATH=/home/inon1796/repositories/Sila-DesBeng
+    - export WEBROOT=/home/inon1796/public_html/siladesbeng.inovasia.site
+    - /bin/cp -R $APPPATH/public/. $WEBROOT/
+    # index.php bawaan menunjuk ../vendor dan ../bootstrap yang tidak ada
+    # di document root. Versi hosting ini memakai path absolut.
+    - /bin/cp $APPPATH/deploy/index-hosting.php $WEBROOT/index.php
+    # Segarkan cache konfigurasi supaya perubahan .env ikut terbaca.
+    - /opt/alt/php82/usr/bin/php $APPPATH/artisan config:clear
+    - /opt/alt/php82/usr/bin/php $APPPATH/artisan config:cache
+    - /opt/alt/php82/usr/bin/php $APPPATH/artisan route:cache
+    - /opt/alt/php82/usr/bin/php $APPPATH/artisan view:cache
