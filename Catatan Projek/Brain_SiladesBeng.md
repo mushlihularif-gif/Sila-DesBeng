@@ -904,3 +904,194 @@ Sebagai bagian dari tugas akademik dan wawasan untuk *Future Work*, sistem SilaD
      - Berkas foto fisik e-KTP dan foto wajah terenkripsi langsung dihapus permanen dari penyimpanan server.
      - Kolom path foto dan data frame biometrik (`face_scan_data`) dikosongkan (`null`).
      - Data pribadi warga (NIK dan Nama) langsung disensor/masking dan dienkripsi kuat menggunakan ChaCha20 dengan blind indexing SHA-256 (`nik_hash`).
+
+---
+
+## 10. Panduan Presentasi, Demonstrasi, dan Pertahanan Final KMIPN VIII 2026 (Durasi 10 Menit)
+
+### 10.1 Strategi Menjembatani Proposal Awal vs Produk Final
+Ketika dewan juri membandingkan dokumen proposal awal (yang mencantumkan 6 layanan) dengan produk final dan poster (yang menampilkan 7 layanan serta RBAC dinamis), jangan menunggu juri bertanya. Jadikan ini sebagai pembuktian keunggulan riset lapangan (field research) tim dengan menyampaikan narasi:
+
+1. **Penyempurnaan Berbasis Kebutuhan Riil (Iterasi Agile):**
+   Pada proposal awal, sistem merancang 6 modul layanan dasar. Namun, saat tim turun langsung melakukan observasi lapangan ke desa-desa di Kabupaten Bengkalis, ditemukan bahwa desa memiliki potensi komoditas nyata (hasil perkebunan, kerajinan lokal, pupuk, bahan bangunan, dan olahan pangan) yang belum memiliki wadah pemasaran terpadu antar-desa.
+2. **Lahirnya Modul ke-7 (Pasar Daerah):**
+   Modul Pasar Daerah ditambahkan bukan untuk mengubah konsep dasar, melainkan sebagai penyempurnaan sistem E-Government agar dampaknya menyentuh ekonomi riil masyarakat (G2C dan G2B).
+3. **Prinsip Pengembangan:**
+   Semua fitur yang tertulis di proposal awal 100% tetap ada dan berfungsi. Penambahan fitur baru membuktikan bahwa tim menerapkan metodologi pengembangan perangkat lunak modern yang responsif terhadap kebutuhan lapangan (user-centered design).
+
+---
+
+### 10.2 Susunan Slide Presentasi (Total 10 Slide - Alokasi 10 Menit)
+
+#### Slide 1: Cover / Identitas Resmi
+- **Waktu Alokasi:** 00:00 – 00:30 (30 Detik)
+- **Judul Besar:** SILADESBENG
+- **Sub-Judul:** Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis
+- **Tagline:** "Integrasi Daerah, Menuju Bengkalis Bermarwah"
+- **Kategori:** E-Government (G2C, G2G, G2B) - KMIPN VIII Tahun 2026
+- **Identitas Tim:**
+  - Tim Pengusul: Tim Gen Hello World (Politeknik Negeri Bengkalis)
+  - Anggota: Rizqy Hamadi Ken (Full Stack), M. Mushlihul Arif (Security & UI/UX), Dicki Wahyudi (Mobile Developer)
+  - Dosen Pembimbing: Nurmi Hidayasari, ST., M.Kom.
+- **Narasi Pembuka:**
+  "Selamat pagi/siang Dewan Juri yang terhormat. Kami dari Tim Gen Hello World, Politeknik Negeri Bengkalis, mempersembahkan SILADESBENG: Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis, platform terpadu yang menjembatani layanan publik dan tata kelola pemerintahan dari tingkat RT hingga Kabupaten tanpa bottleneck."
+
+#### Slide 2: Latar Belakang Masalah & Kesenjangan di Daerah
+- **Waktu Alokasi:** 00:30 – 01:15 (45 Detik)
+- **Visual:** 3 Kotak Masalah Merah (Sesuai Bagian Kiri Poster):
+  1. Pengelolaan Aset Konvensional & Manual: Pencatatan aset dan transaksi sewa alat/kendaraan masih manual dan terpisah. Data mudah hilang, stok sulit dipantau, dan potensi pendapatan daerah rawan kebocoran.
+  2. Pelaporan Warga Mudah Terabaikan (Bottleneck): Pengaduan masyarakat terhenti di level bawah atau tercecer di grup pesan tanpa kepastian tindak lanjut dan batas waktu penanganan (SLA).
+  3. Fragmentasi Layanan (Belum Terintegrasi): Pelayanan bersifat parsial dan terisolasi antar-wilayah. Belum ada satu sistem terpadu yang menghubungkan warga dari level RT, RW, Desa, Kecamatan, hingga Kabupaten.
+- **Narasi:**
+  "Di era transformasi digital, tata kelola pemerintahan desa di Kabupaten Bengkalis menghadapi tiga tantangan krusial: pencatatan aset manual yang rentan kebocoran, aspirasi warga yang sering mandek di tingkat bawah, serta fragmentasi sistem antar-instansi. Warga membutuhkan kepastian layanan, sementara pemerintah membutuhkan data yang akurat dan transparan."
+
+#### Slide 3: Solusi SILADESBENG & 7 Layanan Terintegrasi
+- **Waktu Alokasi:** 01:15 – 02:00 (45 Detik)
+- **Visual:**
+  - Logo SILADESBENG di tengah.
+  - 7 Ikon Layanan Melingkar (Penyewaan Alat, Penjualan Gas, Penyewaan Mobil, Fasilitas Umum, Pasar Daerah, Pelaporan Warga, Kabar & Informasi Daerah).
+  - Badge Highlight: Penambahan Pasar Daerah berdasarkan temuan lapangan untuk hilirisasi ekonomi lokal.
+- **Karakteristik Solusi:** Terintegrasi, Mudah Diakses (Web & Mobile), Transparan, Aman, Responsif, dan Inklusif.
+- **Narasi:**
+  "Sebagai jawaban, kami menghadirkan SILADESBENG: Satu platform terpadu untuk layanan daerah dan aspirasi warga. Sistem ini mengintegrasikan 7 layanan utama dalam satu ekosistem: dari penanganan aduan, pusat informasi, hingga unit layanan ekonomi seperti gas, fasilitas, dan pasar daerah yang kami tambahkan berdasarkan riset lapangan nyata."
+
+#### Slide 4: Arsitektur Multi-Tenant & Birokrasi Berjenjang (G2G + G2C)
+- **Waktu Alokasi:** 02:00 – 02:45 (45 Detik)
+- **Visual:** Diagram Alir Vertikal (Sesuai Kolom Tengah Poster):
+  Masyarakat (Warga) <--> RT <--> RW <--> Desa <--> Kecamatan <--> Kabupaten
+- **Poin Inovasi:**
+  - Multi-Tenant Architecture: 1 database dan 1 sistem yang melayani seluruh hierarki pemerintahan dengan isolasi hak akses berbasis wilayah (region-bound data).
+  - Matriks Eskalasi Tanpa Bottleneck: Pengaduan warga memiliki SLA otomatis. Jika RT tidak merespons dalam waktu tertentu, sistem otomatis menaikkan laporan ke tingkat RW, Desa, hingga Kecamatan.
+  - Dynamic RBAC (Pemisahan Wewenang): Super Admin (Pimpinan) fokus pada pengawasan dan monitoring agregat, sementara Staf Unit mengelola operasional harian secara spesifik.
+- **Narasi:**
+  "Kekuatan utama SILADESBENG terletak pada arsitektur multi-tenant berjenjang. Kami menghubungkan struktur birokrasi dari level RT hingga Kabupaten. Dengan Matriks Eskalasi, laporan warga tidak akan pernah terkunci oleh kelalaian oknum petugas karena sistem secara otomatis melimpahkan aduan ke jenjang di atasnya hingga tuntas."
+
+#### Slide 5: Simulasi Ketahanan Siber & Kepatuhan UU PDP (Slide Khusus Keamanan)
+- **Waktu Alokasi:** 02:45 – 03:30 (45 Detik)
+- **Judul Slide:** Arsitektur Keamanan Berlapis & Simulasi Pertahanan Serangan Siber
+- **Visual Slide (Desain Infografis 2 Skenario Serangan):**
+
+```
++--------------------------------------------------------------------------------------------------+
+|                            SIMULASI SERANGAN SIBER VS PERTAHANAN SISTEM                          |
++-------------------------------------------------+------------------------------------------------+
+|  SKENARIO 1: SERANGAN PENCURIAN BASIS DATA      |  SKENARIO 2: PENARGETAN BERKAS IDENTITAS KTP   |
+|  (SQL Injection / Dump Leak)                    |  (Directory Traversal / File Theft)            |
+|                                                 |                                                |
+|       [IKON HACKER]                             |       [IKON HACKER]                            |
+|             | (Menyedot Tabel Database)         |             | (Mencari Foto KTP & Wajah)       |
+|             v                                   |             v                                  |
+|  [SILINDER BASIS DATA TERENKRIPSI]              |  [DIREKTORI PENYIMPANAN PRIVATE]               |
+|                                                 |                                                |
+|  Hasil yang Ditemukan Penyerang:                |  Hasil yang Ditemukan Penyerang:               |
+|  - NIK Asli: [TERCORET MERAH] (Tidak Ada)       |  - Berkas Foto Fisik: 0 FILE DITEMUKAN         |
+|  - Nilai di Kolom: "chc20:v1:9f8a2b..."         |  - Status Penyimpanan: BERSIH TOTAL            |
+|    (Terenkripsi ChaCha20-Poly1305)              |    (Zero Footprint Storage)                    |
+|  - Pencarian Cepat: Blind Index HMAC-SHA256     |                                                |
+|                                                 |  Mekanisme:                                    |
+|  Benteng Perlindungan:                          |  Prinsip Burn After Reading UU PDP No. 27/2022 |
+|  Data tidak bernilai tanpa APP_KEY server       |  Berkas fisik dimusnahkan saat akun disetujui  |
++-------------------------------------------------+------------------------------------------------+
+|  LAPISAN PENDUKUNG: Enkripsi AES-256 (File Antrean) | Dynamic RBAC | Proteksi Brute-Force        |
++--------------------------------------------------------------------------------------------------+
+```
+
+- **Narasi Penjelasan Slide 5:**
+  "Menjawab isu maraknya kebocoran data kependudukan, SILADESBENG menerapkan Security by Design dan kepatuhan penuh terhadap UU Perlindungan Data Pribadi No. 27 Tahun 2022.
+  Jika terjadi skenario serangan di mana basis data server dicuri peretas:
+  Pertama, data identitas warga seperti NIK dan nama tidak akan bisa dibaca karena terenkripsi menggunakan ChaCha20-Poly1305, dengan pencarian cepat berbasis blind index HMAC-SHA256.
+  Kedua, peretas tidak akan menemukan satu lembar pun berkas foto e-KTP atau foto selfie warga di server. Karena sistem menerapkan prinsip Zero Footprint: begitu admin menyetujui verifikasi identitas, berkas fisik foto langsung dimusnahkan secara permanen dari penyimpanan server. Risiko kebocoran data warga ditekan hingga nol persen."
+
+#### Slide 6: Transisi Menuju Live Demonstration
+- **Waktu Alokasi:** 03:30 (Peralihan Layar)
+- **Visual:** Layar transisi bertuliskan: "Demonstrasi Sistem Terintegrasi: Skenario Pelaporan Tanpa Bottleneck & Layanan Terpadu".
+- **Presenter:** Langsung berpindah ke jendela peramban (browser) untuk menjalankan demonstrasi.
+
+---
+
+### 10.3 Skenario Live Demo Aplikasi (Durasi: 03:30 – 08:30 / 5 Menit)
+
+#### Persiapan Sebelum Presentasi:
+Buka peramban dengan 3 tab yang sudah dalam posisi login:
+- **Tab A (Layar Kiri / Mobile View):** Akun Warga (Warga Desa Pematang Duku Timur).
+- **Tab B (Layar Kanan / Web Admin):** Akun Admin RT / RW (Petugas Wilayah Bawah).
+- **Tab C (Web Admin Desa):** Akun Super Admin Desa (Pemerintah Desa).
+
+#### Langkah 1: Sisi Warga - Interaksi AI & Pelaporan Berpresisi (1,5 Menit)
+1. **Buka Tab A (Antarmuka Warga):**
+   - Tunjukkan Beranda yang bersih, responsif, dan bebas dari tulisan instansi kaku.
+   - Tunjukkan SiladesBeng Assistant (AI) di pojok layar:
+     - Ketik pertanyaan singkat: "Bagaimana cara lapor lampu jalan mati?".
+     - Tunjukkan asisten virtual memberikan panduan cerdas dan mengarahkan ke form pelaporan.
+2. **Kirim Laporan Pengaduan:**
+   - Masuk ke menu Pelaporan Warga.
+   - Pilih tujuan laporan: Pengurus RT setempat.
+   - Ambil foto bukti, sistem mengunci titik koordinat GPS (Geolocation).
+   - Klik Kirim Laporan.
+   - Tunjukkan notifikasi toast sukses dan nomor tiket laporan diterbitkan.
+
+#### Langkah 2: Sisi Birokrasi - Matriks Eskalasi & Verifikasi KYC (2 Menit)
+1. **Pindah ke Tab B (Admin RT/RW):**
+   - Buka menu Pelaporan Masuk.
+   - Tunjukkan laporan warga yang baru dikirim langsung muncul secara real-time.
+   - Perlihatkan detail laporan: Foto bukti kejadian, koordinat peta satelit, dan identitas pelapor yang terverifikasi.
+   - Jelaskan Logika Matriks Eskalasi:
+     "Jika Admin RT berhalangan atau melewati batas waktu SLA yang ditentukan sistem, laporan ini secara otomatis tereskalasi ke tingkat RW atau Desa tanpa tertahan oleh kelalaian manusia."
+2. **Pindah ke Tab C (Admin Desa - Pembuktian Keamanan Data):**
+   - Buka menu Verifikasi Identitas (KYC).
+   - Tunjukkan perlindungan privasi: NIK hasil OCR dan NIK akun secara default tersensor penuh (1403********3597).
+   - Klik tombol ikon mata (Buka Sensor) untuk memperlihatkan bahwa admin berwenang dapat memeriksa keaslian angka.
+   - Tunjukkan lencana hijau: "Berkas fisik e-KTP dan foto wajah telah dimusnahkan secara permanen dari server sesuai kepatuhan UU PDP."
+
+#### Langkah 3: Layanan Ekonomi & Transparansi Keuangan (1,5 Menit)
+1. **Tunjukkan Unit Layanan Terpadu (Tab C):**
+   - Buka modul layanan aset (Peminjaman Fasilitas Umum atau Pemesanan Gas Daerah).
+   - Perlihatkan alur pemesanan: Mendukung pembayaran digital instan via Midtrans (QRIS/VA) maupun pembayaran tunai/COD bagi masyarakat non-digital.
+2. **Dashboard Laporan & Mutasi:**
+   - Buka menu Laporan Pendapatan & Mutasi.
+   - Tunjukkan bahwa setiap transaksi langsung mengalir ke buku kas digital secara otomatis.
+   - Tunjukkan grafik Indeks Poin Pertumbuhan Wilayah:
+     "Sistem menyajikan transparansi kinerja berupa Indeks Pertumbuhan, menjaga kerahasiaan nominal absolut kas desa dari pihak luar, namun tetap memberikan keterbukaan audit yang sehat bagi pimpinan daerah."
+
+---
+
+### 10.4 Slide Penutup & Tanya Jawab (Durasi: 08:30 – 10:00)
+
+#### Slide 7: Bukti Implementasi Riil & Kemitraan Lapangan
+- **Waktu Alokasi:** 08:30 – 09:15 (45 Detik)
+- **Isi Slide:**
+  - Status Sistem: Live dan operasional pada domain resmi siladesbeng.inovasia.site.
+  - Mitra Pengujian: Uji coba lapangan bersama Pemerintah Desa Pematang Duku Timur, Kecamatan Bengkalis.
+  - Hasil Uji Coba (UAT):
+    - 100% alur eskalasi pengaduan terbukti memangkas waktu penanganan dari hitungan hari menjadi hitungan jam.
+    - Perangkat RT/RW mampu mengoperasikan sistem dengan antarmuka yang ramah pengguna.
+- **Narasi:**
+  "SILADESBENG bukan sekadar proyek simulasi di localhost. Sistem ini telah aktif secara live pada domain produksi dan telah diuji cobakan bersama mitra kami di Pemerintah Desa Pematang Duku Timur. Aparatur desa dan pengurus RT memvalidasi bahwa sistem ini mempermudah koordinasi birokrasi dan menutup celah aduan yang hilang."
+
+#### Slide 8: Dampak Nyata & Keselarasan Regulasi SPBE
+- **Waktu Alokasi:** 09:15 – 09:45 (30 Detik)
+- **Isi Slide:**
+  - Dampak Bagi Warga: Layanan publik 24/7 dalam satu genggaman, jaminan pengaduan ditindaklanjuti, dan data pribadi terlindungi secara hukum.
+  - Dampak Bagi Pemerintah Daerah: Transparansi aset daerah, pengambilan keputusan berbasis data real-time, dan pencegahan kebocoran retribusi.
+  - Keselarasan Regulasi: Mendukung penuh Perpres No. 95 Tahun 2018 tentang Sistem Pemerintahan Berbasis Elektronik (SPBE) dan UU No. 27 Tahun 2022 tentang Pelindungan Data Pribadi (UU PDP).
+
+#### Slide 9: Kesimpulan & Penutup
+- **Waktu Alokasi:** 09:45 – 10:00 (15 Detik)
+- **Pernyataan Penutup:**
+  "Melalui sinergi layanan publik, arsitektur eskalasi tanpa bottleneck, dan standar keamanan data berstandar nasional, SILADESBENG siap menjadi katalis transformasi digital desa menuju Kabupaten Bengkalis yang bermarwah, maju, dan sejahtera. Terima kasih, kami siap untuk sesi tanya jawab bersama Dewan Juri yang terhormat."
+
+---
+
+### 10.5 Panduan Menghadapi Sesi Tanya Jawab (15 Menit Q&A)
+
+1. **Pertanyaan: "Kenapa di proposal ada 6 layanan, tapi di poster dan demo ada 7 layanan?"**
+   - **Jawaban:** "Betul Bapak/Ibu Juri. 6 layanan pada proposal awal adalah rancangan dasar kami. Ketika tim kami melakukan riset dan validasi langsung ke desa-desa di Bengkalis, kami menemukan kebutuhan hilirisasi produk UMKM dan hasil bumi desa yang membutuhkan sentra pasar daerah terpadu. Kami menambahkan Pasar Daerah sebagai penyempurnaan sistem tanpa mengurangi satupun fitur di proposal awal. Ini menunjukkan bahwa sistem kami responsif terhadap kebutuhan nyata masyarakat."
+
+2. **Pertanyaan: "Bagaimana cara kerja Blind Index HMAC-SHA256 pada NIK yang terenkripsi?"**
+   - **Jawaban:** "Algoritma ChaCha20-Poly1305 bersifat non-deterministik karena menggunakan Nonce acak, sehingga NIK yang sama akan menghasilkan ciphertext yang berbeda setiap saat dan tidak bisa dicari menggunakan query SQL biasa. Untuk mengatasi hal tersebut tanpa membuka kunci enkripsi, kami membuat indeks buta (blind index) satu arah menggunakan HMAC-SHA256 dengan cryptographic secret key server. Hasil hash tersebut bersifat deterministik dan unik, sehingga sistem dapat mencari data warga atau mendeteksi duplikasi secara instan tanpa pernah mendekripsi angka NIK di database."
+
+3. **Pertanyaan: "Apakah Kepala Desa punya akun khusus untuk login?"**
+   - **Jawaban:** "Kami merancang arsitektur sistem berbasis operasional praktis. Jabatan Kepala Desa bersifat politis dan periodik. Memberikan beban login operasional kepada pimpinan justru menimbulkan inefisiensi. Oleh karena itu, operasional dipegang oleh Operator/Super Admin Desa dan Staf Unit melalui sistem Dynamic RBAC. Pimpinan menerima laporan eksekutif berkala dalam format PDF resmi, sementara grafik kinerja dan indeks poin pertumbuhan dapat dipantau langsung tanpa kerumitan administrasi akun."
+
+4. **Pertanyaan: "Bagaimana sistem mengakomodasi warga desa yang tidak memiliki smartphone atau gaptek?"**
+   - **Jawaban:** "SILADESBENG dirancang inklusif. Bagi warga yang tidak memiliki smartphone, mereka cukup datang ke kantor desa atau menghubungi pengurus RT. Operator desa memiliki fitur pemesanan dan pencatatan manual (walk-in) dengan metode pembayaran tunai (Cash). Seluruh transaksi tersebut tetap masuk ke buku kas digital sistem sehingga akuntabilitas keuangan daerah tetap terjaga 100%."

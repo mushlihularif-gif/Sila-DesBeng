@@ -1,6 +1,12 @@
 @extends('layouts.user')
 
-@section('title', 'Saldo & Alamat')
+@section('title', 'Saldo dan Alamat')
+
+@push('styles')
+<style>
+    * { font-family: 'Inter', sans-serif; }
+</style>
+@endpush
 
 @section('page')
 <main class="flex-grow relative w-full">
@@ -9,7 +15,10 @@
         <div class="absolute inset-0 bg-white/25 pointer-events-none"></div>
 
         <div class="relative max-w-3xl mx-auto px-4">
-            <h1 class="text-3xl font-bold text-center text-blue-600 mb-8">Saldo &amp; Alamat</h1>
+            <h1 class="text-3xl md:text-4xl font-bold text-center mb-8">
+                <span class="bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">Saldo </span>
+                <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">dan Alamat</span>
+            </h1>
 
             @if(session('success'))
                 <div class="mb-6 rounded-xl bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-800">

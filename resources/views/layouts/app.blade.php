@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google" content="notranslate">
     <title>SiladesBeng</title>
 
     {{-- GOOGLE FONTS + FAVICON --}}
@@ -46,6 +47,9 @@
             50% { transform: translateX(300%); background-color: #fdb824; }
             99.9% { transform: translateX(0%); background-color: #fdb824; }
             100% { transform: translateX(0%); background-color: #2f84f3; }
+        }
+        body, input, textarea, select, button {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
         }
     </style>
 
