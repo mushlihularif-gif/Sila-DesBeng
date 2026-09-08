@@ -60,22 +60,50 @@ class NotificationController extends Controller
         return redirect()->route('admin.notifications.index')->with('success', 'Notifikasi berhasil dikirim.');
     }
 
-    public function markAsRead($id)
+    public function markAsRead(Request $request, $id)
     {
         $notification = \App\Models\AdminNotification::findOrFail($id);
         $notification->is_read = true;
         $notification->save();
 
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Notifikasi ditandai sebagai sudah dibaca.'
+            ]);
+        }
+
         return redirect()->back()->with('success', 'Notifikasi ditandai sebagai sudah dibaca.');
     }
 
-    public function markAllAsRead()
+    public function markAllAsRead(Request $request)
     {
-        // Tandai semua notifikasi yang belum dibaca sebagai sudah dibaca
-        \App\Models\AdminNotification::where('is_read', false)
-            ->update([
-                'is_read' => true,
+        $currentUser = auth()->user();
+        $query = \App\Models\AdminNotification::where('is_read', false);
+
+        if ($currentUser && !in_array($currentUser->role, ['super_admin'])) {
+            $userRegionId = $currentUser->region_id;
+            if ($userRegionId) {
+                $allowedRegionIds = \App\Models\Region::getDescendantIds($userRegionId);
+                $allowedRegionIds[] = $userRegionId;
+                $query->where(function($q) use ($allowedRegionIds) {
+                    $q->whereIn('region_id', $allowedRegionIds)->orWhereNull('region_id');
+                });
+            } else {
+                $query->whereNull('region_id');
+            }
+        }
+
+        $query->update([
+            'is_read' => true,
+        ]);
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Semua notifikasi berhasil ditandai sebagai sudah dibaca.'
             ]);
+        }
 
         return redirect()->back()->with('success', 'Semua notifikasi ditandai sebagai sudah dibaca.');
     }

@@ -138,7 +138,7 @@
                 <h5 class="fw-bold mb-1 text-info">Sistem Mutasi Lintas Wilayah</h5>
                 <p class="mb-0 text-info" style="opacity: 0.85; line-height: 1.5; font-size: 0.88rem;">
                     <span class="fw-bold text-decoration-underline text-danger">PENTING:</span> Ini <b>bukan</b> fitur untuk mengurus surat pindah administrasi secara fisik. Fitur ini khusus digunakan untuk <strong class="text-dark shadow-sm" style="background-color: rgba(255, 255, 255, 0.7); padding: 3px 6px; border-radius: 4px;">memindahkan domisili akun digital warga (Mutasi Akun) agar mereka bisa mengakses layanan SiladesBeng di wilayah barunya jika mereka pindah domisili.</strong><br><br>
-                    Pemindahan akun ini menggunakan sistem <b>Persetujuan Dua Arah</b>: Jika Anda <b>Memutasi Keluar</b> warga ke desa lain, maka Kepala Desa tujuan wajib menyetujuinya. Sebaliknya, jika Anda <b>Menarik Data</b> warga dari desa luar, maka desa asalnya harus melepasnya.
+                    Pemindahan akun ini menggunakan sistem <b>Persetujuan Dua Tahap Berantai</b>: Pengajuan mandiri oleh warga wajib disetujui pelepasannya oleh Pemerintah Desa Asal terlebih dahulu, kemudian diverifikasi dan disetujui penerimaannya oleh Pemerintah Desa Tujuan sebelum akun warga resmi berpindah domisili.
                 </p>
             </div>
         </div>
@@ -232,8 +232,7 @@
                             <tr>
                                 <td>{{ $m->created_at ? $m->created_at->format('d M Y') : '-' }}</td>
                                 <td>
-                                    <strong>{{ $m->user->name ?? 'Warga #' . $m->user_id }}</strong><br>
-                                    <span class="text-muted text-sm">NIK: {{ $m->user->nik ?? '-' }}</span>
+                                    @include('admin.warga.partials.user_avatar_nik', ['user' => $m->user, 'fallbackName' => 'Warga #' . $m->user_id])
                                 </td>
                                 <td>
                                     @if($isKeluar)
@@ -255,11 +254,17 @@
                                     @if($m->rejection_reason)
                                     <br><small class="text-muted">{{ Str::limit($m->rejection_reason, 30) }}</small>
                                     @endif
+                                    @elseif($m->status == 'pending_tujuan')
+                                        @if($isKeluar)
+                                        <span class="badge bg-label-success"><i class='bx bx-check me-1'></i>Dilepas (Di Desa Tujuan)</span>
+                                        @else
+                                        <span class="badge bg-warning text-dark"><i class='bx bx-time-five me-1'></i>Menunggu Penerimaan Anda</span>
+                                        @endif
                                     @else
                                         @if($isKeluar)
-                                        <span class="badge bg-warning text-dark"><i class='bx bx-time-five me-1'></i>Menunggu Pelepasan</span>
+                                        <span class="badge bg-warning text-dark"><i class='bx bx-time-five me-1'></i>Menunggu Pelepasan Anda</span>
                                         @else
-                                        <span class="badge bg-info"><i class='bx bx-time-five me-1'></i>Menunggu Persetujuan</span>
+                                        <span class="badge bg-secondary"><i class='bx bx-time-five me-1'></i>Menunggu Pelepasan Desa Asal</span>
                                         @endif
                                     @endif
                                 </td>
@@ -270,12 +275,12 @@
                                             <i class="bx bx-id-card me-1"></i> KTP
                                         </a>
                                         @endif
-                                        @if($m->status == 'pending')
-                                            @if($isKeluar && $m->requested_by != 'admin_asal')
+                                        @if(in_array($m->status, ['pending', 'pending_asal', 'pending_tujuan']))
+                                            @if($isKeluar && in_array($m->status, ['pending', 'pending_asal']) && $m->requested_by != 'admin_asal')
                                             <button type="button" class="btn btn-xs btn-outline-danger" onclick="$('button[data-bs-target=\'#navs-keluar\']').tab('show')">
                                                 Kelola
                                             </button>
-                                            @elseif(!$isKeluar && $m->requested_by == 'admin_asal')
+                                            @elseif(!$isKeluar && ($m->status == 'pending_tujuan' || $m->requested_by == 'admin_asal'))
                                             <button type="button" class="btn btn-xs btn-outline-success" onclick="$('button[data-bs-target=\'#navs-masuk\']').tab('show')">
                                                 Tinjau
                                             </button>
@@ -302,21 +307,26 @@
                             $isKeluar = ($m->from_region_id == $currentAdminRegId);
                         @endphp
                         <div class="card border shadow-none bg-white rounded-3 p-3" style="border-color: #e7e7e8 !important;">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <div>
-                                    <span class="fw-bold text-dark fs-6 d-block">{{ $m->user->name ?? 'Warga #' . $m->user_id }}</span>
-                                    <small class="text-muted">NIK: {{ $m->user->nik ?? '-' }}</small>
+                            <div class="d-flex justify-content-between align-items-start mb-2 gap-2">
+                                <div class="min-w-0">
+                                    @include('admin.warga.partials.user_avatar_nik', ['user' => $m->user, 'fallbackName' => 'Warga #' . $m->user_id, 'isMobile' => true])
                                 </div>
-                                <div>
+                                <div class="flex-shrink-0">
                                     @if($m->status == 'approved')
                                     <span class="badge bg-success">Disetujui</span>
                                     @elseif($m->status == 'rejected')
                                     <span class="badge bg-danger">Ditolak</span>
+                                    @elseif($m->status == 'pending_tujuan')
+                                        @if($isKeluar)
+                                        <span class="badge bg-label-success">Dilepas (Di Tujuan)</span>
+                                        @else
+                                        <span class="badge bg-warning text-dark">Penerimaan Warga</span>
+                                        @endif
                                     @else
                                         @if($isKeluar)
-                                        <span class="badge bg-warning text-dark">Pelepasan</span>
+                                        <span class="badge bg-warning text-dark">Pelepasan Warga</span>
                                         @else
-                                        <span class="badge bg-info">Persetujuan</span>
+                                        <span class="badge bg-secondary">Menunggu Desa Asal</span>
                                         @endif
                                     @endif
                                 </div>
@@ -362,13 +372,13 @@
                                 </div>
                                 @endif
                             </div>
-                            @if($m->status == 'pending')
+                            @if(in_array($m->status, ['pending', 'pending_asal', 'pending_tujuan']))
                             <div class="mt-2">
-                                @if($isKeluar && $m->requested_by != 'admin_asal')
+                                @if($isKeluar && in_array($m->status, ['pending', 'pending_asal']) && $m->requested_by != 'admin_asal')
                                 <button type="button" class="btn btn-sm btn-outline-danger w-100" onclick="$('button[data-bs-target=\'#navs-keluar\']').tab('show')">
                                     <i class='bx bx-export me-1'></i> Kelola di Tab Pelepasan
                                 </button>
-                                @elseif(!$isKeluar && $m->requested_by == 'admin_asal')
+                                @elseif(!$isKeluar && ($m->status == 'pending_tujuan' || $m->requested_by == 'admin_asal'))
                                 <button type="button" class="btn btn-sm btn-outline-success w-100" onclick="$('button[data-bs-target=\'#navs-masuk\']').tab('show')">
                                     <i class='bx bx-import me-1'></i> Tinjau di Tab Persetujuan
                                 </button>
@@ -410,8 +420,7 @@
                             @foreach($pengajuanKeluar as $p)
                             <tr>
                                 <td>
-                                    <strong>{{ $p->user->name }}</strong><br>
-                                    <span class="text-muted text-sm">NIK: {{ $p->user->nik ?? '-' }}</span>
+                                    @include('admin.warga.partials.user_avatar_nik', ['user' => $p->user])
                                 </td>
                                 <td>{{ $p->toRegion->kecamatan }} - {{ $p->toRegion->desa }}</td>
                                 <td>
@@ -433,16 +442,28 @@
                                 </td>
                                 <td>
                                     <div class="d-flex gap-2">
-                                        @if($p->requested_by != 'admin_asal')
-                                        <form action="{{ route('admin.warga.mutasi.approve', $p->id) }}" method="POST">
-                                            @csrf
-                                            <button type="submit" class="btn btn-sm btn-success" data-konfirmasi="Anda yakin melepaskan warga ini? NIK akan dipindah ke desa tujuan.">
-                                                Lepaskan
-                                            </button>
-                                        </form>
-                                        <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#rejectModal{{ $p->id }}">Tahan</button>
+                                        @if($p->requested_by == 'user')
+                                            @if($p->status == 'pending_tujuan')
+                                            <span class="badge bg-label-success"><i class='bx bx-check-circle me-1'></i> Sudah Dilepas (Menunggu Desa Tujuan)</span>
+                                            @else
+                                            <form action="{{ route('admin.warga.mutasi.approve', $p->id) }}" method="POST">
+                                                @csrf
+                                                <button type="submit" class="btn btn-sm btn-success" data-konfirmasi="Anda yakin menyetujui pelepasan warga ini? Permohonan akan diteruskan ke Desa Tujuan untuk diverifikasi dan diterima.">
+                                                    Lepaskan
+                                                </button>
+                                            </form>
+                                            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#rejectModal{{ $p->id }}">Tahan</button>
+                                            @endif
+                                        @elseif($p->requested_by == 'admin_asal')
+                                            <span class="badge bg-label-warning"><i class='bx bx-time'></i> Menunggu Desa Tujuan</span>
                                         @else
-                                        <span class="badge bg-label-warning"><i class='bx bx-time'></i> Menunggu Desa Tujuan</span>
+                                            <form action="{{ route('admin.warga.mutasi.approve', $p->id) }}" method="POST">
+                                                @csrf
+                                                <button type="submit" class="btn btn-sm btn-success" data-konfirmasi="Anda yakin melepaskan warga ini? NIK akan dipindah ke desa tujuan.">
+                                                    Lepaskan
+                                                </button>
+                                            </form>
+                                            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#rejectModal{{ $p->id }}">Tahan</button>
                                         @endif
                                     </div>
                                     
@@ -450,19 +471,25 @@
                                     @push('modals')
                                     <div class="modal fade" id="rejectModal{{ $p->id }}" tabindex="-1" aria-hidden="true">
                                         <div class="modal-dialog modal-dialog-centered">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title">Tahan Warga: {{ $p->user->name }}</h5>
+                                            <div class="modal-content border-0 shadow">
+                                                <div class="modal-header border-bottom">
+                                                    <h5 class="modal-title fw-bold text-danger"><i class='bx bx-block me-1'></i> Tahan Warga: {{ $p->user->name }}</h5>
                                                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                                 </div>
                                                 <form action="{{ route('admin.warga.mutasi.reject', $p->id) }}" method="POST">
                                                     @csrf
                                                     <div class="modal-body">
-                                                        <label class="form-label">Alasan Penahanan</label>
-                                                        <input type="text" name="rejection_reason" class="form-control" required placeholder="Contoh: Belum lunas pinjaman BUMDes">
+                                                        <div class="mb-3">
+                                                            <label class="form-label fw-semibold">Alasan Penahanan / Penolakan <span class="text-danger">*</span></label>
+                                                            <textarea name="rejection_reason" class="form-control" rows="3" required placeholder="Contoh: Berkas administrasi desa belum lengkap atau masih memiliki tanggungan kewajiban di desa asal"></textarea>
+                                                            <div class="form-text text-muted small mt-1">
+                                                                <i class='bx bx-info-circle me-1'></i>Alasan penolakan ini akan dikirimkan langsung ke notifikasi warga dan ditampilkan di profil akunnya.
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                    <div class="modal-footer">
-                                                        <button type="submit" class="btn btn-danger">Tolak Perpindahan</button>
+                                                    <div class="modal-footer border-top">
+                                                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                                                        <button type="submit" class="btn btn-danger">Tolak & Tahan Warga</button>
                                                     </div>
                                                 </form>
                                             </div>
@@ -481,12 +508,11 @@
                     <div class="d-flex flex-column gap-3">
                         @foreach($pengajuanKeluar as $p)
                         <div class="card border shadow-none bg-white rounded-3 p-3" style="border-color: #e7e7e8 !important;">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <div>
-                                    <span class="fw-bold text-dark fs-6 d-block">{{ $p->user->name }}</span>
-                                    <small class="text-muted">NIK: {{ $p->user->nik ?? '-' }}</small>
+                            <div class="d-flex justify-content-between align-items-start mb-2 gap-2">
+                                <div class="min-w-0">
+                                    @include('admin.warga.partials.user_avatar_nik', ['user' => $p->user, 'isMobile' => true])
                                 </div>
-                                <div>
+                                <div class="flex-shrink-0">
                                     @if($p->requested_by == 'user')
                                     <span class="badge bg-label-info">Warga Sendiri</span>
                                     @elseif($p->requested_by == 'admin_asal')
@@ -514,18 +540,32 @@
                                 @endif
                             </div>
                             <div>
-                                @if($p->requested_by != 'admin_asal')
-                                <div class="d-flex gap-2">
-                                    <form action="{{ route('admin.warga.mutasi.approve', $p->id) }}" method="POST" class="flex-grow-1">
-                                        @csrf
-                                        <button type="submit" class="btn btn-sm btn-success w-100" onclick="return confirm('Anda yakin melepaskan warga ini? NIK akan dipindah ke desa tujuan.')">
-                                            Lepaskan
-                                        </button>
-                                    </form>
-                                    <button type="button" class="btn btn-sm btn-danger px-3" data-bs-toggle="modal" data-bs-target="#rejectModal{{ $p->id }}">Tahan</button>
-                                </div>
+                                @if($p->requested_by == 'user')
+                                    @if($p->status == 'pending_tujuan')
+                                    <span class="badge bg-label-success w-100 py-2 text-center d-block"><i class='bx bx-check-circle me-1'></i> Sudah Dilepas (Menunggu Desa Tujuan)</span>
+                                    @else
+                                    <div class="d-flex gap-2">
+                                        <form action="{{ route('admin.warga.mutasi.approve', $p->id) }}" method="POST" class="flex-grow-1">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-success w-100" data-konfirmasi="Anda yakin menyetujui pelepasan warga ini? Permohonan akan diteruskan ke Desa Tujuan untuk diverifikasi dan diterima.">
+                                                Lepaskan
+                                            </button>
+                                        </form>
+                                        <button type="button" class="btn btn-sm btn-danger px-3" data-bs-toggle="modal" data-bs-target="#rejectModal{{ $p->id }}">Tahan</button>
+                                    </div>
+                                    @endif
+                                @elseif($p->requested_by == 'admin_asal')
+                                    <span class="badge bg-label-warning w-100 py-2 text-center d-block"><i class='bx bx-time me-1'></i> Menunggu Desa Tujuan</span>
                                 @else
-                                <span class="badge bg-label-warning w-100 py-2 text-center d-block"><i class='bx bx-time me-1'></i> Menunggu Desa Tujuan</span>
+                                    <div class="d-flex gap-2">
+                                        <form action="{{ route('admin.warga.mutasi.approve', $p->id) }}" method="POST" class="flex-grow-1">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-success w-100" data-konfirmasi="Anda yakin melepaskan warga ini? NIK akan dipindah ke desa tujuan.">
+                                                Lepaskan
+                                            </button>
+                                        </form>
+                                        <button type="button" class="btn btn-sm btn-danger px-3" data-bs-toggle="modal" data-bs-target="#rejectModal{{ $p->id }}">Tahan</button>
+                                    </div>
                                 @endif
                             </div>
                         </div>
@@ -562,8 +602,7 @@
                             @foreach($pengajuanMasuk as $p)
                             <tr>
                                 <td>
-                                    <strong>{{ $p->user->name }}</strong><br>
-                                    <span class="text-muted text-sm">NIK: {{ $p->user->nik ?? '-' }}</span>
+                                    @include('admin.warga.partials.user_avatar_nik', ['user' => $p->user])
                                 </td>
                                 <td>{{ $p->fromRegion->kecamatan }} - {{ $p->fromRegion->desa }}</td>
                                 <td>
@@ -584,11 +623,11 @@
                                     @endif
                                 </td>
                                 <td>
-                                    @if($p->requested_by == 'admin_asal')
+                                    @if(($p->requested_by == 'user' && $p->status == 'pending_tujuan') || $p->requested_by == 'admin_asal')
                                         <div class="d-flex gap-2">
                                             <form action="{{ route('admin.warga.mutasi.approve', $p->id) }}" method="POST">
                                                 @csrf
-                                                <button type="submit" class="btn btn-sm btn-success" data-konfirmasi="Anda yakin menerima warga ini?">
+                                                <button type="submit" class="btn btn-sm btn-success" data-konfirmasi="Anda yakin menerima warga ini? Akun warga akan resmi menjadi warga desa Anda.">
                                                     Terima Warga
                                                 </button>
                                             </form>
@@ -597,18 +636,24 @@
                                         @push('modals')
                                         <div class="modal fade" id="rejectModalMasuk{{ $p->id }}" tabindex="-1" aria-hidden="true">
                                             <div class="modal-dialog modal-dialog-centered">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title">Tolak Masuk: {{ $p->user->name }}</h5>
+                                                <div class="modal-content border-0 shadow">
+                                                    <div class="modal-header border-bottom">
+                                                        <h5 class="modal-title fw-bold text-danger"><i class='bx bx-block me-1'></i> Tolak Masuk: {{ $p->user->name }}</h5>
                                                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                                     </div>
                                                     <form action="{{ route('admin.warga.mutasi.reject', $p->id) }}" method="POST">
                                                         @csrf
                                                         <div class="modal-body">
-                                                            <label class="form-label">Alasan Penolakan</label>
-                                                            <input type="text" name="rejection_reason" class="form-control" required placeholder="Contoh: Warga tidak melapor ke aparat RT/RW setempat">
+                                                            <div class="mb-3">
+                                                                <label class="form-label fw-semibold">Alasan Penolakan <span class="text-danger">*</span></label>
+                                                                <textarea name="rejection_reason" class="form-control" rows="3" required placeholder="Contoh: Warga belum melapor ke RT/RW setempat atau berkas KK/KTP belum sesuai"></textarea>
+                                                                <div class="form-text text-muted small mt-1">
+                                                                    <i class='bx bx-info-circle me-1'></i>Alasan penolakan ini akan dikirimkan langsung ke notifikasi warga dan Pemerintah Desa asal.
+                                                                </div>
+                                                            </div>
                                                         </div>
-                                                        <div class="modal-footer">
+                                                        <div class="modal-footer border-top">
+                                                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
                                                             <button type="submit" class="btn btn-danger">Tolak Perpindahan</button>
                                                         </div>
                                                     </form>
@@ -618,7 +663,7 @@
                                         @endpush
                                     @else
                                         <span class="spinner-border spinner-border-sm text-warning" role="status"></span>
-                                        <span class="text-warning fw-bold ms-1">Menunggu Desa Asal</span>
+                                        <span class="text-warning fw-bold ms-1">Menunggu Pelepasan Desa Asal</span>
                                     @endif
                                 </td>
                             </tr>
@@ -632,12 +677,11 @@
                     <div class="d-flex flex-column gap-3">
                         @foreach($pengajuanMasuk as $p)
                         <div class="card border shadow-none bg-white rounded-3 p-3" style="border-color: #e7e7e8 !important;">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <div>
-                                    <span class="fw-bold text-dark fs-6 d-block">{{ $p->user->name }}</span>
-                                    <small class="text-muted">NIK: {{ $p->user->nik ?? '-' }}</small>
+                            <div class="d-flex justify-content-between align-items-start mb-2 gap-2">
+                                <div class="min-w-0">
+                                    @include('admin.warga.partials.user_avatar_nik', ['user' => $p->user, 'isMobile' => true])
                                 </div>
-                                <div>
+                                <div class="flex-shrink-0">
                                     @if($p->requested_by == 'user')
                                     <span class="badge bg-label-info">Warga Sendiri</span>
                                     @elseif($p->requested_by == 'admin_asal')
@@ -665,11 +709,11 @@
                                 @endif
                             </div>
                             <div>
-                                @if($p->requested_by == 'admin_asal')
+                                @if(($p->requested_by == 'user' && $p->status == 'pending_tujuan') || $p->requested_by == 'admin_asal')
                                 <div class="d-flex gap-2">
                                     <form action="{{ route('admin.warga.mutasi.approve', $p->id) }}" method="POST" class="flex-grow-1">
                                         @csrf
-                                        <button type="submit" class="btn btn-sm btn-success w-100" onclick="return confirm('Anda yakin menerima warga ini?')">
+                                        <button type="submit" class="btn btn-sm btn-success w-100" data-konfirmasi="Anda yakin menerima warga ini? Akun warga akan resmi menjadi warga desa Anda.">
                                             Terima Warga
                                         </button>
                                     </form>
@@ -678,7 +722,7 @@
                                 @else
                                 <div class="text-center p-2 rounded bg-label-warning d-flex align-items-center justify-content-center gap-2">
                                     <span class="spinner-border spinner-border-sm text-warning" role="status"></span>
-                                    <span class="text-warning fw-bold small">Menunggu Desa Asal</span>
+                                    <span class="text-warning fw-bold small">Menunggu Pelepasan Desa Asal</span>
                                 </div>
                                 @endif
                             </div>
@@ -715,7 +759,9 @@
                             @foreach($riwayat as $r)
                             <tr>
                                 <td>{{ $r->updated_at->format('d M Y') }}</td>
-                                <td><strong>{{ $r->user->name }}</strong> ({{ $r->user->nik }})</td>
+                                <td>
+                                    @include('admin.warga.partials.user_avatar_nik', ['user' => $r->user])
+                                </td>
                                 <td>{{ $r->fromRegion->desa }} <i class='bx bx-right-arrow-alt'></i> {{ $r->toRegion->desa }}</td>
                                 <td>
                                     @if($r->status == 'approved')
@@ -736,12 +782,11 @@
                     <div class="d-flex flex-column gap-3">
                         @foreach($riwayat as $r)
                         <div class="card border shadow-none bg-white rounded-3 p-3" style="border-color: #e7e7e8 !important;">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <div>
-                                    <span class="fw-bold text-dark d-block">{{ $r->user->name }}</span>
-                                    <small class="text-muted">NIK: {{ $r->user->nik }}</small>
+                            <div class="d-flex justify-content-between align-items-start mb-2 gap-2">
+                                <div class="min-w-0">
+                                    @include('admin.warga.partials.user_avatar_nik', ['user' => $r->user, 'isMobile' => true])
                                 </div>
-                                <div>
+                                <div class="flex-shrink-0">
                                     @if($r->status == 'approved')
                                     <span class="badge bg-success">Disetujui</span>
                                     @else
@@ -793,7 +838,7 @@
                         <i class='bx bx-info-circle fs-3 me-3 text-primary'></i>
                         <div>
                             <h6 class="alert-heading fw-bold mb-1 text-primary">Panduan Tarik Warga</h6>
-                            <p class="mb-0 text-primary" style="font-size: 0.85rem;">Pilih kecamatan dan desa asal warga terlebih dahulu, lalu cari warga berdasarkan nama atau NIK. Akun warga tidak akan langsung berpindah sampai Kepala Desa asal <b>menyetujui pelepasannya</b>.</p>
+                            <p class="mb-0 text-primary" style="font-size: 0.85rem;">Pilih kecamatan dan desa asal warga terlebih dahulu, lalu cari warga berdasarkan nama atau NIK. Akun warga tidak akan langsung berpindah sampai Pemerintah Desa asal <b>menyetujui pelepasannya</b>.</p>
                         </div>
                     </div>
                     <div class="row">
@@ -877,7 +922,7 @@
                         <i class='bx bx-info-circle fs-3 me-3 text-warning'></i>
                         <div>
                             <h6 class="alert-heading fw-bold mb-1 text-warning">Panduan Ekspor Warga</h6>
-                            <p class="mb-0 text-warning" style="font-size: 0.85rem;">Fitur ini digunakan untuk melempar akun warga Anda ke desa lain. Kepala Desa tujuan wajib <b>mengonfirmasi (Handshake)</b> untuk dapat menerima warga ini.</p>
+                            <p class="mb-0 text-warning" style="font-size: 0.85rem;">Fitur ini digunakan untuk melempar akun warga Anda ke desa lain. Pemerintah Desa tujuan wajib <b>mengonfirmasi (Handshake)</b> untuk dapat menerima warga ini.</p>
                         </div>
                     </div>
                     
@@ -1259,6 +1304,63 @@
                 tab.show();
             }
         }
+
+        // Toggle Tampilkan / Sembunyikan NIK Lengkap
+        $(document).on('click', '.btn-toggle-nik', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            var $btn = $(this);
+            var $wrap = $btn.closest('div');
+            var $display = $wrap.find('.nik-display');
+            var fullNik = $display.data('full');
+            var maskedNik = $display.data('masked');
+            var isMasked = ($display.text().trim() === String(maskedNik).trim());
+
+            if (isMasked) {
+                $display.text(fullNik);
+                $btn.find('i').removeClass('bx-show').addClass('bx-hide');
+                $btn.attr('title', 'Sembunyikan NIK');
+            } else {
+                $display.text(maskedNik);
+                $btn.find('i').removeClass('bx-hide').addClass('bx-show');
+                $btn.attr('title', 'Tampilkan NIK lengkap');
+            }
+        });
+
+        // Salin NIK ke Clipboard
+        $(document).on('click', '.btn-copy-nik', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            var $btn = $(this);
+            var nik = $btn.data('nik');
+            if (!nik) return;
+
+            var performSuccessAnim = function() {
+                var $icon = $btn.find('i');
+                $icon.removeClass('bx-copy').addClass('bx-check text-success');
+                setTimeout(function() {
+                    $icon.removeClass('bx-check text-success').addClass('bx-copy');
+                }, 1500);
+            };
+
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(String(nik)).then(performSuccessAnim).catch(function() {
+                    fallbackCopy(String(nik));
+                    performSuccessAnim();
+                });
+            } else {
+                fallbackCopy(String(nik));
+                performSuccessAnim();
+            }
+
+            function fallbackCopy(text) {
+                var $temp = $('<input>');
+                $('body').append($temp);
+                $temp.val(text).select();
+                document.execCommand('copy');
+                $temp.remove();
+            }
+        });
     });
 </script>
 @endpush

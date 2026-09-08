@@ -20,6 +20,11 @@
             background: rgba(255, 255, 255, 0.2) !important;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
         }
+        body.sdb-konf-aktif .sd-navbar {
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            will-change: auto !important;
+        }
         .sd-navbar.hidden-nav {
             transform: translateY(-100%) translateZ(0);
         }

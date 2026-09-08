@@ -21,6 +21,14 @@ class MutasiPenduduk extends Model
         'rt_baru',
         'rw_baru',
         'ktp_image_path',
+        'approved_asal_at',
+        'approved_tujuan_at',
+        'rejected_by_role',
+    ];
+
+    protected $casts = [
+        'approved_asal_at' => 'datetime',
+        'approved_tujuan_at' => 'datetime',
     ];
 
     public function user()

@@ -1000,17 +1000,19 @@
                                         }
                                         $unreadCount = (clone $notifQuery)->where('is_read', false)->count();
                                     @endphp
-                                    @if($unreadCount > 0)
-                                    <span class="badge bg-danger rounded-pill badge-notifications position-absolute" style="top: -2px; right: -6px; font-size: 10px; min-width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;">{{ $unreadCount > 99 ? '99+' : $unreadCount }}</span>
-                                    @endif
+                                    <span id="notif-badge-bell" class="badge bg-danger rounded-pill badge-notifications position-absolute {{ $unreadCount > 0 ? '' : 'd-none' }}" style="top: -2px; right: -6px; font-size: 10px; min-width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;">{{ $unreadCount > 99 ? '99+' : $unreadCount }}</span>
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end py-0 notif-dropdown-menu">
                                     <li class="dropdown-menu-header border-bottom bg-white">
                                         <div class="dropdown-header d-flex align-items-center justify-content-between py-3 px-3 px-sm-4">
-                                            <h6 class="mb-0 fw-bold text-dark fs-5">Notifikasi</h6>
-                                            @if($unreadCount > 0)
-                                            <span class="badge bg-label-primary rounded-pill px-3 py-1 fw-bold fs-7">{{ $unreadCount }} Baru</span>
-                                            @endif
+                                            <div class="d-flex align-items-center gap-2">
+                                                <h6 class="mb-0 fw-bold text-dark fs-5">Notifikasi</h6>
+                                                <span id="notif-badge-header" class="badge bg-label-primary rounded-pill px-2.5 py-1 fw-bold fs-7 {{ $unreadCount > 0 ? '' : 'd-none' }}">{{ $unreadCount }} Baru</span>
+                                            </div>
+                                            <button type="button" id="btn-mark-all-read" class="btn btn-link btn-sm text-primary text-decoration-none p-0 fw-semibold d-flex align-items-center gap-1 shadow-none {{ $unreadCount > 0 ? '' : 'd-none' }}" style="font-size: 0.8rem;" title="Tandai semua notifikasi sudah dibaca">
+                                                <i class="bx bx-check-double fs-6"></i>
+                                                <span>Tandai Semua Dibaca</span>
+                                            </button>
                                         </div>
                                         <!-- Pill Tabs untuk Semua Layanan -->
                                         <div class="px-3 px-sm-4 pb-3">
@@ -1075,7 +1077,7 @@
                                                     $targetUrl = route('admin.aktivitas.permintaan-pengajuan.index');
                                                 }
                                             @endphp
-                                            <a href="{{ $targetUrl }}" class="dropdown-item notif-item {{ !$notif->is_read ? 'is-unread category-'.$cat : '' }} gap-3" data-category="{{ $cat }}">
+                                            <a href="{{ $targetUrl }}" class="dropdown-item notif-item {{ !$notif->is_read ? 'is-unread category-'.$cat : '' }} gap-3" data-category="{{ $cat }}" data-id="{{ $notif->id }}" data-unread="{{ !$notif->is_read ? '1' : '0' }}">
                                                 <div class="flex-shrink-0 mt-1">
                                                     <div class="rounded-circle d-flex align-items-center justify-content-center shadow-xs {{ !$notif->is_read ? 'bg-label-'.$color : 'bg-light' }}" style="width: 40px; height: 40px;">
                                                         <i class="bx {{ $icon }} fs-5 {{ !$notif->is_read ? 'text-'.$color : 'text-secondary' }}"></i>
@@ -1640,6 +1642,99 @@
                             });
                         }
                     }
+
+                    // Handler tombol "Tandai Semua Dibaca"
+                    const btnMarkAll = document.getElementById('btn-mark-all-read');
+                    if (btnMarkAll) {
+                        btnMarkAll.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+
+                            btnMarkAll.disabled = true;
+                            const originalHtml = btnMarkAll.innerHTML;
+                            btnMarkAll.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true" style="width: 12px; height: 12px;"></span> Memproses...';
+
+                            fetch('{{ route("admin.notifications.mark-all-read") }}', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'Accept': 'application/json'
+                                },
+                                body: JSON.stringify({ _method: 'PUT' })
+                            })
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data && data.success) {
+                                    const bellBadge = document.getElementById('notif-badge-bell');
+                                    if (bellBadge) bellBadge.classList.add('d-none');
+
+                                    const headerBadge = document.getElementById('notif-badge-header');
+                                    if (headerBadge) headerBadge.classList.add('d-none');
+
+                                    btnMarkAll.classList.add('d-none');
+
+                                    document.querySelectorAll('.notif-item.is-unread').forEach(item => {
+                                        item.classList.remove('is-unread', 'category-rental', 'category-mobil', 'category-fasilitas', 'category-gas', 'category-pasar', 'category-kyc', 'category-mutasi', 'category-laporan');
+                                        item.setAttribute('data-unread', '0');
+                                        const dot = item.querySelector('.badge-dot');
+                                        if (dot) dot.remove();
+
+                                        const title = item.querySelector('h6');
+                                        if (title) {
+                                            title.classList.remove('text-dark');
+                                            title.classList.add('text-secondary');
+                                        }
+
+                                        const iconWrap = item.querySelector('.flex-shrink-0 > div');
+                                        if (iconWrap) {
+                                            iconWrap.className = 'rounded-circle d-flex align-items-center justify-content-center shadow-xs bg-light';
+                                            iconWrap.style.width = '40px';
+                                            iconWrap.style.height = '40px';
+                                        }
+
+                                        const icon = item.querySelector('.flex-shrink-0 i');
+                                        if (icon) {
+                                            icon.className = icon.className.replace(/text-(primary|warning|info|success|danger|secondary)/g, 'text-secondary');
+                                        }
+                                    });
+                                } else {
+                                    btnMarkAll.disabled = false;
+                                    btnMarkAll.innerHTML = originalHtml;
+                                }
+                            })
+                            .catch(err => {
+                                console.error('Gagal menandai semua notifikasi:', err);
+                                btnMarkAll.disabled = false;
+                                btnMarkAll.innerHTML = originalHtml;
+                            });
+                        });
+                    }
+
+                    // Tandai dibaca saat item notifikasi diklik
+                    document.querySelectorAll('.notif-item').forEach(item => {
+                        item.addEventListener('click', function() {
+                            if (this.getAttribute('data-unread') === '1') {
+                                const notifId = this.getAttribute('data-id');
+                                if (notifId) {
+                                    const formData = new FormData();
+                                    formData.append('_token', '{{ csrf_token() }}');
+                                    formData.append('_method', 'PUT');
+                                    const markUrl = '{{ url("/admin/notifications") }}/' + notifId + '/read';
+                                    if (navigator.sendBeacon) {
+                                        navigator.sendBeacon(markUrl, formData);
+                                    } else {
+                                        fetch(markUrl, {
+                                            method: 'POST',
+                                            body: formData,
+                                            keepalive: true
+                                        });
+                                    }
+                                }
+                            }
+                        });
+                    });
                 });
             </script>
             @yield('modals')

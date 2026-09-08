@@ -70,8 +70,9 @@
     css.textContent = [
         // bg-gray-900 bg-opacity-50, sama dengan modal Kemitraan.
         '.sdb-konf-tirai{position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;',
-        'padding:16px;background:rgba(17,24,39,.5);opacity:0;transition:opacity .25s ease}',
+        'padding:16px;background:rgba(17,24,39,.5);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);opacity:0;transition:opacity .25s ease}',
         '.sdb-konf-tirai.tampil{opacity:1}',
+        'body.sdb-konf-aktif .sd-navbar{backdrop-filter:none !important;-webkit-backdrop-filter:none !important;will-change:auto !important}',
 
         // bg-white rounded-3xl shadow-2xl sm:max-w-md w-full + animate-fade-in-up
         '.sdb-konf-kartu{background:#fff;border-radius:24px;overflow:hidden;',
@@ -114,6 +115,18 @@
         '.sdb-konf-kaki button{width:100%;padding-left:0;padding-right:0}}'
     ].join('');
     document.head.appendChild(css);
+
+    var konfBukaCount = 0;
+    function bukaSdbKonf() {
+        konfBukaCount++;
+        document.body.classList.add('sdb-konf-aktif');
+    }
+    function tutupSdbKonf() {
+        konfBukaCount = Math.max(0, konfBukaCount - 1);
+        if (konfBukaCount === 0) {
+            document.body.classList.remove('sdb-konf-aktif');
+        }
+    }
 
     /**
      * @returns {Promise<boolean>} true kalau pengguna menekan tombol setuju
@@ -176,6 +189,7 @@
             kartu.appendChild(kaki);
             tirai.appendChild(kartu);
             document.body.appendChild(tirai);
+            bukaSdbKonf();
 
             var fokusSebelumnya = document.activeElement;
             requestAnimationFrame(function () {
@@ -186,6 +200,7 @@
             function tutup(jawaban) {
                 document.removeEventListener('keydown', padaTombol, true);
                 tirai.classList.remove('tampil');
+                tutupSdbKonf();
                 setTimeout(function () {
                     tirai.remove();
                     if (fokusSebelumnya && fokusSebelumnya.focus) fokusSebelumnya.focus();

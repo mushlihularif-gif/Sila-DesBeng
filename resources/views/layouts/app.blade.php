@@ -200,7 +200,12 @@
     window.showSiladesBengToast = function(type, title, message, duration) {
         duration = duration || 5000;
         var container = document.getElementById('sdbToastContainer');
-        if (!container) return;
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'sdbToastContainer';
+            container.className = 'sdb-toast-container';
+            document.body.appendChild(container);
+        }
 
         var icons = {
             success: '<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>',
