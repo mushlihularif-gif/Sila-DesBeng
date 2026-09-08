@@ -314,15 +314,15 @@ class UnitChatApiController extends Controller
     {
         switch ($service) {
             case 'gas':
-                return "Halo {$userName}! Selamat datang di layanan pesan Penjualan Gas LPG BUMDes. Asisten otomatis kami siap membantu pertanyaan seputar stok tabung, ketentuan penukaran, dan status pengantaran. Klik tombol 'Chat Petugas' jika ingin berbicara langsung dengan admin desa.";
+                return "Halo {$userName}! Selamat datang di layanan Pembelian Gas BUMDes. Ada yang bisa kami bantu? Anda bisa menanyakan ketersediaan stok, pengantaran, atau informasi tukar tabung. Untuk bantuan lebih lanjut, silakan klik 'Chat Petugas'.";
             case 'penyewaan':
-                return "Halo {$userName}! Selamat datang di layanan Penyewaan Alat & Mesin BUMDes. Anda dapat menanyakan ketersediaan alat, ketentuan SOP tanggung jawab sewa, serta durasi peminjaman. Untuk berbicara dengan petugas, silakan klik 'Chat Petugas'.";
+                return "Halo {$userName}! Selamat datang di layanan Penyewaan Alat BUMDes. Silakan tanyakan ketersediaan alat, ketentuan sewa, atau durasi peminjaman. Jika butuh bantuan langsung dari admin, silakan klik 'Chat Petugas'.";
             case 'mobil':
-                return "Halo {$userName}! Selamat datang di layanan Penyewaan Mobil / Kendaraan Operasional BUMDes. Tanyakan seputar jadwal armada, opsi dengan supir / lepas kunci, dan syarat rental. Untuk berbicara dengan admin, klik 'Chat Petugas'.";
+                return "Halo {$userName}! Selamat datang di layanan Penyewaan Mobil BUMDes. Anda bisa bertanya seputar ketersediaan mobil, jadwal, dan syarat penyewaan. Klik 'Chat Petugas' untuk langsung terhubung dengan admin.";
             case 'fasilitas_umum':
-                return "Halo {$userName}! Selamat datang di Pusat Informasi Fasilitas Umum & Gedung Serbaguna BUMDes. Silakan tanyakan ketersediaan jadwal pemakaian gedung, kapasitas, atau fasilitas publik lainnya.";
+                return "Halo {$userName}! Selamat datang di layanan Fasilitas Umum BUMDes. Silakan tanyakan jadwal kosong, kapasitas ruangan, atau detail fasilitas lainnya. Untuk pemesanan langsung, Anda bisa klik 'Chat Petugas'.";
             default:
-                return "Halo {$userName}! Ada yang bisa kami bantu seputar layanan desa ini?";
+                return "Halo {$userName}! Selamat datang. Ada yang bisa kami bantu seputar layanan ini? Silakan klik 'Chat Petugas' jika butuh bantuan admin.";
         }
     }
 
@@ -332,47 +332,47 @@ class UnitChatApiController extends Controller
 
         if ($service === 'gas') {
             if (Str::contains($q, ['stok', 'ada', 'ready', 'tersedia'])) {
-                return "Stok tabung gas kami selalu diperbarui secara berkala pada katalog. Anda dapat langsung memilih jenis tabung di halaman pemesanan. Jika memerlukan tabung dalam jumlah mendesak, silakan klik 'Chat Petugas' agar admin memeriksa fisik tabung di pangkalan.";
+                return "Ketersediaan tabung gas selalu kami perbarui di halaman produk. Anda bisa langsung memesan jika stoknya masih ada. Jika butuh dalam jumlah banyak, silakan klik 'Chat Petugas' ya.";
             }
             if (Str::contains($q, ['antar', 'kirim', 'ongkir', 'sampai rumah'])) {
-                return "Layanan pengantaran gas ke rumah tersedia untuk wilayah desa kami. Biaya antar disesuaikan dengan jarak tempuh dusun. Pastikan alamat Anda tertera jelas saat membuat pesanan.";
+                return "Kami menyediakan layanan antar jemput gas ke rumah Anda. Biaya pengiriman akan disesuaikan dengan jarak lokasi Anda. Pastikan alamat pengiriman sudah benar saat memesan ya.";
             }
             if (Str::contains($q, ['tukar', 'kosong', 'bawa'])) {
-                return "Untuk pembelian isi ulang, warga diwajibkan membawa tabung kosong yang sesuai (misalnya Elpiji 3kg ditukar dengan tabung 3kg dalam kondisi layak).";
+                return "Untuk pembelian isi ulang, mohon pastikan Anda sudah menyiapkan tabung kosong dengan ukuran yang sama dan dalam kondisi baik saat petugas kami datang atau saat Anda mengambil pesanan.";
             }
-            return "Terima kasih atas pertanyaannya seputar gas Elpiji. Jika Anda memerlukan kepastian cepat dari petugas pengelola, silakan klik tombol 'Chat Petugas'.";
+            return "Pesan Anda sudah kami catat. Agar bisa dijawab lebih lengkap oleh admin, silakan tekan tombol 'Chat Petugas' ya.";
         }
 
         if ($service === 'penyewaan') {
-            if (Str::contains($q, ['sop', 'rusak', 'tanggung', 'ganti'])) {
-                return "Ketentuan sewa mengacu pada SOP desa: Penyewa wajib menjaga keutuhan alat. Kerusakan akibat kelalaian pemakaian menjadi tanggung jawab penyewa sesuai ketentuan berlaku.";
+            if (Str::contains($q, ['sop', 'rusak', 'tanggung', 'ganti', 'syarat'])) {
+                return "Sebagai informasi, penyewa diharapkan menjaga kondisi alat tetap baik selama masa sewa. Jika terjadi kerusakan akibat kelalaian, biaya perbaikan akan menjadi tanggung jawab penyewa.";
             }
             if (Str::contains($q, ['tarif', 'harga', 'biaya', 'ongkos'])) {
-                return "Tarif sewa alat dihitung per hari atau per durasi yang dipilih pada formulir. Rincian biaya transparan dan tertera pada setiap kartu barang.";
+                return "Biaya penyewaan dihitung berdasarkan lama hari penyewaan. Harga detailnya sudah tertera langsung di halaman detail alat tersebut ya.";
             }
-            return "Informasi alat Anda telah kami terima. Untuk informasi jadwal pengambilan alat secara langsung, silakan klik tombol 'Chat Petugas'.";
+            return "Pertanyaan Anda sudah masuk ke sistem kami. Untuk konfirmasi ketersediaan alat atau info lainnya, silakan tekan tombol 'Chat Petugas'.";
         }
 
         if ($service === 'mobil') {
-            if (Str::contains($q, ['supir', 'driver', 'lepas kunci'])) {
-                return "Penyewaan mobil operasional desa menyediakan opsi Lepas Kunci (dengan verifikasi KTP/SIM) maupun Dengan Supir berpengalaman dari petugas BUMDes.";
+            if (Str::contains($q, ['supir', 'driver', 'petugas'])) {
+                return "Layanan penyewaan mobil operasional kami sudah termasuk supir (driver) dari petugas BUMDes untuk memastikan keamanan dan kenyamanan perjalanan Anda.";
             }
             if (Str::contains($q, ['syarat', 'dokumen', 'jaminan'])) {
-                return "Persyaratan umum penyewaan kendaraan meliputi: KTP asli warga desa/Kecamatan, SIM yang berlaku, dan menyetujui formulir komitmen tanggung jawab kendaraan.";
+                return "Persyaratan utama untuk penyewaan mobil adalah KTP warga setempat yang masih berlaku dan persetujuan surat tanggung jawab penggunaan kendaraan.";
             }
-            return "Armada mobil operasional kami siap melayani perjalanan dinas maupun warga. Klik 'Chat Petugas' untuk memesan supir atau memastikan jadwal kosong armada.";
+            return "Pesan Anda telah kami terima. Untuk memastikan ketersediaan jadwal mobil atau melakukan pemesanan, silakan tekan tombol 'Chat Petugas' ya.";
         }
 
         if ($service === 'fasilitas_umum') {
             if (Str::contains($q, ['jadwal', 'kosong', 'tanggal', 'booking'])) {
-                return "Jadwal gedung serbaguna atau lapangan dapat dicek pada kalender pemesanan di halaman detail fasilitas. Silakan ajukan tanggal yang diinginkan.";
+                return "Anda dapat melihat ketersediaan tanggal langsung dari halaman fasilitas ini. Jika ingin memastikan jadwal yang spesifik, silakan pilih tanggalnya atau hubungi admin kami.";
             }
             if (Str::contains($q, ['kapasitas', 'muat', 'orang'])) {
-                return "Kapasitas Gedung Serbaguna Desa dapat menampung hingga 300-500 orang untuk acara pernikahan, rapat warga, atau kegiatan olahraga tertutup.";
+                return "Setiap fasilitas memiliki kapasitas yang berbeda-beda, mulai dari rapat kecil hingga acara pernikahan yang bisa menampung ratusan orang. Informasi detail ada di deskripsi fasilitas ya.";
             }
-            return "Pusat pelayanan fasilitas desa siap memfasilitasi kebutuhan acara Anda. Klik 'Chat Petugas' untuk koordinasi izin dan teknis penggunaan fasilitas.";
+            return "Pesan Anda tentang fasilitas umum sudah kami terima. Silakan tekan tombol 'Chat Petugas' agar admin kami bisa langsung membantu kebutuhan acara Anda.";
         }
 
-        return "Pesan Anda telah kami catat. Untuk respon langsung dari pengelola desa, silakan klik tombol 'Chat Petugas'.";
+        return "Pesan Anda telah kami terima. Untuk respon cepat langsung dari petugas desa, silakan klik tombol 'Chat Petugas'.";
     }
 }
