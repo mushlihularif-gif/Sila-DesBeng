@@ -1092,7 +1092,13 @@ class ReceiptGeneratorService
                     imagecopyresampled($image, $qrImage, $qrX, $yQr, 0, 0, $qrSize, $qrSize, imagesx($qrImage), imagesy($qrImage));
                     
                     // Tambahkan Logo SiladesBeng di tengah QR Code
-                    $logoPath = public_path('Admin/img/illustrations/logodomain.png');
+                    // Versi 256px, BUKAN logodomain.png yang 5000x5000.
+                    // GD mendekode PNG jadi bitmap mentah: yang 5000x5000 memakan
+                    // ~95 MB memori, dan bersama latar struk (~16 MB) plus Laravel
+                    // sendiri, batas 128 MB di hosting langsung jebol — pemesanan
+                    // gagal dengan "Server Error" tanpa petunjuk apa pun.
+                    // Logonya toh cuma digambar 88 piksel (qrSize 250 x 0.35).
+                    $logoPath = public_path('Admin/img/illustrations/logodomain-256.png');
                     if (file_exists($logoPath)) {
                         $logoImage = @imagecreatefrompng($logoPath);
                         if ($logoImage) {

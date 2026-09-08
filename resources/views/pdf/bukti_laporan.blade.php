@@ -466,7 +466,9 @@
                                 @else
                                     <div style="width: 80px; height: 80px; position: absolute; top: 0; left: 0; border: 1px dashed #ccc; text-align: center; line-height: 80px; font-size: 8pt; color: #999;">QR Error</div>
                                 @endif
-                                <img src="{{ public_path('Admin/img/illustrations/logodomain.png') }}" width="18" height="18" style="position: absolute; top: 31px; left: 31px; background-color: white; padding: 2px; border-radius: 4px;" alt="Logo SiladesBeng">
+                                {{-- Versi 256px: yang asli 5000x5000 dan menghabiskan ~95 MB memori saat
+     didekode, padahal di sini hanya digambar 18x18. --}}
+                                <img src="{{ public_path('Admin/img/illustrations/logodomain-256.png') }}" width="18" height="18" style="position: absolute; top: 31px; left: 31px; background-color: white; padding: 2px; border-radius: 4px;" alt="Logo SiladesBeng">
                             </div>
 
                             @if(!empty(trim($handler_name ?? '')))
