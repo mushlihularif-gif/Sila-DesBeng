@@ -39,3 +39,7 @@ security/*.log
 
 # Arsip vendor untuk unggahan manual, jangan pernah masuk repo
 vendor.zip
+
+/storage/framework/cache/data/*
+/storage/framework/sessions/*
+/storage/framework/views/*
