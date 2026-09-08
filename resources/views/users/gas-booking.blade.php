@@ -662,7 +662,7 @@
                                 class="payment-method-btn group relative py-4 px-2 rounded-2xl font-bold transition-all duration-300 bg-white shadow-sm border border-gray-100 hover:border-blue-300 hover:shadow-md hover:-translate-y-1">
                             <div class="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
                             <div class="flex flex-col items-center justify-center gap-2 text-center h-full relative z-10">
-                                <div class="h-10 flex items-center justify-center"><img src="{{ asset('admin/img/banks/bca.png') }}" alt="BCA" class="h-9 max-w-full object-contain transform group-hover:scale-110 transition-transform"></div>
+                                <div class="h-10 flex items-center justify-center"><img src="{{ asset('Admin/img/banks/bca.png') }}" alt="BCA" class="h-9 max-w-full object-contain transform group-hover:scale-110 transition-transform"></div>
                                 <span class="text-[10px] uppercase tracking-widest text-gray-700 group-hover:text-blue-600 font-bold">Virtual Account</span>
                             </div>
                         </button>
@@ -674,7 +674,7 @@
                                 class="payment-method-btn group relative py-4 px-2 rounded-2xl font-bold transition-all duration-300 bg-white shadow-sm border border-gray-100 hover:border-orange-300 hover:shadow-md hover:-translate-y-1">
                             <div class="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
                             <div class="flex flex-col items-center justify-center gap-2 text-center h-full relative z-10">
-                                <div class="h-10 flex items-center justify-center"><img src="{{ asset('admin/img/banks/bri.png') }}" alt="BRI" class="h-9 max-w-full object-contain transform group-hover:scale-110 transition-transform"></div>
+                                <div class="h-10 flex items-center justify-center"><img src="{{ asset('Admin/img/banks/bri.png') }}" alt="BRI" class="h-9 max-w-full object-contain transform group-hover:scale-110 transition-transform"></div>
                                 <span class="text-[10px] uppercase tracking-widest text-gray-700 group-hover:text-orange-600 font-bold">Virtual Account</span>
                             </div>
                         </button>
@@ -686,7 +686,7 @@
                                 class="payment-method-btn group relative py-4 px-2 rounded-2xl font-bold transition-all duration-300 bg-white shadow-sm border border-gray-100 hover:border-yellow-400 hover:shadow-md hover:-translate-y-1">
                             <div class="absolute inset-0 bg-gradient-to-br from-yellow-500/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
                             <div class="flex flex-col items-center justify-center gap-2 text-center h-full relative z-10">
-                                <div class="h-10 flex items-center justify-center"><img src="{{ asset('admin/img/banks/mandiri.png') }}" alt="Mandiri" class="h-9 max-w-full object-contain transform group-hover:scale-110 transition-transform"></div>
+                                <div class="h-10 flex items-center justify-center"><img src="{{ asset('Admin/img/banks/mandiri.png') }}" alt="Mandiri" class="h-9 max-w-full object-contain transform group-hover:scale-110 transition-transform"></div>
                                 <span class="text-[10px] uppercase tracking-widest text-gray-700 group-hover:text-yellow-600 font-bold">Virtual Account</span>
                             </div>
                         </button>
@@ -698,7 +698,7 @@
                                 class="payment-method-btn group relative py-4 px-2 rounded-2xl font-bold transition-all duration-300 bg-white shadow-sm border border-gray-100 hover:border-orange-500 hover:shadow-md hover:-translate-y-1">
                             <div class="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
                             <div class="flex flex-col items-center justify-center gap-2 text-center h-full relative z-10">
-                                <div class="h-10 flex items-center justify-center"><img src="{{ asset('admin/img/banks/bni.png') }}" alt="BNI" class="h-9 max-w-full object-contain transform group-hover:scale-110 transition-transform"></div>
+                                <div class="h-10 flex items-center justify-center"><img src="{{ asset('Admin/img/banks/bni.png') }}" alt="BNI" class="h-9 max-w-full object-contain transform group-hover:scale-110 transition-transform"></div>
                                 <span class="text-[10px] uppercase tracking-widest text-gray-700 group-hover:text-orange-600 font-bold">Virtual Account</span>
                             </div>
                         </button>
@@ -726,7 +726,7 @@
                             
                             <div class="flex flex-col items-center justify-center gap-3 text-center h-full relative z-10">
                                 <div class="bg-white p-1 rounded-lg shadow-sm group-hover:shadow border border-gray-50 transform group-hover:scale-110 transition-all">
-                                    <img src="{{ asset('admin/img/banks/qris.svg') }}" alt="QRIS" class="h-6 object-contain" onerror="this.src='{{ asset('admin/img/banks/dana.png') }}'">
+                                    <img src="{{ asset('Admin/img/banks/qris.svg') }}" alt="QRIS" class="h-6 object-contain" onerror="this.src='{{ asset('assets/img/payment_logos/dana.png') }}'">
                                 </div>
                                 <span class="text-[10px] uppercase tracking-widest text-gray-700 group-hover:text-red-600 font-black">All E-Wallet</span>
                             </div>

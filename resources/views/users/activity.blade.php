@@ -688,11 +688,11 @@
     // Change Payment Method Logic
     async function openChangeMethodModal(orderId, currentMethod) {
         const banks = [
-            { id: 'bank_transfer_bca', name: 'BCA Virtual Account', img: '{{ asset('admin/img/banks/bca.png') }}' },
-            { id: 'bank_transfer_mandiri', name: 'Mandiri Virtual Account', img: '{{ asset('admin/img/banks/mandiri.png') }}' },
-            { id: 'bank_transfer_bni', name: 'BNI Virtual Account', img: '{{ asset('admin/img/banks/bni.png') }}' },
-            { id: 'bank_transfer_bri', name: 'BRI Virtual Account', img: '{{ asset('admin/img/banks/bri.png') }}' },
-            { id: 'qris', name: 'QRIS (All E-Wallet)', img: '{{ asset('admin/img/banks/qris.svg') }}', fallback: '{{ asset('admin/img/banks/dana.png') }}' }
+            { id: 'bank_transfer_bca', name: 'BCA Virtual Account', img: '{{ asset('Admin/img/banks/bca.png') }}' },
+            { id: 'bank_transfer_mandiri', name: 'Mandiri Virtual Account', img: '{{ asset('Admin/img/banks/mandiri.png') }}' },
+            { id: 'bank_transfer_bni', name: 'BNI Virtual Account', img: '{{ asset('Admin/img/banks/bni.png') }}' },
+            { id: 'bank_transfer_bri', name: 'BRI Virtual Account', img: '{{ asset('Admin/img/banks/bri.png') }}' },
+            { id: 'qris', name: 'QRIS (All E-Wallet)', img: '{{ asset('Admin/img/banks/qris.svg') }}', fallback: '{{ asset('assets/img/payment_logos/dana.png') }}' }
         ];
 
         let optionsHtml = `

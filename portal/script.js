@@ -8,7 +8,10 @@
 (function () {
     'use strict';
 
-    var konfig = window.KONFIG_PORTAL || {};
+    // Terima dua cara penulisan: window.KONFIG_PORTAL (dianjurkan) maupun
+    // deklarasi const/let di <head>, yang tidak pernah menempel di window.
+    var konfig = window.KONFIG_PORTAL
+        || (typeof KONFIG_PORTAL !== 'undefined' ? KONFIG_PORTAL : {});
     var BELUM = 'BELUM_DIISI';
 
     /* ---------- 1. Pasang dua tautan utama ----------
