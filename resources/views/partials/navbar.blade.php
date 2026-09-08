@@ -262,7 +262,7 @@
                                 @php $saldoWarga = \App\Support\DompetWarga::saldo(auth()->id()); @endphp
                                 <a href="{{ route('user.saldo.index') }}" class="block px-4 py-2.5 text-gray-800 hover:bg-blue-50 hover:border-l-[3px] hover:border-l-blue-500 transition-all duration-150 border-l-[3px] border-l-transparent">
                                     <span class="text-[15px] font-normal flex items-center justify-center gap-2 whitespace-nowrap">
-                                        Saldo &amp; Alamat
+                                        Saldo dan Alamat
                                         @if($saldoWarga > 0)
                                             <span class="text-[11px] font-bold text-green-700 bg-green-100 rounded-full px-2 py-0.5">
                                                 Rp {{ number_format($saldoWarga, 0, ',', '.') }}
@@ -497,7 +497,7 @@
                 </a>
                 @php $saldoWargaMobile = \App\Support\DompetWarga::saldo(auth()->id()); @endphp
                 <a href="{{ route('user.saldo.index') }}" class="block w-full text-center px-4 py-2.5 rounded-lg font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition">
-                    Saldo &amp; Alamat
+                    Saldo dan Alamat
                     @if($saldoWargaMobile > 0)
                         <span class="ml-1 text-xs font-bold text-green-700">Rp {{ number_format($saldoWargaMobile, 0, ',', '.') }}</span>
                     @endif
