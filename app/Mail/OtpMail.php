@@ -9,8 +9,19 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class OtpMail extends Mailable
+class OtpMail extends Mailable implements ShouldQueue
 {
+    /**
+     * Dikirim lewat antrean, bukan saat request berjalan.
+     *
+     * Sebelumnya pendaftaran menahan warga sampai SMTP menjawab —
+     * 1-3 detik kalau lancar, dan menggantung sampai timeout kalau
+     * penyedia email melambat. Padahal akunnya sudah terbuat, sehingga
+     * warga mengira gagal lalu mendaftar ulang.
+     *
+     * SYARAT: worker harus berjalan (cron queue:work). Selama
+     * QUEUE_CONNECTION=sync, ini tetap berperilaku seperti dulu.
+     */
     use Queueable, SerializesModels;
 
     public $otp;

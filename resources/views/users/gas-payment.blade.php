@@ -86,13 +86,14 @@
                         <h3 class="font-bold text-xl text-gray-800 mb-2">Pembayaran Tunai</h3>
                         <p class="text-gray-600">Silakan lakukan pembayaran langsung ke admin/petugas saat menerima/mengambil gas.</p>
                     </div>
-                    @elseif(in_array($order->payment_channel, ['bank_transfer_bca', 'bank_transfer_bri', 'bank_transfer_mandiri', 'bank_transfer_bni']))
+                    @elseif(in_array($order->payment_channel, ['bank_transfer_bca', 'bank_transfer_bri', 'bank_transfer_mandiri', 'bank_transfer_bni', 'bank_transfer_bsi']))
                     @php
                         $bankLogos = [
                             'bank_transfer_bca' => ['name' => 'BCA', 'logo' => 'Admin/img/banks/bca.png', 'color' => 'text-blue-600'],
                             'bank_transfer_bri' => ['name' => 'BRI', 'logo' => 'Admin/img/banks/bri.png', 'color' => 'text-orange-600'],
                             'bank_transfer_mandiri' => ['name' => 'MANDIRI', 'logo' => 'Admin/img/banks/mandiri.png', 'color' => 'text-yellow-600'],
                             'bank_transfer_bni' => ['name' => 'BNI', 'logo' => 'Admin/img/banks/bni.png', 'color' => 'text-orange-500'],
+                            'bank_transfer_bsi' => ['name' => 'BSI', 'logo' => 'Admin/img/banks/bsi.png', 'color' => 'text-teal-600'],
                             'qris' => ['name' => 'QRIS', 'logo' => 'Admin/img/banks/qris.svg', 'color' => 'text-red-500'],
                         ];
                         $bank = $bankLogos[$order->payment_channel] ?? ['name' => strtoupper(str_replace('bank_transfer_', '', $order->payment_channel)), 'logo' => null, 'color' => 'text-gray-800'];

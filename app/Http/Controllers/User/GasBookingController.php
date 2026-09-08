@@ -34,7 +34,7 @@ class GasBookingController extends Controller
             // wilayah. 'transfer' sempat tidak ada di daftar ini padahal tombolnya
             // dirender dan sisa kode di bawah sudah menanganinya, jadi setiap warga
             // yang memilih Transfer Bank ditolak validasi tanpa penjelasan.
-            'payment_method' => 'required|in:tunai,transfer,ewallet,bank_transfer_bca,bank_transfer_bri,bank_transfer_bni,bank_transfer_mandiri,gopay,qris',
+            'payment_method' => 'required|in:tunai,transfer,ewallet,bank_transfer_bca,bank_transfer_bri,bank_transfer_bni,bank_transfer_mandiri,bank_transfer_bsi,gopay,qris',
             'payment_proof' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
         ]);
 
@@ -361,7 +361,7 @@ class GasBookingController extends Controller
         }
 
         $validated = $request->validate([
-            'payment_method' => 'required|in:bank_transfer_bca,bank_transfer_bri,bank_transfer_bni,bank_transfer_mandiri,gopay,qris',
+            'payment_method' => 'required|in:bank_transfer_bca,bank_transfer_bri,bank_transfer_bni,bank_transfer_mandiri,bank_transfer_bsi,gopay,qris',
         ]);
 
         $newMethod = $validated['payment_method'];

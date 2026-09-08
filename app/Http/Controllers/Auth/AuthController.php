@@ -50,22 +50,20 @@ class AuthController extends Controller
             ]);
 
             // # ===================================================================
-            // # MODE SANDBOX UNTUK MASS-TESTING DEMO
+            // Pengiriman OTP sungguhan: email lewat SMTP, WhatsApp lewat Fonnte.
             // # ===================================================================
             if ($validated['otp_method'] === 'email') {
-                Mail::to($validated['email'])->send(new OtpMail($otpCode));
+                Mail::to($validated['email'])->queue(new OtpMail($otpCode));
             } elseif ($validated['otp_method'] === 'whatsapp') {
                 $fonnte = new \App\Services\FonnteService();
                 $fonnte->sendOtp($validated['phone'], $otpCode);
             }
             // # ===================================================================
 
-            session()->flash('otp_demo_sandbox_code', $otpCode);
-            session()->flash('trigger_open_otp_tab', true);
 
             $methodText = $validated['otp_method'] === 'whatsapp' ? 'nomor WhatsApp' : 'email';
             return redirect()->route('beranda')->with('open_otp_modal', true)
-                ->with('success', '🔑 Kode OTP Anda: ' . $otpCode . ' — (dikirim ke ' . $methodText . ' Anda)');
+                ->with('success', 'Kode OTP telah dikirim ke ' . $methodText . ' Anda. Berlaku 5 menit.');
         } catch (\Illuminate\Validation\ValidationException $e) {
             return redirect()->back()->withErrors($e->errors())->withInput()->with('open_register_modal', true);
         } catch (\Exception $e) {
@@ -82,39 +80,6 @@ class AuthController extends Controller
         return redirect()->route('beranda')->with('open_otp_modal', true);
     }
 
-    public function showSandboxOtp()
-    {
-        $otpCode = '1234'; // Default fallback
-        $method = 'Email';
-
-        if (session('temp_registration')) {
-            $otpCode = session('temp_registration')['otp_code'] ?? '1234';
-            if (isset(session('temp_registration')['otp_method']) && session('temp_registration')['otp_method'] === 'whatsapp') {
-                $method = 'WhatsApp';
-            }
-        } elseif (session('forgot_password_data')) {
-            $otpCode = session('forgot_password_data')['otp_code'] ?? '1234';
-            if (isset(session('forgot_password_data')['otp_method']) && session('forgot_password_data')['otp_method'] === 'whatsapp') {
-                $method = 'WhatsApp';
-            }
-        }
-        
-        return response("
-            <html>
-            <head><title>🛡️ TESTING MODE: LAB OTP INTERCEPTOR</title></head>
-            <body style='background: #1e1e2e; color: #a6e3a1; font-family: monospace; padding: 50px; text-align: center;'>
-                <div style='border: 2px dashed #a6e3a1; padding: 30px; display: inline-block; border-radius: 10px; background: #252538;'>
-                    <h2 style='color: #cdd6f4; margin-top: 0;'>🔑 [SANDBOX LAB MODE]</h2>
-                    <p style='color: #bac2de; font-size: 1.1rem;'>Sistem mendeteksi request OTP dari Localhost. Log $method dialihkan ke layar ini:</p>
-                    <hr style='border: 1px dashed #45475a;'>
-                    <h1 style='font-size: 3rem; letter-spacing: 5px; margin: 20px 0;'>$otpCode</h1>
-                    <hr style='border: 1px dashed #45475a;'>
-                    <p style='color: #f38ba8; font-size: 0.9rem; margin-bottom: 0;'>⚠️ Jangan tutup tab ini sebelum memasukkan kode ke halaman verifikasi utama.</p>
-                </div>
-            </body>
-            </html>
-        ");
-    }
 
     public function verifyOtp(Request $request)
     {
@@ -216,8 +181,6 @@ class AuthController extends Controller
                 $method = session('google_otp_method', 'email');
             }
 
-            session()->flash('otp_demo_sandbox_code', $newOtpCode);
-            session()->flash('trigger_open_otp_tab', true);
 
             $methodText = ($method === 'whatsapp') ? 'nomor WhatsApp' : 'email';
             return redirect()->route('beranda')
@@ -375,16 +338,14 @@ class AuthController extends Controller
                 ]
             ]);
 
-            // # MODE SANDBOX UNTUK MASS-TESTING DEMO
+            // Pengiriman OTP sungguhan: email lewat SMTP, WhatsApp lewat Fonnte.
             if ($validated['otp_method'] === 'email') {
-                Mail::to($user->email)->send(new OtpMail($otpCode));
+                Mail::to($user->email)->queue(new OtpMail($otpCode));
             } elseif ($validated['otp_method'] === 'whatsapp') {
                 $fonnte = new \App\Services\FonnteService();
                 $fonnte->sendOtp($user->phone, $otpCode);
             }
 
-            session()->flash('otp_demo_sandbox_code', $otpCode);
-            session()->flash('trigger_open_otp_tab', true);
 
             $methodText = $validated['otp_method'] === 'whatsapp' ? 'nomor WhatsApp' : 'email';
             return redirect()->route('beranda')->with('open_forgot_otp_modal', true)
@@ -516,8 +477,6 @@ class AuthController extends Controller
 
             $method = session('forgot_password_otp_method', 'email');
 
-            session()->flash('otp_demo_sandbox_code', $newOtpCode);
-            session()->flash('trigger_open_otp_tab', true);
 
             $methodText = ($method === 'whatsapp') ? 'nomor WhatsApp' : 'email';
             return redirect()->route('beranda')

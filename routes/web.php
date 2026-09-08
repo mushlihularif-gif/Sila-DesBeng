@@ -360,7 +360,6 @@ Route::get('/receipt/pasar/{id}/download', [App\Http\Controllers\User\ReceiptCon
 Route::post('/auth/register', [AuthController::class, 'register'])->name('auth.register')->middleware('throttle:5,5');
 Route::get('/auth/otp', [AuthController::class, 'showOtpForm'])->name('auth.otp.view');
 Route::post('/auth/verify-otp', [AuthController::class, 'verifyOtp'])->name('auth.verify-otp')->middleware('throttle:10,5');
-Route::get('/auth/sandbox-otp-display', [AuthController::class, 'showSandboxOtp'])->name('auth.sandbox.otp');
 Route::post('/auth/resend-otp', [AuthController::class, 'resendOtp'])->name('auth.resend-otp')->middleware('throttle:3,5');
 Route::get('/auth/login', function () {
     return redirect()->route('beranda')->with('open_login_modal', true);

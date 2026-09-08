@@ -401,7 +401,7 @@ class PasarDaerahController extends Controller
 
         $validated = $request->validate([
             'delivery_method' => 'required|in:antar,jemput',
-            'payment_method' => 'required|in:tunai,bank_transfer,transfer_manual,bank_transfer_bca,bank_transfer_bri,bank_transfer_bni,bank_transfer_mandiri,gopay,qris,COD,virtual_account',
+            'payment_method' => 'required|in:tunai,bank_transfer,transfer_manual,bank_transfer_bca,bank_transfer_bri,bank_transfer_bni,bank_transfer_mandiri,bank_transfer_bsi,gopay,qris,COD,virtual_account',
             'full_name' => 'required|string|max:255',
             'phone' => 'required|string',
             'delivery_address' => 'required_if:delivery_method,antar|string|nullable',
