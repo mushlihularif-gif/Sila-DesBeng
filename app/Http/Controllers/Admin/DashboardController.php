@@ -406,6 +406,17 @@ public function index(Request $request)
             $activeServices = $userRegion->services->pluck('name')->unique()->values()->toArray();
         }
     }
+
+    // Staf unit memakai region_id warisan pembuatnya, jadi $activeServices di
+    // atas berisi SELURUH layanan aktif wilayah itu. Dipersempit ke unit yang
+    // benar-benar dipegangnya, supaya dashboard menampilkan pekerjaannya
+    // sendiri — bukan unit milik rekan yang tidak bisa ia buka.
+    if ($user && $user->role === 'staff') {
+        $activeServices = array_values(
+            array_intersect($activeServices, $user->layananDipegang())
+        );
+    }
+
     $data['activeServices'] = $activeServices;
 
     return view('admin.dashboard.index', $data);

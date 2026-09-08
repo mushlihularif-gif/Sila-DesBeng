@@ -13,8 +13,11 @@ class NotificationController extends Controller
     {
         $search = $request->get('search');
         
-        // Ambil semua notifikasi untuk admin, diurutkan dari yang terbaru
-        $notifications = \App\Models\AdminNotification::when($search, function ($query, $search) {
+        // Hanya notifikasi yang berhak dilihat pengguna ini, diurutkan dari
+        // yang terbaru. Tanpa untukPengguna(), halaman ini menampilkan
+        // notifikasi seluruh wilayah kepada siapa pun yang membukanya.
+        $notifications = \App\Models\AdminNotification::untukPengguna(auth()->user())
+            ->when($search, function ($query, $search) {
                 return $query->searchWhereLike(['title', 'message'], $search);
             })
             ->orderBy('created_at', 'desc')
@@ -60,22 +63,41 @@ class NotificationController extends Controller
         return redirect()->route('admin.notifications.index')->with('success', 'Notifikasi berhasil dikirim.');
     }
 
-    public function markAsRead($id)
+    public function markAsRead(Request $request, $id)
     {
-        $notification = \App\Models\AdminNotification::findOrFail($id);
+        // Dibatasi untukPengguna(): tanpa itu, siapa pun yang menebak id bisa
+        // menandai notifikasi wilayah lain sudah dibaca, dan admin wilayah itu
+        // kehilangan penanda tanpa pernah membukanya.
+        $notification = \App\Models\AdminNotification::untukPengguna(auth()->user())
+            ->findOrFail($id);
+
         $notification->is_read = true;
         $notification->save();
+
+        // Lonceng memanggil ini lewat fetch() sambil halaman berpindah ke
+        // tujuan notifikasi, jadi jawabannya tidak boleh berupa redirect.
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true]);
+        }
 
         return redirect()->back()->with('success', 'Notifikasi ditandai sebagai sudah dibaca.');
     }
 
     public function markAllAsRead()
     {
-        // Tandai semua notifikasi yang belum dibaca sebagai sudah dibaca
-        \App\Models\AdminNotification::where('is_read', false)
+        // Tandai sebagai sudah dibaca, TERBATAS pada notifikasi milik pengguna
+        // ini. Tanpa untukPengguna(), satu klik dari admin desa mana pun akan
+        // menandai notifikasi seluruh wilayah lain sebagai sudah dibaca, dan
+        // admin wilayah itu tidak akan pernah tahu ada yang masuk.
+        \App\Models\AdminNotification::untukPengguna(auth()->user())
+            ->where('is_read', false)
             ->update([
                 'is_read' => true,
             ]);
+
+        if (request()->expectsJson()) {
+            return response()->json(['success' => true]);
+        }
 
         return redirect()->back()->with('success', 'Semua notifikasi ditandai sebagai sudah dibaca.');
     }
@@ -83,7 +105,11 @@ class NotificationController extends Controller
     public function destroy($id)
     {
         try {
-            $notification = \App\Models\AdminNotification::findOrFail($id);
+            // Satu-satunya pemanggil yang masih tanpa untukPengguna(), padahal
+            // ini yang paling merusak: menghapus notifikasi wilayah lain
+            // menghilangkannya untuk selamanya, bukan sekadar menandainya.
+            $notification = \App\Models\AdminNotification::untukPengguna(auth()->user())
+                ->findOrFail($id);
             $notification->delete();
 
             return redirect()->back()->with('success', 'Notifikasi berhasil dihapus.');

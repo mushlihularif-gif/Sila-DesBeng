@@ -298,14 +298,16 @@ class TransactionController extends Controller
         $oldStatus = $model->status;
         $model->update(['status' => 'completed']);
 
-        // Ikut tandai baris ledgernya terverifikasi. Sebelumnya hanya webhook
-        // gateway (Midtrans/Xendit) yang pernah menyentuh status ini, sehingga
-        // transfer manual/tunai yang ditinjau lewat tombol ini tidak pernah
-        // beranjak dari 'pending' walau petugas sudah menyatakan lunas di sini.
-        \App\Models\WalletTransaction::where('reference_type', $type === 'gas' ? 'gas' : $type)
-            ->where('reference_id', $model->id)
-            ->where('status', 'pending')
-            ->update(['status' => 'verified', 'verified_by' => auth()->id()]);
+        // Tandai pembayaran MANUAL pesanan ini sudah diterima. Sebelumnya blok
+        // ini menyapu semua baris 'pending' termasuk yang gateway, sehingga
+        // menekan tombol selesai bisa "melunasi" pesanan yang kode bayarnya
+        // kedaluwarsa tanpa pernah dibayar. Baris gateway kini hanya berubah
+        // lewat webhook penyedia pembayaran.
+        \App\Models\WalletTransaction::tandaiPembayaranManualDiterima(
+            $type === 'gas' ? 'gas' : $type,
+            $model->id,
+            auth()->id(),
+        );
 
         // Kembalikan stok barang jika status sebelumnya belum selesai
         if ($type === 'rental' && $oldStatus !== 'completed') {
