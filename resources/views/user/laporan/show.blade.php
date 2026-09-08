@@ -282,7 +282,7 @@
 
                         <form action="{{ route('user.laporan.destroy', $laporan) }}"
                             method="POST"
-                            onsubmit="return confirm('⚠️ Yakin ingin menghapus laporan ini?\n\nLaporan yang dihapus tidak dapat dikembalikan!')">
+                            data-konfirmasi="⚠️ Yakin ingin menghapus laporan ini?&#10;&#10;Laporan yang dihapus tidak dapat dikembalikan!">
                             @csrf
                             @method('DELETE')
 

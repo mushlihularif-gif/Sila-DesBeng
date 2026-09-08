@@ -101,7 +101,7 @@
                                         <i class="bx bx-edit-alt me-1"></i> Ubah
                                     </a>
                                     <form action="{{ route('admin.unit.penjualan_gas.destroy', $gas->id) }}" method="POST"
-                                        onsubmit="return confirm('Apakah Anda yakin ingin menghapus gas ini?');">
+                                        data-konfirmasi="Apakah Anda yakin ingin menghapus gas ini?">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-danger px-4">

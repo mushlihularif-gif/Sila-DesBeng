@@ -52,7 +52,7 @@
                         <a href="{{ route('admin.announcements.edit', $item->id) }}" class="btn btn-sm btn-info rounded-pill px-3 shadow-sm">
                             <i class="bx bx-edit-alt me-1"></i> Edit
                         </a>
-                        <form action="{{ route('admin.announcements.destroy', $item->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus ini?');">
+                        <form action="{{ route('admin.announcements.destroy', $item->id) }}" method="POST" class="d-inline" data-konfirmasi="Apakah Anda yakin ingin menghapus ini?">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="btn btn-sm btn-danger rounded-pill px-3 shadow-sm">

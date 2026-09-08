@@ -22,6 +22,18 @@ class DashboardController extends Controller
  */
 public function index(Request $request)
 {
+    // Super Admin Sistem (Diskominfotik) tidak mengelola operasional/keuangan
+    // per wilayah - dashboard "kinerja kabupaten" di bawah bukan untuk mereka.
+    // Mereka mendapat berandanya sendiri: rangkuman lintas modul tingkat platform.
+    // (Sebelumnya dialihkan ke Monitoring, sehingga tombol Dashboard di sidebar
+    // terasa rusak dan halaman dashboard tidak pernah bisa dibuka super admin.)
+    // Berlaku juga untuk akun staf platform (akun pendamping yang dibuat Super
+    // Admin lewat Kelola Staf): beranda mereka adalah dashboard Sistem Platform,
+    // bukan dashboard kinerja kabupaten.
+    if (auth()->user()->bolehAksesPlatform()) {
+        return app(SuperAdminDashboardController::class)->index();
+    }
+
     // Ambil pemesanan penyewaan yang tertunda atau minta batal
     $selectedYear = $request->input('year', now()->year);
     

@@ -12,6 +12,56 @@ class WilayahAdminController extends Controller
 
 
 
+    /**
+     * Wilayah yang boleh diurus admin RT/RW ini.
+     *
+     * Region::getDescendantIds(null) memakai where('parent_id', null), yang oleh
+     * Laravel diubah menjadi IS NULL — jadi yang kembali adalah SELURUH pohon
+     * wilayah dari akarnya. Akibatnya admin yang region_id-nya kosong justru
+     * melihat, dan bisa menanggapi, laporan satu kabupaten penuh. Di sini
+     * ketiadaan wilayah berarti tidak ada yang bisa dijangkau.
+     *
+     * @return array<int>
+     */
+    private function wilayahDiurus($user): array
+    {
+        if (! $user->region_id) {
+            return [];
+        }
+
+        $ids = \App\Models\Region::getDescendantIds($user->region_id);
+        $ids[] = $user->region_id;
+
+        return $ids;
+    }
+
+    /**
+     * Tingkat jabatan admin ini: 'rt', 'rw', 'desa', dan seterusnya.
+     *
+     * $user->region bisa null — akun yang belum ditempatkan, atau wilayahnya
+     * sudah dihapus — dan membaca ->type langsung membuat halamannya jatuh 500.
+     */
+    private function tingkatAdmin($user): ?string
+    {
+        return $user->region?->type;
+    }
+
+    /**
+     * Laporan hanya boleh disentuh oleh tingkat yang sedang memegangnya.
+     *
+     * escalateLaporan() sudah memeriksa hal ini, tetapi respondLaporan() dan
+     * resolveLaporan() tidak: admin RT bisa MENUTUP laporan yang sudah
+     * dieskalasi ke desa, mendahului tingkat yang seharusnya menanganinya.
+     */
+    private function tingkatSesuai($user, Laporan $laporan): bool
+    {
+        if ($user->role === 'super_admin') {
+            return true;
+        }
+
+        return $this->tingkatAdmin($user) === ($laporan->escalation_level ?? 'rt');
+    }
+
     public function indexLaporan(Request $request)
     {
         if ($splash = $this->checkDelegation($request, 'pelaporan', 'Pelaporan Masyarakat')) {
@@ -21,8 +71,7 @@ class WilayahAdminController extends Controller
         $user = auth()->user();
         
         // Dapatkan Region milik User beserta descendants
-        $allowedRegionIds = \App\Models\Region::getDescendantIds($user->region_id);
-        $allowedRegionIds[] = $user->region_id;
+        $allowedRegionIds = $this->wilayahDiurus($user);
 
         $query = Laporan::with(['user'])->whereIn('region_id', $allowedRegionIds)->orderBy('created_at', 'desc');
 
@@ -50,7 +99,14 @@ class WilayahAdminController extends Controller
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
-                $q->searchWhereLike(['nama', 'deskripsi', 'lokasi'], $search);
+                // 'nama' dan 'lokasi' tersimpan terenkripsi ChaCha20, jadi LIKE
+                // atas ciphertext tidak akan pernah cocok dengan kata yang
+                // diketik — pencariannya selama ini diam-diam nihil. Nama
+                // pelapor dicari lewat relasi user yang tidak dienkripsi.
+                $q->searchWhereLike(['deskripsi', 'kategori'], $search)
+                  ->orWhereHas('user', function ($uq) use ($search) {
+                      $uq->searchWhereLike(['name'], $search);
+                  });
             });
         }
 
@@ -79,8 +135,7 @@ class WilayahAdminController extends Controller
     {
         $user = auth()->user();
         
-        $allowedRegionIds = \App\Models\Region::getDescendantIds($user->region_id);
-        $allowedRegionIds[] = $user->region_id;
+        $allowedRegionIds = $this->wilayahDiurus($user);
         
         $query = \App\Models\Announcement::with(['admin', 'region'])->whereIn('region_id', $allowedRegionIds)->orderBy('created_at', 'desc');
         
@@ -162,8 +217,7 @@ class WilayahAdminController extends Controller
     {
         $user = auth()->user();
         
-        $allowedRegionIds = \App\Models\Region::getDescendantIds($user->region_id);
-        $allowedRegionIds[] = $user->region_id;
+        $allowedRegionIds = $this->wilayahDiurus($user);
         
         $query = \App\Models\Announcement::with(['admin', 'region'])->whereIn('region_id', $allowedRegionIds)->orderBy('created_at', 'desc');
         
@@ -246,8 +300,7 @@ class WilayahAdminController extends Controller
         $search = $request->get('search');
         $user = auth()->user();
         
-        $allowedRegionIds = \App\Models\Region::getDescendantIds($user->region_id);
-        $allowedRegionIds[] = $user->region_id;
+        $allowedRegionIds = $this->wilayahDiurus($user);
         
         $usersQuery = \App\Models\User::with('region')
             ->whereIn('region_id', $allowedRegionIds)
@@ -268,8 +321,7 @@ class WilayahAdminController extends Controller
     public function showLaporan($id)
     {
         $user = auth()->user();
-        $allowedRegionIds = \App\Models\Region::getDescendantIds($user->region_id);
-        $allowedRegionIds[] = $user->region_id;
+        $allowedRegionIds = $this->wilayahDiurus($user);
 
         $laporan = Laporan::with(['user', 'region'])->whereIn('region_id', $allowedRegionIds)->findOrFail($id);
         
@@ -283,8 +335,7 @@ class WilayahAdminController extends Controller
         ]);
 
         $user = auth()->user();
-        $allowedRegionIds = \App\Models\Region::getDescendantIds($user->region_id);
-        $allowedRegionIds[] = $user->region_id;
+        $allowedRegionIds = $this->wilayahDiurus($user);
 
         $laporan = Laporan::whereIn('region_id', $allowedRegionIds)->findOrFail($id);
 
@@ -292,8 +343,13 @@ class WilayahAdminController extends Controller
             return back()->with('error', 'Laporan sudah ditutup.');
         }
 
+        if (! $this->tingkatSesuai($user, $laporan)) {
+            return back()->with('error', 'Laporan ini sedang berada di tingkat "'
+                . ($laporan->escalation_level ?? 'rt') . '", bukan tingkat Anda.');
+        }
+
         // Tentukan level admin saat ini berdasarkan jabatannya
-        $currentAdminLevel = $user->region->type; // 'rt', 'rw', 'desa', dll
+        $currentAdminLevel = $this->tingkatAdmin($user); // 'rt', 'rw', 'desa', dll
 
         if ($currentAdminLevel === 'rt') {
             $laporan->catatan_rt = $request->catatan;
@@ -322,8 +378,7 @@ class WilayahAdminController extends Controller
         ]);
 
         $user = auth()->user();
-        $allowedRegionIds = \App\Models\Region::getDescendantIds($user->region_id);
-        $allowedRegionIds[] = $user->region_id;
+        $allowedRegionIds = $this->wilayahDiurus($user);
 
         $laporan = Laporan::whereIn('region_id', $allowedRegionIds)->findOrFail($id);
 
@@ -332,7 +387,7 @@ class WilayahAdminController extends Controller
         }
 
         // Pastikan level admin yang mencoba eskalasi sesuai dengan level laporan saat ini
-        $currentAdminLevel = $user->region->type;
+        $currentAdminLevel = $this->tingkatAdmin($user);
         $laporanLevel = $laporan->escalation_level ?? 'rt';
 
         if ($currentAdminLevel !== $laporanLevel && $user->role !== 'super_admin') {
@@ -355,8 +410,7 @@ class WilayahAdminController extends Controller
         ]);
 
         $user = auth()->user();
-        $allowedRegionIds = \App\Models\Region::getDescendantIds($user->region_id);
-        $allowedRegionIds[] = $user->region_id;
+        $allowedRegionIds = $this->wilayahDiurus($user);
 
         $laporan = Laporan::whereIn('region_id', $allowedRegionIds)->findOrFail($id);
 
@@ -364,7 +418,12 @@ class WilayahAdminController extends Controller
             return back()->with('error', 'Laporan sudah ditutup.');
         }
 
-        $currentAdminLevel = $user->region->type;
+        if (! $this->tingkatSesuai($user, $laporan)) {
+            return back()->with('error', 'Laporan ini sudah diteruskan ke tingkat "'
+                . ($laporan->escalation_level ?? 'rt') . '" dan hanya bisa diselesaikan di sana.');
+        }
+
+        $currentAdminLevel = $this->tingkatAdmin($user);
 
         if ($currentAdminLevel === 'rt') {
             $laporan->catatan_rt = $request->catatan ?? $laporan->catatan_rt;
@@ -393,8 +452,7 @@ class WilayahAdminController extends Controller
     public function cetakBukti($id)
     {
         $user = auth()->user();
-        $allowedRegionIds = \App\Models\Region::getDescendantIds($user->region_id);
-        $allowedRegionIds[] = $user->region_id;
+        $allowedRegionIds = $this->wilayahDiurus($user);
 
         $laporan = Laporan::with(['user', 'region'])->whereIn('region_id', $allowedRegionIds)->findOrFail($id);
 
@@ -420,7 +478,13 @@ class WilayahAdminController extends Controller
         $qrApiUrl = "https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=" . urlencode($qrUrl);
         $qrBase64 = '';
         try {
-            $context = stream_context_create(["ssl" => ["verify_peer" => false, "verify_peer_name" => false]]);
+            // Batas waktu wajib: tanpa itu file_get_contents menunggu selama
+            // batas default PHP kalau penyedia QR-nya lambat atau mati, dan
+            // unduhan surat bukti ikut menggantung selama itu.
+            $context = stream_context_create([
+                "ssl"  => ["verify_peer" => false, "verify_peer_name" => false],
+                "http" => ["timeout" => 5],
+            ]);
             $qrData = @file_get_contents($qrApiUrl, false, $context);
             if ($qrData) {
                 $qrBase64 = 'data:image/png;base64,' . base64_encode($qrData);
@@ -430,7 +494,10 @@ class WilayahAdminController extends Controller
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.bukti_laporan', [
             'laporan' => $laporan,
             'handler_name' => $handler_name,
-            'qr_base64' => $qrBase64,
+            // View pdf.bukti_laporan membaca $qrBase64. Dikirim sebagai
+            // 'qr_base64', QR-nya tidak pernah tampil — padahal justru QR itu
+            // yang dipakai memverifikasi keaslian suratnya.
+            'qrBase64' => $qrBase64,
         ]);
 
         $pdf->setPaper('A4', 'portrait');

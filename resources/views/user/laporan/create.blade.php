@@ -472,6 +472,26 @@
     let map, marker, geocoder;
     let pendingLat = null, pendingLng = null, pendingAddress = null;
 
+    // Pin digambar inline sebagai SVG, bukan diambil dari maps.google.com.
+    // Alasannya: Content-Security-Policy aplikasi ini tidak mengizinkan gambar
+    // dari host tersebut, sehingga ikon eksternal akan diblokir browser dan
+    // pin-nya jadi tidak kelihatan. Skema "data:" sudah diizinkan CSP.
+    const PIN_SVG = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="52" viewBox="0 0 40 52">
+            <ellipse cx="20" cy="48" rx="7" ry="2.5" fill="rgba(0,0,0,0.25)"/>
+            <path d="M20 1.5C10.9 1.5 3.5 8.9 3.5 18c0 11.9 16.5 30.5 16.5 30.5S36.5 29.9 36.5 18c0-9.1-7.4-16.5-16.5-16.5z"
+                  fill="#dc2626" stroke="#ffffff" stroke-width="2.5" stroke-linejoin="round"/>
+            <circle cx="20" cy="18" r="6.5" fill="#ffffff"/>
+        </svg>`;
+
+    function pinIcon() {
+        return {
+            url: "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(PIN_SVG.trim()),
+            scaledSize: new google.maps.Size(40, 52),
+            anchor: new google.maps.Point(20, 48), // ujung bawah pin tepat di titik koordinat
+        };
+    }
+
     function initMap() {
         const pakning = { lat: 1.0916, lng: 102.0724 };
 
@@ -492,7 +512,8 @@
             draggable: true,
             animation: google.maps.Animation.DROP,
             title: "Geser atau klik peta untuk mengubah lokasi",
-            icon: { url: "https://maps.google.com/mapfiles/ms/icons/red-dot.png" }
+            icon: pinIcon(),
+            zIndex: 999
         });
 
         map.addListener("click", function(event) {
@@ -574,7 +595,7 @@
         const text = document.getElementById('gps-text');
 
         if (!navigator.geolocation) {
-            alert('Browser Anda tidak mendukung fitur GPS/Geolocation.');
+            showSiladesBengToast('error', 'Gagal', 'Browser Anda tidak mendukung fitur GPS/Geolocation.');
             return;
         }
 
@@ -619,7 +640,7 @@
                     default:
                         msg += 'Terjadi kesalahan yang tidak diketahui.';
                 }
-                alert(msg);
+                showSiladesBengToast('info', 'Informasi', msg);
 
                 // Reset tombol
                 btn.disabled = false;
@@ -656,7 +677,7 @@
 
             // Check if adding these files exceeds maxFiles
             if (selectedFiles.length + files.length > maxFiles) {
-                alert(`Anda hanya dapat mengunggah maksimal ${maxFiles} foto.`);
+                showSiladesBengToast('warning', 'Perhatian', `Anda hanya dapat mengunggah maksimal ${maxFiles} foto.`);
                 event.target.value = ''; // Reset input
                 return;
             }
@@ -665,7 +686,7 @@
             let validFilesAdded = false;
             files.forEach(file => {
                 if (file.size > 2 * 1024 * 1024) {
-                    alert(`File ${file.name} terlalu besar. Maksimal 2MB.`);
+                    showSiladesBengToast('error', 'Gagal', `File ${file.name} terlalu besar. Maksimal 2MB.`);
                 } else {
                     selectedFiles.push(file);
                     dataTransfer.items.add(file);

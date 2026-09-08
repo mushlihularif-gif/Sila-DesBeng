@@ -61,17 +61,17 @@
             const confirmPassword = formData.get('new_password_confirmation');
 
             if (!currentPassword || !newPassword || !confirmPassword) {
-                alert('Semua field harus diisi');
+                showSiladesBengToast('warning', 'Perhatian', 'Semua field harus diisi');
                 return;
             }
 
             if (newPassword.length < 8) {
-                alert('Kata sandi baru minimal 8 karakter');
+                showSiladesBengToast('warning', 'Perhatian', 'Kata sandi baru minimal 8 karakter');
                 return;
             }
 
             if (newPassword !== confirmPassword) {
-                alert('Konfirmasi kata sandi tidak cocok');
+                showSiladesBengToast('error', 'Gagal', 'Konfirmasi kata sandi tidak cocok');
                 return;
             }
 
@@ -101,12 +101,12 @@
                     // Reset form
                     form.reset();
                 } else {
-                    alert(data.message || 'Terjadi kesalahan');
+                    showSiladesBengToast('error', 'Gagal', data.message || 'Terjadi kesalahan');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Terjadi kesalahan: ' + error.message);
+                showSiladesBengToast('error', 'Gagal', 'Terjadi kesalahan: ' + error.message);
             })
             .finally(() => {
                 button.disabled = false;
@@ -180,7 +180,7 @@
             const originalText = button.innerHTML;
             
             if (otp.length !== 4) {
-                alert('Masukkan 4 digit kode OTP');
+                showSiladesBengToast('warning', 'Perhatian', 'Masukkan 4 digit kode OTP');
                 return;
             }
 
@@ -214,7 +214,7 @@
                         input.classList.remove('filled');
                     });
                 } else {
-                    alert(data.message || 'Kode OTP tidak valid');
+                    showSiladesBengToast('error', 'Gagal', data.message || 'Kode OTP tidak valid');
                     // Clear OTP inputs for retry
                     otpInputs.forEach(input => {
                         input.value = '';
@@ -225,7 +225,7 @@
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Terjadi kesalahan jaringan');
+                showSiladesBengToast('error', 'Gagal', 'Terjadi kesalahan jaringan');
             })
             .finally(() => {
                 button.disabled = false;
@@ -253,7 +253,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert(data.message || 'Kode OTP baru telah dikirim');
+                    showSiladesBengToast('success', 'Berhasil', data.message || 'Kode OTP baru telah dikirim');
                     
                     // Clear and focus first input
                     otpInputs.forEach(input => {
@@ -262,12 +262,12 @@
                     });
                     otpInputs[0].focus();
                 } else {
-                    alert(data.message || 'Gagal mengirim ulang OTP');
+                    showSiladesBengToast('error', 'Gagal', data.message || 'Gagal mengirim ulang OTP');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Terjadi kesalahan jaringan');
+                showSiladesBengToast('error', 'Gagal', 'Terjadi kesalahan jaringan');
             })
             .finally(() => {
                 link.innerHTML = originalText;

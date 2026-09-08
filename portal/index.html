@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SiladesBeng — Portal Layanan Digital Desa Kabupaten Bengkalis</title>
+    <meta name="description" content="Portal resmi SiladesBeng (Sistem Sinergi Layanan dan Aspirasi Desa) Kabupaten Bengkalis. Akses layanan BUMDes, pasar daerah, dan pelaporan warga lewat web atau aplikasi mobile.">
+    <meta name="theme-color" content="#115789">
+    <link rel="icon" href="assets/img/brand/favicon.ico" sizes="any">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="style.css">
+
+    <!-- ============================================================
+         ISI DUA LINK DI BAWAH INI SAJA.
+
+         linkWeb   = alamat web SiladesBeng yang sudah di-hosting
+                     (tombol "Buka Layanan Web")
+         linkDrive = link Google Drive berisi file APK aplikasi mobile
+                     (tombol "Unduh Aplikasi Mobile")
+
+         Biarkan apa adanya kalau belum ada — tombolnya otomatis
+         berubah jadi "Segera hadir" dan tidak bisa diklik.
+         ============================================================ -->
+    <script>
+        const KONFIG_PORTAL = {
+            linkWeb:   'BELUM_DIISI',
+            linkDrive: 'BELUM_DIISI',
+
+            /* Opsional — dipakai di footer & bilah atas. */
+            email:    'siladesbeng@bengkaliskab.go.id',
+            telepon:  '(0766) 21001',
+            alamat:   'Kompleks Perkantoran Pemkab Bengkalis, Jl. Antara, Bengkalis, Riau'
+        };
+    </script>
+</head>
+<body>
+
+    <!-- ===== BILAH ATAS ===== -->
+    <div id="topbar">
+        <div class="wadah">
+            <span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                Pemerintah Kabupaten Bengkalis — Provinsi Riau
+            </span>
+            <span class="topbar-kanan">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                <a data-teks="email" href="#">siladesbeng@bengkaliskab.go.id</a>
+            </span>
+        </div>
+    </div>
+
+    <!-- ===== NAVIGASI ===== -->
+    <header id="header">
+        <div class="wadah">
+            <a href="#beranda" class="merek">
+                <img src="assets/img/brand/logo.webp" alt="Logo SiladesBeng">
+                <span class="merek-teks">
+                    <span class="merek-nama">SiladesBeng</span>
+                    <span class="merek-sub">Sistem Sinergi Layanan dan Aspirasi Desa</span>
+                </span>
+            </a>
+
+            <nav id="nav">
+                <ul>
+                    <li><a href="#beranda" class="aktif">Beranda</a></li>
+                    <li><a href="#tentang">Tentang</a></li>
+                    <li><a href="#layanan">Layanan</a></li>
+                    <li><a href="#aplikasi">Aplikasi</a></li>
+                    <li><a href="#akses">Akses</a></li>
+                </ul>
+            </nav>
+
+            <div class="aksi-nav">
+                <a href="#akses" data-tautan="web" class="tombol tombol-utama tombol-kecil">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                    <span data-label="web">Buka Layanan Web</span>
+                </a>
+                <button class="hamburger" id="hamburger" aria-label="Buka menu" aria-expanded="false">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <div id="menu-mobile">
+            <a href="#beranda">Beranda</a>
+            <a href="#tentang">Tentang</a>
+            <a href="#layanan">Layanan</a>
+            <a href="#aplikasi">Aplikasi</a>
+            <a href="#akses">Akses</a>
+            <a href="#akses" data-tautan="web" class="tombol tombol-utama">
+                <span data-label="web">Buka Layanan Web</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- ===== HERO ===== -->
+    <section id="beranda" class="hero">
+        <div class="wadah hero-isi">
+            <div class="hero-teks muncul">
+                <div class="hero-lencana">
+                    <i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></i>
+                    Portal Resmi Layanan Digital Desa
+                </div>
+
+                <h1>Satu Pintu Layanan Desa<br>se-Kabupaten <em>Bengkalis</em></h1>
+
+                <p class="hero-ket">
+                    SiladesBeng menyatukan layanan BUMDes, pasar daerah, dan aspirasi warga
+                    dari tingkat kabupaten hingga pelosok desa dalam satu ekosistem digital
+                    yang transparan dan mudah diakses.
+                </p>
+
+                <div class="hero-tombol">
+                    <a href="#akses" data-tautan="web" class="tombol tombol-emas">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                        <span data-label="web">Buka Layanan Web</span>
+                    </a>
+                    <a href="#akses" data-tautan="drive" class="tombol tombol-garis-putih">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        <span data-label="drive">Unduh Aplikasi Mobile</span>
+                    </a>
+                </div>
+
+                <div class="hero-catatan">
+                    <span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        Gratis untuk seluruh warga
+                    </span>
+                    <span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        Data terverifikasi KYC
+                    </span>
+                    <span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        Berlaku se-Kabupaten
+                    </span>
+                </div>
+            </div>
+
+            <div class="hero-visual muncul">
+                <div class="kartu-kaca">
+                    <div class="kk-kepala">
+                        <img src="assets/img/brand/logo.webp" alt="">
+                        <div>
+                            <b>Unit Layanan Terpadu</b>
+                            <small>Tersedia di web dan aplikasi</small>
+                        </div>
+                    </div>
+                    <div class="kk-grid">
+                        <div class="kk-item"><img src="assets/img/unit/alat.png" alt=""><span>Penyewaan Alat</span></div>
+                        <div class="kk-item"><img src="assets/img/unit/gas.png" alt=""><span>Pembelian Gas</span></div>
+                        <div class="kk-item"><img src="assets/img/unit/mobil.png" alt=""><span>Penyewaan Kendaraan</span></div>
+                        <div class="kk-item"><img src="assets/img/unit/fasilitas.png" alt=""><span>Fasilitas Umum</span></div>
+                        <div class="kk-item"><img src="assets/img/unit/pasar.png" alt=""><span>Pasar Daerah</span></div>
+                        <div class="kk-item"><img src="assets/img/unit/lapor.png" alt=""><span>Pelaporan Warga</span></div>
+                        <div class="kk-item"><img src="assets/img/unit/kabar.png" alt=""><span>Kabar dan Informasi Daerah</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== STATISTIK ===== -->
+    <div class="statistik">
+        <div class="wadah">
+            <div class="statistik-kotak beruntun">
+                <div class="stat"><b>7</b><span>Unit Layanan</span></div>
+                <div class="stat"><b>11</b><span>Kecamatan</span></div>
+                <div class="stat"><b>155+</b><span>Desa &amp; Kelurahan</span></div>
+                <div class="stat"><b>24/7</b><span>Akses Daring</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== TENTANG ===== -->
+    <section id="tentang" class="bagian">
+        <div class="wadah tentang-isi">
+            <div class="tentang-teks muncul">
+                <div class="label-bagian">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                    Tentang SiladesBeng
+                </div>
+                <h2 class="judul-bagian">Ekosistem digital desa yang <em>terpadu dan terukur</em></h2>
+
+                <p>
+                    <strong>SiladesBeng</strong> (Sistem Sinergi Layanan dan Aspirasi Desa) adalah platform
+                    digital terpadu berskala kabupaten yang memodernisasi tata kelola administrasi dan
+                    pelayanan publik, dari jaringan kecamatan hingga tingkat desa se-Kabupaten Bengkalis.
+                </p>
+                <p>
+                    Seluruh pilar layanan esensial masyarakat dan operasional BUMDes dihimpun dalam satu
+                    pintu: penyewaan alat, pendistribusian gas, peminjaman kendaraan, pemanfaatan fasilitas
+                    umum, pasar daerah, sampai <strong>Pelaporan Warga</strong> dan pusat
+                    <strong>Kabar dan Informasi Daerah</strong> secara <i>real-time</i>, dibantu asisten daring yang siap menjawab pertanyaan warga.
+                </p>
+
+                <ul class="poin">
+                    <li>
+                        <i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></i>
+                        <div>
+                            <b>Identitas warga terverifikasi</b>
+                            <span>Verifikasi KYC memastikan setiap transaksi layanan tercatat atas warga yang sah.</span>
+                        </div>
+                    </li>
+                    <li>
+                        <i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg></i>
+                        <div>
+                            <b>Tata kelola yang transparan</b>
+                            <span>Riwayat pemesanan, mutasi, dan laporan tersimpan rapi serta dapat ditelusuri.</span>
+                        </div>
+                    </li>
+                    <li>
+                        <i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></i>
+                        <div>
+                            <b>Kemandirian ekonomi desa</b>
+                            <span>Setiap desa mengelola unit usahanya sendiri di dalam satu sistem kabupaten.</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="tentang-gambar muncul">
+                <div class="papan-unit">
+                    <h4>Layanan dalam satu genggaman</h4>
+                    <p>Semua unit di bawah ini dapat diakses dari web maupun aplikasi mobile.</p>
+                    <div class="papan-kisi">
+                        <div><img src="assets/img/unit/alat.png" alt=""><span>Penyewaan Alat</span></div>
+                        <div><img src="assets/img/unit/gas.png" alt=""><span>Pembelian Gas</span></div>
+                        <div><img src="assets/img/unit/mobil.png" alt=""><span>Penyewaan Kendaraan</span></div>
+                        <div><img src="assets/img/unit/fasilitas.png" alt=""><span>Fasilitas Umum</span></div>
+                        <div><img src="assets/img/unit/pasar.png" alt=""><span>Pasar Daerah</span></div>
+                        <div><img src="assets/img/unit/lapor.png" alt=""><span>Pelaporan Warga</span></div>
+                        <div><img src="assets/img/unit/kabar.png" alt=""><span>Kabar dan Informasi Daerah</span></div>
+                    </div>
+                </div>
+                <div class="tempel-tentang">
+                    <i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></i>
+                    <div>
+                        <b>Satu akun, semua layanan</b>
+                        <span>Daftar sekali, pakai di seluruh unit layanan.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== LAYANAN ===== -->
+    <section id="layanan" class="bagian bagian-lembut">
+        <div class="wadah">
+            <div class="kepala-bagian muncul">
+                <div class="label-bagian">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                    Unit Layanan
+                </div>
+                <h2>Tujuh pilar layanan untuk <em>warga Bengkalis</em></h2>
+                <p>Setiap desa dapat mengaktifkan unit layanan sesuai kebutuhan wilayahnya masing-masing.</p>
+            </div>
+
+            <div class="kisi-layanan beruntun">
+                <article class="kartu-layanan" style="--aksen: #f59e0b; --aksen-lembut: #fef4e4;">
+                    <div class="ikon-layanan"><img src="assets/img/unit/alat.png" alt=""></div>
+                    <h3>Penyewaan Alat</h3>
+                    <p>Sewa tenda, sound system, kursi, dan perlengkapan acara milik BUMDes secara daring dengan jadwal yang jelas.</p>
+                    <span class="tanda-layanan">BUMDes</span>
+                </article>
+
+                <article class="kartu-layanan" style="--aksen: #3b82f6; --aksen-lembut: #e8f0fe;">
+                    <div class="ikon-layanan"><img src="assets/img/unit/gas.png" alt=""></div>
+                    <h3>Pembelian Gas</h3>
+                    <p>Pemesanan gas LPG bersubsidi maupun non-subsidi dengan kuota dan pencatatan distribusi yang tertib.</p>
+                    <span class="tanda-layanan">BUMDes</span>
+                </article>
+
+                <article class="kartu-layanan" style="--aksen: #10b981; --aksen-lembut: #e6f7f1;">
+                    <div class="ikon-layanan"><img src="assets/img/unit/mobil.png" alt=""></div>
+                    <h3>Penyewaan Kendaraan</h3>
+                    <p>Sewa mobil desa, ambulans, dan bus lengkap dengan pilihan supir sendiri atau disediakan, serta ketentuan bahan bakar.</p>
+                    <span class="tanda-layanan">Kendaraan</span>
+                </article>
+
+                <article class="kartu-layanan" style="--aksen: #8b5cf6; --aksen-lembut: #f0eafe;">
+                    <div class="ikon-layanan"><img src="assets/img/unit/fasilitas.png" alt=""></div>
+                    <h3>Fasilitas Umum</h3>
+                    <p>Ajukan pemakaian balai desa, lapangan, dan gedung serbaguna tanpa perlu antre di kantor desa.</p>
+                    <span class="tanda-layanan">Fasilitas</span>
+                </article>
+
+                <article class="kartu-layanan" style="--aksen: #ec4899; --aksen-lembut: #fdeaf3;">
+                    <div class="ikon-layanan"><img src="assets/img/unit/pasar.png" alt=""></div>
+                    <h3>Pasar Daerah</h3>
+                    <p>Etalase produk pelaku usaha se-Kabupaten Bengkalis dalam satu pasar digital yang terbuka untuk umum.</p>
+                    <span class="tanda-layanan">Publik</span>
+                </article>
+
+                <article class="kartu-layanan" style="--aksen: #ef4444; --aksen-lembut: #fdeaea;">
+                    <div class="ikon-layanan"><img src="assets/img/unit/lapor.png" alt=""></div>
+                    <h3>Pelaporan Warga</h3>
+                    <p>Sampaikan aspirasi dan laporan infrastruktur, kebersihan, atau keselamatan beserta bukti foto — status ditindaklanjuti secara terbuka.</p>
+                    <span class="tanda-layanan">Aspirasi</span>
+                </article>
+
+                <article class="kartu-layanan" style="--aksen: #06b6d4; --aksen-lembut: #e4f8fb;">
+                    <div class="ikon-layanan"><img src="assets/img/unit/kabar.png" alt=""></div>
+                    <h3>Kabar dan Informasi Daerah</h3>
+                    <p>Pengumuman resmi, agenda kegiatan, dan informasi daerah terbaru yang tersaji secara <i>real-time</i>.</p>
+                    <span class="tanda-layanan">Informasi</span>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== APLIKASI MOBILE ===== -->
+    <section id="aplikasi" class="bagian">
+        <div class="wadah aplikasi-isi">
+            <div class="muncul">
+                <div class="ponsel">
+                    <div class="ponsel-layar">
+                        <!-- Tambah tangkapan layar cukup dengan menambah <img> di sini;
+                             titik penanda dan pergantian otomatis menyesuaikan sendiri. -->
+                        <div class="jalur-layar" id="jalur-layar">
+                            <img src="assets/img/app/layar-1.jpg" alt="Beranda aplikasi SiladesBeng dengan daftar unit pelayanan">
+                            <img src="assets/img/app/layar-2.jpg" alt="Halaman masuk akun aplikasi SiladesBeng" loading="lazy">
+                        </div>
+                    </div>
+                    <div class="titik-layar" id="titik-layar"></div>
+                </div>
+            </div>
+
+            <div class="muncul">
+                <div class="label-bagian">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+                    Aplikasi Mobile
+                </div>
+                <h2 class="judul-bagian">Layanan desa <em>dalam genggaman</em></h2>
+                <p style="color: var(--teks-lembut); font-size: 15.5px;">
+                    Versi Android SiladesBeng dibagikan melalui Google Drive resmi pengelola.
+                    Unduh berkasnya, pasang, lalu masuk dengan akun yang sama seperti di web.
+                </p>
+
+                <ul class="fitur-aplikasi">
+                    <li>
+                        <i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></i>
+                        <div>
+                            <b>Notifikasi langsung</b>
+                            <span>Perkembangan pesanan dan laporan warga masuk ke ponsel tanpa perlu dibuka berkala.</span>
+                        </div>
+                    </li>
+                    <li>
+                        <i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></i>
+                        <div>
+                            <b>Lapor sambil di lokasi</b>
+                            <span>Ambil foto bukti lewat kamera dan tandai titik kejadian di peta, langsung dari tempatnya.</span>
+                        </div>
+                    </li>
+                    <li>
+                        <i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3z"/><path d="M20 20h1v1h-1z"/></svg></i>
+                        <div>
+                            <b>Tiket ber-QR untuk tiap pesanan</b>
+                            <span>Pesanan sewa menerbitkan tiket berkode QR yang tinggal ditunjukkan ke petugas unit.</span>
+                        </div>
+                    </li>
+                    <li>
+                        <i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8z"/></svg></i>
+                        <div>
+                            <b>Tanya Asisten dan obrolan unit</b>
+                            <span>Asisten daring menjawab pertanyaan seputar layanan, atau hubungi langsung petugas unit desa.</span>
+                        </div>
+                    </li>
+                </ul>
+
+                <a href="#akses" data-tautan="drive" class="tombol tombol-utama">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    <span data-label="drive">Unduh Aplikasi Mobile</span>
+                </a>
+
+                <div class="catatan-unduh">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    <span>
+                        Berkas dipasang di luar Play Store, jadi aktifkan izin <b>Instal aplikasi tidak dikenal</b>
+                        pada perangkat Android Anda saat pemasangan pertama.
+                    </span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== LANGKAH ===== -->
+    <section class="bagian bagian-lembut">
+        <div class="wadah">
+            <div class="kepala-bagian muncul">
+                <div class="label-bagian">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                    Cara Memulai
+                </div>
+                <h2>Empat langkah, layanan <em>langsung bisa dipakai</em></h2>
+            </div>
+
+            <div class="kisi-langkah beruntun">
+                <div class="langkah">
+                    <b class="nomor">1</b>
+                    <h4>Pilih jalur akses</h4>
+                    <p>Buka layanan lewat peramban, atau pasang aplikasi mobile dari tautan Google Drive resmi.</p>
+                </div>
+                <div class="langkah">
+                    <b class="nomor">2</b>
+                    <h4>Daftar akun warga</h4>
+                    <p>Daftar dengan email atau akun Google, lalu pilih desa atau kelurahan tempat Anda berdomisili.</p>
+                </div>
+                <div class="langkah">
+                    <b class="nomor">3</b>
+                    <h4>Verifikasi identitas</h4>
+                    <p>Pindai KTP dan lakukan verifikasi biometrik wajah — data dicocokkan dengan Dukcapil.</p>
+                </div>
+                <div class="langkah">
+                    <b class="nomor">4</b>
+                    <h4>Gunakan layanan</h4>
+                    <p>Pesan unit layanan, belanja di pasar daerah, atau kirim laporan warga.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== AKSES / DUA TOMBOL UTAMA ===== -->
+    <section id="akses" class="bagian akses">
+        <div class="wadah">
+            <div class="akses-isi muncul">
+                <h2>Siap mengakses <em>SiladesBeng</em>?</h2>
+                <p>Pilih jalur yang paling nyaman untuk Anda — keduanya memakai akun dan data yang sama.</p>
+
+                <div class="akses-tombol">
+                    <a href="#akses" data-tautan="web" class="tombol tombol-emas">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                        <span data-label="web">Buka Layanan Web</span>
+                    </a>
+                    <a href="#akses" data-tautan="drive" class="tombol tombol-garis-putih">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        <span data-label="drive">Unduh Aplikasi Mobile</span>
+                    </a>
+                </div>
+
+                <div class="kartu-pintu">
+                    <div class="pintu">
+                        <i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></i>
+                        <b>Versi Web</b>
+                        <p>Langsung dipakai dari peramban di komputer maupun ponsel, tanpa perlu memasang apa pun.</p>
+                        <a href="#akses" data-tautan="web" class="tombol tombol-garis-putih tombol-kecil">
+                            <span data-label="web">Buka Layanan Web</span>
+                        </a>
+                    </div>
+                    <div class="pintu">
+                        <i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></i>
+                        <b>Aplikasi Android</b>
+                        <p>Berkas pemasangan dibagikan lewat Google Drive resmi pengelola SiladesBeng.</p>
+                        <a href="#akses" data-tautan="drive" class="tombol tombol-garis-putih tombol-kecil">
+                            <span data-label="drive">Unduh Aplikasi Mobile</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== FOOTER ===== -->
+    <footer>
+        <div class="wadah">
+            <div class="footer-kisi">
+                <div class="footer-merek">
+                    <div class="footer-logo">
+                        <img src="assets/img/brand/logo.webp" alt="Logo SiladesBeng">
+                        <b>SiladesBeng</b>
+                    </div>
+                    <p>
+                        Sistem Sinergi Layanan dan Aspirasi Desa Kabupaten Bengkalis —
+                        platform digital terpadu untuk pelayanan publik dan penguatan
+                        ekonomi desa se-Kabupaten Bengkalis.
+                    </p>
+                </div>
+
+                <div>
+                    <h5>Navigasi</h5>
+                    <ul>
+                        <li><a href="#beranda">Beranda</a></li>
+                        <li><a href="#tentang">Tentang</a></li>
+                        <li><a href="#layanan">Layanan</a></li>
+                        <li><a href="#aplikasi">Aplikasi Mobile</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h5>Layanan</h5>
+                    <ul>
+                        <li><a href="#layanan">Penyewaan Alat</a></li>
+                        <li><a href="#layanan">Pembelian Gas</a></li>
+                        <li><a href="#layanan">Penyewaan Kendaraan</a></li>
+                        <li><a href="#layanan">Fasilitas Umum</a></li>
+                        <li><a href="#layanan">Pasar Daerah</a></li>
+                        <li><a href="#layanan">Pelaporan Warga</a></li>
+                        <li><a href="#layanan">Kabar dan Informasi Daerah</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h5>Kontak</h5>
+                    <ul class="footer-kontak">
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                            <span data-teks="alamat">Kompleks Perkantoran Pemkab Bengkalis, Riau</span>
+                        </li>
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                            <a data-teks="email" href="#">siladesbeng@bengkaliskab.go.id</a>
+                        </li>
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                            <a data-teks="telepon" href="#">(0766) 21001</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bawah">
+                <span>&copy; <span id="tahun">2026</span> SiladesBeng — Pemerintah Kabupaten Bengkalis. Seluruh hak cipta dilindungi.</span>
+                <span>Sistem Sinergi Layanan dan Aspirasi Desa</span>
+            </div>
+        </div>
+    </footer>
+
+    <button class="ke-atas" id="ke-atas" aria-label="Kembali ke atas">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+    </button>
+
+    <script src="script.js"></script>
+</body>
+</html>

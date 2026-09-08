@@ -24,9 +24,17 @@ class GasBookingController extends Controller
             'delivery_method' => 'required|in:antar,jemput',
             'buyer_name' => 'required|string|max:255',
             'buyer_address' => 'required|string',
+            // Titik antar hanya terisi bila warga memilih diantar; kolomnya
+            // memang boleh kosong untuk pesanan yang diambil sendiri.
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
             'nomor_kk' => 'required|string|size:16',
             'quantity' => 'required|integer|min:1|max:100',
-            'payment_method' => 'required|in:tunai,bank_transfer_bca,bank_transfer_bri,bank_transfer_bni,bank_transfer_mandiri,gopay,qris',
+            // 'transfer' dan 'ewallet' adalah pembayaran manual ke rekening/dompet
+            // wilayah. 'transfer' sempat tidak ada di daftar ini padahal tombolnya
+            // dirender dan sisa kode di bawah sudah menanganinya, jadi setiap warga
+            // yang memilih Transfer Bank ditolak validasi tanpa penjelasan.
+            'payment_method' => 'required|in:tunai,transfer,ewallet,bank_transfer_bca,bank_transfer_bri,bank_transfer_bni,bank_transfer_mandiri,gopay,qris',
             'payment_proof' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
         ]);
 
@@ -97,6 +105,8 @@ class GasBookingController extends Controller
             'delivery_method' => $validated['delivery_method'],
             'payment_method' => ucfirst($validated['payment_method']),
             'address' => $validated['buyer_address'],
+            'latitude' => $validated['latitude'] ?? null,
+            'longitude' => $validated['longitude'] ?? null,
             'full_name' => $validated['buyer_name'],
             'email' => Auth::user()->email,
             'nomor_kk' => $validated['nomor_kk'],
@@ -110,11 +120,24 @@ class GasBookingController extends Controller
             'booking_id' => $order->id,
             'receipt_number' => TransactionReceipt::generateReceiptNumber('gas'),
             'user_id' => Auth::id(),
+            'region_id' => $gas->region_id,
             'item_name' => $gas->jenis_gas,
             'quantity' => $validated['quantity'],
             'total_amount' => $totalAmount,
             'payment_method' => $validated['payment_method'],
         ]);
+
+        // Catat pergerakan dana ke ledger wilayah. Pembayaran gateway ditahan dulu
+        // (escrow) sampai pesanan dikonfirmasi selesai; transfer manual/tunai
+        // langsung tercatat "masuk" karena dananya tidak pernah singgah di Midtrans.
+        \App\Models\WalletTransaction::catatPemasukan(
+            regionId: $gas->region_id,
+            referenceType: 'gas',
+            referenceId: $order->id,
+            amount: $totalAmount,
+            paymentMethod: $validated['payment_method'],
+            proofPath: $paymentProofPath,
+        );
 
         // Create admin notification
         AdminNotification::create([
@@ -137,12 +160,28 @@ class GasBookingController extends Controller
             'receipt_number' => $receipt->receipt_number,
         ];
 
-        // Midtrans Integration using Core API
-        if ($validated['payment_method'] !== 'tunai') {
-            \Midtrans\Config::$serverKey = config('services.midtrans.server_key');
-            \Midtrans\Config::$isProduction = config('services.midtrans.is_production');
-            \Midtrans\Config::$isSanitized = true;
-            \Midtrans\Config::$is3ds = true;
+        // Gateway hanya dijalankan untuk metode otomatis. 'tunai' dan 'transfer'
+        // (transfer manual ke rekening wilayah, dibuktikan lewat unggahan) tidak
+        // melewati gateway sama sekali.
+        $lewatGateway = ! in_array($validated['payment_method'], ['tunai', 'transfer', 'ewallet'], true);
+
+        if ($lewatGateway) {
+            // Kredensial WILAYAH, bukan kredensial platform. Kalau wilayah ini
+            // belum siap, gateway TIDAK dijalankan — lebih baik pesanan menunggu
+            // pembayaran manual daripada uang warga masuk ke rekening yang salah.
+            $siap = \App\Support\PenyediaPembayaran::terapkanMidtransWilayah($gas->region_id);
+
+            if (! $siap) {
+                \Illuminate\Support\Facades\Log::warning('Gateway dilewati: wilayah belum siap', [
+                    'region_id' => $gas->region_id,
+                    'alasan'    => \App\Support\PenyediaPembayaran::kesiapanWilayah($gas->region_id)['alasan'],
+                ]);
+
+                $lewatGateway = false;
+            }
+        }
+
+        if ($lewatGateway) {
 
             $paymentMethod = $validated['payment_method'];
             $paymentType = '';
@@ -339,10 +378,19 @@ class GasBookingController extends Controller
         // We do not change the local $order->order_number because it's used for display
         $midtransOrderId = $order->order_number . '-' . time();
 
-        \Midtrans\Config::$serverKey = config('services.midtrans.server_key');
-        \Midtrans\Config::$isProduction = config('services.midtrans.is_production');
-        \Midtrans\Config::$isSanitized = true;
-        \Midtrans\Config::$is3ds = true;
+        // Kunci milik wilayah gasnya, bukan kunci platform. Kalau wilayahnya belum
+        // siap, jangan diteruskan: SDK akan memakai kunci sisa di Config dan uang
+        // warga mendarat di rekening wilayah lain.
+        if (! \App\Support\PenyediaPembayaran::terapkanMidtransWilayah($gas->region_id)) {
+            \Log::warning('Ganti metode bayar dilewati: wilayah belum siap', [
+                'order_number' => $order->order_number,
+                'region_id'    => $gas->region_id,
+            ]);
+
+            return redirect()->back()->with('error',
+                'Pembayaran otomatis untuk wilayah ini sedang tidak tersedia. '
+                . 'Silakan pilih pembayaran tunai atau transfer manual.');
+        }
 
         $paymentType = '';
         if (str_starts_with($newMethod, 'bank_transfer_')) {

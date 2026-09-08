@@ -493,6 +493,20 @@ class PasarDaerahController extends Controller
                 'status' => 'pending',
             ]);
 
+            // Catat pergerakan dana ke ledger wilayah - sebelumnya tidak tercatat
+            // sama sekali di sini, lihat catatan yang sama di RentalBookingController.
+            // Dipanggil dengan nilai payment_method MENTAH (sebelum di-ucfirst di
+            // atas), karena itulah yang dikenali WalletTransaction::catatPemasukan()
+            // untuk membedakan tunai/transfer manual dari gateway.
+            \App\Models\WalletTransaction::catatPemasukan(
+                regionId: $region_id,
+                referenceType: 'pasar',
+                referenceId: $order->id,
+                amount: $grandTotal,
+                paymentMethod: $validated['payment_method'],
+                proofPath: $paymentProofPath,
+            );
+
             // Create Order Items & Reduce Stock
             foreach ($carts as $cart) {
                 PasarOrderItem::create([
@@ -545,7 +559,18 @@ class PasarDaerahController extends Controller
 
             // MIDTRANS INTEGRATION
             if (!in_array($validated['payment_method'], ['tunai', 'transfer_manual'])) {
-                $this->processMidtrans($order, $validated['payment_method'], $grandTotal);
+                // Kalau tagihannya tidak terbit, seluruh pesanan dibatalkan.
+                // Menyimpan pesanan tanpa cara membayar hanya menyisakan pesanan
+                // menggantung yang tidak bisa diselesaikan siapa pun.
+                if (! $this->processMidtrans($order, $validated['payment_method'], $grandTotal)) {
+                    \DB::rollBack();
+
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Pembayaran otomatis untuk wilayah ini sedang tidak tersedia. '
+                            . 'Silakan pilih pembayaran tunai atau transfer manual.',
+                    ], 422);
+                }
             }
 
             \DB::commit();
@@ -565,12 +590,23 @@ class PasarDaerahController extends Controller
         }
     }
 
+    /**
+     * @return bool true kalau tagihan gateway benar-benar terbit.
+     */
     private function processMidtrans($order, $paymentMethod, $totalAmount)
     {
-        \Midtrans\Config::$serverKey = config('services.midtrans.server_key');
-        \Midtrans\Config::$isProduction = config('services.midtrans.is_production');
-        \Midtrans\Config::$isSanitized = true;
-        \Midtrans\Config::$is3ds = true;
+        // Kunci milik WILAYAH pasarnya, bukan kunci platform. Tiap daerah memegang
+        // rekening dan akun Midtrans sendiri; memakai kunci platform di sini
+        // membuat uang warga mendarat di akun yang salah, dan callback-nya pun
+        // tidak akan cocok karena diverifikasi dengan kunci wilayah.
+        if (! \App\Support\PenyediaPembayaran::terapkanMidtransWilayah($order->region_id)) {
+            \Log::warning('Gateway pasar dilewati: wilayah belum siap', [
+                'order_number' => $order->order_number,
+                'region_id'    => $order->region_id,
+            ]);
+
+            return false;
+        }
 
         $paymentType = '';
         $bank = '';
@@ -630,17 +666,19 @@ class PasarDaerahController extends Controller
             }
             $order->save();
         } catch (\Exception $e) {
-            \Log::warning('Midtrans Error: ' . $e->getMessage());
-            // Mock response
-            $order->payment_channel = $paymentMethod;
-            $order->payment_expiry_time = now()->addDay();
-            if ($paymentType === 'bank_transfer' || $paymentType === 'echannel') {
-                $order->payment_va_number = rand(10000, 99999) . rand(100000, 999999);
-            } else if ($paymentType === 'qris' || $paymentType === 'gopay') {
-                $order->payment_qr_url = 'DUMMY_QR_CODE';
-            }
-            $order->save();
+            // JANGAN mengarang nomor virtual account di sini. Kode lama mengisinya
+            // dengan rand() dan menampilkannya ke warga seolah tagihan sungguhan -
+            // uang yang ditransfer ke sana tidak sampai ke mana pun dan tidak ada
+            // callback yang akan datang. Lebih baik pesanannya gagal terang-terangan.
+            \Log::error('Midtrans Error (pasar): ' . $e->getMessage(), [
+                'order_number' => $order->order_number,
+                'region_id'    => $order->region_id,
+            ]);
+
+            return false;
         }
+
+        return true;
     }
 
     public function payment($id)

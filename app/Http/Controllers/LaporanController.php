@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Laporan;
 use App\Models\Notification;
+use App\Models\Region;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -13,6 +14,105 @@ use Illuminate\Support\Str;
 
 class LaporanController extends Controller
 {
+    /**
+     * Desa (atau kelurahan) tempat warga ini berdomisili.
+     *
+     * region_id warga bisa menunjuk RT, RW, atau langsung desa, jadi ditelusuri
+     * ke atas sampai bertemu tingkat desa. Penelusurannya dibatasi jumlah
+     * langkah: data wilayah yang saling menunjuk (RT -> RW -> RT) sebelumnya
+     * membuat perulangan ini berputar selamanya.
+     */
+    private function desaWarga(?int $regionId): ?Region
+    {
+        if (! $regionId) {
+            return null;
+        }
+
+        $wilayahWarga = Region::find($regionId);
+        if (! $wilayahWarga) {
+            return null;
+        }
+
+        $temp = $wilayahWarga;
+        $langkah = 0;
+        while ($temp && $langkah++ < 10) {
+            if ($temp->type === 'desa' || $temp->type === 'kelurahan') {
+                return $temp;
+            }
+            $temp = $temp->parent;
+        }
+
+        // Cadangan untuk data wilayah yang tingkat desanya belum diberi type.
+        if ($wilayahWarga->type === 'rt') {
+            return $wilayahWarga->parent?->parent;
+        }
+        if ($wilayahWarga->type === 'rw') {
+            return $wilayahWarga->parent;
+        }
+
+        return null;
+    }
+
+    /**
+     * Wilayah yang boleh dituju sebuah laporan dari warga ini.
+     *
+     * @return array<int>
+     */
+    private function wilayahTujuanSah(User $user): array
+    {
+        $desa = $this->desaWarga($user->region_id);
+
+        $ids = [];
+        if ($desa) {
+            $ids = Region::getDescendantIds($desa->id);
+            $ids[] = $desa->id;
+        }
+        if ($user->region_id) {
+            $ids[] = $user->region_id;
+        }
+
+        return array_values(array_unique(array_map('intval', $ids)));
+    }
+
+    /**
+     * Siapa yang boleh membuka surat bukti sebuah laporan.
+     *
+     * Sebelumnya yang dicek hanya perannya: admin RT atau RW mana pun bisa
+     * mengunduh PDF laporan siapa saja di seluruh kabupaten, padahal isinya
+     * nama dan alamat pelapor dalam bentuk terbaca — dua kolom yang justru
+     * sengaja dienkripsi di basis data. Daftar perannya juga menyebut
+     * 'superadmin', peran yang tidak ada di sistem ini (yang benar
+     * 'super_admin'), sehingga Kominfo malah ikut tertolak.
+     */
+    private function bolehMelihatLaporan(Laporan $laporan, ?User $user): bool
+    {
+        if (! $user) {
+            return false;
+        }
+
+        if ((int) $laporan->user_id === (int) $user->id) {
+            return true;
+        }
+
+        if ($user->role === 'super_admin') {
+            return true;
+        }
+
+        $peranWilayah = ['admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'staff'];
+
+        // Tanpa wilayah, tidak ada yang bisa dijangkau. Region::getDescendantIds(null)
+        // justru mengembalikan SELURUH pohon wilayah, jadi tanpa penjaga ini
+        // admin yang region_id-nya kosong malah melihat satu kabupaten penuh.
+        if (! in_array($user->role, $peranWilayah, true) || ! $user->region_id) {
+            return false;
+        }
+
+        $jangkauan = Region::getDescendantIds($user->region_id);
+        $jangkauan[] = $user->region_id;
+
+        return in_array((int) $laporan->region_id, array_map('intval', $jangkauan), true);
+    }
+
     public function index()
     {
         $laporans = Laporan::where('user_id', auth()->id())
@@ -31,31 +131,10 @@ class LaporanController extends Controller
         //     return redirect()->back()->with('show_kyc_modal', true)->with('error', 'Anda harus melakukan verifikasi KTP terlebih dahulu untuk membuat laporan.');
         // }
         
-        // Ambil desa_id user (parent dari RT/RW user)
-        $desaId = null;
-        if ($user->region_id) {
-            $userRegion = \App\Models\Region::find($user->region_id);
-            if ($userRegion) {
-                // Naik ke atas hingga menemukan region bertipe 'desa'
-                $temp = $userRegion;
-                while ($temp) {
-                    if ($temp->type === 'desa' || $temp->type === 'kelurahan') {
-                        $desaId = $temp->id;
-                        break;
-                    }
-                    $temp = $temp->parent;
-                }
-                // Fallback: jika tidak ketemu desa, gunakan parent dari RW
-                if (!$desaId && $userRegion->type === 'rt') {
-                    $rwRegion = $userRegion->parent;
-                    if ($rwRegion && $rwRegion->parent_id) {
-                        $desaId = $rwRegion->parent_id;
-                    }
-                } elseif (!$desaId && $userRegion->type === 'rw') {
-                    $desaId = $userRegion->parent_id;
-                }
-            }
-        }
+        // Desa warga, lewat penelusuran yang sama dengan yang dipakai store()
+        // untuk memeriksa wilayah tujuan — supaya daftar RT/RW yang ditawarkan
+        // di formulir persis sama dengan yang nanti diterima saat disimpan.
+        $desaId = $this->desaWarga($user->region_id)?->id;
 
         // Ambil semua RW dan RT di bawah desa ini, dengan status admin-nya
         $allRWData = collect();
@@ -128,6 +207,19 @@ class LaporanController extends Controller
 
         $user = auth()->user();
 
+        // Wilayah tujuan wajib berada di dalam desa warga sendiri.
+        //
+        // Aturan 'exists:regions,id' saja hanya memastikan wilayahnya ada, bukan
+        // bahwa wilayah itu urusan warga ini: dengan menyisipkan target_region_id
+        // sebuah RT di desa lain, laporannya benar-benar tersimpan di sana dan
+        // muncul di daftar admin RT desa tersebut.
+        if (! empty($validated['target_region_id'])
+            && ! in_array((int) $validated['target_region_id'], $this->wilayahTujuanSah($user), true)) {
+            return back()
+                ->withInput()
+                ->withErrors(['target_region_id' => 'Wilayah tujuan harus berada di desa Anda sendiri.']);
+        }
+
         // Tentukan region_id tujuan laporan
         // Jika user memilih RT/RW dari dropdown, gunakan target_region_id
         // Jika tidak (pilih Desa), fallback ke region_id domisili user
@@ -143,6 +235,12 @@ class LaporanController extends Controller
             'latitude' => $validated['latitude'] ?? null,
             'longitude' => $validated['longitude'] ?? null,
             'tujuan_laporan' => $validated['tujuan_laporan'],
+            // Tingkat awal mengikuti tujuan laporan. Sebelumnya kolom ini tidak
+            // pernah diisi sehingga selalu memakai bawaannya, 'rt', walau
+            // laporannya ditujukan ke desa — akibatnya admin desa yang menekan
+            // Eskalasi justru menaikkannya ke 'rw', satu tingkat DI BAWAH
+            // dirinya sendiri.
+            'escalation_level' => $validated['tujuan_laporan'],
             'status' => 'Pending',
             'rw' => $user->rw,
             'rt' => $user->rt,
@@ -151,43 +249,41 @@ class LaporanController extends Controller
             'region_id' => $targetRegionId,
         ];
 
-        // Upload bukti SETELAH validasi
-        // Upload bukti SETELAH validasi
+        // Upload bukti SETELAH validasi.
+        //
+        // Lewat disk 'public', bukan $_SERVER['DOCUMENT_ROOT']. Nilai itu kosong
+        // di luar request web (antrean, artisan, pengujian), sehingga tujuannya
+        // jatuh menjadi '/storage/laporan' di akar drive. Jalur yang disimpan
+        // tetap berbentuk 'laporan/xxx.jpg', jadi asset('storage/'.$p) di view
+        // tidak berubah sama sekali — dan berkasnya kini bisa dihapus lagi lewat
+        // disk yang sama saat laporannya dibatalkan warga.
         if ($request->hasFile('bukti')) {
             $buktiPaths = [];
-            // PATH KE ROOT SUBDOMAIN (INI KUNCI)
-            $destination = $_SERVER['DOCUMENT_ROOT'] . '/storage/laporan';
-            if (!is_dir($destination)) {
-                mkdir($destination, 0755, true);
-            }
 
             foreach ($request->file('bukti') as $file) {
-                if ($file->isValid()) {
-                    $extension = strtolower($file->extension());
-                    
-                    // Strict whitelist extension
-                    $allowedExtensions = ['jpg', 'jpeg', 'png'];
-                    if (!in_array($extension, $allowedExtensions)) {
-                        return back()->with('error', 'Format file bukti tidak valid. Hanya JPG, JPEG, PNG yang diizinkan.')->withInput();
-                    }
-
-                    $filename = time() . '_' . Str::random(24) . '.' . $extension;
-                    $file->move($destination, $filename);
-                    
-                    // SIMPAN RELATIVE URL
-                    $buktiPaths[] = 'laporan/' . $filename;
+                if (! $file->isValid()) {
+                    continue;
                 }
+
+                $extension = strtolower($file->extension());
+
+                // Strict whitelist extension
+                $allowedExtensions = ['jpg', 'jpeg', 'png'];
+                if (!in_array($extension, $allowedExtensions)) {
+                    return back()->with('error', 'Format file bukti tidak valid. Hanya JPG, JPEG, PNG yang diizinkan.')->withInput();
+                }
+
+                $filename = time() . '_' . Str::random(24) . '.' . $extension;
+                $file->storeAs('laporan', $filename, 'public');
+
+                // SIMPAN RELATIVE URL
+                $buktiPaths[] = 'laporan/' . $filename;
             }
 
             if (!empty($buktiPaths)) {
                 $data['bukti'] = json_encode($buktiPaths);
             }
         }
-
-
-
-
-
 
         // Simpan laporan
         $laporan = Laporan::create($data);
@@ -265,9 +361,15 @@ class LaporanController extends Controller
                 Log::info('Laporan dikirim ke Admin Desa (fallback)');
             }
 
-            // Update tujuan laporan jika berubah karena eskalasi otomatis
+            // Update tujuan laporan jika berubah karena eskalasi otomatis.
+            // escalation_level ikut disamakan, kalau tidak laporan yang dialihkan
+            // ke desa karena RT-nya belum punya admin tetap tercatat di tingkat
+            // 'rt' dan tombol Eskalasi milik admin desa kembali salah arah.
             if ($actualDestination !== $validated['tujuan_laporan']) {
-                $laporan->update(['tujuan_laporan' => $actualDestination]);
+                $laporan->update([
+                    'tujuan_laporan'   => $actualDestination,
+                    'escalation_level' => $actualDestination,
+                ]);
             }
 
             // Kirim notifikasi ke admin yang sudah ditentukan
@@ -278,7 +380,10 @@ class LaporanController extends Controller
                     'type' => 'laporan_baru',
                     'title' => 'Laporan Baru Masuk',
                     'message' => "User {$user->name} telah melakukan pelaporan dari {$regionName}. Kategori: {$laporan->kategori}",
-                    'link' => '/admin/laporan/' . $laporan->id,
+                    // Rute admin untuk detail laporan warga adalah
+                    // /admin/pelaporan/{id}; '/admin/laporan/{id}' tidak pernah
+                    // ada, jadi setiap notifikasi laporan baru berujung 404.
+                    'link' => route('admin.pelaporan.show', $laporan->id),
                     'icon' => 'fas fa-file-alt',
                 ]);
             }
@@ -321,14 +426,19 @@ class LaporanController extends Controller
 
         $laporan = Laporan::with(['user', 'admin'])->findOrFail($id);
 
-        // Cast ke int untuk menghindari null / string mismatch
-        if ((int) $laporan->user_id !== (int) $user->id && !in_array($user->role, ['admin_desa', 'superadmin', 'admin_rt', 'admin_rw'])) {
-            abort(403);
+        if (! $this->bolehMelihatLaporan($laporan, $user)) {
+            abort(403, 'Laporan ini berada di luar wilayah wewenang Anda.');
         }
 
-        // Fetch QR Code from Google Charts API safely bypassing local SSL issues
+        // QR kode validasi surat.
+        //
+        // Dulu memakai chart.googleapis.com — layanan Google Image Charts yang
+        // sudah dihentikan dan kini menjawab HTTP 404. Halaman galatnya ikut
+        // ter-base64 lalu dipasang sebagai gambar QR, jadi surat buktinya membawa
+        // QR rusak yang tidak bisa dipindai. Sekarang memakai penyedia yang sama
+        // dengan cetakBukti() milik RT/RW supaya keduanya seragam.
         $qrData = urlencode(url('/validasi/laporan/' . $laporan->id . '?token=' . hash_hmac('sha256', $laporan->id . $laporan->created_at, config('app.key'))));
-        $qrUrl = "https://chart.googleapis.com/chart?chs=80x80&cht=qr&chl=" . $qrData;
+        $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=" . $qrData;
         
         try {
             $qrImage = \Illuminate\Support\Facades\Http::withoutVerifying()->timeout(10)->get($qrUrl)->body();
@@ -386,12 +496,16 @@ public function show($id)
         return back()->with('error', '❌ Laporan sudah melewati batas waktu penghapusan (24 jam).');
     }
 
-    // Hapus file bukti
-    if ($laporan->bukti) {
-        $filePath = public_path('storage/' . $laporan->bukti);
-        if (file_exists($filePath)) {
-            unlink($filePath);
-        }
+    // Hapus semua file bukti.
+    //
+    // Kolom `bukti` berisi JSON array jalur foto, bukan satu jalur. Menyusun
+    // path langsung dari nilainya menghasilkan
+    // 'storage/["laporan\/a.jpg","laporan\/b.jpg"]' yang tidak pernah cocok
+    // dengan berkas mana pun, sehingga foto warga tertinggal di server meski
+    // laporannya sudah dihapus. bukti_array sudah menangani laporan lama yang
+    // hanya menyimpan satu jalur sebagai string biasa.
+    foreach ($laporan->bukti_array as $jalur) {
+        Storage::disk('public')->delete($jalur);
     }
 
     // Hapus notifikasi terkait

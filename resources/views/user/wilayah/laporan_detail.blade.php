@@ -266,7 +266,7 @@
                                         <p class="text-xs text-gray-500 mb-2">Teruskan wewenang laporan ini ke tingkat <strong class="uppercase text-gray-800">{{ $laporan->getNextEscalationLevel() }}</strong>.</p>
                                     </div>
                                     <textarea id="catatan_eskalasi" name="catatan" rows="3" class="shadow-sm focus:ring-yellow-500 focus:border-yellow-500 block w-full sm:text-sm border-gray-300 rounded-md" required placeholder="Tuliskan alasan mengapa tingkat ini tidak sanggup menangani..."></textarea>
-                                    <button type="submit" class="mt-3 w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-yellow-800 bg-yellow-100 hover:bg-yellow-200 border-yellow-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-colors" onclick="return confirm('Apakah Anda yakin ingin melepas tanggung jawab laporan ini dan meneruskannya ke tingkat yang lebih tinggi?')">
+                                    <button type="submit" class="mt-3 w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-yellow-800 bg-yellow-100 hover:bg-yellow-200 border-yellow-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-colors" data-konfirmasi="Apakah Anda yakin ingin melepas tanggung jawab laporan ini dan meneruskannya ke tingkat yang lebih tinggi?">
                                         Teruskan ke Tingkat Atas
                                     </button>
                                 </form>
@@ -281,7 +281,7 @@
                                         <p class="text-xs text-gray-500 mb-2">Tandai bahwa laporan ini telah diselesaikan sepenuhnya.</p>
                                     </div>
                                     <textarea id="catatan_selesai" name="catatan" rows="2" class="shadow-sm focus:ring-green-500 focus:border-green-500 block w-full sm:text-sm border-gray-300 rounded-md" placeholder="Catatan hasil penyelesaian (opsional)..."></textarea>
-                                    <button type="submit" class="mt-3 w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors" onclick="return confirm('Tandai laporan ini sebagai selesai?')">
+                                    <button type="submit" class="mt-3 w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors" data-konfirmasi="Tandai laporan ini sebagai selesai?">
                                         Selesaikan Laporan
                                     </button>
                                 </form>

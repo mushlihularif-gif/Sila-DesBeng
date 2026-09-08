@@ -18,6 +18,10 @@ class RegionSeeder extends Seeder
         $serviceFasilitas = \App\Models\Service::firstOrCreate(['slug' => 'fasilitas-umum'], ['name' => 'Fasilitas Umum']);
         $serviceGas = \App\Models\Service::firstOrCreate(['slug' => 'penjualan-gas'], ['name' => 'Penjualan Gas']);
         $serviceLaporan = \App\Models\Service::firstOrCreate(['slug' => 'pelaporan-warga'], ['name' => 'Pelaporan Warga']);
+        // Pasar Daerah sempat tertinggal di sini, sehingga menunya tidak pernah
+        // muncul di sidebar maupun tab Permintaan & Pengajuan: keduanya menyaring
+        // dengan daftar layanan aktif wilayah, dan layanannya sendiri belum ada.
+        $servicePasar = \App\Models\Service::firstOrCreate(['slug' => 'pasar-daerah'], ['name' => 'Pasar Daerah']);
 
         // 2. Create Kabupaten Bengkalis
         $kabupaten = \App\Models\Region::firstOrCreate(
@@ -26,7 +30,10 @@ class RegionSeeder extends Seeder
         );
 
         // 3. Create Kecamatan
-        $kecamatanNames = ['Bengkalis', 'Bantan', 'Bukit Batu', 'Mandau', 'Rupat', 'Siak Kecil', 'Pinggir', 'Bandar Laksamana', 'Talang Muandau', 'Bathin Solapan'];
+        // Kabupaten Bengkalis punya 11 kecamatan; daftar ini sempat hanya
+        // memuat 10 - Rupat Utara tertinggal, sehingga wilayahnya tidak pernah
+        // bisa dipilih warga maupun diberi admin.
+        $kecamatanNames = ['Bengkalis', 'Bantan', 'Bukit Batu', 'Mandau', 'Rupat', 'Rupat Utara', 'Siak Kecil', 'Pinggir', 'Bandar Laksamana', 'Talang Muandau', 'Bathin Solapan'];
         $kecamatans = [];
         foreach ($kecamatanNames as $name) {
             $kecamatans[$name] = \App\Models\Region::firstOrCreate(

@@ -40,6 +40,8 @@
     <div id="dynamic-notifications" class="position-fixed top-0 end-0 p-3" style="z-index: 1060; width: 380px;"></div>
 
     @stack('scripts')
+    {{-- Dialog konfirmasi bergaya situs, pengganti window.confirm() --}}
+    @include('partials.dialog-konfirmasi')
 </body>
 </html>
 

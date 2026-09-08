@@ -14,6 +14,12 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withSchedule(function (\Illuminate\Console\Scheduling\Schedule $schedule) {
         // MATRIKS ESKALASI: Cek batas SLA pelaporan warga setiap jam
         $schedule->command('laporan:auto-escalate')->hourly();
+
+        // Pengingat pencairan saldo wilayah yang didiamkan Diskominfotik.
+        // Harian, bukan tiap jam: perintahnya sendiri sudah menahan pengingat
+        // ganda per hari, dan uang tertahan bukan hal yang perlu diteriakkan
+        // tiap jam — cukup terdengar sekali sehari sampai benar-benar diurus.
+        $schedule->command('penarikan:ingatkan')->dailyAt('08:00');
     })
     ->withMiddleware(function (Middleware $middleware) {
         // Register global middleware (Skenario 1, 2: Security Headers & Input Sanitization)
@@ -28,6 +34,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => \App\Http\Middleware\CheckRole::class, // For backward compatibility
             'region.service' => \App\Http\Middleware\CheckRegionService::class,
             'staff.permission' => \App\Http\Middleware\CheckStaffPermission::class,
+            'platform.permission' => \App\Http\Middleware\CheckPlatformPermission::class,
         ]);
 
         // Global rate limiting for all web routes (Skenario 21: DoS defense)

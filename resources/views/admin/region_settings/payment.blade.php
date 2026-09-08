@@ -7,26 +7,71 @@
 <div class="container-xxl flex-grow-1 container-p-y">
     <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Admin /</span> Pengaturan Pembayaran Wilayah <br> <small class="text-primary fs-6">(Admin Wilayah)</small></h4>
 
-    <div class="card mb-4">
-        <h5 class="card-header bg-gradient-primary text-white">
-            <i class="bx bx-credit-card-front me-2"></i>Informasi Kas & Pembayaran
-        </h5>
-        <div class="card-body mt-4">
+    {{-- Header banner - gaya sama dengan tab "Layanan & Metode Pengiriman" di
+         sebelahnya, supaya kedua halaman pengaturan wilayah terasa satu keluarga. --}}
+    <div class="card bg-label-primary border-0 shadow-none mb-4" style="border-radius: 12px;">
+        <div class="card-body d-flex align-items-center p-4">
+            <div class="me-3">
+                <div class="bg-primary p-3 rounded-circle text-white d-flex align-items-center justify-content-center shadow-sm" style="width: 56px; height: 56px;">
+                    <i class="bx bx-credit-card-front fs-3"></i>
+                </div>
+            </div>
+            <div>
+                <h5 class="fw-bold mb-1 text-primary">Kas & Pembayaran Wilayah</h5>
+                <p class="mb-0 text-primary" style="opacity: 0.85;">
+                    Kelola rekening bank, e-wallet, sakelar pembayaran otomatis, dan cairkan saldo Midtrans wilayah Anda.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible shadow-sm rounded-4 border-0 d-flex align-items-center" role="alert">
+            <i class="bx bx-check-circle fs-4 me-2"></i>
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible shadow-sm rounded-4 border-0 d-flex align-items-center" role="alert">
+            <i class="bx bx-error-circle fs-4 me-2"></i>
+            {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
+    {{-- Saldo & pencairan pindah ke Manajemen → Keuangan. Halaman ini tinggal
+         mengurus KONFIGURASI (rekening tujuan, sakelar pembayaran otomatis);
+         melihat saldo dan mencairkannya adalah pekerjaan berulang yang lebih
+         pas berdiri sendiri. Tautan ini menjaga admin yang terbiasa mencarinya
+         di sini tidak kehilangan jejak. --}}
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-body p-4 d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div class="d-flex align-items-center">
+                <div class="avatar avatar-sm bg-success-subtle text-success rounded-circle me-3 d-flex justify-content-center align-items-center">
+                    <i class="bx bx-wallet fs-5"></i>
+                </div>
+                <div>
+                    <h6 class="fw-bold mb-0">Saldo & Pencairan</h6>
+                    <small class="text-muted">Rekening yang Anda isi di bawah dipakai sebagai tujuan pencairan saldo Midtrans wilayah.</small>
+                </div>
+            </div>
+            <a href="{{ route('admin.keuangan.index') }}" class="btn btn-outline-success rounded-pill px-4">
+                <i class="bx bx-line-chart me-1"></i> Buka Halaman Keuangan
+            </a>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-body p-4">
+            <div class="d-flex align-items-center mb-3 border-bottom pb-3">
+                <div class="avatar avatar-sm bg-primary-subtle text-primary rounded-circle me-3 d-flex justify-content-center align-items-center">
+                    <i class="bx bx-credit-card-front fs-5"></i>
+                </div>
+                <h6 class="fw-bold mb-0">Informasi Kas & Pembayaran</h6>
+            </div>
             <p class="text-muted mb-4">Kelola rekening bank utama, dompet elektronik (e-wallet), dan integrasi otomatis Payment Gateway (Midtrans).</p>
-
-            @if(session('success'))
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    <strong>Berhasil!</strong> {{ session('success') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            @endif
-
-            @if(session('error'))
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <strong>Gagal!</strong> {{ session('error') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            @endif
 
             <form action="{{ route('admin.region-settings.payment.update') }}" method="POST">
                 @csrf
@@ -36,7 +81,7 @@
                     <!-- Kolom Kiri: Transfer Bank & Preview -->
                     <div class="col-md-6">
                         <!-- Bank Utama -->
-                        <div class="card border border-primary shadow-none mb-3 bg-label-primary">
+                        <div class="card border-0 shadow-none bg-label-primary rounded-3 mb-3">
                             <div class="card-body p-3">
                                 <div class="d-flex justify-content-between align-items-center mb-4">
                                     <h6 class="fw-bold text-primary mb-0">Rekening Bank Utama (Transfer Manual)</h6>
@@ -152,7 +197,7 @@
                     <!-- Kolom Kanan: E-Wallet & Midtrans -->
                     <div class="col-md-6">
                         <!-- Cash Only (Bayar di Tempat) -->
-                        <div class="card border border-success shadow-none mb-3 bg-label-success">
+                        <div class="card border-0 shadow-none bg-label-success rounded-3 mb-3">
                             <div class="card-body p-3">
                                 <h6 class="fw-bold text-success mb-2"><i class="bx bx-money me-1"></i>Pembayaran Di Tempat (Cash)</h6>
                                 <p class="text-success small mb-3">Aktifkan jika wilayah Anda menerima pembayaran secara tunai (bayar langsung di tempat).</p>
@@ -164,7 +209,7 @@
                         </div>
 
                         <!-- E-Wallet (Opsional) -->
-                        <div class="card border border-info shadow-none mb-3 bg-label-info">
+                        <div class="card border-0 shadow-none bg-label-info rounded-3 mb-3">
                             <div class="card-body p-3">
                                 <div class="d-flex justify-content-between align-items-center mb-3">
                                     <h6 class="fw-bold text-info mb-0">Dompet Elektronik / E-Wallet (Opsional)</h6>
@@ -228,31 +273,47 @@
                         </div>
 
                         <!-- Payment Gateway -->
-                        <div class="card border border-warning shadow-none mb-3 bg-label-warning">
+                        {{-- Kredensial gateway (Midtrans maupun Xendit) dipegang Diskominfotik
+                             di panel Super Admin. Wilayah tidak pernah menyentuh kunci API —
+                             cukup mengaktifkan sakelar dan memastikan rekening di atas benar. --}}
+                        <div class="card border-0 shadow-none bg-label-warning rounded-3 mb-3">
                             <div class="card-body p-3">
-                                <h6 class="fw-bold text-warning mb-2"><i class="bx bx-bolt-circle me-1"></i>Payment Gateway Otomatis</h6>
-                                <p class="text-warning small mb-2">
-                                    Aktifkan untuk menerima pembayaran otomatis (Midtrans VA/QRIS).
-                                </p>
-                                <div class="alert alert-danger p-2 mb-3 shadow-sm" style="font-size: 0.85rem; border-left: 4px solid #ff3e1d;">
-                                    <strong><i class="bx bx-error-circle me-1"></i>PENTING:</strong> Pastikan Daerah Anda Sudah Mendaftar Midtrans!
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h6 class="fw-bold text-warning mb-0">
+                                        <i class="bx bx-bolt-circle me-1"></i>Pembayaran Otomatis
+                                    </h6>
+                                    <span class="badge bg-label-secondary rounded-pill">{{ $labelPenyedia }}</span>
                                 </div>
+
+                                {{-- Status kesiapan: menjawab "kenapa pembayaran otomatis saya belum jalan" --}}
+                                <div class="alert {{ $kesiapan['siap'] ? 'alert-success' : 'alert-warning' }} p-2 mb-3" style="font-size: 0.82rem;">
+                                    <i class="bx {{ $kesiapan['siap'] ? 'bx-check-circle' : 'bx-error-circle' }} me-1"></i>
+                                    {{ $kesiapan['alasan'] }}
+                                </div>
+
                                 <div class="form-check form-switch mb-0 d-flex align-items-center">
-                                    <input class="form-check-input me-2" type="checkbox" name="payment_gateway_active" id="payment_gateway_active" value="1" style="width: 2.5em; height: 1.2em; cursor: pointer;" {{ (old('payment_gateway_active', $region->payment_info['payment_gateway_active'] ?? false)) ? 'checked' : '' }} onchange="document.getElementById('midtrans_fields').style.display = this.checked ? 'block' : 'none'">
-                                    <label class="form-check-label fw-semibold text-warning" for="payment_gateway_active" style="cursor: pointer;">Aktifkan Gateway</label>
+                                    <input class="form-check-input me-2" type="checkbox" name="payment_gateway_active" id="payment_gateway_active" value="1"
+                                           style="width: 2.5em; height: 1.2em; cursor: pointer;"
+                                           {{ old('payment_gateway_active', $region->payment_info['payment_gateway_active'] ?? false) ? 'checked' : '' }}
+                                           onchange="document.getElementById('gateway_fields').style.display = this.checked ? 'block' : 'none'">
+                                    <label class="form-check-label fw-semibold text-warning" for="payment_gateway_active" style="cursor: pointer;">
+                                        Aktifkan Pembayaran Otomatis
+                                    </label>
                                 </div>
-                                
-                                <div id="midtrans_fields" class="mt-3" style="display: {{ (old('payment_gateway_active', $region->payment_info['payment_gateway_active'] ?? false)) ? 'block' : 'none' }}; border-top: 1px dashed #ffab00; padding-top: 15px;">
-                                    <div class="alert alert-warning p-2 mb-3" style="font-size: 0.8rem;">
-                                        <i class="bx bx-info-circle me-1"></i>Masukkan kunci API Midtrans wilayah Anda. Jika dibiarkan kosong, pembayaran tidak akan diproses.
-                                    </div>
-                                    <div class="mb-2">
-                                        <label class="form-label text-warning fw-semibold" style="font-size: 0.8rem;">Midtrans Server Key</label>
-                                        <input type="text" name="midtrans_server_key" class="form-control form-control-sm border-warning bg-white" value="{{ old('midtrans_server_key', $region->payment_info['midtrans_server_key'] ?? '') }}" placeholder="SB-Mid-server-xxx">
-                                    </div>
-                                    <div class="mb-2">
-                                        <label class="form-label text-warning fw-semibold" style="font-size: 0.8rem;">Midtrans Client Key</label>
-                                        <input type="text" name="midtrans_client_key" class="form-control form-control-sm border-warning bg-white" value="{{ old('midtrans_client_key', $region->payment_info['midtrans_client_key'] ?? '') }}" placeholder="SB-Mid-client-xxx">
+
+                                <div id="gateway_fields" class="mt-3"
+                                     style="display: {{ old('payment_gateway_active', $region->payment_info['payment_gateway_active'] ?? false) ? 'block' : 'none' }}; border-top: 1px dashed #ffab00; padding-top: 15px;">
+
+                                    {{-- Kredensial gateway sepenuhnya dipegang Diskominfotik, apa pun
+                                         penyedianya. Untuk Midtrans, pemasukan mendarat di rekening
+                                         Diskominfotik dulu sebagai saldo wilayah (lihat kartu Saldo
+                                         Wilayah di atas) baru dicairkan lewat pengajuan penarikan. --}}
+                                    <div class="alert alert-warning p-2 mb-0" style="font-size: 0.8rem;">
+                                        <i class="bx bx-check-shield me-1"></i>
+                                        Pembayaran otomatis disiapkan oleh <strong>Diskominfotik</strong> lewat {{ $labelPenyedia }}.
+                                        Anda tidak perlu memasukkan kunci API apa pun.
+                                        Pastikan <strong>nomor rekening di sebelah kiri sudah benar</strong>,
+                                        karena ke situlah pemasukan wilayah Anda dicairkan.
                                     </div>
                                 </div>
                             </div>
@@ -261,7 +322,7 @@
                 </div>
 
                 <div class="mt-5 border-top pt-4 pb-4 mb-2 text-center">
-                    <button type="submit" class="btn btn-primary btn-lg">
+                    <button type="submit" class="btn btn-primary btn-lg rounded-pill px-5 shadow-sm">
                         <i class="bx bx-save me-1"></i> Simpan Pengaturan Pembayaran
                     </button>
                 </div>
@@ -271,9 +332,6 @@
 </div>
 
 <style>
-    .bg-gradient-primary {
-        background: #4a4a4a;
-    }
     .bg-label-primary {
         background-color: rgba(105, 108, 255, 0.08) !important;
     }
