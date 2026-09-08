@@ -74,18 +74,11 @@ class NotificationController extends Controller
         $notification->is_read = true;
         $notification->save();
 
-<<<<<<< HEAD
-        if ($request->ajax() || $request->wantsJson()) {
+        if ($request->ajax() || $request->wantsJson() || $request->expectsJson()) {
             return response()->json([
                 'success' => true,
                 'message' => 'Notifikasi ditandai sebagai sudah dibaca.'
             ]);
-=======
-        // Lonceng memanggil ini lewat fetch() sambil halaman berpindah ke
-        // tujuan notifikasi, jadi jawabannya tidak boleh berupa redirect.
-        if ($request->expectsJson()) {
-            return response()->json(['success' => true]);
->>>>>>> 8ce84c9c47ca9a66cda29cf04e9f0abcc80c7fdb
         }
 
         return redirect()->back()->with('success', 'Notifikasi ditandai sebagai sudah dibaca.');
@@ -93,32 +86,6 @@ class NotificationController extends Controller
 
     public function markAllAsRead(Request $request)
     {
-<<<<<<< HEAD
-        $currentUser = auth()->user();
-        $query = \App\Models\AdminNotification::where('is_read', false);
-
-        if ($currentUser && !in_array($currentUser->role, ['super_admin'])) {
-            $userRegionId = $currentUser->region_id;
-            if ($userRegionId) {
-                $allowedRegionIds = \App\Models\Region::getDescendantIds($userRegionId);
-                $allowedRegionIds[] = $userRegionId;
-                $query->where(function($q) use ($allowedRegionIds) {
-                    $q->whereIn('region_id', $allowedRegionIds)->orWhereNull('region_id');
-                });
-            } else {
-                $query->whereNull('region_id');
-            }
-        }
-
-        $query->update([
-            'is_read' => true,
-        ]);
-
-        if ($request->ajax() || $request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Semua notifikasi berhasil ditandai sebagai sudah dibaca.'
-=======
         // Tandai sebagai sudah dibaca, TERBATAS pada notifikasi milik pengguna
         // ini. Tanpa untukPengguna(), satu klik dari admin desa mana pun akan
         // menandai notifikasi seluruh wilayah lain sebagai sudah dibaca, dan
@@ -127,16 +94,21 @@ class NotificationController extends Controller
             ->where('is_read', false)
             ->update([
                 'is_read' => true,
->>>>>>> 8ce84c9c47ca9a66cda29cf04e9f0abcc80c7fdb
             ]);
-        }
 
-        if (request()->expectsJson()) {
-            return response()->json(['success' => true]);
+        // Dua skrip lonceng hidup berdampingan di layout: yang satu mengirim
+        // X-Requested-With, yang satu Accept: application/json. Keduanya
+        // diterima supaya tidak ada yang menerima redirect di tengah fetch().
+        if ($request->ajax() || $request->wantsJson() || $request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Semua notifikasi berhasil ditandai sebagai sudah dibaca.',
+            ]);
         }
 
         return redirect()->back()->with('success', 'Semua notifikasi ditandai sebagai sudah dibaca.');
     }
+
 
     public function destroy($id)
     {

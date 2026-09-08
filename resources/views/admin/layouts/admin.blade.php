@@ -1123,7 +1123,6 @@
                                 <ul class="dropdown-menu dropdown-menu-end py-0 notif-dropdown-menu">
                                     <li class="dropdown-menu-header border-bottom bg-white">
                                         <div class="dropdown-header d-flex align-items-center justify-content-between py-3 px-3 px-sm-4">
-<<<<<<< HEAD
                                             <div class="d-flex align-items-center gap-2">
                                                 <h6 class="mb-0 fw-bold text-dark fs-5">Notifikasi</h6>
                                                 <span id="notif-badge-header" class="badge bg-label-primary rounded-pill px-2.5 py-1 fw-bold fs-7 {{ $unreadCount > 0 ? '' : 'd-none' }}">{{ $unreadCount }} Baru</span>
@@ -1132,15 +1131,6 @@
                                                 <i class="bx bx-check-double fs-6"></i>
                                                 <span>Tandai Semua Dibaca</span>
                                             </button>
-=======
-                                            <h6 class="mb-0 fw-bold text-dark fs-5">Notifikasi</h6>
-                                            @if($unreadCount > 0)
-                                            <div class="d-flex align-items-center gap-2 notif-header-actions">
-                                                <span class="badge bg-label-primary rounded-pill px-3 py-1 fw-bold fs-7 notif-header-count">{{ $unreadCount }} Baru</span>
-                                                <button type="button" class="btn btn-sm btn-link p-0 text-primary fw-bold notif-mark-all" data-url="{{ route('admin.notifications.mark-all-read') }}" style="font-size: 0.75rem; text-decoration: none;">Tandai dibaca</button>
-                                            </div>
-                                            @endif
->>>>>>> 8ce84c9c47ca9a66cda29cf04e9f0abcc80c7fdb
                                         </div>
                                         <!-- Pill Tabs untuk Semua Layanan -->
                                         <div class="px-3 px-sm-4 pb-3">
@@ -1205,11 +1195,7 @@
                                                     $targetUrl = route('admin.aktivitas.permintaan-pengajuan.index');
                                                 }
                                             @endphp
-<<<<<<< HEAD
                                             <a href="{{ $targetUrl }}" class="dropdown-item notif-item {{ !$notif->is_read ? 'is-unread category-'.$cat : '' }} gap-3" data-category="{{ $cat }}" data-id="{{ $notif->id }}" data-unread="{{ !$notif->is_read ? '1' : '0' }}">
-=======
-                                            <a href="{{ $targetUrl }}" class="dropdown-item notif-item {{ !$notif->is_read ? 'is-unread category-'.$cat : '' }} gap-3" data-category="{{ $cat }}" data-read-url="{{ route('admin.notifications.mark-as-read', $notif->id) }}">
->>>>>>> 8ce84c9c47ca9a66cda29cf04e9f0abcc80c7fdb
                                                 <div class="flex-shrink-0 mt-1">
                                                     <div class="rounded-circle d-flex align-items-center justify-content-center shadow-xs {{ !$notif->is_read ? 'bg-label-'.$color : 'bg-light' }}" style="width: 40px; height: 40px;">
                                                         <i class="bx {{ $icon }} fs-5 {{ !$notif->is_read ? 'text-'.$color : 'text-secondary' }}"></i>
