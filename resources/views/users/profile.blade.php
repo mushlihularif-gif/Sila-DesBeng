@@ -22,11 +22,7 @@
             <h1 class="text-3xl md:text-4xl font-bold text-white drop-shadow-[0_4px_12px_rgba(0,0,0,0.3)] flex items-center gap-3">
                 Profil Saya
                 @if($user->verification_status === 'verified')
-                <div class="bg-blue-500 rounded-full p-1 shadow-lg" title="Warga Terverifikasi">
-                    <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                    </svg>
-                </div>
+                <img src="{{ asset('images/verified-badge.png?v=2') }}" class="w-8 h-8 md:w-9 md:h-9 object-contain drop-shadow-md select-none inline-block" alt="Warga Terverifikasi" title="Warga Terverifikasi">
                 @endif
             </h1>
         </div>
@@ -130,64 +126,8 @@
                     </div>
                     @endif
 
-                    {{-- KTP DIGITAL (Fase 5) --}}
-                    @if($user->verification_status === 'verified')
-                    <div class="glass-card rounded-3xl p-0 border border-blue-300 shadow-[0_0_20px_rgba(59,130,246,0.3)] overflow-hidden relative group">
-                        <div class="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-transparent to-blue-500/10 opacity-50 group-hover:opacity-100 transition"></div>
-                        <div class="absolute top-0 right-0 p-4">
-                            <img src="{{ asset('Admin/img/illustrations/isewalogo.webp') }}" class="w-16 opacity-30">
-                        </div>
-                        <div class="p-6">
-                            <div class="flex items-center justify-between border-b border-blue-200/50 pb-3 mb-4">
-                                <h3 class="text-xl font-black text-blue-900 tracking-wider">KTP DIGITAL</h3>
-                                <span class="bg-blue-600 text-white text-xs px-3 py-1 rounded-full font-bold shadow">TERVERIFIKASI</span>
-                            </div>
-                            <div class="flex gap-6 items-center">
-                                {{-- Cadangannya dulu menunjuk Admin/img/avatars/1.png, berkas
-                                     yang tidak ada di public/ — sehingga warga tanpa foto profil
-                                     melihat ikon gambar rusak di kartu KTP-nya. Diganti penampung
-                                     yang memang dirancang untuk keadaan kosong. --}}
-                                <div class="w-24 h-32 rounded-lg border-2 border-blue-300 overflow-hidden shadow-md shrink-0 bg-blue-50">
-                                    @if($user->file)
-                                        <img src="{{ $user->file->file_stream }}" alt="Foto profil" class="w-full h-full object-cover">
-                                    @else
-                                        <div class="w-full h-full flex flex-col items-center justify-center text-blue-300 gap-1">
-                                            <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
-                                            </svg>
-                                            <span class="text-[9px] text-center leading-tight px-1">Belum ada foto</span>
-                                        </div>
-                                    @endif
-                                </div>
-                                <div class="flex-1 space-y-2 text-sm text-blue-900 font-medium">
-                                    <div class="grid grid-cols-[100px_1fr]">
-                                        <span class="text-blue-700 font-bold">NIK</span>
-                                        <span class="font-mono bg-blue-100 px-2 py-0.5 rounded tracking-widest">{{ $user->nik ? substr($user->nik, 0, 4) . '********' . substr($user->nik, -4) : 'Belum diisi' }}</span>
-                                    </div>
-                                    <div class="grid grid-cols-[100px_1fr]">
-                                        <span class="text-blue-700 font-bold">NAMA</span>
-                                        <span class="uppercase font-bold flex items-center gap-1">
-                                            @php
-                                                $nameParts = explode(' ', trim($user->name));
-                                                $maskedName = implode(' ', array_map(function($w) {
-                                                    $l = strlen($w);
-                                                    if ($l <= 2) return $w;
-                                                    return substr($w, 0, 1) . str_repeat('*', $l - 2) . substr($w, -1);
-                                                }, $nameParts));
-                                            @endphp
-                                            {{ $maskedName }}
-                                            <i class='bx bxs-badge-check text-blue-500 text-lg' title="Terverifikasi"></i>
-                                        </span>
-                                    </div>
-                                    <div class="grid grid-cols-[100px_1fr]">
-                                        <span class="text-blue-700 font-bold">ALAMAT</span>
-                                        <span>RT {{ $user->rt ?? '000' }}/RW {{ $user->rw ?? '000' }} - {{ $user->region->name ?? 'Desa' }} (Disensor)</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    @else
+                    {{-- Peringatan jika belum verifikasi identitas --}}
+                    @if($user->verification_status !== 'verified')
                     <div class="bg-yellow-50 border border-yellow-200 rounded-3xl p-6 shadow-sm flex items-center justify-between">
                         <div>
                             <h3 class="font-bold text-yellow-800 text-lg mb-1">Identitas Belum Terverifikasi</h3>

@@ -89,14 +89,27 @@ class PartnerApplicationController extends Controller
         }
 
         if ($validated['parent_region_id']) {
+            $namaTingkat = self::LABEL_TINGKAT[$validated['region_type']] ?? ucfirst($validated['region_type']);
             \App\Models\AdminNotification::create([
                 'type' => 'kemitraan',
                 'reference_id' => $application->id,
                 'region_id' => $validated['parent_region_id'],
-                'title' => 'Pengajuan Pengurus RT/RW Baru',
-                'message' => "Warga {$validated['applicant_name']} mengajukan pendaftaran pengurus {$validated['region_name']} ({$validated['position']}).",
+                'title' => "Pengajuan Kemitraan {$namaTingkat} Baru",
+                'message' => "Pemohon {$validated['applicant_name']} mengajukan pendaftaran {$namaTingkat} {$validated['region_name']} ({$validated['position']}).",
                 'is_read' => false,
             ]);
+
+            // Jika pengajuan RT di bawah RW, beri tahu juga Admin Desa induknya
+            if ($induk && $induk->type === 'rw' && $induk->parent_id) {
+                \App\Models\AdminNotification::create([
+                    'type' => 'kemitraan',
+                    'reference_id' => $application->id,
+                    'region_id' => $induk->parent_id,
+                    'title' => 'Pengajuan Pengurus RT Baru',
+                    'message' => "Warga {$validated['applicant_name']} mengajukan pendaftaran pengurus {$validated['region_name']} ({$validated['position']}) di lingkungan {$induk->name}.",
+                    'is_read' => false,
+                ]);
+            }
         }
 
         return redirect()->back()->with('success_modal', 'Pengajuan kemitraan Anda terkirim. Silakan tunggu notifikasinya, email dan sandi akun Anda akan dikirim setelah disetujui.');

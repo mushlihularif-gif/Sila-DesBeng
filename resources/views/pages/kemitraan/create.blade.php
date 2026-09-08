@@ -4,6 +4,7 @@
 
 @push('styles')
 <style>
+    * { font-family: 'Inter', sans-serif; }
     .btn-outline {
         display: inline-flex; align-items: center; justify-content: center;
         padding: 20px 40px; font-size: 1.25rem; font-weight: 700;
@@ -62,7 +63,7 @@
 
             @if(!$isJoined)
                 <p class="text-gray-700 text-lg max-w-2xl mx-auto mb-6 animate-fade-in-up" style="animation-delay: 100ms;">
-                    Desa / Kelurahan Anda belum bergabung? Daftarkan sekarang!
+                    Wilayah desa Anda belum bergabung? Daftarkan sekarang!
                 </p>
                 
                 <p class="text-gray-500 text-sm max-w-2xl mx-auto mb-10 animate-fade-in-up bg-blue-50/50 p-3 rounded-xl border border-blue-100" style="animation-delay: 150ms;">
@@ -391,7 +392,7 @@
                             {{-- Judul Tengah --}}
                             <div class="text-center flex-1 px-4">
                                 <h3 class="text-2xl font-bold text-gray-900 uppercase tracking-wide" id="modal-title">Form Pengajuan Kemitraan</h3>
-                                <p class="text-base text-gray-500 mt-2">Daftarkan desa/kelurahan Anda untuk bergabung</p>
+                                <p class="text-base text-gray-500 mt-2">Daftarkan wilayah desa Anda untuk bergabung</p>
                                 <p class="text-sm text-gray-400 mt-1">Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis</p>
                             </div>
 
@@ -521,7 +522,7 @@
                                 {{-- Pesan Tambahan --}}
                                 <div>
                                     <label for="reason" class="block text-sm font-semibold text-gray-700 mb-1">Pesan Tambahan</label>
-                                    <textarea id="reason" name="reason" rows="3" class="py-2 px-3 block w-full border border-gray-200 rounded-lg bg-gray-50 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#115789]/30 focus:border-[#115789] transition-colors" style="outline: none;" required placeholder="Alasan mengapa desa Anda ingin bergabung...">{{ old('reason') }}</textarea>
+                                    <textarea id="reason" name="reason" rows="3" class="py-2 px-3 block w-full border border-gray-200 rounded-lg bg-gray-50 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#115789]/30 focus:border-[#115789] transition-colors" style="outline: none;" required placeholder="Alasan mengapa wilayah desa Anda ingin bergabung...">{{ old('reason') }}</textarea>
                                 </div>
                             </div>
 
@@ -611,7 +612,7 @@
         positionSel.innerHTML = '<option value="" disabled selected>Pilih Jabatan</option>';
         
         let options = [];
-        if(type === 'desa') options = ['Kepala Desa', 'Sekretaris Desa', 'BPD', 'Admin BUMDes', 'Lainnya'];
+        if(type === 'desa') options = ['Kepala Desa', 'Sekretaris Desa', 'BPD', 'Pengelola Layanan Desa', 'Lainnya'];
         else if(type === 'rw') options = ['Ketua RW', 'Sekretaris RW', 'Lainnya'];
         else if(type === 'rt') options = ['Ketua RT', 'Sekretaris RT', 'Lainnya'];
         

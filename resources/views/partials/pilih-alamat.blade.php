@@ -79,7 +79,7 @@
 
     <p class="text-xs text-gray-500 mt-2">
         Pilih salah satu untuk mengisi kolom di bawah — masih bisa Anda sunting.
-        Titik petanya diatur di <a href="{{ route('user.saldo.index') }}" class="text-blue-600 hover:underline">Saldo &amp; Alamat</a>.
+        Titik petanya diatur di <a href="{{ route('user.saldo.index') }}" class="text-blue-600 hover:underline">Saldo dan Alamat</a>.
     </p>
 </div>
 @endif
