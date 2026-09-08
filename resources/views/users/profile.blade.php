@@ -299,43 +299,271 @@
 
         {{-- Pengajuan Mutasi / Pindah Desa --}}
         @if($user->verification_status === 'verified')
-        <div class="mt-8 w-full glass-card rounded-3xl p-6 border border-white/50 shadow-lg relative overflow-hidden">
-            <div class="absolute top-0 left-0 w-2 h-full bg-orange-500"></div>
-            <h3 class="text-xl font-bold text-gray-800 mb-2 flex items-center gap-2">
-                <i class='bx bx-transfer-alt text-orange-500'></i> Pengajuan Pindah Desa (Mutasi)
-            </h3>
-            
-            @php
-                $pendingMutasi = \App\Models\MutasiPenduduk::where('user_id', $user->id)->where('status', 'pending')->first();
-            @endphp
+        @php
+            $pendingMutasi = \App\Models\MutasiPenduduk::with(['toRegion.parent', 'fromRegion'])
+                ->where('user_id', $user->id)
+                ->whereIn('status', ['pending', 'pending_asal', 'pending_tujuan'])
+                ->first();
+            $latestRejectedMutasi = null;
+            if (!$pendingMutasi) {
+                $latestRejectedMutasi = \App\Models\MutasiPenduduk::with(['toRegion.parent', 'fromRegion'])
+                    ->where('user_id', $user->id)
+                    ->where('status', 'rejected')
+                    ->latest()
+                    ->first();
+            }
+            $kecamatansData = $kecamatans ?? \App\Models\Region::where('type', 'kecamatan')
+                ->with(['children' => fn($q) => $q->where('type', 'desa')->orderBy('name')])
+                ->orderBy('name')
+                ->get();
+            $userDesaId = $currentDesaId ?? ($user->region_id ?? 0);
+        @endphp
+
+        <div id="mutasi-section-container" class="mt-8 w-full glass-card rounded-3xl p-6 sm:p-8 border border-white/50 shadow-lg relative overflow-hidden transition-all duration-300">
+            {{-- Garis Penanda Sisi Kiri --}}
+            <div class="absolute top-0 left-0 w-2 h-full bg-blue-500"></div>
+
+            <div class="flex items-start gap-4 mb-6">
+                <div class="w-12 h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold text-gray-800">Pengajuan Pindah Desa (Mutasi)</h3>
+                    <p class="text-gray-600 text-sm mt-1">Layanan pemindahan domisili akun digital warga antar desa di wilayah Kabupaten Bengkalis.</p>
+                </div>
+            </div>
 
             @if($pendingMutasi)
-                <div class="bg-orange-50 border border-orange-200 text-orange-800 p-4 rounded-xl mt-4">
-                    <p class="font-bold flex items-center gap-2">
-                        <i class='bx bx-time-five animate-spin-slow'></i> Sedang Diproses
-                    </p>
-                    <p class="text-sm mt-1">Pengajuan pindah Anda ke <strong>{{ $pendingMutasi->toRegion->desa }}</strong> sedang menunggu persetujuan (Handshake) dari Kepala Desa saat ini.</p>
+                <div class="bg-blue-50/80 border border-blue-200/80 rounded-2xl p-5 backdrop-blur-sm">
+                    <div class="flex items-start gap-3">
+                        <div class="w-8 h-8 rounded-full bg-blue-500/10 text-blue-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                            </svg>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <h4 class="font-bold text-blue-900 text-base">Permohonan Mutasi Sedang Diproses</h4>
+                                @if($pendingMutasi->status === 'pending_tujuan')
+                                    <span class="px-3 py-1 bg-amber-100 text-amber-800 text-xs font-semibold rounded-full border border-amber-200">Tahap 2: Menunggu Penerimaan Desa Tujuan</span>
+                                @else
+                                    <span class="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full border border-blue-200">Tahap 1: Menunggu Pelepasan Desa Asal</span>
+                                @endif
+                            </div>
+                            @php
+                                $parentKecName = $pendingMutasi->toRegion && $pendingMutasi->toRegion->parent ? $pendingMutasi->toRegion->parent->name : null;
+                                if ($parentKecName && !str_starts_with($parentKecName, 'Kecamatan')) {
+                                    $parentKecName = 'Kecamatan ' . $parentKecName;
+                                }
+                                $fromDesaName = $pendingMutasi->fromRegion ? $pendingMutasi->fromRegion->name : 'Desa Asal';
+                                $toDesaName = $pendingMutasi->toRegion ? $pendingMutasi->toRegion->name : 'Desa Tujuan';
+                            @endphp
+                            @if($pendingMutasi->status === 'pending_tujuan')
+                                <p class="text-blue-800/90 text-sm mt-2 leading-relaxed">
+                                    Pelepasan dari <strong>{{ $fromDesaName }}</strong> telah disetujui. Saat ini pengajuan pindah Anda sedang menunggu verifikasi dan penerimaan dari Pemerintah Desa <strong>{{ $toDesaName }}</strong>@if($parentKecName) ({{ $parentKecName }})@endif.
+                                </p>
+                            @else
+                                <p class="text-blue-800/90 text-sm mt-2 leading-relaxed">
+                                    Pengajuan pindah Anda ke <strong>{{ $toDesaName }}</strong>@if($parentKecName) ({{ $parentKecName }})@endif sedang menunggu verifikasi pelepasan dari Pemerintah Desa <strong>{{ $fromDesaName }}</strong> saat ini.
+                                </p>
+                            @endif
+                            <div class="mt-4 pt-3 border-t border-blue-200/60 flex flex-wrap items-center justify-between gap-3">
+                                @if($pendingMutasi->reason)
+                                    <div class="text-xs text-blue-700 flex items-center gap-1.5">
+                                        <span class="font-medium text-blue-900">Alasan:</span>
+                                        <span class="italic">"{{ $pendingMutasi->reason }}"</span>
+                                    </div>
+                                @else
+                                    <div></div>
+                                @endif
+
+                                <form id="form-cancel-mutasi" action="{{ route('user.mutasi.cancel') }}" method="POST"
+                                      data-konfirmasi="Apakah Anda yakin ingin membatalkan pengajuan pindah desa ini?"
+                                      data-konfirmasi-judul="Batalkan Pengajuan Mutasi"
+                                      data-konfirmasi-jenis="bahaya"
+                                      data-konfirmasi-ya="Ya, Batalkan">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" id="btn-cancel-mutasi"
+                                            class="px-4 py-2 bg-white hover:bg-red-50 text-red-600 hover:text-red-700 border border-red-200 hover:border-red-300 rounded-xl text-xs font-semibold shadow-sm transition-all duration-200 inline-flex items-center justify-center cursor-pointer">
+                                        <span>Batalkan Pengajuan</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             @else
-                <p class="text-gray-600 text-sm mb-4">Jika Anda berpindah domisili ke desa lain, Anda bisa mengajukan perpindahan data secara digital. Kades asal harus menyetujui pelepasan data Anda.</p>
-                <form action="{{ route('user.mutasi.store') }}" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-4" data-konfirmasi="Apakah Anda yakin ingin mengajukan pindah desa? Anda tidak dapat memesan fasilitas desa hingga proses ini selesai.">
+                @if($latestRejectedMutasi)
+                    <div x-data="{
+                        dismissed: localStorage.getItem('mutasi_rejected_dismissed_{{ $latestRejectedMutasi->id }}') === 'true',
+                        showDetails: false,
+                        dismiss() {
+                            this.dismissed = true;
+                            localStorage.setItem('mutasi_rejected_dismissed_{{ $latestRejectedMutasi->id }}', 'true');
+                        }
+                    }" class="mb-6">
+                        {{-- STATE 1: BANNER NOTIFIKASI BESAR (Sebelum Ditutup) --}}
+                        <div x-show="!dismissed"
+                             x-transition:leave="transition ease-in duration-200"
+                             x-transition:leave-start="opacity-100 scale-100"
+                             x-transition:leave-end="opacity-0 scale-95"
+                             class="bg-red-50/90 border border-red-200 rounded-2xl p-4 sm:p-5 relative shadow-xs">
+                            <div class="flex items-start gap-3">
+                                <div class="w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                    </svg>
+                                </div>
+                                <div class="flex-1 pr-6">
+                                    <h5 class="text-sm font-bold text-red-900">Pengajuan Mutasi Terakhir Ditolak</h5>
+                                    <p class="text-xs text-red-700 mt-1 leading-relaxed">
+                                        Pengajuan pindah Anda ke <strong>{{ $latestRejectedMutasi->toRegion->name ?? 'Desa Tujuan' }}</strong>
+                                        @if($latestRejectedMutasi->rejected_by_role === 'desa_tujuan')
+                                            ditolak oleh Pemerintah Desa Tujuan saat proses penerimaan.
+                                        @elseif($latestRejectedMutasi->rejected_by_role === 'desa_asal')
+                                            ditolak oleh Pemerintah Desa Asal saat verifikasi pelepasan.
+                                        @else
+                                            ditolak oleh Pemerintah Desa.
+                                        @endif
+                                    </p>
+                                    @if($latestRejectedMutasi->rejection_reason)
+                                        <div class="mt-2 text-xs bg-white/95 p-2.5 rounded-xl border border-red-200/60 text-red-800">
+                                            <strong>Alasan Penolakan:</strong> "{{ $latestRejectedMutasi->rejection_reason }}"
+                                        </div>
+                                    @endif
+                                    <p class="text-xs text-gray-500 mt-2">
+                                        Anda dapat melengkapi persyaratan yang diminta lalu mengajukan kembali permohonan melalui formulir di bawah ini.
+                                    </p>
+                                    <div class="mt-3 pt-2.5 border-t border-red-200/60 flex items-center justify-end">
+                                        <button type="button" @click="dismiss()" class="px-3.5 py-1.5 bg-white hover:bg-red-100 text-red-700 border border-red-200 rounded-xl text-xs font-semibold transition cursor-pointer shadow-xs">
+                                            Saya Mengerti & Tutup
+                                        </button>
+                                    </div>
+                                </div>
+                                <button type="button" @click="dismiss()" class="absolute top-3 right-3 text-red-400 hover:text-red-700 p-1.5 rounded-lg transition cursor-pointer" title="Tutup Pemberitahuan">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        {{-- STATE 2: ACCORDION RINGKAS PERSIS SEPERTI KYC (Setelah Ditutup / Kunjungan Berikutnya) --}}
+                        <div x-show="dismissed" class="text-center pt-1">
+                            <button type="button" 
+                                    @click="showDetails = !showDetails"
+                                    class="text-xs text-gray-500 hover:text-blue-600 font-medium transition cursor-pointer hover:underline inline-flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span x-text="showDetails ? 'Sembunyikan Catatan Petugas Penolakan' : 'Lihat Catatan Petugas Penolakan Sebelumnya'"></span>
+                            </button>
+
+                            <div x-show="showDetails" 
+                                 x-transition
+                                 class="mt-3 text-left p-4 rounded-2xl bg-white/95 border border-gray-100 shadow-sm text-xs text-gray-700 space-y-2 max-w-lg mx-auto">
+                                <div class="flex justify-between items-center pb-1.5 border-b border-gray-100">
+                                    <span class="text-gray-500">Tujuan Mutasi:</span>
+                                    <span class="font-semibold text-gray-800">{{ $latestRejectedMutasi->toRegion->name ?? 'Desa Tujuan' }}</span>
+                                </div>
+                                <div class="flex justify-between items-center pb-1.5 border-b border-gray-100">
+                                    <span class="text-gray-500">Waktu Peninjauan:</span>
+                                    <span class="font-semibold text-gray-800">{{ \Carbon\Carbon::parse($latestRejectedMutasi->updated_at)->translatedFormat('d F Y, H:i') }} WIB</span>
+                                </div>
+                                <div class="flex justify-between items-center pb-1.5 border-b border-gray-100">
+                                    <span class="text-gray-500">Ditolak Oleh:</span>
+                                    <span class="font-semibold text-red-600">
+                                        @if($latestRejectedMutasi->rejected_by_role === 'desa_tujuan')
+                                            Pemerintah Desa Tujuan (Saat Penerimaan)
+                                        @elseif($latestRejectedMutasi->rejected_by_role === 'desa_asal')
+                                            Pemerintah Desa Asal (Saat Pelepasan)
+                                        @else
+                                            Pemerintah Desa
+                                        @endif
+                                    </span>
+                                </div>
+                                <div class="flex justify-between items-start pt-0.5">
+                                    <span class="text-gray-500 shrink-0 mr-3">Catatan Petugas:</span>
+                                    <span class="font-medium text-gray-800 text-right">{{ $latestRejectedMutasi->rejection_reason ?? 'Tidak ada catatan tambahan' }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
+                <div class="bg-blue-50/60 border border-blue-100 rounded-2xl p-4 mb-6 flex items-start gap-3 text-sm text-blue-900">
+                    <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p class="leading-relaxed text-xs sm:text-sm text-gray-600">
+                        Jika Anda berpindah domisili ke desa lain di Kabupaten Bengkalis, tentukan <strong>Kecamatan Tujuan</strong> lalu <strong>Desa Tujuan</strong>. Pemerintah Desa asal dan tujuan akan memverifikasi mutasi akun Anda.
+                    </p>
+                </div>
+
+                <form id="form-store-mutasi" action="{{ route('user.mutasi.store') }}" method="POST" class="space-y-5" 
+                      data-konfirmasi="Apakah Anda yakin ingin mengajukan pindah desa? Anda tidak dapat memesan fasilitas desa hingga proses mutasi disetujui."
+                      data-konfirmasi-judul="Konfirmasi Pengajuan Mutasi"
+                      data-konfirmasi-jenis="peringatan"
+                      data-konfirmasi-ya="Ya, Ajukan Pindah">
                     @csrf
-                    <div>
-                        <label class="block text-sm font-bold text-gray-800 mb-2">Pilih Desa Tujuan</label>
-                        <select name="to_region_id" class="w-full px-4 py-2 bg-white/80 border border-white/60 rounded-xl focus:border-orange-400 outline-none text-gray-800 text-sm" required>
-                            <option value="">-- Pilih Desa --</option>
-                            @foreach(\App\Models\Region::where('id', '!=', $user->region_id)->get() as $reg)
-                                <option value="{{ $reg->id }}">{{ $reg->kecamatan }} - {{ $reg->desa }}</option>
-                            @endforeach
-                        </select>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        {{-- Pilih Kecamatan Tujuan --}}
+                        <div>
+                            <label for="select-kecamatan-mutasi" class="block text-sm font-bold text-gray-800 mb-2">Kecamatan Tujuan</label>
+                            <div class="relative">
+                                <select id="select-kecamatan-mutasi" 
+                                        class="appearance-none w-full px-4 py-2.5 pr-10 bg-white/80 border border-white/60 rounded-xl focus:border-blue-400 focus:ring-2 focus:ring-blue-200/50 outline-none transition glass-input text-gray-800 text-sm" 
+                                        required>
+                                    <option value="">-- Pilih Kecamatan Tujuan --</option>
+                                    @foreach($kecamatansData as $kec)
+                                        <option value="{{ $kec->id }}">{{ $kec->name }}</option>
+                                    @endforeach
+                                </select>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
+                                    <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Pilih Desa Tujuan --}}
+                        <div>
+                            <label for="select-desa-mutasi" class="block text-sm font-bold text-gray-800 mb-2">Desa Tujuan</label>
+                            <div class="relative">
+                                <select name="to_region_id" id="select-desa-mutasi" 
+                                        class="appearance-none w-full px-4 py-2.5 pr-10 bg-white/80 border border-white/60 rounded-xl focus:border-blue-400 focus:ring-2 focus:ring-blue-200/50 outline-none transition glass-input text-gray-800 text-sm disabled:opacity-60 disabled:cursor-not-allowed" 
+                                        required disabled>
+                                    <option value="">-- Pilih Kecamatan Terlebih Dahulu --</option>
+                                </select>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
+                                    <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
                     </div>
+
+                    {{-- Alasan Pindah --}}
                     <div>
-                        <label class="block text-sm font-bold text-gray-800 mb-2">Alasan Pindah</label>
-                        <input type="text" name="reason" placeholder="Contoh: Ikut suami, pindah domisili, dll" class="w-full px-4 py-2 bg-white/80 border border-white/60 rounded-xl focus:border-orange-400 outline-none text-gray-800 text-sm" required>
+                        <label for="input-alasan-mutasi" class="block text-sm font-bold text-gray-800 mb-2">Alasan Kepindahan</label>
+                        <input type="text" id="input-alasan-mutasi" name="reason" 
+                                placeholder="Contoh: Pindah domisili mengikuti pekerjaan atau keluarga" 
+                                class="w-full px-4 py-2.5 bg-white/80 border border-white/60 rounded-xl focus:border-blue-400 focus:ring-2 focus:ring-blue-200/50 outline-none transition glass-input text-gray-800 text-sm" 
+                                required maxlength="500">
                     </div>
-                    <div class="md:col-span-2">
-                        <button type="submit" class="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl shadow transition">
-                            Ajukan Pindah Sekarang
+
+                    {{-- Tombol Submit --}}
+                    <div class="pt-2 flex justify-end">
+                        <button type="submit" id="btn-submit-mutasi"
+                                class="button-interactive py-3 px-8 bg-blue-600 hover:bg-blue-700 text-white rounded-full font-semibold text-sm transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105 active:scale-95 inline-flex items-center justify-center gap-2">
+                            <span>Ajukan Pindah Sekarang</span>
                         </button>
                     </div>
                 </form>
@@ -462,6 +690,188 @@
             });
         }
 
+        // ==========================================
+        // FITUR AJAX MUTASI WARGA (PINDAH DESA)
+        // ==========================================
+        window.MUTASI_DATA = {
+            desasByKecamatan: @json(isset($kecamatansData) ? $kecamatansData->mapWithKeys(function($k) {
+                return [$k->id => $k->children->map(function($d) {
+                    return ['id' => $d->id, 'name' => $d->name];
+                })];
+            }) : []),
+            currentUserDesaId: {{ $userDesaId ?? ($user->region_id ?? 0) }}
+        };
+
+        function populateDesaDropdown(kecId) {
+            const selectDesaMutasi = document.getElementById('select-desa-mutasi');
+            if (!selectDesaMutasi) return;
+
+            selectDesaMutasi.innerHTML = '';
+            const allDesas = window.MUTASI_DATA ? window.MUTASI_DATA.desasByKecamatan : {};
+            const currentUserDesaId = window.MUTASI_DATA ? window.MUTASI_DATA.currentUserDesaId : 0;
+
+            if (kecId && allDesas[kecId]) {
+                const desas = allDesas[kecId].filter(function(d) {
+                    return d.id != currentUserDesaId;
+                });
+
+                if (desas.length > 0) {
+                    const defaultOpt = document.createElement('option');
+                    defaultOpt.value = '';
+                    defaultOpt.textContent = '-- Pilih Desa Tujuan --';
+                    selectDesaMutasi.appendChild(defaultOpt);
+
+                    desas.forEach(function(d) {
+                        const opt = document.createElement('option');
+                        opt.value = d.id;
+                        opt.textContent = d.name;
+                        selectDesaMutasi.appendChild(opt);
+                    });
+                    selectDesaMutasi.disabled = false;
+                } else {
+                    const emptyOpt = document.createElement('option');
+                    emptyOpt.value = '';
+                    emptyOpt.textContent = '-- Tidak ada desa tujuan di kecamatan ini --';
+                    selectDesaMutasi.appendChild(emptyOpt);
+                    selectDesaMutasi.disabled = true;
+                }
+            } else {
+                const defaultOpt = document.createElement('option');
+                defaultOpt.value = '';
+                defaultOpt.textContent = '-- Pilih Kecamatan Terlebih Dahulu --';
+                selectDesaMutasi.appendChild(defaultOpt);
+                selectDesaMutasi.disabled = true;
+            }
+        }
+
+        async function reloadMutasiSection() {
+            const container = document.getElementById('mutasi-section-container');
+            if (!container) return;
+
+            container.style.opacity = '0.4';
+            container.style.pointerEvents = 'none';
+
+            try {
+                const res = await fetch(window.location.href, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                if (!res.ok) throw new Error('Gagal memuat ulang data mutasi');
+
+                const html = await res.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const newContainer = doc.getElementById('mutasi-section-container');
+
+                if (newContainer) {
+                    container.innerHTML = newContainer.innerHTML;
+                }
+            } catch (err) {
+                console.error('Error reload mutasi:', err);
+            } finally {
+                container.style.opacity = '1';
+                container.style.pointerEvents = 'auto';
+            }
+        }
+
+        function tampilkanNotifikasiMutasi(pesan, tipe = 'success') {
+            const judul = tipe === 'success' ? 'Berhasil' : (tipe === 'warning' ? 'Perhatian' : 'Gagal');
+            if (typeof window.showSiladesBengToast === 'function') {
+                window.showSiladesBengToast(tipe, judul, pesan);
+            } else if (typeof showSiladesBengToast === 'function') {
+                showSiladesBengToast(tipe, judul, pesan);
+            } else if (typeof window.showToast === 'function') {
+                window.showToast(pesan, tipe);
+            } else {
+                alert(pesan);
+            }
+        }
+
+        if (!window.mutasiDelegasiTerpasang) {
+            window.mutasiDelegasiTerpasang = true;
+
+            // Delegasi change event untuk dropdown kecamatan tujuan
+            document.addEventListener('change', function(e) {
+                if (e.target && e.target.id === 'select-kecamatan-mutasi') {
+                    populateDesaDropdown(e.target.value);
+                }
+            });
+
+            // Delegasi submit event untuk AJAX Form Pembatalan & Pengajuan Mutasi
+            document.addEventListener('submit', async function(e) {
+                const form = e.target.closest('#form-cancel-mutasi, #form-store-mutasi');
+                if (!form) return;
+
+                // Jika form memiliki data-konfirmasi dan belum disetujui di dialog konfirmasi,
+                // biarkan dialog-konfirmasi yang memproses terlebih dahulu.
+                if (form.hasAttribute('data-konfirmasi') && form.dataset.konfirmasiLolos !== '1') {
+                    return;
+                }
+
+                // Pengguna telah menyetujui tindakan di modal dialog konfirmasi
+                e.preventDefault();
+                e.stopPropagation();
+                delete form.dataset.konfirmasiLolos;
+
+                const isCancel = form.id === 'form-cancel-mutasi';
+                const submitBtn = form.querySelector('button[type="submit"]');
+                const originalContent = submitBtn ? submitBtn.innerHTML : '';
+
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.classList.add('opacity-70', 'cursor-not-allowed');
+                    submitBtn.innerHTML = `
+                        <svg class="w-4 h-4 animate-spin inline-block mr-1.5" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                        </svg>
+                        <span>${isCancel ? 'Membatalkan...' : 'Mengirim...'}</span>
+                    `;
+                }
+
+                try {
+                    const formData = new FormData(form);
+                    const res = await fetch(form.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json'
+                        }
+                    });
+
+                    const data = await res.json();
+
+                    if (res.ok && data.success) {
+                        tampilkanNotifikasiMutasi(data.message || (isCancel ? 'Pengajuan berhasil dibatalkan.' : 'Pengajuan berhasil dikirim.'), 'success');
+                        await reloadMutasiSection();
+                    } else {
+                        let pesanGagal = data.message || (isCancel ? 'Gagal membatalkan pengajuan.' : 'Gagal mengirim pengajuan.');
+                        if (data.errors) {
+                            const firstErrKey = Object.keys(data.errors)[0];
+                            if (firstErrKey && data.errors[firstErrKey][0]) {
+                                pesanGagal = data.errors[firstErrKey][0];
+                            }
+                        }
+                        tampilkanNotifikasiMutasi(pesanGagal, 'error');
+                        if (submitBtn) {
+                            submitBtn.disabled = false;
+                            submitBtn.classList.remove('opacity-70', 'cursor-not-allowed');
+                            submitBtn.innerHTML = originalContent;
+                        }
+                    }
+                } catch (err) {
+                    console.error('Mutasi submit error:', err);
+                    tampilkanNotifikasiMutasi('Terjadi gangguan jaringan atau server.', 'error');
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.classList.remove('opacity-70', 'cursor-not-allowed');
+                        submitBtn.innerHTML = originalContent;
+                    }
+                }
+            });
+        }
 
         // Efek Ripple Tombol
         const interactiveButtons = document.querySelectorAll('.button-interactive');

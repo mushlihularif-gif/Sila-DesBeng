@@ -41,6 +41,8 @@ class ProfileController extends Controller
         $rw_name = null;
         $rt_name = null;
         
+        $currentDesaId = null;
+
         if ($user->region_id) {
             $currentRegion = \App\Models\Region::find($user->region_id);
             
@@ -51,6 +53,7 @@ class ProfileController extends Controller
                     $rw_name = $currentRegion->name;
                 } elseif ($currentRegion->type == 'desa') {
                     $desa_name = $currentRegion->name;
+                    $currentDesaId = $currentRegion->id;
                 } elseif ($currentRegion->type == 'kecamatan') {
                     $kecamatan_name = $currentRegion->name;
                 }
@@ -63,7 +66,18 @@ class ProfileController extends Controller
             }
         }
 
-        return view('users.profile', compact('user', 'kecamatan_name', 'desa_name', 'rw_name', 'rt_name'));
+        if (!$currentDesaId && $user->region_id) {
+            $currentDesaId = $user->region_id;
+        }
+
+        $kecamatans = \App\Models\Region::where('type', 'kecamatan')
+            ->with(['children' => function($q) {
+                $q->where('type', 'desa')->orderBy('name');
+            }])
+            ->orderBy('name')
+            ->get();
+
+        return view('users.profile', compact('user', 'kecamatan_name', 'desa_name', 'rw_name', 'rt_name', 'kecamatans', 'currentDesaId'));
     }
 
     /**

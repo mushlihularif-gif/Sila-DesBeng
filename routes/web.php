@@ -214,6 +214,7 @@ Route::middleware('auth')->group(function () {
     
     // Mutasi Penduduk (User)
     Route::post('/profile/mutasi', [App\Http\Controllers\User\MutasiUserController::class, 'store'])->name('user.mutasi.store');
+    Route::delete('/profile/mutasi/cancel', [App\Http\Controllers\User\MutasiUserController::class, 'cancel'])->name('user.mutasi.cancel');
 });
 
 
@@ -560,8 +561,8 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index'])->name('admin.notifications.index');
     Route::get('/notifications/create', [NotificationController::class, 'create'])->name('admin.notifications.create');
     Route::post('/notifications', [NotificationController::class, 'store'])->name('admin.notifications.store');
-    Route::put('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('admin.notifications.mark-as-read');
-    Route::put('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('admin.notifications.mark-all-read');
+    Route::match(['put', 'post'], '/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('admin.notifications.mark-as-read');
+    Route::match(['put', 'post'], '/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('admin.notifications.mark-all-read');
     Route::delete('/notifications/hapus-semua', [NotificationController::class, 'deleteAll'])->name('admin.notifications.deleteAll');
     Route::delete('/notifications/{notification}', [NotificationController::class, 'destroy'])->name('admin.notifications.destroy');
 

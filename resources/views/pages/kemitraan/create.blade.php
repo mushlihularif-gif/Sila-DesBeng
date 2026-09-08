@@ -32,25 +32,7 @@
 
 
     @php
-        $isJoined = false;
-        if (auth()->check() && auth()->user()->region) {
-            $userRegionIds = array_merge([auth()->user()->region_id], \App\Models\Region::getAncestorIds(auth()->user()->region_id));
-            foreach($kecamatans as $kecamatan) {
-                foreach($kecamatan->children as $desa) {
-                    if(in_array($desa->id, $userRegionIds)) {
-                        // Cek apakah desa ini sudah punya admin
-                        $hasAdmin = $desa->users->filter(function($user) {
-                            return in_array($user->role, ['admin_desa', 'admin']);
-                        })->count() > 0;
-                        
-                        if ($hasAdmin) {
-                            $isJoined = true;
-                            break 2;
-                        }
-                    }
-                }
-            }
-        }
+        $isJoined = $isJoined ?? false;
     @endphp
 
     {{-- Hero Section --}}
@@ -108,7 +90,7 @@
                         } else if(document.getElementById('btn-open-login-mobile')) {
                             document.getElementById('btn-open-login-mobile').click();
                         }" class="btn-outline shadow-sm hover:shadow-lg">
-                        <span>Daftarkan Jabatan Kewilayahan Anda</span>
+                        <span>{{ $isJoined ? 'Daftarkan Jabatan Pengurus RT/RW' : 'Daftarkan Kemitraan Desa' }}</span>
                     </button>
                 @else
                     @if(auth()->user()->verification_status !== 'verified')
@@ -124,11 +106,11 @@
                             setTimeout(() => { t.style.transform = 'translateX(150%)'; t.style.opacity = '0'; setTimeout(() => t.remove(), 500); }, 3000);
                             setTimeout(() => { window.location.href = '{{ route('user.verifikasi.index') }}'; }, 1500);
                         " class="btn-outline shadow-sm hover:shadow-lg">
-                            <span>Daftarkan Jabatan Kewilayahan Anda</span>
+                            <span>{{ $isJoined ? 'Daftarkan Jabatan Pengurus RT/RW' : 'Daftarkan Kemitraan Desa' }}</span>
                         </button>
                     @else
                         <button onclick="openModal()" class="btn-outline shadow-sm hover:shadow-lg">
-                            <span>Daftarkan Jabatan Kewilayahan Anda</span>
+                            <span>{{ $isJoined ? 'Daftarkan Jabatan Pengurus RT/RW' : 'Daftarkan Kemitraan Desa' }}</span>
                         </button>
                     @endif
                 @endguest
@@ -391,8 +373,12 @@
 
                             {{-- Judul Tengah --}}
                             <div class="text-center flex-1 px-4">
-                                <h3 class="text-2xl font-bold text-gray-900 uppercase tracking-wide" id="modal-title">Form Pengajuan Kemitraan</h3>
-                                <p class="text-base text-gray-500 mt-2">Daftarkan wilayah desa Anda untuk bergabung</p>
+                                <h3 class="text-2xl font-bold text-gray-900 uppercase tracking-wide" id="modal-title">
+                                    {{ $isJoined ? 'FORM PENGAJUAN KEMITRAAN WILAYAH' : 'FORM PENGAJUAN KEMITRAAN DESA' }}
+                                </h3>
+                                <p class="text-base text-gray-500 mt-2">
+                                    {{ $isJoined ? 'Daftarkan wilayah Anda untuk bergabung' : 'Daftarkan desa Anda untuk bergabung' }}
+                                </p>
                                 <p class="text-sm text-gray-400 mt-1">Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis</p>
                             </div>
 
@@ -407,9 +393,19 @@
                         <div class="mt-1 border-b border-gray-400"></div>
                     </div>
 
+                    @if(!empty($pendingApplication))
+                        <div class="mx-12 mb-2 p-4 rounded-xl bg-amber-50 border border-amber-200 flex items-start gap-3">
+                            <svg class="w-6 h-6 text-amber-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                            <div>
+                                <h5 class="text-sm font-bold text-amber-900">Pengajuan Anda Sedang Ditinjau</h5>
+                                <p class="text-xs text-amber-700 mt-1">Anda sudah memiliki pengajuan kemitraan sebagai <strong>{{ $pendingApplication->position }} ({{ $pendingApplication->region_name }})</strong> yang saat ini masih dalam proses peninjauan oleh Pemerintah Desa.</p>
+                            </div>
+                        </div>
+                    @endif
+
                     {{-- Body Form --}}
                     <div class="bg-white" style="padding: 1rem 3rem 3.5rem;">
-                        <form action="{{ route('kemitraan.store') }}" method="POST" enctype="multipart/form-data">
+                        <form action="{{ route('kemitraan.store') }}" method="POST" enctype="multipart/form-data" id="partner-form">
                             @csrf
                             
                             {{-- Baris 1: Data Pribadi & Jabatan (4 kolom) --}}
@@ -423,10 +419,11 @@
                                     <select id="region_type" name="region_type" class="py-2 px-3 block w-full border border-gray-300 rounded-lg bg-white text-gray-900 text-sm focus:ring-2 focus:ring-[#115789]/30 focus:border-[#115789]" required onchange="updateJabatanOptions()">
                                         <option value="" disabled selected>Pilih Tingkat</option>
                                         @if(!$isJoined)
-                                        <option value="desa">Pemerintah Desa / Kelurahan</option>
+                                            <option value="desa">Pemerintah Desa / Kelurahan</option>
+                                        @else
+                                            <option value="rw">Pengurus RW</option>
+                                            <option value="rt">Pengurus RT</option>
                                         @endif
-                                        <option value="rw">Pengurus RW</option>
-                                        <option value="rt">Pengurus RT</option>
                                     </select>
                                 </div>
                                 <div>
@@ -451,59 +448,182 @@
                             </div>
 
                             {{-- Divider Informasi Wilayah --}}
-                            <div class="flex items-center gap-2 mb-5">
+                            <div class="flex items-center gap-2 mb-4">
                                 <svg class="w-6 h-6 shrink-0" style="color: #2f80ed;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                                <h4 class="font-bold text-gray-800 text-sm ml-1">Informasi Wilayah Anda</h4>
+                                <h4 class="font-bold text-gray-800 text-sm ml-1">
+                                    {{ $isJoined ? 'Informasi Wilayah Domisili Anda' : 'Informasi Wilayah Anda' }}
+                                </h4>
                                 <div class="flex-1 border-b border-gray-200"></div>
                             </div>
 
-                            {{-- Baris 2: Informasi Wilayah Dinamis --}}
-                            <div class="grid grid-cols-1 sm:grid-cols-4 gap-5 mb-6" id="region_selectors">
-                                {{-- Kabupaten (Fixed) --}}
-                                <div>
-                                    <label class="block text-xs font-semibold text-gray-500 mb-1 uppercase">Kabupaten</label>
-                                    <div class="py-2.5 px-4 w-full border border-gray-300 rounded-lg bg-gray-100 text-gray-600 text-[15px] font-bold shadow-sm">
-                                        Bengkalis
+                            @if($isJoined)
+                                {{-- Wilayah Domisili Terkunci (3 Kolom) --}}
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-4">
+                                    {{-- Kabupaten --}}
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-500 mb-1 uppercase">Kabupaten</label>
+                                        <div class="py-2.5 px-4 w-full border border-gray-300 rounded-lg bg-gray-100 text-gray-700 text-sm font-bold shadow-sm flex items-center justify-between">
+                                            <span>Bengkalis</span>
+                                            <span class="text-[11px] bg-gray-200 text-gray-600 px-2 py-0.5 rounded font-normal">Terkunci</span>
+                                        </div>
+                                    </div>
+                                    
+                                    {{-- Kecamatan --}}
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-500 mb-1 uppercase">Kecamatan</label>
+                                        <div class="py-2.5 px-4 w-full border border-gray-300 rounded-lg bg-gray-100 text-gray-700 text-sm font-bold shadow-sm flex items-center justify-between">
+                                            <span>{{ $userKecamatan->name ?? '-' }}</span>
+                                            <span class="text-[11px] bg-gray-200 text-gray-600 px-2 py-0.5 rounded font-normal">Domisili Akun</span>
+                                        </div>
+                                    </div>
+
+                                    {{-- Desa --}}
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-500 mb-1 uppercase">Desa / Kelurahan</label>
+                                        <div class="py-2.5 px-4 w-full border border-gray-300 rounded-lg bg-gray-100 text-gray-700 text-sm font-bold shadow-sm flex items-center justify-between">
+                                            <span>{{ $userDesa->name ?? '-' }}</span>
+                                            <span class="text-[11px] bg-green-100 text-green-700 px-2 py-0.5 rounded font-normal">Terdaftar</span>
+                                        </div>
                                     </div>
                                 </div>
-                                
-                                {{-- Kecamatan --}}
-                                <div>
-                                    <label class="block text-xs font-semibold text-gray-500 mb-1 uppercase">Kecamatan</label>
-                                    <select id="sel_kecamatan" class="py-2 px-3 block w-full border border-gray-300 rounded-lg bg-white text-[#1f2937] text-sm font-semibold shadow-sm focus:ring-2 focus:ring-[#115789]/30" required onchange="onKecamatanChange()">
-                                        <option value="" disabled selected>Pilih Kecamatan</option>
-                                        @foreach($kecamatans as $kecamatan)
-                                            <option value="{{ $kecamatan->id }}">{{ $kecamatan->name }}</option>
-                                        @endforeach
-                                    </select>
+
+                                {{-- Notice Penguncian Wilayah --}}
+                                <div class="mb-5 px-3.5 py-2.5 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-600 flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-slate-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                                    <span>Wilayah Kabupaten, Kecamatan, dan Desa dikunci otomatis sesuai identitas akun terverifikasi Anda untuk menjaga keamanan serta mencegah pendaftaran lintas desa.</span>
                                 </div>
 
-                                {{-- Kelurahan/Desa --}}
-                                <div>
-                                    <label class="block text-xs font-semibold text-gray-500 mb-1 uppercase">Desa/Kelurahan</label>
-                                    <select id="sel_desa" class="py-2 px-3 block w-full border border-gray-300 rounded-lg bg-gray-100 text-gray-500 text-sm font-semibold shadow-sm focus:ring-2 focus:ring-[#115789]/30" disabled onchange="onDesaChange()">
-                                        <option value="" disabled selected>Pilih Desa</option>
-                                    </select>
-                                </div>
+                                {{-- Box Pilihan / Input Wilayah RW atau RT --}}
+                                <div id="section_wilayah_rtrw" class="p-4 rounded-xl border border-blue-100 bg-blue-50/40 mb-6" style="display: none;">
+                                    {{-- Form Wilayah Khusus Pengurus RW --}}
+                                    <div id="box_input_rw" style="display: none;">
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
+                                            <div>
+                                                <label class="block text-xs font-bold text-gray-700 mb-1 uppercase">Pilih / Masukkan Nomor RW</label>
+                                                @if(!empty($existingRwsData))
+                                                    <div class="mb-2">
+                                                        <select id="sel_rw_choice" class="py-2.5 px-3 block w-full border border-gray-300 rounded-lg bg-white text-gray-900 text-sm font-semibold shadow-sm focus:ring-2 focus:ring-[#115789]/30" onchange="onRwChoiceChange()">
+                                                            <option value="" disabled selected>Pilih RW Terdaftar</option>
+                                                            @foreach($existingRwsData as $erw)
+                                                                <option value="{{ $erw['name'] }}" data-id="{{ $erw['id'] }}" {{ $erw['has_admin'] ? 'disabled class="bg-gray-100 text-gray-400 font-normal"' : '' }}
+                                                                    {{ (!$erw['has_admin'] && auth()->user()->rw && (int)auth()->user()->rw == (int)filter_var($erw['name'], FILTER_SANITIZE_NUMBER_INT)) ? 'selected' : '' }}>
+                                                                    {{ $erw['name'] }} {{ $erw['has_admin'] ? '(Sudah Ada Admin: ' . $erw['admin_name'] . ')' : '(Tersedia)' }}
+                                                                </option>
+                                                            @endforeach
+                                                            <option value="__manual__">+ Tulis Nomor RW Lainnya</option>
+                                                        </select>
+                                                    </div>
+                                                @endif
+                                                <div id="input_rw_manual_wrapper" class="{{ !empty($existingRwsData) ? 'hidden' : '' }}">
+                                                    <div class="relative rounded-lg shadow-sm">
+                                                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 font-bold text-sm">RW</span>
+                                                        <input type="number" id="input_rw_number" min="1" max="99" placeholder="Contoh: 01" value="" class="py-2.5 pl-12 pr-3 block w-full border border-gray-300 rounded-lg bg-white text-gray-900 text-sm font-semibold focus:ring-2 focus:ring-[#115789]/30" oninput="onRwManualInput()">
+                                                    </div>
+                                                </div>
 
-                                {{-- RT/RW (Tergantung Pilihan Tingkat) --}}
-                                <div id="container_rtrw" style="display: none;">
-                                    <label id="label_rtrw" class="block text-xs font-semibold text-gray-500 mb-1 uppercase">Pilih RT/RW</label>
-                                    <select id="sel_rtrw" class="py-2 px-3 block w-full border border-gray-300 rounded-lg bg-gray-100 text-gray-500 text-sm font-semibold shadow-sm focus:ring-2 focus:ring-[#115789]/30" disabled onchange="onRtRwChange()">
-                                        <option value="" disabled selected>-</option>
-                                    </select>
-                                </div>
+                                                {{-- Pesan Validasi Status RW --}}
+                                                <div id="rw_status_message" class="mt-2 text-xs font-medium" style="display: none;"></div>
+                                                <p class="text-xs text-gray-500 mt-1">Pilih nomor RW yang tersedia atau ketik nomor RW baru jika belum terdata.</p>
+                                            </div>
+                                            <div class="text-xs text-gray-600 bg-white p-3.5 rounded-lg border border-blue-100">
+                                                <p class="font-bold text-blue-700 mb-1">Ketentuan Pengurus RW</p>
+                                                <p class="leading-relaxed">Setiap wilayah RW hanya dapat dikelola oleh satu akun Admin RW. Jika nomor RW telah memiliki admin aktif, Anda tidak dapat mendaftar untuk nomor tersebut dan opsi akan otomatis dinonaktifkan.</p>
+                                            </div>
+                                        </div>
+                                    </div>
 
-                                {{-- Hidden Inputs untuk Submit ke Backend --}}
-                                <input type="hidden" name="parent_region_id" id="form_parent_region_id">
-                                <input type="hidden" name="region_name" id="form_region_name">
-                            </div>
+                                    {{-- Form Wilayah Khusus Pengurus RT --}}
+                                    <div id="box_input_rt" style="display: none;">
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
+                                            <div>
+                                                <label class="block text-xs font-bold text-gray-700 mb-1 uppercase">1. Tentukan RW Induk</label>
+                                                @if(!empty($existingRwsData))
+                                                    <select id="sel_rt_parent_rw" class="py-2.5 px-3 block w-full border border-gray-300 rounded-lg bg-white text-gray-900 text-sm font-semibold shadow-sm focus:ring-2 focus:ring-[#115789]/30" onchange="onRtParentRwChange()">
+                                                        <option value="" disabled selected>Pilih RW Induk</option>
+                                                        @foreach($existingRwsData as $erw)
+                                                            <option value="{{ $erw['name'] }}" data-id="{{ $erw['id'] }}" {{ (auth()->user()->rw && (int)auth()->user()->rw == (int)filter_var($erw['name'], FILTER_SANITIZE_NUMBER_INT)) ? 'selected' : '' }}>
+                                                                {{ $erw['name'] }}
+                                                            </option>
+                                                        @endforeach
+                                                        <option value="__manual__">+ Tulis Nomor RW Induk Baru</option>
+                                                    </select>
+                                                @endif
+                                                <div id="input_rt_parent_rw_manual_wrapper" class="{{ !empty($existingRwsData) ? 'hidden' : '' }} mt-2">
+                                                    <div class="relative rounded-lg shadow-sm">
+                                                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 font-bold text-sm">RW</span>
+                                                        <input type="number" id="input_rt_parent_rw_manual" min="1" max="99" placeholder="Contoh: 01" value="" class="py-2.5 pl-12 pr-3 block w-full border border-gray-300 rounded-lg bg-white text-gray-900 text-sm font-semibold focus:ring-2 focus:ring-[#115789]/30" oninput="onRtParentRwManualInput()">
+                                                    </div>
+                                                </div>
+                                                <p class="text-xs text-gray-500 mt-1">RW yang menaungi RT yang akan Anda ajukan.</p>
+                                            </div>
+                                            <div>
+                                                <label class="block text-xs font-bold text-gray-700 mb-1 uppercase">2. Masukkan / Pilih Nomor RT</label>
+                                                {{-- Dropdown pilihan RT terdaftar --}}
+                                                <div id="rt_dropdown_wrapper" style="display: none;" class="mb-2">
+                                                    <select id="sel_rt_choice" class="py-2.5 px-3 block w-full border border-gray-300 rounded-lg bg-white text-gray-900 text-sm font-semibold shadow-sm focus:ring-2 focus:ring-[#115789]/30" onchange="onRtChoiceChange()">
+                                                        <option value="" disabled selected>Pilih RT di RW ini</option>
+                                                    </select>
+                                                </div>
+
+                                                {{-- Input RT Manual --}}
+                                                <div id="input_rt_number_wrapper">
+                                                    <div class="relative rounded-lg shadow-sm">
+                                                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 font-bold text-sm">RT</span>
+                                                        <input type="number" id="input_rt_number" min="1" max="99" placeholder="Contoh: 01" value="" class="py-2.5 pl-12 pr-3 block w-full border border-gray-300 rounded-lg bg-white text-gray-900 text-sm font-semibold focus:ring-2 focus:ring-[#115789]/30" oninput="onRtNumberInput()">
+                                                    </div>
+                                                </div>
+
+                                                {{-- Pesan Validasi Status RT --}}
+                                                <div id="rt_status_message" class="mt-2 text-xs font-medium" style="display: none;"></div>
+                                                <p class="text-xs text-gray-500 mt-1">Nomor Rukun Tetangga (RT) yang Anda ajukan.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @else
+                                {{-- Baris 2: Pemilihan Wilayah Desa Baru (Jika Desa Belum Terdaftar) --}}
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-6" id="region_selectors">
+                                    {{-- Kabupaten (Fixed) --}}
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-500 mb-1 uppercase">Kabupaten</label>
+                                        <div class="py-2.5 px-4 w-full border border-gray-300 rounded-lg bg-gray-100 text-gray-600 text-[15px] font-bold shadow-sm">
+                                            Bengkalis
+                                        </div>
+                                    </div>
+                                    
+                                    {{-- Kecamatan --}}
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-500 mb-1 uppercase">Kecamatan</label>
+                                        <select id="sel_kecamatan" class="py-2 px-3 block w-full border border-gray-300 rounded-lg bg-white text-[#1f2937] text-sm font-semibold shadow-sm focus:ring-2 focus:ring-[#115789]/30" required onchange="onKecamatanChange()">
+                                            <option value="" disabled selected>Pilih Kecamatan</option>
+                                            @foreach($kecamatans as $kecamatan)
+                                                <option value="{{ $kecamatan->id }}">{{ $kecamatan->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+                                    {{-- Kelurahan/Desa --}}
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-500 mb-1 uppercase">Desa / Kelurahan</label>
+                                        <select id="sel_desa" class="py-2 px-3 block w-full border border-gray-300 rounded-lg bg-gray-100 text-gray-500 text-sm font-semibold shadow-sm focus:ring-2 focus:ring-[#115789]/30" disabled onchange="onDesaChange()">
+                                            <option value="" disabled selected>Pilih Desa</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            @endif
+
+                            {{-- Hidden Inputs untuk Submit ke Backend --}}
+                            <input type="hidden" name="parent_region_id" id="form_parent_region_id" value="{{ $isJoined && $userDesa ? $userDesa->id : '' }}">
+                            <input type="hidden" name="region_name" id="form_region_name">
+                            <input type="hidden" name="parent_rw_name" id="form_parent_rw_name">
 
                             {{-- Baris 3: Upload & Pesan (2 kolom sejajar) --}}
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-8">
                                 {{-- Upload Dokumen --}}
                                 <div>
-                                    <label for="document" class="block text-sm font-semibold text-gray-700 mb-1">Unggah SK/Surat Tugas (Max 5MB)</label>
+                                    <label for="document" class="block text-sm font-semibold text-gray-700 mb-1">
+                                        {{ $isJoined ? 'Unggah Surat Pendukung / Bukti Mandat (Maks 5MB)' : 'Unggah SK / Surat Tugas Resmi (Maks 5MB)' }}
+                                    </label>
                                     <label for="document" class="flex items-center gap-3 rounded-lg border-2 border-dashed border-gray-300 px-4 py-4 bg-gray-50 hover:border-blue-500 hover:bg-blue-50/30 transition-all cursor-pointer group">
                                         <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-100 transition-colors">
                                             <svg class="h-5 w-5" style="color: #2f80ed;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
@@ -514,15 +634,19 @@
                                                 <input id="document" name="document" type="file" style="display: none;" required accept=".pdf,.jpg,.jpeg,.png">
                                                 <span class="text-gray-500">atau seret dan lepas</span>
                                             </div>
-                                            <p class="text-xs text-gray-400 mt-0.5" id="file-name-display">PDF, PNG, JPG maksimal 5MB</p>
+                                            <p class="text-xs text-gray-400 mt-0.5" id="file-name-display">
+                                                {{ $isJoined ? 'SK, Surat Tugas, Surat Pengantar Desa, atau Berita Acara Mandat (PDF, PNG, JPG maks 5MB)' : 'SK Jabatan atau Surat Tugas resmi Pemerintah Desa (PDF, PNG, JPG maks 5MB)' }}
+                                            </p>
                                         </div>
                                     </label>
                                 </div>
 
                                 {{-- Pesan Tambahan --}}
                                 <div>
-                                    <label for="reason" class="block text-sm font-semibold text-gray-700 mb-1">Pesan Tambahan</label>
-                                    <textarea id="reason" name="reason" rows="3" class="py-2 px-3 block w-full border border-gray-200 rounded-lg bg-gray-50 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#115789]/30 focus:border-[#115789] transition-colors" style="outline: none;" required placeholder="Alasan mengapa wilayah desa Anda ingin bergabung...">{{ old('reason') }}</textarea>
+                                    <label for="reason" class="block text-sm font-semibold text-gray-700 mb-1">
+                                        {{ $isJoined ? 'Catatan / Alasan Pengajuan Mandat' : 'Pesan Tambahan' }}
+                                    </label>
+                                    <textarea id="reason" name="reason" rows="3" class="py-2 px-3 block w-full border border-gray-200 rounded-lg bg-gray-50 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#115789]/30 focus:border-[#115789] transition-colors" style="outline: none;" required placeholder="{{ $isJoined ? 'Tuliskan catatan singkat pengajuan mandat atau alasan mengajukan kepengurusan RT/RW...' : 'Alasan mengapa wilayah desa Anda ingin bergabung...' }}">{{ old('reason') }}</textarea>
                                 </div>
                             </div>
 
@@ -531,7 +655,7 @@
                                 <p class="text-xs text-gray-400 italic">* Semua kolom wajib diisi</p>
                                 <div class="flex items-center gap-3">
                                     <button type="button" onclick="closeModal()" class="inline-flex justify-center rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-200 hover:bg-gray-50 transition-colors">Batal</button>
-                                    <button type="submit" class="inline-flex justify-center items-center gap-2 rounded-full px-8 py-2.5 text-sm font-bold text-white shadow-sm hover:shadow transition-all hover:bg-blue-600" style="background-color: #2f80ed;">
+                                    <button type="submit" id="btn-submit-partner" class="inline-flex justify-center items-center gap-2 rounded-full px-8 py-2.5 text-sm font-bold text-white shadow-sm hover:shadow transition-all hover:bg-blue-600 {{ !empty($pendingApplication) ? 'opacity-50 cursor-not-allowed' : '' }}" style="background-color: #2f80ed;" {{ !empty($pendingApplication) ? 'disabled' : '' }}>
                                         Kirim Pengajuan
                                     </button>
                                 </div>
@@ -593,28 +717,55 @@
 @endpush
 
 <script>
+    const isJoined = @json($isJoined);
     const allRegions = @json($regions);
+    const existingRwsData = @json($existingRwsData ?? []);
+    const userDesaId = {{ $userDesa ? $userDesa->id : 'null' }};
+    const userDesaName = @json($userDesa ? $userDesa->name : '');
     
+    let isRwBlocked = false;
+    let isRtBlocked = false;
+
     function getChildren(parentId) {
         return allRegions.filter(r => r.parent_id == parentId);
     }
 
     const selKec = document.getElementById('sel_kecamatan');
     const selDesa = document.getElementById('sel_desa');
-    const selRtRw = document.getElementById('sel_rtrw');
-    const containerRtRw = document.getElementById('container_rtrw');
-    const labelRtRw = document.getElementById('label_rtrw');
     const selRegionType = document.getElementById('region_type');
+    const positionSel = document.getElementById('position');
     
+    // Elements for isJoined mode
+    const sectionWilayahRtRw = document.getElementById('section_wilayah_rtrw');
+    const boxInputRw = document.getElementById('box_input_rw');
+    const boxInputRt = document.getElementById('box_input_rt');
+    const selRwChoice = document.getElementById('sel_rw_choice');
+    const inputRwManualWrapper = document.getElementById('input_rw_manual_wrapper');
+    const inputRwNumber = document.getElementById('input_rw_number');
+    const selRtParentRw = document.getElementById('sel_rt_parent_rw');
+    const inputRtParentRwManualWrapper = document.getElementById('input_rt_parent_rw_manual_wrapper');
+    const inputRtParentRwManual = document.getElementById('input_rt_parent_rw_manual');
+    const selRtChoice = document.getElementById('sel_rt_choice');
+    const rtDropdownWrapper = document.getElementById('rt_dropdown_wrapper');
+    const inputRtNumberWrapper = document.getElementById('input_rt_number_wrapper');
+    const inputRtNumber = document.getElementById('input_rt_number');
+
+    const hiddenParent = document.getElementById('form_parent_region_id');
+    const hiddenName = document.getElementById('form_region_name');
+    const hiddenParentRwName = document.getElementById('form_parent_rw_name');
+
     function updateJabatanOptions() {
         const type = selRegionType.value;
-        const positionSel = document.getElementById('position');
         positionSel.innerHTML = '<option value="" disabled selected>Pilih Jabatan</option>';
         
         let options = [];
-        if(type === 'desa') options = ['Kepala Desa', 'Sekretaris Desa', 'BPD', 'Pengelola Layanan Desa', 'Lainnya'];
-        else if(type === 'rw') options = ['Ketua RW', 'Sekretaris RW', 'Lainnya'];
-        else if(type === 'rt') options = ['Ketua RT', 'Sekretaris RT', 'Lainnya'];
+        if (type === 'desa') {
+            options = ['Kepala Desa', 'Sekretaris Desa', 'BPD', 'Perangkat Desa', 'Pengelola Layanan Desa', 'Lainnya'];
+        } else if (type === 'rw') {
+            options = ['Ketua RW', 'Sekretaris RW', 'Pengurus RW Lainnya'];
+        } else if (type === 'rt') {
+            options = ['Ketua RT', 'Sekretaris RT', 'Pengurus RT Lainnya'];
+        }
         
         options.forEach(opt => {
             const el = document.createElement('option');
@@ -622,19 +773,303 @@
             positionSel.appendChild(el);
         });
 
-        // Reset Wilayah selectors
-        selDesa.disabled = true; selDesa.innerHTML = '<option value="" disabled selected>Pilih Desa</option>';
-        selRtRw.disabled = true; selRtRw.innerHTML = '<option value="" disabled selected>-</option>';
-        containerRtRw.style.display = 'none';
-        
-        if(selKec.value) onKecamatanChange(); // trigger if kec is already selected
+        if (isJoined) {
+            if (sectionWilayahRtRw) sectionWilayahRtRw.style.display = 'block';
+            if (type === 'rw') {
+                if (boxInputRw) boxInputRw.style.display = 'block';
+                if (boxInputRt) boxInputRt.style.display = 'none';
+                if (selRwChoice && selRwChoice.value) {
+                    onRwChoiceChange();
+                } else {
+                    syncRwValues();
+                }
+            } else if (type === 'rt') {
+                if (boxInputRw) boxInputRw.style.display = 'none';
+                if (boxInputRt) boxInputRt.style.display = 'block';
+                if (selRtParentRw && selRtParentRw.value) {
+                    onRtParentRwChange();
+                } else {
+                    syncRtValues();
+                }
+            } else {
+                if (sectionWilayahRtRw) sectionWilayahRtRw.style.display = 'none';
+            }
+        } else {
+            // Mode Desa Belum Terdaftar
+            if (selDesa) {
+                selDesa.disabled = true;
+                selDesa.innerHTML = '<option value="" disabled selected>Pilih Desa</option>';
+            }
+            if (selKec && selKec.value) onKecamatanChange();
+        }
     }
 
+    // --- LOGIKA PENGURUS RW ---
+    function onRwChoiceChange() {
+        if (!selRwChoice) return;
+        const val = selRwChoice.value;
+        const msgEl = document.getElementById('rw_status_message');
+        
+        if (val === '__manual__') {
+            if (inputRwManualWrapper) inputRwManualWrapper.classList.remove('hidden');
+            if (inputRwNumber) {
+                inputRwNumber.focus();
+                onRwManualInput();
+            }
+        } else {
+            if (inputRwManualWrapper) inputRwManualWrapper.classList.add('hidden');
+            const selectedRw = existingRwsData.find(r => r.name === val);
+            if (selectedRw && selectedRw.has_admin) {
+                isRwBlocked = true;
+                showStatusMessage(msgEl, 'error', `${selectedRw.name} sudah memiliki Admin aktif (${selectedRw.admin_name}). Anda tidak dapat mendaftar untuk RW ini.`);
+            } else if (selectedRw) {
+                isRwBlocked = false;
+                showStatusMessage(msgEl, 'success', `${selectedRw.name} tersedia untuk diajukan.`);
+            } else {
+                isRwBlocked = false;
+                if (msgEl) msgEl.style.display = 'none';
+            }
+            syncRwValues();
+        }
+    }
+
+    function onRwManualInput() {
+        const msgEl = document.getElementById('rw_status_message');
+        if (!inputRwNumber) return;
+        const numVal = inputRwNumber.value.trim();
+        if (!numVal) {
+            isRwBlocked = false;
+            if (msgEl) msgEl.style.display = 'none';
+            syncRwValues();
+            return;
+        }
+
+        const formatted = 'RW ' + numVal.padStart(2, '0');
+        const numInt = parseInt(numVal, 10);
+        const existing = existingRwsData.find(r => r.name === formatted || r.name === 'RW ' + numInt);
+
+        if (existing && existing.has_admin) {
+            isRwBlocked = true;
+            showStatusMessage(msgEl, 'error', `${existing.name} sudah memiliki Admin aktif (${existing.admin_name}). Silakan tentukan nomor RW lain.`);
+        } else if (existing) {
+            isRwBlocked = false;
+            showStatusMessage(msgEl, 'success', `${existing.name} terdaftar dan tersedia untuk diajukan.`);
+        } else {
+            isRwBlocked = false;
+            showStatusMessage(msgEl, 'success', `${formatted} (wilayah baru) tersedia untuk didaftarkan.`);
+        }
+        syncRwValues();
+    }
+
+    function syncRwValues() {
+        if (!isJoined) return;
+        hiddenParent.value = userDesaId;
+        hiddenParentRwName.value = '';
+
+        let rwName = '';
+        if (selRwChoice && selRwChoice.value && selRwChoice.value !== '__manual__') {
+            rwName = selRwChoice.value;
+        } else if (inputRwNumber && inputRwNumber.value) {
+            let num = inputRwNumber.value.trim().padStart(2, '0');
+            rwName = 'RW ' + num;
+        }
+        hiddenName.value = rwName;
+        checkSubmitButtonState();
+    }
+
+    // --- LOGIKA PENGURUS RT ---
+    function onRtParentRwChange() {
+        const parentRwVal = selRtParentRw ? selRtParentRw.value : '';
+        const manualWrapper = document.getElementById('input_rt_parent_rw_manual_wrapper');
+        const rtDropWrap = document.getElementById('rt_dropdown_wrapper');
+        const rtChoiceEl = document.getElementById('sel_rt_choice');
+        const inputRtEl = document.getElementById('input_rt_number');
+        const inputRtWrap = document.getElementById('input_rt_number_wrapper');
+        const rtStatusMsg = document.getElementById('rt_status_message');
+
+        if (parentRwVal === '__manual__') {
+            if (manualWrapper) manualWrapper.classList.remove('hidden');
+            if (rtDropWrap) rtDropWrap.style.display = 'none';
+            if (inputRtWrap) inputRtWrap.style.display = 'block';
+            if (inputRtEl) inputRtEl.value = '';
+            onRtParentRwManualInput();
+        } else {
+            if (manualWrapper) manualWrapper.classList.add('hidden');
+            const selectedRw = existingRwsData.find(r => r.name === parentRwVal);
+            
+            if (selectedRw && selectedRw.rts && selectedRw.rts.length > 0) {
+                // Tampilkan dropdown RT terdaftar
+                rtChoiceEl.innerHTML = `<option value="" disabled selected>Pilih RT di ${selectedRw.name}</option>`;
+                selectedRw.rts.forEach(rt => {
+                    const opt = document.createElement('option');
+                    opt.value = rt.name;
+                    opt.setAttribute('data-id', rt.id);
+                    if (rt.has_admin) {
+                        opt.disabled = true;
+                        opt.className = 'bg-gray-100 text-gray-400 font-normal';
+                        opt.textContent = `${rt.name} (Sudah Ada Admin: ${rt.admin_name})`;
+                    } else {
+                        opt.textContent = `${rt.name} (Tersedia)`;
+                    }
+                    rtChoiceEl.appendChild(opt);
+                });
+                
+                const optManual = document.createElement('option');
+                optManual.value = '__manual__';
+                optManual.textContent = '+ Tulis Nomor RT Baru';
+                rtChoiceEl.appendChild(optManual);
+
+                if (rtDropWrap) rtDropWrap.style.display = 'block';
+                if (inputRtWrap) inputRtWrap.style.display = 'none';
+            } else {
+                // RW belum punya anak RT terdaftar, langsung input manual
+                if (rtDropWrap) rtDropWrap.style.display = 'none';
+                if (inputRtWrap) inputRtWrap.style.display = 'block';
+            }
+            if (rtStatusMsg) rtStatusMsg.style.display = 'none';
+            isRtBlocked = false;
+            syncRtValues();
+        }
+    }
+
+    function onRtParentRwManualInput() {
+        onRtNumberInput();
+    }
+
+    function onRtChoiceChange() {
+        const rtChoiceEl = document.getElementById('sel_rt_choice');
+        const inputRtWrap = document.getElementById('input_rt_number_wrapper');
+        const inputRtEl = document.getElementById('input_rt_number');
+        const msgEl = document.getElementById('rt_status_message');
+        if (!rtChoiceEl) return;
+
+        if (rtChoiceEl.value === '__manual__') {
+            if (inputRtWrap) inputRtWrap.style.display = 'block';
+            if (inputRtEl) {
+                inputRtEl.value = '';
+                inputRtEl.focus();
+            }
+            if (msgEl) msgEl.style.display = 'none';
+            isRtBlocked = false;
+        } else {
+            if (inputRtWrap) inputRtWrap.style.display = 'none';
+            const currentParentRw = selRtParentRw ? selRtParentRw.value : '';
+            const rwObj = existingRwsData.find(r => r.name === currentParentRw);
+            const rtObj = rwObj?.rts?.find(t => t.name === rtChoiceEl.value);
+
+            if (rtObj && rtObj.has_admin) {
+                isRtBlocked = true;
+                showStatusMessage(msgEl, 'error', `${rtObj.name} di ${currentParentRw} sudah memiliki Admin aktif (${rtObj.admin_name}). Anda tidak dapat mendaftar untuk RT ini.`);
+            } else if (rtObj) {
+                isRtBlocked = false;
+                showStatusMessage(msgEl, 'success', `${rtObj.name} di ${currentParentRw} tersedia untuk diajukan.`);
+            }
+        }
+        syncRtValues();
+    }
+
+    function onRtNumberInput() {
+        const inputRtEl = document.getElementById('input_rt_number');
+        const msgEl = document.getElementById('rt_status_message');
+        if (!inputRtEl) return;
+        const numVal = inputRtEl.value.trim();
+        if (!numVal) {
+            isRtBlocked = false;
+            if (msgEl) msgEl.style.display = 'none';
+            syncRtValues();
+            return;
+        }
+
+        const formattedRt = 'RT ' + numVal.padStart(2, '0');
+        const numInt = parseInt(numVal, 10);
+        const currentParentRw = (selRtParentRw && selRtParentRw.value !== '__manual__') 
+            ? selRtParentRw.value 
+            : ('RW ' + (inputRtParentRwManual?.value?.trim()?.padStart(2, '0') || ''));
+
+        const rwObj = existingRwsData.find(r => r.name === currentParentRw);
+        const existingRt = rwObj?.rts?.find(t => t.name === formattedRt || t.name === 'RT ' + numInt);
+
+        if (existingRt && existingRt.has_admin) {
+            isRtBlocked = true;
+            showStatusMessage(msgEl, 'error', `${existingRt.name} di lingkungan ${currentParentRw} sudah memiliki Admin aktif (${existingRt.admin_name}). Silakan tentukan nomor RT lain.`);
+        } else if (existingRt) {
+            isRtBlocked = false;
+            showStatusMessage(msgEl, 'success', `${existingRt.name} di lingkungan ${currentParentRw} terdaftar dan tersedia untuk diajukan.`);
+        } else {
+            isRtBlocked = false;
+            showStatusMessage(msgEl, 'success', `${formattedRt} di lingkungan ${currentParentRw} (wilayah baru) tersedia untuk didaftarkan.`);
+        }
+        syncRtValues();
+    }
+
+    function syncRtValues() {
+        if (!isJoined) return;
+
+        // Tentukan RW Induk
+        if (selRtParentRw && selRtParentRw.value && selRtParentRw.value !== '__manual__') {
+            const selectedOpt = selRtParentRw.options[selRtParentRw.selectedIndex];
+            hiddenParent.value = selectedOpt.getAttribute('data-id') || '';
+            hiddenParentRwName.value = selectedOpt.value;
+        } else if (inputRtParentRwManual && inputRtParentRwManual.value) {
+            let num = inputRtParentRwManual.value.trim().padStart(2, '0');
+            hiddenParent.value = userDesaId;
+            hiddenParentRwName.value = 'RW ' + num;
+        } else {
+            hiddenParent.value = '';
+            hiddenParentRwName.value = '';
+        }
+
+        // Tentukan RT Name
+        const rtChoiceEl = document.getElementById('sel_rt_choice');
+        const inputRtWrap = document.getElementById('input_rt_number_wrapper');
+        const inputRtEl = document.getElementById('input_rt_number');
+
+        let rtName = '';
+        if (rtChoiceEl && rtChoiceEl.value && rtChoiceEl.value !== '__manual__' && inputRtWrap && inputRtWrap.style.display === 'none') {
+            rtName = rtChoiceEl.value;
+        } else if (inputRtEl && inputRtEl.value) {
+            let num = inputRtEl.value.trim().padStart(2, '0');
+            rtName = 'RT ' + num;
+        }
+        hiddenName.value = rtName;
+        checkSubmitButtonState();
+    }
+
+    function showStatusMessage(element, type, message) {
+        if (!element) return;
+        element.style.display = 'flex';
+        element.className = type === 'error' 
+            ? 'mt-2 p-2.5 rounded-lg bg-red-50 border border-red-200 text-xs text-red-700 flex items-center gap-2 font-semibold'
+            : 'mt-2 p-2.5 rounded-lg bg-green-50 border border-green-200 text-xs text-green-700 flex items-center gap-2 font-semibold';
+        
+        const iconSvg = type === 'error'
+            ? `<svg class="w-4 h-4 text-red-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>`
+            : `<svg class="w-4 h-4 text-green-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`;
+
+        element.innerHTML = `${iconSvg}<span>${message}</span>`;
+    }
+
+    function checkSubmitButtonState() {
+        const btn = document.getElementById('btn-submit-partner');
+        if (!btn) return;
+        const type = selRegionType ? selRegionType.value : '';
+        if (isJoined) {
+            if ((type === 'rw' && isRwBlocked) || (type === 'rt' && isRtBlocked)) {
+                btn.disabled = true;
+                btn.classList.add('opacity-50', 'cursor-not-allowed');
+                return;
+            }
+        }
+        btn.disabled = false;
+        btn.classList.remove('opacity-50', 'cursor-not-allowed');
+    }
+
+    // Handler untuk Mode Desa Belum Bergabung (isJoined == false)
     function onKecamatanChange() {
+        if (!selKec || !selDesa) return;
         const kecId = selKec.value;
         selDesa.innerHTML = '<option value="" disabled selected>Pilih Desa/Kelurahan</option>';
         selDesa.disabled = !kecId;
-        selRtRw.disabled = true;
         
         if (kecId) {
             const desas = getChildren(kecId).filter(r => r.type === 'desa');
@@ -644,86 +1079,66 @@
                 selDesa.appendChild(opt);
             });
         }
-        updateFormHiddenValues();
+        updateFormHiddenValuesDesa();
     }
 
     function onDesaChange() {
-        const desaId = selDesa.value;
-        const type = selRegionType.value;
-        
-        selRtRw.innerHTML = '<option value="" disabled selected>-</option>';
-        selRtRw.disabled = !desaId;
-        
-        if(type === 'desa') {
-            containerRtRw.style.display = 'none';
-        } else if(type === 'rw') {
-            containerRtRw.style.display = 'block';
-            labelRtRw.textContent = 'Pilih RW';
-            const rws = getChildren(desaId).filter(r => r.type === 'rw');
-            if(rws.length === 0) selRtRw.innerHTML = '<option value="" disabled selected>Belum ada RW terdaftar di desa ini</option>';
-            else {
-                selRtRw.innerHTML = '<option value="" disabled selected>Pilih RW</option>';
-                rws.forEach(r => {
-                    const opt = document.createElement('option');
-                    opt.value = r.id; opt.textContent = r.name;
-                    selRtRw.appendChild(opt);
-                });
-            }
-        } else if(type === 'rt') {
-            containerRtRw.style.display = 'block';
-            labelRtRw.textContent = 'Pilih RW -> RT';
-            // Need grouped dropdown
-            const rws = getChildren(desaId).filter(r => r.type === 'rw');
-            if(rws.length === 0) selRtRw.innerHTML = '<option value="" disabled selected>Belum ada RW terdaftar di desa ini</option>';
-            else {
-                selRtRw.innerHTML = '<option value="" disabled selected>Pilih RT</option>';
-                rws.forEach(rw => {
-                    const group = document.createElement('optgroup');
-                    group.label = rw.name;
-                    const rts = getChildren(rw.id).filter(r => r.type === 'rt');
-                    rts.forEach(rt => {
-                        const opt = document.createElement('option');
-                        opt.value = rt.id; opt.textContent = rt.name;
-                        group.appendChild(opt);
-                    });
-                    if(rts.length === 0) {
-                        const opt = document.createElement('option');
-                        opt.disabled = true; opt.textContent = 'Belum ada RT';
-                        group.appendChild(opt);
-                    }
-                    selRtRw.appendChild(group);
-                });
-            }
-        }
-        updateFormHiddenValues();
+        updateFormHiddenValuesDesa();
     }
-    
-    function onRtRwChange() {
-        updateFormHiddenValues();
-    }
-    
-    function updateFormHiddenValues() {
-        const type = selRegionType.value;
-        const hiddenParent = document.getElementById('form_parent_region_id');
-        const hiddenName = document.getElementById('form_region_name');
-        
-        if(type === 'desa') {
+
+    function updateFormHiddenValuesDesa() {
+        if (isJoined) return;
+        if (selKec && selDesa) {
             hiddenParent.value = selKec.value;
             hiddenName.value = selDesa.options[selDesa.selectedIndex]?.text || '';
-        } else if(type === 'rw') {
-            hiddenParent.value = selDesa.value;
-            hiddenName.value = selRtRw.options[selRtRw.selectedIndex]?.text || '';
-        } else if(type === 'rt') {
-            // Wait, parent of RT is RW. We need the RW ID!
-            // But select option value is RT's ID.
-            // Let's get the parent of this RT from allRegions
-            const rtId = selRtRw.value;
-            if(rtId) {
-                const rtObj = allRegions.find(r => r.id == rtId);
-                hiddenParent.value = rtObj ? rtObj.parent_id : '';
-                hiddenName.value = rtObj ? rtObj.name : '';
-            }
         }
+    }
+
+    // Validation before submit
+    const partnerForm = document.getElementById('partner-form');
+    if (partnerForm) {
+        partnerForm.addEventListener('submit', function(e) {
+            const type = selRegionType.value;
+            if (isJoined) {
+                if (type === 'rw') {
+                    syncRwValues();
+                    if (isRwBlocked) {
+                        e.preventDefault();
+                        alert('Nomor RW yang Anda pilih/ketik sudah memiliki Admin aktif. Silakan pilih nomor RW lain.');
+                        return false;
+                    }
+                    if (!hiddenName.value) {
+                        e.preventDefault();
+                        alert('Silakan tentukan nomor RW yang valid terlebih dahulu.');
+                        return false;
+                    }
+                } else if (type === 'rt') {
+                    syncRtValues();
+                    if (isRtBlocked) {
+                        e.preventDefault();
+                        alert('Nomor RT yang Anda pilih/ketik sudah memiliki Admin aktif. Silakan pilih nomor RT lain.');
+                        return false;
+                    }
+                    if (!hiddenParentRwName.value && !hiddenParent.value) {
+                        e.preventDefault();
+                        alert('Silakan tentukan RW Induk terlebih dahulu.');
+                        return false;
+                    }
+                    if (!hiddenName.value) {
+                        e.preventDefault();
+                        alert('Silakan tentukan nomor RT yang valid terlebih dahulu.');
+                        return false;
+                    }
+                }
+            } else {
+                updateFormHiddenValuesDesa();
+                if (!hiddenParent.value || !hiddenName.value) {
+                    e.preventDefault();
+                    alert('Silakan pilih Kecamatan dan Desa/Kelurahan terlebih dahulu.');
+                    return false;
+                }
+            }
+        });
     }
 
     // Modal logic
@@ -733,7 +1148,6 @@
         const content = document.getElementById('modal-content');
         
         modal.classList.remove('hidden');
-        
         void modal.offsetWidth;
         
         // Animate in
@@ -742,6 +1156,11 @@
         
         content.classList.remove('opacity-0', 'translate-y-4', 'sm:scale-95');
         content.classList.add('opacity-100', 'translate-y-0', 'sm:scale-100');
+
+        // Trigger update jika opsi sudah terpilih
+        if (selRegionType && selRegionType.value) {
+            updateJabatanOptions();
+        }
     }
     
     function closeModal() {
@@ -756,21 +1175,25 @@
         content.classList.remove('opacity-100', 'translate-y-0', 'sm:scale-100');
         content.classList.add('opacity-0', 'translate-y-4', 'sm:scale-95');
         
-        // Wait for transition to finish
         setTimeout(() => {
             modal.classList.add('hidden');
-            // document.body.style.overflow = 'auto';
-        }, 300); // 300ms matches duration-300
+        }, 300);
     }
 
     // File name display logic
-    document.getElementById('document').addEventListener('change', function(e) {
-        var fileName = e.target.files[0].name;
-        document.getElementById('file-name-display').textContent = 'File terpilih: ' + fileName;
-        document.getElementById('file-name-display').classList.add('text-[#115789]', 'font-medium');
-    });
-</script>
-
+    const docInput = document.getElementById('document');
+    if (docInput) {
+        docInput.addEventListener('change', function(e) {
+            if (e.target.files && e.target.files[0]) {
+                var fileName = e.target.files[0].name;
+                const display = document.getElementById('file-name-display');
+                if (display) {
+                    display.textContent = 'File terpilih: ' + fileName;
+                    display.classList.add('text-[#115789]', 'font-medium');
+                }
+            }
+        });
+    }
 </script>
 
 @if(session('success_modal'))

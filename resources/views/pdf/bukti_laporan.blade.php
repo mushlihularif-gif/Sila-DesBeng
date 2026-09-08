@@ -343,8 +343,8 @@
                     <td>
                         @php
                             $nik = $laporan->user->nik ?? '-';
-                            if (strlen($nik) >= 16) {
-                                $censoredNik = substr($nik, 0, 2) . str_repeat('*', 12) . substr($nik, -2);
+                            if (strlen($nik) >= 8) {
+                                $censoredNik = substr($nik, 0, 4) . str_repeat('*', max(4, strlen($nik) - 8)) . substr($nik, -4);
                             } else {
                                 $censoredNik = $nik;
                             }

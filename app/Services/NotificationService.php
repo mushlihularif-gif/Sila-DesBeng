@@ -274,6 +274,26 @@ class NotificationService
         }
     }
 
+    public static function notifyMutasiApprovedByAsal($mutasi)
+    {
+        try {
+            $fromName = $mutasi->fromRegion ? $mutasi->fromRegion->name : 'Desa Asal';
+            $toName = $mutasi->toRegion ? $mutasi->toRegion->name : 'Desa Tujuan';
+            Notification::create([
+                'user_id' => $mutasi->user_id,
+                'type' => 'mutasi_approved_asal',
+                'title' => 'Pelepasan Pindah Desa Disetujui',
+                'message' => "Permohonan pindah Anda telah disetujui dan dilepaskan oleh Pemerintah {$fromName}. Saat ini sedang menunggu verifikasi penerimaan dari Pemerintah {$toName}.",
+                'link' => route('profile'),
+                'icon' => 'bx bx-time-five',
+                'is_read' => false,
+                'sent_at' => now(),
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('NotificationService error [notifyMutasiApprovedByAsal]: ' . $e->getMessage());
+        }
+    }
+
     public static function notifyMutasiRejected($mutasi, $reason)
     {
         try {
