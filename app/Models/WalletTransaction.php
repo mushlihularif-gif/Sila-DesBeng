@@ -80,6 +80,35 @@ class WalletTransaction extends Model
     }
 
     /**
+     * Tandai pembayaran MANUAL satu pesanan sebagai sudah diterima petugas.
+     *
+     * Hanya menyentuh baris `source = 'manual'` (tunai, transfer ke rekening
+     * wilayah, e-wallet) — uang yang penerimaannya memang cuma bisa dipastikan
+     * oleh manusia.
+     *
+     * Baris gateway SENGAJA tidak ikut. Satu-satunya yang berhak menyatakan
+     * uang gateway benar-benar masuk adalah webhook penyedia pembayaran (lihat
+     * PaymentCallbackController). Kalau tombol "selesai" di panel admin ikut
+     * memverifikasi baris gateway, pesanan yang kode bayarnya kedaluwarsa tanpa
+     * pernah dibayar akan berubah menjadi saldo yang bisa dicairkan — uang yang
+     * tidak pernah ada. Ini sungguh terjadi pada pesanan gas #24 dan #25.
+     *
+     * Dipanggil dari SEMUA jalur penyelesaian pesanan, supaya hasilnya tidak
+     * bergantung pada tombol mana yang kebetulan ditekan admin.
+     */
+    public static function tandaiPembayaranManualDiterima(
+        string $referenceType,
+        int $referenceId,
+        ?int $verifiedBy = null,
+    ): void {
+        self::where('reference_type', $referenceType)
+            ->where('reference_id', $referenceId)
+            ->where('source', 'manual')
+            ->where('status', 'pending')
+            ->update(['status' => 'verified', 'verified_by' => $verifiedBy]);
+    }
+
+    /**
      * Batalkan pemasukan satu pesanan, dan kembalikan uangnya ke dompet warga
      * bila memang sudah terbayar.
      *

@@ -341,6 +341,46 @@ class User extends Authenticatable
     ];
 
     /**
+     * Nama layanan wilayah yang diwakili tiap kunci izin unit.
+     *
+     * Izin dan layanan memakai kosakata berbeda: izinnya bernama 'sewa_alat',
+     * sedangkan RegionService menamainya 'Penyewaan Alat'. Peta ini sebelumnya
+     * hanya ada sebagai properti privat di StaffManagementController, sehingga
+     * dashboard tidak punya cara mengetahui unit apa yang dipegang seorang staf.
+     */
+    public const NAMA_UNIT = [
+        'gas'             => 'Penjualan Gas',
+        'sewa_alat'       => 'Penyewaan Alat',
+        'sewa_mobil'      => 'Penyewaan Mobil',
+        'fasilitas_umum'  => 'Fasilitas Umum',
+        'pasar_daerah'    => 'Pasar Daerah',
+        'kabar_informasi' => 'Kabar dan Informasi Daerah',
+        'pelaporan_warga' => 'Pelaporan Warga',
+    ];
+
+    /**
+     * Nama layanan yang benar-benar dipegang staf ini.
+     *
+     * Mengembalikan array kosong untuk yang bukan staf — pemanggilnya yang
+     * memutuskan arti "kosong", karena bagi admin wilayah kosong berarti
+     * "tidak dibatasi", sedangkan bagi staf berarti "belum diberi unit".
+     */
+    public function layananDipegang(): array
+    {
+        if ($this->role !== 'staff') {
+            return [];
+        }
+
+        return $this->staffPermissions()
+            ->whereIn('unit_key', self::IZIN_UNIT)
+            ->pluck('unit_key')
+            ->map(fn ($kunci) => self::NAMA_UNIT[$kunci] ?? null)
+            ->filter()
+            ->values()
+            ->all();
+    }
+
+    /**
      * True untuk staf yang memegang minimal satu unit layanan.
      *
      * Dipakai menampilkan grup menu tempat pekerjaan mereka sebenarnya berada:

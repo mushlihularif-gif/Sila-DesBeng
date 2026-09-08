@@ -25,24 +25,11 @@ class ProfileController extends Controller
 
         $user = auth()->user();
         
-        // null, BUKAN 'Belum ditentukan'.
-        //
-        // Teks itu dulu dikirim sebagai NILAI data, dan aplikasi mobile
-        // memasukkannya apa adanya ke kolom RT. Saat disimpan, ia dikirim balik
-        // sebagai rt = "Belum ditentukan" -- 16 karakter, ditolak validasi
-        // 'rt' => 'nullable|string|max:10'. Operator melihatnya sebagai error
-        // yang muncul entah dari mana, padahal ia tidak pernah mengetik apa pun.
-        //
-        // Kosong berarti KOSONG. Kalimat "Belum ditentukan" itu urusan
-        // tampilan, dan tempatnya di lapisan tampilan -- bukan di nilai yang
-        // akan dikirim balik ke server sebagai data.
-        $kecamatan_name = null;
-        $desa_name = null;
-        $rw_name = null;
-        $rt_name = null;
+        $kecamatan_name = 'Belum ditentukan';
+        $desa_name = 'Belum ditentukan';
+        $rw_name = 'Belum ditentukan';
+        $rt_name = 'Belum ditentukan';
         
-        $currentDesaId = null;
-
         if ($user->region_id) {
             $currentRegion = \App\Models\Region::find($user->region_id);
             
@@ -53,7 +40,6 @@ class ProfileController extends Controller
                     $rw_name = $currentRegion->name;
                 } elseif ($currentRegion->type == 'desa') {
                     $desa_name = $currentRegion->name;
-                    $currentDesaId = $currentRegion->id;
                 } elseif ($currentRegion->type == 'kecamatan') {
                     $kecamatan_name = $currentRegion->name;
                 }
@@ -66,18 +52,7 @@ class ProfileController extends Controller
             }
         }
 
-        if (!$currentDesaId && $user->region_id) {
-            $currentDesaId = $user->region_id;
-        }
-
-        $kecamatans = \App\Models\Region::where('type', 'kecamatan')
-            ->with(['children' => function($q) {
-                $q->where('type', 'desa')->orderBy('name');
-            }])
-            ->orderBy('name')
-            ->get();
-
-        return view('users.profile', compact('user', 'kecamatan_name', 'desa_name', 'rw_name', 'rt_name', 'kecamatans', 'currentDesaId'));
+        return view('users.profile', compact('user', 'kecamatan_name', 'desa_name', 'rw_name', 'rt_name'));
     }
 
     /**

@@ -25,11 +25,15 @@ class DDoSProtection
     /**
      * Konfigurasi DDoS Protection
      */
-    private const MAX_REQUESTS_PER_MINUTE = 100;    // Maks request per menit per IP
-    private const MAX_REQUESTS_PER_SECOND = 10;     // Maks request per detik per IP  
-    private const BAN_DURATION_MINUTES = 30;         // Durasi ban dalam menit
-    private const STRIKE_THRESHOLD = 3;              // Jumlah pelanggaran sebelum ban
-    private const SUSPICIOUS_THRESHOLD = 60;         // Request per menit dianggap mencurigakan
+    /**
+     * Ambang dibaca dari config/ddos.php supaya bisa disetel lewat .env tanpa
+     * mengubah kode. Angka pada pemanggilan di bawah adalah nilai cadangan
+     * kalau berkas config-nya tidak ada.
+     */
+    private function batas(string $kunci, int $bawaan): int
+    {
+        return (int) config('ddos.' . $kunci, $bawaan);
+    }
 
     public function handle(Request $request, Closure $next): Response
     {
@@ -37,6 +41,13 @@ class DDoSProtection
         
         // Skip untuk localhost/development
         if (in_array($ip, ['127.0.0.1', '::1']) && app()->environment('local')) {
+            return $next($request);
+        }
+
+        // IP yang dikecualikan lewat DDOS_WHITELIST di .env. Dicek sebelum
+        // penghitungan apa pun supaya pengelola tidak bisa memblokir dirinya
+        // sendiri saat sedang menangani gangguan.
+        if (in_array($ip, (array) config('ddos.whitelist', []), true)) {
             return $next($request);
         }
 
@@ -50,7 +61,7 @@ class DDoSProtection
             return response()->json([
                 'error' => 'Too Many Requests',
                 'message' => 'IP Anda telah diblokir sementara karena aktivitas mencurigakan.',
-                'retry_after' => self::BAN_DURATION_MINUTES . ' menit',
+                'retry_after' => $this->batas('ban_menit', 10) . ' menit',
             ], 429);
         }
 
@@ -58,7 +69,7 @@ class DDoSProtection
         $perSecondKey = 'ddos_sec:' . $ip;
         $perSecondCount = Cache::get($perSecondKey, 0);
         
-        if ($perSecondCount >= self::MAX_REQUESTS_PER_SECOND) {
+        if ($perSecondCount >= $this->batas('per_detik', 30)) {
             $this->addStrike($ip, $request);
             
             return response()->json([
@@ -73,7 +84,7 @@ class DDoSProtection
         $perMinuteKey = 'ddos_min:' . $ip;
         $perMinuteCount = Cache::get($perMinuteKey, 0);
         
-        if ($perMinuteCount >= self::MAX_REQUESTS_PER_MINUTE) {
+        if ($perMinuteCount >= $this->batas('per_menit', 600)) {
             $this->addStrike($ip, $request);
             
             return response()->json([
@@ -85,7 +96,7 @@ class DDoSProtection
         Cache::put($perMinuteKey, $perMinuteCount + 1, now()->addMinute());
 
         // Layer 4: Log jika mendekati batas (early warning)
-        if ($perMinuteCount >= self::SUSPICIOUS_THRESHOLD) {
+        if ($perMinuteCount >= $this->batas('mencurigakan', 400)) {
             Log::notice('DDOS_PROTECTION: Suspicious activity detected', [
                 'ip' => $ip,
                 'requests_per_minute' => $perMinuteCount,
@@ -110,8 +121,8 @@ class DDoSProtection
         $response = $next($request);
 
         // Tambahkan rate limit headers ke response
-        $response->headers->set('X-RateLimit-Limit', (string) self::MAX_REQUESTS_PER_MINUTE);
-        $response->headers->set('X-RateLimit-Remaining', (string) max(0, self::MAX_REQUESTS_PER_MINUTE - $perMinuteCount));
+        $response->headers->set('X-RateLimit-Limit', (string) $this->batas('per_menit', 600));
+        $response->headers->set('X-RateLimit-Remaining', (string) max(0, $this->batas('per_menit', 600) - $perMinuteCount));
 
         return $response;
     }
@@ -133,14 +144,14 @@ class DDoSProtection
         $strikes = Cache::get($strikeKey, 0) + 1;
         Cache::put($strikeKey, $strikes, now()->addHour());
 
-        if ($strikes >= self::STRIKE_THRESHOLD) {
+        if ($strikes >= $this->batas('strike', 5)) {
             // BAN IP
-            Cache::put('ddos_ban:' . $ip, true, now()->addMinutes(self::BAN_DURATION_MINUTES));
+            Cache::put('ddos_ban:' . $ip, true, now()->addMinutes($this->batas('ban_menit', 10)));
             
             Log::critical('DDOS_PROTECTION: IP BANNED', [
                 'ip' => $ip,
                 'strikes' => $strikes,
-                'ban_duration' => self::BAN_DURATION_MINUTES . ' minutes',
+                'ban_duration' => $this->batas('ban_menit', 10) . ' minutes',
                 'path' => $request->path(),
                 'user_agent' => $request->userAgent(),
             ]);

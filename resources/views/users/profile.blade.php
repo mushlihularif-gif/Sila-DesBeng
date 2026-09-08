@@ -222,14 +222,14 @@
                         {{-- Kecamatan --}}
                         <div>
                             <label class="block text-sm font-bold text-gray-800 mb-2">Kecamatan</label>
-                            <input type="text" value="{{ $kecamatan_name }}" disabled 
+                            <input type="text" value="{{ $kecamatan_name ?? 'Belum ditentukan' }}" disabled 
                                    class="w-full px-4 py-2.5 bg-white/60 border border-white/40 rounded-xl text-gray-700 cursor-not-allowed glass-input text-sm">
                         </div>
 
                         {{-- Desa / Kelurahan --}}
                         <div>
                             <label class="block text-sm font-bold text-gray-800 mb-2">Desa / Kelurahan</label>
-                            <input type="text" value="{{ $desa_name }}" disabled 
+                            <input type="text" value="{{ $desa_name ?? 'Belum ditentukan' }}" disabled 
                                    class="w-full px-4 py-2.5 bg-white/60 border border-white/40 rounded-xl text-gray-700 cursor-not-allowed glass-input text-sm">
                         </div>
 

@@ -403,7 +403,11 @@
                         $isSquare = true;
                     }
                 @endphp
-            @if(in_array(auth()->user()->role, ['admin_desa', 'admin_rt', 'admin_rw']))
+            {{-- 'staff' ikut di sini: tanpa itu staf unit membuka dashboard dan
+                 tidak melihat satu pun kartu layanan yang dipegangnya, padahal
+                 di situlah pekerjaan hariannya. Daftarnya sudah dipersempit ke
+                 unit miliknya oleh DashboardController. --}}
+            @if(in_array(auth()->user()->role, ['admin_desa', 'admin_rt', 'admin_rw', 'staff']))
             <div class="row g-2 g-sm-3 mb-4">
                 @foreach($activeServicesList as $serviceName)
                     @if(isset($unitConfigs[$serviceName]))

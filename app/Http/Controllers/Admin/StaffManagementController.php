@@ -13,15 +13,10 @@ use Illuminate\Validation\Rule;
 class StaffManagementController extends Controller
 {
     // Hak akses untuk staf UNIT LAYANAN, dibuat oleh admin kabupaten/kecamatan/desa.
-    private $unitLayanan = [
-        'gas' => 'Penjualan Gas',
-        'sewa_alat' => 'Penyewaan Alat',
-        'sewa_mobil' => 'Penyewaan Mobil',
-        'fasilitas_umum' => 'Fasilitas Umum',
-        'pasar_daerah' => 'Pasar Daerah',
-        'kabar_informasi' => 'Kabar dan Informasi Daerah',
-        'pelaporan_warga' => 'Pelaporan Warga'
-    ];
+    // Petanya tinggal di User::NAMA_UNIT karena dashboard juga memerlukannya
+    // untuk menerjemahkan izin staf menjadi nama layanan wilayah; dua salinan
+    // akan cepat berbeda begitu ada unit baru.
+    private $unitLayanan = User::NAMA_UNIT;
 
     /**
      * Daftar hak akses yang ditawarkan, TERGANTUNG SIAPA YANG MEMBUAT AKUN.

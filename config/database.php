@@ -59,7 +59,13 @@ return [
             'strict' => true,
             'engine' => null,
             'options' => extension_loaded('pdo_mysql') ? array_filter([
-                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+                // PHP 8.5 memindahkan konstanta ini ke Pdo\Mysql dan menandai
+                // PDO::MYSQL_ATTR_SSL_CA sebagai deprecated. Nilainya sama, tapi
+                // menyentuh yang lama saja sudah memunculkan peringatan di SETIAP
+                // request - dan pada hosting yang display_errors-nya menyala,
+                // peringatan itu tercetak di atas halaman warga. Dipilih saat
+                // runtime supaya bersih di PHP 8.2 maupun 8.5.
+                (defined('Pdo\Mysql::ATTR_SSL_CA') ? \Pdo\Mysql::ATTR_SSL_CA : PDO::MYSQL_ATTR_SSL_CA) => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],
         ],
 
@@ -79,7 +85,13 @@ return [
             'strict' => true,
             'engine' => null,
             'options' => extension_loaded('pdo_mysql') ? array_filter([
-                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+                // PHP 8.5 memindahkan konstanta ini ke Pdo\Mysql dan menandai
+                // PDO::MYSQL_ATTR_SSL_CA sebagai deprecated. Nilainya sama, tapi
+                // menyentuh yang lama saja sudah memunculkan peringatan di SETIAP
+                // request - dan pada hosting yang display_errors-nya menyala,
+                // peringatan itu tercetak di atas halaman warga. Dipilih saat
+                // runtime supaya bersih di PHP 8.2 maupun 8.5.
+                (defined('Pdo\Mysql::ATTR_SSL_CA') ? \Pdo\Mysql::ATTR_SSL_CA : PDO::MYSQL_ATTR_SSL_CA) => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],
         ],
 
