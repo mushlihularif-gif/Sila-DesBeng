@@ -58,7 +58,7 @@ class PartnerApplicationController extends Controller
     private function pastikanPeninjau(): void
     {
         abort_unless(
-            in_array(auth()->user()?->role, ['super_admin', 'admin', 'admin_kecamatan', 'admin_desa'], true),
+            in_array(auth()->user()?->role, ['super_admin', 'admin', 'admin_kecamatan', 'admin_desa', 'admin_rw'], true),
             403,
             'Peninjauan kemitraan hanya untuk admin wilayah dan Super Admin.'
         );
@@ -70,14 +70,15 @@ class PartnerApplicationController extends Controller
 
         $user = auth()->user();
 
-        // Filter applications based on the admin's region
+        // Filter applications based on the admin's region and its descendants
         if ($user->role === 'super_admin') {
             // Super Admin sees ALL pending applications, especially Kabupaten/Kecamatan
             $applications = PartnerApplication::where('status', 'pending')->latest()->get();
         } else {
-            // Region Admin only sees applications that have their region as parent
+            // Region Admin sees applications that have their region or any descendant as parent
+            $allowedRegionIds = array_merge([$user->region_id], Region::getDescendantIds($user->region_id));
             $applications = PartnerApplication::where('status', 'pending')
-                ->where('parent_region_id', $user->region_id)
+                ->whereIn('parent_region_id', $allowedRegionIds)
                 ->latest()
                 ->get();
         }
@@ -92,8 +93,11 @@ class PartnerApplicationController extends Controller
         $application = PartnerApplication::findOrFail($id);
 
         $user = auth()->user();
-        if ($user->role !== 'super_admin' && $application->parent_region_id !== $user->region_id) {
-            abort(403);
+        if ($user->role !== 'super_admin') {
+            $allowedRegionIds = array_merge([$user->region_id], Region::getDescendantIds($user->region_id));
+            if (!in_array($application->parent_region_id, $allowedRegionIds)) {
+                abort(403);
+            }
         }
 
         if ($application->user_id && $application->status === 'pending') {
@@ -131,8 +135,11 @@ class PartnerApplicationController extends Controller
 
         // Security check
         $user = auth()->user();
-        if ($user->role !== 'super_admin' && $application->parent_region_id !== $user->region_id) {
-            return back()->with('error', 'Anda tidak memiliki akses untuk menyetujui aplikasi ini.');
+        if ($user->role !== 'super_admin') {
+            $allowedRegionIds = array_merge([$user->region_id], Region::getDescendantIds($user->region_id));
+            if (!in_array($application->parent_region_id, $allowedRegionIds)) {
+                return back()->with('error', 'Anda tidak memiliki akses untuk menyetujui aplikasi ini.');
+            }
         }
 
         // Role tiap tingkat wilayah. Sebelumnya ada fallback `?? 'admin'`, jadi
@@ -297,8 +304,11 @@ class PartnerApplicationController extends Controller
         $application = PartnerApplication::findOrFail($id);
         
         $user = auth()->user();
-        if ($user->role !== 'super_admin' && $application->parent_region_id !== $user->region_id) {
-            return back()->with('error', 'Anda tidak memiliki akses untuk menolak aplikasi ini.');
+        if ($user->role !== 'super_admin') {
+            $allowedRegionIds = array_merge([$user->region_id], Region::getDescendantIds($user->region_id));
+            if (!in_array($application->parent_region_id, $allowedRegionIds)) {
+                return back()->with('error', 'Anda tidak memiliki akses untuk menolak aplikasi ini.');
+            }
         }
 
         $application->update(['status' => 'rejected']);

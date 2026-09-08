@@ -4,6 +4,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     
     <style>
+        * { font-family: 'Inter', sans-serif; }
         /* Animasi Pemuatan Halaman Global */
         @keyframes fadeInUp {
             from {

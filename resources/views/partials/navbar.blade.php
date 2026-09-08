@@ -222,9 +222,7 @@
                         <span class="text-gray-900 font-bold text-[15px] group-hover:border-b-2 group-hover:border-blue-500 pb-0.5 flex items-center gap-1">
                             {{ auth()->user()->username }}
                             @if(auth()->user()->verification_status === 'verified')
-                            <svg class="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20" title="Warga Terverifikasi">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                            </svg>
+                            <img src="{{ asset('images/verified-badge.png?v=2') }}" class="w-4 h-4 object-contain inline-block select-none" alt="Warga Terverifikasi" title="Warga Terverifikasi">
                             @endif
                         </span>
                         <div class="relative w-11 h-11 rounded-full bg-[#D1D5DB] flex-shrink-0 shadow-md">
@@ -483,9 +481,7 @@
                     <p class="font-semibold text-gray-900 flex items-center gap-1">
                         {{ auth()->user()->name }}
                         @if(auth()->user()->verification_status === 'verified')
-                        <svg class="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20" title="Warga Terverifikasi">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                        </svg>
+                        <img src="{{ asset('images/verified-badge.png?v=2') }}" class="w-4 h-4 object-contain inline-block select-none" alt="Warga Terverifikasi" title="Warga Terverifikasi">
                         @endif
                     </p>
                     <p class="text-sm text-gray-500">{{ auth()->user()->email }}</p>

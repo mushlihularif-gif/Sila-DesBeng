@@ -329,20 +329,20 @@
 @endpush
 
 <!-- Floating Action Button -->
-<div class="chatbot-fab" id="chatbot-fab">
-    <div class="chatbot-tooltip" id="chatbot-tooltip"><span id="tooltip-text"></span><span class="cursor">|</span></div>
+<div class="chatbot-fab notranslate" translate="no" id="chatbot-fab">
+    <div class="chatbot-tooltip notranslate" translate="no" id="chatbot-tooltip"><span id="tooltip-text"></span><span class="cursor">|</span></div>
     <div class="notification-badge" id="chatbot-badge">1</div>
     <img src="{{ asset('User/img/logo/logocb.webp') }}" alt="SiladesBeng Assistant" draggable="false">
 </div>
 
 <!-- Chat Window -->
-<div class="chatbot-window" id="chatbot-window">
+<div class="chatbot-window notranslate" translate="no" id="chatbot-window">
     <div class="chatbot-header">
         <div class="chatbot-header-info">
             <img src="{{ asset('User/img/logo/logocb.webp') }}" alt="AI">
             <div>
                 <h4 class="chatbot-title">SiladesBeng Assistant</h4>
-                <div class="chatbot-subtitle"><span class="online-dot"></span> Online - AI Ready</div>
+                <div class="chatbot-subtitle"><span class="online-dot"></span> Online - Siap Membantu</div>
             </div>
         </div>
         <button class="chatbot-close" id="chatbot-close">&times;</button>
@@ -351,7 +351,7 @@
     <div class="chatbot-messages" id="chatbot-messages">
         <!-- Default Welcome Message -->
         <div class="msg-bubble msg-bot">
-            Halo! Saya SiladesBeng Assistant ðŸ‘‹<br><br>Ada yang bisa saya bantu hari ini tentang cara penyewaan alat, pembelian gas, pelaporan, atau layanan kami lainnya?
+            Halo! Saya SiladesBeng Assistant.<br><br>Ada yang bisa saya bantu hari ini seputar layanan daerah atau pelaporan warga?
         </div>
     </div>
     
