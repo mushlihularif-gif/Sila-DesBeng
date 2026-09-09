@@ -174,7 +174,7 @@
     document.addEventListener('contextmenu', function(e) {
         if (e.target.tagName === 'IMG') {
             e.preventDefault();
-            showSiladesBengToast('error', 'Peringatan Keamanan', '⚠️ PERINGATAN KEAMANAN<br><br>Anda tidak diizinkan menyimpan atau menyalin foto identitas warga.<br>Seluruh aktivitas Anda pada halaman ini tercatat dalam sistem audit.', 12000);
+            showSiladesBengToast('error', 'Peringatan Keamanan', '<i class="bx bx-shield-quarter me-1"></i> PERINGATAN KEAMANAN<br><br>Anda tidak diizinkan menyimpan atau menyalin foto identitas warga.<br>Seluruh aktivitas Anda pada halaman ini tercatat dalam sistem audit.', 12000);
             return false;
         }
     });
@@ -190,7 +190,7 @@
     // Peringatan jika mendeteksi PrintScreen (hanya edukasi, tidak bisa benar-benar mencegah)
     document.addEventListener('keyup', function(e) {
         if (e.key === 'PrintScreen') {
-            showSiladesBengToast('error', 'Peringatan Keamanan', '⚠️ PERINGATAN KEAMANAN<br><br>Screenshot terdeteksi!<br>Seluruh foto identitas sudah dilindungi watermark.<br>Penyalahgunaan data warga adalah pelanggaran hukum (UU PDP No. 27/2022).', 12000);
+            showSiladesBengToast('error', 'Peringatan Keamanan', '<i class="bx bx-shield-quarter me-1"></i> PERINGATAN KEAMANAN<br><br>Screenshot terdeteksi!<br>Seluruh foto identitas sudah dilindungi watermark.<br>Penyalahgunaan data warga adalah pelanggaran hukum (UU PDP No. 27/2022).', 12000);
         }
     });
 </script>

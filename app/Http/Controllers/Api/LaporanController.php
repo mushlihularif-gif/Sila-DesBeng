@@ -101,12 +101,13 @@ class LaporanController extends Controller
         // Simpan laporan
         $laporan = Laporan::create($data);
 
-        Log::info('✅ Laporan created via API', [
+        Log::info('Laporan created via API', [
             'id' => $laporan->id,
-            'has_bukti' => isset($data['bukti']),
+            'nama' => $laporan->nama,
+            'region_id' => $laporan->region_id,
         ]);
 
-        // ✅ Fix 4: Smart Routing - Kirim notifikasi berdasarkan ketersediaan admin
+        // Fix 4: Smart Routing - Kirim notifikasi berdasarkan ketersediaan admin
         try {
             $regionName = '';
             $currentRegion = Region::find($user->region_id);
@@ -278,7 +279,7 @@ class LaporanController extends Controller
                 'title' => 'Status Laporan Diperbarui',
                 'message' => "Laporan Anda telah diperbarui menjadi: {$laporan->status}",
                 'link' => '/laporan/' . $laporan->id,
-                'icon' => '📝',
+                'icon' => 'file-text',
             ]);
 
             // Send FCM Push Notification

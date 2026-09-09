@@ -250,7 +250,7 @@ class UnitPenyewaanController extends Controller
         $validated = $request->validate([
             'nama_barang' => 'required|string|max:255',
             'deskripsi' => 'required|string',
-            'harga_sewa' => 'required|string', // ✅ Terima sebagai string (untuk format Rupiah)
+            'harga_sewa' => 'required|string', // Terima sebagai string (untuk format Rupiah)
             'stok' => 'required|integer',
             'status' => 'required|in:tersedia,disewa,rusak',
             'kategori' => 'required|string',

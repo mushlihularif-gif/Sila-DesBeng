@@ -130,6 +130,6 @@ class ProposalMockupSeeder extends Seeder
         
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
         
-        echo "✅ BERHASIL: 200+ Data Simulasi Proposal Berhasil Dibuat!\n";
+        echo "BERHASIL: 200+ Data Simulasi Proposal Berhasil Dibuat!\n";
     }
 }

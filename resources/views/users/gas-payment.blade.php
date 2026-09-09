@@ -32,7 +32,7 @@
                     <h1 class="text-3xl font-bold bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent mb-2">Selesaikan Pembayaran Anda</h1>
                     <p class="text-gray-700 font-medium">Pesanan <span class="font-bold text-[#115789]">#{{ $order->order_number }}</span> telah dibuat.</p>
                 @else
-                    <h1 class="text-3xl font-bold text-green-500 mb-2">Pembayaran Berhasil! 🎉</h1>
+                    <h1 class="text-3xl font-bold text-green-500 mb-2 flex items-center justify-center gap-2"><i class="bx bx-check-circle text-4xl"></i> Pembayaran Berhasil!</h1>
                     <p class="text-gray-700 font-medium">Pesanan <span class="font-bold text-green-600">#{{ $order->order_number }}</span> telah lunas dan sedang diproses.</p>
                 @endif
             </div>

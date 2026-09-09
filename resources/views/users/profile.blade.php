@@ -578,7 +578,7 @@
     </div>
 </section>
 
-{{-- ✅ INCLUDE MODALS & SCRIPTS DARI AUTH --}}
+{{-- INCLUDE MODALS & SCRIPTS DARI AUTH --}}
 @include('auth.profile-modals')
 @endsection
 

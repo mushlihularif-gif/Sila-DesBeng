@@ -9,13 +9,13 @@
         {{-- Alert Messages --}}
         @if (session('success'))
         <div class="mb-6 bg-green-500/20 border border-green-500/50 rounded-xl p-4 animate-fade-in">
-            <p class="text-green-400">✅ {{ session('success') }}</p>
+            <p class="text-green-400 flex items-center gap-2"><svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> {{ session('success') }}</p>
         </div>
         @endif
 
         @if (session('error'))
         <div class="mb-6 bg-red-500/20 border border-red-500/50 rounded-xl p-4 animate-fade-in">
-            <p class="text-red-400">❌ {{ session('error') }}</p>
+            <p class="text-red-400 flex items-center gap-2"><svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg> {{ session('error') }}</p>
         </div>
         @endif
 
@@ -161,7 +161,7 @@
                 {{-- Foto Bukti --}}
                 @if (!empty($laporan->bukti_array))
                 <div class="mb-6">
-                    <p class="text-gray-400 text-sm mb-3">📸 Foto Bukti ({{ count($laporan->bukti_array) }} foto)</p>
+                    <p class="text-gray-400 text-sm mb-3 flex items-center gap-2"><svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg> Foto Bukti ({{ count($laporan->bukti_array) }} foto)</p>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         @foreach ($laporan->bukti_array as $foto)
                         <div class="bg-gray-900 rounded-xl overflow-hidden border-2 border-yellow-400/30 shadow-lg">
@@ -171,7 +171,7 @@
                         </div>
                         @endforeach
                     </div>
-                    <p class="text-xs text-gray-400 mt-2 text-center">💡 Klik gambar untuk memperbesar</p>
+                    <p class="text-xs text-gray-400 mt-2 text-center flex items-center justify-center gap-1"><svg class="w-3.5 h-3.5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Klik gambar untuk memperbesar</p>
                 </div>
                 @endif
 
@@ -179,7 +179,7 @@
                 @if ($laporan->catatan_admin)
                 <div class="mb-6 bg-blue-500/10 border-2 border-blue-500/30 rounded-xl p-6">
                     <div class="flex items-start gap-3 mb-3">
-                        <span class="text-3xl">💬</span>
+                        <svg class="w-7 h-7 text-blue-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
                         <div>
                             <p class="text-blue-400 font-bold text-lg">Catatan dari Admin</p>
                             @if ($laporan->admin)
@@ -190,8 +190,9 @@
                     <div class="bg-[#003026]/50 rounded-lg p-4">
                         <p class="text-gray-300 leading-relaxed">{{ $laporan->catatan_admin }}</p>
                     </div>
-                    <p class="text-gray-500 text-xs mt-3">
-                        📅 {{ $laporan->updated_at->format('d M Y, H:i') }} WIB
+                    <p class="text-gray-500 text-xs mt-3 flex items-center gap-1.5">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        {{ $laporan->updated_at->format('d M Y, H:i') }} WIB
                     </p>
                 </div>
                 @endif
@@ -200,7 +201,7 @@
                 @if ($laporan->status === 'Pending')
                 <div class="mb-6 bg-yellow-500/10 border-2 border-yellow-400/30 rounded-xl p-4">
                     <div class="flex items-center gap-3">
-                        <span class="text-3xl">⏰</span>
+                        <svg class="w-7 h-7 text-yellow-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                         <div>
                             <p class="text-yellow-300 font-semibold">Laporan Sedang Menunggu</p>
                             <p class="text-gray-400 text-sm">Laporan Anda sedang menunggu ditinjau oleh admin. Mohon bersabar.</p>
@@ -210,7 +211,7 @@
                 @elseif(in_array($laporan->status, ['Proses', 'Diproses']))
                 <div class="mb-6 bg-blue-500/10 border-2 border-blue-400/30 rounded-xl p-4">
                     <div class="flex items-center gap-3">
-                        <span class="text-3xl">🔄</span>
+                        <svg class="w-7 h-7 text-blue-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                         <div>
                             <p class="text-blue-300 font-semibold">Laporan Sedang Diproses</p>
                             <p class="text-gray-400 text-sm">Tim kami sedang menangani laporan Anda. Terima kasih atas kesabaran Anda.</p>
@@ -220,7 +221,7 @@
                 @elseif($laporan->status === 'Dilanjutkan')
                 <div class="mb-6 bg-orange-500/10 border-2 border-orange-400/30 rounded-xl p-4">
                     <div class="flex items-center gap-3">
-                        <span class="text-3xl">📤</span>
+                        <svg class="w-7 h-7 text-orange-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
                         <div>
                             <p class="text-orange-300 font-semibold">Laporan Dilanjutkan</p>
                             <p class="text-gray-400 text-sm">
@@ -232,7 +233,7 @@
                 @elseif($laporan->status === 'Selesai')
                 <div class="mb-6 bg-green-500/10 border-2 border-green-400/30 rounded-xl p-4">
                     <div class="flex items-center gap-3">
-                        <span class="text-3xl">✅</span>
+                        <svg class="w-7 h-7 text-green-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                         <div>
                             <p class="text-green-300 font-semibold">Laporan Selesai Ditangani</p>
                             <p class="text-gray-400 text-sm">
@@ -244,7 +245,7 @@
                 @elseif($laporan->status === 'Ditolak')
                 <div class="mb-6 bg-red-500/10 border-2 border-red-400/30 rounded-xl p-4">
                     <div class="flex items-center gap-3">
-                        <span class="text-3xl">❌</span>
+                        <svg class="w-7 h-7 text-red-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                         <div>
                             <p class="text-red-300 font-semibold">Laporan Ditolak</p>
                             <p class="text-gray-400 text-sm">Laporan Anda telah ditolak. Silakan cek catatan admin untuk informasi lebih lanjut.</p>
@@ -273,7 +274,7 @@
                     @if ($isOwner)
                     <div class="mt-6 bg-red-500/10 border-2 border-red-400/30 rounded-xl p-5">
                         <div class="flex items-start gap-3 mb-4">
-                            <span class="text-3xl">⚠️</span>
+                            <svg class="w-7 h-7 text-red-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                             <div>
                                 <p class="text-red-400 font-bold text-lg">Laporan Dapat Dihapus</p>
                                 <p class="text-gray-400 text-sm">Karena status laporan masih "Pending", Anda dapat menghapus laporan ini.</p>
@@ -282,13 +283,13 @@
 
                         <form action="{{ route('user.laporan.destroy', $laporan) }}"
                             method="POST"
-                            data-konfirmasi="⚠️ Yakin ingin menghapus laporan ini?&#10;&#10;Laporan yang dihapus tidak dapat dikembalikan!">
+                            data-konfirmasi="Yakin ingin menghapus laporan ini?&#10;&#10;Laporan yang dihapus tidak dapat dikembalikan!">
                             @csrf
                             @method('DELETE')
 
                             <button type="submit"
                                 class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold transition-all duration-200 transform hover:scale-105 flex items-center gap-2">
-                                <span>🗑️</span>
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                 <span>Hapus Laporan</span>
                             </button>
                         </form>

@@ -12,17 +12,17 @@ class RatingController extends Controller
     {
         // Validasi hanya pemilik laporan yang bisa rating
         if ($laporan->user_id !== auth()->id()) {
-            return back()->with('error', '❌ Anda tidak berhak memberikan rating untuk laporan ini.');
+            return back()->with('error', 'Anda tidak berhak memberikan rating untuk laporan ini.');
         }
 
         // Validasi status harus selesai
         if ($laporan->status !== 'Selesai') {
-            return back()->with('error', '❌ Rating hanya bisa diberikan untuk laporan yang sudah selesai.');
+            return back()->with('error', 'Rating hanya bisa diberikan untuk laporan yang sudah selesai.');
         }
 
         // Validasi sudah rating atau belum
         if ($laporan->rating) {
-            return back()->with('error', '❌ Anda sudah memberikan rating untuk laporan ini.');
+            return back()->with('error', 'Anda sudah memberikan rating untuk laporan ini.');
         }
 
         $validated = $request->validate([
@@ -38,7 +38,7 @@ class RatingController extends Controller
             'is_published' => true
         ]);
 
-        return back()->with('success', '⭐ Terima kasih atas rating Anda!');
+        return back()->with('success', 'Terima kasih atas rating Anda!');
     }
 
     public function update(Request $request, Laporan $laporan)
@@ -46,7 +46,7 @@ class RatingController extends Controller
         $rating = $laporan->rating;
 
         if (!$rating || $rating->user_id !== auth()->id()) {
-            return back()->with('error', '❌ Anda tidak berhak mengubah rating ini.');
+            return back()->with('error', 'Anda tidak berhak mengubah rating ini.');
         }
 
         $validated = $request->validate([
@@ -56,7 +56,7 @@ class RatingController extends Controller
 
         $rating->update($validated);
 
-        return back()->with('success', '✅ Rating berhasil diperbarui!');
+        return back()->with('success', 'Rating berhasil diperbarui!');
     }
 
     public function togglePublish(Rating $rating)
@@ -65,6 +65,6 @@ class RatingController extends Controller
             'is_published' => !$rating->is_published
         ]);
 
-        return back()->with('success', '✅ Status publikasi rating berhasil diubah!');
+        return back()->with('success', 'Status publikasi rating berhasil diubah!');
     }
 }

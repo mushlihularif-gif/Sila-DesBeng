@@ -31,6 +31,6 @@ class ClearProposalMockupSeeder extends Seeder
 
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
-        echo "🧹 BERSIH: Semua data simulasi proposal telah berhasil dihapus secara permanen dari database Anda.\n";
+        echo "BERSIH: Semua data simulasi proposal telah berhasil dihapus secara permanen dari database Anda.\n";
     }
 }

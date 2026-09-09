@@ -99,9 +99,9 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        echo "\n✅ Admin created: admin@isewa.com / admin123";
-        echo "\n✅ Admin Kecamatan created: adminkecamatan@isewa.com / password123";
-        echo "\n✅ Admin Desa created: admindesa@isewa.com / password123";
-        echo "\n✅ User created: user@test.com / password123\n\n";
+        echo "\n[INFO] Admin created: admin@isewa.com / admin123";
+        echo "\n[INFO] Admin Kecamatan created: adminkecamatan@isewa.com / password123";
+        echo "\n[INFO] Admin Desa created: admindesa@isewa.com / password123";
+        echo "\n[INFO] User created: user@test.com / password123\n\n";
     }
 }

@@ -445,7 +445,7 @@
                 document.getElementById('unitQuickReplies').style.display = 'none';
                 
                 setTimeout(() => {
-                    appendUnitMessageLocally("✅ Chat telah diteruskan. Petugas Admin akan segera membalas pesan Anda di sini.", 'toko');
+                    appendUnitMessageLocally("<i class='bx bx-check-circle text-green-500 me-1'></i> Chat telah diteruskan. Petugas Admin akan segera membalas pesan Anda di sini.", 'toko');
                 }, 500);
             }
         }).catch(err => {
