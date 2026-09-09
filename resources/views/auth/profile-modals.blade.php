@@ -143,7 +143,7 @@
                     </p>
                     <div class="mt-3">
                         <button type="button" id="btn-switch-profile-otp" class="text-sm font-medium text-gray-500 hover:text-blue-500 transition underline">
-                            Kirim OTP melalui No. Telepon
+                            Kirim OTP melalui WhatsApp
                         </button>
                     </div>
                 </div>

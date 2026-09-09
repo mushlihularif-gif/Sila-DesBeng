@@ -319,7 +319,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const btnSwitchProfileOtp = document.getElementById('btn-switch-profile-otp');
     let currentProfileOtpMethod = 'email';
     btnSwitchProfileOtp?.addEventListener('click', function() {
-        const switchMethod = currentProfileOtpMethod === 'email' ? 'sms' : 'email';
+        const switchMethod = currentProfileOtpMethod === 'email' ? 'whatsapp' : 'email';
         resendProfileOtp(switchMethod);
     });
 
@@ -353,7 +353,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (switchMethod) {
                     currentProfileOtpMethod = switchMethod;
                     if (btnSwitchProfileOtp) {
-                        btnSwitchProfileOtp.textContent = 'Kirim OTP melalui ' + (currentProfileOtpMethod === 'email' ? 'No. Telepon' : 'Email');
+                        btnSwitchProfileOtp.textContent = 'Kirim OTP melalui ' + (currentProfileOtpMethod === 'email' ? 'WhatsApp' : 'Email');
                     }
                 }
             } else {

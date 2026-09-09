@@ -209,7 +209,19 @@
             {{-- Form Register --}}
             <form id="form-register" action="{{ route('auth.register') }}" method="POST" class="space-y-3 max-h-96 overflow-y-auto pr-2">
                 @csrf
-                <input type="hidden" name="otp_method" value="email">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Metode Pengiriman OTP</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <label class="flex items-center gap-2 p-2 rounded-lg border border-gray-200 hover:border-blue-400 cursor-pointer transition text-xs font-medium text-gray-700 has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50/50 has-[:checked]:text-blue-700">
+                            <input type="radio" name="otp_method" value="email" checked class="text-blue-600 focus:ring-blue-500">
+                            <span>Email</span>
+                        </label>
+                        <label class="flex items-center gap-2 p-2 rounded-lg border border-gray-200 hover:border-blue-400 cursor-pointer transition text-xs font-medium text-gray-700 has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50/50 has-[:checked]:text-blue-700">
+                            <input type="radio" name="otp_method" value="whatsapp" class="text-blue-600 focus:ring-blue-500">
+                            <span>WhatsApp</span>
+                        </label>
+                    </div>
+                </div>
                 
                 <div class="grid grid-cols-2 gap-3">
                     <div>
@@ -390,8 +402,8 @@
                 <div class="mt-3">
                     @php
                         $currentMethod = session('temp_registration.otp_method') ?? session('otp_method') ?? 'email';
-                        $switchMethod = $currentMethod === 'email' ? 'sms' : 'email';
-                        $switchText = $currentMethod === 'email' ? 'Kirim OTP melalui No. Telepon' : 'Kirim OTP melalui Email';
+                        $switchMethod = $currentMethod === 'email' ? 'whatsapp' : 'email';
+                        $switchText = $currentMethod === 'email' ? 'Kirim OTP melalui WhatsApp' : 'Kirim OTP melalui Email';
                     @endphp
                     <button type="submit" name="switch_method" value="{{ $switchMethod }}" class="text-sm font-medium text-gray-500 hover:text-blue-500 transition underline">
                         {{ $switchText }}
@@ -458,9 +470,9 @@
                 </p>
                 <div class="mt-3">
                     @php
-                        $currentMethod = session('forgot_password_otp_method') ?? 'email';
-                        $switchMethod = $currentMethod === 'email' ? 'sms' : 'email';
-                        $switchText = $currentMethod === 'email' ? 'Kirim OTP melalui No. Telepon' : 'Kirim OTP melalui Email';
+                        $currentMethod = session('forgot_password_data.otp_method') ?? session('forgot_password_otp_method') ?? 'email';
+                        $switchMethod = $currentMethod === 'email' ? 'whatsapp' : 'email';
+                        $switchText = $currentMethod === 'email' ? 'Kirim OTP melalui WhatsApp' : 'Kirim OTP melalui Email';
                     @endphp
                     <button type="submit" name="switch_method" value="{{ $switchMethod }}" class="text-sm font-medium text-gray-500 hover:text-blue-500 transition underline">
                         {{ $switchText }}
