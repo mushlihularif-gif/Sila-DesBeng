@@ -29,7 +29,7 @@
 
         {{-- Peringatan Sukses ditangani secara global oleh AlpineJS Toast di app.blade.php --}}
 
-        <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data" data-turbo="false">
             @csrf
             @method('PUT')
 
