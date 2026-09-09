@@ -1043,4 +1043,14 @@ Route::get('/run-encrypt', function() { \Illuminate\Support\Facades\Artisan::cal
 
 Route::get('/test-berita-view', function() { return view('user.wilayah.berita', ['beritas' => collect(), 'jangkauanOptions' => []]); });
 
-
+// Fallback Route untuk aset Storage jika symlink dinonaktifkan oleh shared hosting
+Route::get('/storage/{path}', function ($path) {
+    if (str_contains($path, '..') || str_contains($path, "\0")) {
+        abort(403);
+    }
+    $fullPath = storage_path('app/public/' . $path);
+    if (!file_exists($fullPath) || is_dir($fullPath)) {
+        abort(404);
+    }
+    return response()->file($fullPath);
+})->where('path', '.*')->name('storage.fallback');
