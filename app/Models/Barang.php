@@ -24,7 +24,8 @@ class Barang extends Model
         'lokasi',
         'latitude',
         'longitude',
-        'satuan', 
+        'satuan',
+        'region_id',
     ];
 
     protected $casts = [
@@ -63,5 +64,10 @@ class Barang extends Model
         $this->save();
 
         return $this;
+    }
+
+    public function region()
+    {
+        return $this->belongsTo(Region::class);
     }
 }

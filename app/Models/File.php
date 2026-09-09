@@ -26,7 +26,22 @@ class File extends Model
     }
     public function handleAction($action)
     {
-        if (!Storage::exists($this->path)) {
+        $disk = null;
+        if (Storage::disk('local')->exists($this->path)) {
+            $disk = 'local';
+        } elseif (Storage::disk('public')->exists($this->path)) {
+            $disk = 'public';
+        } elseif (Storage::disk('private')->exists($this->path)) {
+            $disk = 'private';
+        } elseif (file_exists(storage_path('app/' . $this->path))) {
+            $disk = 'legacy_app';
+        } elseif (file_exists(storage_path('app/private/' . $this->path))) {
+            $disk = 'legacy_private';
+        } elseif (file_exists(storage_path('app/public/' . $this->path))) {
+            $disk = 'legacy_public';
+        }
+
+        if (!$disk) {
             if ($action === 'stream' && str_starts_with($this->mime_type ?? '', 'image/')) {
                 $fallbackPath = public_path('Admin/img/avatars/pria.png');
                 if (file_exists($fallbackPath)) {
@@ -37,13 +52,24 @@ class File extends Model
             }
             abort(404, 'File tidak ditemukan');
         }
+
+        $filePath = match ($disk) {
+            'local' => Storage::disk('local')->path($this->path),
+            'public' => Storage::disk('public')->path($this->path),
+            'private' => Storage::disk('private')->path($this->path),
+            'legacy_app' => storage_path('app/' . $this->path),
+            'legacy_private' => storage_path('app/private/' . $this->path),
+            'legacy_public' => storage_path('app/public/' . $this->path),
+        };
+
         if ($action === 'stream') {
-            return response()->file(Storage::path($this->path), [
-                'Content-Type' => $this->mime_type,
+            return response()->file($filePath, [
+                'Content-Type' => $this->mime_type ?: 'image/jpeg',
+                'Cache-Control' => 'no-cache, private',
             ]);
         }
         if ($action === 'download') {
-            return Storage::download($this->path, $this->filename);
+            return response()->download($filePath, $this->filename);
         }
         abort(400, 'Aksi tidak valid');
     }

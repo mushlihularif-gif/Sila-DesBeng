@@ -176,6 +176,7 @@ class UnitPenyewaanController extends Controller
             'latitude' => $request->latitude,
             'longitude' => $request->longitude,
             'satuan' => $request->satuan,
+            'region_id' => auth()->user()->region_id ?? $request->region_id,
         ];
 
         // Upload gambar
@@ -293,6 +294,7 @@ class UnitPenyewaanController extends Controller
             'latitude' => $request->latitude,
             'longitude' => $request->longitude,
             'satuan' => $request->satuan,
+            'region_id' => $barang->region_id ?? (auth()->user()->region_id ?? null),
         ];
 
         // Update gambar utama
