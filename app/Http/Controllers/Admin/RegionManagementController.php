@@ -24,10 +24,14 @@ class RegionManagementController extends Controller
         if ($region_id) {
             $parentRegion = Region::with(['children.users.file'])->find($region_id);
         } elseif ($isSuperAdmin) {
-            // Admin Kabupaten: Tampilkan Kabupaten Bengkalis (root region)
-            $parentRegion = Region::with(['children.users.file'])->whereNull('parent_id')->orWhere('parent_id', 0)->first();
-            if (!$parentRegion) {
-                $parentRegion = Region::with(['children.users.file'])->where('type', 'kabupaten')->first();
+            if (auth()->user()->role === 'super_admin') {
+                $parentRegion = null;
+            } else {
+                // Admin Kabupaten: Tampilkan Kabupaten Bengkalis (root region)
+                $parentRegion = Region::with(['children.users.file'])->whereNull('parent_id')->orWhere('parent_id', 0)->first();
+                if (!$parentRegion) {
+                    $parentRegion = Region::with(['children.users.file'])->where('type', 'kabupaten')->first();
+                }
             }
         } else {
             // Admin tingkat lain (Kecamatan, Desa, RW, dll)
@@ -43,11 +47,17 @@ class RegionManagementController extends Controller
         if ($parentRegion) {
             $childrenRegions = $childrenQuery->where('parent_id', $parentRegion->id)->get();
         } else {
-            $childrenRegions = collect([]);
+            if (auth()->user()->role === 'super_admin') {
+                $childrenRegions = $childrenQuery->whereNull('parent_id')->orWhere('parent_id', 0)->get();
+            } else {
+                $childrenRegions = collect([]);
+            }
         }
 
         $targetType = '';
-        if ($parentRegion && $parentRegion->type == 'kabupaten') {
+        if (!$parentRegion && auth()->user()->role === 'super_admin') {
+            $targetType = 'kabupaten';
+        } elseif ($parentRegion && $parentRegion->type == 'kabupaten') {
             $targetType = 'kecamatan';
         } elseif ($parentRegion && $parentRegion->type == 'kecamatan') {
             $targetType = 'desa';
@@ -67,7 +77,7 @@ class RegionManagementController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'type' => ['required', Rule::in(['kecamatan', 'desa', 'kelurahan', 'rw', 'rt'])],
+            'type' => ['required', Rule::in(['kabupaten', 'kecamatan', 'desa', 'kelurahan', 'rw', 'rt'])],
             'parent_id' => 'nullable|exists:regions,id',
             'admin_name' => 'nullable|string|max:255',
             'admin_email' => 'nullable|string|email|max:255|unique:users,email',
@@ -80,13 +90,17 @@ class RegionManagementController extends Controller
         $targetParentId = $request->input('parent_id', $user->region_id);
         
         $isSuperAdmin = in_array($user->role, ['super_admin', 'admin']);
-        if ($isSuperAdmin && !$request->filled('parent_id')) {
+        if ($isSuperAdmin && !$request->filled('parent_id') && $request->type !== 'kabupaten') {
              $kabupaten = Region::where('type', 'kabupaten')->first() ?? Region::whereNull('parent_id')->first();
              $targetParentId = $kabupaten ? $kabupaten->id : 0;
         }
 
+        if ($request->type === 'kabupaten' && $user->role === 'super_admin') {
+            $targetParentId = null;
+        }
+
         $parentRegion = Region::find($targetParentId);
-        if (!$parentRegion && !($isSuperAdmin && $targetParentId === 0)) {
+        if (!$parentRegion && !($isSuperAdmin && ($targetParentId === 0 || $targetParentId === null))) {
             return back()->with('error', 'Wilayah parent tidak ditemukan.');
         }
 
@@ -108,7 +122,9 @@ class RegionManagementController extends Controller
         $cleanName = ucwords(strtolower(trim(preg_replace('/\s+/', ' ', $request->name))));
 
         // Pastikan prefix otomatis untuk meminimalisir duplikasi
-        if ($request->type === 'kecamatan' && !str_starts_with(strtolower($cleanName), 'kecamatan')) {
+        if ($request->type === 'kabupaten' && !str_starts_with(strtolower($cleanName), 'kabupaten') && !str_starts_with(strtolower($cleanName), 'kota')) {
+            $cleanName = 'Kabupaten ' . $cleanName;
+        } elseif ($request->type === 'kecamatan' && !str_starts_with(strtolower($cleanName), 'kecamatan')) {
             $cleanName = 'Kecamatan ' . $cleanName;
         } elseif (in_array($request->type, ['desa', 'kelurahan']) && !str_starts_with(strtolower($cleanName), 'desa') && !str_starts_with(strtolower($cleanName), 'kelurahan')) {
             $cleanName = 'Desa ' . $cleanName;
@@ -122,6 +138,7 @@ class RegionManagementController extends Controller
 
         if ($request->filled('admin_name') && $request->filled('admin_email')) {
             $roleMapping = [
+                'kabupaten' => 'admin', // admin_kabupaten
                 'kecamatan' => 'admin_kecamatan',
                 'desa' => 'admin_desa',
                 'kelurahan' => 'admin_desa',
@@ -225,6 +242,7 @@ class RegionManagementController extends Controller
 
         // Tentukan Role
         $roleMapping = [
+            'kabupaten' => 'admin',
             'kecamatan' => 'admin_kecamatan',
             'desa' => 'admin_desa',
             'kelurahan' => 'admin_desa',

@@ -834,11 +834,13 @@
                         @endif
 
                         @if(in_array(auth()->user()->role, ['super_admin', 'admin', 'admin_kecamatan', 'admin_desa']))
+                    @if(auth()->user()->role === 'admin_desa' || auth()->user()->role === 'admin_kecamatan')
                         <li class="menu-item {{ request()->routeIs('admin.warga.mutasi.*') ? 'active' : '' }}">
                             <a href="{{ route('admin.warga.mutasi.index') }}" class="menu-link">
                                 <div>Mutasi Penduduk</div>
                             </a>
                         </li>
+                    @endif
                         @endif
 
                         @if(in_array(auth()->user()->role, ['super_admin', 'admin', 'admin_kecamatan', 'admin_rw']))

@@ -197,6 +197,8 @@ class StaffManagementController extends Controller
 
         if ($user->region_id) {
             $query->where('region_id', $user->region_id);
+        } else {
+            $query->whereNull('region_id');
         }
 
         $staffUsers = $query->when($search, function ($q) use ($search) {
