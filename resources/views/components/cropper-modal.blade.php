@@ -177,10 +177,12 @@
             } catch (err) {}
             window.globalCropperInstance = null;
         }
-        if (window.globalCropperInput && !window.globalCropperFileSaved) {
+        if (window.globalCropperInput && !window.globalCropperFileSaved && !window._isCropperSaving) {
             window.globalCropperInput.value = '';
         }
         window.globalCropperFileSaved = false;
+        window.globalCropperInput = null;
+        window.globalCropperPreview = null;
     };
 
     // Fungsi menyimpan hasil crop ke elemen input & pratinjau
@@ -234,10 +236,16 @@
                     var dataTransfer = new DataTransfer();
                     dataTransfer.items.add(croppedFile);
                     fileInput.files = dataTransfer.files;
+                    fileInput.dataset.cropped = '1';
 
-                    // Picu event input/change agar komponen lain tahu file sudah terisi
-                    fileInput.dispatchEvent(new Event('input', { bubbles: true }));
-                    fileInput.dispatchEvent(new Event('change', { bubbles: true }));
+                    // Picu event input/change dengan proteksi flag agar tidak memicu pemotongan ulang
+                    window._isCropperSaving = true;
+                    try {
+                        fileInput.dispatchEvent(new Event('input', { bubbles: true }));
+                        fileInput.dispatchEvent(new CustomEvent('change', { bubbles: true, detail: { fromCropper: true } }));
+                    } finally {
+                        window._isCropperSaving = false;
+                    }
                 } catch(e) {
                     console.error('DataTransfer error:', e);
                 }
@@ -292,11 +300,17 @@
                     if (delInput) delInput.value = '0';
                 }
 
+                var delAvatar = document.getElementById('delete_avatar');
+                if (delAvatar) delAvatar.value = '0';
+
                 var avatarPlaceholder = document.getElementById('avatar-placeholder');
                 if (avatarPlaceholder) avatarPlaceholder.classList.add('hidden', 'd-none');
 
                 var deletePhotoBtn = document.getElementById('delete-photo-btn');
-                if (deletePhotoBtn) deletePhotoBtn.style.display = 'inline-block';
+                if (deletePhotoBtn) {
+                    deletePhotoBtn.style.display = 'inline-block';
+                    deletePhotoBtn.classList.remove('hidden');
+                }
 
                 var uploadHint = document.getElementById('upload-hint');
                 if (uploadHint) uploadHint.classList.add('hidden');
@@ -325,6 +339,14 @@
     window.initGlobalCropper = function(inputElement, previewElementId, aspectRatio, showRatioButtons) {
         if (typeof aspectRatio === 'undefined') aspectRatio = 1;
         if (typeof showRatioButtons === 'undefined') showRatioButtons = false;
+
+        // Cegah re-trigger saat menyimpan hasil crop
+        if (window._isCropperSaving || (inputElement && inputElement.dataset && inputElement.dataset.cropped === '1')) {
+            if (inputElement && inputElement.dataset) {
+                delete inputElement.dataset.cropped;
+            }
+            return false;
+        }
 
         if (!inputElement || !inputElement.files || !inputElement.files[0]) return false;
 
