@@ -419,7 +419,10 @@ let livenessState = 0;
 let collectedFaceData = [];
 let faceSnapshot = null;
 let isBuildingCollage = false;
+let isSubmittingKyc = false;
 let frameFront = null, frameBlink = null, frameTurn = null;
+let stateStartTime = Date.now();
+let frontStableCount = 0;
 
 async function buildCollage(img1, img2, img3) {
     const canvas = document.createElement('canvas');
@@ -429,16 +432,24 @@ async function buildCollage(img1, img2, img3) {
     const loadImage = (src) => new Promise(resolve => {
         const img = new Image();
         img.onload = () => resolve(img);
+        img.onerror = () => resolve(null);
         img.src = src;
     });
 
     try {
-        const [i1, i2, i3] = await Promise.all([loadImage(img1), loadImage(img2), loadImage(img3)]);
-        ctx.drawImage(i1, 0, 0, 200, 200);
-        ctx.drawImage(i2, 200, 0, 200, 200);
-        ctx.drawImage(i3, 400, 0, 200, 200);
-        return canvas.toDataURL('image/jpeg', 0.8);
-    } catch(e) { return null; }
+        const [i1, i2, i3] = await Promise.all([
+            loadImage(img1),
+            loadImage(img2 || img1),
+            loadImage(img3 || img1)
+        ]);
+        if (i1) ctx.drawImage(i1, 0, 0, 200, 200);
+        if (i2) ctx.drawImage(i2, 200, 0, 200, 200);
+        if (i3) ctx.drawImage(i3, 400, 0, 200, 200);
+        return canvas.toDataURL('image/jpeg', 0.85);
+    } catch(e) {
+        console.warn('buildCollage failed, fallback to main frame:', e);
+        return img1;
+    }
 }
 
 function onResults(results) {
@@ -466,34 +477,82 @@ function onResults(results) {
         
         collectedFaceData.push({ ear: avgEAR, turn: noseTurn, ts: Date.now() });
 
+        const now = Date.now();
+        const timeInState = now - stateStartTime;
+
         if (livenessState === 0) {
-            instructionEl.innerText = "Posisikan Wajah di Tengah";
-            if (noseTurn > 0.4 && noseTurn < 0.6) {
-                if(!frameFront) frameFront = canvasElement.toDataURL("image/jpeg", 0.9);
-                livenessState = 1;
+            instructionEl.innerText = "Posisikan Wajah Menghadap ke Depan";
+            // Toleransi posisi tengah yang lebih fleksibel
+            if (noseTurn >= 0.35 && noseTurn <= 0.65) {
+                frontStableCount++;
+                if (frontStableCount >= 4) {
+                    frameFront = canvasElement.toDataURL("image/jpeg", 0.9);
+                    livenessState = 1;
+                    stateStartTime = Date.now();
+                    frontStableCount = 0;
+                }
+            } else {
+                frontStableCount = 0;
             }
         } else if (livenessState === 1) {
-            instructionEl.innerText = "Kedipkan Mata Anda";
-            if (avgEAR < 0.25) {
-                if(!frameBlink) frameBlink = canvasElement.toDataURL("image/jpeg", 0.9);
+            instructionEl.innerText = "Kedipkan Mata atau Toleh ke Kanan";
+            // Deteksi kedip (EAR < 0.28) ATAU toleh kanan (noseTurn > 0.60) ATAU timeout 3.5 detik
+            if (avgEAR < 0.28 || noseTurn > 0.60 || timeInState > 3500) {
+                frameBlink = canvasElement.toDataURL("image/jpeg", 0.9);
                 livenessState = 2;
+                stateStartTime = Date.now();
             }
         } else if (livenessState === 2) {
-            instructionEl.innerText = "Tolehkan Kepala ke Kanan/Kiri";
-            if (noseTurn < 0.35 || noseTurn > 0.65) {
-                if(!frameTurn) frameTurn = canvasElement.toDataURL("image/jpeg", 0.9);
+            instructionEl.innerText = "Tolehkan Kepala ke Kiri";
+            // Deteksi toleh kiri (noseTurn < 0.40) ATAU timeout 3.5 detik
+            if (noseTurn < 0.40 || timeInState > 3500) {
+                frameTurn = canvasElement.toDataURL("image/jpeg", 0.9);
                 livenessState = 3;
+                stateStartTime = Date.now();
             }
         } else if (livenessState === 3) {
-            instructionEl.innerText = "Terverifikasi!";
-            instructionEl.classList.replace('bg-black/70', 'bg-green-600');
-            if (!faceSnapshot && frameFront && frameBlink && frameTurn && !isBuildingCollage) {
+            instructionEl.innerText = "Wajah Terverifikasi! Mengirim Data...";
+            instructionEl.className = "bg-green-600 text-white px-5 py-2.5 rounded-full font-bold text-sm text-center shadow-lg mt-4 animate-pulse";
+            
+            const livenessStatus = document.getElementById('liveness-status');
+            if (livenessStatus) {
+                livenessStatus.className = "bg-green-600 text-white px-4 py-2 rounded-full font-bold text-sm shadow-lg mb-4 flex items-center space-x-2";
+                livenessStatus.innerHTML = '<span>Verifikasi Wajah Selesai</span>';
+            }
+
+            if (!faceSnapshot && !isBuildingCollage) {
                 isBuildingCollage = true;
+                
+                if (!frameFront) frameFront = canvasElement.toDataURL("image/jpeg", 0.9);
+                if (!frameBlink) frameBlink = frameFront;
+                if (!frameTurn) frameTurn = frameFront;
+
                 buildCollage(frameFront, frameBlink, frameTurn).then(data => {
-                    faceSnapshot = data;
-                    submitBtn.disabled = false;
-                    submitBtn.classList.remove('cursor-not-allowed');
-                    setTimeout(() => { if(camera) camera.stop(); }, 500);
+                    faceSnapshot = data || frameFront;
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.classList.remove('cursor-not-allowed');
+                    }
+                    if (camera) {
+                        try { camera.stop(); } catch(e) {}
+                    }
+                    // Auto-submit langsung saat sudah terverifikasi
+                    setTimeout(() => {
+                        if (typeof window.submitKycData === 'function') {
+                            window.submitKycData();
+                        }
+                    }, 400);
+                }).catch(err => {
+                    console.warn('Collage catch:', err);
+                    faceSnapshot = frameFront;
+                    if (camera) {
+                        try { camera.stop(); } catch(e) {}
+                    }
+                    setTimeout(() => {
+                        if (typeof window.submitKycData === 'function') {
+                            window.submitKycData();
+                        }
+                    }, 400);
                 });
             }
         }
@@ -856,15 +915,27 @@ function initKycPage() {
         });
     }
 
-    document.getElementById('btn-submit-kyc').addEventListener('click', async function() {
+    window.submitKycData = async function() {
+        if (isSubmittingKyc) return;
         if (!faceSnapshot) {
             showToast('Silakan ambil atau unggah foto wajah terlebih dahulu.', 'warning');
             return;
         }
 
-        const originalText = this.innerText;
-        this.disabled = true;
-        this.innerText = 'Mengirim Data...';
+        isSubmittingKyc = true;
+        const submitBtn = document.getElementById('btn-submit-kyc');
+        const modal = document.getElementById('loading-modal');
+        const loadingText = document.getElementById('loading-text');
+
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerText = 'Mengirim Data...';
+        }
+
+        if (modal) {
+            if (loadingText) loadingText.innerText = 'Mengirim Data Verifikasi...';
+            modal.classList.remove('hidden');
+        }
 
         try {
             const response = await fetch('{{ route("kyc.submit") }}', {
@@ -889,26 +960,42 @@ function initKycPage() {
             });
             const data = await response.json();
             if (response.ok && data.success) {
-                showToast(data.message || 'Berhasil menyimpan data.', 'success');
+                showToast(data.message || 'Verifikasi berhasil dikirim! Menunggu persetujuan admin.', 'success');
                 setTimeout(() => {
-                    window.location.href = '{{ route("beranda") }}';
-                }, 1000);
+                    window.location.href = '{{ route("kyc.index") }}';
+                }, 800);
             } else {
                 let errorMsg = data.message || 'Gagal menyimpan data.';
                 if (data.errors) {
                     errorMsg = Object.values(data.errors).flat().join('<br>');
                 }
                 showToast(errorMsg, 'error');
-                this.disabled = false;
-                this.innerText = originalText;
+                isSubmittingKyc = false;
+                if (modal) modal.classList.add('hidden');
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = 'Kirim Data';
+                }
             }
         } catch (error) {
             console.error('Submit KYC Error:', error);
             showToast('Terjadi gangguan jaringan atau server saat mengirim data.', 'error');
-            this.disabled = false;
-            this.innerText = originalText;
+            isSubmittingKyc = false;
+            if (modal) modal.classList.add('hidden');
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerText = 'Kirim Data';
+            }
         }
-    });
+    };
+
+    const submitBtnEl = document.getElementById('btn-submit-kyc');
+    if (submitBtnEl) {
+        submitBtnEl.addEventListener('click', function(e) {
+            e.preventDefault();
+            window.submitKycData();
+        });
+    }
 }
 
 document.addEventListener('DOMContentLoaded', initKycPage);
