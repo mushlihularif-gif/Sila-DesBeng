@@ -110,6 +110,38 @@
                         </div>
                     </div>
 
+                    {{-- Pembayaran lewat Snap tidak menyimpan nomor VA di sisi kita —
+                         nomornya diterbitkan dan ditampilkan di dalam popup Midtrans.
+                         Jadi selama belum ada nomornya, yang disodorkan adalah tombol
+                         untuk membuka (atau membuka ulang) popup itu. --}}
+                    @if(! $order->payment_va_number && $order->snap_token)
+                    <div class="bg-blue-50 rounded-2xl p-6 border border-blue-200 mb-8 text-center">
+                        <p class="text-sm font-semibold text-blue-900 mb-1">Pembayaran belum diselesaikan</p>
+                        <p class="text-xs text-blue-700 mb-4">Tekan tombol di bawah untuk membuka kembali halaman pembayaran.</p>
+                        <button type="button" id="btn-buka-snap"
+                                class="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition-colors">
+                            Bayar Sekarang
+                        </button>
+                    </div>
+
+                    @push('scripts')
+                    <script>
+                        document.getElementById('btn-buka-snap')?.addEventListener('click', function () {
+                            if (!window.snap) {
+                                alert('Layanan pembayaran belum siap dimuat. Periksa koneksi Anda lalu muat ulang halaman.');
+                                return;
+                            }
+                            const muatUlang = () => window.location.reload();
+                            window.snap.pay(@json($order->snap_token), {
+                                onSuccess: muatUlang,
+                                onPending: muatUlang,
+                                onError: muatUlang,
+                                onClose: muatUlang,
+                            });
+                        });
+                    </script>
+                    @endpush
+                    @else
                     <div class="bg-gray-50 rounded-2xl p-6 border border-gray-200 mb-8 relative group hover:border-blue-300 transition-colors cursor-pointer" onclick="copyVA()">
                         <p class="text-center text-sm font-semibold text-gray-500 mb-3">Nomor Virtual Account</p>
                         <div class="flex items-center justify-center gap-4">
@@ -119,6 +151,7 @@
                             </button>
                         </div>
                     </div>
+                    @endif
 
                     <div class="mb-8 px-2">
                         <h4 class="font-bold text-gray-800 mb-3 text-sm">Cara Pembayaran:</h4>

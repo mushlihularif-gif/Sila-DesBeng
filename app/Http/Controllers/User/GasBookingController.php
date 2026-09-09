@@ -424,49 +424,32 @@ class GasBookingController extends Controller
             'unit' => 'minute'
         ];
 
-        if ($paymentType === 'bank_transfer') {
-            $params['bank_transfer'] = [
-                'bank' => $bank,
-            ];
-        } else if ($paymentType === 'echannel') {
-            $params['echannel'] = [
-                'bill_info1' => 'Payment for:',
-                'bill_info2' => 'Sila-DesBeng',
-            ];
+        // Popup dibatasi ke kanal baru yang dipilih warga, supaya mereka tidak
+        // perlu memilih ulang di dalam popup.
+        $kanal = \App\Support\PenyediaPembayaran::kanalSnap($newMethod);
+        if ($kanal) {
+            $params['enabled_payments'] = [$kanal];
         }
 
         try {
-            $coreResponse = \Midtrans\CoreApi::charge($params);
+            $snap = \Midtrans\Snap::createTransaction($params);
 
-            // Update order with NEW Midtrans data
-            // IMPORTANT: We do NOT update payment_expiry_time here!
+            // payment_expiry_time SENGAJA tidak diperbarui: batas waktunya
+            // mengikuti pesanan asli, bukan direset tiap ganti metode.
             $order->payment_channel = $newMethod;
-            
-            // Format for display
+            $order->snap_token = $snap->token;
+
             if ($newMethod == 'gopay' || $newMethod == 'qris') {
                 $order->payment_method = ucfirst($newMethod);
             } else {
                 $order->payment_method = 'Bank Transfer ' . strtoupper(str_replace('bank_transfer_', '', $newMethod));
             }
 
-            if ($paymentType === 'bank_transfer' || $paymentType === 'echannel') {
-                if (isset($coreResponse->va_numbers) && count($coreResponse->va_numbers) > 0) {
-                    $order->payment_va_number = $coreResponse->va_numbers[0]->va_number;
-                } else if (isset($coreResponse->biller_code) && isset($coreResponse->bill_key)) {
-                    $order->payment_va_number = $coreResponse->biller_code . '-' . $coreResponse->bill_key;
-                }
-                $order->payment_qr_url = null;
-            } else if ($paymentType === 'qris' || $paymentType === 'gopay') {
-                if (isset($coreResponse->actions)) {
-                    foreach ($coreResponse->actions as $action) {
-                        if ($action->name === 'generate-qr-code') {
-                            $order->payment_qr_url = $action->url;
-                            break;
-                        }
-                    }
-                }
-                $order->payment_va_number = null;
-            }
+            // Nomor VA lama dikosongkan: yang berlaku sekarang adalah tagihan
+            // baru di dalam popup Snap, dan menyisakan nomor lama di halaman
+            // hanya membuat warga membayar ke tagihan yang sudah ditinggalkan.
+            $order->payment_va_number = null;
+            $order->payment_qr_url = null;
 
             $order->save();
 

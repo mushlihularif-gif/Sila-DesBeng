@@ -144,24 +144,14 @@ class GasBookingController extends Controller
             }
 
             $paymentMethod = $validated['payment_method'];
-            $paymentType = '';
-            $bank = '';
-            
-            if (str_starts_with($paymentMethod, 'bank_transfer_')) {
-                $bank = str_replace('bank_transfer_', '', $paymentMethod);
-                if ($bank === 'mandiri') {
-                    $paymentType = 'echannel';
-                } else {
-                    $paymentType = 'bank_transfer';
-                }
-            } else if ($paymentMethod === 'gopay') {
-                $paymentType = 'gopay';
-            } else if ($paymentMethod === 'qris') {
-                $paymentType = 'qris';
-            }
 
+            // Snap, bukan Core API. Akun ini hanya punya Snap; Core API menolak
+            // seluruh kanal dengan 402 "Payment channel is not activated".
+            //
+            // Aplikasi Flutter tidak bisa membuka popup, jadi yang dikirim
+            // balik adalah redirect_url - dibuka di webview. snap_token ikut
+            // disertakan untuk berjaga kalau nanti dipasang SDK Snap mobile.
             $params = [
-                'payment_type' => $paymentType,
                 'transaction_details' => [
                     'order_id' => $orderNumber,
                     'gross_amount' => $totalAmount,
@@ -176,55 +166,45 @@ class GasBookingController extends Controller
                         'id' => (string) $gas->id,
                         'price' => $gas->harga_satuan,
                         'quantity' => $validated['quantity'],
-                        'name' => $gas->jenis_gas
-                    ]
-                ]
+                        'name' => $gas->jenis_gas,
+                    ],
+                ],
             ];
 
-            if ($paymentType === 'bank_transfer') {
-                $params['bank_transfer'] = [
-                    'bank' => $bank
-                ];
-            } else if ($paymentType === 'echannel') {
-                $params['echannel'] = [
-                    'bill_info1' => 'Pembayaran:',
-                    'bill_info2' => 'Gas ' . $gas->jenis_gas
-                ];
+            $kanal = \App\Support\PenyediaPembayaran::kanalSnap($paymentMethod);
+            if ($kanal) {
+                $params['enabled_payments'] = [$kanal];
             }
 
             try {
-                $coreResponse = \Midtrans\CoreApi::charge($params);
-                
+                $snap = \Midtrans\Snap::createTransaction($params);
+
                 $order->payment_channel = $paymentMethod;
+                $order->snap_token = $snap->token;
                 $order->payment_expiry_time = now()->addDay();
-                
-                if (isset($coreResponse->va_numbers[0]->va_number)) {
-                    $order->payment_va_number = $coreResponse->va_numbers[0]->va_number;
-                } else if (isset($coreResponse->biller_code) && isset($coreResponse->bill_key)) {
-                    $order->payment_va_number = $coreResponse->biller_code . '-' . $coreResponse->bill_key;
-                } else if (isset($coreResponse->actions)) {
-                    foreach ($coreResponse->actions as $action) {
-                        if ($action->name === 'generate-qr-code') {
-                            $order->payment_qr_url = $action->url;
-                        }
-                    }
-                }
-                
                 $order->save();
+
+                $response['snap_token'] = $snap->token;
+                $response['snap_redirect_url'] = $snap->redirect_url;
             } catch (\Exception $e) {
-                \Log::warning('Midtrans Error (Mobile): ' . $e->getMessage());
-                
-                // MOCK RESPONSE
+                // TIDAK ADA nomor VA palsu. Versi sebelumnya mengisi
+                // rand(10000,99999).rand(100000,999999) sebagai nomor VA dan
+                // 'DUMMY_QR_CODE' sebagai QR, sehingga aplikasi mobile
+                // menampilkan tagihan yang tidak pernah ada di Midtrans.
+                \Illuminate\Support\Facades\Log::error('Midtrans Snap gagal (mobile)', [
+                    'order_number' => $orderNumber,
+                    'metode'       => $paymentMethod,
+                    'pesan'        => $e->getMessage(),
+                ]);
+
                 $order->payment_channel = $paymentMethod;
-                $order->payment_expiry_time = now()->addDay();
-                
-                if ($paymentType === 'bank_transfer' || $paymentType === 'echannel') {
-                    $order->payment_va_number = rand(10000, 99999) . rand(100000, 999999);
-                } else if ($paymentType === 'qris' || $paymentType === 'gopay') {
-                    $order->payment_qr_url = 'DUMMY_QR_CODE';
-                }
-                
                 $order->save();
+
+                $response['snap_token'] = null;
+                $response['snap_redirect_url'] = null;
+                $response['gateway_gagal'] = true;
+                $response['message'] = 'Pesanan tersimpan, tetapi pembayaran otomatis '
+                    . 'sedang tidak dapat diproses. Silakan pilih tunai atau hubungi petugas desa.';
             }
         }
 
