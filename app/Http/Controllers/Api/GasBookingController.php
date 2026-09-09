@@ -132,7 +132,7 @@ class GasBookingController extends Controller
             // Kunci milik wilayah gasnya, bukan kunci platform - lihat catatan yang
             // sama di User\GasBookingController.
             if (! \App\Support\PenyediaPembayaran::terapkanMidtransWilayah($gas->region_id)) {
-                \Log::warning('Gateway API dilewati: wilayah belum siap', [
+                \Illuminate\Support\Facades\Log::warning('Gateway API dilewati: wilayah belum siap', [
                     'order_number' => $order->order_number,
                     'region_id'    => $gas->region_id,
                 ]);
@@ -191,7 +191,7 @@ class GasBookingController extends Controller
                 // rand(10000,99999).rand(100000,999999) sebagai nomor VA dan
                 // 'DUMMY_QR_CODE' sebagai QR, sehingga aplikasi mobile
                 // menampilkan tagihan yang tidak pernah ada di Midtrans.
-                \Illuminate\Support\Facades\Log::error('Midtrans Snap gagal (mobile)', [
+                \Illuminate\Support\Facades\Illuminate\Support\Facades\Log::error('Midtrans Snap gagal (mobile)', [
                     'order_number' => $orderNumber,
                     'metode'       => $paymentMethod,
                     'pesan'        => $e->getMessage(),
@@ -221,11 +221,21 @@ class GasBookingController extends Controller
 
         if ($validated['payment_method'] !== 'tunai') {
             $response['payment_data'] = [
+                // va_number dan qr_url kini SELALU null untuk pembayaran gateway:
+                // sejak pindah ke Snap, nomor VA diterbitkan dan ditampilkan di
+                // halaman Midtrans, bukan disimpan di sisi kita. Keduanya
+                // dipertahankan supaya bentuk jawabannya tidak berubah bagi
+                // pemanggil lama, tapi aplikasi harus memakai snap_redirect_url.
                 'va_number' => $order->payment_va_number,
                 'qr_url' => $order->payment_qr_url,
                 'channel' => $order->payment_channel,
                 'expiry_time' => $order->payment_expiry_time ? $order->payment_expiry_time->toDateTimeString() : null,
-                'total_amount' => $totalAmount
+                'total_amount' => $totalAmount,
+
+                // Inilah yang harus dibuka aplikasi — di webview atau peramban
+                // luar. Popup Snap tidak tersedia di aplikasi mobile.
+                'snap_redirect_url' => $response['snap_redirect_url'] ?? null,
+                'snap_token' => $response['snap_token'] ?? null,
             ];
         }
 

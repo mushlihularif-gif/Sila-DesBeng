@@ -603,7 +603,7 @@ class PasarDaerahController extends Controller
         // membuat uang warga mendarat di akun yang salah, dan callback-nya pun
         // tidak akan cocok karena diverifikasi dengan kunci wilayah.
         if (! \App\Support\PenyediaPembayaran::terapkanMidtransWilayah($order->region_id)) {
-            \Log::warning('Gateway pasar dilewati: wilayah belum siap', [
+            \Illuminate\Support\Facades\Log::warning('Gateway pasar dilewati: wilayah belum siap', [
                 'order_number' => $order->order_number,
                 'region_id'    => $order->region_id,
             ]);
@@ -653,7 +653,7 @@ class PasarDaerahController extends Controller
             // dengan rand() dan menampilkannya ke warga seolah tagihan sungguhan -
             // uang yang ditransfer ke sana tidak sampai ke mana pun dan tidak ada
             // callback yang akan datang. Lebih baik pesanannya gagal terang-terangan.
-            \Log::error('Midtrans Error (pasar): ' . $e->getMessage(), [
+            \Illuminate\Support\Facades\Log::error('Midtrans Error (pasar): ' . $e->getMessage(), [
                 'order_number' => $order->order_number,
                 'region_id'    => $order->region_id,
             ]);
