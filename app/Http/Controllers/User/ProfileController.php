@@ -240,26 +240,36 @@ class ProfileController extends Controller
         }
 
         try {
-            $validated = $request->validate([
-                'current_password' => 'required',
+            $user = auth()->user();
+            $isGoogleUser = !empty($user->google_id);
+
+            $rules = [
                 'new_password' => 'required|min:8|confirmed',
-            ], [
+            ];
+            
+            if (!$isGoogleUser) {
+                $rules['current_password'] = 'required';
+            }
+
+            $messages = [
                 'current_password.required' => 'Password lama harus diisi',
                 'new_password.required' => 'Password baru harus diisi',
                 'new_password.min' => 'Password baru minimal 8 karakter',
                 'new_password.confirmed' => 'Konfirmasi password tidak cocok',
-            ]);
+            ];
 
-            $user = auth()->user();
+            $validated = $request->validate($rules, $messages);
 
-            // Verifikasi password saat ini
-            if (!Hash::check($validated['current_password'], $user->password)) {
-                return response()->json([
-                    'success' => false,
-                    'errors' => [
-                        'current_password' => ['Password lama tidak sesuai']
-                    ]
-                ], 422);
+            // Verifikasi password saat ini jika bukan Google User
+            if (!$isGoogleUser) {
+                if (!Hash::check($validated['current_password'], $user->password)) {
+                    return response()->json([
+                        'success' => false,
+                        'errors' => [
+                            'current_password' => ['Password lama tidak sesuai']
+                        ]
+                    ], 422);
+                }
             }
 
             // Buat OTP

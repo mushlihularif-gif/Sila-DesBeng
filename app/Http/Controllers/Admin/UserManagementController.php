@@ -45,6 +45,13 @@ class UserManagementController extends Controller
             if (in_array($user->role, ['admin_rt', 'admin_rw'])) {
                 $usersQuery->where('role', 'user');
             }
+        } else if (in_array($user->role, ['super_admin', 'admin'])) {
+            // Super Admin / Admin Kabupaten tidak perlu melihat Staff Layanan (staff daerah) di Manajemen Pengguna
+            // karena akan membuat daftar pengguna tercampur.
+            $usersQuery->where(function($q) {
+                $q->where('role', '!=', 'staff')
+                  ->orWhereNull('region_id');
+            });
         }
         
         // Filter opsional berdasarkan dropdown (hanya berlaku jika super_admin yang punya akses semua, atau admin desa yang memfilter per RT, dll)

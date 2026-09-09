@@ -1,5 +1,5 @@
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+function initProfileScripts() {
     // ========================================
     // PROFILE PAGE JAVASCRIPT
     // ========================================
@@ -389,5 +389,13 @@ document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => successAlert.remove(), 300);
         }, 3000);
     }
-});
+}
+
+// Jalankan saat pertama kali dan setiap kali Turbo memuat halaman
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initProfileScripts);
+} else {
+    initProfileScripts();
+}
+document.addEventListener('turbo:load', initProfileScripts);
 </script>

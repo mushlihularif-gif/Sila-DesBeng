@@ -94,7 +94,7 @@
 
             {{-- Social Login --}}
             <div class="mt-4 space-y-3 flex flex-col gap-3">
-                <a href="{{ route('auth.google') }}"
+                <a href="{{ route('auth.google') }}" data-turbo="false"
                     class="w-full py-3 border border-gray-300 rounded-full flex items-center justify-center gap-3 hover:bg-gray-50 transition text-decoration-none">
                     <svg class="w-5 h-5" viewBox="0 0 24 24">
                         <path fill="#4285F4"
@@ -315,7 +315,7 @@
 
             {{-- Social Register --}}
             <div class="mt-4 space-y-3 flex flex-col gap-3">
-                <a href="{{ route('auth.google') }}"
+                <a href="{{ route('auth.google') }}" data-turbo="false"
                     class="w-full py-3 border border-gray-300 rounded-full flex items-center justify-center gap-3 hover:bg-gray-50 transition text-decoration-none">
                     <svg class="w-5 h-5" viewBox="0 0 24 24">
                         <path fill="#4285F4"

@@ -876,11 +876,10 @@
         // Efek Ripple Tombol
         const interactiveButtons = document.querySelectorAll('.button-interactive');
         interactiveButtons.forEach(button => {
-            // Clone to remove old listeners
-            const newBtn = button.cloneNode(true);
-            button.parentNode.replaceChild(newBtn, button);
+            if (button.dataset.rippleAdded) return;
+            button.dataset.rippleAdded = 'true';
 
-            newBtn.addEventListener('click', function(e) {
+            button.addEventListener('click', function(e) {
                 const ripple = document.createElement('span');
                 const rect = this.getBoundingClientRect();
                 const size = Math.max(rect.width, rect.height);
