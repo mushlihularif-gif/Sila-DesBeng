@@ -184,7 +184,9 @@
                             <div class="relative z-10 bg-white p-2 rounded-xl">
                                 @if($order->payment_qr_url)
                                     @if(str_starts_with($order->payment_qr_url, 'http'))
-                                        <img src="{{ $order->payment_qr_url }}" alt="QR Code" class="w-full h-auto aspect-square object-contain" onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2Y4ZmFmYyIvPjxwYXRoIGQ9Ik0yMCAyMGg2MHY2MEgyMHoiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2NiZDVlMSIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtZGFzaGFycmF5PSI4IDQiLz48dGV4dCB4PSI1MCIgeT0iNTEiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXNpemU9IjgiIGZpbGw9IiM2NDc0OGIiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiPklNQUdFIEVSUk9SPC90ZXh0Pjwvc3ZnPg==';">
+                                        {{-- Lewat proxy: alamat QR Midtrans menuntut autentikasi Basic dengan
+                                             server key, jadi browser tidak bisa memuatnya langsung. --}}
+                                        <img src="{{ route('user.gas.payment.qr', $order->id) }}" alt="QR Code" class="w-full h-auto aspect-square object-contain" onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2Y4ZmFmYyIvPjxwYXRoIGQ9Ik0yMCAyMGg2MHY2MEgyMHoiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2NiZDVlMSIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtZGFzaGFycmF5PSI4IDQiLz48dGV4dCB4PSI1MCIgeT0iNTEiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXNpemU9IjgiIGZpbGw9IiM2NDc0OGIiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiPklNQUdFIEVSUk9SPC90ZXh0Pjwvc3ZnPg==';">
                                     @else
                                         <!-- Dummy QR Code SVG -->
                                         <svg class="w-full h-auto aspect-square text-gray-800" viewBox="0 0 24 24" fill="currentColor">

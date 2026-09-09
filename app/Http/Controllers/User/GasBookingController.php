@@ -288,7 +288,9 @@ class GasBookingController extends Controller
         if ($order->payment_qr_url || $order->payment_va_number) {
             return response()->json([
                 'siap'      => true,
-                'qr_url'    => $order->payment_qr_url,
+                'qr_url'    => $order->payment_qr_url
+                    ? route('user.gas.payment.qr', $order->id)
+                    : null,
                 'va_number' => $order->payment_va_number,
                 'status'    => $order->status,
             ]);
@@ -350,7 +352,11 @@ class GasBookingController extends Controller
 
             return response()->json([
                 'siap'      => $berubah,
-                'qr_url'    => $order->payment_qr_url,
+                // Alamat proxy, bukan alamat Midtrans mentah: yang mentah butuh
+                // server key dan akan gagal dimuat browser.
+                'qr_url'    => $order->payment_qr_url
+                    ? route('user.gas.payment.qr', $order->id)
+                    : null,
                 'va_number' => $order->payment_va_number,
                 'status'    => $order->status,
             ]);
@@ -369,6 +375,64 @@ class GasBookingController extends Controller
                 'alasan' => 'belum_ada_transaksi',
                 'pesan'  => $e->getMessage(),
             ]);
+        }
+    }
+
+    /**
+     * Teruskan gambar QRIS dari Midtrans ke browser warga.
+     *
+     * Alamat aslinya menuntut autentikasi Basic dengan SERVER KEY — kunci yang
+     * tidak boleh menyentuh browser sama sekali. Jadi server kita yang
+     * mengambil gambarnya, lalu meneruskannya sebagai gambar biasa.
+     */
+    public function qrPembayaran($id)
+    {
+        $order = \App\Models\GasOrder::findOrFail($id);
+
+        if ((int) $order->user_id !== (int) \Illuminate\Support\Facades\Auth::id()
+            && \Illuminate\Support\Facades\Auth::user()->role !== 'admin') {
+            abort(403);
+        }
+
+        if (! $order->payment_qr_url) {
+            abort(404);
+        }
+
+        $gas = \App\Models\Gas::find($order->gas_id);
+
+        if (! $gas || ! \App\Support\PenyediaPembayaran::terapkanMidtransWilayah($gas->region_id)) {
+            abort(404);
+        }
+
+        try {
+            $jawab = \Illuminate\Support\Facades\Http::withBasicAuth(
+                \Midtrans\Config::$serverKey,
+                ''
+            )->timeout(10)->get($order->payment_qr_url);
+
+            if (! $jawab->successful()) {
+                \Illuminate\Support\Facades\Log::warning('Gagal mengambil gambar QRIS', [
+                    'order_number' => $order->order_number,
+                    'kode'         => $jawab->status(),
+                ]);
+
+                abort(502);
+            }
+
+            return response($jawab->body(), 200, [
+                'Content-Type'  => $jawab->header('Content-Type') ?: 'image/png',
+                // QR berlaku sampai transaksinya kedaluwarsa; menyimpannya
+                // sebentar menghindari penembakan berulang ke Midtrans setiap
+                // kali halaman dibuka.
+                'Cache-Control' => 'private, max-age=300',
+            ]);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('Gagal mengambil gambar QRIS', [
+                'order_number' => $order->order_number,
+                'pesan'        => $e->getMessage(),
+            ]);
+
+            abort(502);
         }
     }
 
