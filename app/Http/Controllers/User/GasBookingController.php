@@ -334,10 +334,18 @@ class GasBookingController extends Controller
             ]);
         } catch (\Throwable $e) {
             // Wajar selama warga belum memilih kanal di popup: bagi Midtrans
-            // transaksinya memang belum ada. Bukan error yang perlu ditampilkan.
+            // transaksinya memang belum ada. Pesan aslinya tetap disertakan —
+            // tanpa itu, kegagalan sinkron tidak bisa dibedakan dari "belum
+            // dipilih", dan halaman hanya berputar tanpa petunjuk apa pun.
+            \Illuminate\Support\Facades\Log::info('Sinkron pembayaran belum berhasil', [
+                'order_number' => $order->order_number,
+                'pesan'        => $e->getMessage(),
+            ]);
+
             return response()->json([
                 'siap'   => false,
                 'alasan' => 'belum_ada_transaksi',
+                'pesan'  => $e->getMessage(),
             ]);
         }
     }
@@ -440,7 +448,7 @@ class GasBookingController extends Controller
         // siap, jangan diteruskan: SDK akan memakai kunci sisa di Config dan uang
         // warga mendarat di rekening wilayah lain.
         if (! \App\Support\PenyediaPembayaran::terapkanMidtransWilayah($gas->region_id)) {
-            \Log::warning('Ganti metode bayar dilewati: wilayah belum siap', [
+            \Illuminate\Support\Facades\Log::warning('Ganti metode bayar dilewati: wilayah belum siap', [
                 'order_number' => $order->order_number,
                 'region_id'    => $gas->region_id,
             ]);
