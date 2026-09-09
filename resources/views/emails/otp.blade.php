@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kode Verifikasi OTP - SilaDesBeng</title>
+    <title>Kode Verifikasi OTP - SiladesBeng</title>
 </head>
 <body style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased;">
     <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f1f5f9; padding: 40px 15px;">
@@ -26,8 +26,8 @@
                                 </tr>
                                 <tr>
                                     <td align="center">
-                                        <h1 style="margin: 0; font-size: 26px; font-weight: 700; color: #ffffff; letter-spacing: -0.5px;">SilaDesBeng</h1>
-                                        <p style="margin: 4px 0 0 0; color: #cbd5e1; font-size: 13px; letter-spacing: 0.2px;">Sistem Informasi Layanan Daerah Bengkalis</p>
+                                        <h1 style="margin: 0; font-size: 26px; font-weight: 700; color: #ffffff; letter-spacing: -0.5px;">SiladesBeng</h1>
+                                        <p style="margin: 4px 0 0 0; color: #cbd5e1; font-size: 13px; letter-spacing: 0.2px;">Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis</p>
                                     </td>
                                 </tr>
                             </table>
@@ -69,7 +69,7 @@
                                             Pemberitahuan Keamanan:
                                         </div>
                                         <div style="font-size: 13px; color: #78350f; line-height: 1.5;">
-                                            Jangan pernah membagikan kode OTP ini kepada siapa pun. Tim pengelola SilaDesBeng tidak akan pernah meminta kode verifikasi Anda untuk alasan apa pun.
+                                            Jangan pernah membagikan kode OTP ini kepada siapa pun. Tim pengelola SiladesBeng tidak akan pernah meminta kode verifikasi Anda untuk alasan apa pun.
                                         </div>
                                     </td>
                                 </tr>
@@ -85,7 +85,7 @@
                     <tr>
                         <td style="background-color: #f8fafc; padding: 24px 30px; text-align: center; border-top: 1px solid #e2e8f0;">
                             <p style="margin: 0 0 4px 0; font-size: 13px; font-weight: 600; color: #334155;">
-                                SilaDesBeng &bull; Kabupaten Bengkalis
+                                SiladesBeng &bull; Kabupaten Bengkalis
                             </p>
                             <p style="margin: 0 0 10px 0; font-size: 12px; color: #64748b;">
                                 Menghubungkan Layanan, Mempercepat Kemajuan Daerah
