@@ -36,12 +36,21 @@ class UnitPenyewaanMobilController extends Controller
         
         $tab = $request->get('tab', 'katalog');
         $user = auth()->user();
-        $chats = \App\Models\UnitChatSession::where('region_id', $user ? $user->region_id : null)
-            ->where('service_type', 'mobil')
-            ->with('user')
-            ->orderBy('last_message_at', 'desc')
-            ->get();
-        $totalUnreadChats = $chats->sum('unread_admin_count');
+        $chats = collect();
+        $totalUnreadChats = 0;
+
+        if (\Illuminate\Support\Facades\Schema::hasTable('unit_chat_sessions')) {
+            try {
+                $chats = \App\Models\UnitChatSession::where('region_id', $user ? $user->region_id : null)
+                    ->where('service_type', 'mobil')
+                    ->with('user')
+                    ->orderBy('last_message_at', 'desc')
+                    ->get();
+                $totalUnreadChats = $chats->sum('unread_admin_count');
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('UnitChatSession mobil query skipped: ' . $e->getMessage());
+            }
+        }
         
         return view('admin.unit.mobil.index', compact('mobils', 'search', 'chats', 'totalUnreadChats', 'tab'));
     }
@@ -220,7 +229,7 @@ class UnitPenyewaanMobilController extends Controller
         $mobil = Mobil::create($data);
 
         // Broadcast armada mobil baru ke warga
-        \App\Services\NotificationService::broadcastNewProduct('Sewa Mobil', $mobil->nama_mobil, $mobil->region_id, route('mobil.index'));
+        \App\Services\NotificationService::broadcastNewProduct('Sewa Mobil', $mobil->nama_mobil, $mobil->region_id, route('mobil.rental.equipment'));
 
         return redirect()->route('admin.unit.mobil.index')->with('success', 'Mobil berhasil ditambahkan.');
     }

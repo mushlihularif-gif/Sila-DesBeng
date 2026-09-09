@@ -81,7 +81,7 @@
                                         @if($item->images && $item->images->count() > 0)
                                             <div class="flex transition-transform duration-500 ease-in-out h-full" id="slider-{{ $item->id }}">
                                                 @foreach($item->images as $img)
-                                                    <img src="{{ Storage::url($img->image_path) }}" alt="{{ $item->title }}" class="w-full h-full object-cover flex-shrink-0">
+                                                    <img src="{{ Storage::url($img->image_path) }}" alt="{{ $item->title }}" class="w-full h-full object-cover flex-shrink-0" onerror="this.onerror=null; this.src='{{ asset('User/img/elemen/KabardanInformasiDaerah.png') }}';">
                                                 @endforeach
                                             </div>
                                             @if($item->images->count() > 1)
@@ -175,7 +175,7 @@
                                     {{-- Image Header --}}
                                     <div class="h-56 relative overflow-hidden bg-gray-100">
                                         @if($item->image_path)
-                                            <img src="{{ Storage::url($item->image_path) }}" alt="{{ $item->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                            <img src="{{ Storage::url($item->image_path) }}" alt="{{ $item->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.onerror=null; this.src='{{ asset('User/img/elemen/KabardanInformasiDaerah.png') }}';">
                                         @else
                                             <div class="w-full h-full flex items-center justify-center text-6xl opacity-50 bg-gradient-to-br from-blue-50 to-blue-100">
                                                 @if($item->type == 'Pengumuman') ðŸ“¢ 
