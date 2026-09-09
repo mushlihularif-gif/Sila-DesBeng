@@ -22,11 +22,14 @@ class DomicileTransferApiController extends Controller
 
     public function store(Request $request)
     {
+        $user = $request->user();
+        $user->load('region');
+
         $request->validate([
             'nama' => 'required|string|max:255',
             'nik' => 'required|string|max:16',
             'no_kk' => 'nullable|string|max:16',
-            'desa_asal' => 'required|string',
+            'desa_asal' => 'nullable|string',
             'desa_tujuan' => 'required|string',
             'alamat' => 'nullable|string',
             'status_pemohon' => 'nullable|string',
@@ -34,14 +37,19 @@ class DomicileTransferApiController extends Controller
             'tipe' => 'required|in:keluar,masuk',
         ]);
 
+        // Prioritaskan nama desa resmi user dari database wilayah
+        $desaAsal = ($user->region && $user->region->name)
+            ? $user->region->name
+            : ($request->desa_asal ?? 'Belum ditentukan');
+
         $transfer = DomicileTransfer::create([
-            'user_id' => $request->user()->id,
-            'nama' => $request->nama,
-            'nik' => $request->nik,
+            'user_id' => $user->id,
+            'nama' => $request->nama ?? $user->name,
+            'nik' => $request->nik ?? $user->nik,
             'no_kk' => $request->no_kk,
-            'desa_asal' => $request->desa_asal,
+            'desa_asal' => $desaAsal,
             'desa_tujuan' => $request->desa_tujuan,
-            'alamat' => $request->alamat,
+            'alamat' => $request->alamat ?? $user->address,
             'status_pemohon' => $request->status_pemohon,
             'alasan' => $request->alasan,
             'tipe' => $request->tipe,

@@ -12,10 +12,16 @@ class FasilitasBookingApiController extends Controller
     /**
      * List semua fasilitas yang tersedia
      */
-    public function index()
+    public function index(Request $request)
     {
-        $items = FasilitasUmum::where('status', 'tersedia')
-            ->get()
+        $query = FasilitasUmum::where('status', 'tersedia');
+
+        $user = $request->user('sanctum');
+        if ($user && $user->region_id) {
+            $query->where('region_id', $user->region_id);
+        }
+
+        $items = $query->get()
             ->map(function ($item) {
                 $isAmbulance = str_contains(strtolower($item->nama_fasilitas), 'ambulan');
                 $isVehicle = str_contains(strtolower($item->nama_fasilitas), 'mobil')

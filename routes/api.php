@@ -59,6 +59,19 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/profile/update', [AuthController::class, 'updateProfile']);
     Route::post('/profile/password', [AuthController::class, 'updatePassword']);
     Route::post('/fcm-token', [AuthController::class, 'updateFcmToken']);
+    
+    // Profile Tambahan (Saldo & Alamat)
+    Route::get('/profile/saldo', [\App\Http\Controllers\Api\ProfileSaldoApiController::class, 'index']);
+    Route::post('/profile/saldo/tarik', [\App\Http\Controllers\Api\ProfileSaldoApiController::class, 'tarik']);
+    Route::post('/profile/saldo/tarik/{id}/batal', [\App\Http\Controllers\Api\ProfileSaldoApiController::class, 'batal']);
+
+    Route::get('/profile/alamat', [\App\Http\Controllers\Api\ProfileAlamatApiController::class, 'index']);
+    Route::post('/profile/alamat', [\App\Http\Controllers\Api\ProfileAlamatApiController::class, 'store']);
+    Route::get('/profile/alamat/{id}', [\App\Http\Controllers\Api\ProfileAlamatApiController::class, 'show']);
+    Route::put('/profile/alamat/{id}', [\App\Http\Controllers\Api\ProfileAlamatApiController::class, 'update']);
+    Route::post('/profile/alamat/{id}/utama', [\App\Http\Controllers\Api\ProfileAlamatApiController::class, 'utama']);
+    Route::delete('/profile/alamat/{id}', [\App\Http\Controllers\Api\ProfileAlamatApiController::class, 'destroy']);
+    
     // Kemitraan
     Route::post('/kemitraan/gabung', [\App\Http\Controllers\Api\PartnerApplicationApiController::class, 'store']);
 

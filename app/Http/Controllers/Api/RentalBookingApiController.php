@@ -12,11 +12,17 @@ class RentalBookingApiController extends Controller
     /**
      * List semua alat sewa yang tersedia
      */
-    public function index()
+    public function index(Request $request)
     {
-        $items = Barang::where('status', 'tersedia')
-            ->where('stok', '>', 0)
-            ->get()
+        $query = Barang::where('status', 'tersedia')
+            ->where('stok', '>', 0);
+
+        $user = $request->user('sanctum');
+        if ($user && $user->region_id) {
+            $query->where('region_id', $user->region_id);
+        }
+
+        $items = $query->get()
             ->map(function ($item) {
                 return [
                     'id' => $item->id,

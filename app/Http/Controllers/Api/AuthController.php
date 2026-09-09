@@ -47,54 +47,95 @@ class AuthController extends Controller
             'email' => 'required|email',
             'name' => 'required|string',
             'google_id' => 'required|string',
-            'location_name' => 'nullable|string'
+            'location_name' => 'nullable|string',
+            'phone' => 'nullable|string',
+            'region_id' => 'nullable|integer',
         ]);
 
         $user = User::where('email', $request->email)->first();
 
-        // Cari region_id berdasarkan location_name (Desa/Kecamatan)
-        $regionId = 1; // Default
-        if ($request->location_name) {
-            // Find a region matching the location name (e.g. "Pematang Duku Timur")
-            $locName = trim($request->location_name);
-            $region = \App\Models\Region::where('name', 'like', "%{$locName}%")->first();
-            if ($region) {
-                $regionId = $region->id;
+        // 1. Pengguna SUDAH TERDAFTAR di database -> Langsung login!
+        if ($user) {
+            if ($request->region_id && (!$user->region_id || $user->region_id == 1)) {
+                $user->region_id = $request->region_id;
             }
+            if ($request->phone && ($user->phone == '-' || empty($user->phone))) {
+                $user->phone = $request->phone;
+            }
+            if (!$user->google_id) {
+                $user->google_id = $request->google_id;
+            }
+            $user->save();
+
+            $token = $user->createToken('flutter-mobile-app')->plainTextToken;
+            $user->load('region');
+
+            return response()->json([
+                'status' => 'success',
+                'is_new_user' => false,
+                'message' => 'Berhasil login dengan Google',
+                'data' => [
+                    'user' => $user,
+                    'token' => $token
+                ]
+            ], 200);
         }
 
-        if (!$user) {
-            // Register if not found
-            // In a real app, you might want to prompt for NIK etc.
-            // But for now, we'll create a minimal user account.
-            $user = User::create([
-                'email' => $request->email,
-                'name' => $request->name,
-                'username' => $request->email, // use email as username
-                'password' => Hash::make(uniqid()), // random password
-                'nik' => null, 
-                'phone' => '-',
-                'address' => $request->location_name ?? '-',
-                'gender' => 'laki-laki',
-                'region_id' => $regionId,
-            ]);
-        } else {
-            // Update user's region_id if they log in via Google and we found their location
-            if ($request->location_name && $regionId != 1) {
-                $user->update(['region_id' => $regionId]);
-            }
+        // 2. Pengguna BARU
+        // Jika belum menyertakan region_id atau nomor HP, minta lengkapi profil terlebih dahulu
+        if (!$request->region_id || !$request->phone || $request->phone === '-') {
+            return response()->json([
+                'status' => 'needs_completion',
+                'is_new_user' => true,
+                'message' => 'Silakan lengkapi wilayah dan nomor WhatsApp.',
+                'data' => [
+                    'email' => $request->email,
+                    'name' => $request->name,
+                    'google_id' => $request->google_id,
+                ]
+            ], 200);
         }
+
+        // Generate username unik dari nama
+        $baseUsername = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $request->name));
+        if (empty($baseUsername)) {
+            $baseUsername = 'warga';
+        }
+        $username = $baseUsername;
+        $counter = 1;
+        while (User::where('username', $username)->exists()) {
+            $username = $baseUsername . $counter;
+            $counter++;
+        }
+
+        // Buat akun baru dengan wilayah & nomor telepon valid
+        $user = User::create([
+            'email' => $request->email,
+            'name' => $request->name,
+            'username' => $username,
+            'password' => Hash::make(uniqid()),
+            'nik' => null,
+            'phone' => $request->phone,
+            'address' => $request->location_name ?? '-',
+            'gender' => 'laki-laki',
+            'region_id' => $request->region_id,
+            'google_id' => $request->google_id,
+            'status' => 'aktif',
+            'email_verified_at' => now(),
+        ]);
 
         $token = $user->createToken('flutter-mobile-app')->plainTextToken;
+        $user->load('region');
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Berhasil login dengan Google',
+            'is_new_user' => true,
+            'message' => 'Pendaftaran akun dengan Google berhasil',
             'data' => [
                 'user' => $user,
                 'token' => $token
             ]
-        ], 200);
+        ], 201);
     }
 
     public function logout(Request $request)
@@ -243,6 +284,14 @@ class AuthController extends Controller
                     $currentRegion = null;
                 }
             }
+        }
+
+        // Prioritaskan nilai RT dan RW langsung dari tabel user jika ada
+        if (!empty($user->rw) && $user->rw !== '-') {
+            $rw_name = $user->rw;
+        }
+        if (!empty($user->rt) && $user->rt !== '-') {
+            $rt_name = $user->rt;
         }
 
         $avatar_url = null;
