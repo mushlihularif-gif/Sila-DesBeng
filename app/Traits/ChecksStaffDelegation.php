@@ -22,6 +22,10 @@ trait ChecksStaffDelegation
             return null;
         }
 
+        if (!\Illuminate\Support\Facades\Schema::hasTable('staff_permissions')) {
+            return null;
+        }
+
         // Cek apakah ada bypass
         if ($request->has('bypass_delegation')) {
             return null;

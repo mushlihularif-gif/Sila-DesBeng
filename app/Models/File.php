@@ -27,6 +27,14 @@ class File extends Model
     public function handleAction($action)
     {
         if (!Storage::exists($this->path)) {
+            if ($action === 'stream' && str_starts_with($this->mime_type ?? '', 'image/')) {
+                $fallbackPath = public_path('Admin/img/avatars/pria.png');
+                if (file_exists($fallbackPath)) {
+                    return response()->file($fallbackPath, [
+                        'Content-Type' => 'image/png',
+                    ]);
+                }
+            }
             abort(404, 'File tidak ditemukan');
         }
         if ($action === 'stream') {

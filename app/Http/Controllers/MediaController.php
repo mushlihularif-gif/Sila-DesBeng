@@ -24,6 +24,10 @@ class MediaController extends Controller
 
         $path = 'profiles/' . $filename;
         if (!Storage::disk('local')->exists($path)) {
+            $fallback = public_path('Admin/img/avatars/pria.png');
+            if (file_exists($fallback)) {
+                return response()->file($fallback, ['Content-Type' => 'image/png']);
+            }
             abort(404);
         }
         $fullPath = Storage::disk('local')->path($path);
@@ -34,7 +38,7 @@ class MediaController extends Controller
      * Serve user profile picture from private storage.
      *
      * @param string $filename
-     * @return StreamedResponse
+     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function userProfile($filename)
     {
@@ -47,6 +51,10 @@ class MediaController extends Controller
         $path = 'profiles/' . $filename;
 
         if (!Storage::disk('local')->exists($path)) {
+            $fallback = public_path('Admin/img/avatars/pria.png');
+            if (file_exists($fallback)) {
+                return response()->file($fallback, ['Content-Type' => 'image/png']);
+            }
             abort(404);
         }
 

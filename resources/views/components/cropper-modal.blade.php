@@ -208,6 +208,20 @@
         var fileName = originalFile ? originalFile.name : 'cropped-image.jpg';
         var fileType = originalFile && originalFile.type ? originalFile.type : 'image/jpeg';
 
+        if (!fileType || !fileType.startsWith('image/')) {
+            fileType = 'image/jpeg';
+        }
+
+        // Pastikan nama file memiliki ekstensi gambar yang valid
+        if (!/\.(jpe?g|png|webp|gif|svg)$/i.test(fileName)) {
+            var ext = fileType.split('/')[1] || 'jpg';
+            if (ext === 'jpeg') ext = 'jpg';
+            fileName = fileName.replace(/\.[^/.]+$/, "") + '.' + ext;
+            if (!/\.(jpe?g|png|webp|gif|svg)$/i.test(fileName)) {
+                fileName += '.jpg';
+            }
+        }
+
         canvas.toBlob(function(blob) {
             if (!blob) return;
 
@@ -223,6 +237,7 @@
 
                     // Picu event input/change agar komponen lain tahu file sudah terisi
                     fileInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    fileInput.dispatchEvent(new Event('change', { bubbles: true }));
                 } catch(e) {
                     console.error('DataTransfer error:', e);
                 }
