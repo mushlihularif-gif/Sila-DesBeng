@@ -17,7 +17,7 @@ class BumdesUserController extends Controller
             return $q->where('region_id', $regionId);
         }, function($q) {
             return $q->whereNull('region_id')->orWhere('region_id', 0);
-        })->orderBy('order')->get();
+        })->orderBy('level', 'asc')->orderBy('order', 'asc')->get();
         
         // Fetch region and its active services if id is provided
         $regionId = $request->query('id');

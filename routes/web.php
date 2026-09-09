@@ -810,6 +810,9 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
             Route::get('/{id}/edit', [\App\Http\Controllers\Admin\BumdesController::class, 'edit'])->name('admin.SiladesBeng.bumdes.edit');
             Route::put('/{id}', [\App\Http\Controllers\Admin\BumdesController::class, 'update'])->name('admin.SiladesBeng.bumdes.update');
             Route::delete('/{id}', [\App\Http\Controllers\Admin\BumdesController::class, 'destroy'])->name('admin.SiladesBeng.bumdes.destroy');
+            Route::post('/{id}/move-up', [\App\Http\Controllers\Admin\BumdesController::class, 'moveUp'])->name('admin.SiladesBeng.bumdes.move-up');
+            Route::post('/{id}/move-down', [\App\Http\Controllers\Admin\BumdesController::class, 'moveDown'])->name('admin.SiladesBeng.bumdes.move-down');
+            Route::post('/{id}/change-level', [\App\Http\Controllers\Admin\BumdesController::class, 'changeLevel'])->name('admin.SiladesBeng.bumdes.change-level');
         });
         Route::post('/bumdes/update-whatsapp', [\App\Http\Controllers\Admin\BumdesController::class, 'updateWhatsapp'])->name('admin.SiladesBeng.bumdes.update.whatsapp');
     });
