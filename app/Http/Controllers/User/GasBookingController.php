@@ -324,6 +324,16 @@ class GasBookingController extends Controller
 
             if ($berubah) {
                 $order->save();
+            } else {
+                // Transaksinya ADA di Midtrans (kalau tidak, panggilan di atas
+                // melempar), tapi tidak ada nomor VA maupun actions di dalamnya.
+                // Bentuk jawaban /status memang berbeda-beda per kanal, jadi
+                // yang mentah dicatat supaya ketahuan field mana yang membawa
+                // QR-nya — tanpa ini kita hanya bisa menebak.
+                \Illuminate\Support\Facades\Log::info('Sinkron: instrumen tidak ditemukan di jawaban Midtrans', [
+                    'order_number' => $order->order_number,
+                    'jawaban'      => json_encode($detail),
+                ]);
             }
 
             return response()->json([
