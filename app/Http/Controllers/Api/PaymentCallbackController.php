@@ -67,6 +67,14 @@ class PaymentCallbackController extends Controller
                 $order->status = 'confirmed';
             } else if ($transaction == 'pending') {
                 $order->status = 'pending';
+
+                // Snap menerbitkan instrumen bayarnya BARU SETELAH warga memilih
+                // kanal di dalam popup, jadi saat pesanan dibuat kita belum punya
+                // nomor VA maupun QR untuk ditampilkan. Notifikasi 'pending' ini
+                // adalah kesempatan pertama mengambilnya — sehingga halaman
+                // pembayaran kita bisa menampilkan QR/VA yang sama, dan warga yang
+                // terlanjur menutup popup tidak perlu mengulang dari awal.
+                $this->simpanInstrumenBayar($order, $orderId);
             } else if ($transaction == 'deny') {
                 $order->status = 'cancelled';
             } else if ($transaction == 'expire') {
@@ -128,6 +136,51 @@ class PaymentCallbackController extends Controller
      *
      * @return array{0: mixed, 1: string, 2: int|null} [pesanan, jenis, region_id]
      */
+    /**
+     * Ambil nomor VA / URL QR dari Midtrans lalu simpan ke pesanan.
+     *
+     * Dipanggil saat notifikasi 'pending' datang. Kegagalannya sengaja tidak
+     * dilempar: callback WAJIB tetap menjawab 200, kalau tidak Midtrans akan
+     * mengirim ulang notifikasi yang sama berkali-kali.
+     */
+    private function simpanInstrumenBayar($order, string $orderId): void
+    {
+        try {
+            $detail = \Midtrans\Transaction::status($orderId);
+            $atribut = $order->getAttributes();
+            $berubah = false;
+
+            if (array_key_exists('payment_va_number', $atribut)) {
+                if (isset($detail->va_numbers[0]->va_number)) {
+                    $order->payment_va_number = $detail->va_numbers[0]->va_number;
+                    $berubah = true;
+                } elseif (isset($detail->biller_code, $detail->bill_key)) {
+                    $order->payment_va_number = $detail->biller_code . '-' . $detail->bill_key;
+                    $berubah = true;
+                }
+            }
+
+            if (array_key_exists('payment_qr_url', $atribut) && isset($detail->actions)) {
+                foreach ($detail->actions as $aksi) {
+                    if (($aksi->name ?? null) === 'generate-qr-code') {
+                        $order->payment_qr_url = $aksi->url;
+                        $berubah = true;
+                        break;
+                    }
+                }
+            }
+
+            if ($berubah) {
+                $order->save();
+            }
+        } catch (\Throwable $e) {
+            Log::warning('Gagal mengambil instrumen bayar dari Midtrans', [
+                'order_id' => $orderId,
+                'pesan'    => $e->getMessage(),
+            ]);
+        }
+    }
+
     private function kenaliPesanan(string $orderId): array
     {
         if (str_starts_with($orderId, 'GAS-')) {

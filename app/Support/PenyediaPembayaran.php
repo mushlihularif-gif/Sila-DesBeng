@@ -224,16 +224,15 @@ class PenyediaPembayaran
         'bank_transfer_mandiri' => 'echannel',
         'gopay'                 => 'gopay',
 
-        // QRIS SENGAJA TIDAK ADA DI SINI.
+        // QRIS di Snap bernama 'other_qris', BUKAN 'qris'. Mengirim 'qris'
+        // membuat popup terbuka tanpa satu pun pilihan ("no payment channel
+        // available"), karena tidak ada kanal sah dalam daftar pembatasnya.
         //
-        // Mengirim 'qris' membuat Snap terbuka tanpa satu pun pilihan —
-        // "no payment channel available" — karena di Snap, QRIS bukan kanal
-        // berdiri sendiri seperti VA. Ia menempel pada GoPay dan dikendalikan
-        // lewat centang "Always show QRIS" di Snap Checkout.
-        //
-        // Tanpa entri di sini, kanalnya tidak dibatasi dan Snap menampilkan
-        // seluruh metode aktif — warga tetap bisa memilih QRIS di sana. Lebih
-        // baik memberi pilihan berlebih daripada popup kosong.
+        // Kalau kode ini pun ditolak, hapus barisnya: tanpa entri di sini
+        // kanalnya tidak dibatasi dan Snap menampilkan seluruh metode aktif,
+        // sehingga warga tetap bisa memilih QRIS — hanya perlu satu ketukan
+        // tambahan.
+        'qris'                  => 'other_qris',
     ];
 
     public static function kanalSnap(?string $metode): ?string
