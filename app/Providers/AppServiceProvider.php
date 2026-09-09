@@ -26,6 +26,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        \Illuminate\Pagination\Paginator::useBootstrapFive();
         // =====================================================
         // KONFIGURASI API KEY DINAMIS (dari panel Super Admin Sistem)
         // Timpa config('services.*') dengan kredensial dari tabel api_credentials
