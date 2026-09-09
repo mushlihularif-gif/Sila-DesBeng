@@ -322,6 +322,18 @@ class GasBookingController extends Controller
                 }
             }
 
+            // QRIS: respons /status tidak memuat actions maupun qr_string —
+            // hanya transaction_id. Gambar QR-nya disajikan Midtrans di alamat
+            // tetap berikut, yang juga persis isi actions[].url pada respons
+            // charge. Jadi alamatnya disusun sendiri dari transaction_id.
+            if (! $order->payment_qr_url
+                && isset($detail->transaction_id)
+                && in_array($detail->payment_type ?? '', ['qris', 'gopay'], true)) {
+                $order->payment_qr_url = \Midtrans\Config::getBaseUrl()
+                    . '/v2/qris/' . $detail->transaction_id . '/qr-code';
+                $berubah = true;
+            }
+
             if ($berubah) {
                 $order->save();
             } else {
