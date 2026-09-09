@@ -215,11 +215,25 @@ class PenyediaPembayaran
         'bank_transfer_bri'     => 'bri_va',
         'bank_transfer_permata' => 'permata_va',
         'bank_transfer_cimb'    => 'cimb_va',
+        // Satu-satunya kode di daftar ini yang belum terbukti dipakai
+        // sungguhan. Kalau memilih BSI membuat popup terbuka kosong
+        // ("no payment channel available"), hapus baris ini — Snap akan
+        // menampilkan seluruh kanal dan warga tetap bisa memilih BSI.
         'bank_transfer_bsi'     => 'bsi_va',
         // Mandiri memakai Bill Payment, bukan VA — kodenya berbeda sendiri.
         'bank_transfer_mandiri' => 'echannel',
         'gopay'                 => 'gopay',
-        'qris'                  => 'qris',
+
+        // QRIS SENGAJA TIDAK ADA DI SINI.
+        //
+        // Mengirim 'qris' membuat Snap terbuka tanpa satu pun pilihan —
+        // "no payment channel available" — karena di Snap, QRIS bukan kanal
+        // berdiri sendiri seperti VA. Ia menempel pada GoPay dan dikendalikan
+        // lewat centang "Always show QRIS" di Snap Checkout.
+        //
+        // Tanpa entri di sini, kanalnya tidak dibatasi dan Snap menampilkan
+        // seluruh metode aktif — warga tetap bisa memilih QRIS di sana. Lebih
+        // baik memberi pilihan berlebih daripada popup kosong.
     ];
 
     public static function kanalSnap(?string $metode): ?string
