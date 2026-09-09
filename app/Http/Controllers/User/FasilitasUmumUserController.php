@@ -24,7 +24,7 @@ class FasilitasUmumUserController extends Controller
 
     public function show($id)
     {
-        $item = FasilitasUmum::findOrFail($id);
+        $item = FasilitasUmum::with('pengurus')->findOrFail($id);
         
         // Rekening & metode pembayaran milik WILAYAH layanan ini, bukan rekening
         // pusat. Pemasukan tiap daerah menjadi tanggung jawab daerahnya sendiri.

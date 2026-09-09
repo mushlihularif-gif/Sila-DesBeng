@@ -119,19 +119,19 @@
                                     Coba gunakan kata kunci lain atau hapus filter pencarian.
                                 </p>
                                 <a href="{{ route('admin.unit.mobil.index') }}" class="btn btn-outline-primary btn-lg">
-                                    <i class="bx bx-refresh me-2"></i>Tampilkan Semua Alat
+                                    <i class="bx bx-refresh me-2"></i>Tampilkan Semua Mobil
                                 </a>
                             @else
                                 <!-- No Products -->
                                 <div class="empty-state-icon mb-4">
-                                    <i class="bx bx-package" style="font-size: 120px; color: #d1d5db;"></i>
+                                    <i class="bx bx-car" style="font-size: 120px; color: #d1d5db;"></i>
                                 </div>
-                                <h3 class="fw-bold text-muted mb-3">Belum Ada Alat Penyewaan</h3>
+                                <h3 class="fw-bold text-muted mb-3">Belum Ada Mobil / Kendaraan</h3>
                                 <p class="text-muted mb-4" style="max-width: 500px; margin: 0 auto;">
-                                    Anda belum menambahkan alat penyewaan apapun. Mulai tambahkan alat seperti tenda, sound system, atau perlengkapan acara lainnya untuk ditampilkan kepada pengguna.
+                                    Anda belum menambahkan mobil atau kendaraan penyewaan apapun. Mulai tambahkan armada kendaraan untuk ditampilkan kepada pengguna.
                                 </p>
                                 <a href="{{ route('admin.unit.mobil.create') }}" class="btn btn-primary btn-lg">
-                                    <i class="bx bx-plus-circle me-2"></i>Tambah Alat Pertama
+                                    <i class="bx bx-plus-circle me-2"></i>Tambah Mobil Pertama
                                 </a>
                             @endif
                         </div>

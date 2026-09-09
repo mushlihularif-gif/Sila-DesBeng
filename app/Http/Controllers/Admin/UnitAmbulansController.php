@@ -20,9 +20,9 @@ class UnitAmbulansController extends Controller
     {
         $user = Auth::user();
         if ($user->role === 'admin_desa') {
-            $supirs = Supir::where('region_id', $user->region_id)->where('is_fasilitas_umum', 1)->with('ambulans')->get();
+            $supirs = Supir::where('tipe', 'supir')->where('region_id', $user->region_id)->where('is_fasilitas_umum', 1)->with('ambulans')->get();
         } else {
-            $supirs = Supir::where('is_fasilitas_umum', 1)->with('ambulans')->get();
+            $supirs = Supir::where('tipe', 'supir')->where('is_fasilitas_umum', 1)->with('ambulans')->get();
         }
 
         return view('admin.unit.ambulans.create', compact('supirs'));
@@ -69,15 +69,24 @@ class UnitAmbulansController extends Controller
         return redirect()->route('admin.unit.fasilitas_umum.index', ['tab' => 'kendaraan'])->with('success', 'Kendaraan Operasional berhasil ditambahkan');
     }
 
+    public function show($id)
+    {
+        $ambulans = Mobil::whereIn('kategori', ['ambulans', 'kendaraan_operasional'])
+            ->with(['supirs', 'region'])
+            ->findOrFail($id);
+
+        return view('admin.unit.ambulans.show', compact('ambulans'));
+    }
+
     public function edit($id)
     {
         $ambulans = Mobil::whereIn('kategori', ['ambulans', 'kendaraan_operasional'])->findOrFail($id);
         
         $user = Auth::user();
         if ($user->role === 'admin_desa') {
-            $supirs = Supir::where('region_id', $user->region_id)->where('is_fasilitas_umum', 1)->with('ambulans')->get();
+            $supirs = Supir::where('tipe', 'supir')->where('region_id', $user->region_id)->where('is_fasilitas_umum', 1)->with('ambulans')->get();
         } else {
-            $supirs = Supir::where('is_fasilitas_umum', 1)->with('ambulans')->get();
+            $supirs = Supir::where('tipe', 'supir')->where('is_fasilitas_umum', 1)->with('ambulans')->get();
         }
 
         return view('admin.unit.ambulans.edit', compact('ambulans', 'supirs'));

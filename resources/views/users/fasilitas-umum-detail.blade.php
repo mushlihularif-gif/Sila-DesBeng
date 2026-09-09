@@ -176,6 +176,49 @@
                             </div>
                         </div>
 
+                        @if($item->pengurus && $item->pengurus->count() > 0)
+                        <!-- Petugas Pengurus / Pemegang Kunci Gedung -->
+                        <div class="mb-6 p-4 bg-emerald-50/80 border border-emerald-200 rounded-2xl">
+                            <div class="flex items-center gap-2 mb-3">
+                                <div class="w-7 h-7 rounded-lg bg-emerald-600 text-white flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 class="text-xs font-bold text-emerald-900 uppercase tracking-wider">Pengurus & Pemegang Kunci</h4>
+                                    <p class="text-[11px] text-emerald-700">Hubungi personil untuk koordinasi pengecekan & serah terima gedung</p>
+                                </div>
+                            </div>
+                            <div class="space-y-2">
+                                @foreach($item->pengurus as $pengurus)
+                                    @php
+                                        $cleanWa = preg_replace('/[^0-9]/', '', $pengurus->kontak ?? '');
+                                        $waUrl = $cleanWa ? ('https://wa.me/' . (str_starts_with($cleanWa, '0') ? '62' . substr($cleanWa, 1) : $cleanWa)) : null;
+                                        $avatar = $pengurus->foto ? asset('storage/' . $pengurus->foto) : asset('Admin/img/avatars/pria.png');
+                                    @endphp
+                                    <div class="flex items-center justify-between p-2.5 bg-white rounded-xl border border-emerald-100 shadow-sm gap-2">
+                                        <div class="flex items-center gap-2.5 min-w-0">
+                                            <img src="{{ $avatar }}" alt="{{ $pengurus->nama }}" class="w-9 h-9 rounded-full object-cover border border-gray-200 flex-shrink-0" onerror="this.src='{{ asset('Admin/img/avatars/pria.png') }}'">
+                                            <div class="min-w-0">
+                                                <div class="text-xs font-bold text-gray-800 truncate">{{ $pengurus->nama }}</div>
+                                                <div class="text-[11px] text-gray-500 truncate">{{ $pengurus->kontak ?? '-' }}</div>
+                                            </div>
+                                        </div>
+                                        @if($waUrl)
+                                            <a href="{{ $waUrl }}" target="_blank" class="flex-shrink-0 inline-flex items-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full text-xs font-semibold shadow-sm transition-colors">
+                                                <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+                                                    <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.007c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86.174.086.275.073.376-.044.101-.116.433-.506.549-.68.116-.173.231-.145.39-.086s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.1.824z"/>
+                                                </svg>
+                                                <span>WhatsApp</span>
+                                            </a>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
+
 
 
                         <!-- Quantity Selector + Rent Button - SIDE BY SIDE -->

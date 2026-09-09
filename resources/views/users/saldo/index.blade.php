@@ -311,9 +311,7 @@
 
                 @forelse($alamat as $a)
                     @php
-                        // Disiapkan di sini, bukan langsung di dalam onclick: Blade
-                        // tidak dapat mengurai @json([...]) yang ditulis berbaris-baris
-                        // di dalam atribut, dan gagal dengan "Unclosed '['".
+                        // Disiapkan di sini dalam variabel array terpisah agar aman
                         $dataAlamat = [
                             'id'            => $a->id,
                             'label'         => $a->label,
@@ -348,8 +346,8 @@
                             </div>
 
                             <div class="flex flex-col items-end gap-1 flex-shrink-0">
-                                <button type="button" class="text-xs font-semibold text-blue-600 hover:text-blue-700"
-                                        onclick='ubahAlamat(@json($dataAlamat))'>
+                                <button type="button" class="btn-ubah-alamat text-xs font-semibold text-blue-600 hover:text-blue-700"
+                                        data-alamat="{{ json_encode($dataAlamat) }}">
                                     Ubah
                                 </button>
 
@@ -431,8 +429,8 @@
     // ---- Buku alamat ----
     // Satu formulir dipakai untuk tambah dan ubah; yang berubah hanya action
     // dan method-nya, supaya tidak ada dua formulir yang harus dijaga selaras.
-    const RUTE_ALAMAT_BARU = @json(route('user.alamat.store'));
-    const RUTE_ALAMAT      = @json(url('alamat'));
+    const RUTE_ALAMAT_BARU = "{{ route('user.alamat.store') }}";
+    const RUTE_ALAMAT      = "{{ url('alamat') }}";
 
     function isiFormAlamat(data) {
         const f = document.getElementById('form-alamat');
@@ -539,6 +537,17 @@
             f.nama_penerima.focus();
         });
         if (batal) batal.addEventListener('click', () => f.classList.add('hidden'));
+
+        document.querySelectorAll('.btn-ubah-alamat').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                try {
+                    const data = JSON.parse(this.getAttribute('data-alamat'));
+                    ubahAlamat(data);
+                } catch (e) {
+                    console.error('Gagal memuat data alamat:', e);
+                }
+            });
+        });
 
         const btnPos = document.getElementById('al-posisi-saya');
         if (btnPos) {

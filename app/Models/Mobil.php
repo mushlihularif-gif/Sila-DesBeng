@@ -50,6 +50,41 @@ class Mobil extends Model
         'opsi_lepas_kunci' => 'boolean',
     ];
 
+    public function getTarifBoronganWilayahParsedAttribute()
+    {
+        if (empty($this->tarif_borongan_wilayah)) {
+            return [];
+        }
+        return is_array($this->tarif_borongan_wilayah)
+            ? $this->tarif_borongan_wilayah
+            : (json_decode($this->tarif_borongan_wilayah, true) ?? []);
+    }
+
+    public function getHargaDalamDesaWilayahAttribute()
+    {
+        return $this->tarif_borongan_wilayah_parsed['harga_dalam_desa'] ?? null;
+    }
+
+    public function getHargaLuarDesaWilayahAttribute()
+    {
+        return $this->tarif_borongan_wilayah_parsed['harga_luar_desa'] ?? null;
+    }
+
+    public function getTipeLuarKecamatanWilayahAttribute()
+    {
+        return $this->tarif_borongan_wilayah_parsed['tipe_luar_kecamatan'] ?? 'pukul_rata';
+    }
+
+    public function getHargaLuarKecamatanWilayahAttribute()
+    {
+        return $this->tarif_borongan_wilayah_parsed['harga_luar_kecamatan'] ?? null;
+    }
+
+    public function getHargaKecamatanKhususAttribute()
+    {
+        return $this->tarif_borongan_wilayah_parsed['harga_kecamatan_khusus'] ?? [];
+    }
+
     public function supirs()
     {
         return $this->belongsToMany(Supir::class, 'mobil_supir', 'mobil_id', 'supir_id');

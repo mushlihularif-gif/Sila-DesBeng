@@ -62,9 +62,14 @@
         background: #fff; border-left: 1px solid #e4e6e8;
         box-shadow: -6px 0 24px rgba(20, 20, 43, .10);
         display: flex; flex-direction: column;
-        transform: translateX(100%); transition: transform .25s ease;
+        transform: translateX(100%); transition: transform .25s ease, visibility .25s ease;
+        visibility: hidden;
     }
-    .inbox-rail.show { transform: none; }
+    .inbox-rail.show { transform: none; visibility: visible; }
+
+    @media (max-width: 575.98px) {
+        .inbox-rail { width: 100vw; max-width: 100vw; }
+    }
 
     .inbox-head {
         display: flex; align-items: center; gap: .5rem;

@@ -87,10 +87,10 @@
                                     <!-- Foto Utama -->
                                     <div class="col-6 col-md-4">
                                         <label class="form-label fw-semibold" for="foto">Foto Utama</label>
-                                        <div class="upload-box" onclick="document.getElementById('foto').click()">
+                                        <label for="foto" class="upload-box cursor-pointer d-flex align-items-center justify-content-center m-0">
                                             <div id="preview_foto" class="preview-container" style="display:none;">
                                                 <img src="#" alt="Preview" class="preview-image" />
-                                                <button type="button" class="btn-remove-image" onclick="event.stopPropagation(); clearFile('foto', 'preview_foto')">
+                                                <button type="button" class="btn-remove-image" onclick="event.preventDefault(); event.stopPropagation(); clearFile('foto', 'preview_foto')">
                                                     <span style="font-size: 20px; font-weight: bold; line-height: 1; color: white;">&times;</span>
                                                 </button>
                                             </div>
@@ -99,7 +99,7 @@
                                                 <p class="mb-0 mt-2">Klik untuk upload</p>
                                                 <small class="text-muted">JPG, PNG (Max 8MB)</small>
                                             </div>
-                                        </div>
+                                        </label>
                                         <input type="file" class="d-none" id="foto" name="foto_utama" 
                                                accept="image/*" onchange="previewFile(this, 'preview_foto', 'placeholder_foto')" />
                                     </div>
@@ -107,10 +107,10 @@
                                     <!-- Foto Tambahan 1 -->
                                     <div class="col-6 col-md-4">
                                         <label class="form-label fw-semibold" for="foto_2">Foto Tambahan 1</label>
-                                        <div class="upload-box" onclick="document.getElementById('foto_2').click()">
+                                        <label for="foto_2" class="upload-box cursor-pointer d-flex align-items-center justify-content-center m-0">
                                             <div id="preview_foto_2" class="preview-container" style="display:none;">
                                                 <img src="#" alt="Preview" class="preview-image" />
-                                                <button type="button" class="btn-remove-image" onclick="event.stopPropagation(); clearFile('foto_2', 'preview_foto_2')">
+                                                <button type="button" class="btn-remove-image" onclick="event.preventDefault(); event.stopPropagation(); clearFile('foto_2', 'preview_foto_2')">
                                                     <span style="font-size: 20px; font-weight: bold; line-height: 1; color: white;">&times;</span>
                                                 </button>
                                             </div>
@@ -119,7 +119,7 @@
                                                 <p class="mb-0 mt-2">Klik untuk upload</p>
                                                 <small class="text-muted">JPG, PNG (Max 8MB)</small>
                                             </div>
-                                        </div>
+                                        </label>
                                         <input type="file" class="d-none" id="foto_2" name="foto_2" 
                                                accept="image/*" onchange="previewFile(this, 'preview_foto_2', 'placeholder_foto_2')" />
                                     </div>
@@ -127,10 +127,10 @@
                                     <!-- Foto Tambahan 2 -->
                                     <div class="col-6 col-md-4">
                                         <label class="form-label fw-semibold" for="foto_3">Foto Tambahan 2</label>
-                                        <div class="upload-box" onclick="document.getElementById('foto_3').click()">
+                                        <label for="foto_3" class="upload-box cursor-pointer d-flex align-items-center justify-content-center m-0">
                                             <div id="preview_foto_3" class="preview-container" style="display:none;">
                                                 <img src="#" alt="Preview" class="preview-image" />
-                                                <button type="button" class="btn-remove-image" onclick="event.stopPropagation(); clearFile('foto_3', 'preview_foto_3')">
+                                                <button type="button" class="btn-remove-image" onclick="event.preventDefault(); event.stopPropagation(); clearFile('foto_3', 'preview_foto_3')">
                                                     <span style="font-size: 20px; font-weight: bold; line-height: 1; color: white;">&times;</span>
                                                 </button>
                                             </div>
@@ -139,7 +139,7 @@
                                                 <p class="mb-0 mt-2">Klik untuk upload</p>
                                                 <small class="text-muted">JPG, PNG (Max 8MB)</small>
                                             </div>
-                                        </div>
+                                        </label>
                                         <input type="file" class="d-none" id="foto_3" name="foto_3" 
                                                accept="image/*" onchange="previewFile(this, 'preview_foto_3', 'placeholder_foto_3')" />
                                     </div>
@@ -719,22 +719,34 @@
 
     // Fungsi untuk preview file gambar
     function previewFile(input, previewId, placeholderId) {
+        if (!input || !input.files || !input.files[0]) return;
+
+        const file = input.files[0];
         const preview = document.getElementById(previewId);
         const placeholder = document.getElementById(placeholderId);
-        const img = preview ? preview.querySelector('img') : null;
+        const img = preview ? (preview.tagName === 'IMG' ? preview : preview.querySelector('img')) : null;
 
-        if (input.files && input.files[0]) {
-            if (typeof initGlobalCropper === 'function') {
-                initGlobalCropper(input, img || previewId, NaN, true);
+        if (typeof initGlobalCropper === 'function') {
+            try {
+                const started = initGlobalCropper(input, img || previewId, 4 / 3, true);
+                if (started !== false) {
+                    return;
+                }
+            } catch (err) {
+                console.warn('Cropper failed, fallback to direct preview:', err);
             }
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                if (img) img.src = e.target.result;
-                if (preview) preview.style.display = 'block';
-                if (placeholder) placeholder.style.display = 'none';
-            };
-            reader.readAsDataURL(input.files[0]);
+        }
+
+        const url = URL.createObjectURL(file);
+        if (img) {
+            img.src = url;
+        }
+        if (preview) {
+            preview.style.display = 'block';
+            preview.classList.remove('d-none');
+        }
+        if (placeholder) {
+            placeholder.style.display = 'none';
         }
     }
 

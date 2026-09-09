@@ -15,8 +15,29 @@ class Supir extends Model
         'foto',
         'user_id',
         'is_sewa_mobil',
-        'is_fasilitas_umum'
+        'is_fasilitas_umum',
+        'tipe',
     ];
+
+    public function scopeHanyaSupir($query)
+    {
+        return $query->where('tipe', 'supir');
+    }
+
+    public function scopeHanyaPengurusGedung($query)
+    {
+        return $query->where('tipe', 'pengurus_gedung');
+    }
+
+    public function isPengurusGedung(): bool
+    {
+        return $this->tipe === 'pengurus_gedung';
+    }
+
+    public function isSupir(): bool
+    {
+        return $this->tipe === 'supir';
+    }
 
     public function region()
     {
@@ -32,5 +53,11 @@ class Supir extends Model
     public function ambulans()
     {
         return $this->belongsToMany(Mobil::class, 'mobil_supir', 'supir_id', 'mobil_id');
+    }
+
+    // Khusus untuk Gedung & Ruang Publik yang menggunakan tabel pivot fasilitas_pengurus
+    public function fasilitas()
+    {
+        return $this->belongsToMany(FasilitasUmum::class, 'fasilitas_pengurus', 'pengurus_id', 'fasilitas_id');
     }
 }

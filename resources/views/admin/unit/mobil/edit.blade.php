@@ -94,11 +94,11 @@
                                     <!-- Foto Utama -->
                                     <div class="col-6 col-md-4">
                                         <label class="form-label fw-semibold" for="foto">Foto Utama</label>
-                                        <div class="upload-box" onclick="document.getElementById('foto').click()">
+                                        <label for="foto" class="upload-box cursor-pointer d-flex align-items-center justify-content-center m-0">
                                             @if($mobil->foto)
                                                 <div id="preview_foto" class="preview-container">
                                                     <img src="{{ asset('storage/' . $mobil->foto) }}" alt="{{ $mobil->nama_mobil }}" class="preview-image" />
-                                                    <button type="button" class="btn-remove-image" onclick="event.stopPropagation(); clearFile('foto', 'preview_foto')">
+                                                    <button type="button" class="btn-remove-image" onclick="event.preventDefault(); event.stopPropagation(); clearFile('foto', 'preview_foto')">
                                                     <span style="font-size: 20px; font-weight: bold; line-height: 1; color: white;">&times;</span>
                                                 </button>
                                                 </div>
@@ -110,7 +110,7 @@
                                             @else
                                                 <div id="preview_foto" class="preview-container" style="display:none;">
                                                     <img src="#" alt="Preview" class="preview-image" />
-                                                    <button type="button" class="btn-remove-image" onclick="event.stopPropagation(); clearFile('foto', 'preview_foto')">
+                                                    <button type="button" class="btn-remove-image" onclick="event.preventDefault(); event.stopPropagation(); clearFile('foto', 'preview_foto')">
                                                     <span style="font-size: 20px; font-weight: bold; line-height: 1; color: white;">&times;</span>
                                                 </button>
                                                 </div>
@@ -120,7 +120,7 @@
                                                     <small class="text-muted">JPG, PNG (Max 8MB)</small>
                                                 </div>
                                             @endif
-                                        </div>
+                                        </label>
                                         <input type="file" class="d-none" id="foto" name="foto_utama" 
                                                accept="image/*" onchange="previewFile(this, 'preview_foto', 'placeholder_foto')" />
                                         <input type="hidden" name="delete_foto" id="delete_foto" value="0">
@@ -129,11 +129,11 @@
                                     <!-- Foto Tambahan 1 -->
                                     <div class="col-6 col-md-4">
                                         <label class="form-label fw-semibold" for="foto_2">Foto Tambahan 1</label>
-                                        <div class="upload-box" onclick="document.getElementById('foto_2').click()">
+                                        <label for="foto_2" class="upload-box cursor-pointer d-flex align-items-center justify-content-center m-0">
                                             @if($mobil->foto_2)
                                                 <div id="preview_foto_2" class="preview-container">
                                                     <img src="{{ asset('storage/' . $mobil->foto_2) }}" alt="{{ $mobil->nama_mobil }}" class="preview-image" />
-                                                    <button type="button" class="btn-remove-image" onclick="event.stopPropagation(); clearFile('foto_2', 'preview_foto_2')">
+                                                    <button type="button" class="btn-remove-image" onclick="event.preventDefault(); event.stopPropagation(); clearFile('foto_2', 'preview_foto_2')">
                                                     <span style="font-size: 20px; font-weight: bold; line-height: 1; color: white;">&times;</span>
                                                 </button>
                                                 </div>
@@ -145,7 +145,7 @@
                                             @else
                                                 <div id="preview_foto_2" class="preview-container" style="display:none;">
                                                     <img src="#" alt="Preview" class="preview-image" />
-                                                    <button type="button" class="btn-remove-image" onclick="event.stopPropagation(); clearFile('foto_2', 'preview_foto_2')">
+                                                    <button type="button" class="btn-remove-image" onclick="event.preventDefault(); event.stopPropagation(); clearFile('foto_2', 'preview_foto_2')">
                                                     <span style="font-size: 20px; font-weight: bold; line-height: 1; color: white;">&times;</span>
                                                 </button>
                                                 </div>
@@ -155,7 +155,7 @@
                                                     <small class="text-muted">JPG, PNG (Max 8MB)</small>
                                                 </div>
                                             @endif
-                                        </div>
+                                        </label>
                                         <input type="file" class="d-none" id="foto_2" name="foto_2" 
                                                accept="image/*" onchange="previewFile(this, 'preview_foto_2', 'placeholder_foto_2')" />
                                         <input type="hidden" name="delete_foto_2" id="delete_foto_2" value="0">
@@ -164,11 +164,11 @@
                                     <!-- Foto Tambahan 2 -->
                                     <div class="col-6 col-md-4">
                                         <label class="form-label fw-semibold" for="foto_3">Foto Tambahan 2</label>
-                                        <div class="upload-box" onclick="document.getElementById('foto_3').click()">
+                                        <label for="foto_3" class="upload-box cursor-pointer d-flex align-items-center justify-content-center m-0">
                                             @if($mobil->foto_3)
                                                 <div id="preview_foto_3" class="preview-container">
                                                     <img src="{{ asset('storage/' . $mobil->foto_3) }}" alt="{{ $mobil->nama_mobil }}" class="preview-image" />
-                                                    <button type="button" class="btn-remove-image" onclick="event.stopPropagation(); clearFile('foto_3', 'preview_foto_3')">
+                                                    <button type="button" class="btn-remove-image" onclick="event.preventDefault(); event.stopPropagation(); clearFile('foto_3', 'preview_foto_3')">
                                                     <span style="font-size: 20px; font-weight: bold; line-height: 1; color: white;">&times;</span>
                                                 </button>
                                                 </div>
@@ -180,7 +180,7 @@
                                             @else
                                                 <div id="preview_foto_3" class="preview-container" style="display:none;">
                                                     <img src="#" alt="Preview" class="preview-image" />
-                                                    <button type="button" class="btn-remove-image" onclick="event.stopPropagation(); clearFile('foto_3', 'preview_foto_3')">
+                                                    <button type="button" class="btn-remove-image" onclick="event.preventDefault(); event.stopPropagation(); clearFile('foto_3', 'preview_foto_3')">
                                                     <span style="font-size: 20px; font-weight: bold; line-height: 1; color: white;">&times;</span>
                                                 </button>
                                                 </div>
@@ -190,7 +190,7 @@
                                                     <small class="text-muted">JPG, PNG (Max 8MB)</small>
                                                 </div>
                                             @endif
-                                        </div>
+                                        </label>
                                         <input type="file" class="d-none" id="foto_3" name="foto_3" 
                                                accept="image/*" onchange="previewFile(this, 'preview_foto_3', 'placeholder_foto_3')" />
                                         <input type="hidden" name="delete_foto_3" id="delete_foto_3" value="0">
@@ -206,11 +206,11 @@
                                 <div class="row g-3">
                                     <div class="col-md-6">
                                         <label class="form-label fw-semibold" for="nama_mobil">
-                                            Nama Barang <span class="text-danger">*</span>
+                                            Nama Kendaraan / Mobil <span class="text-danger">*</span>
                                         </label>
                                         <input type="text" class="form-control modern-input" id="nama_mobil" 
                                                name="nama_mobil" value="{{ old('nama_mobil', $mobil->nama_mobil) }}" 
-                                               placeholder="Contoh: Tenda Pesta 5x5m" required />
+                                               placeholder="Contoh: Toyota Avanza / Mitsubishi L300" required />
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label fw-semibold" for="kategori">
@@ -260,7 +260,7 @@
                                             Deskripsi <span class="text-danger">*</span>
                                         </label>
                                         <textarea class="form-control modern-input" id="deskripsi" name="deskripsi" 
-                                                  rows="4" placeholder="Jelaskan detail alat, kondisi, dan spesifikasi..." required>{{ old('deskripsi', $mobil->deskripsi) }}</textarea>
+                                                  rows="4" placeholder="Jelaskan detail kendaraan, kondisi, dan spesifikasi..." required>{{ old('deskripsi', $mobil->deskripsi) }}</textarea>
                                     </div>
                                 </div>
                             </div>
@@ -581,9 +581,10 @@
                                                                 <tbody class="table-border-bottom-0">
                                                                     @foreach($semuaKecamatan as $kec)
                                                                         @php
-                                                                            $tarifKec = isset($tarifKecamatan) ? $tarifKecamatan->firstWhere('kecamatan_id', $kec->id) : null;
-                                                                            $isKecActive = $tarifKec && $tarifKec->is_active;
-                                                                            $nominalKec = $tarifKec ? number_format($tarifKec->biaya, 0, ',', '.') : '';
+                                                                            $khususMap = $mobil->harga_kecamatan_khusus ?? [];
+                                                                            $rawVal = old("harga_kecamatan_khusus.{$kec->id}", $khususMap[$kec->id] ?? null);
+                                                                            $isKecActive = !is_null($rawVal) && $rawVal !== '' && (int)$rawVal > 0;
+                                                                            $nominalKec = $isKecActive ? number_format((int)$rawVal, 0, ',', '.') : ($rawVal !== null && $rawVal !== '' ? $rawVal : '');
                                                                         @endphp
                                                                         <tr>
                                                                             <td class="text-center">
@@ -1267,22 +1268,34 @@
 
     // Preview File Image
     function previewFile(input, previewId, placeholderId) {
+        if (!input || !input.files || !input.files[0]) return;
+
+        const file = input.files[0];
         const preview = document.getElementById(previewId);
         const placeholder = document.getElementById(placeholderId);
-        const img = preview ? preview.querySelector('img') : null;
+        const img = preview ? (preview.tagName === 'IMG' ? preview : preview.querySelector('img')) : null;
 
-        if (input.files && input.files[0]) {
-            if (typeof initGlobalCropper === 'function') {
-                initGlobalCropper(input, img || previewId, NaN, true);
+        if (typeof initGlobalCropper === 'function') {
+            try {
+                const started = initGlobalCropper(input, img || previewId, 16 / 9, true);
+                if (started !== false) {
+                    return;
+                }
+            } catch (err) {
+                console.warn('Cropper failed, fallback to direct preview:', err);
             }
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                if (img) img.src = e.target.result;
-                if (preview) preview.style.display = 'block';
-                if (placeholder) placeholder.style.display = 'none';
-            };
-            reader.readAsDataURL(input.files[0]);
+        }
+
+        const url = URL.createObjectURL(file);
+        if (img) {
+            img.src = url;
+        }
+        if (preview) {
+            preview.style.display = 'block';
+            preview.classList.remove('d-none');
+        }
+        if (placeholder) {
+            placeholder.style.display = 'none';
         }
     }
 
@@ -1291,9 +1304,11 @@
         const input = document.getElementById(inputId);
         const preview = document.getElementById(previewId);
         const placeholder = document.getElementById('placeholder_' + inputId);
+        const deleteInput = document.getElementById('delete_' + inputId);
         const img = preview ? preview.querySelector('img') : null;
 
         if (input) input.value = '';
+        if (deleteInput) deleteInput.value = '1';
         if (img) img.src = '#';
         if (preview) preview.style.display = 'none';
         if (placeholder) placeholder.style.display = 'block';

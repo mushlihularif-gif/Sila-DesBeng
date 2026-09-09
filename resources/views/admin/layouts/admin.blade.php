@@ -24,6 +24,52 @@
     <link rel="stylesheet" href="{{ asset('Admin/vendor/libs/apex-charts/apex-charts.css') }}" />
     <!-- CSS Kustom untuk Gaya -->
     <style>
+        /* Pencegahan Overflow Horizontal & Optimalisasi Mobile Global */
+        html, body {
+            overflow-x: hidden !important;
+            max-width: 100vw !important;
+            width: 100% !important;
+            position: relative;
+        }
+
+        .layout-wrapper,
+        .layout-container,
+        .layout-page,
+        .content-wrapper {
+            overflow-x: hidden !important;
+            max-width: 100vw !important;
+            width: 100% !important;
+            min-width: 0 !important;
+        }
+
+        @media (max-width: 575.98px) {
+            /* Kompaksi padding wadah untuk layar ponsel (< 576px) */
+            .container-xxl,
+            .container-fluid,
+            .container-p-x {
+                padding-left: 0.75rem !important;
+                padding-right: 0.75rem !important;
+            }
+
+            .container-p-y:not([class^=pt-]):not([class*=" pt-"]) {
+                padding-top: 0.75rem !important;
+            }
+            .container-p-y:not([class^=pb-]):not([class*=" pb-"]) {
+                padding-bottom: 0.75rem !important;
+            }
+
+            /* Navbar detached pas presisi di mobile */
+            .layout-navbar.navbar-detached {
+                width: calc(100% - 1.5rem) !important;
+                margin: 0.5rem auto 0 !important;
+                padding: 0 0.75rem !important;
+            }
+
+            #headerSearchInput {
+                max-width: 110px !important;
+            }
+        }
+
         /* Animasi Transisi Halaman */
         @keyframes pageFadeIn {
             0% {
@@ -1123,24 +1169,14 @@
                                 <ul class="dropdown-menu dropdown-menu-end py-0 notif-dropdown-menu">
                                     <li class="dropdown-menu-header border-bottom bg-white">
                                         <div class="dropdown-header d-flex align-items-center justify-content-between py-3 px-3 px-sm-4">
-<<<<<<< HEAD
                                             <div class="d-flex align-items-center gap-2">
                                                 <h6 class="mb-0 fw-bold text-dark fs-5">Notifikasi</h6>
                                                 <span id="notif-badge-header" class="badge bg-label-primary rounded-pill px-2.5 py-1 fw-bold fs-7 {{ $unreadCount > 0 ? '' : 'd-none' }}">{{ $unreadCount }} Baru</span>
                                             </div>
-                                            <button type="button" id="btn-mark-all-read" class="btn btn-link btn-sm text-primary text-decoration-none p-0 fw-semibold d-flex align-items-center gap-1 shadow-none {{ $unreadCount > 0 ? '' : 'd-none' }}" style="font-size: 0.8rem;" title="Tandai semua notifikasi sudah dibaca">
+                                            <button type="button" id="btn-mark-all-read" class="btn btn-link btn-sm text-primary text-decoration-none p-0 fw-semibold d-flex align-items-center gap-1 shadow-none notif-mark-all {{ $unreadCount > 0 ? '' : 'd-none' }}" data-url="{{ route('admin.notifications.mark-all-read') }}" style="font-size: 0.8rem;" title="Tandai semua notifikasi sudah dibaca">
                                                 <i class="bx bx-check-double fs-6"></i>
                                                 <span>Tandai Semua Dibaca</span>
                                             </button>
-=======
-                                            <h6 class="mb-0 fw-bold text-dark fs-5">Notifikasi</h6>
-                                            @if($unreadCount > 0)
-                                            <div class="d-flex align-items-center gap-2 notif-header-actions">
-                                                <span class="badge bg-label-primary rounded-pill px-3 py-1 fw-bold fs-7 notif-header-count">{{ $unreadCount }} Baru</span>
-                                                <button type="button" class="btn btn-sm btn-link p-0 text-primary fw-bold notif-mark-all" data-url="{{ route('admin.notifications.mark-all-read') }}" style="font-size: 0.75rem; text-decoration: none;">Tandai dibaca</button>
-                                            </div>
-                                            @endif
->>>>>>> 8ce84c9c47ca9a66cda29cf04e9f0abcc80c7fdb
                                         </div>
                                         <!-- Pill Tabs untuk Semua Layanan -->
                                         <div class="px-3 px-sm-4 pb-3">
@@ -1205,11 +1241,7 @@
                                                     $targetUrl = route('admin.aktivitas.permintaan-pengajuan.index');
                                                 }
                                             @endphp
-<<<<<<< HEAD
-                                            <a href="{{ $targetUrl }}" class="dropdown-item notif-item {{ !$notif->is_read ? 'is-unread category-'.$cat : '' }} gap-3" data-category="{{ $cat }}" data-id="{{ $notif->id }}" data-unread="{{ !$notif->is_read ? '1' : '0' }}">
-=======
-                                            <a href="{{ $targetUrl }}" class="dropdown-item notif-item {{ !$notif->is_read ? 'is-unread category-'.$cat : '' }} gap-3" data-category="{{ $cat }}" data-read-url="{{ route('admin.notifications.mark-as-read', $notif->id) }}">
->>>>>>> 8ce84c9c47ca9a66cda29cf04e9f0abcc80c7fdb
+                                            <a href="{{ $targetUrl }}" class="dropdown-item notif-item {{ !$notif->is_read ? 'is-unread category-'.$cat : '' }} gap-3" data-category="{{ $cat }}" data-id="{{ $notif->id }}" data-unread="{{ !$notif->is_read ? '1' : '0' }}" data-read-url="{{ route('admin.notifications.mark-as-read', $notif->id) }}">
                                                 <div class="flex-shrink-0 mt-1">
                                                     <div class="rounded-circle d-flex align-items-center justify-content-center shadow-xs {{ !$notif->is_read ? 'bg-label-'.$color : 'bg-light' }}" style="width: 40px; height: 40px;">
                                                         <i class="bx {{ $icon }} fs-5 {{ !$notif->is_read ? 'text-'.$color : 'text-secondary' }}"></i>
@@ -1398,7 +1430,7 @@
             <script src="{{ asset('Admin/js/dashboards-analytics.js') }}"></script>
             {{-- SiladesBeng Global Toast System (Admin) --}}
             <style>
-                .sdb-toast-container { position: fixed; top: 70px; right: 24px; z-index: 999999 !important; display: flex; flex-direction: column; gap: 12px; pointer-events: none; }
+                .sdb-toast-container { position: fixed; top: 70px; right: 16px; z-index: 999999 !important; display: flex; flex-direction: column; gap: 12px; pointer-events: none; max-width: calc(100vw - 32px); overflow: hidden; }
                 .sdb-toast { pointer-events: auto; display: flex; align-items: flex-start; padding: 16px 18px; border-radius: 14px; box-shadow: 0 8px 30px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06); border-left: 4px solid; max-width: 380px; width: 100%; background: white; opacity: 0; transform: translateX(50px) scale(0.95); transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
                 .sdb-toast.sdb-toast-show { opacity: 1; transform: translateX(0) scale(1); }
                 .sdb-toast.sdb-toast-hide { opacity: 0; transform: translateX(50px) scale(0.95); transition: all 0.4s ease-in; }

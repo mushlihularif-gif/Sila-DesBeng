@@ -143,10 +143,10 @@
                                     <label class="form-label fw-semibold text-dark" for="foto">
                                         Foto Utama <span class="text-danger">*</span>
                                     </label>
-                                    <div class="upload-box" onclick="document.getElementById('foto').click()">
+                                    <label for="foto" class="upload-box cursor-pointer d-flex align-items-center justify-content-center m-0">
                                         <div id="preview_foto" class="preview-container" style="{{ $existingPhotoUrl ? 'display:block;' : 'display:none;' }}">
                                             <img src="{{ $existingPhotoUrl ?? '#' }}" alt="Preview Foto Utama" class="preview-image" />
-                                            <button type="button" class="btn-remove-image" title="Hapus Foto" onclick="event.stopPropagation(); clearFile('foto', 'preview_foto')">
+                                            <button type="button" class="btn-remove-image" title="Hapus Foto" onclick="event.preventDefault(); event.stopPropagation(); clearFile('foto', 'preview_foto')">
                                                 <span style="font-size: 20px; font-weight: bold; line-height: 1; color: white;">&times;</span>
                                             </button>
                                         </div>
@@ -155,7 +155,7 @@
                                             <p class="mb-0 mt-1 fw-semibold text-dark font-13">Foto Utama</p>
                                             <small class="text-muted d-block font-11">Klik untuk upload</small>
                                         </div>
-                                    </div>
+                                    </label>
                                     <input type="file" 
                                            class="d-none" 
                                            id="foto" 
@@ -170,10 +170,10 @@
                                     <label class="form-label fw-semibold text-dark" for="foto_2">
                                         Foto Tambahan 1 <small class="text-muted fw-normal">(Opsional)</small>
                                     </label>
-                                    <div class="upload-box" onclick="document.getElementById('foto_2').click()">
+                                    <label for="foto_2" class="upload-box cursor-pointer d-flex align-items-center justify-content-center m-0">
                                         <div id="preview_foto_2" class="preview-container" style="{{ $existingPhoto2Url ? 'display:block;' : 'display:none;' }}">
                                             <img src="{{ $existingPhoto2Url ?? '#' }}" alt="Preview Foto Tambahan 1" class="preview-image" />
-                                            <button type="button" class="btn-remove-image" title="Hapus Foto" onclick="event.stopPropagation(); clearFile('foto_2', 'preview_foto_2')">
+                                            <button type="button" class="btn-remove-image" title="Hapus Foto" onclick="event.preventDefault(); event.stopPropagation(); clearFile('foto_2', 'preview_foto_2')">
                                                 <span style="font-size: 20px; font-weight: bold; line-height: 1; color: white;">&times;</span>
                                             </button>
                                         </div>
@@ -182,7 +182,7 @@
                                             <p class="mb-0 mt-1 fw-semibold text-dark font-13">Foto Tambahan 1</p>
                                             <small class="text-muted d-block font-11">Klik untuk upload</small>
                                         </div>
-                                    </div>
+                                    </label>
                                     <input type="file" 
                                            class="d-none" 
                                            id="foto_2" 
@@ -197,10 +197,10 @@
                                     <label class="form-label fw-semibold text-dark" for="foto_3">
                                         Foto Tambahan 2 <small class="text-muted fw-normal">(Opsional)</small>
                                     </label>
-                                    <div class="upload-box" onclick="document.getElementById('foto_3').click()">
+                                    <label for="foto_3" class="upload-box cursor-pointer d-flex align-items-center justify-content-center m-0">
                                         <div id="preview_foto_3" class="preview-container" style="{{ $existingPhoto3Url ? 'display:block;' : 'display:none;' }}">
                                             <img src="{{ $existingPhoto3Url ?? '#' }}" alt="Preview Foto Tambahan 2" class="preview-image" />
-                                            <button type="button" class="btn-remove-image" title="Hapus Foto" onclick="event.stopPropagation(); clearFile('foto_3', 'preview_foto_3')">
+                                            <button type="button" class="btn-remove-image" title="Hapus Foto" onclick="event.preventDefault(); event.stopPropagation(); clearFile('foto_3', 'preview_foto_3')">
                                                 <span style="font-size: 20px; font-weight: bold; line-height: 1; color: white;">&times;</span>
                                             </button>
                                         </div>
@@ -209,7 +209,7 @@
                                             <p class="mb-0 mt-1 fw-semibold text-dark font-13">Foto Tambahan 2</p>
                                             <small class="text-muted d-block font-11">Klik untuk upload</small>
                                         </div>
-                                    </div>
+                                    </label>
                                     <input type="file" 
                                            class="d-none" 
                                            id="foto_3" 
@@ -466,7 +466,7 @@
         <!-- ============================================== -->
         <!-- KOLOM KANAN: VISUALISASI PLAT & RINGKASAN      -->
         <!-- ============================================== -->
-        <div class="col-xl-5 col-lg-5">
+        <div class="col-xl-5 col-lg-5 d-none d-lg-block">
             <div class="sticky-top" style="top: 24px; z-index: 10;">
                 
                 <!-- KARTU 1: VISUALISASI PLAT NOMOR & MOBIL -->
@@ -1210,24 +1210,36 @@
 
     // 6. Preview & Cropper File Upload
     function previewFile(input, previewId, placeholderId) {
+        if (!input || !input.files || !input.files[0]) return;
+
+        const file = input.files[0];
         const preview = document.getElementById(previewId);
         const placeholder = document.getElementById(placeholderId);
-        const img = preview ? preview.querySelector('img') : null;
+        const img = preview ? (preview.tagName === 'IMG' ? preview : preview.querySelector('img')) : null;
         const deleteInput = document.getElementById('delete_' + input.id);
         if (deleteInput) deleteInput.value = '0';
 
-        if (input.files && input.files[0]) {
-            if (typeof initGlobalCropper === 'function') {
-                initGlobalCropper(input, img || previewId, 16 / 9, true);
+        if (typeof initGlobalCropper === 'function') {
+            try {
+                const started = initGlobalCropper(input, img || previewId, 16 / 9, true);
+                if (started !== false) {
+                    return;
+                }
+            } catch (err) {
+                console.warn('Cropper failed, fallback to direct preview:', err);
             }
+        }
 
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                if (img) img.src = e.target.result;
-                if (preview) preview.style.display = 'block';
-                if (placeholder) placeholder.style.display = 'none';
-            };
-            reader.readAsDataURL(input.files[0]);
+        const url = URL.createObjectURL(file);
+        if (img) {
+            img.src = url;
+        }
+        if (preview) {
+            preview.style.display = 'block';
+            preview.classList.remove('d-none');
+        }
+        if (placeholder) {
+            placeholder.style.display = 'none';
         }
     }
 

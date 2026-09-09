@@ -24,6 +24,8 @@ class FasilitasUmum extends Model
         'region_id',
         'opsi_supir',
         'bbm_ditanggung',
+        'status_biaya',
+        'harga_sewa',
     ];
 
     public function bookings()
@@ -34,6 +36,11 @@ class FasilitasUmum extends Model
     public function region()
     {
         return $this->belongsTo(Region::class);
+    }
+
+    public function pengurus()
+    {
+        return $this->belongsToMany(Supir::class, 'fasilitas_pengurus', 'fasilitas_id', 'pengurus_id');
     }
 
     public function hasStock($quantity)

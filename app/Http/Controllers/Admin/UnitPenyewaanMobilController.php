@@ -228,7 +228,8 @@ class UnitPenyewaanMobilController extends Controller
     public function show($id)
     {
         $mobil = Mobil::findOrFail($id);
-        return view('admin.unit.mobil.show', compact('mobil'));
+        $kecamatans = Region::where('type', 'kecamatan')->orderBy('name', 'asc')->get()->keyBy('id');
+        return view('admin.unit.mobil.show', compact('mobil', 'kecamatans'));
     }
 
     public function edit($id)

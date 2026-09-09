@@ -31,8 +31,12 @@ class UnitFasilitasUmumController extends Controller
         
         $fasilitas = FasilitasUmum::query()
             ->when($user->region_id, function($q, $regionId) {
-                return $q->where('region_id', $regionId);
+                return $q->where(function($query) use ($regionId) {
+                    $query->where('region_id', $regionId)
+                          ->orWhereNull('region_id');
+                });
             })
+            ->with('pengurus')
             ->when($search, function ($query, $search) {
                 return $query->searchWhereLike(['nama_fasilitas', 'kategori'], $search);
             })
@@ -123,19 +127,26 @@ class UnitFasilitasUmumController extends Controller
 
     public function create()
     {
-        // Lokasi diambil dari daftar milik WILAYAH, bukan lagi SELECT DISTINCT
-        // pada tabel produk unit ini. Query lama tidak menyaring region_id sama
-        // sekali, sehingga admin satu desa ikut melihat nama lokasi desa lain;
-        // selain itu lokasinya lenyap begitu produk terakhir yang memakainya
-        // dihapus, dan koordinatnya harus diketik ulang tiap kali.
-        $savedLocations = \App\Models\LokasiLayanan::untukWilayah(auth()->user()->region_id);
+        $user = auth()->user();
+        $savedLocations = \App\Models\LokasiLayanan::untukWilayah($user ? $user->region_id : null);
             
-        $categories = Category::where('region_id', auth()->user()->region_id)
+        $categories = Category::where('region_id', $user ? $user->region_id : null)
             ->where(function($q) {
                 $q->where('type', 'fasilitas')->orWhereNull('type');
             })->orderBy('name')->get();
 
-        return view('admin.unit.fasilitas_umum.create', compact('savedLocations', 'categories'));
+        // Hanya ambil personil bertipe pengurus gedung (bukan supir)
+        $pengurusList = \App\Models\Supir::where('tipe', 'pengurus_gedung')
+            ->when($user && $user->region_id, function($q) use ($user) {
+                return $q->where(function($query) use ($user) {
+                    $query->where('region_id', $user->region_id)
+                          ->orWhereNull('region_id');
+                });
+            })
+            ->with('fasilitas')
+            ->get();
+
+        return view('admin.unit.fasilitas_umum.create', compact('savedLocations', 'categories', 'pengurusList'));
     }
 
     public function store(Request $request)
@@ -149,15 +160,14 @@ class UnitFasilitasUmumController extends Controller
             'lokasi' => 'required|string',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
-            'foto_utama' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
+            'foto_utama' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
             'foto_2' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
             'foto_3' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
-            
             'bbm_ditanggung' => 'nullable|string|in:Ditanggung Pengguna,Disediakan',
-            
-            
             'status_biaya' => 'required|in:gratis,berbayar',
             'harga_sewa' => 'nullable|string',
+            'pengurus_ids' => 'nullable|array',
+            'pengurus_ids.*' => 'exists:supirs,id',
         ]);
 
         $hargaBersih = 0;
@@ -174,10 +184,8 @@ class UnitFasilitasUmumController extends Controller
             'lokasi' => $request->lokasi,
             'latitude' => $request->latitude,
             'longitude' => $request->longitude,
-            
+            'region_id' => auth()->user() ? auth()->user()->region_id : null,
             'bbm_ditanggung' => $request->bbm_ditanggung,
-            
-            
             'status_biaya' => $request->status_biaya,
             'harga_sewa' => $hargaBersih > 0 ? $hargaBersih : null,
         ];
@@ -194,34 +202,49 @@ class UnitFasilitasUmumController extends Controller
 
         $fasilitas = FasilitasUmum::create($data);
 
-        // Broadcast fasilitas umum baru ke warga
-        \App\Services\NotificationService::broadcastNewProduct('Fasilitas Umum', $fasilitas->nama_fasilitas, $fasilitas->region_id, route('fasilitas.index'));
+        // Sinkronisasi penugasan Pengurus / Pemegang Kunci (opsional)
+        if ($request->has('pengurus_ids') && is_array($request->pengurus_ids)) {
+            $fasilitas->pengurus()->sync($request->pengurus_ids);
+        }
 
-        return redirect()->route('admin.unit.fasilitas_umum.index')->with('success', 'Fasilitas Umum berhasil ditambahkan.');
+        // Broadcast fasilitas umum baru ke warga
+        $productUrl = \Illuminate\Support\Facades\Route::has('user.fasilitas-umum.equipment') 
+            ? route('user.fasilitas-umum.equipment') 
+            : url('/unit-peminjaman-fasilitas-umum');
+        \App\Services\NotificationService::broadcastNewProduct('Fasilitas Umum', $fasilitas->nama_fasilitas, $fasilitas->region_id, $productUrl);
+
+        return redirect()->route('admin.unit.fasilitas_umum.index', ['tab' => 'gedung'])->with('success', 'Fasilitas Umum berhasil ditambahkan.');
     }
 
     public function show($id)
     {
-        $fasilitas = FasilitasUmum::findOrFail($id);
+        $fasilitas = FasilitasUmum::with(['pengurus', 'region'])->findOrFail($id);
         return view('admin.unit.fasilitas_umum.show', compact('fasilitas'));
     }
 
     public function edit($id)
     {
-        $fasilitas = FasilitasUmum::findOrFail($id);
-        // Lokasi diambil dari daftar milik WILAYAH, bukan lagi SELECT DISTINCT
-        // pada tabel produk unit ini. Query lama tidak menyaring region_id sama
-        // sekali, sehingga admin satu desa ikut melihat nama lokasi desa lain;
-        // selain itu lokasinya lenyap begitu produk terakhir yang memakainya
-        // dihapus, dan koordinatnya harus diketik ulang tiap kali.
-        $savedLocations = \App\Models\LokasiLayanan::untukWilayah(auth()->user()->region_id);
+        $fasilitas = FasilitasUmum::with('pengurus')->findOrFail($id);
+        $user = auth()->user();
+        $savedLocations = \App\Models\LokasiLayanan::untukWilayah($user ? $user->region_id : null);
             
-        $categories = Category::where('region_id', auth()->user()->region_id)
+        $categories = Category::where('region_id', $user ? $user->region_id : null)
             ->where(function($q) {
                 $q->where('type', 'fasilitas')->orWhereNull('type');
             })->orderBy('name')->get();
 
-        return view('admin.unit.fasilitas_umum.edit', compact('fasilitas', 'savedLocations', 'categories'));
+        // Hanya ambil personil bertipe pengurus gedung (bukan supir)
+        $pengurusList = \App\Models\Supir::where('tipe', 'pengurus_gedung')
+            ->when($user && $user->region_id, function($q) use ($user) {
+                return $q->where(function($query) use ($user) {
+                    $query->where('region_id', $user->region_id)
+                          ->orWhereNull('region_id');
+                });
+            })
+            ->with('fasilitas')
+            ->get();
+
+        return view('admin.unit.fasilitas_umum.edit', compact('fasilitas', 'savedLocations', 'categories', 'pengurusList'));
     }
 
     public function destroy($id)
@@ -234,7 +257,7 @@ class UnitFasilitasUmumController extends Controller
 
         $fasilitas->delete();
 
-        return redirect()->route('admin.unit.fasilitas_umum.index')->with('success', 'Fasilitas Umum berhasil dihapus.');
+        return redirect()->route('admin.unit.fasilitas_umum.index', ['tab' => 'gedung'])->with('success', 'Fasilitas berhasil dihapus.');
     }
 
     public function update(Request $request, $id)
@@ -248,15 +271,14 @@ class UnitFasilitasUmumController extends Controller
             'lokasi' => 'required|string',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
-            'foto_utama' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'foto_2' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'foto_3' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            
+            'foto_utama' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
+            'foto_2' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
+            'foto_3' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
             'bbm_ditanggung' => 'nullable|string|in:Ditanggung Pengguna,Disediakan',
-            
-            
             'status_biaya' => 'required|in:gratis,berbayar',
             'harga_sewa' => 'nullable|string',
+            'pengurus_ids' => 'nullable|array',
+            'pengurus_ids.*' => 'exists:supirs,id',
         ]);
 
         $fasilitas = FasilitasUmum::findOrFail($id);
@@ -275,10 +297,7 @@ class UnitFasilitasUmumController extends Controller
             'lokasi' => $request->lokasi,
             'latitude' => $request->latitude,
             'longitude' => $request->longitude,
-            
             'bbm_ditanggung' => $request->bbm_ditanggung,
-            
-            
             'status_biaya' => $request->status_biaya,
             'harga_sewa' => $hargaBersih > 0 ? $hargaBersih : null,
         ];
@@ -309,6 +328,9 @@ class UnitFasilitasUmumController extends Controller
 
         $fasilitas->update($data);
 
-        return redirect()->route('admin.unit.fasilitas_umum.index')->with('success', 'Fasilitas Umum berhasil diperbarui.');
+        // Sinkronisasi penugasan Pengurus / Pemegang Kunci (opsional)
+        $fasilitas->pengurus()->sync($request->pengurus_ids ?? []);
+
+        return redirect()->route('admin.unit.fasilitas_umum.index', ['tab' => 'gedung'])->with('success', 'Fasilitas Umum berhasil diperbarui.');
     }
 }

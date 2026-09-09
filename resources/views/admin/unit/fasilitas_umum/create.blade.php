@@ -49,7 +49,7 @@
                             </div>
                         @endif
 
-                        <form action="{{ route('admin.unit.fasilitas_umum.store') }}" method="POST" enctype="multipart/form-data">
+                        <form id="formFasilitasUmum" action="{{ route('admin.unit.fasilitas_umum.store') }}" method="POST" enctype="multipart/form-data">
                             @csrf
 
                             
@@ -86,11 +86,11 @@
                                 <div class="row g-2 g-sm-3">
                                     <!-- Foto Utama -->
                                     <div class="col-6 col-md-4">
-                                        <label class="form-label fw-semibold" for="foto">Foto Utama</label>
-                                        <div class="upload-box" onclick="document.getElementById('foto').click()">
+                                        <label class="form-label fw-semibold" for="foto">Foto Utama <small class="text-muted fw-normal">(Opsional)</small></label>
+                                        <label for="foto" class="upload-box cursor-pointer d-flex align-items-center justify-content-center m-0">
                                             <div id="preview_foto" class="preview-container" style="display:none;">
                                                 <img src="#" alt="Preview" class="preview-image" />
-                                                <button type="button" class="btn-remove-image" onclick="event.stopPropagation(); clearFile('foto', 'preview_foto')">
+                                                <button type="button" class="btn-remove-image" onclick="event.preventDefault(); event.stopPropagation(); clearFile('foto', 'preview_foto')">
                                                     <span style="font-size: 20px; font-weight: bold; line-height: 1; color: white;">&times;</span>
                                                 </button>
                                             </div>
@@ -99,7 +99,7 @@
                                                 <p class="mb-0 mt-2">Klik untuk upload</p>
                                                 <small class="text-muted">JPG, PNG (Max 8MB)</small>
                                             </div>
-                                        </div>
+                                        </label>
                                         <input type="file" class="d-none" id="foto" name="foto_utama" 
                                                accept="image/*" onchange="previewFile(this, 'preview_foto', 'placeholder_foto')" />
                                     </div>
@@ -107,10 +107,10 @@
                                     <!-- Foto Tambahan 1 -->
                                     <div class="col-6 col-md-4">
                                         <label class="form-label fw-semibold" for="foto_2">Foto Tambahan 1</label>
-                                        <div class="upload-box" onclick="document.getElementById('foto_2').click()">
+                                        <label for="foto_2" class="upload-box cursor-pointer d-flex align-items-center justify-content-center m-0">
                                             <div id="preview_foto_2" class="preview-container" style="display:none;">
                                                 <img src="#" alt="Preview" class="preview-image" />
-                                                <button type="button" class="btn-remove-image" onclick="event.stopPropagation(); clearFile('foto_2', 'preview_foto_2')">
+                                                <button type="button" class="btn-remove-image" onclick="event.preventDefault(); event.stopPropagation(); clearFile('foto_2', 'preview_foto_2')">
                                                     <span style="font-size: 20px; font-weight: bold; line-height: 1; color: white;">&times;</span>
                                                 </button>
                                             </div>
@@ -119,7 +119,7 @@
                                                 <p class="mb-0 mt-2">Klik untuk upload</p>
                                                 <small class="text-muted">JPG, PNG (Max 8MB)</small>
                                             </div>
-                                        </div>
+                                        </label>
                                         <input type="file" class="d-none" id="foto_2" name="foto_2" 
                                                accept="image/*" onchange="previewFile(this, 'preview_foto_2', 'placeholder_foto_2')" />
                                     </div>
@@ -127,10 +127,10 @@
                                     <!-- Foto Tambahan 2 -->
                                     <div class="col-6 col-md-4">
                                         <label class="form-label fw-semibold" for="foto_3">Foto Tambahan 2</label>
-                                        <div class="upload-box" onclick="document.getElementById('foto_3').click()">
+                                        <label for="foto_3" class="upload-box cursor-pointer d-flex align-items-center justify-content-center m-0">
                                             <div id="preview_foto_3" class="preview-container" style="display:none;">
                                                 <img src="#" alt="Preview" class="preview-image" />
-                                                <button type="button" class="btn-remove-image" onclick="event.stopPropagation(); clearFile('foto_3', 'preview_foto_3')">
+                                                <button type="button" class="btn-remove-image" onclick="event.preventDefault(); event.stopPropagation(); clearFile('foto_3', 'preview_foto_3')">
                                                     <span style="font-size: 20px; font-weight: bold; line-height: 1; color: white;">&times;</span>
                                                 </button>
                                             </div>
@@ -139,7 +139,7 @@
                                                 <p class="mb-0 mt-2">Klik untuk upload</p>
                                                 <small class="text-muted">JPG, PNG (Max 8MB)</small>
                                             </div>
-                                        </div>
+                                        </label>
                                         <input type="file" class="d-none" id="foto_3" name="foto_3" 
                                                accept="image/*" onchange="previewFile(this, 'preview_foto_3', 'placeholder_foto_3')" />
                                     </div>
@@ -320,10 +320,8 @@
                                         </label>
                                         <div class="input-group">
                                             <select class="form-select modern-input" id="satuan" name="satuan" required>
-                                                <option value="" disabled selected>Pilih Satuan</option>
-                                                <option value="Unit">Unit</option>
+                                                <option value="Unit" selected>Unit</option>
                                                 <option value="Paket">Paket</option>
-
                                             </select>
                                             <button type="button" class="btn btn-outline-primary modern-btn-outline" 
                                                     data-bs-toggle="modal" data-bs-target="#addSatuanModal">
@@ -402,18 +400,172 @@
                                                 <input type="text" class="form-control modern-input" id="lokasi" 
                                                        name="lokasi" value="Desa Pematang Duku Timur" required />
                                             </div>
-                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
+                            <!-- Section: Petugas Pengurus & Pemegang Kunci Gedung (Opsional) -->
+                            <div class="form-section mb-4">
+                                <div class="d-flex flex-wrap align-items-center justify-content-between mb-3 pb-2 border-bottom">
+                                    <div>
+                                        <h6 class="section-title mb-1 text-success">
+                                            <i class='bx bx-key me-2'></i>Pengurus & Pemegang Kunci Gedung (Opsional)
+                                        </h6>
+                                        <small class="text-muted">Pilih satu atau beberapa personil pengurus / pemegang kunci untuk fasilitas gedung ini.</small>
+                                    </div>
+                                    <div class="mt-2 mt-sm-0 d-flex gap-2 align-items-center">
+                                        <span class="badge bg-label-success px-2.5 py-1.5" id="selectedPengurusCount">0 Pengurus Dipilih</span>
+                                        <button type="button" class="btn btn-sm btn-success rounded-pill px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#addPengurusModal">
+                                            <i class="bx bx-plus me-1"></i> Tambah Pengurus Baru
+                                        </button>
+                                    </div>
+                                </div>
 
-                            
-                                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-stretch align-items-sm-center gap-2 mt-4 pt-3 border-top">
+                                <!-- Banner Panduan Penugasan Pengurus -->
+                                <div class="card border border-success-subtle bg-white shadow-xs rounded-3 mb-3 overflow-hidden">
+                                    <div class="card-header bg-success-subtle py-2 px-3 border-bottom border-success-subtle d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                        <div class="d-flex align-items-center">
+                                            <div class="p-1.5 bg-success text-white rounded-3 d-flex align-items-center justify-content-center flex-shrink-0 me-2" style="width: 28px; height: 28px;">
+                                                <i class="bx bx-info-circle fs-6 text-white"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-0 fw-bold text-success font-13">
+                                                    Panduan Penugasan Pengurus / Pemegang Kunci
+                                                </h6>
+                                            </div>
+                                        </div>
+                                        <span class="badge bg-white text-success border border-success-subtle font-11 fw-semibold px-2.5 py-0.5 rounded-pill">
+                                            Opsional
+                                        </span>
+                                    </div>
+
+                                    <div class="p-3 bg-white">
+                                        <div class="d-flex align-items-start rounded-3 p-2 bg-light border">
+                                            <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 mt-0.5 me-2" style="width: 22px; height: 22px; background-color: #dcfce7; color: #16a34a;">
+                                                <i class="bx bx-check font-12"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <span class="fw-bold font-12 text-dark">Fleksibel & Kontak Langsung</span>
+                                                <p class="mb-0 font-11 text-muted">
+                                                    Nomor WhatsApp personil yang dipilih akan ditampilkan pada sistem agar pemohon dapat menghubungi pengurus untuk serah terima kunci. Kosongkan jika kunci dipegang langsung oleh kantor desa.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Search Filter Pengurus -->
+                                <div class="mb-3">
+                                    <div class="input-group input-group-merge">
+                                        <span class="input-group-text bg-white border-end-0"><i class="bx bx-search text-muted"></i></span>
+                                        <input type="text" 
+                                               id="searchPengurusInput" 
+                                               class="form-control border-start-0 ps-0 modern-input" 
+                                               placeholder="Cari pengurus berdasarkan nama atau nomor WhatsApp...">
+                                    </div>
+                                </div>
+
+                                <!-- Pengurus Cards Grid Container -->
+                                <div class="row g-3" id="pengurusCardsContainer">
+                                    @forelse($pengurusList as $p)
+                                        @php
+                                            $avatar = $p->foto ? asset('storage/' . $p->foto) : asset('Admin/img/avatars/pria.png');
+                                            $isTersedia = ($p->status == 'Tersedia');
+                                            $isSelected = is_array(old('pengurus_ids')) && in_array($p->id, old('pengurus_ids'));
+                                        @endphp
+                                        <div class="col-md-6 pengurus-card-item" data-name="{{ strtolower($p->nama) }}" data-phone="{{ $p->kontak }}">
+                                            <div class="card pengurus-profile-card h-100 border transition-all {{ $isSelected ? 'selected' : '' }}" 
+                                                 id="card-pengurus-{{ $p->id }}"
+                                                 onclick="togglePengurusSelection({{ $p->id }})">
+                                                
+                                                <!-- Hidden Checkbox Input -->
+                                                <input type="checkbox" 
+                                                       name="pengurus_ids[]" 
+                                                       value="{{ $p->id }}" 
+                                                       id="check-pengurus-{{ $p->id }}"
+                                                       class="d-none pengurus-checkbox"
+                                                       data-id="{{ $p->id }}"
+                                                       data-name="{{ $p->nama }}"
+                                                       data-avatar="{{ $avatar }}"
+                                                       data-kontak="{{ $p->kontak ?? '-' }}"
+                                                       data-status="{{ $p->status }}"
+                                                       {{ $isSelected ? 'checked' : '' }}
+                                                       onchange="syncPengurusSelection({{ $p->id }})">
+
+                                                <!-- Card Body: Avatar & Info -->
+                                                <div class="d-flex align-items-center gap-3 p-3 pb-2">
+                                                    <!-- Avatar Foto Profil -->
+                                                    <div class="position-relative flex-shrink-0" style="width: 44px; height: 44px;">
+                                                        <img src="{{ $avatar }}" 
+                                                             alt="{{ $p->nama }}" 
+                                                             class="rounded-circle border shadow-sm object-fit-cover w-100 h-100" 
+                                                             onerror="this.src='{{ asset('Admin/img/avatars/pria.png') }}'">
+                                                        <span class="position-absolute {{ $isTersedia ? 'bg-success' : 'bg-warning' }} border border-2 border-white rounded-circle" style="width: 10px; height: 10px; bottom: 1px; right: 1px;"></span>
+                                                    </div>
+
+                                                    <!-- Identitas & Status Pengurus -->
+                                                    <div class="flex-grow-1 min-w-0">
+                                                        <div class="d-flex align-items-center justify-content-between gap-2 mb-1">
+                                                            <h6 class="mb-0 fw-bold text-dark text-truncate font-13" title="{{ $p->nama }}">
+                                                                {{ $p->nama }}
+                                                            </h6>
+                                                            <span class="badge {{ $isTersedia ? 'bg-label-success' : 'bg-label-warning' }} rounded-pill px-2 py-0.5 font-10 fw-semibold">
+                                                                {{ $p->status }}
+                                                            </span>
+                                                        </div>
+
+                                                        <div class="d-flex align-items-center gap-1.5 text-muted small">
+                                                            <i class="bx bxl-whatsapp text-success fs-6"></i>
+                                                            <span class="text-truncate font-12 fw-medium">{{ $p->kontak ?? 'Tanpa Kontak' }}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Card Footer: Aksi & Tombol Pilihan -->
+                                                <div class="d-flex align-items-center justify-content-between px-3 py-2 border-top bg-light-subtle">
+                                                    <button type="button" 
+                                                            class="btn btn-sm btn-light border text-dark rounded-pill px-2.5 py-1 font-11 fw-semibold d-inline-flex align-items-center gap-1 hover-shadow"
+                                                            onclick="event.stopPropagation(); showPengurusDetailModal({{ $p->id }}, '{{ addslashes($p->nama) }}', '{{ $avatar }}', '{{ $p->kontak ?? '-' }}', '{{ $p->status }}')">
+                                                        <i class="bx bx-user text-success"></i> Detail
+                                                    </button>
+                                                    <span class="selection-btn-pengurus btn btn-sm {{ $isSelected ? 'btn-success shadow-sm' : 'btn-outline-success' }} rounded-pill px-3 py-1 font-11 fw-bold d-inline-flex align-items-center gap-1">
+                                                        @if($isSelected)
+                                                            <i class="bx bx-check-circle fs-6"></i> Ditugaskan
+                                                        @else
+                                                            <i class="bx bx-plus fs-6"></i> Pilih Pengurus
+                                                        @endif
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @empty
+                                        <div class="col-12 text-center py-4" id="emptyPengurusAlert">
+                                            <div class="p-4 bg-light rounded-3 border text-center">
+                                                <i class="bx bx-user-x text-muted" style="font-size: 40px;"></i>
+                                                <p class="mt-2 mb-1 fw-bold text-dark">Belum Ada Pengurus Terdaftar</p>
+                                                <small class="text-muted d-block mb-3">Tambahkan data pengurus / pemegang kunci gedung agar fasilitas dapat dikelola dengan optimal.</small>
+                                                <button type="button" class="btn btn-sm btn-success rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#addPengurusModal">
+                                                    <i class="bx bx-plus me-1"></i> Tambah Pengurus Sekarang
+                                                </button>
+                                            </div>
+                                        </div>
+                                    @endforelse
+                                    <div class="col-12 text-center py-4" id="noMatchPengurusAlert" style="display: none;">
+                                        <div class="p-4 bg-light rounded-3 border text-center">
+                                            <i class="bx bx-search-alt text-muted" style="font-size: 40px;"></i>
+                                            <p class="mt-2 mb-1 fw-bold text-dark">Tidak Ada Pengurus yang Cocok</p>
+                                            <small class="text-muted d-block">Tidak ditemukan nama atau kontak yang sesuai dengan kata kunci pencarian.</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-stretch align-items-sm-center gap-2 mt-4 pt-3 border-top">
                                         <button type="button" class="btn btn-secondary" onclick="prevStep('step2-tab')"><i class='bx bx-left-arrow-alt me-1'></i> Sebelumnya</button>
                                         <div class="d-flex gap-2">
                                             <a href="{{ route('admin.unit.fasilitas_umum.index') }}" class="btn btn-light border flex-grow-1 flex-sm-grow-0 text-center">Batal</a>
-                                            <button type="submit" class="btn btn-success flex-grow-1 flex-sm-grow-0"><i class='bx bx-save me-1'></i> Simpan Data</button>
+                                            <button type="submit" id="btnSubmitFasilitas" class="btn btn-success flex-grow-1 flex-sm-grow-0"><i class='bx bx-save me-1'></i> Simpan Data</button>
                                         </div>
                                     </div>
                                 </div> <!-- End step 3 -->
@@ -477,6 +629,132 @@
                     <button type="button" class="btn btn-primary modern-btn-primary" id="saveSatuanBtn">
                         <i class='bx bx-check me-1'></i> Simpan
                     </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Tambah Pengurus Baru Langsung (On-the-Fly) -->
+    <div class="modal fade" id="addPengurusModal" tabindex="-1" aria-labelledby="addPengurusModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="modal-header bg-white border-bottom py-3 px-4">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="p-2 bg-success-subtle text-success rounded-3">
+                            <i class="bx bx-user-plus fs-4"></i>
+                        </div>
+                        <div>
+                            <h5 class="modal-title fw-bold text-dark mb-0" id="addPengurusModalLabel">Tambah Pengurus Gedung Baru</h5>
+                            <small class="text-muted">Data personil pemegang kunci & pengurus fasilitas</small>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="formAddPengurusModal" enctype="multipart/form-data">
+                    @csrf
+                    <input type="hidden" name="tipe" value="pengurus_gedung">
+                    <input type="hidden" name="is_fasilitas_umum" value="1">
+                    <div class="modal-body p-4">
+                        <div class="text-center mb-3">
+                            <div class="position-relative d-inline-block">
+                                <img src="{{ asset('Admin/img/avatars/pria.png') }}" 
+                                     id="previewAvatarNewPengurus" 
+                                     class="rounded-circle border shadow-sm object-fit-cover" 
+                                     style="width: 72px; height: 72px;" 
+                                     alt="Avatar">
+                                <button type="button" 
+                                        class="btn btn-sm btn-success rounded-circle position-absolute bottom-0 end-0 p-1" 
+                                        style="width: 26px; height: 26px;"
+                                        onclick="document.getElementById('inputFotoPengurus').click()">
+                                    <i class="bx bx-camera font-11"></i>
+                                </button>
+                            </div>
+                            <input type="file" id="inputFotoPengurus" name="foto" class="d-none" accept="image/*" onchange="previewNewPengurusAvatar(this)">
+                            <small class="d-block text-muted mt-1 font-11">Upload foto profil (opsional)</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold text-dark">Nama Lengkap Pengurus <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bx bx-user"></i></span>
+                                <input type="text" name="nama" id="new_pengurus_nama" class="form-control" placeholder="Nama lengkap petugas / pengurus" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold text-dark">Nomor WhatsApp / HP Aktif <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bx bxl-whatsapp text-success"></i></span>
+                                <input type="text" name="kontak" id="new_pengurus_kontak" class="form-control" placeholder="Contoh: 081234567890" required>
+                            </div>
+                            <div class="form-text small">Nomor WhatsApp untuk koordinasi serah terima kunci fasilitas.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold text-dark">Status Kesiapan</label>
+                            <select name="status" id="new_pengurus_status" class="form-select">
+                                <option value="Tersedia" selected>Tersedia (Aktif)</option>
+                                <option value="Sedang Bertugas">Sedang Bertugas</option>
+                                <option value="Tidak Aktif">Tidak Aktif</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer bg-light px-4 py-3 border-top">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-success" id="btnSavePengurus">
+                            <i class="bx bx-save me-1"></i> Simpan & Gunakan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Detail Pengurus -->
+    <div class="modal fade" id="detailPengurusModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="modal-header bg-white border-bottom py-3 px-4">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="p-2 bg-success-subtle text-success rounded-3">
+                            <i class="bx bx-key fs-4"></i>
+                        </div>
+                        <div>
+                            <h5 class="modal-title fw-bold text-dark mb-0">Detail Profil Pengurus</h5>
+                            <small class="text-muted">Informasi personil pengurus / pemegang kunci gedung</small>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4 text-center">
+                    <div class="mb-3 position-relative d-inline-block">
+                        <img src="{{ asset('Admin/img/avatars/pria.png') }}" 
+                             id="detailPengurusAvatar" 
+                             alt="Foto Profil" 
+                             class="rounded-circle border border-3 border-success shadow-sm object-fit-cover" 
+                             style="width: 80px; height: 80px;">
+                    </div>
+                    <h5 class="fw-bold text-dark mb-1" id="detailPengurusNama">Nama Pengurus</h5>
+                    <div class="mb-3">
+                        <span class="badge bg-success px-3 py-1 rounded-pill font-11" id="detailPengurusStatus">Tersedia</span>
+                    </div>
+                    <div class="bg-light p-3 rounded-3 text-start border mb-3">
+                        <div class="row g-2">
+                            <div class="col-5 text-muted small fw-semibold">No. WhatsApp / HP:</div>
+                            <div class="col-7 text-dark small fw-bold" id="detailPengurusKontak">-</div>
+                            <div class="col-5 text-muted small fw-semibold">Peran / Tugas:</div>
+                            <div class="col-7 text-dark small">Pengurus & Pemegang Kunci</div>
+                        </div>
+                    </div>
+                    <div class="d-grid">
+                        <a href="#" id="detailPengurusWaBtn" target="_blank" class="btn btn-success d-flex align-items-center justify-content-center gap-2 shadow-sm py-2">
+                            <i class="bx bxl-whatsapp fs-5"></i> Hubungi Langsung via WhatsApp
+                        </a>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light py-2 px-4 border-top text-end">
+                    <button type="button" class="btn btn-outline-secondary btn-sm px-3" data-bs-dismiss="modal">Tutup</button>
                 </div>
             </div>
         </div>
@@ -830,6 +1108,25 @@
         font-size: 1.25rem;
         vertical-align: middle;
     }
+    
+    /* Pengurus Profile Card */
+    .pengurus-profile-card {
+        border-radius: 12px;
+        background: #ffffff;
+        cursor: pointer;
+        border: 1.5px solid #e2e8f0 !important;
+        transition: all 0.2s ease-in-out;
+    }
+    .pengurus-profile-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        border-color: #22c55e !important;
+    }
+    .pengurus-profile-card.selected {
+        border-color: #16a34a !important;
+        background: #f0fdf4 !important;
+        box-shadow: 0 4px 14px rgba(22, 163, 74, 0.12);
+    }
 </style>
 @endsection
 
@@ -839,22 +1136,34 @@
 
     // Fungsi untuk preview file gambar
     function previewFile(input, previewId, placeholderId) {
+        if (!input || !input.files || !input.files[0]) return;
+
+        const file = input.files[0];
         const preview = document.getElementById(previewId);
         const placeholder = document.getElementById(placeholderId);
-        const img = preview ? preview.querySelector('img') : null;
+        const img = preview ? (preview.tagName === 'IMG' ? preview : preview.querySelector('img')) : null;
 
-        if (input.files && input.files[0]) {
-            if (typeof initGlobalCropper === 'function') {
-                initGlobalCropper(input, img || previewId, NaN, true);
+        if (typeof initGlobalCropper === 'function') {
+            try {
+                const started = initGlobalCropper(input, img || previewId, 4 / 3, true);
+                if (started !== false) {
+                    return;
+                }
+            } catch (err) {
+                console.warn('Cropper failed, fallback to direct preview:', err);
             }
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                if (img) img.src = e.target.result;
-                if (preview) preview.style.display = 'block';
-                if (placeholder) placeholder.style.display = 'none';
-            };
-            reader.readAsDataURL(input.files[0]);
+        }
+
+        const url = URL.createObjectURL(file);
+        if (img) {
+            img.src = url;
+        }
+        if (preview) {
+            preview.style.display = 'block';
+            preview.classList.remove('d-none');
+        }
+        if (placeholder) {
+            placeholder.style.display = 'none';
         }
     }
 
@@ -863,12 +1172,12 @@
         const input = document.getElementById(inputId);
         const preview = document.getElementById(previewId);
         const placeholder = document.getElementById('placeholder_' + inputId);
-        const img = preview.querySelector('img');
+        const img = preview ? preview.querySelector('img') : null;
 
-        input.value = '';
-        img.src = '#';
-        preview.style.display = 'none';
-        placeholder.style.display = 'block';
+        if (input) input.value = '';
+        if (img) img.src = '#';
+        if (preview) preview.style.display = 'none';
+        if (placeholder) placeholder.style.display = 'block';
     }
 
     // JS Logic for Supir & BBM Toggle
@@ -1052,16 +1361,101 @@
             }
         }
         var tabEl = document.querySelector('#' + tabId);
-        var tab = new bootstrap.Tab(tabEl);
-        tab.show();
-        window.scrollTo(0, 0);
+        if (tabEl) {
+            var tab = bootstrap.Tab.getOrCreateInstance(tabEl);
+            tab.show();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
     }
+
     function prevStep(tabId) {
         var tabEl = document.querySelector('#' + tabId);
-        var tab = new bootstrap.Tab(tabEl);
-        tab.show();
-        window.scrollTo(0, 0);
+        if (tabEl) {
+            var tab = bootstrap.Tab.getOrCreateInstance(tabEl);
+            tab.show();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
     }
+
+    // Tangkap event invalid pada elemen form agar tab otomatis berpindah jika ada error pada tab yang tersembunyi
+    document.addEventListener('invalid', function(e) {
+        const el = e.target;
+        if (el && el.closest && el.closest('#formFasilitasUmum')) {
+            const pane = el.closest('.tab-pane');
+            if (pane && !pane.classList.contains('active')) {
+                const tabBtn = document.querySelector(`[data-bs-target="#${pane.id}"]`) || document.querySelector(`#${pane.id}-tab`);
+                if (tabBtn) {
+                    bootstrap.Tab.getOrCreateInstance(tabBtn).show();
+                }
+            }
+        }
+    }, true);
+
+    // Validasi form saat tombol submit ditekan
+    document.addEventListener('DOMContentLoaded', function() {
+        const formFasilitas = document.getElementById('formFasilitasUmum');
+        if (formFasilitas) {
+            formFasilitas.addEventListener('submit', function(e) {
+                const firstInvalid = formFasilitas.querySelector(':invalid');
+                if (firstInvalid) {
+                    e.preventDefault();
+                    const pane = firstInvalid.closest('.tab-pane');
+                    if (pane) {
+                        const tabBtn = document.querySelector(`[data-bs-target="#${pane.id}"]`) || document.querySelector(`#${pane.id}-tab`);
+                        if (tabBtn) {
+                            bootstrap.Tab.getOrCreateInstance(tabBtn).show();
+                        }
+                    }
+                    setTimeout(function() {
+                        firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        firstInvalid.focus();
+                        firstInvalid.reportValidity();
+                    }, 200);
+
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Data Belum Lengkap',
+                            text: 'Silakan periksa dan lengkapi kolom yang wajib diisi terlebih dahulu.',
+                            confirmButtonText: 'Periksa Data',
+                            confirmButtonColor: '#3b82f6'
+                        });
+                    }
+                    return false;
+                }
+            });
+        }
+
+        // Cegah lompat tab ke depan jika data langkah saat ini belum diisi
+        const wizardTabPills = document.querySelectorAll('#formWizard button[data-bs-toggle="pill"]');
+        wizardTabPills.forEach(btn => {
+            btn.addEventListener('show.bs.tab', function(e) {
+                const targetId = this.getAttribute('data-bs-target');
+                const activePane = document.querySelector('.tab-pane.show.active');
+                if (!activePane) return;
+
+                const steps = ['#step1', '#step2', '#step3'];
+                const currentIndex = steps.indexOf('#' + activePane.id);
+                const targetIndex = steps.indexOf(targetId);
+
+                if (targetIndex > currentIndex) {
+                    for (let i = currentIndex; i < targetIndex; i++) {
+                        const pane = document.querySelector(steps[i]);
+                        if (pane) {
+                            const inputs = pane.querySelectorAll('input[required], select[required], textarea[required]');
+                            for (let j = 0; j < inputs.length; j++) {
+                                if (!inputs[j].checkValidity()) {
+                                    e.preventDefault();
+                                    inputs[j].reportValidity();
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    });
 
     document.addEventListener('DOMContentLoaded', function() {
         const toggles = document.querySelectorAll('.delivery-toggle');
@@ -1145,5 +1539,229 @@
         }
     }
 
+    // ==========================================
+    // LOGIKA PENUGASAN PENGURUS & PEMEGANG KUNCI
+    // ==========================================
+    function togglePengurusSelection(pengurusId) {
+        const checkbox = document.getElementById('check-pengurus-' + pengurusId);
+        if (checkbox) {
+            checkbox.checked = !checkbox.checked;
+            syncPengurusSelection(pengurusId);
+        }
+    }
+
+    function syncPengurusSelection(pengurusId) {
+        const card = document.getElementById('card-pengurus-' + pengurusId);
+        const checkbox = document.getElementById('check-pengurus-' + pengurusId);
+        if (!card || !checkbox) return;
+
+        const selBtn = card.querySelector('.selection-btn-pengurus');
+
+        if (checkbox.checked) {
+            card.classList.add('selected');
+            if (selBtn) {
+                selBtn.className = 'selection-btn-pengurus btn btn-sm btn-success shadow-sm rounded-pill px-3 py-1 font-11 fw-bold d-inline-flex align-items-center gap-1';
+                selBtn.innerHTML = '<i class="bx bx-check-circle fs-6"></i> Ditugaskan';
+            }
+        } else {
+            card.classList.remove('selected');
+            if (selBtn) {
+                selBtn.className = 'selection-btn-pengurus btn btn-sm btn-outline-success rounded-pill px-3 py-1 font-11 fw-bold d-inline-flex align-items-center gap-1';
+                selBtn.innerHTML = '<i class="bx bx-plus fs-6"></i> Pilih Pengurus';
+            }
+        }
+
+        updateAssignedPengurusCount();
+    }
+
+    function updateAssignedPengurusCount() {
+        const checkboxes = document.querySelectorAll('.pengurus-checkbox:checked');
+        const countBadge = document.getElementById('selectedPengurusCount');
+        if (countBadge) {
+            countBadge.textContent = checkboxes.length + ' Pengurus Dipilih';
+        }
+    }
+
+    // Filter Search Pengurus
+    const searchPengurusInput = document.getElementById('searchPengurusInput');
+    if (searchPengurusInput) {
+        searchPengurusInput.addEventListener('input', function() {
+            const query = this.value.toLowerCase().trim();
+            const items = document.querySelectorAll('.pengurus-card-item');
+            let visibleCount = 0;
+            items.forEach(item => {
+                const name = item.dataset.name || '';
+                const phone = item.dataset.phone || '';
+                if (name.includes(query) || phone.includes(query)) {
+                    item.style.display = '';
+                    visibleCount++;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+
+            const noMatchAlert = document.getElementById('noMatchPengurusAlert');
+            if (noMatchAlert) {
+                noMatchAlert.style.display = (visibleCount === 0 && items.length > 0) ? 'block' : 'none';
+            }
+        });
+    }
+
+    // Preview Foto New Pengurus Modal
+    function previewNewPengurusAvatar(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('previewAvatarNewPengurus').src = e.target.result;
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    // Modal Detail Pengurus
+    function showPengurusDetailModal(id, nama, avatar, kontak, status) {
+        document.getElementById('detailPengurusAvatar').src = avatar;
+        document.getElementById('detailPengurusNama').textContent = nama;
+        document.getElementById('detailPengurusStatus').textContent = status;
+        document.getElementById('detailPengurusStatus').className = 'badge ' + (status === 'Tersedia' ? 'bg-success' : 'bg-warning') + ' px-3 py-1 rounded-pill font-11';
+        document.getElementById('detailPengurusKontak').textContent = kontak;
+        
+        const cleanWa = (kontak || '').replace(/[^0-9]/g, '');
+        const waUrl = cleanWa ? ('https://wa.me/' + (cleanWa.startsWith('0') ? '62' + cleanWa.substring(1) : cleanWa)) : '#';
+        const waBtn = document.getElementById('detailPengurusWaBtn');
+        if (waBtn) {
+            waBtn.href = waUrl;
+            if (!cleanWa) waBtn.classList.add('disabled');
+            else waBtn.classList.remove('disabled');
+        }
+
+        const modal = new bootstrap.Modal(document.getElementById('detailPengurusModal'));
+        modal.show();
+    }
+
+    // Submit New Pengurus Modal via AJAX
+    const formAddPengurusModal = document.getElementById('formAddPengurusModal');
+    if (formAddPengurusModal) {
+        formAddPengurusModal.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnSavePengurus');
+            const originalBtnHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span> Menyimpan...';
+
+            const formData = new FormData(this);
+
+            fetch("{{ route('supir.store') }}", {
+                method: "POST",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    "Accept": "application/json"
+                },
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                btn.disabled = false;
+                btn.innerHTML = originalBtnHtml;
+
+                if (data.success && data.supir) {
+                    const supir = data.supir;
+                    const avatar = data.avatar_url;
+                    const isTersedia = (supir.status === 'Tersedia');
+
+                    const emptyAlert = document.getElementById('emptyPengurusAlert');
+                    if (emptyAlert) emptyAlert.style.display = 'none';
+
+                    const container = document.getElementById('pengurusCardsContainer');
+                    const newCol = document.createElement('div');
+                    newCol.className = 'col-md-6 pengurus-card-item';
+                    newCol.dataset.name = supir.nama.toLowerCase();
+                    newCol.dataset.phone = supir.kontak || '';
+
+                    newCol.innerHTML = `
+                        <div class="card pengurus-profile-card h-100 border transition-all selected" 
+                             id="card-pengurus-${supir.id}"
+                             onclick="togglePengurusSelection(${supir.id})">
+                            <input type="checkbox" 
+                                   name="pengurus_ids[]" 
+                                   value="${supir.id}" 
+                                   id="check-pengurus-${supir.id}"
+                                   class="d-none pengurus-checkbox"
+                                   data-id="${supir.id}"
+                                   data-name="${supir.nama}"
+                                   data-avatar="${avatar}"
+                                   data-kontak="${supir.kontak || '-'}"
+                                   data-status="${supir.status}"
+                                   checked
+                                   onchange="syncPengurusSelection(${supir.id})">
+                            <div class="d-flex align-items-center gap-3 p-3 pb-2">
+                                <div class="position-relative flex-shrink-0" style="width: 44px; height: 44px;">
+                                    <img src="${avatar}" 
+                                         alt="${supir.nama}" 
+                                         class="rounded-circle border shadow-sm object-fit-cover w-100 h-100" 
+                                         onerror="this.src='{{ asset('Admin/img/avatars/pria.png') }}'">
+                                    <span class="position-absolute ${isTersedia ? 'bg-success' : 'bg-warning'} border border-2 border-white rounded-circle" style="width: 10px; height: 10px; bottom: 1px; right: 1px;"></span>
+                                </div>
+                                <div class="flex-grow-1 min-w-0">
+                                    <div class="d-flex align-items-center justify-content-between gap-2 mb-1">
+                                        <h6 class="mb-0 fw-bold text-dark text-truncate font-13" title="${supir.nama}">
+                                            ${supir.nama}
+                                        </h6>
+                                        <span class="badge ${isTersedia ? 'bg-label-success' : 'bg-label-warning'} rounded-pill px-2 py-0.5 font-10 fw-semibold">
+                                            ${supir.status}
+                                        </span>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-1.5 text-muted small">
+                                        <i class="bx bxl-whatsapp text-success fs-6"></i>
+                                        <span class="text-truncate font-12 fw-medium">${supir.kontak || 'Tanpa Kontak'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-between px-3 py-2 border-top bg-light-subtle">
+                                <button type="button" 
+                                        class="btn btn-sm btn-light border text-dark rounded-pill px-2.5 py-1 font-11 fw-semibold d-inline-flex align-items-center gap-1 hover-shadow"
+                                        onclick="event.stopPropagation(); showPengurusDetailModal(${supir.id}, '${supir.nama.replace(/'/g, "\\'")}', '${avatar}', '${supir.kontak || '-'}', '${supir.status}')">
+                                    <i class="bx bx-user text-success"></i> Detail
+                                </button>
+                                <span class="selection-btn-pengurus btn btn-sm btn-success shadow-sm rounded-pill px-3 py-1 font-11 fw-bold d-inline-flex align-items-center gap-1">
+                                    <i class="bx bx-check-circle fs-6"></i> Ditugaskan
+                                </span>
+                            </div>
+                        </div>
+                    `;
+
+                    container.appendChild(newCol);
+                    updateAssignedPengurusCount();
+
+                    const modalEl = document.getElementById('addPengurusModal');
+                    const modalInstance = bootstrap.Modal.getInstance(modalEl);
+                    if (modalInstance) modalInstance.hide();
+                    formAddPengurusModal.reset();
+                    document.getElementById('previewAvatarNewPengurus').src = '{{ asset("Admin/img/avatars/pria.png") }}';
+
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Pengurus Berhasil Ditambahkan',
+                            text: 'Personil pengurus berhasil didaftarkan dan langsung ditugaskan. Silakan klik tombol "Simpan Data" di bagian bawah untuk menyimpan formulir fasilitas ini.',
+                            confirmButtonText: 'Mengerti',
+                            confirmButtonColor: '#198754'
+                        });
+                    }
+                } else {
+                    alert(data.message || 'Gagal menambahkan pengurus');
+                }
+            })
+            .catch(err => {
+                btn.disabled = false;
+                btn.innerHTML = originalBtnHtml;
+                console.error(err);
+                alert('Terjadi kesalahan koneksi atau data belum lengkap.');
+            });
+        });
+    }
+
+    // Inisialisasi hitungan pengurus yang terpilih saat halaman pertama kali dibuka
+    updateAssignedPengurusCount();
 </script>
 @endsection
