@@ -239,6 +239,14 @@ Route::get('/gas/booking/{id}/pending', [App\Http\Controllers\User\GasBookingCon
     ->name('user.gas.payment.pending')
     ->middleware('auth');
 
+Route::get('/gas/payment/{id}/qr', [App\Http\Controllers\User\GasBookingController::class, 'qrPembayaran'])
+    ->name('user.gas.payment.qr')
+    ->middleware('auth');
+
+Route::get('/gas/payment/{id}/sinkron', [App\Http\Controllers\User\GasBookingController::class, 'sinkronPembayaran'])
+    ->name('user.gas.payment.sinkron')
+    ->middleware('auth');
+
 Route::post('/gas/payment/{id}/simulate', [App\Http\Controllers\User\GasBookingController::class, 'simulatePayment'])
     ->name('user.gas.payment.simulate')
     ->middleware('auth');
@@ -361,7 +369,6 @@ Route::get('/receipt/pasar/{id}/download', [App\Http\Controllers\User\ReceiptCon
 Route::post('/auth/register', [AuthController::class, 'register'])->name('auth.register')->middleware('throttle:5,5');
 Route::get('/auth/otp', [AuthController::class, 'showOtpForm'])->name('auth.otp.view');
 Route::post('/auth/verify-otp', [AuthController::class, 'verifyOtp'])->name('auth.verify-otp')->middleware('throttle:10,5');
-Route::get('/auth/sandbox-otp-display', [AuthController::class, 'showSandboxOtp'])->name('auth.sandbox.otp');
 Route::post('/auth/resend-otp', [AuthController::class, 'resendOtp'])->name('auth.resend-otp')->middleware('throttle:3,5');
 Route::get('/auth/login', function () {
     return redirect()->route('beranda')->with('open_login_modal', true);

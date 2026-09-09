@@ -294,7 +294,7 @@ class LaporanController extends Controller
             'bukti_value' => $data['bukti'] ?? 'null',
         ]);
 
-        // ✅ Smart Routing - Kirim notifikasi berdasarkan region tujuan yang dipilih
+        // Smart Routing - Kirim notifikasi berdasarkan region tujuan yang dipilih
         try {
             $targetRegion = \App\Models\Region::find($targetRegionId);
             $regionName = $targetRegion ? $targetRegion->name : 'Unknown';
@@ -488,12 +488,12 @@ public function show($id)
 
     // Status harus Pending (WAJIB KONSISTEN)
     if ($laporan->status !== 'Pending') {
-        return back()->with('error', '❌ Laporan yang sudah diproses tidak dapat dihapus.');
+        return back()->with('error', 'Laporan yang sudah diproses tidak dapat dihapus.');
     }
 
     // Batas waktu 24 jam
     if ($laporan->created_at->diffInHours(now()) >= 24) {
-        return back()->with('error', '❌ Laporan sudah melewati batas waktu penghapusan (24 jam).');
+        return back()->with('error', 'Laporan sudah melewati batas waktu penghapusan (24 jam).');
     }
 
     // Hapus semua file bukti.
@@ -516,7 +516,7 @@ public function show($id)
 
     return redirect()
         ->route('user.laporan.index')
-        ->with('success', '✅ Laporan berhasil dihapus.');
+        ->with('success', 'Laporan berhasil dihapus.');
 }
 
 

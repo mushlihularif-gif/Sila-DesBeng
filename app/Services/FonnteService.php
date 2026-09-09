@@ -63,9 +63,13 @@ class FonnteService
         }
 
         try {
-            $response = Http::withHeaders([
-                'Authorization' => $this->token
-            ])->post($this->baseUrl . '/send', [
+            // Batas waktu eksplisit: tanpa ini satu API yang menggantung
+            // ikut menyandera proses pendaftaran warga sampai batas bawaan.
+            $response = Http::timeout(10)
+                ->connectTimeout(5)
+                ->withHeaders([
+                    'Authorization' => $this->token
+                ])->post($this->baseUrl . '/send', [
                 'target' => $target,
                 'message' => $message,
                 'countryCode' => '62', // Default kode negara Indonesia

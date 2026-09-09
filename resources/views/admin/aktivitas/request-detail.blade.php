@@ -111,7 +111,36 @@
                                 <div class="col-md-6">
                                     <p class="text-muted mb-1 text-uppercase small ls-1">Metode Pembayaran</p>
                                     <p class="fw-semibold">
-                                        <span class="badge bg-success-subtle text-success">Tunai</span>
+                                        @php
+                                            // Nilainya tersimpan dalam dua bentuk: saat pesanan dibuat
+                                            // memakai ucfirst() sehingga jadi 'Bank_transfer_bsi',
+                                            // sedangkan saat metode diganti jadi 'Bank Transfer BSI'.
+                                            // Keduanya dinormalkan dulu supaya labelnya konsisten.
+                                            $kunciBayar = strtolower(str_replace(' ', '_', (string) ($request->payment_method ?? '')));
+
+                                            $petaBayar = [
+                                                'tunai'                 => ['Tunai', 'success'],
+                                                'transfer'              => ['Transfer Manual', 'primary'],
+                                                'transfer_manual'       => ['Transfer Manual', 'primary'],
+                                                'ewallet'               => ['E-Wallet', 'info'],
+                                                'gopay'                 => ['GoPay', 'info'],
+                                                'qris'                  => ['QRIS', 'danger'],
+                                                'bank_transfer_bca'     => ['BCA Virtual Account', 'primary'],
+                                                'bank_transfer_bni'     => ['BNI Virtual Account', 'primary'],
+                                                'bank_transfer_bri'     => ['BRI Virtual Account', 'primary'],
+                                                'bank_transfer_mandiri' => ['Mandiri Virtual Account', 'primary'],
+                                                'bank_transfer_bsi'     => ['BSI Virtual Account', 'primary'],
+                                            ];
+
+                                            [$labelBayar, $warnaBayar] = $petaBayar[$kunciBayar]
+                                                ?? [
+                                                    $kunciBayar === ''
+                                                        ? 'Belum ditentukan'
+                                                        : ucwords(str_replace('_', ' ', $kunciBayar)),
+                                                    'secondary',
+                                                ];
+                                        @endphp
+                                        <span class="badge bg-{{ $warnaBayar }}-subtle text-{{ $warnaBayar }}">{{ $labelBayar }}</span>
                                     </p>
                                 </div>
                                 <div class="col-md-6">

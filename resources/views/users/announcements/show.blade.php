@@ -170,7 +170,7 @@
                     {{-- Laporan Reference Card --}}
                     @if($announcement->laporan)
                     <div class="backdrop-blur-sm bg-white/80 rounded-3xl p-6 shadow-md border border-white/80 relative overflow-hidden">
-                        <div class="absolute -right-4 -top-4 text-7xl opacity-5">💬</div>
+                        <div class="absolute -right-4 -top-4 opacity-5"><svg class="w-20 h-20 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg></div>
                         <h3 class="text-md font-bold text-gray-800 mb-2">Tindak Lanjut Laporan Warga</h3>
                         <p class="text-xs text-gray-600 mb-4 leading-relaxed">Pengumuman ini diterbitkan sebagai tindak lanjut dari laporan warga berikut:</p>
                         
@@ -194,7 +194,7 @@
                                         @if($related->cover_image)
                                             <img src="{{ Storage::url($related->cover_image) }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform">
                                         @else
-                                            <div class="w-full h-full flex items-center justify-center text-2xl bg-gradient-to-br from-gray-50 to-gray-200 opacity-60">📰</div>
+                                            <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-200 opacity-60"><svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path></svg></div>
                                         @endif
                                     </div>
                                     <div class="flex-1">

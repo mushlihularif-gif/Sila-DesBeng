@@ -41,8 +41,8 @@ class HelpTicket extends Model
     public function getCategoryIconAttribute()
     {
         return [
-            'bug' => '🐛', 'fitur' => '✨', 'akun' => '👤',
-            'laporan' => '📋', 'lainnya' => '❓',
-        ][$this->category] ?? '❓';
+            'bug' => '', 'fitur' => '', 'akun' => '',
+            'laporan' => '', 'lainnya' => '',
+        ][$this->category] ?? '';
     }
 }

@@ -86,22 +86,29 @@ class NotificationController extends Controller
 
     public function markAllAsRead(Request $request)
     {
-        // Tandai sebagai sudah dibaca, TERBATAS pada notifikasi milik pengguna ini
+        // Tandai sebagai sudah dibaca, TERBATAS pada notifikasi milik pengguna
+        // ini. Tanpa untukPengguna(), satu klik dari admin desa mana pun akan
+        // menandai notifikasi seluruh wilayah lain sebagai sudah dibaca, dan
+        // admin wilayah itu tidak akan pernah tahu ada yang masuk.
         \App\Models\AdminNotification::untukPengguna(auth()->user())
             ->where('is_read', false)
             ->update([
                 'is_read' => true,
             ]);
 
+        // Dua skrip lonceng hidup berdampingan di layout: yang satu mengirim
+        // X-Requested-With, yang satu Accept: application/json. Keduanya
+        // diterima supaya tidak ada yang menerima redirect di tengah fetch().
         if ($request->ajax() || $request->wantsJson() || $request->expectsJson()) {
             return response()->json([
                 'success' => true,
-                'message' => 'Semua notifikasi berhasil ditandai sebagai sudah dibaca.'
+                'message' => 'Semua notifikasi berhasil ditandai sebagai sudah dibaca.',
             ]);
         }
 
         return redirect()->back()->with('success', 'Semua notifikasi ditandai sebagai sudah dibaca.');
     }
+
 
     public function destroy($id)
     {

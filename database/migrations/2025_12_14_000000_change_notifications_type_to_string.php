@@ -24,7 +24,7 @@ return new class extends Migration
         // Hanya jalankan ALTER jika kolom masih ENUM (belum STRING)
         if (!empty($columnType) && $columnType[0]->DATA_TYPE === 'enum') {
             DB::statement("ALTER TABLE notifications MODIFY COLUMN type VARCHAR(255) NOT NULL DEFAULT 'pesan_admin'");
-            echo "✅ Kolom 'type' berhasil diubah dari ENUM ke VARCHAR(255)\n";
+            echo "Kolom 'type' berhasil diubah dari ENUM ke VARCHAR(255)\n";
         } else {
             echo "ℹ️  Kolom 'type' sudah VARCHAR, skip migration ini\n";
         }

@@ -26,7 +26,7 @@ class User extends Authenticatable
             }
         });
 
-        // ✅ BLIND INDEXING: Buat hash dari data sensitif sebelum disimpan
+        // BLIND INDEXING: Buat hash dari data sensitif sebelum disimpan
         // Ini memungkinkan pencarian (seperti saat login atau cek data) meskipun data dienkripsi
         static::saving(function ($model) {
             // Hashing Phone
@@ -54,7 +54,7 @@ class User extends Authenticatable
             }
         });
 
-        // ✅ MENCEGAH BUG HANTU DATA: Hapus relasi foto saat User dihapus
+        // MENCEGAH BUG HANTU DATA: Hapus relasi foto saat User dihapus
         static::deleting(function ($model) {
             if ($model->file) {
                 // Hapus file dari penyimpanan server
@@ -126,8 +126,8 @@ class User extends Authenticatable
             // pada akun yang memang sudah terverifikasi, karena akun yang belum
             // bernilai null dan diam saja.
             'verified_at' => 'datetime',
-            'otp_expires_at' => 'datetime',    // ✅ TAMBAH INI
-            'reset_token_expires_at' => 'datetime', // ✅ TAMBAH INI
+            'otp_expires_at' => 'datetime',
+            'reset_token_expires_at' => 'datetime',
             'password' => 'hashed',
             'status' => 'string',
             // Defense in Depth: ChaCha20-Poly1305 Database-Level Encryption (PII)

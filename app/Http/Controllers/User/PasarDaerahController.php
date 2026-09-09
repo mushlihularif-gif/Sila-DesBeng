@@ -401,7 +401,7 @@ class PasarDaerahController extends Controller
 
         $validated = $request->validate([
             'delivery_method' => 'required|in:antar,jemput',
-            'payment_method' => 'required|in:tunai,bank_transfer,transfer_manual,bank_transfer_bca,bank_transfer_bri,bank_transfer_bni,bank_transfer_mandiri,gopay,qris,COD,virtual_account',
+            'payment_method' => 'required|in:tunai,bank_transfer,transfer_manual,bank_transfer_bca,bank_transfer_bri,bank_transfer_bni,bank_transfer_mandiri,bank_transfer_bsi,gopay,qris,COD,virtual_account',
             'full_name' => 'required|string|max:255',
             'phone' => 'required|string',
             'delivery_address' => 'required_if:delivery_method,antar|string|nullable',
@@ -578,7 +578,10 @@ class PasarDaerahController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Pesanan berhasil dibuat!',
-                'order_id' => $order->id
+                'order_id' => $order->id,
+                // Diisi hanya untuk pembayaran gateway; tunai dan transfer
+                // manual tidak melewati Snap sama sekali.
+                'snap_token' => $order->snap_token,
             ]);
 
         } catch (\Exception $e) {
@@ -600,7 +603,7 @@ class PasarDaerahController extends Controller
         // membuat uang warga mendarat di akun yang salah, dan callback-nya pun
         // tidak akan cocok karena diverifikasi dengan kunci wilayah.
         if (! \App\Support\PenyediaPembayaran::terapkanMidtransWilayah($order->region_id)) {
-            \Log::warning('Gateway pasar dilewati: wilayah belum siap', [
+            \Illuminate\Support\Facades\Log::warning('Gateway pasar dilewati: wilayah belum siap', [
                 'order_number' => $order->order_number,
                 'region_id'    => $order->region_id,
             ]);
@@ -608,20 +611,9 @@ class PasarDaerahController extends Controller
             return false;
         }
 
-        $paymentType = '';
-        $bank = '';
-        
-        if (str_starts_with($paymentMethod, 'bank_transfer_')) {
-            $bank = str_replace('bank_transfer_', '', $paymentMethod);
-            $paymentType = $bank === 'mandiri' ? 'echannel' : 'bank_transfer';
-        } else if ($paymentMethod === 'gopay') {
-            $paymentType = 'gopay';
-        } else if ($paymentMethod === 'qris') {
-            $paymentType = 'qris';
-        }
-
+        // Snap, bukan Core API. Akun ini hanya punya Snap; Core API menolak
+        // seluruh kanal dengan 402 "Payment channel is not activated".
         $params = [
-            'payment_type' => $paymentType,
             'transaction_details' => [
                 'order_id' => $order->order_number,
                 'gross_amount' => $totalAmount,
@@ -641,36 +633,27 @@ class PasarDaerahController extends Controller
             ]
         ];
 
-        if ($paymentType === 'bank_transfer') {
-            $params['bank_transfer'] = ['bank' => $bank];
-        } else if ($paymentType === 'echannel') {
-            $params['echannel'] = ['bill_info1' => 'Pembayaran:', 'bill_info2' => 'Pasar Daerah'];
+        // Popup dibatasi ke kanal yang sudah dipilih warga di halaman checkout,
+        // supaya mereka tidak perlu memilih bank dua kali. Metode yang belum ada
+        // di peta membiarkan Snap menampilkan seluruh kanal aktif.
+        $kanal = \App\Support\PenyediaPembayaran::kanalSnap($paymentMethod);
+        if ($kanal) {
+            $params['enabled_payments'] = [$kanal];
         }
 
         try {
-            $coreResponse = \Midtrans\CoreApi::charge($params);
-            
+            $snap = \Midtrans\Snap::createTransaction($params);
+
             $order->payment_channel = $paymentMethod;
+            $order->snap_token = $snap->token;
             $order->payment_expiry_time = now()->addDay();
-            
-            if (isset($coreResponse->va_numbers[0]->va_number)) {
-                $order->payment_va_number = $coreResponse->va_numbers[0]->va_number;
-            } else if (isset($coreResponse->biller_code) && isset($coreResponse->bill_key)) {
-                $order->payment_va_number = $coreResponse->biller_code . '-' . $coreResponse->bill_key;
-            } else if (isset($coreResponse->actions)) {
-                foreach ($coreResponse->actions as $action) {
-                    if ($action->name === 'generate-qr-code') {
-                        $order->payment_qr_url = $action->url;
-                    }
-                }
-            }
             $order->save();
         } catch (\Exception $e) {
             // JANGAN mengarang nomor virtual account di sini. Kode lama mengisinya
             // dengan rand() dan menampilkannya ke warga seolah tagihan sungguhan -
             // uang yang ditransfer ke sana tidak sampai ke mana pun dan tidak ada
             // callback yang akan datang. Lebih baik pesanannya gagal terang-terangan.
-            \Log::error('Midtrans Error (pasar): ' . $e->getMessage(), [
+            \Illuminate\Support\Facades\Log::error('Midtrans Error (pasar): ' . $e->getMessage(), [
                 'order_number' => $order->order_number,
                 'region_id'    => $order->region_id,
             ]);

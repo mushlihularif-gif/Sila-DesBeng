@@ -16,6 +16,21 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Wilayah HARUS lebih dulu: pembuatan akun di bawah mencari kecamatan
+        // dan desa untuk mengisi region_id, dan dropdown pendaftaran warga
+        // sepenuhnya bergantung pada tabel ini.
+        //
+        // Sebelumnya kedua seeder ini tidak pernah dipanggil dari sini,
+        // sehingga `php artisan db:seed` hanya membuat empat akun dan nol
+        // wilayah — 136 desa serta 19 kelurahan di VillageSeeder tidak pernah
+        // masuk database, dan warga tidak bisa memilih desanya saat mendaftar.
+        //
+        // Keduanya memakai firstOrCreate, jadi aman dijalankan berulang kali.
+        $this->call([
+            RegionSeeder::class,
+            VillageSeeder::class,
+        ]);
+
         // Create Admin User
         User::firstOrCreate(
             ['email' => 'admin@isewa.com'],
@@ -84,9 +99,9 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        echo "\n✅ Admin created: admin@isewa.com / admin123";
-        echo "\n✅ Admin Kecamatan created: adminkecamatan@isewa.com / password123";
-        echo "\n✅ Admin Desa created: admindesa@isewa.com / password123";
-        echo "\n✅ User created: user@test.com / password123\n\n";
+        echo "\n[INFO] Admin created: admin@isewa.com / admin123";
+        echo "\n[INFO] Admin Kecamatan created: adminkecamatan@isewa.com / password123";
+        echo "\n[INFO] Admin Desa created: admindesa@isewa.com / password123";
+        echo "\n[INFO] User created: user@test.com / password123\n\n";
     }
 }

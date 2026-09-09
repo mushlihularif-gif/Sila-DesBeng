@@ -1241,7 +1241,7 @@
                                                     $targetUrl = route('admin.aktivitas.permintaan-pengajuan.index');
                                                 }
                                             @endphp
-                                            <a href="{{ $targetUrl }}" class="dropdown-item notif-item {{ !$notif->is_read ? 'is-unread category-'.$cat : '' }} gap-3" data-category="{{ $cat }}" data-id="{{ $notif->id }}" data-unread="{{ !$notif->is_read ? '1' : '0' }}" data-read-url="{{ route('admin.notifications.mark-as-read', $notif->id) }}">
+                                            <a href="{{ $targetUrl }}" class="dropdown-item notif-item {{ !$notif->is_read ? 'is-unread category-'.$cat : '' }} gap-3" data-category="{{ $cat }}" data-id="{{ $notif->id }}" data-unread="{{ !$notif->is_read ? '1' : '0' }}">
                                                 <div class="flex-shrink-0 mt-1">
                                                     <div class="rounded-circle d-flex align-items-center justify-content-center shadow-xs {{ !$notif->is_read ? 'bg-label-'.$color : 'bg-light' }}" style="width: 40px; height: 40px;">
                                                         <i class="bx {{ $icon }} fs-5 {{ !$notif->is_read ? 'text-'.$color : 'text-secondary' }}"></i>

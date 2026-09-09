@@ -30,8 +30,8 @@ class Laporan extends Model
         'escalated_to_rw_at',
         'catatan_admin',
         'admin_id',
-        'region_id',          // ✅ Ditambahkan: relasi ke wilayah pelapor
-        'tujuan_laporan',     // ✅ Ditambahkan: target awal laporan (rt/rw/desa)
+        'region_id',          // Ditambahkan: relasi ke wilayah pelapor
+        'tujuan_laporan',     // Ditambahkan: target awal laporan (rt/rw/desa)
         'latitude',
         'longitude',
     ];

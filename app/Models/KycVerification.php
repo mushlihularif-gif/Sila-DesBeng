@@ -39,7 +39,7 @@ class KycVerification extends Model
     {
         parent::boot();
 
-        // ✅ BLIND INDEXING: Buat hash dari data sensitif sebelum disimpan
+        // BLIND INDEXING: Buat hash dari data sensitif sebelum disimpan
         static::saving(function ($model) {
             // Hashing NIK
             if ($model->isDirty('nik_from_ocr') && !empty($model->nik_from_ocr)) {

@@ -41,9 +41,9 @@
                         <thead>
                             <tr>
                                 <th class="text-nowrap">Type</th>
-                                <th class="text-nowrap text-center">✉️ Email</th>
-                                <th class="text-nowrap text-center">🖥 Browser</th>
-                                <th class="text-nowrap text-center">👩🏻‍💻 App</th>
+                                <th class="text-nowrap text-center"><i class="bx bx-envelope me-1"></i>Email</th>
+                                <th class="text-nowrap text-center"><i class="bx bx-desktop me-1"></i>Browser</th>
+                                <th class="text-nowrap text-center"><i class="bx bx-mobile-alt me-1"></i>App</th>
                             </tr>
                         </thead>
                         <tbody>

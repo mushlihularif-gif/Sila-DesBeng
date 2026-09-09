@@ -18,22 +18,6 @@
         <form action="{{ route('auth.verify-otp') }}" method="POST" id="otp-form" class="space-y-6">
             @csrf
 
-            @if(session('trigger_open_otp_tab'))
-                <script>
-                    document.addEventListener('DOMContentLoaded', function() {
-                        if (typeof Swal !== 'undefined') {
-                            Swal.fire({
-                                title: 'SANDBOX OTP (Demo)',
-                                html: 'Kode OTP Anda adalah: <b>{{ session("otp_demo_sandbox_code") }}</b><br><br><small><i>Ini muncul karena mode email asli dimatikan untuk mencegah spam.</i></small>',
-                                icon: 'info',
-                                confirmButtonText: 'Tutup'
-                            });
-                        } else {
-                            showSiladesBengToast('info', 'Kode OTP (Demo)', "SANDBOX OTP (Demo)<br><br>Kode OTP Anda adalah: {{ session('otp_demo_sandbox_code') }}", 20000);
-                        }
-                    });
-                </script>
-            @endif
 
             @if(session('error'))
                 <div class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-4 text-sm text-center font-medium">

@@ -132,7 +132,7 @@ class AuthController extends Controller
 
         // Kirim OTP via Email
         try {
-            Mail::to($request->email)->send(new OtpMail($otpCode));
+            Mail::to($request->email)->queue(new OtpMail($otpCode));
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error("Gagal kirim email OTP API: " . $e->getMessage());
         }
@@ -393,7 +393,7 @@ class AuthController extends Controller
         $user->save();
 
         if ($request->otp_method === 'email') {
-            Mail::to($user->email)->send(new OtpMail($otpCode));
+            Mail::to($user->email)->queue(new OtpMail($otpCode));
         } elseif ($request->otp_method === 'whatsapp') {
             $fonnte = new FonnteService();
             $fonnte->sendOtp($user->phone, $otpCode);

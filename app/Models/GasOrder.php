@@ -27,7 +27,7 @@ class GasOrder extends Model
             }
         });
 
-        // ✅ BLIND INDEXING: Buat hash dari nomor_kk sebelum disimpan
+        // BLIND INDEXING: Buat hash dari nomor_kk sebelum disimpan
         static::saving(function ($model) {
             if ($model->isDirty('nomor_kk') && !empty($model->nomor_kk)) {
                 $plainKk = $model->nomor_kk;

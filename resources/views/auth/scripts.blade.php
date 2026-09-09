@@ -65,7 +65,7 @@
             }, 300); // Sesuaikan dengan duration-300
         }
 
-        // ⭐ FIX: SMOOTH MODAL SWITCH (Tanpa Hilang)
+        // FIX: SMOOTH MODAL SWITCH (Tanpa Hilang)
         function switchModal(fromModal, toModal) {
             fromModal.classList.remove('scale-100', 'opacity-100');
             fromModal.classList.add('scale-95', 'opacity-0');
@@ -87,7 +87,7 @@
                 errorSpan.textContent = message;
                 errorSpan.classList.remove('hidden');
 
-                // ⭐ FIX: Auto-hide setelah 3 detik
+                // FIX: Auto-hide setelah 3 detik
                 setTimeout(() => {
                     errorSpan.classList.add('opacity-0');
                     setTimeout(() => {
@@ -163,7 +163,7 @@
         // Session flash messages sudah ditangani oleh AlpineJS global toast di layouts/app.blade.php
         // Jadi kita tidak perlu memanggil showToast() lagi di sini.
 
-        // ⭐ INJECT SERVER-SIDE VALIDATION ERRORS
+        // INJECT SERVER-SIDE VALIDATION ERRORS
         @if($errors->any())
             const serverErrors = @json($errors->toArray());
             
@@ -309,7 +309,7 @@
         });
 
         // ========================================
-        // TAB SWITCHING - ⭐ SMOOTH!
+        // TAB SWITCHING - SMOOTH!
         // ========================================
         document.getElementById('tab-login')?.addEventListener('click', () => switchModal(modalRegister,
             modalLogin));

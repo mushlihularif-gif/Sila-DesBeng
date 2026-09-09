@@ -654,7 +654,7 @@
                             <span class="flex-1 h-px bg-gray-200"></span>
                             <span class="text-[10px] text-gray-400">Terverifikasi otomatis</span>
                         </div>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
                         <!-- Bank BCA -->
                         <button type="button" 
                                 onclick="setPaymentMethod('bank_transfer_bca')"
@@ -698,6 +698,18 @@
                                 <div class="h-10 flex items-center justify-center"><img src="{{ asset('Admin/img/banks/bni.png') }}" alt="BNI" class="h-9 max-w-full object-contain transform group-hover:scale-110 transition-transform"></div>
                             </div>
                         </button>
+
+                        <!-- Bank BSI -->
+                        <button type="button"
+                                onclick="setPaymentMethod('bank_transfer_bsi')"
+                                id="btn-bank_transfer_bsi"
+                                class="payment-method-btn group relative py-4 px-2 rounded-2xl font-bold transition-all duration-300 bg-white shadow-sm border border-gray-100 hover:border-teal-300 hover:shadow-md hover:-translate-y-1">
+                            <div class="absolute inset-0 bg-gradient-to-br from-teal-500/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                            <div class="flex flex-col items-center justify-center gap-2 text-center h-full relative z-10">
+                                <div class="h-10 flex items-center justify-center"><img src="{{ asset('Admin/img/banks/bsi.png') }}" alt="BSI" class="h-9 max-w-full object-contain transform group-hover:scale-110 transition-transform"></div>
+                            </div>
+                        </button>
+
 
                         </div>
                     </div>
@@ -1198,8 +1210,36 @@
                             }).then(() => {
                                 window.location.href = '{{ route("user.activity") }}';
                             });
+                        } else if (data.gateway_gagal) {
+                            // Gateway menolak. Pesanannya tetap tersimpan, jadi warga
+                            // diberi tahu apa adanya dan diarahkan ke Aktivitas untuk
+                            // mengganti metode — bukan disodori nomor VA karangan.
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Pembayaran Otomatis Bermasalah',
+                                text: data.message,
+                                confirmButtonColor: '#3b82f6',
+                            }).then(() => {
+                                window.location.href = '{{ route("user.activity") }}';
+                            });
+                        } else if (data.snap_token && window.snap) {
+                            // Popup Midtrans terbuka dengan kanal yang sudah dipilih
+                            // warga di halaman ini. Semua jalur keluar berakhir di
+                            // halaman instruksi supaya statusnya selalu terlihat —
+                            // termasuk saat popup ditutup tanpa membayar.
+                            const keHalamanBayar = () => {
+                                window.location.href = '/gas/payment/' + data.order_id;
+                            };
+
+                            window.snap.pay(data.snap_token, {
+                                onSuccess: keHalamanBayar,
+                                onPending: keHalamanBayar,
+                                onError: keHalamanBayar,
+                                onClose: keHalamanBayar,
+                            });
                         } else {
-                            // Redirect to beautiful payment instructions page
+                            // snap.js gagal dimuat (jaringan warga, pemblokir iklan).
+                            // Halaman instruksi tetap menampilkan status pesanannya.
                             window.location.href = '/gas/payment/' + data.order_id;
                         }
                     } else {

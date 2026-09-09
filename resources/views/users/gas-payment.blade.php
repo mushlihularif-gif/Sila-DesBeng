@@ -32,7 +32,7 @@
                     <h1 class="text-3xl font-bold bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent mb-2">Selesaikan Pembayaran Anda</h1>
                     <p class="text-gray-700 font-medium">Pesanan <span class="font-bold text-[#115789]">#{{ $order->order_number }}</span> telah dibuat.</p>
                 @else
-                    <h1 class="text-3xl font-bold text-green-500 mb-2">Pembayaran Berhasil! 🎉</h1>
+                    <h1 class="text-3xl font-bold text-green-500 mb-2 flex items-center justify-center gap-2"><i class="bx bx-check-circle text-4xl"></i> Pembayaran Berhasil!</h1>
                     <p class="text-gray-700 font-medium">Pesanan <span class="font-bold text-green-600">#{{ $order->order_number }}</span> telah lunas dan sedang diproses.</p>
                 @endif
             </div>
@@ -86,13 +86,14 @@
                         <h3 class="font-bold text-xl text-gray-800 mb-2">Pembayaran Tunai</h3>
                         <p class="text-gray-600">Silakan lakukan pembayaran langsung ke admin/petugas saat menerima/mengambil gas.</p>
                     </div>
-                    @elseif(in_array($order->payment_channel, ['bank_transfer_bca', 'bank_transfer_bri', 'bank_transfer_mandiri', 'bank_transfer_bni']))
+                    @elseif(in_array($order->payment_channel, ['bank_transfer_bca', 'bank_transfer_bri', 'bank_transfer_mandiri', 'bank_transfer_bni', 'bank_transfer_bsi']))
                     @php
                         $bankLogos = [
                             'bank_transfer_bca' => ['name' => 'BCA', 'logo' => 'Admin/img/banks/bca.png', 'color' => 'text-blue-600'],
                             'bank_transfer_bri' => ['name' => 'BRI', 'logo' => 'Admin/img/banks/bri.png', 'color' => 'text-orange-600'],
                             'bank_transfer_mandiri' => ['name' => 'MANDIRI', 'logo' => 'Admin/img/banks/mandiri.png', 'color' => 'text-yellow-600'],
                             'bank_transfer_bni' => ['name' => 'BNI', 'logo' => 'Admin/img/banks/bni.png', 'color' => 'text-orange-500'],
+                            'bank_transfer_bsi' => ['name' => 'BSI', 'logo' => 'Admin/img/banks/bsi.png', 'color' => 'text-teal-600'],
                             'qris' => ['name' => 'QRIS', 'logo' => 'Admin/img/banks/qris.svg', 'color' => 'text-red-500'],
                         ];
                         $bank = $bankLogos[$order->payment_channel] ?? ['name' => strtoupper(str_replace('bank_transfer_', '', $order->payment_channel)), 'logo' => null, 'color' => 'text-gray-800'];
@@ -109,6 +110,38 @@
                         </div>
                     </div>
 
+                    {{-- Pembayaran lewat Snap tidak menyimpan nomor VA di sisi kita —
+                         nomornya diterbitkan dan ditampilkan di dalam popup Midtrans.
+                         Jadi selama belum ada nomornya, yang disodorkan adalah tombol
+                         untuk membuka (atau membuka ulang) popup itu. --}}
+                    @if(! $order->payment_va_number && $order->snap_token)
+                    <div class="bg-blue-50 rounded-2xl p-6 border border-blue-200 mb-8 text-center">
+                        <p class="text-sm font-semibold text-blue-900 mb-1">Pembayaran belum diselesaikan</p>
+                        <p class="text-xs text-blue-700 mb-4">Tekan tombol di bawah untuk membuka kembali halaman pembayaran.</p>
+                        <button type="button" id="btn-buka-snap"
+                                class="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition-colors">
+                            Bayar Sekarang
+                        </button>
+                    </div>
+
+                    @push('scripts')
+                    <script>
+                        document.getElementById('btn-buka-snap')?.addEventListener('click', function () {
+                            if (!window.snap) {
+                                alert('Layanan pembayaran belum siap dimuat. Periksa koneksi Anda lalu muat ulang halaman.');
+                                return;
+                            }
+                            const muatUlang = () => window.location.reload();
+                            window.snap.pay(@json($order->snap_token), {
+                                onSuccess: muatUlang,
+                                onPending: muatUlang,
+                                onError: muatUlang,
+                                onClose: muatUlang,
+                            });
+                        });
+                    </script>
+                    @endpush
+                    @else
                     <div class="bg-gray-50 rounded-2xl p-6 border border-gray-200 mb-8 relative group hover:border-blue-300 transition-colors cursor-pointer" onclick="copyVA()">
                         <p class="text-center text-sm font-semibold text-gray-500 mb-3">Nomor Virtual Account</p>
                         <div class="flex items-center justify-center gap-4">
@@ -118,6 +151,7 @@
                             </button>
                         </div>
                     </div>
+                    @endif
 
                     <div class="mb-8 px-2">
                         <h4 class="font-bold text-gray-800 mb-3 text-sm">Cara Pembayaran:</h4>
@@ -150,7 +184,9 @@
                             <div class="relative z-10 bg-white p-2 rounded-xl">
                                 @if($order->payment_qr_url)
                                     @if(str_starts_with($order->payment_qr_url, 'http'))
-                                        <img src="{{ $order->payment_qr_url }}" alt="QR Code" class="w-full h-auto aspect-square object-contain" onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2Y4ZmFmYyIvPjxwYXRoIGQ9Ik0yMCAyMGg2MHY2MEgyMHoiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2NiZDVlMSIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtZGFzaGFycmF5PSI4IDQiLz48dGV4dCB4PSI1MCIgeT0iNTEiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXNpemU9IjgiIGZpbGw9IiM2NDc0OGIiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiPklNQUdFIEVSUk9SPC90ZXh0Pjwvc3ZnPg==';">
+                                        {{-- Lewat proxy: alamat QR Midtrans menuntut autentikasi Basic dengan
+                                             server key, jadi browser tidak bisa memuatnya langsung. --}}
+                                        <img src="{{ route('user.gas.payment.qr', $order->id) }}" alt="QR Code" class="w-full h-auto aspect-square object-contain" onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2Y4ZmFmYyIvPjxwYXRoIGQ9Ik0yMCAyMGg2MHY2MEgyMHoiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2NiZDVlMSIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtZGFzaGFycmF5PSI4IDQiLz48dGV4dCB4PSI1MCIgeT0iNTEiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXNpemU9IjgiIGZpbGw9IiM2NDc0OGIiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiPklNQUdFIEVSUk9SPC90ZXh0Pjwvc3ZnPg==';">
                                     @else
                                         <!-- Dummy QR Code SVG -->
                                         <svg class="w-full h-auto aspect-square text-gray-800" viewBox="0 0 24 24" fill="currentColor">
@@ -158,14 +194,116 @@
                                         </svg>
                                     @endif
                                 @else
-                                <div class="w-full aspect-square bg-gray-50 rounded-xl flex items-center justify-center text-gray-400">
-                                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                {{-- QR belum ada. Midtrans menerbitkannya saat warga memilih
+                                     kanal di dalam popup Snap, lalu mengirim notifikasi
+                                     'pending' ke server kita — dan barulah tersimpan. Menutup
+                                     popup lebih cepat daripada notifikasi itu datang adalah hal
+                                     biasa, jadi halaman ini menunggu sendiri alih-alih
+                                     menampilkan kotak kosong tanpa penjelasan. --}}
+                                <div id="qr-menunggu" class="w-full aspect-square bg-gray-50 rounded-xl flex flex-col items-center justify-center text-gray-500 gap-3 px-4 text-center">
+                                    <svg class="w-8 h-8 animate-spin text-blue-500" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                    </svg>
+                                    <p class="text-sm font-semibold">Menyiapkan kode QR…</p>
+                                    <p class="text-xs leading-relaxed">Halaman ini memuat ulang sendiri. Kalau kode belum juga muncul, tekan tombol di bawah untuk membuka kembali halaman pembayaran.</p>
                                 </div>
+
+                                @push('scripts')
+                                <script>
+                                    // Tanya Midtrans langsung, jangan menunggu notifikasi.
+                                    // Untuk QRIS, notifikasi 'pending' sering baru dikirim
+                                    // setelah ada pembayaran — menunggunya membuat halaman
+                                    // berkedip tanpa henti tanpa pernah mendapat QR.
+                                    (function () {
+                                        const kotak = document.getElementById('qr-menunggu');
+                                        if (!kotak) return;
+
+                                        const alamat = @json(route('user.gas.payment.sinkron', $order->id));
+                                        let percobaan = 0;
+
+                                        function tampilkanQr(url) {
+                                            const gambar = document.createElement('img');
+                                            gambar.src = url;
+                                            gambar.alt = 'Kode QRIS';
+                                            gambar.className = 'w-full h-auto aspect-square object-contain';
+                                            kotak.replaceWith(gambar);
+                                        }
+
+                                        function menyerah() {
+                                            const judul = kotak.querySelector('p.text-sm');
+                                            const putar = kotak.querySelector('svg');
+                                            if (judul) judul.textContent = 'Kode QR belum tersedia';
+                                            if (putar) putar.classList.remove('animate-spin');
+                                        }
+
+                                        async function periksa() {
+                                            percobaan++;
+
+                                            try {
+                                                const jawab = await fetch(alamat, {
+                                                    headers: { 'Accept': 'application/json' },
+                                                });
+                                                const data = await jawab.json();
+
+                                                if (data.qr_url) {
+                                                    tampilkanQr(data.qr_url);
+                                                    return;
+                                                }
+
+                                                // Sudah dibayar saat popup masih terbuka.
+                                                if (data.status && data.status !== 'pending') {
+                                                    window.location.reload();
+                                                    return;
+                                                }
+                                            } catch (e) {
+                                                // Jaringan warga putus sesaat; coba lagi.
+                                            }
+
+                                            // 20 kali x 3 detik = satu menit. Setelah itu berhenti
+                                            // supaya tidak menembak Midtrans selamanya.
+                                            if (percobaan >= 20) {
+                                                menyerah();
+                                                return;
+                                            }
+
+                                            setTimeout(periksa, 3000);
+                                        }
+
+                                        periksa();
+                                    })();
+                                </script>
+                                @endpush
                                 @endif
                             </div>
                         </div>
                         
                         <p class="text-sm text-gray-500 max-w-xs mx-auto leading-relaxed">Buka aplikasi E-Wallet Anda (GoPay, OVO, Dana, ShopeePay, dll) dan scan kode QRIS di atas untuk membayar.</p>
+
+                        @if($order->snap_token)
+                        <button type="button" id="btn-buka-snap-qris"
+                                class="mt-5 w-full max-w-xs mx-auto block py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition-colors">
+                            Buka Halaman Pembayaran
+                        </button>
+
+                        @push('scripts')
+                        <script>
+                            document.getElementById('btn-buka-snap-qris')?.addEventListener('click', function () {
+                                if (!window.snap) {
+                                    alert('Layanan pembayaran belum siap dimuat. Periksa koneksi Anda lalu muat ulang halaman.');
+                                    return;
+                                }
+                                const muatUlang = () => window.location.reload();
+                                window.snap.pay(@json($order->snap_token), {
+                                    onSuccess: muatUlang,
+                                    onPending: muatUlang,
+                                    onError: muatUlang,
+                                    onClose: muatUlang,
+                                });
+                            });
+                        </script>
+                        @endpush
+                        @endif
                     </div>
                     @endif
                 </div>

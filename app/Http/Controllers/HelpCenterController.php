@@ -74,7 +74,7 @@ class HelpCenterController extends Controller
         $this->notifyAdmins($ticket);
 
         return redirect()->route('help-center.show', $ticket->id)
-            ->with('success', '✅ Tiket berhasil dibuat! Admin akan segera merespons.');
+            ->with('success', 'Tiket berhasil dibuat! Admin akan segera merespons.');
     }
 
     /**
@@ -105,7 +105,7 @@ class HelpCenterController extends Controller
 
         $ticket->update(['status' => 'ditutup']);
 
-        return back()->with('success', '✅ Tiket berhasil ditutup!');
+        return back()->with('success', 'Tiket berhasil ditutup!');
     }
 
     /**
@@ -116,7 +116,7 @@ class HelpCenterController extends Controller
         return [
             [
                 'category' => 'Umum',
-                'icon' => '❓',
+                'icon' => 'fas fa-question-circle',
                 'items' => [
                     [
                         'question' => 'Bagaimana cara membuat laporan?',
@@ -134,7 +134,7 @@ class HelpCenterController extends Controller
             ],
             [
                 'category' => 'Akun',
-                'icon' => '👤',
+                'icon' => 'fas fa-user-cog',
                 'items' => [
                     [
                         'question' => 'Lupa password, bagaimana?',
@@ -152,7 +152,7 @@ class HelpCenterController extends Controller
             ],
             [
                 'category' => 'Notifikasi',
-                'icon' => '🔔',
+                'icon' => 'fas fa-bell',
                 'items' => [
                     [
                         'question' => 'Kenapa tidak mendapat notifikasi?',

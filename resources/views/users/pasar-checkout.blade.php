@@ -786,7 +786,26 @@
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                window.location.href = `/pasar-daerah/payment/${data.order_id}`;
+                const keHalamanBayar = () => {
+                    window.location.href = `/pasar-daerah/payment/${data.order_id}`;
+                };
+
+                // Popup Midtrans hanya untuk pembayaran gateway. Tunai dan
+                // transfer manual tidak punya snap_token, jadi langsung ke
+                // halaman pembayaran seperti sebelumnya.
+                if (data.snap_token && window.snap) {
+                    // Semua jalur keluar berakhir di halaman pembayaran supaya
+                    // statusnya selalu terlihat — termasuk saat popup ditutup
+                    // tanpa membayar.
+                    window.snap.pay(data.snap_token, {
+                        onSuccess: keHalamanBayar,
+                        onPending: keHalamanBayar,
+                        onError: keHalamanBayar,
+                        onClose: keHalamanBayar,
+                    });
+                } else {
+                    keHalamanBayar();
+                }
             } else {
                 showSiladesBengToast('error', 'Gagal', data.message || 'Terjadi kesalahan.');
                 btn.disabled = false;

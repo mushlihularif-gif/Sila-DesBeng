@@ -692,6 +692,7 @@
             { id: 'bank_transfer_mandiri', name: 'Mandiri', img: '{{ asset('Admin/img/banks/mandiri.png') }}' },
             { id: 'bank_transfer_bni', name: 'BNI', img: '{{ asset('Admin/img/banks/bni.png') }}' },
             { id: 'bank_transfer_bri', name: 'BRI', img: '{{ asset('Admin/img/banks/bri.png') }}' },
+            { id: 'bank_transfer_bsi', name: 'BSI', img: '{{ asset('Admin/img/banks/bsi.png') }}' },
             { id: 'qris', name: 'QRIS (All E-Wallet)', img: '{{ asset('Admin/img/banks/qris.svg') }}', fallback: '{{ asset('assets/img/payment_logos/dana.png') }}' }
         ];
 

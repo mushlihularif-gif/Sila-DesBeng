@@ -42,7 +42,7 @@ class NotificationController extends Controller
         }
 
         return redirect()->route('notifications.index')
-            ->with('success', '✅ Notifikasi telah dibaca!');
+            ->with('success', 'Notifikasi telah dibaca!');
     }
 
     // Mark all as read
@@ -55,7 +55,7 @@ class NotificationController extends Controller
                 'read_at' => now()
             ]);
 
-        return back()->with('success', '✅ Semua notifikasi ditandai sudah dibaca!');
+        return back()->with('success', 'Semua notifikasi ditandai sudah dibaca!');
     }
 
     // Get unread notifications (dropdown)
@@ -82,7 +82,7 @@ class NotificationController extends Controller
 
         $notification->delete();
 
-        return back()->with('success', '✅ Notifikasi berhasil dihapus!');
+        return back()->with('success', 'Notifikasi berhasil dihapus!');
     }
 
     // Clear all read notifications
@@ -92,6 +92,6 @@ class NotificationController extends Controller
             ->where('is_read', true)
             ->delete();
 
-        return back()->with('success', '✅ Notifikasi yang sudah dibaca berhasil dihapus!');
+        return back()->with('success', 'Notifikasi yang sudah dibaca berhasil dihapus!');
     }
 }
