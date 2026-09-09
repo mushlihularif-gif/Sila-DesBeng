@@ -160,7 +160,7 @@
                 
                 {{-- SiladesBeng Logo below title --}}
                 <div class="flex justify-center mb-8">
-                    <img src="{{ asset('User/img/logo/iSewaT.png') }}" alt="SiladesBeng Logo" class="h-32 w-auto object-contain">
+                    <img src="{{ asset('User/img/logo/iSewa.png') }}" alt="SiladesBeng Logo" class="h-32 w-auto object-contain">
                 </div>
 
                 <p class="text-lg font-semibold text-gray-800 mb-2">Kata Sandi Telah Diperbarui</p>

@@ -393,6 +393,22 @@ class PasarDaerahApiController extends Controller
      */
     public function checkout(Request $request)
     {
+        $user = $request->user();
+
+        // KYC Validation Check
+        $status = strtolower(trim($user->verification_status ?? ''));
+        $kycStatus = strtolower(trim($user->kyc_status ?? ''));
+        $isVerified = in_array($status, ['verified', 'approved']) 
+                   || in_array($kycStatus, ['verified', 'approved'])
+                   || $user->is_verified == true;
+
+        if (!$isVerified) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Harap verifikasi identitas (KYC) terlebih dahulu sebelum melakukan pesanan.'
+            ], 403);
+        }
+
         $request->validate([
             'delivery_address' => 'nullable|string',
             'notes' => 'nullable|string',
@@ -400,8 +416,6 @@ class PasarDaerahApiController extends Controller
             // Default to COD if not specified
             'payment_method' => 'nullable|string'
         ]);
-
-        $user = $request->user();
         $cartItems = PasarCart::with('produk')->where('user_id', $user->id)->get();
 
         if ($cartItems->isEmpty()) {

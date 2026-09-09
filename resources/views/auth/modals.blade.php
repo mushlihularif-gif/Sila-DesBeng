@@ -476,7 +476,7 @@
                 <h2 class="text-2xl font-bold text-gray-900 mb-6">Selamat Datang</h2>
 
                 <div class="flex justify-center mb-6">
-                    <img src="{{ asset('User/img/logo/iSewaT.png') }}" alt="SiladesBeng Logo"
+                    <img src="{{ asset('User/img/logo/iSewa.png') }}" alt="SiladesBeng Logo"
                         class="h-32">
                 </div>
 
@@ -506,11 +506,12 @@
             </div>
 
             <div class="flex justify-center mb-8">
-                <img src="{{ asset('User/img/logo/iSewaT.png') }}" alt="SiladesBeng Logo" class="h-32">
+                <img src="{{ asset('User/img/logo/iSewa.png') }}" alt="SiladesBeng Logo" class="h-32">
             </div>
 
             <form action="{{ route('auth.forgot-password') }}" method="POST" class="space-y-6">
                 @csrf
+                <input type="hidden" name="otp_method" value="email">
                 <div>
                     <input type="text" name="email_or_phone" placeholder="Email / Nomor Telepon" required
                         class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition">
