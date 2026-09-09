@@ -183,6 +183,9 @@
                             <!-- The QR Code -->
                             <div class="relative z-10 bg-white p-2 rounded-xl">
                                 @if($order->payment_qr_url)
+                                    @push('scripts')
+                                    <script>sessionStorage.removeItem('qr-tunggu-{{ $order->id }}');</script>
+                                    @endpush
                                     @if(str_starts_with($order->payment_qr_url, 'http'))
                                         <img src="{{ $order->payment_qr_url }}" alt="QR Code" class="w-full h-auto aspect-square object-contain" onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2Y4ZmFmYyIvPjxwYXRoIGQ9Ik0yMCAyMGg2MHY2MEgyMHoiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2NiZDVlMSIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtZGFzaGFycmF5PSI4IDQiLz48dGV4dCB4PSI1MCIgeT0iNTEiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXNpemU9IjgiIGZpbGw9IiM2NDc0OGIiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiPklNQUdFIEVSUk9SPC90ZXh0Pjwvc3ZnPg==';">
                                     @else
@@ -192,14 +195,74 @@
                                         </svg>
                                     @endif
                                 @else
-                                <div class="w-full aspect-square bg-gray-50 rounded-xl flex items-center justify-center text-gray-400">
-                                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                {{-- QR belum ada. Midtrans menerbitkannya saat warga memilih
+                                     kanal di dalam popup Snap, lalu mengirim notifikasi
+                                     'pending' ke server kita — dan barulah tersimpan. Menutup
+                                     popup lebih cepat daripada notifikasi itu datang adalah hal
+                                     biasa, jadi halaman ini menunggu sendiri alih-alih
+                                     menampilkan kotak kosong tanpa penjelasan. --}}
+                                <div id="qr-menunggu" class="w-full aspect-square bg-gray-50 rounded-xl flex flex-col items-center justify-center text-gray-500 gap-3 px-4 text-center">
+                                    <svg class="w-8 h-8 animate-spin text-blue-500" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                    </svg>
+                                    <p class="text-sm font-semibold">Menyiapkan kode QR…</p>
+                                    <p class="text-xs leading-relaxed">Halaman ini memuat ulang sendiri. Kalau kode belum juga muncul, tekan tombol di bawah untuk membuka kembali halaman pembayaran.</p>
                                 </div>
+
+                                @push('scripts')
+                                <script>
+                                    // Berhenti setelah satu menit supaya halaman tidak memuat
+                                    // ulang selamanya kalau notifikasinya memang tidak datang.
+                                    (function () {
+                                        const kunci = 'qr-tunggu-{{ $order->id }}';
+                                        const ke = parseInt(sessionStorage.getItem(kunci) || '0', 10);
+
+                                        if (ke >= 15) {
+                                            sessionStorage.removeItem(kunci);
+                                            const info = document.getElementById('qr-menunggu');
+                                            if (info) {
+                                                info.querySelector('p.text-sm').textContent = 'Kode QR belum tersedia';
+                                                info.querySelector('svg').classList.remove('animate-spin');
+                                            }
+                                            return;
+                                        }
+
+                                        sessionStorage.setItem(kunci, String(ke + 1));
+                                        setTimeout(() => window.location.reload(), 4000);
+                                    })();
+                                </script>
+                                @endpush
                                 @endif
                             </div>
                         </div>
                         
                         <p class="text-sm text-gray-500 max-w-xs mx-auto leading-relaxed">Buka aplikasi E-Wallet Anda (GoPay, OVO, Dana, ShopeePay, dll) dan scan kode QRIS di atas untuk membayar.</p>
+
+                        @if($order->snap_token)
+                        <button type="button" id="btn-buka-snap-qris"
+                                class="mt-5 w-full max-w-xs mx-auto block py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition-colors">
+                            Buka Halaman Pembayaran
+                        </button>
+
+                        @push('scripts')
+                        <script>
+                            document.getElementById('btn-buka-snap-qris')?.addEventListener('click', function () {
+                                if (!window.snap) {
+                                    alert('Layanan pembayaran belum siap dimuat. Periksa koneksi Anda lalu muat ulang halaman.');
+                                    return;
+                                }
+                                const muatUlang = () => window.location.reload();
+                                window.snap.pay(@json($order->snap_token), {
+                                    onSuccess: muatUlang,
+                                    onPending: muatUlang,
+                                    onError: muatUlang,
+                                    onClose: muatUlang,
+                                });
+                            });
+                        </script>
+                        @endpush
+                        @endif
                     </div>
                     @endif
                 </div>
