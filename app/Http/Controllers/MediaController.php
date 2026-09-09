@@ -23,15 +23,17 @@ class MediaController extends Controller
         }
 
         $path = 'profiles/' . $filename;
-        if (!Storage::disk('local')->exists($path)) {
-            $fallback = public_path('Admin/img/avatars/pria.png');
-            if (file_exists($fallback)) {
-                return response()->file($fallback, ['Content-Type' => 'image/png']);
-            }
-            abort(404);
+        $resolvedPath = $this->resolveProfilePath($path);
+
+        if ($resolvedPath && file_exists($resolvedPath)) {
+            return response()->file($resolvedPath);
         }
-        $fullPath = Storage::disk('local')->path($path);
-        return response()->file($fullPath);
+
+        $fallback = public_path('Admin/img/avatars/pria.png');
+        if (file_exists($fallback)) {
+            return response()->file($fallback, ['Content-Type' => 'image/png']);
+        }
+        abort(404);
     }
 
     /**
@@ -49,18 +51,40 @@ class MediaController extends Controller
         }
 
         $path = 'profiles/' . $filename;
+        $resolvedPath = $this->resolveProfilePath($path);
 
-        if (!Storage::disk('local')->exists($path)) {
-            $fallback = public_path('Admin/img/avatars/pria.png');
-            if (file_exists($fallback)) {
-                return response()->file($fallback, ['Content-Type' => 'image/png']);
-            }
-            abort(404);
+        if ($resolvedPath && file_exists($resolvedPath)) {
+            return response()->file($resolvedPath);
         }
 
-        $fullPath = Storage::disk('local')->path($path);
+        $fallback = public_path('Admin/img/avatars/pria.png');
+        if (file_exists($fallback)) {
+            return response()->file($fallback, ['Content-Type' => 'image/png']);
+        }
+        abort(404);
+    }
 
-        return response()->file($fullPath);
+    /**
+     * Resolves profile file path across local, public, and legacy storage paths.
+     */
+    private function resolveProfilePath(string $relativePath): ?string
+    {
+        if (Storage::disk('local')->exists($relativePath)) {
+            return Storage::disk('local')->path($relativePath);
+        }
+        if (Storage::disk('public')->exists($relativePath)) {
+            return Storage::disk('public')->path($relativePath);
+        }
+        if (file_exists(storage_path('app/' . $relativePath))) {
+            return storage_path('app/' . $relativePath);
+        }
+        if (file_exists(storage_path('app/private/' . $relativePath))) {
+            return storage_path('app/private/' . $relativePath);
+        }
+        if (file_exists(storage_path('app/public/' . $relativePath))) {
+            return storage_path('app/public/' . $relativePath);
+        }
+        return null;
     }
 
     /**

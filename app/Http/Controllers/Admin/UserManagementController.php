@@ -31,7 +31,7 @@ class UserManagementController extends Controller
         
         $user = auth()->user();
         
-        $usersQuery = User::with('region');
+        $usersQuery = User::with(['region', 'file']);
 
         // Jika admin memiliki region_id (bukan super_admin/admin pusat), filter berdasarkan wilayahnya
         if ($user->region_id && in_array($user->role, ['admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt'])) {

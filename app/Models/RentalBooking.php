@@ -57,9 +57,9 @@ class RentalBooking extends Model
         'cancellation_requested_at',
         'cancellation_status',
         'admin_cancellation_response',
-        'admin_cancellation_response',
         'receipt_path',
         'rental_purpose',
+        'region_id',
     ];
 
     protected $casts = [
@@ -90,6 +90,11 @@ class RentalBooking extends Model
     public function barang()
     {
         return $this->belongsTo(Barang::class);
+    }
+
+    public function region()
+    {
+        return $this->belongsTo(Region::class);
     }
 
     /**

@@ -19,12 +19,13 @@ class GasSalesUserController extends Controller
         $pendingKk = false;
 
         // Validasi: Warga hanya bisa melihat gas dari desa/wilayahnya sendiri
-        if (auth()->check() && auth()->user()->role === 'user') {
+        if (auth()->check() && auth()->user()->role === 'user' && auth()->user()->region_id) {
             $user = auth()->user();
-            // Terbuka secara bawaan. Yang membatasi adalah sakelar "Eksklusif
-            // Warga Lokal" milik tiap wilayah: kalau menyala, hanya warga wilayah
-            // itu dan wilayah di bawahnya yang boleh melihatnya.
-            $query->whereIn('region_id', \App\Models\Region::wilayahLayananTerlihat($user->region_id, 'Penjualan Gas'));
+            $allowed = \App\Models\Region::wilayahLayananTerlihat($user->region_id, 'Penjualan Gas');
+            $query->where(function($sub) use ($allowed) {
+                $sub->whereIn('region_id', $allowed)
+                    ->orWhereNull('region_id');
+            });
             
             // Cek mode krisis gas
             $region = \App\Models\Region::find($user->region_id);

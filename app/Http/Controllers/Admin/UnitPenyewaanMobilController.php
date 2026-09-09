@@ -214,6 +214,7 @@ class UnitPenyewaanMobilController extends Controller
             'opsi_supir_borongan' => $request->opsi_supir_borongan ?? 'Lepas Kunci',
             'is_harian_active' => $request->has('is_harian_active') ? 1 : 0,
             'is_borongan_active' => $request->has('is_borongan_active') ? 1 : 0,
+            'region_id' => auth()->user()->region_id ?? $request->region_id,
         ];
 
         if ($request->hasFile('foto_utama')) { 
@@ -371,6 +372,7 @@ class UnitPenyewaanMobilController extends Controller
             'opsi_supir_borongan' => $request->opsi_supir_borongan ?? 'Lepas Kunci',
             'is_harian_active' => $request->has('is_harian_active') ? 1 : 0,
             'is_borongan_active' => $request->has('is_borongan_active') ? 1 : 0,
+            'region_id' => $mobil->region_id ?? (auth()->user()->region_id ?? null),
         ];
 
         if ($request->hasFile('foto_utama')) {
