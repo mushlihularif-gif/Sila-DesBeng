@@ -108,4 +108,42 @@ class WilayahAdminApiController extends Controller
             ]
         ]);
     }
+
+    public function storeBerita(Request $request)
+    {
+        $user = $request->user();
+
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'type' => 'required|string',
+            'description' => 'required|string',
+            'location' => 'nullable|string|max:255',
+            'event_date' => 'nullable|date',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
+        ]);
+
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('announcements', 'public');
+        }
+
+        $berita = Announcement::create([
+            'title' => $request->title,
+            'type' => $request->type, // e.g. Berita, Kegiatan, Artikel
+            'description' => $request->description,
+            'location' => $request->location,
+            'event_date' => $request->event_date,
+            'image_path' => $imagePath,
+            'region_id' => $user->region_id,
+            'admin_id' => $user->id,
+            'post_category' => 'Berita',
+            'is_active' => true,
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Berita berhasil dipublikasikan!',
+            'data' => $berita
+        ], 201);
+    }
 }

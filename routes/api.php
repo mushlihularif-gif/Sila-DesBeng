@@ -129,6 +129,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Wilayah Admin Dashboard (RT/RW)
     Route::prefix('wilayah')->middleware('role:admin_rt,admin_rw,rt,rw')->group(function () {
         Route::get('/dashboard', [\App\Http\Controllers\Api\WilayahAdminApiController::class, 'getDashboardStats']);
+        Route::post('/berita', [\App\Http\Controllers\Api\WilayahAdminApiController::class, 'storeBerita']);
         Route::get('/warga', [\App\Http\Controllers\Api\AdminWargaApiController::class, 'index']);
         Route::get('/warga/{id}', [\App\Http\Controllers\Api\AdminWargaApiController::class, 'show']);
         Route::post('/warga/{id}/approve-kyc', [\App\Http\Controllers\Api\AdminWargaApiController::class, 'approveKyc']);
