@@ -321,10 +321,9 @@
                         $avatarUrl = route('media.avatar', ['filename' => basename($user->file->path)]);
                     }
 
-                    $roleLabel = 'User';
+                    $roleLabel = $user->labelRole();
                     $roleBadgeClass = 'bg-label-info';
                     if (in_array($user->role, ['super_admin', 'admin'])) {
-                        $roleLabel = 'Admin';
                         $roleBadgeClass = 'bg-label-danger';
                     } elseif ($user->role === 'admin_kecamatan') {
                         $roleLabel = 'Kecamatan';
@@ -442,10 +441,9 @@
                 $avatarUrl = route('media.avatar', ['filename' => basename($user->file->path)]);
             }
 
-            $roleLabel = 'User';
+            $roleLabel = $user->labelRole();
             $roleBadgeClass = 'bg-label-info';
             if (in_array($user->role, ['super_admin', 'admin'])) {
-                $roleLabel = 'Admin';
                 $roleBadgeClass = 'bg-label-danger';
             } elseif ($user->role === 'admin_kecamatan') {
                 $roleLabel = 'Kecamatan';

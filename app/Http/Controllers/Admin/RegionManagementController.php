@@ -284,7 +284,7 @@ class RegionManagementController extends Controller
         $targetUser = User::findOrFail($user_id);
         
         // Pastikan user tersebut adalah akun pengurus wilayah
-        if (!in_array($targetUser->role, ['admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt'])) {
+        if (!in_array($targetUser->role, ['admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt'])) {
             return back()->with('error', 'Hanya akun pengurus wilayah yang dapat dihapus.');
         }
 
