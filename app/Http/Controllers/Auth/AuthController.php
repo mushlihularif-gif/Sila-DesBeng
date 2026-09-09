@@ -173,14 +173,29 @@ class AuthController extends Controller
                 }
                 session(['temp_registration' => $tempData]);
                 $method = $tempData['otp_method'] ?? 'email';
+                $email = $tempData['email'] ?? null;
+                $phone = $tempData['phone'] ?? null;
             } else {
                 session(['otp_code' => $newOtpCode]);
                 if ($request->has('switch_method')) {
                     session(['google_otp_method' => $request->switch_method]);
                 }
                 $method = session('google_otp_method', 'email');
+                $email = $otpEmail;
+                $phone = session('otp_phone');
             }
 
+            // Kirim ulang OTP sesuai metode (Email via SMTP atau WhatsApp via Fonnte)
+            if ($method === 'whatsapp') {
+                if ($phone) {
+                    $fonnte = new \App\Services\FonnteService();
+                    $fonnte->sendOtp($phone, $newOtpCode);
+                }
+            } else {
+                if ($email) {
+                    Mail::to($email)->queue(new OtpMail($newOtpCode));
+                }
+            }
 
             $methodText = ($method === 'whatsapp') ? 'nomor WhatsApp' : 'email';
             return redirect()->route('beranda')
@@ -471,12 +486,27 @@ class AuthController extends Controller
             $sessionData['otp_code'] = $newOtpCode;
             $sessionData['otp_expires_at'] = now()->addMinutes(5);
             if ($request->has('switch_method')) {
+                $sessionData['otp_method'] = $request->switch_method;
                 session(['forgot_password_otp_method' => $request->switch_method]);
             }
             session(['forgot_password_data' => $sessionData]);
 
-            $method = session('forgot_password_otp_method', 'email');
+            $method = $sessionData['otp_method'] ?? session('forgot_password_otp_method', 'email');
+            $user = \App\Models\User::find($sessionData['user_id'] ?? null);
 
+            // Kirim ulang OTP lupa password sesuai metode
+            if ($method === 'whatsapp') {
+                $phone = $user ? $user->phone : null;
+                if ($phone) {
+                    $fonnte = new \App\Services\FonnteService();
+                    $fonnte->sendOtp($phone, $newOtpCode);
+                }
+            } else {
+                $email = $sessionData['email'] ?? ($user ? $user->email : null);
+                if ($email) {
+                    Mail::to($email)->queue(new OtpMail($newOtpCode));
+                }
+            }
 
             $methodText = ($method === 'whatsapp') ? 'nomor WhatsApp' : 'email';
             return redirect()->route('beranda')

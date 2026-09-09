@@ -27,6 +27,7 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/login/google', [AuthController::class, 'loginGoogle']);
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/register/verify-otp', [AuthController::class, 'verifyOtp']);
+Route::post('/register/resend-otp', [AuthController::class, 'resendRegisterOtp']);
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('/forgot-password/verify-otp', [AuthController::class, 'verifyForgotPasswordOtp']);
 Route::post('/forgot-password/reset', [AuthController::class, 'resetForgotPassword']);

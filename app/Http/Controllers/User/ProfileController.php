@@ -397,14 +397,17 @@ class ProfileController extends Controller
             $method = $sessionData['otp_method'] ?? 'email';
             $user = auth()->user();
 
-            // Send OTP via Email or SMS based on $method
+            // Kirim OTP via Email atau WhatsApp
             if ($method === 'email') {
                 Mail::to($user->email)->send(new OtpMail($newOtpCode));
-            } else {
-                // SMS implementation would go here
+            } elseif ($method === 'whatsapp') {
+                if ($user->phone) {
+                    $fonnte = new \App\Services\FonnteService();
+                    $fonnte->sendOtp($user->phone, $newOtpCode);
+                }
             }
 
-            $methodText = ($method === 'sms') ? 'nomor telepon' : 'email';
+            $methodText = ($method === 'whatsapp') ? 'nomor WhatsApp' : 'email';
 
             return response()->json([
                 'success' => true,

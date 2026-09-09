@@ -193,6 +193,47 @@ class AuthController extends Controller
         ], 200);
     }
 
+    public function resendRegisterOtp(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|string|email',
+            'method' => 'required|in:email,whatsapp'
+        ]);
+
+        $cacheKey = 'register_otp_' . $request->email;
+        $tempData = Cache::get($cacheKey);
+
+        if (!$tempData) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Sesi pendaftaran telah habis. Silakan daftar ulang.'
+            ], 400);
+        }
+
+        $otpCode = str_pad(rand(0, 9999), 4, '0', STR_PAD_LEFT);
+        $tempData['otp_code'] = $otpCode;
+        
+        Cache::put($cacheKey, $tempData, now()->addMinutes(5));
+
+        if ($request->method === 'email') {
+            try {
+                Mail::to($request->email)->queue(new OtpMail($otpCode));
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error("Gagal kirim email OTP API: " . $e->getMessage());
+            }
+        } elseif ($request->method === 'whatsapp' && isset($tempData['phone'])) {
+            try {
+                $fonnte = new FonnteService();
+                $fonnte->sendOtp($tempData['phone'], $otpCode);
+            } catch (\Exception $e) {}
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Kode OTP telah dikirim ulang ke ' . $request->method
+        ], 200);
+    }
+
     public function verifyOtp(Request $request)
     {
         $request->validate([

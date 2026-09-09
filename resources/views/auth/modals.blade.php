@@ -390,8 +390,8 @@
                 <div class="mt-3">
                     @php
                         $currentMethod = session('temp_registration.otp_method') ?? session('otp_method') ?? 'email';
-                        $switchMethod = $currentMethod === 'email' ? 'sms' : 'email';
-                        $switchText = $currentMethod === 'email' ? 'Kirim OTP melalui No. Telepon' : 'Kirim OTP melalui Email';
+                        $switchMethod = $currentMethod === 'email' ? 'whatsapp' : 'email';
+                        $switchText = $currentMethod === 'email' ? 'Kirim OTP melalui WhatsApp' : 'Kirim OTP melalui Email';
                     @endphp
                     <button type="submit" name="switch_method" value="{{ $switchMethod }}" class="text-sm font-medium text-gray-500 hover:text-blue-500 transition underline">
                         {{ $switchText }}
@@ -458,9 +458,9 @@
                 </p>
                 <div class="mt-3">
                     @php
-                        $currentMethod = session('forgot_password_otp_method') ?? 'email';
-                        $switchMethod = $currentMethod === 'email' ? 'sms' : 'email';
-                        $switchText = $currentMethod === 'email' ? 'Kirim OTP melalui No. Telepon' : 'Kirim OTP melalui Email';
+                        $currentMethod = session('forgot_password_data.otp_method') ?? session('forgot_password_otp_method') ?? 'email';
+                        $switchMethod = $currentMethod === 'email' ? 'whatsapp' : 'email';
+                        $switchText = $currentMethod === 'email' ? 'Kirim OTP melalui WhatsApp' : 'Kirim OTP melalui Email';
                     @endphp
                     <button type="submit" name="switch_method" value="{{ $switchMethod }}" class="text-sm font-medium text-gray-500 hover:text-blue-500 transition underline">
                         {{ $switchText }}
