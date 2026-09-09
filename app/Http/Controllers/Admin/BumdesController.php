@@ -32,7 +32,37 @@ class BumdesController extends Controller
             ->get();
             
         $whatsapp = env('BUMDES_WHATSAPP', '+6283846078693');
-        return view('admin.isewa.profile-bumdes', compact('members', 'whatsapp', 'search'));
+        
+        $region = $user->region;
+        if (!$region && in_array($user->role, ['admin', 'super_admin'])) {
+            $region = \App\Models\Region::where('type', 'kabupaten')->first();
+        }
+        $strukturLayout = $region->settings['struktur_layout'] ?? 'hierarki';
+
+        return view('admin.isewa.profile-bumdes', compact('members', 'whatsapp', 'search', 'strukturLayout'));
+    }
+
+    public function updateLayout(Request $request)
+    {
+        $request->validate([
+            'struktur_layout' => 'required|in:hierarki,sejajar',
+        ]);
+
+        $user = auth()->user();
+        $region = $user->region;
+        if (!$region && in_array($user->role, ['admin', 'super_admin'])) {
+            $region = \App\Models\Region::where('type', 'kabupaten')->first();
+        }
+
+        if ($region) {
+            $settings = $region->settings ?? [];
+            $settings['struktur_layout'] = $request->struktur_layout;
+            $region->settings = $settings;
+            $region->save();
+        }
+
+        $namaMode = $request->struktur_layout === 'sejajar' ? 'Sejajar (Grid Mendatar)' : 'Bagan Berjenjang (Hierarki)';
+        return back()->with('success', 'Model tampilan struktur berhasil diubah menjadi: ' . $namaMode);
     }
 
     public function create()

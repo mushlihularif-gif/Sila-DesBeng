@@ -27,11 +27,38 @@
                 </div>
             </div>
 
+            <!-- PENGATURAN MODEL TAMPILAN PUBLIK -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-body p-3 p-md-4">
+                    <form action="{{ route('admin.SiladesBeng.bumdes.update-layout') }}" method="POST">
+                        @csrf
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+                            <div>
+                                <h6 class="fw-bold mb-1 text-dark d-flex align-items-center gap-2">
+                                    <i class="bx bx-layout text-primary fs-5"></i> Model Tampilan Struktur di Halaman Publik
+                                </h6>
+                                <p class="text-muted small mb-0">Pilih apakah susunan aparatur di halaman publik ditampilkan berjenjang sesuai hierarki atau sejajar dalam satu baris mendatar.</p>
+                            </div>
+                            <div class="d-flex flex-wrap gap-2">
+                                <label class="btn {{ ($strukturLayout ?? 'hierarki') === 'hierarki' ? 'btn-primary' : 'btn-outline-primary' }} btn-sm rounded-pill px-3 py-2 cursor-pointer d-flex align-items-center gap-2">
+                                    <input type="radio" name="struktur_layout" value="hierarki" class="d-none" onchange="this.form.submit()" {{ ($strukturLayout ?? 'hierarki') === 'hierarki' ? 'checked' : '' }}>
+                                    <i class="bx bx-sitemap"></i> Bagan Berjenjang (Hierarki)
+                                </label>
+                                <label class="btn {{ ($strukturLayout ?? 'hierarki') === 'sejajar' ? 'btn-secondary' : 'btn-outline-secondary' }} btn-sm rounded-pill px-3 py-2 cursor-pointer d-flex align-items-center gap-2">
+                                    <input type="radio" name="struktur_layout" value="sejajar" class="d-none" onchange="this.form.submit()" {{ ($strukturLayout ?? 'hierarki') === 'sejajar' ? 'checked' : '' }}>
+                                    <i class="bx bx-grid-horizontal"></i> Sejajar (Grid Mendatar)
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
             <!-- INFO CARD HIERARKI -->
             <div class="alert alert-primary border-0 shadow-sm rounded-3 mb-4 p-3 d-flex align-items-center">
                 <i class="bx bx-sitemap fs-3 me-3 text-primary"></i>
                 <div class="small">
-                    <strong>Hierarki Struktur Organisasi:</strong> Aparatur ditata secara berjenjang (Tingkat 1 s.d. 4) sehingga pada halaman publik tidak lagi sejajar dalam satu baris. Gunakan tombol panah pada setiap kartu atau ubah tingkatan untuk menyesuaikan posisi aparatur di bawah pimpinan.
+                    <strong>Hierarki Struktur Organisasi:</strong> Aparatur ditata berdasarkan tingkatan (Tingkat 1 s.d. 4). Pada mode <em>Bagan Berjenjang</em>, posisi aparatur akan bertingkat di bawah pimpinan. Jika mode <em>Sejajar</em> dipilih, seluruh aparatur ditampilkan dalam satu baris mendatar.
                 </div>
             </div>
 

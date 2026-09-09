@@ -86,6 +86,7 @@
                 </div>
 
                 @php
+                    $layoutMode = ($region && isset($region->settings['struktur_layout'])) ? $region->settings['struktur_layout'] : 'hierarki';
                     $level1 = $members->where('level', 1);
                     $level2 = $members->where('level', 2);
                     $level3 = $members->where('level', 3);
@@ -93,12 +94,40 @@
                     $unclassified = $members->whereNotIn('level', [1, 2, 3, 4]);
                 @endphp
 
-                <div class="hierarchy-container max-w-6xl mx-auto mb-16">
-                    {{-- TINGKAT 1: PIMPINAN UTAMA (CAMAT) --}}
-                    @if($level1->count() > 0)
-                        <div class="hierarchy-tier hierarchy-tier-1">
-                            <div class="flex flex-wrap justify-center gap-10">
-                                @foreach($level1 as $member)
+                @if($layoutMode === 'sejajar')
+                    {{-- TAMPILAN SEJAJAR (GRID MENDATAR) --}}
+                    <div class="flex flex-wrap justify-center gap-10 mb-16 mt-6">
+                        @foreach($members as $member)
+                        <div class="member-card transition-all duration-300 text-center w-72">
+                            <div class="relative mx-auto mb-6" style="width: 185px; height: 225px;">
+                                <div class="absolute inset-0 opacity-90" style="
+                                    border-radius: 0 50px 0 50px; 
+                                    transform: translate(6px, 6px); 
+                                    padding: 3px; 
+                                    background: linear-gradient(135deg, #115789, #3b82f6); 
+                                    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); 
+                                    -webkit-mask-composite: xor; 
+                                    mask-composite: exclude;
+                                "></div>
+                                <div class="absolute inset-0 overflow-hidden bg-gray-50 animate-float z-10" style="border-radius: 0 50px 0 50px; box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.18);">
+                                    <img src="{{ $member->photo_url }}" 
+                                         alt="{{ $member->name }}"
+                                         class="w-full h-full object-cover">
+                                </div>
+                            </div>
+                            <h3 class="text-lg font-bold mb-1" style="color: #000000;">{{ $member->name }}</h3>
+                            <p class="text-sm font-semibold text-blue-900">{{ $member->position }}</p>
+                        </div>
+                        @endforeach
+                    </div>
+                @else
+                    {{-- TAMPILAN BERJENJANG (HIERARKI) --}}
+                    <div class="hierarchy-container max-w-6xl mx-auto mb-16">
+                        {{-- TINGKAT 1: PIMPINAN UTAMA (CAMAT) --}}
+                        @if($level1->count() > 0)
+                            <div class="hierarchy-tier hierarchy-tier-1">
+                                <div class="flex flex-wrap justify-center gap-10">
+                                    @foreach($level1 as $member)
                                 <div class="member-card transition-all duration-300 text-center w-72">
                                     <div class="relative mx-auto mb-6" style="width: 185px; height: 225px;">
                                         <div class="absolute inset-0 opacity-90" style="
@@ -247,6 +276,7 @@
                         </div>
                     @endif
                 </div>
+                @endif
 
                 <!-- WhatsApp Contact Button -->
                 @if($isWhatsappActive)
