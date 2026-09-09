@@ -239,6 +239,10 @@ Route::get('/gas/booking/{id}/pending', [App\Http\Controllers\User\GasBookingCon
     ->name('user.gas.payment.pending')
     ->middleware('auth');
 
+Route::get('/gas/payment/{id}/sinkron', [App\Http\Controllers\User\GasBookingController::class, 'sinkronPembayaran'])
+    ->name('user.gas.payment.sinkron')
+    ->middleware('auth');
+
 Route::post('/gas/payment/{id}/simulate', [App\Http\Controllers\User\GasBookingController::class, 'simulatePayment'])
     ->name('user.gas.payment.simulate')
     ->middleware('auth');

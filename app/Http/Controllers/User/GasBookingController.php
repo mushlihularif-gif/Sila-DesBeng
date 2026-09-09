@@ -265,6 +265,83 @@ class GasBookingController extends Controller
         return response()->json($response);
     }
 
+    /**
+     * Tanyakan instrumen bayar (QR / nomor VA) langsung ke Midtrans.
+     *
+     * Snap menerbitkannya saat warga memilih kanal di dalam popup, dan halaman
+     * kita baru tahu lewat notifikasi 'pending'. Untuk QRIS notifikasi itu
+     * sering TIDAK dikirim sampai ada pembayaran, sehingga menunggu saja
+     * membuat halaman memuat ulang tanpa henti tanpa hasil.
+     *
+     * Jadi di sini kita menarik, bukan menunggu.
+     */
+    public function sinkronPembayaran($id)
+    {
+        $order = \App\Models\GasOrder::findOrFail($id);
+
+        if ((int) $order->user_id !== (int) \Illuminate\Support\Facades\Auth::id()
+            && \Illuminate\Support\Facades\Auth::user()->role !== 'admin') {
+            abort(403);
+        }
+
+        // Sudah ada isinya, tidak perlu menembak Midtrans lagi.
+        if ($order->payment_qr_url || $order->payment_va_number) {
+            return response()->json([
+                'siap'      => true,
+                'qr_url'    => $order->payment_qr_url,
+                'va_number' => $order->payment_va_number,
+                'status'    => $order->status,
+            ]);
+        }
+
+        $gas = \App\Models\Gas::find($order->gas_id);
+
+        if (! $gas || ! \App\Support\PenyediaPembayaran::terapkanMidtransWilayah($gas->region_id)) {
+            return response()->json(['siap' => false, 'alasan' => 'gateway_belum_siap']);
+        }
+
+        try {
+            $detail = \Midtrans\Transaction::status($order->order_number);
+            $berubah = false;
+
+            if (isset($detail->va_numbers[0]->va_number)) {
+                $order->payment_va_number = $detail->va_numbers[0]->va_number;
+                $berubah = true;
+            } elseif (isset($detail->biller_code, $detail->bill_key)) {
+                $order->payment_va_number = $detail->biller_code . '-' . $detail->bill_key;
+                $berubah = true;
+            }
+
+            if (isset($detail->actions)) {
+                foreach ($detail->actions as $aksi) {
+                    if (($aksi->name ?? null) === 'generate-qr-code') {
+                        $order->payment_qr_url = $aksi->url;
+                        $berubah = true;
+                        break;
+                    }
+                }
+            }
+
+            if ($berubah) {
+                $order->save();
+            }
+
+            return response()->json([
+                'siap'      => $berubah,
+                'qr_url'    => $order->payment_qr_url,
+                'va_number' => $order->payment_va_number,
+                'status'    => $order->status,
+            ]);
+        } catch (\Throwable $e) {
+            // Wajar selama warga belum memilih kanal di popup: bagi Midtrans
+            // transaksinya memang belum ada. Bukan error yang perlu ditampilkan.
+            return response()->json([
+                'siap'   => false,
+                'alasan' => 'belum_ada_transaksi',
+            ]);
+        }
+    }
+
     public function payment($id)
     {
         $order = \App\Models\GasOrder::findOrFail($id);

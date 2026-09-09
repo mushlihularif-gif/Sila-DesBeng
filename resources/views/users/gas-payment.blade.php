@@ -183,9 +183,6 @@
                             <!-- The QR Code -->
                             <div class="relative z-10 bg-white p-2 rounded-xl">
                                 @if($order->payment_qr_url)
-                                    @push('scripts')
-                                    <script>sessionStorage.removeItem('qr-tunggu-{{ $order->id }}');</script>
-                                    @endpush
                                     @if(str_starts_with($order->payment_qr_url, 'http'))
                                         <img src="{{ $order->payment_qr_url }}" alt="QR Code" class="w-full h-auto aspect-square object-contain" onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2Y4ZmFmYyIvPjxwYXRoIGQ9Ik0yMCAyMGg2MHY2MEgyMHoiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2NiZDVlMSIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtZGFzaGFycmF5PSI4IDQiLz48dGV4dCB4PSI1MCIgeT0iNTEiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXNpemU9IjgiIGZpbGw9IiM2NDc0OGIiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiPklNQUdFIEVSUk9SPC90ZXh0Pjwvc3ZnPg==';">
                                     @else
@@ -212,24 +209,66 @@
 
                                 @push('scripts')
                                 <script>
-                                    // Berhenti setelah satu menit supaya halaman tidak memuat
-                                    // ulang selamanya kalau notifikasinya memang tidak datang.
+                                    // Tanya Midtrans langsung, jangan menunggu notifikasi.
+                                    // Untuk QRIS, notifikasi 'pending' sering baru dikirim
+                                    // setelah ada pembayaran — menunggunya membuat halaman
+                                    // berkedip tanpa henti tanpa pernah mendapat QR.
                                     (function () {
-                                        const kunci = 'qr-tunggu-{{ $order->id }}';
-                                        const ke = parseInt(sessionStorage.getItem(kunci) || '0', 10);
+                                        const kotak = document.getElementById('qr-menunggu');
+                                        if (!kotak) return;
 
-                                        if (ke >= 15) {
-                                            sessionStorage.removeItem(kunci);
-                                            const info = document.getElementById('qr-menunggu');
-                                            if (info) {
-                                                info.querySelector('p.text-sm').textContent = 'Kode QR belum tersedia';
-                                                info.querySelector('svg').classList.remove('animate-spin');
-                                            }
-                                            return;
+                                        const alamat = @json(route('user.gas.payment.sinkron', $order->id));
+                                        let percobaan = 0;
+
+                                        function tampilkanQr(url) {
+                                            const gambar = document.createElement('img');
+                                            gambar.src = url;
+                                            gambar.alt = 'Kode QRIS';
+                                            gambar.className = 'w-full h-auto aspect-square object-contain';
+                                            kotak.replaceWith(gambar);
                                         }
 
-                                        sessionStorage.setItem(kunci, String(ke + 1));
-                                        setTimeout(() => window.location.reload(), 4000);
+                                        function menyerah() {
+                                            const judul = kotak.querySelector('p.text-sm');
+                                            const putar = kotak.querySelector('svg');
+                                            if (judul) judul.textContent = 'Kode QR belum tersedia';
+                                            if (putar) putar.classList.remove('animate-spin');
+                                        }
+
+                                        async function periksa() {
+                                            percobaan++;
+
+                                            try {
+                                                const jawab = await fetch(alamat, {
+                                                    headers: { 'Accept': 'application/json' },
+                                                });
+                                                const data = await jawab.json();
+
+                                                if (data.qr_url) {
+                                                    tampilkanQr(data.qr_url);
+                                                    return;
+                                                }
+
+                                                // Sudah dibayar saat popup masih terbuka.
+                                                if (data.status && data.status !== 'pending') {
+                                                    window.location.reload();
+                                                    return;
+                                                }
+                                            } catch (e) {
+                                                // Jaringan warga putus sesaat; coba lagi.
+                                            }
+
+                                            // 20 kali x 3 detik = satu menit. Setelah itu berhenti
+                                            // supaya tidak menembak Midtrans selamanya.
+                                            if (percobaan >= 20) {
+                                                menyerah();
+                                                return;
+                                            }
+
+                                            setTimeout(periksa, 3000);
+                                        }
+
+                                        periksa();
                                     })();
                                 </script>
                                 @endpush
