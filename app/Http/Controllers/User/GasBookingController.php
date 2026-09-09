@@ -182,26 +182,16 @@ class GasBookingController extends Controller
         }
 
         if ($lewatGateway) {
-
             $paymentMethod = $validated['payment_method'];
-            $paymentType = '';
-            $bank = '';
-            
-            if (str_starts_with($paymentMethod, 'bank_transfer_')) {
-                $bank = str_replace('bank_transfer_', '', $paymentMethod);
-                if ($bank === 'mandiri') {
-                    $paymentType = 'echannel';
-                } else {
-                    $paymentType = 'bank_transfer';
-                }
-            } else if ($paymentMethod === 'gopay') {
-                $paymentType = 'gopay';
-            } else if ($paymentMethod === 'qris') {
-                $paymentType = 'qris';
-            }
 
+            // Snap, bukan Core API. Akun sandbox ini hanya punya Snap; Core API
+            // menolak SEMUA kanal dengan 402 "Payment channel is not activated",
+            // termasuk saat dipanggil langsung dengan cURL di luar aplikasi.
+            //
+            // Kanal dibatasi sesuai pilihan warga di halaman ini, supaya mereka
+            // tidak perlu memilih bank dua kali. Metode yang belum ada di peta
+            // membiarkan Snap menampilkan seluruh kanal aktif.
             $params = [
-                'payment_type' => $paymentType,
                 'transaction_details' => [
                     'order_id' => $orderNumber,
                     'gross_amount' => $totalAmount,
@@ -216,59 +206,50 @@ class GasBookingController extends Controller
                         'id' => $gas->id,
                         'price' => $gas->harga_satuan,
                         'quantity' => $validated['quantity'],
-                        'name' => $gas->jenis_gas
-                    ]
-                ]
+                        'name' => $gas->jenis_gas,
+                    ],
+                ],
             ];
 
-            if ($paymentType === 'bank_transfer') {
-                $params['bank_transfer'] = [
-                    'bank' => $bank
-                ];
-            } else if ($paymentType === 'echannel') {
-                $params['echannel'] = [
-                    'bill_info1' => 'Pembayaran:',
-                    'bill_info2' => 'Gas ' . $gas->jenis_gas
-                ];
+            $kanal = \App\Support\PenyediaPembayaran::kanalSnap($paymentMethod);
+            if ($kanal) {
+                $params['enabled_payments'] = [$kanal];
             }
 
             try {
-                $coreResponse = \Midtrans\CoreApi::charge($params);
-                
+                $snap = \Midtrans\Snap::createTransaction($params);
+
                 $order->payment_channel = $paymentMethod;
+                $order->snap_token = $snap->token;
                 $order->payment_expiry_time = now()->addDay();
-                
-                if (isset($coreResponse->va_numbers[0]->va_number)) {
-                    $order->payment_va_number = $coreResponse->va_numbers[0]->va_number;
-                } else if (isset($coreResponse->biller_code) && isset($coreResponse->bill_key)) {
-                    $order->payment_va_number = $coreResponse->biller_code . '-' . $coreResponse->bill_key;
-                } else if (isset($coreResponse->actions)) {
-                    foreach ($coreResponse->actions as $action) {
-                        if ($action->name === 'generate-qr-code') {
-                            $order->payment_qr_url = $action->url;
-                        }
-                    }
-                }
-                
                 $order->save();
+
+                $response['snap_token'] = $snap->token;
             } catch (\Exception $e) {
-                \Log::warning('Midtrans Error: ' . $e->getMessage() . '. Menggunakan Mock API untuk keperluan Demo.');
-                
-                // MOCK RESPONSE UNTUK KEPERLUAN DEMO LOMBA AGAR TIDAK PERNAH ERROR
+                // TIDAK ADA nomor VA palsu di sini.
+                //
+                // Versi sebelumnya menangkap kegagalan Midtrans lalu mengarang
+                // nomor VA acak 11 digit supaya demo tidak pernah terlihat
+                // error. Akibatnya kegagalan gateway tersembunyi berhari-hari,
+                // dan kalau sampai produksi, warga akan mentransfer ke nomor
+                // yang tidak dikenal bank mana pun.
+                \Illuminate\Support\Facades\Log::error('Midtrans Snap gagal membuat transaksi', [
+                    'order_number' => $orderNumber,
+                    'metode'       => $paymentMethod,
+                    'pesan'        => $e->getMessage(),
+                ]);
+
                 $order->payment_channel = $paymentMethod;
-                $order->payment_expiry_time = now()->addDay();
-                
-                if ($paymentType === 'bank_transfer' || $paymentType === 'echannel') {
-                    // Generate random 11 digit VA number
-                    $order->payment_va_number = rand(10000, 99999) . rand(100000, 999999);
-                } else if ($paymentType === 'qris' || $paymentType === 'gopay') {
-                    // Gunakan dummy QR code image (inline SVG via blade)
-                    $order->payment_qr_url = 'DUMMY_QR_CODE';
-                }
-                
                 $order->save();
+
+                $response['snap_token'] = null;
+                $response['gateway_gagal'] = true;
+                $response['message'] = 'Pesanan tersimpan, tetapi pembayaran otomatis '
+                    . 'sedang tidak dapat diproses. Silakan hubungi petugas desa atau '
+                    . 'ganti metode pembayaran dari halaman Aktivitas.';
             }
         }
+
 
         // Create notification for user
         \App\Models\Notification::create([
@@ -497,30 +478,26 @@ class GasBookingController extends Controller
             }
             return redirect()->route('user.gas.payment', $order->id);
         } catch (\Exception $e) {
-            // Fallback for local testing if Midtrans fails
-            $order->payment_channel = $newMethod;
-            
-            if ($newMethod == 'gopay' || $newMethod == 'qris') {
-                $order->payment_method = ucfirst($newMethod);
-            } else {
-                $order->payment_method = 'Bank Transfer ' . strtoupper(str_replace('bank_transfer_', '', $newMethod));
-            }
+            // TIDAK mengarang nomor VA maupun QR palsu di sini.
+            //
+            // Versi sebelumnya menyimpan rand(10000,99999).rand(100000,999999)
+            // sebagai nomor VA dan 'DUMMY_QR_CODE' sebagai QR. Warga melihat
+            // halaman pembayaran yang tampak sah, mentransfer ke nomor yang tidak
+            // dikenal bank mana pun, dan uangnya hilang tanpa jejak di Midtrans.
+            //
+            // Metode lama sengaja DIBIARKAN UTUH: lebih baik pesanan tetap pada
+            // cara bayar yang sudah berhasil daripada berpindah ke cara yang
+            // baru saja gagal dibuatkan tagihannya.
+            \Illuminate\Support\Facades\Log::error('Gagal mengganti metode pembayaran gas', [
+                'order_id' => $order->id,
+                'metode_baru' => $newMethod,
+                'pesan' => $e->getMessage(),
+            ]);
 
-            if ($paymentType === 'bank_transfer' || $paymentType === 'echannel') {
-                $order->payment_va_number = rand(10000, 99999) . rand(100000, 999999);
-                $order->payment_qr_url = null;
-            } else if ($paymentType === 'qris' || $paymentType === 'gopay') {
-                $order->payment_qr_url = 'DUMMY_QR_CODE';
-                $order->payment_va_number = null;
-            }
-            $order->save();
-
-            $receipt = \App\Models\TransactionReceipt::where('booking_type', 'gas')->where('booking_id', $order->id)->first();
-            if ($receipt) {
-                $receipt->payment_method = $order->payment_method;
-                $receipt->save();
-            }
-            return redirect()->route('user.gas.payment', $order->id);
+            return redirect()->route('user.gas.payment', $order->id)
+                ->with('error', 'Metode pembayaran gagal diubah karena layanan pembayaran '
+                    . 'sedang tidak dapat dihubungi. Metode sebelumnya masih berlaku. '
+                    . 'Silakan coba lagi nanti atau hubungi petugas desa.');
         }
     }
 }

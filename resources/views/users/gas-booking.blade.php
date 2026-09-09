@@ -1210,8 +1210,36 @@
                             }).then(() => {
                                 window.location.href = '{{ route("user.activity") }}';
                             });
+                        } else if (data.gateway_gagal) {
+                            // Gateway menolak. Pesanannya tetap tersimpan, jadi warga
+                            // diberi tahu apa adanya dan diarahkan ke Aktivitas untuk
+                            // mengganti metode — bukan disodori nomor VA karangan.
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Pembayaran Otomatis Bermasalah',
+                                text: data.message,
+                                confirmButtonColor: '#3b82f6',
+                            }).then(() => {
+                                window.location.href = '{{ route("user.activity") }}';
+                            });
+                        } else if (data.snap_token && window.snap) {
+                            // Popup Midtrans terbuka dengan kanal yang sudah dipilih
+                            // warga di halaman ini. Semua jalur keluar berakhir di
+                            // halaman instruksi supaya statusnya selalu terlihat —
+                            // termasuk saat popup ditutup tanpa membayar.
+                            const keHalamanBayar = () => {
+                                window.location.href = '/gas/payment/' + data.order_id;
+                            };
+
+                            window.snap.pay(data.snap_token, {
+                                onSuccess: keHalamanBayar,
+                                onPending: keHalamanBayar,
+                                onError: keHalamanBayar,
+                                onClose: keHalamanBayar,
+                            });
                         } else {
-                            // Redirect to beautiful payment instructions page
+                            // snap.js gagal dimuat (jaringan warga, pemblokir iklan).
+                            // Halaman instruksi tetap menampilkan status pesanannya.
                             window.location.href = '/gas/payment/' + data.order_id;
                         }
                     } else {

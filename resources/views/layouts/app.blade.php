@@ -57,7 +57,7 @@
     @vite('resources/css/app.css')
 
     {{-- Midtrans Snap JS (Global for Turbo SPA) --}}
-    <script type="text/javascript" src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('services.midtrans.client_key') }}"></script>
+    <script type="text/javascript" src="{{ \App\Support\PenyediaPembayaran::alamatSnapJs() }}" data-client-key="{{ config('services.midtrans.client_key') }}"></script>
 
     {{-- Page-specific styles --}}
     @stack('styles')

@@ -197,4 +197,47 @@ class PenyediaPembayaran
             'region_id'     => $regionId,
         ];
     }
+
+    /**
+     * Terjemahan metode internal -> kode kanal Snap (enabled_payments).
+     *
+     * Dipakai membatasi popup Snap agar hanya menampilkan kanal yang SUDAH
+     * dipilih warga di halaman kita, sehingga mereka tidak perlu memilih bank
+     * dua kali.
+     *
+     * Metode yang tidak ada di sini mengembalikan null, dan pemanggilnya
+     * membiarkan Snap menampilkan seluruh kanal aktif — lebih baik memberi
+     * pilihan berlebih daripada mengirim kode yang tidak dikenal.
+     */
+    public const KANAL_SNAP = [
+        'bank_transfer_bca'     => 'bca_va',
+        'bank_transfer_bni'     => 'bni_va',
+        'bank_transfer_bri'     => 'bri_va',
+        'bank_transfer_permata' => 'permata_va',
+        'bank_transfer_cimb'    => 'cimb_va',
+        'bank_transfer_bsi'     => 'bsi_va',
+        // Mandiri memakai Bill Payment, bukan VA — kodenya berbeda sendiri.
+        'bank_transfer_mandiri' => 'echannel',
+        'gopay'                 => 'gopay',
+        'qris'                  => 'qris',
+    ];
+
+    public static function kanalSnap(?string $metode): ?string
+    {
+        return self::KANAL_SNAP[$metode] ?? null;
+    }
+
+    /**
+     * Alamat snap.js sesuai lingkungan yang sedang dipakai.
+     *
+     * Sengaja diturunkan dari konfigurasi, bukan ditulis mati: memakai
+     * snap.js sandbox dengan kunci produksi (atau sebaliknya) menghasilkan
+     * popup yang gagal terbuka tanpa pesan apa pun di layar.
+     */
+    public static function alamatSnapJs(): string
+    {
+        return config('services.midtrans.is_production')
+            ? 'https://app.midtrans.com/snap/snap.js'
+            : 'https://app.sandbox.midtrans.com/snap/snap.js';
+    }
 }
