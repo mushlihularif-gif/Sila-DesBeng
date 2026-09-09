@@ -240,9 +240,9 @@
                         <a href="{{ route('announcements.show', $item->id) }}" class="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col h-full transform hover:-translate-y-1">
                             <div class="h-40 shrink-0 relative overflow-hidden bg-gray-50">
                                 @if($item->image_path)
-                                    <img src="{{ Storage::url($item->image_path) }}" alt="{{ $item->title }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                                    <img src="{{ Storage::url($item->image_path) }}" alt="{{ $item->title }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.onerror=null; this.src='{{ asset('User/img/elemen/KabardanInformasiDaerah.png') }}';">
                                 @elseif($item->images && $item->images->count() > 0)
-                                    <img src="{{ Storage::url($item->images->first()->image_path) }}" alt="{{ $item->title }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                                    <img src="{{ Storage::url($item->images->first()->image_path) }}" alt="{{ $item->title }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.onerror=null; this.src='{{ asset('User/img/elemen/KabardanInformasiDaerah.png') }}';">
                                 @else
                                     <div class="w-full h-full flex items-center justify-center text-4xl bg-gradient-to-br from-[#115789]/10 to-blue-500/10">
                                         @if($item->type == 'Pengumuman') ðŸ“¢ 

@@ -88,6 +88,7 @@
                             <img src="{{ asset('storage/' . $item->foto) }}" 
                                  alt="{{ $item->jenis_gas }}"
                                  loading="lazy"
+                                 onerror="this.onerror=null; this.src='{{ asset('User/img/elemen/gas_melon.png') }}';"
                                  class="product-image w-full h-full object-contain drop-shadow-md group-hover:scale-105 transition-transform duration-500 p-1 sm:p-2">
                             
                             <!-- Status Badge -->
