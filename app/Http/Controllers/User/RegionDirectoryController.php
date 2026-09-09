@@ -44,7 +44,7 @@ class RegionDirectoryController extends Controller
             $activeServices = $region->services->pluck('name')->toArray();
         }
 
-        $members = \App\Models\BumdesMember::whereNull('region_id')->orWhere('region_id', 0)->orderBy('order')->get();
+        $members = \App\Models\BumdesMember::whereNull('region_id')->orWhere('region_id', 0)->orderBy('level', 'asc')->orderBy('order', 'asc')->get();
         
         $isWhatsappActive = $region && isset($region->payment_info['whatsapp_active']) ? $region->payment_info['whatsapp_active'] : false;
 
@@ -74,7 +74,7 @@ class RegionDirectoryController extends Controller
         $cleanNumber = preg_replace('/[^0-9+]/', '', $whatsappNumber);
         $whatsappLink = 'https://wa.me/' . ltrim($cleanNumber, '+');
         
-        $members = \App\Models\BumdesMember::where('region_id', $kecamatan->id)->orderBy('order')->get();
+        $members = \App\Models\BumdesMember::where('region_id', $kecamatan->id)->orderBy('level', 'asc')->orderBy('order', 'asc')->get();
         
         $region = $kecamatan;
         $activeServices = $region->services->pluck('name')->toArray();
