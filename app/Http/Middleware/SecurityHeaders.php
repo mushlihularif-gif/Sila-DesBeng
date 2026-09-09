@@ -34,8 +34,8 @@ class SecurityHeaders
         // Mengontrol informasi referrer yang dikirim
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
 
-        // Membatasi akses ke fitur browser (kamera, mikrofon, geolokasi)
-        $response->headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+        // Mengizinkan akses kamera dan geolokasi untuk origin sendiri (self)
+        $response->headers->set('Permissions-Policy', 'camera=(self), microphone=(), geolocation=(self)');
 
         // HSTS - Memaksa koneksi HTTPS (hanya jika request sudah secure)
         if ($request->secure()) {
@@ -45,11 +45,13 @@ class SecurityHeaders
         // Content Security Policy - Mengontrol sumber daya yang boleh dimuat
         $csp = implode('; ', [
             "default-src 'self'",
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://maps.googleapis.com https://accounts.google.com https://cdn.skypack.dev https://code.jquery.com https://app.sandbox.midtrans.com https://app.midtrans.com",
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://maps.googleapis.com https://accounts.google.com https://cdn.skypack.dev https://code.jquery.com https://app.sandbox.midtrans.com https://app.midtrans.com",
             "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com",
             "img-src 'self' data: blob: https://*.googleapis.com https://*.gstatic.com https://lh3.googleusercontent.com https://www.google.com storage: https://app.sandbox.midtrans.com https://app.midtrans.com",
             "font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com",
-            "connect-src 'self' https://maps.googleapis.com https://cdn.jsdelivr.net https://app.sandbox.midtrans.com https://app.midtrans.com",
+            "connect-src 'self' data: blob: https://maps.googleapis.com https://cdn.jsdelivr.net https://app.sandbox.midtrans.com https://app.midtrans.com",
+            "worker-src 'self' blob:",
+            "child-src 'self' blob:",
             "frame-src https://accounts.google.com https://app.sandbox.midtrans.com https://app.midtrans.com",
             "object-src 'none'",
             "base-uri 'self'",

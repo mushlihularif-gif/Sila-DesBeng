@@ -42,13 +42,28 @@
         }
         .sd-navbar-toggle:hover { color: #0284c7; background: rgba(255, 255, 255, 0.4); }
         .sd-navbar-toggle svg { width: 32px; height: 32px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); }
+
+        @media (max-width: 768px) {
+            .sd-navbar-toggle {
+                bottom: -18px !important;
+                right: 14px !important;
+                width: 38px !important;
+                height: 18px !important;
+                border-radius: 0 0 10px 10px !important;
+            }
+            .sd-navbar-toggle svg {
+                width: 18px !important;
+                height: 18px !important;
+            }
+        }
         
         .sd-nav-container {
-            max-width: 1536px; margin: 0 auto; padding: 0 20px;
+            max-width: 1536px; margin: 0 auto; padding: 0 16px;
             display: flex; align-items: center; justify-content: space-between;
         }
-        .sd-nav-logo img { height: 80px; width: auto; object-fit: contain; padding: 8px 0; }
-        @media (min-width: 640px) { .sd-nav-logo img { height: 96px; } }
+        .sd-nav-logo img { height: 46px; width: auto; object-fit: contain; padding: 4px 0; }
+        @media (min-width: 640px) { .sd-nav-logo img { height: 72px; padding: 6px 0; } }
+        @media (min-width: 1024px) { .sd-nav-logo img { height: 96px; padding: 8px 0; } }
         
         .sd-nav-links { display: flex; align-items: center; gap: 32px; margin-left: auto; margin-right: 32px; }
         .sd-nav-link {

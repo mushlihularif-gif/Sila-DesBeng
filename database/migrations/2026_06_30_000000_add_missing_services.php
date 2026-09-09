@@ -23,10 +23,10 @@ return new class extends Migration
             ['name' => 'Fasilitas Umum']
         );
 
-        // Optionally, attach to all villages (desa) so they can use it immediately if desired
-        $regions = Region::where('type', 'desa')->get();
-        foreach ($regions as $region) {
-            $region->services()->syncWithoutDetaching([
+        // Hanya pasangkan ke Desa Pematang Duku Timur (desa aktif percontohan)
+        $desaPDT = Region::where('type', 'desa')->where('name', 'like', '%Pematang Duku Timur%')->first();
+        if ($desaPDT) {
+            $desaPDT->services()->syncWithoutDetaching([
                 $serviceMobil->id => ['is_active' => true],
                 $serviceFasilitas->id => ['is_active' => true],
             ]);

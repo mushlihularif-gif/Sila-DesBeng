@@ -3,25 +3,27 @@
         // Jika tidak ada region spesifik (misal diakses manual), tampilkan semua
         if (!$region) return true; 
         
-        // Pengumuman dan Pasar bersifat publik sentral
+        // Pengumuman dan Pasar bersifat publik sentral yang selalu aktif secara default
         if (in_array($name, ['Pengumuman dan Event', 'Pasar Daerah'])) return true;
 
         // Mapping nama tampilan ke nama layanan di database
         $map = [
-            'Unit Penyewaan Alat' => 'Penyewaan Alat',
-            'Unit Penjualan Gas' => 'Penjualan Gas',
-            'Unit Penyewaan Mobil' => 'Penyewaan Mobil',
-            'Unit Peminjaman Fasilitas Umum' => 'Peminjaman Fasilitas Umum',
-            'Pelaporan Warga' => 'Pelaporan Warga'
+            'Unit Penyewaan Alat' => ['Penyewaan Alat'],
+            'Unit Penjualan Gas' => ['Penjualan Gas'],
+            'Unit Penyewaan Mobil' => ['Penyewaan Mobil'],
+            'Unit Peminjaman Fasilitas Umum' => ['Peminjaman Fasilitas Umum', 'Fasilitas Umum'],
+            'Pelaporan Warga' => ['Pelaporan Warga']
         ];
         
-        $dbName = $map[$name] ?? $name;
-        
-        return in_array($dbName, $activeServices);
+        $dbNames = $map[$name] ?? [$name];
+        foreach ($dbNames as $dbName) {
+            if (in_array($dbName, $activeServices ?? [])) return true;
+        }
+        return false;
     };
 
     $activeCount = 0;
-    $allUnits = ['Unit Penyewaan Alat', 'Unit Penjualan Gas', 'Unit Penyewaan Mobil', 'Unit Peminjaman Fasilitas Umum', 'Pelaporan Warga', 'Pengumuman dan Event'];
+    $allUnits = ['Unit Penyewaan Alat', 'Unit Penjualan Gas', 'Unit Penyewaan Mobil', 'Unit Peminjaman Fasilitas Umum', 'Pasar Daerah', 'Pelaporan Warga', 'Pengumuman dan Event'];
     foreach ($allUnits as $unit) {
         if ($isServiceActive($unit)) $activeCount++;
     }
@@ -31,73 +33,79 @@
 
 @if($activeCount > 0)
             <!-- Unit Pelayanan Section -->
-            <div id="unit-carousel-container" class="max-w-7xl mx-auto px-6 py-16 overflow-hidden">
+            <div id="unit-carousel-container" class="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-16 overflow-hidden">
                 <div class="max-w-7xl mx-auto">
-                    <div class="text-center mb-16 relative">
-                        <h2 class="text-3xl font-bold mb-2">
+                    <div class="text-center mb-6 sm:mb-16 relative">
+                        <h2 class="text-2xl sm:text-3xl font-bold mb-2">
                             <span class="text-gray-800">Unit </span>
                             <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Pelayanan</span>
                         </h2>
                     </div>
 
-                    <div class="relative h-[400px] w-full flex justify-center items-center">
+                    <div class="relative w-full flex justify-center items-center unit-stage-wrapper">
                         <div class="relative w-full max-w-6xl mx-auto h-full">
 
                             @if($isServiceActive('Unit Penyewaan Alat'))
-                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="{{ $index++ }}" data-name="Unit Penyewaan Alat" onclick="window.location.href='{{ route('rental.equipment') . '?region_id=' . $region->id }}'">
+                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="{{ $index++ }}" data-name="Unit Penyewaan Alat" onclick="window.location.href='{{ route('rental.equipment') . ($region ? '?region_id=' . $region->id : '') }}'">
                                 <img src="{{ asset('User/img/elemen/F1.png') }}" alt="Alat">
                             </div>
                             @endif
 
                             @if($isServiceActive('Unit Penjualan Gas'))
-                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="{{ $index++ }}" data-name="Unit Penjualan Gas" onclick="window.location.href='{{ route('gas.sales') . '?region_id=' . $region->id }}'">
+                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="{{ $index++ }}" data-name="Unit Penjualan Gas" onclick="window.location.href='{{ route('gas.sales') . ($region ? '?region_id=' . $region->id : '') }}'">
                                 <img src="{{ asset('User/img/elemen/F2.png') }}" alt="Gas">
                             </div>
                             @endif
 
                             @if($isServiceActive('Unit Penyewaan Mobil'))
-                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="{{ $index++ }}" data-name="Unit Penyewaan Mobil" onclick="window.location.href='{{ route('mobil.rental.equipment') . '?region_id=' . $region->id }}'">
+                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="{{ $index++ }}" data-name="Unit Penyewaan Mobil" onclick="window.location.href='{{ route('mobil.rental.equipment') . ($region ? '?region_id=' . $region->id : '') }}'">
                                 <img src="{{ asset('User/img/elemen/mobil.png') }}" alt="Mobil">
                             </div>
                             @endif
 
                             @if($isServiceActive('Unit Peminjaman Fasilitas Umum'))
-                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="{{ $index++ }}" data-name="Unit Peminjaman Fasilitas Umum" onclick="window.location.href='{{ route('user.fasilitas-umum.equipment') . '?region_id=' . $region->id }}'">
+                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="{{ $index++ }}" data-name="Unit Peminjaman Fasilitas Umum" onclick="window.location.href='{{ route('user.fasilitas-umum.equipment') . ($region ? '?region_id=' . $region->id : '') }}'">
                                 <img src="{{ asset('User/img/elemen/fasilitas.png') }}" alt="Fasilitas">
+                            </div>
+                            @endif
+
+                            @if($isServiceActive('Pasar Daerah'))
+                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="{{ $index++ }}" data-name="Pasar Daerah" onclick="window.location.href='{{ route('pasar.index') . ($region ? '?region_id=' . $region->id : '') }}'">
+                                <img src="{{ asset('Admin/img/pasardaerah/PasarDaerah2.png') }}" alt="Pasar Daerah" onerror="this.src='{{ asset('User/img/elemen/F1.png') }}'">
                             </div>
                             @endif
                             
                             @if($isServiceActive('Pelaporan Warga'))
-                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="{{ $index++ }}" data-name="Pelaporan Warga" onclick="window.location.href='{{ route('pelaporan.landing') . '?region_id=' . $region->id }}'">
+                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="{{ $index++ }}" data-name="Pelaporan Warga" onclick="window.location.href='{{ route('pelaporan.landing') . ($region ? '?region_id=' . $region->id : '') }}'">
                                 <img src="{{ asset('User/img/elemen/lapor.png') }}" alt="Lapor">
                             </div>
                             @endif
 
                             @if($isServiceActive('Pengumuman dan Event'))
-                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="{{ $index++ }}" data-name="Kabar dan Informasi Daerah" onclick="window.location.href='{{ route('announcements.index') . '?region_id=' . $region->id }}'">
+                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="{{ $index++ }}" data-name="Kabar dan Informasi Daerah" onclick="window.location.href='{{ route('announcements.index') . ($region ? '?region_id=' . $region->id : '') }}'">
                                 <img src="{{ asset('User/img/elemen/KabardanInformasiDaerah.png') }}" alt="Event">
                             </div>
                             @endif
                         </div>
 
-                        <div class="absolute -bottom-6 left-0 right-0 flex items-center justify-center gap-4 md:gap-12 z-[60]">
+                        <div class="unit-nav-wrapper absolute -bottom-6 left-0 right-0 flex items-center justify-center gap-2 sm:gap-4 md:gap-12 z-[60] px-2 sm:px-4">
                             <button id="unit-prev"
-                                class="bg-white hover:bg-gray-50 text-gray-800 rounded-full p-3 shadow-lg border border-gray-100 transition-transform active:scale-95">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                class="bg-white hover:bg-gray-50 text-gray-800 rounded-full p-2 sm:p-3 shadow-lg border border-gray-100 transition-transform active:scale-95 flex-shrink-0">
+                                <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                                         d="M15 19l-7-7 7-7" />
                                 </svg>
                             </button>
 
-                            <div class="min-w-[300px] text-center">
+                            <div class="unit-title-box text-center min-w-0 flex-1 max-w-[240px] sm:max-w-none sm:min-w-[300px]">
                                 <h3 id="unit-title"
-                                    class="text-xl md:text-2xl font-bold text-black transition-all duration-300">
+                                    class="text-sm sm:text-xl md:text-2xl font-bold text-black transition-all duration-300 truncate">
                                 </h3>
                             </div>
 
                             <button id="unit-next"
-                                class="bg-white hover:bg-gray-50 text-gray-800 rounded-full p-3 shadow-lg border border-gray-100 transition-transform active:scale-95">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                class="bg-white hover:bg-gray-50 text-gray-800 rounded-full p-2 sm:p-3 shadow-lg border border-gray-100 transition-transform active:scale-95 flex-shrink-0">
+                                <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                                         d="M9 5l7 7-7 7" />
                                 </svg>

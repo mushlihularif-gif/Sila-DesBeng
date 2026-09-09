@@ -7,9 +7,9 @@
     * { font-family: 'Inter', sans-serif; }
     .btn-outline {
         display: inline-flex; align-items: center; justify-content: center;
-        padding: 20px 40px; font-size: 1.25rem; font-weight: 700;
+        padding: 16px 36px; font-size: 1.15rem; font-weight: 700;
         color: #2563eb; background: transparent;
-        border: 3px solid #2563eb; border-radius: 9999px;
+        border: 2.5px solid #2563eb; border-radius: 9999px;
         cursor: pointer; transition: all 0.5s ease;
         position: relative; overflow: hidden;
         text-decoration: none;
@@ -22,6 +22,15 @@
     .btn-outline:hover { color: #fff !important; }
     .btn-outline:hover::before { transform: translateY(0); }
     .btn-outline span { position: relative; z-index: 1; display: flex; align-items: center; gap: 8px; }
+
+    @media (max-width: 640px) {
+        .btn-outline {
+            padding: 12px 24px !important;
+            font-size: 0.95rem !important;
+            border-width: 2px !important;
+            max-width: 100% !important;
+        }
+    }
 </style>
 @endpush
 
@@ -36,19 +45,19 @@
     @endphp
 
     {{-- Hero Section --}}
-    <section class="relative z-10" style="padding-top: 12rem; padding-bottom: {{ $isJoined ? '2rem' : '8rem' }};">
-        <div class="max-w-7xl mx-auto px-6 text-center animate-section">
-            <h1 class="text-4xl md:text-5xl font-bold mb-4 animate-fade-in-up">
+    <section class="relative z-10 pt-28 sm:pt-48 pb-12 sm:pb-32">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 text-center animate-section">
+            <h1 class="text-2xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4 animate-fade-in-up">
                 <span class="bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">Peta Kemitraan </span>
                 <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">SiladesBeng</span>
             </h1>
 
             @if(!$isJoined)
-                <p class="text-gray-700 text-lg max-w-2xl mx-auto mb-6 animate-fade-in-up" style="animation-delay: 100ms;">
+                <p class="text-gray-700 text-sm sm:text-lg max-w-2xl mx-auto mb-4 sm:mb-6 animate-fade-in-up" style="animation-delay: 100ms;">
                     Wilayah desa Anda belum bergabung? Daftarkan sekarang!
                 </p>
                 
-                <p class="text-gray-500 text-sm max-w-2xl mx-auto mb-10 animate-fade-in-up bg-blue-50/50 p-3 rounded-xl border border-blue-100" style="animation-delay: 150ms;">
+                <p class="text-gray-500 text-xs sm:text-sm max-w-2xl mx-auto mb-6 sm:mb-10 animate-fade-in-up bg-blue-50/50 p-2.5 sm:p-3 rounded-xl border border-blue-100" style="animation-delay: 150ms;">
                     <span class="font-bold text-blue-600">Info:</span> Anda yang menjabat sebagai <strong>Ketua RT</strong> atau <strong>Ketua RW</strong> juga dapat menggunakan form ini untuk mengeklaim hak akses Admin di wilayah Anda.
                 </p>
             @else
@@ -192,8 +201,8 @@
     </script>
 
     {{-- Direktori Section --}}
-    <section class="relative z-10 pt-10 pb-32" style="margin-top: 1rem; margin-bottom: 5rem;">
-        <div class="max-w-7xl mx-auto px-6">
+    <section class="relative z-10 pt-4 sm:pt-10 pb-16 sm:pb-32 mt-2 sm:mt-4 mb-8 sm:mb-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6">
             @php
                 $totalJoined = 0;
                 foreach($kecamatans as $kecamatan) {
@@ -206,31 +215,31 @@
             @endphp
             
             {{-- Statistik Total Kabupaten --}}
-            <div class="mb-8 bg-white/60 backdrop-blur-md rounded-2xl border border-gray-100 p-6 flex flex-row items-center justify-between animate-section shadow-sm">
-                <div class="flex flex-col justify-center">
-                    <h2 class="text-2xl font-bold text-black mb-2" style="font-family: 'Poppins', sans-serif;">
+            <div class="mb-6 sm:mb-8 bg-white/60 backdrop-blur-md rounded-2xl border border-gray-100 p-4 sm:p-6 flex flex-row items-center justify-between animate-section shadow-sm gap-4">
+                <div class="flex flex-col justify-center min-w-0 flex-1">
+                    <h2 class="text-lg sm:text-2xl font-bold text-black mb-1 sm:mb-2 truncate" style="font-family: 'Poppins', sans-serif;">
                         Kabupaten Bengkalis
                     </h2>
-                    <p class="text-black text-sm font-semibold">
+                    <p class="text-gray-600 text-xs sm:text-sm font-semibold">
                         Total Desa / Kelurahan Bergabung
                     </p>
                 </div>
                 
-                <div class="bg-white/60 backdrop-blur-sm px-6 py-3 rounded-lg border shadow-sm flex items-center justify-center" style="border-color: #bfdbfe;">
-                    <span class="text-3xl font-bold text-blue-600" style="font-family: 'Poppins', sans-serif;">
+                <div class="bg-white/60 backdrop-blur-sm px-4 sm:px-6 py-2 sm:py-3 rounded-xl border shadow-sm flex items-center justify-center shrink-0" style="border-color: #bfdbfe;">
+                    <span class="text-2xl sm:text-3xl font-bold text-blue-600" style="font-family: 'Poppins', sans-serif;">
                         {{ $totalJoined }}
                     </span>
                 </div>
             </div>
 
-            <div class="space-y-12">
+            <div class="space-y-6 sm:space-y-12">
                 <div class="bg-white/60 backdrop-blur-md rounded-2xl shadow-sm border border-gray-100 overflow-hidden animate-section">
                     {{-- Header with Dropdown --}}
-                    <div class="bg-gradient-to-r from-gray-50 to-white px-6 py-4 border-b border-gray-100 flex flex-wrap justify-between items-center relative gap-4">
-                        <div class="flex items-center flex-1 min-w-0 max-w-lg">
-                            <svg class="w-7 h-7 text-blue-600 shrink-0" style="margin-right: 1.5rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                            <div class="relative w-full">
-                                <select id="kecamatan-selector" class="block w-full pl-6 pr-10 py-3 text-base md:text-lg font-bold text-gray-800 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#115789] focus:border-[#115789] cursor-pointer transition-colors" style="appearance: none; background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%234B5563%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right 0.75rem top 50%; background-size: 0.75rem auto; padding-left: 1.5rem;">
+                    <div class="bg-gradient-to-r from-gray-50 to-white px-3 sm:px-6 py-3 sm:py-4 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-stretch sm:items-center relative gap-2.5 sm:gap-4">
+                        <div class="flex items-center gap-2 sm:gap-3 flex-1 min-w-0 w-full">
+                            <svg class="w-5 h-5 sm:w-7 sm:h-7 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                            <div class="relative flex-1 min-w-0 w-full">
+                                <select id="kecamatan-selector" class="block w-full pl-3 sm:pl-6 pr-8 sm:pr-10 py-2 sm:py-3 text-xs sm:text-base md:text-lg font-bold text-gray-800 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#115789] focus:border-[#115789] cursor-pointer transition-colors truncate">
                                     @foreach($kecamatans as $kecamatan)
                                         <option value="{{ $kecamatan->id }}" class="text-gray-900 font-medium py-1">{{ $kecamatan->name }}</option>
                                     @endforeach
@@ -238,14 +247,14 @@
                             </div>
                         </div>
                         
-                        <div class="flex items-center shrink-0">
-                            <div class="text-sm font-medium px-4 py-1.5 rounded-full bg-blue-50 text-blue-700 border border-blue-100 shadow-sm">
-                                <span id="kecamatan-badge" class="font-bold text-base">0</span> Bergabung
+                        <div class="flex items-center justify-end sm:justify-start shrink-0">
+                            <div class="text-xs sm:text-sm font-medium px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-blue-50 text-blue-700 border border-blue-100 shadow-sm whitespace-nowrap">
+                                <span id="kecamatan-badge" class="font-bold text-sm sm:text-base">0</span> Bergabung
                             </div>
                         </div>
                     </div>
 
-                    <div class="p-6 relative min-h-[300px]">
+                    <div class="p-4 sm:p-6 relative min-h-[300px]">
                         @foreach($kecamatans as $index => $kecamatan)
                             @php
                                 $joinedCount = $kecamatan->children->filter(function($desa) {
@@ -256,7 +265,7 @@
                             @endphp
                             <div id="kecamatan-content-{{ $kecamatan->id }}" class="kecamatan-panel transition-opacity duration-300 {{ $index === 0 ? 'block opacity-100' : 'hidden opacity-0' }}" data-joined="{{ $joinedCount }}">
                         @if($joinedCount > 0)
-                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" style="gap: 2rem;">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
                                 @foreach($kecamatan->children as $desa)
                                 @if($desa->users->filter(function($user) { return in_array($user->role, ['admin_desa', 'admin']); })->count() > 0)
                                 <div class="bg-white/40 backdrop-blur-sm border border-gray-100 shadow-sm rounded-xl p-5 hover:shadow-md transition-all animate-section">

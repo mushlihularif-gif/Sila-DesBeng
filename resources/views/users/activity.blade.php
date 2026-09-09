@@ -20,65 +20,65 @@
                 </h1>
             </div>
 
-            <!-- Menu Pilihan -->
-            <div class="flex flex-col sm:flex-row justify-center gap-6 mb-10 items-center">
+            <!-- Menu Pilihan (Grid 3 Kolom di Mobile, Flex di Layar Lebar) -->
+            <div class="grid grid-cols-3 sm:flex sm:flex-row justify-center gap-2 sm:gap-6 mb-8 sm:mb-10 items-stretch sm:items-center">
                 <!-- Penyewaan Card -->
-                <div class="activity-menu-card active cursor-pointer" data-type="rental">
-                    <div class="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 w-48 text-center border-4 border-transparent">
-                        <div class="mb-3 flex justify-center">
-                            <img src="{{ asset('User/img/elemen/F1.png') }}" alt="Penyewaan" class="w-16 h-16 object-contain">
+                <div class="activity-menu-card active cursor-pointer w-full sm:w-auto" data-type="rental">
+                    <div class="bg-white rounded-xl sm:rounded-2xl p-2.5 sm:p-6 shadow-md sm:shadow-lg hover:shadow-xl transition-all duration-300 w-full sm:w-48 text-center border-2 sm:border-4 border-transparent flex flex-col justify-center items-center h-full">
+                        <div class="mb-1.5 sm:mb-3 flex justify-center">
+                            <img src="{{ asset('User/img/elemen/F1.png') }}" alt="Penyewaan" class="w-9 h-9 sm:w-16 sm:h-16 object-contain">
                         </div>
-                        <p class="font-bold text-lg text-gray-800">Penyewaan</p>
+                        <p class="font-bold text-xs sm:text-lg text-gray-800 leading-tight">Penyewaan</p>
                     </div>
                 </div>
 
                 <!-- Pesanan Gas Card -->
-                <div class="activity-menu-card cursor-pointer" data-type="gas">
-                    <div class="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 w-48 text-center border-4 border-transparent">
-                        <div class="mb-3 flex justify-center">
-                            <img src="{{ asset('User/img/elemen/F2.png') }}" alt="Pesanan Gas" class="w-16 h-16 object-contain">
+                <div class="activity-menu-card cursor-pointer w-full sm:w-auto" data-type="gas">
+                    <div class="bg-white rounded-xl sm:rounded-2xl p-2.5 sm:p-6 shadow-md sm:shadow-lg hover:shadow-xl transition-all duration-300 w-full sm:w-48 text-center border-2 sm:border-4 border-transparent flex flex-col justify-center items-center h-full">
+                        <div class="mb-1.5 sm:mb-3 flex justify-center">
+                            <img src="{{ asset('User/img/elemen/F2.png') }}" alt="Pesanan Gas" class="w-9 h-9 sm:w-16 sm:h-16 object-contain">
                         </div>
-                        <p class="font-bold text-lg text-gray-800">Pesanan Gas</p>
+                        <p class="font-bold text-xs sm:text-lg text-gray-800 leading-tight">Pesanan Gas</p>
                     </div>
                 </div>
 
                 <!-- Penyewaan Mobil Card -->
-                <div class="activity-menu-card cursor-pointer" data-type="mobil">
-                    <div class="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 w-48 text-center border-4 border-transparent">
-                        <div class="mb-3 flex justify-center">
-                            <img src="{{ asset('User/img/elemen/mobil.png') }}" alt="Sewa Mobil" class="w-16 h-16 object-contain">
+                <div class="activity-menu-card cursor-pointer w-full sm:w-auto" data-type="mobil">
+                    <div class="bg-white rounded-xl sm:rounded-2xl p-2.5 sm:p-6 shadow-md sm:shadow-lg hover:shadow-xl transition-all duration-300 w-full sm:w-48 text-center border-2 sm:border-4 border-transparent flex flex-col justify-center items-center h-full">
+                        <div class="mb-1.5 sm:mb-3 flex justify-center">
+                            <img src="{{ asset('User/img/elemen/mobil.png') }}" alt="Sewa Mobil" class="w-9 h-9 sm:w-16 sm:h-16 object-contain">
                         </div>
-                        <p class="font-bold text-lg text-gray-800">Sewa Mobil</p>
+                        <p class="font-bold text-xs sm:text-lg text-gray-800 leading-tight">Sewa Mobil</p>
                     </div>
                 </div>
 
                 <!-- Fasilitas Umum Card -->
-                <div class="activity-menu-card cursor-pointer" data-type="fasilitas">
-                    <div class="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 w-48 text-center border-4 border-transparent">
-                        <div class="mb-3 flex justify-center">
-                            <img src="{{ asset('User/img/elemen/fasilitas.png') }}" alt="Fasilitas Umum" class="w-16 h-16 object-contain">
+                <div class="activity-menu-card cursor-pointer w-full sm:w-auto" data-type="fasilitas">
+                    <div class="bg-white rounded-xl sm:rounded-2xl p-2.5 sm:p-6 shadow-md sm:shadow-lg hover:shadow-xl transition-all duration-300 w-full sm:w-48 text-center border-2 sm:border-4 border-transparent flex flex-col justify-center items-center h-full">
+                        <div class="mb-1.5 sm:mb-3 flex justify-center">
+                            <img src="{{ asset('User/img/elemen/fasilitas.png') }}" alt="Fasilitas Umum" class="w-9 h-9 sm:w-16 sm:h-16 object-contain">
                         </div>
-                        <p class="font-bold text-lg text-gray-800">Fasilitas Umum</p>
+                        <p class="font-bold text-xs sm:text-lg text-gray-800 leading-tight">Fasilitas Umum</p>
                     </div>
                 </div>
                 
                 <!-- Pasar Daerah Card -->
-                <div class="activity-menu-card cursor-pointer" data-type="pasar">
-                    <div class="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 w-48 text-center border-4 border-transparent">
-                        <div class="mb-3 flex justify-center">
-                            <img src="{{ asset('Admin/img/pasardaerah/PasarDaerah2.png') }}" alt="Pasar Daerah" class="w-16 h-16 object-contain">
+                <div class="activity-menu-card cursor-pointer w-full sm:w-auto" data-type="pasar">
+                    <div class="bg-white rounded-xl sm:rounded-2xl p-2.5 sm:p-6 shadow-md sm:shadow-lg hover:shadow-xl transition-all duration-300 w-full sm:w-48 text-center border-2 sm:border-4 border-transparent flex flex-col justify-center items-center h-full">
+                        <div class="mb-1.5 sm:mb-3 flex justify-center">
+                            <img src="{{ asset('Admin/img/pasardaerah/PasarDaerah2.png') }}" alt="Pasar Daerah" class="w-9 h-9 sm:w-16 sm:h-16 object-contain">
                         </div>
-                        <p class="font-bold text-lg text-gray-800">Pasar Daerah</p>
+                        <p class="font-bold text-xs sm:text-lg text-gray-800 leading-tight">Pasar Daerah</p>
                     </div>
                 </div>
 
                 <!-- Pelaporan Warga Card -->
-                <div class="activity-menu-card cursor-pointer" data-type="laporan">
-                    <div class="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 w-48 text-center border-4 border-transparent">
-                        <div class="mb-3 flex justify-center">
-                            <img src="{{ asset('User/img/elemen/lapor.png') }}" alt="Laporan Warga" class="w-16 h-16 object-contain">
+                <div class="activity-menu-card cursor-pointer w-full sm:w-auto" data-type="laporan">
+                    <div class="bg-white rounded-xl sm:rounded-2xl p-2.5 sm:p-6 shadow-md sm:shadow-lg hover:shadow-xl transition-all duration-300 w-full sm:w-48 text-center border-2 sm:border-4 border-transparent flex flex-col justify-center items-center h-full">
+                        <div class="mb-1.5 sm:mb-3 flex justify-center">
+                            <img src="{{ asset('User/img/elemen/lapor.png') }}" alt="Laporan Warga" class="w-9 h-9 sm:w-16 sm:h-16 object-contain">
                         </div>
-                        <p class="font-bold text-lg text-gray-800">Laporan Warga</p>
+                        <p class="font-bold text-xs sm:text-lg text-gray-800 leading-tight">Laporan Warga</p>
                     </div>
                 </div>
             </div>

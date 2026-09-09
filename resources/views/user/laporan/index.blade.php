@@ -117,6 +117,17 @@
     .stat-bar-fill.purple { background: linear-gradient(to right, #c084fc, #ec4899); }
     .stat-bar-fill.green { background: linear-gradient(to right, #4ade80, #059669); }
     @keyframes progress { from { width: 0; } to { width: 100%; } }
+
+    @media (max-width: 768px) {
+        .stat-card { padding: 14px !important; border-radius: 12px !important; }
+        .stat-icon { width: 42px !important; height: 42px !important; font-size: 1.35rem !important; border-radius: 10px !important; }
+        .stat-icon-wrap { margin-bottom: 6px !important; }
+        .stat-value { font-size: 1.4rem !important; margin-bottom: 2px !important; }
+        .stat-label { font-size: 0.72rem !important; }
+        .stat-bar { margin-top: 6px !important; height: 4px !important; }
+        .hero-title { font-size: 1.5rem !important; margin-bottom: 16px !important; }
+        .btn-outline { padding: 8px 16px !important; font-size: 0.85rem !important; }
+    }
 </style>
 @endpush
 

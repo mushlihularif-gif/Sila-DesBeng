@@ -23,24 +23,24 @@
             </div>
 
             {{-- Tabs (Cards Style) --}}
-            <div class="flex flex-col sm:flex-row justify-center gap-6 mb-12 items-center animate-section">
+            <div class="grid grid-cols-2 gap-3 sm:gap-6 max-w-md sm:max-w-none mx-auto sm:flex sm:flex-row justify-center mb-8 sm:mb-12 items-center animate-section">
                 <!-- Berita Terbaru Card -->
-                <div class="tab-btn focus:outline-none cursor-pointer" data-tab="berita">
-                    <div id="tab-card-berita" class="tab-card bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 w-64 h-48 flex flex-col justify-center items-center text-center border-4 border-transparent {{ $activeTab === 'berita' ? 'active' : '' }}">
-                        <div class="mb-4 flex justify-center">
-                            <img src="{{ asset('Admin/img/kabardaerah/Berita.png') }}" alt="Berita Daerah" class="w-20 h-20 object-contain">
+                <div class="tab-btn focus:outline-none cursor-pointer w-full sm:w-auto" data-tab="berita">
+                    <div id="tab-card-berita" class="tab-card bg-white rounded-xl sm:rounded-2xl p-3 sm:p-6 shadow-md sm:shadow-lg hover:shadow-xl transition-all duration-300 w-full sm:w-64 h-28 sm:h-48 flex flex-col justify-center items-center text-center border-2 sm:border-4 border-transparent {{ $activeTab === 'berita' ? 'active' : '' }}">
+                        <div class="mb-1.5 sm:mb-4 flex justify-center">
+                            <img src="{{ asset('Admin/img/kabardaerah/Berita.png') }}" alt="Berita Daerah" class="w-10 h-10 sm:w-20 sm:h-20 object-contain">
                         </div>
-                        <p class="font-bold text-lg text-gray-800 w-full whitespace-nowrap">Berita Daerah</p>
+                        <p class="font-bold text-xs sm:text-lg text-gray-800 w-full whitespace-nowrap">Berita Daerah</p>
                     </div>
                 </div>
                 
                 <!-- Pengumuman Warga Card -->
-                <div class="tab-btn focus:outline-none cursor-pointer" data-tab="pengumuman">
-                    <div id="tab-card-pengumuman" class="tab-card bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 w-64 h-48 flex flex-col justify-center items-center text-center border-4 border-transparent {{ $activeTab === 'pengumuman' ? 'active' : '' }}">
-                        <div class="mb-4 flex justify-center">
-                            <img src="{{ asset('Admin/img/kabardaerah/Pengumuman1.png') }}" alt="Pengumuman" class="w-20 h-20 object-contain">
+                <div class="tab-btn focus:outline-none cursor-pointer w-full sm:w-auto" data-tab="pengumuman">
+                    <div id="tab-card-pengumuman" class="tab-card bg-white rounded-xl sm:rounded-2xl p-3 sm:p-6 shadow-md sm:shadow-lg hover:shadow-xl transition-all duration-300 w-full sm:w-64 h-28 sm:h-48 flex flex-col justify-center items-center text-center border-2 sm:border-4 border-transparent {{ $activeTab === 'pengumuman' ? 'active' : '' }}">
+                        <div class="mb-1.5 sm:mb-4 flex justify-center">
+                            <img src="{{ asset('Admin/img/kabardaerah/Pengumuman1.png') }}" alt="Pengumuman" class="w-10 h-10 sm:w-20 sm:h-20 object-contain">
                         </div>
-                        <p class="font-bold text-lg text-gray-800 w-full whitespace-nowrap">Pengumuman</p>
+                        <p class="font-bold text-xs sm:text-lg text-gray-800 w-full whitespace-nowrap">Pengumuman</p>
                     </div>
                 </div>
             </div>

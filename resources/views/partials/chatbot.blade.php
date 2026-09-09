@@ -309,20 +309,27 @@
     }
     
     /* Mobile adjustments */
-    @media (max-width: 480px) {
+    @media (max-width: 768px) {
         .chatbot-window {
-            width: calc(100% - 40px);
-            right: 20px;
-            bottom: 90px;
-            height: calc(100vh - 120px);
-            max-height: 600px;
+            width: calc(100% - 24px) !important;
+            right: 12px !important;
+            bottom: 68px !important;
+            height: calc(100vh - 100px) !important;
+            max-height: 500px !important;
         }
         
         .chatbot-fab {
-            bottom: 20px;
-            right: 20px;
-            width: 55px;
-            height: 55px;
+            bottom: 14px !important;
+            right: 14px !important;
+            width: 44px !important;
+            height: 44px !important;
+        }
+
+        .chatbot-tooltip {
+            display: none !important;
+            opacity: 0 !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
         }
     }
 </style>

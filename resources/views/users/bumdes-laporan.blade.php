@@ -2,7 +2,7 @@
 
 @section('page')
 <main class="flex-grow relative w-full">
-    <section class="relative z-10 min-h-screen pt-40 pb-16">
+    <section class="relative z-10 min-h-screen pt-28 sm:pt-40 pb-28 sm:pb-16">
         <!-- Animated Background Wrapper -->
         <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
             <div id="animated-bg" class="absolute inset-0 bg-cover bg-top bg-no-repeat opacity-0 scale-105 transition-all duration-1000 ease-out" 
@@ -12,129 +12,129 @@
             <div class="absolute inset-0 bg-white/25"></div>
         </div>
 
-        <div id="main-content" class="max-w-6xl mx-auto px-6 relative z-20">
+        <div id="main-content" class="max-w-6xl mx-auto px-4 sm:px-6 relative z-20">
             
             <!-- Header Section -->
-            <div class="text-center mb-16 animate-section">
-                <h1 class="text-4xl md:text-5xl font-bold mb-4 pb-2 bg-gradient-to-r from-[#1a1a1a] via-[#0099ff] to-[#33b5ff] bg-clip-text text-transparent">
+            <div class="text-center mb-8 sm:mb-16 animate-section">
+                <h1 class="text-2xl sm:text-4xl md:text-5xl font-bold mb-2 sm:mb-4 pb-1 sm:pb-2 bg-gradient-to-r from-[#1a1a1a] via-[#0099ff] to-[#33b5ff] bg-clip-text text-transparent">
                     Laporan Layanan Daerah
                 </h1>
-                <p class="text-lg text-gray-700">
+                <p class="text-sm sm:text-lg text-gray-700">
                     Laporan kinerja dan aktivitas Layanan Daerah
                 </p>
             </div>
 
-            <!-- Desa Section Header -->
-            <div class="mb-12 animate-section">
-                <h2 class="text-2xl md:text-3xl font-bold text-gray-900 text-center mb-2">
+            <!-- Regional Hierarchy Section -->
+            <div class="mb-8 sm:mb-16 animate-section">
+                <h2 class="text-xl sm:text-3xl md:text-4xl font-bold text-center text-gray-800 mb-1 sm:mb-2">
                     Kabupaten Bengkalis
                 </h2>
-                <h3 class="text-xl md:text-2xl font-bold text-center pb-2 bg-gradient-to-r from-[#1a1a1a] via-[#0099ff] to-[#33b5ff] bg-clip-text text-transparent mb-8">
+                <h3 class="text-base sm:text-xl md:text-2xl font-bold text-center pb-2 bg-gradient-to-r from-[#1a1a1a] via-[#0099ff] to-[#33b5ff] bg-clip-text text-transparent mb-4 sm:mb-8">
                     Grafik Umum
                 </h3>
 
                 <!-- Global Filters -->
-                <div class="max-w-5xl mx-auto flex flex-col md:flex-row justify-center items-center gap-4 bg-white/40 backdrop-blur-md p-4 rounded-2xl border border-gray-200 shadow-sm">
-                    <div class="px-4 py-3 text-sm border border-gray-300 rounded-xl bg-white/80 backdrop-blur-md text-gray-800 font-bold flex items-center justify-center cursor-not-allowed shadow-sm" style="min-width: 200px;">
+                <div class="max-w-5xl mx-auto flex flex-col sm:flex-row justify-center items-stretch sm:items-center gap-2 sm:gap-4 bg-white/40 backdrop-blur-md p-2.5 sm:p-4 rounded-2xl border border-gray-200 shadow-sm w-full">
+                    <div class="w-full sm:w-auto px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm border border-gray-300 rounded-xl bg-white/80 backdrop-blur-md text-gray-800 font-bold flex items-center justify-center cursor-not-allowed shadow-sm sm:min-w-[180px]">
                         Kabupaten Bengkalis
                     </div>
                     
-                    <div class="relative inline-block" style="min-width: 250px;">
-                        <select id="kecamatanSelect" class="w-full appearance-none px-4 py-3 pr-10 text-sm border border-gray-300 rounded-xl bg-white/80 backdrop-blur-md text-gray-800 font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 hover:bg-white transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm">
+                    <div class="relative w-full sm:w-auto sm:min-w-[220px]">
+                        <select id="kecamatanSelect" class="w-full appearance-none px-3 sm:px-4 py-2 sm:py-3 pr-8 sm:pr-10 text-xs sm:text-sm border border-gray-300 rounded-xl bg-white/80 backdrop-blur-md text-gray-800 font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 hover:bg-white transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm">
                             <option value="all">Semua Kecamatan</option>
                             @foreach($kecamatans as $kec)
                                 <option value="{{ $kec->id }}" {{ $kecamatanId == $kec->id ? 'selected' : '' }}>{{ $kec->name }}</option>
                             @endforeach
                         </select>
-                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-600">
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 sm:px-4 text-gray-600">
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </div>
                     </div>
 
-                    <div class="relative inline-block" style="min-width: 240px;">
-                        <select id="desaSelect" class="w-full appearance-none px-4 py-3 pr-10 text-sm border border-gray-300 rounded-xl bg-white/80 backdrop-blur-md text-gray-800 font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 hover:bg-white transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm" {{ $kecamatanId === 'all' ? 'disabled' : '' }}>
+                    <div class="relative w-full sm:w-auto sm:min-w-[220px]">
+                        <select id="desaSelect" class="w-full appearance-none px-3 sm:px-4 py-2 sm:py-3 pr-8 sm:pr-10 text-xs sm:text-sm border border-gray-300 rounded-xl bg-white/80 backdrop-blur-md text-gray-800 font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 hover:bg-white transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm" {{ $kecamatanId === 'all' ? 'disabled' : '' }}>
                             <option value="all">Semua Kelurahan/Desa</option>
                             @foreach($desas as $desa)
                                 <option value="{{ $desa->id }}" {{ $desaId == $desa->id ? 'selected' : '' }}>{{ $desa->name }}</option>
                             @endforeach
                         </select>
-                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-600">
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 sm:px-4 text-gray-600">
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </div>
                     </div>
 
-                    <div class="relative inline-block" style="min-width: 120px;">
-                        <select id="globalYearSelect" translate="no" class="w-full appearance-none px-4 py-3 pr-10 text-sm border border-gray-300 rounded-xl bg-white/80 backdrop-blur-md text-gray-800 font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 hover:bg-white transition-all shadow-sm">
+                    <div class="relative w-full sm:w-auto sm:min-w-[110px]">
+                        <select id="globalYearSelect" translate="no" class="w-full appearance-none px-3 sm:px-4 py-2 sm:py-3 pr-8 sm:pr-10 text-xs sm:text-sm border border-gray-300 rounded-xl bg-white/80 backdrop-blur-md text-gray-800 font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 hover:bg-white transition-all shadow-sm">
                             @foreach($availableYears as $optYear)
                                 <option value="{{ $optYear }}" {{ $optYear == $year ? 'selected' : '' }}>{{ $optYear }}</option>
                             @endforeach
                         </select>
-                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-600">
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 sm:px-4 text-gray-600">
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Kinerja BUMDes Chart -->
-            <div class="mb-16 animate-section">
-                <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-lg p-8 border border-gray-200">
-                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-                        <h3 class="text-xl font-bold mb-3 md:mb-0">
+            <!-- Kinerja Chart -->
+            <div class="mb-12 sm:mb-16 animate-section">
+                <div class="bg-white/80 backdrop-blur-sm rounded-2xl sm:rounded-3xl shadow-lg p-4 sm:p-8 border border-gray-200">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 sm:mb-6">
+                        <h3 class="text-base sm:text-xl font-bold mb-2 md:mb-0">
                             <span class="text-gray-900">Persentase Pendapatan </span>
                             <span class="bg-gradient-to-r from-[#1a1a1a] via-[#0099ff] to-[#33b5ff] bg-clip-text text-transparent pb-1">Unit Pelayanan Daerah</span>
                         </h3>
                     </div>
-                    <div class="bg-white/50 backdrop-blur-sm rounded-2xl p-5 border border-gray-100" style="min-height: 340px;">
+                    <div class="bg-white/50 backdrop-blur-sm rounded-xl sm:rounded-2xl p-2 sm:p-5 border border-gray-100 min-h-[220px] sm:min-h-[340px]">
                         <div id="kinerjaChart" data-chart='@json($kinerjaData)'></div>
                     </div>
-                    <p class="text-sm text-gray-600 mt-4 leading-relaxed">
+                    <p class="text-xs sm:text-sm text-gray-600 mt-4 leading-relaxed">
                         Grafik menunjukkan perkembangan tingkat aktivitas secara unit Layanan Daerah Kabupaten Bengkalis. Data diambil dari total pendapatan per bulan. Informasi ini membantu dalam memahami tren kinerja dan mengidentifikasi area yang perlu ditingkatkan.
                     </p>
                 </div>
             </div>
 
             <!-- Unit Populer Chart -->
-            <div class="mb-16 animate-section">
-                <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-lg p-8 border border-gray-200">
-                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-                        <h3 class="text-xl font-bold mb-3 md:mb-0">
+            <div class="mb-12 sm:mb-16 animate-section">
+                <div class="bg-white/80 backdrop-blur-sm rounded-2xl sm:rounded-3xl shadow-lg p-4 sm:p-8 border border-gray-200">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 sm:mb-6">
+                        <h3 class="text-base sm:text-xl font-bold mb-2 md:mb-0">
                             <span class="text-gray-900">Unit </span>
                             <span class="bg-gradient-to-r from-[#1a1a1a] via-[#0099ff] to-[#33b5ff] bg-clip-text text-transparent pb-1">Populer</span>
                         </h3>
                     </div>
-                    <div class="bg-white/50 backdrop-blur-sm rounded-2xl p-5 mb-5 border border-gray-100" style="min-height: 340px;">
+                    <div class="bg-white/50 backdrop-blur-sm rounded-xl sm:rounded-2xl p-2 sm:p-5 mb-4 sm:mb-5 border border-gray-100 min-h-[220px] sm:min-h-[340px]">
                         <div id="unitChart" data-chart='@json($unitPopulerData)'></div>
                     </div>
-                    <!-- Legend - 6 Units -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-8 text-sm w-fit mx-auto mb-4">
-                        <div class="flex items-center gap-2">
-                            <div class="w-3 h-3 rounded-sm" style="background-color: #f59e0b;"></div>
-                            <span class="text-gray-700 font-medium">Unit Penyewaan Alat</span>
+                    <!-- Legend - 7 Units -->
+                    <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-y-2 sm:gap-y-3 gap-x-2 sm:gap-x-6 text-[11px] sm:text-sm w-full sm:w-fit mx-auto mb-4">
+                        <div class="flex items-center gap-1.5 sm:gap-2">
+                            <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm flex-shrink-0" style="background-color: #f59e0b;"></div>
+                            <span class="text-gray-700 font-medium truncate">Unit Penyewaan Alat</span>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <div class="w-3 h-3 rounded-sm" style="background-color: #3b82f6;"></div>
-                            <span class="text-gray-700 font-medium">Unit Penjualan Gas</span>
+                        <div class="flex items-center gap-1.5 sm:gap-2">
+                            <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm flex-shrink-0" style="background-color: #3b82f6;"></div>
+                            <span class="text-gray-700 font-medium truncate">Unit Penjualan Gas</span>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <div class="w-3 h-3 rounded-sm" style="background-color: #10b981;"></div>
-                            <span class="text-gray-700 font-medium">Unit Peminjaman Mobil</span>
+                        <div class="flex items-center gap-1.5 sm:gap-2">
+                            <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm flex-shrink-0" style="background-color: #10b981;"></div>
+                            <span class="text-gray-700 font-medium truncate">Unit Peminjaman Mobil</span>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <div class="w-3 h-3 rounded-sm" style="background-color: #8b5cf6;"></div>
-                            <span class="text-gray-700 font-medium">Unit Fasilitas Umum</span>
+                        <div class="flex items-center gap-1.5 sm:gap-2">
+                            <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm flex-shrink-0" style="background-color: #8b5cf6;"></div>
+                            <span class="text-gray-700 font-medium truncate">Unit Fasilitas Umum</span>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <div class="w-3 h-3 rounded-sm" style="background-color: #ef4444;"></div>
-                            <span class="text-gray-700 font-medium">Pelaporan Warga</span>
+                        <div class="flex items-center gap-1.5 sm:gap-2">
+                            <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm flex-shrink-0" style="background-color: #ef4444;"></div>
+                            <span class="text-gray-700 font-medium truncate">Pelaporan Warga</span>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <div class="w-3 h-3 rounded-sm" style="background-color: #06b6d4;"></div>
-                            <span class="text-gray-700 font-medium">Kabar dan Informasi Daerah</span>
+                        <div class="flex items-center gap-1.5 sm:gap-2">
+                            <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm flex-shrink-0" style="background-color: #06b6d4;"></div>
+                            <span class="text-gray-700 font-medium truncate">Kabar & Info Daerah</span>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <div class="w-3 h-3 rounded-sm" style="background-color: #ec4899;"></div>
-                            <span class="text-gray-700 font-medium">Pasar Daerah</span>
+                        <div class="flex items-center gap-1.5 sm:gap-2 col-span-2 sm:col-span-1">
+                            <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm flex-shrink-0" style="background-color: #ec4899;"></div>
+                            <span class="text-gray-700 font-medium truncate">Pasar Daerah</span>
                         </div>
                     </div>
                     <p class="text-sm text-gray-600 leading-relaxed mt-2">
@@ -503,6 +503,12 @@
             return;
         }
 
+        const shortMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+        const isSmallScreen = window.innerWidth < 1024;
+        const categories = isSmallScreen 
+            ? (chartData.categories.length === 12 ? shortMonths : chartData.categories.map(c => c.length > 3 ? c.substring(0, 3) : c))
+            : chartData.categories;
+
         const options = {
             series: [{
                 name: 'Indeks Poin',
@@ -510,7 +516,7 @@
             }],
             chart: {
                 type: 'area',
-                height: 300,
+                height: isSmallScreen ? 230 : 300,
                 toolbar: { show: false },
                 zoom: { enabled: false },
                 background: 'transparent'
@@ -535,13 +541,17 @@
                 hover: { size: 6 }
             },
             xaxis: {
-                categories: chartData.categories,
+                categories: categories,
                 labels: {
                     style: {
                         colors: '#374151',
-                        fontSize: '12px',
+                        fontSize: isSmallScreen ? '10px' : '12px',
                         fontWeight: 500
-                    }
+                    },
+                    rotate: isSmallScreen ? -40 : 0,
+                    rotateAlways: isSmallScreen,
+                    hideOverlappingLabels: false,
+                    trim: false
                 },
                 axisBorder: { show: false },
                 axisTicks: { show: false }
@@ -582,6 +592,12 @@
             return;
         }
 
+        const shortMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+        const isSmallScreen = window.innerWidth < 1024;
+        const categories = isSmallScreen 
+            ? (chartData.categories.length === 12 ? shortMonths : chartData.categories.map(c => c.length > 3 ? c.substring(0, 3) : c))
+            : chartData.categories;
+
         const options = {
             series: [
                 {
@@ -615,7 +631,7 @@
             ],
             chart: {
                 type: 'bar',
-                height: 300,
+                height: isSmallScreen ? 230 : 300,
                 toolbar: { show: false },
                 stacked: false,
                 background: 'transparent'
@@ -624,19 +640,23 @@
             plotOptions: {
                 bar: {
                     horizontal: false,
-                    columnWidth: '50%',
+                    columnWidth: isSmallScreen ? '70%' : '50%',
                     borderRadius: 4
                 }
             },
             dataLabels: { enabled: false },
             xaxis: {
-                categories: chartData.categories,
+                categories: categories,
                 labels: {
                     style: {
                         colors: '#374151',
-                        fontSize: '12px',
+                        fontSize: isSmallScreen ? '10px' : '12px',
                         fontWeight: 500
-                    }
+                    },
+                    rotate: isSmallScreen ? -40 : 0,
+                    rotateAlways: isSmallScreen,
+                    hideOverlappingLabels: false,
+                    trim: false
                 },
                 axisBorder: { show: false },
                 axisTicks: { show: false }
@@ -694,7 +714,7 @@
             series: [rentalPercentage, gasPercentage, mobilPercentage, fasilitasPercentage, pasarPercentage],
             chart: {
                 type: 'pie',
-                height: 280
+                height: window.innerWidth < 640 ? 220 : 280
             },
             labels: ['Penyewaan Alat', 'Penjualan Gas', 'Peminjaman Mobil', 'Fasilitas Umum', 'Pasar Daerah'],
             colors: ['#f59e0b', '#3b82f6', '#10b981', '#8b5cf6', '#ec4899'],

@@ -61,11 +61,11 @@
             </div>
 
             <!-- Village Selection Card -->
-            <div class="max-w-3xl mx-auto mb-16 animate-section">
-                <div class="backdrop-blur-sm bg-white/70 rounded-2xl p-6 border border-white/80 shadow-lg hover:shadow-xl transition-all duration-300">
+            <div class="max-w-3xl mx-auto mb-12 sm:mb-16 animate-section">
+                <div class="backdrop-blur-sm bg-white/70 rounded-xl sm:rounded-2xl p-3.5 sm:p-6 border border-white/80 shadow-md sm:shadow-lg hover:shadow-xl transition-all duration-300">
                     <div class="flex items-center justify-between">
-                        <h3 class="text-xl font-bold text-gray-800">Desa Pematang Duku Timur</h3>
-                        <button onclick="selectBumdes()" class="px-8 py-2.5 bg-white text-[#0099ff] font-semibold rounded-full border-2 border-gray-300 hover:bg-gray-50 hover:shadow-lg transition-all duration-300">
+                        <h3 class="text-base sm:text-xl font-bold text-gray-800">Desa Pematang Duku Timur</h3>
+                        <button onclick="selectBumdes()" class="px-5 sm:px-8 py-1.5 sm:py-2.5 bg-white text-[#0099ff] font-semibold text-xs sm:text-base rounded-full border-2 border-gray-300 hover:bg-gray-50 hover:shadow-lg transition-all duration-300">
                             Pilih
                         </button>
                     </div>
@@ -73,16 +73,16 @@
             </div>
 
             <!-- BUMDes Section -->
-            <div class="mb-16 animate-section">
-                <div class="text-left mb-8">
-                    <h2 class="text-3xl md:text-4xl font-bold">
+            <div class="mb-12 sm:mb-16 animate-section">
+                <div class="text-left mb-6 sm:mb-8">
+                    <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold">
                         <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">BUMDes</span>
                     </h2>
                 </div>
 
                 <!-- BUMDes Description Card -->
-                <div class="backdrop-blur-sm bg-white/70 rounded-3xl p-8 md:p-12 border border-white/80 shadow-xl">
-                    <div class="text-gray-700 text-base leading-relaxed text-justify space-y-4">
+                <div class="backdrop-blur-sm bg-white/70 rounded-2xl sm:rounded-3xl p-4 sm:p-8 md:p-12 border border-white/80 shadow-xl">
+                    <div class="text-gray-700 text-xs sm:text-base leading-relaxed text-justify space-y-4">
                         <p>
                             BUMDes (Badan Usaha Milik Desa) merupakan lembaga ekonomi desa yang dibentuk oleh pemerintah desa untuk mengelola potensi dan aset yang dimiliki desa guna meningkatkan kesejahteraan masyarakat. Melalui BUMDes, berbagai kegiatan usaha dapat dijalankan secara mandiri oleh desa, seperti penyewaan alat, perdagangan hasil pertanian, simpan pinjam, hingga penyediaan layanan publik berbasis desa. Kehadiran BUMDes menjadi sarana penting dalam memperkuat ekonomi desa, mengurangi ketergantungan terhadap pihak luar, serta membuka peluang usaha dan lapangan kerja bagi masyarakat desa. Dengan sistem yang terkelola secara transparan, BUMDes menjadi motor penggerak ekonomi yang mendorong kemandirian desa menuju pembangunan yang berkelanjutan.
                         </p>

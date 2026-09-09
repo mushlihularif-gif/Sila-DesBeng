@@ -33,17 +33,17 @@
             <div class="space-y-6">
                 {{-- Service 1: Unit Penyewaan Alat --}}
                 <div
-                    class="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-md hover:shadow-xl transition-all duration-300 border border-white/50 animate-section">
-                    <div class="flex flex-col md:flex-row gap-8 items-start">
+                    class="bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-8 shadow-md hover:shadow-xl transition-all duration-300 border border-white/50 animate-section">
+                    <div class="flex flex-col sm:flex-row gap-4 sm:gap-8 items-center sm:items-start">
                         <div class="flex-shrink-0">
-                            <div class="w-32 h-32 flex items-center justify-center">
+                            <div class="w-20 h-20 sm:w-32 sm:h-32 flex items-center justify-center">
                                 <img src="{{ asset('User/img/elemen/F0.png') }}" alt="Unit Penyewaan Alat"
                                     class="w-full h-full object-contain drop-shadow-md">
                             </div>
                         </div>
                         <div class="flex-1">
-                            <h3 class="text-2xl font-bold text-gray-900 mb-4">Unit Penyewaan Alat</h3>
-                            <p class="text-gray-700 leading-relaxed text-justify">
+                            <h3 class="text-lg sm:text-2xl font-bold text-gray-900 mb-2 sm:mb-4 text-center sm:text-left">Unit Penyewaan Alat</h3>
+                            <p class="text-xs sm:text-base text-gray-700 leading-relaxed text-justify">
                                 Masyarakat dapat melakukan pemesanan sewa alat seperti tenda, kursi, meja, sound system, dan
                                 diesel secara online. Sistem menampilkan ketersediaan alat secara real-time, harga sewa yang
                                 transparan, serta bukti transaksi digital. Hal ini membantu menghindari bentrok jadwal dan
@@ -55,17 +55,17 @@
 
                 {{-- Service 2: Pelaporan dan Monitoring Usaha --}}
                 <div
-                    class="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-md hover:shadow-xl transition-all duration-300 border border-white/50 animate-section">
-                    <div class="flex flex-col md:flex-row gap-8 items-start">
+                    class="bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-8 shadow-md hover:shadow-xl transition-all duration-300 border border-white/50 animate-section">
+                    <div class="flex flex-col sm:flex-row gap-4 sm:gap-8 items-center sm:items-start">
                         <div class="flex-shrink-0">
-                            <div class="w-32 h-32 flex items-center justify-center">
+                            <div class="w-20 h-20 sm:w-32 sm:h-32 flex items-center justify-center">
                                 <img src="{{ asset('User/img/elemen/C2.png') }}" alt="Pelaporan dan Monitoring Usaha"
                                     class="w-full h-full object-contain drop-shadow-md">
                             </div>
                         </div>
                         <div class="flex-1">
-                            <h3 class="text-2xl font-bold text-gray-900 mb-4">Pelaporan dan Monitoring Usaha</h3>
-                            <p class="text-gray-700 leading-relaxed text-justify">
+                            <h3 class="text-lg sm:text-2xl font-bold text-gray-900 mb-2 sm:mb-4 text-center sm:text-left">Pelaporan dan Monitoring Usaha</h3>
+                            <p class="text-xs sm:text-base text-gray-700 leading-relaxed text-justify">
                                 Laporan keuangan, laporan transaksi, serta kinerja unit usaha secara otomatis dan real-time.
                                 Sistem ini membantu meningkatkan akuntabilitas dan mempermudah evaluasi pengelolaan dana
                                 daerah
@@ -77,17 +77,17 @@
 
                 {{-- Service 3: Penjualan Gas Daerah --}}
                 <div
-                    class="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-md hover:shadow-xl transition-all duration-300 border border-white/50 animate-section">
-                    <div class="flex flex-col md:flex-row gap-8 items-start">
+                    class="bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-8 shadow-md hover:shadow-xl transition-all duration-300 border border-white/50 animate-section">
+                    <div class="flex flex-col sm:flex-row gap-4 sm:gap-8 items-center sm:items-start">
                         <div class="flex-shrink-0">
-                            <div class="w-32 h-32 flex items-center justify-center">
+                            <div class="w-20 h-20 sm:w-32 sm:h-32 flex items-center justify-center">
                                 <img src="{{ asset('User/img/elemen/C3.png') }}" alt="Penjualan Gas Daerah"
                                     class="w-full h-full object-contain drop-shadow-md">
                             </div>
                         </div>
                         <div class="flex-1">
-                            <h3 class="text-2xl font-bold text-gray-900 mb-4">Penjualan Gas Daerah</h3>
-                            <p class="text-gray-700 leading-relaxed text-justify">
+                            <h3 class="text-lg sm:text-2xl font-bold text-gray-900 mb-2 sm:mb-4 text-center sm:text-left">Penjualan Gas Daerah</h3>
+                            <p class="text-xs sm:text-base text-gray-700 leading-relaxed text-justify">
                                 Warga dapat membeli tabung gas seperti gas LPG 3 kg secara digital melalui sistem SiladesBeng.
                                 Proses pencatatan transaksi, validasi pembayaran, dan laporan penjualan dilakukan otomatis
                                 oleh sistem untuk menjamin transparansi dan keakuratan data.
@@ -98,17 +98,17 @@
 
                 {{-- Service 4: Unit Penyewaan Mobil --}}
                 <div
-                    class="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-md hover:shadow-xl transition-all duration-300 border border-white/50 animate-section">
-                    <div class="flex flex-col md:flex-row gap-8 items-start">
+                    class="bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-8 shadow-md hover:shadow-xl transition-all duration-300 border border-white/50 animate-section">
+                    <div class="flex flex-col sm:flex-row gap-4 sm:gap-8 items-center sm:items-start">
                         <div class="flex-shrink-0">
-                            <div class="w-32 h-32 flex items-center justify-center">
+                            <div class="w-20 h-20 sm:w-32 sm:h-32 flex items-center justify-center">
                                 <img src="{{ asset('User/img/elemen/mobil.png') }}" alt="Unit Penyewaan Mobil"
                                     class="w-full h-full object-contain drop-shadow-md">
                             </div>
                         </div>
                         <div class="flex-1">
-                            <h3 class="text-2xl font-bold text-gray-900 mb-4">Unit Penyewaan Mobil</h3>
-                            <p class="text-gray-700 leading-relaxed text-justify">
+                            <h3 class="text-lg sm:text-2xl font-bold text-gray-900 mb-2 sm:mb-4 text-center sm:text-left">Unit Penyewaan Mobil</h3>
+                            <p class="text-xs sm:text-base text-gray-700 leading-relaxed text-justify">
                                 Memfasilitasi masyarakat dalam penyewaan kendaraan roda empat untuk berbagai keperluan. 
                                 Sistem memungkinkan pengecekan jadwal ketersediaan armada, harga sewa transparan, dan pemesanan secara langsung secara digital.
                             </p>
@@ -118,17 +118,17 @@
 
                 {{-- Service 5: Unit Peminjaman Fasilitas Umum --}}
                 <div
-                    class="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-md hover:shadow-xl transition-all duration-300 border border-white/50 animate-section">
-                    <div class="flex flex-col md:flex-row gap-8 items-start">
+                    class="bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-8 shadow-md hover:shadow-xl transition-all duration-300 border border-white/50 animate-section">
+                    <div class="flex flex-col sm:flex-row gap-4 sm:gap-8 items-center sm:items-start">
                         <div class="flex-shrink-0">
-                            <div class="w-32 h-32 flex items-center justify-center">
+                            <div class="w-20 h-20 sm:w-32 sm:h-32 flex items-center justify-center">
                                 <img src="{{ asset('User/img/elemen/fasilitas.png') }}" alt="Unit Peminjaman Fasilitas Umum"
                                     class="w-full h-full object-contain drop-shadow-md">
                             </div>
                         </div>
                         <div class="flex-1">
-                            <h3 class="text-2xl font-bold text-gray-900 mb-4">Unit Peminjaman Fasilitas Umum</h3>
-                            <p class="text-gray-700 leading-relaxed text-justify">
+                            <h3 class="text-lg sm:text-2xl font-bold text-gray-900 mb-2 sm:mb-4 text-center sm:text-left">Unit Peminjaman Fasilitas Umum</h3>
+                            <p class="text-xs sm:text-base text-gray-700 leading-relaxed text-justify">
                                 Masyarakat dapat memesan dan menggunakan fasilitas daerah, seperti gedung aula atau sarana olahraga, melalui sistem.
                                 Jadwal penggunaan akan tercatat rapi, mencegah terjadinya bentrok waktu antar warga yang ingin meminjam sarana yang sama.
                             </p>
@@ -138,17 +138,17 @@
 
                 {{-- Service 6: Pelaporan Warga --}}
                 <div
-                    class="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-md hover:shadow-xl transition-all duration-300 border border-white/50 animate-section">
-                    <div class="flex flex-col md:flex-row gap-8 items-start">
+                    class="bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-8 shadow-md hover:shadow-xl transition-all duration-300 border border-white/50 animate-section">
+                    <div class="flex flex-col sm:flex-row gap-4 sm:gap-8 items-center sm:items-start">
                         <div class="flex-shrink-0">
-                            <div class="w-32 h-32 flex items-center justify-center">
+                            <div class="w-20 h-20 sm:w-32 sm:h-32 flex items-center justify-center">
                                 <img src="{{ asset('User/img/elemen/lapor.png') }}" alt="Pelaporan Warga"
                                     class="w-full h-full object-contain drop-shadow-md">
                             </div>
                         </div>
                         <div class="flex-1">
-                            <h3 class="text-2xl font-bold text-gray-900 mb-4">Pelaporan Warga</h3>
-                            <p class="text-gray-700 leading-relaxed text-justify">
+                            <h3 class="text-lg sm:text-2xl font-bold text-gray-900 mb-2 sm:mb-4 text-center sm:text-left">Pelaporan Warga</h3>
+                            <p class="text-xs sm:text-base text-gray-700 leading-relaxed text-justify">
                                 Wadah digital bagi masyarakat untuk menyampaikan laporan, kritik, masukan, atau keluhan terkait daerah secara langsung ke pemerintah daerah.
                                 Setiap pelaporan dapat dipantau status tindak lanjutnya sehingga komunikasi menjadi lebih dua arah dan cepat.
                             </p>
@@ -158,17 +158,17 @@
 
                 {{-- Service 7: Kabar dan Informasi Daerah --}}
                 <div
-                    class="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-md hover:shadow-xl transition-all duration-300 border border-white/50 animate-section">
-                    <div class="flex flex-col md:flex-row gap-8 items-start">
+                    class="bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-8 shadow-md hover:shadow-xl transition-all duration-300 border border-white/50 animate-section">
+                    <div class="flex flex-col sm:flex-row gap-4 sm:gap-8 items-center sm:items-start">
                         <div class="flex-shrink-0">
-                            <div class="w-32 h-32 flex items-center justify-center">
+                            <div class="w-20 h-20 sm:w-32 sm:h-32 flex items-center justify-center">
                                 <img src="{{ asset('User/img/elemen/KabardanInformasiDaerah.png') }}" alt="Kabar dan Informasi Daerah"
                                     class="w-full h-full object-contain drop-shadow-md">
                             </div>
                         </div>
                         <div class="flex-1">
-                            <h3 class="text-2xl font-bold text-gray-900 mb-4">Kabar dan Informasi Daerah</h3>
-                            <p class="text-gray-700 leading-relaxed text-justify">
+                            <h3 class="text-lg sm:text-2xl font-bold text-gray-900 mb-2 sm:mb-4 text-center sm:text-left">Kabar dan Informasi Daerah</h3>
+                            <p class="text-xs sm:text-base text-gray-700 leading-relaxed text-justify">
                                 Portal resmi yang tidak hanya menyajikan pengumuman, tetapi juga meliput berbagai berita daerah, artikel kegiatan, gotong royong, dan acara penting lainnya.
                                 Memastikan seluruh elemen warga selalu update dengan kabar berita terbaru dan informasi resmi pemerintah daerah secara terpadu melalui satu pintu digital.
                             </p>
@@ -177,17 +177,17 @@
                 </div>
                 {{-- Service 8: Pasar Daerah --}}
                 <div
-                    class="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-md hover:shadow-xl transition-all duration-300 border border-white/50 animate-section">
-                    <div class="flex flex-col md:flex-row gap-8 items-start">
+                    class="bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-8 shadow-md hover:shadow-xl transition-all duration-300 border border-white/50 animate-section">
+                    <div class="flex flex-col sm:flex-row gap-4 sm:gap-8 items-center sm:items-start">
                         <div class="flex-shrink-0">
-                            <div class="w-32 h-32 flex items-center justify-center">
+                            <div class="w-20 h-20 sm:w-32 sm:h-32 flex items-center justify-center">
                                 <img src="{{ asset('Admin/img/pasardaerah/PasarDaerah2.png') }}" alt="Pasar Daerah"
                                     class="w-full h-full object-contain drop-shadow-md">
                             </div>
                         </div>
                         <div class="flex-1">
-                            <h3 class="text-2xl font-bold text-gray-900 mb-4">Pasar Daerah</h3>
-                            <p class="text-gray-700 leading-relaxed text-justify">
+                            <h3 class="text-lg sm:text-2xl font-bold text-gray-900 mb-2 sm:mb-4 text-center sm:text-left">Pasar Daerah</h3>
+                            <p class="text-xs sm:text-base text-gray-700 leading-relaxed text-justify">
                                 Marketplace khusus warga daerah yang memfasilitasi transaksi jual-beli berbagai produk lokal lintas wilayah (seperti hasil tani, olahan pangan, kerajinan, hingga material bangunan).
                                 Dilengkapi dengan perhitungan ongkos kirim otomatis berdasarkan jarak lokasi serta dukungan multi-pembayaran secara digital dan tunai (COD).
                             </p>

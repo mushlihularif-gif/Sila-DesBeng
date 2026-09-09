@@ -1,16 +1,16 @@
 @forelse($rentalBookings as $booking)
                 <div class="transaction-card bg-white rounded-2xl shadow-lg overflow-hidden" data-status="{{ $booking->status }}">
                     <!-- Konten Kartu Utama -->
-                    <div class="p-6">
-                        <div class="flex gap-6">
+                    <div class="p-4 sm:p-6">
+                        <div class="flex flex-col sm:flex-row gap-4 sm:gap-6">
                             <!-- Gambar Produk -->
                             @if($booking->barang && $booking->barang->foto)
                             <img src="{{ asset('storage/' . $booking->barang->foto) }}" 
                                  alt="{{ $booking->barang?->nama_barang }}" 
-                                 class="w-32 h-32 object-cover rounded-lg flex-shrink-0"
+                                 class="w-full sm:w-32 h-48 sm:h-32 object-cover rounded-lg flex-shrink-0"
                                  onerror="this.src='{{ asset('User/img/elemen/F1.png') }}'">
                             @else
-                            <div class="w-32 h-32 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <div class="w-full sm:w-32 h-48 sm:h-32 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
                                 <img src="{{ asset('User/img/elemen/F1.png') }}" alt="Rental" class="w-16 h-16 object-contain">
                             </div>
                             @endif
@@ -43,9 +43,9 @@
                             </div>
                             
                             <!-- Right Side: Status and Payment -->
-                            <div class="text-right">
+                            <div class="text-left sm:text-right mt-2 sm:mt-0">
                                 <!-- Status Badge -->
-                                <div class="flex items-center justify-end gap-2 mb-3">
+                                <div class="flex items-center justify-start sm:justify-end gap-2 mb-3">
                                     <span class="text-sm font-semibold">Status Penyewaan</span>
                                     @php
                                         $statusConfig = [

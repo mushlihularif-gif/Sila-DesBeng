@@ -36,16 +36,69 @@
         .animate-section:nth-child(8) { animation-delay: 0.8s; }
 
         /* ================================================ */
-        /* RESPONSIVE BACKGROUND OPTIMIZATION */
+        /* RESPONSIVE OPTIMIZATION GLOBAL */
         /* ================================================ */
-        
-        /* Hide complex backgrounds on mobile */
-        @media (max-width: 767px) {
+        html, body {
+            overflow-x: hidden !important;
+            max-width: 100vw !important;
+            width: 100% !important;
+            position: relative;
+        }
+
+        #main-content {
+            overflow-x: hidden !important;
+            max-width: 100vw !important;
+            width: 100% !important;
+        }
+
+        /* Penyesuaian Tipografi & Spasi di Ponsel (Mobile) */
+        @media (max-width: 767.98px) {
             .bg-decorative {
                 opacity: 0.3 !important;
             }
             .bg-hide-mobile {
                 display: none !important;
+            }
+            
+            /* Menyesuaikan judul besar agar tidak tumpah di layar HP */
+            .text-5xl {
+                font-size: 1.5rem !important; /* 24px */
+                line-height: 1.3 !important;
+            }
+            .text-4xl {
+                font-size: 1.35rem !important; /* 21px */
+                line-height: 1.3 !important;
+            }
+            .text-3xl {
+                font-size: 1.2rem !important; /* ~19px */
+                line-height: 1.35 !important;
+            }
+            .text-2xl {
+                font-size: 1.1rem !important; /* ~17px */
+                line-height: 1.4 !important;
+            }
+
+            /* Mengurangi padding atas berlebih di halaman sekunder pada mobile */
+            section[style*="padding-top: 12rem"],
+            section[style*="padding-top: 10rem"],
+            section[style*="padding-top: 8rem"],
+            section.pt-48,
+            section.pt-40,
+            section.pt-36,
+            section.pt-32 {
+                padding-top: 5.5rem !important;
+            }
+
+            /* Tombol besar di mobile */
+            .btn-outline, .btn-lihat-lainnya {
+                padding: 10px 24px !important;
+                font-size: 0.9rem !important;
+                border-width: 2px !important;
+            }
+
+            /* Bantalan bawah halaman agar tidak tertutup tombol asisten */
+            #main-content {
+                padding-bottom: 5rem !important;
             }
         }
 

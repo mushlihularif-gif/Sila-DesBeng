@@ -93,7 +93,7 @@
             </div>
 
             <!-- Bilah Pencarian dengan Batas Gradien -->
-            <div class="max-w-screen-2xl mx-auto px-5 py-8">
+            <div class="max-w-screen-2xl mx-auto px-4 sm:px-5 py-4 sm:py-8">
                 <div class="max-w-2xl mx-auto">
                     <form action="{{ route('beranda') }}" method="GET" class="relative group">
                         <!-- Gradient Border -->
@@ -104,11 +104,11 @@
                         <!-- Search Input -->
                         <div class="relative flex items-center bg-white rounded-full overflow-hidden">
                             <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="Cari produk atau kategori..."
-                                class="flex-1 px-8 py-3.5 text-gray-700 text-[15px] focus:outline-none bg-transparent">
+                                class="flex-1 px-5 sm:px-8 py-2.5 sm:py-3.5 text-gray-700 text-sm sm:text-[15px] focus:outline-none bg-transparent">
 
                             <!-- Search Button -->
                             <button type="submit"
-                                class="flex-shrink-0 px-6 py-3.5 text-blue-600 hover:text-blue-700 transition-colors duration-200">
+                                class="flex-shrink-0 px-4 sm:px-6 py-2.5 sm:py-3.5 text-blue-600 hover:text-blue-700 transition-colors duration-200">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                                         d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -173,42 +173,42 @@
             @endif
 
             <!-- Section Populer -->
-            <div id="populer-section" class="max-w-7xl mx-auto px-6 py-12">
+            <div id="populer-section" class="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-12">
                 <div class="max-w-7xl mx-auto">
                     <!-- Judul Populer -->
-                    <div class="text-center mb-8 relative">
-                        <h2 class="text-3xl font-bold mb-2">
+                    <div class="text-center mb-6 sm:mb-8 relative">
+                        <h2 class="text-2xl sm:text-3xl font-bold mb-2">
                             <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Populer</span>
                         </h2>
                     </div>
-                    <!-- Flex Container (Centered) -->
-                    <div class="flex flex-wrap justify-center gap-6 max-w-6xl mx-auto">
+                    <!-- Grid Container (2 Kolom di Mobile, 3 di Tablet, 4 di Desktop) -->
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-6 max-w-6xl mx-auto">
                         @forelse($popularProducts as $item)
                         <!-- Product Card -->
-                        <div class="flex flex-col items-center">
+                        <div class="flex flex-col items-center w-full">
                             <div onclick="window.location.href='{{ $item->type === 'pasar' ? route('pasar.index') . '?product=' . $item->id : $item->link }}'"
-                                class="bg-white/80 backdrop-blur-sm rounded-lg border border-white shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer w-full max-w-[280px]">
+                                class="bg-white/80 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-white shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer w-full flex flex-col h-full">
                                 <div
-                                    class="aspect-square p-4 flex items-center justify-center bg-gradient-to-br from-white/50 to-blue-50/30 relative">
+                                    class="aspect-square p-2.5 sm:p-4 flex items-center justify-center bg-gradient-to-br from-white/50 to-blue-50/30 relative">
                                     <img src="{{ Str::startsWith($item->image, ['http', 'https', 'User', 'Admin']) ? asset($item->image) : asset('storage/' . $item->image) }}" alt="{{ $item->name }}"
                                         loading="lazy"
                                         class="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300">
                                     @if($loop->iteration <= 2)
-                                    <span class="absolute top-2 right-2 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm flex items-center gap-1">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                                    <span class="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 bg-red-500 text-white text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 sm:px-2 sm:py-0.5 rounded-full shadow-sm flex items-center gap-0.5">
+                                        <svg class="w-2.5 h-2.5 sm:w-3 sm:h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
                                         HOT
                                     </span>
                                     @endif
                                 </div>
-                                <div class="p-3 text-center bg-white/90 backdrop-blur-sm">
-                                    <h3 class="text-sm font-semibold text-gray-800 line-clamp-1">{{ $item->name }}</h3>
-                                    <p class="text-xs text-blue-600 font-medium mt-1">{{ $item->price_formatted }} <span class="text-gray-400">/ {{ $item->unit }}</span></p>
+                                <div class="p-2 sm:p-3 text-center bg-white/90 backdrop-blur-sm flex flex-col flex-1 justify-between">
+                                    <h3 class="text-xs sm:text-sm font-semibold text-gray-800 line-clamp-1">{{ $item->name }}</h3>
+                                    <p class="text-[11px] sm:text-xs text-blue-600 font-bold mt-1">{{ $item->price_formatted }} <span class="text-gray-400 font-normal">/ {{ $item->unit }}</span></p>
                                 </div>
                             </div>
                         </div>
                         @empty
-                        <div class="col-span-full text-center py-8">
-                            <p class="text-gray-500">Belum ada data produk populer untuk tahun ini.</p>
+                        <div class="col-span-full text-center py-6 sm:py-8">
+                            <p class="text-gray-500 text-sm">Belum ada data produk populer untuk tahun ini.</p>
                         </div>
                         @endforelse
                     </div>
@@ -285,11 +285,11 @@
             @endif
 
             <!-- Section Unit Pelayanan -->
-            <div id="unit-carousel-container" class="max-w-7xl mx-auto px-6 py-16 overflow-hidden" style="padding-bottom: 8rem;">
+            <div id="unit-carousel-container" class="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-16 overflow-hidden">
                 <div class="max-w-7xl mx-auto">
 
-                    <div class="text-center mb-16 relative">
-                        <h2 class="text-3xl font-bold mb-2">
+                    <div class="text-center mb-6 sm:mb-16 relative">
+                        <h2 class="text-2xl sm:text-3xl font-bold mb-2">
                             <span class="bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">Unit</span> 
                             <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Pelayanan</span>
                         </h2>
@@ -326,7 +326,7 @@
                         @endphp
 
                         @if($activeCount > 0)
-                        <div class="relative w-full flex justify-center items-center" style="height: 480px;">
+                        <div class="relative w-full flex justify-center items-center unit-stage-wrapper">
                             <div class="relative w-full max-w-6xl mx-auto h-full">
                                 @if($isServiceActive('Unit Penyewaan Alat'))
                                 <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="0" data-name="Unit Penyewaan Alat" onclick="window.location.href='{{ $isLoggedInWithRegion ? route('rental.equipment') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=rental.equipment' }}'">
@@ -371,21 +371,21 @@
                                 @endif
                             </div>
 
-                            <div class="absolute -bottom-6 left-0 right-0 flex items-center justify-center gap-4 md:gap-12 z-60">
-                                <button id="unit-prev" class="bg-white hover:bg-gray-50 text-gray-800 rounded-full p-3 shadow-lg border border-gray-100 transition-transform active:scale-95">
-                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="unit-nav-wrapper absolute -bottom-6 left-0 right-0 flex items-center justify-center gap-2 sm:gap-4 md:gap-12 z-60 px-2 sm:px-4">
+                                <button id="unit-prev" class="bg-white hover:bg-gray-50 text-gray-800 rounded-full p-2 sm:p-3 shadow-lg border border-gray-100 transition-transform active:scale-95 flex-shrink-0">
+                                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
                                     </svg>
                                 </button>
 
-                                <div class="min-w-[300px] text-center">
-                                    <h3 id="unit-title" class="text-xl md:text-2xl font-bold text-black transition-all duration-300">
+                                <div class="unit-title-box text-center min-w-0 flex-1 max-w-[240px] sm:max-w-none sm:min-w-[300px]">
+                                    <h3 id="unit-title" class="text-sm sm:text-xl md:text-2xl font-bold text-black transition-all duration-300 truncate">
                                         Unit Penyewaan Alat
                                     </h3>
                                 </div>
 
-                                <button id="unit-next" class="bg-white hover:bg-gray-50 text-gray-800 rounded-full p-3 shadow-lg border border-gray-100 transition-transform active:scale-95">
-                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <button id="unit-next" class="bg-white hover:bg-gray-50 text-gray-800 rounded-full p-2 sm:p-3 shadow-lg border border-gray-100 transition-transform active:scale-95 flex-shrink-0">
+                                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
                                     </svg>
                                 </button>
@@ -406,109 +406,109 @@
             </div>
 
             <!-- Section Grafik Umum -->
-            <div id="grafik-umum" class="max-w-6xl mx-auto px-6 py-16">
+            <div id="grafik-umum" class="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-16">
                 <!-- Title dengan gradient -->
                 <div class="text-center mb-6">
-                    <h2 class="text-3xl font-bold mb-2">
+                    <h2 class="text-2xl sm:text-3xl font-bold mb-2">
                         <span class="bg-gradient-to-r from-gray-600 to-gray-600 bg-clip-text text-transparent">Grafik</span> 
                         <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Umum</span>
                     </h2>
                 </div>
 
                 <!-- Global Filters -->
-                <div class="max-w-5xl mx-auto mb-12 flex flex-col md:flex-row justify-center items-center gap-4 bg-white/40 backdrop-blur-md p-4 rounded-2xl border border-white/50 shadow-lg">
-                    <div class="px-4 py-3 text-sm border border-gray-300 rounded-xl bg-white/80 backdrop-blur-md text-gray-800 font-bold flex items-center justify-center cursor-not-allowed shadow-sm" style="min-width: 200px;">
+                <div class="max-w-5xl mx-auto mb-6 sm:mb-12 flex flex-col sm:flex-row justify-center items-stretch sm:items-center gap-2 sm:gap-4 bg-white/40 backdrop-blur-md p-2.5 sm:p-4 rounded-2xl border border-white/50 shadow-lg w-full">
+                    <div class="px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm border border-gray-300 rounded-xl bg-white/80 backdrop-blur-md text-gray-800 font-bold flex items-center justify-center cursor-not-allowed shadow-sm w-full sm:w-auto sm:min-w-[180px]">
                         Kabupaten Bengkalis
                     </div>
                     
-                    <div class="relative inline-block" style="min-width: 250px;">
-                        <select id="kecamatanSelect" class="w-full appearance-none px-4 py-3 pr-10 text-sm border border-gray-300 rounded-xl bg-white/80 backdrop-blur-md text-gray-800 font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 hover:bg-white transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm">
+                    <div class="relative w-full sm:w-auto sm:min-w-[220px]">
+                        <select id="kecamatanSelect" class="w-full appearance-none px-3 sm:px-4 py-2 sm:py-3 pr-8 sm:pr-10 text-xs sm:text-sm border border-gray-300 rounded-xl bg-white/80 backdrop-blur-md text-gray-800 font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 hover:bg-white transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm">
                             <option value="all">Semua Kecamatan</option>
                             @foreach($kecamatans as $kec)
                                 <option value="{{ $kec->id }}" {{ $kecamatanId == $kec->id ? 'selected' : '' }}>{{ $kec->name }}</option>
                             @endforeach
                         </select>
-                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-600">
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 sm:px-4 text-gray-600">
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </div>
                     </div>
 
-                    <div class="relative inline-block" style="min-width: 240px;">
-                        <select id="desaSelect" class="w-full appearance-none px-4 py-3 pr-10 text-sm border border-gray-300 rounded-xl bg-white/80 backdrop-blur-md text-gray-800 font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 hover:bg-white transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm" {{ $kecamatanId == 'all' ? 'disabled' : '' }}>
+                    <div class="relative w-full sm:w-auto sm:min-w-[220px]">
+                        <select id="desaSelect" class="w-full appearance-none px-3 sm:px-4 py-2 sm:py-3 pr-8 sm:pr-10 text-xs sm:text-sm border border-gray-300 rounded-xl bg-white/80 backdrop-blur-md text-gray-800 font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 hover:bg-white transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm" {{ $kecamatanId == 'all' ? 'disabled' : '' }}>
                             <option value="all">Semua Kelurahan/Desa</option>
                             @foreach($desas as $desa)
                                 <option value="{{ $desa->id }}" {{ $desaId == $desa->id ? 'selected' : '' }}>{{ $desa->name }}</option>
                             @endforeach
                         </select>
-                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-600">
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 sm:px-4 text-gray-600">
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </div>
                     </div>
 
-                    <div class="relative inline-block" style="min-width: 120px;">
-                        <select id="globalYearSelect" translate="no" class="w-full appearance-none px-4 py-3 pr-10 text-sm border border-gray-300 rounded-xl bg-white/80 backdrop-blur-md text-gray-800 font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 hover:bg-white transition-all shadow-sm">
+                    <div class="relative w-full sm:w-auto sm:min-w-[110px]">
+                        <select id="globalYearSelect" translate="no" class="w-full appearance-none px-3 sm:px-4 py-2 sm:py-3 pr-8 sm:pr-10 text-xs sm:text-sm border border-gray-300 rounded-xl bg-white/80 backdrop-blur-md text-gray-800 font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 hover:bg-white transition-all shadow-sm">
                             @foreach($availableYears as $optYear)
                                 <option value="{{ $optYear }}" {{ $optYear == $year ? 'selected' : '' }}>{{ $optYear }}</option>
                             @endforeach
                         </select>
-                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-600">
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 sm:px-4 text-gray-600">
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </div>
                     </div>
                 </div>
 
-                <div id="charts-section" class="max-w-5xl mx-auto space-y-12">
+                <div id="charts-section" class="max-w-5xl mx-auto space-y-8 sm:space-y-12">
                     <!-- Grafik Kinerja Layanan -->
                     <div>
                         <div
-                            class="relative rounded-3xl p-6 backdrop-blur-md bg-white/20 border border-white/30 shadow-[0_8px_32px_0_rgba(31,38,135,0.15)]">
-                            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-5">
-                                <h3 class="text-xl font-bold text-gray-800 mb-3 md:mb-0">Kinerja Layanan</h3>
+                            class="relative rounded-2xl sm:rounded-3xl p-4 sm:p-6 backdrop-blur-md bg-white/20 border border-white/30 shadow-[0_8px_32px_0_rgba(31,38,135,0.15)]">
+                            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-3 sm:mb-5">
+                                <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-2 md:mb-0">Kinerja Layanan</h3>
                             </div>
-                            <div class="bg-white/30 backdrop-blur-sm rounded-2xl p-2 md:p-5 border border-white/20 max-w-full overflow-hidden">
-                                <div id="kinerjaChart" class="w-full min-h-[300px]" data-chart='@json($kinerjaData)'></div>
+                            <div class="bg-white/30 backdrop-blur-sm rounded-xl sm:rounded-2xl p-2 sm:p-5 border border-white/20 max-w-full overflow-hidden">
+                                <div id="kinerjaChart" class="w-full min-h-[220px] sm:min-h-[300px]" data-chart='@json($kinerjaData)'></div>
                             </div>
                         </div>
                     </div>
                     <!-- Grafik Unit Populer -->
                     <div>
                         <div
-                            class="relative rounded-3xl p-6 backdrop-blur-md bg-white/20 border border-white/30 shadow-[0_8px_32px_0_rgba(31,38,135,0.15)]">
-                            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-5">
-                                <h3 class="text-xl font-bold text-gray-800 mb-3 md:mb-0">Unit Populer</h3>
+                            class="relative rounded-2xl sm:rounded-3xl p-4 sm:p-6 backdrop-blur-md bg-white/20 border border-white/30 shadow-[0_8px_32px_0_rgba(31,38,135,0.15)]">
+                            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-3 sm:mb-5">
+                                <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-2 md:mb-0">Unit Populer</h3>
                             </div>
-                            <div class="bg-white/30 backdrop-blur-sm rounded-2xl p-5 mb-5 border border-white/20">
-                                <div id="unitChart" class="w-full min-h-[300px]" data-chart='@json($unitPopulerData)'></div>
+                            <div class="bg-white/30 backdrop-blur-sm rounded-xl sm:rounded-2xl p-2 sm:p-5 mb-4 sm:mb-5 border border-white/20 max-w-full overflow-hidden">
+                                <div id="unitChart" class="w-full min-h-[220px] sm:min-h-[300px]" data-chart='@json($unitPopulerData)'></div>
                             </div>
-                            <!-- Legend - 6 Units -->
-                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-8 text-sm w-fit mx-auto">
-                                <div class="flex items-center gap-2">
-                                    <div class="w-3 h-3 rounded-sm" style="background-color: #f59e0b;"></div>
-                                    <span class="text-gray-600 font-medium">Unit Penyewaan Alat</span>
+                            <!-- Legend - 7 Units -->
+                            <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-y-2 sm:gap-y-2.5 gap-x-2 sm:gap-x-4 text-[11px] sm:text-sm w-full sm:w-fit mx-auto">
+                                <div class="flex items-center gap-1.5 sm:gap-2">
+                                    <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm flex-shrink-0" style="background-color: #f59e0b;"></div>
+                                    <span class="text-gray-600 font-medium truncate">Unit Penyewaan Alat</span>
                                 </div>
-                                <div class="flex items-center gap-2">
-                                    <div class="w-3 h-3 rounded-sm" style="background-color: #3b82f6;"></div>
-                                    <span class="text-gray-600 font-medium">Unit Penjualan Gas</span>
+                                <div class="flex items-center gap-1.5 sm:gap-2">
+                                    <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm flex-shrink-0" style="background-color: #3b82f6;"></div>
+                                    <span class="text-gray-600 font-medium truncate">Unit Penjualan Gas</span>
                                 </div>
-                                <div class="flex items-center gap-2">
-                                    <div class="w-3 h-3 rounded-sm" style="background-color: #10b981;"></div>
-                                    <span class="text-gray-600 font-medium">Unit Peminjaman Mobil</span>
+                                <div class="flex items-center gap-1.5 sm:gap-2">
+                                    <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm flex-shrink-0" style="background-color: #10b981;"></div>
+                                    <span class="text-gray-600 font-medium truncate">Unit Peminjaman Mobil</span>
                                 </div>
-                                <div class="flex items-center gap-2">
-                                    <div class="w-3 h-3 rounded-sm" style="background-color: #8b5cf6;"></div>
-                                    <span class="text-gray-600 font-medium">Unit Fasilitas Umum</span>
+                                <div class="flex items-center gap-1.5 sm:gap-2">
+                                    <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm flex-shrink-0" style="background-color: #8b5cf6;"></div>
+                                    <span class="text-gray-600 font-medium truncate">Unit Fasilitas Umum</span>
                                 </div>
-                                <div class="flex items-center gap-2">
-                                    <div class="w-3 h-3 rounded-sm" style="background-color: #ef4444;"></div>
-                                    <span class="text-gray-600 font-medium">Pelaporan Warga</span>
+                                <div class="flex items-center gap-1.5 sm:gap-2">
+                                    <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm flex-shrink-0" style="background-color: #ef4444;"></div>
+                                    <span class="text-gray-600 font-medium truncate">Pelaporan Warga</span>
                                 </div>
-                                <div class="flex items-center gap-2">
-                                    <div class="w-3 h-3 rounded-sm" style="background-color: #06b6d4;"></div>
-                                    <span class="text-gray-600 font-medium">Kabar dan Informasi Daerah</span>
+                                <div class="flex items-center gap-1.5 sm:gap-2">
+                                    <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm flex-shrink-0" style="background-color: #06b6d4;"></div>
+                                    <span class="text-gray-600 font-medium truncate">Kabar Daerah</span>
                                 </div>
-                                <div class="flex items-center gap-2">
-                                    <div class="w-3 h-3 rounded-sm" style="background-color: #ec4899;"></div>
-                                    <span class="text-gray-600 font-medium">Pasar Daerah</span>
+                                <div class="flex items-center gap-1.5 sm:gap-2 col-span-2 sm:col-span-1">
+                                    <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm flex-shrink-0" style="background-color: #ec4899;"></div>
+                                    <span class="text-gray-600 font-medium truncate">Pasar Daerah</span>
                                 </div>
                             </div>
                         </div>
@@ -807,6 +807,10 @@
         }
 
         /* --- UNIT CAROUSEL STYLES (4 VISIBLE ITEMS) --- */
+        .unit-stage-wrapper {
+            height: 440px;
+        }
+
         .unit-card {
             width: 280px;
             height: 280px;
@@ -884,43 +888,107 @@
 
         /* RESPONSIVE MOBILE - 3 COLUMN LAYOUT (CENTER FOCUS) */
         @media (max-width: 768px) {
+            #unit-carousel-container {
+                padding-top: 1rem !important;
+                padding-bottom: 2rem !important;
+            }
+            .unit-stage-wrapper {
+                height: 200px !important;
+            }
             .unit-card {
-                width: 150px; /* Slightly larger for visibility */
-                height: 150px;
+                width: 90px !important;
+                height: 90px !important;
+                top: 36% !important;
             }
 
-            /* Slot Kiri (Background) */
+            /* Slot Kiri (Background Preview) */
             .state-0 {
-                left: 10% !important;
-                transform: translate(-50%, -50%) scale(0.6) !important;
-                opacity: 0.6 !important;
-                z-index: 20;
-                filter: grayscale(20%);
+                left: 15% !important;
+                transform: translate(-50%, -50%) scale(0.65) !important;
+                opacity: 0.5 !important;
+                z-index: 20 !important;
+                filter: grayscale(20%) !important;
             }
 
-            /* Slot Tengah (Focus) */
+            /* Slot Tengah (Focus Terpusat, Proporsional dan Rapi) */
             .state-1 {
                 left: 50% !important;
-                transform: translate(-50%, -50%) scale(1.8) !important;
+                transform: translate(-50%, -50%) scale(1.15) !important;
                 opacity: 1 !important;
-                z-index: 50;
-                filter: grayscale(0%) drop-shadow(0 10px 15px rgba(0,0,0,0.2));
+                z-index: 50 !important;
+                filter: grayscale(0%) drop-shadow(0 8px 16px rgba(0,0,0,0.18)) !important;
             }
 
-            /* Slot Kanan (Background) */
+            /* Slot Kanan (Background Preview) */
             .state-2 {
-                left: 90% !important;
-                transform: translate(-50%, -50%) scale(0.6) !important;
-                opacity: 0.6 !important;
-                z-index: 20;
-                filter: grayscale(20%);
+                left: 85% !important;
+                transform: translate(-50%, -50%) scale(0.65) !important;
+                opacity: 0.5 !important;
+                z-index: 20 !important;
+                filter: grayscale(20%) !important;
             }
 
             /* Antrian (Hidden) */
             .state-3 {
-                left: 150% !important;
-                transform: translate(-50%, -50%) scale(0.5) !important;
-                opacity: 0;
+                left: 120% !important;
+                transform: translate(-50%, -50%) scale(0.3) !important;
+                opacity: 0 !important;
+                pointer-events: none !important;
+            }
+            .state-4 {
+                left: -20% !important;
+                transform: translate(-50%, -50%) scale(0.3) !important;
+                opacity: 0 !important;
+                pointer-events: none !important;
+            }
+            .state-5 {
+                left: 50% !important;
+                transform: translate(-50%, -50%) scale(0.1) !important;
+                opacity: 0 !important;
+                pointer-events: none !important;
+            }
+
+            /* Navigasi Tombol Geser di Bawah */
+            .unit-nav-wrapper {
+                bottom: 4px !important;
+                left: 0 !important;
+                right: 0 !important;
+                width: 100% !important;
+                padding: 0 16px !important;
+                gap: 10px !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+            }
+            #unit-prev, #unit-next {
+                width: 36px !important;
+                height: 36px !important;
+                min-width: 36px !important;
+                padding: 0 !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.12) !important;
+            }
+            #unit-prev svg, #unit-next svg {
+                width: 18px !important;
+                height: 18px !important;
+            }
+            .unit-title-box {
+                min-width: 0 !important;
+                max-width: 210px !important;
+                flex: 1 !important;
+            }
+            #unit-title {
+                font-size: 0.95rem !important;
+                line-height: 1.25 !important;
+            }
+
+            /* Kurangi opasitas latar belakang dekoratif di ponsel agar kontras terbaca */
+            .bg-element {
+                opacity: 0.25 !important;
+                max-width: 100vw !important;
+                overflow: hidden !important;
             }
         }
     </style>
@@ -1216,6 +1284,12 @@
                     return;
                 }
 
+                const shortMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+                const isSmallScreen = window.innerWidth < 1024;
+                const categories = isSmallScreen 
+                    ? (kinerjaData.categories.length === 12 ? shortMonths : kinerjaData.categories.map(c => c.length > 3 ? c.substring(0, 3) : c))
+                    : kinerjaData.categories;
+
                 const options = {
                     series: [{
                         name: 'Indeks Poin',
@@ -1223,7 +1297,7 @@
                     }],
                     chart: {
                         type: 'area',
-                        height: 280,
+                        height: isSmallScreen ? 230 : 280,
                         toolbar: {
                             show: false
                         },
@@ -1256,13 +1330,17 @@
                         }
                     },
                     xaxis: {
-                        categories: kinerjaData.categories,
+                        categories: categories,
                         labels: {
                             style: {
                                 colors: '#374151',
-                                fontSize: '12px',
+                                fontSize: isSmallScreen ? '10px' : '12px',
                                 fontWeight: 500
-                            }
+                            },
+                            rotate: isSmallScreen ? -40 : 0,
+                            rotateAlways: isSmallScreen,
+                            hideOverlappingLabels: false,
+                            trim: false
                         },
                         axisBorder: {
                             show: false
@@ -1321,6 +1399,12 @@
                     return;
                 }
 
+                const shortMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+                const isSmallScreen = window.innerWidth < 1024;
+                const categories = isSmallScreen 
+                    ? (unitPopulerData.categories.length === 12 ? shortMonths : unitPopulerData.categories.map(c => c.length > 3 ? c.substring(0, 3) : c))
+                    : unitPopulerData.categories;
+
                 const options = {
                     series: [{
                             name: 'Unit Penyewaan Alat',
@@ -1353,7 +1437,7 @@
                     ],
                     chart: {
                         type: 'bar',
-                        height: 280,
+                        height: isSmallScreen ? 230 : 280,
                         toolbar: {
                             show: false
                         },
@@ -1364,7 +1448,7 @@
                     plotOptions: {
                         bar: {
                             horizontal: false,
-                            columnWidth: '50%',
+                            columnWidth: isSmallScreen ? '70%' : '50%',
                             borderRadius: 4,
                             dataLabels: {
                                 position: 'top'
@@ -1375,13 +1459,17 @@
                         enabled: false
                     },
                     xaxis: {
-                        categories: unitPopulerData.categories,
+                        categories: categories,
                         labels: {
                             style: {
                                 colors: '#374151',
-                                fontSize: '12px',
+                                fontSize: isSmallScreen ? '10px' : '12px',
                                 fontWeight: 500
-                            }
+                            },
+                            rotate: isSmallScreen ? -40 : 0,
+                            rotateAlways: isSmallScreen,
+                            hideOverlappingLabels: false,
+                            trim: false
                         },
                         axisBorder: {
                             show: false

@@ -2,12 +2,10 @@
 
 @section('page')
 <main class="flex-grow relative w-full">
-    <section class="relative z-10 min-h-screen pt-40 pb-16">
-        {{-- Background Image --}}
-        <div class="fixed inset-0 pointer-events-none overflow-hidden z-0" style="will-change: transform; transform: translateZ(0);">
-            <img src="{{ asset('Admin/img/elements/background.webp') }}" class="w-full h-full object-cover" alt="">
-        </div>
+    {{-- Custom Vector Abstract Background (Gelombang Wave Pasar Daerah) --}}
+    @include('partials.abstract-bg')
 
+    <section class="relative z-10 min-h-screen pt-40 pb-16">
         <div class="max-w-7xl mx-auto px-6 relative z-10">
             {{-- Header Section --}}
             <div class="text-center mb-16 animate-section">
@@ -21,13 +19,13 @@
             </div>
 
             {{-- Search Bar (dari beranda) --}}
-            <div class="max-w-2xl mx-auto mb-10 animate-section">
+            <div class="max-w-2xl mx-auto mb-8 sm:mb-10 animate-section">
                 <div class="relative group">
                     <div class="absolute -inset-0.5 bg-gradient-to-r from-blue-500 via-blue-400 to-amber-400 rounded-full opacity-80 group-hover:opacity-100 transition-opacity duration-300"></div>
                     <div class="relative flex items-center bg-white rounded-full overflow-hidden">
                         <input type="text" id="searchInput" placeholder="Cari"
-                            class="flex-1 px-8 py-3.5 text-gray-700 text-[15px] focus:outline-none bg-transparent text-center placeholder:text-center">
-                        <div class="flex-shrink-0 px-6 py-3.5 text-blue-600">
+                            class="flex-1 px-4 sm:px-8 py-2.5 sm:py-3.5 text-gray-700 text-sm sm:text-[15px] focus:outline-none bg-transparent text-center placeholder:text-center">
+                        <div class="flex-shrink-0 px-4 sm:px-6 py-2.5 sm:py-3.5 text-blue-600">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                                     d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -42,13 +40,13 @@
                 
 
                 @foreach($kecamatans as $index => $kecamatan)
-                <div class="kecamatan-card mb-4 {{ $index >= 3 ? 'extra-card is-collapsed' : '' }}"
+                <div class="kecamatan-card mb-3 sm:mb-4 {{ $index >= 3 ? 'extra-card is-collapsed' : '' }}"
                      data-name="{{ strtolower($kecamatan->name) }}">
-                    <div class="backdrop-blur-sm bg-white/70 rounded-2xl p-6 border border-white/80 shadow-lg hover:shadow-xl transition-all duration-300">
+                    <div class="backdrop-blur-sm bg-white/70 rounded-xl sm:rounded-2xl p-3.5 sm:p-6 border border-white/80 shadow-md sm:shadow-lg hover:shadow-xl transition-all duration-300">
                         <div class="flex items-center justify-between">
-                            <h3 class="text-xl font-bold text-gray-800">{{ $kecamatan->name }}</h3>
+                            <h3 class="text-base sm:text-xl font-bold text-gray-800">{{ $kecamatan->name }}</h3>
                             <a href="{{ route('bumdes.profil.desa', $kecamatan->id) }}{{ request()->has('redirect') ? '?redirect=' . request('redirect') : '' }}"
-                               class="px-8 py-2.5 bg-white text-[#0099ff] font-semibold rounded-full border-2 border-gray-300 hover:bg-gray-50 hover:shadow-lg transition-all duration-300">
+                               class="px-5 sm:px-8 py-1.5 sm:py-2.5 bg-white text-[#0099ff] font-semibold text-xs sm:text-base rounded-full border-2 border-gray-300 hover:bg-gray-50 hover:shadow-lg transition-all duration-300">
                                 Pilih
                             </a>
                         </div>
@@ -224,9 +222,8 @@
         animation: float 4s ease-in-out infinite;
     }
 
-    /* Responsive Mobile - 3 Column Layout (Center Focus) */
-    @include('users.partials.unit-carousel-styles')
 </style>
+    @include('users.partials.unit-carousel-styles')
 @endpush
 
 @push('scripts')

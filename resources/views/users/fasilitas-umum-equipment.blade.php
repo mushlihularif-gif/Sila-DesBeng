@@ -75,14 +75,15 @@
             @endif
 
             <!-- Grid Kartu Produk -->
+            <!-- Grid Kartu Produk (2 Kolom di Mobile, 2 di Tablet, 3 di Desktop) -->
             @if($items->count() > 0)
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16 max-w-6xl mx-auto">
+                <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6 mb-12 sm:mb-16 max-w-6xl mx-auto">
                     @foreach($items as $item)
                     <a href="{{ route('user.fasilitas-umum.show', $item->id) }}" class="block group product-item transition-all duration-500" data-category="{{ $item->kategori ? Str::slug($item->kategori) : '' }}">
-                    <div class="product-card bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 mx-auto w-full max-w-[350px] flex flex-col h-full">
+                    <div class="product-card bg-white rounded-2xl sm:rounded-3xl p-2.5 sm:p-6 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 mx-auto w-full max-w-[350px] flex flex-col h-full">
                         
                         <!-- Gambar Produk -->
-                        <div class="product-image-wrapper mb-6 relative aspect-square overflow-hidden rounded-2xl bg-gray-100 flex items-center justify-center group-hover:from-blue-50 group-hover:to-blue-50/30 transition-colors">
+                        <div class="product-image-wrapper mb-2 sm:mb-6 relative aspect-square overflow-hidden rounded-xl sm:rounded-2xl bg-gray-100 flex items-center justify-center group-hover:from-blue-50 group-hover:to-blue-50/30 transition-colors">
                             <img src="{{ asset('storage/' . $item->foto) }}" 
                                  alt="{{ $item->nama_fasilitas }}"
                                  loading="lazy"
@@ -90,47 +91,47 @@
                             
                             <!-- Status Badge -->
                             @if($item->stok > 0 && strtolower($item->status) != 'disewa')
-                                <div class="absolute top-4 right-4 px-3 py-1.5 text-[10px] font-bold rounded-full bg-green-500 text-white shadow-md flex items-center gap-1 tracking-wider uppercase">
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <div class="absolute top-2 right-2 sm:top-4 sm:right-4 px-1.5 sm:px-3 py-0.5 sm:py-1.5 text-[8px] sm:text-[10px] font-bold rounded-full bg-green-500 text-white shadow-md flex items-center gap-0.5 sm:gap-1 tracking-wider uppercase">
+                                    <svg class="w-2.5 h-2.5 sm:w-3 sm:h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
                                     </svg>
-                                    Tersedia
+                                    <span class="hidden xs:inline sm:inline">Tersedia</span>
                                 </div>
                             @else
-                                <div class="absolute top-4 right-4 px-3 py-1.5 text-[10px] font-bold rounded-full bg-red-500 text-white shadow-md flex items-center gap-1 tracking-wider uppercase">
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <div class="absolute top-2 right-2 sm:top-4 sm:right-4 px-1.5 sm:px-3 py-0.5 sm:py-1.5 text-[8px] sm:text-[10px] font-bold rounded-full bg-red-500 text-white shadow-md flex items-center gap-0.5 sm:gap-1 tracking-wider uppercase">
+                                    <svg class="w-2.5 h-2.5 sm:w-3 sm:h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path>
                                     </svg>
-                                    Habis / Digunakan
+                                    <span class="hidden xs:inline sm:inline">Habis</span>
                                 </div>
                             @endif
                         </div>
 
                         <!-- Info Produk -->
-                        <div class="product-info flex flex-col flex-1 px-2">
+                        <div class="product-info flex flex-col flex-1 px-1 sm:px-2">
                             <!-- Kategori -->
                             @if($item->kategori)
-                                <div class="mb-4">
-                                    <span class="inline-flex items-center px-3 py-1.5 rounded-md text-[10px] font-bold text-white bg-blue-600 shadow-sm">
+                                <div class="mb-1.5 sm:mb-4">
+                                    <span class="inline-flex items-center px-2 sm:px-3 py-0.5 sm:py-1.5 rounded-md text-[9px] sm:text-[10px] font-bold text-white bg-blue-600 shadow-sm">
                                         {{ ucfirst(str_replace('-', ' ', $item->kategori)) }}
                                     </span>
                                 </div>
                             @endif
 
-                            <h3 class="product-name text-base font-bold text-gray-800 mb-2 line-clamp-2 group-hover:text-[#115789] transition-colors mt-0">
+                            <h3 class="product-name text-xs sm:text-base font-bold text-gray-800 mb-1 sm:mb-2 line-clamp-2 group-hover:text-[#115789] transition-colors mt-0">
                                 {{ $item->nama_fasilitas }}
                             </h3>
                             
-                            <div class="mt-auto pt-3 flex items-end justify-between">
+                            <div class="mt-auto pt-2 sm:pt-3 flex items-end justify-between">
                                 <div class="flex flex-col">
-                                    <span class="text-xs text-gray-500 mb-0.5 font-medium">Akses Layanan</span>
-                                    <p class="text-gray-900 font-bold text-base tracking-tight leading-none text-blue-600">
+                                    <span class="text-[10px] sm:text-xs text-gray-500 mb-0.5 font-medium">Akses Layanan</span>
+                                    <p class="text-gray-900 font-bold text-xs sm:text-base tracking-tight leading-none text-blue-600">
                                         Fasilitas Desa
                                     </p>
                                 </div>
                                 <div class="text-right flex flex-col">
-                                    <span class="text-xs text-gray-400 mb-0.5 font-medium">Tersedia</span>
-                                    <p class="text-base font-bold {{ $item->stok > 0 ? 'text-gray-800' : 'text-red-500' }} leading-none">
+                                    <span class="text-[10px] sm:text-xs text-gray-400 mb-0.5 font-medium">Tersedia</span>
+                                    <p class="text-xs sm:text-base font-bold {{ $item->stok > 0 ? 'text-gray-800' : 'text-red-500' }} leading-none">
                                         {{ $item->stok }} Unit
                                     </p>
                                 </div>

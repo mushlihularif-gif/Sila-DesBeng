@@ -16,7 +16,15 @@
         
         
 
-        @media (max-width: 768px) { .hero-buttons { flex-direction: column; } }
+        @media (max-width: 768px) {
+            .hero { padding: 80px 16px 40px !important; }
+            .hero-title { font-size: 1.75rem !important; line-height: 1.25 !important; margin-bottom: 16px !important; }
+            .hero-subtitle { font-size: 1.25rem !important; margin-top: 8px !important; }
+            .hero-desc { font-size: 0.95rem !important; margin-bottom: 24px !important; }
+            .hero-buttons { flex-direction: column !important; gap: 12px !important; width: 100% !important; }
+            .btn-primary, .btn-outline { padding: 12px 24px !important; font-size: 0.95rem !important; width: 100% !important; max-width: 320px !important; }
+            .hero-badge { font-size: 12px !important; padding: 8px 16px !important; }
+        }
 
                 @keyframes fade-in-up {
             0% { opacity: 0; transform: translateY(30px); }
