@@ -54,12 +54,19 @@
                                 
                                 @if($announcement->images->count() > 1)
                                     <!-- Controls -->
-                                    <button id="slider-prev" class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/30 hover:bg-black/50 backdrop-blur-md rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button type="button" id="slider-prev" aria-label="Foto Sebelumnya" class="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/40 hover:bg-black/70 active:scale-95 backdrop-blur-md rounded-full flex items-center justify-center text-white opacity-90 md:opacity-0 md:group-hover:opacity-100 transition-all z-20 cursor-pointer shadow-md">
                                         <i class="bx bx-chevron-left text-2xl"></i>
                                     </button>
-                                    <button id="slider-next" class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/30 hover:bg-black/50 backdrop-blur-md rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button type="button" id="slider-next" aria-label="Foto Selanjutnya" class="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/40 hover:bg-black/70 active:scale-95 backdrop-blur-md rounded-full flex items-center justify-center text-white opacity-90 md:opacity-0 md:group-hover:opacity-100 transition-all z-20 cursor-pointer shadow-md">
                                         <i class="bx bx-chevron-right text-2xl"></i>
                                     </button>
+
+                                    <!-- Indicators -->
+                                    <div id="slider-indicators" class="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-20 pointer-events-auto">
+                                        @for($i = 0; $i < $announcement->images->count(); $i++)
+                                            <button type="button" class="h-2 rounded-full transition-all cursor-pointer {{ $i === 0 ? 'w-6 bg-white shadow-sm' : 'w-2 bg-white/60 hover:bg-white shadow-sm' }}" data-index="{{ $i }}" aria-label="Slide {{ $i + 1 }}"></button>
+                                        @endfor
+                                    </div>
                                 @endif
                             @elseif($announcement->cover_image)
                                 <div class="w-full h-full flex-shrink-0 relative">
@@ -288,48 +295,89 @@
 @push('scripts')
 @if($announcement->images && $announcement->images->count() > 1)
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const slider = document.getElementById('slider-main');
-        const prev = document.getElementById('slider-prev');
-        const next = document.getElementById('slider-next');
-        const indicators = document.getElementById('slider-indicators').children;
-        const total = {{ $announcement->images->count() }};
-        let current = 0;
+    (function() {
+        let autoSlideTimer = null;
 
-        function updateSlider() {
-            slider.style.transform = `translateX(-${current * 100}%)`;
-            Array.from(indicators).forEach((ind, i) => {
-                if(i === current) {
-                    ind.className = 'w-4 h-2 rounded-full transition-all bg-white';
-                } else {
-                    ind.className = 'w-2 h-2 rounded-full transition-all bg-white/50';
+        function initSlider() {
+            const slider = document.getElementById('slider-main');
+            const prev = document.getElementById('slider-prev');
+            const next = document.getElementById('slider-next');
+            const indicatorsContainer = document.getElementById('slider-indicators');
+            const indicators = indicatorsContainer ? Array.from(indicatorsContainer.children) : [];
+            const total = {{ $announcement->images->count() }};
+            let current = 0;
+
+            if (!slider || !prev || !next) return;
+
+            function updateSlider() {
+                slider.style.transform = `translateX(-${current * 100}%)`;
+                indicators.forEach((ind, i) => {
+                    if (i === current) {
+                        ind.className = 'h-2 rounded-full transition-all cursor-pointer w-6 bg-white shadow-sm';
+                    } else {
+                        ind.className = 'h-2 rounded-full transition-all cursor-pointer w-2 bg-white/60 hover:bg-white shadow-sm';
+                    }
+                });
+            }
+
+            function startAutoSlide() {
+                stopAutoSlide();
+                autoSlideTimer = setInterval(() => {
+                    current = (current + 1) % total;
+                    updateSlider();
+                }, 5000);
+            }
+
+            function stopAutoSlide() {
+                if (autoSlideTimer) {
+                    clearInterval(autoSlideTimer);
+                    autoSlideTimer = null;
                 }
+            }
+
+            prev.onclick = function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                current = current > 0 ? current - 1 : total - 1;
+                updateSlider();
+                startAutoSlide();
+            };
+
+            next.onclick = function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                current = (current + 1) % total;
+                updateSlider();
+                startAutoSlide();
+            };
+
+            indicators.forEach((ind, i) => {
+                ind.onclick = function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    current = i;
+                    updateSlider();
+                    startAutoSlide();
+                };
             });
+
+            const container = slider.parentElement;
+            if (container) {
+                container.onmouseenter = stopAutoSlide;
+                container.onmouseleave = startAutoSlide;
+            }
+
+            updateSlider();
+            startAutoSlide();
         }
 
-        prev.addEventListener('click', () => {
-            current = current > 0 ? current - 1 : total - 1;
-            updateSlider();
-        });
-
-        next.addEventListener('click', () => {
-            current = current < total - 1 ? current + 1 : 0;
-            updateSlider();
-        });
-
-        Array.from(indicators).forEach((ind, i) => {
-            ind.addEventListener('click', () => {
-                current = i;
-                updateSlider();
-            });
-        });
-
-        // Auto slide
-        setInterval(() => {
-            current = current < total - 1 ? current + 1 : 0;
-            updateSlider();
-        }, 5000);
-    });
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initSlider);
+        } else {
+            initSlider();
+        }
+        document.addEventListener('turbo:load', initSlider);
+    })();
 </script>
 @endif
 @endpush
