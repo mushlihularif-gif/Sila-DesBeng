@@ -147,9 +147,6 @@
                                                  class="w-full h-full object-cover">
                                         </div>
                                     </div>
-                                    <span class="inline-block px-3 py-1 mb-2 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-200">
-                                        Pimpinan Daerah
-                                    </span>
                                     <h3 class="text-lg font-bold mb-1" style="color: #000000;">{{ $member->name }}</h3>
                                     <p class="text-sm font-semibold text-blue-900">{{ $member->position }}</p>
                                 </div>
@@ -187,9 +184,6 @@
                                                  class="w-full h-full object-cover">
                                         </div>
                                     </div>
-                                    <span class="inline-block px-3 py-1 mb-2 rounded-full text-xs font-semibold bg-sky-100 text-sky-800 border border-sky-200">
-                                        Wakil / Sekretaris Daerah
-                                    </span>
                                     <h3 class="text-lg font-bold mb-1" style="color: #000000;">{{ $member->name }}</h3>
                                     <p class="text-sm font-semibold text-sky-900">{{ $member->position }}</p>
                                 </div>
@@ -227,9 +221,6 @@
                                                  class="w-full h-full object-cover">
                                         </div>
                                     </div>
-                                    <span class="inline-block px-3 py-1 mb-2 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">
-                                        Kepala Dinas / Badan
-                                    </span>
                                     <h3 class="text-base font-bold mb-1" style="color: #000000;">{{ $member->name }}</h3>
                                     <p class="text-sm font-medium text-gray-700">{{ $member->position }}</p>
                                 </div>
@@ -267,9 +258,6 @@
                                                  class="w-full h-full object-cover">
                                         </div>
                                     </div>
-                                    <span class="inline-block px-3 py-1 mb-2 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
-                                        Staf / Aparatur
-                                    </span>
                                     <h3 class="text-base font-bold mb-1" style="color: #000000;">{{ $member->name }}</h3>
                                     <p class="text-sm font-medium text-gray-600">{{ $member->position }}</p>
                                 </div>
