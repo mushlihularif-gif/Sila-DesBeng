@@ -253,7 +253,7 @@
                                 <span class="flex items-center gap-2"><i class="bx bx-grid-alt"></i> Unit Pelayanan Desa</span>
                                 <i class="bx bx-chevron-right"></i>
                             </a>
-                            <a href="{{ route('pelaporan.create') }}" class="bg-white/15 hover:bg-white/25 text-white p-2.5 rounded-xl flex items-center justify-between transition-all font-medium border border-white/10">
+                            <a href="{{ route('pelaporan.landing') }}" class="bg-white/15 hover:bg-white/25 text-white p-2.5 rounded-xl flex items-center justify-between transition-all font-medium border border-white/10">
                                 <span class="flex items-center gap-2"><i class="bx bx-message-rounded-dots"></i> Layanan Pengaduan Warga</span>
                                 <i class="bx bx-chevron-right"></i>
                             </a>
