@@ -52,22 +52,24 @@ class RegionApiController extends Controller
      */
     public function getProfile($regionId)
     {
-        $region = Region::find($regionId);
+        $region = Region::with(['services' => function($q) {
+            $q->where('is_active', true);
+        }])->find($regionId);
+
         if (!$region) {
             return response()->json(['status' => 'error', 'message' => 'Wilayah tidak ditemukan'], 404);
         }
         
-        // Coba cari data di id tersebut
         $members = BumdesMember::where('region_id', $regionId)
             ->orderBy('level', 'asc')
             ->orderBy('order', 'asc')
             ->get();
             
-        // Fallback: Jika tidak ada data spesifik untuk region ini (misal baru dibuat),
-        // di web kadang memakai: whereNull('region_id')->orWhere('region_id', 0) untuk default kabupaten.
-        if ($members->isEmpty() && $region->type === 'kabupaten') {
+        // Fallback untuk Kabupaten jika kosong
+        if ($members->isEmpty() && ($region->type === 'kabupaten' || $regionId == 1)) {
              $members = BumdesMember::whereNull('region_id')
                 ->orWhere('region_id', 0)
+                ->orWhere('region_id', 1)
                 ->orderBy('level', 'asc')
                 ->orderBy('order', 'asc')
                 ->get();
@@ -78,7 +80,7 @@ class RegionApiController extends Controller
         $formattedMembers = [];
         foreach($groupedMembers as $level => $group) {
             $formattedMembers[] = [
-                'level' => $level,
+                'level' => (int)$level,
                 'level_name' => $group->first()->level_short_label ?? 'Tingkat ' . $level,
                 'members' => $group->map(function($m) {
                     return [
@@ -86,6 +88,8 @@ class RegionApiController extends Controller
                         'name' => $m->name,
                         'position' => $m->position,
                         'photo_url' => $m->photo_url,
+                        'level' => (int)$m->level,
+                        'order' => (int)$m->order,
                     ];
                 })->values()
             ];
@@ -98,6 +102,10 @@ class RegionApiController extends Controller
                     'id' => $region->id,
                     'name' => $region->name,
                     'type' => $region->type,
+                    'profile_text' => $region->profile_text,
+                    'contact_phone' => $region->contact_phone,
+                    'contact_email' => $region->contact_email,
+                    'active_services' => $region->services ? $region->services->pluck('name')->toArray() : [],
                 ],
                 'structure' => $formattedMembers
             ]
