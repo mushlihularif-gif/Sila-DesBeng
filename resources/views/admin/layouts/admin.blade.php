@@ -22,6 +22,8 @@
     <link rel="stylesheet" href="{{ asset('Admin/css/demo.css') }}" />
     <link rel="stylesheet" href="{{ asset('Admin/vendor/libs/perfect-scrollbar/perfect-scrollbar.css') }}" />
     <link rel="stylesheet" href="{{ asset('Admin/vendor/libs/apex-charts/apex-charts.css') }}" />
+    <link rel="stylesheet" href="{{ asset('vendor/cropperjs/cropper.min.css') }}" />
+    <script src="{{ asset('vendor/cropperjs/cropper.min.js') }}"></script>
     <!-- CSS Kustom untuk Gaya -->
     <style>
         /* Pencegahan Overflow Horizontal & Optimalisasi Mobile Global */
@@ -834,11 +836,13 @@
                         @endif
 
                         @if(in_array(auth()->user()->role, ['super_admin', 'admin', 'admin_kecamatan', 'admin_desa']))
+                    @if(auth()->user()->role === 'admin_desa' || auth()->user()->role === 'admin_kecamatan')
                         <li class="menu-item {{ request()->routeIs('admin.warga.mutasi.*') ? 'active' : '' }}">
                             <a href="{{ route('admin.warga.mutasi.index') }}" class="menu-link">
                                 <div>Mutasi Penduduk</div>
                             </a>
                         </li>
+                    @endif
                         @endif
 
                         @if(in_array(auth()->user()->role, ['super_admin', 'admin', 'admin_kecamatan', 'admin_rw']))

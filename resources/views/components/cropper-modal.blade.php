@@ -137,20 +137,222 @@
     </div>
 </div>
 
-{{-- Load Cropper CSS & JS dari vendor lokal secara andal --}}
-<link rel="stylesheet" href="{{ asset('vendor/cropperjs/cropper.min.css') }}" />
-<script src="{{ asset('vendor/cropperjs/cropper.min.js') }}"></script>
+{{-- Fallback assets jika belum termuat di head --}}
 <script>
-    window.globalCropperInstance = null;
-    window.globalCropperInput = null;
-    window.globalCropperPreview = null;
-    
-    function initGlobalCropper(inputElement, previewElementId, aspectRatio = 1, showRatioButtons = false) {
+    if (typeof Cropper === 'undefined') {
+        if (!document.getElementById('cropper-css-fallback')) {
+            var link = document.createElement('link');
+            link.id = 'cropper-css-fallback';
+            link.rel = 'stylesheet';
+            link.href = "{{ asset('vendor/cropperjs/cropper.min.css') }}";
+            document.head.appendChild(link);
+        }
+        if (!document.getElementById('cropper-js-fallback')) {
+            var script = document.createElement('script');
+            script.id = 'cropper-js-fallback';
+            script.src = "{{ asset('vendor/cropperjs/cropper.min.js') }}";
+            document.head.appendChild(script);
+        }
+    }
+</script>
+
+<script>
+(function () {
+    // Variabel state global yang aman terhadap SPA / Turbo
+    window.globalCropperInstance = window.globalCropperInstance || null;
+    window.globalCropperInput = window.globalCropperInput || null;
+    window.globalCropperPreview = window.globalCropperPreview || null;
+    window.globalCropperFileSaved = false;
+
+    // Fungsi menutup modal cropper
+    window.closeGlobalCropper = function() {
+        var modal = document.getElementById('global-cropper-modal');
+        if (modal) {
+            modal.classList.remove('active');
+            modal.style.display = 'none';
+        }
+        if (window.globalCropperInstance) {
+            try {
+                window.globalCropperInstance.destroy();
+            } catch (err) {}
+            window.globalCropperInstance = null;
+        }
+        if (window.globalCropperInput && !window.globalCropperFileSaved && !window._isCropperSaving) {
+            window.globalCropperInput.value = '';
+        }
+        window.globalCropperFileSaved = false;
+        window.globalCropperInput = null;
+        window.globalCropperPreview = null;
+    };
+
+    // Fungsi menyimpan hasil crop ke elemen input & pratinjau
+    window.saveGlobalCropper = function() {
+        if (!window.globalCropperInstance) return;
+
+        var canvas = window.globalCropperInstance.getCroppedCanvas({
+            maxWidth: 1600,
+            maxHeight: 1600,
+            imageSmoothingEnabled: true,
+            imageSmoothingQuality: 'high'
+        });
+
+        if (!canvas) {
+            if (typeof showSiladesBengToast === 'function') {
+                showSiladesBengToast('error', 'Gagal', 'Gagal memotong gambar. Silakan coba lagi.');
+            } else {
+                alert('Gagal memotong gambar. Silakan coba lagi.');
+            }
+            return;
+        }
+
+        var fileInput = window.globalCropperInput;
+        var originalFile = fileInput && fileInput.files ? fileInput.files[0] : null;
+        var fileName = originalFile ? originalFile.name : 'cropped-image.jpg';
+        var fileType = originalFile && originalFile.type ? originalFile.type : 'image/jpeg';
+
+        if (!fileType || !fileType.startsWith('image/')) {
+            fileType = 'image/jpeg';
+        }
+
+        // Pastikan nama file memiliki ekstensi gambar yang valid
+        if (!/\.(jpe?g|png|webp|gif|svg)$/i.test(fileName)) {
+            var ext = fileType.split('/')[1] || 'jpg';
+            if (ext === 'jpeg') ext = 'jpg';
+            fileName = fileName.replace(/\.[^/.]+$/, "") + '.' + ext;
+            if (!/\.(jpe?g|png|webp|gif|svg)$/i.test(fileName)) {
+                fileName += '.jpg';
+            }
+        }
+
+        canvas.toBlob(function(blob) {
+            if (!blob) return;
+
+            window.globalCropperFileSaved = true;
+
+            // Masukkan file hasil crop ke elemen input form via DataTransfer
+            if (fileInput) {
+                try {
+                    var croppedFile = new File([blob], fileName, { type: fileType, lastModified: Date.now() });
+                    var dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(croppedFile);
+                    fileInput.files = dataTransfer.files;
+                    fileInput.dataset.cropped = '1';
+
+                    // Picu event input/change dengan proteksi flag agar tidak memicu pemotongan ulang
+                    window._isCropperSaving = true;
+                    try {
+                        fileInput.dispatchEvent(new Event('input', { bubbles: true }));
+                        fileInput.dispatchEvent(new CustomEvent('change', { bubbles: true, detail: { fromCropper: true } }));
+                    } finally {
+                        window._isCropperSaving = false;
+                    }
+                } catch(e) {
+                    console.error('DataTransfer error:', e);
+                }
+            }
+
+            // Perbarui elemen tampilan pratinjau (preview)
+            if (window.globalCropperPreview) {
+                var url = URL.createObjectURL(blob);
+                var targetImg = null;
+
+                if (window.globalCropperPreview.tagName === 'IMG') {
+                    targetImg = window.globalCropperPreview;
+                } else if (window.globalCropperPreview.querySelector) {
+                    targetImg = window.globalCropperPreview.querySelector('img');
+                }
+
+                if (targetImg) {
+                    targetImg.src = url;
+                    targetImg.classList.remove('d-none', 'hidden');
+                    targetImg.style.display = 'block';
+
+                    var container = targetImg.closest('.preview-container') || targetImg.parentElement;
+                    if (container) {
+                        container.style.display = 'block';
+                        container.classList.remove('d-none', 'hidden');
+                    }
+
+                    var uploadBox = targetImg.closest('.upload-box') || (container ? container.parentElement : null);
+                    if (uploadBox) {
+                        var ph = uploadBox.querySelector('.upload-placeholder');
+                        if (ph) ph.style.display = 'none';
+                    }
+                } else if (window.globalCropperPreview.tagName === 'DIV') {
+                    window.globalCropperPreview.style.backgroundImage = 'url(' + url + ')';
+                    window.globalCropperPreview.style.backgroundSize = 'cover';
+                    window.globalCropperPreview.style.backgroundPosition = 'center';
+                    window.globalCropperPreview.style.display = 'block';
+                    window.globalCropperPreview.classList.remove('d-none', 'hidden');
+
+                    var uploadBox2 = window.globalCropperPreview.closest('.upload-box') || window.globalCropperPreview.parentElement;
+                    if (uploadBox2) {
+                        var ph2 = uploadBox2.querySelector('.upload-placeholder');
+                        if (ph2) ph2.style.display = 'none';
+                    }
+                }
+
+                // Sembunyikan placeholder spesifik by ID dan reset delete flag
+                if (fileInput && fileInput.id) {
+                    var phById = document.getElementById('placeholder_' + fileInput.id);
+                    if (phById) phById.style.display = 'none';
+                    var delInput = document.getElementById('delete_' + fileInput.id);
+                    if (delInput) delInput.value = '0';
+                }
+
+                var delAvatar = document.getElementById('delete_avatar');
+                if (delAvatar) delAvatar.value = '0';
+
+                var avatarPlaceholder = document.getElementById('avatar-placeholder');
+                if (avatarPlaceholder) avatarPlaceholder.classList.add('hidden', 'd-none');
+
+                var deletePhotoBtn = document.getElementById('delete-photo-btn');
+                if (deletePhotoBtn) {
+                    deletePhotoBtn.style.display = 'inline-block';
+                    deletePhotoBtn.classList.remove('hidden');
+                }
+
+                var uploadHint = document.getElementById('upload-hint');
+                if (uploadHint) uploadHint.classList.add('hidden');
+
+                var belum = document.getElementById('belum-tersimpan');
+                if (belum) belum.classList.remove('hidden');
+
+                var parent = window.globalCropperPreview.parentElement;
+                if (parent) {
+                    var icon = parent.querySelector('i');
+                    if (icon) icon.style.display = 'none';
+                }
+
+                if (window.globalCropperPreview.classList && window.globalCropperPreview.classList.contains('avatar-default')) {
+                    window.globalCropperPreview.outerHTML = '<img src="' + url + '" alt="user-avatar" class="avatar-preview rounded-circle" id="' + window.globalCropperPreview.id + '" />';
+                }
+            }
+
+            // Tutup modal
+            window.closeGlobalCropper();
+
+        }, fileType, 0.92);
+    };
+
+    // Fungsi utama inisialisasi cropper saat pengguna memilih foto
+    window.initGlobalCropper = function(inputElement, previewElementId, aspectRatio, showRatioButtons) {
+        if (typeof aspectRatio === 'undefined') aspectRatio = 1;
+        if (typeof showRatioButtons === 'undefined') showRatioButtons = false;
+
+        // Cegah re-trigger saat menyimpan hasil crop
+        if (window._isCropperSaving || (inputElement && inputElement.dataset && inputElement.dataset.cropped === '1')) {
+            if (inputElement && inputElement.dataset) {
+                delete inputElement.dataset.cropped;
+            }
+            return false;
+        }
+
         if (!inputElement || !inputElement.files || !inputElement.files[0]) return false;
-        
-        const file = inputElement.files[0];
-        const fileName = (file.name || '').toLowerCase().trim();
-        const isImage = (file.type && file.type.startsWith('image/')) || /\.(jpe?g|png|webp|gif|bmp|svg)$/i.test(fileName);
+
+        var file = inputElement.files[0];
+        var fileName = (file.name || '').toLowerCase().trim();
+        var isImage = (file.type && file.type.startsWith('image/')) || /\.(jpe?g|png|webp|gif|bmp|svg)$/i.test(fileName);
         if (!isImage) {
             if (typeof showSiladesBengToast === 'function') {
                 showSiladesBengToast('warning', 'Perhatian', 'File harus berupa gambar (JPG, PNG, WEBP)');
@@ -161,18 +363,18 @@
             return false;
         }
 
-        const modal = document.getElementById('global-cropper-modal');
+        var modal = document.getElementById('global-cropper-modal');
         if (!modal) {
-            console.warn('Modal global-cropper-modal tidak ditemukan');
+            console.warn('Modal global-cropper-modal tidak ditemukan di DOM');
             return false;
         }
 
-        // Self-healing: pastikan modal berada langsung di document.body agar tidak terkurung kontainer ber-display:none
+        // Pastikan modal menempel langsung di document.body agar tidak terkurung kontainer ber-overflow:hidden / display:none
         if (modal.parentElement !== document.body) {
             document.body.appendChild(modal);
         }
 
-        const container = modal.querySelector('.cropper-img-container');
+        var container = modal.querySelector('.cropper-img-container');
         if (!container) {
             console.warn('Container .cropper-img-container tidak ditemukan');
             return false;
@@ -180,13 +382,15 @@
 
         window.globalCropperInput = inputElement;
         window.globalCropperPreview = typeof previewElementId === 'string' ? document.getElementById(previewElementId) : previewElementId;
+        window.globalCropperFileSaved = false;
 
-        const ratioGroup = document.getElementById('cropper-ratio-group');
+        // Pengaturan tombol rasio
+        var ratioGroup = document.getElementById('cropper-ratio-group');
         if (ratioGroup) {
             if (showRatioButtons) {
                 ratioGroup.classList.add('active');
-                document.querySelectorAll('.btn-ratio').forEach(btn => {
-                    const r = parseFloat(btn.dataset.ratio);
+                document.querySelectorAll('#global-cropper-modal .btn-ratio').forEach(function(btn) {
+                    var r = parseFloat(btn.dataset.ratio);
                     if ((isNaN(aspectRatio) && isNaN(r)) || Math.abs(r - aspectRatio) < 0.01) {
                         btn.classList.add('active');
                     } else {
@@ -198,6 +402,7 @@
             }
         }
 
+        // Bersihkan instance lama jika ada
         if (window.globalCropperInstance) {
             try {
                 window.globalCropperInstance.destroy();
@@ -205,9 +410,9 @@
             window.globalCropperInstance = null;
         }
 
-        const blobUrl = URL.createObjectURL(file);
+        var blobUrl = URL.createObjectURL(file);
         container.innerHTML = '<img id="cropper-image" src="' + blobUrl + '" alt="Picture" style="max-width: 100%; display: block;">';
-        const imgEl = document.getElementById('cropper-image');
+        var imgEl = document.getElementById('cropper-image');
 
         modal.classList.add('active');
         modal.style.display = 'flex';
@@ -227,6 +432,9 @@
                 } catch (err) {
                     console.error('Cropper initialization error:', err);
                 }
+            } else {
+                // Fallback polling jika library Cropper sedang dimuat
+                setTimeout(startCropper, 50);
             }
         }
 
@@ -235,159 +443,64 @@
                 startCropper();
             } else {
                 imgEl.onload = startCropper;
-                setTimeout(startCropper, 80);
+                setTimeout(startCropper, 100);
             }
         }
 
         return true;
+    };
+
+    // EVENT DELEGATION LEVEL DOCUMENT (Tahan terhadap perpindahan halaman SPA / Turbo)
+    if (!window.globalCropperDelegated) {
+        window.globalCropperDelegated = true;
+
+        document.addEventListener('click', function (e) {
+            // 1. Klik tombol Batal atau tombol silang 'x'
+            if (e.target.closest('#btn-cropper-cancel') || (e.target.closest('#global-cropper-modal') && e.target.closest('.btn-close'))) {
+                window.closeGlobalCropper();
+                return;
+            }
+
+            // 2. Klik backdrop luar modal untuk menutup
+            if (e.target.id === 'global-cropper-modal') {
+                window.closeGlobalCropper();
+                return;
+            }
+
+            // 3. Klik tombol pilihan rasio (1:1, 4:3, 16:9, Bebas)
+            var ratioBtn = e.target.closest('.btn-ratio');
+            if (ratioBtn && ratioBtn.closest('#global-cropper-modal')) {
+                if (!window.globalCropperInstance) return;
+                document.querySelectorAll('#global-cropper-modal .btn-ratio').forEach(function(b) {
+                    b.classList.remove('active');
+                });
+                ratioBtn.classList.add('active');
+                var ratio = parseFloat(ratioBtn.dataset.ratio);
+                window.globalCropperInstance.setAspectRatio(isNaN(ratio) ? NaN : ratio);
+                return;
+            }
+
+            // 4. Klik tombol Simpan Foto
+            if (e.target.closest('#btn-cropper-save')) {
+                window.saveGlobalCropper();
+                return;
+            }
+        });
+
+        // Tombol Escape menutup modal
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                var modal = document.getElementById('global-cropper-modal');
+                if (modal && (modal.classList.contains('active') || modal.style.display === 'flex')) {
+                    window.closeGlobalCropper();
+                }
+            }
+        });
+
+        // Bersihkan sebelum Turbo mengambil snapshot halaman
+        document.addEventListener('turbo:before-cache', function () {
+            window.closeGlobalCropper();
+        });
     }
-
-    document.querySelectorAll('.btn-ratio').forEach(btn => {
-        btn.addEventListener('click', function() {
-            if (!window.globalCropperInstance) return;
-            
-            document.querySelectorAll('.btn-ratio').forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
-            
-            const ratio = parseFloat(this.dataset.ratio);
-            window.globalCropperInstance.setAspectRatio(isNaN(ratio) ? NaN : ratio);
-        });
-    });
-
-    document.getElementById('btn-cropper-cancel').addEventListener('click', function() {
-        const modal = document.getElementById('global-cropper-modal');
-        if (modal) {
-            modal.classList.remove('active');
-            modal.style.display = 'none';
-        }
-        if (window.globalCropperInstance) {
-            window.globalCropperInstance.destroy();
-            window.globalCropperInstance = null;
-        }
-        if (window.globalCropperInput) {
-            window.globalCropperInput.value = '';
-        }
-    });
-
-    const cropperModalEl = document.getElementById('global-cropper-modal');
-    if (cropperModalEl) {
-        cropperModalEl.addEventListener('click', function(e) {
-            if (e.target === this) {
-                document.getElementById('btn-cropper-cancel').click();
-            }
-        });
-    }
-
-    document.getElementById('btn-cropper-save').addEventListener('click', function() {
-        if (!window.globalCropperInstance) return;
-        
-        const canvas = window.globalCropperInstance.getCroppedCanvas({
-            maxWidth: 1600,
-            maxHeight: 1600,
-            imageSmoothingEnabled: true,
-            imageSmoothingQuality: 'high'
-        });
-        
-        if (!canvas) {
-            alert('Gagal memotong gambar. Silakan coba lagi.');
-            return;
-        }
-
-        const fileInput = window.globalCropperInput;
-        const originalFile = fileInput && fileInput.files ? fileInput.files[0] : null;
-        const fileName = originalFile ? originalFile.name : 'cropped-image.jpg';
-        const fileType = originalFile && originalFile.type ? originalFile.type : 'image/jpeg';
-
-        canvas.toBlob(function(blob) {
-            if (!blob) return;
-
-            // Ganti isi input file dengan file hasil crop via DataTransfer
-            if (fileInput) {
-                const croppedFile = new File([blob], fileName, { type: fileType, lastModified: Date.now() });
-                const dataTransfer = new DataTransfer();
-                dataTransfer.items.add(croppedFile);
-                fileInput.files = dataTransfer.files;
-            }
-            
-            // Perbarui preview foto
-            if (window.globalCropperPreview) {
-                const url = URL.createObjectURL(blob);
-                let targetImg = null;
-
-                if (window.globalCropperPreview.tagName === 'IMG') {
-                    targetImg = window.globalCropperPreview;
-                } else if (window.globalCropperPreview.querySelector) {
-                    targetImg = window.globalCropperPreview.querySelector('img');
-                }
-
-                if (targetImg) {
-                    targetImg.src = url;
-                    targetImg.classList.remove('d-none', 'hidden');
-                    targetImg.style.display = 'block';
-
-                    // Tampilkan container pembungkus preview
-                    const container = targetImg.closest('.preview-container') || targetImg.parentElement;
-                    if (container) {
-                        container.style.display = 'block';
-                        container.classList.remove('d-none', 'hidden');
-                    }
-
-                    // Sembunyikan placeholder di kotak upload yang bersangkutan
-                    const uploadBox = targetImg.closest('.upload-box') || (container ? container.parentElement : null);
-                    if (uploadBox) {
-                        const ph = uploadBox.querySelector('.upload-placeholder');
-                        if (ph) ph.style.display = 'none';
-                    }
-                } else if (window.globalCropperPreview.tagName === 'DIV') {
-                    window.globalCropperPreview.style.backgroundImage = 'url(' + url + ')';
-                    window.globalCropperPreview.style.backgroundSize = 'cover';
-                    window.globalCropperPreview.style.backgroundPosition = 'center';
-                    window.globalCropperPreview.style.display = 'block';
-                    window.globalCropperPreview.classList.remove('d-none', 'hidden');
-
-                    const uploadBox = window.globalCropperPreview.closest('.upload-box') || window.globalCropperPreview.parentElement;
-                    if (uploadBox) {
-                        const ph = uploadBox.querySelector('.upload-placeholder');
-                        if (ph) ph.style.display = 'none';
-                    }
-                }
-                
-                // Sembunyikan placeholder spesifik by ID dan reset delete flag
-                if (fileInput && fileInput.id) {
-                    const phById = document.getElementById('placeholder_' + fileInput.id);
-                    if (phById) phById.style.display = 'none';
-                    const delInput = document.getElementById('delete_' + fileInput.id);
-                    if (delInput) delInput.value = '0';
-                }
-
-                const avatarPlaceholder = document.getElementById('avatar-placeholder');
-                if (avatarPlaceholder) avatarPlaceholder.classList.add('hidden', 'd-none');
-
-                const belum = document.getElementById('belum-tersimpan');
-                if (belum) belum.classList.remove('hidden');
-
-                const parent = window.globalCropperPreview.parentElement;
-                if (parent) {
-                    const icon = parent.querySelector('i');
-                    if (icon) icon.style.display = 'none';
-                }
-
-                if (window.globalCropperPreview.classList.contains('avatar-default')) {
-                    window.globalCropperPreview.outerHTML = '<img src="' + url + '" alt="user-avatar" class="avatar-preview rounded-circle" id="' + window.globalCropperPreview.id + '" />';
-                }
-            }
-            
-            // Tutup modal & destroy Cropper instance
-            const modal = document.getElementById('global-cropper-modal');
-            if (modal) {
-                modal.classList.remove('active');
-                modal.style.display = 'none';
-            }
-            if (window.globalCropperInstance) {
-                window.globalCropperInstance.destroy();
-                window.globalCropperInstance = null;
-            }
-            
-        }, fileType, 0.92);
-    });
+})();
 </script>

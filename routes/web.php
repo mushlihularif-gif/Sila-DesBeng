@@ -810,6 +810,10 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
             Route::get('/{id}/edit', [\App\Http\Controllers\Admin\BumdesController::class, 'edit'])->name('admin.SiladesBeng.bumdes.edit');
             Route::put('/{id}', [\App\Http\Controllers\Admin\BumdesController::class, 'update'])->name('admin.SiladesBeng.bumdes.update');
             Route::delete('/{id}', [\App\Http\Controllers\Admin\BumdesController::class, 'destroy'])->name('admin.SiladesBeng.bumdes.destroy');
+            Route::post('/{id}/move-up', [\App\Http\Controllers\Admin\BumdesController::class, 'moveUp'])->name('admin.SiladesBeng.bumdes.move-up');
+            Route::post('/{id}/move-down', [\App\Http\Controllers\Admin\BumdesController::class, 'moveDown'])->name('admin.SiladesBeng.bumdes.move-down');
+            Route::post('/{id}/change-level', [\App\Http\Controllers\Admin\BumdesController::class, 'changeLevel'])->name('admin.SiladesBeng.bumdes.change-level');
+            Route::post('/update-layout', [\App\Http\Controllers\Admin\BumdesController::class, 'updateLayout'])->name('admin.SiladesBeng.bumdes.update-layout');
         });
         Route::post('/bumdes/update-whatsapp', [\App\Http\Controllers\Admin\BumdesController::class, 'updateWhatsapp'])->name('admin.SiladesBeng.bumdes.update.whatsapp');
     });
@@ -1043,4 +1047,14 @@ Route::get('/run-encrypt', function() { \Illuminate\Support\Facades\Artisan::cal
 
 Route::get('/test-berita-view', function() { return view('user.wilayah.berita', ['beritas' => collect(), 'jangkauanOptions' => []]); });
 
-
+// Fallback Route untuk aset Storage jika symlink dinonaktifkan oleh shared hosting
+Route::get('/storage/{path}', function ($path) {
+    if (str_contains($path, '..') || str_contains($path, "\0")) {
+        abort(403);
+    }
+    $fullPath = storage_path('app/public/' . $path);
+    if (!file_exists($fullPath) || is_dir($fullPath)) {
+        abort(404);
+    }
+    return response()->file($fullPath);
+})->where('path', '.*')->name('storage.fallback');

@@ -44,12 +44,21 @@ class UnitPenyewaanController extends Controller
             ->appends(['search' => $search]);
         
         $tab = $request->get('tab', 'katalog');
-        $chats = \App\Models\UnitChatSession::where('region_id', $user ? $user->region_id : null)
-            ->where('service_type', 'penyewaan')
-            ->with('user')
-            ->orderBy('last_message_at', 'desc')
-            ->get();
-        $totalUnreadChats = $chats->sum('unread_admin_count');
+        $chats = collect();
+        $totalUnreadChats = 0;
+
+        if (\Illuminate\Support\Facades\Schema::hasTable('unit_chat_sessions')) {
+            try {
+                $chats = \App\Models\UnitChatSession::where('region_id', $user ? $user->region_id : null)
+                    ->where('service_type', 'penyewaan')
+                    ->with('user')
+                    ->orderBy('last_message_at', 'desc')
+                    ->get();
+                $totalUnreadChats = $chats->sum('unread_admin_count');
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('UnitChatSession penyewaan query skipped: ' . $e->getMessage());
+            }
+        }
         
         return view('admin.unit.penyewaan.index', compact('barangs', 'search', 'sop_penyewaan_alat', 'chats', 'totalUnreadChats', 'tab'));
     }
@@ -167,6 +176,7 @@ class UnitPenyewaanController extends Controller
             'latitude' => $request->latitude,
             'longitude' => $request->longitude,
             'satuan' => $request->satuan,
+            'region_id' => auth()->user()->region_id ?? $request->region_id,
         ];
 
         // Upload gambar
@@ -183,7 +193,7 @@ class UnitPenyewaanController extends Controller
         $barang = Barang::create($data);
 
         // Broadcast produk baru ke warga
-        \App\Services\NotificationService::broadcastNewProduct('Penyewaan Alat', $barang->nama_barang, $barang->region_id, route('rental.index'));
+        \App\Services\NotificationService::broadcastNewProduct('Penyewaan Alat', $barang->nama_barang, $barang->region_id ?? (auth()->user()->region_id ?? null), route('rental.equipment'));
 
         return redirect()->route('admin.unit.penyewaan.index')->with('success', 'Barang berhasil ditambahkan.');
     }
@@ -284,6 +294,7 @@ class UnitPenyewaanController extends Controller
             'latitude' => $request->latitude,
             'longitude' => $request->longitude,
             'satuan' => $request->satuan,
+            'region_id' => $barang->region_id ?? (auth()->user()->region_id ?? null),
         ];
 
         // Update gambar utama

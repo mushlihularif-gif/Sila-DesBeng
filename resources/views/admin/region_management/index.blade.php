@@ -87,13 +87,15 @@
                         </div>
                     </div>
                     <div>
-                        <h5 class="fw-bold mb-1 text-primary">Manajemen Wilayah: {{ $parentRegion->name }}</h5>
+                        <h5 class="fw-bold mb-1 text-primary">Manajemen Wilayah: {{ $parentRegion ? $parentRegion->name : 'Sistem Pusat' }}</h5>
                         @php
                             $childLevelText = '';
-                            if($parentRegion->type == 'kabupaten') $childLevelText = '(Kecamatan)';
-                            elseif($parentRegion->type == 'kecamatan') $childLevelText = '(Desa/Kelurahan)';
-                            elseif(in_array($parentRegion->type, ['desa', 'kelurahan'])) $childLevelText = '(Dusun/RW)';
-                            elseif($parentRegion->type == 'rw') $childLevelText = '(RT)';
+                            $parentType = $parentRegion ? $parentRegion->type : 'pusat';
+                            if($parentType == 'pusat') $childLevelText = '(Kabupaten/Kota)';
+                            elseif($parentType == 'kabupaten') $childLevelText = '(Kecamatan)';
+                            elseif($parentType == 'kecamatan') $childLevelText = '(Desa/Kelurahan)';
+                            elseif(in_array($parentType, ['desa', 'kelurahan'])) $childLevelText = '(Dusun/RW)';
+                            elseif($parentType == 'rw') $childLevelText = '(RT)';
                             else $childLevelText = 'di bawahnya';
                         @endphp
                         <p class="mb-0 text-primary small" style="opacity: 0.85;">
@@ -228,7 +230,7 @@
                                                         <div class="border rounded-3 p-3 text-center h-100" style="background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);">
                                                             <i class="bx bx-home-alt text-warning fs-3 mb-1 d-block"></i>
                                                             <small class="text-muted d-block mb-1">Induk Wilayah</small>
-                                                            <span class="fw-bold text-dark">{{ $parentRegion->name }}</span>
+                                                            <span class="fw-bold text-dark">{{ $parentRegion ? $parentRegion->name : 'Sistem Pusat' }}</span>
                                                         </div>
                                                     </div>
                                                     <div class="col-6">
@@ -516,7 +518,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    @if(in_array($parentRegion->type, ['desa', 'kelurahan']))
+                    @if($parentRegion && in_array($parentRegion->type, ['desa', 'kelurahan']))
                         <div class="mb-3">
                             <label class="form-label fw-semibold">Jenis Wilayah</label>
                             <select name="type" class="form-select" required>

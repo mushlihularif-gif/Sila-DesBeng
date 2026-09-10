@@ -25,7 +25,8 @@
             </div>
 
             <form id="form-change-password" class="space-y-4">
-                {{-- Password Lama --}}
+                {{-- Password Lama (Hanya untuk non-Google user atau bisa diabaikan) --}}
+                @if(empty(auth()->user()->google_id))
                 <div class="relative">
                     <input type="password" name="current_password" id="profile-password-current" placeholder="Kata Sandi Lama" required
                         class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition pr-12">
@@ -41,6 +42,7 @@
                     </button>
                     <span class="text-red-500 text-xs hidden mt-1 block" data-error="current_password"></span>
                 </div>
+                @endif
 
                 {{-- Password Baru --}}
                 <div class="relative">

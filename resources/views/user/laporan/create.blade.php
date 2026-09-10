@@ -76,7 +76,7 @@
                     </div>
                 @endif
 
-                <form action="{{ route('user.laporan.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+                <form action="{{ route('user.laporan.store') }}" method="POST" enctype="multipart/form-data" data-turbo="false" class="space-y-6">
                     @csrf
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -659,43 +659,73 @@
     </script>
 
     <script>
-        const maxFiles = 3;
-        let selectedFiles = []; // Array of File objects
-        const dataTransfer = new DataTransfer(); // Used to sync with the hidden input
-        
-        const realInput = document.getElementById('bukti-real');
-        const previewContainer = document.getElementById('multi-preview-container');
+        (function() {
+            window.laporanMaxFiles = 3;
+            window.laporanSelectedFiles = window.laporanSelectedFiles || [];
+            window.laporanDataTransfer = window.laporanDataTransfer || new DataTransfer();
+
+            window.initLaporanUpload = function() {
+                window.laporanSelectedFiles = [];
+                window.laporanDataTransfer = new DataTransfer();
+                var realInput = document.getElementById('bukti-real');
+                if (realInput) {
+                    realInput.files = window.laporanDataTransfer.files;
+                }
+                var previewContainer = document.getElementById('multi-preview-container');
+                if (previewContainer) {
+                    previewContainer.innerHTML = '';
+                    previewContainer.classList.add('hidden');
+                }
+            };
+
+            document.addEventListener('turbo:load', window.initLaporanUpload);
+        })();
 
         function handleFileSelect(event, isCamera) {
-            const files = Array.from(event.target.files);
+            var maxFiles = window.laporanMaxFiles || 3;
+            window.laporanSelectedFiles = window.laporanSelectedFiles || [];
+            window.laporanDataTransfer = window.laporanDataTransfer || new DataTransfer();
+
+            var realInput = document.getElementById('bukti-real');
+            var files = Array.from(event.target.files);
             if (!files.length) return;
 
             // Trigger GPS if camera was used
-            if (isCamera) {
+            if (isCamera && typeof getMyLocation === 'function') {
                 getMyLocation();
             }
 
             // Check if adding these files exceeds maxFiles
-            if (selectedFiles.length + files.length > maxFiles) {
-                showSiladesBengToast('warning', 'Perhatian', `Anda hanya dapat mengunggah maksimal ${maxFiles} foto.`);
+            if (window.laporanSelectedFiles.length + files.length > maxFiles) {
+                if (typeof showSiladesBengToast === 'function') {
+                    showSiladesBengToast('warning', 'Perhatian', 'Anda hanya dapat mengunggah maksimal ' + maxFiles + ' foto.');
+                } else {
+                    alert('Anda hanya dapat mengunggah maksimal ' + maxFiles + ' foto.');
+                }
                 event.target.value = ''; // Reset input
                 return;
             }
 
             // Validate and add files
-            let validFilesAdded = false;
-            files.forEach(file => {
+            var validFilesAdded = false;
+            files.forEach(function(file) {
                 if (file.size > 2 * 1024 * 1024) {
-                    showSiladesBengToast('error', 'Gagal', `File ${file.name} terlalu besar. Maksimal 2MB.`);
+                    if (typeof showSiladesBengToast === 'function') {
+                        showSiladesBengToast('error', 'Gagal', 'File ' + file.name + ' terlalu besar. Maksimal 2MB.');
+                    } else {
+                        alert('File ' + file.name + ' terlalu besar. Maksimal 2MB.');
+                    }
                 } else {
-                    selectedFiles.push(file);
-                    dataTransfer.items.add(file);
+                    window.laporanSelectedFiles.push(file);
+                    window.laporanDataTransfer.items.add(file);
                     validFilesAdded = true;
                 }
             });
 
             // Update real hidden input
-            realInput.files = dataTransfer.files;
+            if (realInput) {
+                realInput.files = window.laporanDataTransfer.files;
+            }
 
             // Render previews
             if (validFilesAdded) {
@@ -707,9 +737,13 @@
         }
 
         function renderPreviews() {
+            var maxFiles = window.laporanMaxFiles || 3;
+            var previewContainer = document.getElementById('multi-preview-container');
+            if (!previewContainer) return;
+
             previewContainer.innerHTML = '';
             
-            if (selectedFiles.length === 0) {
+            if (!window.laporanSelectedFiles || window.laporanSelectedFiles.length === 0) {
                 previewContainer.classList.add('hidden');
                 return;
             }
@@ -717,228 +751,263 @@
             previewContainer.classList.remove('hidden');
 
             // 1. Render actual images using Object URL (Synchronous & Faster)
-            selectedFiles.forEach((file, index) => {
-                const objectUrl = URL.createObjectURL(file);
-                const div = document.createElement('div');
+            window.laporanSelectedFiles.forEach(function(file, index) {
+                var objectUrl = URL.createObjectURL(file);
+                var div = document.createElement('div');
                 div.className = 'relative group';
-                div.innerHTML = `
-                    <img src="${objectUrl}" class="rounded-xl border border-gray-200 w-full h-32 object-cover shadow-sm" onload="URL.revokeObjectURL(this.src)">
-                    <button type="button" onclick="removeFile(${index})" class="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-md hover:bg-red-600 z-10">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                    </button>
-                `;
+                div.innerHTML = '<img src="' + objectUrl + '" class="rounded-xl border border-gray-200 w-full h-32 object-cover shadow-sm" onload="URL.revokeObjectURL(this.src)">' +
+                    '<button type="button" onclick="removeFile(' + index + ')" class="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-md hover:bg-red-600 z-10">' +
+                    '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>' +
+                    '</button>';
                 previewContainer.appendChild(div);
             });
 
             // 2. Render empty slots (Visual placeholders)
-            const emptySlots = maxFiles - selectedFiles.length;
-            for(let i = 0; i < emptySlots; i++) {
-                const div = document.createElement('div');
+            var emptySlots = maxFiles - window.laporanSelectedFiles.length;
+            for(var i = 0; i < emptySlots; i++) {
+                var div = document.createElement('div');
                 div.className = 'w-full h-32 rounded-xl border-2 border-dashed border-gray-200 bg-gray-50/50 flex flex-col items-center justify-center text-gray-400';
-                div.innerHTML = `
-                    <svg class="w-6 h-6 mb-1 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                    <span class="text-xs font-medium opacity-70">Slot Tersedia</span>
-                `;
+                div.innerHTML = '<svg class="w-6 h-6 mb-1 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>' +
+                    '<span class="text-xs font-medium opacity-70">Slot Tersedia</span>';
                 previewContainer.appendChild(div);
             }
         }
 
         function removeFile(index) {
-            selectedFiles.splice(index, 1);
+            if (!window.laporanSelectedFiles) return;
+            window.laporanSelectedFiles.splice(index, 1);
             
             // Rebuild DataTransfer
-            dataTransfer.items.clear();
-            selectedFiles.forEach(file => dataTransfer.items.add(file)); // Keep sync
+            window.laporanDataTransfer = new DataTransfer();
+            window.laporanSelectedFiles.forEach(function(file) {
+                window.laporanDataTransfer.items.add(file);
+            });
             
-            realInput.files = dataTransfer.files;
+            var realInput = document.getElementById('bukti-real');
+            if (realInput) {
+                realInput.files = window.laporanDataTransfer.files;
+            }
             renderPreviews();
         }
     </script>
 
-    {{-- Modal RTRW legacy telah dihapus â€” domisili kini dikelola oleh KYC KTP --}}
+    {{-- Modal RTRW legacy telah dihapus -- domisili kini dikelola oleh KYC KTP --}}
 
     {{-- ===== SCRIPT SEARCHABLE DROPDOWN TUJUAN PELAPORAN ===== --}}
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Data RT/RW dari backend (semua RT/RW disertakan, dengan flag has_admin)
-        const allRTData = {!! json_encode($allRTData->map(fn($rt) => ['id' => $rt->id, 'name' => $rt->name, 'rw_name' => $rt->rw_name, 'has_admin' => $rt->has_admin])->values()->all()) !!};
-        const allRWData = {!! json_encode($allRWData->map(fn($rw) => ['id' => $rw->id, 'name' => $rw->name, 'has_admin' => $rw->has_admin])->values()->all()) !!};
+    (function() {
+        function initSearchableDropdownTujuan() {
+            var trigger = document.getElementById('dropdown-trigger');
+            if (!trigger) return;
+            if (trigger.dataset.siap === '1') return;
+            trigger.dataset.siap = '1';
 
-        // DOM Elements
-        const radios = document.querySelectorAll('input[name="tujuan_laporan"]');
-        const wrapper = document.getElementById('dropdown-tujuan-wrapper');
-        const label = document.getElementById('dropdown-tujuan-label');
-        const trigger = document.getElementById('dropdown-trigger');
-        const triggerText = document.getElementById('dropdown-trigger-text');
-        const arrow = document.getElementById('dropdown-arrow');
-        const panel = document.getElementById('dropdown-panel');
-        const searchInput = document.getElementById('dropdown-search');
-        const optionsList = document.getElementById('dropdown-options');
-        const emptyState = document.getElementById('dropdown-empty');
-        const hiddenInput = document.getElementById('target_region_id');
+            // Data RT/RW dari backend (semua RT/RW disertakan, dengan flag has_admin)
+            var allRTData = {!! json_encode($allRTData->map(fn($rt) => ['id' => $rt->id, 'name' => $rt->name, 'rw_name' => $rt->rw_name, 'has_admin' => $rt->has_admin])->values()->all()) !!};
+            var allRWData = {!! json_encode($allRWData->map(fn($rw) => ['id' => $rw->id, 'name' => $rw->name, 'has_admin' => $rw->has_admin])->values()->all()) !!};
 
-        let currentItems = [];
-        let isOpen = false;
+            // DOM Elements
+            var radios = document.querySelectorAll('input[name="tujuan_laporan"]');
+            var wrapper = document.getElementById('dropdown-tujuan-wrapper');
+            var label = document.getElementById('dropdown-tujuan-label');
+            var triggerText = document.getElementById('dropdown-trigger-text');
+            var arrow = document.getElementById('dropdown-arrow');
+            var panel = document.getElementById('dropdown-panel');
+            var searchInput = document.getElementById('dropdown-search');
+            var optionsList = document.getElementById('dropdown-options');
+            var emptyState = document.getElementById('dropdown-empty');
+            var hiddenInput = document.getElementById('target_region_id');
 
-        // Render opsi dropdown
-        function renderOptions(items, searchTerm = '') {
-            optionsList.innerHTML = '';
-            const filtered = items.filter(item => {
-                const label = item.label || item.name;
-                return label.toLowerCase().includes(searchTerm.toLowerCase());
-            });
+            var currentItems = [];
+            var isOpen = false;
 
-            if (filtered.length === 0) {
-                emptyState.classList.remove('hidden');
-                optionsList.classList.add('hidden');
-                return;
+            // Render opsi dropdown
+            function renderOptions(items, searchTerm) {
+                searchTerm = searchTerm || '';
+                if (!optionsList) return;
+                optionsList.innerHTML = '';
+                var filtered = items.filter(function(item) {
+                    var l = item.label || item.name;
+                    return l.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1;
+                });
+
+                if (filtered.length === 0) {
+                    if (emptyState) emptyState.classList.remove('hidden');
+                    optionsList.classList.add('hidden');
+                    return;
+                }
+
+                if (emptyState) emptyState.classList.add('hidden');
+                optionsList.classList.remove('hidden');
+
+                filtered.forEach(function(item) {
+                    var li = document.createElement('li');
+                    
+                    if (item.has_admin) {
+                        li.className = 'px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 cursor-pointer transition-colors flex items-center justify-between border-b border-gray-50 last:border-0';
+                    } else {
+                        li.className = 'px-4 py-2.5 text-sm text-gray-400 cursor-not-allowed flex items-center justify-between bg-gray-50/50 border-b border-gray-100 last:border-0';
+                    }
+                    
+                    var labelContainer = document.createElement('div');
+                    labelContainer.className = 'flex items-center gap-2';
+
+                    var labelSpan = document.createElement('span');
+                    labelSpan.className = item.has_admin ? 'font-medium' : '';
+                    labelSpan.textContent = item.label || item.name;
+                    labelContainer.appendChild(labelSpan);
+
+                    if (item.badge) {
+                        var badge = document.createElement('span');
+                        badge.className = 'text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-gray-200 text-gray-600';
+                        badge.textContent = item.badge;
+                        labelContainer.appendChild(badge);
+                    }
+                    
+                    li.appendChild(labelContainer);
+
+                    if (item.has_admin) {
+                        var statusBadge = document.createElement('span');
+                        statusBadge.className = 'text-[10px] font-medium px-2 py-0.5 rounded bg-green-100 text-green-700 whitespace-nowrap';
+                        statusBadge.textContent = 'Aktif';
+                        li.appendChild(statusBadge);
+
+                        li.addEventListener('click', function() {
+                            selectItem(item);
+                        });
+                    } else {
+                        var statusBadge2 = document.createElement('span');
+                        statusBadge2.className = 'text-[10px] font-medium px-2 py-0.5 rounded bg-red-100 text-red-600 whitespace-nowrap';
+                        statusBadge2.textContent = 'Admin Belum Bergabung';
+                        li.appendChild(statusBadge2);
+                    }
+
+                    optionsList.appendChild(li);
+                });
             }
 
-            emptyState.classList.add('hidden');
-            optionsList.classList.remove('hidden');
-
-            filtered.forEach(item => {
-                const li = document.createElement('li');
-                
-                if (item.has_admin) {
-                    li.className = 'px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 cursor-pointer transition-colors flex items-center justify-between border-b border-gray-50 last:border-0';
-                } else {
-                    li.className = 'px-4 py-2.5 text-sm text-gray-400 cursor-not-allowed flex items-center justify-between bg-gray-50/50 border-b border-gray-100 last:border-0';
+            // Pilih item
+            function selectItem(item) {
+                if (hiddenInput) hiddenInput.value = item.id;
+                if (triggerText) {
+                    triggerText.textContent = item.label || item.name;
+                    triggerText.classList.remove('text-gray-400');
+                    triggerText.classList.add('text-gray-800');
                 }
-                
-                const labelContainer = document.createElement('div');
-                labelContainer.className = 'flex items-center gap-2';
-
-                const labelSpan = document.createElement('span');
-                labelSpan.className = item.has_admin ? 'font-medium' : '';
-                labelSpan.textContent = item.label || item.name;
-                labelContainer.appendChild(labelSpan);
-
-                if (item.badge) {
-                    const badge = document.createElement('span');
-                    badge.className = 'text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-gray-200 text-gray-600';
-                    badge.textContent = item.badge;
-                    labelContainer.appendChild(badge);
-                }
-                
-                li.appendChild(labelContainer);
-
-                if (item.has_admin) {
-                    const statusBadge = document.createElement('span');
-                    statusBadge.className = 'text-[10px] font-medium px-2 py-0.5 rounded bg-green-100 text-green-700 whitespace-nowrap';
-                    statusBadge.textContent = 'âœ“ Aktif';
-                    li.appendChild(statusBadge);
-
-                    li.addEventListener('click', () => {
-                        selectItem(item);
-                    });
-                } else {
-                    const statusBadge = document.createElement('span');
-                    statusBadge.className = 'text-[10px] font-medium px-2 py-0.5 rounded bg-red-100 text-red-600 whitespace-nowrap';
-                    statusBadge.textContent = 'Admin Belum Bergabung';
-                    li.appendChild(statusBadge);
-                }
-
-                optionsList.appendChild(li);
-            });
-        }
-
-        // Pilih item
-        function selectItem(item) {
-            hiddenInput.value = item.id;
-            triggerText.textContent = item.label || item.name;
-            triggerText.classList.remove('text-gray-400');
-            triggerText.classList.add('text-gray-800');
-            closeDropdown();
-        }
-
-        // Buka dropdown
-        function openDropdown() {
-            panel.classList.remove('hidden');
-            arrow.classList.add('rotate-180');
-            isOpen = true;
-            searchInput.value = '';
-            renderOptions(currentItems);
-            setTimeout(() => searchInput.focus(), 50);
-        }
-
-        // Tutup dropdown
-        function closeDropdown() {
-            panel.classList.add('hidden');
-            arrow.classList.remove('rotate-180');
-            isOpen = false;
-        }
-
-        // Toggle dropdown
-        trigger.addEventListener('click', () => {
-            isOpen ? closeDropdown() : openDropdown();
-        });
-
-        // Search filter
-        searchInput.addEventListener('input', (e) => {
-            renderOptions(currentItems, e.target.value);
-        });
-
-        // Tutup saat klik di luar
-        document.addEventListener('click', (e) => {
-            const container = document.getElementById('searchable-select-container');
-            if (container && !container.contains(e.target)) {
                 closeDropdown();
             }
-        });
 
-        // Handle radio button change
-        radios.forEach(radio => {
-            radio.addEventListener('change', function() {
-                const val = this.value;
-                hiddenInput.value = ''; // Reset pilihan
-                triggerText.textContent = 'Ketik untuk mencari...';
-                triggerText.classList.add('text-gray-400');
-                triggerText.classList.remove('text-gray-800');
-
-                if (val === 'rt' && allRTData.length > 0) {
-                    label.textContent = 'Pilih RT Tujuan';
-                    currentItems = allRTData.map(rt => ({
-                        id: rt.id,
-                        name: rt.name,
-                        label: rt.name + ' â€” ' + rt.rw_name,
-                        badge: rt.rw_name,
-                        has_admin: rt.has_admin
-                    }));
-                    wrapper.classList.remove('hidden');
-                } else if (val === 'rw' && allRWData.length > 0) {
-                    label.textContent = 'Pilih RW Tujuan';
-                    currentItems = allRWData.map(rw => ({
-                        id: rw.id,
-                        name: rw.name,
-                        label: rw.name,
-                        has_admin: rw.has_admin
-                    }));
-                    wrapper.classList.remove('hidden');
-                } else {
-                    wrapper.classList.add('hidden');
-                    currentItems = [];
+            // Buka dropdown
+            function openDropdown() {
+                if (panel) panel.classList.remove('hidden');
+                if (arrow) arrow.classList.add('rotate-180');
+                isOpen = true;
+                if (searchInput) {
+                    searchInput.value = '';
+                    renderOptions(currentItems);
+                    setTimeout(function() { searchInput.focus(); }, 50);
                 }
+            }
 
-                closeDropdown();
+            // Tutup dropdown
+            function closeDropdown() {
+                if (panel) panel.classList.add('hidden');
+                if (arrow) arrow.classList.remove('rotate-180');
+                isOpen = false;
+            }
+
+            // Toggle dropdown
+            trigger.addEventListener('click', function() {
+                isOpen ? closeDropdown() : openDropdown();
             });
-        });
 
-        // Restore state jika ada old value
-        const oldTujuan = '{{ old('tujuan_laporan') }}';
-        const oldRegionId = '{{ old('target_region_id') }}';
-        if (oldTujuan && oldRegionId) {
-            const checkedRadio = document.querySelector(`input[name="tujuan_laporan"][value="${oldTujuan}"]`);
-            if (checkedRadio) {
-                checkedRadio.dispatchEvent(new Event('change'));
-                // Set selected item
-                setTimeout(() => {
-                    const found = currentItems.find(i => i.id == oldRegionId);
-                    if (found) selectItem(found);
-                }, 100);
+            // Search filter
+            if (searchInput) {
+                searchInput.addEventListener('input', function(e) {
+                    renderOptions(currentItems, e.target.value);
+                });
+            }
+
+            // Tutup saat klik di luar
+            document.addEventListener('click', function(e) {
+                var container = document.getElementById('searchable-select-container');
+                if (container && !container.contains(e.target)) {
+                    closeDropdown();
+                }
+            });
+
+            // Handle radio button change
+            radios.forEach(function(radio) {
+                radio.addEventListener('change', function() {
+                    var val = this.value;
+                    if (hiddenInput) hiddenInput.value = ''; // Reset pilihan
+                    if (triggerText) {
+                        triggerText.textContent = 'Ketik untuk mencari...';
+                        triggerText.classList.add('text-gray-400');
+                        triggerText.classList.remove('text-gray-800');
+                    }
+
+                    if (val === 'rt' && allRTData.length > 0) {
+                        if (label) label.textContent = 'Pilih RT Tujuan';
+                        currentItems = allRTData.map(function(rt) {
+                            return {
+                                id: rt.id,
+                                name: rt.name,
+                                label: rt.name + ' - ' + rt.rw_name,
+                                badge: rt.rw_name,
+                                has_admin: rt.has_admin
+                            };
+                        });
+                        if (wrapper) wrapper.classList.remove('hidden');
+                    } else if (val === 'rw' && allRWData.length > 0) {
+                        if (label) label.textContent = 'Pilih RW Tujuan';
+                        currentItems = allRWData.map(function(rw) {
+                            return {
+                                id: rw.id,
+                                name: rw.name,
+                                label: rw.name,
+                                has_admin: rw.has_admin
+                            };
+                        });
+                        if (wrapper) wrapper.classList.remove('hidden');
+                    } else {
+                        if (wrapper) wrapper.classList.add('hidden');
+                        currentItems = [];
+                    }
+
+                    closeDropdown();
+                });
+            });
+
+            // Restore state jika ada old value
+            var oldTujuan = '{{ old('tujuan_laporan') }}';
+            var oldRegionId = '{{ old('target_region_id') }}';
+            if (oldTujuan && oldRegionId) {
+                var checkedRadio = document.querySelector('input[name="tujuan_laporan"][value="' + oldTujuan + '"]');
+                if (checkedRadio) {
+                    checkedRadio.dispatchEvent(new Event('change'));
+                    setTimeout(function() {
+                        var found = currentItems.find(function(i) { return i.id == oldRegionId; });
+                        if (found) selectItem(found);
+                    }, 100);
+                }
             }
         }
-    });
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initSearchableDropdownTujuan);
+        } else {
+            initSearchableDropdownTujuan();
+        }
+        document.addEventListener('turbo:load', initSearchableDropdownTujuan);
+
+        // Pastikan Google Maps re-inisialisasi jika pindah halaman dengan Turbo
+        document.addEventListener('turbo:load', function() {
+            if (window.google && window.google.maps && document.getElementById('map') && typeof initMap === 'function') {
+                initMap();
+            }
+        });
+    })();
     </script>
 @endsection
 

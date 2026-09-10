@@ -248,7 +248,11 @@
                         <div class="relative w-11 h-11 rounded-full bg-[#D1D5DB] flex-shrink-0 shadow-md">
                             <div class="w-full h-full rounded-full overflow-hidden">
                                 @if (auth()->user()->file)
-                                    <img src="{{ auth()->user()->file->file_stream }}" alt="Avatar" class="w-full h-full object-cover">
+                                    <img src="{{ auth()->user()->file->file_stream }}" alt="Avatar" class="w-full h-full object-cover"
+                                         onerror="this.style.display='none'; var ph = this.parentElement.querySelector('.avatar-nav-fallback'); if(ph) ph.style.display='flex';">
+                                    <div class="avatar-nav-fallback w-full h-full items-center justify-center" style="display: none;">
+                                        <svg class="w-7 h-7 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                                    </div>
                                 @else
                                     <div class="w-full h-full flex items-center justify-center">
                                         <svg class="w-7 h-7 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
@@ -484,7 +488,13 @@
                 <div class="relative w-12 h-12 rounded-full bg-[#D1D5DB] flex-shrink-0">
                     <div class="w-full h-full rounded-full overflow-hidden">
                         @if (auth()->user()->file)
-                            <img src="{{ auth()->user()->file->file_stream }}" alt="Avatar" class="w-full h-full object-cover">
+                            <img src="{{ auth()->user()->file->file_stream }}" alt="Avatar" class="w-full h-full object-cover"
+                                 onerror="this.style.display='none'; var ph = this.parentElement.querySelector('.avatar-mobile-fallback'); if(ph) ph.style.display='flex';">
+                            <div class="avatar-mobile-fallback w-full h-full items-center justify-center" style="display: none;">
+                                <svg class="w-7 h-7 text-white" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                                </svg>
+                            </div>
                         @else
                             <div class="w-full h-full flex items-center justify-center">
                                 <svg class="w-7 h-7 text-white" viewBox="0 0 24 24" fill="currentColor">

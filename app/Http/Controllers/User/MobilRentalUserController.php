@@ -10,11 +10,15 @@ class MobilRentalUserController extends Controller
     public function index()
     {
         $items = Mobil::where('status', '!=', 'rusak')
-                       // Dulu daftar ini TIDAK disaring sama sekali: warga melihat
-                       // barang milik desa lain, lalu ditolak saat memesan. Sekarang
-                       // mengikuti sakelar "Eksklusif Warga Lokal" tiap wilayah.
-                       ->when(auth()->check() && auth()->user()->role === 'user', function ($q) {
-                           $q->whereIn('region_id', \App\Models\Region::wilayahLayananTerlihat(auth()->user()->region_id, 'Penyewaan Mobil'));
+                       ->where(function($q) {
+                           $q->where('kategori', '!=', 'ambulans')->orWhereNull('kategori');
+                       })
+                       ->when(auth()->check() && auth()->user()->role === 'user' && auth()->user()->region_id, function ($q) {
+                           $allowed = \App\Models\Region::wilayahLayananTerlihat(auth()->user()->region_id, 'Penyewaan Mobil');
+                           $q->where(function($sub) use ($allowed) {
+                               $sub->whereIn('region_id', $allowed)
+                                   ->orWhereNull('region_id');
+                           });
                        })
                        ->orderBy('created_at', 'desc')
                        ->get();

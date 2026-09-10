@@ -240,9 +240,9 @@
                 <div class="products-grid" id="productsGrid">
                     @foreach($produks as $produk)
                     <div class="product-card" data-product-id="{{ $produk->id }}">
-                        <div class="product-image-wrapper" style="cursor: pointer;" onclick="openOrderModal({{ $produk->id }}, '{{ addslashes($produk->nama_produk) }}', '{{ $produk->foto ? Storage::url($produk->foto) : '' }}', '{{ addslashes($produk->deskripsi ?? 'Tidak ada deskripsi.') }}', {{ $produk->harga }}, {{ $produk->stok ?? 10 }}, 'Toko BUMDes {{ addslashes($produk->region->name ?? 'Desa') }}', '{{ route('pasar.toko', $produk->region_id ?? 1) }}')">
+                        <div class="product-image-wrapper" style="cursor: pointer;" onclick="openOrderModal({{ $produk->id }}, '{{ addslashes($produk->nama_produk) }}', '{{ $produk->foto ? Storage::url($produk->foto) : '' }}', '{{ addslashes($produk->deskripsi ?? 'Tidak ada deskripsi.') }}', {{ $produk->harga }}, {{ $produk->stok ?? 10 }}, 'Toko Desa {{ addslashes($produk->region->name ?? 'Desa') }}', '{{ route('pasar.toko', $produk->region_id ?? 1) }}')">
                             @if($produk->foto)
-                                <img src="{{ Storage::url($produk->foto) }}" alt="{{ $produk->nama_produk }}">
+                                <img src="{{ Storage::url($produk->foto) }}" alt="{{ $produk->nama_produk }}" onerror="this.onerror=null; this.src='{{ asset('User/img/elemen/PasarDaerah.png') }}';">
                             @else
                                 <div style="width:100%; height:100%; background:#f3f4f6; display:flex; align-items:center; justify-content:center; color:#cbd5e1;">
                                     <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
@@ -254,7 +254,7 @@
                             @endif
                             
                             <div class="product-actions-overlay">
-                                <button type="button" class="product-action-btn" title="Lihat Detail" onclick="event.stopPropagation(); openOrderModal({{ $produk->id }}, '{{ addslashes($produk->nama_produk) }}', '{{ $produk->foto ? Storage::url($produk->foto) : '' }}', '{{ addslashes($produk->deskripsi ?? 'Tidak ada deskripsi.') }}', {{ $produk->harga }}, {{ $produk->stok ?? 10 }}, 'Toko BUMDes {{ addslashes($produk->region->name ?? 'Desa') }}', '{{ route('pasar.toko', $produk->region_id ?? 1) }}')">
+                                <button type="button" class="product-action-btn" title="Lihat Detail" onclick="event.stopPropagation(); openOrderModal({{ $produk->id }}, '{{ addslashes($produk->nama_produk) }}', '{{ $produk->foto ? Storage::url($produk->foto) : '' }}', '{{ addslashes($produk->deskripsi ?? 'Tidak ada deskripsi.') }}', {{ $produk->harga }}, {{ $produk->stok ?? 10 }}, 'Toko Desa {{ addslashes($produk->region->name ?? 'Desa') }}', '{{ route('pasar.toko', $produk->region_id ?? 1) }}')">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                                 </button>
                                 
@@ -268,7 +268,7 @@
                             </div>
                         </div>
                         <div class="product-info">
-                            <h3 class="product-name" style="font-size: 1.1rem; line-height: 1.4; margin-bottom: 8px; cursor: pointer;" onclick="openOrderModal({{ $produk->id }}, '{{ addslashes($produk->nama_produk) }}', '{{ $produk->foto ? Storage::url($produk->foto) : '' }}', '{{ addslashes($produk->deskripsi ?? 'Tidak ada deskripsi.') }}', {{ $produk->harga }}, {{ $produk->stok ?? 10 }}, 'Toko BUMDes {{ addslashes($produk->region->name ?? 'Desa') }}', '{{ route('pasar.toko', $produk->region_id ?? 1) }}')">{{ $produk->nama_produk }}</h3>
+                            <h3 class="product-name" style="font-size: 1.1rem; line-height: 1.4; margin-bottom: 8px; cursor: pointer;" onclick="openOrderModal({{ $produk->id }}, '{{ addslashes($produk->nama_produk) }}', '{{ $produk->foto ? Storage::url($produk->foto) : '' }}', '{{ addslashes($produk->deskripsi ?? 'Tidak ada deskripsi.') }}', {{ $produk->harga }}, {{ $produk->stok ?? 10 }}, 'Toko Desa {{ addslashes($produk->region->name ?? 'Desa') }}', '{{ route('pasar.toko', $produk->region_id ?? 1) }}')">{{ $produk->nama_produk }}</h3>
                             <p class="product-desc" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 8px;">{{ $produk->deskripsi ?? 'Produk khas daerah Bengkalis.' }}</p>
                             
                             <div style="display: flex; align-items: center; gap: 5px; margin-bottom: 12px; font-size: 11px; color: #64748b;">
@@ -288,7 +288,7 @@
                                 
                                 @auth
                                     @if($produk->stok > 0)
-                                        <button type="button" class="btn-add-cart" onclick="openOrderModal({{ $produk->id }}, '{{ addslashes($produk->nama_produk) }}', '{{ $produk->foto ? Storage::url($produk->foto) : '' }}', '{{ addslashes($produk->deskripsi ?? 'Tidak ada deskripsi.') }}', {{ $produk->harga }}, {{ $produk->stok ?? 10 }}, 'Toko BUMDes {{ addslashes($produk->region->name ?? 'Desa') }}', '{{ route('pasar.toko', $produk->region_id ?? 1) }}')">
+                                        <button type="button" class="btn-add-cart" onclick="openOrderModal({{ $produk->id }}, '{{ addslashes($produk->nama_produk) }}', '{{ $produk->foto ? Storage::url($produk->foto) : '' }}', '{{ addslashes($produk->deskripsi ?? 'Tidak ada deskripsi.') }}', {{ $produk->harga }}, {{ $produk->stok ?? 10 }}, 'Toko Desa {{ addslashes($produk->region->name ?? 'Desa') }}', '{{ route('pasar.toko', $produk->region_id ?? 1) }}')">
                                             + Keranjang
                                         </button>
                                     @else

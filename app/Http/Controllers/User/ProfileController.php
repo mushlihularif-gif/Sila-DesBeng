@@ -103,13 +103,13 @@ class ProfileController extends Controller
             'rt' => 'nullable|string|max:10',
             'rw' => 'nullable|string|max:10',
             'gender' => 'nullable|in:laki-laki,perempuan',
-            'profile' => 'nullable|image|mimes:jpg,jpeg,png|max:8192',
+            'profile' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:8192',
         ], [
             'username.required' => 'Username wajib diisi.',
             'username.unique' => 'Username sudah digunakan oleh orang lain.',
             'name.required' => 'Nama lengkap wajib diisi.',
             'profile.image' => 'File harus berupa gambar.',
-            'profile.mimes' => 'Format gambar harus JPG, JPEG, atau PNG.',
+            'profile.mimes' => 'Format gambar harus JPG, JPEG, PNG, atau WEBP.',
             'profile.max' => 'Ukuran foto profil tidak boleh lebih dari 8MB.',
         ]);
 
@@ -137,7 +137,9 @@ class ProfileController extends Controller
             if ($user->file) {
                 // Periksa apakah file ada di penyimpanan sebelum menghapus
                 if (Storage::disk('local')->exists($user->file->path)) {
-                    Storage::delete($user->file->path);
+                    Storage::disk('local')->delete($user->file->path);
+                } elseif (Storage::disk('public')->exists($user->file->path)) {
+                    Storage::disk('public')->delete($user->file->path);
                 }
                 $user->file->delete();
             }
@@ -145,10 +147,10 @@ class ProfileController extends Controller
 
         if ($request->hasFile('profile')) {
             $file = $request->file('profile');
-            $extension = strtolower($file->extension());
+            $extension = strtolower($file->getClientOriginalExtension() ?: $file->extension() ?: 'jpg');
             
             // Strict whitelist extension
-            $allowedExtensions = ['jpg', 'jpeg', 'png'];
+            $allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
             if (!in_array($extension, $allowedExtensions)) {
                 return back()->with('error', 'Format file profil tidak valid.')->withInput();
             }
@@ -160,8 +162,8 @@ class ProfileController extends Controller
                 'alias' => 'profile_picture',
                 'filename' => $filename,
                 'path' => $path,
-                'mime_type' => $file->getMimeType(),
-                'size' => $file->getSize(),
+                'mime_type' => $file->getMimeType() ?: 'image/jpeg',
+                'size' => $file->getSize() ?: 0,
             ]);
         }
 
@@ -240,26 +242,36 @@ class ProfileController extends Controller
         }
 
         try {
-            $validated = $request->validate([
-                'current_password' => 'required',
+            $user = auth()->user();
+            $isGoogleUser = !empty($user->google_id);
+
+            $rules = [
                 'new_password' => 'required|min:8|confirmed',
-            ], [
+            ];
+            
+            if (!$isGoogleUser) {
+                $rules['current_password'] = 'required';
+            }
+
+            $messages = [
                 'current_password.required' => 'Password lama harus diisi',
                 'new_password.required' => 'Password baru harus diisi',
                 'new_password.min' => 'Password baru minimal 8 karakter',
                 'new_password.confirmed' => 'Konfirmasi password tidak cocok',
-            ]);
+            ];
 
-            $user = auth()->user();
+            $validated = $request->validate($rules, $messages);
 
-            // Verifikasi password saat ini
-            if (!Hash::check($validated['current_password'], $user->password)) {
-                return response()->json([
-                    'success' => false,
-                    'errors' => [
-                        'current_password' => ['Password lama tidak sesuai']
-                    ]
-                ], 422);
+            // Verifikasi password saat ini jika bukan Google User
+            if (!$isGoogleUser) {
+                if (!Hash::check($validated['current_password'], $user->password)) {
+                    return response()->json([
+                        'success' => false,
+                        'errors' => [
+                            'current_password' => ['Password lama tidak sesuai']
+                        ]
+                    ], 422);
+                }
             }
 
             // Buat OTP

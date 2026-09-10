@@ -86,6 +86,7 @@
                             <img src="{{ asset('storage/' . $item->foto) }}" 
                                  alt="{{ $item->nama_barang }}"
                                  loading="lazy"
+                                 onerror="this.onerror=null; this.src='{{ asset('User/img/elemen/soundsystem.png') }}';"
                                  class="product-image w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                             
                             <!-- Status Badge -->

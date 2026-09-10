@@ -13,20 +13,31 @@ class AmbulansUserController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $region = Region::find($user->region_id);
+        $region = $user && $user->region_id ? Region::find($user->region_id) : null;
         
         if (!$region) {
-            return redirect()->back()->with('error', 'Data wilayah tidak ditemukan.');
+            $region = Region::where('type', 'desa')->first() ?? Region::first();
         }
 
-        // Ambil data ambulans saja
-        $ambulansList = Mobil::with('supirs')
-                             ->where('region_id', $region->id)
-                             ->where('kategori', 'ambulans')
-                             ->where('status', '!=', 'rusak')
-                             ->get();
+        $relevantRegionIds = [];
+        if ($user && $user->region_id) {
+            $relevantRegionIds = array_merge([$user->region_id], Region::getAncestorIds($user->region_id));
+        }
 
-        $regionSettings = $region->settings ?? [];
+        // Ambil data ambulans untuk wilayah pengguna, wilayah leluhur (desa/kecamatan/kabupaten), atau umum
+        $ambulansQuery = Mobil::with('supirs')
+                             ->where('kategori', 'ambulans')
+                             ->where('status', '!=', 'rusak');
+
+        if (!empty($relevantRegionIds)) {
+            $ambulansQuery->where(function($q) use ($relevantRegionIds) {
+                $q->whereIn('region_id', $relevantRegionIds)
+                  ->orWhereNull('region_id');
+            });
+        }
+
+        $ambulansList = $ambulansQuery->get();
+        $regionSettings = $region ? ($region->settings ?? []) : [];
 
         return view('users.ambulans-layanan', compact('ambulansList', 'regionSettings', 'region'));
     }

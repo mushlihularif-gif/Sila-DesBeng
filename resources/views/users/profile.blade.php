@@ -29,7 +29,7 @@
 
         {{-- Peringatan Sukses ditangani secara global oleh AlpineJS Toast di app.blade.php --}}
 
-        <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data" data-turbo="false">
             @csrf
             @method('PUT')
 
@@ -41,7 +41,8 @@
                             {{-- Avatar dengan Border Biru --}}
                             <div class="relative group">
                                 <div class="w-44 h-44 rounded-full overflow-hidden border-[5px] border-blue-400 shadow-xl bg-[#D1D5DB]">
-                                    <img id="avatar-preview" src="{{ $user->file ? $user->file->file_stream : '' }}" alt="Avatar" class="w-full h-full object-cover {{ $user->file ? '' : 'hidden' }}">
+                                    <img id="avatar-preview" src="{{ $user->file ? $user->file->file_stream : '' }}" alt="Avatar" class="w-full h-full object-cover {{ $user->file ? '' : 'hidden' }}"
+                                         onerror="this.classList.add('hidden'); document.getElementById('avatar-placeholder')?.classList.remove('hidden');">
                                     
                                     {{-- Placeholder Ikon Pengguna SVG --}}
                                     <div id="avatar-placeholder" class="w-full h-full flex items-center justify-center {{ $user->file ? 'hidden' : '' }}">
@@ -60,7 +61,7 @@
                                     </svg>
                                 </div>
 
-                                <input type="file" id="profile-input" name="profile" accept="image/jpeg,image/jpg,image/png" class="hidden">
+                                <input type="file" id="profile-input" name="profile" accept="image/jpeg,image/jpg,image/png,image/webp" class="hidden">
                             </div>
 
                             {{-- Pilih File Button --}}
@@ -71,12 +72,11 @@
 
                             {{-- Link Unduh Foto --}}
                             {{-- Tombol Hapus Foto (Ditunda) --}}
-                            @if($user->file)
                             <button type="button" id="delete-photo-btn"
-                               class="mt-2.5 text-red-500 hover:text-red-700 font-medium text-sm transition-colors">
+                               class="mt-2.5 text-red-500 hover:text-red-700 font-medium text-sm transition-colors {{ $user->file ? '' : 'hidden' }}"
+                               style="{{ $user->file ? '' : 'display: none;' }}">
                                 Hapus Foto
                             </button>
-                            @endif
                             <p id="upload-hint" class="mt-2.5 text-gray-600 text-xs text-center {{ $user->file ? 'hidden' : '' }}">
                                 JPG, PNG (Max 8MB)
                             </p>
@@ -633,7 +633,13 @@
             profileInput.dataset.siap = '1';
 
             profileInput.addEventListener('change', function(e) {
-                const file = e.target.files[0];
+                // Abaikan pemanggilan jika event change dipicu setelah pemotongan selesai
+                if (window._isCropperSaving || this.dataset.cropped === '1' || (e.detail && e.detail.fromCropper)) {
+                    delete this.dataset.cropped;
+                    return;
+                }
+
+                const file = e.target.files && e.target.files[0];
                 const clientErrorProfile = document.getElementById('client-error-profile');
 
                 if (file) {
@@ -646,12 +652,10 @@
                         return;
                     }
                     
+                    if (clientErrorProfile) clientErrorProfile.classList.add('hidden');
+
                     if (typeof initGlobalCropper === 'function') {
                         initGlobalCropper(this, 'avatar-preview', 1);
-                        if (avatarPlaceholder) avatarPlaceholder.classList.add('hidden');
-                        if (deletePhotoBtn) deletePhotoBtn.style.display = 'inline-block';
-                        if (uploadHint) uploadHint.classList.add('hidden');
-                        if (clientErrorProfile) clientErrorProfile.classList.add('hidden');
                     } else {
                         console.error('Cropper is not initialized properly in layout');
                     }
@@ -665,11 +669,11 @@
 
             deletePhotoBtn.addEventListener('click', function() {
                 // Setel flag untuk menghapus saat disimpan
-                 if(deleteAvatarInput) deleteAvatarInput.value = '1';
+                if (deleteAvatarInput) deleteAvatarInput.value = '1';
                 
                 // Bersihkan nilai input agar jika mereka mengunggah file yang sama lagi, itu memicu perubahan
                 const currentProfileInput = document.getElementById('profile-input');
-                if(currentProfileInput) currentProfileInput.value = '';
+                if (currentProfileInput) currentProfileInput.value = '';
 
                 // Tampilkan placeholder secara visual
                 if (avatarPreview) {
@@ -680,8 +684,13 @@
                     avatarPlaceholder.classList.remove('hidden');
                 }
                 
-                newDeleteBtn.style.display = 'none';
-                if(uploadHint) uploadHint.classList.remove('hidden');
+                deletePhotoBtn.style.display = 'none';
+                deletePhotoBtn.classList.add('hidden');
+
+                const belumTersimpan = document.getElementById('belum-tersimpan');
+                if (belumTersimpan) belumTersimpan.classList.add('hidden');
+
+                if (uploadHint) uploadHint.classList.remove('hidden');
                 
                 // Tambahkan toast notifikasi informatif
                 if (typeof showToast === 'function') {
@@ -876,11 +885,10 @@
         // Efek Ripple Tombol
         const interactiveButtons = document.querySelectorAll('.button-interactive');
         interactiveButtons.forEach(button => {
-            // Clone to remove old listeners
-            const newBtn = button.cloneNode(true);
-            button.parentNode.replaceChild(newBtn, button);
+            if (button.dataset.rippleAdded) return;
+            button.dataset.rippleAdded = 'true';
 
-            newBtn.addEventListener('click', function(e) {
+            button.addEventListener('click', function(e) {
                 const ripple = document.createElement('span');
                 const rect = this.getBoundingClientRect();
                 const size = Math.max(rect.width, rect.height);

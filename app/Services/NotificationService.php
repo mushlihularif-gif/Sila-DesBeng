@@ -535,17 +535,31 @@ class NotificationService
      */
     public function notifyOrderApproved($order, $type)
     {
-        $itemName = $type === 'gas' ? ($order->item_name ?? 'Gas') : ($order->barang->nama_barang ?? 'Alat');
+        $itemName = match ($type) {
+            'gas' => $order->item_name ?? 'Gas LPG',
+            'mobil' => $order->mobil->nama_mobil ?? 'Armada Mobil',
+            'fasilitas' => $order->fasilitas->nama_fasilitas ?? 'Fasilitas Umum',
+            default => $order->barang->nama_barang ?? 'Alat Sewa',
+        };
         
         if ($type === 'gas') {
             $message = "Silahkan Ambil Gas, Pesanan Telah dikonfirmasi, NB : Jangan Lupa Tunjukkan Bukti Transaksi";
             $title = "Pesanan Gas Disetujui";
+        } elseif ($type === 'mobil') {
+            $title = "Pemesanan Sewa Mobil Disetujui";
+            if (($order->delivery_method ?? '') === 'antar') {
+                $message = "Pemesanan armada {$itemName} telah dikonfirmasi dan siap untuk proses pengantaran.";
+            } else {
+                $message = "Pemesanan armada {$itemName} telah dikonfirmasi. Silahkan ambil di lokasi garasi operasional.";
+            }
+        } elseif ($type === 'fasilitas') {
+            $title = "Peminjaman Fasilitas Disetujui";
+            $message = "Permohonan peminjaman {$itemName} telah disetujui oleh pengelola.";
         } else {
             // Rental Logic
-            if ($order->delivery_method === 'jemput') {
+            if (($order->delivery_method ?? '') === 'jemput') {
                 $message = "Silahkan Ambil Alat Sewa, Pesanan Telah dikonfirmasi, NB : Jangan Lupa Tunjukkan Bukti Transaksi";
             } else {
-                // Delivery method is 'antar' (or others)
                 $message = "Pesanan dikonfirmasi. Alat sewa akan segera diproses untuk pengiriman.";
             }
             $title = "Penyewaan Disetujui";
@@ -600,7 +614,12 @@ class NotificationService
      */
     public function notifyOrderRejected($order, $reason, $type)
     {
-        $itemName = $type === 'gas' ? ($order->item_name ?? 'Gas') : ($order->barang->nama_barang ?? 'Alat');
+        $itemName = match ($type) {
+            'gas' => $order->item_name ?? 'Gas LPG',
+            'mobil' => $order->mobil->nama_mobil ?? 'Armada Mobil',
+            'fasilitas' => $order->fasilitas->nama_fasilitas ?? 'Fasilitas Umum',
+            default => $order->barang->nama_barang ?? 'Alat Sewa',
+        };
         
         Notification::create([
             'title' => 'Permintaan Ditolak',
@@ -616,7 +635,12 @@ class NotificationService
      */
     public function notifyStockInsufficient($order, $type, $availableStock, $requestedQty)
     {
-        $itemName = $type === 'gas' ? $order->item_name : $order->barang->nama_barang;
+        $itemName = match ($type) {
+            'gas' => $order->item_name ?? 'Gas LPG',
+            'mobil' => $order->mobil->nama_mobil ?? 'Armada Mobil',
+            'fasilitas' => $order->fasilitas->nama_fasilitas ?? 'Fasilitas Umum',
+            default => $order->barang->nama_barang ?? 'Alat Sewa',
+        };
         
         // Notify user
         Notification::create([

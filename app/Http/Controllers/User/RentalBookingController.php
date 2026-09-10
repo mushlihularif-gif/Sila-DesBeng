@@ -26,7 +26,7 @@ class RentalBookingController extends Controller
         }
 
         // Validasi: Warga hanya bisa memesan layanan di wilayahnya sendiri
-        if (! in_array($item->region_id, \App\Models\Region::wilayahLayananTerlihat(Auth::user()->region_id, 'Penyewaan Alat'))) {
+        if ($item->region_id && Auth::user()->region_id && ! in_array($item->region_id, \App\Models\Region::wilayahLayananTerlihat(Auth::user()->region_id, 'Penyewaan Alat'))) {
             return redirect()->back()->with('error', 'Layanan khusus warga lokal. Silakan sesuaikan wilayah Anda.');
         }
         
@@ -129,6 +129,7 @@ class RentalBookingController extends Controller
             'payment_proof' => $paymentProofPath,
             'total_amount' => $totalAmount,
             'status' => 'pending',
+            'region_id' => $item->region_id ?? Auth::user()->region_id,
         ]);
 
         // Catat pergerakan dana ke ledger wilayah. Sebelumnya tidak tercatat sama

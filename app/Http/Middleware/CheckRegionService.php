@@ -48,6 +48,18 @@ class CheckRegionService
             ->first();
 
         if (!$regionService || !$regionService->is_active) {
+            // Fallback khusus untuk layanan ambulans jika belum terkonfigurasi mandiri
+            if ($serviceSlug === 'layanan-ambulans') {
+                $mobilService = RegionService::whereIn('region_id', $relevantRegionIds)
+                    ->whereHas('service', function($q) {
+                        $q->where('slug', 'penyewaan-mobil');
+                    })
+                    ->first();
+                if ($mobilService && $mobilService->is_active) {
+                    return $next($request);
+                }
+            }
+
             $currentRoute = \Route::currentRouteName();
             
             // Default fallback is beranda

@@ -35,7 +35,7 @@ class ProfileController extends Controller
             'address' => 'nullable|string',
             'position' => 'nullable|string|max:255',
             'gender' => 'nullable|in:laki-laki,perempuan',
-            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:8192',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif|max:8192',
         ]);
 
         // Handle avatar upload or deletion
@@ -44,6 +44,8 @@ class ProfileController extends Controller
             if ($user->file) {
                 if (Storage::disk('local')->exists($user->file->path)) {
                     Storage::disk('local')->delete($user->file->path);
+                } elseif (Storage::disk('public')->exists($user->file->path)) {
+                    Storage::disk('public')->delete($user->file->path);
                 }
                 $user->file()->delete();
             }
@@ -52,10 +54,10 @@ class ProfileController extends Controller
         if ($request->hasFile('avatar')) {
             // Store new avatar in private storage (local disk)
             $file = $request->file('avatar');
-            $extension = strtolower($file->extension());
+            $extension = strtolower($file->getClientOriginalExtension() ?: $file->extension() ?: 'jpg');
             
             // Strict whitelist extension
-            $allowedExtensions = ['jpg', 'jpeg', 'png'];
+            $allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
             if (!in_array($extension, $allowedExtensions)) {
                 return back()->with('error', 'Format file avatar tidak valid.')->withInput();
             }
@@ -68,8 +70,8 @@ class ProfileController extends Controller
                 'alias' => 'admin_avatar',
                 'filename' => $filename,
                 'path' => $path,
-                'mime_type' => $file->getMimeType(),
-                'size' => $file->getSize(),
+                'mime_type' => $file->getMimeType() ?: 'image/jpeg',
+                'size' => $file->getSize() ?: 0,
             ]);
         }
 

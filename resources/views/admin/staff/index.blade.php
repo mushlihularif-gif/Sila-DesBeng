@@ -39,11 +39,16 @@
     }
 </style>
 
+@php
+    $isSuper = auth()->user()->role === 'super_admin' || empty(auth()->user()->region_id);
+    $pageTitle = $isSuper ? 'Staf Admin' : 'Staf Layanan';
+@endphp
+
 <div class="container-xxl flex-grow-1 container-p-y animate-fade-up">
     <!-- Page Header -->
     <div class="row mb-4">
         <div class="col-12 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
-            <h4 class="fw-bold m-0"><span class="text-muted fw-light">Manajemen /</span> Staf Layanan</h4>
+            <h4 class="fw-bold m-0"><span class="text-muted fw-light">Manajemen /</span> {{ $pageTitle }}</h4>
             <a href="{{ route('admin.staff.create') }}" class="btn btn-primary shadow-sm text-nowrap">
                 <i class="bx bx-plus me-1"></i> Tambah Staf Baru
             </a>
@@ -59,10 +64,13 @@
                 </div>
             </div>
             <div>
-                <h5 class="fw-bold mb-1 text-primary">Manajemen Staf Layanan</h5>
+                <h5 class="fw-bold mb-1 text-primary">Manajemen {{ $pageTitle }}</h5>
                 <p class="mb-0 text-primary" style="opacity: 0.85;">
-                    Halaman ini digunakan untuk mengelola akun petugas atau staf operasional (misal: Petugas Penjualan Gas, Petugas Pasar, dsb). 
-                    Staf yang ditambahkan di sini akan diberikan hak akses terbatas hanya untuk mengelola unit layanan yang ditugaskan kepadanya.
+                    @if($isSuper)
+                        Halaman ini digunakan untuk mengelola akun staf platform tingkat pusat yang bertugas mengelola sistem utama. Staf yang ditambahkan di sini dapat diberi hak akses untuk mengatur integrasi, pengaturan, dan monitoring sistem.
+                    @else
+                        Halaman ini digunakan untuk mengelola akun petugas atau staf operasional (misal: Petugas Penjualan Gas, Petugas Pasar, dsb). Staf yang ditambahkan di sini akan diberikan hak akses terbatas hanya untuk mengelola unit layanan yang ditugaskan kepadanya.
+                    @endif
                 </p>
             </div>
         </div>

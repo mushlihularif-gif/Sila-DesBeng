@@ -31,7 +31,7 @@ class UserManagementController extends Controller
         
         $user = auth()->user();
         
-        $usersQuery = User::with('region');
+        $usersQuery = User::with(['region', 'file']);
 
         // Jika admin memiliki region_id (bukan super_admin/admin pusat), filter berdasarkan wilayahnya
         if ($user->region_id && in_array($user->role, ['admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt'])) {
@@ -45,6 +45,13 @@ class UserManagementController extends Controller
             if (in_array($user->role, ['admin_rt', 'admin_rw'])) {
                 $usersQuery->where('role', 'user');
             }
+        } else if (in_array($user->role, ['super_admin', 'admin'])) {
+            // Super Admin / Admin Kabupaten tidak perlu melihat Staff Layanan (staff daerah) di Manajemen Pengguna
+            // karena akan membuat daftar pengguna tercampur.
+            $usersQuery->where(function($q) {
+                $q->where('role', '!=', 'staff')
+                  ->orWhereNull('region_id');
+            });
         }
         
         // Filter opsional berdasarkan dropdown (hanya berlaku jika super_admin yang punya akses semua, atau admin desa yang memfilter per RT, dll)

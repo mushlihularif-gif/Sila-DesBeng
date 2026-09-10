@@ -313,18 +313,20 @@
             </thead>
             <tbody class="table-border-bottom-0">
                 @foreach($users as $user)
-                @php
                     $avatarUrl = null;
                     if (!empty($user->avatar)) {
-                        $avatarUrl = route('media.avatar', ['filename' => basename($user->avatar)]);
+                        $avatarUrl = \Illuminate\Support\Str::startsWith($user->avatar, ['http://', 'https://']) 
+                            ? $user->avatar 
+                            : route('media.avatar', ['filename' => basename($user->avatar)]);
                     } elseif ($user->file && !empty($user->file->path)) {
                         $avatarUrl = route('media.avatar', ['filename' => basename($user->file->path)]);
+                    } elseif (!empty($user->face_photo_path)) {
+                        $avatarUrl = asset('storage/' . $user->face_photo_path);
                     }
 
-                    $roleLabel = 'User';
+                    $roleLabel = $user->labelRole();
                     $roleBadgeClass = 'bg-label-info';
                     if (in_array($user->role, ['super_admin', 'admin'])) {
-                        $roleLabel = 'Admin';
                         $roleBadgeClass = 'bg-label-danger';
                     } elseif ($user->role === 'admin_kecamatan') {
                         $roleLabel = 'Kecamatan';
@@ -437,15 +439,18 @@
         @php
             $avatarUrl = null;
             if (!empty($user->avatar)) {
-                $avatarUrl = route('media.avatar', ['filename' => basename($user->avatar)]);
+                $avatarUrl = \Illuminate\Support\Str::startsWith($user->avatar, ['http://', 'https://']) 
+                    ? $user->avatar 
+                    : route('media.avatar', ['filename' => basename($user->avatar)]);
             } elseif ($user->file && !empty($user->file->path)) {
                 $avatarUrl = route('media.avatar', ['filename' => basename($user->file->path)]);
+            } elseif (!empty($user->face_photo_path)) {
+                $avatarUrl = asset('storage/' . $user->face_photo_path);
             }
 
-            $roleLabel = 'User';
+            $roleLabel = $user->labelRole();
             $roleBadgeClass = 'bg-label-info';
             if (in_array($user->role, ['super_admin', 'admin'])) {
-                $roleLabel = 'Admin';
                 $roleBadgeClass = 'bg-label-danger';
             } elseif ($user->role === 'admin_kecamatan') {
                 $roleLabel = 'Kecamatan';

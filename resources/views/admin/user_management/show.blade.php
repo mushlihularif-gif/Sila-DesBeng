@@ -147,9 +147,11 @@
                 <div class="card-body pt-0" style="margin-top: -50px;">
                     <div class="profile-avatar-circle mb-3" style="overflow: hidden;">
                         @if($user->avatar)
-                            <img src="{{ route('media.avatar', ['filename' => basename($user->avatar)]) }}" alt="Avatar" class="w-100 h-100" style="object-fit: cover;">
-                        @elseif($user->file)
+                            <img src="{{ \Illuminate\Support\Str::startsWith($user->avatar, ['http://', 'https://']) ? $user->avatar : route('media.avatar', ['filename' => basename($user->avatar)]) }}" alt="Avatar" class="w-100 h-100" style="object-fit: cover;">
+                        @elseif($user->file && !empty($user->file->path))
                             <img src="{{ route('media.avatar', ['filename' => basename($user->file->path)]) }}" alt="Avatar" class="w-100 h-100" style="object-fit: cover;">
+                        @elseif(!empty($user->face_photo_path))
+                            <img src="{{ asset('storage/' . $user->face_photo_path) }}" alt="Avatar" class="w-100 h-100" style="object-fit: cover;">
                         @else
                             @php
                                 $initials = collect(explode(' ', $user->name))->map(function($segment) { return strtoupper(substr($segment, 0, 1)); })->take(2)->join('');

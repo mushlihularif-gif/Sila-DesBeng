@@ -80,39 +80,205 @@
 
             <!-- Pemerintahan Section -->
             <div class="mb-16 mt-16 animate-section">
-                <div class="text-center mb-16">
+                <div class="text-center mb-12">
                     <h2 class="text-3xl md:text-4xl font-bold">
                         <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Pemerintah Kabupaten Bengkalis</span>
                     </h2>
+                    <p class="text-gray-500 text-sm mt-2">Bagan Struktur Organisasi dan Tata Kerja Pemerintahan Kabupaten</p>
                 </div>
 
-                <!-- Members Grid -->
-                <div class="flex flex-wrap justify-center gap-10 mb-16 mt-6">
-                    @foreach($members as $member)
-                    <div class="member-card transition-all duration-300 text-center w-72">
-                        <div class="relative mx-auto mb-8" style="width: 190px; height: 230px;">
-                            <!-- Bingkai Belakang (Gradient Biru) -->
-                            <div class="absolute inset-0 opacity-90" style="
-                                border-radius: 0 50px 0 50px; 
-                                transform: translate(6px, 6px); 
-                                padding: 3px; 
-                                background: linear-gradient(135deg, #115789, #3b82f6); 
-                                -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); 
-                                -webkit-mask-composite: xor; 
-                                mask-composite: exclude;
-                            "></div>
-                            <!-- Foto dengan efek mengambang -->
-                            <div class="absolute inset-0 overflow-hidden bg-gray-50 animate-float z-10" style="border-radius: 0 50px 0 50px; box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.15);">
-                                <img src="{{ $member->photo_url }}" 
-                                     alt="{{ $member->name }}"
-                                     class="w-full h-full object-cover">
+                @php
+                    $layoutMode = ($region && isset($region->settings['struktur_layout'])) ? $region->settings['struktur_layout'] : 'hierarki';
+                    $level1 = $members->where('level', 1);
+                    $level2 = $members->where('level', 2);
+                    $level3 = $members->where('level', 3);
+                    $level4 = $members->where('level', 4);
+                    $unclassified = $members->whereNotIn('level', [1, 2, 3, 4]);
+                @endphp
+
+                @if($layoutMode === 'sejajar')
+                    {{-- TAMPILAN SEJAJAR (GRID MENDATAR) --}}
+                    <div class="flex flex-wrap justify-center gap-10 mb-16 mt-6">
+                        @foreach($members as $member)
+                        <div class="member-card transition-all duration-300 text-center w-72">
+                            <div class="relative mx-auto mb-6" style="width: 190px; height: 230px;">
+                                <div class="absolute inset-0 opacity-90" style="
+                                    border-radius: 0 50px 0 50px; 
+                                    transform: translate(6px, 6px); 
+                                    padding: 3px; 
+                                    background: linear-gradient(135deg, #115789, #3b82f6); 
+                                    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); 
+                                    -webkit-mask-composite: xor; 
+                                    mask-composite: exclude;
+                                "></div>
+                                <div class="absolute inset-0 overflow-hidden bg-gray-50 animate-float z-10" style="border-radius: 0 50px 0 50px; box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.18);">
+                                    <img src="{{ $member->photo_url }}" 
+                                         alt="{{ $member->name }}"
+                                         class="w-full h-full object-cover">
+                                </div>
+                            </div>
+                            <h3 class="text-lg font-bold mb-1" style="color: #000000;">{{ $member->name }}</h3>
+                            <p class="text-sm font-semibold text-blue-900">{{ $member->position }}</p>
+                        </div>
+                        @endforeach
+                    </div>
+                @else
+                    {{-- TAMPILAN BERJENJANG (HIERARKI) --}}
+                    <div class="hierarchy-container max-w-6xl mx-auto mb-16">
+                        {{-- TINGKAT 1: PIMPINAN UTAMA (BUPATI) --}}
+                        @if($level1->count() > 0)
+                            <div class="hierarchy-tier hierarchy-tier-1">
+                                <div class="flex flex-wrap justify-center gap-10">
+                                    @foreach($level1 as $member)
+                                <div class="member-card transition-all duration-300 text-center w-72">
+                                    <div class="relative mx-auto mb-6" style="width: 190px; height: 230px;">
+                                        <div class="absolute inset-0 opacity-90" style="
+                                            border-radius: 0 50px 0 50px; 
+                                            transform: translate(6px, 6px); 
+                                            padding: 3px; 
+                                            background: linear-gradient(135deg, #115789, #3b82f6); 
+                                            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); 
+                                            -webkit-mask-composite: xor; 
+                                            mask-composite: exclude;
+                                        "></div>
+                                        <div class="absolute inset-0 overflow-hidden bg-gray-50 animate-float z-10" style="border-radius: 0 50px 0 50px; box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.18);">
+                                            <img src="{{ $member->photo_url }}" 
+                                                 alt="{{ $member->name }}"
+                                                 class="w-full h-full object-cover">
+                                        </div>
+                                    </div>
+                                    <span class="inline-block px-3 py-1 mb-2 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-200">
+                                        Pimpinan Daerah
+                                    </span>
+                                    <h3 class="text-lg font-bold mb-1" style="color: #000000;">{{ $member->name }}</h3>
+                                    <p class="text-sm font-semibold text-blue-900">{{ $member->position }}</p>
+                                </div>
+                                @endforeach
                             </div>
                         </div>
-                        <h3 class="text-lg font-bold mt-2 mb-1" style="color: #000000;">{{ $member->name }}</h3>
-                        <p class="text-sm font-medium" style="color: #000000;">{{ $member->position }}</p>
-                    </div>
-                    @endforeach
+                    @endif
+
+                    {{-- PENGHUBUNG HIERARKI TINGKAT 1 KE 2 --}}
+                    @if($level1->count() > 0 && ($level2->count() > 0 || $level3->count() > 0 || $level4->count() > 0))
+                        <div class="flex justify-center my-3">
+                            <div class="h-8 w-0.5 bg-gradient-to-b from-[#115789] to-[#3b82f6]"></div>
+                        </div>
+                    @endif
+
+                    {{-- TINGKAT 2: WAKIL BUPATI / SEKDA --}}
+                    @if($level2->count() > 0)
+                        <div class="hierarchy-tier hierarchy-tier-2">
+                            <div class="flex flex-wrap justify-center gap-10">
+                                @foreach($level2 as $member)
+                                <div class="member-card transition-all duration-300 text-center w-72">
+                                    <div class="relative mx-auto mb-6" style="width: 180px; height: 220px;">
+                                        <div class="absolute inset-0 opacity-90" style="
+                                            border-radius: 0 50px 0 50px; 
+                                            transform: translate(6px, 6px); 
+                                            padding: 3px; 
+                                            background: linear-gradient(135deg, #0284c7, #38bdf8); 
+                                            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); 
+                                            -webkit-mask-composite: xor; 
+                                            mask-composite: exclude;
+                                        "></div>
+                                        <div class="absolute inset-0 overflow-hidden bg-gray-50 animate-float z-10" style="border-radius: 0 50px 0 50px; box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.15);">
+                                            <img src="{{ $member->photo_url }}" 
+                                                 alt="{{ $member->name }}"
+                                                 class="w-full h-full object-cover">
+                                        </div>
+                                    </div>
+                                    <span class="inline-block px-3 py-1 mb-2 rounded-full text-xs font-semibold bg-sky-100 text-sky-800 border border-sky-200">
+                                        Wakil / Sekretaris Daerah
+                                    </span>
+                                    <h3 class="text-lg font-bold mb-1" style="color: #000000;">{{ $member->name }}</h3>
+                                    <p class="text-sm font-semibold text-sky-900">{{ $member->position }}</p>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+
+                    {{-- PENGHUBUNG HIERARKI TINGKAT 2 KE 3 --}}
+                    @if($level2->count() > 0 && ($level3->count() > 0 || $level4->count() > 0))
+                        <div class="flex justify-center my-3">
+                            <div class="h-8 w-0.5 bg-gradient-to-b from-[#38bdf8] to-[#10b981]"></div>
+                        </div>
+                    @endif
+
+                    {{-- TINGKAT 3: KEPALA DINAS / BADAN / BAGIAN --}}
+                    @if($level3->count() > 0)
+                        <div class="hierarchy-tier hierarchy-tier-3">
+                            <div class="flex flex-wrap justify-center gap-8">
+                                @foreach($level3 as $member)
+                                <div class="member-card transition-all duration-300 text-center w-72">
+                                    <div class="relative mx-auto mb-6" style="width: 170px; height: 210px;">
+                                        <div class="absolute inset-0 opacity-90" style="
+                                            border-radius: 0 50px 0 50px; 
+                                            transform: translate(6px, 6px); 
+                                            padding: 3px; 
+                                            background: linear-gradient(135deg, #059669, #34d399); 
+                                            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); 
+                                            -webkit-mask-composite: xor; 
+                                            mask-composite: exclude;
+                                        "></div>
+                                        <div class="absolute inset-0 overflow-hidden bg-gray-50 animate-float z-10" style="border-radius: 0 50px 0 50px; box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.15);">
+                                            <img src="{{ $member->photo_url }}" 
+                                                 alt="{{ $member->name }}"
+                                                 class="w-full h-full object-cover">
+                                        </div>
+                                    </div>
+                                    <span class="inline-block px-3 py-1 mb-2 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                        Kepala Dinas / Badan
+                                    </span>
+                                    <h3 class="text-base font-bold mb-1" style="color: #000000;">{{ $member->name }}</h3>
+                                    <p class="text-sm font-medium text-gray-700">{{ $member->position }}</p>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+
+                    {{-- PENGHUBUNG HIERARKI TINGKAT 3 KE 4 --}}
+                    @if($level3->count() > 0 && ($level4->count() > 0 || $unclassified->count() > 0))
+                        <div class="flex justify-center my-3">
+                            <div class="h-8 w-0.5 bg-gradient-to-b from-[#34d399] to-[#94a3b8]"></div>
+                        </div>
+                    @endif
+
+                    {{-- TINGKAT 4: STAF PELAKSANA / APARATUR --}}
+                    @if($level4->count() > 0 || $unclassified->count() > 0)
+                        <div class="hierarchy-tier hierarchy-tier-4">
+                            <div class="flex flex-wrap justify-center gap-8">
+                                @foreach($level4->concat($unclassified) as $member)
+                                <div class="member-card transition-all duration-300 text-center w-72">
+                                    <div class="relative mx-auto mb-6" style="width: 165px; height: 205px;">
+                                        <div class="absolute inset-0 opacity-90" style="
+                                            border-radius: 0 50px 0 50px; 
+                                            transform: translate(6px, 6px); 
+                                            padding: 3px; 
+                                            background: linear-gradient(135deg, #64748b, #94a3b8); 
+                                            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); 
+                                            -webkit-mask-composite: xor; 
+                                            mask-composite: exclude;
+                                        "></div>
+                                        <div class="absolute inset-0 overflow-hidden bg-gray-50 animate-float z-10" style="border-radius: 0 50px 0 50px; box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.15);">
+                                            <img src="{{ $member->photo_url }}" 
+                                                 alt="{{ $member->name }}"
+                                                 class="w-full h-full object-cover">
+                                        </div>
+                                    </div>
+                                    <span class="inline-block px-3 py-1 mb-2 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                                        Staf / Aparatur
+                                    </span>
+                                    <h3 class="text-base font-bold mb-1" style="color: #000000;">{{ $member->name }}</h3>
+                                    <p class="text-sm font-medium text-gray-600">{{ $member->position }}</p>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
                 </div>
+                @endif
 
                 <!-- WhatsApp Contact Button -->
                 @if($isWhatsappActive)
