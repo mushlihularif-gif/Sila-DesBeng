@@ -327,7 +327,7 @@ function previewImage(event) {
             }
 
             if (typeof initGlobalCropper === 'function') {
-                initGlobalCropper(input, 'preview-image', 1);
+                initGlobalCropper(input, 'preview-image', NaN, true);
             } else {
                 console.error('Cropper is not initialized properly in layout');
             }

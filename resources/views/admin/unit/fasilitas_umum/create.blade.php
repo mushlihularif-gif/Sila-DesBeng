@@ -1610,6 +1610,10 @@
     // Preview Foto New Pengurus Modal
     function previewNewPengurusAvatar(input) {
         if (input.files && input.files[0]) {
+            if (typeof initGlobalCropper === 'function') {
+                initGlobalCropper(input, 'previewAvatarNewPengurus', NaN, true);
+                return;
+            }
             const reader = new FileReader();
             reader.onload = function(e) {
                 document.getElementById('previewAvatarNewPengurus').src = e.target.result;

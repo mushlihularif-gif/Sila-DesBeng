@@ -1241,6 +1241,10 @@
     // 7. Preview Avatar Modal Tambah Supir Baru
     function previewNewSupirAvatar(input) {
         if (input.files && input.files[0]) {
+            if (typeof initGlobalCropper === 'function') {
+                initGlobalCropper(input, 'previewAvatarNewSupir', NaN, true);
+                return;
+            }
             const reader = new FileReader();
             reader.onload = function(e) {
                 document.getElementById('previewAvatarNewSupir').src = e.target.result;
