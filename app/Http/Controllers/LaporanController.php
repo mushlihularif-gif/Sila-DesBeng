@@ -492,9 +492,11 @@ class LaporanController extends Controller
                     $response = \Illuminate\Support\Facades\Http::withoutVerifying()->timeout(10)->get($mapUrl);
                     if ($response->successful()) {
                         $staticMapBase64 = base64_encode($response->body());
+                    } else {
+                        \Illuminate\Support\Facades\Log::error('Google Static Maps Failed: ' . $response->status() . ' - ' . $response->body());
                     }
                 } catch (\Exception $e) {
-                    // Abaikan jika gagal memuat peta
+                    \Illuminate\Support\Facades\Log::error('Google Static Maps Exception: ' . $e->getMessage());
                 }
             }
         }
