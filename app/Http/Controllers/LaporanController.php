@@ -225,6 +225,14 @@ class LaporanController extends Controller
         // Jika tidak (pilih Desa), fallback ke region_id domisili user
         $targetRegionId = $validated['target_region_id'] ?? $user->region_id;
 
+        // Jika tujuan_laporan adalah 'desa', arahkan langsung ke Region Desa
+        if ($validated['tujuan_laporan'] === 'desa') {
+            $desaRegion = \App\Models\Region::where('type', 'desa')->first();
+            if ($desaRegion) {
+                $targetRegionId = $desaRegion->id;
+            }
+        }
+
         // Prepare data TANPA bukti dulu
         $data = [
             'user_id' => $user->id,
