@@ -94,7 +94,15 @@
                         </div>
                         <div class="sm:col-span-2">
                             <dt class="text-sm font-medium text-gray-500">Lokasi Kejadian</dt>
-                            <dd class="mt-1 text-sm text-gray-900">{{ $laporan->lokasi }}</dd>
+                            <dd class="mt-1 text-sm text-gray-900 font-medium">{{ $laporan->display_lokasi }}</dd>
+                            @if($laporan->latitude && $laporan->longitude)
+                                <dd class="mt-1 text-xs text-gray-500 flex items-center gap-2">
+                                    <span>Koordinat: {{ $laporan->latitude }}, {{ $laporan->longitude }}</span>
+                                    <a href="https://www.google.com/maps?q={{ $laporan->latitude }},{{ $laporan->longitude }}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline inline-flex items-center gap-1 font-semibold">
+                                        Buka di Google Maps &rarr;
+                                    </a>
+                                </dd>
+                            @endif
                         </div>
                         <div class="sm:col-span-2">
                             <dt class="text-sm font-medium text-gray-500">Tingkat Eskalasi (Wewenang Saat Ini)</dt>

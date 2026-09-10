@@ -142,17 +142,28 @@
                     </div>
                 </div>
 
-                {{-- Lokasi --}}
-                @if ($laporan->lokasi)
+                {{-- Lokasi Kejadian --}}
+                @if ($laporan->lokasi || ($laporan->latitude && $laporan->longitude))
                 <div class="mb-6">
-                    <p class="text-gray-500 font-medium text-sm mb-2"><i class="fas fa-map-marker-alt mr-2"></i> Lokasi Kejadian</p>
-                    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                        <p class="text-gray-900">{{ $laporan->lokasi }}</p>
+                    <p class="text-gray-500 font-medium text-sm mb-2"><i class="fas fa-map-marker-alt mr-2 text-red-500"></i> Lokasi Kejadian</p>
+                    <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                        <p class="text-gray-900 font-semibold">{{ $laporan->display_lokasi }}</p>
                         @if($laporan->latitude && $laporan->longitude)
-                            <div class="mt-4 rounded-lg overflow-hidden border border-gray-200 shadow-sm" style="height: 250px;">
+                            <div class="mt-3 rounded-xl overflow-hidden border border-gray-200 shadow-sm relative" style="height: 280px; z-index: 1;">
                                 <div id="map-{{ $laporan->id }}" class="w-full h-full"></div>
                             </div>
-                            <p class="text-gray-500 text-xs mt-2"><i class="fas fa-satellite"></i> Titik koordinat tersimpan: {{ $laporan->latitude }}, {{ $laporan->longitude }}</p>
+                            <div class="mt-2.5 flex flex-wrap items-center justify-between gap-2">
+                                <p class="text-gray-500 text-xs flex items-center gap-1">
+                                    <i class="fas fa-satellite text-blue-500"></i> 
+                                    <span>Titik koordinat: <strong>{{ $laporan->latitude }}, {{ $laporan->longitude }}</strong></span>
+                                </p>
+                                <a href="https://www.google.com/maps?q={{ $laporan->latitude }},{{ $laporan->longitude }}" 
+                                   target="_blank" rel="noopener noreferrer"
+                                   class="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 border border-blue-200 px-3 py-1.5 rounded-lg transition-colors">
+                                    <i class="fas fa-external-link-alt text-[10px]"></i>
+                                    <span>Buka di Google Maps</span>
+                                </a>
+                            </div>
                         @endif
                     </div>
                 </div>
@@ -340,29 +351,46 @@
 </script>
 
 @if($laporan->latitude && $laporan->longitude)
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    function initMap{{ $laporan->id }}() {
-        const location = { lat: {{ $laporan->latitude }}, lng: {{ $laporan->longitude }} };
-        const map = new google.maps.Map(document.getElementById("map-{{ $laporan->id }}"), {
-            zoom: 17,
-            center: location,
-            mapTypeId: 'satellite',
-            mapTypeControl: true,
-            streetViewControl: false,
+    function initLeafletMap{{ $laporan->id }}() {
+        const mapContainer = document.getElementById("map-{{ $laporan->id }}");
+        if (!mapContainer || mapContainer._leaflet_id) return;
+
+        const lat = {{ $laporan->latitude }};
+        const lng = {{ $laporan->longitude }};
+
+        const map = L.map(mapContainer, {
+            center: [lat, lng],
+            zoom: 16,
+            scrollWheelZoom: false
         });
-        new google.maps.Marker({
-            position: location,
-            map: map,
-            title: "{{ $laporan->lokasi }}",
-            animation: google.maps.Animation.DROP
-        });
+
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        const marker = L.marker([lat, lng]).addTo(map);
+        marker.bindPopup("<strong>Lokasi Kejadian</strong><br>{{ addslashes($laporan->display_lokasi) }}").openPopup();
+
+        setTimeout(() => map.invalidateSize(), 300);
     }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initLeafletMap{{ $laporan->id }});
+    } else {
+        initLeafletMap{{ $laporan->id }}();
+    }
+    document.addEventListener('turbo:load', initLeafletMap{{ $laporan->id }});
 </script>
-<script src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google_maps.api_key') }}&callback=initMap{{ $laporan->id }}" async defer></script>
 @endif
 @endpush
 
 @push('styles')
+@if($laporan->latitude && $laporan->longitude)
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+@endif
 <style>
     /* Animation for bounce */
     @keyframes bounce-slow {

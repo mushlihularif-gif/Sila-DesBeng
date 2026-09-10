@@ -309,15 +309,27 @@
                             <div id="map" style="height:420px; width:100%; border-radius:12px; border:2px solid #e5e7eb; z-index: 1;"></div>
                         </div>
 
-                        <input type="hidden" name="latitude"    id="latitude">
-                        <input type="hidden" name="longitude"   id="longitude">
-                        <input type="hidden" name="lokasi" id="nama_lokasi">
+                        <input type="hidden" name="latitude"  id="latitude"  value="{{ old('latitude') }}">
+                        <input type="hidden" name="longitude" id="longitude" value="{{ old('longitude') }}">
 
-                        {{-- Tampilan nama lokasi hasil klik --}}
-                        <div class="mt-3 p-4 rounded-xl bg-gray-50 border border-gray-200 min-h-[52px] flex items-center gap-3 transition-colors" id="lokasi-display">
-                            <div>
-                                <p id="lokasi-nama" class="text-gray-400 text-sm italic">Belum ada lokasi dipilih. Klik peta di atas atau gunakan tombol GPS.</p>
-                                <p id="lokasi-coords" class="text-gray-500 text-xs mt-0.5 hidden"></p>
+                        {{-- Input & Keterangan Nama Lokasi --}}
+                        <div class="mt-3">
+                            <label class="block text-xs font-semibold text-gray-700 mb-1.5">
+                                Keterangan / Patokan Alamat Kejadian <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <input type="text" name="lokasi" id="nama_lokasi" required
+                                    value="{{ old('lokasi') }}"
+                                    placeholder="Pilih lokasi di peta / tombol GPS, atau ketik alamat/patokan di sini..."
+                                    class="w-full px-4 py-3 rounded-xl bg-white border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 text-sm transition-all shadow-sm @error('lokasi') border-red-500 @enderror">
+                            </div>
+                            <div class="flex items-center justify-between mt-1 px-1">
+                                <p id="lokasi-coords" class="text-gray-500 text-xs {{ old('latitude') ? '' : 'hidden' }}">
+                                    @if(old('latitude') && old('longitude'))
+                                        Koordinat: {{ old('latitude') }}, {{ old('longitude') }}
+                                    @endif
+                                </p>
+                                <p class="text-[11px] text-gray-400 italic">Otomatis terisi saat klik peta / GPS, dan dapat Anda lengkapi.</p>
                             </div>
                         </div>
                         @error('lokasi')
@@ -438,25 +450,31 @@
     <div id="location-modal"
         class="fixed inset-0 flex items-center justify-center hidden"
         style="z-index: 99999; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px);">
-        <div class="bg-white border border-gray-100 rounded-2xl shadow-2xl p-6 max-w-sm w-full mx-4">
+        <div class="bg-white border border-gray-100 rounded-2xl shadow-2xl p-6 max-w-md w-full mx-4">
             <div class="flex items-center gap-2 mb-1">
                 <span class="text-blue-500">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                 </span>
-                <h3 class="text-gray-800 font-bold text-lg">Konfirmasi Lokasi</h3>
+                <h3 class="text-gray-800 font-bold text-lg">Konfirmasi Lokasi Kejadian</h3>
             </div>
-            <p class="text-gray-500 text-sm mb-4">Apakah ini lokasi kejadian yang Anda maksud?</p>
+            <p class="text-gray-500 text-sm mb-4">Pastikan nama jalan atau patokan lokasi sesuai dengan titik kejadian:</p>
 
-            <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-5">
-                <p id="modal-address" class="text-gray-800 font-semibold text-sm leading-relaxed"></p>
-                <p id="modal-coords"  class="text-gray-500 text-xs mt-1"></p>
+            <div class="bg-gray-50 border border-gray-200 rounded-xl p-3 mb-5">
+                <label class="block text-xs font-semibold text-gray-700 mb-1.5">Nama Jalan / Patokan Lokasi (Dapat disesuaikan):</label>
+                <textarea id="modal-address-input" rows="2"
+                    class="w-full text-sm font-medium text-gray-800 bg-white border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none transition shadow-sm"
+                    placeholder="Contoh: Jl. Utama Desa, Depan Kantor Desa..."></textarea>
+                <div class="flex items-center justify-between mt-2 pt-2 border-t border-gray-200">
+                    <span id="modal-coords" class="text-gray-500 text-xs font-mono"></span>
+                    <span class="text-[11px] text-blue-600 font-medium">Bisa Anda lengkapi</span>
+                </div>
             </div>
 
             <div class="flex gap-3">
                 <button type="button" id="btn-confirm"
                     class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition text-sm shadow-sm flex items-center justify-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                    Ya, Benar
+                    Gunakan Lokasi Ini
                 </button>
                 <button type="button" id="btn-cancel"
                     class="flex-1 py-2.5 bg-white border border-gray-300 hover:bg-gray-50 hover:text-red-500 text-gray-700 font-semibold rounded-xl transition text-sm shadow-sm flex items-center justify-center gap-2">
@@ -495,9 +513,14 @@
     function initMap() {
         const pakning = { lat: 1.0916, lng: 102.0724 };
 
-        geocoder = new google.maps.Geocoder();
+        if (window.google && window.google.maps && window.google.maps.Geocoder) {
+            geocoder = new google.maps.Geocoder();
+        }
 
-        map = new google.maps.Map(document.getElementById("map"), {
+        const mapEl = document.getElementById("map");
+        if (!mapEl) return;
+
+        map = new google.maps.Map(mapEl, {
             zoom: 15,
             center: pakning,
             mapTypeId: "roadmap",
@@ -536,56 +559,81 @@
         pendingLat = lat;
         pendingLng = lng;
 
-        geocoder.geocode({ location: { lat: lat, lng: lng } }, function(results, status) {
-            let address = "Lokasi tidak dikenali";
-            if (status === "OK" && results[0]) {
-                address = results[0].formatted_address;
-                updateLocationUI(address, lat, lng);
-            } else {
-                // Fallback ke OpenStreetMap Nominatim jika Google API bermasalah/limit
-                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data && data.display_name) {
-                            address = data.display_name;
+        // Tampilkan modal terlebih dahulu dengan pesan sementara
+        updateLocationUI("Mendeteksi nama lokasi...", lat, lng);
+
+        // Prioritas 1: Gunakan server proxy SiladesBeng (OpenStreetMap Nominatim dengan User-Agent resmi)
+        fetch(`/api/geocode/reverse?lat=${lat}&lng=${lng}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.address) {
+                    updateLocationUI(data.address, lat, lng);
+                } else if (geocoder) {
+                    // Fallback ke Google Geocoder jika API key aktif
+                    geocoder.geocode({ location: { lat: lat, lng: lng } }, function(results, status) {
+                        if (status === "OK" && results && results[0]) {
+                            updateLocationUI(results[0].formatted_address, lat, lng);
+                        } else {
+                            updateLocationUI(`Titik Koordinat: ${lat.toFixed(6)}, ${lng.toFixed(6)}`, lat, lng);
                         }
-                        updateLocationUI(address, lat, lng);
-                    })
-                    .catch(err => {
-                        updateLocationUI(address, lat, lng);
                     });
-            }
-        });
+                } else {
+                    updateLocationUI(`Titik Koordinat: ${lat.toFixed(6)}, ${lng.toFixed(6)}`, lat, lng);
+                }
+            })
+            .catch(() => {
+                if (geocoder) {
+                    geocoder.geocode({ location: { lat: lat, lng: lng } }, function(results, status) {
+                        if (status === "OK" && results && results[0]) {
+                            updateLocationUI(results[0].formatted_address, lat, lng);
+                        } else {
+                            updateLocationUI(`Titik Koordinat: ${lat.toFixed(6)}, ${lng.toFixed(6)}`, lat, lng);
+                        }
+                    });
+                } else {
+                    updateLocationUI(`Titik Koordinat: ${lat.toFixed(6)}, ${lng.toFixed(6)}`, lat, lng);
+                }
+            });
     }
 
     function updateLocationUI(address, lat, lng) {
         pendingAddress = address;
-        document.getElementById("modal-address").innerText = address;
-        document.getElementById("modal-coords").innerText  =
-            "Lat: " + lat.toFixed(6) + "  •  Lng: " + lng.toFixed(6);
+        const modalInput = document.getElementById("modal-address-input");
+        if (modalInput) {
+            modalInput.value = address;
+        }
 
-        marker.setPosition({ lat: lat, lng: lng });
-        marker.setAnimation(google.maps.Animation.BOUNCE);
-        setTimeout(() => marker.setAnimation(null), 700);
+        const coordsEl = document.getElementById("modal-coords");
+        if (coordsEl) {
+            coordsEl.innerText = "Lat: " + lat.toFixed(6) + " • Lng: " + lng.toFixed(6);
+        }
+
+        if (marker) {
+            marker.setPosition({ lat: lat, lng: lng });
+            if (typeof marker.setAnimation === 'function') {
+                marker.setAnimation(google.maps.Animation.BOUNCE);
+                setTimeout(() => marker.setAnimation(null), 700);
+            }
+        }
 
         document.getElementById("location-modal").classList.remove("hidden");
     }
 
     function confirmLocation() {
+        const modalInput = document.getElementById("modal-address-input");
+        if (modalInput && modalInput.value.trim() !== '') {
+            pendingAddress = modalInput.value.trim();
+        }
+
         document.getElementById("latitude").value    = pendingLat;
         document.getElementById("longitude").value   = pendingLng;
         document.getElementById("nama_lokasi").value = pendingAddress;
 
-        document.getElementById("lokasi-nama").innerText = pendingAddress;
-        document.getElementById("lokasi-nama").classList.remove("italic", "text-gray-400");
-        document.getElementById("lokasi-nama").classList.add("text-gray-800", "font-semibold");
-
-        document.getElementById("lokasi-coords").innerText =
-            "Lat: " + pendingLat.toFixed(6) + "  â€¢  Lng: " + pendingLng.toFixed(6);
-        document.getElementById("lokasi-coords").classList.remove("hidden");
-
-        document.getElementById("lokasi-display").classList.remove("border-gray-200", "bg-gray-50");
-        document.getElementById("lokasi-display").classList.add("border-blue-400", "bg-blue-50");
+        const coordsElem = document.getElementById("lokasi-coords");
+        if (coordsElem) {
+            coordsElem.innerText = "Koordinat: " + pendingLat.toFixed(6) + ", " + pendingLng.toFixed(6);
+            coordsElem.classList.remove("hidden");
+        }
 
         document.getElementById("location-modal").classList.add("hidden");
     }
@@ -598,7 +646,7 @@
 
         const confirmedLat = document.getElementById("latitude").value;
         const confirmedLng = document.getElementById("longitude").value;
-        if (confirmedLat && confirmedLng) {
+        if (confirmedLat && confirmedLng && marker) {
             marker.setPosition({ lat: parseFloat(confirmedLat), lng: parseFloat(confirmedLng) });
         }
     }

@@ -233,13 +233,32 @@ class LaporanController extends Controller
             }
         }
 
+        // Sanitasi lokasi: Jangan simpan "Lokasi tidak dikenali" jika koordinat tersedia
+        $lokasi = trim($validated['lokasi'] ?? '');
+        if (empty($lokasi) || $lokasi === 'Lokasi tidak dikenali') {
+            if (!empty($validated['latitude']) && !empty($validated['longitude'])) {
+                $resolved = \App\Support\GeocodeHelper::reverse($validated['latitude'], $validated['longitude']);
+                if ($resolved) {
+                    $lokasi = $resolved;
+                }
+            }
+        }
+        if (empty($lokasi) || $lokasi === 'Lokasi tidak dikenali') {
+            $regionName = $user->region?->name ?? 'Wilayah Desa';
+            if (!empty($validated['latitude']) && !empty($validated['longitude'])) {
+                $lokasi = "{$regionName} ({$validated['latitude']}, {$validated['longitude']})";
+            } else {
+                $lokasi = $regionName;
+            }
+        }
+
         // Prepare data TANPA bukti dulu
         $data = [
             'user_id' => $user->id,
             'nama' => $validated['nama'],
             'deskripsi' => $validated['deskripsi'],
             'kategori' => $validated['kategori'],
-            'lokasi' => $validated['lokasi'] ?? null,
+            'lokasi' => $lokasi,
             'latitude' => $validated['latitude'] ?? null,
             'longitude' => $validated['longitude'] ?? null,
             'tujuan_laporan' => $validated['tujuan_laporan'],
@@ -553,7 +572,7 @@ public function show($id)
         abort(403);
     }
 
-    $laporan = Laporan::with(['user', 'rating'])
+    $laporan = Laporan::with(['user', 'rating', 'region'])
         ->where('id', $id)
         ->where('user_id', $userId)
         ->firstOrFail();

@@ -924,6 +924,17 @@ Route::get('/api/regions', function () {
     return response()->json(\App\Models\Region::all());
 });
 
+// Reverse geocoding API proxy (OpenStreetMap Nominatim dengan User-Agent SiladesBeng resmi)
+Route::get('/api/geocode/reverse', function (\Illuminate\Http\Request $request) {
+    $lat = $request->query('lat');
+    $lng = $request->query('lng');
+    $address = \App\Support\GeocodeHelper::reverse($lat, $lng);
+    return response()->json([
+        'status' => $address ? 'success' : 'fallback',
+        'address' => $address,
+    ]);
+});
+
 Route::get('/dev/setup-region', function () {
     $user = \App\Models\User::first();
     if (!$user) return 'No user found';
