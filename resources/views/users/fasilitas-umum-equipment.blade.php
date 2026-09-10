@@ -159,6 +159,15 @@
                             <h3 class="product-name text-xs sm:text-base font-bold text-gray-800 mb-1 sm:mb-2 line-clamp-2 group-hover:text-[#115789] transition-colors mt-0">
                                 {{ $item->nama_fasilitas }}
                             </h3>
+
+                            @if($item->pengurus && $item->pengurus->count() > 0)
+                            <div class="my-1.5 py-1 px-2 bg-emerald-50 rounded-lg text-[10px] text-emerald-700 font-semibold flex items-center justify-between border border-emerald-100">
+                                <span class="flex items-center gap-1 truncate"><i class="bx bx-key"></i> Kunci: {{ $item->pengurus->first()->nama }}</span>
+                                @if($item->pengurus->count() > 1)
+                                <span class="text-[9px] bg-emerald-200/60 px-1 rounded font-bold">+{{ $item->pengurus->count() - 1 }}</span>
+                                @endif
+                            </div>
+                            @endif
                             
                             <div class="mt-auto pt-2 sm:pt-3 flex items-end justify-between">
                                 <div class="flex flex-col">
@@ -240,12 +249,16 @@
                                 </a>
                                 @endif
                             </div>
+                            @elseif($isAmb)
+                            <div class="bg-gray-50 rounded-xl p-2 sm:p-2.5 mb-3 border border-dashed border-gray-200 text-center">
+                                <span class="text-[10px] text-gray-400 italic">Supir siaga belum ditugaskan</span>
+                            </div>
                             @endif
                             
                             <div class="mt-auto pt-2 sm:pt-3">
                                 @if($isAmb)
-                                <a href="{{ route('user.ambulans.index') }}" class="w-full block text-center py-2 px-3 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white font-bold rounded-xl text-xs sm:text-sm shadow transition-all">
-                                    Panggil / Detail Armada
+                                <a href="{{ route('user.ambulans.show', $k->id) }}" class="w-full block text-center py-2 px-3 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white font-bold rounded-xl text-xs sm:text-sm shadow transition-all">
+                                    Detail & Panggil Armada
                                 </a>
                                 @else
                                 <span class="w-full block text-center py-2 px-3 bg-blue-50 text-blue-600 font-bold rounded-xl text-xs sm:text-sm border border-blue-200">

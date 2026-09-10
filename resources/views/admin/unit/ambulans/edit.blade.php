@@ -252,6 +252,21 @@
                                     Ketik nomor plat polisi dengan spasi standar. Karakter akan otomatis tersinkronisasi ke visualisasi plat di panel samping.
                                 </div>
                             </div>
+
+                            @php
+                                $realDesc = ($ambulans->deskripsi && !str_starts_with(trim($ambulans->deskripsi), 'Plat:')) ? $ambulans->deskripsi : '';
+                            @endphp
+                            <!-- Deskripsi & Fasilitas Medis -->
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold text-dark">
+                                    Deskripsi & Perlengkapan Medis <small class="text-muted fw-normal">(Opsional)</small>
+                                </label>
+                                <textarea class="form-control modern-input" 
+                                          name="deskripsi" 
+                                          rows="3" 
+                                          placeholder="Contoh: Dilengkapi tabung oksigen, regulator, tandu darurat (stretcher), kotak P3K lengkap, sirene, dan lampu strobo siaga 24 jam.">{{ old('deskripsi', $realDesc) }}</textarea>
+                                <div class="form-text text-muted small">Jelaskan fasilitas atau perlengkapan medis yang tersedia di armada ini untuk informasi warga.</div>
+                            </div>
                         </div>
 
                         <!-- SECTION 4: DATA SUPIR DENGAN KARTU PROFIL LENGKAP -->

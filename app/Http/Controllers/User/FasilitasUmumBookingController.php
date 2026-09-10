@@ -18,7 +18,7 @@ class FasilitasUmumBookingController extends Controller
             return redirect()->back()->with('show_kyc_modal', true);
         }
 
-        $item = FasilitasUmum::findOrFail($itemId);
+        $item = FasilitasUmum::with('pengurus')->findOrFail($itemId);
 
         // Validasi: Warga hanya bisa memesan layanan di wilayahnya sendiri
         $userRegionId = Auth::user()->region_id;
@@ -64,7 +64,7 @@ class FasilitasUmumBookingController extends Controller
     {
         $validated = $request->validate([
             'fasilitas_id' => 'required|exists:fasilitas_umums,id',
-            'delivery_method' => 'required|in:antar,jemput',
+            'delivery_method' => 'nullable|string|in:antar,jemput,lokasi,ditempat,ambil_sendiri',
             'quantity' => 'required|integer|min:1|max:50',
             'start_date' => 'required|date|after_or_equal:today',
             'end_date' => 'required|date|after_or_equal:start_date',
@@ -81,14 +81,20 @@ class FasilitasUmumBookingController extends Controller
             'payment_proof' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
         ]);
 
-        if ($validated['delivery_method'] == 'antar') {
+        $item = FasilitasUmum::findOrFail($validated['fasilitas_id']);
+        
+        $deliveryMethod = $validated['delivery_method'] ?? 'lokasi';
+        $recipientName = $validated['recipient_name'] ?? (Auth::user()->name ?? 'Warga');
+        $deliveryAddress = $validated['delivery_address'] ?? ($item->lokasi ?? 'Lokasi Gedung / Ruang Publik');
+
+        if ($deliveryMethod === 'antar') {
             $request->validate([
                 'recipient_name' => 'required|string|max:255',
                 'delivery_address' => 'required|string',
             ]);
+            $recipientName = $request->recipient_name;
+            $deliveryAddress = $request->delivery_address;
         }
-
-        $item = FasilitasUmum::findOrFail($validated['fasilitas_id']);
         
         // Validate stock before proceeding
         if ($item->stok < $validated['quantity']) {
@@ -121,11 +127,11 @@ class FasilitasUmumBookingController extends Controller
         $booking = FasilitasUmumBooking::create([
             'user_id' => Auth::id(),
             'fasilitas_id' => $validated['fasilitas_id'],
-            'delivery_method' => $validated['delivery_method'],
+            'delivery_method' => $deliveryMethod,
             'payment_method' => $metodeBayar,
             'payment_proof' => $buktiBayar,
-            'recipient_name' => $validated['recipient_name'] ?? null,
-            'delivery_address' => $validated['delivery_address'] ?? null,
+            'recipient_name' => $recipientName,
+            'delivery_address' => $deliveryAddress,
             'quantity' => $validated['quantity'],
             'start_date' => $validated['start_date'],
             'end_date' => $validated['end_date'],

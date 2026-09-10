@@ -21,7 +21,7 @@ class FasilitasUmumUserController extends Controller
         }
 
         // 1. Gedung & Ruang Publik
-        $itemsQuery = FasilitasUmum::where('status', '!=', 'Tidak Tersedia');
+        $itemsQuery = FasilitasUmum::with('pengurus')->where('status', '!=', 'Tidak Tersedia');
         if ($user && $user->role === 'user' && $userRegionId) {
             $allowed = Region::wilayahLayananTerlihat($userRegionId, 'Fasilitas Umum');
             $itemsQuery->where(function($sub) use ($allowed, $relevantRegionIds) {

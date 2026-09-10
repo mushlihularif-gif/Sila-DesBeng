@@ -19,11 +19,15 @@ class UnitAmbulansController extends Controller
     public function create()
     {
         $user = Auth::user();
-        if ($user->role === 'admin_desa') {
-            $supirs = Supir::where('tipe', 'supir')->where('region_id', $user->region_id)->where('is_fasilitas_umum', 1)->with('ambulans')->get();
-        } else {
-            $supirs = Supir::where('tipe', 'supir')->where('is_fasilitas_umum', 1)->with('ambulans')->get();
-        }
+        $supirs = Supir::where('tipe', 'supir')
+            ->when($user && $user->region_id, function($q) use ($user) {
+                $q->where(function($sub) use ($user) {
+                    $sub->where('region_id', $user->region_id)
+                        ->orWhereNull('region_id');
+                });
+            })
+            ->with('ambulans')
+            ->get();
 
         return view('admin.unit.ambulans.create', compact('supirs'));
     }
@@ -36,12 +40,14 @@ class UnitAmbulansController extends Controller
             'supir_ids' => 'nullable|array',
             'supir_ids.*' => 'exists:supirs,id',
             'nomor_plat' => 'nullable|string|max:20',
+            'deskripsi' => 'nullable|string',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:8192',
             'foto_2' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:8192',
             'foto_3' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:8192',
         ]);
         
         $kategori = $request->kategori ?? 'ambulans';
+        $deskripsi = $request->filled('deskripsi') ? $request->deskripsi : ("Plat: " . ($request->nomor_plat ?? '-'));
         $data = [
             'nama_mobil' => $validated['nama_mobil'],
             'kategori' => $kategori,
@@ -52,7 +58,8 @@ class UnitAmbulansController extends Controller
             'harga_luar_kota' => 0,
             'is_harian_active' => false,
             'is_borongan_active' => false,
-            'deskripsi' => "Plat: " . ($request->nomor_plat ?? '-'),
+            'plat_nomor' => $request->nomor_plat,
+            'deskripsi' => $deskripsi,
         ];
         
         if ($request->hasFile('foto')) {
@@ -107,11 +114,15 @@ class UnitAmbulansController extends Controller
         $ambulans = Mobil::whereIn('kategori', ['ambulans', 'kendaraan_operasional'])->findOrFail($id);
         
         $user = Auth::user();
-        if ($user->role === 'admin_desa') {
-            $supirs = Supir::where('tipe', 'supir')->where('region_id', $user->region_id)->where('is_fasilitas_umum', 1)->with('ambulans')->get();
-        } else {
-            $supirs = Supir::where('tipe', 'supir')->where('is_fasilitas_umum', 1)->with('ambulans')->get();
-        }
+        $supirs = Supir::where('tipe', 'supir')
+            ->when($user && $user->region_id, function($q) use ($user) {
+                $q->where(function($sub) use ($user) {
+                    $sub->where('region_id', $user->region_id)
+                        ->orWhereNull('region_id');
+                });
+            })
+            ->with('ambulans')
+            ->get();
 
         return view('admin.unit.ambulans.edit', compact('ambulans', 'supirs'));
     }
@@ -126,16 +137,19 @@ class UnitAmbulansController extends Controller
             'supir_ids' => 'nullable|array',
             'supir_ids.*' => 'exists:supirs,id',
             'nomor_plat' => 'nullable|string|max:20',
+            'deskripsi' => 'nullable|string',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:8192',
             'foto_2' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:8192',
             'foto_3' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:8192',
         ]);
         
         $kategori = $request->kategori ?? $ambulans->kategori;
+        $deskripsi = $request->filled('deskripsi') ? $request->deskripsi : ($ambulans->deskripsi ?: ("Plat: " . ($request->nomor_plat ?? '-')));
         $data = [
             'nama_mobil' => $validated['nama_mobil'],
             'kategori' => $kategori,
-            'deskripsi' => "Plat: " . ($request->nomor_plat ?? '-'),
+            'plat_nomor' => $request->nomor_plat,
+            'deskripsi' => $deskripsi,
         ];
         
         // Foto Utama

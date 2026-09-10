@@ -124,71 +124,114 @@
                     </div>
                     </div>
 
-                    @php
-                        $paymentInfo = $region->payment_info ?? [];
-                        $antarActive = !isset($paymentInfo['fasilitas_delivery_antar_active']) || $paymentInfo['fasilitas_delivery_antar_active'];
-                        $jemputActive = !isset($paymentInfo['fasilitas_delivery_jemput_active']) || $paymentInfo['fasilitas_delivery_jemput_active'];
-                        $defaultMethod = $antarActive ? 'antar' : 'jemput';
-                    @endphp
-                    <input type="hidden" name="delivery_method" id="delivery-method-input" value="{{ $defaultMethod }}">
+                    <!-- Metode Penggunaan & Lokasi Fasilitas (Gedung/Ruang Publik) -->
+                    <input type="hidden" name="delivery_method" id="delivery-method-input" value="lokasi">
+                    <input type="hidden" name="recipient_name" id="recipient-name" value="{{ Auth::user()->name }}">
+                    <input type="hidden" name="delivery_address" id="delivery-address" value="{{ $item->lokasi ?? 'Lokasi Gedung / Fasilitas Umum' }}">
 
-                    <!-- Pilihan Metode Pengiriman -->
-                    <div class="flex flex-col sm:flex-row justify-center gap-6 mb-10 items-center mt-8">
-                        @if($antarActive)
-                        <!-- Antar Card -->
-                        <div class="delivery-method-card {{ $defaultMethod == 'antar' ? 'active' : '' }} cursor-pointer bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 w-48 text-center border-4 border-transparent" data-method="antar">
-                            <div class="mb-4 flex justify-center">
-                                <img src="{{ asset('Admin/img/elements/antar.png') }}" alt="Antar" class="w-20 h-20 object-contain">
+                    <!-- Card Lokasi & Cara Peminjaman -->
+                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-5 sm:p-6 mb-6">
+                        <div class="flex items-start gap-4">
+                            <div class="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center flex-shrink-0 shadow-md">
+                                <i class="bx bx-buildings text-2xl"></i>
                             </div>
-                            <p class="font-bold text-lg text-gray-800">Diantar</p>
-                        </div>
-                        @endif
-
-                        @if($jemputActive)
-                        <!-- Jemput Card -->
-                        <div class="delivery-method-card {{ $defaultMethod == 'jemput' ? 'active' : '' }} cursor-pointer bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 w-48 text-center border-4 border-transparent" data-method="jemput">
-                            <div class="mb-4 flex justify-center">
-                                <img src="{{ asset('Admin/img/elements/jemput.png') }}" alt="Jemput" class="w-20 h-20 object-contain">
-                            </div>
-                            <p class="font-bold text-lg text-gray-800">Ambil Sendiri</p>
-                        </div>
-                        @endif
-                    </div>
-
-                    <!-- Form Alamat Pengiriman (Hanya tampil jika Antar dipilih) -->
-                    <div id="delivery-address-form" class="{{ $defaultMethod == 'antar' ? 'block' : 'hidden' }} animate-fade-in bg-blue-50/50 p-6 rounded-2xl mb-8 border border-blue-100">
-                        <h4 class="font-bold text-gray-800 mb-4 flex items-center gap-2">
-                            <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                            Informasi Pengiriman
-                        </h4>
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-1">Nama Penerima <span class="text-red-500">*</span></label>
-                                @include('partials.pilih-alamat', [
-    'alamatTersimpan' => $alamatTersimpan ?? collect(),
-    'idNama'   => 'recipient-name',
-    'idAlamat' => 'delivery-address',
-])
-<input type="text" name="recipient_name" id="recipient-name" value="{{ Auth::user()->name }}" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-1">Alamat Lengkap Tujuan <span class="text-red-500">*</span></label>
-                                <textarea name="delivery_address" id="delivery-address" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all resize-none" placeholder="Masukkan alamat lengkap tujuan pengiriman (termasuk RT/RW, Dusun, dll)"></textarea>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="jemput-note" class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded-r-lg {{ $defaultMethod == 'jemput' ? '' : 'hidden' }}">
-                        <div class="flex">
-                            <div class="flex-shrink-0">
-                                <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
-                                </svg>
-                            </div>
-                            <div class="ml-3">
-                                <p class="text-sm text-yellow-700">
-                                    <span class="font-bold">Info:</span> Anda harus mengambil dan mengembalikan sendiri fasilitas umum ke lokasi operasional.
+                            <div class="flex-grow">
+                                <div class="flex flex-wrap items-center justify-between gap-2 mb-1">
+                                    <h4 class="font-bold text-gray-800 text-base sm:text-lg">Lokasi & Penggunaan Fasilitas</h4>
+                                    <span class="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded-full border border-blue-200">
+                                        Penggunaan di Lokasi
+                                    </span>
+                                </div>
+                                <p class="text-xs sm:text-sm text-gray-600 mb-3">
+                                    Peminjaman fasilitas gedung/ruang publik digunakan langsung di lokasi bangunan yang bersangkutan.
                                 </p>
+                                <div class="flex flex-wrap items-center gap-3 pt-2 border-t border-blue-100/80 text-xs sm:text-sm">
+                                    <div class="flex items-center gap-1.5 text-gray-700">
+                                        <i class="bx bx-map-pin text-red-500 text-base flex-shrink-0"></i>
+                                        <span class="font-semibold">{{ $item->lokasi ?? 'Area Desa / Gedung Serbaguna' }}</span>
+                                    </div>
+                                    @if($item->latitude && $item->longitude)
+                                    <a href="https://www.google.com/maps?q={{ $item->latitude }},{{ $item->longitude }}" target="_blank" class="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 font-semibold underline text-xs">
+                                        <i class="bx bx-navigation"></i> Buka di Google Maps
+                                    </a>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Petugas Kunci & Penanggung Jawab Gedung -->
+                    <div class="bg-white border border-gray-200 rounded-2xl p-5 sm:p-6 mb-6 shadow-sm">
+                        <div class="flex items-center justify-between gap-2 mb-4 pb-3 border-b border-gray-100">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
+                                    <i class="bx bx-key text-lg"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-gray-800 text-sm sm:text-base leading-tight">Petugas Pemegang Kunci</h4>
+                                    <p class="text-xs text-gray-500 mt-0.5">Personil penanggung jawab serah terima kunci dan pengawasan gedung</p>
+                                </div>
+                            </div>
+                            <span class="px-2.5 py-1 bg-amber-50 text-amber-800 border border-amber-200 rounded-lg text-xs font-bold">
+                                Kunci & Akses
+                            </span>
+                        </div>
+
+                        @if($item->pengurus && $item->pengurus->count() > 0)
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                @foreach($item->pengurus as $pengurus)
+                                    @php
+                                        $cleanWa = preg_replace('/[^0-9]/', '', $pengurus->kontak ?? '');
+                                        $waUrl = $cleanWa ? ('https://wa.me/' . (str_starts_with($cleanWa, '0') ? '62' . substr($cleanWa, 1) : $cleanWa)) : null;
+                                        $avatar = $pengurus->foto ? asset('storage/' . $pengurus->foto) : asset('Admin/img/avatars/pria.png');
+                                        $isTersedia = ($pengurus->status == 'Tersedia');
+                                    @endphp
+                                    <div class="p-3.5 bg-gray-50/80 hover:bg-amber-50/50 rounded-xl border border-gray-200/80 transition-all flex items-center justify-between gap-3">
+                                        <div class="flex items-center gap-3 min-w-0">
+                                            <div class="relative flex-shrink-0">
+                                                <img src="{{ $avatar }}" alt="{{ $pengurus->nama }}" class="w-10 h-10 rounded-full object-cover border border-gray-200 shadow-sm" onerror="this.src='{{ asset('Admin/img/avatars/pria.png') }}'">
+                                                <span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full {{ $isTersedia ? 'bg-green-500' : 'bg-yellow-500' }} border-2 border-white"></span>
+                                            </div>
+                                            <div class="min-w-0">
+                                                <h5 class="text-xs sm:text-sm font-bold text-gray-800 truncate leading-snug">{{ $pengurus->nama }}</h5>
+                                                <div class="text-[11px] text-gray-500 flex items-center gap-1 mt-0.5">
+                                                    <i class="bx bx-phone text-xs"></i>
+                                                    <span>{{ $pengurus->kontak ?? '-' }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        @if($waUrl)
+                                        <a href="{{ $waUrl }}" target="_blank" class="flex-shrink-0 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-sm">
+                                            <i class="bx bxl-whatsapp text-sm"></i>
+                                            <span>WhatsApp</span>
+                                        </a>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <div class="bg-amber-50/60 border border-dashed border-amber-200 rounded-xl p-4 text-center">
+                                <i class="bx bx-key text-amber-500 text-2xl mb-1"></i>
+                                <p class="text-xs sm:text-sm text-gray-700 font-medium mb-0.5">Belum ada petugas kunci yang ditugaskan khusus oleh admin desa.</p>
+                                <p class="text-[11px] text-gray-500 mb-0">Untuk pengambilan kunci dan koordinasi pembukaan gedung, silakan hubungi pengelola BUMDes atau kantor desa setempat.</p>
+                            </div>
+                        @endif
+                    </div>
+
+                    <!-- Informasi Pemohon / Penanggung Jawab Peminjaman -->
+                    <div class="bg-white border border-gray-200 rounded-2xl p-5 sm:p-6 mb-6 shadow-sm">
+                        <h4 class="font-bold text-gray-800 text-sm sm:text-base mb-3 flex items-center gap-2">
+                            <i class="bx bx-user text-blue-600 text-lg"></i>
+                            Data Pemohon Peminjaman
+                        </h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs sm:text-sm">
+                            <div class="p-3 bg-gray-50 rounded-xl border border-gray-100">
+                                <span class="text-gray-400 block text-[11px] font-semibold mb-0.5">NAMA PEMOHON</span>
+                                <span class="text-gray-800 font-bold text-sm">{{ Auth::user()->name }}</span>
+                            </div>
+                            <div class="p-3 bg-gray-50 rounded-xl border border-gray-100">
+                                <span class="text-gray-400 block text-[11px] font-semibold mb-0.5">NOMOR TELEPON / WHATSAPP</span>
+                                <span class="text-gray-800 font-bold text-sm">{{ Auth::user()->phone ?? (Auth::user()->kontak ?? 'Sesuai Profil Warga') }}</span>
                             </div>
                         </div>
                     </div>
@@ -474,56 +517,6 @@
             });
         });
 
-        // Delivery Method Logic
-        const deliveryCards = document.querySelectorAll('.delivery-method-card');
-        const deliveryMethodInput = document.getElementById('delivery-method-input');
-        const deliveryAddressForm = document.getElementById('delivery-address-form');
-        const antarNote = document.getElementById('antar-note');
-        const jemputNote = document.getElementById('jemput-note');
-        const recipientName = document.getElementById('recipient-name');
-        const deliveryAddress = document.getElementById('delivery-address');
-
-        deliveryCards.forEach(card => {
-            card.addEventListener('click', function() {
-                deliveryCards.forEach(c => c.classList.remove('active'));
-                this.classList.add('active');
-                
-                const method = this.getAttribute('data-method');
-                deliveryMethodInput.value = method;
-
-                if (method === 'antar') {
-                    if (deliveryAddressForm) {
-                        deliveryAddressForm.classList.remove('hidden');
-                        deliveryAddressForm.classList.add('block');
-                        recipientName.required = true;
-                        deliveryAddress.required = true;
-                    }
-                    if(antarNote) {
-                        antarNote.classList.remove('hidden');
-                        antarNote.classList.add('block');
-                    }
-                    if(jemputNote) {
-                        jemputNote.classList.add('hidden');
-                        jemputNote.classList.remove('block');
-                    }
-                } else {
-                    if (deliveryAddressForm) {
-                        deliveryAddressForm.classList.remove('block');
-                        deliveryAddressForm.classList.add('hidden');
-                        recipientName.required = false;
-                        deliveryAddress.required = false;
-                    }
-                    if(antarNote) {
-                        antarNote.classList.add('hidden');
-                        antarNote.classList.remove('block');
-                    }
-                    if(jemputNote) {
-                        jemputNote.classList.remove('hidden');
-                        jemputNote.classList.add('block');
-                    }
-                }
-            });
-        });
 
         if (decreaseBtn && increaseBtn && qtyInput) {
             decreaseBtn.addEventListener('click', () => {

@@ -43,6 +43,10 @@ class FasilitasUmumBooking extends Model
         'payment_expiry_time',
         'payment_va_number',
         'payment_qr_url',
+        'recipient_name',
+        'delivery_address',
+        'payment_method',
+        'payment_proof',
     ];
 
     protected $casts = [

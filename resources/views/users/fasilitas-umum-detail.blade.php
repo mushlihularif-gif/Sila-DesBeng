@@ -217,6 +217,21 @@
                                 @endforeach
                             </div>
                         </div>
+                        @else
+                        <!-- Belum ada Petugas Pengurus Kunci -->
+                        <div class="mb-6 p-4 bg-amber-50/70 border border-dashed border-amber-200 rounded-2xl">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-8 h-8 rounded-lg bg-amber-500 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 class="text-xs font-bold text-amber-900 uppercase tracking-wider">Pengurus & Pemegang Kunci</h4>
+                                    <p class="text-[11px] text-amber-700 mb-0">Belum ada petugas kunci khusus yang ditugaskan untuk gedung ini. Silakan hubungi pengelola BUMDes / kantor desa untuk koordinasi kunci.</p>
+                                </div>
+                            </div>
+                        </div>
                         @endif
 
 

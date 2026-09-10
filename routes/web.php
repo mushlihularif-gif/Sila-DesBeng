@@ -224,6 +224,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/layanan-ambulans', [App\Http\Controllers\User\AmbulansUserController::class, 'index'])
         ->name('user.ambulans.index')
         ->middleware(['role:user', 'region.service:layanan-ambulans']);
+    Route::get('/layanan-ambulans/{id}', [App\Http\Controllers\User\AmbulansUserController::class, 'show'])
+        ->name('user.ambulans.show')
+        ->middleware(['role:user,guest']);
         
     // Verifikasi Identitas
     Route::redirect('/profile/verifikasi', '/kyc', 301)->name('user.verifikasi.index');
