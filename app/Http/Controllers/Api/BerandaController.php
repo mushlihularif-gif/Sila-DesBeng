@@ -167,4 +167,104 @@ class BerandaController extends Controller
             'data' => $menus
         ]);
     }
+
+    /**
+     * Get popular items across all services based on order counts (or random if no orders)
+     */
+    public function popular(Request $request)
+    {
+        $limitPerCategory = 5;
+
+        // Pasar Daerah - Most ordered
+        $pasarProducts = \App\Models\PasarProduk::where('status', 'tersedia')
+            ->withCount('orderItems')
+            ->orderBy('order_items_count', 'desc')
+            ->take($limitPerCategory)
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'name' => $item->nama_produk,
+                    'price' => $item->harga,
+                    'type' => 'pasar',
+                    'category' => 'Pasar Daerah',
+                    'image_url' => $item->foto ? asset('storage/' . $item->foto) : null,
+                    'satuan' => $item->satuan,
+                    'order_count' => $item->order_items_count,
+                    'original_data' => $item,
+                ];
+            });
+
+        // Gas - Most ordered
+        $gasProducts = \App\Models\Gas::where('stok', '>', 0)
+            ->withCount('gasOrders')
+            ->orderBy('gas_orders_count', 'desc')
+            ->take($limitPerCategory)
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'name' => $item->jenis_gas,
+                    'price' => $item->harga_satuan,
+                    'type' => 'gas',
+                    'category' => 'Penjualan Gas',
+                    'image_url' => $item->foto ? asset('storage/' . $item->foto) : null,
+                    'satuan' => 'tabung',
+                    'order_count' => $item->gas_orders_count,
+                    'original_data' => $item,
+                ];
+            });
+
+        // Sewa Alat
+        $alatProducts = \App\Models\Barang::where('status', 'tersedia')
+            ->take($limitPerCategory)
+            ->get()
+            ->map(function ($item) {
+                // RentalBookings doesn't have direct belongsTo Barang in some cases, so we might just use random or generic
+                $orderCount = \App\Models\RentalBooking::where('barang_id', $item->id)->count();
+                return [
+                    'id' => $item->id,
+                    'name' => $item->nama_barang,
+                    'price' => $item->harga_sewa,
+                    'type' => 'alat',
+                    'category' => 'Penyewaan Alat',
+                    'image_url' => $item->foto ? asset('storage/' . $item->foto) : null,
+                    'satuan' => $item->satuan ?? 'hari',
+                    'order_count' => $orderCount,
+                    'original_data' => $item,
+                ];
+            })->sortByDesc('order_count')->values();
+
+        // Sewa Mobil
+        $mobilProducts = \App\Models\Mobil::where('status', 'tersedia')
+            ->take($limitPerCategory)
+            ->get()
+            ->map(function ($item) {
+                $orderCount = \App\Models\MobilBooking::where('mobil_id', $item->id)->count();
+                return [
+                    'id' => $item->id,
+                    'name' => $item->nama_mobil,
+                    'price' => $item->harga_sewa,
+                    'type' => 'mobil',
+                    'category' => 'Penyewaan Mobil',
+                    'image_url' => $item->foto ? asset('storage/' . $item->foto) : null,
+                    'satuan' => 'hari',
+                    'order_count' => $orderCount,
+                    'original_data' => $item,
+                ];
+            })->sortByDesc('order_count')->values();
+
+        // Merge all
+        $allPopular = $pasarProducts->concat($gasProducts)
+            ->concat($alatProducts)
+            ->concat($mobilProducts)
+            ->sortByDesc('order_count')
+            ->values()
+            ->take(10); // Show top 10 overall
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $allPopular
+        ]);
+    }
 }

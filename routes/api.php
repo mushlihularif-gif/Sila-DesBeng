@@ -34,6 +34,7 @@ Route::post('/forgot-password/reset', [AuthController::class, 'resetForgotPasswo
 Route::get('/banners', [BerandaController::class, 'banners']);
 Route::get('/services', [BerandaController::class, 'services']);
 Route::get('/unit-pelayanan', [BerandaController::class, 'unitPelayanan']);
+Route::get('/popular', [BerandaController::class, 'popular']);
     Route::get('/announcements', [BerandaController::class, 'announcements']);
     
     // Berita & Pengumuman Lengkap
