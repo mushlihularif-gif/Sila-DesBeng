@@ -82,7 +82,7 @@
                     <h2 class="text-3xl md:text-4xl font-bold">
                         <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Pemerintah {{ $kecamatan->name }}</span>
                     </h2>
-                    <p class="text-gray-500 text-sm mt-2">Bagan Struktur Organisasi dan Tata Kerja Pemerintahan Kecamatan</p>
+                    <p class="text-gray-500 text-sm mt-2">Struktur Organisasi dan Tata Kerja Pemerintahan Kecamatan</p>
                 </div>
 
                 @php
