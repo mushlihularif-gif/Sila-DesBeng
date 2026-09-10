@@ -2,7 +2,7 @@
 
 @section('page')
 <main class="flex-grow relative w-full">
-    <section class="relative z-10 min-h-screen pt-32 pb-16">
+    <section class="relative z-10 min-h-screen pt-28 pb-16">
         <!-- Elemen Dekoratif Latar Belakang -->
         <div class="absolute inset-0 pointer-events-none overflow-hidden">
             <!-- Top Left Blue Wave -->
@@ -49,75 +49,60 @@
 
         <div class="max-w-7xl mx-auto px-6 relative z-10">
             <!-- Header Section -->
-            <div class="text-center mb-12 mt-12">
-                <h1 class="text-3xl md:text-4xl font-bold mb-4">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl md:text-4xl font-bold mb-3">
                     <span class="text-gray-800">Unit </span>
                     <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Peminjaman Fasilitas Umum</span>
                 </h1>
+                <p class="text-gray-500 text-sm max-w-xl mx-auto">Layanan peminjaman gedung, ruang serbaguna, dan armada siaga untuk kebutuhan masyarakat desa.</p>
             </div>
 
             <!-- Category Filter -->
             @php
-                $itemCategories = $items->pluck('kategori')->filter()->unique()->values();
+                $hasGedung = $items->count() > 0;
                 $hasAmbulans = isset($kendaraans) && $kendaraans->where('kategori', 'ambulans')->isNotEmpty();
                 $hasKendaraanOps = isset($kendaraans) && $kendaraans->where('kategori', 'kendaraan_operasional')->isNotEmpty();
                 $totalCount = $items->count() + (isset($kendaraans) ? $kendaraans->count() : 0);
             @endphp
             
             @if($totalCount > 0)
-            <div class="flex flex-wrap justify-center gap-3 mb-10 max-w-4xl mx-auto px-4">
-                <button class="filter-btn active px-6 py-2.5 rounded-full font-semibold text-sm transition-all duration-300 bg-blue-500 text-white shadow-md border border-transparent hover:bg-blue-600 hover:shadow-lg hover:scale-105" data-filter="all">
-                    Semua
+            <div class="flex flex-wrap justify-center gap-2.5 mb-8 max-w-4xl mx-auto px-4">
+                <button class="filter-btn active px-5 py-2 rounded-full font-semibold text-xs sm:text-sm transition-all duration-300 bg-blue-500 text-white shadow-md border border-transparent hover:bg-blue-600 hover:shadow-lg hover:scale-105" data-filter="all">
+                    Semua ({{ $totalCount }})
                 </button>
-                @if($items->count() > 0)
-                <button class="filter-btn px-6 py-2.5 rounded-full font-semibold text-sm transition-all duration-300 bg-white text-gray-600 border border-gray-200 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 shadow-sm hover:shadow-md" data-filter="gedung">
-                    Gedung & Ruang Publik
+                @if($hasGedung)
+                <button class="filter-btn px-5 py-2 rounded-full font-semibold text-xs sm:text-sm transition-all duration-300 bg-white text-gray-600 border border-gray-200 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 shadow-sm hover:shadow-md" data-filter="gedung">
+                    Gedung & Ruang Publik ({{ $items->count() }})
                 </button>
                 @endif
                 @if($hasAmbulans)
-                <button class="filter-btn px-6 py-2.5 rounded-full font-semibold text-sm transition-all duration-300 bg-white text-gray-600 border border-gray-200 hover:bg-red-50 hover:text-red-600 hover:border-red-200 shadow-sm hover:shadow-md" data-filter="ambulans">
-                    Layanan Ambulans
+                <button class="filter-btn px-5 py-2 rounded-full font-semibold text-xs sm:text-sm transition-all duration-300 bg-white text-gray-600 border border-gray-200 hover:bg-red-50 hover:text-red-600 hover:border-red-200 shadow-sm hover:shadow-md" data-filter="ambulans">
+                    Layanan Ambulans ({{ $kendaraans->where('kategori', 'ambulans')->count() }})
                 </button>
                 @endif
                 @if($hasKendaraanOps)
-                <button class="filter-btn px-6 py-2.5 rounded-full font-semibold text-sm transition-all duration-300 bg-white text-gray-600 border border-gray-200 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 shadow-sm hover:shadow-md" data-filter="kendaraan-operasional">
+                <button class="filter-btn px-5 py-2 rounded-full font-semibold text-xs sm:text-sm transition-all duration-300 bg-white text-gray-600 border border-gray-200 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 shadow-sm hover:shadow-md" data-filter="kendaraan-operasional">
                     Kendaraan Operasional
                 </button>
                 @endif
-                @foreach($itemCategories as $cat)
-                    @if(!in_array(Str::slug($cat), ['gedung', 'ambulans', 'kendaraan-operasional']))
-                    <button class="filter-btn px-6 py-2.5 rounded-full font-semibold text-sm transition-all duration-300 bg-white text-gray-600 border border-gray-200 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 shadow-sm hover:shadow-md" data-filter="{{ Str::slug($cat) }}">
-                        {{ ucfirst(str_replace('-', ' ', $cat)) }}
-                    </button>
-                    @endif
-                @endforeach
             </div>
             @endif
 
-            @if($hasAmbulans)
-            <!-- Banner Siaga Ambulans Desa -->
-            <div class="mb-10 max-w-6xl mx-auto">
-                <div class="bg-gradient-to-r from-red-600 via-red-500 to-rose-600 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
-                    <div class="flex items-center gap-4 sm:gap-5 z-10">
-                        <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center flex-shrink-0 border border-white/30 shadow-inner">
-                            <i class="bx bx-plus-medical text-2xl sm:text-3xl text-white"></i>
-                        </div>
-                        <div>
-                            <span class="inline-block px-3 py-0.5 bg-white/20 backdrop-blur-sm rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1">Unit Siaga Medis Desa</span>
-                            <h3 class="text-lg sm:text-2xl font-black leading-tight">Layanan Ambulans Desa Siaga</h3>
-                            <p class="text-red-100 text-xs sm:text-sm mt-0.5 max-w-xl">Armada ambulans siap melayani kebutuhan medis dan rujukan darurat warga.</p>
-                        </div>
+            @if(isset($regionSettings['kontak_ambulans']) && $regionSettings['kontak_ambulans'])
+            <!-- Kontak Darurat Medis Cepat (Kompak & Ringkas) -->
+            <div class="mb-8 max-w-6xl mx-auto">
+                <div class="bg-red-50 border border-red-200 rounded-2xl px-4 py-2.5 flex flex-col sm:flex-row items-center justify-between gap-3 text-red-700 shadow-sm">
+                    <div class="flex items-center gap-2.5 text-xs sm:text-sm font-semibold">
+                        <span class="flex h-2.5 w-2.5 relative flex-shrink-0">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-600"></span>
+                        </span>
+                        <span>Layanan Darurat Medis & Ambulans 24 Jam Desa Siaga</span>
                     </div>
-                    <div class="flex flex-wrap items-center gap-3 z-10 flex-shrink-0 w-full md:w-auto">
-                        @if(isset($regionSettings['kontak_ambulans']) && $regionSettings['kontak_ambulans'])
-                        <a href="https://wa.me/{{ preg_replace('/^0/', '62', $regionSettings['kontak_ambulans']) }}" target="_blank" class="flex-1 md:flex-initial text-center px-5 py-2.5 bg-white text-red-600 hover:bg-red-50 font-bold rounded-xl shadow-lg transition-all transform hover:scale-105 flex items-center justify-center gap-2 text-xs sm:text-sm">
-                            <i class="bx bxs-phone-call text-base"></i> Panggil Darurat
-                        </a>
-                        @endif
-                        <a href="{{ route('user.ambulans.index') }}" class="flex-1 md:flex-initial text-center px-4 py-2.5 bg-red-700/60 hover:bg-red-700 text-white font-semibold rounded-xl border border-white/30 transition-all text-xs sm:text-sm flex items-center justify-center gap-1.5">
-                            <i class="bx bx-car text-base"></i> Info Armada & Supir
-                        </a>
-                    </div>
+                    <a href="https://wa.me/{{ preg_replace('/^0/', '62', $regionSettings['kontak_ambulans']) }}" target="_blank"
+                       class="px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm flex-shrink-0">
+                        <i class="bx bxs-phone-call"></i> Panggil Ambulans Darurat
+                    </a>
                 </div>
             </div>
             @endif
