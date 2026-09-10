@@ -176,8 +176,8 @@
                 <div class="card-body pt-3">
                     <div class="rounded overflow-hidden" style="height: 300px;">
                         <iframe width="100%" height="100%" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" 
-                            src="https://www.openstreetmap.org/export/embed.html?bbox={{ $laporan->longitude - 0.005 }},{{ $laporan->latitude - 0.005 }},{{ $laporan->longitude + 0.005 }},{{ $laporan->latitude + 0.005 }}&layer=mapnik&marker={{ $laporan->latitude }},{{ $laporan->longitude }}" 
-                            style="border: 1px solid black">
+                            src="https://maps.google.com/maps?q={{ $laporan->latitude }},{{ $laporan->longitude }}&hl=id&z=14&output=embed" 
+                            style="border: 1px solid #ccc; border-radius: 8px;">
                         </iframe>
                     </div>
                     <div class="mt-2 text-end">
@@ -340,14 +340,14 @@
 </div>
 
 <!-- Modal Bukti Foto -->
-<div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true" style="z-index: 9999;">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 bg-transparent shadow-none">
-            <div class="modal-header border-0 d-flex justify-content-end pb-0">
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-header border-0 d-flex justify-content-end pb-0" style="z-index: 10000;">
+                <button type="button" class="btn btn-danger btn-sm rounded-circle shadow" data-bs-dismiss="modal" aria-label="Close" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; position: absolute; right: -10px; top: -10px; z-index: 10000;"><i class="bx bx-x"></i></button>
             </div>
             <div class="modal-body text-center pt-0">
-                <img id="modalImage" src="" class="img-fluid rounded shadow-lg" alt="Bukti Foto Besar">
+                <img id="modalImage" src="" class="img-fluid rounded shadow-lg" alt="Bukti Foto Besar" data-bs-dismiss="modal" style="cursor: pointer;" title="Klik untuk menutup">
             </div>
         </div>
     </div>

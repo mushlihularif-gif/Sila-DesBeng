@@ -418,6 +418,9 @@ class LaporanController extends Controller
 
     public function exportPdf(Request $request, $id)
     {
+        ini_set('memory_limit', '512M');
+        ini_set('max_execution_time', 300);
+
         // Pastikan user login (session atau token Sanctum)
         $user = auth()->user();
         if (!$user && $request->has('token')) {
@@ -439,18 +442,16 @@ class LaporanController extends Controller
         }
 
         // QR kode validasi surat.
-        //
-        // Dulu memakai chart.googleapis.com — layanan Google Image Charts yang
-        // sudah dihentikan dan kini menjawab HTTP 404. Halaman galatnya ikut
-        // ter-base64 lalu dipasang sebagai gambar QR, jadi surat buktinya membawa
-        // QR rusak yang tidak bisa dipindai. Sekarang memakai penyedia yang sama
-        // dengan cetakBukti() milik RT/RW supaya keduanya seragam.
         $qrData = urlencode(url('/validasi/laporan/' . $laporan->id . '?token=' . hash_hmac('sha256', $laporan->id . $laporan->created_at, config('app.key'))));
         $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=" . $qrData;
         
         try {
-            $qrImage = \Illuminate\Support\Facades\Http::withoutVerifying()->timeout(10)->get($qrUrl)->body();
-            $qrBase64 = base64_encode($qrImage);
+            $response = \Illuminate\Support\Facades\Http::withoutVerifying()->timeout(10)->get($qrUrl);
+            if ($response->successful()) {
+                $qrBase64 = base64_encode($response->body());
+            } else {
+                $qrBase64 = null;
+            }
         } catch (\Exception $e) {
             $qrBase64 = null;
         }
