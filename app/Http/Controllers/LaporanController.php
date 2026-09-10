@@ -459,14 +459,17 @@ class LaporanController extends Controller
         // Peta Lokasi Static
         $staticMapBase64 = null;
         if ($laporan->latitude && $laporan->longitude) {
-            $mapUrl = "https://static-maps.yandex.ru/1.x/?lang=id-ID&ll={$laporan->longitude},{$laporan->latitude}&z=16&l=map&size=600,300&pt={$laporan->longitude},{$laporan->latitude},pm2rdm";
-            try {
-                $response = \Illuminate\Support\Facades\Http::withoutVerifying()->timeout(10)->get($mapUrl);
-                if ($response->successful()) {
-                    $staticMapBase64 = base64_encode($response->body());
+            $mapKey = config('services.google_maps.api_key');
+            if ($mapKey) {
+                $mapUrl = "https://maps.googleapis.com/maps/api/staticmap?center={$laporan->latitude},{$laporan->longitude}&zoom=15&size=600x300&markers=color:red%7C{$laporan->latitude},{$laporan->longitude}&key={$mapKey}";
+                try {
+                    $response = \Illuminate\Support\Facades\Http::withoutVerifying()->timeout(10)->get($mapUrl);
+                    if ($response->successful()) {
+                        $staticMapBase64 = base64_encode($response->body());
+                    }
+                } catch (\Exception $e) {
+                    // Abaikan jika gagal memuat peta
                 }
-            } catch (\Exception $e) {
-                // Abaikan jika gagal memuat peta
             }
         }
 
