@@ -34,6 +34,17 @@ class AppServiceProvider extends ServiceProvider
         }
 
         // =====================================================
+        // ROBUST IMAGE UPLOAD & MIME DETECTION FALLBACK
+        // Memastikan deteksi format gambar dan validasi image|mimes
+        // berjalan 100% akurat di shared hosting (cPanel) meskipun
+        // ekstensi PHP fileinfo dinonaktifkan atau membatasi finfo_open.
+        // =====================================================
+        \Symfony\Component\Mime\MimeTypes::getDefault()->registerGuesser(new \App\Services\ImageFallbackMimeTypeGuesser());
+        \Illuminate\Support\Facades\Validator::resolver(function ($translator, $data, $rules, $messages, $attributes) {
+            return new \App\Services\RobustValidator($translator, $data, $rules, $messages, $attributes);
+        });
+
+        // =====================================================
         // KONFIGURASI API KEY DINAMIS (dari panel Super Admin Sistem)
         // Timpa config('services.*') dengan kredensial dari tabel api_credentials
         // supaya key bisa diganti lewat dashboard tanpa edit .env/redeploy.
