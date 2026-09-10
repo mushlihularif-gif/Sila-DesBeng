@@ -540,19 +540,35 @@
             let address = "Lokasi tidak dikenali";
             if (status === "OK" && results[0]) {
                 address = results[0].formatted_address;
+                updateLocationUI(address, lat, lng);
+            } else {
+                // Fallback ke OpenStreetMap Nominatim jika Google API bermasalah/limit
+                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data && data.display_name) {
+                            address = data.display_name;
+                        }
+                        updateLocationUI(address, lat, lng);
+                    })
+                    .catch(err => {
+                        updateLocationUI(address, lat, lng);
+                    });
             }
-            pendingAddress = address;
-
-            document.getElementById("modal-address").innerText = address;
-            document.getElementById("modal-coords").innerText  =
-                "Lat: " + lat.toFixed(6) + "  â€¢  Lng: " + lng.toFixed(6);
-
-            marker.setPosition({ lat: lat, lng: lng });
-            marker.setAnimation(google.maps.Animation.BOUNCE);
-            setTimeout(() => marker.setAnimation(null), 700);
-
-            document.getElementById("location-modal").classList.remove("hidden");
         });
+    }
+
+    function updateLocationUI(address, lat, lng) {
+        pendingAddress = address;
+        document.getElementById("modal-address").innerText = address;
+        document.getElementById("modal-coords").innerText  =
+            "Lat: " + lat.toFixed(6) + "  •  Lng: " + lng.toFixed(6);
+
+        marker.setPosition({ lat: lat, lng: lng });
+        marker.setAnimation(google.maps.Animation.BOUNCE);
+        setTimeout(() => marker.setAnimation(null), 700);
+
+        document.getElementById("location-modal").classList.remove("hidden");
     }
 
     function confirmLocation() {
