@@ -26,8 +26,12 @@ class UnitPenyewaanMobilController extends Controller
 
         $search = $request->get('search');
         
+        $user = auth()->user();
         $mobils = Mobil::query()
-            ->where('kategori', '!=', 'ambulans') // Mencegah kendaraan fasilitas umum masuk
+            ->whereNotIn('kategori', ['ambulans', 'kendaraan_operasional'])
+            ->when($user && $user->region_id, function ($q) use ($user) {
+                return $q->where('region_id', $user->region_id);
+            })
             ->when($search, function ($query, $search) {
                 return $query->searchWhereLike(['nama_mobil', 'kategori'], $search);
             })
@@ -35,7 +39,6 @@ class UnitPenyewaanMobilController extends Controller
             ->appends(['search' => $search]);
         
         $tab = $request->get('tab', 'katalog');
-        $user = auth()->user();
         $chats = collect();
         $totalUnreadChats = 0;
 

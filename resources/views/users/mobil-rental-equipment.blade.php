@@ -127,7 +127,15 @@
                                 <div class="flex flex-col">
                                     <span class="text-[10px] sm:text-xs text-gray-500 mb-0.5 font-medium">Harga</span>
                                     <p class="text-gray-900 font-bold text-xs sm:text-xl tracking-tight leading-none">
-                                        Rp {{ number_format($item->harga_sewa, 0, ',', '.') }}<span class="text-[9px] sm:text-xs text-gray-400 font-medium tracking-normal ml-0.5">/{{ $item->satuan ?? 'Unit' }}</span>
+                                        @if($item->harga_mulai > 0 && ($item->harga_mulai < $item->harga_sewa || $item->harga_sewa <= 0))
+                                            Mulai Rp {{ number_format($item->harga_mulai, 0, ',', '.') }}
+                                        @elseif($item->harga_sewa > 0)
+                                            Rp {{ number_format($item->harga_sewa, 0, ',', '.') }}<span class="text-[9px] sm:text-xs text-gray-400 font-medium tracking-normal ml-0.5">/{{ $item->satuan ?? 'Unit' }}</span>
+                                        @elseif($item->harga_mulai > 0)
+                                            Rp {{ number_format($item->harga_mulai, 0, ',', '.') }}
+                                        @else
+                                            Gratis
+                                        @endif
                                     </p>
                                 </div>
                                 <div class="text-right flex flex-col">

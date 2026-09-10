@@ -345,7 +345,7 @@
                         ],
                         'Penyewaan Mobil' => [
                             'title' => 'Unit Penyewaan Mobil',
-                            'count' => (\App\Models\Mobil::count() ?? 0),
+                            'count' => ($unitMobil ?? (\App\Models\Mobil::whereNotIn('kategori', ['ambulans', 'kendaraan_operasional'])->when(auth()->user() && auth()->user()->region_id, fn($q) => $q->where('region_id', auth()->user()->region_id))->count() ?? 0)),
                             'label' => 'Kendaraan',
                             'route' => route('admin.unit.mobil.index'),
                             'image' => asset('User/img/elemen/mobil.png'),
@@ -353,7 +353,7 @@
                         ],
                         'Fasilitas Umum' => [
                             'title' => 'Unit Peminjaman Fasilitas Umum',
-                            'count' => (\App\Models\FasilitasUmum::count() ?? 0),
+                            'count' => ($unitFasilitas ?? ((\App\Models\FasilitasUmum::when(auth()->user() && auth()->user()->region_id, fn($q) => $q->where(fn($sub) => $sub->where('region_id', auth()->user()->region_id)->orWhereNull('region_id')))->count() ?? 0) + (\App\Models\Mobil::whereIn('kategori', ['ambulans', 'kendaraan_operasional'])->when(auth()->user() && auth()->user()->region_id, fn($q) => $q->where('region_id', auth()->user()->region_id))->count() ?? 0))),
                             'label' => 'Fasilitas',
                             'route' => route('admin.unit.fasilitas_umum.index'),
                             'image' => asset('User/img/elemen/fasilitas.png'),

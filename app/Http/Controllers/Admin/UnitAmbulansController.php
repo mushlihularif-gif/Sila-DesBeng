@@ -47,6 +47,11 @@ class UnitAmbulansController extends Controller
             'kategori' => $kategori,
             'region_id' => auth()->user()->region_id,
             'harga_sewa' => 0,
+            'harga_dalam_desa' => 0,
+            'harga_luar_desa' => 0,
+            'harga_luar_kota' => 0,
+            'is_harian_active' => false,
+            'is_borongan_active' => false,
             'deskripsi' => "Plat: " . ($request->nomor_plat ?? '-'),
         ];
         

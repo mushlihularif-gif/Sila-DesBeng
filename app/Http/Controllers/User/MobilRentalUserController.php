@@ -11,7 +11,7 @@ class MobilRentalUserController extends Controller
     {
         $items = Mobil::where('status', '!=', 'rusak')
                        ->where(function($q) {
-                           $q->where('kategori', '!=', 'ambulans')->orWhereNull('kategori');
+                           $q->whereNotIn('kategori', ['ambulans', 'kendaraan_operasional'])->orWhereNull('kategori');
                        })
                        ->when(auth()->check() && auth()->user()->role === 'user' && auth()->user()->region_id, function ($q) {
                            $allowed = \App\Models\Region::wilayahLayananTerlihat(auth()->user()->region_id, 'Penyewaan Mobil');

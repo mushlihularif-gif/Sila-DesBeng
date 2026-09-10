@@ -13,6 +13,8 @@ use App\Models\RentalBooking;
 use App\Models\RentalRequest;
 use App\Models\GasOrder;
 use App\Models\ManualReport;
+use App\Models\Mobil;
+use App\Models\FasilitasUmum;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
@@ -383,8 +385,18 @@ public function index(Request $request)
     ];
 
     // Ambil jumlah item untuk setiap unit layanan
+    $adminUser = auth()->user();
+    $adminRegionId = $adminUser ? $adminUser->region_id : null;
+
     $data['unitPenyewaan'] = Barang::count(); 
     $data['unitGas'] = Gas::count();
+    $data['unitMobil'] = Mobil::whereNotIn('kategori', ['ambulans', 'kendaraan_operasional'])
+        ->when($adminRegionId, fn($q) => $q->where('region_id', $adminRegionId))
+        ->count();
+    $data['unitFasilitas'] = FasilitasUmum::when($adminRegionId, fn($q) => $q->where(fn($sub) => $sub->where('region_id', $adminRegionId)->orWhereNull('region_id')))->count()
+        + Mobil::whereIn('kategori', ['ambulans', 'kendaraan_operasional'])
+            ->when($adminRegionId, fn($q) => $q->where('region_id', $adminRegionId))
+            ->count();
 
     // Ambil data Total Pendapatan untuk grafik baru (Pastikan pass selectedYear)
     // Override request year jika diperlukan agar konsisten
