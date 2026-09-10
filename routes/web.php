@@ -92,7 +92,7 @@ Route::post('/kemitraan/gabung', [App\Http\Controllers\PartnerApplicationControl
 // Validasi QR Code Surat Bukti Laporan (Publik, tanpa login)
 Route::get('/validasi/laporan/{id}', function ($id) {
     $token = request('token');
-    $laporan = \App\Models\Laporan::find($id);
+    $laporan = \App\Models\Laporan::with(['user', 'region'])->find($id);
     
     $valid = false;
     $handler_name = 'Sistem SiladesBeng';
@@ -113,6 +113,20 @@ Route::get('/validasi/laporan/{id}', function ($id) {
                 $handler = \App\Models\User::find($laporan->rt_handler_id);
                 if ($handler) $handler_name = $handler->name;
             }
+
+            // Fallback ke Nama Lengkap Admin Desa jika belum ada handler spesifik
+            if (empty($handler_name) || $handler_name === 'Sistem SiladesBeng') {
+                $desaId = $laporan->region_id ?? $laporan->user?->region_id;
+                $adminDesa = \App\Models\User::where('role', 'admin_desa')
+                    ->where('region_id', $desaId)
+                    ->first();
+
+                if ($adminDesa && !empty($adminDesa->name)) {
+                    $handler_name = $adminDesa->name;
+                } else {
+                    $handler_name = 'Pemerintah Desa';
+                }
+            }
         }
     }
     
@@ -132,17 +146,20 @@ Route::get('/validasi/transaksi/{type}/{id}', function ($type, $id) {
 
     // Cari model berdasarkan tipe transaksi
     if ($type === 'rental') {
-        $transaksi = \App\Models\RentalBooking::find($id);
+        $transaksi = \App\Models\RentalBooking::with(['barang', 'user'])->find($id);
         $title = 'Penyewaan Alat Berat';
     } elseif ($type === 'gas') {
-        $transaksi = \App\Models\GasOrder::find($id);
+        $transaksi = \App\Models\GasOrder::with('user')->find($id);
         $title = 'Pembelian Tabung Gas';
     } elseif ($type === 'mobil') {
-        $transaksi = \App\Models\MobilBooking::find($id);
-        $title = 'Penyewaan Mobil BUMDes';
+        $transaksi = \App\Models\MobilBooking::with(['mobil', 'user'])->find($id);
+        $title = 'Penyewaan Mobil';
     } elseif ($type === 'fasilitas') {
-        $transaksi = \App\Models\FasilitasUmumBooking::find($id);
+        $transaksi = \App\Models\FasilitasUmumBooking::with(['fasilitas', 'user'])->find($id);
         $title = 'Peminjaman Fasilitas Umum';
+    } elseif ($type === 'pasar-daerah' || $type === 'pasar') {
+        $transaksi = \App\Models\PasarOrder::with(['items', 'user'])->find($id);
+        $title = 'Belanja Pasar Daerah';
     }
 
     if ($transaksi && $token) {

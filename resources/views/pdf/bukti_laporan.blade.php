@@ -311,8 +311,10 @@
 </head>
 <body>
     <!-- Background Image (Desain dari user) -->
-    <!-- Background untuk Halaman 2 dan seterusnya (Fixed position agar berulang di semua halaman) -->
+    <!-- Background untuk Halaman 2 dan seterusnya (Fixed position agar berulang di semua halaman lampiran) -->
+    @if(!empty($laporan->bukti) || !empty($laporan->lokasi))
     <img src="{{ public_path('User/img/buktilapor/Halaman2danseterusnya(tanpakopsurat).png') }}" class="background-image-fixed">
+    @endif
 
     <!-- Background KHUSUS Halaman 1 (Absolute position agar hanya muncul di halaman 1 dan menutupi fixed) -->
     <img src="{{ public_path('User/img/buktilapor/Halaman1buktipelaporan(kopsurat).jpg') }}" class="background-image-first">
@@ -396,7 +398,7 @@
                 <tr>
                     <td class="label">Ditangani Oleh</td>
                     <td class="separator">:</td>
-                    <td><strong>{{ str_replace('Sistem SiladesBeng', '', $handler_name) }}</strong> (Admin {{ ucfirst($laporan->escalation_level) }})</td>
+                    <td><strong>{{ $handler_name }}</strong> ({{ $jabatan_handler ?? ('Admin ' . ucfirst($laporan->escalation_level)) }})</td>
                 </tr>
             </table>
 
@@ -459,22 +461,19 @@
                         <td style="width: 45%; text-align: center;">
                             <p style="font-size: 10pt; margin-top: 0; margin-bottom: 5px;">Bengkalis, {{ now()->format('d F Y') }}</p>
                             
-                            <!-- QR Code dipindah ke antara tanggal dan nama agar menutupi ruang kosong -->
-                            <div style="position: relative; width: 80px; height: 80px; margin: 15px auto;">
+                            <!-- QR Code Validasi Digital -->
+                            <div style="width: 80px; height: 80px; margin: 15px auto;">
                                 @if(!empty($qrBase64))
-                                    <img src="data:image/png;base64,{{ $qrBase64 }}" width="80" height="80" style="position: absolute; top: 0; left: 0;" alt="QR Validasi">
+                                    <img src="data:image/png;base64,{{ $qrBase64 }}" width="80" height="80" alt="QR Validasi">
                                 @else
-                                    <div style="width: 80px; height: 80px; position: absolute; top: 0; left: 0; border: 1px dashed #ccc; text-align: center; line-height: 80px; font-size: 8pt; color: #999;">QR Error</div>
+                                    <div style="width: 80px; height: 80px; border: 1px dashed #ccc; text-align: center; line-height: 80px; font-size: 8pt; color: #999;">QR Error</div>
                                 @endif
-                                {{-- Versi 256px: yang asli 5000x5000 dan menghabiskan ~95 MB memori saat
-     didekode, padahal di sini hanya digambar 18x18. --}}
-                                <img src="{{ public_path('Admin/img/illustrations/logodomain-256.png') }}" width="18" height="18" style="position: absolute; top: 31px; left: 31px; background-color: white; padding: 2px; border-radius: 4px;" alt="Logo SiladesBeng">
                             </div>
 
                             @if(!empty(trim($handler_name ?? '')))
                                 <p style="font-size: 10pt; font-weight: bold; margin-top: 5px; margin-bottom: 2px;">{{ $handler_name }}</p>
                             @endif
-                            <p style="font-size: 9pt; color: #555; margin-top: 0; margin-bottom: 0;">Admin Desa</p>
+                            <p style="font-size: 9pt; color: #555; margin-top: 0; margin-bottom: 0;">{{ $jabatan_handler ?? 'Pemerintah Desa' }}</p>
                             <p style="font-size: 8pt; color: #999;">Tanda Tangan Elektronik</p>
                         </td>
                     </tr>
@@ -563,7 +562,7 @@
             {{-- BAGIAN B: DATA ADMIN     --}}
             {{-- ======================== --}}
             <p class="section-title">B. Data Dari Pihak Penanganan</p>
-            <span class="sumber-label sumber-admin">Dikelola oleh Admin {{ ucfirst($laporan->escalation_level) }} ({{ $handler_name }})</span>
+            <span class="sumber-label sumber-admin">Dikelola oleh {{ $handler_name }}</span>
 
             <table class="info-table" style="margin-top: 12px;">
                 <tr>
@@ -574,7 +573,7 @@
                 <tr>
                     <td class="label">Jabatan</td>
                     <td class="separator">:</td>
-                    <td>Admin {{ ucfirst($laporan->escalation_level) }}</td>
+                    <td>{{ $jabatan_handler ?? ('Admin ' . ucfirst($laporan->escalation_level)) }}</td>
                 </tr>
                 <tr>
                     <td class="label">Status Akhir</td>

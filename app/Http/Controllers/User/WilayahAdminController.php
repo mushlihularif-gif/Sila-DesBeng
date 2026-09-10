@@ -451,6 +451,7 @@ class WilayahAdminController extends Controller
      */
     public function cetakBukti($id)
     {
+        ini_set('memory_limit', '256M');
         $user = auth()->user();
         $allowedRegionIds = $this->wilayahDiurus($user);
 
@@ -461,42 +462,90 @@ class WilayahAdminController extends Controller
             return back()->with('error', 'Surat bukti hanya dapat dicetak untuk laporan yang sudah diproses.');
         }
 
-        // Tentukan nama handler (penanggung jawab terakhir)
-        $handler_name = 'Sistem SiladesBeng';
+        // Tentukan nama handler (penanggung jawab)
+        $handler_name = null;
+        $jabatan_handler = 'Pemerintah Desa';
+
         if ($laporan->admin_id) {
             $handler = \App\Models\User::find($laporan->admin_id);
-            if ($handler) $handler_name = $handler->name;
+            if ($handler) {
+                $handler_name = $handler->name;
+                $jabatan_handler = 'Pemerintah Desa';
+            }
         } elseif ($laporan->rw_handler_id) {
             $handler = \App\Models\User::find($laporan->rw_handler_id);
-            if ($handler) $handler_name = $handler->name;
+            if ($handler) {
+                $handler_name = $handler->name;
+                $jabatan_handler = 'Admin RW ' . ($laporan->rw_number ?? '');
+            }
         } elseif ($laporan->rt_handler_id) {
             $handler = \App\Models\User::find($laporan->rt_handler_id);
-            if ($handler) $handler_name = $handler->name;
+            if ($handler) {
+                $handler_name = $handler->name;
+                $jabatan_handler = 'Admin RT ' . ($laporan->rt_number ?? '');
+            }
         }
 
-        $qrUrl = url('/validasi/laporan/' . $laporan->id . '?token=' . hash_hmac('sha256', $laporan->id . $laporan->created_at, config('app.key')));
-        $qrApiUrl = "https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=" . urlencode($qrUrl);
+        // Jika belum ada handler spesifik, gunakan Nama Lengkap profil Admin Desa wilayah laporan atau admin yang sedang login
+        if (empty($handler_name)) {
+            $desaId = $laporan->region_id ?? $laporan->user?->region_id;
+            $adminDesa = \App\Models\User::where('role', 'admin_desa')
+                ->where('region_id', $desaId)
+                ->first();
+
+            if (!$adminDesa && in_array($user->role, ['admin_desa', 'admin', 'super_admin'])) {
+                $adminDesa = $user;
+            }
+
+            if ($adminDesa && !empty($adminDesa->name)) {
+                $handler_name = $adminDesa->name;
+                $jabatan_handler = 'Pemerintah Desa';
+            } else {
+                $regionName = $laporan->region?->name ?? 'Desa';
+                $handler_name = 'Pemerintah ' . $regionName;
+                $jabatan_handler = 'Pemerintah Desa';
+            }
+        }
+
+        $validasiUrl = url('/validasi/laporan/' . $laporan->id . '?token=' . hash_hmac('sha256', $laporan->id . $laporan->created_at, config('app.key')));
+        $qrSize = 200;
+        $qrApiUrl = "https://api.qrserver.com/v1/create-qr-code/?size={$qrSize}x{$qrSize}&ecc=H&margin=4&data=" . urlencode($validasiUrl);
         $qrBase64 = '';
         try {
-            // Batas waktu wajib: tanpa itu file_get_contents menunggu selama
-            // batas default PHP kalau penyedia QR-nya lambat atau mati, dan
-            // unduhan surat bukti ikut menggantung selama itu.
             $context = stream_context_create([
                 "ssl"  => ["verify_peer" => false, "verify_peer_name" => false],
                 "http" => ["timeout" => 5],
             ]);
-            $qrData = @file_get_contents($qrApiUrl, false, $context);
-            if ($qrData) {
-                $qrBase64 = 'data:image/png;base64,' . base64_encode($qrData);
+            $qrRawData = @file_get_contents($qrApiUrl, false, $context);
+            if ($qrRawData) {
+                $qrImg = @imagecreatefromstring($qrRawData);
+                if ($qrImg) {
+                    $logoPath = public_path('Admin/img/illustrations/logodomain-256.png');
+                    if (file_exists($logoPath)) {
+                        $logoImg = @imagecreatefrompng($logoPath);
+                        if ($logoImg) {
+                            $logoSize = (int) round($qrSize * 0.16);
+                            $logoX = (int) round(($qrSize - $logoSize) / 2);
+                            $logoY = (int) round(($qrSize - $logoSize) / 2);
+                            imagefilledrectangle($qrImg, $logoX - 2, $logoY - 2, $logoX + $logoSize + 2, $logoY + $logoSize + 2, imagecolorallocate($qrImg, 255, 255, 255));
+                            imagecopyresampled($qrImg, $logoImg, $logoX, $logoY, 0, 0, $logoSize, $logoSize, imagesx($logoImg), imagesy($logoImg));
+                            imagedestroy($logoImg);
+                        }
+                    }
+                    ob_start();
+                    imagepng($qrImg);
+                    $qrBase64 = base64_encode(ob_get_clean());
+                    imagedestroy($qrImg);
+                } else {
+                    $qrBase64 = base64_encode($qrRawData);
+                }
             }
         } catch (\Exception $e) {}
 
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.bukti_laporan', [
             'laporan' => $laporan,
             'handler_name' => $handler_name,
-            // View pdf.bukti_laporan membaca $qrBase64. Dikirim sebagai
-            // 'qr_base64', QR-nya tidak pernah tampil — padahal justru QR itu
-            // yang dipakai memverifikasi keaslian suratnya.
+            'jabatan_handler' => $jabatan_handler,
             'qrBase64' => $qrBase64,
         ]);
 

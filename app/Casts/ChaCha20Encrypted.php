@@ -50,56 +50,59 @@ class ChaCha20Encrypted implements CastsAttributes
             return $value;
         }
 
-        if (!function_exists('sodium_crypto_aead_chacha20poly1305_ietf_decrypt')) {
-            Log::warning("ChaCha20: Libsodium extension tidak aktif di PHP environment ini.");
-            return $value;
+        // 1. Coba dekripsi dengan Libsodium jika tersedia
+        if (function_exists('sodium_crypto_aead_chacha20poly1305_ietf_decrypt')) {
+            try {
+                $encryptionKey = $this->deriveKey();
+                $encoded = substr($value, strlen(self::ENCRYPTED_PREFIX));
+                $decoded = base64_decode($encoded, true);
+
+                if ($decoded !== false && strlen($decoded) >= 12) {
+                    $nonce = substr($decoded, 0, 12);
+                    $ciphertext = substr($decoded, 12);
+
+                    $plaintext = sodium_crypto_aead_chacha20poly1305_ietf_decrypt(
+                        $ciphertext,
+                        '',
+                        $nonce,
+                        $encryptionKey
+                    );
+
+                    sodium_memzero($encryptionKey);
+
+                    if ($plaintext !== false) {
+                        return $plaintext;
+                    }
+                }
+            } catch (\Exception $e) {
+                // Lanjut ke fallback OpenSSL jika terjadi error
+            }
         }
 
-        try {
-            $encryptionKey = $this->deriveKey();
+        // 2. Fallback OpenSSL AEAD: Sangat krusial untuk shared hosting / cPanel jika ekstensi libsodium dinonaktifkan
+        if (in_array('chacha20-poly1305', openssl_get_cipher_methods())) {
+            try {
+                $encryptionKey = $this->deriveKey();
+                $encoded = substr($value, strlen(self::ENCRYPTED_PREFIX));
+                $decoded = base64_decode($encoded, true);
 
-            // Hapus prefix dan decode Base64
-            $encoded = substr($value, strlen(self::ENCRYPTED_PREFIX));
-            $decoded = base64_decode($encoded, true);
+                if ($decoded !== false && strlen($decoded) >= 28) {
+                    $nonce = substr($decoded, 0, 12);
+                    $cipherWithTag = substr($decoded, 12);
+                    $cipher = substr($cipherWithTag, 0, -16);
+                    $tag = substr($cipherWithTag, -16);
 
-            if ($decoded === false) {
-                Log::warning("ChaCha20 Decrypt: Base64 decode gagal untuk field [{$key}]");
-                return $value;
+                    $plain = openssl_decrypt($cipher, 'chacha20-poly1305', $encryptionKey, OPENSSL_RAW_DATA, $nonce, $tag);
+                    if ($plain !== false) {
+                        return $plain;
+                    }
+                }
+            } catch (\Exception $e) {
+                Log::error("ChaCha20 OpenSSL Decrypt Error [{$key}]: " . $e->getMessage());
             }
-
-            // Pisahkan nonce (12 bytes pertama) dari ciphertext
-            $nonceLength = 12; // 12 bytes
-
-            if (strlen($decoded) < $nonceLength) {
-                Log::warning("ChaCha20 Decrypt: Data terlalu pendek untuk field [{$key}]");
-                return $value;
-            }
-
-            $nonce = substr($decoded, 0, $nonceLength);
-            $ciphertext = substr($decoded, $nonceLength);
-
-            // Decrypt menggunakan ChaCha20-Poly1305 IETF
-            $plaintext = sodium_crypto_aead_chacha20poly1305_ietf_decrypt(
-                $ciphertext,
-                '',     // Additional Authenticated Data (AAD) — kosong
-                $nonce,
-                $encryptionKey
-            );
-
-            if ($plaintext === false) {
-                Log::error("ChaCha20 Decrypt: Dekripsi gagal untuk field [{$key}]. Data mungkin telah dimanipulasi (tampered).");
-                return null;
-            }
-
-            // Bersihkan memori sensitif
-            sodium_memzero($encryptionKey);
-
-            return $plaintext;
-
-        } catch (\SodiumException $e) {
-            Log::error("ChaCha20 Decrypt Error [{$key}]: " . $e->getMessage());
-            return null;
         }
+
+        return $value;
     }
 
     /**
@@ -122,36 +125,53 @@ class ChaCha20Encrypted implements CastsAttributes
             return $value;
         }
 
-        if (!function_exists('sodium_crypto_aead_chacha20poly1305_ietf_encrypt')) {
-            Log::warning("ChaCha20: Libsodium extension tidak aktif di PHP environment ini.");
-            return $value;
+        // 1. Coba enkripsi dengan Libsodium jika tersedia
+        if (function_exists('sodium_crypto_aead_chacha20poly1305_ietf_encrypt')) {
+            try {
+                $encryptionKey = $this->deriveKey();
+                $nonce = random_bytes(12);
+
+                $ciphertext = sodium_crypto_aead_chacha20poly1305_ietf_encrypt(
+                    $value,
+                    '',
+                    $nonce,
+                    $encryptionKey
+                );
+
+                sodium_memzero($encryptionKey);
+
+                return self::ENCRYPTED_PREFIX . base64_encode($nonce . $ciphertext);
+            } catch (\Exception $e) {
+                // Lanjut ke fallback OpenSSL
+            }
         }
 
-        try {
-            $encryptionKey = $this->deriveKey();
+        // 2. Fallback OpenSSL AEAD
+        if (in_array('chacha20-poly1305', openssl_get_cipher_methods())) {
+            try {
+                $encryptionKey = $this->deriveKey();
+                $nonce = random_bytes(12);
+                $tag = '';
 
-            // Generate nonce acak unik (12 bytes untuk IETF variant)
-            $nonce = random_bytes(12);
+                $ciphertext = openssl_encrypt(
+                    $value,
+                    'chacha20-poly1305',
+                    $encryptionKey,
+                    OPENSSL_RAW_DATA,
+                    $nonce,
+                    $tag
+                );
 
-            // Encrypt menggunakan ChaCha20-Poly1305 IETF (AEAD)
-            $ciphertext = sodium_crypto_aead_chacha20poly1305_ietf_encrypt(
-                $value,
-                '',     // Additional Authenticated Data (AAD) — kosong
-                $nonce,
-                $encryptionKey
-            );
-
-            // Bersihkan memori sensitif
-            sodium_memzero($encryptionKey);
-
-            // Format: prefix + Base64( nonce + ciphertext )
-            return self::ENCRYPTED_PREFIX . base64_encode($nonce . $ciphertext);
-
-        } catch (\SodiumException $e) {
-            Log::error("ChaCha20 Encrypt Error [{$key}]: " . $e->getMessage());
-            // Fallback: simpan sebagai plaintext daripada kehilangan data
-            return $value;
+                if ($ciphertext !== false) {
+                    return self::ENCRYPTED_PREFIX . base64_encode($nonce . $ciphertext . $tag);
+                }
+            } catch (\Exception $e) {
+                Log::error("ChaCha20 OpenSSL Encrypt Error [{$key}]: " . $e->getMessage());
+            }
         }
+
+        // Fallback: simpan apa adanya daripada kehilangan data
+        return $value;
     }
 
     /**
@@ -181,8 +201,11 @@ class ChaCha20Encrypted implements CastsAttributes
         $requiredLength = 32; // 32 bytes
 
         if (strlen($key) !== $requiredLength) {
-            // Jika key bukan 32 bytes, derive menggunakan BLAKE2b hash
-            $key = sodium_crypto_generichash($key, '', $requiredLength);
+            if (function_exists('sodium_crypto_generichash')) {
+                $key = sodium_crypto_generichash($key, '', $requiredLength);
+            } else {
+                $key = hash('sha256', $key, true);
+            }
         }
 
         return $key;

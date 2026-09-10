@@ -435,22 +435,48 @@ class LaporanController extends Controller
             return redirect()->route('login');
         }
 
+        ini_set('memory_limit', '256M');
+
         $laporan = Laporan::with(['user', 'admin'])->findOrFail($id);
 
         if (! $this->bolehMelihatLaporan($laporan, $user)) {
             abort(403, 'Laporan ini berada di luar wilayah wewenang Anda.');
         }
 
-        // QR kode validasi surat.
-        $qrData = urlencode(url('/validasi/laporan/' . $laporan->id . '?token=' . hash_hmac('sha256', $laporan->id . $laporan->created_at, config('app.key'))));
-        $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=" . $qrData;
+        // QR kode validasi surat dengan ecc=H (High error correction) & margin=4
+        $validasiUrl = url('/validasi/laporan/' . $laporan->id . '?token=' . hash_hmac('sha256', $laporan->id . $laporan->created_at, config('app.key')));
+        $qrSize = 200;
+        $qrApiUrl = "https://api.qrserver.com/v1/create-qr-code/?size={$qrSize}x{$qrSize}&ecc=H&margin=4&data=" . urlencode($validasiUrl);
+        $qrBase64 = null;
         
         try {
-            $response = \Illuminate\Support\Facades\Http::withoutVerifying()->timeout(10)->get($qrUrl);
-            if ($response->successful()) {
-                $qrBase64 = base64_encode($response->body());
-            } else {
-                $qrBase64 = null;
+            $context = stream_context_create([
+                "ssl" => ["verify_peer" => false, "verify_peer_name" => false],
+                "http" => ["timeout" => 5],
+            ]);
+            $qrRawData = @file_get_contents($qrApiUrl, false, $context);
+            if ($qrRawData) {
+                $qrImg = @imagecreatefromstring($qrRawData);
+                if ($qrImg) {
+                    $logoPath = public_path('Admin/img/illustrations/logodomain-256.png');
+                    if (file_exists($logoPath)) {
+                        $logoImg = @imagecreatefrompng($logoPath);
+                        if ($logoImg) {
+                            $logoSize = (int) round($qrSize * 0.16);
+                            $logoX = (int) round(($qrSize - $logoSize) / 2);
+                            $logoY = (int) round(($qrSize - $logoSize) / 2);
+                            imagefilledrectangle($qrImg, $logoX - 2, $logoY - 2, $logoX + $logoSize + 2, $logoY + $logoSize + 2, imagecolorallocate($qrImg, 255, 255, 255));
+                            imagecopyresampled($qrImg, $logoImg, $logoX, $logoY, 0, 0, $logoSize, $logoSize, imagesx($logoImg), imagesy($logoImg));
+                            imagedestroy($logoImg);
+                        }
+                    }
+                    ob_start();
+                    imagepng($qrImg);
+                    $qrBase64 = base64_encode(ob_get_clean());
+                    imagedestroy($qrImg);
+                } else {
+                    $qrBase64 = base64_encode($qrRawData);
+                }
             }
         } catch (\Exception $e) {
             $qrBase64 = null;
@@ -473,11 +499,46 @@ class LaporanController extends Controller
             }
         }
 
-        $handlerName = $laporan->admin ? $laporan->admin->name : 'Pemerintah Desa Bengkalis';
+        // Tentukan nama penanggung jawab (prioritas: admin penangan -> admin desa wilayah -> user login jika admin desa)
+        $handlerName = null;
+        $jabatanHandler = 'Pemerintah Desa';
+
+        if ($laporan->admin_id && $laporan->admin) {
+            $handlerName = $laporan->admin->name;
+            $jabatanHandler = 'Pemerintah Desa';
+        } elseif ($laporan->rw_handler_id && $laporan->rwHandler) {
+            $handlerName = $laporan->rwHandler->name;
+            $jabatanHandler = 'Admin RW ' . ($laporan->rw_number ?? '');
+        } elseif ($laporan->rt_handler_id && $laporan->rtHandler) {
+            $handlerName = $laporan->rtHandler->name;
+            $jabatanHandler = 'Admin RT ' . ($laporan->rt_number ?? '');
+        }
+
+        // Fallback: Gunakan Nama Lengkap dari profil Admin Desa wilayah laporan
+        if (empty($handlerName)) {
+            $desaId = $laporan->region_id ?? $laporan->user?->region_id;
+            $adminDesa = \App\Models\User::where('role', 'admin_desa')
+                ->where('region_id', $desaId)
+                ->first();
+
+            if (!$adminDesa && auth()->check() && in_array(auth()->user()->role, ['admin_desa', 'admin', 'super_admin'])) {
+                $adminDesa = auth()->user();
+            }
+
+            if ($adminDesa && !empty($adminDesa->name)) {
+                $handlerName = $adminDesa->name;
+                $jabatanHandler = 'Pemerintah Desa';
+            } else {
+                $regionName = $laporan->region?->name ?? 'Desa';
+                $handlerName = 'Pemerintah ' . $regionName;
+                $jabatanHandler = 'Pemerintah Desa';
+            }
+        }
 
         return Pdf::loadView('pdf.bukti_laporan', [
             'laporan' => $laporan,
             'handler_name' => $handlerName,
+            'jabatan_handler' => $jabatanHandler,
             'waktu_cetak' => now()->format('d F Y, H:i'),
             'qrBase64' => $qrBase64,
             'staticMapBase64' => $staticMapBase64
