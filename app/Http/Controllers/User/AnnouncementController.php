@@ -71,13 +71,24 @@ class AnnouncementController extends Controller
             ->where('is_active', true)
             ->findOrFail($id);
 
-        // Fetch related announcements from same category
+        // Ambil rekomendasi kabar dari kategori yang sama terlebih dahulu
         $relatedAnnouncements = Announcement::where('is_active', true)
             ->where('id', '!=', $id)
             ->where('post_category', $announcement->post_category)
             ->orderBy('created_at', 'desc')
-            ->take(3)
+            ->take(4)
             ->get();
+
+        // Jika kurang dari 4, lengkapi dengan kabar aktif lainnya agar rekomendasi tidak kosong
+        if ($relatedAnnouncements->count() < 4) {
+            $excludeIds = array_merge([$id], $relatedAnnouncements->pluck('id')->toArray());
+            $otherAnnouncements = Announcement::where('is_active', true)
+                ->whereNotIn('id', $excludeIds)
+                ->orderBy('created_at', 'desc')
+                ->take(4 - $relatedAnnouncements->count())
+                ->get();
+            $relatedAnnouncements = $relatedAnnouncements->concat($otherAnnouncements);
+        }
 
         return view('users.announcements.show', compact('announcement', 'relatedAnnouncements'));
     }
