@@ -27,6 +27,12 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         \Illuminate\Pagination\Paginator::useBootstrapFive();
+        
+        // Force HTTPS in production to avoid mixed content or blocked cleartext traffic on mobile
+        if(env('APP_ENV') !== 'local' || str_starts_with(env('APP_URL'), 'https')) {
+            \Illuminate\Support\Facades\URL::forceScheme('https');
+        }
+
         // =====================================================
         // KONFIGURASI API KEY DINAMIS (dari panel Super Admin Sistem)
         // Timpa config('services.*') dengan kredensial dari tabel api_credentials
