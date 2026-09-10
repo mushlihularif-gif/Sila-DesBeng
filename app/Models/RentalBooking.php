@@ -60,6 +60,11 @@ class RentalBooking extends Model
         'receipt_path',
         'rental_purpose',
         'region_id',
+        'snap_token',
+        'payment_channel',
+        'payment_expiry_time',
+        'payment_va_number',
+        'payment_qr_url',
     ];
 
     protected $casts = [
@@ -159,7 +164,7 @@ class RentalBooking extends Model
     public static function generateOrderNumber()
     {
         do {
-            $orderNumber = strtoupper(substr(md5(uniqid(rand(), true)), 0, 13));
+            $orderNumber = 'RNT-' . date('Ymd') . '-' . strtoupper(substr(md5(uniqid(rand(), true)), 0, 8));
         } while (self::where('order_number', $orderNumber)->exists());
         
         return $orderNumber;

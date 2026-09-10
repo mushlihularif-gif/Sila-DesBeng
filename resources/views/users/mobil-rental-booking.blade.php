@@ -5,7 +5,6 @@
     $boronganActive = $item->is_borongan_active ?? true;
     $defaultJenis = $harianActive ? 'harian' : ($boronganActive ? 'borongan' : 'harian');
 
-    // Normalisasi opsi supir dari database ('Lepas Kunci' -> 'sendiri', 'Dengan Supir' -> 'pengelola', 'Bebas Pilih' -> 'bebas')
     $normalizeSupir = function($val) {
         return match($val) {
             'Lepas Kunci', 'sendiri' => 'sendiri',
@@ -18,7 +17,6 @@
     $harianOpsiSupir = $normalizeSupir($item->opsi_supir ?? 'Bebas Pilih');
     $boronganOpsiSupir = $normalizeSupir($item->opsi_supir_borongan ?? 'Bebas Pilih');
 
-    // Normalisasi ketentuan BBM dari database (1 = ditanggung penyewa, 0 = termasuk layanan / disediakan pengelola)
     $normalizeBbm = function($val) {
         if (is_bool($val)) return $val ? 1 : 0;
         if (is_numeric($val)) return (int)$val ? 1 : 0;
@@ -28,11 +26,16 @@
     $harianBbm = $normalizeBbm($item->bbm_ditanggung ?? 'Penyewa');
     $boronganBbm = $normalizeBbm($item->bbm_ditanggung_borongan ?? 'Pengelola');
 
-    // Petugas pembayaran tunai (strictly no BUMDes)
     $cashDescription = $setting->cash_payment_description ?? 'Petugas / Bendahara Layanan Pengelola';
     if (str_contains(strtolower($cashDescription), 'bumdes')) {
         $cashDescription = str_ireplace('bumdes', 'Pengelola', $cashDescription);
     }
+
+    // Metode transfer & gateway
+    $methods = $setting?->payment_methods ?? ['tunai'];
+    if (!is_array($methods) || empty($methods)) $methods = ['tunai'];
+    $hasTransfer = in_array('transfer', $methods);
+    $adaGateway = $adaGateway ?? false;
 @endphp
 
 @section('page')
@@ -65,7 +68,7 @@
                 <input type="hidden" name="opsi_layanan_supir" id="opsi-layanan-supir-input" value="sendiri">
                 <input type="hidden" name="delivery_method" id="delivery-method-input" value="jemput">
                 <input type="hidden" name="dengan_supir" id="dengan-supir-input" value="0">
-                <input type="hidden" name="payment_method" value="tunai">
+                {{-- payment_method diset oleh pilihMetodeMobil() di bawah --}}
 
                 <!-- 1. Pilihan Jenis Sewa (Pill Tabs) -->
                 <div class="flex justify-center mb-8" id="jenis-sewa-container">
@@ -538,41 +541,119 @@
                     </div>
                 </div>
 
-                <!-- 8. Metode Pembayaran (Tunai / Bayar Ditempat) -->
+                <!-- 8. Metode Pembayaran -->
                 <div class="bg-white rounded-3xl shadow-xl border border-gray-100 p-6 md:p-8 mb-8">
                     <div class="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
                         <div class="p-2.5 bg-blue-50 text-blue-600 rounded-xl text-xl flex-shrink-0">
                             <i class="bx bx-wallet"></i>
                         </div>
                         <div>
-                            <h3 class="text-lg md:text-xl font-extrabold text-gray-800">
-                                Metode Pembayaran
-                            </h3>
-                            <p class="text-xs text-gray-500">
-                                Pembayaran tunai saat serah terima unit di lokasi
-                            </p>
+                            <h3 class="text-lg md:text-xl font-extrabold text-gray-800">Metode Pembayaran</h3>
+                            <p class="text-xs text-gray-500">Pilih cara pembayaran yang Anda inginkan</p>
                         </div>
                     </div>
 
-                    <div class="bg-gradient-to-br from-gray-50 to-gray-100/70 border border-gray-200 rounded-2xl p-6 shadow-sm">
-                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                            <div>
-                                <div class="flex items-center gap-2 mb-1">
-                                    <span class="px-2.5 py-0.5 bg-blue-600 text-white font-bold text-xs rounded-full">
-                                        Tunai
-                                    </span>
-                                    <h4 class="font-bold text-gray-900 text-base">Pembayaran Ditempat (COD)</h4>
-                                </div>
-                                <p class="text-xs md:text-sm text-gray-600">
-                                    Diserahkan langsung kepada: <strong class="text-gray-800">{{ $cashDescription }}</strong>
-                                </p>
-                            </div>
+                    <input type="hidden" name="payment_method" id="payment-method-mobil"
+                           value="{{ $hasTransfer ? 'transfer' : 'tunai' }}">
 
-                            <div class="text-left md:text-right border-t md:border-t-0 pt-3 md:pt-0">
-                                <p class="text-xs font-semibold text-gray-500">Total Yang Harus Dibayar</p>
-                                <p class="text-3xl font-black text-red-600 tracking-tight" id="total-amount-display">
-                                    Rp. {{ number_format($item->harga_sewa * $quantity, 0, ',', '.') }}
-                                </p>
+                    @if($hasTransfer)
+                    <div class="grid grid-cols-2 gap-3 mb-5">
+                        <button type="button" onclick="pilihMetodeMobil('transfer')" id="btn-mobil-transfer"
+                                class="metode-mobil-btn py-4 px-3 rounded-2xl font-bold border-2 border-blue-500 bg-blue-50 text-blue-700 transition-all">
+                            Transfer Bank
+                        </button>
+                        <button type="button" onclick="pilihMetodeMobil('tunai')" id="btn-mobil-tunai"
+                                class="metode-mobil-btn py-4 px-3 rounded-2xl font-bold border-2 border-gray-200 bg-white text-gray-600 transition-all">
+                            Bayar di Tempat
+                        </button>
+                    </div>
+                    <div id="transfer-payment-mobil" class="mb-5">
+                        <div class="bg-white border-2 border-blue-50 rounded-2xl shadow-lg p-6">
+                            <h4 class="font-bold text-gray-800 mb-4">Transfer ke Rekening Berikut</h4>
+                            <div class="flex items-center gap-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-5 mb-4">
+                                @if(!empty($bankLogoPath))
+                                    <img src="{{ asset($bankLogoPath) }}" alt="{{ $setting->bank_name }}" class="h-8 object-contain">
+                                @endif
+                                <div class="min-w-0">
+                                    <div class="text-xs uppercase tracking-wider text-gray-500">{{ $setting->bank_name ?: 'Bank' }}</div>
+                                    <div class="text-xl font-black tracking-wide text-gray-900 select-all break-all">{{ $setting->bank_account_number ?: 'Belum diatur' }}</div>
+                                    <div class="text-sm text-gray-600">a.n. {{ $setting->bank_account_holder ?: '-' }}</div>
+                                </div>
+                            </div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">
+                                Unggah Bukti Transfer <span class="text-red-500">*</span>
+                            </label>
+                            <input type="file" name="payment_proof" accept=".jpg,.jpeg,.png,.pdf"
+                                   class="block w-full text-sm text-gray-600 border-2 border-dashed border-blue-200 rounded-xl p-3 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-500 file:text-white file:font-semibold hover:file:bg-blue-600">
+                        </div>
+                    </div>
+                    @endif
+
+                    @if($adaGateway)
+                    <div class="mb-5 mt-4">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="text-xs font-bold uppercase tracking-wider text-gray-500">Virtual Account</span>
+                            <span class="flex-1 h-px bg-gray-200"></span>
+                            <span class="text-[10px] text-gray-400">Terverifikasi otomatis</span>
+                        </div>
+                        <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+                            <button type="button" onclick="pilihMetodeMobil('bank_transfer_bca')" id="btn-mobil-bank_transfer_bca" class="metode-mobil-btn group relative py-4 px-2 rounded-2xl font-bold transition-all duration-300 bg-white shadow-sm border border-gray-100 hover:border-blue-300 hover:shadow-md hover:-translate-y-1">
+                                <div class="flex flex-col items-center justify-center gap-2 text-center h-full"><div class="h-10 flex items-center justify-center"><img src="{{ asset('Admin/img/banks/bca.png') }}" alt="BCA" class="h-9 max-w-full object-contain"></div></div>
+                            </button>
+                            <button type="button" onclick="pilihMetodeMobil('bank_transfer_bri')" id="btn-mobil-bank_transfer_bri" class="metode-mobil-btn group relative py-4 px-2 rounded-2xl font-bold transition-all duration-300 bg-white shadow-sm border border-gray-100 hover:border-orange-300 hover:shadow-md hover:-translate-y-1">
+                                <div class="flex flex-col items-center justify-center gap-2 text-center h-full"><div class="h-10 flex items-center justify-center"><img src="{{ asset('Admin/img/banks/bri.png') }}" alt="BRI" class="h-9 max-w-full object-contain"></div></div>
+                            </button>
+                            <button type="button" onclick="pilihMetodeMobil('bank_transfer_mandiri')" id="btn-mobil-bank_transfer_mandiri" class="metode-mobil-btn group relative py-4 px-2 rounded-2xl font-bold transition-all duration-300 bg-white shadow-sm border border-gray-100 hover:border-yellow-400 hover:shadow-md hover:-translate-y-1">
+                                <div class="flex flex-col items-center justify-center gap-2 text-center h-full"><div class="h-10 flex items-center justify-center"><img src="{{ asset('Admin/img/banks/mandiri.png') }}" alt="Mandiri" class="h-9 max-w-full object-contain"></div></div>
+                            </button>
+                            <button type="button" onclick="pilihMetodeMobil('bank_transfer_bni')" id="btn-mobil-bank_transfer_bni" class="metode-mobil-btn group relative py-4 px-2 rounded-2xl font-bold transition-all duration-300 bg-white shadow-sm border border-gray-100 hover:border-orange-500 hover:shadow-md hover:-translate-y-1">
+                                <div class="flex flex-col items-center justify-center gap-2 text-center h-full"><div class="h-10 flex items-center justify-center"><img src="{{ asset('Admin/img/banks/bni.png') }}" alt="BNI" class="h-9 max-w-full object-contain"></div></div>
+                            </button>
+                            <button type="button" onclick="pilihMetodeMobil('bank_transfer_bsi')" id="btn-mobil-bank_transfer_bsi" class="metode-mobil-btn group relative py-4 px-2 rounded-2xl font-bold transition-all duration-300 bg-white shadow-sm border border-gray-100 hover:border-teal-300 hover:shadow-md hover:-translate-y-1">
+                                <div class="flex flex-col items-center justify-center gap-2 text-center h-full"><div class="h-10 flex items-center justify-center"><img src="{{ asset('Admin/img/banks/bsi.png') }}" alt="BSI" class="h-9 max-w-full object-contain"></div></div>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="mb-5">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="text-xs font-bold uppercase tracking-wider text-gray-500">QRIS / E-Wallet</span>
+                            <span class="flex-1 h-px bg-gray-200"></span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <button type="button" onclick="pilihMetodeMobil('gopay')" id="btn-mobil-gopay" class="metode-mobil-btn group relative py-4 px-2 rounded-2xl font-bold transition-all duration-300 bg-white shadow-sm border border-gray-100 hover:border-green-400 hover:shadow-md hover:-translate-y-1">
+                                <div class="flex flex-col items-center justify-center gap-2 text-center h-full"><div class="h-10 flex items-center justify-center"><img src="{{ asset('Admin/img/banks/gopay.png') }}" alt="GoPay" class="h-9 max-w-full object-contain"></div></div>
+                            </button>
+                            <button type="button" onclick="pilihMetodeMobil('qris')" id="btn-mobil-qris" class="metode-mobil-btn group relative py-4 px-2 rounded-2xl font-bold transition-all duration-300 bg-white shadow-sm border border-gray-100 hover:border-blue-400 hover:shadow-md hover:-translate-y-1">
+                                <div class="flex flex-col items-center justify-center gap-2 text-center h-full"><div class="h-10 flex items-center justify-center"><img src="{{ asset('Admin/img/banks/qris.png') }}" alt="QRIS" class="h-9 max-w-full object-contain"></div></div>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="midtrans-payment-mobil" class="payment-content hidden">
+                        <div class="bg-blue-50 border border-blue-200 rounded-2xl p-5 text-center">
+                            <svg class="w-10 h-10 mx-auto mb-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <p class="text-sm font-semibold text-blue-700">Pembayaran akan dilakukan melalui Midtrans secara otomatis setelah konfirmasi.</p>
+                        </div>
+                    </div>
+                    @endif
+
+                    <div id="cash-payment-mobil" class="{{ ($hasTransfer || $adaGateway) ? 'hidden' : '' }}">
+                        <div class="bg-gradient-to-br from-gray-50 to-gray-100/70 border border-gray-200 rounded-2xl p-6 shadow-sm">
+                            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                <div>
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <span class="px-2.5 py-0.5 bg-blue-600 text-white font-bold text-xs rounded-full">Tunai</span>
+                                        <h4 class="font-bold text-gray-900 text-base">Pembayaran Ditempat (COD)</h4>
+                                    </div>
+                                    <p class="text-xs md:text-sm text-gray-600">Diserahkan langsung kepada: <strong class="text-gray-800">{{ $cashDescription }}</strong></p>
+                                </div>
+                                <div class="text-left md:text-right border-t md:border-t-0 pt-3 md:pt-0">
+                                    <p class="text-xs font-semibold text-gray-500">Total Yang Harus Dibayar</p>
+                                    <p class="text-3xl font-black text-red-600 tracking-tight" id="total-amount-display">
+                                        Rp. {{ number_format($item->harga_sewa * $quantity, 0, ',', '.') }}
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1126,9 +1207,42 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(data => {
             if (data.success) {
                 receiptId = data.receipt_id || data.booking_id;
-                if (successModal) {
-                    successModal.style.display = 'flex';
-                    successModal.classList.remove('hidden');
+
+                const metodeDipakai = document.getElementById('payment-method-mobil')?.value || 'tunai';
+                const metodeManual = ['tunai', 'transfer'];
+
+                if (metodeManual.includes(metodeDipakai)) {
+                    // Tunai / Transfer manual — langsung tampil modal sukses
+                    if (successModal) {
+                        successModal.style.display = 'flex';
+                        successModal.classList.remove('hidden');
+                    }
+                } else if (data.gateway_gagal) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Pembayaran Otomatis Bermasalah',
+                        text: data.message || 'Pesanan tersimpan, tetapi pembayaran otomatis tidak dapat diproses.',
+                        confirmButtonColor: '#3b82f6',
+                    }).then(() => {
+                        window.location.href = '{{ route("user.activity") }}';
+                    });
+                } else if (data.snap_token && window.snap) {
+                    // Buka popup Midtrans Snap
+                    window.snap.pay(data.snap_token, {
+                        onSuccess: () => window.location.href = '{{ route("user.activity") }}',
+                        onPending: () => window.location.href = '{{ route("user.activity") }}',
+                        onError:   () => window.location.href = '{{ route("user.activity") }}',
+                        onClose:   () => {
+                            // Pengguna menutup popup tanpa selesai bayar — arahkan ke aktivitas
+                            window.location.href = '{{ route("user.activity") }}';
+                        },
+                    });
+                } else {
+                    // Fallback: snap_token tidak ada tapi gateway dipilih
+                    if (successModal) {
+                        successModal.style.display = 'flex';
+                        successModal.classList.remove('hidden');
+                    }
                 }
             } else {
                 Swal.fire({
@@ -1160,4 +1274,63 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+
+{{-- Pemilih metode bayar mobil. Dipisah dari skrip utama agar tidak
+     mengganggu alur FormData yang sudah berjalan. --}}
+<script>
+    window.pilihMetodeMobil = function (metode) {
+        // Update semua input[name="payment_method"] sekaligus
+        document.querySelectorAll('[name="payment_method"]').forEach(function (el) {
+            el.value = metode;
+        });
+
+        var panelTransfer  = document.getElementById('transfer-payment-mobil');
+        var panelTunai     = document.getElementById('cash-payment-mobil');
+        var panelMidtrans  = document.getElementById('midtrans-payment-mobil');
+
+        var metodeGateway = [
+            'bank_transfer_bca', 'bank_transfer_bri', 'bank_transfer_mandiri',
+            'bank_transfer_bni', 'bank_transfer_bsi', 'gopay', 'qris'
+        ];
+
+        if (panelTransfer)  panelTransfer.classList.toggle('hidden',  metode !== 'transfer');
+        if (panelTunai)     panelTunai.classList.toggle('hidden',     metode !== 'tunai');
+        if (panelMidtrans)  panelMidtrans.classList.toggle('hidden',  !metodeGateway.includes(metode));
+
+        // Highlight tombol aktif
+        document.querySelectorAll('.metode-mobil-btn').forEach(function (el) {
+            var idExpected = 'btn-mobil-' + metode;
+            var aktif = el.id === idExpected;
+
+            // Reset dulu ke kondisi non-aktif
+            el.classList.remove(
+                'ring-2', 'ring-blue-500', 'border-blue-500', 'bg-blue-50', 'text-blue-700',
+                'border-orange-300', 'border-yellow-400', 'border-orange-500', 'border-teal-300',
+                'border-green-400', 'border-blue-400'
+            );
+            el.classList.add('border-gray-100', 'bg-white');
+
+            if (aktif) {
+                el.classList.remove('border-gray-100');
+                el.classList.add('ring-2', 'ring-blue-500', 'border-blue-500', 'bg-blue-50');
+            }
+        });
+    };
+
+    // Inisialisasi: set default metode sesuai yang tersedia
+    (function () {
+        var defaultMetode = @json($hasTransfer ? 'transfer' : 'tunai');
+        var input = document.getElementById('payment-method-mobil');
+        if (input && input.value) {
+            defaultMetode = input.value;
+        }
+        window.pilihMetodeMobil(defaultMetode);
+    })();
+</script>
+
+@if(config('services.midtrans.client_key'))
+<script src="{{ config('services.midtrans.is_production') ? 'https://app.midtrans.com/snap/snap.js' : 'https://app.sandbox.midtrans.com/snap/snap.js' }}"
+        data-client-key="{{ config('services.midtrans.client_key') }}"></script>
+@endif
+
 @endpush

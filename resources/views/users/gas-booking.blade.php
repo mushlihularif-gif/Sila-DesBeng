@@ -363,13 +363,7 @@
                     </div>
                     
                     <div class="space-y-4">
-                        <input type="text" 
-                               name="nomor_kk" 
-                               id="nomor-kk"
-                               placeholder="16 Digit Nomor Kartu Keluarga (KK)" 
-                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                               minlength="16" maxlength="16" pattern="[0-9]{16}"
-                               required>
+
                         @include('partials.pilih-alamat', [
     'alamatTersimpan' => $alamatTersimpan ?? collect(),
     'idNama'   => 'buyer-name',

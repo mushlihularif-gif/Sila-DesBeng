@@ -50,7 +50,11 @@ class FasilitasUmumBookingController extends Controller
             ->orderByDesc('is_utama')
             ->orderBy('id')
             ->get();
-        return view('users.fasilitas-umum-booking', compact('item', 'setting', 'quantity', 'sop_fasilitas', 'region', 'alamatTersimpan'));
+
+        // Cek apakah wilayah ini sudah siap gateway Midtrans
+        $adaGateway = \App\Support\PenyediaPembayaran::terapkanMidtransWilayah($item->region_id);
+
+        return view('users.fasilitas-umum-booking', compact('item', 'setting', 'quantity', 'sop_fasilitas', 'region', 'alamatTersimpan', 'adaGateway'));
     }
 
     public function store(Request $request)
@@ -70,8 +74,8 @@ class FasilitasUmumBookingController extends Controller
             // Acara komersial di fasilitas berbayar menagih uang sungguhan.
             // Sebelumnya kolom payment_method/payment_proof ada di tabel tetapi
             // tidak pernah diisi, sehingga tagihannya tidak punya jejak bayar.
-            'payment_method' => 'nullable|in:tunai,transfer',
-            'payment_proof' => 'required_if:payment_method,transfer|nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
+            'payment_method' => 'nullable|in:tunai,transfer,ewallet,bank_transfer_bca,bank_transfer_bri,bank_transfer_bni,bank_transfer_mandiri,bank_transfer_bsi,gopay,qris',
+            'payment_proof' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
         ]);
 
         if ($validated['delivery_method'] == 'antar') {
@@ -107,7 +111,7 @@ class FasilitasUmumBookingController extends Controller
         // Metode bayar hanya bermakna kalau pesanannya memang ditagih.
         $metodeBayar = $totalAmount > 0 ? ($validated['payment_method'] ?? 'tunai') : null;
         $buktiBayar = null;
-        if ($metodeBayar === 'transfer' && $request->hasFile('payment_proof')) {
+        if (in_array($metodeBayar, ['tunai', 'transfer']) && $request->hasFile('payment_proof')) {
             $buktiBayar = $request->file('payment_proof')->store('payment_proofs', 'public');
         }
 
@@ -161,10 +165,55 @@ class FasilitasUmumBookingController extends Controller
         // We can just rely on the normal flow for now, the user can check their activity dashboard
         // If we want a separate payment page, we can build it later.
         
-        return response()->json([
+        $response = [
             'success' => true,
             'message' => 'Pengajuan Peminjaman Fasilitas Umum berhasil dibuat! ' . ($totalAmount > 0 ? 'Silakan periksa detail tagihan Anda.' : 'Menunggu konfirmasi admin.'),
-            'receipt_id' => $booking->id
-        ]);
+            'receipt_id' => $booking->id,
+            'booking_id' => $booking->id,
+        ];
+
+        if ($totalAmount > 0 && $metodeBayar && ! in_array($metodeBayar, ['tunai', 'transfer', 'ewallet'], true)) {
+            $siap = \App\Support\PenyediaPembayaran::terapkanMidtransWilayah($item->region_id);
+            if ($siap) {
+                try {
+                    $params = [
+                        'transaction_details' => [
+                            'order_id' => $booking->order_number,
+                            'gross_amount' => (int) $totalAmount,
+                        ],
+                        'customer_details' => [
+                            'first_name' => $validated['recipient_name'] ?? Auth::user()->name,
+                            'email' => Auth::user()->email,
+                            'phone' => Auth::user()->phone ?? '081234567890',
+                        ],
+                        'item_details' => [[
+                            'id' => $item->id,
+                            'price' => (int) $totalAmount,
+                            'quantity' => 1,
+                            'name' => ($item->nama_fasilitas ?? 'Fasilitas Umum'),
+                        ]],
+                    ];
+
+                    $kanal = \App\Support\PenyediaPembayaran::kanalSnap($metodeBayar);
+                    if ($kanal) $params['enabled_payments'] = [$kanal];
+
+                    $snap = \Midtrans\Snap::createTransaction($params);
+                    $booking->snap_token = $snap->token;
+                    $booking->payment_channel = $metodeBayar;
+                    $booking->payment_expiry_time = now()->addDay();
+                    $booking->save();
+                    $response['snap_token'] = $snap->token;
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error('Midtrans Snap Fasilitas gagal', ['error' => $e->getMessage()]);
+                    $booking->payment_channel = $metodeBayar;
+                    $booking->save();
+                    $response['snap_token'] = null;
+                    $response['gateway_gagal'] = true;
+                    $response['message'] = 'Pesanan tersimpan, tetapi pembayaran otomatis sedang tidak dapat diproses.';
+                }
+            }
+        }
+
+        return response()->json($response);
     }
 }
