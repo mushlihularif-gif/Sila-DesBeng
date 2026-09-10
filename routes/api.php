@@ -53,6 +53,10 @@ Route::get('/popular', [BerandaController::class, 'popular']);
 
     // Wilayah (Regions) - Public for registration
     Route::get('/kemitraan/regions', [\App\Http\Controllers\Api\PartnerApplicationApiController::class, 'getRegions']);
+
+    // Profil & Layanan (Pemerintahan)
+    Route::get('/region-hierarchy', [\App\Http\Controllers\Api\RegionApiController::class, 'getHierarchy']);
+    Route::get('/region-profile/{id}', [\App\Http\Controllers\Api\RegionApiController::class, 'getProfile']);
     Route::get('/kemitraan/check-desa/{id}', [\App\Http\Controllers\Api\PartnerApplicationApiController::class, 'checkDesaAdmin']);
 
 // Protected Routes (Harus mengirimkan Bearer Token dari hasil Login)
