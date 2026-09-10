@@ -175,10 +175,7 @@
                 </div>
                 <div class="card-body pt-3">
                     <div class="rounded overflow-hidden" style="height: 300px;">
-                        <iframe width="100%" height="100%" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" 
-                            src="https://maps.google.com/maps?q={{ $laporan->latitude }},{{ $laporan->longitude }}&hl=id&z=14&output=embed" 
-                            style="border: 1px solid #ccc; border-radius: 8px;">
-                        </iframe>
+                        <div id="map-{{ $laporan->id }}" style="width: 100%; height: 100%; border-radius: 8px;"></div>
                     </div>
                     <div class="mt-2 text-end">
                         <small>Lat: {{ $laporan->latitude }}, Lng: {{ $laporan->longitude }}</small>
@@ -358,4 +355,26 @@
         document.getElementById('modalImage').src = src;
     }
 </script>
+
+@if($laporan->latitude && $laporan->longitude)
+<script>
+    function initMap{{ $laporan->id }}() {
+        const location = { lat: {{ $laporan->latitude }}, lng: {{ $laporan->longitude }} };
+        const map = new google.maps.Map(document.getElementById("map-{{ $laporan->id }}"), {
+            zoom: 17,
+            center: location,
+            mapTypeId: 'roadmap',
+            mapTypeControl: true,
+            streetViewControl: false,
+        });
+        new google.maps.Marker({
+            position: location,
+            map: map,
+            title: "{{ addslashes($laporan->lokasi ?? 'Lokasi Kejadian') }}",
+            animation: google.maps.Animation.DROP
+        });
+    }
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google_maps.api_key') }}&callback=initMap{{ $laporan->id }}" async defer></script>
+@endif
 @endsection

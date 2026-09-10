@@ -519,7 +519,10 @@
             <div class="lokasi-box">
                 <p class="lokasi-title">Lokasi Kejadian yang Dilaporkan</p>
                 <p class="lokasi-text">{{ $laporan->lokasi }}</p>
-                <p style="font-size: 9pt; color: #555; margin-top: 6px;">Wilayah: RT {{ $laporan->rt_number ?? '-' }} / RW {{ $laporan->rw_number ?? '-' }}</p>
+                @if($laporan->latitude && $laporan->longitude)
+                <p style="font-size: 9pt; color: #555; margin-top: 6px;">Koordinat Peta: {{ $laporan->latitude }}, {{ $laporan->longitude }}</p>
+                @endif
+                <p style="font-size: 9pt; color: #555; margin-top: 3px;">Wilayah: RT {{ $laporan->rt_number ?? '-' }} / RW {{ $laporan->rw_number ?? '-' }}</p>
             </div>
             @endif
 
