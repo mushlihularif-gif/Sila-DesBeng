@@ -69,6 +69,31 @@ class Laporan extends Model
         return [$this->bukti];
     }
 
+    /**
+     * Tampilan alamat/lokasi kejadian yang ramah dan tidak pernah bernilai 'Lokasi tidak dikenali'
+     */
+    public function getDisplayLokasiAttribute(): string
+    {
+        $lokasi = trim($this->lokasi ?? '');
+        if (!empty($lokasi) && $lokasi !== 'Lokasi tidak dikenali') {
+            return $lokasi;
+        }
+
+        if ($this->region) {
+            $prefix = $this->region->type === 'desa' ? 'Desa ' : 'Wilayah ';
+            if ($this->latitude && $this->longitude) {
+                return $prefix . $this->region->name . " ({$this->latitude}, {$this->longitude})";
+            }
+            return $prefix . $this->region->name;
+        }
+
+        if ($this->latitude && $this->longitude) {
+            return "Titik Koordinat: {$this->latitude}, {$this->longitude}";
+        }
+
+        return 'Lokasi Kejadian';
+    }
+
     // ===================================
     // KONFIGURASI SLA ESKALASI OTOMATIS
     // (Proportional Response Time)

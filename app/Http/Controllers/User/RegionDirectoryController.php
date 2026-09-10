@@ -16,7 +16,7 @@ class RegionDirectoryController extends Controller
             'rental.equipment' => 'penyewaan-alat',
             'gas.sales' => 'penjualan-gas',
             'mobil.rental.equipment' => 'penyewaan-mobil',
-            'user.fasilitas-umum.equipment' => 'peminjaman-fasilitas-umum',
+            'user.fasilitas-umum.equipment' => 'fasilitas-umum',
             'pelaporan.landing' => 'pelaporan-warga',
             'announcements.index' => 'pengumuman-dan-event',
         ];

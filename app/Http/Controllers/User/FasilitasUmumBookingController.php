@@ -21,7 +21,10 @@ class FasilitasUmumBookingController extends Controller
         $item = FasilitasUmum::findOrFail($itemId);
 
         // Validasi: Warga hanya bisa memesan layanan di wilayahnya sendiri
-        if (! in_array($item->region_id, \App\Models\Region::wilayahLayananTerlihat(Auth::user()->region_id, 'Fasilitas Umum'))) {
+        $userRegionId = Auth::user()->region_id;
+        $allowedRegions = \App\Models\Region::wilayahLayananTerlihat($userRegionId, 'Fasilitas Umum');
+        $userRegionAncestors = $userRegionId ? array_merge([$userRegionId], \App\Models\Region::getAncestorIds($userRegionId)) : [];
+        if ($item->region_id && !in_array($item->region_id, $allowedRegions) && !in_array($item->region_id, $userRegionAncestors)) {
             return redirect()->back()->with('error', 'Layanan khusus warga lokal. Silakan sesuaikan wilayah Anda.');
         }
         

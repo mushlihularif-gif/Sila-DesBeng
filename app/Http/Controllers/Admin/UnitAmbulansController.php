@@ -67,6 +67,25 @@ class UnitAmbulansController extends Controller
         
         $mobil = Mobil::create($data);
         
+        // Auto-aktifkan layanan Ambulans dan Fasilitas Umum untuk wilayah admin ini
+        $adminRegionId = auth()->user() ? auth()->user()->region_id : null;
+        if ($adminRegionId) {
+            $ambulanceService = \App\Models\Service::whereIn('slug', ['layanan-ambulans', 'ambulans'])->first();
+            if ($ambulanceService) {
+                \App\Models\RegionService::updateOrInsert(
+                    ['region_id' => $adminRegionId, 'service_id' => $ambulanceService->id],
+                    ['is_active' => true, 'updated_at' => now()]
+                );
+            }
+            $fasilitasService = \App\Models\Service::whereIn('slug', ['fasilitas-umum', 'peminjaman-fasilitas-umum'])->first();
+            if ($fasilitasService) {
+                \App\Models\RegionService::updateOrInsert(
+                    ['region_id' => $adminRegionId, 'service_id' => $fasilitasService->id],
+                    ['is_active' => true, 'updated_at' => now()]
+                );
+            }
+        }
+
         if ($kategori === 'ambulans' && isset($validated['supir_ids'])) {
             $mobil->supirs()->sync($validated['supir_ids']);
         }

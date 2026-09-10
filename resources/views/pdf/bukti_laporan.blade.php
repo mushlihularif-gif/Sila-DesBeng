@@ -514,10 +514,10 @@
             <span class="sumber-label sumber-pelapor">Disubmit oleh Pelapor ({{ $laporan->nama }})</span>
             
             {{-- Lokasi --}}
-            @if($laporan->lokasi)
+            @if($laporan->lokasi || ($laporan->latitude && $laporan->longitude))
             <div class="lokasi-box">
                 <p class="lokasi-title">Lokasi Kejadian yang Dilaporkan</p>
-                <p class="lokasi-text">{{ $laporan->lokasi }}</p>
+                <p class="lokasi-text">{{ $laporan->display_lokasi }}</p>
                 @if($laporan->latitude && $laporan->longitude)
                 <p style="font-size: 9pt; color: #555; margin-top: 6px;">Koordinat Peta: {{ $laporan->latitude }}, {{ $laporan->longitude }}</p>
                 @endif

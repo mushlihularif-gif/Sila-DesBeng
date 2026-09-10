@@ -123,6 +123,17 @@ class GasController extends Controller
 
         $gas->save();
 
+        // Auto-aktifkan layanan Penjualan Gas untuk wilayah ini di region_services
+        if ($gas->region_id) {
+            $serviceGas = \App\Models\Service::where('slug', 'penjualan-gas')->first();
+            if ($serviceGas) {
+                \App\Models\RegionService::updateOrInsert(
+                    ['region_id' => $gas->region_id, 'service_id' => $serviceGas->id],
+                    ['is_active' => true, 'updated_at' => now()]
+                );
+            }
+        }
+
         // Broadcast produk gas baru ke warga
         \App\Services\NotificationService::broadcastNewProduct('Gas LPG', $gas->jenis_gas, $gas->region_id, route('gas.index'));
 

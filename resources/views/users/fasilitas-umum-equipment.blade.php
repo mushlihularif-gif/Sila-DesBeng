@@ -2,7 +2,7 @@
 
 @section('page')
 <main class="flex-grow relative w-full">
-    <section class="relative z-10 min-h-screen pt-32 pb-16">
+    <section class="relative z-10 min-h-screen pt-28 pb-16">
         <!-- Elemen Dekoratif Latar Belakang -->
         <div class="absolute inset-0 pointer-events-none overflow-hidden">
             <!-- Top Left Blue Wave -->
@@ -49,37 +49,74 @@
 
         <div class="max-w-7xl mx-auto px-6 relative z-10">
             <!-- Header Section -->
-            <div class="text-center mb-12 mt-12">
-                <h1 class="text-3xl md:text-4xl font-bold mb-4">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl md:text-4xl font-bold mb-3">
                     <span class="text-gray-800">Unit </span>
                     <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Peminjaman Fasilitas Umum</span>
                 </h1>
+                <p class="text-gray-500 text-sm max-w-xl mx-auto">Layanan peminjaman gedung, ruang serbaguna, dan armada siaga untuk kebutuhan masyarakat desa.</p>
             </div>
 
             <!-- Category Filter -->
             @php
-                $categories = $items->pluck('kategori')->filter()->unique()->values();
+                $hasGedung = $items->count() > 0;
+                $hasAmbulans = isset($kendaraans) && $kendaraans->where('kategori', 'ambulans')->isNotEmpty();
+                $hasKendaraanOps = isset($kendaraans) && $kendaraans->where('kategori', 'kendaraan_operasional')->isNotEmpty();
+                $totalCount = $items->count() + (isset($kendaraans) ? $kendaraans->count() : 0);
             @endphp
             
-            @if($categories->count() > 0)
-            <div class="flex flex-wrap justify-center gap-3 mb-10 max-w-4xl mx-auto px-4">
-                <button class="filter-btn active px-6 py-2.5 rounded-full font-semibold text-sm transition-all duration-300 bg-blue-500 text-white shadow-md border border-transparent hover:bg-blue-600 hover:shadow-lg hover:scale-105" data-filter="all">
-                    Semua
+            @if($totalCount > 0)
+            <div class="flex flex-wrap justify-center gap-2.5 mb-8 max-w-4xl mx-auto px-4">
+                <button class="filter-btn active px-5 py-2 rounded-full font-semibold text-xs sm:text-sm transition-all duration-300 bg-blue-500 text-white shadow-md border border-transparent hover:bg-blue-600 hover:shadow-lg hover:scale-105" data-filter="all">
+                    Semua ({{ $totalCount }})
                 </button>
-                @foreach($categories as $category)
-                <button class="filter-btn px-6 py-2.5 rounded-full font-semibold text-sm transition-all duration-300 bg-white text-gray-600 border border-gray-200 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 shadow-sm hover:shadow-md" data-filter="{{ Str::slug($category) }}">
-                    {{ ucfirst(str_replace('-', ' ', $category)) }}
+                @if($hasGedung)
+                <button class="filter-btn px-5 py-2 rounded-full font-semibold text-xs sm:text-sm transition-all duration-300 bg-white text-gray-600 border border-gray-200 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 shadow-sm hover:shadow-md" data-filter="gedung">
+                    Gedung & Ruang Publik ({{ $items->count() }})
                 </button>
-                @endforeach
+                @endif
+                @if($hasAmbulans)
+                <button class="filter-btn px-5 py-2 rounded-full font-semibold text-xs sm:text-sm transition-all duration-300 bg-white text-gray-600 border border-gray-200 hover:bg-red-50 hover:text-red-600 hover:border-red-200 shadow-sm hover:shadow-md" data-filter="ambulans">
+                    Layanan Ambulans ({{ $kendaraans->where('kategori', 'ambulans')->count() }})
+                </button>
+                @endif
+                @if($hasKendaraanOps)
+                <button class="filter-btn px-5 py-2 rounded-full font-semibold text-xs sm:text-sm transition-all duration-300 bg-white text-gray-600 border border-gray-200 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 shadow-sm hover:shadow-md" data-filter="kendaraan-operasional">
+                    Kendaraan Operasional
+                </button>
+                @endif
+            </div>
+            @endif
+
+            @if(isset($regionSettings['kontak_ambulans']) && $regionSettings['kontak_ambulans'])
+            <!-- Kontak Darurat Medis Cepat (Kompak & Ringkas) -->
+            <div class="mb-8 max-w-6xl mx-auto">
+                <div class="bg-red-50 border border-red-200 rounded-2xl px-4 py-2.5 flex flex-col sm:flex-row items-center justify-between gap-3 text-red-700 shadow-sm">
+                    <div class="flex items-center gap-2.5 text-xs sm:text-sm font-semibold">
+                        <span class="flex h-2.5 w-2.5 relative flex-shrink-0">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-600"></span>
+                        </span>
+                        <span>Layanan Darurat Medis & Ambulans 24 Jam Desa Siaga</span>
+                    </div>
+                    <a href="https://wa.me/{{ preg_replace('/^0/', '62', $regionSettings['kontak_ambulans']) }}" target="_blank"
+                       class="px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm flex-shrink-0">
+                        <i class="bx bxs-phone-call"></i> Panggil Ambulans Darurat
+                    </a>
+                </div>
             </div>
             @endif
 
             <!-- Grid Kartu Produk -->
             <!-- Grid Kartu Produk (2 Kolom di Mobile, 2 di Tablet, 3 di Desktop) -->
-            @if($items->count() > 0)
+            @if($totalCount > 0)
                 <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6 mb-12 sm:mb-16 max-w-6xl mx-auto">
+                    <!-- Gedung & Ruang Publik -->
                     @foreach($items as $item)
-                    <a href="{{ route('user.fasilitas-umum.show', $item->id) }}" class="block group product-item transition-all duration-500" data-category="{{ $item->kategori ? Str::slug($item->kategori) : '' }}">
+                    @php
+                        $catSlug = $item->kategori ? Str::slug($item->kategori) : '';
+                    @endphp
+                    <a href="{{ route('user.fasilitas-umum.show', $item->id) }}" class="block group product-item transition-all duration-500" data-category="{{ $catSlug }} gedung">
                     <div class="product-card bg-white rounded-2xl sm:rounded-3xl p-2.5 sm:p-6 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 mx-auto w-full max-w-[350px] flex flex-col h-full">
                         
                         <!-- Gambar Produk -->
@@ -141,6 +178,86 @@
                     </div>
                     </a>
                     @endforeach
+
+                    <!-- Armada Kendaraan & Ambulans -->
+                    @if(isset($kendaraans))
+                    @foreach($kendaraans as $k)
+                    @php
+                        $isAmb = $k->kategori === 'ambulans';
+                        $supir = $k->supirs->first();
+                        $kCat = $isAmb ? 'ambulans' : 'kendaraan-operasional';
+                    @endphp
+                    <div class="block group product-item transition-all duration-500" data-category="{{ $kCat }} kendaraan">
+                    <div class="product-card bg-white rounded-2xl sm:rounded-3xl p-2.5 sm:p-6 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 mx-auto w-full max-w-[350px] flex flex-col h-full">
+                        
+                        <!-- Gambar Kendaraan -->
+                        <div class="product-image-wrapper mb-2 sm:mb-6 relative aspect-square overflow-hidden rounded-xl sm:rounded-2xl bg-gray-100 flex items-center justify-center group-hover:from-blue-50 group-hover:to-blue-50/30 transition-colors">
+                            <img src="{{ $k->foto ? asset('storage/' . $k->foto) : ($isAmb ? asset('Admin/img/elements/ambulance.png') : asset('User/img/elemen/mobil.png')) }}" 
+                                 alt="{{ $k->nama_mobil }}"
+                                 loading="lazy"
+                                 onerror="this.onerror=null; this.src='{{ asset('User/img/elemen/mobil.png') }}';"
+                                 class="product-image w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                            
+                            <!-- Status Badge -->
+                            <div class="absolute top-2 right-2 sm:top-4 sm:right-4 px-1.5 sm:px-3 py-0.5 sm:py-1.5 text-[8px] sm:text-[10px] font-bold rounded-full {{ $isAmb ? 'bg-red-500' : 'bg-blue-600' }} text-white shadow-md flex items-center gap-0.5 sm:gap-1 tracking-wider uppercase">
+                                <i class="bx {{ $isAmb ? 'bxs-ambulance' : 'bx-car' }}"></i>
+                                <span>{{ $isAmb ? 'Ambulans Siaga' : 'Kendaraan Desa' }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Info Kendaraan -->
+                        <div class="product-info flex flex-col flex-1 px-1 sm:px-2">
+                            <!-- Kategori -->
+                            <div class="mb-1.5 sm:mb-4">
+                                <span class="inline-flex items-center px-2 sm:px-3 py-0.5 sm:py-1.5 rounded-md text-[9px] sm:text-[10px] font-bold text-white {{ $isAmb ? 'bg-red-600' : 'bg-indigo-600' }} shadow-sm">
+                                    {{ $isAmb ? 'Ambulans Siaga Medis' : 'Kendaraan Operasional' }}
+                                </span>
+                            </div>
+
+                            <h3 class="product-name text-xs sm:text-base font-bold text-gray-800 mb-1 sm:mb-2 line-clamp-2 mt-0">
+                                {{ $k->nama_mobil }}
+                            </h3>
+
+                            <div class="text-[10px] sm:text-xs text-gray-500 mb-3 flex items-center gap-1 font-medium">
+                                <i class="bx bx-id-card text-gray-400"></i>
+                                <span>{{ str_replace('Plat: ', '', $k->deskripsi) }}</span>
+                            </div>
+
+                            @if($supir)
+                            <div class="bg-gray-50 rounded-xl p-2 sm:p-2.5 mb-3 border border-gray-100 flex items-center justify-between gap-1.5">
+                                <div class="flex items-center gap-2 overflow-hidden">
+                                    <div class="w-6 h-6 rounded-full {{ $isAmb ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600' }} flex items-center justify-center font-bold text-[10px] flex-shrink-0">
+                                        {{ substr($supir->nama, 0, 1) }}
+                                    </div>
+                                    <div class="truncate">
+                                        <span class="text-[9px] text-gray-400 block leading-none">Penanggung Jawab</span>
+                                        <span class="text-[11px] font-bold text-gray-800 truncate block leading-tight mt-0.5">{{ $supir->nama }}</span>
+                                    </div>
+                                </div>
+                                @if($supir->kontak)
+                                <a href="https://wa.me/{{ preg_replace('/^0/', '62', $supir->kontak) }}" target="_blank" class="px-2 py-1 bg-green-500 hover:bg-green-600 text-white rounded-lg text-[10px] font-bold flex items-center gap-0.5 flex-shrink-0 transition-colors">
+                                    <i class="bx bxl-whatsapp text-xs"></i> WA
+                                </a>
+                                @endif
+                            </div>
+                            @endif
+                            
+                            <div class="mt-auto pt-2 sm:pt-3">
+                                @if($isAmb)
+                                <a href="{{ route('user.ambulans.index') }}" class="w-full block text-center py-2 px-3 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white font-bold rounded-xl text-xs sm:text-sm shadow transition-all">
+                                    Panggil / Detail Armada
+                                </a>
+                                @else
+                                <span class="w-full block text-center py-2 px-3 bg-blue-50 text-blue-600 font-bold rounded-xl text-xs sm:text-sm border border-blue-200">
+                                    Unit Layanan Desa
+                                </span>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                    @endforeach
+                    @endif
                 </div>
             @else
                 <div class="text-center py-20">
@@ -273,7 +390,8 @@
                 // Disable transition temporarily to prevent weird jumping
                 item.style.transition = 'none';
                 
-                if (filterValue === 'all' || item.getAttribute('data-category') === filterValue) {
+                const itemCategories = (item.getAttribute('data-category') || '').split(' ').filter(Boolean);
+                if (filterValue === 'all' || itemCategories.includes(filterValue)) {
                     item.style.display = 'block';
                     item.style.opacity = '0';
                     // Force reflow
