@@ -99,6 +99,7 @@ class SystemSettingController extends Controller
 
         $paymentInfo['mobil_delivery_antar_active'] = $request->has('mobil_delivery_antar_active') || $request->has('mobil_sewa_delivery_antar_active');
         $paymentInfo['mobil_delivery_jemput_active'] = $request->has('mobil_delivery_jemput_active') || $request->has('mobil_sewa_delivery_jemput_active');
+        $paymentInfo['mobil_lepas_kunci_antar_active'] = $request->has('mobil_lepas_kunci_antar_active');
         $paymentInfo['mobil_sewa_delivery_antar_active'] = $paymentInfo['mobil_delivery_antar_active'];
         $paymentInfo['mobil_sewa_delivery_jemput_active'] = $paymentInfo['mobil_delivery_jemput_active'];
         $paymentInfo['mobil_rental_delivery_antar_active'] = $request->has('mobil_rental_delivery_antar_active');
@@ -109,6 +110,9 @@ class SystemSettingController extends Controller
         
         $paymentInfo['gas_delivery_antar_active'] = $request->has('gas_delivery_antar_active');
         $paymentInfo['gas_delivery_jemput_active'] = $request->has('gas_delivery_jemput_active');
+
+        $paymentInfo['pasar_delivery_antar_active'] = $request->has('pasar_delivery_antar_active');
+        $paymentInfo['pasar_delivery_jemput_active'] = $request->has('pasar_delivery_jemput_active');
 
         $paymentInfo['fasilitas_delivery_antar_active'] = $request->has('fasilitas_delivery_antar_active');
         $paymentInfo['fasilitas_delivery_jemput_active'] = $request->has('fasilitas_delivery_jemput_active');
@@ -153,6 +157,16 @@ class SystemSettingController extends Controller
                 ];
             }
         }
+
+        // Layanan Publik Kabupaten (Pasar Daerah & Kabar dan Informasi Daerah) selalu aktif dan terbuka umum
+        $publicServiceIds = \App\Models\Service::whereIn('slug', ['pasar-daerah', 'pengumuman'])->pluck('id')->toArray();
+        foreach ($publicServiceIds as $pubId) {
+            $syncData[$pubId] = [
+                'is_active' => true,
+                'is_exclusive' => false
+            ];
+        }
+
         $region->services()->sync($syncData);
 
         return redirect()->back()->with('success', 'Pengaturan Pemerintah Kabupaten berhasil diperbarui.');

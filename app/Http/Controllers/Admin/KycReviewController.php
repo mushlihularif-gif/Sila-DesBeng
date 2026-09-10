@@ -23,9 +23,9 @@ class KycReviewController extends Controller
     private function pastikanPeninjau(): void
     {
         abort_unless(
-            in_array(auth()->user()?->role, ['super_admin', 'admin', 'admin_kecamatan', 'admin_desa'], true),
+            in_array(auth()->user()?->role, ['admin_desa', 'admin_kecamatan'], true),
             403,
-            'Peninjauan verifikasi identitas hanya untuk admin wilayah dan Super Admin.'
+            'Peninjauan verifikasi identitas hanya untuk admin desa dan admin kecamatan.'
         );
     }
 

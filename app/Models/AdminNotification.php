@@ -70,6 +70,11 @@ class AdminNotification extends Model
             return $query->whereNull('region_id');
         }
 
+        // Akun Pemkab (super_admin, admin) tidak mengurus verifikasi identitas warga desa
+        if (in_array($pengguna->role, ['super_admin', 'admin'])) {
+            $query->where('type', '!=', 'kyc');
+        }
+
         $wilayah = Region::getDescendantIds($regionId);
         $wilayah[] = $regionId;
 

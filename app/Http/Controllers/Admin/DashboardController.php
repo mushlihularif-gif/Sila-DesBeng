@@ -123,12 +123,15 @@ public function index(Request $request)
         
         $laporanRequests = $baseLaporan->clone()->with('user')->where('status', 'Pending')->get()->map(function ($i) { $i->type = 'laporan'; $i->item_name = 'Laporan Warga'; return $i; });
         
-        $kycRequests = $baseKyc->clone()->with('user')
-            ->where('status', 'pending')
-            ->where(function($q) {
-                $q->whereNotNull('face_scan_data')->orWhereNotNull('face_image_path');
-            })
-            ->get()->map(function ($i) { $i->type = 'kyc'; $i->item_name = 'Verifikasi Identitas (KYC)'; return $i; });
+        $kycRequests = collect();
+        if (in_array(auth()->user()->role, ['admin_desa', 'admin_kecamatan'])) {
+            $kycRequests = $baseKyc->clone()->with('user')
+                ->where('status', 'pending')
+                ->where(function($q) {
+                    $q->whereNotNull('face_scan_data')->orWhereNotNull('face_image_path');
+                })
+                ->get()->map(function ($i) { $i->type = 'kyc'; $i->item_name = 'Verifikasi Identitas (KYC)'; return $i; });
+        }
 
         $baseMutasi = \App\Models\MutasiPenduduk::query();
         $adminUser = auth()->user();
