@@ -523,6 +523,13 @@
                 <p style="font-size: 9pt; color: #555; margin-top: 6px;">Koordinat Peta: {{ $laporan->latitude }}, {{ $laporan->longitude }}</p>
                 @endif
                 <p style="font-size: 9pt; color: #555; margin-top: 3px;">Wilayah: RT {{ $laporan->rt_number ?? '-' }} / RW {{ $laporan->rw_number ?? '-' }}</p>
+                
+                @if(!empty($staticMapBase64))
+                <div style="margin-top: 15px; border: 1px solid #ccc; border-radius: 6px; padding: 5px; text-align: center;">
+                    <img src="data:image/png;base64,{{ $staticMapBase64 }}" style="max-width: 100%; height: auto; border-radius: 4px;" alt="Peta Lokasi Static">
+                    <p style="font-size: 8pt; color: #888; margin-top: 5px; margin-bottom: 0;">Cuplikan titik lokasi (Map)</p>
+                </div>
+                @endif
             </div>
             @endif
 

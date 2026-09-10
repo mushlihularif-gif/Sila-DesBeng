@@ -455,6 +455,20 @@ class LaporanController extends Controller
         } catch (\Exception $e) {
             $qrBase64 = null;
         }
+        
+        // Peta Lokasi Static
+        $staticMapBase64 = null;
+        if ($laporan->latitude && $laporan->longitude) {
+            $mapUrl = "https://static-maps.yandex.ru/1.x/?lang=id-ID&ll={$laporan->longitude},{$laporan->latitude}&z=16&l=map&size=600,300&pt={$laporan->longitude},{$laporan->latitude},pm2rdm";
+            try {
+                $response = \Illuminate\Support\Facades\Http::withoutVerifying()->timeout(10)->get($mapUrl);
+                if ($response->successful()) {
+                    $staticMapBase64 = base64_encode($response->body());
+                }
+            } catch (\Exception $e) {
+                // Abaikan jika gagal memuat peta
+            }
+        }
 
         $handlerName = $laporan->admin ? $laporan->admin->name : 'Pemerintah Desa Bengkalis';
 
@@ -462,7 +476,8 @@ class LaporanController extends Controller
             'laporan' => $laporan,
             'handler_name' => $handlerName,
             'waktu_cetak' => now()->format('d F Y, H:i'),
-            'qrBase64' => $qrBase64
+            'qrBase64' => $qrBase64,
+            'staticMapBase64' => $staticMapBase64
         ])->download('Bukti_Laporan_'.$laporan->id.'.pdf');
     }
 
