@@ -39,6 +39,13 @@ class AppServiceProvider extends ServiceProvider
         // berjalan 100% akurat di shared hosting (cPanel) meskipun
         // ekstensi PHP fileinfo dinonaktifkan atau membatasi finfo_open.
         // =====================================================
+        if (!class_exists(\App\Services\ImageFallbackMimeTypeGuesser::class)) {
+            require_once app_path('Services/ImageFallbackMimeTypeGuesser.php');
+        }
+        if (!class_exists(\App\Services\RobustValidator::class)) {
+            require_once app_path('Services/RobustValidator.php');
+        }
+
         \Symfony\Component\Mime\MimeTypes::getDefault()->registerGuesser(new \App\Services\ImageFallbackMimeTypeGuesser());
         \Illuminate\Support\Facades\Validator::resolver(function ($translator, $data, $rules, $messages, $attributes) {
             return new \App\Services\RobustValidator($translator, $data, $rules, $messages, $attributes);

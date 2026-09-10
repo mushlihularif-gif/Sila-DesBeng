@@ -22,35 +22,38 @@ class ImageCompressorService
      */
     public static function compressAndStore(UploadedFile $file, string $folder, int $maxWidth = 1280, int $quality = 80, bool $forceJpg = false): string
     {
-        // Buat instance manager dengan GD driver
-        $manager = new ImageManager(new Driver());
-
-        // Baca file gambar
-        $image = $manager->read($file->getRealPath());
-
-        // Jika lebar gambar lebih besar dari maxWidth, perkecil secara proporsional
-        if ($image->width() > $maxWidth) {
-            $image->scale(width: $maxWidth);
-        }
-
-        // Generate nama file unik dengan ekstensi
         $extension = $file->getClientOriginalExtension() ?: 'jpg';
         if ($forceJpg) {
             $extension = 'jpg';
-            // Jika memaksa JPG, kita beri warna dasar putih agar bagian transparan (PNG) tidak jadi hitam
-            // Intervention Image v3 belum punya fill background langsung sebelum encode,
-            // tapi kita biarkan saja karena biasanya banner tidak transparan.
         }
 
         $filename = Str::random(40) . '.' . $extension;
         $path = $folder . '/' . $filename;
+        $realPath = $file->getRealPath() ?: $file->getPathname();
 
-        // Encode gambar dengan kualitas yang ditentukan
-        $encoded = $image->encodeByExtension($extension, $quality);
+        try {
+            // Buat instance manager dengan GD driver
+            $manager = new ImageManager(new Driver());
 
-        // Simpan ke storage public
-        Storage::disk('public')->put($path, (string) $encoded);
+            // Baca file gambar
+            $image = $manager->read($realPath);
 
-        return $path;
+            // Jika lebar gambar lebih besar dari maxWidth, perkecil secara proporsional
+            if ($image->width() > $maxWidth) {
+                $image->scale(width: $maxWidth);
+            }
+
+            // Encode gambar dengan kualitas yang ditentukan
+            $encoded = $image->encodeByExtension($extension, $quality);
+
+            // Simpan ke storage public
+            Storage::disk('public')->put($path, (string) $encoded);
+
+            return $path;
+        } catch (\Throwable $e) {
+            // Fallback jika GD driver di hosting bermasalah: simpan berkas asli secara langsung
+            Storage::disk('public')->putFileAs($folder, $file, $filename);
+            return $path;
+        }
     }
 }
