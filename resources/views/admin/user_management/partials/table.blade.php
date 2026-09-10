@@ -313,6 +313,7 @@
             </thead>
             <tbody class="table-border-bottom-0">
                 @foreach($users as $user)
+                @php
                     $avatarUrl = null;
                     if (!empty($user->avatar)) {
                         $avatarUrl = \Illuminate\Support\Str::startsWith($user->avatar, ['http://', 'https://']) 
