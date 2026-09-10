@@ -608,6 +608,7 @@
             
             <form id="addSupirForm" action="{{ route('supir.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
+                <input type="hidden" name="tipe" value="supir">
                 <input type="hidden" name="is_fasilitas_umum" value="1">
                 <input type="hidden" name="is_sewa_mobil" value="1">
 
@@ -1288,13 +1289,19 @@
                     'Accept': 'application/json'
                 }
             })
-            .then(res => res.json())
+            .then(async res => {
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) {
+                    throw data;
+                }
+                return data;
+            })
             .then(data => {
                 if (data.success || data.supir) {
                     const newSupir = data.supir || data.data;
                     supirsMaster[newSupir.id] = newSupir;
 
-                    const avatarUrl = newSupir.foto ? `/storage/${newSupir.foto}` : `{{ asset('Admin/img/avatars/pria.png') }}`;
+                    const avatarUrl = data.avatar_url || (newSupir.foto ? `/storage/${newSupir.foto}` : `{{ asset('Admin/img/avatars/pria.png') }}`);
                     const isTersedia = (newSupir.status === 'Tersedia');
 
                     // Sembunyikan empty state jika ada
@@ -1368,7 +1375,9 @@
                     updateAssignedDriversList();
 
                     // Tutup modal & reset form
-                    bootstrap.Modal.getInstance(document.getElementById('addSupirModal')).hide();
+                    const modalEl = document.getElementById('addSupirModal');
+                    const modalInst = bootstrap.Modal.getInstance(modalEl);
+                    if (modalInst) modalInst.hide();
                     form.reset();
                     document.getElementById('previewAvatarNewSupir').src = "{{ asset('Admin/img/avatars/pria.png') }}";
 
@@ -1383,12 +1392,40 @@
                         });
                     }
                 } else {
-                    alert('Gagal menyimpan data supir baru.');
+                    let errMsg = data.message || 'Gagal menyimpan data supir baru.';
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal Menyimpan Supir',
+                            text: errMsg,
+                            confirmButtonText: 'Tutup',
+                            confirmButtonColor: '#d33'
+                        });
+                    } else {
+                        alert(errMsg);
+                    }
                 }
             })
             .catch(err => {
                 console.error(err);
-                alert('Terjadi kesalahan koneksi server saat menyimpan supir.');
+                let errorMsg = 'Terjadi kesalahan saat menyimpan supir.';
+                if (err && err.errors) {
+                    const messages = Object.values(err.errors).flat();
+                    errorMsg = messages.join('\n');
+                } else if (err && err.message) {
+                    errorMsg = err.message;
+                }
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal Menyimpan Supir',
+                        text: errorMsg,
+                        confirmButtonText: 'Tutup',
+                        confirmButtonColor: '#d33'
+                    });
+                } else {
+                    alert(errorMsg);
+                }
             })
             .finally(() => {
                 btn.innerHTML = originalText;
