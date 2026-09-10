@@ -100,22 +100,33 @@ class Region extends Model
      */
     public static function wilayahLayananTerlihat(?int $userRegionId, string $namaLayanan): array
     {
-        $layanan = Service::where('name', $namaLayanan)->first();
-
-        if (! $layanan) {
-            return [];
-        }
+        $slug = \Illuminate\Support\Str::slug($namaLayanan);
+        $layanan = Service::where('name', $namaLayanan)
+            ->orWhere('slug', $slug)
+            ->orWhere('slug', str_replace('peminjaman-', '', $slug))
+            ->first();
 
         $garis = self::garisLayananUntukWarga($userRegionId);
 
-        return RegionService::where('service_id', $layanan->id)
-            ->where('is_active', true)
-            ->where(function ($q) use ($garis) {
-                $q->where('is_exclusive', false)
-                  ->orWhereIn('region_id', $garis);
-            })
-            ->pluck('region_id')
-            ->all();
+        $allowed = [];
+        if ($layanan) {
+            $allowed = RegionService::where('service_id', $layanan->id)
+                ->where('is_active', true)
+                ->where(function ($q) use ($garis) {
+                    $q->where('is_exclusive', false)
+                      ->orWhereIn('region_id', $garis);
+                })
+                ->pluck('region_id')
+                ->all();
+        }
+
+        // Pastikan garis wilayah warga sendiri (RT/RW/Desa) selalu terikut
+        // agar warga tidak terblokir dari produk yang disediakan oleh desanya sendiri
+        if (!empty($garis)) {
+            $allowed = array_values(array_unique(array_merge($allowed, $garis)));
+        }
+
+        return $allowed;
     }
 
     public function getFullPathAttribute()

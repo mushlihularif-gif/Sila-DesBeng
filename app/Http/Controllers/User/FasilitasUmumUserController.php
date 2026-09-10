@@ -4,26 +4,52 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Models\FasilitasUmum;
+use App\Models\Mobil;
+use App\Models\Region;
+use Illuminate\Support\Facades\Auth;
 
 class FasilitasUmumUserController extends Controller
 {
     public function index()
     {
-        $items = FasilitasUmum::where('status', '!=', 'Tidak Tersedia')
-                       // Dulu daftar ini TIDAK disaring sama sekali: warga melihat
-                       // barang milik desa lain, lalu ditolak saat memesan. Sekarang
-                       // mengikuti sakelar "Eksklusif Warga Lokal" tiap wilayah.
-                       ->when(auth()->check() && auth()->user()->role === 'user' && auth()->user()->region_id, function ($q) {
-                           $allowed = \App\Models\Region::wilayahLayananTerlihat(auth()->user()->region_id, 'Fasilitas Umum');
-                           $q->where(function($sub) use ($allowed) {
-                               $sub->whereIn('region_id', $allowed)
-                                   ->orWhereNull('region_id');
-                           });
-                       })
-                       ->orderBy('created_at', 'desc')
-                       ->get();
+        $user = Auth::user();
+        $userRegionId = $user ? $user->region_id : null;
         
-        return view('users.fasilitas-umum-equipment', compact('items'));
+        $relevantRegionIds = [];
+        if ($userRegionId) {
+            $relevantRegionIds = array_merge([$userRegionId], Region::getAncestorIds($userRegionId));
+        }
+
+        // 1. Gedung & Ruang Publik
+        $itemsQuery = FasilitasUmum::where('status', '!=', 'Tidak Tersedia');
+        if ($user && $user->role === 'user' && $userRegionId) {
+            $allowed = Region::wilayahLayananTerlihat($userRegionId, 'Fasilitas Umum');
+            $itemsQuery->where(function($sub) use ($allowed, $relevantRegionIds) {
+                $sub->whereIn('region_id', $allowed)
+                    ->orWhereIn('region_id', $relevantRegionIds)
+                    ->orWhereNull('region_id');
+            });
+        }
+        $items = $itemsQuery->orderBy('created_at', 'desc')->get();
+
+        // 2. Armada Ambulans & Kendaraan Layanan
+        $kendaraansQuery = Mobil::with('supirs')
+            ->whereIn('kategori', ['ambulans', 'kendaraan_operasional'])
+            ->where('status', '!=', 'rusak');
+
+        if ($user && $userRegionId) {
+            $kendaraansQuery->where(function($q) use ($relevantRegionIds) {
+                $q->whereIn('region_id', $relevantRegionIds)
+                  ->orWhereNull('region_id');
+            });
+        }
+        $kendaraans = $kendaraansQuery->orderBy('created_at', 'desc')->get();
+
+        // Kontak darurat dan konfigurasi wilayah
+        $region = $userRegionId ? Region::find($userRegionId) : Region::first();
+        $regionSettings = $region ? ($region->settings ?? []) : [];
+
+        return view('users.fasilitas-umum-equipment', compact('items', 'kendaraans', 'regionSettings', 'region'));
     }
 
     public function show($id)

@@ -208,7 +208,7 @@ Route::post('/mobil-rental/booking', [App\Http\Controllers\User\MobilBookingCont
 
 Route::get('/unit-peminjaman-fasilitas-umum', [App\Http\Controllers\User\FasilitasUmumUserController::class, 'index'])
     ->name('user.fasilitas-umum.equipment')
-    ->middleware(['role:user,guest', 'region.service:peminjaman-fasilitas-umum']);
+    ->middleware(['role:user,guest', 'region.service:fasilitas-umum']);
 Route::get('/unit-peminjaman-fasilitas-umum/{id}', [App\Http\Controllers\User\FasilitasUmumUserController::class, 'show'])
     ->name('user.fasilitas-umum.show')
     ->middleware('role:user,guest');

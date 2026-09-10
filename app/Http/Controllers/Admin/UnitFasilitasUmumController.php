@@ -202,6 +202,18 @@ class UnitFasilitasUmumController extends Controller
 
         $fasilitas = FasilitasUmum::create($data);
 
+        // Auto-aktifkan layanan Fasilitas Umum untuk wilayah admin ini di region_services
+        $adminRegionId = auth()->user() ? auth()->user()->region_id : null;
+        if ($adminRegionId) {
+            $service = \App\Models\Service::whereIn('slug', ['fasilitas-umum', 'peminjaman-fasilitas-umum'])->first();
+            if ($service) {
+                \App\Models\RegionService::updateOrInsert(
+                    ['region_id' => $adminRegionId, 'service_id' => $service->id],
+                    ['is_active' => true, 'updated_at' => now()]
+                );
+            }
+        }
+
         // Sinkronisasi penugasan Pengurus / Pemegang Kunci (opsional)
         if ($request->has('pengurus_ids') && is_array($request->pengurus_ids)) {
             $fasilitas->pengurus()->sync($request->pengurus_ids);
