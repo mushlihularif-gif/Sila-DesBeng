@@ -45,10 +45,32 @@ class RobustValidator extends BaseValidator
             return true;
         }
 
-        // 2. Fallback: getimagesize pada file binary langsung (bekerja walau ekstensi fileinfo mati)
-        $realPath = $value->getRealPath();
-        if ($realPath && file_exists($realPath) && filesize($realPath) > 0) {
-            $info = @getimagesize($realPath);
+        // Ambil path berkas sementara (pathname dari $_FILES['tmp_name'] paling akurat)
+        $path = $value->getPathname() ?: $value->getRealPath();
+
+        // 2. Deteksi langsung via Magic Bytes biner (tidak tergantung ekstensi PHP fileinfo / GD)
+        if ($path && file_exists($path) && filesize($path) > 0) {
+            $binaryMime = ImageFallbackMimeTypeGuesser::detectMimeFromBinary($path);
+            if ($binaryMime) {
+                $mimeMap = [
+                    'image/jpeg' => ['jpg', 'jpeg'],
+                    'image/png' => ['png'],
+                    'image/gif' => ['gif'],
+                    'image/webp' => ['webp'],
+                    'image/bmp' => ['bmp'],
+                    'image/svg+xml' => ['svg'],
+                    'application/pdf' => ['pdf'],
+                ];
+                $possibleExts = $mimeMap[$binaryMime] ?? [];
+                foreach ($possibleExts as $pe) {
+                    if (in_array($pe, $normalized, true)) {
+                        return true;
+                    }
+                }
+            }
+
+            // Fallback getimagesize jika format belum tertangkap magic bytes
+            $info = @getimagesize($path);
             if ($info && !empty($info['mime'])) {
                 $mimeMap = [
                     'image/jpeg' => ['jpg', 'jpeg'],
@@ -69,23 +91,22 @@ class RobustValidator extends BaseValidator
                     }
                 }
             }
-
-            // Cek SVG
-            if (in_array('svg', $normalized, true)) {
-                $content = @file_get_contents($realPath, false, null, 0, 1024);
-                if ($content && stripos($content, '<svg') !== false) {
-                    return true;
-                }
-            }
         }
 
-        // 3. Fallback: Jika getimagesize membaca gambar valid dan ekstensi klien cocok
+        // 3. Fallback: Ekstensi klien yang diunggah cocok dengan whitelist parameter
+        // Berguna saat server shared hosting membatasi akses parser biner atau MIME detection
         $clientExt = strtolower($value->getClientOriginalExtension());
         if ($clientExt && in_array($clientExt, $normalized, true)) {
-            if ($realPath && file_exists($realPath) && filesize($realPath) > 0) {
-                if (@getimagesize($realPath) !== false) {
-                    return true;
+            $dangerousExts = ['php', 'phtml', 'php3', 'php4', 'php5', 'phar', 'exe', 'sh', 'bat', 'cmd', 'cgi', 'pl', 'py', 'js', 'html', 'htm'];
+            if (!in_array($clientExt, $dangerousExts, true)) {
+                // Periksa keamanan isi file: tidak boleh mengandung tag script PHP
+                if ($path && file_exists($path) && filesize($path) > 0) {
+                    $firstChunk = @file_get_contents($path, false, null, 0, 2048);
+                    if ($firstChunk && (stripos($firstChunk, '<?php') !== false || stripos($firstChunk, '<?=') !== false)) {
+                        return false;
+                    }
                 }
+                return true;
             }
         }
 
