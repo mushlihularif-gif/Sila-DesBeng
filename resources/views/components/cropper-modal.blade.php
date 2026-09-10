@@ -208,21 +208,21 @@
         var fileInput = window.globalCropperInput;
         var originalFile = fileInput && fileInput.files ? fileInput.files[0] : null;
         var fileName = originalFile ? originalFile.name : 'cropped-image.jpg';
-        var fileType = originalFile && originalFile.type ? originalFile.type : 'image/jpeg';
+        var origType = (originalFile && originalFile.type ? originalFile.type : '').toLowerCase();
 
-        if (!fileType || !fileType.startsWith('image/')) {
-            fileType = 'image/jpeg';
+        var fileType = 'image/jpeg';
+        var ext = 'jpg';
+
+        if (origType === 'image/png' || /\.png$/i.test(fileName)) {
+            fileType = 'image/png';
+            ext = 'png';
+        } else if (origType === 'image/webp' || /\.webp$/i.test(fileName)) {
+            fileType = 'image/webp';
+            ext = 'webp';
         }
 
-        // Pastikan nama file memiliki ekstensi gambar yang valid
-        if (!/\.(jpe?g|png|webp|gif|svg)$/i.test(fileName)) {
-            var ext = fileType.split('/')[1] || 'jpg';
-            if (ext === 'jpeg') ext = 'jpg';
-            fileName = fileName.replace(/\.[^/.]+$/, "") + '.' + ext;
-            if (!/\.(jpe?g|png|webp|gif|svg)$/i.test(fileName)) {
-                fileName += '.jpg';
-            }
-        }
+        // Pastikan nama file selalu memiliki ekstensi gambar yang valid dan sesuai dengan format kanvas
+        fileName = fileName.replace(/\.[^/.]+$/, "") + '.' + ext;
 
         canvas.toBlob(function(blob) {
             if (!blob) return;
