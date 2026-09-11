@@ -62,9 +62,9 @@
                                     </button>
 
                                     <!-- Indicators -->
-                                    <div id="slider-indicators" class="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-20 pointer-events-auto">
+                                    <div id="slider-indicators" class="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 z-20 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full shadow-md pointer-events-auto">
                                         @for($i = 0; $i < $announcement->images->count(); $i++)
-                                            <button type="button" class="h-2 rounded-full transition-all cursor-pointer {{ $i === 0 ? 'w-6 bg-white shadow-sm' : 'w-2 bg-white/60 hover:bg-white shadow-sm' }}" data-index="{{ $i }}" aria-label="Slide {{ $i + 1 }}"></button>
+                                            <button type="button" class="w-2.5 h-2.5 rounded-full transition-all duration-300 cursor-pointer {{ $i === 0 ? 'bg-white scale-125 shadow-sm' : 'bg-white/40 hover:bg-white/70' }}" data-index="{{ $i }}" aria-label="Slide {{ $i + 1 }}"></button>
                                         @endfor
                                     </div>
                                 @endif
@@ -313,9 +313,9 @@
                 slider.style.transform = `translateX(-${current * 100}%)`;
                 indicators.forEach((ind, i) => {
                     if (i === current) {
-                        ind.className = 'h-2 rounded-full transition-all cursor-pointer w-6 bg-white shadow-sm';
+                        ind.className = 'w-2.5 h-2.5 rounded-full transition-all duration-300 cursor-pointer bg-white scale-125 shadow-sm';
                     } else {
-                        ind.className = 'h-2 rounded-full transition-all cursor-pointer w-2 bg-white/60 hover:bg-white shadow-sm';
+                        ind.className = 'w-2.5 h-2.5 rounded-full transition-all duration-300 cursor-pointer bg-white/40 hover:bg-white/70';
                     }
                 });
             }
@@ -361,11 +361,36 @@
                 };
             });
 
+            // Touch Swipe Support
+            let touchStartX = 0;
+            let touchEndX = 0;
+
+            slider.addEventListener('touchstart', (e) => {
+                touchStartX = e.changedTouches[0].screenX;
+                stopAutoSlide();
+            }, { passive: true });
+
+            slider.addEventListener('touchend', (e) => {
+                touchEndX = e.changedTouches[0].screenX;
+                const diff = touchStartX - touchEndX;
+                if (Math.abs(diff) > 40) {
+                    if (diff > 0) {
+                        current = (current + 1) % total;
+                    } else {
+                        current = current > 0 ? current - 1 : total - 1;
+                    }
+                    updateSlider();
+                }
+                startAutoSlide();
+            }, { passive: true });
+
             const container = slider.parentElement;
             if (container) {
                 container.onmouseenter = stopAutoSlide;
                 container.onmouseleave = startAutoSlide;
             }
+
+            document.addEventListener('turbo:before-cache', stopAutoSlide);
 
             updateSlider();
             startAutoSlide();
