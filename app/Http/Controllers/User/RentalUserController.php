@@ -9,20 +9,21 @@ class RentalUserController extends Controller
 {
     public function index()
     {
-        // Ambil semua item penyewaan (kecuali item rusak)
-        $items = Barang::where('status', '!=', 'rusak')
-                       // Dulu daftar ini TIDAK disaring sama sekali: warga melihat
-                       // barang milik desa lain, lalu ditolak saat memesan. Sekarang
-                       // mengikuti sakelar "Eksklusif Warga Lokal" tiap wilayah.
-                       ->when(auth()->check() && auth()->user()->role === 'user' && auth()->user()->region_id, function ($q) {
-                           $allowed = \App\Models\Region::wilayahLayananTerlihat(auth()->user()->region_id, 'Penyewaan Alat');
-                           $q->where(function($sub) use ($allowed) {
-                               $sub->whereIn('region_id', $allowed)
-                                   ->orWhereNull('region_id');
-                           });
-                       })
-                       ->orderBy('created_at', 'desc')
-                       ->get();
+        $targetRegionId = request('region_id');
+        $query = Barang::where('status', '!=', 'rusak');
+
+        if ($targetRegionId) {
+            $regionIds = array_merge([(int) $targetRegionId], \App\Models\Region::getDescendantIds($targetRegionId));
+            $query->whereIn('region_id', $regionIds);
+        } elseif (auth()->check() && auth()->user()->role === 'user' && auth()->user()->region_id) {
+            $allowed = \App\Models\Region::wilayahLayananTerlihat(auth()->user()->region_id, 'Penyewaan Alat');
+            $query->where(function($sub) use ($allowed) {
+                $sub->whereIn('region_id', $allowed)
+                    ->orWhereNull('region_id');
+            });
+        }
+
+        $items = $query->orderBy('created_at', 'desc')->get();
         
         return view('users.rental-equipment', compact('items'));
     }

@@ -9,19 +9,24 @@ class MobilRentalUserController extends Controller
 {
     public function index()
     {
-        $items = Mobil::where('status', '!=', 'rusak')
-                       ->where(function($q) {
-                           $q->whereNotIn('kategori', ['ambulans', 'kendaraan_operasional'])->orWhereNull('kategori');
-                       })
-                       ->when(auth()->check() && auth()->user()->role === 'user' && auth()->user()->region_id, function ($q) {
-                           $allowed = \App\Models\Region::wilayahLayananTerlihat(auth()->user()->region_id, 'Penyewaan Mobil');
-                           $q->where(function($sub) use ($allowed) {
-                               $sub->whereIn('region_id', $allowed)
-                                   ->orWhereNull('region_id');
-                           });
-                       })
-                       ->orderBy('created_at', 'desc')
-                       ->get();
+        $targetRegionId = request('region_id');
+        $query = Mobil::where('status', '!=', 'rusak')
+                      ->where(function($q) {
+                          $q->whereNotIn('kategori', ['ambulans', 'kendaraan_operasional'])->orWhereNull('kategori');
+                      });
+
+        if ($targetRegionId) {
+            $regionIds = array_merge([(int) $targetRegionId], \App\Models\Region::getDescendantIds($targetRegionId));
+            $query->whereIn('region_id', $regionIds);
+        } elseif (auth()->check() && auth()->user()->role === 'user' && auth()->user()->region_id) {
+            $allowed = \App\Models\Region::wilayahLayananTerlihat(auth()->user()->region_id, 'Penyewaan Mobil');
+            $query->where(function($sub) use ($allowed) {
+                $sub->whereIn('region_id', $allowed)
+                    ->orWhereNull('region_id');
+            });
+        }
+
+        $items = $query->orderBy('created_at', 'desc')->get();
         
         return view('users.mobil-rental-equipment', compact('items'));
     }
