@@ -18,7 +18,7 @@
                 <p class="text-gray-600">Peminjaman fasilitas ini tidak dipungut biaya (Gratis).</p>
             </div>
 
-            <form id="booking-form" action="#" method="POST" onsubmit="return false;" enctype="multipart/form-data">
+            <form id="booking-form" action="#" method="POST" onsubmit="return false;" enctype="multipart/form-data" data-turbo="false">
                 @csrf
                 <input type="hidden" name="fasilitas_id" value="{{ $item->id }}">
 
@@ -490,11 +490,16 @@
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const qtyInput = document.getElementById('quantity');
-        const decreaseBtn = document.getElementById('decrease-qty');
-        const increaseBtn = document.getElementById('increase-qty');
-        const maxStock = {{ $item->stok }};
+    (() => {
+        function initFasilitasBooking() {
+            const form = document.getElementById('booking-form');
+            if (!form || form.dataset.initialized === 'true') return;
+            form.dataset.initialized = 'true';
+
+            const qtyInput = document.getElementById('quantity');
+            const decreaseBtn = document.getElementById('decrease-qty');
+            const increaseBtn = document.getElementById('increase-qty');
+            const maxStock = {{ $item->stok }};
         
         // Logic Jenis Acara -> Surat Pengantar
         const jenisAcaraRadios = document.querySelectorAll('input[name="jenis_acara"]');
@@ -612,7 +617,15 @@
                 });
             });
         }
-    });
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initFasilitasBooking);
+        } else {
+            initFasilitasBooking();
+        }
+        document.addEventListener('turbo:load', initFasilitasBooking);
+    })();
+
     // Pemilih metode bayar fasilitas umum.
     window.pilihMetodeFasilitas = function (metode) {
         var input = document.getElementById('payment-method-fasilitas');

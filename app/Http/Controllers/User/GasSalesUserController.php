@@ -83,25 +83,17 @@ class GasSalesUserController extends Controller
         $item = Gas::findOrFail($id);
         $user = auth()->user();
 
-        // Validasi KYC: Pengguna harus sudah terverifikasi
-        if ($user->verification_status !== 'verified') {
-            return redirect()->back()->with('show_kyc_modal', true);
-        }
-
         // Validasi: Warga hanya bisa memesan layanan di wilayahnya sendiri
         if (! in_array($item->region_id, \App\Models\Region::wilayahLayananTerlihat($user->region_id, 'Penjualan Gas'))) {
             return redirect()->back()->with('error', 'Layanan khusus warga lokal. Silakan sesuaikan wilayah Anda.');
         }
 
-        // Validasi Krisis Gas
+        // Validasi Mode Krisis Gas (hanya jika mode krisis diaktifkan oleh admin)
         $region = \App\Models\Region::find($user->region_id);
         if ($region && $region->is_gas_crisis) {
-            if (!$user->nik) {
-                return redirect()->route('user.gas.sales')->with('error', 'Ini adalah akun khusus pemerintahan (tanpa NIK). Silakan login menggunakan akun warga pribadi Anda yang terdaftar NIK untuk membeli gas subsidi.');
-            }
             // Cek apakah punya KK terverifikasi
             if (!$user->familyMember || !$user->familyMember->familyCard) {
-                return redirect()->route('user.gas.sales')->with('error', 'Desa sedang dalam mode krisis gas. Anda wajib memverifikasi Kartu Keluarga (KK) terlebih dahulu.');
+                return redirect()->route('gas.sales')->with('error', 'Desa sedang dalam mode krisis gas. Anda wajib memverifikasi Kartu Keluarga (KK) terlebih dahulu.');
             }
         }
         

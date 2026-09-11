@@ -133,7 +133,7 @@
                 </h1>
             </div>
 
-            <form id="gas-booking-form" action="#" method="POST" enctype="multipart/form-data">
+            <form id="gas-booking-form" action="#" method="POST" enctype="multipart/form-data" data-turbo="false">
                 @csrf
                 <input type="hidden" name="gas_id" value="{{ $item->id }}">
                 <input type="hidden" name="quantity" id="hidden-quantity" value="{{ $quantity }}">
@@ -961,10 +961,14 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     (() => {
-        'use strict';
+        function initGasBooking() {
+            'use strict';
+            const form = document.getElementById('gas-booking-form');
+            if (!form || form.dataset.initialized === 'true') return;
+            form.dataset.initialized = 'true';
 
-        const pricePerUnit = {{ $item->harga_satuan }};
-        const maxStock = {{ $item->stok }};
+            const pricePerUnit = {{ $item->harga_satuan }};
+            const maxStock = {{ $item->stok }};
 
         // Delivery Method Logic
         const deliveryCards = document.querySelectorAll('.delivery-method-card');
@@ -1291,52 +1295,63 @@
         }
 
 
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initGasBooking);
+        } else {
+            initGasBooking();
+        }
+        document.addEventListener('turbo:load', initGasBooking);
     })();
 </script>
 
 <script src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google_maps.api_key') }}&libraries=places"></script>
 <script>
-    // Peta lokasi layanan. Hanya menampilkan — pembeli tidak menggeser apa pun
-    // di sini, jadi penandanya tidak bisa ditarik dan pengendali peta dibuat
-    // seperlunya saja.
-    document.addEventListener('DOMContentLoaded', function () {
+    // Peta lokasi layanan & Autocomplete
+    function initGasMapAndPlaces() {
         const wadah = document.getElementById('petaLayanan');
-        if (!wadah || typeof google === 'undefined' || !google.maps) return;
+        if (wadah && typeof google !== 'undefined' && google.maps && !wadah.dataset.mapInitialized) {
+            const titik = {
+                lat: parseFloat(wadah.dataset.lat),
+                lng: parseFloat(wadah.dataset.lng),
+            };
+            if (!isNaN(titik.lat) && !isNaN(titik.lng)) {
+                wadah.dataset.mapInitialized = 'true';
+                const peta = new google.maps.Map(wadah, {
+                    zoom: 16,
+                    center: titik,
+                    mapTypeId: 'roadmap',
+                    streetViewControl: false,
+                    mapTypeControl: false,
+                    fullscreenControl: true,
+                    gestureHandling: 'cooperative',
+                });
 
-        const titik = {
-            lat: parseFloat(wadah.dataset.lat),
-            lng: parseFloat(wadah.dataset.lng),
-        };
-        if (isNaN(titik.lat) || isNaN(titik.lng)) return;
+                new google.maps.Marker({
+                    position: titik,
+                    map: peta,
+                    title: wadah.dataset.nama || 'Lokasi layanan',
+                });
+            }
+        }
 
-        const peta = new google.maps.Map(wadah, {
-            zoom: 16,
-            center: titik,
-            mapTypeId: 'roadmap',
-            streetViewControl: false,
-            mapTypeControl: false,
-            fullscreenControl: true,
-            // Gulir halaman jangan tersedot peta saat pembeli menggulir formulir.
-            gestureHandling: 'cooperative',
-        });
-
-        new google.maps.Marker({
-            position: titik,
-            map: peta,
-            title: wadah.dataset.nama || 'Lokasi layanan',
-        });
-    });
-
-    // Initialize Places Autocomplete
-    document.addEventListener('DOMContentLoaded', function() {
         const addressInput = document.getElementById('buyer-address');
-        if (addressInput && typeof google === 'object' && typeof google.maps === 'object' && google.maps.places) {
-            const autocomplete = new google.maps.places.Autocomplete(addressInput, {
+        if (addressInput && typeof google === 'object' && typeof google.maps === 'object' && google.maps.places && !addressInput.dataset.autocompleteInitialized) {
+            addressInput.dataset.autocompleteInitialized = 'true';
+            new google.maps.places.Autocomplete(addressInput, {
                 types: ['geocode'],
                 componentRestrictions: { country: "id" }
             });
         }
-    });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initGasMapAndPlaces);
+    } else {
+        initGasMapAndPlaces();
+    }
+    document.addEventListener('turbo:load', initGasMapAndPlaces);
 </script>
 @endpush
 

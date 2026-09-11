@@ -65,7 +65,7 @@
                                 <div id="slider-amb-{{ $amb->id }}" class="flex w-full h-full transition-transform duration-500 ease-out">
                                     @foreach($images as $imgIdx => $img)
                                     <div class="w-full h-full flex-shrink-0 flex-grow-0">
-                                        <a href="{{ route('user.ambulans.show', $amb->id) }}" class="block w-full h-full">
+                                        <a href="{{ route('user.ambulans.show', $amb->id) }}" data-turbo="false" class="block w-full h-full">
                                             <img src="{{ asset('storage/' . $img) }}" alt="{{ $amb->nama_mobil }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                                         </a>
                                     </div>
@@ -101,7 +101,7 @@
 
                         <!-- Header Info Armada -->
                         <div class="mb-3">
-                            <a href="{{ route('user.ambulans.show', $amb->id) }}" class="block">
+                            <a href="{{ route('user.ambulans.show', $amb->id) }}" data-turbo="false" class="block">
                                 <h3 class="text-lg sm:text-xl font-bold text-gray-900 hover:text-red-600 transition-colors leading-snug mb-1">
                                     {{ $amb->nama_mobil }}
                                 </h3>
@@ -169,10 +169,10 @@
 
                         <!-- Action Buttons -->
                         <div class="mt-auto pt-3 border-t border-gray-100 flex flex-col sm:flex-row gap-2">
-                            <a href="{{ route('user.ambulans.show', $amb->id) }}" class="flex-1 py-2.5 px-3 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 font-bold text-center rounded-xl transition-all text-xs flex items-center justify-center gap-1.5">
+                            <a href="{{ route('user.ambulans.show', $amb->id) }}" data-turbo="false" class="flex-1 py-2.5 px-3 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 font-bold text-center rounded-xl transition-all text-xs flex items-center justify-center gap-1.5">
                                 <i class="bx bx-info-circle text-sm"></i> Detail Armada
                             </a>
-                            <a href="{{ route('mobil.rental.booking', $amb->id) }}" class="flex-1 py-2.5 px-3 bg-gray-900 hover:bg-gray-800 text-white font-bold text-center rounded-xl transition-colors text-xs flex items-center justify-center gap-1.5">
+                            <a href="{{ route('mobil.rental.booking', $amb->id) }}" data-turbo="false" class="flex-1 py-2.5 px-3 bg-gray-900 hover:bg-gray-800 text-white font-bold text-center rounded-xl transition-colors text-xs flex items-center justify-center gap-1.5">
                                 <i class="bx bx-calendar text-sm"></i> Jadwalkan
                             </a>
                         </div>

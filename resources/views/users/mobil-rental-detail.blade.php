@@ -221,6 +221,7 @@
                             <!-- Rent Button -->
                             <a href="{{ route('mobil.rental.booking', $item->id) }}?quantity={{ $item->stok > 0 ? 1 : 0 }}" 
                                id="rent-button"
+                               data-turbo="false"
                                class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-full transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-center">
                                 Sewa
                             </a>
@@ -295,158 +296,132 @@
 @endpush
 
 @push('scripts')
-<!-- Modal Peringatan KYC -->
-@if(session('show_kyc_modal'))
-<div id="kyc-prompt-modal" class="fixed inset-0 flex items-center justify-center p-4" style="z-index: 999999;">
-    <div class="absolute inset-0" style="background-color: rgba(17, 24, 39, 0.7); backdrop-filter: blur(4px);" onclick="document.getElementById('kyc-prompt-modal').remove()"></div>
-    
-    <!-- Balok mirip halaman KYC -->
-    <div class="relative w-full max-w-lg z-10" style="animation: fadeInUp 0.3s ease-out;">
-        <div class="bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden relative">
-            <button onclick="document.getElementById('kyc-prompt-modal').remove()" class="absolute top-4 right-4 z-50 p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors">
-                <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
-            <div class="p-8 text-center">
-                <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
-                    </svg>
-                </div>
-                <h2 class="text-2xl font-bold text-gray-900 mb-2">Verifikasi Identitas (KYC)</h2>
-                <p class="text-gray-600 mb-8">Anda harus menyelesaikan verifikasi identitas terlebih dahulu untuk dapat melanjutkan penyewaan layanan ini.</p>
-                <a href="{{ route('kyc.index') }}" class="w-full inline-flex justify-center items-center px-4 py-3 border border-transparent text-sm font-bold rounded-full shadow-sm text-white bg-blue-600 hover:bg-blue-700 transition">
-                    Mulai Verifikasi KYC
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
-@endif
-
 <script>
-    // Quantity Selector
-    const qtyInput = document.getElementById('quantity');
-    const decreaseBtn = document.getElementById('decrease-qty');
-    const increaseBtn = document.getElementById('increase-qty');
-    const rentButton = document.getElementById('rent-button');
-    const maxStock = {{ $item->stok }};
-    const itemId = {{ $item->id }};
+(() => {
+    function initMobilDetail() {
+        // Quantity Selector
+        const qtyInput = document.getElementById('quantity');
+        const decreaseBtn = document.getElementById('decrease-qty');
+        const increaseBtn = document.getElementById('increase-qty');
+        const rentButton = document.getElementById('rent-button');
+        const maxStock = {{ $item->stok ?? 0 }};
+        const itemId = {{ $item->id }};
 
-    function updateRentButtonUrl() {
-        const qty = parseInt(qtyInput.value) || 1;
-        rentButton.href = `/unit-penyewaan-alat/${itemId}/booking?quantity=${qty}`;
-    }
+        function updateRentButtonUrl() {
+            if (!rentButton || !qtyInput) return;
+            const qty = parseInt(qtyInput.value) || 1;
+            rentButton.href = `/unit-penyewaan-mobil/${itemId}/booking?quantity=${qty}`;
+        }
 
-    if (qtyInput && decreaseBtn && increaseBtn) {
-        decreaseBtn.addEventListener('click', () => {
-            let currentValue = parseInt(qtyInput.value) || 1;
-            if (currentValue > 1) {
-                qtyInput.value = currentValue - 1;
-                updateRentButtonUrl();
-            }
-        });
-
-        increaseBtn.addEventListener('click', () => {
-            let currentValue = parseInt(qtyInput.value) || 1;
-            if (currentValue < maxStock) {
-                qtyInput.value = currentValue + 1;
-                updateRentButtonUrl();
-            }
-        });
-
-        // Prevent manual input outside range
-        qtyInput.addEventListener('change', () => {
-            let value = parseInt(qtyInput.value) || 1;
-            if (value < 1) qtyInput.value = 1;
-            if (value > maxStock) qtyInput.value = maxStock;
-            updateRentButtonUrl();
-        });
-    }
-
-    // Image Carousel
-    const carousel = document.getElementById('product-carousel');
-    const prevBtn = document.getElementById('carousel-prev');
-    const nextBtn = document.getElementById('carousel-next');
-    const indicators = document.querySelectorAll('.carousel-indicator');
-
-    if (carousel && indicators.length > 1) {
-        let currentSlide = 0;
-        const totalSlides = indicators.length;
-        let autoSlideInterval;
-        const autoSlideDelay = 5000; // 5 seconds
-
-        const goToSlide = (slideIndex) => {
-            currentSlide = slideIndex;
-            carousel.style.transform = `translateX(-${slideIndex * 100}%)`;
-
-            // Update indicators
-            indicators.forEach((indicator, index) => {
-                if (index === slideIndex) {
-                    indicator.classList.remove('w-2.5', 'bg-white/50');
-                    indicator.classList.add('w-8', 'bg-white');
-                } else {
-                    indicator.classList.remove('w-8', 'bg-white');
-                    indicator.classList.add('w-2.5', 'bg-white/50');
+        if (qtyInput && decreaseBtn && increaseBtn) {
+            decreaseBtn.onclick = () => {
+                let currentValue = parseInt(qtyInput.value) || 1;
+                if (currentValue > 1) {
+                    qtyInput.value = currentValue - 1;
+                    updateRentButtonUrl();
                 }
+            };
+
+            increaseBtn.onclick = () => {
+                let currentValue = parseInt(qtyInput.value) || 1;
+                if (currentValue < maxStock) {
+                    qtyInput.value = currentValue + 1;
+                    updateRentButtonUrl();
+                }
+            };
+
+            qtyInput.onchange = () => {
+                let value = parseInt(qtyInput.value) || 1;
+                if (value < 1) qtyInput.value = 1;
+                if (value > maxStock) qtyInput.value = maxStock;
+                updateRentButtonUrl();
+            };
+        }
+
+        // Image Carousel
+        const carousel = document.getElementById('product-carousel');
+        const prevBtn = document.getElementById('carousel-prev');
+        const nextBtn = document.getElementById('carousel-next');
+        const indicators = document.querySelectorAll('.carousel-indicator');
+
+        if (carousel && indicators.length > 1) {
+            let currentSlide = 0;
+            const totalSlides = indicators.length;
+            let autoSlideInterval;
+            const autoSlideDelay = 5000;
+
+            const goToSlide = (slideIndex) => {
+                currentSlide = slideIndex;
+                carousel.style.transform = `translateX(-${slideIndex * 100}%)`;
+
+                indicators.forEach((indicator, index) => {
+                    if (index === slideIndex) {
+                        indicator.classList.remove('w-2.5', 'bg-white/50');
+                        indicator.classList.add('w-8', 'bg-white');
+                    } else {
+                        indicator.classList.remove('w-8', 'bg-white');
+                        indicator.classList.add('w-2.5', 'bg-white/50');
+                    }
+                });
+            };
+
+            const nextSlide = () => {
+                currentSlide = (currentSlide + 1) % totalSlides;
+                goToSlide(currentSlide);
+            };
+
+            const prevSlide = () => {
+                currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+                goToSlide(currentSlide);
+            };
+
+            const startAutoSlide = () => {
+                clearInterval(autoSlideInterval);
+                autoSlideInterval = setInterval(nextSlide, autoSlideDelay);
+            };
+
+            const resetAutoSlide = () => {
+                clearInterval(autoSlideInterval);
+                startAutoSlide();
+            };
+
+            if (prevBtn) {
+                prevBtn.onclick = () => {
+                    prevSlide();
+                    resetAutoSlide();
+                };
+            }
+
+            if (nextBtn) {
+                nextBtn.onclick = () => {
+                    nextSlide();
+                    resetAutoSlide();
+                };
+            }
+
+            indicators.forEach((indicator, index) => {
+                indicator.onclick = () => {
+                    goToSlide(index);
+                    resetAutoSlide();
+                };
             });
-        };
 
-        const nextSlide = () => {
-            currentSlide = (currentSlide + 1) % totalSlides;
-            goToSlide(currentSlide);
-        };
-
-        const prevSlide = () => {
-            currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
-            goToSlide(currentSlide);
-        };
-
-        const startAutoSlide = () => {
-            clearInterval(autoSlideInterval);
-            autoSlideInterval = setInterval(nextSlide, autoSlideDelay);
-        };
-
-        const resetAutoSlide = () => {
-            clearInterval(autoSlideInterval);
             startAutoSlide();
-        };
 
-        // Navigation buttons
-        if (prevBtn) {
-            prevBtn.addEventListener('click', () => {
-                prevSlide();
-                resetAutoSlide();
-            });
-        }
-
-        if (nextBtn) {
-            nextBtn.addEventListener('click', () => {
-                nextSlide();
-                resetAutoSlide();
-            });
-        }
-
-        // Indicator buttons
-        indicators.forEach((indicator, index) => {
-            indicator.addEventListener('click', () => {
-                goToSlide(index);
-                resetAutoSlide();
-            });
-        });
-
-        // Start auto-slide
-        startAutoSlide();
-
-        // Pause on hover
-        const carouselContainer = carousel.parentElement;
-        if (carouselContainer) {
-            carouselContainer.addEventListener('mouseenter', () => clearInterval(autoSlideInterval));
-            carouselContainer.addEventListener('mouseleave', startAutoSlide);
+            const carouselContainer = carousel.parentElement;
+            if (carouselContainer) {
+                carouselContainer.onmouseenter = () => clearInterval(autoSlideInterval);
+                carouselContainer.onmouseleave = startAutoSlide;
+            }
         }
     }
 
-    // Smooth scroll to top on page load
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initMobilDetail);
+    } else {
+        initMobilDetail();
+    }
+    document.addEventListener('turbo:load', initMobilDetail);
+})();
 </script>
 @endpush
-```

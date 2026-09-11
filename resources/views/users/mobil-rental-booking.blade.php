@@ -60,7 +60,7 @@
                 </p>
             </div>
 
-            <form id="booking-form" action="#" method="POST" enctype="multipart/form-data" onsubmit="return false;">
+            <form id="booking-form" action="#" method="POST" enctype="multipart/form-data" onsubmit="return false;" data-turbo="false">
                 @csrf
                 <input type="hidden" name="mobil_id" value="{{ $item->id }}">
                 <input type="hidden" name="quantity" id="hidden-quantity" value="{{ $quantity }}">
@@ -785,10 +785,14 @@
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    'use strict';
+(() => {
+    function initMobilBooking() {
+        'use strict';
+        const form = document.getElementById('booking-form');
+        if (!form || form.dataset.initialized === 'true') return;
+        form.dataset.initialized = 'true';
 
-    // Konfigurasi Layanan dari Controller
+        // Konfigurasi Layanan dari Controller
     const config = {
         harian: {
             opsi_supir: '{{ $harianOpsiSupir }}',
@@ -1272,7 +1276,15 @@ document.addEventListener('DOMContentLoaded', function() {
     viewActivityBtn?.addEventListener('click', function() {
         window.location.href = '{{ route("user.activity") }}';
     });
-});
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initMobilBooking);
+    } else {
+        initMobilBooking();
+    }
+    document.addEventListener('turbo:load', initMobilBooking);
+})();
 </script>
 
 {{-- Pemilih metode bayar mobil. Dipisah dari skrip utama agar tidak
@@ -1318,14 +1330,22 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     // Inisialisasi: set default metode sesuai yang tersedia
-    (function () {
+    function initDefaultMetodeMobil() {
         var defaultMetode = @json($hasTransfer ? 'transfer' : 'tunai');
         var input = document.getElementById('payment-method-mobil');
         if (input && input.value) {
             defaultMetode = input.value;
         }
-        window.pilihMetodeMobil(defaultMetode);
-    })();
+        if (typeof window.pilihMetodeMobil === 'function') {
+            window.pilihMetodeMobil(defaultMetode);
+        }
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initDefaultMetodeMobil);
+    } else {
+        initDefaultMetodeMobil();
+    }
+    document.addEventListener('turbo:load', initDefaultMetodeMobil);
 </script>
 
 @if(config('services.midtrans.client_key'))

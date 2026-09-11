@@ -116,7 +116,7 @@
                     @php
                         $catSlug = $item->kategori ? Str::slug($item->kategori) : '';
                     @endphp
-                    <a href="{{ route('user.fasilitas-umum.show', $item->id) }}" class="block group product-item transition-all duration-500" data-category="{{ $catSlug }} gedung">
+                    <a href="{{ route('user.fasilitas-umum.show', $item->id) }}" data-turbo="false" class="block group product-item transition-all duration-500" data-category="{{ $catSlug }} gedung">
                     <div class="product-card bg-white rounded-2xl sm:rounded-3xl p-2.5 sm:p-6 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 mx-auto w-full max-w-[350px] flex flex-col h-full">
                         
                         <!-- Gambar Produk -->
@@ -257,7 +257,7 @@
                             
                             <div class="mt-auto pt-2 sm:pt-3">
                                 @if($isAmb)
-                                <a href="{{ route('user.ambulans.show', $k->id) }}" class="w-full block text-center py-2 px-3 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white font-bold rounded-xl text-xs sm:text-sm shadow transition-all">
+                                <a href="{{ route('user.ambulans.show', $k->id) }}" data-turbo="false" class="w-full block text-center py-2 px-3 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white font-bold rounded-xl text-xs sm:text-sm shadow transition-all">
                                     Detail & Panggil Armada
                                 </a>
                                 @else

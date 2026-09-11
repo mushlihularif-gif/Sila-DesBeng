@@ -250,6 +250,9 @@ Route::get('/unit-penjualan-gas/{id}/booking', [App\Http\Controllers\User\GasSal
 Route::post('/gas/booking', [App\Http\Controllers\User\GasBookingController::class, 'store'])
     ->name('gas.booking.store')
     ->middleware('auth');
+Route::post('/gas/verify-kk', [App\Http\Controllers\User\GasKkVerificationController::class, 'store'])
+    ->name('user.gas.verify-kk')
+    ->middleware('auth');
 
 Route::get('/gas/payment/{id}', [App\Http\Controllers\User\GasBookingController::class, 'payment'])
     ->name('user.gas.payment')

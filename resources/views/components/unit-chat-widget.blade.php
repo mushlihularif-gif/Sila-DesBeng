@@ -205,30 +205,33 @@
 </style>
 
 <script>
+(() => {
     // UNIT CHAT SYSTEM (BOT + ESKALASI ADMIN)
-    const unitServiceCode = '{{ $service }}';
-    const unitRegionId = '{{ $regionId }}';
-    let unitChatSessionToken = localStorage.getItem(`unitChatToken_${unitServiceCode}_${unitRegionId}`);
+    var unitServiceCode = '{{ $service }}';
+    var unitRegionId = '{{ $regionId }}';
+    var unitChatSessionToken = localStorage.getItem(`unitChatToken_${unitServiceCode}_${unitRegionId}`);
     if (!unitChatSessionToken) {
         unitChatSessionToken = 'session_' + Math.random().toString(36).substr(2, 9);
         localStorage.setItem(`unitChatToken_${unitServiceCode}_${unitRegionId}`, unitChatSessionToken);
     }
     
-    let isUnitChatEscalated = false;
-    let isUnitChatOpen = false;
-    let unitChatHasPushedItem = false;
-    let unitChatPollInterval;
+    var isUnitChatEscalated = false;
+    var isUnitChatOpen = false;
+    var unitChatHasPushedItem = false;
+    if (window.unitChatPollInterval) {
+        clearInterval(window.unitChatPollInterval);
+    }
 
-    const unitItemName = '{{ addslashes($itemName) }}';
-    const unitItemPrice = '{{ addslashes($itemPrice) }}';
-    const unitItemImage = '{{ addslashes($itemImage) }}';
+    var unitItemName = '{{ addslashes($itemName) }}';
+    var unitItemPrice = '{{ addslashes($itemPrice) }}';
+    var unitItemImage = '{{ addslashes($itemImage) }}';
 
     function escapeHtml(unsafe) {
         return (unsafe || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     }
 
-    function chatAboutCurrentItem() {
-        openUnitChat();
+    window.chatAboutCurrentItem = function() {
+        window.openUnitChat();
         
         if (!unitChatHasPushedItem && unitItemName) {
             setTimeout(() => {
@@ -237,7 +240,7 @@
                     name: unitItemName,
                     price: unitItemPrice,
                     image: unitItemImage
-                }, true); // silent parameter
+                }, true);
                 unitChatHasPushedItem = true;
                 
                 appendUnitMessageLocally(initialMessage, 'user', {
@@ -247,26 +250,30 @@
                 });
             }, 300);
         }
-    }
+    };
 
-    function openUnitChat() {
-        document.getElementById('unitChatWidget').classList.add('active');
+    window.openUnitChat = function() {
+        const widget = document.getElementById('unitChatWidget');
+        if (widget) widget.classList.add('active');
         isUnitChatOpen = true;
         loadUnitChatHistory();
-        setTimeout(() => document.getElementById('unitChatInput').focus(), 100);
+        const input = document.getElementById('unitChatInput');
+        if (input) setTimeout(() => input.focus(), 100);
         
-        if(unitChatPollInterval) clearInterval(unitChatPollInterval);
-        unitChatPollInterval = setInterval(loadUnitChatHistory, 5000);
-    }
+        if (window.unitChatPollInterval) clearInterval(window.unitChatPollInterval);
+        window.unitChatPollInterval = setInterval(loadUnitChatHistory, 5000);
+    };
 
-    function closeUnitChat() {
-        document.getElementById('unitChatWidget').classList.remove('active');
+    window.closeUnitChat = function() {
+        const widget = document.getElementById('unitChatWidget');
+        if (widget) widget.classList.remove('active');
         isUnitChatOpen = false;
-        if(unitChatPollInterval) clearInterval(unitChatPollInterval);
-    }
+        if (window.unitChatPollInterval) clearInterval(window.unitChatPollInterval);
+    };
 
     function appendUnitMessageLocally(text, sender, itemData = null) {
         const messages = document.getElementById('unitChatMessages');
+        if (!messages) return;
         const bubble = document.createElement('div');
         const timeStr = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
         
@@ -341,26 +348,29 @@
                 if (msgs.length > 0) {
                     if (data.data.session && data.data.session.status === 'escalated') {
                         isUnitChatEscalated = true;
-                        document.getElementById('unitQuickReplies').style.display = 'none';
+                        const qr = document.getElementById('unitQuickReplies');
+                        if (qr) qr.style.display = 'none';
                     }
                     
                     const messagesContainer = document.getElementById('unitChatMessages');
-                    messagesContainer.innerHTML = ''; 
-                    
-                    msgs.forEach(msg => {
-                        let senderType = 'toko';
-                        if (msg.sender_type === 'user') senderType = 'user';
-                        if (msg.sender_type === 'admin') senderType = 'admin';
+                    if (messagesContainer) {
+                        messagesContainer.innerHTML = ''; 
                         
-                        let itemData = null;
-                        if (msg.item_data || msg.item_reference) {
-                            try {
-                                itemData = JSON.parse(msg.item_data || msg.item_reference);
-                            } catch(e){}
-                        }
-                        
-                        appendUnitMessageLocally(msg.message, senderType, itemData);
-                    });
+                        msgs.forEach(msg => {
+                            let senderType = 'toko';
+                            if (msg.sender_type === 'user') senderType = 'user';
+                            if (msg.sender_type === 'admin') senderType = 'admin';
+                            
+                            let itemData = null;
+                            if (msg.item_data || msg.item_reference) {
+                                try {
+                                    itemData = JSON.parse(msg.item_data || msg.item_reference);
+                                } catch(e){}
+                            }
+                            
+                            appendUnitMessageLocally(msg.message, senderType, itemData);
+                        });
+                    }
                 }
             }
         }).catch(err => console.error("Error loading chat:", err));
@@ -404,22 +414,23 @@
         });
     }
 
-    function sendUnitMessage() {
+    window.sendUnitMessage = function() {
         const input = document.getElementById('unitChatInput');
+        if (!input) return;
         const text = input.value;
         if (!text.trim()) return;
         
         input.value = '';
         appendUnitMessageLocally(text, 'user');
         sendUnitMessageInternal(text, null, false);
-    }
+    };
 
-    function sendUnitQuickReply(text) {
+    window.sendUnitQuickReply = function(text) {
         appendUnitMessageLocally(text, 'user');
         sendUnitMessageInternal(text, null, false);
-    }
+    };
 
-    function escalateToAdminUnit() {
+    window.escalateToAdminUnit = function() {
         const btn = document.querySelector('.toko-chat-escalate-btn');
         if (btn) btn.innerHTML = 'Sedang meneruskan...';
         
@@ -442,7 +453,8 @@
         .then(data => {
             if (data.status === 'success') {
                 isUnitChatEscalated = true;
-                document.getElementById('unitQuickReplies').style.display = 'none';
+                const qr = document.getElementById('unitQuickReplies');
+                if (qr) qr.style.display = 'none';
                 
                 setTimeout(() => {
                     appendUnitMessageLocally("<i class='bx bx-check-circle text-green-500 me-1'></i> Chat telah diteruskan. Petugas Admin akan segera membalas pesan Anda di sini.", 'toko');
@@ -452,5 +464,12 @@
             console.error(err);
             alert('Gagal meneruskan chat.');
         });
-    }
+    };
+
+    document.addEventListener('turbo:before-cache', () => {
+        if (window.unitChatPollInterval) {
+            clearInterval(window.unitChatPollInterval);
+        }
+    });
+})();
 </script>

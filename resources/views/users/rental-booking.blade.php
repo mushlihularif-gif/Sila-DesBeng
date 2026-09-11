@@ -146,7 +146,7 @@
                 </h1>
             </div>
 
-            <form id="booking-form" action="#" method="POST" enctype="multipart/form-data" onsubmit="return false;">
+            <form id="booking-form" action="#" method="POST" enctype="multipart/form-data" onsubmit="return false;" data-turbo="false">
                 @csrf
                 <input type="hidden" name="barang_id" value="{{ $item->id }}">
                 <input type="hidden" name="quantity" id="hidden-quantity" value="{{ $quantity }}">
@@ -1052,10 +1052,14 @@
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        'use strict';
+    (() => {
+        function initRentalBooking() {
+            'use strict';
+            const form = document.getElementById('booking-form');
+            if (!form || form.dataset.initialized === 'true') return;
+            form.dataset.initialized = 'true';
 
-        const pricePerUnit = {{ number_format($item->harga_sewa, 0, '.', '') }};
+            const pricePerUnit = {{ number_format($item->harga_sewa, 0, '.', '') }};
         const maxStock = {{ $item->stok }};
         
         // Helper to safely get element
@@ -1552,7 +1556,15 @@
             });
         }
 
-    });
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initRentalBooking);
+        } else {
+            initRentalBooking();
+        }
+        document.addEventListener('turbo:load', initRentalBooking);
+    })();
 </script>
 
 @if(config('midtrans.client_key'))
