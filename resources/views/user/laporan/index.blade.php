@@ -566,15 +566,16 @@
                 window.abstractCanvasAnimationId = requestAnimationFrame(animate);
             }
 
+            if (window.abstractCanvasAnimationId) {
+                cancelAnimationFrame(window.abstractCanvasAnimationId);
+            }
+
             resize();
             animate();
         };
 
-        document.addEventListener('turbo:load', window.initAbstractCanvas);
-    }
-    
-    // Always trigger init on execution if DOM is ready
-    if (document.readyState === 'complete' || document.readyState === 'interactive') {
-        setTimeout(window.initAbstractCanvas, 100);
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+            setTimeout(window.initAbstractCanvas, 100);
+        }
     }
 </script>

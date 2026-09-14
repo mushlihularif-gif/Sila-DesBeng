@@ -20,27 +20,29 @@
     {{-- Alpine.js --}}
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
-    {{-- Hotwire Turbo for SPA Navigation --}}
-    <meta name="turbo-cache-control" content="no-cache">
-    <script type="module" src="https://cdn.jsdelivr.net/npm/@hotwired/turbo/+esm"></script>
+    {{-- Global Navigation Progress Indicator --}}
+    <div id="pageProgressBar" class="global-progress-bar" style="display:none;"></div>
     <style>
-        /* Custom Turbo Progress Bar (Bi-color Wobble) */
-        .turbo-progress-bar {
-            height: 5px !important;
-            background-color: rgba(0,0,0,0.05) !important;
-            width: 100% !important;
-            opacity: 1 !important;
-            transition: none !important; /* Mencegah konflik dengan animasi bawaan Turbo */
+        .global-progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            width: 100%;
+            z-index: 9999999;
+            background-color: rgba(0,0,0,0.05);
+            pointer-events: none;
+            overflow: hidden;
         }
-        .turbo-progress-bar::before {
+        .global-progress-bar::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             height: 100%;
             width: 25%;
-            border-radius: 5px;
-            will-change: transform, background-color; /* Hardware Acceleration */
+            border-radius: 4px;
+            will-change: transform, background-color;
             animation: customWobble 1.5s ease-in-out infinite;
         }
         @keyframes customWobble {
@@ -54,6 +56,22 @@
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
         }
     </style>
+    <script>
+        document.addEventListener('click', function(e) {
+            const link = e.target.closest('a');
+            if (!link || !link.href) return;
+            const href = link.getAttribute('href') || '';
+            if (link.target === '_blank' || link.hasAttribute('download') || href.startsWith('#') || href.startsWith('javascript:') || href === '') return;
+            if (link.origin === window.location.origin && link.href !== window.location.href) {
+                const bar = document.getElementById('pageProgressBar');
+                if (bar) bar.style.display = 'block';
+            }
+        });
+        window.addEventListener('pageshow', function() {
+            const bar = document.getElementById('pageProgressBar');
+            if (bar) bar.style.display = 'none';
+        });
+    </script>
 
     {{-- Vite Tailwind--}}
     @vite('resources/css/app.css')
@@ -142,26 +160,27 @@
                 }
             });
         }
-        document.addEventListener('DOMContentLoaded', initModal);
-        document.addEventListener('turbo:load', initModal);
-        initModal();
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initModal);
+        } else {
+            initModal();
+        }
     </script>
     @endif
 
     @if(session('show_login_modal'))
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        function triggerLoginModal() {
             setTimeout(function() {
                 var btn = document.getElementById('btn-open-login');
                 if (btn) btn.click();
             }, 300);
-        });
-        document.addEventListener('turbo:load', function() {
-            setTimeout(function() {
-                var btn = document.getElementById('btn-open-login');
-                if (btn) btn.click();
-            }, 300);
-        });
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', triggerLoginModal);
+        } else {
+            triggerLoginModal();
+        }
     </script>
     @endif
 

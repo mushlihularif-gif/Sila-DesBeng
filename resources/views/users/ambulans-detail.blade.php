@@ -9,7 +9,6 @@
     $hasCustomDesc = $rawDeskripsi && !str_starts_with(trim($rawDeskripsi), 'Plat:');
 @endphp
 
-<main class="flex-grow relative w-full">
     <section class="relative z-10 min-h-screen pt-28 pb-16">
         <!-- Elemen Dekoratif Latar Belakang -->
         <div class="absolute inset-0 pointer-events-none overflow-hidden">
@@ -237,12 +236,11 @@
             </div>
         </div>
     </section>
-</main>
 @endsection
 
 @push('scripts')
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    function initAmbulansCarousel() {
         const carousel = document.getElementById('product-carousel');
         const prevBtn = document.getElementById('carousel-prev');
         const nextBtn = document.getElementById('carousel-next');
@@ -312,6 +310,12 @@
                 goToSlide(currentSlide - 1);
             }
         }
-    });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initAmbulansCarousel);
+    } else {
+        initAmbulansCarousel();
+    }
 </script>
 @endpush

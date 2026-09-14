@@ -160,6 +160,10 @@
                 window.abstractBgAnimationId = requestAnimationFrame(animate);
             }
 
+            if (window.abstractBgAnimationId) {
+                cancelAnimationFrame(window.abstractBgAnimationId);
+            }
+
             resize();
             animate();
         };
@@ -169,7 +173,11 @@
         } else {
             initCanvas();
         }
-        document.addEventListener('turbo:load', initCanvas);
-        document.addEventListener('turbo:render', initCanvas);
+
+        window.addEventListener('beforeunload', () => {
+            if (window.abstractBgAnimationId) {
+                cancelAnimationFrame(window.abstractBgAnimationId);
+            }
+        });
     })();
 </script>
