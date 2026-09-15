@@ -41,4 +41,18 @@ class AmbulansUserController extends Controller
 
         return view('users.ambulans-layanan', compact('ambulansList', 'regionSettings', 'region'));
     }
+
+    public function show($id)
+    {
+        $ambulans = Mobil::whereIn('kategori', ['ambulans', 'kendaraan_operasional'])
+            ->with(['supirs', 'region'])
+            ->findOrFail($id);
+
+        $user = Auth::user();
+        $userRegionId = $user ? $user->region_id : $ambulans->region_id;
+        $region = $userRegionId ? Region::find($userRegionId) : $ambulans->region;
+        $regionSettings = $region ? ($region->settings ?? []) : [];
+
+        return view('users.ambulans-detail', compact('ambulans', 'region', 'regionSettings'));
+    }
 }

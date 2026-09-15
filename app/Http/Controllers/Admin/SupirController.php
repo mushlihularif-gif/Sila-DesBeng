@@ -57,6 +57,11 @@ class SupirController extends Controller
 
     public function store(Request $request)
     {
+        // Default tipe ke 'supir' jika tidak dikirim dari form
+        if (!$request->filled('tipe')) {
+            $request->merge(['tipe' => 'supir']);
+        }
+
         $request->validate([
             'nama' => 'required|string|max:255',
             'tipe' => 'required|in:supir,pengurus_gedung',
@@ -67,7 +72,7 @@ class SupirController extends Controller
         ]);
 
         $user = Auth::user();
-        $region_id = ($user && $user->role === 'admin_desa') ? $user->region_id : $request->region_id;
+        $region_id = ($user && $user->region_id) ? $user->region_id : ($request->region_id ?? null);
         $tipe = $request->input('tipe', 'supir');
 
         $data = [
@@ -104,6 +109,10 @@ class SupirController extends Controller
 
     public function update(Request $request, Supir $supir)
     {
+        if (!$request->filled('tipe')) {
+            $request->merge(['tipe' => $supir->tipe ?? 'supir']);
+        }
+
         $request->validate([
             'nama' => 'required|string|max:255',
             'tipe' => 'required|in:supir,pengurus_gedung',

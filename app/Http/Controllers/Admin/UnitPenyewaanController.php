@@ -192,6 +192,17 @@ class UnitPenyewaanController extends Controller
 
         $barang = Barang::create($data);
 
+        // Auto-aktifkan layanan Penyewaan Alat untuk wilayah ini di region_services
+        if ($barang->region_id) {
+            $serviceAlat = \App\Models\Service::where('slug', 'penyewaan-alat')->first();
+            if ($serviceAlat) {
+                \App\Models\RegionService::updateOrInsert(
+                    ['region_id' => $barang->region_id, 'service_id' => $serviceAlat->id],
+                    ['is_active' => true, 'updated_at' => now()]
+                );
+            }
+        }
+
         // Broadcast produk baru ke warga
         \App\Services\NotificationService::broadcastNewProduct('Penyewaan Alat', $barang->nama_barang, $barang->region_id ?? (auth()->user()->region_id ?? null), route('rental.equipment'));
 

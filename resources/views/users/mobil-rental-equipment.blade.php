@@ -79,7 +79,7 @@
             @if($items->count() > 0)
                 <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6 mb-12 sm:mb-16 max-w-6xl mx-auto">
                     @foreach($items as $item)
-                    <a href="{{ route('mobil.rental.show', $item->id) }}" class="block group product-item transition-all duration-500" data-category="{{ $item->kategori ? Str::slug($item->kategori) : '' }}">
+                    <a href="{{ route('mobil.rental.show', $item->id) }}" data-turbo="false" class="block group product-item transition-all duration-500" data-category="{{ $item->kategori ? Str::slug($item->kategori) : '' }}">
                     <div class="product-card bg-white rounded-2xl sm:rounded-3xl p-2.5 sm:p-6 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 mx-auto w-full max-w-[350px] flex flex-col h-full">
                         
                         <!-- Gambar Produk -->
@@ -127,7 +127,15 @@
                                 <div class="flex flex-col">
                                     <span class="text-[10px] sm:text-xs text-gray-500 mb-0.5 font-medium">Harga</span>
                                     <p class="text-gray-900 font-bold text-xs sm:text-xl tracking-tight leading-none">
-                                        Rp {{ number_format($item->harga_sewa, 0, ',', '.') }}<span class="text-[9px] sm:text-xs text-gray-400 font-medium tracking-normal ml-0.5">/{{ $item->satuan ?? 'Unit' }}</span>
+                                        @if($item->harga_mulai > 0 && ($item->harga_mulai < $item->harga_sewa || $item->harga_sewa <= 0))
+                                            Mulai Rp {{ number_format($item->harga_mulai, 0, ',', '.') }}
+                                        @elseif($item->harga_sewa > 0)
+                                            Rp {{ number_format($item->harga_sewa, 0, ',', '.') }}<span class="text-[9px] sm:text-xs text-gray-400 font-medium tracking-normal ml-0.5">/{{ $item->satuan ?? 'Unit' }}</span>
+                                        @elseif($item->harga_mulai > 0)
+                                            Rp {{ number_format($item->harga_mulai, 0, ',', '.') }}
+                                        @else
+                                            Gratis
+                                        @endif
                                     </p>
                                 </div>
                                 <div class="text-right flex flex-col">

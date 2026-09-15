@@ -41,23 +41,51 @@ class CheckRegionService
             $relevantRegionIds = array_merge($relevantRegionIds, $ancestorIds);
         }
 
+        // Resolve target slugs and aliases
+        $targetSlugs = match($serviceSlug) {
+            'peminjaman-fasilitas-umum', 'fasilitas-umum' => ['peminjaman-fasilitas-umum', 'fasilitas-umum'],
+            'layanan-ambulans', 'ambulans' => ['layanan-ambulans', 'ambulans', 'fasilitas-umum', 'penyewaan-mobil'],
+            'penyewaan-mobil' => ['penyewaan-mobil'],
+            'penyewaan-alat' => ['penyewaan-alat'],
+            'penjualan-gas' => ['penjualan-gas'],
+            'pelaporan-warga' => ['pelaporan-warga'],
+            'pasar-daerah' => ['pasar-daerah'],
+            default => [$serviceSlug]
+        };
+
         $regionService = RegionService::whereIn('region_id', $relevantRegionIds)
-            ->whereHas('service', function($q) use ($serviceSlug) {
-                $q->where('slug', $serviceSlug);
+            ->whereHas('service', function($q) use ($targetSlugs) {
+                $q->whereIn('slug', $targetSlugs);
             })
+            ->where('is_active', true)
             ->first();
 
-        if (!$regionService || !$regionService->is_active) {
-            // Fallback khusus untuk layanan ambulans jika belum terkonfigurasi mandiri
-            if ($serviceSlug === 'layanan-ambulans') {
-                $mobilService = RegionService::whereIn('region_id', $relevantRegionIds)
-                    ->whereHas('service', function($q) {
-                        $q->where('slug', 'penyewaan-mobil');
-                    })
-                    ->first();
-                if ($mobilService && $mobilService->is_active) {
-                    return $next($request);
+        if (!$regionService) {
+            // Fallback khusus jika wilayah atau leluhurnya memiliki data produk/armada langsung
+            $hasProducts = false;
+            if (in_array('fasilitas-umum', $targetSlugs) || in_array('peminjaman-fasilitas-umum', $targetSlugs)) {
+                $hasProducts = \App\Models\FasilitasUmum::whereIn('region_id', $relevantRegionIds)->where('status', '!=', 'Tidak Tersedia')->exists()
+                    || \App\Models\Mobil::whereIn('region_id', $relevantRegionIds)->whereIn('kategori', ['ambulans', 'kendaraan_operasional'])->exists();
+            } elseif (in_array('layanan-ambulans', $targetSlugs)) {
+                $hasProducts = \App\Models\Mobil::whereIn('region_id', $relevantRegionIds)->where('kategori', 'ambulans')->exists();
+            } elseif (in_array('penyewaan-mobil', $targetSlugs)) {
+                $hasProducts = \App\Models\Mobil::whereIn('region_id', $relevantRegionIds)->whereNotIn('kategori', ['ambulans', 'kendaraan_operasional'])->exists();
+            } elseif (in_array('penyewaan-alat', $targetSlugs)) {
+                $hasProducts = \App\Models\Barang::whereIn('region_id', $relevantRegionIds)->exists();
+            } elseif (in_array('penjualan-gas', $targetSlugs)) {
+                $hasProducts = \App\Models\Gas::whereIn('region_id', $relevantRegionIds)->exists();
+            }
+
+            if ($hasProducts) {
+                // Auto-sync & aktifkan region_service agar akses cepat dan konsisten
+                $service = \App\Models\Service::whereIn('slug', $targetSlugs)->first();
+                if ($service && $regionId) {
+                    \App\Models\RegionService::updateOrInsert(
+                        ['region_id' => $regionId, 'service_id' => $service->id],
+                        ['is_active' => true, 'is_exclusive' => false, 'updated_at' => now()]
+                    );
                 }
+                return $next($request);
             }
 
             $currentRoute = \Route::currentRouteName();
@@ -80,7 +108,7 @@ class CheckRegionService
         }
 
         // Cek eksklusivitas layanan (hanya untuk warga lokal)
-        if ($regionService->is_exclusive) {
+        if ($regionService && $regionService->is_exclusive) {
             $isAuthorized = false;
             if (auth()->check()) {
                 $userRegionId = auth()->user()->region_id;

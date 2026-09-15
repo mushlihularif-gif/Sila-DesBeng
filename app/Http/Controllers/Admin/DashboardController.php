@@ -13,6 +13,8 @@ use App\Models\RentalBooking;
 use App\Models\RentalRequest;
 use App\Models\GasOrder;
 use App\Models\ManualReport;
+use App\Models\Mobil;
+use App\Models\FasilitasUmum;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
@@ -121,12 +123,15 @@ public function index(Request $request)
         
         $laporanRequests = $baseLaporan->clone()->with('user')->where('status', 'Pending')->get()->map(function ($i) { $i->type = 'laporan'; $i->item_name = 'Laporan Warga'; return $i; });
         
-        $kycRequests = $baseKyc->clone()->with('user')
-            ->where('status', 'pending')
-            ->where(function($q) {
-                $q->whereNotNull('face_scan_data')->orWhereNotNull('face_image_path');
-            })
-            ->get()->map(function ($i) { $i->type = 'kyc'; $i->item_name = 'Verifikasi Identitas (KYC)'; return $i; });
+        $kycRequests = collect();
+        if (in_array(auth()->user()->role, ['admin_desa', 'admin_kecamatan'])) {
+            $kycRequests = $baseKyc->clone()->with('user')
+                ->where('status', 'pending')
+                ->where(function($q) {
+                    $q->whereNotNull('face_scan_data')->orWhereNotNull('face_image_path');
+                })
+                ->get()->map(function ($i) { $i->type = 'kyc'; $i->item_name = 'Verifikasi Identitas (KYC)'; return $i; });
+        }
 
         $baseMutasi = \App\Models\MutasiPenduduk::query();
         $adminUser = auth()->user();
@@ -383,8 +388,18 @@ public function index(Request $request)
     ];
 
     // Ambil jumlah item untuk setiap unit layanan
+    $adminUser = auth()->user();
+    $adminRegionId = $adminUser ? $adminUser->region_id : null;
+
     $data['unitPenyewaan'] = Barang::count(); 
     $data['unitGas'] = Gas::count();
+    $data['unitMobil'] = Mobil::whereNotIn('kategori', ['ambulans', 'kendaraan_operasional'])
+        ->when($adminRegionId, fn($q) => $q->where('region_id', $adminRegionId))
+        ->count();
+    $data['unitFasilitas'] = FasilitasUmum::when($adminRegionId, fn($q) => $q->where(fn($sub) => $sub->where('region_id', $adminRegionId)->orWhereNull('region_id')))->count()
+        + Mobil::whereIn('kategori', ['ambulans', 'kendaraan_operasional'])
+            ->when($adminRegionId, fn($q) => $q->where('region_id', $adminRegionId))
+            ->count();
 
     // Ambil data Total Pendapatan untuk grafik baru (Pastikan pass selectedYear)
     // Override request year jika diperlukan agar konsisten

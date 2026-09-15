@@ -402,7 +402,7 @@ function previewImage(input, previewId, filenameId) {
         }
         
         if (typeof initGlobalCropper === 'function') {
-            initGlobalCropper(input, previewId, 1, true);
+            initGlobalCropper(input, previewId, NaN, true);
         } else {
             var reader = new FileReader();
             reader.onload = function(e) {

@@ -1073,16 +1073,19 @@ class ReceiptGeneratorService
         // Posisikan QR di tengah (Center)
         $qrX = ($imageWidth - $qrSize) / 2;
         
-        // 1. Generate & Tempel QR Code via API
-        $qrApiUrl = "https://api.qrserver.com/v1/create-qr-code/?size={$qrSize}x{$qrSize}&data=" . urlencode($url);
+        // 1. Generate & Tempel QR Code via API dengan ecc=H (High error correction) & margin=4
+        $qrApiUrl = "https://api.qrserver.com/v1/create-qr-code/?size={$qrSize}x{$qrSize}&ecc=H&margin=4&data=" . urlencode($url);
         
         try {
-            // Kita bypass SSL error jika server lokal
+            // Bypass SSL error jika server lokal
             $context = stream_context_create([
                 "ssl" => [
                     "verify_peer" => false,
                     "verify_peer_name" => false,
-                ]
+                ],
+                "http" => [
+                    "timeout" => 5,
+                ],
             ]);
             $qrData = @file_get_contents($qrApiUrl, false, $context);
             if ($qrData) {
@@ -1092,22 +1095,17 @@ class ReceiptGeneratorService
                     imagecopyresampled($image, $qrImage, $qrX, $yQr, 0, 0, $qrSize, $qrSize, imagesx($qrImage), imagesy($qrImage));
                     
                     // Tambahkan Logo SiladesBeng di tengah QR Code
-                    // Versi 256px, BUKAN logodomain.png yang 5000x5000.
-                    // GD mendekode PNG jadi bitmap mentah: yang 5000x5000 memakan
-                    // ~95 MB memori, dan bersama latar struk (~16 MB) plus Laravel
-                    // sendiri, batas 128 MB di hosting langsung jebol — pemesanan
-                    // gagal dengan "Server Error" tanpa petunjuk apa pun.
-                    // Logonya toh cuma digambar 88 piksel (qrSize 250 x 0.35).
+                    // Gunakan proporsi aman (18% lebar QR) dengan padding 2px agar modul koreksi error QR tetap utuh dan mudah di-scan kamera HP
                     $logoPath = public_path('Admin/img/illustrations/logodomain-256.png');
                     if (file_exists($logoPath)) {
                         $logoImage = @imagecreatefrompng($logoPath);
                         if ($logoImage) {
-                            $logoSize = $qrSize * 0.35; // Perbesar porsi logo menjadi 35% agar lebih jelas
-                            $logoX = $qrX + ($qrSize - $logoSize) / 2;
-                            $logoY = $yQr + ($qrSize - $logoSize) / 2;
+                            $logoSize = (int) round($qrSize * 0.18);
+                            $logoX = (int) round($qrX + ($qrSize - $logoSize) / 2);
+                            $logoY = (int) round($yQr + ($qrSize - $logoSize) / 2);
                             
-                            // Buat background putih untuk logo (padding 6px agar kotak putih proporsional)
-                            imagefilledrectangle($image, $logoX - 6, $logoY - 6, $logoX + $logoSize + 6, $logoY + $logoSize + 6, imagecolorallocate($image, 255, 255, 255));
+                            // Background putih tipis (padding 2px)
+                            imagefilledrectangle($image, $logoX - 2, $logoY - 2, $logoX + $logoSize + 2, $logoY + $logoSize + 2, imagecolorallocate($image, 255, 255, 255));
                             
                             // Tempel logo di atas background putih tersebut
                             imagecopyresampled($image, $logoImage, $logoX, $logoY, 0, 0, $logoSize, $logoSize, imagesx($logoImage), imagesy($logoImage));

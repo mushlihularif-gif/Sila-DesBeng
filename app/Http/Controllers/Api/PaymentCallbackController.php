@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\GasOrder;
 use App\Models\RentalBooking;
+use App\Models\MobilBooking;
+use App\Models\FasilitasUmumBooking;
 use App\Models\PasarOrder;
 use App\Models\TransactionReceipt;
 use App\Models\WalletTransaction;
@@ -198,30 +200,45 @@ class PaymentCallbackController extends Controller
         if (str_starts_with($orderId, 'GAS-')) {
             $order = GasOrder::with('gas')->where('order_number', $orderId)->first();
 
-            // Ganti metode bayar menerbitkan ulang tagihan dengan order_id
-            // bersuffix waktu (GAS-XX-123-1787762109) supaya Midtrans menganggapnya
-            // transaksi baru. Nomor itu tidak ada di tabel, jadi suffix-nya
-            // dilepas dulu - tanpa ini pesanan yang metodenya pernah diganti
-            // tidak akan pernah terkonfirmasi.
             if (! $order && preg_match('/^(.*)-\d{10,}$/', $orderId, $cocok)) {
                 $order = GasOrder::with('gas')->where('order_number', $cocok[1])->first();
             }
 
             return [$order, 'gas', $order?->gas?->region_id];
         }
-        if (str_starts_with($orderId, 'PSR-')) {
-            // Pasar Daerah sebelumnya tidak dikenali di sini sama sekali, jadi
-            // setiap callback-nya dijawab 404 dan pesanannya tidak pernah
-            // terkonfirmasi meski warganya sudah membayar.
-            $order = PasarOrder::where('order_number', $orderId)->first();
 
+        if (str_starts_with($orderId, 'PSR-')) {
+            $order = PasarOrder::where('order_number', $orderId)->first();
             return [$order, 'pasar', $order?->region_id];
         }
 
-        // Penyewaan alat memakai nomor tanpa awalan. Cabang lama mencari kolom
-        // 'booking_number' yang tidak ada di tabelnya.
-        $order = RentalBooking::with('barang')->where('order_number', $orderId)->first();
+        if (str_starts_with($orderId, 'MB-')) {
+            $order = MobilBooking::where('order_number', $orderId)->first();
+            // Suffix suffix waktu (MB-XX-ABCDE-1787762109) — lepas suffix dulu
+            if (! $order && preg_match('/^(.*)-\d{10,}$/', $orderId, $cocok)) {
+                $order = MobilBooking::where('order_number', $cocok[1])->first();
+            }
+            return [$order, 'mobil', $order?->region_id];
+        }
 
+        if (str_starts_with($orderId, 'FU-')) {
+            $order = FasilitasUmumBooking::where('order_number', $orderId)->first();
+            if (! $order && preg_match('/^(.*)-\d{10,}$/', $orderId, $cocok)) {
+                $order = FasilitasUmumBooking::where('order_number', $cocok[1])->first();
+            }
+            return [$order, 'fasilitas_umum', $order?->region_id];
+        }
+
+        if (str_starts_with($orderId, 'RNT-')) {
+            $order = RentalBooking::with('barang')->where('order_number', $orderId)->first();
+            if (! $order && preg_match('/^(.*)-\d{10,}$/', $orderId, $cocok)) {
+                $order = RentalBooking::with('barang')->where('order_number', $cocok[1])->first();
+            }
+            return [$order, 'rental', $order?->barang?->region_id];
+        }
+
+        // Fallback: order lama tanpa awalan (sebelum penambahan prefix RNT-)
+        $order = RentalBooking::with('barang')->where('order_number', $orderId)->first();
         return [$order, 'rental', $order?->barang?->region_id];
     }
 }

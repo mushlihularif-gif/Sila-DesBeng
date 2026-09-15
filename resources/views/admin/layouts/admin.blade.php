@@ -723,7 +723,7 @@
                                     </a>
                                 </li>
                                 @endif
-                                @if(in_array('Fasilitas Umum', $activeServicesMenu ?? []) && auth()->user()->hasUnitPermission('fasilitas_umum'))
+                                @if((in_array('Fasilitas Umum', $activeServicesMenu ?? []) || in_array('Layanan Ambulans', $activeServicesMenu ?? [])) && auth()->user()->hasUnitPermission('fasilitas_umum'))
                                 <li class="menu-item {{ request()->is('admin/unit/fasilitas_umum*') || request()->is('admin/unit/ambulans*') ? 'active' : '' }}">
                                     <a href="{{ route('admin.unit.fasilitas_umum.index') }}" class="menu-link">
                                         <div data-i18n="Fasilitas Umum">Fasilitas Umum</div>
@@ -874,7 +874,7 @@
                                 <div data-i18n="Permintaan & Pengajuan">Permintaan & Pengajuan</div>
                             </a>
                         </li>
-                        @if(in_array(auth()->user()->role, ['super_admin', 'admin', 'admin_kecamatan', 'admin_desa']))
+                        @if(in_array(auth()->user()->role, ['admin_desa', 'admin_kecamatan']))
                         <li class="menu-item {{ request()->routeIs('admin.kyc.*') ? 'active' : '' }}">
                             <a href="{{ route('admin.kyc.index') }}" class="menu-link">
                                 <div data-i18n="Verifikasi Identitas">Verifikasi Identitas</div>

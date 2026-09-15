@@ -11,6 +11,7 @@ class GasSalesUserController extends Controller
     public function index()
     {
         $kategori = request('kategori', '');
+        $targetRegionId = request('region_id');
         $query = Gas::where('status', '!=', 'rusak');
         
         $isGasCrisis = false;
@@ -18,8 +19,15 @@ class GasSalesUserController extends Controller
         $familyCardNumber = null;
         $pendingKk = false;
 
-        // Validasi: Warga hanya bisa melihat gas dari desa/wilayahnya sendiri
-        if (auth()->check() && auth()->user()->role === 'user' && auth()->user()->region_id) {
+        if ($targetRegionId) {
+            $regionIds = array_merge([(int) $targetRegionId], \App\Models\Region::getDescendantIds($targetRegionId));
+            $query->whereIn('region_id', $regionIds);
+
+            $region = \App\Models\Region::find($targetRegionId);
+            if ($region && $region->is_gas_crisis) {
+                $isGasCrisis = true;
+            }
+        } elseif (auth()->check() && auth()->user()->role === 'user' && auth()->user()->region_id) {
             $user = auth()->user();
             $allowed = \App\Models\Region::wilayahLayananTerlihat($user->region_id, 'Penjualan Gas');
             $query->where(function($sub) use ($allowed) {
@@ -31,18 +39,19 @@ class GasSalesUserController extends Controller
             $region = \App\Models\Region::find($user->region_id);
             if ($region && $region->is_gas_crisis) {
                 $isGasCrisis = true;
-                
-                // Cek apakah user punya KK terverifikasi
-                if ($user->familyMember && $user->familyMember->familyCard) {
-                    $hasKk = true;
-                    $familyCardNumber = $user->familyMember->familyCard->no_kk_masked;
-                } else {
-                    // Cek apakah ada pengajuan KK yang pending
-                    $pending = \App\Models\FamilyCard::where('submitted_by', $user->id)
-                        ->where('status', 'pending')->first();
-                    if ($pending) {
-                        $pendingKk = true;
-                    }
+            }
+        }
+
+        if (auth()->check() && $isGasCrisis) {
+            $user = auth()->user();
+            if ($user->familyMember && $user->familyMember->familyCard) {
+                $hasKk = true;
+                $familyCardNumber = $user->familyMember->familyCard->no_kk_masked;
+            } else {
+                $pending = \App\Models\FamilyCard::where('submitted_by', $user->id)
+                    ->where('status', 'pending')->first();
+                if ($pending) {
+                    $pendingKk = true;
                 }
             }
         }
@@ -83,25 +92,17 @@ class GasSalesUserController extends Controller
         $item = Gas::findOrFail($id);
         $user = auth()->user();
 
-        // Validasi KYC: Pengguna harus sudah terverifikasi
-        if ($user->verification_status !== 'verified') {
-            return redirect()->back()->with('show_kyc_modal', true);
-        }
-
         // Validasi: Warga hanya bisa memesan layanan di wilayahnya sendiri
         if (! in_array($item->region_id, \App\Models\Region::wilayahLayananTerlihat($user->region_id, 'Penjualan Gas'))) {
             return redirect()->back()->with('error', 'Layanan khusus warga lokal. Silakan sesuaikan wilayah Anda.');
         }
 
-        // Validasi Krisis Gas
+        // Validasi Mode Krisis Gas (hanya jika mode krisis diaktifkan oleh admin)
         $region = \App\Models\Region::find($user->region_id);
         if ($region && $region->is_gas_crisis) {
-            if (!$user->nik) {
-                return redirect()->route('user.gas.sales')->with('error', 'Ini adalah akun khusus pemerintahan (tanpa NIK). Silakan login menggunakan akun warga pribadi Anda yang terdaftar NIK untuk membeli gas subsidi.');
-            }
             // Cek apakah punya KK terverifikasi
             if (!$user->familyMember || !$user->familyMember->familyCard) {
-                return redirect()->route('user.gas.sales')->with('error', 'Desa sedang dalam mode krisis gas. Anda wajib memverifikasi Kartu Keluarga (KK) terlebih dahulu.');
+                return redirect()->route('gas.sales')->with('error', 'Desa sedang dalam mode krisis gas. Anda wajib memverifikasi Kartu Keluarga (KK) terlebih dahulu.');
             }
         }
         

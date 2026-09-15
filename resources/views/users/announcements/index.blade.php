@@ -90,7 +90,7 @@
                                                 </div>
                                             @endif
                                         @else
-                                            <div class="w-full h-full flex items-center justify-center text-6xl opacity-50 bg-gradient-to-br from-blue-50 to-blue-100">ðŸ“°</div>
+                                            <div class="w-full h-full flex items-center justify-center text-5xl bg-gradient-to-br from-blue-50 to-blue-100 text-blue-300"><i class="bx bx-news"></i></div>
                                         @endif
                                         <div class="absolute top-4 left-4">
                                             <span class="px-4 py-1.5 bg-blue-500 text-white rounded-full text-xs font-bold shadow-md flex items-center gap-1.5"><i class="bx bx-news"></i> Berita Daerah</span>
@@ -177,21 +177,21 @@
                                         @if($item->image_path)
                                             <img src="{{ Storage::url($item->image_path) }}" alt="{{ $item->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.onerror=null; this.src='{{ asset('User/img/elemen/KabardanInformasiDaerah.png') }}';">
                                         @else
-                                            <div class="w-full h-full flex items-center justify-center text-6xl opacity-50 bg-gradient-to-br from-blue-50 to-blue-100">
-                                                @if($item->type == 'Pengumuman') ðŸ“¢ 
-                                                @elseif($item->type == 'Event') ðŸŽ‰
-                                                @else ðŸ¤
+                                            <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100">
+                                                @if($item->type == 'Pengumuman') <i class="bx bx-broadcast text-5xl text-blue-400"></i>
+                                                @elseif($item->type == 'Event') <i class="bx bx-calendar-event text-5xl text-purple-400"></i>
+                                                @else <i class="bx bx-group text-5xl text-emerald-400"></i>
                                                 @endif
                                             </div>
                                         @endif
                                         
                                         <div class="absolute top-4 left-4">
                                             @if($item->type == 'Gotong Royong')
-                                                <span class="px-4 py-1.5 bg-emerald-500 text-white rounded-full text-xs font-bold shadow-md flex items-center gap-1.5">ðŸ¤ Gotong Royong</span>
+                                                <span class="px-4 py-1.5 bg-emerald-500 text-white rounded-full text-xs font-bold shadow-md flex items-center gap-1.5"><i class="bx bx-group"></i> Gotong Royong</span>
                                             @elseif($item->type == 'Event')
-                                                <span class="px-4 py-1.5 bg-purple-500 text-white rounded-full text-xs font-bold shadow-md flex items-center gap-1.5">ðŸŽ‰ Event</span>
+                                                <span class="px-4 py-1.5 bg-purple-500 text-white rounded-full text-xs font-bold shadow-md flex items-center gap-1.5"><i class="bx bx-calendar-event"></i> Event</span>
                                             @else
-                                                <span class="px-4 py-1.5 bg-blue-500 text-white rounded-full text-xs font-bold shadow-md flex items-center gap-1.5">ðŸ“¢ Pengumuman</span>
+                                                <span class="px-4 py-1.5 bg-blue-500 text-white rounded-full text-xs font-bold shadow-md flex items-center gap-1.5"><i class="bx bx-broadcast"></i> Pengumuman</span>
                                             @endif
                                         </div>
                                     </div>
@@ -220,11 +220,11 @@
 
                                         @if($item->event_date)
                                         <div class="bg-blue-50/80 rounded-xl p-4 mt-auto border border-blue-100">
-                                            <div class="flex items-center gap-2 text-blue-700 font-bold text-xs mb-1 uppercase tracking-wider">ðŸ—“ï¸ Pelaksanaan:</div>
-                                            <div class="text-gray-800 font-medium text-sm">{{ $item->event_date->format('d M Y, H:i') }} WIB</div>
+                                            <div class="flex items-center gap-2 text-blue-700 font-bold text-xs mb-1 uppercase tracking-wider"><i class="bx bx-calendar-check text-sm"></i> Pelaksanaan:</div>
+                                            <div class="text-gray-800 font-medium text-sm">{{ \Carbon\Carbon::parse($item->event_date)->locale('id')->translatedFormat('d M Y, H:i') }} WIB</div>
                                             @if($item->location)
                                             <div class="text-gray-600 text-xs mt-1.5 flex items-start gap-1">
-                                                <span class="mt-0.5">ðŸ“</span>
+                                                <i class="bx bx-map-pin text-xs text-blue-600 mt-0.5 shrink-0"></i>
                                                 <span class="truncate">{{ $item->location }}</span>
                                             </div>
                                             @endif

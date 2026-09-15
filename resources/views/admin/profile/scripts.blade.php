@@ -292,7 +292,7 @@
                     if(deleteAvatarInput) deleteAvatarInput.value = '0';
                     
                     if (typeof initGlobalCropper === 'function') {
-                        initGlobalCropper(fileInput, 'uploadedAvatar', 1);
+                        initGlobalCropper(fileInput, 'uploadedAvatar', NaN, true);
                     } else {
                         console.error('Cropper is not initialized properly in layout');
                     }

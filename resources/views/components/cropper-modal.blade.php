@@ -122,9 +122,9 @@
         
         <div class="cropper-ratio-group" id="cropper-ratio-group">
             <button type="button" class="btn-ratio" data-ratio="1">1:1 (Persegi)</button>
-            <button type="button" class="btn-ratio active" data-ratio="1.3333333333333333">4:3 (Standar)</button>
+            <button type="button" class="btn-ratio" data-ratio="1.3333333333333333">4:3 (Standar)</button>
             <button type="button" class="btn-ratio" data-ratio="1.7777777777777777">16:9 (Landscape)</button>
-            <button type="button" class="btn-ratio" data-ratio="NaN">Bebas</button>
+            <button type="button" class="btn-ratio active" data-ratio="NaN">Bebas</button>
         </div>
 
         <div class="cropper-img-container">
@@ -337,8 +337,8 @@
 
     // Fungsi utama inisialisasi cropper saat pengguna memilih foto
     window.initGlobalCropper = function(inputElement, previewElementId, aspectRatio, showRatioButtons) {
-        if (typeof aspectRatio === 'undefined') aspectRatio = 1;
-        if (typeof showRatioButtons === 'undefined') showRatioButtons = false;
+        if (typeof aspectRatio === 'undefined') aspectRatio = NaN;
+        if (typeof showRatioButtons === 'undefined') showRatioButtons = true;
 
         // Cegah re-trigger saat menyimpan hasil crop
         if (window._isCropperSaving || (inputElement && inputElement.dataset && inputElement.dataset.cropped === '1')) {

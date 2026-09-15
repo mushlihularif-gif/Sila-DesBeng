@@ -81,8 +81,13 @@
                                 <h5 class="card-title">{{ $mobil->nama_mobil }}</h5>
                                 
                                 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-3">
-                                    <span class="badge bg-primary">Mulai Rp.
-                                        {{ number_format($mobil->harga_dalam_desa ?? 0, 0, ',', '.') }}</span>
+                                    @if($mobil->harga_mulai > 0)
+                                        <span class="badge bg-primary">Mulai Rp. {{ number_format($mobil->harga_mulai, 0, ',', '.') }}</span>
+                                    @elseif($mobil->harga_sewa > 0)
+                                        <span class="badge bg-primary">Rp. {{ number_format($mobil->harga_sewa, 0, ',', '.') }}</span>
+                                    @else
+                                        <span class="badge bg-label-success">Gratis</span>
+                                    @endif
                                     <span class="badge bg-success">{{ $mobil->stok }} {{ $mobil->satuan }}</span>
                                 </div>
                                 <div class="mt-3 d-flex gap-1 flex-nowrap justify-content-center">

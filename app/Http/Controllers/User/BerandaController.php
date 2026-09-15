@@ -142,6 +142,23 @@ class BerandaController extends Controller
                     $activeServices = array_merge($activeServices, $region->services->pluck('name')->toArray());
                 }
             }
+
+            // Jaminan ketersediaan: Jika admin telah menambahkan produk/armada di wilayah ini,
+            // maka otomatis layanan tersebut aktif dan dapat diakses warga dari Beranda
+            if (\App\Models\FasilitasUmum::whereIn('region_id', $relevantIds)->where('status', '!=', 'Tidak Tersedia')->exists()
+                || \App\Models\Mobil::whereIn('region_id', $relevantIds)->whereIn('kategori', ['ambulans', 'kendaraan_operasional'])->exists()) {
+                $activeServices[] = 'Fasilitas Umum';
+            }
+            if (\App\Models\Barang::whereIn('region_id', $relevantIds)->exists()) {
+                $activeServices[] = 'Penyewaan Alat';
+            }
+            if (\App\Models\Gas::whereIn('region_id', $relevantIds)->exists()) {
+                $activeServices[] = 'Penjualan Gas';
+            }
+            if (\App\Models\Mobil::whereIn('region_id', $relevantIds)->whereNotIn('kategori', ['ambulans', 'kendaraan_operasional'])->exists()) {
+                $activeServices[] = 'Penyewaan Mobil';
+            }
+
             $activeServices = array_unique($activeServices);
         }
         

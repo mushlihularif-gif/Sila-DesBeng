@@ -655,7 +655,7 @@
                     if (clientErrorProfile) clientErrorProfile.classList.add('hidden');
 
                     if (typeof initGlobalCropper === 'function') {
-                        initGlobalCropper(this, 'avatar-preview', 1);
+                        initGlobalCropper(this, 'avatar-preview', NaN, true);
                     } else {
                         console.error('Cropper is not initialized properly in layout');
                     }

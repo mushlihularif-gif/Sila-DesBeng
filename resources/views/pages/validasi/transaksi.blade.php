@@ -38,13 +38,13 @@
                         </div>
                         <div class="flex justify-between border-b border-gray-100 pb-3">
                             <dt class="text-sm font-medium text-gray-500">Nama Pemesan</dt>
-                            <dd class="text-sm text-gray-900">{{ $transaksi->user->name ?? '-' }}</dd>
+                            <dd class="text-sm text-gray-900">{{ $transaksi->recipient_name ?? $transaksi->full_name ?? $transaksi->user->name ?? '-' }}</dd>
                         </div>
                         
                         {{-- Penyesuaian Detail Barang / Jasa berdasarkan tipe --}}
                         <div class="flex justify-between border-b border-gray-100 pb-3">
                             <dt class="text-sm font-medium text-gray-500">Keterangan</dt>
-                            <dd class="text-sm text-gray-900">
+                            <dd class="text-sm text-gray-900 text-right">
                                 @if($type === 'rental')
                                     {{ $transaksi->barang->nama_barang ?? '-' }}
                                 @elseif($type === 'gas')
@@ -53,6 +53,12 @@
                                     {{ $transaksi->mobil->nama_mobil ?? '-' }}
                                 @elseif($type === 'fasilitas')
                                     {{ $transaksi->fasilitas->nama_fasilitas ?? '-' }}
+                                @elseif($type === 'pasar-daerah' || $type === 'pasar')
+                                    @if(isset($transaksi->items) && $transaksi->items->count() > 0)
+                                        {{ $transaksi->items->map(fn($i) => $i->product_name . ' (' . $i->quantity . 'x)')->join(', ') }}
+                                    @else
+                                        Pesanan Produk Pasar Daerah
+                                    @endif
                                 @endif
                             </dd>
                         </div>
@@ -66,7 +72,19 @@
                         @if($type !== 'fasilitas')
                         <div class="flex justify-between border-b border-gray-100 pb-3">
                             <dt class="text-sm font-medium text-gray-500">Total Pembayaran</dt>
-                            <dd class="text-sm font-bold text-gray-900">Rp. {{ number_format($type === 'gas' ? ($transaksi->price * $transaksi->quantity) : ($transaksi->total_amount ?? $transaksi->total_harga ?? 0), 0, ',', '.') }}</dd>
+                            <dd class="text-sm font-bold text-gray-900">
+                                @php
+                                    $nominal = 0;
+                                    if ($type === 'gas') {
+                                        $nominal = $transaksi->price * $transaksi->quantity;
+                                    } elseif ($type === 'pasar-daerah' || $type === 'pasar') {
+                                        $nominal = $transaksi->grand_total ?? $transaksi->total_amount ?? 0;
+                                    } else {
+                                        $nominal = $transaksi->total_amount ?? $transaksi->total_harga ?? 0;
+                                    }
+                                @endphp
+                                Rp. {{ number_format($nominal, 0, ',', '.') }}
+                            </dd>
                         </div>
                         
                         @if(!empty($transaksi->payment_method))

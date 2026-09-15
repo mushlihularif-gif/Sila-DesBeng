@@ -110,7 +110,7 @@
                     </div>
                     <div class="row mb-3">
                         <div class="col-sm-4 text-muted">Lokasi</div>
-                        <div class="col-sm-8 fw-semibold">{{ $laporan->lokasi ?? 'Tidak ada lokasi' }}</div>
+                        <div class="col-sm-8 fw-semibold">{{ $laporan->display_lokasi }}</div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-sm-4 text-muted">Deskripsi</div>
@@ -170,18 +170,19 @@
             <!-- Peta Lokasi -->
             @if($laporan->latitude && $laporan->longitude)
             <div class="card border-0 shadow-sm rounded-4 mb-4">
-                <div class="card-header pb-0">
-                    <h5 class="card-title mb-0"><i class="bx bx-map text-primary me-2"></i> Peta Lokasi</h5>
+                <div class="card-header pb-0 d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0"><i class="bx bx-map text-primary me-2"></i> Peta Lokasi Kejadian</h5>
+                    <a href="https://www.google.com/maps?q={{ $laporan->latitude }},{{ $laporan->longitude }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-primary">
+                        <i class="bx bx-link-external me-1"></i> Buka di Google Maps
+                    </a>
                 </div>
                 <div class="card-body pt-3">
-                    <div class="rounded overflow-hidden" style="height: 300px;">
-                        <iframe width="100%" height="100%" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" 
-                            src="https://www.openstreetmap.org/export/embed.html?bbox={{ $laporan->longitude - 0.005 }},{{ $laporan->latitude - 0.005 }},{{ $laporan->longitude + 0.005 }},{{ $laporan->latitude + 0.005 }}&layer=mapnik&marker={{ $laporan->latitude }},{{ $laporan->longitude }}" 
-                            style="border: 1px solid black">
-                        </iframe>
+                    <div class="rounded overflow-hidden" style="height: 300px; position: relative; z-index: 1;">
+                        <div id="map-{{ $laporan->id }}" style="width: 100%; height: 100%; border-radius: 8px;"></div>
                     </div>
-                    <div class="mt-2 text-end">
-                        <small>Lat: {{ $laporan->latitude }}, Lng: {{ $laporan->longitude }}</small>
+                    <div class="mt-2 text-muted small d-flex justify-content-between">
+                        <span><i class="bx bx-current-location text-primary me-1"></i> {{ $laporan->display_lokasi }}</span>
+                        <span>Lat: {{ $laporan->latitude }}, Lng: {{ $laporan->longitude }}</span>
                     </div>
                 </div>
             </div>
@@ -340,14 +341,14 @@
 </div>
 
 <!-- Modal Bukti Foto -->
-<div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true" style="z-index: 9999;">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 bg-transparent shadow-none">
-            <div class="modal-header border-0 d-flex justify-content-end pb-0">
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-header border-0 d-flex justify-content-end pb-0" style="z-index: 10000;">
+                <button type="button" class="btn btn-danger btn-sm rounded-circle shadow" data-bs-dismiss="modal" aria-label="Close" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; position: absolute; right: -10px; top: -10px; z-index: 10000;"><i class="bx bx-x"></i></button>
             </div>
             <div class="modal-body text-center pt-0">
-                <img id="modalImage" src="" class="img-fluid rounded shadow-lg" alt="Bukti Foto Besar">
+                <img id="modalImage" src="" class="img-fluid rounded shadow-lg" alt="Bukti Foto Besar" data-bs-dismiss="modal" style="cursor: pointer;" title="Klik untuk menutup">
             </div>
         </div>
     </div>
@@ -358,4 +359,34 @@
         document.getElementById('modalImage').src = src;
     }
 </script>
+
+@if($laporan->latitude && $laporan->longitude)
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const mapContainer = document.getElementById("map-{{ $laporan->id }}");
+        if (!mapContainer) return;
+
+        const lat = {{ $laporan->latitude }};
+        const lng = {{ $laporan->longitude }};
+
+        const map = L.map(mapContainer, {
+            center: [lat, lng],
+            zoom: 16,
+            scrollWheelZoom: false
+        });
+
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        const marker = L.marker([lat, lng]).addTo(map);
+        marker.bindPopup("<strong>Lokasi Kejadian</strong><br>{{ addslashes($laporan->display_lokasi) }}").openPopup();
+
+        setTimeout(() => map.invalidateSize(), 300);
+    });
+</script>
+@endif
 @endsection

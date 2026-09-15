@@ -1,7 +1,6 @@
 @extends('layouts.user')
 
 @section('page')
-<main class="flex-grow relative w-full">
     <section class="relative z-10 min-h-screen pt-28 sm:pt-40 pb-28 sm:pb-16">
         <!-- Animated Background Wrapper -->
         <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
@@ -12,11 +11,11 @@
             <div class="absolute inset-0 bg-white/25"></div>
         </div>
 
-        <div id="main-content" class="max-w-6xl mx-auto px-4 sm:px-6 relative z-20">
+        <div id="laporan-container" class="max-w-5xl mx-auto px-4 sm:px-6 relative z-20">
             
             <!-- Header Section -->
             <div class="text-center mb-8 sm:mb-16 animate-section">
-                <h1 class="text-2xl sm:text-4xl md:text-5xl font-bold mb-2 sm:mb-4 pb-1 sm:pb-2 bg-gradient-to-r from-[#1a1a1a] via-[#0099ff] to-[#33b5ff] bg-clip-text text-transparent">
+                <h1 class="text-2xl sm:text-4xl md:text-5xl font-bold mb-2 sm:mb-4 pb-1 sm:pb-2 bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">
                     Laporan Layanan Daerah
                 </h1>
                 <p class="text-sm sm:text-lg text-gray-700">
@@ -25,16 +24,16 @@
             </div>
 
             <!-- Regional Hierarchy Section -->
-            <div class="mb-8 sm:mb-16 animate-section">
+            <div class="mb-8 sm:mb-12 animate-section">
                 <h2 class="text-xl sm:text-3xl md:text-4xl font-bold text-center text-gray-800 mb-1 sm:mb-2">
                     Kabupaten Bengkalis
                 </h2>
-                <h3 class="text-base sm:text-xl md:text-2xl font-bold text-center pb-2 bg-gradient-to-r from-[#1a1a1a] via-[#0099ff] to-[#33b5ff] bg-clip-text text-transparent mb-4 sm:mb-8">
+                <h3 class="text-base sm:text-xl md:text-2xl font-bold text-center pb-2 bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent mb-4 sm:mb-8">
                     Grafik Umum
                 </h3>
 
                 <!-- Global Filters -->
-                <div class="max-w-5xl mx-auto flex flex-col sm:flex-row justify-center items-stretch sm:items-center gap-2 sm:gap-4 bg-white/40 backdrop-blur-md p-2.5 sm:p-4 rounded-2xl border border-gray-200 shadow-sm w-full">
+                <div class="max-w-5xl mx-auto flex flex-col sm:flex-row justify-center items-stretch sm:items-center gap-2 sm:gap-4 bg-white/40 backdrop-blur-md p-2.5 sm:p-4 rounded-2xl border border-white/50 shadow-lg w-full">
                     <div class="w-full sm:w-auto px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm border border-gray-300 rounded-xl bg-white/80 backdrop-blur-md text-gray-800 font-bold flex items-center justify-center cursor-not-allowed shadow-sm sm:min-w-[180px]">
                         Kabupaten Bengkalis
                     </div>
@@ -76,212 +75,214 @@
                 </div>
             </div>
 
-            <!-- Kinerja Chart -->
-            <div class="mb-12 sm:mb-16 animate-section">
-                <div class="bg-white/80 backdrop-blur-sm rounded-2xl sm:rounded-3xl shadow-lg p-4 sm:p-8 border border-gray-200">
-                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 sm:mb-6">
-                        <h3 class="text-base sm:text-xl font-bold mb-2 md:mb-0">
-                            <span class="text-gray-900">Persentase Pendapatan </span>
-                            <span class="bg-gradient-to-r from-[#1a1a1a] via-[#0099ff] to-[#33b5ff] bg-clip-text text-transparent pb-1">Unit Pelayanan Daerah</span>
-                        </h3>
+            <!-- Charts Section Wrapper (max-w-5xl matching Beranda) -->
+            <div id="charts-section" class="max-w-5xl mx-auto space-y-8 sm:space-y-12">
+                <!-- Kinerja Chart -->
+                <div class="animate-section">
+                    <div class="relative rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 backdrop-blur-md bg-white/20 border border-white/30 shadow-[0_8px_32px_0_rgba(31,38,135,0.15)]">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 sm:mb-6">
+                            <h3 class="text-base sm:text-xl font-bold mb-2 md:mb-0">
+                                <span class="text-gray-900">Persentase Pendapatan </span>
+                                <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent pb-1">Unit Pelayanan Daerah</span>
+                            </h3>
+                        </div>
+                        <div class="bg-white/30 backdrop-blur-sm rounded-xl sm:rounded-2xl p-2 sm:p-5 border border-white/20 max-w-full overflow-hidden min-h-[220px] sm:min-h-[340px]">
+                            <div id="kinerjaChart" class="w-full min-h-[220px] sm:min-h-[300px]" data-chart='@json($kinerjaData)'></div>
+                        </div>
+                        <p class="text-xs sm:text-sm text-gray-600 mt-4 leading-relaxed">
+                            Grafik menunjukkan perkembangan tingkat aktivitas secara unit Layanan Daerah Kabupaten Bengkalis. Data diambil dari total pendapatan per bulan. Informasi ini membantu dalam memahami tren kinerja dan mengidentifikasi area yang perlu ditingkatkan.
+                        </p>
                     </div>
-                    <div class="bg-white/50 backdrop-blur-sm rounded-xl sm:rounded-2xl p-2 sm:p-5 border border-gray-100 min-h-[220px] sm:min-h-[340px]">
-                        <div id="kinerjaChart" data-chart='@json($kinerjaData)'></div>
-                    </div>
-                    <p class="text-xs sm:text-sm text-gray-600 mt-4 leading-relaxed">
-                        Grafik menunjukkan perkembangan tingkat aktivitas secara unit Layanan Daerah Kabupaten Bengkalis. Data diambil dari total pendapatan per bulan. Informasi ini membantu dalam memahami tren kinerja dan mengidentifikasi area yang perlu ditingkatkan.
-                    </p>
                 </div>
-            </div>
 
-            <!-- Unit Populer Chart -->
-            <div class="mb-12 sm:mb-16 animate-section">
-                <div class="bg-white/80 backdrop-blur-sm rounded-2xl sm:rounded-3xl shadow-lg p-4 sm:p-8 border border-gray-200">
-                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 sm:mb-6">
-                        <h3 class="text-base sm:text-xl font-bold mb-2 md:mb-0">
-                            <span class="text-gray-900">Unit </span>
-                            <span class="bg-gradient-to-r from-[#1a1a1a] via-[#0099ff] to-[#33b5ff] bg-clip-text text-transparent pb-1">Populer</span>
-                        </h3>
+                <!-- Unit Populer Chart -->
+                <div class="animate-section">
+                    <div class="relative rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 backdrop-blur-md bg-white/20 border border-white/30 shadow-[0_8px_32px_0_rgba(31,38,135,0.15)]">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 sm:mb-6">
+                            <h3 class="text-base sm:text-xl font-bold mb-2 md:mb-0">
+                                <span class="text-gray-900">Unit </span>
+                                <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent pb-1">Populer</span>
+                            </h3>
+                        </div>
+                        <div class="bg-white/30 backdrop-blur-sm rounded-xl sm:rounded-2xl p-2 sm:p-5 mb-4 sm:mb-5 border border-white/20 max-w-full overflow-hidden min-h-[220px] sm:min-h-[340px]">
+                            <div id="unitChart" class="w-full min-h-[220px] sm:min-h-[300px]" data-chart='@json($unitPopulerData)'></div>
+                        </div>
+                        <!-- Legend - 7 Units -->
+                        <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-y-2 sm:gap-y-3 gap-x-2 sm:gap-x-6 text-[11px] sm:text-sm w-full sm:w-fit mx-auto mb-4">
+                            <div class="flex items-center gap-1.5 sm:gap-2">
+                                <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm flex-shrink-0" style="background-color: #f59e0b;"></div>
+                                <span class="text-gray-700 font-medium truncate">Unit Penyewaan Alat</span>
+                            </div>
+                            <div class="flex items-center gap-1.5 sm:gap-2">
+                                <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm flex-shrink-0" style="background-color: #3b82f6;"></div>
+                                <span class="text-gray-700 font-medium truncate">Unit Penjualan Gas</span>
+                            </div>
+                            <div class="flex items-center gap-1.5 sm:gap-2">
+                                <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm flex-shrink-0" style="background-color: #10b981;"></div>
+                                <span class="text-gray-700 font-medium truncate">Unit Peminjaman Mobil</span>
+                            </div>
+                            <div class="flex items-center gap-1.5 sm:gap-2">
+                                <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm flex-shrink-0" style="background-color: #8b5cf6;"></div>
+                                <span class="text-gray-700 font-medium truncate">Unit Fasilitas Umum</span>
+                            </div>
+                            <div class="flex items-center gap-1.5 sm:gap-2">
+                                <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm flex-shrink-0" style="background-color: #ef4444;"></div>
+                                <span class="text-gray-700 font-medium truncate">Pelaporan Warga</span>
+                            </div>
+                            <div class="flex items-center gap-1.5 sm:gap-2">
+                                <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm flex-shrink-0" style="background-color: #06b6d4;"></div>
+                                <span class="text-gray-700 font-medium truncate">Kabar & Info Daerah</span>
+                            </div>
+                            <div class="flex items-center gap-1.5 sm:gap-2 col-span-2 sm:col-span-1">
+                                <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm flex-shrink-0" style="background-color: #ec4899;"></div>
+                                <span class="text-gray-700 font-medium truncate">Pasar Daerah</span>
+                            </div>
+                        </div>
+                        <p class="text-xs sm:text-sm text-gray-600 leading-relaxed mt-2">
+                            Grafik menunjukkan tingkat aktivitas dari seluruh unit Layanan Daerah. Informasi ini membantu dalam memahami performa dan antusiasme warga terhadap masing-masing layanan sehingga dapat ditingkatkan dan dikembangkan lebih lanjut.
+                        </p>
                     </div>
-                    <div class="bg-white/50 backdrop-blur-sm rounded-xl sm:rounded-2xl p-2 sm:p-5 mb-4 sm:mb-5 border border-gray-100 min-h-[220px] sm:min-h-[340px]">
-                        <div id="unitChart" data-chart='@json($unitPopulerData)'></div>
-                    </div>
-                    <!-- Legend - 7 Units -->
-                    <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-y-2 sm:gap-y-3 gap-x-2 sm:gap-x-6 text-[11px] sm:text-sm w-full sm:w-fit mx-auto mb-4">
-                        <div class="flex items-center gap-1.5 sm:gap-2">
-                            <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm flex-shrink-0" style="background-color: #f59e0b;"></div>
-                            <span class="text-gray-700 font-medium truncate">Unit Penyewaan Alat</span>
-                        </div>
-                        <div class="flex items-center gap-1.5 sm:gap-2">
-                            <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm flex-shrink-0" style="background-color: #3b82f6;"></div>
-                            <span class="text-gray-700 font-medium truncate">Unit Penjualan Gas</span>
-                        </div>
-                        <div class="flex items-center gap-1.5 sm:gap-2">
-                            <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm flex-shrink-0" style="background-color: #10b981;"></div>
-                            <span class="text-gray-700 font-medium truncate">Unit Peminjaman Mobil</span>
-                        </div>
-                        <div class="flex items-center gap-1.5 sm:gap-2">
-                            <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm flex-shrink-0" style="background-color: #8b5cf6;"></div>
-                            <span class="text-gray-700 font-medium truncate">Unit Fasilitas Umum</span>
-                        </div>
-                        <div class="flex items-center gap-1.5 sm:gap-2">
-                            <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm flex-shrink-0" style="background-color: #ef4444;"></div>
-                            <span class="text-gray-700 font-medium truncate">Pelaporan Warga</span>
-                        </div>
-                        <div class="flex items-center gap-1.5 sm:gap-2">
-                            <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm flex-shrink-0" style="background-color: #06b6d4;"></div>
-                            <span class="text-gray-700 font-medium truncate">Kabar & Info Daerah</span>
-                        </div>
-                        <div class="flex items-center gap-1.5 sm:gap-2 col-span-2 sm:col-span-1">
-                            <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm flex-shrink-0" style="background-color: #ec4899;"></div>
-                            <span class="text-gray-700 font-medium truncate">Pasar Daerah</span>
-                        </div>
-                    </div>
-                    <p class="text-sm text-gray-600 leading-relaxed mt-2">
-                        Grafik menunjukkan tingkat aktivitas dari seluruh unit Layanan Daerah. Informasi ini membantu dalam memahami performa dan antusiasme warga terhadap masing-masing layanan sehingga dapat ditingkatkan dan dikembangkan lebih lanjut.
-                    </p>
                 </div>
-            </div>
 
-            <!-- Total Pendapatan Section -->
-            <div class="mb-16 animate-section">
-                <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-lg p-8 border border-gray-200">
-                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-                        <h3 class="text-xl font-bold mb-3 md:mb-0">
-                            <span class="text-gray-900">Total Pendapatan </span>
-                            <span class="bg-gradient-to-r from-[#1a1a1a] via-[#0099ff] to-[#33b5ff] bg-clip-text text-transparent pb-1">Unit Pelayanan Daerah</span>
-                        </h3>
-                        <select id="pendapatan-month" class="px-4 py-2 text-sm border border-gray-300 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400">
-                            <option value="all" {{ $totalPendapatanData['month'] === 'all' ? 'selected' : '' }}>Sepanjang Tahun {{ $totalPendapatanData['year'] }}</option>
-                            @php
-                                $months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-                                $currentMonth = $totalPendapatanData['month'];
-                            @endphp
-                            @foreach($months as $index => $month)
-                                <option value="{{ $index + 1 }}" {{ (string)($index + 1) === (string)$currentMonth ? 'selected' : '' }}>
-                                    {{ $month }} {{ $totalPendapatanData['year'] }}
-                                </option>
-                            @endforeach
-                        </select>
+                <!-- Total Pendapatan Section -->
+                <div class="animate-section">
+                    <div class="relative rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 backdrop-blur-md bg-white/20 border border-white/30 shadow-[0_8px_32px_0_rgba(31,38,135,0.15)]">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+                            <h3 class="text-base sm:text-xl font-bold mb-3 md:mb-0">
+                                <span class="text-gray-900">Total Pendapatan </span>
+                                <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent pb-1">Unit Pelayanan Daerah</span>
+                            </h3>
+                            <select id="pendapatan-month" class="px-3 sm:px-4 py-2 text-xs sm:text-sm border border-gray-300 rounded-xl bg-white/80 backdrop-blur-md text-gray-800 font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm">
+                                <option value="all" {{ $totalPendapatanData['month'] === 'all' ? 'selected' : '' }}>Sepanjang Tahun {{ $totalPendapatanData['year'] }}</option>
+                                @php
+                                    $months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+                                    $currentMonth = $totalPendapatanData['month'];
+                                @endphp
+                                @foreach($months as $index => $month)
+                                    <option value="{{ $index + 1 }}" {{ (string)($index + 1) === (string)$currentMonth ? 'selected' : '' }}>
+                                        {{ $month }} {{ $totalPendapatanData['year'] }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 items-center">
+                            <!-- Left: Revenue Bars -->
+                            <div class="space-y-4 sm:space-y-5 bg-white/30 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-white/20">
+                                <!-- Unit Penyewaan Alat -->
+                                <div>
+                                    <div class="flex justify-between items-center mb-1.5">
+                                        <span class="text-xs sm:text-sm font-medium text-gray-700">Unit Penyewaan Alat</span>
+                                        <span class="text-xs sm:text-sm font-bold text-gray-900">{{ number_format($totalPendapatanData['rental']['percentage'], 1, ',', '.') }}%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200/70 rounded-full h-3.5 overflow-hidden">
+                                        <div class="bg-gradient-to-r from-[#f59e0b] to-[#fbbf24] h-3.5 rounded-full transition-all duration-500" 
+                                             style="width: {{ $totalPendapatanData['rental']['percentage'] }}%"></div>
+                                    </div>
+                                    <p class="text-[11px] sm:text-xs text-gray-500 mt-1">{{ $totalPendapatanData['rental']['transactions'] }} Transaksi</p>
+                                </div>
+
+                                <!-- Unit Penjualan Gas -->
+                                <div>
+                                    <div class="flex justify-between items-center mb-1.5">
+                                        <span class="text-xs sm:text-sm font-medium text-gray-700">Unit Penjualan Gas</span>
+                                        <span class="text-xs sm:text-sm font-bold text-gray-900">{{ number_format($totalPendapatanData['gas']['percentage'], 1, ',', '.') }}%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200/70 rounded-full h-3.5 overflow-hidden">
+                                        <div class="bg-gradient-to-r from-[#3b82f6] to-[#60a5fa] h-3.5 rounded-full transition-all duration-500" 
+                                             style="width: {{ $totalPendapatanData['gas']['percentage'] }}%"></div>
+                                    </div>
+                                    <p class="text-[11px] sm:text-xs text-gray-500 mt-1">{{ $totalPendapatanData['gas']['transactions'] }} Transaksi</p>
+                                </div>
+
+                                <!-- Unit Peminjaman Mobil -->
+                                <div>
+                                    <div class="flex justify-between items-center mb-1.5">
+                                        <span class="text-xs sm:text-sm font-medium text-gray-700">Unit Peminjaman Mobil</span>
+                                        <span class="text-xs sm:text-sm font-bold text-gray-900">{{ number_format($totalPendapatanData['mobil']['percentage'], 1, ',', '.') }}%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200/70 rounded-full h-3.5 overflow-hidden">
+                                        <div class="bg-gradient-to-r from-[#10b981] to-[#34d399] h-3.5 rounded-full transition-all duration-500" 
+                                             style="width: {{ $totalPendapatanData['mobil']['percentage'] }}%"></div>
+                                    </div>
+                                    <p class="text-[11px] sm:text-xs text-gray-500 mt-1">{{ $totalPendapatanData['mobil']['transactions'] }} Transaksi</p>
+                                </div>
+
+                                <!-- Unit Fasilitas Umum -->
+                                <div>
+                                    <div class="flex justify-between items-center mb-1.5">
+                                        <span class="text-xs sm:text-sm font-medium text-gray-700">Fasilitas Umum</span>
+                                        <span class="text-xs sm:text-sm font-bold text-gray-900">{{ number_format($totalPendapatanData['fasilitas']['percentage'], 1, ',', '.') }}%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200/70 rounded-full h-3.5 overflow-hidden">
+                                        <div class="bg-gradient-to-r from-[#8b5cf6] to-[#a78bfa] h-3.5 rounded-full transition-all duration-500" 
+                                            style="width: {{ $totalPendapatanData['fasilitas']['percentage'] }}%"></div>
+                                    </div>
+                                    <p class="text-[11px] sm:text-xs text-gray-500 mt-1">{{ $totalPendapatanData['fasilitas']['transactions'] }} Transaksi</p>
+                                </div>
+
+                                <!-- Pasar Daerah -->
+                                <div>
+                                    <div class="flex justify-between items-center mb-1.5">
+                                        <span class="text-xs sm:text-sm font-medium text-gray-700">Pasar Daerah</span>
+                                        <span class="text-xs sm:text-sm font-bold text-gray-900">{{ number_format($totalPendapatanData['pasar']['percentage'], 1, ',', '.') }}%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200/70 rounded-full h-3.5 overflow-hidden">
+                                        <div class="bg-gradient-to-r from-[#ec4899] to-[#f472b6] h-3.5 rounded-full transition-all duration-500" 
+                                            style="width: {{ $totalPendapatanData['pasar']['percentage'] }}%"></div>
+                                    </div>
+                                    <p class="text-[11px] sm:text-xs text-gray-500 mt-1">{{ $totalPendapatanData['pasar']['transactions'] }} Transaksi</p>
+                                </div>
+
+                                <!-- Total -->
+                                <div class="pt-3 border-t border-gray-300/60">
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm sm:text-base font-bold text-gray-900">Total Keseluruhan</span>
+                                        <span class="text-sm sm:text-base font-bold text-gray-900">{{ $totalPendapatanData['total']['transactions'] > 0 ? '100%' : '0%' }}</span>
+                                    </div>
+                                    <p class="text-[11px] sm:text-xs text-gray-500 mt-1">{{ $totalPendapatanData['total']['transactions'] }} Transaksi</p>
+                                </div>
+                            </div>
+
+                            <!-- Right: Pie Chart -->
+                            <div class="bg-white/30 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-white/20 flex items-center justify-center min-h-[280px]">
+                                <div id="pendapatanPieChart" class="w-full max-w-sm" data-chart='@json($totalPendapatanData)'></div>
+                            </div>
+                        </div>
+
+                        <!-- Legend -->
+                        <div class="flex flex-wrap justify-center gap-3 sm:gap-6 text-xs sm:text-sm mt-6 pt-6 border-t border-white/30">
+                            <div class="flex items-center gap-1.5 sm:gap-2">
+                                <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm" style="background-color: #f59e0b;"></div>
+                                <span class="text-gray-700 font-medium">Unit Penyewaan Alat</span>
+                            </div>
+                            <div class="flex items-center gap-1.5 sm:gap-2">
+                                <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm" style="background-color: #3b82f6;"></div>
+                                <span class="text-gray-700 font-medium">Unit Penjualan Gas</span>
+                            </div>
+                            <div class="flex items-center gap-1.5 sm:gap-2">
+                                <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm" style="background-color: #10b981;"></div>
+                                <span class="text-gray-700 font-medium">Unit Peminjaman Mobil</span>
+                            </div>
+                            <div class="flex items-center gap-1.5 sm:gap-2">
+                                <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm" style="background-color: #8b5cf6;"></div>
+                                <span class="text-gray-700 font-medium">Fasilitas Umum</span>
+                            </div>
+                            <div class="flex items-center gap-1.5 sm:gap-2">
+                                <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm" style="background-color: #ec4899;"></div>
+                                <span class="text-gray-700 font-medium">Pasar Daerah</span>
+                            </div>
+                        </div>
+
+                        <p class="text-xs sm:text-sm text-gray-600 mt-6 leading-relaxed">
+                            Diagram menunjukkan perbandingan persentase kontribusi pendapatan dari transaksi per unit Layanan Daerah per bulan. Informasi ini disajikan dalam bentuk persentase untuk menjaga privasi nominal usaha daerah, namun tetap efektif dalam membantu memahami kontribusi setiap unit dan dapat digunakan untuk perencanaan strategi ke depan.
+                        </p>
                     </div>
-
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        <!-- Left: Revenue Bars -->
-                        <div class="space-y-6">
-                            <!-- Unit Penyewaan Alat -->
-                            <div>
-                                <div class="flex justify-between items-center mb-2">
-                                    <span class="text-sm font-medium text-gray-700">Unit Penyewaan Alat</span>
-                                    <span class="text-sm font-bold text-gray-900">{{ number_format($totalPendapatanData['rental']['percentage'], 1, ',', '.') }}%</span>
-                                </div>
-                                <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
-                                    <div class="bg-gradient-to-r from-[#f59e0b] to-[#fbbf24] h-4 rounded-full transition-all duration-500" 
-                                         style="width: {{ $totalPendapatanData['rental']['percentage'] }}%"></div>
-                                </div>
-                                <p class="text-xs text-gray-500 mt-1">{{ $totalPendapatanData['rental']['transactions'] }} Transaksi</p>
-                            </div>
-
-                            <!-- Unit Penjualan Gas -->
-                            <div>
-                                <div class="flex justify-between items-center mb-2">
-                                    <span class="text-sm font-medium text-gray-700">Unit Penjualan Gas</span>
-                                    <span class="text-sm font-bold text-gray-900">{{ number_format($totalPendapatanData['gas']['percentage'], 1, ',', '.') }}%</span>
-                                </div>
-                                <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
-                                    <div class="bg-gradient-to-r from-[#3b82f6] to-[#60a5fa] h-4 rounded-full transition-all duration-500" 
-                                         style="width: {{ $totalPendapatanData['gas']['percentage'] }}%"></div>
-                                </div>
-                                <p class="text-xs text-gray-500 mt-1">{{ $totalPendapatanData['gas']['transactions'] }} Transaksi</p>
-                            </div>
-
-                            <!-- Unit Peminjaman Mobil -->
-                            <div>
-                                <div class="flex justify-between items-center mb-2">
-                                    <span class="text-sm font-medium text-gray-700">Unit Peminjaman Mobil</span>
-                                    <span class="text-sm font-bold text-gray-900">{{ number_format($totalPendapatanData['mobil']['percentage'], 1, ',', '.') }}%</span>
-                                </div>
-                                <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
-                                    <div class="bg-gradient-to-r from-[#10b981] to-[#34d399] h-4 rounded-full transition-all duration-500" 
-                                         style="width: {{ $totalPendapatanData['mobil']['percentage'] }}%"></div>
-                                </div>
-                                <p class="text-xs text-gray-500 mt-1">{{ $totalPendapatanData['mobil']['transactions'] }} Transaksi</p>
-                            </div>
-
-                            <!-- Unit Fasilitas Umum -->
-                            <div>
-                                <div class="flex justify-between items-center mb-2">
-                                    <span class="text-sm font-medium text-gray-700">Fasilitas Umum</span>
-                                    <span class="text-sm font-bold text-gray-900">{{ number_format($totalPendapatanData['fasilitas']['percentage'], 1, ',', '.') }}%</span>
-                                </div>
-                                <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
-                                    <div class="bg-gradient-to-r from-[#8b5cf6] to-[#a78bfa] h-4 rounded-full transition-all duration-500" 
-                                        style="width: {{ $totalPendapatanData['fasilitas']['percentage'] }}%"></div>
-                                </div>
-                                <p class="text-xs text-gray-500 mt-1">{{ $totalPendapatanData['fasilitas']['transactions'] }} Transaksi</p>
-                            </div>
-
-                            <!-- Pasar Daerah -->
-                            <div>
-                                <div class="flex justify-between items-center mb-2">
-                                    <span class="text-sm font-medium text-gray-700">Pasar Daerah</span>
-                                    <span class="text-sm font-bold text-gray-900">{{ number_format($totalPendapatanData['pasar']['percentage'], 1, ',', '.') }}%</span>
-                                </div>
-                                <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
-                                    <div class="bg-gradient-to-r from-[#ec4899] to-[#f472b6] h-4 rounded-full transition-all duration-500" 
-                                        style="width: {{ $totalPendapatanData['pasar']['percentage'] }}%"></div>
-                                </div>
-                                <p class="text-xs text-gray-500 mt-1">{{ $totalPendapatanData['pasar']['transactions'] }} Transaksi</p>
-                            </div>
-
-                            <!-- Total -->
-                            <div class="pt-4 border-t border-gray-300">
-                                <div class="flex justify-between items-center">
-                                    <span class="text-base font-bold text-gray-900">Total Keseluruhan</span>
-                                    <span class="text-base font-bold text-gray-900">{{ $totalPendapatanData['total']['transactions'] > 0 ? '100%' : '0%' }}</span>
-                                </div>
-                                <p class="text-xs text-gray-500 mt-1">{{ $totalPendapatanData['total']['transactions'] }} Transaksi</p>
-                            </div>
-                        </div>
-
-                        <!-- Right: Pie Chart -->
-                        <div class="flex items-center justify-center" style="min-height: 280px;">
-                            <div id="pendapatanPieChart" class="w-full max-w-sm" data-chart='@json($totalPendapatanData)'></div>
-                        </div>
-                    </div>
-
-                    <!-- Legend -->
-                    <div class="flex flex-wrap justify-center gap-6 text-sm mt-6 pt-6 border-t border-gray-200">
-                        <div class="flex items-center gap-2">
-                            <div class="w-3 h-3 rounded-sm" style="background-color: #f59e0b;"></div>
-                            <span class="text-gray-700 font-medium">Unit Penyewaan Alat</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <div class="w-3 h-3 rounded-sm" style="background-color: #3b82f6;"></div>
-                            <span class="text-gray-700 font-medium">Unit Penjualan Gas</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <div class="w-3 h-3 rounded-sm" style="background-color: #10b981;"></div>
-                            <span class="text-gray-700 font-medium">Unit Peminjaman Mobil</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <div class="w-3 h-3 rounded-sm" style="background-color: #8b5cf6;"></div>
-                            <span class="text-gray-700 font-medium">Fasilitas Umum</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <div class="w-3 h-3 rounded-sm" style="background-color: #ec4899;"></div>
-                            <span class="text-gray-700 font-medium">Pasar Daerah</span>
-                        </div>
-                    </div>
-
-                    <p class="text-sm text-gray-600 mt-6 leading-relaxed">
-                        Diagram menunjukkan perbandingan persentase kontribusi pendapatan dari transaksi per unit Layanan Daerah per bulan. Informasi ini disajikan dalam bentuk persentase untuk menjaga privasi nominal usaha daerah, namun tetap efektif dalam membantu memahami kontribusi setiap unit dan dapat digunakan untuk perencanaan strategi ke depan.
-                    </p>
                 </div>
             </div>
 
         </div>
     </section>
-</main>
 @endsection
 
 @push('styles')
@@ -390,11 +391,11 @@
             if (currentYear) url.searchParams.set('year', currentYear.value || new Date().getFullYear());
             if (currentMonth) url.searchParams.set('month', currentMonth.value || new Date().getMonth() + 1);
 
-            const mainContent = document.getElementById('main-content');
-            if (mainContent) {
-                mainContent.style.transition = 'opacity 0.3s ease';
-                mainContent.style.opacity = '0.5';
-                mainContent.style.pointerEvents = 'none';
+            const laporanContainer = document.getElementById('laporan-container');
+            if (laporanContainer) {
+                laporanContainer.style.transition = 'opacity 0.3s ease';
+                laporanContainer.style.opacity = '0.5';
+                laporanContainer.style.pointerEvents = 'none';
             }
 
             try {
@@ -410,11 +411,11 @@
                 const htmlString = await response.text();
                 const parser = new DOMParser();
                 const newDoc = parser.parseFromString(htmlString, 'text/html');
-                const newMainContent = newDoc.getElementById('main-content');
+                const newLaporanContainer = newDoc.getElementById('laporan-container');
                 
-                if (newMainContent && mainContent) {
+                if (newLaporanContainer && laporanContainer) {
                     const scrollPos = window.scrollY; // Save scroll position
-                    mainContent.innerHTML = newMainContent.innerHTML;
+                    laporanContainer.innerHTML = newLaporanContainer.innerHTML;
                     
                     // Re-bind events to new DOM elements
                     const newKecamatan = document.getElementById('kecamatanSelect');
@@ -439,7 +440,7 @@
                     initChartsSafely();
 
                     // Re-animate sections
-                    const newSections = mainContent.querySelectorAll('.animate-section');
+                    const newSections = laporanContainer.querySelectorAll('.animate-section');
                     newSections.forEach((section, index) => {
                         setTimeout(() => {
                             section.classList.add('show');
@@ -458,14 +459,14 @@
                     // Restore scroll position
                     window.scrollTo(0, scrollPos);
                 } else {
-                    console.error('newMainContent is null. Server returned:', htmlString.substring(0, 500));
+                    console.error('newLaporanContainer is null. Server returned:', htmlString.substring(0, 500));
                 }
             } catch (error) {
                 console.error('AJAX failed:', error);
             } finally {
-                if (mainContent) {
-                    mainContent.style.opacity = '1';
-                    mainContent.style.pointerEvents = 'auto';
+                if (laporanContainer) {
+                    laporanContainer.style.opacity = '1';
+                    laporanContainer.style.pointerEvents = 'auto';
                 }
             }
         };

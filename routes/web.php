@@ -92,7 +92,7 @@ Route::post('/kemitraan/gabung', [App\Http\Controllers\PartnerApplicationControl
 // Validasi QR Code Surat Bukti Laporan (Publik, tanpa login)
 Route::get('/validasi/laporan/{id}', function ($id) {
     $token = request('token');
-    $laporan = \App\Models\Laporan::find($id);
+    $laporan = \App\Models\Laporan::with(['user', 'region'])->find($id);
     
     $valid = false;
     $handler_name = 'Sistem SiladesBeng';
@@ -113,6 +113,20 @@ Route::get('/validasi/laporan/{id}', function ($id) {
                 $handler = \App\Models\User::find($laporan->rt_handler_id);
                 if ($handler) $handler_name = $handler->name;
             }
+
+            // Fallback ke Nama Lengkap Admin Desa jika belum ada handler spesifik
+            if (empty($handler_name) || $handler_name === 'Sistem SiladesBeng') {
+                $desaId = $laporan->region_id ?? $laporan->user?->region_id;
+                $adminDesa = \App\Models\User::where('role', 'admin_desa')
+                    ->where('region_id', $desaId)
+                    ->first();
+
+                if ($adminDesa && !empty($adminDesa->name)) {
+                    $handler_name = $adminDesa->name;
+                } else {
+                    $handler_name = 'Pemerintah Desa';
+                }
+            }
         }
     }
     
@@ -132,17 +146,20 @@ Route::get('/validasi/transaksi/{type}/{id}', function ($type, $id) {
 
     // Cari model berdasarkan tipe transaksi
     if ($type === 'rental') {
-        $transaksi = \App\Models\RentalBooking::find($id);
+        $transaksi = \App\Models\RentalBooking::with(['barang', 'user'])->find($id);
         $title = 'Penyewaan Alat Berat';
     } elseif ($type === 'gas') {
-        $transaksi = \App\Models\GasOrder::find($id);
+        $transaksi = \App\Models\GasOrder::with('user')->find($id);
         $title = 'Pembelian Tabung Gas';
     } elseif ($type === 'mobil') {
-        $transaksi = \App\Models\MobilBooking::find($id);
-        $title = 'Penyewaan Mobil BUMDes';
+        $transaksi = \App\Models\MobilBooking::with(['mobil', 'user'])->find($id);
+        $title = 'Penyewaan Mobil';
     } elseif ($type === 'fasilitas') {
-        $transaksi = \App\Models\FasilitasUmumBooking::find($id);
+        $transaksi = \App\Models\FasilitasUmumBooking::with(['fasilitas', 'user'])->find($id);
         $title = 'Peminjaman Fasilitas Umum';
+    } elseif ($type === 'pasar-daerah' || $type === 'pasar') {
+        $transaksi = \App\Models\PasarOrder::with(['items', 'user'])->find($id);
+        $title = 'Belanja Pasar Daerah';
     }
 
     if ($transaksi && $token) {
@@ -191,7 +208,7 @@ Route::post('/mobil-rental/booking', [App\Http\Controllers\User\MobilBookingCont
 
 Route::get('/unit-peminjaman-fasilitas-umum', [App\Http\Controllers\User\FasilitasUmumUserController::class, 'index'])
     ->name('user.fasilitas-umum.equipment')
-    ->middleware(['role:user,guest', 'region.service:peminjaman-fasilitas-umum']);
+    ->middleware(['role:user,guest', 'region.service:fasilitas-umum']);
 Route::get('/unit-peminjaman-fasilitas-umum/{id}', [App\Http\Controllers\User\FasilitasUmumUserController::class, 'show'])
     ->name('user.fasilitas-umum.show')
     ->middleware('role:user,guest');
@@ -207,6 +224,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/layanan-ambulans', [App\Http\Controllers\User\AmbulansUserController::class, 'index'])
         ->name('user.ambulans.index')
         ->middleware(['role:user', 'region.service:layanan-ambulans']);
+    Route::get('/layanan-ambulans/{id}', [App\Http\Controllers\User\AmbulansUserController::class, 'show'])
+        ->name('user.ambulans.show')
+        ->middleware(['role:user,guest']);
         
     // Verifikasi Identitas
     Route::redirect('/profile/verifikasi', '/kyc', 301)->name('user.verifikasi.index');
@@ -229,6 +249,9 @@ Route::get('/unit-penjualan-gas/{id}/booking', [App\Http\Controllers\User\GasSal
     ->middleware('auth');
 Route::post('/gas/booking', [App\Http\Controllers\User\GasBookingController::class, 'store'])
     ->name('gas.booking.store')
+    ->middleware('auth');
+Route::post('/gas/verify-kk', [App\Http\Controllers\User\GasKkVerificationController::class, 'store'])
+    ->name('user.gas.verify-kk')
     ->middleware('auth');
 
 Route::get('/gas/payment/{id}', [App\Http\Controllers\User\GasBookingController::class, 'payment'])
@@ -905,6 +928,17 @@ Route::middleware(['auth', 'role:user'])->group(function () {
 // API Routes for Regions
 Route::get('/api/regions', function () {
     return response()->json(\App\Models\Region::all());
+});
+
+// Reverse geocoding API proxy (OpenStreetMap Nominatim dengan User-Agent SiladesBeng resmi)
+Route::get('/api/geocode/reverse', function (\Illuminate\Http\Request $request) {
+    $lat = $request->query('lat');
+    $lng = $request->query('lng');
+    $address = \App\Support\GeocodeHelper::reverse($lat, $lng);
+    return response()->json([
+        'status' => $address ? 'success' : 'fallback',
+        'address' => $address,
+    ]);
 });
 
 Route::get('/dev/setup-region', function () {

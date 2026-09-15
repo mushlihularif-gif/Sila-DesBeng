@@ -18,10 +18,13 @@ class FasilitasUmumBookingController extends Controller
             return redirect()->back()->with('show_kyc_modal', true);
         }
 
-        $item = FasilitasUmum::findOrFail($itemId);
+        $item = FasilitasUmum::with('pengurus')->findOrFail($itemId);
 
         // Validasi: Warga hanya bisa memesan layanan di wilayahnya sendiri
-        if (! in_array($item->region_id, \App\Models\Region::wilayahLayananTerlihat(Auth::user()->region_id, 'Fasilitas Umum'))) {
+        $userRegionId = Auth::user()->region_id;
+        $allowedRegions = \App\Models\Region::wilayahLayananTerlihat($userRegionId, 'Fasilitas Umum');
+        $userRegionAncestors = $userRegionId ? array_merge([$userRegionId], \App\Models\Region::getAncestorIds($userRegionId)) : [];
+        if ($item->region_id && !in_array($item->region_id, $allowedRegions) && !in_array($item->region_id, $userRegionAncestors)) {
             return redirect()->back()->with('error', 'Layanan khusus warga lokal. Silakan sesuaikan wilayah Anda.');
         }
         
@@ -50,14 +53,18 @@ class FasilitasUmumBookingController extends Controller
             ->orderByDesc('is_utama')
             ->orderBy('id')
             ->get();
-        return view('users.fasilitas-umum-booking', compact('item', 'setting', 'quantity', 'sop_fasilitas', 'region', 'alamatTersimpan'));
+
+        // Cek apakah wilayah ini sudah siap gateway Midtrans
+        $adaGateway = \App\Support\PenyediaPembayaran::terapkanMidtransWilayah($item->region_id);
+
+        return view('users.fasilitas-umum-booking', compact('item', 'setting', 'quantity', 'sop_fasilitas', 'region', 'alamatTersimpan', 'adaGateway'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
             'fasilitas_id' => 'required|exists:fasilitas_umums,id',
-            'delivery_method' => 'required|in:antar,jemput',
+            'delivery_method' => 'nullable|string|in:antar,jemput,lokasi,ditempat,ambil_sendiri',
             'quantity' => 'required|integer|min:1|max:50',
             'start_date' => 'required|date|after_or_equal:today',
             'end_date' => 'required|date|after_or_equal:start_date',
@@ -70,18 +77,24 @@ class FasilitasUmumBookingController extends Controller
             // Acara komersial di fasilitas berbayar menagih uang sungguhan.
             // Sebelumnya kolom payment_method/payment_proof ada di tabel tetapi
             // tidak pernah diisi, sehingga tagihannya tidak punya jejak bayar.
-            'payment_method' => 'nullable|in:tunai,transfer',
-            'payment_proof' => 'required_if:payment_method,transfer|nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
+            'payment_method' => 'nullable|in:tunai,transfer,ewallet,bank_transfer_bca,bank_transfer_bri,bank_transfer_bni,bank_transfer_mandiri,bank_transfer_bsi,gopay,qris',
+            'payment_proof' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
         ]);
 
-        if ($validated['delivery_method'] == 'antar') {
+        $item = FasilitasUmum::findOrFail($validated['fasilitas_id']);
+        
+        $deliveryMethod = $validated['delivery_method'] ?? 'lokasi';
+        $recipientName = $validated['recipient_name'] ?? (Auth::user()->name ?? 'Warga');
+        $deliveryAddress = $validated['delivery_address'] ?? ($item->lokasi ?? 'Lokasi Gedung / Ruang Publik');
+
+        if ($deliveryMethod === 'antar') {
             $request->validate([
                 'recipient_name' => 'required|string|max:255',
                 'delivery_address' => 'required|string',
             ]);
+            $recipientName = $request->recipient_name;
+            $deliveryAddress = $request->delivery_address;
         }
-
-        $item = FasilitasUmum::findOrFail($validated['fasilitas_id']);
         
         // Validate stock before proceeding
         if ($item->stok < $validated['quantity']) {
@@ -107,18 +120,18 @@ class FasilitasUmumBookingController extends Controller
         // Metode bayar hanya bermakna kalau pesanannya memang ditagih.
         $metodeBayar = $totalAmount > 0 ? ($validated['payment_method'] ?? 'tunai') : null;
         $buktiBayar = null;
-        if ($metodeBayar === 'transfer' && $request->hasFile('payment_proof')) {
+        if (in_array($metodeBayar, ['tunai', 'transfer']) && $request->hasFile('payment_proof')) {
             $buktiBayar = $request->file('payment_proof')->store('payment_proofs', 'public');
         }
 
         $booking = FasilitasUmumBooking::create([
             'user_id' => Auth::id(),
             'fasilitas_id' => $validated['fasilitas_id'],
-            'delivery_method' => $validated['delivery_method'],
+            'delivery_method' => $deliveryMethod,
             'payment_method' => $metodeBayar,
             'payment_proof' => $buktiBayar,
-            'recipient_name' => $validated['recipient_name'] ?? null,
-            'delivery_address' => $validated['delivery_address'] ?? null,
+            'recipient_name' => $recipientName,
+            'delivery_address' => $deliveryAddress,
             'quantity' => $validated['quantity'],
             'start_date' => $validated['start_date'],
             'end_date' => $validated['end_date'],
@@ -161,10 +174,55 @@ class FasilitasUmumBookingController extends Controller
         // We can just rely on the normal flow for now, the user can check their activity dashboard
         // If we want a separate payment page, we can build it later.
         
-        return response()->json([
+        $response = [
             'success' => true,
             'message' => 'Pengajuan Peminjaman Fasilitas Umum berhasil dibuat! ' . ($totalAmount > 0 ? 'Silakan periksa detail tagihan Anda.' : 'Menunggu konfirmasi admin.'),
-            'receipt_id' => $booking->id
-        ]);
+            'receipt_id' => $booking->id,
+            'booking_id' => $booking->id,
+        ];
+
+        if ($totalAmount > 0 && $metodeBayar && ! in_array($metodeBayar, ['tunai', 'transfer', 'ewallet'], true)) {
+            $siap = \App\Support\PenyediaPembayaran::terapkanMidtransWilayah($item->region_id);
+            if ($siap) {
+                try {
+                    $params = [
+                        'transaction_details' => [
+                            'order_id' => $booking->order_number,
+                            'gross_amount' => (int) $totalAmount,
+                        ],
+                        'customer_details' => [
+                            'first_name' => $validated['recipient_name'] ?? Auth::user()->name,
+                            'email' => Auth::user()->email,
+                            'phone' => Auth::user()->phone ?? '081234567890',
+                        ],
+                        'item_details' => [[
+                            'id' => $item->id,
+                            'price' => (int) $totalAmount,
+                            'quantity' => 1,
+                            'name' => ($item->nama_fasilitas ?? 'Fasilitas Umum'),
+                        ]],
+                    ];
+
+                    $kanal = \App\Support\PenyediaPembayaran::kanalSnap($metodeBayar);
+                    if ($kanal) $params['enabled_payments'] = [$kanal];
+
+                    $snap = \Midtrans\Snap::createTransaction($params);
+                    $booking->snap_token = $snap->token;
+                    $booking->payment_channel = $metodeBayar;
+                    $booking->payment_expiry_time = now()->addDay();
+                    $booking->save();
+                    $response['snap_token'] = $snap->token;
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error('Midtrans Snap Fasilitas gagal', ['error' => $e->getMessage()]);
+                    $booking->payment_channel = $metodeBayar;
+                    $booking->save();
+                    $response['snap_token'] = null;
+                    $response['gateway_gagal'] = true;
+                    $response['message'] = 'Pesanan tersimpan, tetapi pembayaran otomatis sedang tidak dapat diproses.';
+                }
+            }
+        }
+
+        return response()->json($response);
     }
 }

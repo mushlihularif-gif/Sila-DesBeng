@@ -240,6 +240,18 @@
                                     Ketik nomor plat polisi dengan spasi standar. Karakter akan otomatis tersinkronisasi ke visualisasi plat di panel samping.
                                 </div>
                             </div>
+
+                            <!-- Deskripsi & Fasilitas Medis -->
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold text-dark">
+                                    Deskripsi & Perlengkapan Medis <small class="text-muted fw-normal">(Opsional)</small>
+                                </label>
+                                <textarea class="form-control modern-input" 
+                                          name="deskripsi" 
+                                          rows="3" 
+                                          placeholder="Contoh: Dilengkapi tabung oksigen, regulator, tandu darurat (stretcher), kotak P3K lengkap, sirene, dan lampu strobo siaga 24 jam.">{{ old('deskripsi') }}</textarea>
+                                <div class="form-text text-muted small">Jelaskan fasilitas atau perlengkapan medis yang tersedia di armada ini untuk informasi warga.</div>
+                            </div>
                         </div>
 
                         <!-- SECTION 4: DATA SUPIR DENGAN KARTU PROFIL LENGKAP -->
@@ -592,6 +604,7 @@
             
             <form id="addSupirForm" action="{{ route('supir.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
+                <input type="hidden" name="tipe" value="supir">
                 <input type="hidden" name="is_fasilitas_umum" value="1">
                 <input type="hidden" name="is_sewa_mobil" value="1">
 
@@ -1240,6 +1253,10 @@
     // 7. Preview Avatar Modal Tambah Supir Baru
     function previewNewSupirAvatar(input) {
         if (input.files && input.files[0]) {
+            if (typeof initGlobalCropper === 'function') {
+                initGlobalCropper(input, 'previewAvatarNewSupir', NaN, true);
+                return;
+            }
             const reader = new FileReader();
             reader.onload = function(e) {
                 document.getElementById('previewAvatarNewSupir').src = e.target.result;
@@ -1268,13 +1285,19 @@
                     'Accept': 'application/json'
                 }
             })
-            .then(res => res.json())
+            .then(async res => {
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) {
+                    throw data;
+                }
+                return data;
+            })
             .then(data => {
                 if (data.success || data.supir) {
                     const newSupir = data.supir || data.data;
                     supirsMaster[newSupir.id] = newSupir;
 
-                    const avatarUrl = newSupir.foto ? `/storage/${newSupir.foto}` : `{{ asset('Admin/img/avatars/pria.png') }}`;
+                    const avatarUrl = data.avatar_url || (newSupir.foto ? `/storage/${newSupir.foto}` : `{{ asset('Admin/img/avatars/pria.png') }}`);
                     const isTersedia = (newSupir.status === 'Tersedia');
 
                     // Sembunyikan empty state jika ada
@@ -1348,7 +1371,9 @@
                     updateAssignedDriversList();
 
                     // Tutup modal & reset form
-                    bootstrap.Modal.getInstance(document.getElementById('addSupirModal')).hide();
+                    const modalEl = document.getElementById('addSupirModal');
+                    const modalInst = bootstrap.Modal.getInstance(modalEl);
+                    if (modalInst) modalInst.hide();
                     form.reset();
                     document.getElementById('previewAvatarNewSupir').src = "{{ asset('Admin/img/avatars/pria.png') }}";
 
@@ -1363,12 +1388,40 @@
                         });
                     }
                 } else {
-                    alert('Gagal menyimpan data supir baru.');
+                    let errMsg = data.message || 'Gagal menyimpan data supir baru.';
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal Menyimpan Supir',
+                            text: errMsg,
+                            confirmButtonText: 'Tutup',
+                            confirmButtonColor: '#d33'
+                        });
+                    } else {
+                        alert(errMsg);
+                    }
                 }
             })
             .catch(err => {
                 console.error(err);
-                alert('Terjadi kesalahan koneksi server saat menyimpan supir.');
+                let errorMsg = 'Terjadi kesalahan saat menyimpan supir.';
+                if (err && err.errors) {
+                    const messages = Object.values(err.errors).flat();
+                    errorMsg = messages.join('\n');
+                } else if (err && err.message) {
+                    errorMsg = err.message;
+                }
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal Menyimpan Supir',
+                        text: errorMsg,
+                        confirmButtonText: 'Tutup',
+                        confirmButtonColor: '#d33'
+                    });
+                } else {
+                    alert(errorMsg);
+                }
             })
             .finally(() => {
                 btn.innerHTML = originalText;
