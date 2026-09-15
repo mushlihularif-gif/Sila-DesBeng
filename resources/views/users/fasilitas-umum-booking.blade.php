@@ -212,8 +212,8 @@
                         @else
                             <div class="bg-amber-50/60 border border-dashed border-amber-200 rounded-xl p-4 text-center">
                                 <i class="bx bx-key text-amber-500 text-2xl mb-1"></i>
-                                <p class="text-xs sm:text-sm text-gray-700 font-medium mb-0.5">Belum ada petugas kunci yang ditugaskan khusus oleh admin desa.</p>
-                                <p class="text-[11px] text-gray-500 mb-0">Untuk pengambilan kunci dan koordinasi pembukaan gedung, silakan hubungi pengelola BUMDes atau kantor desa setempat.</p>
+                                <p class="text-xs sm:text-sm text-gray-700 font-medium mb-0.5">Belum ada petugas kunci yang ditugaskan khusus oleh pihak pengelola.</p>
+                                <p class="text-[11px] text-gray-500 mb-0">Untuk pengambilan kunci dan koordinasi pembukaan fasilitas, silakan hubungi pengelola layanan daerah setempat.</p>
                             </div>
                         @endif
                     </div>

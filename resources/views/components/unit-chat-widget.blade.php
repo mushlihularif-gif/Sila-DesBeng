@@ -1,6 +1,6 @@
 @props([
     'service',
-    'title' => 'Layanan BUMDes',
+    'title' => 'Layanan Daerah',
     'regionId',
     'regionName',
     'itemName' => '',
@@ -55,7 +55,7 @@
     <div class="toko-chat-body" id="unitChatMessages">
         <!-- Greeting Bubble -->
         <div class="toko-chat-bubble toko">
-            <div>Halo{{ Auth::check() ? ' Kak ' . Auth::user()->name : ' Kak' }}! Selamat datang di {{ $title }} BUMDes {{ $cleanRegionName }}. Ada yang bisa kami bantu?</div>
+            <div>Halo{{ Auth::check() ? ' Kak ' . Auth::user()->name : ' Kak' }}! Selamat datang di {{ $title }} {{ $cleanRegionName }}. Ada yang bisa kami bantu?</div>
             <div class="toko-chat-time">{{ date('H:i') }}</div>
         </div>
     </div>

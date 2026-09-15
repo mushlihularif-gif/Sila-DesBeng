@@ -71,7 +71,14 @@ class UnitChatApiController extends Controller
             $session->update(['unread_user_count' => 0]);
         }
 
-        $messages = $session->messages()->with('sender')->get();
+        $messages = $session->messages()->with('sender')->get()->map(function ($msg) {
+            $msg->message = str_replace(
+                ['BUMDes', 'BUMDES', 'bumdes', 'Petugas Desa', 'petugas desa'],
+                ['Layanan Daerah', 'Layanan Daerah', 'layanan daerah', 'Petugas Layanan', 'petugas layanan'],
+                $msg->message
+            );
+            return $msg;
+        });
 
         return response()->json([
             'status' => 'success',
@@ -314,13 +321,13 @@ class UnitChatApiController extends Controller
     {
         switch ($service) {
             case 'gas':
-                return "Halo {$userName}! Selamat datang di layanan Pembelian Gas BUMDes. Ada yang bisa kami bantu? Anda bisa menanyakan ketersediaan stok, pengantaran, atau informasi tukar tabung. Untuk bantuan lebih lanjut, silakan klik 'Chat Petugas'.";
+                return "Halo {$userName}! Selamat datang di Layanan Gas. Ada yang bisa kami bantu? Anda bisa menanyakan ketersediaan stok, pengantaran, atau informasi tukar tabung. Untuk bantuan lebih lanjut, silakan klik 'Chat Petugas'.";
             case 'penyewaan':
-                return "Halo {$userName}! Selamat datang di layanan Penyewaan Alat BUMDes. Silakan tanyakan ketersediaan alat, ketentuan sewa, atau durasi peminjaman. Jika butuh bantuan langsung dari admin, silakan klik 'Chat Petugas'.";
+                return "Halo {$userName}! Selamat datang di Layanan Sewa Alat. Silakan tanyakan ketersediaan alat, ketentuan sewa, atau durasi peminjaman. Jika butuh bantuan langsung dari admin, silakan klik 'Chat Petugas'.";
             case 'mobil':
-                return "Halo {$userName}! Selamat datang di layanan Penyewaan Mobil BUMDes. Anda bisa bertanya seputar ketersediaan mobil, jadwal, dan syarat penyewaan. Klik 'Chat Petugas' untuk langsung terhubung dengan admin.";
+                return "Halo {$userName}! Selamat datang di Layanan Sewa Mobil. Anda bisa bertanya seputar ketersediaan mobil, jadwal, dan syarat penyewaan. Klik 'Chat Petugas' untuk langsung terhubung dengan admin.";
             case 'fasilitas_umum':
-                return "Halo {$userName}! Selamat datang di layanan Fasilitas Umum BUMDes. Silakan tanyakan jadwal kosong, kapasitas ruangan, atau detail fasilitas lainnya. Untuk pemesanan langsung, Anda bisa klik 'Chat Petugas'.";
+                return "Halo {$userName}! Selamat datang di Layanan Fasilitas Umum. Silakan tanyakan jadwal kosong, kapasitas ruangan, atau detail fasilitas lainnya. Untuk pemesanan langsung, Anda bisa klik 'Chat Petugas'.";
             default:
                 return "Halo {$userName}! Selamat datang. Ada yang bisa kami bantu seputar layanan ini? Silakan klik 'Chat Petugas' jika butuh bantuan admin.";
         }
@@ -355,7 +362,7 @@ class UnitChatApiController extends Controller
 
         if ($service === 'mobil') {
             if (Str::contains($q, ['supir', 'driver', 'petugas'])) {
-                return "Layanan penyewaan mobil operasional kami sudah termasuk supir (driver) dari petugas BUMDes untuk memastikan keamanan dan kenyamanan perjalanan Anda.";
+                return "Layanan penyewaan mobil operasional kami sudah termasuk supir (driver) dari petugas pengelola untuk memastikan keamanan dan kenyamanan perjalanan Anda.";
             }
             if (Str::contains($q, ['syarat', 'dokumen', 'jaminan'])) {
                 return "Persyaratan utama untuk penyewaan mobil adalah KTP warga setempat yang masih berlaku dan persetujuan surat tanggung jawab penggunaan kendaraan.";
@@ -373,6 +380,6 @@ class UnitChatApiController extends Controller
             return "Pesan Anda tentang fasilitas umum sudah kami terima. Silakan tekan tombol 'Chat Petugas' agar admin kami bisa langsung membantu kebutuhan acara Anda.";
         }
 
-        return "Pesan Anda telah kami terima. Untuk respon cepat langsung dari petugas desa, silakan klik tombol 'Chat Petugas'.";
+        return "Pesan Anda telah kami terima. Untuk respon cepat langsung dari petugas pengelola, silakan klik tombol 'Chat Petugas'.";
     }
 }

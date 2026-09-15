@@ -32,7 +32,7 @@
         <div class="text-center mt-8">
             <img src="{{ asset('assets/img/illustrations/undraw_pending.svg') }}" alt="Pending" class="w-48 h-auto mx-auto mb-6 opacity-70" onerror="this.style.display='none'">
             <h2 class="text-lg font-bold text-gray-800 mb-2">Selesaikan Pembayaran Anda</h2>
-            <p class="text-gray-500 max-w-sm mx-auto">Pesanan Anda telah berhasil dibuat namun belum dibayar. Segera lakukan pembayaran agar pesanan dapat diproses oleh BUMDes.</p>
+            <p class="text-gray-500 max-w-sm mx-auto">Pesanan Anda telah berhasil dibuat namun belum dibayar. Segera lakukan pembayaran agar pesanan dapat diproses oleh pihak pengelola.</p>
         </div>
     </div>
 </div>

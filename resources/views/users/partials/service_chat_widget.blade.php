@@ -54,7 +54,7 @@
             <div>
                 <div class="service-chat-title fw-bold">Chat {{ $serviceTitle }}</div>
                 <div class="service-chat-status">
-                    <span class="status-dot"></span> Online &bull; Petugas BUMDes
+                    <span class="status-dot"></span> Online &bull; Petugas Layanan
                 </div>
             </div>
         </div>
@@ -72,7 +72,7 @@
     <!-- Quick Reply Chips -->
     <div class="service-chat-quick-replies" id="serviceQuickReplies_{{ $serviceType }}">
         <button type="button" class="service-chip-btn bg-primary text-white border-0 fw-semibold" onclick="escalateServiceChat('{{ $serviceType }}')">
-            Chat Petugas Desa
+            Chat Petugas Layanan
         </button>
         @foreach($quickReplies as $chip)
             <button type="button" class="service-chip-btn" onclick="sendServiceQuickReply('{{ $serviceType }}', '{{ addslashes($chip) }}')">
@@ -427,7 +427,7 @@
         } else if (msg.sender_type === 'admin') {
             bubble.className = 'chat-bubble-admin';
             bubble.innerHTML = `
-                <div class="fw-semibold text-primary mb-1" style="font-size: 11px;">Petugas BUMDes</div>
+                <div class="fw-semibold text-primary mb-1" style="font-size: 11px;">Petugas Layanan</div>
                 <div>${escapeHtmlService(msg.message)}</div>
                 <div class="chat-bubble-time text-end text-muted">${time}</div>
             `;

@@ -61,10 +61,10 @@
                     <div class="relative z-10">
                         <div class="inline-flex items-center gap-2 px-4 py-2 bg-blue-100/80 backdrop-blur-sm text-blue-700 rounded-full mb-4 border border-blue-200 shadow-sm">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                            <span class="text-xs font-bold tracking-widest uppercase">Pesanan Diterima BUMDes</span>
+                            <span class="text-xs font-bold tracking-widest uppercase">Pesanan Diterima Pengelola</span>
                         </div>
                         <h2 class="text-3xl font-black text-gray-800 tracking-tight">Menunggu Pengiriman</h2>
-                        <p class="text-gray-600 mt-2">Pesanan Anda akan segera diantarkan oleh petugas BUMDes.</p>
+                        <p class="text-gray-600 mt-2">Pesanan Anda akan segera diantarkan oleh petugas layanan.</p>
                     </div>
                 </div>
                 @endif

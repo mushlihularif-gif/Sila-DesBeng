@@ -194,7 +194,7 @@
                             </div>
                             <div class="ml-3">
                                 <p class="text-sm text-yellow-700">
-                                    <span class="font-bold">NB:</span> Pengembalian Alat Sewa akan dijemput oleh Pihak BUMDes setelah waktu penyewaan selesai.
+                                    <span class="font-bold">NB:</span> Pengembalian Alat Sewa akan dijemput oleh Petugas Pengelola setelah waktu penyewaan selesai.
                                 </p>
                             </div>
                         </div>
