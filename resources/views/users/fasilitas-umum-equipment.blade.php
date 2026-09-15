@@ -54,7 +54,12 @@
                     <span class="text-gray-800">Unit </span>
                     <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Peminjaman Fasilitas Umum</span>
                 </h1>
-                <p class="text-gray-500 text-sm max-w-xl mx-auto">Layanan peminjaman gedung, ruang serbaguna, dan armada siaga untuk kebutuhan masyarakat desa.</p>
+                <p class="text-gray-500 text-sm max-w-xl mx-auto mb-3">Layanan peminjaman gedung, ruang serbaguna, dan armada siaga untuk kebutuhan masyarakat desa.</p>
+                @if(isset($region) && $region)
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-blue-50 border border-blue-200 rounded-full text-blue-700 text-sm font-semibold shadow-sm">
+                    <i class="bx bx-map-pin"></i> Wilayah: {{ $region->name }}
+                </div>
+                @endif
             </div>
 
             <!-- Category Filter -->

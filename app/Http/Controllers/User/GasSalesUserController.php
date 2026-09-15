@@ -19,12 +19,12 @@ class GasSalesUserController extends Controller
         $familyCardNumber = null;
         $pendingKk = false;
 
+        $targetRegion = null;
         if ($targetRegionId) {
-            $regionIds = array_merge([(int) $targetRegionId], \App\Models\Region::getDescendantIds($targetRegionId));
-            $query->whereIn('region_id', $regionIds);
+            $targetRegion = \App\Models\Region::find($targetRegionId);
+            $query->where('region_id', $targetRegionId);
 
-            $region = \App\Models\Region::find($targetRegionId);
-            if ($region && $region->is_gas_crisis) {
+            if ($targetRegion && $targetRegion->is_gas_crisis) {
                 $isGasCrisis = true;
             }
         } elseif (auth()->check() && auth()->user()->role === 'user' && auth()->user()->region_id) {
@@ -70,7 +70,7 @@ class GasSalesUserController extends Controller
             'selesai'        => GasOrder::where('status', 'completed')->orWhere('status', 'selesai')->count(),
         ];
 
-        return view('users.gas-sales', compact('items', 'kategori', 'stats', 'isGasCrisis', 'hasKk', 'familyCardNumber', 'pendingKk'));
+        return view('users.gas-sales', compact('items', 'kategori', 'stats', 'isGasCrisis', 'hasKk', 'familyCardNumber', 'pendingKk', 'targetRegion'));
     }
 
 

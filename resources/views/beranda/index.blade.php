@@ -1267,6 +1267,20 @@
                     }
                 };
                 checkAndInit();
+
+                if (!this.chartResizeHandlerAttached) {
+                    this.chartResizeHandlerAttached = true;
+                    let resizeTimer;
+                    window.addEventListener('resize', () => {
+                        clearTimeout(resizeTimer);
+                        resizeTimer = setTimeout(() => {
+                            if (typeof ApexCharts !== 'undefined') {
+                                this.initKinerjaChart();
+                                this.initUnitChart();
+                            }
+                        }, 250);
+                    });
+                }
             },
 
             // Kinerja Layanan Chart
@@ -1274,6 +1288,10 @@
                 const container = document.querySelector("#kinerjaChart");
                 if (!container) return;
 
+                if (this.kinerjaChartInstance) {
+                    try { this.kinerjaChartInstance.destroy(); } catch(e) {}
+                    this.kinerjaChartInstance = null;
+                }
                 container.innerHTML = '';
                 
                 let kinerjaData;
@@ -1286,9 +1304,9 @@
 
                 const shortMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
                 const isSmallScreen = window.innerWidth < 1024;
-                const categories = isSmallScreen 
-                    ? (kinerjaData.categories.length === 12 ? shortMonths : kinerjaData.categories.map(c => c.length > 3 ? c.substring(0, 3) : c))
-                    : kinerjaData.categories;
+                const categories = (kinerjaData.categories.length === 12) 
+                    ? shortMonths 
+                    : kinerjaData.categories.map(c => c.length > 3 ? c.substring(0, 3) : c);
 
                 const options = {
                     series: [{
@@ -1334,10 +1352,10 @@
                         labels: {
                             style: {
                                 colors: '#374151',
-                                fontSize: isSmallScreen ? '10px' : '12px',
+                                fontSize: isSmallScreen ? '10px' : '11px',
                                 fontWeight: 500
                             },
-                            rotate: isSmallScreen ? -40 : 0,
+                            rotate: isSmallScreen ? -45 : -25,
                             rotateAlways: isSmallScreen,
                             hideOverlappingLabels: false,
                             trim: false
@@ -1377,11 +1395,26 @@
                         y: {
                             formatter: (val) => val + ' Indeks Poin'
                         }
-                    }
+                    },
+                    responsive: [
+                        {
+                            breakpoint: 1024,
+                            options: {
+                                chart: { height: 230 },
+                                xaxis: {
+                                    labels: {
+                                        rotate: -45,
+                                        rotateAlways: true,
+                                        style: { fontSize: '10px' }
+                                    }
+                                }
+                            }
+                        }
+                    ]
                 };
 
-                const chart = new ApexCharts(container, options);
-                chart.render();
+                this.kinerjaChartInstance = new ApexCharts(container, options);
+                this.kinerjaChartInstance.render();
             },
 
             // Unit Populer Chart
@@ -1389,6 +1422,10 @@
                 const container = document.querySelector("#unitChart");
                 if (!container) return;
 
+                if (this.unitChartInstance) {
+                    try { this.unitChartInstance.destroy(); } catch(e) {}
+                    this.unitChartInstance = null;
+                }
                 container.innerHTML = '';
                 
                 let unitPopulerData;
@@ -1401,9 +1438,9 @@
 
                 const shortMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
                 const isSmallScreen = window.innerWidth < 1024;
-                const categories = isSmallScreen 
-                    ? (unitPopulerData.categories.length === 12 ? shortMonths : unitPopulerData.categories.map(c => c.length > 3 ? c.substring(0, 3) : c))
-                    : unitPopulerData.categories;
+                const categories = (unitPopulerData.categories.length === 12) 
+                    ? shortMonths 
+                    : unitPopulerData.categories.map(c => c.length > 3 ? c.substring(0, 3) : c);
 
                 const options = {
                     series: [{
@@ -1463,10 +1500,10 @@
                         labels: {
                             style: {
                                 colors: '#374151',
-                                fontSize: isSmallScreen ? '10px' : '12px',
+                                fontSize: isSmallScreen ? '10px' : '11px',
                                 fontWeight: 500
                             },
-                            rotate: isSmallScreen ? -40 : 0,
+                            rotate: isSmallScreen ? -45 : -25,
                             rotateAlways: isSmallScreen,
                             hideOverlappingLabels: false,
                             trim: false
@@ -1502,11 +1539,26 @@
                     tooltip: {
                         shared: true,
                         intersect: false
-                    }
+                    },
+                    responsive: [
+                        {
+                            breakpoint: 1024,
+                            options: {
+                                chart: { height: 230 },
+                                xaxis: {
+                                    labels: {
+                                        rotate: -45,
+                                        rotateAlways: true,
+                                        style: { fontSize: '10px' }
+                                    }
+                                }
+                            }
+                        }
+                    ]
                 };
 
-                const chart = new ApexCharts(container, options);
-                chart.render();
+                this.unitChartInstance = new ApexCharts(container, options);
+                this.unitChartInstance.render();
             },
 
             // Unit Carousel

@@ -27,13 +27,12 @@ class FasilitasUmumUserController extends Controller
         if ($targetRegionId) {
             // Ketika pengunjung memilih desa/wilayah tertentu dari direktori layanan
             $targetRegion = Region::find($targetRegionId);
-            $targetRegionIds = array_merge([(int) $targetRegionId], Region::getDescendantIds($targetRegionId));
 
-            // Fasilitas gedung hanya menampilkan milik desa tersebut
-            $itemsQuery->whereIn('region_id', $targetRegionIds);
+            // Fasilitas gedung hanya menampilkan milik wilayah yang dipilih
+            $itemsQuery->where('region_id', $targetRegionId);
 
             // Ambulans/kendaraan menampilkan milik wilayah tersebut atau induknya jika disediakan terpusat
-            $vehicleRegionIds = array_merge($targetRegionIds, Region::getAncestorIds($targetRegionId));
+            $vehicleRegionIds = array_merge([$targetRegionId], Region::getAncestorIds($targetRegionId));
             $kendaraansQuery->whereIn('region_id', $vehicleRegionIds);
 
             $region = $targetRegion ?: Region::where('type', 'kabupaten')->first();

@@ -12,9 +12,10 @@ class RentalUserController extends Controller
         $targetRegionId = request('region_id');
         $query = Barang::where('status', '!=', 'rusak');
 
+        $targetRegion = null;
         if ($targetRegionId) {
-            $regionIds = array_merge([(int) $targetRegionId], \App\Models\Region::getDescendantIds($targetRegionId));
-            $query->whereIn('region_id', $regionIds);
+            $targetRegion = \App\Models\Region::find($targetRegionId);
+            $query->where('region_id', $targetRegionId);
         } elseif (auth()->check() && auth()->user()->role === 'user' && auth()->user()->region_id) {
             $allowed = \App\Models\Region::wilayahLayananTerlihat(auth()->user()->region_id, 'Penyewaan Alat');
             $query->where(function($sub) use ($allowed) {
@@ -25,7 +26,7 @@ class RentalUserController extends Controller
 
         $items = $query->orderBy('created_at', 'desc')->get();
         
-        return view('users.rental-equipment', compact('items'));
+        return view('users.rental-equipment', compact('items', 'targetRegion'));
     }
 
     public function show($id)

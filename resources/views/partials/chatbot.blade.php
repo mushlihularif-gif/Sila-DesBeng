@@ -313,23 +313,26 @@
         .chatbot-window {
             width: calc(100% - 24px) !important;
             right: 12px !important;
-            bottom: 68px !important;
-            height: calc(100vh - 100px) !important;
-            max-height: 500px !important;
+            bottom: 84px !important;
+            height: calc(100vh - 120px) !important;
+            max-height: 520px !important;
         }
         
         .chatbot-fab {
-            bottom: 14px !important;
-            right: 14px !important;
-            width: 44px !important;
-            height: 44px !important;
+            bottom: 20px !important;
+            right: 18px !important;
+            width: 56px !important;
+            height: 56px !important;
+            box-shadow: 0 8px 24px rgba(37, 99, 235, 0.4) !important;
+            z-index: 99999 !important;
         }
 
         .chatbot-tooltip {
-            display: none !important;
-            opacity: 0 !important;
-            visibility: hidden !important;
-            pointer-events: none !important;
+            font-size: 11px !important;
+            padding: 4px 10px !important;
+            top: -34px !important;
+            right: 0px !important;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3) !important;
         }
     }
 </style>
@@ -537,6 +540,24 @@
             isDragging = false;
         }, 50);
     }
+
+    // Reset FAB position if screen resized or device emulation toggled
+    window.addEventListener('resize', () => {
+        if (fab.style.left || fab.style.top) {
+            let maxX = document.documentElement.clientWidth - fab.offsetWidth;
+            let maxY = document.documentElement.clientHeight - fab.offsetHeight;
+            let currentLeft = parseInt(fab.style.left, 10);
+            let currentTop = parseInt(fab.style.top, 10);
+            if (!isNaN(currentLeft) && currentLeft > maxX) {
+                fab.style.left = '';
+                fab.style.right = '';
+            }
+            if (!isNaN(currentTop) && currentTop > maxY) {
+                fab.style.top = '';
+                fab.style.bottom = '';
+            }
+        }
+    });
 
     // Toggle Window
     fab.addEventListener('click', (e) => {
