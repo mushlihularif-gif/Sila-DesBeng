@@ -157,7 +157,7 @@
             @endif
         </div>
     </section>
-    @include('users.partials.service_chat_widget', ['serviceType' => 'penyewaan', 'serviceTitle' => 'Sewa Alat & Mesin'])
+    @include('users.partials.service_chat_widget', ['serviceType' => 'penyewaan', 'serviceTitle' => 'Layanan Sewa Alat'])
 </main>
 @endsection
 

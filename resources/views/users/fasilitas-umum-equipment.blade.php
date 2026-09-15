@@ -288,7 +288,7 @@
             @endif
         </div>
     </section>
-    @include('users.partials.service_chat_widget', ['serviceType' => 'fasilitas_umum', 'serviceTitle' => 'Fasilitas Umum'])
+    @include('users.partials.service_chat_widget', ['serviceType' => 'fasilitas_umum', 'serviceTitle' => 'Layanan Fasilitas Umum'])
 </main>
 @endsection
 

@@ -108,11 +108,12 @@
     .service-chat-launcher {
         position: fixed;
         bottom: 24px;
-        right: 24px;
+        left: 50%;
+        transform: translateX(-50%);
         z-index: 9998;
         background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
         color: #ffffff;
-        padding: 10px 18px;
+        padding: 10px 20px;
         border-radius: 50rem;
         box-shadow: 0 10px 25px -5px rgba(2, 132, 199, 0.4);
         display: flex;
@@ -122,15 +123,21 @@
         transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         font-weight: 600;
         font-size: 0.9rem;
+        white-space: nowrap;
+        user-select: none;
     }
     .service-chat-launcher:hover {
-        transform: translateY(-3px) scale(1.02);
+        transform: translateX(-50%) translateY(-3px) scale(1.02);
         box-shadow: 0 15px 30px -5px rgba(2, 132, 199, 0.5);
+    }
+    .service-chat-launcher:active {
+        transform: translateX(-50%) translateY(0) scale(0.98);
     }
     .service-chat-widget {
         position: fixed;
         bottom: 80px;
-        right: 24px;
+        left: 50%;
+        transform: translateX(-50%);
         width: 360px;
         max-width: calc(100vw - 32px);
         height: 520px;
@@ -146,11 +153,42 @@
     }
     .service-chat-widget.active {
         display: flex;
-        animation: chatSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        animation: chatSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
     @keyframes chatSlideUp {
-        from { opacity: 0; transform: translateY(20px) scale(0.95); }
-        to { opacity: 1; transform: translateY(0) scale(1); }
+        from { opacity: 0; transform: translateX(-50%) translateY(20px) scale(0.95); }
+        to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+    }
+    @media (max-width: 768px) {
+        .service-chat-launcher {
+            bottom: 18px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 8px 16px;
+            font-size: 0.82rem;
+            gap: 6px;
+            max-width: calc(100vw - 120px);
+            box-shadow: 0 6px 18px -3px rgba(2, 132, 199, 0.45);
+        }
+        .service-chat-launcher .launcher-icon svg {
+            width: 18px;
+            height: 18px;
+        }
+        .service-chat-launcher .launcher-text {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .service-chat-widget {
+            bottom: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100vw - 24px);
+            max-width: 380px;
+            height: 480px;
+            max-height: calc(100vh - 90px);
+            border-radius: 1rem;
+        }
     }
     .service-chat-header {
         background: #ffffff;
