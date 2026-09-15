@@ -70,4 +70,9 @@ class Barang extends Model
     {
         return $this->belongsTo(Region::class);
     }
+
+    public function rentalBookings()
+    {
+        return $this->hasMany(RentalBooking::class, 'barang_id');
+    }
 }

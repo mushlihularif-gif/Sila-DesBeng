@@ -173,3 +173,5 @@ Route::prefix('unit-chat')->group(function () {
     Route::post('/{service}/send', [\App\Http\Controllers\Api\UnitChatApiController::class, 'sendChatMessage']);
     Route::post('/{service}/escalate', [\App\Http\Controllers\Api\UnitChatApiController::class, 'escalateChat']);
 });
+
+Route::get('/ping', function() { return 'pong'; });

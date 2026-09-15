@@ -48,11 +48,17 @@ class NewsApiController extends Controller
 
         // Format to match mobile expectations
         $formatted = $news->map(function ($item) {
-            $image = null;
+            $images = [];
             if ($item->image_path) {
-                $image = asset('storage/' . $item->image_path);
-            } elseif ($item->images && $item->images->count() > 0) {
-                $image = asset('storage/' . $item->images->first()->image_path);
+                $images[] = asset('storage/' . $item->image_path);
+            }
+            if ($item->images && $item->images->count() > 0) {
+                foreach ($item->images as $img) {
+                    $imgUrl = asset('storage/' . $img->image_path);
+                    if (!in_array($imgUrl, $images)) {
+                        $images[] = $imgUrl;
+                    }
+                }
             }
 
             $displayCategory = $item->type ?? 'Pengumuman';
@@ -66,7 +72,8 @@ class NewsApiController extends Controller
                 'category' => $displayCategory,
                 'date' => $item->event_date ? $item->event_date->format('Y-m-d') : $item->created_at->format('Y-m-d'),
                 'desc' => $item->description,
-                'image' => $image,
+                'image' => count($images) > 0 ? $images[0] : null,
+                'images' => $images,
                 'location' => $item->location,
                 'author' => $item->admin ? $item->admin->name : 'Admin Desa',
             ];
@@ -153,11 +160,18 @@ class NewsApiController extends Controller
     {
         $item = Announcement::with(['region', 'admin', 'images'])->findOrFail($id);
         
-        $image = null;
+        $images = [];
         if ($item->image_path) {
-            $image = asset('storage/' . $item->image_path);
-        } elseif ($item->images && $item->images->count() > 0) {
-            $image = asset('storage/' . $item->images->first()->image_path);
+            $images[] = asset('storage/' . $item->image_path);
+        }
+        if ($item->images && $item->images->count() > 0) {
+            foreach ($item->images as $img) {
+                // Avoid duplicating the main image if it's somehow in both
+                $imgUrl = asset('storage/' . $img->image_path);
+                if (!in_array($imgUrl, $images)) {
+                    $images[] = $imgUrl;
+                }
+            }
         }
 
         $formatted = [
@@ -166,7 +180,8 @@ class NewsApiController extends Controller
             'category' => $item->type ?? 'Pengumuman',
             'date' => $item->event_date ? $item->event_date->format('Y-m-d') : $item->created_at->format('Y-m-d'),
             'desc' => $item->description,
-            'image' => $image,
+            'image' => count($images) > 0 ? $images[0] : null,
+            'images' => $images,
             'location' => $item->location,
             'author' => $item->admin ? $item->admin->name : 'Admin Desa',
         ];

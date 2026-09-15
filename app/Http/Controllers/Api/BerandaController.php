@@ -16,13 +16,15 @@ class BerandaController extends Controller
      */
     public function banners()
     {
-        $banners = Banner::where('is_active', true)
-            ->orderBy('sort_order', 'asc')
-            ->get();
-
-        $banners->transform(function ($banner) {
-            $banner->image_url = asset('storage/' . $banner->image_path);
-            return $banner;
+        $banners = \Illuminate\Support\Facades\Cache::remember('api.beranda.banners', 300, function () {
+            $data = Banner::where('is_active', true)
+                ->orderBy('sort_order', 'asc')
+                ->get();
+                
+            return $data->map(function ($banner) {
+                $banner->image_url = asset('storage/' . $banner->image_path);
+                return $banner;
+            });
         });
 
         return response()->json([
@@ -36,32 +38,41 @@ class BerandaController extends Controller
      */
     public function announcements()
     {
-        $announcements = Announcement::with(['region', 'admin', 'images'])
-            ->where('is_active', true)
-            ->orderBy('created_at', 'desc')
-            ->take(5)
-            ->get();
+        $formatted = \Illuminate\Support\Facades\Cache::remember('api.beranda.announcements', 300, function () {
+            $announcements = Announcement::with(['region', 'admin', 'images'])
+                ->where('is_active', true)
+                ->orderBy('created_at', 'desc')
+                ->take(5)
+                ->get();
 
-        // Format to match mobile expectations (same as NewsApiController)
-        $formatted = $announcements->map(function ($item) {
-            $image = null;
-            if ($item->image_path) {
-                $image = asset('storage/' . $item->image_path);
-            } elseif ($item->images && $item->images->count() > 0) {
-                $image = asset('storage/' . $item->images->first()->image_path);
-            }
+            // Format to match mobile expectations (same as NewsApiController)
+            return $announcements->map(function ($item) {
+                $images = [];
+                if ($item->image_path) {
+                    $images[] = asset('storage/' . $item->image_path);
+                }
+                if ($item->images && $item->images->count() > 0) {
+                    foreach ($item->images as $img) {
+                        $imgUrl = asset('storage/' . $img->image_path);
+                        if (!in_array($imgUrl, $images)) {
+                            $images[] = $imgUrl;
+                        }
+                    }
+                }
 
-            return [
-                'id' => $item->id,
-                'title' => $item->title,
-                'category' => $item->type ?? 'Pengumuman',
-                'date' => $item->event_date ? $item->event_date->format('Y-m-d') : $item->created_at->format('Y-m-d'),
-                'desc' => $item->description,
-                'content' => $item->description,
-                'image' => $image,
-                'location' => $item->location,
-                'author' => $item->admin ? $item->admin->name : 'Admin Desa',
-            ];
+                return [
+                    'id' => $item->id,
+                    'title' => $item->title,
+                    'category' => $item->type ?? 'Pengumuman',
+                    'date' => $item->event_date ? $item->event_date->format('Y-m-d') : $item->created_at->format('Y-m-d'),
+                    'desc' => $item->description,
+                    'content' => $item->description,
+                    'image' => count($images) > 0 ? $images[0] : null,
+                    'images' => $images,
+                    'location' => $item->location,
+                    'author' => $item->admin ? $item->admin->name : 'Admin Desa',
+                ];
+            });
         });
 
         return response()->json([
@@ -75,48 +86,50 @@ class BerandaController extends Controller
      */
     public function services()
     {
-        // Simple aggregation of services for mobile display
-        $rentals = Barang::where('status', 'tersedia')->take(10)->get()->map(function($item) {
-            return [
-                'id' => $item->id,
-                'name' => $item->nama_barang,
-                'type' => 'rental',
-                'image' => asset('storage/' . $item->foto),
-                'price' => $item->harga_sewa
-            ];
-        });
+        $services = \Illuminate\Support\Facades\Cache::remember('api.beranda.services', 300, function () {
+            // Simple aggregation of services for mobile display
+            $rentals = Barang::where('status', 'tersedia')->take(10)->get()->map(function($item) {
+                return [
+                    'id' => $item->id,
+                    'name' => $item->nama_barang,
+                    'type' => 'rental',
+                    'image' => asset('storage/' . $item->foto),
+                    'price' => $item->harga_sewa
+                ];
+            });
 
-        $gases = Gas::where('stok', '>', 0)->take(10)->get()->map(function($item) {
-            return [
-                'id' => $item->id,
-                'name' => $item->jenis_gas,
-                'type' => 'gas',
-                'image' => asset('storage/' . $item->foto),
-                'price' => $item->harga_satuan
-            ];
-        });
+            $gases = Gas::where('stok', '>', 0)->take(10)->get()->map(function($item) {
+                return [
+                    'id' => $item->id,
+                    'name' => $item->jenis_gas,
+                    'type' => 'gas',
+                    'image' => asset('storage/' . $item->foto),
+                    'price' => $item->harga_satuan
+                ];
+            });
 
-        $mobils = \App\Models\Mobil::where('status', 'tersedia')->take(10)->get()->map(function($item) {
-            return [
-                'id' => $item->id,
-                'name' => $item->nama_mobil,
-                'type' => 'mobil',
-                'image' => asset('storage/' . $item->foto),
-                'price' => $item->harga_sewa
-            ];
-        });
+            $mobils = \App\Models\Mobil::where('status', 'tersedia')->take(10)->get()->map(function($item) {
+                return [
+                    'id' => $item->id,
+                    'name' => $item->nama_mobil,
+                    'type' => 'mobil',
+                    'image' => asset('storage/' . $item->foto),
+                    'price' => $item->harga_sewa
+                ];
+            });
 
-        $fasilitas = \App\Models\FasilitasUmum::where('status', 'tersedia')->take(10)->get()->map(function($item) {
-            return [
-                'id' => $item->id,
-                'name' => $item->nama_fasilitas,
-                'type' => 'fasilitas',
-                'image' => asset('storage/' . $item->foto),
-                'price' => 0
-            ];
-        });
+            $fasilitas = \App\Models\FasilitasUmum::where('status', 'tersedia')->take(10)->get()->map(function($item) {
+                return [
+                    'id' => $item->id,
+                    'name' => $item->nama_fasilitas,
+                    'type' => 'fasilitas',
+                    'image' => asset('storage/' . $item->foto),
+                    'price' => 0
+                ];
+            });
 
-        $services = $rentals->concat($gases)->concat($mobils)->concat($fasilitas);
+            return $rentals->concat($gases)->concat($mobils)->concat($fasilitas);
+        });
 
         return response()->json([
             'status' => 'success',
@@ -168,99 +181,95 @@ class BerandaController extends Controller
         ]);
     }
 
-    /**
-     * Get popular items across all services based on order counts (or random if no orders)
-     */
     public function popular(Request $request)
     {
-        $limitPerCategory = 5;
+        $allPopular = \Illuminate\Support\Facades\Cache::remember('api.beranda.popular', 300, function () {
+            $limitPerCategory = 5;
 
-        // Pasar Daerah - Most ordered
-        $pasarProducts = \App\Models\PasarProduk::where('status', 'tersedia')
-            ->withCount('orderItems')
-            ->orderBy('order_items_count', 'desc')
-            ->take($limitPerCategory)
-            ->get()
-            ->map(function ($item) {
-                return [
-                    'id' => $item->id,
-                    'name' => $item->nama_produk,
-                    'price' => $item->harga,
-                    'type' => 'pasar',
-                    'category' => 'Pasar Daerah',
-                    'image_url' => $item->foto ? asset('storage/' . $item->foto) : null,
-                    'satuan' => $item->satuan,
-                    'order_count' => $item->order_items_count,
-                    'original_data' => $item,
-                ];
-            });
+            // Pasar Daerah - Most ordered
+            $pasarProducts = \App\Models\PasarProduk::where('status', 'tersedia')
+                ->withCount('orderItems')
+                ->orderBy('order_items_count', 'desc')
+                ->take($limitPerCategory)
+                ->get()
+                ->map(function ($item) {
+                    return [
+                        'id' => $item->id,
+                        'name' => $item->nama_produk,
+                        'price' => $item->harga,
+                        'type' => 'pasar',
+                        'category' => 'Pasar Daerah',
+                        'image_url' => $item->foto ? asset('storage/' . $item->foto) : null,
+                        'satuan' => $item->satuan,
+                        'order_count' => $item->order_items_count,
+                    ];
+                });
 
-        // Gas - Most ordered
-        $gasProducts = \App\Models\Gas::where('stok', '>', 0)
-            ->withCount('gasOrders')
-            ->orderBy('gas_orders_count', 'desc')
-            ->take($limitPerCategory)
-            ->get()
-            ->map(function ($item) {
-                return [
-                    'id' => $item->id,
-                    'name' => $item->jenis_gas,
-                    'price' => $item->harga_satuan,
-                    'type' => 'gas',
-                    'category' => 'Penjualan Gas',
-                    'image_url' => $item->foto ? asset('storage/' . $item->foto) : null,
-                    'satuan' => 'tabung',
-                    'order_count' => $item->gas_orders_count,
-                    'original_data' => $item,
-                ];
-            });
+            // Gas - Most ordered
+            $gasProducts = \App\Models\Gas::where('stok', '>', 0)
+                ->withCount('gasOrders')
+                ->orderBy('gas_orders_count', 'desc')
+                ->take($limitPerCategory)
+                ->get()
+                ->map(function ($item) {
+                    return [
+                        'id' => $item->id,
+                        'name' => $item->jenis_gas,
+                        'price' => $item->harga_satuan,
+                        'type' => 'gas',
+                        'category' => 'Penjualan Gas',
+                        'image_url' => $item->foto ? asset('storage/' . $item->foto) : null,
+                        'satuan' => 'tabung',
+                        'order_count' => $item->gas_orders_count,
+                    ];
+                });
 
-        // Sewa Alat
-        $alatProducts = \App\Models\Barang::where('status', 'tersedia')
-            ->take($limitPerCategory)
-            ->get()
-            ->map(function ($item) {
-                // RentalBookings doesn't have direct belongsTo Barang in some cases, so we might just use random or generic
-                $orderCount = \App\Models\RentalBooking::where('barang_id', $item->id)->count();
-                return [
-                    'id' => $item->id,
-                    'name' => $item->nama_barang,
-                    'price' => $item->harga_sewa,
-                    'type' => 'alat',
-                    'category' => 'Penyewaan Alat',
-                    'image_url' => $item->foto ? asset('storage/' . $item->foto) : null,
-                    'satuan' => $item->satuan ?? 'hari',
-                    'order_count' => $orderCount,
-                    'original_data' => $item,
-                ];
-            })->sortByDesc('order_count')->values();
+            // Sewa Alat
+            $alatProducts = \App\Models\Barang::where('status', 'tersedia')
+                ->withCount('rentalBookings')
+                ->orderBy('rental_bookings_count', 'desc')
+                ->take($limitPerCategory)
+                ->get()
+                ->map(function ($item) {
+                    return [
+                        'id' => $item->id,
+                        'name' => $item->nama_barang,
+                        'price' => $item->harga_sewa,
+                        'type' => 'alat',
+                        'category' => 'Penyewaan Alat',
+                        'image_url' => $item->foto ? asset('storage/' . $item->foto) : null,
+                        'satuan' => $item->satuan ?? 'hari',
+                        'order_count' => $item->rental_bookings_count,
+                    ];
+                });
 
-        // Sewa Mobil
-        $mobilProducts = \App\Models\Mobil::where('status', 'tersedia')
-            ->take($limitPerCategory)
-            ->get()
-            ->map(function ($item) {
-                $orderCount = \App\Models\MobilBooking::where('mobil_id', $item->id)->count();
-                return [
-                    'id' => $item->id,
-                    'name' => $item->nama_mobil,
-                    'price' => $item->harga_sewa,
-                    'type' => 'mobil',
-                    'category' => 'Penyewaan Mobil',
-                    'image_url' => $item->foto ? asset('storage/' . $item->foto) : null,
-                    'satuan' => 'hari',
-                    'order_count' => $orderCount,
-                    'original_data' => $item,
-                ];
-            })->sortByDesc('order_count')->values();
+            // Sewa Mobil
+            $mobilProducts = \App\Models\Mobil::where('status', 'tersedia')
+                ->withCount('bookings')
+                ->orderBy('bookings_count', 'desc')
+                ->take($limitPerCategory)
+                ->get()
+                ->map(function ($item) {
+                    return [
+                        'id' => $item->id,
+                        'name' => $item->nama_mobil,
+                        'price' => $item->harga_sewa,
+                        'type' => 'mobil',
+                        'category' => 'Penyewaan Mobil',
+                        'image_url' => $item->foto ? asset('storage/' . $item->foto) : null,
+                        'satuan' => 'hari',
+                        'order_count' => $item->bookings_count,
+                    ];
+                });
 
-        // Merge all
-        $allPopular = $pasarProducts->concat($gasProducts)
-            ->concat($alatProducts)
-            ->concat($mobilProducts)
-            ->sortByDesc('order_count')
-            ->values()
-            ->take(10); // Show top 10 overall
+            // Merge all
+            return $pasarProducts->concat($gasProducts)
+                ->concat($alatProducts)
+                ->concat($mobilProducts)
+                ->sortByDesc('order_count')
+                ->values()
+                ->take(10); // Show top 10 overall
+        });
 
         return response()->json([
             'status' => 'success',
