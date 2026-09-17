@@ -26,7 +26,7 @@ class HistoryController extends Controller
         // 1. Gas Orders
         $gasOrders = GasOrder::where('user_id', $user->id)->with('gas')->get();
         foreach ($gasOrders as $order) {
-            $totalPrice = $order->price * $order->quantity;
+            $totalPrice = (float)($order->price ?? 0) * (int)($order->quantity ?? 0);
             $history->push([
                 'id' => $order->id,
                 'category' => 'Pesanan Gas',
@@ -50,9 +50,9 @@ class HistoryController extends Controller
             }
             $history->push([
                 'id' => $rental->id,
-                'category' => 'Penyewaan Alat',
+                'category' => 'Penyewaan', // MATCHES FLUTTER 'Penyewaan'
                 'title' => $title,
-                'price' => 'Rp ' . number_format($rental->total_amount ?? $rental->total_price ?? 0, 0, ',', '.'),
+                'price' => 'Rp ' . number_format((float)($rental->total_amount ?? $rental->total_price ?? 0), 0, ',', '.'),
                 'date' => Carbon::parse($rental->created_at)->isoFormat('dddd, D MMMM Y HH:mm') . ' WIB',
                 'status' => $this->mapStatus($rental->status),
                 'payment' => $rental->payment_method ?? 'Tunai',
@@ -67,9 +67,9 @@ class HistoryController extends Controller
         foreach ($mobils as $mobil) {
             $history->push([
                 'id' => $mobil->id,
-                'category' => 'Sewa Kendaraan',
+                'category' => 'Sewa Kendaraan', // MATCHES FLUTTER
                 'title' => $mobil->mobil ? $mobil->mobil->nama_mobil : 'Sewa Mobil',
-                'price' => 'Rp ' . number_format($mobil->total_amount ?? $mobil->total_price ?? 0, 0, ',', '.'),
+                'price' => 'Rp ' . number_format((float)($mobil->total_amount ?? $mobil->total_price ?? 0), 0, ',', '.'),
                 'date' => Carbon::parse($mobil->created_at)->isoFormat('dddd, D MMMM Y HH:mm') . ' WIB',
                 'status' => $this->mapStatus($mobil->status),
                 'payment' => $mobil->payment_method ?? 'Tunai',
@@ -84,9 +84,9 @@ class HistoryController extends Controller
         foreach ($fasilitas as $fas) {
             $history->push([
                 'id' => $fas->id,
-                'category' => 'Sewa Fasilitas',
+                'category' => 'Fasilitas', // MATCHES FLUTTER 'Fasilitas'
                 'title' => $fas->fasilitasUmum ? $fas->fasilitasUmum->nama_fasilitas : 'Sewa Fasilitas',
-                'price' => 'Rp ' . number_format($fas->total_amount ?? $fas->total_price ?? 0, 0, ',', '.'),
+                'price' => 'Rp ' . number_format((float)($fas->total_amount ?? $fas->total_price ?? 0), 0, ',', '.'),
                 'date' => Carbon::parse($fas->created_at)->isoFormat('dddd, D MMMM Y HH:mm') . ' WIB',
                 'status' => $this->mapStatus($fas->status),
                 'payment' => $fas->payment_method ?? 'Tunai',
@@ -134,7 +134,7 @@ class HistoryController extends Controller
                 'id' => $order->id,
                 'category' => 'Pasar Daerah',
                 'title' => $title,
-                'price' => 'Rp ' . number_format($order->grand_total, 0, ',', '.'),
+                'price' => 'Rp ' . number_format((float)($order->grand_total ?? 0), 0, ',', '.'),
                 'date' => Carbon::parse($order->created_at)->isoFormat('dddd, D MMMM Y HH:mm') . ' WIB',
                 'status' => $this->mapStatus($order->status),
                 'payment' => $order->payment_method ? strtoupper(str_replace('_', ' ', $order->payment_method)) : 'Tunai',

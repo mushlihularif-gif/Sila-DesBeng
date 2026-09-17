@@ -74,24 +74,208 @@ class RegionApiController extends Controller
                 ->get();
         }
 
-        $groupedMembers = $members->groupBy('level');
-            
-        $formattedMembers = [];
-        foreach($groupedMembers as $level => $group) {
-            $formattedMembers[] = [
-                'level' => (int)$level,
-                'level_name' => $group->first()->level_short_label ?? 'Tingkat ' . $level,
-                'members' => $group->map(function($m) {
-                    return [
-                        'id' => $m->id,
-                        'name' => $m->name,
-                        'position' => $m->position,
-                        'photo_url' => $m->photo_url,
-                        'level' => (int)$m->level,
-                        'order' => (int)$m->order,
-                    ];
-                })->values()
-            ];
+        // Jika desa atau kecamatan belum ada data pengurus di DB, generate struktur cerdas standar
+        if ($members->isEmpty()) {
+            $formattedMembers = [];
+            if ($region->type === 'desa') {
+                $desaName = $region->name;
+                $formattedMembers = [
+                    [
+                        'level' => 1,
+                        'level_name' => 'Kepala Desa',
+                        'members' => [
+                            [
+                                'id' => 1000 + $region->id,
+                                'name' => 'Kepala ' . $desaName,
+                                'position' => 'Kepala Desa (Pucuk Pimpinan)',
+                                'photo_url' => '',
+                                'level' => 1,
+                                'order' => 1,
+                            ]
+                        ]
+                    ],
+                    [
+                        'level' => 2,
+                        'level_name' => 'Sekretariat Desa',
+                        'members' => [
+                            [
+                                'id' => 2000 + $region->id,
+                                'name' => 'Sekretaris Desa ' . $desaName,
+                                'position' => 'Sekretaris Desa (Sekdes)',
+                                'photo_url' => '',
+                                'level' => 2,
+                                'order' => 1,
+                            ],
+                            [
+                                'id' => 2001 + $region->id,
+                                'name' => 'Kaur Keuangan & Perencanaan',
+                                'position' => 'Kaur Keuangan',
+                                'photo_url' => '',
+                                'level' => 2,
+                                'order' => 2,
+                            ]
+                        ]
+                    ],
+                    [
+                        'level' => 3,
+                        'level_name' => 'Badan Permusyawaratan Desa (BPD)',
+                        'members' => [
+                            [
+                                'id' => 3000 + $region->id,
+                                'name' => 'Ketua BPD ' . $desaName,
+                                'position' => 'Ketua BPD',
+                                'photo_url' => '',
+                                'level' => 3,
+                                'order' => 1,
+                            ],
+                            [
+                                'id' => 3001 + $region->id,
+                                'name' => 'Kasi Pelayanan & Kesejahteraan',
+                                'position' => 'Kasi Pelayanan',
+                                'photo_url' => '',
+                                'level' => 3,
+                                'order' => 2,
+                            ]
+                        ]
+                    ],
+                    [
+                        'level' => 4,
+                        'level_name' => 'Pengurus BUMDes & Kewilayahan',
+                        'members' => [
+                            [
+                                'id' => 4000 + $region->id,
+                                'name' => 'Direktur BUMDes ' . $desaName,
+                                'position' => 'Direktur BUMDes',
+                                'photo_url' => '',
+                                'level' => 4,
+                                'order' => 1,
+                            ],
+                            [
+                                'id' => 4001 + $region->id,
+                                'name' => 'Kepala Dusun I',
+                                'position' => 'Kepala Dusun',
+                                'photo_url' => '',
+                                'level' => 4,
+                                'order' => 2,
+                            ],
+                            [
+                                'id' => 4002 + $region->id,
+                                'name' => 'Kepala Dusun II',
+                                'position' => 'Kepala Dusun',
+                                'photo_url' => '',
+                                'level' => 4,
+                                'order' => 3,
+                            ]
+                        ]
+                    ]
+                ];
+            } else if ($region->type === 'kecamatan') {
+                $kecName = $region->name;
+                $formattedMembers = [
+                    [
+                        'level' => 1,
+                        'level_name' => 'Camat',
+                        'members' => [
+                            [
+                                'id' => 1000 + $region->id,
+                                'name' => 'Camat ' . $kecName,
+                                'position' => 'Camat (Pucuk Pimpinan Wilayah)',
+                                'photo_url' => '',
+                                'level' => 1,
+                                'order' => 1,
+                            ]
+                        ]
+                    ],
+                    [
+                        'level' => 2,
+                        'level_name' => 'Sekretariat Kecamatan',
+                        'members' => [
+                            [
+                                'id' => 2000 + $region->id,
+                                'name' => 'Sekretaris ' . $kecName,
+                                'position' => 'Sekretaris Camat (Sekcam)',
+                                'photo_url' => '',
+                                'level' => 2,
+                                'order' => 1,
+                            ]
+                        ]
+                    ],
+                    [
+                        'level' => 3,
+                        'level_name' => 'Seksi & Pelayanan Terpadu',
+                        'members' => [
+                            [
+                                'id' => 3000 + $region->id,
+                                'name' => 'Kasi Pemerintahan & Trantib',
+                                'position' => 'Kepala Seksi',
+                                'photo_url' => '',
+                                'level' => 3,
+                                'order' => 1,
+                            ],
+                            [
+                                'id' => 3001 + $region->id,
+                                'name' => 'Kasi Pelayanan Umum & Kesra',
+                                'position' => 'Kepala Seksi',
+                                'photo_url' => '',
+                                'level' => 3,
+                                'order' => 2,
+                            ]
+                        ]
+                    ]
+                ];
+            }
+        } else {
+            // Pisahkan Wakil Bupati / Wakil Kades agar TIDAK sejajar di Level 1
+            $hasWakilInLevel1 = false;
+            foreach ($members as $m) {
+                $pos = strtolower($m->position);
+                if ((str_contains($pos, 'wakil') || str_contains($pos, 'sekretaris')) && $m->level == 1) {
+                    $hasWakilInLevel1 = true;
+                    break;
+                }
+            }
+
+            if ($hasWakilInLevel1) {
+                // Geser level 2 dst naik 1 tingkat untuk menempatkan wakil di level 2
+                foreach ($members as $m) {
+                    $pos = strtolower($m->position);
+                    if ($m->level >= 2) {
+                        $m->level = $m->level + 1;
+                    } else if ($m->level == 1 && (str_contains($pos, 'wakil') || str_contains($pos, 'sekretaris'))) {
+                        $m->level = 2;
+                    }
+                }
+            }
+
+            $groupedMembers = $members->groupBy('level');
+                
+            $formattedMembers = [];
+            foreach($groupedMembers as $level => $group) {
+                $firstMember = $group->first();
+                $levelLabel = 'Tingkat ' . $level;
+                if ($level == 1) {
+                    $levelLabel = ($region->type === 'kabupaten') ? 'Kepala Daerah' : (($region->type === 'desa') ? 'Kepala Desa' : 'Camat');
+                } else if ($level == 2 && $hasWakilInLevel1) {
+                    $levelLabel = ($region->type === 'kabupaten') ? 'Wakil Kepala Daerah' : 'Wakil Pimpinan / Sekretariat';
+                } else if (!empty($firstMember->level_short_label)) {
+                    $levelLabel = $firstMember->level_short_label;
+                }
+
+                $formattedMembers[] = [
+                    'level' => (int)$level,
+                    'level_name' => $levelLabel,
+                    'members' => $group->map(function($m) {
+                        return [
+                            'id' => $m->id,
+                            'name' => $m->name,
+                            'position' => $m->position,
+                            'photo_url' => $m->photo_url,
+                            'level' => (int)$m->level,
+                            'order' => (int)$m->order,
+                        ];
+                    })->values()
+                ];
+            }
         }
 
         return response()->json([
