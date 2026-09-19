@@ -45,18 +45,19 @@
 
     // Bank Logo Mapping
     $bankLogos = [
-        'Bank Syariah Indonesia' => 'admin/img/banks/bsi.png',
-        'BSI' => 'admin/img/banks/bsi.png',
-        'BRI' => 'admin/img/banks/bri.png',
-        'BRIMO' => 'admin/img/banks/bri.png',
-        'Mandiri' => 'admin/img/banks/mandiri.png',
-        'BNI' => 'admin/img/banks/bni.png',
-        'BCA' => 'admin/img/banks/bca.png',
-        'Bank Riau Kepri Syariah' => 'admin/img/banks/brk.png',
-        'Bank Mega' => 'admin/img/banks/mega.png',
+        'Bank Syariah Indonesia' => 'Admin/img/banks/bsi.png',
+        'BSI' => 'Admin/img/banks/bsi.png',
+        'BRI' => 'Admin/img/banks/bri.png',
+        'BRIMO' => 'Admin/img/banks/bri.png',
+        'Mandiri' => 'Admin/img/banks/mandiri.png',
+        'BNI' => 'Admin/img/banks/bni.png',
+        'BCA' => 'Admin/img/banks/bca.png',
+        'Bank Riau Kepri Syariah' => 'Admin/img/banks/brk.png',
+        'BRK' => 'Admin/img/banks/brk.png',
+        'Bank Mega' => 'Admin/img/banks/mega.png',
     ];
     $bankName = strtoupper($setting->bank_name ?? '');
-    $bankLogoPath = 'admin/img/banks/bsi.png';
+    $bankLogoPath = 'Admin/img/banks/bsi.png';
     foreach ($bankLogos as $key => $path) {
         if (str_contains($bankName, strtoupper($key))) {
             $bankLogoPath = $path;
@@ -458,7 +459,7 @@
                     @if($hasTransfer || $hasTunai)
                     <div class="mb-5">
                         <div class="flex items-center gap-2 mb-3">
-                            <span class="text-xs font-bold uppercase tracking-wider text-gray-500">Bayar Langsung ke Desa</span>
+                            <span class="text-xs font-bold uppercase tracking-wider text-gray-500">Bayar Langsung ke Pengelola</span>
                             <span class="flex-1 h-px bg-gray-200"></span>
                         </div>
                         <div class="grid grid-cols-2 md:grid-cols-3 gap-3">

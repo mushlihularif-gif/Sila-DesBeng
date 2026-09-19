@@ -7,6 +7,12 @@
 <style>
     * { font-family: 'Inter', sans-serif; }
 
+    @keyframes scan {
+        0% { top: 0; }
+        50% { top: 100%; }
+        100% { top: 0; }
+    }
+
 
     /* Header */
     .co-header { display: flex; align-items: center; gap: 16px; margin-bottom: 12px; }
@@ -412,11 +418,33 @@
                                 $isBank = $region->settings['enable_bank_transfer'] ?? true;
                                 $bankName = $region->settings['rekening_bank'] ?? 'Bank Riau Kepri Syariah';
                                 $bankNumber = $region->settings['rekening_nomor'] ?? '';
-                                $bankHolder = $region->settings['rekening_nama'] ?? ('BUMDes ' . ($region->name ?? 'Desa'));
+                                $bankHolder = $region->settings['rekening_nama'] ?? ('Pengelola ' . ($region->name ?? 'Layanan Daerah'));
                                 $isQris = $region->settings['enable_qris'] ?? (!empty($region->settings['qris_image']) || !empty($region->settings['qris_ewallet_number']));
                                 $qrisImage = $region->settings['qris_image'] ?? null;
                                 $qrisNumber = $region->settings['qris_ewallet_number'] ?? '';
                                 $defaultMethod = $isCod ? 'tunai' : ($isBank ? 'bank_transfer' : ($isQris ? 'qris' : 'tunai'));
+
+                                // Bank Logo Mapping
+                                $bankLogos = [
+                                    'Bank Syariah Indonesia' => 'Admin/img/banks/bsi.png',
+                                    'BSI' => 'Admin/img/banks/bsi.png',
+                                    'BRI' => 'Admin/img/banks/bri.png',
+                                    'BRIMO' => 'Admin/img/banks/bri.png',
+                                    'Mandiri' => 'Admin/img/banks/mandiri.png',
+                                    'BNI' => 'Admin/img/banks/bni.png',
+                                    'BCA' => 'Admin/img/banks/bca.png',
+                                    'Bank Riau Kepri Syariah' => 'Admin/img/banks/brk.png',
+                                    'BRK' => 'Admin/img/banks/brk.png',
+                                    'Bank Mega' => 'Admin/img/banks/mega.png',
+                                ];
+                                $bankNameUpper = strtoupper($bankName);
+                                $bankLogoPath = 'Admin/img/banks/bsi.png';
+                                foreach ($bankLogos as $kunci => $jalur) {
+                                    if (str_contains($bankNameUpper, strtoupper($kunci))) {
+                                        $bankLogoPath = $jalur;
+                                        break;
+                                    }
+                                }
                             @endphp
 
                             <input type="hidden" name="payment_method" id="payment-method-hidden" value="{{ $defaultMethod }}">
@@ -455,11 +483,12 @@
                                 @endif
 
                                 @if($isQris)
-                                <label class="radio-card payment-radio-card {{ $defaultMethod == 'qris' ? 'selected' : '' }}" onclick="setPaymentMethod('qris')">
+                                <label class="radio-card payment-radio-card group relative overflow-hidden {{ $defaultMethod == 'qris' ? 'selected' : '' }}" onclick="setPaymentMethod('qris')">
+                                    <div class="absolute top-0 left-0 right-0 h-0.5 bg-red-500 opacity-0 group-hover:opacity-100 group-hover:animate-[scan_1.5s_ease-in-out_infinite] blur-[1px]"></div>
                                     <input type="radio" name="pay_radio" value="qris" {{ $defaultMethod == 'qris' ? 'checked' : '' }}>
                                     <div class="radio-indicator"></div>
                                     <div class="radio-icon" style="background: linear-gradient(135deg, #fee2e2, #fef2f2); color: #dc2626;">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+                                        <img src="{{ asset('Admin/img/banks/qris.svg') }}" alt="QRIS" class="h-4 object-contain" onerror="this.src='{{ asset('assets/img/payment_logos/dana.png') }}'">
                                     </div>
                                     <div class="radio-info">
                                         <div class="radio-title">QRIS / E-Wallet</div>
@@ -476,29 +505,38 @@
                                     <svg class="w-4 h-4 text-sky-600 inline flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                     <span>Petunjuk Pembayaran Tunai (COD)</span>
                                 </div>
-                                <p class="text-xs text-slate-500 mb-0">Pembayaran dilakukan secara tunai langsung kepada kurir saat barang sampai atau saat Anda mengambil barang di toko BUMDes.</p>
+                                <p class="text-xs text-slate-500 mb-0">Pembayaran dilakukan secara tunai langsung kepada kurir saat barang sampai atau saat Anda mengambil pesanan di gerai pengelola.</p>
                             </div>
 
                             <div id="payment-detail-bank_transfer" class="mt-3 transfer-box" style="display: {{ $defaultMethod == 'bank_transfer' ? 'block' : 'none' }}; margin-bottom: 0;">
                                 <div style="font-size: 0.82rem; font-weight: 700; color: #1e40af; display: flex; align-items: center; justify-content: space-between;">
                                     <span class="flex items-center gap-1.5">
                                         <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
-                                        Rekening Resmi BUMDes / Desa
+                                        Rekening Resmi Pengelola Layanan
                                     </span>
                                     <span class="text-[11px] font-semibold text-blue-700 bg-blue-100/80 px-2 py-0.5 rounded-md">{{ $bankName }}</span>
                                 </div>
                                 
-                                <div class="bank-row">
-                                    <div>
-                                        <div class="bank-name">{{ $bankName }}</div>
-                                        <div class="bank-number">{{ $bankNumber ?: '123-456-7890' }}</div>
-                                        <div class="bank-holder">a.n {{ $bankHolder }}</div>
+                                <div class="bank-row flex items-center gap-4 mt-2">
+                                    @if(!empty($bankLogoPath))
+                                        <img src="{{ asset($bankLogoPath) }}" alt="{{ $bankName }}" class="h-8 object-contain">
+                                    @endif
+                                    <div class="flex-1 min-w-0">
+                                        <div class="bank-name text-xs text-gray-500 uppercase">{{ $bankName }}</div>
+                                        <div class="bank-number font-black text-lg text-gray-900 select-all">{{ $bankNumber ?: 'Belum diatur' }}</div>
+                                        <div class="bank-holder text-sm text-gray-600">a.n {{ $bankHolder }}</div>
                                     </div>
                                     @if($bankNumber)
                                     <button type="button" onclick="navigator.clipboard.writeText('{{ $bankNumber }}'); showSiladesBengToast('success', 'Disalin!', 'Nomor rekening berhasil disalin.', 1500)" class="copy-btn" title="Salin Nomor Rekening">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
                                     </button>
                                     @endif
+                                </div>
+
+                                <div class="bg-amber-50 border-l-4 border-amber-400 p-2.5 rounded-r-xl mt-3 mb-1">
+                                    <p class="text-xs text-amber-800 mb-0">
+                                        <strong>Gunakan bank yang sama ({{ $bankName }})</strong> agar tidak dikenai biaya admin antarbank.
+                                    </p>
                                 </div>
                                 <p style="font-size: 0.75rem; color: #64748b; margin-top: 8px; margin-bottom: 0;">Transfer sesuai total tagihan belanjaan ke rekening resmi di atas.</p>
                             </div>
@@ -507,7 +545,7 @@
                                 <div style="font-size: 0.82rem; font-weight: 700; color: #9b2c2c; display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
                                     <span class="flex items-center gap-1.5">
                                         <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
-                                        QRIS &amp; E-Wallet Resmi Toko
+                                        QRIS &amp; E-Wallet Resmi Layanan
                                     </span>
                                     <span class="text-[11px] font-semibold text-red-700 bg-red-100 px-2 py-0.5 rounded-md">Scan Barcode</span>
                                 </div>
@@ -515,6 +553,10 @@
                                     @if(!empty($qrisImage))
                                         <div class="w-28 h-28 border rounded-lg overflow-hidden p-1 bg-white flex-shrink-0">
                                             <img src="{{ Storage::url($qrisImage) }}" alt="QRIS" class="w-full h-full object-contain">
+                                        </div>
+                                    @else
+                                        <div class="w-24 h-24 border rounded-lg overflow-hidden p-2 bg-white flex-shrink-0 flex items-center justify-center">
+                                            <img src="{{ asset('Admin/img/banks/qris.svg') }}" alt="QRIS" class="w-16 h-16 object-contain" onerror="this.src='{{ asset('assets/img/payment_logos/dana.png') }}'">
                                         </div>
                                     @endif
                                     <div class="flex-1 text-center sm:text-left">

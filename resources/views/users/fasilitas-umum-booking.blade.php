@@ -263,14 +263,16 @@
                         $hasTransfer = in_array('transfer', is_array($metodeWilayah) ? $metodeWilayah : []);
 
                         $bankLogos = [
-                            'Bank Syariah Indonesia' => 'admin/img/banks/bsi.png',
-                            'BSI' => 'admin/img/banks/bsi.png',
-                            'BRI' => 'admin/img/banks/bri.png',
-                            'Mandiri' => 'admin/img/banks/mandiri.png',
-                            'BNI' => 'admin/img/banks/bni.png',
-                            'BCA' => 'admin/img/banks/bca.png',
-                            'Bank Riau Kepri Syariah' => 'admin/img/banks/brk.png',
-                            'Bank Mega' => 'admin/img/banks/mega.png',
+                            'Bank Syariah Indonesia' => 'Admin/img/banks/bsi.png',
+                            'BSI' => 'Admin/img/banks/bsi.png',
+                            'BRI' => 'Admin/img/banks/bri.png',
+                            'BRIMO' => 'Admin/img/banks/bri.png',
+                            'Mandiri' => 'Admin/img/banks/mandiri.png',
+                            'BNI' => 'Admin/img/banks/bni.png',
+                            'BCA' => 'Admin/img/banks/bca.png',
+                            'Bank Riau Kepri Syariah' => 'Admin/img/banks/brk.png',
+                            'BRK' => 'Admin/img/banks/brk.png',
+                            'Bank Mega' => 'Admin/img/banks/mega.png',
                         ];
                         $bankLogoPath = null;
                         $namaBank = strtoupper($setting->bank_name ?? '');
