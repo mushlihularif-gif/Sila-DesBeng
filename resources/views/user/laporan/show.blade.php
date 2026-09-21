@@ -11,6 +11,20 @@
     .transition-smooth {
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
+
+    @keyframes scaleUp {
+        from {
+            opacity: 0;
+            transform: scale(0.94);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+    .animate-scale-up {
+        animation: scaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
 </style>
 @endpush
 
@@ -302,13 +316,20 @@
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                         @foreach ($laporan->bukti_array as $foto)
-                        <div class="group relative rounded-2xl overflow-hidden border border-gray-200 shadow-xs bg-gray-100 cursor-pointer aspect-video"
+                        <div class="group relative rounded-2xl overflow-hidden border border-gray-200 shadow-xs bg-gray-100 cursor-pointer aspect-video transition-all hover:shadow-md"
                              onclick="openImageModal('{{ asset('storage/' . $foto) }}')">
                             <img src="{{ asset('storage/' . $foto) }}" 
                                  alt="Bukti Laporan" 
                                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-                            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
-                                <i class="bx bx-zoom-in text-3xl"></i>
+                            <div class="absolute inset-0 bg-black/35 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
+                                <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/20 backdrop-blur-sm text-xs font-bold border border-white/40 shadow-sm">
+                                    <i class="bx bx-zoom-in text-base"></i>
+                                    <span>Lihat Foto Penuh</span>
+                                </span>
+                            </div>
+                            <div class="absolute bottom-2.5 right-2.5 bg-black/60 backdrop-blur-xs text-white text-[11px] font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1 opacity-85 group-hover:opacity-100 transition-opacity">
+                                <i class="bx bx-expand-alt"></i>
+                                <span>Perbesar</span>
                             </div>
                         </div>
                         @endforeach
@@ -430,38 +451,160 @@
     </section>
 </main>
 
-{{-- Modal Zoom Gambar Bukti --}}
-<div id="imageModal" class="hidden fixed inset-0 bg-black/90 z-50 items-center justify-center p-4" onclick="closeImageModal()">
-    <div class="relative max-w-5xl max-h-full" onclick="event.stopPropagation();">
-        <button onclick="closeImageModal()" 
-                class="absolute -top-12 right-0 text-white hover:text-gray-300 text-3xl font-bold cursor-pointer transition-colors">
-            <i class="bx bx-x"></i>
-        </button>
-        <img id="modalImage" src="" alt="Bukti Foto" class="max-w-full max-h-[85vh] object-contain rounded-2xl shadow-2xl border border-white/20">
+{{-- Modal Lightbox Peninjau Bukti Foto --}}
+<div id="imageModal" 
+     class="hidden fixed inset-0 bg-slate-950/85 backdrop-blur-md items-center justify-center p-3 sm:p-6 transition-all duration-300"
+     style="z-index: 100000;"
+     onclick="closeImageModal()">
+    
+    <div class="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] border border-white/20 animate-scale-up" 
+         onclick="event.stopPropagation();">
+        
+        {{-- Header Modal --}}
+        <div class="flex items-center justify-between px-5 sm:px-6 py-4 bg-white border-b border-gray-100 flex-shrink-0">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl flex-shrink-0 border border-blue-100">
+                    <i class="bx bx-image"></i>
+                </div>
+                <div>
+                    <h4 class="font-bold text-gray-900 text-sm sm:text-base leading-tight">Foto Bukti Lapangan</h4>
+                    <p class="text-xs text-gray-500 mt-0.5">
+                        Laporan #{{ str_pad($laporan->id, 3, '0', STR_PAD_LEFT) }} • {{ $laporan->kategori }}
+                        @if(!empty($laporan->bukti_array) && count($laporan->bukti_array) > 1)
+                            • <span id="modalFotoCounter" class="font-semibold text-blue-600">1 / {{ count($laporan->bukti_array) }}</span>
+                        @endif
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <a id="modalImageLink" href="#" target="_blank" rel="noopener noreferrer"
+                   class="px-3.5 py-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold inline-flex items-center gap-1.5 transition-colors"
+                   title="Buka gambar ukuran asli di tab baru">
+                    <i class="bx bx-link-external"></i>
+                    <span class="hidden sm:inline">Ukuran Asli</span>
+                </a>
+
+                <button type="button" 
+                        onclick="closeImageModal()" 
+                        class="w-8 h-8 rounded-full bg-gray-100 hover:bg-rose-50 text-gray-500 hover:text-rose-600 flex items-center justify-center text-xl transition-colors cursor-pointer"
+                        title="Tutup (Esc)">
+                    <i class="bx bx-x"></i>
+                </button>
+            </div>
+        </div>
+
+        {{-- Area Tampilan Gambar --}}
+        <div class="relative flex-1 bg-slate-900 flex items-center justify-center p-3 sm:p-6 overflow-hidden min-h-[320px] sm:min-h-[440px] select-none">
+            {{-- Tombol Navigasi Kiri --}}
+            <button type="button" 
+                    id="modalPrevBtn"
+                    onclick="prevModalImage()"
+                    style="display: none;"
+                    class="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 hover:bg-black/80 text-white flex items-center justify-center text-2xl transition-all cursor-pointer z-10 backdrop-blur-xs shadow-lg">
+                <i class="bx bx-chevron-left"></i>
+            </button>
+
+            {{-- Gambar Bukti Utama --}}
+            <img id="modalImage" 
+                 src="" 
+                 alt="Foto Bukti Laporan" 
+                 class="max-w-full max-h-[68vh] w-auto h-auto object-contain rounded-xl shadow-2xl transition-transform duration-200">
+
+            {{-- Tombol Navigasi Kanan --}}
+            <button type="button" 
+                    id="modalNextBtn"
+                    onclick="nextModalImage()"
+                    style="display: none;"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 hover:bg-black/80 text-white flex items-center justify-center text-2xl transition-all cursor-pointer z-10 backdrop-blur-xs shadow-lg">
+                <i class="bx bx-chevron-right"></i>
+            </button>
+        </div>
+
+        {{-- Footer Modal --}}
+        <div class="px-5 sm:px-6 py-2.5 bg-gray-50 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500 flex-shrink-0">
+            <span class="flex items-center gap-1">
+                <i class="bx bx-info-circle text-blue-500"></i>
+                <span>Gunakan tombol panah keyboard atau tombol di atas untuk melihat foto lainnya.</span>
+            </span>
+            <button type="button" onclick="closeImageModal()" class="font-semibold text-gray-700 hover:text-blue-600 transition-colors cursor-pointer">
+                Tutup (Esc)
+            </button>
+        </div>
+
     </div>
 </div>
 @endsection
 
 @push('scripts')
 <script>
+    const fotoList = @json(array_map(fn($f) => asset('storage/' . $f), $laporan->bukti_array));
+    let currentFotoIndex = 0;
+
     function openImageModal(src) {
+        const idx = fotoList.indexOf(src);
+        currentFotoIndex = idx >= 0 ? idx : 0;
+        updateModalImage();
+        
         const modal = document.getElementById('imageModal');
-        document.getElementById('modalImage').src = src;
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-        document.body.style.overflow = 'hidden';
+        if (modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    function updateModalImage() {
+        if (!fotoList || fotoList.length === 0) return;
+        const currentSrc = fotoList[currentFotoIndex];
+        const img = document.getElementById('modalImage');
+        const link = document.getElementById('modalImageLink');
+        const counter = document.getElementById('modalFotoCounter');
+        const prevBtn = document.getElementById('modalPrevBtn');
+        const nextBtn = document.getElementById('modalNextBtn');
+
+        if (img) img.src = currentSrc;
+        if (link) link.href = currentSrc;
+        if (counter) counter.textContent = (currentFotoIndex + 1) + ' / ' + fotoList.length;
+
+        if (prevBtn && nextBtn) {
+            const hasMultiple = fotoList.length > 1;
+            prevBtn.style.display = hasMultiple ? 'flex' : 'none';
+            nextBtn.style.display = hasMultiple ? 'flex' : 'none';
+        }
+    }
+
+    function prevModalImage() {
+        if (!fotoList || fotoList.length <= 1) return;
+        currentFotoIndex = (currentFotoIndex - 1 + fotoList.length) % fotoList.length;
+        updateModalImage();
+    }
+
+    function nextModalImage() {
+        if (!fotoList || fotoList.length <= 1) return;
+        currentFotoIndex = (currentFotoIndex + 1) % fotoList.length;
+        updateModalImage();
     }
 
     function closeImageModal() {
         const modal = document.getElementById('imageModal');
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-        document.body.style.overflow = 'auto';
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.style.overflow = 'auto';
+        }
     }
 
     document.addEventListener('keydown', function(e) {
+        const modal = document.getElementById('imageModal');
+        if (!modal || modal.classList.contains('hidden')) return;
+
         if (e.key === 'Escape') {
             closeImageModal();
+        } else if (e.key === 'ArrowLeft') {
+            prevModalImage();
+        } else if (e.key === 'ArrowRight') {
+            nextModalImage();
         }
     });
 </script>
