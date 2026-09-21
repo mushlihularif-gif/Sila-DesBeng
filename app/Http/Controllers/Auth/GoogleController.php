@@ -36,7 +36,7 @@ class GoogleController extends Controller
                     $findUser->save();
                 }
                 
-                Auth::login($findUser);
+                Auth::login($findUser, true);
                 request()->session()->regenerate();
                 
                 // Cek status aktif
@@ -136,7 +136,7 @@ class GoogleController extends Controller
             'ip_address' => request()->ip()
         ]);
 
-        Auth::login($newUser);
+        Auth::login($newUser, true);
         request()->session()->regenerate();
 
         return response()->json([

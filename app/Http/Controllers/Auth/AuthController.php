@@ -105,7 +105,7 @@ class AuthController extends Controller
                         $user->email_verified_at = now();
                         $user->save();
                         session()->forget(['otp_email', 'otp_code', 'google_otp_method']);
-                        Auth::login($user);
+                        Auth::login($user, true);
                         $request->session()->regenerate();
                         return redirect()->route('beranda')->with('success', 'Verifikasi Akun Google Berhasil!');
                     }
@@ -141,7 +141,7 @@ class AuthController extends Controller
             $user->save();
 
             session()->forget('temp_registration');
-            Auth::login($user);
+            Auth::login($user, true);
             $request->session()->regenerate();
 
             return redirect()->route('beranda')->with('success', 'Registrasi dan Verifikasi Berhasil!');
@@ -269,8 +269,12 @@ class AuthController extends Controller
             \Illuminate\Support\Facades\RateLimiter::clear($throttleKey);
             \Illuminate\Support\Facades\RateLimiter::clear($accountThrottleKey);
 
-            // Convert remember value to boolean
-            $rememberMe = isset($validated['remember']) && ($validated['remember'] === true || $validated['remember'] === '1' || $validated['remember'] === 1);
+            // Otomatis remember login (default true untuk kenyamanan warga 30 hari)
+            // Kecuali jika secara eksplisit tidak dicentang (false/'0'/0)
+            $rememberMe = true;
+            if (isset($validated['remember'])) {
+                $rememberMe = filter_var($validated['remember'], FILTER_VALIDATE_BOOLEAN);
+            }
             Auth::login($user, $rememberMe);
             $request->session()->regenerate();
 
@@ -457,8 +461,8 @@ class AuthController extends Controller
             // Clear session
             session()->forget(['forgot_password_data', 'forgot_password_otp_verified']);
 
-            // Auto login user
-            Auth::login($user);
+            // Auto login user dengan remember me
+            Auth::login($user, true);
             $request->session()->regenerate();
 
             return redirect()->route('beranda')->with('success', 'Password berhasil diperbarui dan Anda telah login.');

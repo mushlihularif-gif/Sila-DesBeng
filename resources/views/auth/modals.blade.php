@@ -69,7 +69,8 @@
 
                 <div class="flex items-center justify-between text-sm">
                     <label class="flex items-center cursor-pointer">
-                        <input type="checkbox" name="remember" id="remember-me" value="1" class="mr-2 rounded">
+                        <input type="hidden" name="remember" value="0">
+                        <input type="checkbox" name="remember" id="remember-me" value="1" checked class="mr-2 rounded text-blue-600 focus:ring-blue-500">
                         <span class="text-gray-600">Ingat Saya</span>
                     </label>
                     <button type="button" id="btn-open-forgot-password" class="text-blue-500 hover:underline">Lupa Kata Sandi?</button>
