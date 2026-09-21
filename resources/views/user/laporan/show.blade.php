@@ -24,7 +24,7 @@
 
             {{-- Navigasi Atas (Kembali & Unduh PDF) --}}
             <div class="flex flex-wrap items-center justify-between gap-3 mb-6 sm:mb-8 animate-section">
-                <a href="{{ route('activity.index', ['tab' => 'laporan']) }}" 
+                <a href="{{ route('user.activity', ['tab' => 'laporan']) }}" 
                    class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/85 hover:bg-white text-gray-700 hover:text-blue-600 border border-gray-200/80 shadow-sm backdrop-blur-md text-sm font-semibold transition-all">
                     <i class="bx bx-arrow-back text-base"></i>
                     <span>Kembali ke Riwayat</span>
