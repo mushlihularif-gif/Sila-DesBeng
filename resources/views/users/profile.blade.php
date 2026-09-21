@@ -495,15 +495,15 @@
                     </div>
                 @endif
 
-                <div class="bg-blue-50/70 border border-blue-200/80 rounded-2xl p-4 sm:p-5 mb-6 text-sm text-gray-700 space-y-3">
+                <div class="bg-orange-50/80 border border-orange-200/90 rounded-2xl p-4 sm:p-5 mb-6 text-sm text-gray-700 space-y-3">
                     <div class="flex items-start gap-3">
-                        <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <div class="w-8 h-8 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center flex-shrink-0 mt-0.5">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </div>
                         <div class="flex-1">
-                            <h4 class="font-bold text-blue-900 text-sm mb-1.5">Pemberitahuan Penting Pemindahan Wilayah Akun:</h4>
+                            <h4 class="font-bold text-orange-900 text-sm mb-1.5">Pemberitahuan Penting Pemindahan Wilayah Akun:</h4>
                             <ul class="space-y-2 text-xs sm:text-sm text-gray-600 leading-relaxed list-disc list-outside pl-4">
                                 <li>
                                     <strong class="text-gray-800">Bukan Pengurusan Berkas Kependudukan Sipil:</strong> Fitur ini khusus untuk memindahkan data wilayah akun Anda di aplikasi <strong>SiladesBeng</strong>, bukan layanan pembuatan Surat Pindah Domisili resmi (SKPWNI) dari Disdukcapil atau Kantor Desa.
