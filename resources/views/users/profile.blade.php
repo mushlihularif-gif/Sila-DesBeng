@@ -330,8 +330,8 @@
                     </svg>
                 </div>
                 <div>
-                    <h3 class="text-xl font-bold text-gray-800">Pengajuan Pindah Desa (Mutasi)</h3>
-                    <p class="text-gray-600 text-sm mt-1">Layanan pemindahan domisili akun digital warga antar desa di wilayah Kabupaten Bengkalis.</p>
+                    <h3 class="text-xl font-bold text-gray-800">Penyesuaian Wilayah Akun Layanan (Mutasi Desa)</h3>
+                    <p class="text-gray-600 text-sm mt-1">Pemindahan cakupan desa pada akun Anda untuk menyesuaikan hak akses fasilitas, layanan daerah, dan pelaporan di desa tujuan.</p>
                 </div>
             </div>
 
@@ -346,11 +346,11 @@
                         </div>
                         <div class="flex-1">
                             <div class="flex flex-wrap items-center justify-between gap-2">
-                                <h4 class="font-bold text-blue-900 text-base">Permohonan Mutasi Sedang Diproses</h4>
+                                <h4 class="font-bold text-blue-900 text-base">Permohonan Mutasi Wilayah Akun Sedang Diproses</h4>
                                 @if($pendingMutasi->status === 'pending_tujuan')
-                                    <span class="px-3 py-1 bg-amber-100 text-amber-800 text-xs font-semibold rounded-full border border-amber-200">Tahap 2: Menunggu Penerimaan Desa Tujuan</span>
+                                    <span class="px-3 py-1 bg-amber-100 text-amber-800 text-xs font-semibold rounded-full border border-amber-200">Tahap 2: Menunggu Penerimaan Akun oleh Desa Tujuan</span>
                                 @else
-                                    <span class="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full border border-blue-200">Tahap 1: Menunggu Pelepasan Desa Asal</span>
+                                    <span class="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full border border-blue-200">Tahap 1: Menunggu Pelepasan Akun oleh Desa Asal</span>
                                 @endif
                             </div>
                             @php
@@ -363,11 +363,11 @@
                             @endphp
                             @if($pendingMutasi->status === 'pending_tujuan')
                                 <p class="text-blue-800/90 text-sm mt-2 leading-relaxed">
-                                    Pelepasan dari <strong>{{ $fromDesaName }}</strong> telah disetujui. Saat ini pengajuan pindah Anda sedang menunggu verifikasi dan penerimaan dari Pemerintah Desa <strong>{{ $toDesaName }}</strong>@if($parentKecName) ({{ $parentKecName }})@endif.
+                                    Pelepasan akun dari <strong>{{ $fromDesaName }}</strong> telah disetujui. Saat ini pengajuan pemindahan wilayah akun Anda sedang menunggu verifikasi dan penerimaan dari Pemerintah Desa <strong>{{ $toDesaName }}</strong>@if($parentKecName) ({{ $parentKecName }})@endif.
                                 </p>
                             @else
                                 <p class="text-blue-800/90 text-sm mt-2 leading-relaxed">
-                                    Pengajuan pindah Anda ke <strong>{{ $toDesaName }}</strong>@if($parentKecName) ({{ $parentKecName }})@endif sedang menunggu verifikasi pelepasan dari Pemerintah Desa <strong>{{ $fromDesaName }}</strong> saat ini.
+                                    Pengajuan pemindahan wilayah akun Anda ke <strong>{{ $toDesaName }}</strong>@if($parentKecName) ({{ $parentKecName }})@endif sedang menunggu verifikasi pelepasan akun dari Pemerintah Desa <strong>{{ $fromDesaName }}</strong> saat ini.
                                 </p>
                             @endif
                             <div class="mt-4 pt-3 border-t border-blue-200/60 flex flex-wrap items-center justify-between gap-3">
@@ -381,8 +381,8 @@
                                 @endif
 
                                 <form id="form-cancel-mutasi" action="{{ route('user.mutasi.cancel') }}" method="POST"
-                                      data-konfirmasi="Apakah Anda yakin ingin membatalkan pengajuan pindah desa ini?"
-                                      data-konfirmasi-judul="Batalkan Pengajuan Mutasi"
+                                      data-konfirmasi="Apakah Anda yakin ingin membatalkan pengajuan pemindahan wilayah akun ini?"
+                                      data-konfirmasi-judul="Batalkan Pemindahan Akun"
                                       data-konfirmasi-jenis="bahaya"
                                       data-konfirmasi-ya="Ya, Batalkan">
                                     @csrf
@@ -495,20 +495,32 @@
                     </div>
                 @endif
 
-                <div class="bg-blue-50/60 border border-blue-100 rounded-2xl p-4 mb-6 flex items-start gap-3 text-sm text-blue-900">
-                    <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <p class="leading-relaxed text-xs sm:text-sm text-gray-600">
-                        Jika Anda berpindah domisili ke desa lain di Kabupaten Bengkalis, tentukan <strong>Kecamatan Tujuan</strong> lalu <strong>Desa Tujuan</strong>. Pemerintah Desa asal dan tujuan akan memverifikasi mutasi akun Anda.
-                    </p>
+                <div class="bg-blue-50/70 border border-blue-200/80 rounded-2xl p-4 sm:p-5 mb-6 text-sm text-gray-700 space-y-3">
+                    <div class="flex items-start gap-3">
+                        <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-blue-900 text-sm mb-1.5">Pemberitahuan Penting Pemindahan Wilayah Akun:</h4>
+                            <ul class="space-y-2 text-xs sm:text-sm text-gray-600 leading-relaxed list-disc list-outside pl-4">
+                                <li>
+                                    <strong class="text-gray-800">Bukan Pengurusan Berkas Kependudukan Sipil:</strong> Fitur ini khusus untuk memindahkan data wilayah akun Anda di aplikasi <strong>SiladesBeng</strong>, bukan layanan pembuatan Surat Pindah Domisili resmi (SKPWNI) dari Disdukcapil atau Kantor Desa.
+                                </li>
+                                <li>
+                                    <strong class="text-gray-800">Tujuan Pemindahan Akun:</strong> Setiap desa memiliki kebijakan layanan mandiri (seperti kuota tabung gas subsidi per KK, peminjaman fasilitas desa, dan koordinasi pelaporan RT/RW yang khusus untuk warga desa setempat). Pemindahan ini memastikan akun Anda terdaftar di desa tujuan sehingga Anda dapat mengakses layanan yang berlaku di desa tersebut setelah diverifikasi oleh pihak desa asal dan tujuan.
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
 
                 <form id="form-store-mutasi" action="{{ route('user.mutasi.store') }}" method="POST" class="space-y-5" 
-                      data-konfirmasi="Apakah Anda yakin ingin mengajukan pindah desa? Anda tidak dapat memesan fasilitas desa hingga proses mutasi disetujui."
-                      data-konfirmasi-judul="Konfirmasi Pengajuan Mutasi"
+                      data-konfirmasi="Apakah Anda yakin ingin mengajukan pemindahan wilayah akun? Akses pemesanan fasilitas desa saat ini akan dibatasi sementara hingga proses mutasi akun disetujui."
+                      data-konfirmasi-judul="Konfirmasi Pemindahan Wilayah Akun"
                       data-konfirmasi-jenis="peringatan"
-                      data-konfirmasi-ya="Ya, Ajukan Pindah">
+                      data-konfirmasi-ya="Ya, Ajukan Pemindahan">
                     @csrf
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -552,9 +564,9 @@
 
                     {{-- Alasan Pindah --}}
                     <div>
-                        <label for="input-alasan-mutasi" class="block text-sm font-bold text-gray-800 mb-2">Alasan Kepindahan</label>
+                        <label for="input-alasan-mutasi" class="block text-sm font-bold text-gray-800 mb-2">Alasan Pemindahan Akun Layanan</label>
                         <input type="text" id="input-alasan-mutasi" name="reason" 
-                                placeholder="Contoh: Pindah domisili mengikuti pekerjaan atau keluarga" 
+                                placeholder="Contoh: Sudah menetap di desa tujuan agar dapat mengakses fasilitas dan layanan desa setempat" 
                                 class="w-full px-4 py-2.5 bg-white/80 border border-white/60 rounded-xl focus:border-blue-400 focus:ring-2 focus:ring-blue-200/50 outline-none transition glass-input text-gray-800 text-sm" 
                                 required maxlength="500">
                     </div>
@@ -563,7 +575,7 @@
                     <div class="pt-2 flex justify-end">
                         <button type="submit" id="btn-submit-mutasi"
                                 class="button-interactive py-3 px-8 bg-blue-600 hover:bg-blue-700 text-white rounded-full font-semibold text-sm transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105 active:scale-95 inline-flex items-center justify-center gap-2">
-                            <span>Ajukan Pindah Sekarang</span>
+                            <span>Ajukan Pemindahan Akun</span>
                         </button>
                     </div>
                 </form>
