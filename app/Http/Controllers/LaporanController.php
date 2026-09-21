@@ -233,24 +233,36 @@ class LaporanController extends Controller
             }
         }
 
-        // Sanitasi lokasi: Jangan simpan "Lokasi tidak dikenali" jika koordinat tersedia
+        // Sanitasi lokasi: Jangan simpan "Lokasi tidak dikenali" atau format mentah jika reverse geocode bisa mendeteksi nama asli
         $lokasi = trim($validated['lokasi'] ?? '');
-        if (empty($lokasi) || $lokasi === 'Lokasi tidak dikenali') {
-            if (!empty($validated['latitude']) && !empty($validated['longitude'])) {
-                $resolved = \App\Support\GeocodeHelper::reverse($validated['latitude'], $validated['longitude']);
+        $lat = $validated['latitude'] ?? null;
+        $lng = $validated['longitude'] ?? null;
+
+        if (empty($lokasi) || $lokasi === 'Lokasi tidak dikenali' || str_starts_with($lokasi, 'Titik Koordinat') || str_starts_with($lokasi, 'Mendeteksi')) {
+            if (!empty($lat) && !empty($lng)) {
+                $resolved = \App\Support\GeocodeHelper::reverse($lat, $lng);
                 if ($resolved) {
                     $lokasi = $resolved;
                 }
             }
         }
-        if (empty($lokasi) || $lokasi === 'Lokasi tidak dikenali') {
-            $regionName = $user->region?->name ?? 'Wilayah Desa';
-            if (!empty($validated['latitude']) && !empty($validated['longitude'])) {
-                $lokasi = "{$regionName} ({$validated['latitude']}, {$validated['longitude']})";
+
+        if (empty($lokasi) || $lokasi === 'Lokasi tidak dikenali' || str_starts_with($lokasi, 'Mendeteksi')) {
+            $rawRegion = $user->region?->name ?? 'Wilayah Desa';
+            $cleanRegion = preg_replace('/^(desa|kelurahan|wilayah)\s+/i', '', trim($rawRegion));
+            $prefix = ($user->region?->type === 'kelurahan') ? 'Kelurahan ' : 'Desa ';
+            $regionName = $prefix . $cleanRegion;
+
+            if (!empty($lat) && !empty($lng)) {
+                $lokasi = "{$regionName} ({$lat}, {$lng})";
             } else {
                 $lokasi = $regionName;
             }
         }
+
+        // Hapus dobel prefix jika ada
+        $lokasi = preg_replace('/^Desa\s+Desa\s+/i', 'Desa ', $lokasi);
+        $lokasi = preg_replace('/^Kelurahan\s+Kelurahan\s+/i', 'Kelurahan ', $lokasi);
 
         // Prepare data TANPA bukti dulu
         $data = [
@@ -508,15 +520,20 @@ class LaporanController extends Controller
             if ($mapKey) {
                 $mapUrl = "https://maps.googleapis.com/maps/api/staticmap?center={$laporan->latitude},{$laporan->longitude}&zoom=15&size=600x300&markers=color:red%7C{$laporan->latitude},{$laporan->longitude}&key={$mapKey}";
                 try {
-                    $response = \Illuminate\Support\Facades\Http::withoutVerifying()->timeout(10)->get($mapUrl);
-                    if ($response->successful()) {
+                    $response = \Illuminate\Support\Facades\Http::withoutVerifying()->timeout(5)->get($mapUrl);
+                    if ($response->successful() && str_starts_with($response->header('Content-Type') ?? '', 'image/')) {
                         $staticMapBase64 = base64_encode($response->body());
                     } else {
-                        \Illuminate\Support\Facades\Log::error('Google Static Maps Failed: ' . $response->status() . ' - ' . $response->body());
+                        \Illuminate\Support\Facades\Log::warning('Google Static Maps Failed (Status: ' . $response->status() . '). Menggunakan fallback peta OpenStreetMap.');
                     }
                 } catch (\Exception $e) {
-                    \Illuminate\Support\Facades\Log::error('Google Static Maps Exception: ' . $e->getMessage());
+                    \Illuminate\Support\Facades\Log::warning('Google Static Maps Exception: ' . $e->getMessage());
                 }
+            }
+
+            // Fallback Andal: Menggunakan OpenStreetMap Static Map jika Google Static Maps belum aktif/gagal
+            if (empty($staticMapBase64)) {
+                $staticMapBase64 = \App\Support\GeocodeHelper::getStaticMapBase64($laporan->latitude, $laporan->longitude);
             }
         }
 

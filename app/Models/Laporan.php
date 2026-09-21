@@ -76,15 +76,24 @@ class Laporan extends Model
     {
         $lokasi = trim($this->lokasi ?? '');
         if (!empty($lokasi) && $lokasi !== 'Lokasi tidak dikenali') {
+            $lokasi = preg_replace('/^Desa\s+Desa\s+/i', 'Desa ', $lokasi);
+            $lokasi = preg_replace('/^Kelurahan\s+Kelurahan\s+/i', 'Kelurahan ', $lokasi);
             return $lokasi;
         }
 
         if ($this->region) {
-            $prefix = $this->region->type === 'desa' ? 'Desa ' : 'Wilayah ';
-            if ($this->latitude && $this->longitude) {
-                return $prefix . $this->region->name . " ({$this->latitude}, {$this->longitude})";
+            $regionName = trim($this->region->name);
+            $lowerName = strtolower($regionName);
+            $prefix = '';
+            if (!str_starts_with($lowerName, 'desa ') && !str_starts_with($lowerName, 'kelurahan ') && !str_starts_with($lowerName, 'wilayah ')) {
+                $prefix = $this->region->type === 'desa' ? 'Desa ' : ($this->region->type === 'kelurahan' ? 'Kelurahan ' : 'Wilayah ');
             }
-            return $prefix . $this->region->name;
+            $cleanRegion = $prefix . $regionName;
+
+            if ($this->latitude && $this->longitude) {
+                return "{$cleanRegion} ({$this->latitude}, {$this->longitude})";
+            }
+            return $cleanRegion;
         }
 
         if ($this->latitude && $this->longitude) {

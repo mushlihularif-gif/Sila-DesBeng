@@ -177,8 +177,16 @@
                     </a>
                 </div>
                 <div class="card-body pt-3">
-                    <div class="rounded overflow-hidden" style="height: 300px; position: relative; z-index: 1;">
-                        <div id="map-{{ $laporan->id }}" style="width: 100%; height: 100%; border-radius: 8px;"></div>
+                    <div class="rounded overflow-hidden bg-light" style="height: 300px; position: relative; z-index: 1;">
+                        <iframe
+                            width="100%"
+                            height="100%"
+                            style="border:0; width: 100%; height: 300px; border-radius: 8px;"
+                            loading="lazy"
+                            allowfullscreen
+                            referrerpolicy="no-referrer-when-downgrade"
+                            src="https://maps.google.com/maps?q={{ $laporan->latitude }},{{ $laporan->longitude }}&hl=id&z=16&output=embed">
+                        </iframe>
                     </div>
                     <div class="mt-2 text-muted small d-flex justify-content-between">
                         <span><i class="bx bx-current-location text-primary me-1"></i> {{ $laporan->display_lokasi }}</span>
@@ -359,34 +367,4 @@
         document.getElementById('modalImage').src = src;
     }
 </script>
-
-@if($laporan->latitude && $laporan->longitude)
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const mapContainer = document.getElementById("map-{{ $laporan->id }}");
-        if (!mapContainer) return;
-
-        const lat = {{ $laporan->latitude }};
-        const lng = {{ $laporan->longitude }};
-
-        const map = L.map(mapContainer, {
-            center: [lat, lng],
-            zoom: 16,
-            scrollWheelZoom: false
-        });
-
-        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(map);
-
-        const marker = L.marker([lat, lng]).addTo(map);
-        marker.bindPopup("<strong>Lokasi Kejadian</strong><br>{{ addslashes($laporan->display_lokasi) }}").openPopup();
-
-        setTimeout(() => map.invalidateSize(), 300);
-    });
-</script>
-@endif
 @endsection

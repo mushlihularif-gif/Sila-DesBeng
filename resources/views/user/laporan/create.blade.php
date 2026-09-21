@@ -488,7 +488,14 @@
     {{-- ===== SCRIPT PETA (GOOGLE MAPS) ===== --}}
     <script>
     let map, marker, geocoder;
+    let isLeafletActive = false, leafletMap = null, leafletMarker = null;
     let pendingLat = null, pendingLng = null, pendingAddress = null;
+
+    // Fallback otomatis jika Google Maps API Key bermasalah/dibatasi referer
+    window.gm_authFailure = function() {
+        console.warn("Google Maps API Key ditolak oleh Google. Memuat peta alternatif OpenStreetMap...");
+        initLeafletPicker();
+    };
 
     // Pin digambar inline sebagai SVG, bukan diambil dari maps.google.com.
     // Alasannya: Content-Security-Policy aplikasi ini tidak mengizinkan gambar
@@ -608,7 +615,10 @@
             coordsEl.innerText = "Lat: " + lat.toFixed(6) + " • Lng: " + lng.toFixed(6);
         }
 
-        if (marker) {
+        if (isLeafletActive && leafletMarker) {
+            leafletMarker.setLatLng([lat, lng]);
+            if (leafletMap) leafletMap.panTo([lat, lng]);
+        } else if (marker) {
             marker.setPosition({ lat: lat, lng: lng });
             if (typeof marker.setAnimation === 'function') {
                 marker.setAnimation(google.maps.Animation.BOUNCE);
@@ -646,12 +656,16 @@
 
         const confirmedLat = document.getElementById("latitude").value;
         const confirmedLng = document.getElementById("longitude").value;
-        if (confirmedLat && confirmedLng && marker) {
-            marker.setPosition({ lat: parseFloat(confirmedLat), lng: parseFloat(confirmedLng) });
+        if (confirmedLat && confirmedLng) {
+            if (isLeafletActive && leafletMarker) {
+                leafletMarker.setLatLng([parseFloat(confirmedLat), parseFloat(confirmedLng)]);
+            } else if (marker) {
+                marker.setPosition({ lat: parseFloat(confirmedLat), lng: parseFloat(confirmedLng) });
+            }
         }
     }
 
-    // âœ… Fix 2: Fungsi GPS Otomatis (Share Location)
+    // Fix: Fungsi GPS Otomatis (Share Location)
     function getMyLocation() {
         const btn = document.getElementById('btn-gps');
         const icon = document.getElementById('gps-icon');
@@ -676,8 +690,13 @@
                 const lng = position.coords.longitude;
 
                 // Pindahkan peta ke lokasi user
-                map.setCenter({ lat: lat, lng: lng });
-                map.setZoom(18);
+                if (isLeafletActive && leafletMap) {
+                    leafletMap.setView([lat, lng], 17);
+                    if (leafletMarker) leafletMarker.setLatLng([lat, lng]);
+                } else if (map) {
+                    map.setCenter({ lat: lat, lng: lng });
+                    map.setZoom(18);
+                }
 
                 // Tampilkan modal konfirmasi seperti klik biasa
                 showLocationModal(lat, lng);
@@ -716,10 +735,68 @@
             { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
         );
     }
+
+    function initLeafletPicker() {
+        if (isLeafletActive) return;
+        isLeafletActive = true;
+        const mapEl = document.getElementById("map");
+        if (!mapEl) return;
+        mapEl.innerHTML = '';
+
+        function setupLeaflet() {
+            const defaultPos = [1.0916, 102.0724];
+            leafletMap = L.map('map', {
+                center: defaultPos,
+                zoom: 15,
+                scrollWheelZoom: true
+            });
+
+            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(leafletMap);
+
+            leafletMarker = L.marker(defaultPos, { draggable: true }).addTo(leafletMap);
+
+            leafletMap.on('click', function(e) {
+                showLocationModal(e.latlng.lat, e.latlng.lng);
+            });
+
+            leafletMarker.on('dragend', function(e) {
+                const pos = e.target.getLatLng();
+                showLocationModal(pos.lat, pos.lng);
+            });
+
+            setTimeout(() => {
+                if (leafletMap) leafletMap.invalidateSize();
+            }, 300);
+        }
+
+        if (window.L) {
+            setupLeaflet();
+        } else {
+            const css = document.createElement('link');
+            css.rel = 'stylesheet';
+            css.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+            document.head.appendChild(css);
+
+            const js = document.createElement('script');
+            js.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+            js.onload = setupLeaflet;
+            document.head.appendChild(js);
+        }
+    }
+
+    // Jika Google Maps gagal terinisialisasi dalam 4 detik, otomatis alihkan ke OpenStreetMap
+    setTimeout(function() {
+        if (!map && !isLeafletActive) {
+            initLeafletPicker();
+        }
+    }, 4000);
     </script>
 
     <script async defer
-        src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google_maps.api_key') }}&callback=initMap&loading=async">
+        src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google_maps.api_key') }}&libraries=places&callback=initMap&loading=async">
     </script>
 
     <script>

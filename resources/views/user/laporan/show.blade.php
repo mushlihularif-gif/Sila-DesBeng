@@ -3,9 +3,6 @@
 @section('title', 'Detail Laporan #' . str_pad($laporan->id, 3, '0', STR_PAD_LEFT) . ' - SiladesBeng')
 
 @push('styles')
-@if($laporan->latitude && $laporan->longitude)
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-@endif
 <style>
     /* Halus transisi */
     .transition-smooth {
@@ -363,13 +360,24 @@
                         </p>
 
                         @if($laporan->latitude && $laporan->longitude)
-                            <div class="mt-3 rounded-xl overflow-hidden border border-gray-200 shadow-xs relative" style="height: 280px; z-index: 1;">
-                                <div id="map-{{ $laporan->id }}" class="w-full h-full"></div>
+                            <div class="mt-3 rounded-xl overflow-hidden border border-gray-200 shadow-xs relative bg-gray-100" style="height: 300px; z-index: 1;">
+                                <iframe
+                                    width="100%"
+                                    height="100%"
+                                    style="border:0; width: 100%; height: 300px;"
+                                    loading="lazy"
+                                    allowfullscreen
+                                    referrerpolicy="no-referrer-when-downgrade"
+                                    src="https://maps.google.com/maps?q={{ $laporan->latitude }},{{ $laporan->longitude }}&hl=id&z=16&output=embed">
+                                </iframe>
                             </div>
-                            <p class="text-[11px] text-gray-500 mt-2 flex items-center gap-1">
-                                <i class="bx bx-target-lock text-blue-500"></i>
-                                <span>Titik Koordinat: {{ $laporan->latitude }}, {{ $laporan->longitude }}</span>
-                            </p>
+                            <div class="flex flex-wrap items-center justify-between gap-2 mt-2 px-1">
+                                <p class="text-[11px] text-gray-500 flex items-center gap-1">
+                                    <i class="bx bx-target-lock text-blue-500"></i>
+                                    <span>Titik Koordinat: {{ $laporan->latitude }}, {{ $laporan->longitude }}</span>
+                                </p>
+                                <span class="text-[11px] text-gray-400">Peta Lokasi Kejadian</span>
+                            </div>
                         @endif
                     </div>
                 </div>
@@ -588,40 +596,4 @@
         }
     });
 </script>
-
-@if($laporan->latitude && $laporan->longitude)
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script>
-    function initLeafletMap{{ $laporan->id }}() {
-        const mapContainer = document.getElementById("map-{{ $laporan->id }}");
-        if (!mapContainer || mapContainer._leaflet_id) return;
-
-        const lat = {{ $laporan->latitude }};
-        const lng = {{ $laporan->longitude }};
-
-        const map = L.map(mapContainer, {
-            center: [lat, lng],
-            zoom: 16,
-            scrollWheelZoom: false
-        });
-
-        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(map);
-
-        const marker = L.marker([lat, lng]).addTo(map);
-        marker.bindPopup("<strong>Lokasi Kejadian</strong><br>{{ addslashes($laporan->display_lokasi) }}").openPopup();
-
-        setTimeout(() => map.invalidateSize(), 300);
-    }
-
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initLeafletMap{{ $laporan->id }});
-    } else {
-        initLeafletMap{{ $laporan->id }}();
-    }
-    document.addEventListener('turbo:load', initLeafletMap{{ $laporan->id }});
-</script>
-@endif
 @endpush
