@@ -487,48 +487,37 @@
 
                 <button type="button" 
                         onclick="closeImageModal()" 
-                        class="w-8 h-8 rounded-full bg-gray-100 hover:bg-rose-50 text-gray-500 hover:text-rose-600 flex items-center justify-center text-xl transition-colors cursor-pointer"
-                        title="Tutup (Esc)">
+                        class="w-9 h-9 rounded-full bg-gray-100 hover:bg-rose-50 text-gray-500 hover:text-rose-600 flex items-center justify-center text-xl transition-colors cursor-pointer"
+                        title="Tutup">
                     <i class="bx bx-x"></i>
                 </button>
             </div>
         </div>
 
-        {{-- Area Tampilan Gambar --}}
-        <div class="relative flex-1 bg-slate-900 flex items-center justify-center p-3 sm:p-6 overflow-hidden min-h-[320px] sm:min-h-[440px] select-none">
+        {{-- Area Tampilan Gambar (Tampil Penuh dan Proporsional) --}}
+        <div class="relative bg-slate-950 flex items-center justify-center p-3 sm:p-6 overflow-hidden min-h-[340px] sm:min-h-[460px] select-none">
             {{-- Tombol Navigasi Kiri --}}
             <button type="button" 
                     id="modalPrevBtn"
                     onclick="prevModalImage()"
                     style="display: none;"
-                    class="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 hover:bg-black/80 text-white flex items-center justify-center text-2xl transition-all cursor-pointer z-10 backdrop-blur-xs shadow-lg">
+                    class="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center text-2xl transition-all cursor-pointer z-10 backdrop-blur-xs shadow-lg">
                 <i class="bx bx-chevron-left"></i>
             </button>
 
-            {{-- Gambar Bukti Utama --}}
+            {{-- Gambar Bukti Utama (Otomatis berskala penuh agar tidak tampak kecil) --}}
             <img id="modalImage" 
                  src="" 
                  alt="Foto Bukti Laporan" 
-                 class="max-w-full max-h-[68vh] w-auto h-auto object-contain rounded-xl shadow-2xl transition-transform duration-200">
+                 class="w-full max-h-[75vh] min-h-[300px] sm:min-h-[420px] object-contain rounded-xl transition-transform duration-200">
 
             {{-- Tombol Navigasi Kanan --}}
             <button type="button" 
                     id="modalNextBtn"
                     onclick="nextModalImage()"
                     style="display: none;"
-                    class="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 hover:bg-black/80 text-white flex items-center justify-center text-2xl transition-all cursor-pointer z-10 backdrop-blur-xs shadow-lg">
+                    class="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center text-2xl transition-all cursor-pointer z-10 backdrop-blur-xs shadow-lg">
                 <i class="bx bx-chevron-right"></i>
-            </button>
-        </div>
-
-        {{-- Footer Modal --}}
-        <div class="px-5 sm:px-6 py-2.5 bg-gray-50 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500 flex-shrink-0">
-            <span class="flex items-center gap-1">
-                <i class="bx bx-info-circle text-blue-500"></i>
-                <span>Gunakan tombol panah keyboard atau tombol di atas untuk melihat foto lainnya.</span>
-            </span>
-            <button type="button" onclick="closeImageModal()" class="font-semibold text-gray-700 hover:text-blue-600 transition-colors cursor-pointer">
-                Tutup (Esc)
             </button>
         </div>
 
