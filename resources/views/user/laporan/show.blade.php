@@ -477,14 +477,7 @@
                 </div>
             </div>
 
-            <div class="flex items-center gap-2">
-                <a id="modalImageLink" href="#" target="_blank" rel="noopener noreferrer"
-                   class="px-3.5 py-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold inline-flex items-center gap-1.5 transition-colors"
-                   title="Buka gambar ukuran asli di tab baru">
-                    <i class="bx bx-link-external"></i>
-                    <span class="hidden sm:inline">Ukuran Asli</span>
-                </a>
-
+            <div>
                 <button type="button" 
                         onclick="closeImageModal()" 
                         class="w-9 h-9 rounded-full bg-gray-100 hover:bg-rose-50 text-gray-500 hover:text-rose-600 flex items-center justify-center text-xl transition-colors cursor-pointer"
@@ -547,13 +540,11 @@
         if (!fotoList || fotoList.length === 0) return;
         const currentSrc = fotoList[currentFotoIndex];
         const img = document.getElementById('modalImage');
-        const link = document.getElementById('modalImageLink');
         const counter = document.getElementById('modalFotoCounter');
         const prevBtn = document.getElementById('modalPrevBtn');
         const nextBtn = document.getElementById('modalNextBtn');
 
         if (img) img.src = currentSrc;
-        if (link) link.href = currentSrc;
         if (counter) counter.textContent = (currentFotoIndex + 1) + ' / ' + fotoList.length;
 
         if (prevBtn && nextBtn) {
