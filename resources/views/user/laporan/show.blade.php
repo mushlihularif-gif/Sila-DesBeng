@@ -1,328 +1,445 @@
 @extends('layouts.user')
 
-@section('title', 'Detail Laporan')
+@section('title', 'Detail Laporan #' . str_pad($laporan->id, 3, '0', STR_PAD_LEFT) . ' - SiladesBeng')
+
+@push('styles')
+@if($laporan->latitude && $laporan->longitude)
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+@endif
+<style>
+    /* Halus transisi */
+    .transition-smooth {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+</style>
+@endpush
 
 @section('page')
+<main class="flex-grow relative w-full">
+    {{-- Background Gelombang Interaktif Khas SiladesBeng --}}
+    @include('partials.abstract-bg')
 
-<div class="min-h-screen bg-gradient-to-br from-blue-50 to-white py-20 text-gray-800">
-    <div class="max-w-4xl mx-auto px-4">
-        {{-- Alert Messages --}}
-        @if (session('success'))
-        <div class="mb-6 bg-green-500/20 border border-green-500/50 rounded-xl p-4 animate-fade-in">
-            <p class="text-green-400 flex items-center gap-2"><svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> {{ session('success') }}</p>
-        </div>
-        @endif
+    <section class="relative z-10 min-h-screen pt-32 sm:pt-36 md:pt-40 pb-20">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 relative z-10">
 
-        @if (session('error'))
-        <div class="mb-6 bg-red-500/20 border border-red-500/50 rounded-xl p-4 animate-fade-in">
-            <p class="text-red-400 flex items-center gap-2"><svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg> {{ session('error') }}</p>
-        </div>
-        @endif
+            {{-- Navigasi Atas (Kembali & Unduh PDF) --}}
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-6 sm:mb-8 animate-section">
+                <a href="{{ route('activity.index', ['tab' => 'laporan']) }}" 
+                   class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/85 hover:bg-white text-gray-700 hover:text-blue-600 border border-gray-200/80 shadow-sm backdrop-blur-md text-sm font-semibold transition-all">
+                    <i class="bx bx-arrow-back text-base"></i>
+                    <span>Kembali ke Riwayat</span>
+                </a>
 
-        {{-- Card Laporan --}}
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-xl overflow-hidden">
-            {{-- Header --}}
-            <div class="bg-gradient-to-r from-blue-600 to-blue-500 p-6">
-                <div class="flex items-center justify-between">
-                    <h1 class="text-2xl font-bold text-white">Detail Laporan</h1>
-                    <div class="flex gap-2">
-                        <a href="{{ route('user.laporan.export', $laporan->id) }}"
-                            class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold transition flex items-center gap-2 shadow-sm">
-                            <i class="fas fa-file-pdf"></i>
-                            <span>Download PDF</span>
-                        </a>
-                        <a href="{{ route('user.laporan.index') }}"
-                            class="px-4 py-2 bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition shadow-sm font-semibold">
-                            ← Kembali
-                        </a>
-                    </div>
-                </div>
+                <a href="{{ route('user.laporan.export', $laporan->id) }}"
+                   class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/85 hover:bg-red-50 text-red-600 border border-red-200 shadow-sm backdrop-blur-md text-sm font-semibold transition-all">
+                    <i class="bx bxs-file-pdf text-lg text-red-500"></i>
+                    <span>Unduh PDF</span>
+                </a>
             </div>
 
-            <div class="p-8">
-                {{-- Info Grid --}}
-                <div class="grid md:grid-cols-2 gap-6 mb-8">
-                    {{-- Nomor Laporan --}}
-                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
-                        <p class="text-gray-500 text-sm mb-1 font-medium">Nomor Laporan</p>
-                        <p class="text-gray-900 font-bold text-lg">#{{ str_pad($laporan->id, 3, '0', STR_PAD_LEFT) }}</p>
+            {{-- Judul Halaman dengan Gradasi Khas Kabar Daerah --}}
+            <div class="text-center mb-8 sm:mb-10 animate-section">
+                <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 tracking-tight">
+                    <span class="bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">Detail </span>
+                    <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Laporan Warga</span>
+                </h1>
+                <p class="text-gray-600 text-sm sm:text-base max-w-xl mx-auto">
+                    Pantau perkembangan, bukti dokumentasi, dan tindak lanjut laporan pengaduan Anda di SiladesBeng.
+                </p>
+            </div>
+
+            {{-- Flash Notification Alerts --}}
+            @if (session('success'))
+            <div class="mb-6 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl p-4 flex items-center gap-3 shadow-sm animate-section">
+                <i class="bx bx-check-circle text-2xl text-emerald-600 flex-shrink-0"></i>
+                <p class="text-sm font-medium">{{ session('success') }}</p>
+            </div>
+            @endif
+
+            @if (session('error'))
+            <div class="mb-6 bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl p-4 flex items-center gap-3 shadow-sm animate-section">
+                <i class="bx bx-error-circle text-2xl text-rose-600 flex-shrink-0"></i>
+                <p class="text-sm font-medium">{{ session('error') }}</p>
+            </div>
+            @endif
+
+            @php
+                $statusLower = strtolower($laporan->status);
+                $isVerified = $laporan->user && $laporan->user->kycVerification && $laporan->user->kycVerification->status === 'approved';
+                $namaLaporan = $laporan->nama ?? 'Warga';
+                $namaAkun = $laporan->user->name ?? $namaLaporan;
+
+                // Konfigurasi Status
+                $statusConfig = match($statusLower) {
+                    'pending' => [
+                        'badge' => 'bg-amber-50 text-amber-800 border-amber-200',
+                        'dot' => 'bg-amber-500',
+                        'label' => 'Menunggu Verifikasi',
+                        'desc' => 'Laporan Anda telah tercatat dalam sistem dan sedang menunggu tinjauan dari petugas terkait.',
+                        'step' => 1
+                    ],
+                    'proses', 'diproses' => [
+                        'badge' => 'bg-blue-50 text-blue-800 border-blue-200',
+                        'dot' => 'bg-blue-500',
+                        'label' => 'Sedang Diproses',
+                        'desc' => 'Laporan telah diverifikasi dan saat ini sedang ditindaklanjuti oleh petugas lapangan.',
+                        'step' => 2
+                    ],
+                    'dilanjutkan' => [
+                        'badge' => 'bg-purple-50 text-purple-800 border-purple-200',
+                        'dot' => 'bg-purple-500',
+                        'label' => 'Dieskalasi ke ' . strtoupper($laporan->escalation_level ?? 'Desa'),
+                        'desc' => 'Laporan dialihkan ke jenjang kewenangan yang lebih tinggi untuk penanganan komprehensif.',
+                        'step' => 3
+                    ],
+                    'selesai' => [
+                        'badge' => 'bg-emerald-50 text-emerald-800 border-emerald-200',
+                        'dot' => 'bg-emerald-500',
+                        'label' => 'Selesai Ditangani',
+                        'desc' => 'Seluruh tindak lanjut atas aduan ini telah diselesaikan oleh pemerintah desa.',
+                        'step' => 4
+                    ],
+                    'ditolak' => [
+                        'badge' => 'bg-rose-50 text-rose-800 border-rose-200',
+                        'dot' => 'bg-rose-500',
+                        'label' => 'Laporan Ditolak',
+                        'desc' => 'Laporan tidak dapat diproses lebih lanjut. Silakan periksa catatan dari petugas di bawah.',
+                        'step' => 0
+                    ],
+                    default => [
+                        'badge' => 'bg-gray-50 text-gray-800 border-gray-200',
+                        'dot' => 'bg-gray-400',
+                        'label' => ucfirst($laporan->status),
+                        'desc' => 'Status laporan saat ini: ' . ucfirst($laporan->status),
+                        'step' => 1
+                    ]
+                };
+            @endphp
+
+            {{-- Kartu Utama Detail Laporan --}}
+            <div class="backdrop-blur-md bg-white/90 rounded-3xl shadow-xl border border-white/80 p-6 sm:p-8 md:p-10 space-y-8 animate-section">
+                
+                {{-- Header Kartu: Nomor, Kategori, Tujuan & Badge Status --}}
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-gray-100">
+                    <div class="flex flex-wrap items-center gap-2.5">
+                        <span class="px-3.5 py-1.5 rounded-full text-xs font-bold bg-gray-900 text-white shadow-xs">
+                            #{{ str_pad($laporan->id, 3, '0', STR_PAD_LEFT) }}
+                        </span>
+                        
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-100">
+                            <i class="bx bx-category"></i>
+                            <span>{{ $laporan->kategori }}</span>
+                        </span>
+
+                        @if($laporan->tujuan_laporan)
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-100">
+                            <i class="bx bx-paper-plane"></i>
+                            <span>Ditujukan: {{ strtoupper($laporan->tujuan_laporan) }}</span>
+                        </span>
+                        @endif
                     </div>
 
-                    {{-- Status --}}
-                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
-                        <p class="text-gray-500 text-sm mb-2 font-medium">Status</p>
-                        <div class="flex items-center gap-2">
-                            @if ($laporan->status === 'Pending')
-                            <span class="inline-flex px-3 py-1.5 bg-yellow-100 text-yellow-700 border border-yellow-200 rounded-lg text-sm font-bold flex items-center gap-2">
-                                <i class="fas fa-clock"></i> Pending
-                            </span>
+                    <div>
+                        <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold border {{ $statusConfig['badge'] }}">
+                            <span class="w-2 h-2 rounded-full {{ $statusConfig['dot'] }} animate-pulse"></span>
+                            <span>{{ $statusConfig['label'] }}</span>
+                        </span>
+                    </div>
+                </div>
 
-                            @elseif(in_array($laporan->status, ['Proses','Diproses']))
-                            <span class="inline-flex px-3 py-1.5 bg-blue-100 text-blue-700 border border-blue-200 rounded-lg text-sm font-bold flex items-center gap-2">
-                                <i class="fas fa-spinner fa-spin"></i> Proses
-                            </span>
+                {{-- Alur Penanganan Aduan (Progress Tracker) --}}
+                <div class="bg-gray-50/80 rounded-2xl p-5 sm:p-6 border border-gray-100">
+                    <p class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-4 flex items-center gap-1.5">
+                        <i class="bx bx-git-commit text-blue-600"></i>
+                        <span>Alur Tindak Lanjut Pengaduan</span>
+                    </p>
 
-                            @elseif($laporan->status === 'Dilanjutkan')
-                            <span class="inline-flex px-3 py-1.5 bg-orange-100 text-orange-700 border border-orange-200 rounded-lg text-sm font-bold flex items-center gap-2">
-                                <i class="fas fa-share"></i> Dilanjutkan
-                            </span>
+                    @if($statusLower === 'ditolak')
+                        <div class="flex items-center gap-3 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-sm">
+                            <i class="bx bx-x-circle text-2xl text-rose-600 flex-shrink-0"></i>
+                            <div>
+                                <p class="font-bold">Laporan Dihentikan / Ditolak</p>
+                                <p class="text-xs text-rose-700 mt-0.5">{{ $statusConfig['desc'] }}</p>
+                            </div>
+                        </div>
+                    @else
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 relative">
+                            {{-- Tahap 1: Laporan Dikirim --}}
+                            <div class="flex flex-col items-center text-center">
+                                <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm mb-2 shadow-xs {{ $statusConfig['step'] >= 1 ? 'bg-emerald-500 text-white' : 'bg-gray-200 text-gray-500' }}">
+                                    <i class="bx bx-check text-lg"></i>
+                                </div>
+                                <span class="text-xs font-bold text-gray-800">Laporan Dikirim</span>
+                                <span class="text-[11px] text-gray-500 mt-0.5">{{ $laporan->created_at->format('d M Y') }}</span>
+                            </div>
 
-                            @elseif($laporan->status === 'Selesai')
-                            <span class="inline-flex px-3 py-1.5 bg-green-100 text-green-700 border border-green-200 rounded-lg text-sm font-bold flex items-center gap-2">
-                                <i class="fas fa-check"></i> Selesai
-                            </span>
+                            {{-- Tahap 2: Verifikasi Petugas --}}
+                            <div class="flex flex-col items-center text-center">
+                                <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm mb-2 shadow-xs {{ $statusConfig['step'] >= 2 ? ($statusConfig['step'] == 2 ? 'bg-blue-600 text-white ring-4 ring-blue-100' : 'bg-emerald-500 text-white') : 'bg-gray-200 text-gray-500' }}">
+                                    @if($statusConfig['step'] > 2)
+                                        <i class="bx bx-check text-lg"></i>
+                                    @else
+                                        <i class="bx bx-file-find text-lg"></i>
+                                    @endif
+                                </div>
+                                <span class="text-xs font-bold text-gray-800">Verifikasi</span>
+                                <span class="text-[11px] text-gray-500 mt-0.5">Petugas RT/RW/Desa</span>
+                            </div>
 
-                            @elseif($laporan->status === 'Ditolak')
-                            <span class="inline-flex px-3 py-1.5 bg-red-100 text-red-700 border border-red-200 rounded-lg text-sm font-bold flex items-center gap-2">
-                                <i class="fas fa-times"></i> Ditolak
-                            </span>
-                            @endif
+                            {{-- Tahap 3: Tindak Lanjut Lapangan --}}
+                            <div class="flex flex-col items-center text-center">
+                                <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm mb-2 shadow-xs {{ $statusConfig['step'] >= 3 ? ($statusConfig['step'] == 3 ? 'bg-purple-600 text-white ring-4 ring-purple-100' : 'bg-emerald-500 text-white') : 'bg-gray-200 text-gray-500' }}">
+                                    @if($statusConfig['step'] > 3)
+                                        <i class="bx bx-check text-lg"></i>
+                                    @else
+                                        <i class="bx bx-wrench text-lg"></i>
+                                    @endif
+                                </div>
+                                <span class="text-xs font-bold text-gray-800">Tindak Lanjut</span>
+                                <span class="text-[11px] text-gray-500 mt-0.5">Penanganan</span>
+                            </div>
+
+                            {{-- Tahap 4: Selesai Ditangani --}}
+                            <div class="flex flex-col items-center text-center">
+                                <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm mb-2 shadow-xs {{ $statusConfig['step'] >= 4 ? 'bg-emerald-500 text-white ring-4 ring-emerald-100' : 'bg-gray-200 text-gray-500' }}">
+                                    <i class="bx bx-badge-check text-lg"></i>
+                                </div>
+                                <span class="text-xs font-bold text-gray-800">Selesai</span>
+                                <span class="text-[11px] text-gray-500 mt-0.5">{{ $statusLower === 'selesai' ? $laporan->updated_at->format('d M Y') : 'Tuntas' }}</span>
+                            </div>
+                        </div>
+
+                        <p class="text-xs text-gray-600 text-center mt-4 pt-3 border-t border-gray-200/60">
+                            {{ $statusConfig['desc'] }}
+                        </p>
+                    @endif
+                </div>
+
+                {{-- Informasi Metadata Pelapor & Wilayah --}}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {{-- Kolom Pelapor --}}
+                    <div class="p-4 rounded-2xl bg-gray-50/70 border border-gray-100 flex items-start gap-3.5">
+                        <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0 text-xl border border-blue-100">
+                            <i class="bx bx-user"></i>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <p class="text-xs text-gray-500 font-medium">Pelapor</p>
+                            <p class="text-sm font-bold text-gray-900 truncate mt-0.5">
+                                {{ $namaLaporan }}
+                            </p>
+                            <div class="mt-1 flex items-center gap-2">
+                                @if($isVerified)
+                                    <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+                                        <i class="bx bxs-badge-check"></i>
+                                        <span>Sesuai KTP</span>
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
+                                        <i class="bx bx-info-circle"></i>
+                                        <span>Belum KTP</span>
+                                    </span>
+                                @endif
+                                @if($namaAkun && $namaAkun !== $namaLaporan)
+                                    <span class="text-xs text-gray-500 truncate">Akun: {{ $namaAkun }}</span>
+                                @endif
+                            </div>
                         </div>
                     </div>
 
-                    {{-- Nama Pelapor & Akun --}}
-                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
-                        <p class="text-gray-500 text-sm mb-1 font-medium">Nama Pelapor</p>
-                        @php
-                            $isVerified = $laporan->user && $laporan->user->kycVerification && $laporan->user->kycVerification->status === 'approved';
-                            $namaLaporan = $laporan->nama ?? 'Tidak Diketahui';
-                            $namaAkun = $laporan->user->name ?? 'Tidak Diketahui';
-                        @endphp
-                        
-                        @if($isVerified)
-                            <p class="text-gray-900 font-semibold truncate">{{ $namaLaporan }} 
-                                <span class="inline-flex items-center text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full ml-1 font-medium border border-green-200"><i class="fas fa-check-circle mr-1"></i> Sesuai KTP</span>
-                            </p>
-                        @else
-                            <p class="text-gray-900 font-semibold truncate">{{ $namaLaporan }} 
-                                <span class="inline-flex items-center text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full ml-1 font-medium border border-amber-200"><i class="fas fa-exclamation-triangle mr-1"></i> Belum KTP</span>
-                            </p>
-                            <p class="text-blue-600 text-xs mt-1">Nama Akun: {{ $namaAkun }}</p>
-                        @endif
-                    </div>
-
-                    {{-- Kategori --}}
-                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
-                        <p class="text-gray-500 text-sm mb-2 font-medium">Kategori</p>
-                        <span class="inline-block px-3 py-1 bg-blue-100 text-blue-700 border border-blue-200 rounded-lg text-sm">
-                            {{ $laporan->kategori }}
-                        </span>
-                    </div>
-
-                    {{-- RW --}}
-                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
-                        <p class="text-gray-500 text-sm mb-1 font-medium">RW</p>
-                        <p class="text-blue-600 font-bold text-xl">{{ $laporan->rw ?? '-' }}</p>
-                    </div>
-
-                    {{-- RT --}}
-                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
-                        <p class="text-gray-500 text-sm mb-1 font-medium">RT</p>
-                        <p class="text-green-600 font-bold text-xl">{{ $laporan->rt ?? '-' }}</p>
-                    </div>
-
-                    {{-- Tanggal Lapor --}}
-                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
-                        <p class="text-gray-500 text-sm mb-1 font-medium">Tanggal Lapor</p>
-                        <p class="text-gray-900 text-sm font-medium">{{ $laporan->created_at->format('d M Y, H:i') }} WIB</p>
-                    </div>
-
-                    {{-- Update Terakhir --}}
-                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
-                        <p class="text-gray-500 text-sm mb-1 font-medium">Update Terakhir</p>
-                        <p class="text-gray-900 text-sm font-medium">{{ $laporan->updated_at->format('d M Y, H:i') }} WIB</p>
-                    </div>
-                </div>
-
-                {{-- Deskripsi --}}
-                <div class="mb-6">
-                    <h2 class="text-blue-600 font-bold text-xl mb-3"><i class="fas fa-align-left mr-2"></i> Deskripsi Laporan</h2>
-                    <div class="bg-gray-50 border border-gray-200 rounded-xl p-5">
-                        <p class="text-gray-700 leading-relaxed">{{ $laporan->deskripsi }}</p>
-                    </div>
-                </div>
-
-                {{-- Lokasi Kejadian --}}
-                @if ($laporan->lokasi || ($laporan->latitude && $laporan->longitude))
-                <div class="mb-6">
-                    <p class="text-gray-500 font-medium text-sm mb-2"><i class="fas fa-map-marker-alt mr-2 text-red-500"></i> Lokasi Kejadian</p>
-                    <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
-                        <p class="text-gray-900 font-semibold">{{ $laporan->display_lokasi }}</p>
-                        @if($laporan->latitude && $laporan->longitude)
-                            <div class="mt-3 rounded-xl overflow-hidden border border-gray-200 shadow-sm relative" style="height: 280px; z-index: 1;">
-                                <div id="map-{{ $laporan->id }}" class="w-full h-full"></div>
+                    {{-- Kolom Wilayah Administratif --}}
+                    <div class="p-4 rounded-2xl bg-gray-50/70 border border-gray-100 flex items-start gap-3.5">
+                        <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0 text-xl border border-indigo-100">
+                            <i class="bx bx-buildings"></i>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <p class="text-xs text-gray-500 font-medium">Wilayah Administratif</p>
+                            <div class="flex items-center gap-3 mt-0.5">
+                                <div>
+                                    <span class="text-xs text-gray-500">RT: </span>
+                                    <span class="text-sm font-bold text-gray-900">{{ $laporan->rt ?? '-' }}</span>
+                                </div>
+                                <span class="text-gray-300">|</span>
+                                <div>
+                                    <span class="text-xs text-gray-500">RW: </span>
+                                    <span class="text-sm font-bold text-gray-900">{{ $laporan->rw ?? '-' }}</span>
+                                </div>
+                                @if($laporan->region)
+                                <span class="text-gray-300">|</span>
+                                <div class="truncate">
+                                    <span class="text-xs font-semibold text-blue-700 truncate">{{ $laporan->region->name }}</span>
+                                </div>
+                                @endif
                             </div>
-                            <div class="mt-2.5 flex flex-wrap items-center justify-between gap-2">
-                                <p class="text-gray-500 text-xs flex items-center gap-1">
-                                    <i class="fas fa-satellite text-blue-500"></i> 
-                                    <span>Titik koordinat: <strong>{{ $laporan->latitude }}, {{ $laporan->longitude }}</strong></span>
-                                </p>
-                                <a href="https://www.google.com/maps?q={{ $laporan->latitude }},{{ $laporan->longitude }}" 
-                                   target="_blank" rel="noopener noreferrer"
-                                   class="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 border border-blue-200 px-3 py-1.5 rounded-lg transition-colors">
-                                    <i class="fas fa-external-link-alt text-[10px]"></i>
-                                    <span>Buka di Google Maps</span>
-                                </a>
-                            </div>
-                        @endif
+                            <p class="text-[11px] text-gray-500 mt-1">
+                                Waktu Lapor: {{ \Carbon\Carbon::parse($laporan->created_at)->locale('id')->isoFormat('DD MMMM YYYY, HH:mm') }} WIB
+                            </p>
+                        </div>
                     </div>
                 </div>
-                @endif
 
-                {{-- Foto Bukti --}}
+                {{-- Isi Deskripsi Laporan --}}
+                <div>
+                    <h3 class="text-base font-bold text-gray-900 mb-3 flex items-center gap-2">
+                        <i class="bx bx-align-left text-blue-600 text-lg"></i>
+                        <span>Uraian / Deskripsi Pengaduan</span>
+                    </h3>
+                    <div class="bg-gray-50/80 rounded-2xl p-5 sm:p-6 border border-gray-100 text-gray-700 leading-relaxed text-sm sm:text-base whitespace-pre-line">
+                        {{ $laporan->deskripsi }}
+                    </div>
+                </div>
+
+                {{-- Bukti Dokumentasi / Foto Laporan --}}
                 @if (!empty($laporan->bukti_array))
-                <div class="mb-6">
-                    <p class="text-gray-500 font-medium text-sm mb-3 flex items-center gap-2"><svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg> Foto Bukti ({{ count($laporan->bukti_array) }} foto)</p>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-base font-bold text-gray-900 flex items-center gap-2">
+                            <i class="bx bx-camera text-blue-600 text-lg"></i>
+                            <span>Foto Bukti Lapangan</span>
+                            <span class="text-xs font-normal text-gray-500">({{ count($laporan->bukti_array) }} Foto)</span>
+                        </h3>
+                        <span class="text-xs text-gray-400">Klik untuk memperbesar</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                         @foreach ($laporan->bukti_array as $foto)
-                        <div class="bg-gray-100 rounded-xl overflow-hidden border border-gray-200 shadow-sm">
-                            <img src="{{ asset('storage/' . $foto) }}" alt="Foto Bukti Laporan"
-                                class="w-full h-64 object-cover cursor-pointer hover:opacity-90 transition"
-                                onclick="openImageModal('{{ asset('storage/' . $foto) }}')">
+                        <div class="group relative rounded-2xl overflow-hidden border border-gray-200 shadow-xs bg-gray-100 cursor-pointer aspect-video"
+                             onclick="openImageModal('{{ asset('storage/' . $foto) }}')">
+                            <img src="{{ asset('storage/' . $foto) }}" 
+                                 alt="Bukti Laporan" 
+                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
+                                <i class="bx bx-zoom-in text-3xl"></i>
+                            </div>
                         </div>
                         @endforeach
                     </div>
-                    <p class="text-xs text-gray-500 mt-2 text-center flex items-center justify-center gap-1"><svg class="w-3.5 h-3.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Klik gambar untuk memperbesar</p>
                 </div>
                 @endif
 
-                {{-- Catatan Admin --}}
-                @if ($laporan->catatan_admin)
-                <div class="mb-6 bg-blue-50 border border-blue-200 rounded-xl p-6">
-                    <div class="flex items-start gap-3 mb-3">
-                        <svg class="w-7 h-7 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
-                        <div>
-                            <p class="text-blue-700 font-bold text-lg">Catatan dari Admin</p>
-                            @if ($laporan->admin)
-                            <p class="text-gray-500 text-sm">Oleh: {{ $laporan->admin->name }}</p>
-                            @endif
-                        </div>
-                    </div>
-                    <div class="bg-white rounded-lg p-4 border border-blue-100">
-                        <p class="text-gray-700 leading-relaxed">{{ $laporan->catatan_admin }}</p>
-                    </div>
-                    <p class="text-gray-500 text-xs mt-3 flex items-center gap-1.5">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                        {{ $laporan->updated_at->format('d M Y, H:i') }} WIB
-                    </p>
-                </div>
-                @endif
-
-                {{-- Status Info Banner --}}
-                @if ($laporan->status === 'Pending')
-                <div class="mb-6 bg-yellow-50 border border-yellow-200 rounded-xl p-4">
-                    <div class="flex items-center gap-3">
-                        <svg class="w-7 h-7 text-yellow-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        <div>
-                            <p class="text-yellow-800 font-semibold">Laporan Sedang Menunggu</p>
-                            <p class="text-gray-600 text-sm">Laporan Anda sedang menunggu ditinjau oleh admin. Mohon bersabar.</p>
-                        </div>
-                    </div>
-                </div>
-                @elseif(in_array($laporan->status, ['Proses', 'Diproses']))
-                <div class="mb-6 bg-blue-50 border border-blue-200 rounded-xl p-4">
-                    <div class="flex items-center gap-3">
-                        <svg class="w-7 h-7 text-blue-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-                        <div>
-                            <p class="text-blue-800 font-semibold">Laporan Sedang Diproses</p>
-                            <p class="text-gray-600 text-sm">Tim kami sedang menangani laporan Anda. Terima kasih atas kesabaran Anda.</p>
-                        </div>
-                    </div>
-                </div>
-                @elseif($laporan->status === 'Dilanjutkan')
-                <div class="mb-6 bg-orange-50 border border-orange-200 rounded-xl p-4">
-                    <div class="flex items-center gap-3">
-                        <svg class="w-7 h-7 text-orange-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
-                        <div>
-                            <p class="text-orange-800 font-semibold">Laporan Dilanjutkan</p>
-                            <p class="text-gray-600 text-sm">
-                                Laporan Anda telah diteruskan ke pihak terkait untuk penanganan lanjutan.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                @elseif($laporan->status === 'Selesai')
-                <div class="mb-6 bg-green-50 border border-green-200 rounded-xl p-4">
-                    <div class="flex items-center gap-3">
-                        <svg class="w-7 h-7 text-green-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                        <div>
-                            <p class="text-green-800 font-semibold">Laporan Selesai Ditangani</p>
-                            <p class="text-gray-600 text-sm">
-                                Laporan Anda telah selesai ditangani. Terima kasih atas laporannya!
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                @elseif($laporan->status === 'Ditolak')
-                <div class="mb-6 bg-red-50 border border-red-200 rounded-xl p-4">
-                    <div class="flex items-center gap-3">
-                        <svg class="w-7 h-7 text-red-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                        <div>
-                            <p class="text-red-800 font-semibold">Laporan Ditolak</p>
-                            <p class="text-gray-600 text-sm">Laporan Anda telah ditolak. Silakan cek catatan admin untuk informasi lebih lanjut.</p>
-                        </div>
-                    </div>
-                </div>
-                @endif
-
-                {{-- TOMBOL HAPUS - DIPERBAIKI --}}
-                @if ($laporan->status === 'Pending')
-                    @php
-                        // Cek apakah user adalah pemilik laporan
-                        $isOwner = false;
+                {{-- Lokasi Kejadian & Peta Leaflet --}}
+                @if ($laporan->lokasi || ($laporan->latitude && $laporan->longitude))
+                <div>
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                        <h3 class="text-base font-bold text-gray-900 flex items-center gap-2">
+                            <i class="bx bx-map text-red-500 text-lg"></i>
+                            <span>Lokasi Kejadian</span>
+                        </h3>
                         
-                        // Cek berdasarkan user_id
-                        if (isset($laporan->user_id) && $laporan->user_id === auth()->id()) {
-                            $isOwner = true;
-                        }
-                        
-                        // Cek berdasarkan nama (untuk laporan lama yang tidak ada user_id)
-                        if (!$isOwner && isset($laporan->nama) && auth()->user()) {
-                            $isOwner = strtolower(trim($laporan->nama)) === strtolower(trim(auth()->user()->name));
-                        }
-                    @endphp
+                        @if($laporan->latitude && $laporan->longitude)
+                        <a href="https://www.google.com/maps?q={{ $laporan->latitude }},{{ $laporan->longitude }}" 
+                           target="_blank" rel="noopener noreferrer"
+                           class="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-full border border-blue-200 transition-colors">
+                            <i class="bx bx-link-external"></i>
+                            <span>Buka di Google Maps</span>
+                        </a>
+                        @endif
+                    </div>
 
-                    @if ($isOwner)
-                    <div class="mt-6 bg-red-50 border border-red-200 rounded-xl p-5">
-                        <div class="flex items-start gap-3 mb-4">
-                            <svg class="w-7 h-7 text-red-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                            <div>
-                                <p class="text-red-700 font-bold text-lg">Laporan Dapat Dihapus</p>
-                                <p class="text-gray-600 text-sm">Karena status laporan masih "Pending", Anda dapat menghapus laporan ini.</p>
+                    <div class="bg-gray-50/80 rounded-2xl p-4 sm:p-5 border border-gray-100">
+                        <p class="text-sm font-semibold text-gray-800 flex items-start gap-2">
+                            <i class="bx bx-map-pin text-red-500 text-lg flex-shrink-0 mt-0.5"></i>
+                            <span>{{ $laporan->display_lokasi }}</span>
+                        </p>
+
+                        @if($laporan->latitude && $laporan->longitude)
+                            <div class="mt-3 rounded-xl overflow-hidden border border-gray-200 shadow-xs relative" style="height: 280px; z-index: 1;">
+                                <div id="map-{{ $laporan->id }}" class="w-full h-full"></div>
                             </div>
+                            <p class="text-[11px] text-gray-500 mt-2 flex items-center gap-1">
+                                <i class="bx bx-target-lock text-blue-500"></i>
+                                <span>Titik Koordinat: {{ $laporan->latitude }}, {{ $laporan->longitude }}</span>
+                            </p>
+                        @endif
+                    </div>
+                </div>
+                @endif
+
+                {{-- Catatan & Tanggapan Petugas / Admin --}}
+                @if ($laporan->catatan_admin || $laporan->catatan_rw || $laporan->catatan_rt)
+                <div class="p-5 sm:p-6 rounded-2xl bg-blue-50/60 border border-blue-100 space-y-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center flex-shrink-0 text-xl shadow-xs">
+                            <i class="bx bx-message-rounded-check"></i>
                         </div>
+                        <div>
+                            <h3 class="text-base font-bold text-gray-900">Tanggapan Resmi Petugas</h3>
+                            <p class="text-xs text-gray-500">Pembaruan dan catatan tindak lanjut penanganan pengaduan</p>
+                        </div>
+                    </div>
 
-                        <form action="{{ route('user.laporan.destroy', $laporan) }}"
-                            method="POST"
-                            data-konfirmasi="Yakin ingin menghapus laporan ini?&#10;&#10;Laporan yang dihapus tidak dapat dikembalikan!">
-                            @csrf
-                            @method('DELETE')
-
-                            <button type="submit"
-                                class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold transition-all duration-200 transform hover:scale-105 flex items-center gap-2">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                <span>Hapus Laporan</span>
-                            </button>
-                        </form>
+                    @if($laporan->catatan_admin)
+                    <div class="bg-white rounded-xl p-4 border border-blue-100/80 shadow-xs">
+                        <div class="flex items-center justify-between gap-2 mb-2">
+                            <span class="text-xs font-bold text-blue-800">Admin {{ $laporan->admin->name ?? 'Pemerintah Desa' }}</span>
+                            <span class="text-[11px] text-gray-400">{{ $laporan->updated_at->format('d M Y, H:i') }} WIB</span>
+                        </div>
+                        <p class="text-sm text-gray-700 leading-relaxed">{{ $laporan->catatan_admin }}</p>
                     </div>
                     @endif
+
+                    @if($laporan->catatan_rw)
+                    <div class="bg-white rounded-xl p-4 border border-blue-100/80 shadow-xs">
+                        <div class="flex items-center justify-between gap-2 mb-2">
+                            <span class="text-xs font-bold text-indigo-800">Admin RW {{ $laporan->rw ?? '' }}</span>
+                            @if($laporan->escalated_to_rw_at)
+                            <span class="text-[11px] text-gray-400">{{ $laporan->escalated_to_rw_at->format('d M Y, H:i') }} WIB</span>
+                            @endif
+                        </div>
+                        <p class="text-sm text-gray-700 leading-relaxed">{{ $laporan->catatan_rw }}</p>
+                    </div>
+                    @endif
+
+                    @if($laporan->catatan_rt)
+                    <div class="bg-white rounded-xl p-4 border border-blue-100/80 shadow-xs">
+                        <div class="flex items-center justify-between gap-2 mb-2">
+                            <span class="text-xs font-bold text-emerald-800">Admin RT {{ $laporan->rt ?? '' }}</span>
+                        </div>
+                        <p class="text-sm text-gray-700 leading-relaxed">{{ $laporan->catatan_rt }}</p>
+                    </div>
+                    @endif
+                </div>
+                @endif
+
+                {{-- Batalkan / Hapus Laporan (Jika Status Masih Pending & Memenuhi Syarat) --}}
+                @if ($laporan->canBeDeletedBy(auth()->id()))
+                <div class="pt-6 border-t border-gray-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div>
+                        <p class="font-bold text-gray-900 text-sm">Opsi Pembatalan Pengaduan</p>
+                        <p class="text-xs text-gray-500 mt-0.5">
+                            Laporan masih berstatus menunggu verifikasi. Anda dapat membatalkan laporan ini dalam batas waktu 24 jam pertama.
+                        </p>
+                    </div>
+
+                    <form action="{{ route('user.laporan.destroy', $laporan) }}"
+                          method="POST"
+                          onsubmit="return confirm('Apakah Anda yakin ingin membatalkan dan menghapus laporan ini? Tindakan ini tidak dapat diurungkan.');"
+                          class="flex-shrink-0">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit"
+                                class="px-4 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 text-xs font-bold inline-flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs">
+                            <i class="bx bx-trash text-sm"></i>
+                            <span>Batalkan & Hapus Laporan</span>
+                        </button>
+                    </form>
+                </div>
                 @endif
 
             </div>
         </div>
-    </div>
-</div>
+    </section>
+</main>
 
-{{-- Modal untuk zoom gambar --}}
+{{-- Modal Zoom Gambar Bukti --}}
 <div id="imageModal" class="hidden fixed inset-0 bg-black/90 z-50 items-center justify-center p-4" onclick="closeImageModal()">
-    <div class="relative max-w-7xl max-h-full">
-        <button onclick="closeImageModal()" class="absolute top-4 right-4 text-white bg-red-600 hover:bg-red-700 rounded-full w-10 h-10 flex items-center justify-center text-2xl font-bold z-10">
-            ×
+    <div class="relative max-w-5xl max-h-full" onclick="event.stopPropagation();">
+        <button onclick="closeImageModal()" 
+                class="absolute -top-12 right-0 text-white hover:text-gray-300 text-3xl font-bold cursor-pointer transition-colors">
+            <i class="bx bx-x"></i>
         </button>
-        <img id="modalImage" src="" alt="Preview" class="max-w-full max-h-[90vh] object-contain rounded-lg">
+        <img id="modalImage" src="" alt="Bukti Foto" class="max-w-full max-h-[85vh] object-contain rounded-2xl shadow-2xl border border-white/20">
     </div>
 </div>
-
 @endsection
 
 @push('scripts')
@@ -342,7 +459,6 @@
         document.body.style.overflow = 'auto';
     }
 
-    // Close modal when pressing ESC key
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
             closeImageModal();
@@ -385,51 +501,4 @@
     document.addEventListener('turbo:load', initLeafletMap{{ $laporan->id }});
 </script>
 @endif
-@endpush
-
-@push('styles')
-@if($laporan->latitude && $laporan->longitude)
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-@endif
-<style>
-    /* Animation for bounce */
-    @keyframes bounce-slow {
-        0%, 100% {
-            transform: translateY(0);
-        }
-        50% {
-            transform: translateY(-20px);
-        }
-    }
-
-    .animate-bounce-slow {
-        animation: bounce-slow 2s ease-in-out infinite;
-    }
-
-    /* Border 3px */
-    .border-3 {
-        border-width: 3px;
-    }
-
-    /* Fade in animation */
-    @keyframes fade-in {
-        from {
-            opacity: 0;
-            transform: translateY(-10px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .animate-fade-in {
-        animation: fade-in 0.3s ease-out;
-    }
-
-    /* Smooth transitions */
-    button, a {
-        transition: all 0.2s ease-in-out;
-    }
-</style>
 @endpush
