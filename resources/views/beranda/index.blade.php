@@ -303,8 +303,9 @@
                 <div class="max-w-7xl mx-auto relative z-10">
                     <div class="flex justify-between items-end mb-6 sm:mb-8">
                         <div>
-                            <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">
-                                Kabar dan Informasi <span class="text-[#115789]">Daerah</span>
+                            <h2 class="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2">
+                                <span class="bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">Kabar dan Informasi</span> 
+                                <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Daerah</span>
                             </h2>
                             <p class="text-xs sm:text-base text-gray-500">Pengumuman dan agenda terbaru</p>
                         </div>
