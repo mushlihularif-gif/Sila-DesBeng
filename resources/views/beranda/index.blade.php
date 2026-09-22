@@ -316,7 +316,7 @@
                     <div class="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
                         @foreach($recentAnnouncements as $item)
                         <a href="{{ route('announcements.show', $item->id) }}" class="group bg-white rounded-xl sm:rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col h-full transform hover:-translate-y-1 {{ $loop->iteration == 4 ? 'flex md:hidden' : 'flex' }}">
-                            <div class="h-28 sm:h-36 md:h-44 shrink-0 relative overflow-hidden bg-gray-50">
+                            <div class="h-32 sm:h-40 md:h-56 shrink-0 relative overflow-hidden bg-gray-50">
                                 @if($item->image_path)
                                     <img src="{{ Storage::url($item->image_path) }}" alt="{{ $item->title }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.onerror=null; this.src='{{ asset('User/img/elemen/KabardanInformasiDaerah.png') }}';">
                                 @elseif($item->images && $item->images->count() > 0)
