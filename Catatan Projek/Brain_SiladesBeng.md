@@ -1193,3 +1193,22 @@ Pekerjaan yang perlu diselesaikan di Google Cloud Platform Console:
   4. **Pengindeksan Prioritas (Priority Crawling Queue):**
      - Peta situs `sitemap.xml` telah disubmit dan terbaca oleh sistem Google.
      - Halaman Beranda (`https://siladesbeng.inovasia.site/beranda`) telah masuk ke dalam antrean *Priority Crawling*. Estimasi penayangan publik di pencarian Google: 1-3 hari kerja.
+
+---
+
+## 13. Restrukturisasi Tata Letak Beranda dan Perampingan Komponen UI
+
+- **Tanggal Implementasi:** 23 September 2026
+- **Latar Belakang:**
+  - Bagian "Populer" sering kali kosong ("Belum ada data produk populer untuk tahun ini") sehingga membingungkan masyarakat yang baru pertama kali mengakses portal.
+  - Bagian "Grafik Umum" memuat duplikasi data statistik kinerja tahunan yang sebenarnya sudah memiliki halaman transparansi khusus di `/layanandaerah/laporan`.
+- **Perubahan Struktur Tata Letak (`resources/views/beranda/index.blade.php`):**
+  1. **Banner & Bilah Pencarian (Hero & Search):** Berada di bagian paling atas.
+  2. **Unit Pelayanan (Paling Atas):** Diposisikan langsung di bawah bilah pencarian menggantikan bagian Populer. Memberikan kemudahan bagi warga untuk langsung mengakses unit-unit layanan (Penyewaan Alat, Penjualan Gas, Penyewaan Mobil, Fasilitas Umum, Pasar Daerah, Pelaporan Warga, dan Kabar Daerah).
+  3. **Kabar dan Informasi Daerah:** Diposisikan langsung tepat di bawah carousel Unit Pelayanan, menyajikan pengumuman, agenda gotong royong, dan kegiatan daerah terkini.
+  4. **Tentang Kami:** Diposisikan tepat di bawah Kabar dan Informasi Daerah, memuat profil ringkas platform SiladesBeng.
+  5. **Penghapusan Komponen & Optimasi Kecepatan:**
+     - Bagian Populer (`#populer-section`) dihapus seutuhnya.
+     - Bagian Grafik Umum (`#grafik-umum`) dihapus seutuhnya.
+     - Pustaka ApexCharts dan Select2 dihapus dari Beranda untuk mempercepat *loading speed* halaman (menghilangkan request CDN eksternal yang tidak lagi terpakai).
+     - Seluruh fungsi JavaScript grafik dan filter tahunan dibersihkan, menyederhanakan kode menjadi sangat ringan.
