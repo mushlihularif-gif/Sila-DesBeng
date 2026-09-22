@@ -569,38 +569,33 @@
         // Tampilkan modal terlebih dahulu dengan pesan sementara
         updateLocationUI("Mendeteksi nama lokasi...", lat, lng);
 
-        // Prioritas 1: Gunakan server proxy SiladesBeng (OpenStreetMap Nominatim dengan User-Agent resmi)
-        fetch(`/api/geocode/reverse?lat=${lat}&lng=${lng}`)
-            .then(res => res.json())
-            .then(data => {
-                if (data && data.address) {
-                    updateLocationUI(data.address, lat, lng);
-                } else if (geocoder) {
-                    // Fallback ke Google Geocoder jika API key aktif
-                    geocoder.geocode({ location: { lat: lat, lng: lng } }, function(results, status) {
-                        if (status === "OK" && results && results[0]) {
-                            updateLocationUI(results[0].formatted_address, lat, lng);
-                        } else {
-                            updateLocationUI(`Titik Koordinat: ${lat.toFixed(6)}, ${lng.toFixed(6)}`, lat, lng);
-                        }
-                    });
-                } else {
+        function fallbackReverseProxy() {
+            fetch(`/api/geocode/reverse?lat=${lat}&lng=${lng}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.address) {
+                        updateLocationUI(data.address, lat, lng);
+                    } else {
+                        updateLocationUI(`Titik Koordinat: ${lat.toFixed(6)}, ${lng.toFixed(6)}`, lat, lng);
+                    }
+                })
+                .catch(() => {
                     updateLocationUI(`Titik Koordinat: ${lat.toFixed(6)}, ${lng.toFixed(6)}`, lat, lng);
-                }
-            })
-            .catch(() => {
-                if (geocoder) {
-                    geocoder.geocode({ location: { lat: lat, lng: lng } }, function(results, status) {
-                        if (status === "OK" && results && results[0]) {
-                            updateLocationUI(results[0].formatted_address, lat, lng);
-                        } else {
-                            updateLocationUI(`Titik Koordinat: ${lat.toFixed(6)}, ${lng.toFixed(6)}`, lat, lng);
-                        }
-                    });
+                });
+        }
+
+        // Prioritas 1: Gunakan Google Maps Geocoder resmi
+        if (geocoder) {
+            geocoder.geocode({ location: { lat: lat, lng: lng } }, function(results, status) {
+                if (status === "OK" && results && results[0] && results[0].formatted_address) {
+                    updateLocationUI(results[0].formatted_address, lat, lng);
                 } else {
-                    updateLocationUI(`Titik Koordinat: ${lat.toFixed(6)}, ${lng.toFixed(6)}`, lat, lng);
+                    fallbackReverseProxy();
                 }
             });
+        } else {
+            fallbackReverseProxy();
+        }
     }
 
     function updateLocationUI(address, lat, lng) {
