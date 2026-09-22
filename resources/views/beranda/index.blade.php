@@ -172,118 +172,6 @@
             </div>
             @endif
 
-            <!-- Section Populer -->
-            <div id="populer-section" class="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-12">
-                <div class="max-w-7xl mx-auto">
-                    <!-- Judul Populer -->
-                    <div class="text-center mb-6 sm:mb-8 relative">
-                        <h2 class="text-2xl sm:text-3xl font-bold mb-2">
-                            <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Populer</span>
-                        </h2>
-                    </div>
-                    <!-- Grid Container (2 Kolom di Mobile, 3 di Tablet, 4 di Desktop) -->
-                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-6 max-w-6xl mx-auto">
-                        @forelse($popularProducts as $item)
-                        <!-- Product Card -->
-                        <div class="flex flex-col items-center w-full">
-                            <div onclick="window.location.href='{{ $item->type === 'pasar' ? route('pasar.index') . '?product=' . $item->id : $item->link }}'"
-                                class="bg-white/80 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-white shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer w-full flex flex-col h-full">
-                                <div
-                                    class="aspect-square p-2.5 sm:p-4 flex items-center justify-center bg-gradient-to-br from-white/50 to-blue-50/30 relative">
-                                    <img src="{{ Str::startsWith($item->image, ['http', 'https', 'User', 'Admin']) ? asset($item->image) : asset('storage/' . $item->image) }}" alt="{{ $item->name }}"
-                                        loading="lazy"
-                                        class="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300">
-                                    @if($loop->iteration <= 2)
-                                    <span class="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 bg-red-500 text-white text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 sm:px-2 sm:py-0.5 rounded-full shadow-sm flex items-center gap-0.5">
-                                        <svg class="w-2.5 h-2.5 sm:w-3 sm:h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
-                                        HOT
-                                    </span>
-                                    @endif
-                                </div>
-                                <div class="p-2 sm:p-3 text-center bg-white/90 backdrop-blur-sm flex flex-col flex-1 justify-between">
-                                    <h3 class="text-xs sm:text-sm font-semibold text-gray-800 line-clamp-1">{{ $item->name }}</h3>
-                                    <p class="text-[11px] sm:text-xs text-blue-600 font-bold mt-1">{{ $item->price_formatted }} <span class="text-gray-400 font-normal">/ {{ $item->unit }}</span></p>
-                                </div>
-                            </div>
-                        </div>
-                        @empty
-                        <div class="col-span-full text-center py-6 sm:py-8">
-                            <p class="text-gray-500 text-sm">Belum ada data produk populer untuk tahun ini.</p>
-                        </div>
-                        @endforelse
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Section Pengumuman Terbaru -->
-            @if(isset($recentAnnouncements) && $recentAnnouncements->count() > 0)
-            <div id="kabar-daerah-section" class="max-w-7xl mx-auto px-6 py-12 relative">
-                <!-- Decorative background elements -->
-                <div class="absolute top-0 right-0 w-32 h-32 md:w-64 md:h-64 bg-yellow-400/5 rounded-full filter blur-3xl"></div>
-                <div class="absolute bottom-0 left-0 w-80 h-80 bg-[#115789]/5 rounded-full filter blur-3xl"></div>
-                
-                <div class="max-w-7xl mx-auto relative z-10">
-                    <div class="flex justify-between items-end mb-8">
-                        <div>
-                            <h2 class="text-3xl font-bold bg-gradient-to-r from-[#115789] to-blue-300 bg-clip-text text-transparent drop-shadow-sm mb-2">
-                                Kabar dan Informasi Daerah
-                            </h2>
-                            <p class="text-gray-500">Pengumuman dan agenda terbaru</p>
-                        </div>
-                        <a href="{{ route('announcements.index') }}" class="hidden md:flex items-center gap-2 text-[#115789] font-semibold hover:text-blue-500 transition-colors">
-                            Lihat Semua <i class="bx bx-right-arrow-alt text-xl"></i>
-                        </a>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        @foreach($recentAnnouncements as $item)
-                        <a href="{{ route('announcements.show', $item->id) }}" class="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col h-full transform hover:-translate-y-1">
-                            <div class="h-40 shrink-0 relative overflow-hidden bg-gray-50">
-                                @if($item->image_path)
-                                    <img src="{{ Storage::url($item->image_path) }}" alt="{{ $item->title }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.onerror=null; this.src='{{ asset('User/img/elemen/KabardanInformasiDaerah.png') }}';">
-                                @elseif($item->images && $item->images->count() > 0)
-                                    <img src="{{ Storage::url($item->images->first()->image_path) }}" alt="{{ $item->title }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.onerror=null; this.src='{{ asset('User/img/elemen/KabardanInformasiDaerah.png') }}';">
-                                @else
-                                    <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#115789]/10 to-blue-500/10">
-                                        @if($item->type == 'Pengumuman') <i class="bx bx-broadcast text-4xl text-blue-500"></i>
-                                        @elseif($item->type == 'Event') <i class="bx bx-calendar-event text-4xl text-purple-500"></i>
-                                        @else <i class="bx bx-group text-4xl text-emerald-500"></i>
-                                        @endif
-                                    </div>
-                                @endif
-                                
-                                <div class="absolute top-3 left-3 flex gap-2">
-                                    @if($item->type == 'Gotong Royong')
-                                        <span class="px-2.5 py-1 bg-emerald-500 text-white rounded-md text-xs font-bold shadow-sm">Gotong Royong</span>
-                                    @elseif($item->type == 'Event')
-                                        <span class="px-2.5 py-1 bg-purple-500 text-white rounded-md text-xs font-bold shadow-sm">Event</span>
-                                    @else
-                                        <span class="px-2.5 py-1 bg-blue-500 text-white rounded-md text-xs font-bold shadow-sm">Pengumuman</span>
-                                    @endif
-                                </div>
-                            </div>
-                            
-                            <div class="p-5 flex flex-col flex-1">
-                                <div class="text-xs text-gray-500 mb-2 flex items-center justify-between">
-                                    <span class="flex items-center gap-1.5"><i class="bx bx-calendar text-[#115789]"></i> {{ $item->created_at->format('d M Y') }}</span>
-                                    <span class="font-medium text-[#115789]">{{ $item->region->name ?? 'Pusat' }}</span>
-                                </div>
-                                <h3 class="font-bold text-gray-800 text-lg mb-2 line-clamp-2 group-hover:text-[#115789] transition-colors">{{ $item->title }}</h3>
-                                <p class="text-gray-500 text-sm line-clamp-2 mt-auto">{{ \Illuminate\Support\Str::limit(strip_tags($item->description), 80) }}</p>
-                            </div>
-                        </a>
-                        @endforeach
-                    </div>
-                    
-                    <div class="mt-6 text-center md:hidden">
-                        <a href="{{ route('announcements.index') }}" class="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-gray-50 hover:bg-gray-100 text-[#115789] font-semibold rounded-xl transition-colors border border-gray-200 w-full">
-                            Lihat Semua Kabar
-                        </a>
-                    </div>
-                </div>
-            </div>
-            @endif
-
             <!-- Section Unit Pelayanan -->
             <div id="unit-carousel-container" class="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-16 overflow-hidden">
                 <div class="max-w-7xl mx-auto">
@@ -405,147 +293,74 @@
                 </div>
             </div>
 
-            <!-- Section Grafik Umum -->
-            <div id="grafik-umum" class="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-16">
-                <!-- Title dengan gradient -->
-                <div class="text-center mb-6">
-                    <h2 class="text-2xl sm:text-3xl font-bold mb-2">
-                        <span class="bg-gradient-to-r from-gray-600 to-gray-600 bg-clip-text text-transparent">Grafik</span> 
-                        <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Umum</span>
-                    </h2>
-                </div>
+            <!-- Section Pengumuman Terbaru -->
+            @if(isset($recentAnnouncements) && $recentAnnouncements->count() > 0)
+            <div id="kabar-daerah-section" class="max-w-7xl mx-auto px-6 py-12 relative">
+                <!-- Decorative background elements -->
+                <div class="absolute top-0 right-0 w-32 h-32 md:w-64 md:h-64 bg-yellow-400/5 rounded-full filter blur-3xl"></div>
+                <div class="absolute bottom-0 left-0 w-80 h-80 bg-[#115789]/5 rounded-full filter blur-3xl"></div>
+                
+                <div class="max-w-7xl mx-auto relative z-10">
+                    <div class="flex justify-between items-end mb-8">
+                        <div>
+                            <h2 class="text-3xl font-bold bg-gradient-to-r from-[#115789] to-blue-300 bg-clip-text text-transparent drop-shadow-sm mb-2">
+                                Kabar dan Informasi Daerah
+                            </h2>
+                            <p class="text-gray-500">Pengumuman dan agenda terbaru</p>
+                        </div>
+                        <a href="{{ route('announcements.index') }}" class="hidden md:flex items-center gap-2 text-[#115789] font-semibold hover:text-blue-500 transition-colors">
+                            Lihat Semua <i class="bx bx-right-arrow-alt text-xl"></i>
+                        </a>
+                    </div>
 
-                <!-- Global Filters -->
-                <div class="max-w-5xl mx-auto mb-6 sm:mb-12 flex flex-col sm:flex-row justify-center items-stretch sm:items-center gap-2 sm:gap-4 bg-white/40 backdrop-blur-md p-2.5 sm:p-4 rounded-2xl border border-white/50 shadow-lg w-full">
-                    <div class="px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm border border-gray-300 rounded-xl bg-white/80 backdrop-blur-md text-gray-800 font-bold flex items-center justify-center cursor-not-allowed shadow-sm w-full sm:w-auto sm:min-w-[180px]">
-                        Kabupaten Bengkalis
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        @foreach($recentAnnouncements as $item)
+                        <a href="{{ route('announcements.show', $item->id) }}" class="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col h-full transform hover:-translate-y-1">
+                            <div class="h-40 shrink-0 relative overflow-hidden bg-gray-50">
+                                @if($item->image_path)
+                                    <img src="{{ Storage::url($item->image_path) }}" alt="{{ $item->title }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.onerror=null; this.src='{{ asset('User/img/elemen/KabardanInformasiDaerah.png') }}';">
+                                @elseif($item->images && $item->images->count() > 0)
+                                    <img src="{{ Storage::url($item->images->first()->image_path) }}" alt="{{ $item->title }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.onerror=null; this.src='{{ asset('User/img/elemen/KabardanInformasiDaerah.png') }}';">
+                                @else
+                                    <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#115789]/10 to-blue-500/10">
+                                        @if($item->type == 'Pengumuman') <i class="bx bx-broadcast text-4xl text-blue-500"></i>
+                                        @elseif($item->type == 'Event') <i class="bx bx-calendar-event text-4xl text-purple-500"></i>
+                                        @else <i class="bx bx-group text-4xl text-emerald-500"></i>
+                                        @endif
+                                    </div>
+                                @endif
+                                
+                                <div class="absolute top-3 left-3 flex gap-2">
+                                    @if($item->type == 'Gotong Royong')
+                                        <span class="px-2.5 py-1 bg-emerald-500 text-white rounded-md text-xs font-bold shadow-sm">Gotong Royong</span>
+                                    @elseif($item->type == 'Event')
+                                        <span class="px-2.5 py-1 bg-purple-500 text-white rounded-md text-xs font-bold shadow-sm">Event</span>
+                                    @else
+                                        <span class="px-2.5 py-1 bg-blue-500 text-white rounded-md text-xs font-bold shadow-sm">Pengumuman</span>
+                                    @endif
+                                </div>
+                            </div>
+                            
+                            <div class="p-5 flex flex-col flex-1">
+                                <div class="text-xs text-gray-500 mb-2 flex items-center justify-between">
+                                    <span class="flex items-center gap-1.5"><i class="bx bx-calendar text-[#115789]"></i> {{ $item->created_at->format('d M Y') }}</span>
+                                    <span class="font-medium text-[#115789]">{{ $item->region->name ?? 'Pusat' }}</span>
+                                </div>
+                                <h3 class="font-bold text-gray-800 text-lg mb-2 line-clamp-2 group-hover:text-[#115789] transition-colors">{{ $item->title }}</h3>
+                                <p class="text-gray-500 text-sm line-clamp-2 mt-auto">{{ \Illuminate\Support\Str::limit(strip_tags($item->description), 80) }}</p>
+                            </div>
+                        </a>
+                        @endforeach
                     </div>
                     
-                    <div class="relative w-full sm:w-auto sm:min-w-[220px]">
-                        <select id="kecamatanSelect" class="w-full appearance-none px-3 sm:px-4 py-2 sm:py-3 pr-8 sm:pr-10 text-xs sm:text-sm border border-gray-300 rounded-xl bg-white/80 backdrop-blur-md text-gray-800 font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 hover:bg-white transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm">
-                            <option value="all">Semua Kecamatan</option>
-                            @foreach($kecamatans as $kec)
-                                <option value="{{ $kec->id }}" {{ $kecamatanId == $kec->id ? 'selected' : '' }}>{{ $kec->name }}</option>
-                            @endforeach
-                        </select>
-                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 sm:px-4 text-gray-600">
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                        </div>
-                    </div>
-
-                    <div class="relative w-full sm:w-auto sm:min-w-[220px]">
-                        <select id="desaSelect" class="w-full appearance-none px-3 sm:px-4 py-2 sm:py-3 pr-8 sm:pr-10 text-xs sm:text-sm border border-gray-300 rounded-xl bg-white/80 backdrop-blur-md text-gray-800 font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 hover:bg-white transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm" {{ $kecamatanId == 'all' ? 'disabled' : '' }}>
-                            <option value="all">Semua Kelurahan/Desa</option>
-                            @foreach($desas as $desa)
-                                <option value="{{ $desa->id }}" {{ $desaId == $desa->id ? 'selected' : '' }}>{{ $desa->name }}</option>
-                            @endforeach
-                        </select>
-                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 sm:px-4 text-gray-600">
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                        </div>
-                    </div>
-
-                    <div class="relative w-full sm:w-auto sm:min-w-[110px]">
-                        <select id="globalYearSelect" translate="no" class="w-full appearance-none px-3 sm:px-4 py-2 sm:py-3 pr-8 sm:pr-10 text-xs sm:text-sm border border-gray-300 rounded-xl bg-white/80 backdrop-blur-md text-gray-800 font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 hover:bg-white transition-all shadow-sm">
-                            @foreach($availableYears as $optYear)
-                                <option value="{{ $optYear }}" {{ $optYear == $year ? 'selected' : '' }}>{{ $optYear }}</option>
-                            @endforeach
-                        </select>
-                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 sm:px-4 text-gray-600">
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="charts-section" class="max-w-5xl mx-auto space-y-8 sm:space-y-12">
-                    <!-- Grafik Kinerja Layanan -->
-                    <div>
-                        <div
-                            class="relative rounded-2xl sm:rounded-3xl p-4 sm:p-6 backdrop-blur-md bg-white/20 border border-white/30 shadow-[0_8px_32px_0_rgba(31,38,135,0.15)]">
-                            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-3 sm:mb-5">
-                                <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-2 md:mb-0">Kinerja Layanan</h3>
-                            </div>
-                            <div class="bg-white/30 backdrop-blur-sm rounded-xl sm:rounded-2xl p-2 sm:p-5 border border-white/20 max-w-full overflow-hidden">
-                                <div id="kinerjaChart" class="w-full min-h-[220px] sm:min-h-[300px]" data-chart='@json($kinerjaData)'></div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Grafik Unit Populer -->
-                    <div>
-                        <div
-                            class="relative rounded-2xl sm:rounded-3xl p-4 sm:p-6 backdrop-blur-md bg-white/20 border border-white/30 shadow-[0_8px_32px_0_rgba(31,38,135,0.15)]">
-                            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-3 sm:mb-5">
-                                <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-2 md:mb-0">Unit Populer</h3>
-                            </div>
-                            <div class="bg-white/30 backdrop-blur-sm rounded-xl sm:rounded-2xl p-2 sm:p-5 mb-4 sm:mb-5 border border-white/20 max-w-full overflow-hidden">
-                                <div id="unitChart" class="w-full min-h-[220px] sm:min-h-[300px]" data-chart='@json($unitPopulerData)'></div>
-                            </div>
-                            <!-- Legend - 7 Units -->
-                            <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-y-2 sm:gap-y-2.5 gap-x-2 sm:gap-x-4 text-[11px] sm:text-sm w-full sm:w-fit mx-auto">
-                                <div class="flex items-center gap-1.5 sm:gap-2">
-                                    <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm flex-shrink-0" style="background-color: #f59e0b;"></div>
-                                    <span class="text-gray-600 font-medium truncate">Unit Penyewaan Alat</span>
-                                </div>
-                                <div class="flex items-center gap-1.5 sm:gap-2">
-                                    <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm flex-shrink-0" style="background-color: #3b82f6;"></div>
-                                    <span class="text-gray-600 font-medium truncate">Unit Penjualan Gas</span>
-                                </div>
-                                <div class="flex items-center gap-1.5 sm:gap-2">
-                                    <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm flex-shrink-0" style="background-color: #10b981;"></div>
-                                    <span class="text-gray-600 font-medium truncate">Unit Peminjaman Mobil</span>
-                                </div>
-                                <div class="flex items-center gap-1.5 sm:gap-2">
-                                    <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm flex-shrink-0" style="background-color: #8b5cf6;"></div>
-                                    <span class="text-gray-600 font-medium truncate">Unit Fasilitas Umum</span>
-                                </div>
-                                <div class="flex items-center gap-1.5 sm:gap-2">
-                                    <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm flex-shrink-0" style="background-color: #ef4444;"></div>
-                                    <span class="text-gray-600 font-medium truncate">Pelaporan Warga</span>
-                                </div>
-                                <div class="flex items-center gap-1.5 sm:gap-2">
-                                    <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm flex-shrink-0" style="background-color: #06b6d4;"></div>
-                                    <span class="text-gray-600 font-medium truncate">Kabar Daerah</span>
-                                </div>
-                                <div class="flex items-center gap-1.5 sm:gap-2 col-span-2 sm:col-span-1">
-                                    <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm flex-shrink-0" style="background-color: #ec4899;"></div>
-                                    <span class="text-gray-600 font-medium truncate">Pasar Daerah</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Tombol Lihat Lainnya -->
-                    <div class="text-center">
-                        <style>
-                            .btn-lihat-lainnya {
-                                display: inline-flex; align-items: center; justify-content: center;
-                                padding: 12px 40px; font-weight: 600;
-                                color: #2563eb; background: rgba(255, 255, 255, 0.7);
-                                backdrop-filter: blur(4px);
-                                border: 2px solid #2563eb; border-radius: 9999px;
-                                cursor: pointer; transition: color 0.5s ease;
-                                position: relative; overflow: hidden;
-                                text-decoration: none;
-                                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-                            }
-                            .btn-lihat-lainnya:hover {
-                                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-                                color: #fff !important;
-                            }
-                            .btn-lihat-lainnya::before {
-                                content: ''; position: absolute; inset: 0;
-                                background: #2563eb; transform: translateY(100%);
-                                transition: transform 0.5s ease;
-                                z-index: 0;
-                            }
-                            .btn-lihat-lainnya:hover::before { transform: translateY(0); }
-                            .btn-lihat-lainnya span { position: relative; z-index: 1; }
-                        </style>
-                        <a href="{{ route('bumdes.laporan') }}" class="btn-lihat-lainnya">
-                            <span>Lihat Lainnya</span>
+                    <div class="mt-6 text-center md:hidden">
+                        <a href="{{ route('announcements.index') }}" class="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-gray-50 hover:bg-gray-100 text-[#115789] font-semibold rounded-xl transition-colors border border-gray-200 w-full">
+                            Lihat Semua Kabar
                         </a>
                     </div>
                 </div>
             </div>
+            @endif
 
             <!-- Section Tentang Kami -->
             <div class="relative max-w-7xl mx-auto px-6 py-16 overflow-visible">
@@ -603,22 +418,6 @@
         {{-- DECORATIONS --}}
 
         <!-- ============================================ -->
-        <!-- AREA POPULER - Pakai 4.webp (BLUR) Kiri & Kanan -->
-        <!-- ============================================ -->
-        <svg class="bg-element bg-blur-left-populer">
-            <image href="{{ asset('User/img/backgrounds/4.webp') }}" width="100%" height="100%" loading="lazy" />
-        </svg>
-
-        <svg class="bg-element bg-blur-right-populer">
-            <image href="{{ asset('User/img/backgrounds/4.webp') }}" width="100%" height="100%" loading="lazy" />
-        </svg>
-
-        <!-- ============================================ -->
-        <!-- BAWAH POPULER - Pakai 2.webp (WAVE) Kiri -->
-        <!-- ============================================ -->
-        <img src="{{ asset('User/img/backgrounds/2.webp') }}" class="bg-element bg-wave-left-lower-populer" loading="lazy" />
-
-        <!-- ============================================ -->
         <!-- AREA UNIT PELAYANAN - Pakai 2.webp (WAVE) Kanan + 5.webp (GEOMETRIS ROTASI) -->
         <!-- ============================================ -->
         <img src="{{ asset('User/img/backgrounds/2.webp') }}" class="bg-element bg-wave-right-unit" loading="lazy" />
@@ -626,11 +425,6 @@
         <svg class="bg-element bg-squares-right-unit">
             <image href="{{ asset('User/img/backgrounds/5.webp') }}" width="100%" height="100%" loading="lazy" />
         </svg>
-
-        <!-- ============================================ -->
-        <!-- AREA GRAFIK UMUM - Pakai 3.webp (WAVE BESAR TENGAH) -->
-        <!-- ============================================ -->
-        <img src="{{ asset('User/img/backgrounds/3.webp') }}" class="bg-element bg-wave-center-grafik" loading="lazy" />
 
     </main>
 
@@ -641,29 +435,7 @@
 
 
 @push('styles')
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <style>
-        /* Select2 Custom Styling for Glassmorphism */
-        .select2-container--default .select2-selection--single {
-            background-color: rgba(255, 255, 255, 0.6) !important;
-            backdrop-filter: blur(4px);
-            border: 1px solid rgba(255, 255, 255, 0.4) !important;
-            border-radius: 0.5rem !important;
-            height: 38px !important;
-            display: flex;
-            align-items: center;
-        }
-        .select2-container--default .select2-selection--single .select2-selection__arrow {
-            height: 36px !important;
-        }
-        .select2-dropdown {
-            background-color: rgba(255, 255, 255, 0.95) !important;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.4) !important;
-            border-radius: 0.5rem !important;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
-        }
-
         * {
             font-family: 'Inter', sans-serif;
         }
@@ -708,77 +480,9 @@
             margin-top: 1rem;
         }
 
-        /* Styling untuk layer sinkron di belakang navbar */
-        #navbar-blur-bg {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: var(--nav-height, 96px);
-            z-index: 40;
-            overflow: hidden;
-            transform: translateZ(0); /* HW acceleration */
-            transition: transform 0.3s ease-in-out;
-            pointer-events: none;
-            will-change: transform;
-        }
-        body:has(#master-navbar.hidden-nav) #navbar-blur-bg {
-            transform: translateY(-100%) translateZ(0);
-        }
-        .blur-slide {
-            min-width: 100%;
-            height: 400px;
-            background-size: cover;
-            background-position: center;
-            flex-shrink: 0;
-        }
-        @media (min-width: 768px) { .blur-slide { height: 40vw; } }
-        @media (min-width: 1024px) { .blur-slide { height: 45vw; } }
-
-        #beranda {
-            padding-top: var(--nav-height, 96px);
-            transition: padding-top 0.3s ease-in-out;
-            will-change: padding-top, scroll-position;
-        }
-        body:has(#master-navbar.hidden-nav) #beranda {
-            padding-top: 0 !important;
-        }
-
-        /* Area Carousel/Hero - TIDAK PAKAI BACKGROUND */
-
-        /* Area POPULER - Pakai 4.webp (BLUR) KIRI BESAR + KANAN BAWAH BESAR (KEMBAR) */
-        .bg-blur-left-populer {
-            top: 21%;
-            left: -220px;
-            width: 650px;
-            transform: rotate(-15deg) scaleX(1.2) scale(3.0);
-            opacity: 0.88;
-            z-index: 2;
-        }
-
-        /* KEMBARAN 4.webp di KANAN BAWAH - MIRROR HORIZONTAL */
-        .bg-blur-right-populer {
-            top: 27%;
-            right: -180px;
-            width: 680px;
-            transform: rotate(18deg) scaleX(-1.5) scale(3.0);
-            opacity: 0.90;
-            z-index: 2;
-        }
-
-        /* Bawah POPULER / Atas UNIT PELAYANAN - Pakai 2.webp (WAVE) BESAR */
-        .bg-wave-left-lower-populer {
-            top: 30%;
-            left: -140px;
-            width: 550px;
-            transform: rotate(-8deg);
-            opacity: 0.90;
-            z-index: 2;
-        }
-
         /* Area UNIT PELAYANAN - Pakai 2.webp (WAVE) BESAR + 5.webp (GEOMETRIS) SUPER BESAR */
         .bg-wave-right-unit {
-            top: 40%;
+            top: 25%;
             right: -150px;
             width: 580px;
             transform: rotate(15deg) scaleX(-1);
@@ -788,22 +492,12 @@
 
         /* 5.webp DIPERBESAR LAGI - SUPER BESAR! */
         .bg-squares-right-unit {
-            top: 35%;
+            top: 20%;
             right: -230px;
             width: 580px;
             transform: rotate(-100deg) scale(1.5);
             opacity: 0.90;
             z-index: 2;
-        }
-
-        /* Area GRAFIK UMUM - Pakai 3.webp (WAVE BESAR TENGAH) */
-        .bg-wave-center-grafik {
-            top: 52%;
-            left: 50%;
-            width: 115%;
-            transform: translateX(-50%) scale(1.1);
-            opacity: 0.95;
-            z-index: 1;
         }
 
         /* --- UNIT CAROUSEL STYLES (4 VISIBLE ITEMS) --- */
@@ -995,25 +689,15 @@
 @endpush
 
 @push('scripts')
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    {{-- ApexCharts Library - Minified Version --}}
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts@latest/dist/apexcharts.min.js"></script>
     <script>
         (() => {
             const BerandaPage = {
             // Initialize all components
             init() {
-                this.initYearSelectors(); // Call this FIRST to ensure filters always work
                 try {
                     this.initCarousel();
                 } catch (e) {
                     console.error("Carousel failed to initialize:", e);
-                }
-                try {
-                    this.initCharts();
-                } catch (e) {
-                    console.error("Charts failed to initialize:", e);
                 }
                 this.initUnitCarousel();
                 this.initNavbarMarginSync();
@@ -1032,113 +716,6 @@
                 window.addEventListener('resize', syncHeights);
                 const logoImg = navbar.querySelector('.sd-nav-logo img');
                 if (logoImg) logoImg.addEventListener('load', syncHeights);
-            },
-
-            // Initialize Year & Region Selectors
-            initYearSelectors() {
-                const kecamatanSelect = document.getElementById('kecamatanSelect');
-                const desaSelect = document.getElementById('desaSelect');
-                const globalYearSelect = document.getElementById('globalYearSelect');
-
-                if (!kecamatanSelect || !desaSelect || !globalYearSelect) return;
-
-                // Handle cascading changes
-                const redirectWithFilters = async () => {
-                    const url = new URL(window.location.href);
-                    url.searchParams.set('kecamatan_id', kecamatanSelect.value || 'all');
-                    url.searchParams.set('desa_id', desaSelect.value || 'all');
-                    url.searchParams.set('year', globalYearSelect.value || new Date().getFullYear());
-                    
-                    // Identify sections to update
-                    const sectionIds = ['search-results-section', 'populer-section', 'kabar-daerah-section', 'charts-section'];
-                    const elementsToDim = sectionIds.map(id => document.getElementById(id)).filter(Boolean);
-
-                    // Show subtle loading state only on affected sections
-                    elementsToDim.forEach(el => {
-                        el.style.transition = 'opacity 0.3s ease';
-                        el.style.opacity = '0.5';
-                        el.style.pointerEvents = 'none';
-                    });
-
-                    try {
-                        // Push state without reloading
-                        window.history.pushState({}, '', url.toString());
-
-                        const response = await fetch(url.toString(), {
-                            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                        });
-                        
-                        if (!response.ok) throw new Error('Network response was not ok');
-                        
-                        const htmlString = await response.text();
-                        
-                        const parser = new DOMParser();
-                        const newDoc = parser.parseFromString(htmlString, 'text/html');
-                        
-                        let updatedAny = false;
-                        
-                        // Replace only the specific sections
-                        sectionIds.forEach(id => {
-                            const oldEl = document.getElementById(id);
-                            const newEl = newDoc.getElementById(id);
-                            if (oldEl && newEl) {
-                                oldEl.innerHTML = newEl.innerHTML;
-                                updatedAny = true;
-                            } else if (oldEl && !newEl) {
-                                oldEl.innerHTML = ''; // Clear if removed
-                                updatedAny = true;
-                            } else if (!oldEl && newEl) {
-                                // If search-results-section didn't exist before, insert it before populer-section
-                                if (id === 'search-results-section') {
-                                    const populer = document.getElementById('populer-section');
-                                    if (populer) {
-                                        const wrapper = document.createElement('div');
-                                        wrapper.id = 'search-results-section';
-                                        wrapper.className = newEl.className;
-                                        wrapper.innerHTML = newEl.innerHTML;
-                                        populer.parentNode.insertBefore(wrapper, populer);
-                                        updatedAny = true;
-                                    }
-                                }
-                            }
-                        });
-                        
-                        // If we didn't find specific sections, fallback to full reload just in case
-                        if (!updatedAny) {
-                            window.location.reload();
-                        } else {
-                            // Only re-initialize charts if charts-section was updated
-                            try {
-                                BerandaPage.initCharts();
-                            } catch (e) {
-                                console.error("Charts failed to re-initialize:", e);
-                            }
-                            
-                            // Re-init any other specific components inside those sections if needed
-                            // Note: We don't call BerandaPage.init() to avoid destroying select2 and carousel
-                        }
-                    } catch (error) {
-                        console.error('AJAX failed, falling back to reload:', error);
-                        window.location.reload();
-                    } finally {
-                        // Restore opacity
-                        const elementsToRestore = sectionIds.map(id => document.getElementById(id)).filter(Boolean);
-                        elementsToRestore.forEach(el => {
-                            el.style.opacity = '1';
-                            el.style.pointerEvents = 'auto';
-                        });
-                    }
-                };
-
-                // When Kecamatan changes, reset Desa
-                kecamatanSelect.addEventListener('change', function() {
-                    desaSelect.value = 'all';
-                    redirectWithFilters();
-                });
-
-                // When Desa or Year changes, just submit
-                desaSelect.addEventListener('change', redirectWithFilters);
-                globalYearSelect.addEventListener('change', redirectWithFilters);
             },
 
             // Carousel initialization
@@ -1248,317 +825,6 @@
                 indicators = newIndicatorsList; // Update reference to new nodes
 
                 startAutoSlide();
-            },
-
-            // Sinkronisasi background blur navbar dihilangkan, sekarang menggunakan CSS native
-
-            // Charts initialization
-            initCharts() {
-                let attempts = 0;
-                const checkAndInit = () => {
-                    if (typeof ApexCharts !== 'undefined') {
-                        this.initKinerjaChart();
-                        this.initUnitChart();
-                    } else if (attempts < 50) { // Try for 5 seconds
-                        attempts++;
-                        setTimeout(checkAndInit, 100);
-                    } else {
-                        console.error('ApexCharts failed to load after 5 seconds.');
-                    }
-                };
-                checkAndInit();
-
-                if (!this.chartResizeHandlerAttached) {
-                    this.chartResizeHandlerAttached = true;
-                    let resizeTimer;
-                    window.addEventListener('resize', () => {
-                        clearTimeout(resizeTimer);
-                        resizeTimer = setTimeout(() => {
-                            if (typeof ApexCharts !== 'undefined') {
-                                this.initKinerjaChart();
-                                this.initUnitChart();
-                            }
-                        }, 250);
-                    });
-                }
-            },
-
-            // Kinerja Layanan Chart
-            initKinerjaChart() {
-                const container = document.querySelector("#kinerjaChart");
-                if (!container) return;
-
-                if (this.kinerjaChartInstance) {
-                    try { this.kinerjaChartInstance.destroy(); } catch(e) {}
-                    this.kinerjaChartInstance = null;
-                }
-                container.innerHTML = '';
-                
-                let kinerjaData;
-                try {
-                    kinerjaData = JSON.parse(container.getAttribute('data-chart'));
-                } catch(e) {
-                    console.error("Failed to parse kinerja data", e);
-                    return;
-                }
-
-                const shortMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-                const isSmallScreen = window.innerWidth < 1024;
-                const categories = (kinerjaData.categories.length === 12) 
-                    ? shortMonths 
-                    : kinerjaData.categories.map(c => c.length > 3 ? c.substring(0, 3) : c);
-
-                const options = {
-                    series: [{
-                        name: 'Indeks Poin',
-                        data: kinerjaData.data
-                    }],
-                    chart: {
-                        type: 'area',
-                        height: isSmallScreen ? 230 : 280,
-                        toolbar: {
-                            show: false
-                        },
-                        zoom: {
-                            enabled: false
-                        },
-                        background: 'transparent'
-                    },
-                    colors: ['#ffab00'],
-                    stroke: {
-                        curve: 'smooth',
-                        width: 3
-                    },
-                    fill: {
-                        type: 'gradient',
-                        gradient: {
-                            shadeIntensity: 1,
-                            opacityFrom: 0.45,
-                            opacityTo: 0.05,
-                            stops: [0, 90, 100]
-                        }
-                    },
-                    dataLabels: {
-                        enabled: false
-                    },
-                    markers: {
-                        size: 0,
-                        hover: {
-                            size: 5
-                        }
-                    },
-                    xaxis: {
-                        categories: categories,
-                        labels: {
-                            style: {
-                                colors: '#374151',
-                                fontSize: isSmallScreen ? '10px' : '11px',
-                                fontWeight: 500
-                            },
-                            rotate: isSmallScreen ? -45 : -25,
-                            rotateAlways: isSmallScreen,
-                            hideOverlappingLabels: false,
-                            trim: false
-                        },
-                        axisBorder: {
-                            show: false
-                        },
-                        axisTicks: {
-                            show: false
-                        }
-                    },
-                    yaxis: {
-                        labels: {
-                            formatter: (val) => val.toFixed(0),
-                            style: {
-                                colors: '#6b7280',
-                                fontSize: '11px'
-                            }
-                        }
-                    },
-                    grid: {
-                        borderColor: '#e5e7eb',
-                        strokeDashArray: 3,
-                        xaxis: {
-                            lines: {
-                                show: true
-                            }
-                        },
-                        padding: {
-                            top: 0,
-                            right: 5,
-                            bottom: 0,
-                            left: 5
-                        }
-                    },
-                    tooltip: {
-                        y: {
-                            formatter: (val) => val + ' Indeks Poin'
-                        }
-                    },
-                    responsive: [
-                        {
-                            breakpoint: 1024,
-                            options: {
-                                chart: { height: 230 },
-                                xaxis: {
-                                    labels: {
-                                        rotate: -45,
-                                        rotateAlways: true,
-                                        style: { fontSize: '10px' }
-                                    }
-                                }
-                            }
-                        }
-                    ]
-                };
-
-                this.kinerjaChartInstance = new ApexCharts(container, options);
-                this.kinerjaChartInstance.render();
-            },
-
-            // Unit Populer Chart
-            initUnitChart() {
-                const container = document.querySelector("#unitChart");
-                if (!container) return;
-
-                if (this.unitChartInstance) {
-                    try { this.unitChartInstance.destroy(); } catch(e) {}
-                    this.unitChartInstance = null;
-                }
-                container.innerHTML = '';
-                
-                let unitPopulerData;
-                try {
-                    unitPopulerData = JSON.parse(container.getAttribute('data-chart'));
-                } catch(e) {
-                    console.error("Failed to parse unit data", e);
-                    return;
-                }
-
-                const shortMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-                const isSmallScreen = window.innerWidth < 1024;
-                const categories = (unitPopulerData.categories.length === 12) 
-                    ? shortMonths 
-                    : unitPopulerData.categories.map(c => c.length > 3 ? c.substring(0, 3) : c);
-
-                const options = {
-                    series: [{
-                            name: 'Unit Penyewaan Alat',
-                            data: unitPopulerData.rental
-                        },
-                        {
-                            name: 'Unit Penjualan Gas',
-                            data: unitPopulerData.gas
-                        },
-                        {
-                            name: 'Unit Peminjaman Mobil',
-                            data: unitPopulerData.mobil
-                        },
-                        {
-                            name: 'Unit Fasilitas Umum',
-                            data: unitPopulerData.fasilitas
-                        },
-                        {
-                            name: 'Pelaporan Warga',
-                            data: unitPopulerData.laporan
-                        },
-                        {
-                            name: 'Kabar dan Informasi Daerah',
-                            data: unitPopulerData.pengumuman
-                        },
-                        {
-                            name: 'Pasar Daerah',
-                            data: unitPopulerData.pasar
-                        }
-                    ],
-                    chart: {
-                        type: 'bar',
-                        height: isSmallScreen ? 230 : 280,
-                        toolbar: {
-                            show: false
-                        },
-                        stacked: false,
-                        background: 'transparent'
-                    },
-                    colors: ['#f59e0b', '#3b82f6', '#10b981', '#8b5cf6', '#ef4444', '#06b6d4', '#ec4899'],
-                    plotOptions: {
-                        bar: {
-                            horizontal: false,
-                            columnWidth: isSmallScreen ? '70%' : '50%',
-                            borderRadius: 4,
-                            dataLabels: {
-                                position: 'top'
-                            }
-                        }
-                    },
-                    dataLabels: {
-                        enabled: false
-                    },
-                    xaxis: {
-                        categories: categories,
-                        labels: {
-                            style: {
-                                colors: '#374151',
-                                fontSize: isSmallScreen ? '10px' : '11px',
-                                fontWeight: 500
-                            },
-                            rotate: isSmallScreen ? -45 : -25,
-                            rotateAlways: isSmallScreen,
-                            hideOverlappingLabels: false,
-                            trim: false
-                        },
-                        axisBorder: {
-                            show: false
-                        },
-                        axisTicks: {
-                            show: false
-                        }
-                    },
-                    yaxis: {
-                        labels: {
-                            style: {
-                                colors: '#6b7280',
-                                fontSize: '11px'
-                            }
-                        }
-                    },
-                    grid: {
-                        borderColor: '#e5e7eb',
-                        strokeDashArray: 3,
-                        padding: {
-                            top: 0,
-                            right: 10,
-                            bottom: 0,
-                            left: 5
-                        }
-                    },
-                    legend: {
-                        show: false
-                    },
-                    tooltip: {
-                        shared: true,
-                        intersect: false
-                    },
-                    responsive: [
-                        {
-                            breakpoint: 1024,
-                            options: {
-                                chart: { height: 230 },
-                                xaxis: {
-                                    labels: {
-                                        rotate: -45,
-                                        rotateAlways: true,
-                                        style: { fontSize: '10px' }
-                                    }
-                                }
-                            }
-                        }
-                    ]
-                };
-
-                this.unitChartInstance = new ApexCharts(container, options);
-                this.unitChartInstance.render();
             },
 
             // Unit Carousel
