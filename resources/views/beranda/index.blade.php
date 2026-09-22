@@ -307,7 +307,7 @@
                                 <span class="bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">Kabar dan Informasi</span> 
                                 <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Daerah</span>
                             </h2>
-                            <p class="text-xs sm:text-base text-gray-500">Pengumuman dan agenda terbaru</p>
+                            <p class="text-xs sm:text-base text-gray-500">Pengumuman dan berita terbaru</p>
                         </div>
                         <a href="{{ route('announcements.index') }}" class="hidden md:flex items-center gap-2 text-[#115789] font-semibold hover:text-blue-500 transition-colors">
                             Lihat Semua <i class="bx bx-right-arrow-alt text-xl"></i>
