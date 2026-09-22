@@ -38,6 +38,14 @@ Route::get('/test-route-123', function() {
     return response('Migrated! ' . \Illuminate\Support\Facades\Artisan::output(), 200);
 });
 
+Route::get('/sitemap.xml', function () {
+    $path = public_path('sitemap.xml');
+    if (file_exists($path)) {
+        return response()->file($path, ['Content-Type' => 'application/xml']);
+    }
+    abort(404);
+});
+
 Route::get('/beranda', [App\Http\Controllers\User\BerandaController::class, 'index'])
     ->name('beranda')
     ->middleware('role:user,guest');

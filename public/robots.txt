@@ -1,2 +1,8 @@
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /admin/
+Disallow: /superadmin/
+Disallow: /wilayah/
+Disallow: /api/
+
+Sitemap: https://siladesbeng.inovasia.site/sitemap.xml

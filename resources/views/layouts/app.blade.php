@@ -4,7 +4,42 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="google" content="notranslate">
-    <title>SiladesBeng</title>
+    <title>@yield('title', 'SiladesBeng - Sistem Layanan Desa Kabupaten Bengkalis')</title>
+
+    {{-- SEO & META DATA --}}
+    <meta name="description" content="SiladesBeng adalah portal resmi sistem layanan administrasi desa, pelaporan pengaduan warga, sewa fasilitas, dan pasar desa se-Kabupaten Bengkalis.">
+    <meta name="keywords" content="SiladesBeng, siladesbeng, Silades Beng, layanan desa bengkalis, sistem informasi desa bengkalis, bengkalis, desa bengkalis, inovasia site">
+    <meta name="author" content="Pemerintah Kabupaten Bengkalis - SiladesBeng">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="{{ url()->current() }}">
+
+    {{-- Open Graph / Media Sosial Preview --}}
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:title" content="SiladesBeng - Sistem Layanan Desa Kabupaten Bengkalis">
+    <meta property="og:description" content="Portal resmi sistem layanan administrasi desa, pelaporan pengaduan warga, sewa fasilitas, dan pasar desa se-Kabupaten Bengkalis.">
+    <meta property="og:image" content="{{ asset('Admin/img/illustrations/logodomain.webp') }}">
+    <meta property="og:site_name" content="SiladesBeng">
+
+    {{-- Twitter Cards --}}
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="{{ url()->current() }}">
+    <meta name="twitter:title" content="SiladesBeng - Sistem Layanan Desa Kabupaten Bengkalis">
+    <meta name="twitter:description" content="Portal resmi sistem layanan administrasi desa, pelaporan pengaduan warga, sewa fasilitas, dan pasar desa se-Kabupaten Bengkalis.">
+    <meta name="twitter:image" content="{{ asset('Admin/img/illustrations/logodomain.webp') }}">
+
+    {{-- JSON-LD Structured Data Schema untuk Mesin Pencari Google --}}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "GovernmentOrganization",
+      "name": "SiladesBeng",
+      "alternateName": ["Silades Beng", "Sistem Layanan Desa Bengkalis"],
+      "url": "https://siladesbeng.inovasia.site",
+      "logo": "https://siladesbeng.inovasia.site/Admin/img/illustrations/logodomain.webp",
+      "description": "Sistem Layanan Administrasi Desa Terpadu Kabupaten Bengkalis"
+    }
+    </script>
 
     {{-- GOOGLE FONTS + FAVICON --}}
     <link rel="dns-prefetch" href="https://fonts.googleapis.com">
@@ -20,9 +55,6 @@
 
     {{-- Alpine.js --}}
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-
-    {{-- Global Navigation Progress Indicator --}}
-    <div id="pageProgressBar" class="global-progress-bar" style="display:none;"></div>
     <style>
         .global-progress-bar {
             position: fixed;
@@ -84,6 +116,8 @@
     @stack('styles')
 </head>
 <body class="antialiased text-gray-900 bg-white min-h-screen flex flex-col overflow-x-hidden">
+    {{-- Global Navigation Progress Indicator --}}
+    <div id="pageProgressBar" class="global-progress-bar" style="display:none;"></div>
 
     {{-- Main content --}}
     @yield('content')
