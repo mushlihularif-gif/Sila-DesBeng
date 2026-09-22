@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="google" content="notranslate">
-    <title>@yield('title', 'SiladesBeng - Sistem Layanan Desa Kabupaten Bengkalis')</title>
+    <title>@yield('title', 'SiladesBeng - Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis')</title>
 
     {{-- SEO & META DATA --}}
-    <meta name="description" content="SiladesBeng adalah portal resmi sistem layanan administrasi desa, pelaporan pengaduan warga, sewa fasilitas, dan pasar desa se-Kabupaten Bengkalis.">
-    <meta name="keywords" content="SiladesBeng, siladesbeng, Silades Beng, layanan desa bengkalis, sistem informasi desa bengkalis, bengkalis, desa bengkalis, inovasia site">
+    <meta name="description" content="SiladesBeng (Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis) adalah portal resmi layanan desa, pelaporan pengaduan warga, sewa fasilitas, dan pasar desa se-Kabupaten Bengkalis.">
+    <meta name="keywords" content="SiladesBeng, siladesbeng, Silades Beng, Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis, layanan desa bengkalis, aspirasi desa bengkalis, sistem informasi desa bengkalis, bengkalis, inovasia site">
     <meta name="author" content="Pemerintah Kabupaten Bengkalis - SiladesBeng">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="{{ url()->current() }}">
@@ -16,16 +16,16 @@
     {{-- Open Graph / Media Sosial Preview --}}
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ url()->current() }}">
-    <meta property="og:title" content="SiladesBeng - Sistem Layanan Desa Kabupaten Bengkalis">
-    <meta property="og:description" content="Portal resmi sistem layanan administrasi desa, pelaporan pengaduan warga, sewa fasilitas, dan pasar desa se-Kabupaten Bengkalis.">
+    <meta property="og:title" content="SiladesBeng - Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis">
+    <meta property="og:description" content="SiladesBeng (Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis) adalah portal terpadu layanan desa, pelaporan pengaduan warga, dan transparansi daerah.">
     <meta property="og:image" content="{{ asset('Admin/img/illustrations/logodomain.webp') }}">
     <meta property="og:site_name" content="SiladesBeng">
 
     {{-- Twitter Cards --}}
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:url" content="{{ url()->current() }}">
-    <meta name="twitter:title" content="SiladesBeng - Sistem Layanan Desa Kabupaten Bengkalis">
-    <meta name="twitter:description" content="Portal resmi sistem layanan administrasi desa, pelaporan pengaduan warga, sewa fasilitas, dan pasar desa se-Kabupaten Bengkalis.">
+    <meta name="twitter:title" content="SiladesBeng - Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis">
+    <meta name="twitter:description" content="SiladesBeng (Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis) adalah portal terpadu layanan desa, pelaporan pengaduan warga, dan transparansi daerah.">
     <meta name="twitter:image" content="{{ asset('Admin/img/illustrations/logodomain.webp') }}">
 
     {{-- JSON-LD Structured Data Schema untuk Mesin Pencari Google --}}
@@ -34,10 +34,14 @@
       "@context": "https://schema.org",
       "@type": "GovernmentOrganization",
       "name": "SiladesBeng",
-      "alternateName": ["Silades Beng", "Sistem Layanan Desa Bengkalis"],
+      "alternateName": [
+        "Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis",
+        "Silades Beng",
+        "SiladesBeng Bengkalis"
+      ],
       "url": "https://siladesbeng.inovasia.site",
       "logo": "https://siladesbeng.inovasia.site/Admin/img/illustrations/logodomain.webp",
-      "description": "Sistem Layanan Administrasi Desa Terpadu Kabupaten Bengkalis"
+      "description": "Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis"
     }
     </script>
 
