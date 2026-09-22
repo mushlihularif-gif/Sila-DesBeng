@@ -30,19 +30,19 @@
 
     {{-- JSON-LD Structured Data Schema untuk Mesin Pencari Google --}}
     <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "GovernmentOrganization",
-      "name": "SiladesBeng",
-      "alternateName": [
-        "Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis",
-        "Silades Beng",
-        "SiladesBeng Bengkalis"
+    {!! json_encode([
+      '@context' => 'https://schema.org',
+      '@type' => 'GovernmentOrganization',
+      'name' => 'SiladesBeng',
+      'alternateName' => [
+        'Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis',
+        'Silades Beng',
+        'SiladesBeng Bengkalis'
       ],
-      "url": "https://siladesbeng.inovasia.site",
-      "logo": "https://siladesbeng.inovasia.site/Admin/img/illustrations/logodomain.webp",
-      "description": "Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis"
-    }
+      'url' => 'https://siladesbeng.inovasia.site',
+      'logo' => asset('Admin/img/illustrations/logodomain.webp'),
+      'description' => 'Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis'
+    ], JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) !!}
     </script>
 
     {{-- GOOGLE FONTS + FAVICON --}}
