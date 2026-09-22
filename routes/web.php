@@ -46,14 +46,6 @@ Route::get('/sitemap.xml', function () {
     abort(404);
 });
 
-// Route Verifikasi Google Search Console
-Route::get('/googlecbbc2eb6e887bb22.html', function () {
-    return response('google-site-verification: googlecbbc2eb6e887bb22.html', 200, ['Content-Type' => 'text/html']);
-});
-
-Route::get('/google{hash}.html', function ($hash) {
-    return response("google-site-verification: google{$hash}.html", 200, ['Content-Type' => 'text/html']);
-})->where('hash', '[a-zA-Z0-9]+');
 
 Route::get('/beranda', [App\Http\Controllers\User\BerandaController::class, 'index'])
     ->name('beranda')
