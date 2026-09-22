@@ -303,8 +303,8 @@
                 <div class="max-w-7xl mx-auto relative z-10">
                     <div class="flex justify-between items-end mb-6 sm:mb-8">
                         <div>
-                            <h2 class="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-[#115789] to-blue-400 bg-clip-text text-transparent drop-shadow-sm mb-1 sm:mb-2">
-                                Kabar dan Informasi Daerah
+                            <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">
+                                Kabar dan Informasi <span class="text-[#115789]">Daerah</span>
                             </h2>
                             <p class="text-xs sm:text-base text-gray-500">Pengumuman dan agenda terbaru</p>
                         </div>
@@ -316,16 +316,16 @@
                     <div class="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
                         @foreach($recentAnnouncements as $item)
                         <a href="{{ route('announcements.show', $item->id) }}" class="group bg-white rounded-xl sm:rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col h-full transform hover:-translate-y-1 {{ $loop->iteration == 4 ? 'flex md:hidden' : 'flex' }}">
-                            <div class="h-32 sm:h-40 md:h-56 shrink-0 relative overflow-hidden bg-gray-50">
+                            <div class="kabar-img-wrapper">
                                 @if($item->image_path)
-                                    <img src="{{ Storage::url($item->image_path) }}" alt="{{ $item->title }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.onerror=null; this.src='{{ asset('User/img/elemen/KabardanInformasiDaerah.png') }}';">
+                                    <img src="{{ Storage::url($item->image_path) }}" alt="{{ $item->title }}" class="w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-500" onerror="this.onerror=null; this.src='{{ asset('User/img/elemen/KabardanInformasiDaerah.png') }}';">
                                 @elseif($item->images && $item->images->count() > 0)
-                                    <img src="{{ Storage::url($item->images->first()->image_path) }}" alt="{{ $item->title }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.onerror=null; this.src='{{ asset('User/img/elemen/KabardanInformasiDaerah.png') }}';">
+                                    <img src="{{ Storage::url($item->images->first()->image_path) }}" alt="{{ $item->title }}" class="w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-500" onerror="this.onerror=null; this.src='{{ asset('User/img/elemen/KabardanInformasiDaerah.png') }}';">
                                 @else
                                     <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#115789]/10 to-blue-500/10">
-                                        @if($item->type == 'Pengumuman') <i class="bx bx-broadcast text-2xl sm:text-3xl md:text-4xl text-blue-500"></i>
-                                        @elseif($item->type == 'Event') <i class="bx bx-calendar-event text-2xl sm:text-3xl md:text-4xl text-purple-500"></i>
-                                        @else <i class="bx bx-group text-2xl sm:text-3xl md:text-4xl text-emerald-500"></i>
+                                        @if($item->type == 'Pengumuman') <i class="bx bx-broadcast text-3xl sm:text-4xl text-blue-500"></i>
+                                        @elseif($item->type == 'Event') <i class="bx bx-calendar-event text-3xl sm:text-4xl text-purple-500"></i>
+                                        @else <i class="bx bx-group text-3xl sm:text-4xl text-emerald-500"></i>
                                         @endif
                                     </div>
                                 @endif
@@ -479,6 +479,31 @@
             color: #1f2937;
             line-height: 1.4;
             margin-top: 1rem;
+        }
+
+        /* Kontainer Gambar Kabar Daerah (Responsif & Anti-Gepeng) */
+        .kabar-img-wrapper {
+            position: relative;
+            width: 100%;
+            height: 140px;
+            overflow: hidden;
+            background-color: #f3f4f6;
+            flex-shrink: 0;
+        }
+        @media (min-width: 640px) {
+            .kabar-img-wrapper {
+                height: 170px;
+            }
+        }
+        @media (min-width: 768px) {
+            .kabar-img-wrapper {
+                height: 230px;
+            }
+        }
+        @media (min-width: 1024px) {
+            .kabar-img-wrapper {
+                height: 250px;
+            }
         }
 
         /* Area UNIT PELAYANAN - Pakai 2.webp (WAVE) BESAR + 5.webp (GEOMETRIS) SUPER BESAR */
