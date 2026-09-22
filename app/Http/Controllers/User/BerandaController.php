@@ -121,7 +121,7 @@ class BerandaController extends Controller
             });
         }
 
-        $recentAnnouncements = $announcementQuery->take(3)->get();
+        $recentAnnouncements = $announcementQuery->take(4)->get();
         
         // Ambil Active Services jika user login dan punya region
         $activeServices = [];

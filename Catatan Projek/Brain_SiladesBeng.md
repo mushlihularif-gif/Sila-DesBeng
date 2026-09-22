@@ -1212,3 +1212,7 @@ Pekerjaan yang perlu diselesaikan di Google Cloud Platform Console:
      - Bagian Grafik Umum (`#grafik-umum`) dihapus seutuhnya.
      - Pustaka ApexCharts dan Select2 dihapus dari Beranda untuk mempercepat *loading speed* halaman (menghilangkan request CDN eksternal yang tidak lagi terpakai).
      - Seluruh fungsi JavaScript grafik dan filter tahunan dibersihkan, menyederhanakan kode menjadi sangat ringan.
+  6. **Responsivitas Grid Kabar dan Informasi Daerah:**
+     - Tampilan Desktop: Menampilkan 3 kartu kabar dalam 1 baris (3 kolom), dengan kartu ke-4 disembunyikan menggunakan utilitas `md:hidden`.
+     - Tampilan Mobile: Menampilkan 4 kartu kabar dalam tata letak 2 kolom x 2 baris (`grid-cols-2`) dengan proporsi gambar dan tipografi yang rapi di layar ponsel.
+     - Tombol navigasi "Lihat Semua Kabar" diposisikan di bawah kartu secara terpusat untuk desktop dan mobile.

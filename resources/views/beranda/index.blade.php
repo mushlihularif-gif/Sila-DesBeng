@@ -295,67 +295,68 @@
 
             <!-- Section Pengumuman Terbaru -->
             @if(isset($recentAnnouncements) && $recentAnnouncements->count() > 0)
-            <div id="kabar-daerah-section" class="max-w-7xl mx-auto px-6 py-12 relative">
+            <div id="kabar-daerah-section" class="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12 relative">
                 <!-- Decorative background elements -->
                 <div class="absolute top-0 right-0 w-32 h-32 md:w-64 md:h-64 bg-yellow-400/5 rounded-full filter blur-3xl"></div>
                 <div class="absolute bottom-0 left-0 w-80 h-80 bg-[#115789]/5 rounded-full filter blur-3xl"></div>
                 
                 <div class="max-w-7xl mx-auto relative z-10">
-                    <div class="flex justify-between items-end mb-8">
+                    <div class="flex justify-between items-end mb-6 sm:mb-8">
                         <div>
-                            <h2 class="text-3xl font-bold bg-gradient-to-r from-[#115789] to-blue-300 bg-clip-text text-transparent drop-shadow-sm mb-2">
+                            <h2 class="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-[#115789] to-blue-400 bg-clip-text text-transparent drop-shadow-sm mb-1 sm:mb-2">
                                 Kabar dan Informasi Daerah
                             </h2>
-                            <p class="text-gray-500">Pengumuman dan agenda terbaru</p>
+                            <p class="text-xs sm:text-base text-gray-500">Pengumuman dan agenda terbaru</p>
                         </div>
                         <a href="{{ route('announcements.index') }}" class="hidden md:flex items-center gap-2 text-[#115789] font-semibold hover:text-blue-500 transition-colors">
                             Lihat Semua <i class="bx bx-right-arrow-alt text-xl"></i>
                         </a>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
                         @foreach($recentAnnouncements as $item)
-                        <a href="{{ route('announcements.show', $item->id) }}" class="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col h-full transform hover:-translate-y-1">
-                            <div class="h-40 shrink-0 relative overflow-hidden bg-gray-50">
+                        <a href="{{ route('announcements.show', $item->id) }}" class="group bg-white rounded-xl sm:rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col h-full transform hover:-translate-y-1 {{ $loop->iteration == 4 ? 'flex md:hidden' : 'flex' }}">
+                            <div class="h-28 sm:h-36 md:h-44 shrink-0 relative overflow-hidden bg-gray-50">
                                 @if($item->image_path)
                                     <img src="{{ Storage::url($item->image_path) }}" alt="{{ $item->title }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.onerror=null; this.src='{{ asset('User/img/elemen/KabardanInformasiDaerah.png') }}';">
                                 @elseif($item->images && $item->images->count() > 0)
                                     <img src="{{ Storage::url($item->images->first()->image_path) }}" alt="{{ $item->title }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.onerror=null; this.src='{{ asset('User/img/elemen/KabardanInformasiDaerah.png') }}';">
                                 @else
                                     <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#115789]/10 to-blue-500/10">
-                                        @if($item->type == 'Pengumuman') <i class="bx bx-broadcast text-4xl text-blue-500"></i>
-                                        @elseif($item->type == 'Event') <i class="bx bx-calendar-event text-4xl text-purple-500"></i>
-                                        @else <i class="bx bx-group text-4xl text-emerald-500"></i>
+                                        @if($item->type == 'Pengumuman') <i class="bx bx-broadcast text-2xl sm:text-3xl md:text-4xl text-blue-500"></i>
+                                        @elseif($item->type == 'Event') <i class="bx bx-calendar-event text-2xl sm:text-3xl md:text-4xl text-purple-500"></i>
+                                        @else <i class="bx bx-group text-2xl sm:text-3xl md:text-4xl text-emerald-500"></i>
                                         @endif
                                     </div>
                                 @endif
                                 
-                                <div class="absolute top-3 left-3 flex gap-2">
+                                <div class="absolute top-2 left-2 sm:top-3 sm:left-3 flex gap-1 sm:gap-2">
                                     @if($item->type == 'Gotong Royong')
-                                        <span class="px-2.5 py-1 bg-emerald-500 text-white rounded-md text-xs font-bold shadow-sm">Gotong Royong</span>
+                                        <span class="px-2 py-0.5 sm:px-2.5 sm:py-1 bg-emerald-500 text-white rounded-md text-[10px] sm:text-xs font-bold shadow-sm">Gotong Royong</span>
                                     @elseif($item->type == 'Event')
-                                        <span class="px-2.5 py-1 bg-purple-500 text-white rounded-md text-xs font-bold shadow-sm">Event</span>
+                                        <span class="px-2 py-0.5 sm:px-2.5 sm:py-1 bg-purple-500 text-white rounded-md text-[10px] sm:text-xs font-bold shadow-sm">Event</span>
                                     @else
-                                        <span class="px-2.5 py-1 bg-blue-500 text-white rounded-md text-xs font-bold shadow-sm">Pengumuman</span>
+                                        <span class="px-2 py-0.5 sm:px-2.5 sm:py-1 bg-blue-500 text-white rounded-md text-[10px] sm:text-xs font-bold shadow-sm">Pengumuman</span>
                                     @endif
                                 </div>
                             </div>
                             
-                            <div class="p-5 flex flex-col flex-1">
-                                <div class="text-xs text-gray-500 mb-2 flex items-center justify-between">
-                                    <span class="flex items-center gap-1.5"><i class="bx bx-calendar text-[#115789]"></i> {{ $item->created_at->format('d M Y') }}</span>
-                                    <span class="font-medium text-[#115789]">{{ $item->region->name ?? 'Pusat' }}</span>
+                            <div class="p-3 sm:p-4 md:p-5 flex flex-col flex-1">
+                                <div class="text-[10px] sm:text-xs text-gray-500 mb-1.5 sm:mb-2 flex items-center justify-between gap-1">
+                                    <span class="flex items-center gap-1 shrink-0"><i class="bx bx-calendar text-[#115789]"></i> {{ $item->created_at->format('d M Y') }}</span>
+                                    <span class="font-medium text-[#115789] truncate max-w-[90px] sm:max-w-[140px] md:max-w-none text-right">{{ $item->region->name ?? 'Pusat' }}</span>
                                 </div>
-                                <h3 class="font-bold text-gray-800 text-lg mb-2 line-clamp-2 group-hover:text-[#115789] transition-colors">{{ $item->title }}</h3>
-                                <p class="text-gray-500 text-sm line-clamp-2 mt-auto">{{ \Illuminate\Support\Str::limit(strip_tags($item->description), 80) }}</p>
+                                <h3 class="font-bold text-gray-800 text-xs sm:text-sm md:text-base lg:text-lg mb-1.5 sm:mb-2 line-clamp-2 group-hover:text-[#115789] transition-colors leading-snug">{{ $item->title }}</h3>
+                                <p class="text-gray-500 text-[11px] sm:text-xs md:text-sm line-clamp-2 mt-auto leading-relaxed">{{ \Illuminate\Support\Str::limit(strip_tags($item->description), 80) }}</p>
                             </div>
                         </a>
                         @endforeach
                     </div>
                     
-                    <div class="mt-6 text-center md:hidden">
-                        <a href="{{ route('announcements.index') }}" class="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-gray-50 hover:bg-gray-100 text-[#115789] font-semibold rounded-xl transition-colors border border-gray-200 w-full">
-                            Lihat Semua Kabar
+                    <!-- Tombol Lihat Semua Kabar (Muncul di Bawah pada Desktop maupun Mobile) -->
+                    <div class="mt-8 text-center">
+                        <a href="{{ route('announcements.index') }}" class="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-gray-50 hover:bg-gray-100 text-[#115789] font-semibold rounded-xl transition-all duration-300 border border-gray-200 hover:border-[#115789]/30 shadow-sm hover:shadow w-full sm:w-auto">
+                            Lihat Semua Kabar <i class="bx bx-right-arrow-alt text-xl"></i>
                         </a>
                     </div>
                 </div>
