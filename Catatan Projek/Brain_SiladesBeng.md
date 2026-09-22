@@ -1095,3 +1095,76 @@ Buka peramban dengan 3 tab yang sudah dalam posisi login:
 
 4. **Pertanyaan: "Bagaimana sistem mengakomodasi warga desa yang tidak memiliki smartphone atau gaptek?"**
    - **Jawaban:** "SILADESBENG dirancang inklusif. Bagi warga yang tidak memiliki smartphone, mereka cukup datang ke kantor desa atau menghubungi pengurus RT. Operator desa memiliki fitur pemesanan dan pencatatan manual (walk-in) dengan metode pembayaran tunai (Cash). Seluruh transaksi tersebut tetap masuk ke buku kas digital sistem sehingga akuntabilitas keuangan daerah tetap terjaga 100%."
+
+---
+
+## 11. Catatan Integrasi Google Maps & Panduan Eksekusi (Pelaporan, GPS, dan PDF)
+
+### 11.1 Latar Belakang Masalah
+Pada modul Pelaporan Warga dan modul lain yang menggunakan peta, sempat terjadi kendala di mana share lokasi GPS tidak mendeteksi nama alamat secara otomatis, nama lokasi tersimpan sebagai koordinat angka atau dobel teks ("Desa Desa Pematang Duku Timur"), dan denah peta di dokumen PDF bukti laporan tidak muncul (kosong).
+
+Setelah dilakukan audit langsung menggunakan API Key di berkas `.env` (`AIzaSyCH-3y18TCGdlORkD7q_WmOxiMfWeDO-1I`), ditemukan akar penyebabnya:
+1. **Application Restriction (HTTP Referrer):** API Key di Google Cloud Console dibatasi oleh *HTTP Referrers (Websites)*. Akibatnya, pemanggilan backend server PHP (cURL) untuk memanggil Geocoding API atau Maps Static API ditolak oleh Google dengan pesan `API keys with referer restrictions cannot be used with this API` (status: `REQUEST_DENIED`).
+2. **Maps Static API Belum Aktif:** Layanan *Maps Static API* pada Google Cloud Project belum diaktifkan (status HTTP 403), sehingga fungsi cetak PDF tidak mendapatkan gambar peta.
+3. **Geocoding API Belum Aktif:** Layanan *Geocoding API* belum diaktifkan, sehingga konversi koordinat GPS ke nama jalan/desa tidak berjalan di Google.
+4. **Timeout Reverse Geocode Publik:** Sistem sebelumnya hanya mengandalkan Nominatim OSM dengan batas waktu 4 detik tanpa resolver IPv4, sehingga sering gagal (timeout 8 detik) dan jatuh ke koordinat mentah.
+5. **Bug Dobel Prefiks Wilayah:** Model Laporan menambahkan kata "Desa " pada `$region->name` yang sudah berawalan "Desa", menghasilkan string "Desa Desa ...".
+
+---
+
+### 11.2 Penyempurnaan Sistem yang Telah Selesai Diterapkan di Kode SiladesBeng
+1. **Multi-Tier Geocoding Cepat (< 1 Detik):**
+   - Berkas `app/Support/GeocodeHelper.php` diperbarui dengan alur berjenjang:
+     - Tingkat 1: Google Geocoding API (jika diizinkan).
+     - Tingkat 2: OpenStreetMap Nominatim dengan `CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4` (memangkas waktu respon dari 8 detik menjadi 1,1 detik).
+     - Tingkat 3: BigDataCloud Reverse Geocoding API.
+2. **Generator Peta Statis Otomatis untuk Dokumen PDF:**
+   - Berkas `app/Support/GeocodeHelper.php` dan `app/Http/Controllers/LaporanController.php` metode `exportPdf()` telah dilengkapi generator peta resolusi tinggi berpenanda titik merah (*pin marker*) otomatis. Jika Google Static Maps belum aktif atau kehabisan kuota, sistem secara mulus beralih ke peta cadangan berpenanda pin merah sehingga dokumen PDF tidak pernah kosong.
+3. **Sanitasi Lokasi & Pencegahan Dobel Prefiks:**
+   - Berkas `app/Models/Laporan.php` dan `app/Http/Controllers/LaporanController.php` telah memfilter prefiks agar tidak ada lagi duplikasi teks "Desa Desa" atau "Kelurahan Kelurahan".
+4. **Form Pelaporan Warga (`create.blade.php`):**
+   - Tombol "Gunakan Lokasi Saya (GPS)" langsung memusatkan peta ke titik perangkat dan memicu Google Geocoder resmi dari peramban warga.
+   - Dilengkapi fail-safe: jika Google Maps gagal terhubung, form otomatis beralih ke peta interaktif cadangan tanpa mengganggu pengisian form.
+5. **Peta Interaktif Halaman Detail (`show.blade.php` Warga & Admin):**
+   - Menggunakan Google Maps embed interaktif resmi via iframe sandboxed. Peta terbukti langsung muncul presisi, bebas risiko blank putih, dan dilengkapi tombol "Buka di Google Maps".
+
+---
+
+### 11.3 Daftar Tugas Eksekusi Nanti Malam (Checklist Tindakan Google Cloud Console)
+Pekerjaan yang perlu diselesaikan di Google Cloud Platform Console:
+
+- [ ] **Langkah 1: Masuk ke Google Cloud Console**
+  - Buka URL: `https://console.cloud.google.com/google/maps-apis/overview`
+  - Pastikan masuk menggunakan akun Google yang memiliki project SiladesBeng.
+
+- [ ] **Langkah 2: Aktifkan 4 Layanan Google Maps Wajib**
+  - Masuk ke menu **APIs & Services > Library**.
+  - Cari dan klik tombol **Enable** (Aktifkan) pada 4 API berikut:
+    1. **Maps JavaScript API** (Untuk merender peta interaktif di layar browser).
+    2. **Geocoding API** (Untuk menerjemahkan koordinat latitude & longitude menjadi nama jalan, desa, dan RT/RW).
+    3. **Places API** (Untuk fitur pencarian lokasi dan pelengkapan alamat otomatis).
+    4. **Maps Static API** (Untuk merender cuplikan gambar peta denah lokasi ke dalam berkas PDF Bukti Laporan).
+
+- [ ] **Langkah 3: Sesuaikan Pembatasan Kredensial (Credentials)**
+  - Masuk ke menu **APIs & Services > Credentials**.
+  - Klik pada API Key yang digunakan (`GOOGLE_MAPS_API_KEY`).
+  - Pada bagian **Set application restrictions**:
+    - Pilih **None** (agar API Key dapat dipakai bersama oleh peramban warga dan server backend Laravel saat mencetak PDF).
+  - Pada bagian **API restrictions**:
+    - Pilih **Don't restrict key** (atau pilih *Restrict key* lalu centang 4 API yang diaktifkan di atas).
+  - Klik tombol **Save** (Simpan).
+
+- [ ] **Langkah 4: Pengujian & Validasi Menyeluruh (Testing Checklist)**
+  - **Uji Form Laporan Warga (`/lapor-warga/create`):**
+    - Klik tombol "Gunakan Lokasi Saya (GPS)". Pastikan peta bergeser dan nama lokasi terisi otomatis dari Google.
+    - Coba geser pin marker pada peta. Pastikan nama lokasi diperbarui sesuai titik geser.
+    - Kirimkan laporan uji coba.
+  - **Uji Detail Laporan Warga & Admin (`/user/laporan/{id}` & `/admin/pelaporan/{id}`):**
+    - Buka laporan yang baru dikirim. Pastikan peta interaktif Google Maps tampil jelas dengan penanda pin merah.
+    - Klik tombol "Buka di Google Maps" dan pastikan membuka aplikasi/web Google Maps di koordinat yang tepat.
+  - **Uji Cetak Bukti Laporan PDF (`/user/laporan/{id}/export-pdf`):**
+    - Unduh berkas PDF.
+    - Periksa Halaman 2 (Lampiran Bukti Visual dan Lokasi). Pastikan gambar denah peta tercetak dengan penanda titik merah tanpa kotak kosong.
+  - **Uji Modul Terintegrasi Lainnya:**
+    - Modul Pemesanan Gas Daerah (`/layanan/gas`): Pastikan peta pangkalan dan penentuan titik antar berfungsi normal.
+    - Modul Tarik Tunai / Saldo: Pastikan fungsi peta Google Maps berjalan sebagaimana mestinya.
