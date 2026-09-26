@@ -89,7 +89,7 @@
                                         <div class="d-flex flex-column gap-3">
                                             <div class="form-check form-switch d-flex align-items-center">
                                                 <input class="form-check-input mt-0 me-3 cursor-pointer" type="checkbox" name="is_sewa_mobil" value="1" id="is_rental_edit_{{ $supir->id }}" style="width: 2.5em; height: 1.25em;" {{ $supir->is_sewa_mobil ? 'checked' : '' }}>
-                                                <label class="form-check-label cursor-pointer fw-bold text-dark" for="is_rental_edit_{{ $supir->id }}">Sewa Mobil (Rental)</label>
+                                                <label class="form-check-label cursor-pointer fw-bold text-dark" for="is_rental_edit_{{ $supir->id }}">Penyewaan Transportasi</label>
                                             </div>
                                             <div class="form-check form-switch d-flex align-items-center">
                                                 <input class="form-check-input mt-0 me-3 cursor-pointer bg-danger border-danger" type="checkbox" name="is_fasilitas_umum" value="1" id="is_fasilitas_edit_{{ $supir->id }}" style="width: 2.5em; height: 1.25em;" {{ $supir->is_fasilitas_umum ? 'checked' : '' }}>
@@ -188,7 +188,7 @@
                                 <small class="text-muted d-block mb-1" style="font-size: 0.72rem;">Layanan Kendaraan Aktif</small>
                                 <div class="d-flex flex-wrap gap-1">
                                     @if($supir->is_sewa_mobil)
-                                        <span class="badge bg-label-primary px-2.5 py-1"><i class="bx bx-car me-1"></i> Rental Mobil</span>
+                                        <span class="badge bg-label-primary px-2.5 py-1"><i class="bx bx-car me-1"></i> Penyewaan Transportasi</span>
                                     @endif
                                     @if($supir->is_fasilitas_umum)
                                         <span class="badge bg-label-danger px-2.5 py-1"><i class="bx bx-plus-medical me-1"></i> Ambulans & Kendaraan</span>

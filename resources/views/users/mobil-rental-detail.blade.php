@@ -236,7 +236,7 @@
 
     <x-unit-chat-widget 
         service="mobil" 
-        title="Layanan Pesan Mobil" 
+        title="Layanan Sewa Transportasi" 
         :regionId="$item->region_id" 
         :regionName="$item->region->name ?? ''"
         :itemName="$item->nama_kendaraan"

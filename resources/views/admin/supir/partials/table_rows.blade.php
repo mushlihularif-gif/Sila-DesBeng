@@ -37,7 +37,7 @@
                 @endif
             @else
                 @if($supir->is_sewa_mobil)
-                    <span class="badge bg-label-primary w-100 text-start"><i class="bx bx-car me-1"></i> Rental Mobil</span>
+                    <span class="badge bg-label-primary w-100 text-start"><i class="bx bx-car me-1"></i> Penyewaan Transportasi</span>
                 @endif
                 @if($supir->is_fasilitas_umum)
                     <span class="badge bg-label-danger w-100 text-start"><i class="bx bx-plus-medical me-1"></i> Ambulans & Kendaraan</span>

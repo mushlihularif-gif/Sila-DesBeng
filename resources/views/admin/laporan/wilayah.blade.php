@@ -67,7 +67,7 @@
     $activeServices = $activeServices ?? [];
     $isRentalActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'alat'));
     $isGasActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'gas'));
-    $isMobilActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'mobil'));
+    $isMobilActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'mobil') || str_contains(strtolower($name), 'transportasi'));
     $isFasilitasActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'fasilitas'));
     $isPasarActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'pasar'));
 @endphp
@@ -100,7 +100,7 @@
             <div>
                 <h6 class="fw-bold mb-1 text-primary">Panduan Evaluasi Wilayah</h6>
                 <p class="mb-0 text-primary small" style="opacity: 0.9; line-height: 1.5;">
-                    Halaman ini merangkum indeks aktivitas dari <strong>5 sektor layanan daerah</strong> (Penyewaan Alat, Gas LPG, Mobil, Fasilitas Umum, Pasar Daerah) serta <strong>Pelaporan Warga</strong> dalam bentuk poin tren. Nilai nominal keuangan disamarkan demi menjaga privasi antar wilayah.
+                    Halaman ini merangkum indeks aktivitas dari <strong>5 sektor layanan daerah</strong> (Penyewaan Alat, Gas LPG, Transportasi, Fasilitas Umum, Pasar Daerah) serta <strong>Pelaporan Warga</strong> dalam bentuk poin tren. Nilai nominal keuangan disamarkan demi menjaga privasi antar wilayah.
                 </p>
             </div>
         </div>
@@ -266,15 +266,15 @@
             </div>
         </div>
 
-        <!-- Rental Mobil -->
+        <!-- Rental Transportasi -->
         <div class="col-6 col-md-4 col-xl-2">
             <div class="card border-0 shadow-sm h-100 unit-stat-card p-3">
                 <div class="d-flex align-items-center mb-2">
                     <div class="avatar avatar-sm bg-label-danger rounded-3 p-1 me-2 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 32px; height: 32px;">
-                        <img src="{{ asset('User/img/elemen/mobil.png') }}" style="width: 18px; height: 18px; object-fit: contain;" alt="Sewa Mobil">
+                        <img src="{{ asset('User/img/elemen/mobil.png') }}" style="width: 18px; height: 18px; object-fit: contain;" alt="Sewa Transportasi">
                     </div>
                     <div class="overflow-hidden">
-                        <span class="text-secondary fw-semibold d-block text-truncate" style="font-size: 0.75rem;">Sewa Mobil</span>
+                        <span class="text-secondary fw-semibold d-block text-truncate" style="font-size: 0.75rem;">Sewa Transportasi</span>
                     </div>
                 </div>
                 <h5 class="fw-bold mb-0 text-dark" id="count-mobil">{{ $serviceTotals['mobil'] ?? 0 }}</h5>

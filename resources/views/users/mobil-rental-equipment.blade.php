@@ -52,7 +52,7 @@
             <div class="text-center mb-12 mt-12">
                 <h1 class="text-3xl md:text-4xl font-bold mb-4">
                     <span class="text-gray-800">Unit </span>
-                    <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Penyewaan Mobil</span>
+                    <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Penyewaan Transportasi</span>
                 </h1>
                 @if(isset($targetRegion) && $targetRegion)
                 <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-blue-50 border border-blue-200 rounded-full text-blue-700 text-sm font-semibold shadow-sm">
@@ -162,12 +162,12 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
                     </svg>
                     <h3 class="text-xl font-semibold text-gray-700 mb-2">Belum Ada Produk Tersedia</h3>
-                    <p class="text-gray-500">Produk Penyewaan Mobil akan segera ditambahkan.</p>
+                    <p class="text-gray-500">Produk Penyewaan Transportasi akan segera ditambahkan.</p>
                 </div>
             @endif
         </div>
     </section>
-    @include('users.partials.service_chat_widget', ['serviceType' => 'mobil', 'serviceTitle' => 'Layanan Sewa Mobil'])
+    @include('users.partials.service_chat_widget', ['serviceType' => 'mobil', 'serviceTitle' => 'Layanan Sewa Transportasi'])
 </main>
 @endsection
 

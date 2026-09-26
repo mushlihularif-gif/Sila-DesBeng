@@ -23,7 +23,7 @@ class LokasiLayananController extends Controller
     private const TABEL_UNIT = [
         'gas'             => 'Penjualan Gas',
         'barang'          => 'Penyewaan Alat',
-        'mobils'          => 'Penyewaan Mobil',
+        'mobils'          => 'Penyewaan Transportasi',
         'fasilitas_umums' => 'Fasilitas Umum',
         'pasar_produks'   => 'Pasar Daerah',
     ];

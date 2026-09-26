@@ -10,7 +10,8 @@
         $map = [
             'Unit Penyewaan Alat' => ['Penyewaan Alat'],
             'Unit Penjualan Gas' => ['Penjualan Gas'],
-            'Unit Penyewaan Mobil' => ['Penyewaan Mobil'],
+            'Unit Penyewaan Mobil' => ['Penyewaan Mobil', 'Penyewaan Transportasi'],
+            'Unit Penyewaan Transportasi' => ['Penyewaan Mobil', 'Penyewaan Transportasi'],
             'Unit Peminjaman Fasilitas Umum' => ['Peminjaman Fasilitas Umum', 'Fasilitas Umum'],
             'Pelaporan Warga' => ['Pelaporan Warga']
         ];
@@ -23,7 +24,7 @@
     };
 
     $activeCount = 0;
-    $allUnits = ['Unit Penyewaan Alat', 'Unit Penjualan Gas', 'Unit Penyewaan Mobil', 'Unit Peminjaman Fasilitas Umum', 'Pasar Daerah', 'Pelaporan Warga', 'Pengumuman dan Event'];
+    $allUnits = ['Unit Penyewaan Alat', 'Unit Penjualan Gas', 'Unit Penyewaan Transportasi', 'Unit Peminjaman Fasilitas Umum', 'Pasar Daerah', 'Pelaporan Warga', 'Pengumuman dan Event'];
     foreach ($allUnits as $unit) {
         if ($isServiceActive($unit)) $activeCount++;
     }
@@ -57,9 +58,9 @@
                             </div>
                             @endif
 
-                            @if($isServiceActive('Unit Penyewaan Mobil'))
-                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="{{ $index++ }}" data-name="Unit Penyewaan Mobil" onclick="window.location.href='{{ route('mobil.rental.equipment') . ($region ? '?region_id=' . $region->id : '') }}'">
-                                <img src="{{ asset('User/img/elemen/mobil.png') }}" alt="Mobil">
+                            @if($isServiceActive('Unit Penyewaan Transportasi') || $isServiceActive('Unit Penyewaan Mobil'))
+                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="{{ $index++ }}" data-name="Unit Penyewaan Transportasi" onclick="window.location.href='{{ route('mobil.rental.equipment') . ($region ? '?region_id=' . $region->id : '') }}'">
+                                <img src="{{ asset('User/img/elemen/mobil.png') }}" alt="Transportasi">
                             </div>
                             @endif
 

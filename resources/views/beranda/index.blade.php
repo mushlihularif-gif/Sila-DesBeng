@@ -239,7 +239,7 @@
                                         } elseif ($item->type == 'mobil') {
                                             $btnClass = 'btn-action-mobil';
                                             $btnStyle = 'background-color: #2563eb !important; color: #ffffff !important;';
-                                            $btnLabel = 'Cek Mobil';
+                                            $btnLabel = 'Sewa Transportasi';
                                         } elseif ($item->type == 'fasilitas') {
                                             $btnClass = 'btn-action-fasilitas';
                                             $btnStyle = 'background-color: #9333ea !important; color: #ffffff !important;';
@@ -258,7 +258,7 @@
                                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                                 </div>
                                 <h3 class="text-base font-bold text-gray-800">Tidak ada produk ditemukan</h3>
-                                <p class="text-xs text-gray-500 max-w-sm mx-auto mt-1">Coba gunakan kata kunci lain seperti "Mobil Pick Up", "Gas 3kg", "Tenda", atau "Kursi".</p>
+                                <p class="text-xs text-gray-500 max-w-sm mx-auto mt-1">Coba gunakan kata kunci lain seperti "Transportasi", "Pikap", "Gas 3kg", "Tenda", atau "Kursi".</p>
                             </div>
                         @endif
                     </div>
@@ -291,10 +291,10 @@
                             <div id="unit-speech-box" class="unit-speech-box bg-amber-50/90 border border-amber-200 rounded-2xl sm:rounded-3xl p-5 sm:p-7 shadow-sm transition-all duration-300">
                                 <div id="speech-text-wrapper" class="speech-text-wrapper">
                                     <p id="speech-heading" class="text-xs sm:text-sm md:text-[15px] font-extrabold text-amber-950 leading-relaxed">
-                                        "Punya rencana pesta pernikahan, kenduri atau acara lain?? Mau Sewa tenda dan perlengkapan acara lainnya??"
+                                        "Lagi ada rencana pesta, kenduri, atau acara keluarga? Mau sewa tenda dan perlengkapannya?"
                                     </p>
                                     <p id="speech-body" class="text-xs sm:text-[13px] text-gray-700 mt-2.5 sm:mt-3 font-medium leading-relaxed">
-                                        Sewa di sini! Hanya dengan klik menu di bawah ini kamu sudah bisa sewa tenda, kursi, dan perlengkapan lengkap tanpa harus datang ke lokasi loh.
+                                        Sewa di sini! Cukup pilih tenda, kursi, dan alat acara yang kamu butuhkan langsung dari desa.
                                     </p>
                                     <div class="mt-3.5 sm:mt-4 flex items-center justify-center gap-2 flex-wrap">
                                         <span id="speech-badge" class="px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full bg-amber-100 text-amber-800 border border-amber-300">
@@ -331,6 +331,8 @@
                                     'Unit Penyewaan Alat' => 'Penyewaan Alat',
                                     'Unit Penjualan Gas' => 'Penjualan Gas',
                                     'Unit Penyewaan Mobil' => 'Penyewaan Mobil',
+                                    'Unit Penyewaan Transportasi' => 'Penyewaan Mobil',
+                                    'Penyewaan Transportasi' => 'Penyewaan Mobil',
                                     'Unit Peminjaman Fasilitas Umum' => 'Fasilitas Umum',
                                     'Pelaporan Warga' => 'Pelaporan Warga'
                                 ];
@@ -339,7 +341,7 @@
                             };
 
                             $activeCount = 0;
-                            $allUnits = ['Unit Penyewaan Alat', 'Unit Penjualan Gas', 'Unit Penyewaan Mobil', 'Unit Peminjaman Fasilitas Umum', 'Pasar Daerah', 'Pelaporan Warga', 'Pengumuman dan Event'];
+                            $allUnits = ['Unit Penyewaan Alat', 'Unit Penjualan Gas', 'Unit Penyewaan Transportasi', 'Unit Peminjaman Fasilitas Umum', 'Pasar Daerah', 'Pelaporan Warga', 'Pengumuman dan Event'];
                             foreach ($allUnits as $unit) {
                                 if ($isServiceActive($unit)) $activeCount++;
                             }
@@ -352,8 +354,8 @@
                                 <div class="unit-card cursor-pointer hover:scale-105 transition-transform" 
                                      data-index="0" 
                                      data-name="Unit Penyewaan Alat"
-                                     data-heading="&quot;Punya rencana pesta pernikahan, kenduri atau acara lain?? Mau Sewa tenda dan perlengkapan acara lainnya??&quot;"
-                                     data-body="Sewa di sini! Hanya dengan klik menu di bawah ini kamu sudah bisa sewa tenda, kursi, dan perlengkapan lengkap tanpa harus datang ke lokasi loh."
+                                     data-heading="&quot;Lagi ada rencana pesta, kenduri, atau acara keluarga? Mau sewa tenda dan perlengkapannya?&quot;"
+                                     data-body="Sewa di sini! Cukup pilih tenda, kursi, dan alat acara yang kamu butuhkan langsung dari desa."
                                      data-badge="Unit Penyewaan Alat"
                                      data-box-bg="bg-amber-50/90"
                                      data-box-border="border-amber-200"
@@ -368,8 +370,8 @@
                                 <div class="unit-card cursor-pointer hover:scale-105 transition-transform" 
                                      data-index="1" 
                                      data-name="Unit Penjualan Gas"
-                                     data-heading="&quot;Gas di rumah tiba-tiba habis saat lagi memasak?? Mau beli gas tanpa harus repot keluar rumah??&quot;"
-                                     data-body="Pesan di sini! Tabung gas elpiji siap dipesan dengan harga resmi dan langsung diambil di pangkalan resmi desa Anda."
+                                     data-heading="&quot;Gas di dapur tiba-tiba habis saat lagi masak? Mau beli gas tanpa antre?&quot;"
+                                     data-body="Pesan di sini! Tabung gas elpiji 3kg dan 5.5kg siap dipesan dengan harga resmi pangkalan desa."
                                      data-badge="Unit Penjualan Gas"
                                      data-box-bg="bg-orange-50/90"
                                      data-box-border="border-orange-200"
@@ -380,19 +382,19 @@
                                 </div>
                                 @endif
 
-                                @if($isServiceActive('Unit Penyewaan Mobil'))
+                                @if($isServiceActive('Unit Penyewaan Transportasi') || $isServiceActive('Unit Penyewaan Mobil'))
                                 <div class="unit-card cursor-pointer hover:scale-105 transition-transform" 
                                      data-index="2" 
-                                     data-name="Unit Penyewaan Mobil"
-                                     data-heading="&quot;Butuh kendaraan untuk angkut barang pindahan, hasil kebun, atau perjalanan keluarga dan dinas??&quot;"
-                                     data-body="Sewa mobil di sini! Tersedia armada pikap dan mobil operasional desa dengan tarif resmi, transparan, dan supir terpercaya."
-                                     data-badge="Unit Penyewaan Mobil"
+                                     data-name="Unit Penyewaan Transportasi"
+                                     data-heading="&quot;Butuh kendaraan untuk angkut barang, pindahan rumah, atau bepergian bersama keluarga?&quot;"
+                                     data-body="Sewa di sini! Tersedia mobil pikap dan mobil desa dengan tarif terjangkau dan supir terpercaya."
+                                     data-badge="Unit Penyewaan Transportasi"
                                      data-box-bg="bg-blue-50/90"
                                      data-box-border="border-blue-200"
                                      data-badge-bg="bg-blue-100 text-blue-800 border-blue-300"
                                      data-text-color="text-blue-950"
                                      data-url="{{ $isLoggedInWithRegion ? route('mobil.rental.equipment') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=mobil.rental.equipment' }}">
-                                    <img src="{{ asset('User/img/elemen/mobil.png') }}" alt="Mobil" loading="lazy">
+                                    <img src="{{ asset('User/img/elemen/mobil.png') }}" alt="Transportasi" loading="lazy">
                                 </div>
                                 @endif
 
@@ -400,8 +402,8 @@
                                 <div class="unit-card cursor-pointer hover:scale-105 transition-transform" 
                                      data-index="3" 
                                      data-name="Unit Peminjaman Fasilitas Umum"
-                                     data-heading="&quot;Ingin mengadakan rapat warga, turnamen olahraga, atau kegiatan sosial bersama di desa??&quot;"
-                                     data-body="Ajukan di sini! Cek jadwal kosong balai pertemuan warga, gedung serbaguna, dan lapangan olahraga desa secara langsung dan resmi."
+                                     data-heading="&quot;Mau adakan acara olahraga, rapat warga, atau kumpul bersama di desa?&quot;"
+                                     data-body="Pinjam di sini! Cek jadwal dan ajukan izin pemakaian lapangan, gedung, atau balai desa dengan mudah."
                                      data-badge="Fasilitas Umum Desa"
                                      data-box-bg="bg-purple-50/90"
                                      data-box-border="border-purple-200"
@@ -416,8 +418,8 @@
                                 <div class="unit-card cursor-pointer hover:scale-105 transition-transform" 
                                      data-index="4" 
                                      data-name="Pasar Daerah"
-                                     data-heading="&quot;Mau belanja aneka barang atau produk dari pedagang dan UMKM lokal di Bengkalis??&quot;"
-                                     data-body="Belanja di sini! Dukung usaha warga sekitar dengan melihat dan membeli produk langsung dari pedagang lokal."
+                                     data-heading="&quot;Mau belanja kebutuhan atau jajanan dari pedagang lokal di Bengkalis?&quot;"
+                                     data-body="Belanja di sini! Dukung usaha daerah dengan membeli aneka produk langsung dari penjualnya."
                                      data-badge="Pasar Daerah Bengkalis"
                                      data-box-bg="bg-emerald-50/90"
                                      data-box-border="border-emerald-200"
@@ -432,8 +434,8 @@
                                 <div class="unit-card cursor-pointer hover:scale-105 transition-transform" 
                                      data-index="5" 
                                      data-name="Pelaporan Warga"
-                                     data-heading="&quot;Menemukan lampu jalan mati, sampah berserakan, drainase tersumbat, atau jalan berlubang di lingkungan Anda??&quot;"
-                                     data-body="Lapor di sini! Ambil foto dan kirim aduan Anda langsung ke pengurus RT, RW, dan Kantor Desa agar cepat ditindaklanjuti."
+                                     data-heading="&quot;Ada lampu jalan mati, sampah menumpuk, parit tersumbat, atau jalan rusak di dekatmu?&quot;"
+                                     data-body="Lapor di sini! Cukup foto dan kirim laporanmu agar segera diperbaiki oleh pengurus RT, RW, atau kantor desa."
                                      data-badge="Pelaporan Warga"
                                      data-box-bg="bg-red-50/90"
                                      data-box-border="border-red-200"
@@ -448,8 +450,8 @@
                                 <div class="unit-card cursor-pointer hover:scale-105 transition-transform" 
                                      data-index="6" 
                                      data-name="Kabar dan Informasi Daerah"
-                                     data-heading="&quot;Ingin tahu agenda terbaru, jadwal penyaluran bantuan, atau informasi penting dari pemerintah desa??&quot;"
-                                     data-body="Baca di sini! Dapatkan pengumuman resmi, jadwal kegiatan gotong royong, dan kabar perkembangan desa langsung dari sumber terpercaya."
+                                     data-heading="&quot;Mau tahu pengumuman desa, jadwal bantuan sosial, atau kegiatan gotong royong?&quot;"
+                                     data-body="Baca di sini! Dapatkan kabar resmi dan info penting seputar desa langsung dari pengurus kelurahan dan desa."
                                      data-badge="Kabar dan Informasi Daerah"
                                      data-box-bg="bg-sky-50/90"
                                      data-box-border="border-sky-200"
@@ -518,8 +520,8 @@
                             @if(!isset($isServiceActive) || $isServiceActive('Unit Penyewaan Alat'))
                             <a href="{{ $isLoggedInWithRegion ? route('rental.equipment') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=rental.equipment' }}" class="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-white text-emerald-700 hover:bg-emerald-600 hover:text-white border border-emerald-200 transition-colors shadow-xs">Semua Alat</a>
                             @endif
-                            @if(!isset($isServiceActive) || $isServiceActive('Unit Penyewaan Mobil'))
-                            <a href="{{ $isLoggedInWithRegion ? route('mobil.rental.equipment') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=mobil.rental.equipment' }}" class="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-white text-blue-700 hover:bg-blue-600 hover:text-white border border-blue-200 transition-colors shadow-xs">Semua Mobil</a>
+                            @if(!isset($isServiceActive) || $isServiceActive('Unit Penyewaan Transportasi') || $isServiceActive('Unit Penyewaan Mobil'))
+                            <a href="{{ $isLoggedInWithRegion ? route('mobil.rental.equipment') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=mobil.rental.equipment' }}" class="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-white text-blue-700 hover:bg-blue-600 hover:text-white border border-blue-200 transition-colors shadow-xs">Semua Transportasi</a>
                             @endif
                             <a href="{{ route('pasar.index') }}" class="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-white text-amber-700 hover:bg-amber-600 hover:text-white border border-amber-200 transition-colors shadow-xs">Pasar Daerah</a>
                         </div>
@@ -599,7 +601,7 @@
                                     } elseif ($item->type == 'mobil') {
                                         $btnClass = 'btn-action-mobil';
                                         $btnStyle = 'background-color: #2563eb !important; color: #ffffff !important;';
-                                        $btnLabel = 'Cek Mobil';
+                                        $btnLabel = 'Sewa Transportasi';
                                     } elseif ($item->type == 'fasilitas') {
                                         $btnClass = 'btn-action-fasilitas';
                                         $btnStyle = 'background-color: #9333ea !important; color: #ffffff !important;';
@@ -730,7 +732,7 @@
                                     <span class="font-semibold text-gray-800">SiladesBeng</span> (Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis) merupakan platform digital terpadu berskala kabupaten yang dirancang khusus untuk memodernisasi tata kelola administrasi dan pelayanan publik di seluruh jaringan kecamatan hingga tingkat desa se-Kabupaten Bengkalis. Platform ini mengintegrasikan berbagai pilar layanan esensial masyarakat dan operasional layanan desa dalam satu pintu.
                                 </p>
                                 <p>
-                                    Melalui SiladesBeng, masyarakat Kabupaten Bengkalis dapat dengan mudah mengakses beragam unit layanan, mulai dari penyewaan alat, pendistribusian gas, peminjaman mobilitas (kendaraan), hingga pemanfaatan fasilitas umum. Di samping itu, sistem ini juga mewadahi fitur <span class="font-medium text-gray-800">Pelaporan Warga</span> serta pusat informasi <span class="font-medium text-gray-800">Kabar dan Informasi Daerah</span> secara <i>real-time</i>. Kami percaya bahwa ekosistem digital yang transparan dan terukur dari jenjang kabupaten hingga pelosok desa ini merupakan kunci utama untuk mewujudkan pelayanan publik yang prima, memajukan perekonomian daerah, dan membangun kemandirian masyarakat Bengkalis yang berkelanjutan.
+                                    Melalui SiladesBeng, masyarakat Kabupaten Bengkalis dapat dengan mudah mengakses beragam unit layanan, mulai dari penyewaan alat, pendistribusian gas, penyewaan transportasi, hingga pemanfaatan fasilitas umum. Di samping itu, sistem ini juga mewadahi fitur <span class="font-medium text-gray-800">Pelaporan Warga</span> serta pusat informasi <span class="font-medium text-gray-800">Kabar dan Informasi Daerah</span> secara <i>real-time</i>. Kami percaya bahwa ekosistem digital yang transparan dan terukur dari jenjang kabupaten hingga pelosok desa ini merupakan kunci utama untuk mewujudkan pelayanan publik yang prima, memajukan perekonomian daerah, dan membangun kemandirian masyarakat Bengkalis yang berkelanjutan.
                                 </p>
                             </div>
                         </div>
@@ -1542,7 +1544,7 @@
                     } else if (item.type === 'mobil') {
                         btnClass = 'btn-action-mobil';
                         btnStyle = 'background-color: #2563eb !important; color: #ffffff !important;';
-                        btnText = 'Cek Mobil';
+                        btnText = 'Sewa Transportasi';
                     } else if (item.type === 'fasilitas') {
                         btnClass = 'btn-action-fasilitas';
                         btnStyle = 'background-color: #9333ea !important; color: #ffffff !important;';

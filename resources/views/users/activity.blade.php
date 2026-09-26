@@ -42,13 +42,13 @@
                     </div>
                 </div>
 
-                <!-- Penyewaan Mobil Card -->
+                <!-- Penyewaan Transportasi Card -->
                 <div class="activity-menu-card cursor-pointer w-full sm:w-auto" data-type="mobil">
                     <div class="bg-white rounded-xl sm:rounded-2xl p-2.5 sm:p-6 shadow-md sm:shadow-lg hover:shadow-xl transition-all duration-300 w-full sm:w-48 text-center border-2 sm:border-4 border-transparent flex flex-col justify-center items-center h-full">
                         <div class="mb-1.5 sm:mb-3 flex justify-center">
-                            <img src="{{ asset('User/img/elemen/mobil.png') }}" alt="Sewa Mobil" class="w-9 h-9 sm:w-16 sm:h-16 object-contain">
+                            <img src="{{ asset('User/img/elemen/mobil.png') }}" alt="Sewa Transportasi" class="w-9 h-9 sm:w-16 sm:h-16 object-contain">
                         </div>
-                        <p class="font-bold text-xs sm:text-lg text-gray-800 leading-tight">Sewa Mobil</p>
+                        <p class="font-bold text-xs sm:text-lg text-gray-800 leading-tight">Sewa Transportasi</p>
                     </div>
                 </div>
 
@@ -102,7 +102,7 @@
                         class="clear-history-btn bg-red-100 text-red-600 px-6 py-2 rounded-full font-semibold hover:bg-red-200 transition-colors hidden"
                         id="clear-mobil-btn"
                         data-type="mobil">
-                    <i class="fas fa-trash-alt mr-2"></i>Bersihkan Riwayat Sewa Mobil
+                    <i class="fas fa-trash-alt mr-2"></i>Bersihkan Riwayat Sewa Transportasi
                 </button>
                 <button type="button" 
                         class="clear-history-btn bg-red-100 text-red-600 px-6 py-2 rounded-full font-semibold hover:bg-red-200 transition-colors hidden"
@@ -522,7 +522,7 @@
                     const type = button.dataset.type;
                     let typeText = 'Penyewaan';
                     if(type === 'gas') typeText = 'Pesanan Gas';
-                    else if(type === 'mobil') typeText = 'Sewa Mobil';
+                    else if(type === 'mobil') typeText = 'Sewa Transportasi';
                     else if(type === 'fasilitas') typeText = 'Fasilitas Umum';
                     else if(type === 'laporan') typeText = 'Laporan Warga';
                     else if(type === 'pasar') typeText = 'Pasar Daerah';

@@ -68,7 +68,7 @@ class HistoryController extends Controller
             $history->push([
                 'id' => $mobil->id,
                 'category' => 'Sewa Kendaraan', // MATCHES FLUTTER
-                'title' => $mobil->mobil ? $mobil->mobil->nama_mobil : 'Sewa Mobil',
+                'title' => $mobil->mobil ? $mobil->mobil->nama_mobil : 'Sewa Transportasi',
                 'price' => 'Rp ' . number_format((float)($mobil->total_amount ?? $mobil->total_price ?? 0), 0, ',', '.'),
                 'date' => Carbon::parse($mobil->created_at)->isoFormat('dddd, D MMMM Y HH:mm') . ' WIB',
                 'status' => $this->mapStatus($mobil->status),

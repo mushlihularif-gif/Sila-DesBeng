@@ -716,10 +716,10 @@
                                     </a>
                                 </li>
                                 @endif
-                                @if(in_array('Penyewaan Mobil', $activeServicesMenu ?? []) && auth()->user()->hasUnitPermission('sewa_mobil'))
+                                @if((in_array('Penyewaan Mobil', $activeServicesMenu ?? []) || in_array('Penyewaan Transportasi', $activeServicesMenu ?? [])) && auth()->user()->hasUnitPermission('sewa_mobil'))
                                 <li class="menu-item {{ request()->is('admin/unit/mobil*') ? 'active' : '' }}">
                                     <a href="{{ route('admin.unit.mobil.index') }}" class="menu-link">
-                                        <div data-i18n="Penyewaan Mobil">Penyewaan Mobil</div>
+                                        <div data-i18n="Penyewaan Mobil">Penyewaan Transportasi</div>
                                     </a>
                                 </li>
                                 @endif
@@ -997,7 +997,7 @@
                         @endif
                         @endif
                         
-                        @if(in_array('Penyewaan Mobil', $activeServicesMenu ?? []) || in_array('Fasilitas Umum', $activeServicesMenu ?? []))
+                        @if(in_array('Penyewaan Mobil', $activeServicesMenu ?? []) || in_array('Penyewaan Transportasi', $activeServicesMenu ?? []) || in_array('Fasilitas Umum', $activeServicesMenu ?? []))
                         <li class="menu-item {{ request()->is('admin/unit/supir*') ? 'active' : '' }}">
                             <a href="{{ route('supir.index') }}" class="menu-link">
                                 <div data-i18n="Data Supir & Petugas">Data Supir & Petugas</div>
@@ -1191,7 +1191,7 @@
                                                 <div class="notif-filter-scroll">
                                                     <button type="button" class="btn btn-sm notif-filter-btn active" data-filter="all">Semua</button>
                                                     <button type="button" class="btn btn-sm notif-filter-btn" data-filter="rental">Sewa Alat</button>
-                                                    <button type="button" class="btn btn-sm notif-filter-btn" data-filter="mobil">Sewa Mobil</button>
+                                                    <button type="button" class="btn btn-sm notif-filter-btn" data-filter="mobil">Sewa Transportasi</button>
                                                     <button type="button" class="btn btn-sm notif-filter-btn" data-filter="fasilitas">Fasilitas Umum</button>
                                                     <button type="button" class="btn btn-sm notif-filter-btn" data-filter="gas">Gas LPG</button>
                                                     <button type="button" class="btn btn-sm notif-filter-btn" data-filter="pasar">Pasar Desa</button>

@@ -988,7 +988,7 @@ public function index(Request $request)
                 'stock' => $item->mobil->stok,
                 'sold' => $item->total_sold,
                 'type' => 'mobil',
-                'category' => 'Unit Penyewaan Mobil',
+                'category' => 'Unit Penyewaan Transportasi',
                 'unit' => $item->mobil->satuan ?? 'unit',
                 'link' => route('admin.unit.mobil.show', $item->mobil->id)
             ];

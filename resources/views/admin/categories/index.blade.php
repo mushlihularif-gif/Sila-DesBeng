@@ -54,7 +54,7 @@
                             @if($category->type == 'barang')
                                 <span class="badge bg-label-info"><i class="bx bx-package me-1"></i>Penyewaan Alat</span>
                             @elseif($category->type == 'mobil')
-                                <span class="badge bg-label-warning"><i class="bx bx-car me-1"></i>Penyewaan Mobil</span>
+                                <span class="badge bg-label-warning"><i class="bx bx-car me-1"></i>Penyewaan Transportasi</span>
                             @elseif($category->type == 'gas')
                                 <span class="badge bg-label-success"><i class="bx bxs-gas-pump me-1"></i>Unit Gas</span>
                             @elseif($category->type == 'fasilitas')
@@ -95,7 +95,7 @@
                                             <select class="form-select" name="type">
                                                 <option value="" {{ empty($category->type) ? 'selected' : '' }}>Umum (Tampil di Semua)</option>
                                                 <option value="barang" {{ $category->type == 'barang' ? 'selected' : '' }}>Penyewaan Alat</option>
-                                                <option value="mobil" {{ $category->type == 'mobil' ? 'selected' : '' }}>Penyewaan Mobil</option>
+                                                <option value="mobil" {{ $category->type == 'mobil' ? 'selected' : '' }}>Penyewaan Transportasi</option>
                                                 <option value="gas" {{ $category->type == 'gas' ? 'selected' : '' }}>Penjualan Gas</option>
                                                 <option value="fasilitas" {{ $category->type == 'fasilitas' ? 'selected' : '' }}>Fasilitas Umum</option>
                                             </select>
@@ -143,7 +143,7 @@
                         <select class="form-select" name="type">
                             <option value="">Umum (Tampil di Semua)</option>
                             <option value="barang">Penyewaan Alat</option>
-                            <option value="mobil">Penyewaan Mobil</option>
+                            <option value="mobil">Penyewaan Transportasi</option>
                             <option value="gas">Penjualan Gas</option>
                             <option value="fasilitas">Fasilitas Umum</option>
                         </select>

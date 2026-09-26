@@ -351,7 +351,7 @@ class User extends Authenticatable
     public const NAMA_UNIT = [
         'gas'             => 'Penjualan Gas',
         'sewa_alat'       => 'Penyewaan Alat',
-        'sewa_mobil'      => 'Penyewaan Mobil',
+        'sewa_mobil'      => 'Penyewaan Transportasi',
         'fasilitas_umum'  => 'Fasilitas Umum',
         'pasar_daerah'    => 'Pasar Daerah',
         'kabar_informasi' => 'Kabar dan Informasi Daerah',
@@ -374,7 +374,12 @@ class User extends Authenticatable
         return $this->staffPermissions()
             ->whereIn('unit_key', self::IZIN_UNIT)
             ->pluck('unit_key')
-            ->map(fn ($kunci) => self::NAMA_UNIT[$kunci] ?? null)
+            ->flatMap(function ($kunci) {
+                if ($kunci === 'sewa_mobil') {
+                    return ['Penyewaan Mobil', 'Penyewaan Transportasi'];
+                }
+                return [self::NAMA_UNIT[$kunci] ?? null];
+            })
             ->filter()
             ->values()
             ->all();

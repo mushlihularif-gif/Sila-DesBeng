@@ -1180,8 +1180,8 @@ class ReportController extends Controller
             $mobil = $mobilQuery->get()->map(function($item) {
                 return (object)[
                     'id' => $item->id,
-                    'type' => 'Penyewaan Mobil',
-                    'item_name' => $item->mobil->nama_mobil ?? 'Mobil',
+                    'type' => 'Penyewaan Transportasi',
+                    'item_name' => $item->mobil->nama_mobil ?? 'Transportasi',
                     'date' => $item->created_at,
                     'amount' => $item->total_amount,
                     'payment_method' => $item->payment_method ?? 'Transfer',

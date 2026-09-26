@@ -20,7 +20,7 @@ class UnitPenyewaanMobilController extends Controller
 
     public function index(Request $request)
     {
-        if ($splash = $this->checkDelegation($request, 'sewa_mobil', 'Penyewaan Mobil/Kendaraan')) {
+        if ($splash = $this->checkDelegation($request, 'sewa_mobil', 'Penyewaan Transportasi')) {
             return $splash;
         }
 
@@ -243,10 +243,10 @@ class UnitPenyewaanMobilController extends Controller
             }
         }
 
-        // Broadcast armada mobil baru ke warga
-        \App\Services\NotificationService::broadcastNewProduct('Sewa Mobil', $mobil->nama_mobil, $mobil->region_id, route('mobil.rental.equipment'));
+        // Broadcast armada transportasi baru ke warga
+        \App\Services\NotificationService::broadcastNewProduct('Sewa Transportasi', $mobil->nama_mobil, $mobil->region_id, route('mobil.rental.equipment'));
 
-        return redirect()->route('admin.unit.mobil.index')->with('success', 'Mobil berhasil ditambahkan.');
+        return redirect()->route('admin.unit.mobil.index')->with('success', 'Transportasi berhasil ditambahkan.');
     }
 
     public function show($id)
@@ -286,7 +286,7 @@ class UnitPenyewaanMobilController extends Controller
 
         $mobil->delete();
 
-        return redirect()->route('admin.unit.mobil.index')->with('success', 'Mobil berhasil dihapus.');
+        return redirect()->route('admin.unit.mobil.index')->with('success', 'Transportasi berhasil dihapus.');
     }
 
     public function update(Request $request, $id)
@@ -415,6 +415,6 @@ class UnitPenyewaanMobilController extends Controller
 
         $mobil->update($data);
 
-        return redirect()->route('admin.unit.mobil.index')->with('success', 'Mobil berhasil diperbarui.');
+        return redirect()->route('admin.unit.mobil.index')->with('success', 'Transportasi berhasil diperbarui.');
     }
 }

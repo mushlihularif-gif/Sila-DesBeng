@@ -51,7 +51,7 @@
                     @endif
                 @else
                     @if($supir->is_sewa_mobil)
-                        <span class="badge bg-label-primary rounded-pill px-2 py-0.5" style="font-size: 0.68rem;"><i class="bx bx-car me-0.5"></i>Rental Mobil</span>
+                        <span class="badge bg-label-primary rounded-pill px-2 py-0.5" style="font-size: 0.68rem;"><i class="bx bx-car me-0.5"></i>Penyewaan Transportasi</span>
                     @endif
                     @if($supir->is_fasilitas_umum)
                         <span class="badge bg-label-danger rounded-pill px-2 py-0.5" style="font-size: 0.68rem;"><i class="bx bx-plus-medical me-0.5"></i>Ambulans</span>

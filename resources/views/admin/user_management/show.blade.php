@@ -237,7 +237,7 @@
                             <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-gas" role="tab"><i class="bx bx-gas-pump me-1"></i> Gas</button>
                         </li>
                         <li class="nav-item">
-                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-mobil" role="tab"><i class="bx bx-car me-1"></i> Sewa Mobil</button>
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-mobil" role="tab"><i class="bx bx-car me-1"></i> Sewa Transportasi</button>
                         </li>
                         <li class="nav-item">
                             <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-fasilitas" role="tab"><i class="bx bx-building-house me-1"></i> Fasilitas</button>
@@ -359,7 +359,7 @@
                             <div class="text-center py-5">
                                 <div class="bg-white p-4 rounded-circle d-inline-block shadow-sm mb-3 border"><img src="{{ asset('User/img/elemen/mobil.png') }}" alt="Mobil" style="width: 48px; height: 48px; object-fit: contain;"></div>
                                 <h6 class="fw-bold text-dark mb-1">Belum Ada Riwayat</h6>
-                                <p class="text-muted mb-0">Pengguna ini belum pernah melakukan penyewaan mobil.</p>
+                                <p class="text-muted mb-0">Pengguna ini belum pernah melakukan penyewaan transportasi.</p>
                             </div>
                             @endif
                         </div>

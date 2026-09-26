@@ -101,7 +101,7 @@
                     <i class="bx bx-car text-base"></i> Layanan Transportasi Warga
                 </div>
                 <h1 class="text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight mb-2">
-                    Formulir Pemesanan <span class="bg-gradient-to-r from-[#115789] to-[#2563eb] bg-clip-text text-transparent">Penyewaan Mobil</span>
+                    Formulir Pemesanan <span class="bg-gradient-to-r from-[#115789] to-[#2563eb] bg-clip-text text-transparent">Penyewaan Transportasi</span>
                 </h1>
                 <p class="text-gray-600 text-sm md:text-base max-w-xl mx-auto">
                     Pilih opsi layanan pengemudi yang sesuai dan lengkapi rincian jadwal sewa dengan transparan.
@@ -520,7 +520,7 @@
 
                     <div class="flex items-center gap-2 text-xs text-gray-500 bg-gray-50 p-3 rounded-xl border border-gray-100">
                         <i class="bx bx-shield-quarter text-blue-600 text-base"></i>
-                        <span>Pembayaran sewa dapat dilakukan secara fleksibel di tempat hingga selesainya pemakaian mobil.</span>
+                        <span>Pembayaran sewa dapat dilakukan secara fleksibel di tempat hingga selesainya pemakaian kendaraan / transportasi.</span>
                     </div>
                 </div>
 
@@ -855,7 +855,7 @@
                         </div>
                         <div>
                             <h3 class="text-lg md:text-xl font-extrabold text-gray-800">
-                                Ketentuan SOP Layanan Mobil
+                                Ketentuan SOP Layanan Transportasi
                             </h3>
                             <p class="text-xs text-gray-500">
                                 Harap membaca dan menyetujui syarat & ketentuan sebelum menyelesaikan pesanan
@@ -894,7 +894,7 @@
         <div class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl transform transition-all text-center">
             <img src="{{ asset('Admin/img/illustrations/isewalogo.webp') }}" alt="Logo" class="w-36 mx-auto mb-5">
             <h3 class="text-2xl font-black text-gray-900 mb-2">Konfirmasi Pemesanan</h3>
-            <p class="text-gray-600 text-sm mb-1">Apakah data pemesanan mobil Anda sudah benar?</p>
+            <p class="text-gray-600 text-sm mb-1">Apakah data pemesanan transportasi Anda sudah benar?</p>
             <p class="text-xs text-gray-400 mb-6">Pesanan Anda akan segera diteruskan ke petugas pengelola.</p>
             
             <div class="flex gap-3">

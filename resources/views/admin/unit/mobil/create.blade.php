@@ -10,9 +10,9 @@
         <!-- Breadcrumb -->
         <div class="mb-4">
             <h4 class="fw-bold mb-1">
-                <span class="text-muted fw-light">Unit Layanan / Penyewaan Mobil /</span> Tambah Mobil
+                <span class="text-muted fw-light">Unit Layanan / Penyewaan Transportasi /</span> Tambah Transportasi
             </h4>
-            <p class="text-muted mb-0">Lengkapi formulir di bawah untuk menambahkan mobil baru</p>
+            <p class="text-muted mb-0">Lengkapi formulir di bawah untuk menambahkan transportasi baru</p>
         </div>
 
         <!-- Form Card -->
@@ -25,7 +25,7 @@
                                 <i class='bx bx-package text-primary' style="font-size: 24px;"></i>
                             </div>
                             <div>
-                                <h5 class="mb-0 fw-bold">Form Tambah Mobil Sewa</h5>
+                                <h5 class="mb-0 fw-bold">Form Tambah Transportasi Sewa</h5>
                                 <small class="text-muted">Masukkan detail kendaraan yang akan disewakan</small>
                             </div>
                         </div>
@@ -160,7 +160,7 @@
                                 <div class="row g-3">
                                     <div class="col-md-6">
                                         <label class="form-label fw-semibold" for="nama_mobil">
-                                            Nama Kendaraan / Mobil <span class="text-danger">*</span>
+                                            Nama Kendaraan / Transportasi <span class="text-danger">*</span>
                                         </label>
                                         <input type="text" class="form-control modern-input" id="nama_mobil" 
                                                name="nama_mobil" placeholder="Contoh: Toyota Avanza / Mitsubishi L300" required />
@@ -194,7 +194,7 @@
                                 <div class="row g-3 mt-1">
                                     <div class="col-md-6">
                                         <label class="form-label fw-semibold" for="stok">
-                                            Stok Mobil Tersedia <span class="text-danger">*</span>
+                                            Stok Unit Tersedia <span class="text-danger">*</span>
                                         </label>
                                         <input type="number" class="form-control modern-input" id="stok" name="stok" value="1" placeholder="1" min="0" required />
                                     </div>

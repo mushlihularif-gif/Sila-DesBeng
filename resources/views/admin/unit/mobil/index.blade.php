@@ -4,7 +4,7 @@
     <div class="container-xxl flex-grow-1 container-p-y">
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
             <div class="flex-grow-1">
-                <h4 class="fw-bold m-0 mb-2"><span class="text-muted fw-light">Unit Layanan /</span> Penyewaan Mobil</h4>
+                <h4 class="fw-bold m-0 mb-2"><span class="text-muted fw-light">Unit Layanan /</span> Penyewaan Transportasi</h4>
                 <div class="alert alert-warning d-inline-flex align-items-center p-2 mb-0 text-dark" style="font-size: 0.85rem; border-left: 4px solid #ffab00;">
                     <i class="bx bx-error me-2 fs-5"></i>
                     <div><strong>PENTING:</strong> Tentukan dan Pastikan Ketentuan SOP sesuai dengan ketentuan daerah anda.</div>
@@ -20,7 +20,7 @@
             <ul class="nav nav-pills nav-justified gap-2 mb-3 mb-sm-4" role="tablist">
                 <li class="nav-item">
                     <button type="button" class="nav-link {{ $tab == 'katalog' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-mobil-katalog" aria-controls="navs-mobil-katalog" aria-selected="{{ $tab == 'katalog' ? 'true' : 'false' }}">
-                        <i class="bx bx-car me-1"></i> Daftar Mobil
+                        <i class="bx bx-car me-1"></i> Daftar Transportasi
                     </button>
                 </li>
                 <li class="nav-item">
@@ -181,7 +181,7 @@
                 <div class="tab-pane fade {{ $tab == 'chat' ? 'show active' : '' }}" id="navs-mobil-chat" role="tabpanel">
                     @include('admin.unit.partials.unit_chat_panel', [
                         'serviceType' => 'mobil',
-                        'chatServiceTitle' => 'Penyewaan Mobil / Kendaraan',
+                        'chatServiceTitle' => 'Penyewaan Transportasi',
                         'chats' => $chats
                     ])
                 </div>

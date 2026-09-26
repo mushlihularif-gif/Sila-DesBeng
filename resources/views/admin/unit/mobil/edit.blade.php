@@ -10,9 +10,9 @@
         <!-- Breadcrumb -->
         <div class="mb-4">
             <h4 class="fw-bold mb-1">
-                <span class="text-muted fw-light">Unit Layanan / Penyewaan Mobil /</span> Edit Mobil
+                <span class="text-muted fw-light">Unit Layanan / Penyewaan Transportasi /</span> Edit Transportasi
             </h4>
-            <p class="text-muted mb-0">Perbarui informasi mobil sewa</p>
+            <p class="text-muted mb-0">Perbarui informasi transportasi sewa</p>
         </div>
 
         <!-- Form Card -->
@@ -25,7 +25,7 @@
                                 <i class='bx bx-edit text-primary' style="font-size: 24px;"></i>
                             </div>
                             <div>
-                                <h5 class="mb-0 fw-bold">Form Edit Mobil Sewa</h5>
+                                <h5 class="mb-0 fw-bold">Form Edit Transportasi Sewa</h5>
                                 <small class="text-muted">Ubah detail kendaraan yang akan disewakan</small>
                             </div>
                         </div>
@@ -206,7 +206,7 @@
                                 <div class="row g-3">
                                     <div class="col-md-6">
                                         <label class="form-label fw-semibold" for="nama_mobil">
-                                            Nama Kendaraan / Mobil <span class="text-danger">*</span>
+                                            Nama Kendaraan / Transportasi <span class="text-danger">*</span>
                                         </label>
                                         <input type="text" class="form-control modern-input" id="nama_mobil" 
                                                name="nama_mobil" value="{{ old('nama_mobil', $mobil->nama_mobil) }}" 
@@ -236,7 +236,7 @@
                                 <div class="row g-3 mt-1">
                                     <div class="col-md-6">
                                         <label class="form-label fw-semibold" for="stok">
-                                            Stok Mobil Tersedia <span class="text-danger">*</span>
+                                            Stok Unit Tersedia <span class="text-danger">*</span>
                                         </label>
                                         <input type="number" class="form-control modern-input" id="stok" 
                                                name="stok" value="{{ old('stok', $mobil->stok) }}" 

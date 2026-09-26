@@ -344,7 +344,7 @@
                             'color' => 'danger'
                         ],
                         'Penyewaan Mobil' => [
-                            'title' => 'Unit Penyewaan Mobil',
+                            'title' => 'Unit Penyewaan Transportasi',
                             'count' => ($unitMobil ?? (\App\Models\Mobil::whereNotIn('kategori', ['ambulans', 'kendaraan_operasional'])->when(auth()->user() && auth()->user()->region_id, fn($q) => $q->where('region_id', auth()->user()->region_id))->count() ?? 0)),
                             'label' => 'Kendaraan',
                             'route' => route('admin.unit.mobil.index'),
@@ -469,7 +469,7 @@
                                         } elseif ($request->type == 'gas') {
                                             $icon = 'bxs-gas-pump'; $bgClass = 'bg-label-danger text-danger'; $badgeClass = 'bg-label-danger'; $serviceName = 'Penjualan Gas';
                                         } elseif ($request->type == 'mobil') {
-                                            $icon = 'bx-car'; $bgClass = 'bg-label-info text-info'; $badgeClass = 'bg-label-info'; $serviceName = 'Penyewaan Mobil';
+                                            $icon = 'bx-car'; $bgClass = 'bg-label-info text-info'; $badgeClass = 'bg-label-info'; $serviceName = 'Penyewaan Transportasi';
                                         } elseif ($request->type == 'fasilitas_umum') {
                                             $icon = 'bx-building-house'; $bgClass = 'bg-label-success text-success'; $badgeClass = 'bg-label-success'; $serviceName = 'Fasilitas Umum';
                                         } elseif ($request->type == 'pasar_daerah') {
@@ -757,7 +757,7 @@
                                                 @endphp
                                                 <div class="mb-4">
                                                     <div class="d-flex justify-content-between mb-1">
-                                                        <span class="fw-medium">Unit {{ $serviceName }}</span>
+                                                        <span class="fw-medium">Unit {{ $serviceName === 'Penyewaan Mobil' ? 'Penyewaan Transportasi' : $serviceName }}</span>
                                                         <span class="fw-bold">Rp <span class="count-up-rupiah" data-value="{{ $dataItem['revenue'] }}">0</span></span>
                                                     </div>
                                                     <div class="progress" style="height: 8px;">
@@ -1170,7 +1170,8 @@
                         foreach($activeRevenueServices as $serviceName) {
                             $c = $countMap[$serviceName]['count'] ?? 0;
                             $donutSeries[] = $c;
-                            $donutLabels[] = $serviceName . " (" . $c . ")";
+                            $displayLabel = $serviceName === 'Penyewaan Mobil' ? 'Penyewaan Transportasi' : $serviceName;
+                            $donutLabels[] = $displayLabel . " (" . $c . ")";
                             $donutColors[] = $countMap[$serviceName]['color'] ?? '#8592a3';
                             $totalDonut += $c;
                         }

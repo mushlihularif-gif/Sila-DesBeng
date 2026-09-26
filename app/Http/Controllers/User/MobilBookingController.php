@@ -193,8 +193,8 @@ class MobilBookingController extends Controller
             'type' => 'mobil_order',
             'reference_id' => $booking->id,
             'region_id' => $item->region_id,
-            'title' => 'Permintaan Penyewaan Mobil Baru',
-            'message' => 'Permintaan sewa mobil ' . ($item->nama_mobil ?? $item->nama_barang) . ' (' . ($denganSupir ? 'Dengan Supir' : 'Lepas Kunci') . ') dari ' . Auth::user()->name,
+            'title' => 'Permintaan Penyewaan Transportasi Baru',
+            'message' => 'Permintaan sewa transportasi ' . ($item->nama_mobil ?? $item->nama_barang) . ' (' . ($denganSupir ? 'Dengan Supir' : 'Lepas Kunci') . ') dari ' . Auth::user()->name,
             'is_read' => false,
         ]);
 
@@ -204,7 +204,7 @@ class MobilBookingController extends Controller
         if ($request->wantsJson() || $request->ajax()) {
             $response = [
                 'success' => true,
-                'message' => 'Pemesanan Mobil berhasil dibuat! Menunggu konfirmasi admin.',
+                'message' => 'Pemesanan transportasi berhasil dibuat! Menunggu konfirmasi admin.',
                 'booking_id' => $booking->id,
                 'receipt_id' => $booking->id,
                 'receipt_number' => $receipt->receipt_number,
@@ -232,7 +232,7 @@ class MobilBookingController extends Controller
                         'id' => $item->id,
                         'price' => (int) ($totalAmount),
                         'quantity' => 1,
-                        'name' => ($item->nama_mobil ?? $item->nama_barang ?? 'Sewa Mobil'),
+                        'name' => ($item->nama_mobil ?? $item->nama_barang ?? 'Sewa Transportasi'),
                     ]],
                 ];
 
@@ -260,7 +260,7 @@ class MobilBookingController extends Controller
         }
 
         return redirect()->route('user.dashboard')
-            ->with('success', 'Pemesanan Mobil berhasil dibuat! Menunggu konfirmasi admin.')
+            ->with('success', 'Pemesanan transportasi berhasil dibuat! Menunggu konfirmasi admin.')
             ->with('show_receipt', $receipt->id);
     }
 }

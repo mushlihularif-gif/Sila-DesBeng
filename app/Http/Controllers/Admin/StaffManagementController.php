@@ -72,12 +72,13 @@ class StaffManagementController extends Controller
 
         // Nama layanan di tabel services -> kunci izin staf.
         $peta = [
-            'Penyewaan Alat'  => 'sewa_alat',
-            'Penjualan Gas'   => 'gas',
-            'Penyewaan Mobil' => 'sewa_mobil',
-            'Fasilitas Umum'  => 'fasilitas_umum',
-            'Pasar Daerah'    => 'pasar_daerah',
-            'Pelaporan Warga' => 'pelaporan_warga',
+            'Penyewaan Alat'         => 'sewa_alat',
+            'Penjualan Gas'          => 'gas',
+            'Penyewaan Mobil'        => 'sewa_mobil',
+            'Penyewaan Transportasi' => 'sewa_mobil',
+            'Fasilitas Umum'         => 'fasilitas_umum',
+            'Pasar Daerah'           => 'pasar_daerah',
+            'Pelaporan Warga'        => 'pelaporan_warga',
         ];
 
         $aktif = [];

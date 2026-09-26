@@ -204,8 +204,8 @@ class NotificationService
                     $icon = 'bx bx-wrench';
                     break;
                 case 'mobil':
-                    $title = 'Pemesanan Sewa Mobil Terkirim';
-                    $message = 'Pemesanan armada "' . $itemName . '" berhasil dibuat dan sedang menunggu konfirmasi Admin.';
+                    $title = 'Pemesanan Sewa Transportasi Terkirim';
+                    $message = 'Pemesanan transportasi "' . $itemName . '" berhasil dibuat dan sedang menunggu konfirmasi Admin.';
                     $link = route('activity.index', ['tab' => 'mobil']);
                     $icon = 'bx bx-car';
                     break;
@@ -537,7 +537,7 @@ class NotificationService
     {
         $itemName = match ($type) {
             'gas' => $order->item_name ?? 'Gas LPG',
-            'mobil' => $order->mobil->nama_mobil ?? 'Armada Mobil',
+            'mobil' => $order->mobil->nama_mobil ?? 'Transportasi',
             'fasilitas' => $order->fasilitas->nama_fasilitas ?? 'Fasilitas Umum',
             default => $order->barang->nama_barang ?? 'Alat Sewa',
         };
@@ -546,11 +546,11 @@ class NotificationService
             $message = "Silahkan Ambil Gas, Pesanan Telah dikonfirmasi, NB : Jangan Lupa Tunjukkan Bukti Transaksi";
             $title = "Pesanan Gas Disetujui";
         } elseif ($type === 'mobil') {
-            $title = "Pemesanan Sewa Mobil Disetujui";
+            $title = "Pemesanan Sewa Transportasi Disetujui";
             if (($order->delivery_method ?? '') === 'antar') {
-                $message = "Pemesanan armada {$itemName} telah dikonfirmasi dan siap untuk proses pengantaran.";
+                $message = "Pemesanan transportasi {$itemName} telah dikonfirmasi dan siap untuk proses pengantaran.";
             } else {
-                $message = "Pemesanan armada {$itemName} telah dikonfirmasi. Silahkan ambil di lokasi garasi operasional.";
+                $message = "Pemesanan transportasi {$itemName} telah dikonfirmasi. Silahkan ambil di lokasi operasional.";
             }
         } elseif ($type === 'fasilitas') {
             $title = "Peminjaman Fasilitas Disetujui";
@@ -616,7 +616,7 @@ class NotificationService
     {
         $itemName = match ($type) {
             'gas' => $order->item_name ?? 'Gas LPG',
-            'mobil' => $order->mobil->nama_mobil ?? 'Armada Mobil',
+            'mobil' => $order->mobil->nama_mobil ?? 'Transportasi',
             'fasilitas' => $order->fasilitas->nama_fasilitas ?? 'Fasilitas Umum',
             default => $order->barang->nama_barang ?? 'Alat Sewa',
         };
@@ -637,7 +637,7 @@ class NotificationService
     {
         $itemName = match ($type) {
             'gas' => $order->item_name ?? 'Gas LPG',
-            'mobil' => $order->mobil->nama_mobil ?? 'Armada Mobil',
+            'mobil' => $order->mobil->nama_mobil ?? 'Transportasi',
             'fasilitas' => $order->fasilitas->nama_fasilitas ?? 'Fasilitas Umum',
             default => $order->barang->nama_barang ?? 'Alat Sewa',
         };

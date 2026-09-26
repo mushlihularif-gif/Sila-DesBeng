@@ -177,6 +177,11 @@ class BerandaController extends Controller
             }
             if (\App\Models\Mobil::whereIn('region_id', $relevantIds)->whereNotIn('kategori', ['ambulans', 'kendaraan_operasional'])->exists()) {
                 $activeServices[] = 'Penyewaan Mobil';
+                $activeServices[] = 'Penyewaan Transportasi';
+            }
+
+            if (in_array('Penyewaan Mobil', $activeServices)) {
+                $activeServices[] = 'Penyewaan Transportasi';
             }
 
             $activeServices = array_unique($activeServices);
@@ -288,7 +293,7 @@ class BerandaController extends Controller
                 'stock' => $item->mobil->stok,
                 'sold' => (int)$item->total_sold,
                 'type' => 'mobil',
-                'category' => 'Unit Penyewaan Mobil',
+                'category' => 'Unit Penyewaan Transportasi',
                 'badge_color' => 'bg-blue-600 text-white',
                 'unit' => $item->mobil->satuan ?? 'hari',
                 'link' => route('mobil.rental.show', $item->mobil->id)
@@ -407,7 +412,7 @@ class BerandaController extends Controller
                         'stock' => $m->stok,
                         'sold' => 0,
                         'type' => 'mobil',
-                        'category' => 'Unit Penyewaan Mobil',
+                        'category' => 'Unit Penyewaan Transportasi',
                         'badge_color' => 'bg-blue-600 text-white',
                         'unit' => $m->satuan ?? 'hari',
                         'link' => route('mobil.rental.show', $m->id)
@@ -713,7 +718,7 @@ class BerandaController extends Controller
 
         // Detect Unit Intent
         $isGasIntent = (bool) preg_match('/\b(gas|elpiji|lpg|bright|tabung|melon)\b/i', $rawSearch);
-        $isMobilIntent = (bool) preg_match('/\b(mobil|pikap|pick|pickup|carry|armada|kendaraan|supir)\b/i', $rawSearch);
+        $isMobilIntent = (bool) preg_match('/\b(mobil|pikap|pick|pickup|carry|armada|kendaraan|supir|transportasi)\b/i', $rawSearch);
         $isRentalIntent = (bool) preg_match('/\b(tenda|terop|kursi|meja|sound|genset|alat|piring|dekorasi)\b/i', $rawSearch);
         $isFasilitasIntent = (bool) preg_match('/\b(gedung|aula|lapangan|balai|serbaguna|fasilitas)\b/i', $rawSearch);
         $isPasarIntent = (bool) preg_match('/\b(pasar|ikan|madu|lempuk|kerupuk|makanan|buah|sayur|produk)\b/i', $rawSearch);
@@ -726,7 +731,7 @@ class BerandaController extends Controller
         if (!$hasSpecificIntent || $isMobilIntent) {
             $mobilQuery = \App\Models\Mobil::whereNotIn('kategori', ['ambulans', 'kendaraan_operasional']);
             $mobilQuery->where(function ($q) use ($allTerms, $cleanSearch, $rawSearch) {
-                if (trim($rawSearch) === 'mobil' || trim($rawSearch) === 'sewa mobil') {
+                if (trim($rawSearch) === 'mobil' || trim($rawSearch) === 'sewa mobil' || trim($rawSearch) === 'transportasi' || trim($rawSearch) === 'sewa transportasi') {
                     $q->orWhereRaw('1 = 1');
                 } else {
                     $q->where('nama_mobil', 'LIKE', "%{$cleanSearch}%")
@@ -748,7 +753,7 @@ class BerandaController extends Controller
                     'price_formatted' => 'Rp ' . number_format($item->harga_sewa, 0, ',', '.'),
                     'stock' => $item->stok,
                     'type' => 'mobil',
-                    'category' => 'Unit Penyewaan Mobil',
+                    'category' => 'Unit Penyewaan Transportasi',
                     'badge_color' => 'bg-blue-600 text-white',
                     'real_category' => $item->kategori,
                     'unit' => $item->satuan ?? 'hari',

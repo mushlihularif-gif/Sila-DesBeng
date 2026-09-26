@@ -2,7 +2,7 @@
 $activeServices = $activeServices ?? [];
 $isRentalActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'alat'));
 $isGasActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'gas'));
-$isMobilActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'mobil'));
+$isMobilActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'mobil') || str_contains(strtolower($name), 'transportasi'));
 $isFasilitasActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'fasilitas'));
 $isPasarActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'pasar'));
 $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasilitasActive, $isPasarActive])->filter()->count();
@@ -164,7 +164,7 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                 @if($isMobilActive)
                 <li class="nav-item" role="presentation">
                     <button class="nav-link {{ $activeTab == 'mobil' || (!$isRentalActive && !$isGasActive && $activeTab == 'rental') ? 'active' : '' }} rounded-pill px-3 py-2 fw-semibold" id="mobil-tab" data-bs-toggle="tab" data-bs-target="#mobil-pane" type="button" role="tab">
-                        <img src="{{ asset('User/img/elemen/mobil.png') }}" class="me-2" style="width: 22px; height: 22px; object-fit: contain;">Penyewaan Mobil
+                        <img src="{{ asset('User/img/elemen/mobil.png') }}" class="me-2" style="width: 22px; height: 22px; object-fit: contain;">Penyewaan Transportasi
                         @php $mobilTotal = $notificationCounts['mobil']['total'] ?? 0; @endphp
                         @php $mobilCount = $mobilTotal > 0 ? $mobilTotal : $mobilRequests->count(); @endphp
                         <span id="mobil-badge" 
@@ -216,9 +216,9 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                     // Gas
                     if($notificationCounts['gas']['pending'] > 0) $messages[] = $notificationCounts['gas']['pending'] . " Pesanan Gas Baru";
                     if($notificationCounts['gas']['cancellation'] > 0) $messages[] = $notificationCounts['gas']['cancellation'] . " Pembatalan Gas";
-                    // Mobil
-                    if($notificationCounts['mobil']['pending'] > 0) $messages[] = $notificationCounts['mobil']['pending'] . " Pesanan Mobil Baru";
-                    if($notificationCounts['mobil']['cancellation'] > 0) $messages[] = $notificationCounts['mobil']['cancellation'] . " Pembatalan Mobil";
+                    // Mobil / Transportasi
+                    if($notificationCounts['mobil']['pending'] > 0) $messages[] = $notificationCounts['mobil']['pending'] . " Pesanan Transportasi Baru";
+                    if($notificationCounts['mobil']['cancellation'] > 0) $messages[] = $notificationCounts['mobil']['cancellation'] . " Pembatalan Transportasi";
                     // Fasilitas
                     if($notificationCounts['fasilitas']['pending'] > 0) $messages[] = $notificationCounts['fasilitas']['pending'] . " Pesanan Fasilitas Baru";
                     if($notificationCounts['fasilitas']['cancellation'] > 0) $messages[] = $notificationCounts['fasilitas']['cancellation'] . " Pembatalan Fasilitas";
@@ -486,7 +486,7 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                     @if($mobilRequests->isEmpty())
                         <div class="text-center py-5">
                             <div class="mb-3"><i class="bx bx-car fs-1 text-muted opacity-25"></i></div>
-                            <h6 class="text-muted fw-bold">Belum ada permintaan penyewaan mobil</h6>
+                            <h6 class="text-muted fw-bold">Belum ada permintaan penyewaan transportasi</h6>
                         </div>
                     @else
                         <div class="table-responsive">
@@ -536,7 +536,7 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                                                             <form action="{{ route('admin.aktivitas.update-status', ['type' => 'mobil', 'id' => $req->id]) }}" method="POST" class="d-inline">
                                                                 @csrf
                                                                 <input type="hidden" name="status" value="process">
-                                                                <button type="submit" class="btn btn-sm btn-outline-warning shadow-sm rounded-pill px-3" data-konfirmasi="Mulai siapkan mobil ini?">
+                                                                <button type="submit" class="btn btn-sm btn-outline-warning shadow-sm rounded-pill px-3" data-konfirmasi="Mulai siapkan transportasi ini?">
                                                                     <i class="bx bx-package me-1"></i>Proses
                                                                 </button>
                                                             </form>
@@ -544,7 +544,7 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                                                             <form action="{{ route('admin.aktivitas.update-status', ['type' => 'mobil', 'id' => $req->id]) }}" method="POST" class="d-inline">
                                                                 @csrf
                                                                 <input type="hidden" name="status" value="delivering">
-                                                                <button type="submit" class="btn btn-sm btn-outline-info shadow-sm rounded-pill px-3" data-konfirmasi="Mulai jalan / kirim mobil?">
+                                                                <button type="submit" class="btn btn-sm btn-outline-info shadow-sm rounded-pill px-3" data-konfirmasi="Mulai jalan / kirim transportasi?">
                                                                     <i class="bx bx-car me-1"></i>Kirim
                                                                 </button>
                                                             </form>

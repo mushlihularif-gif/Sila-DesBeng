@@ -10,7 +10,7 @@
                                 @endif
                             </div>
                             <div class="flex-1">
-                                <h3 class="text-xl font-bold text-gray-800 mb-2">{{ $booking->mobil?->nama_mobil ?? 'Sewa Mobil' }}</h3>
+                                <h3 class="text-xl font-bold text-gray-800 mb-2">{{ $booking->mobil?->nama_mobil ?? 'Sewa Transportasi' }}</h3>
                                 <p class="text-sm text-gray-600 mb-4">
                                     {{ \Carbon\Carbon::parse($booking->created_at)->locale('id')->isoFormat('dddd, DD MMMM YYYY HH:mm') }} WIB
                                 </p>
@@ -48,7 +48,7 @@
                 @empty
                 @if($mobilBookings->currentPage() == 1)
                 <div class="bg-white rounded-2xl shadow-lg p-8 text-center">
-                    <p class="text-gray-500">Belum ada riwayat penyewaan mobil</p>
+                    <p class="text-gray-500">Belum ada riwayat penyewaan transportasi</p>
                 </div>
                 @endif
                 @endforelse

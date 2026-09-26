@@ -472,9 +472,9 @@ class ReceiptGeneratorService
         $y += 60;
         $this->drawLine($image, 130, $y, $imageWidth - 130, $y, $black);
         
-        // Header: Informasi Sewa Mobil
+        // Header: Informasi Sewa Transportasi
         $y += 70;
-        $this->addText($image, 'Informasi Sewa Mobil', $labelX, $y, $headerSize, $black, $fontPath, true);
+        $this->addText($image, 'Informasi Sewa Transportasi', $labelX, $y, $headerSize, $black, $fontPath, true);
 
         $y += 85;
         $this->addText($image, 'Nama Lengkap', $labelX, $y, $normalSize, $black, $fontPath, true);
@@ -545,7 +545,7 @@ class ReceiptGeneratorService
         $this->drawLine($image, 130, $y, $imageWidth - 130, $y, $black);
         
         $y += 60;
-        $itemName = $booking->mobil->nama_mobil ?? 'Sewa Mobil';
+        $itemName = $booking->mobil->nama_mobil ?? 'Sewa Transportasi';
         $quantity = $booking->lama_sewa . ' Hari';
         $unitPrice = 'Rp. ' . number_format($booking->mobil->harga_sewa ?? 0, 0, ',', '.');
         $total = 'Rp. ' . number_format($booking->total_harga ?? 0, 0, ',', '.');

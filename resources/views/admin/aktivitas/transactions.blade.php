@@ -18,7 +18,7 @@
     $activeServices = $activeServices ?? [];
     $isRentalActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'alat'));
     $isGasActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'gas'));
-    $isMobilActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'mobil'));
+    $isMobilActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'mobil') || str_contains(strtolower($name), 'transportasi'));
     $isFasilitasActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'fasilitas'));
     $isPasarActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'pasar'));
     $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasilitasActive, $isPasarActive])->filter()->count();
@@ -141,7 +141,7 @@
                                     <img src="{{ asset('User/img/elemen/mobil.png') }}" style="width: 44px; height: 44px; object-fit: contain;">
                                 </div>
                                 <div>
-                                    <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Penyewaan Mobil</small>
+                                    <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Penyewaan Transportasi</small>
                                     <h4 class="fw-bold mb-0 text-dark"><span class="count-up" data-value="{{ $stats['mobil_total'] }}">0</span></h4>
                                 </div>
                             </div>
@@ -262,7 +262,7 @@
                 @if($isMobilActive)
                 <li class="nav-item" role="presentation">
                     <button class="nav-link {{ $category == 'mobil' || (!$isRentalActive && !$isGasActive && ($category == 'rental' || $category == 'all')) ? 'active' : '' }} rounded-pill px-4 fw-semibold" id="mobil-tab" data-bs-toggle="tab" data-bs-target="#mobil-pane" type="button" role="tab">
-                        <img src="{{ asset('User/img/elemen/mobil.png') }}" class="me-2" style="width: 28px; height: 28px; object-fit: contain;">Penyewaan Mobil
+                        <img src="{{ asset('User/img/elemen/mobil.png') }}" class="me-2" style="width: 28px; height: 28px; object-fit: contain;">Penyewaan Transportasi
                         <span class="badge {{ $category == 'mobil' ? 'bg-white text-primary' : 'bg-primary text-white' }} ms-2 shadow-sm">{{ $mobilPayments->count() }}</span>
                     </button>
                 </li>
@@ -476,7 +476,7 @@
                       @if($mobilPayments->isEmpty())
                         <div class="text-center py-5">
                             <div class="mb-3"><i class="bx bx-receipt fs-1 text-muted opacity-25"></i></div>
-                            <h6 class="text-muted fw-bold">Belum ada bukti pembayaran penyewaan mobil</h6>
+                            <h6 class="text-muted fw-bold">Belum ada bukti pembayaran penyewaan transportasi</h6>
                         </div>
                     @else
                         <div class="table-responsive">

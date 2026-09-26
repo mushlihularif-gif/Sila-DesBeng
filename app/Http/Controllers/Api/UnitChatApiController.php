@@ -325,7 +325,7 @@ class UnitChatApiController extends Controller
             case 'penyewaan':
                 return "Halo {$userName}! Selamat datang di Layanan Sewa Alat. Silakan tanyakan ketersediaan alat, ketentuan sewa, atau durasi peminjaman. Jika butuh bantuan langsung dari admin, silakan klik 'Chat Petugas'.";
             case 'mobil':
-                return "Halo {$userName}! Selamat datang di Layanan Sewa Mobil. Anda bisa bertanya seputar ketersediaan mobil, jadwal, dan syarat penyewaan. Klik 'Chat Petugas' untuk langsung terhubung dengan admin.";
+                return "Halo {$userName}! Selamat datang di Layanan Penyewaan Transportasi. Anda bisa bertanya seputar ketersediaan kendaraan transportasi, jadwal, dan syarat penyewaan. Klik 'Chat Petugas' untuk langsung terhubung dengan admin.";
             case 'fasilitas_umum':
                 return "Halo {$userName}! Selamat datang di Layanan Fasilitas Umum. Silakan tanyakan jadwal kosong, kapasitas ruangan, atau detail fasilitas lainnya. Untuk pemesanan langsung, Anda bisa klik 'Chat Petugas'.";
             default:
@@ -362,12 +362,12 @@ class UnitChatApiController extends Controller
 
         if ($service === 'mobil') {
             if (Str::contains($q, ['supir', 'driver', 'petugas'])) {
-                return "Layanan penyewaan mobil operasional kami sudah termasuk supir (driver) dari petugas pengelola untuk memastikan keamanan dan kenyamanan perjalanan Anda.";
+                return "Layanan penyewaan transportasi kami sudah termasuk supir (driver) dari petugas pengelola untuk memastikan keamanan dan kenyamanan perjalanan Anda.";
             }
             if (Str::contains($q, ['syarat', 'dokumen', 'jaminan'])) {
-                return "Persyaratan utama untuk penyewaan mobil adalah KTP warga setempat yang masih berlaku dan persetujuan surat tanggung jawab penggunaan kendaraan.";
+                return "Persyaratan utama untuk penyewaan transportasi adalah KTP warga setempat yang masih berlaku dan persetujuan surat tanggung jawab penggunaan kendaraan.";
             }
-            return "Pesan Anda telah kami terima. Untuk memastikan ketersediaan jadwal mobil atau melakukan pemesanan, silakan tekan tombol 'Chat Petugas' ya.";
+            return "Pesan Anda telah kami terima. Untuk memastikan ketersediaan jadwal transportasi atau melakukan pemesanan, silakan tekan tombol 'Chat Petugas' ya.";
         }
 
         if ($service === 'fasilitas_umum') {

@@ -2,7 +2,7 @@
 $activeServices = $activeServices ?? [];
 $isRentalActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'alat'));
 $isGasActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'gas'));
-$isMobilActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'mobil'));
+$isMobilActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'mobil') || str_contains(strtolower($name), 'transportasi'));
 $isFasilitasActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'fasilitas'));
 $isPasarActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'pasar'));
 $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasilitasActive, $isPasarActive])->filter()->count();
@@ -83,14 +83,14 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
         @endif
 
         @if($isMobilActive)
-        <!-- Sewa Mobil -->
+        <!-- Sewa Transportasi -->
         <div class="col-6 col-md-4 col-lg">
             <div class="card border-0 shadow-sm h-100 rounded-4 stat-card">
                 <div class="card-body p-2 p-md-3 d-flex flex-column align-items-center justify-content-center text-center">
                     <div class="stat-icon bg-primary-subtle mb-1 mx-auto d-flex align-items-center justify-content-center">
                         <img src="{{ asset('User/img/elemen/mobil.png') }}" style="width: 24px; height: 24px; object-fit: contain;">
                     </div>
-                    <small class="text-muted text-uppercase fw-bold ls-1 mb-1 text-truncate w-100" style="font-size: 0.65rem;">Sewa Mobil</small>
+                    <small class="text-muted text-uppercase fw-bold ls-1 mb-1 text-truncate w-100" style="font-size: 0.65rem;">Sewa Transportasi</small>
                     <div class="stat-number text-dark">
                         <span class="count-up" data-value="{{ $mobilBookings->count() }}">0</span>
                     </div>
@@ -158,7 +158,7 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                     @if($isMobilActive)
                     <li class="nav-item flex-shrink-0" role="presentation">
                         <button class="nav-link {{ !$isRentalActive && !$isGasActive ? 'active' : '' }} rounded-pill px-3 py-2 fw-semibold text-nowrap" id="mobil-tab" data-bs-toggle="tab" data-bs-target="#mobil-pane" type="button" role="tab">
-                            <img src="{{ asset('User/img/elemen/mobil.png') }}" class="me-2" style="width: 20px; height: 20px; object-fit: contain;">Sewa Mobil
+                            <img src="{{ asset('User/img/elemen/mobil.png') }}" class="me-2" style="width: 20px; height: 20px; object-fit: contain;">Penyewaan Transportasi
                             <span class="badge bg-white text-primary ms-2 shadow-sm">{{ $mobilBookings->count() }}</span>
                         </button>
                     </li>
@@ -329,7 +329,7 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                     @if($mobilBookings->isEmpty())
                         <div class="text-center py-5">
                             <div class="mb-3"><i class="bx bx-bar-chart-alt-2 fs-1 text-muted opacity-25"></i></div>
-                            <h6 class="text-muted fw-bold">Tidak ada data transaksi sewa mobil</h6>
+                            <h6 class="text-muted fw-bold">Tidak ada data transaksi sewa transportasi</h6>
                         </div>
                     @else
                         <div class="table-responsive">
@@ -362,7 +362,7 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                                             </div>
                                         </td>
                                         <td>
-                                            <div class="text-dark">{{ $order->mobil->nama_mobil ?? 'Sewa Mobil' }}</div>
+                                            <div class="text-dark">{{ $order->mobil->nama_mobil ?? 'Sewa Transportasi' }}</div>
                                             <small class="text-muted">{{ $order->lama_sewa }} Hari</small>
                                         </td>
                                         <td>

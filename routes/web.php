@@ -162,7 +162,7 @@ Route::get('/validasi/transaksi/{type}/{id}', function ($type, $id) {
         $title = 'Pembelian Tabung Gas';
     } elseif ($type === 'mobil') {
         $transaksi = \App\Models\MobilBooking::with(['mobil', 'user'])->find($id);
-        $title = 'Penyewaan Mobil';
+        $title = 'Penyewaan Transportasi';
     } elseif ($type === 'fasilitas') {
         $transaksi = \App\Models\FasilitasUmumBooking::with(['fasilitas', 'user'])->find($id);
         $title = 'Peminjaman Fasilitas Umum';
@@ -676,7 +676,7 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
             ]);
         });
 
-        // Penyewaan Mobil
+        // Penyewaan Transportasi
         Route::middleware('staff.permission:sewa_mobil')->group(function () {
             Route::get('mobil/sop', [\App\Http\Controllers\Admin\UnitPenyewaanMobilController::class, 'sop'])->name('admin.unit.mobil.sop');
             Route::post('mobil/sop', [\App\Http\Controllers\Admin\UnitPenyewaanMobilController::class, 'updateSop'])->name('admin.unit.mobil.sop.update');
@@ -765,7 +765,7 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
             Route::post('pasar-daerah/chats/{id}/resolve', [\App\Http\Controllers\Admin\UnitPasarDaerahController::class, 'resolveChat'])->name('admin.unit.pasar_daerah.resolve_chat');
         });
 
-        // Chat Layanan Terpisah (Gas, Sewa Alat, Sewa Mobil, Fasilitas Umum)
+        // Chat Layanan Terpisah (Gas, Sewa Alat, Sewa Transportasi, Fasilitas Umum)
         Route::prefix('chat-service')->group(function () {
             Route::get('{service}/{id}/messages', [\App\Http\Controllers\Admin\UnitChatController::class, 'getMessages'])->name('admin.unit.chat.messages');
             Route::post('{service}/{id}/reply', [\App\Http\Controllers\Admin\UnitChatController::class, 'replyChat'])->name('admin.unit.chat.reply');

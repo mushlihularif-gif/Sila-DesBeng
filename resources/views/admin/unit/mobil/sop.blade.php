@@ -2,16 +2,16 @@
 
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Unit Layanan / Penyewaan Mobil /</span> Ketentuan SOP</h4>
+        <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Unit Layanan / Penyewaan Transportasi /</span> Ketentuan SOP</h4>
 
         <div class="row">
             <div class="col-md-12">
                 <div class="card mb-4">
-                    <h5 class="card-header">Manajemen Ketentuan SOP Penyewaan Mobil</h5>
+                    <h5 class="card-header">Manajemen Ketentuan SOP Penyewaan Transportasi</h5>
                     <div class="card-body">
                         <div class="alert alert-danger mt-3 text-dark">
                             <h6 class="alert-heading fw-bold mb-2"><i class="bx bx-error me-1"></i> PENTING</h6>
-                            <p class="mb-0">Pilih salah satu dari opsi SOP di bawah ini yang akan diberlakukan kepada pengguna saat mereka menyewa mobil. Anda dapat mengubah isi teks sesuai kebutuhan, atau mengembalikannya ke pengaturan bawaan jika terjadi kesalahan.</p>
+                            <p class="mb-0">Pilih salah satu dari opsi SOP di bawah ini yang akan diberlakukan kepada pengguna saat mereka menyewa kendaraan / transportasi. Anda dapat mengubah isi teks sesuai kebutuhan, atau mengembalikannya ke pengaturan bawaan jika terjadi kesalahan.</p>
                         </div>
                         
                         <form action="{{ route('admin.unit.mobil.sop.update') }}" method="POST">

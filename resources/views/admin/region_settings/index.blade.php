@@ -150,7 +150,7 @@
                                 <div>
                                     <strong class="d-block mb-1 text-dark">Panduan Pengaturan Layanan</strong>
                                     <p class="mb-0 text-dark" style="font-size: 0.85rem; line-height: 1.45;">
-                                        <strong>Unit Layanan Mandiri Desa:</strong> Anda dapat mengaktifkan unit usaha lokal desa Anda (Alat, Gas, Mobil, Fasilitas Umum, Pelaporan) dan menentukan apakah layanannya eksklusif hanya untuk warga domisili desa Anda atau terbuka untuk warga luar.<br>
+                                        <strong>Unit Layanan Mandiri Desa:</strong> Anda dapat mengaktifkan unit usaha lokal desa Anda (Alat, Gas, Transportasi, Fasilitas Umum, Pelaporan) dan menentukan apakah layanannya eksklusif hanya untuk warga domisili desa Anda atau terbuka untuk warga luar.<br>
                                         <strong>Layanan Publik Kabupaten:</strong> <em>Pasar Daerah</em> dan <em>Kabar & Informasi Daerah</em> berstatus sentral terbuka untuk seluruh warga se-Kabupaten Bengkalis dan otomatis selalu aktif demi keterbukaan akses ekonomi dan informasi warga.
                                     </p>
                                 </div>
@@ -181,11 +181,11 @@
                                     $iconPath = 'User/img/elemen/fasilitas.png';
                                     $descText = 'yang dapat mengakses layanan ini.';
                                     $sName = strtolower($service->name);
-                                    $displayName = $service->name;
+                                    $displayName = $service->name === 'Penyewaan Mobil' ? 'Penyewaan Transportasi' : $service->name;
                                     
-                                    if (strpos($sName, 'mobil') !== false) {
+                                    if (strpos($sName, 'mobil') !== false || strpos($sName, 'transportasi') !== false) {
                                         $iconPath = 'User/img/elemen/mobil.png';
-                                        $descText = 'yang dapat melihat dan menyewa armada ini.';
+                                        $descText = 'yang dapat melihat dan menyewa kendaraan transportasi ini.';
                                     }
                                     elseif (strpos($sName, 'alat') !== false) {
                                         $iconPath = 'User/img/elemen/F1.png';
@@ -370,7 +370,7 @@
                                         <button class="nav-link d-flex align-items-center text-start p-3 rounded-4 active" id="v-pills-mobil-tab" data-bs-toggle="pill" data-bs-target="#box_delivery_mobil" type="button" role="tab" aria-selected="true" style="display: none; transition: all 0.2s;">
                                             <img src="{{ asset('User/img/elemen/mobil.png') }}" class="me-3" style="width: 24px; height: 24px; object-fit: contain;">
                                             <div>
-                                                <span class="fw-bold d-block">Penyewaan Mobil</span>
+                                                <span class="fw-bold d-block">Penyewaan Transportasi</span>
                                                 <small class="text-muted" style="font-size: 0.75rem;">Serah Terima, BBM & Supir</small>
                                             </div>
                                         </button>
@@ -418,8 +418,8 @@
                                             <div class="d-flex align-items-center mb-4">
                                                 <img src="{{ asset('User/img/elemen/mobil.png') }}" class="me-3" style="width: 32px; height: 32px; object-fit: contain;">
                                                 <div>
-                                                    <h6 class="fw-bold mb-0 text-primary">Pengaturan Penyewaan Mobil</h6>
-                                                    <small class="text-muted">Atur metode penyerahan armada, bahan bakar, dan ketersediaan supir.</small>
+                                                    <h6 class="fw-bold mb-0 text-primary">Pengaturan Penyewaan Transportasi</h6>
+                                                    <small class="text-muted">Atur metode penyerahan armada transportasi, bahan bakar, dan ketersediaan supir.</small>
                                                 </div>
                                             </div>
                                             <div class="d-flex flex-column gap-3 mb-4">
@@ -430,7 +430,7 @@
                 <img src="{{ asset('Admin/img/elements/antar.png') }}" alt="Layanan Antar (Diantar Petugas)" style="width: 45px; height: 45px; object-fit: contain;" class="me-3">
                 <div>
                     <span class="text-dark fw-bold d-block" style="font-size: 1.05rem;">Layanan Antar (Diantar Petugas)</span>
-                    <span class="text-muted small d-block mb-0">Mobil desa diantarkan langsung ke titik lokasi penyewa</span>
+                    <span class="text-muted small d-block mb-0">Kendaraan transportasi diantarkan langsung ke titik lokasi penyewa</span>
                 </div>
             </div>
             <div class="dynamic-keterangan mt-2" style="display: none;">
@@ -823,7 +823,7 @@
                 const nameElem = cb.closest('.card-body').querySelector('span.fw-bold');
                 if (nameElem) {
                     const name = nameElem.innerText;
-                    if(name.includes('Mobil')) showMobil = true;
+                    if(name.includes('Mobil') || name.includes('Transportasi')) showMobil = true;
                     if(name.includes('Alat')) showAlat = true;
                     if(name.includes('Gas')) showGas = true;
                     if(name.includes('Fasilitas Umum')) showFasilitas = true;

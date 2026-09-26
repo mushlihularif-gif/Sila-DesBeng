@@ -116,7 +116,7 @@
                         <i class="bx bx-bulb fs-4 me-3 mt-1"></i>
                         <div>
                             <h6 class="alert-heading fw-bold mb-1">Panduan Supir Kendaraan</h6>
-                            <p class="mb-0 small">Data supir ini akan tersedia untuk ditugaskan pada pesanan <strong>Rental Mobil</strong> dan layanan darurat <strong>Ambulans Desa</strong>.</p>
+                            <p class="mb-0 small">Data supir ini akan tersedia untuk ditugaskan pada pesanan <strong>Penyewaan Transportasi</strong> dan layanan darurat <strong>Ambulans Desa</strong>.</p>
                         </div>
                     </div>
 
@@ -175,7 +175,7 @@
                                 <div class="d-flex flex-column gap-3">
                                     <div class="form-check form-switch d-flex align-items-center">
                                         <input class="form-check-input mt-0 me-3 cursor-pointer" type="checkbox" name="is_sewa_mobil" value="1" id="is_rental_add" style="width: 2.5em; height: 1.25em;" checked>
-                                        <label class="form-check-label cursor-pointer fw-bold text-dark" for="is_rental_add">Rental Mobil (Sewa)</label>
+                                        <label class="form-check-label cursor-pointer fw-bold text-dark" for="is_rental_add">Penyewaan Transportasi</label>
                                     </div>
                                     <div class="form-check form-switch d-flex align-items-center">
                                         <input class="form-check-input mt-0 me-3 cursor-pointer bg-danger border-danger" type="checkbox" name="is_fasilitas_umum" value="1" id="is_fasilitas_add" style="width: 2.5em; height: 1.25em;" checked>

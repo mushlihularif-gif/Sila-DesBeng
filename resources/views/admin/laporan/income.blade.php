@@ -55,7 +55,7 @@
     $activeServices = $activeServices ?? [];
     $isRentalActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'alat'));
     $isGasActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'gas'));
-    $isMobilActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'mobil'));
+    $isMobilActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'mobil') || str_contains(strtolower($name), 'transportasi'));
     $isFasilitasActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'fasilitas'));
     $isPasarActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'pasar'));
     $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasilitasActive, $isPasarActive])->filter()->count();
@@ -226,7 +226,7 @@
         @endif
         
         @if($isMobilActive)
-        <!-- Sewa Mobil -->
+        <!-- Sewa Transportasi -->
         <div class="col-6 col-md-4 col-xl-2">
             <div class="card border-0 shadow-sm h-100 rounded-4 stat-card overflow-hidden">
                 <div class="card-body p-2 p-md-3 d-flex flex-column justify-content-between">
@@ -235,7 +235,7 @@
                             <img src="{{ asset('User/img/elemen/mobil.png') }}" style="width: 20px; height: 20px; object-fit: contain;">
                         </div>
                         <div class="overflow-hidden">
-                            <small class="text-muted text-uppercase fw-bold ls-1 d-block text-truncate" style="font-size: 0.65rem;">Sewa Mobil</small>
+                            <small class="text-muted text-uppercase fw-bold ls-1 d-block text-truncate" style="font-size: 0.65rem;">Sewa Transportasi</small>
                         </div>
                     </div>
                     <div>
@@ -415,7 +415,7 @@
                           </div>
                           <div class="flex-grow-1">
                               <div class="d-flex justify-content-between align-items-center mb-1">
-                                  <h6 class="fw-bold text-dark mb-0">Unit Sewa Mobil</h6>
+                                  <h6 class="fw-bold text-dark mb-0">Unit Sewa Transportasi</h6>
                                   <span class="fw-bold text-dark">Rp <span class="count-up-rupiah" data-value="{{ $totalPendapatanData['mobil']['revenue'] ?? 0 }}">0</span></span>
                               </div>
                               <div class="progress mb-2" style="height: 6px;">
@@ -668,7 +668,7 @@
                                                 <option value="gas">Penjualan Gas LPG</option>
                                             @endif
                                             @if($isMobilActive || $totalActive === 0)
-                                                <option value="mobil">Penyewaan Mobil</option>
+                                                <option value="mobil">Penyewaan Transportasi</option>
                                             @endif
                                             @if($isFasilitasActive || $totalActive === 0)
                                                 <option value="fasilitas">Fasilitas Umum</option>
@@ -918,7 +918,7 @@
                 {{ $totalPendapatanData['pasar']['revenue'] ?? 0 }},
                 {{ $totalPendapatanData['lainnya']['revenue'] ?? 0 }}
             ];
-            const seriesLabels = ['Penyewaan', 'Gas', 'Sewa Mobil', 'Fasilitas Umum', 'Pasar Daerah', 'Lainnya'];
+            const seriesLabels = ['Penyewaan', 'Gas', 'Sewa Transportasi', 'Fasilitas Umum', 'Pasar Daerah', 'Lainnya'];
             const seriesColors = ['#ffab00', '#03c3ec', '#ff3e1d', '#696cff', '#71dd37', '#8592a3'];
 
             const totalPieRevenue = seriesData.reduce((a, b) => a + b, 0);
