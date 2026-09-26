@@ -92,101 +92,182 @@
                 </div>
             </div>
 
-            <!-- Bilah Pencarian dengan Batas Gradien -->
+            <!-- Bilah Pencarian dengan Batas Gradien & Live AJAX Search -->
             <div class="max-w-screen-2xl mx-auto px-4 sm:px-5 py-4 sm:py-8">
                 <div class="max-w-2xl mx-auto">
-                    <form action="{{ route('beranda') }}" method="GET" class="relative group">
+                    <form id="live-search-form" action="{{ route('beranda') }}" method="GET" class="relative group">
                         <!-- Gradient Border -->
                         <div
                             class="absolute -inset-0.5 bg-gradient-to-r from-blue-500 via-blue-400 to-amber-400 rounded-full opacity-80 group-hover:opacity-100 transition-opacity duration-300">
                         </div>
 
                         <!-- Search Input -->
-                        <div class="relative flex items-center bg-white rounded-full overflow-hidden">
-                            <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="Cari produk atau kategori..."
-                                class="flex-1 px-5 sm:px-8 py-2.5 sm:py-3.5 text-gray-700 text-sm sm:text-[15px] focus:outline-none bg-transparent">
-
-                            <!-- Search Button -->
-                            <button type="submit"
-                                class="flex-shrink-0 px-4 sm:px-6 py-2.5 sm:py-3.5 text-blue-600 hover:text-blue-700 transition-colors duration-200">
+                        <div class="relative flex items-center bg-white rounded-full overflow-hidden shadow-sm">
+                            <div class="pl-4 sm:pl-5 text-gray-400 flex items-center justify-center">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                 </svg>
+                            </div>
+
+                            <input type="text" id="live-search-input" name="search" value="{{ $search ?? '' }}" 
+                                placeholder="Cari Mobil Pick Up, Gas 3kg, Tenda, Kursi..." autocomplete="off"
+                                class="flex-1 px-3 sm:px-4 py-3 sm:py-3.5 text-gray-800 text-sm sm:text-[15px] focus:outline-none bg-transparent font-medium">
+
+                            <!-- Loading Spinner -->
+                            <div id="search-spinner" class="hidden pr-3 text-blue-600 animate-spin">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                                </svg>
+                            </div>
+
+                            <!-- Clear Button -->
+                            <button type="button" id="search-clear-btn" class="{{ (!empty($search)) ? '' : 'hidden' }} px-3 text-gray-400 hover:text-gray-600 transition-colors" title="Hapus pencarian">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+
+                            <!-- Search Button -->
+                            <button type="submit" id="search-submit-btn"
+                                class="flex-shrink-0 px-5 sm:px-6 py-3 sm:py-3.5 bg-gradient-to-r from-blue-600 to-[#115789] hover:from-blue-700 hover:to-[#0d456d] text-white font-bold text-xs sm:text-sm transition-all duration-200">
+                                <span>Cari</span>
                             </button>
                         </div>
                     </form>
 
-                    <!-- Quick Popular Search Chips -->
+                    <!-- Quick Popular Search Chips (Live AJAX Triggers) -->
                     <div class="mt-3 flex items-center justify-center gap-1.5 flex-wrap text-xs text-gray-500">
                         <span class="text-[11px] text-gray-400 font-medium">Paling sering dicari:</span>
-                        <a href="{{ route('beranda', ['search' => 'Gas 3kg']) }}" class="px-2.5 py-1 rounded-full bg-white/80 hover:bg-white text-gray-700 hover:text-blue-600 border border-gray-200 shadow-xs transition-all text-[11px]">Gas 3kg</a>
-                        <a href="{{ route('beranda', ['search' => 'Tenda']) }}" class="px-2.5 py-1 rounded-full bg-white/80 hover:bg-white text-gray-700 hover:text-blue-600 border border-gray-200 shadow-xs transition-all text-[11px]">Tenda Acara</a>
-                        <a href="{{ route('beranda', ['search' => 'Mobil Pick Up']) }}" class="px-2.5 py-1 rounded-full bg-white/80 hover:bg-white text-gray-700 hover:text-blue-600 border border-gray-200 shadow-xs transition-all text-[11px]">Mobil Pick Up</a>
-                        <a href="{{ route('beranda', ['search' => 'Kursi']) }}" class="px-2.5 py-1 rounded-full bg-white/80 hover:bg-white text-gray-700 hover:text-blue-600 border border-gray-200 shadow-xs transition-all text-[11px]">Kursi Lipat</a>
+                        <button type="button" data-query="Mobil Pick Up" class="popular-search-chip px-2.5 py-1 rounded-full bg-white/80 hover:bg-blue-50 text-gray-700 hover:text-blue-600 border border-gray-200 shadow-xs transition-all text-[11px] font-medium cursor-pointer">Mobil Pick Up</button>
+                        <button type="button" data-query="Gas 3kg" class="popular-search-chip px-2.5 py-1 rounded-full bg-white/80 hover:bg-blue-50 text-gray-700 hover:text-blue-600 border border-gray-200 shadow-xs transition-all text-[11px] font-medium cursor-pointer">Gas 3kg</button>
+                        <button type="button" data-query="Tenda" class="popular-search-chip px-2.5 py-1 rounded-full bg-white/80 hover:bg-blue-50 text-gray-700 hover:text-blue-600 border border-gray-200 shadow-xs transition-all text-[11px] font-medium cursor-pointer">Tenda Acara</button>
+                        <button type="button" data-query="Kursi" class="popular-search-chip px-2.5 py-1 rounded-full bg-white/80 hover:bg-blue-50 text-gray-700 hover:text-blue-600 border border-gray-200 shadow-xs transition-all text-[11px] font-medium cursor-pointer">Kursi Lipat</button>
+                        <button type="button" data-query="Pasar" class="popular-search-chip px-2.5 py-1 rounded-full bg-white/80 hover:bg-blue-50 text-gray-700 hover:text-blue-600 border border-gray-200 shadow-xs transition-all text-[11px] font-medium cursor-pointer">Pasar Daerah</button>
                     </div>
                 </div>
             </div>
 
-            <!-- Search Results Section (Only visible if searching) -->
-            @if(isset($search) && $search)
-            <div id="search-results-section" class="max-w-7xl mx-auto px-6 py-4">
-                <div class="max-w-7xl mx-auto">
-                    <div class="text-center mb-8 relative">
-                        <h2 class="text-2xl font-bold text-gray-800">
-                            Hasil Pencarian: "{{ $search }}"
-                        </h2>
-                        <a href="{{ route('beranda') }}" class="text-sm text-blue-600 hover:underline mt-2 inline-block">Reset Pencarian</a>
+            <!-- Search Results Section (Supports both server-side initial render and live AJAX updates) -->
+            <div id="search-results-section" class="{{ (isset($search) && !empty($search)) ? '' : 'hidden' }} max-w-7xl mx-auto px-4 sm:px-6 py-6 transition-all duration-300">
+                <div class="max-w-7xl mx-auto bg-gradient-to-b from-blue-50/60 to-white/90 rounded-2xl sm:rounded-3xl p-4 sm:p-8 border border-blue-100 shadow-sm">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-blue-100">
+                        <div>
+                            <span class="text-[11px] sm:text-xs font-bold text-blue-600 uppercase tracking-wider block">Hasil Pencarian Produk & Layanan</span>
+                            <h2 id="search-results-title" class="text-xl sm:text-2xl font-black text-gray-900">
+                                @if(isset($search) && !empty($search))
+                                    Menampilkan hasil untuk: "<span class="text-[#115789]">{{ $search }}</span>"
+                                @endif
+                            </h2>
+                            <p id="search-results-count" class="text-xs sm:text-sm text-gray-500 mt-0.5">
+                                @if(isset($searchResults))
+                                    Ditemukan {{ count($searchResults) }} produk / layanan
+                                @endif
+                            </p>
+                        </div>
+                        <button type="button" id="btn-close-search" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-600 hover:text-red-600 hover:bg-red-50 border border-gray-200 transition-colors flex items-center gap-1 cursor-pointer">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            <span>Tutup Hasil</span>
+                        </button>
                     </div>
                     
-                    <div class="flex flex-wrap justify-center gap-8 mb-16 max-w-7xl mx-auto">
-                        @forelse($searchResults as $item)
-                        <!-- Product Card -->
-                        <a href="{{ $item->link }}" class="block p-4">
-                            <div class="product-card bg-white rounded-[2rem] p-6 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 mx-auto w-full max-w-[380px]">
-                                <!-- Product Image -->
-                                <div class="product-image-wrapper mb-6 relative aspect-[4/3] overflow-hidden rounded-2xl">
-                                    <img src="{{ Str::startsWith($item->image, ['http', 'https', 'User', 'Admin']) ? asset($item->image) : asset('storage/' . $item->image) }}" 
-                                         alt="{{ $item->name }}"
-                                         loading="lazy"
-                                         class="product-image w-full h-full object-cover">
-                                </div>
-    
-                                <!-- Product Name Only -->
-                                <div class="product-info text-center">
-                                    <h3 class="product-name text-sm font-bold text-gray-800 mb-2">
+                    <!-- Search Results Grid -->
+                    <div id="search-results-grid" class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
+                        @if(isset($searchResults) && count($searchResults) > 0)
+                            @foreach($searchResults as $item)
+                            <div class="bg-white rounded-xl sm:rounded-2xl border border-gray-100 shadow-xs hover:shadow-xl transition-all duration-300 p-3 sm:p-4 flex flex-col justify-between group transform hover:-translate-y-1">
+                                <div>
+                                    <div class="rekomendasi-img-wrapper relative rounded-lg sm:rounded-xl overflow-hidden bg-slate-50 mb-3 flex items-center justify-center border border-gray-100 p-2 sm:p-3">
+                                        @php
+                                            $imgUrl = null;
+                                            if (!empty($item->image)) {
+                                                $imgUrl = \Illuminate\Support\Str::startsWith($item->image, ['http://', 'https://', 'User/', 'Admin/']) 
+                                                    ? asset($item->image) 
+                                                    : asset('storage/' . $item->image);
+                                            }
+                                        @endphp
+                                        @if($imgUrl)
+                                        <img src="{{ $imgUrl }}" alt="{{ $item->name }}" loading="lazy" class="max-w-full max-h-full w-auto h-auto object-contain mx-auto group-hover:scale-105 transition-transform duration-300" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                        <div class="w-full h-full hidden items-center justify-center text-gray-300 bg-gray-100">
+                                            <i class="bx bx-package text-3xl"></i>
+                                        </div>
+                                        @else
+                                        <div class="w-full h-full flex items-center justify-center text-gray-300 bg-gray-100">
+                                            <i class="bx bx-package text-3xl"></i>
+                                        </div>
+                                        @endif
+
+                                        <span class="absolute top-2 left-2 px-2 py-0.5 text-[9px] font-bold rounded-md shadow-xs {{ $item->badge_color ?? 'bg-[#115789] text-white' }}" style="color: #ffffff !important;">
+                                            {{ $item->category }}
+                                        </span>
+                                    </div>
+
+                                    <h3 class="text-xs sm:text-sm font-bold text-gray-900 line-clamp-1 mb-1" title="{{ $item->name }}">
                                         {{ $item->name }}
                                     </h3>
-                                    <!-- Optional Badge for Type -->
-                                    <span class="inline-block px-3 py-1 text-[10px] font-bold rounded-full {{ $item->type == 'rental' ? 'bg-blue-100 text-blue-600' : ($item->type == 'gas' ? 'bg-orange-100 text-orange-600' : 'bg-green-100 text-green-600') }} mt-1">
-                                            {{ $item->type == 'rental' ? 'Sewa' : ($item->type == 'gas' ? 'Beli' : 'Profil') }}
-                                    </span>
-                                    
-                                    @if($item->type == 'profile')
-                                    <p class="text-xs text-gray-500 font-medium mt-2">{{ $item->price_formatted }}</p>
-                                    @endif
+
+                                    <div class="text-xs sm:text-sm font-black text-[#115789] mb-1">
+                                        {{ $item->price_formatted }}
+                                        @if(!empty($item->unit) && $item->type != 'fasilitas')
+                                        <span class="text-[10px] font-normal text-gray-500">/{{ $item->unit }}</span>
+                                        @endif
+                                    </div>
+
+                                    <div class="text-[10px] sm:text-[11px] text-gray-400">
+                                        @if($item->type == 'fasilitas')
+                                            Tersedia izin kegiatan
+                                        @elseif(isset($item->stock) && $item->stock > 0)
+                                            Stok: {{ $item->stock }} {{ $item->unit }}
+                                        @else
+                                            Siap Dipesan
+                                        @endif
+                                    </div>
+                                </div>
+
+                                <div class="mt-3 pt-2 border-t border-gray-50">
+                                    @php
+                                        $btnColor = 'bg-[#115789] hover:bg-[#0c446c] active:bg-[#082f4d]';
+                                        $btnLabel = 'Beli Produk';
+                                        if ($item->type == 'gas') {
+                                            $btnColor = 'bg-orange-600 hover:bg-orange-700 active:bg-orange-800';
+                                            $btnLabel = 'Pesan Gas';
+                                        } elseif ($item->type == 'rental') {
+                                            $btnColor = 'bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800';
+                                            $btnLabel = 'Sewa Alat';
+                                        } elseif ($item->type == 'mobil') {
+                                            $btnColor = 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800';
+                                            $btnLabel = 'Cek Mobil';
+                                        } elseif ($item->type == 'fasilitas') {
+                                            $btnColor = 'bg-purple-600 hover:bg-purple-700 active:bg-purple-800';
+                                            $btnLabel = 'Ajukan Izin';
+                                        }
+                                    @endphp
+                                    <a href="{{ $item->link }}" class="w-full block text-center py-2 px-3 rounded-lg text-xs font-bold transition-all shadow-xs {{ $btnColor }}" style="color: #ffffff !important;">
+                                        {{ $btnLabel }}
+                                    </a>
                                 </div>
                             </div>
-                        </a>
-                        @empty
-                        <div class="w-full text-center py-8">
-                            <div class="bg-gray-50 rounded-lg p-8 inline-block">
-                                <i class="bx bx-search-alt text-4xl text-gray-300 mb-3 block"></i>
-                                <p class="text-gray-500">Tidak ada produk yang cocok dengan pencarian Anda.</p>
+                            @endforeach
+                        @elseif(isset($search) && !empty($search))
+                            <div class="col-span-2 md:col-span-4 text-center py-12">
+                                <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-blue-50 flex items-center justify-center text-blue-400">
+                                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                                </div>
+                                <h3 class="text-base font-bold text-gray-800">Tidak ada produk ditemukan</h3>
+                                <p class="text-xs text-gray-500 max-w-sm mx-auto mt-1">Coba gunakan kata kunci lain seperti "Mobil Pick Up", "Gas 3kg", "Tenda", atau "Kursi".</p>
                             </div>
-                        </div>
-                        @endforelse
+                        @endif
                     </div>
                 </div>
             </div>
-            @endif
 
             <!-- Section Sapaan Ramah & Unit Pelayanan -->
-            <div id="unit-carousel-container" class="max-w-7xl mx-auto px-4 sm:px-6 pt-4 pb-10 sm:pt-8 sm:pb-16 overflow-hidden relative">
+            <div id="unit-carousel-container" class="max-w-7xl mx-auto px-4 sm:px-6 pt-8 pb-14 sm:pt-14 sm:pb-20 overflow-hidden relative">
                 <div class="max-w-7xl mx-auto relative z-10">
 
                     <!-- Sapaan Ramah Pengunjung / Warga -->
-                    <div class="text-center mb-5 sm:mb-6">
+                    <div class="text-center mb-8 sm:mb-12">
                         @if(auth()->check())
                             <h2 class="text-2xl sm:text-3xl md:text-4xl font-black text-gray-900 tracking-tight">
                                 Halo, <span class="bg-gradient-to-r from-gray-900 via-[#115789] to-[#60a5fa] bg-clip-text text-transparent">{{ auth()->user()->nama_lengkap ?? auth()->user()->name }}</span>
@@ -208,16 +289,16 @@
                         @endif
 
                         <!-- Kotak Narasi Dinamis (Sinkron dengan Carousel 3D) -->
-                        <div class="mt-4 sm:mt-5 max-w-2xl mx-auto px-1 sm:px-2">
-                            <div id="unit-speech-box" class="unit-speech-box bg-amber-50/90 border border-amber-200 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm transition-all duration-300">
+                        <div class="mt-6 sm:mt-8 max-w-2xl mx-auto px-2">
+                            <div id="unit-speech-box" class="unit-speech-box bg-amber-50/90 border border-amber-200 rounded-2xl sm:rounded-3xl p-5 sm:p-7 shadow-sm transition-all duration-300">
                                 <div id="speech-text-wrapper" class="speech-text-wrapper">
-                                    <p id="speech-heading" class="text-xs sm:text-sm md:text-[15px] font-extrabold text-amber-950 leading-snug">
+                                    <p id="speech-heading" class="text-xs sm:text-sm md:text-[15px] font-extrabold text-amber-950 leading-relaxed">
                                         "Punya rencana pesta pernikahan, kenduri atau acara lain?? Mau Sewa tenda dan perlengkapan acara lainnya??"
                                     </p>
-                                    <p id="speech-body" class="text-xs sm:text-[13px] text-gray-700 mt-2 font-medium leading-relaxed">
+                                    <p id="speech-body" class="text-xs sm:text-[13px] text-gray-700 mt-2.5 sm:mt-3 font-medium leading-relaxed">
                                         Sewa di sini! Hanya dengan klik menu di bawah ini kamu sudah bisa sewa tenda, kursi, dan perlengkapan lengkap tanpa harus datang ke lokasi loh.
                                     </p>
-                                    <div class="mt-3 flex items-center justify-center gap-2 flex-wrap">
+                                    <div class="mt-3.5 sm:mt-4 flex items-center justify-center gap-2 flex-wrap">
                                         <span id="speech-badge" class="px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full bg-amber-100 text-amber-800 border border-amber-300">
                                             Unit Penyewaan Alat
                                         </span>
@@ -229,7 +310,7 @@
                     </div>
 
                     <!-- Judul Section Unit Pelayanan -->
-                    <div class="text-center mb-4 sm:mb-8 relative">
+                    <div class="text-center mt-10 sm:mt-16 mb-8 sm:mb-12 relative">
                         <h3 class="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight">
                             <span class="bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">Unit</span> 
                             <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Pelayanan</span>
@@ -418,7 +499,7 @@
 
             <!-- Section Rekomendasi Produk Buat Kamu -->
             @if(isset($popularProducts) && $popularProducts->count() > 0)
-            <div id="rekomendasi-produk-section" class="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10 relative">
+            <div id="rekomendasi-produk-section" class="max-w-7xl mx-auto px-4 sm:px-6 pt-12 pb-10 sm:pt-20 sm:pb-16 relative">
                 <div class="max-w-7xl mx-auto relative z-10">
                     <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-6 sm:mb-8">
                         <div>
@@ -434,15 +515,15 @@
                         <div class="flex items-center gap-1.5 flex-wrap">
                             <span class="text-[11px] text-gray-400 font-medium mr-1 hidden sm:inline">Pilih unit:</span>
                             @if(!isset($isServiceActive) || $isServiceActive('Unit Penjualan Gas'))
-                            <a href="{{ $isLoggedInWithRegion ? route('gas.sales') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=gas.sales' }}" class="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-orange-50 text-orange-700 hover:bg-orange-100 border border-orange-200 transition-colors">Semua Gas</a>
+                            <a href="{{ $isLoggedInWithRegion ? route('gas.sales') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=gas.sales' }}" class="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-white text-orange-700 hover:bg-orange-600 hover:text-white border border-orange-200 transition-colors shadow-xs">Semua Gas</a>
                             @endif
                             @if(!isset($isServiceActive) || $isServiceActive('Unit Penyewaan Alat'))
-                            <a href="{{ $isLoggedInWithRegion ? route('rental.equipment') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=rental.equipment' }}" class="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition-colors">Semua Alat</a>
+                            <a href="{{ $isLoggedInWithRegion ? route('rental.equipment') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=rental.equipment' }}" class="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-white text-emerald-700 hover:bg-emerald-600 hover:text-white border border-emerald-200 transition-colors shadow-xs">Semua Alat</a>
                             @endif
                             @if(!isset($isServiceActive) || $isServiceActive('Unit Penyewaan Mobil'))
-                            <a href="{{ $isLoggedInWithRegion ? route('mobil.rental.equipment') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=mobil.rental.equipment' }}" class="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 transition-colors">Semua Mobil</a>
+                            <a href="{{ $isLoggedInWithRegion ? route('mobil.rental.equipment') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=mobil.rental.equipment' }}" class="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-white text-blue-700 hover:bg-blue-600 hover:text-white border border-blue-200 transition-colors shadow-xs">Semua Mobil</a>
                             @endif
-                            <a href="{{ route('pasar.index') }}" class="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200 transition-colors">Pasar Daerah</a>
+                            <a href="{{ route('pasar.index') }}" class="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-white text-amber-700 hover:bg-amber-600 hover:text-white border border-amber-200 transition-colors shadow-xs">Pasar Daerah</a>
                         </div>
                     </div>
 
@@ -451,8 +532,8 @@
                         @foreach($popularProducts as $item)
                         <div class="bg-white rounded-xl sm:rounded-2xl border border-gray-100 shadow-xs hover:shadow-xl transition-all duration-300 p-3 sm:p-4 flex flex-col justify-between group transform hover:-translate-y-1">
                             <div>
-                                <!-- Image Container -->
-                                <div class="rekomendasi-img-wrapper relative rounded-lg sm:rounded-xl overflow-hidden bg-gray-50 mb-3 flex items-center justify-center border border-gray-100">
+                                <!-- Image Container (Anti-Gepeng, Padded, Centered) -->
+                                <div class="rekomendasi-img-wrapper relative rounded-lg sm:rounded-xl overflow-hidden bg-slate-50 mb-3 flex items-center justify-center border border-gray-100 p-2 sm:p-3">
                                     @php
                                         $imgUrl = null;
                                         if (!empty($item->image)) {
@@ -462,7 +543,7 @@
                                         }
                                     @endphp
                                     @if($imgUrl)
-                                    <img src="{{ $imgUrl }}" alt="{{ $item->name }}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                    <img src="{{ $imgUrl }}" alt="{{ $item->name }}" loading="lazy" class="max-w-full max-h-full w-auto h-auto object-contain mx-auto group-hover:scale-105 transition-transform duration-300" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                     <div class="w-full h-full hidden items-center justify-center text-gray-300 bg-gray-100">
                                         <i class="bx bx-package text-3xl"></i>
                                     </div>
@@ -473,7 +554,7 @@
                                     @endif
 
                                     <!-- Badge Asal Unit -->
-                                    <span class="absolute top-2 left-2 px-2 py-0.5 text-[9px] font-bold rounded-md shadow-xs {{ $item->badge_color ?? 'bg-[#115789] text-white' }}">
+                                    <span class="absolute top-2 left-2 px-2 py-0.5 text-[9px] font-bold rounded-md shadow-xs {{ $item->badge_color ?? 'bg-[#115789] text-white' }}" style="color: #ffffff !important;">
                                         {{ $item->category }}
                                     </span>
                                 </div>
@@ -503,10 +584,27 @@
                                 </div>
                             </div>
 
-                            <!-- Button Action -->
+                            <!-- Button Action (Solid, High-Contrast, Never Washes Out) -->
                             <div class="mt-3 pt-2 border-t border-gray-50">
-                                <a href="{{ $item->link }}" class="w-full block text-center py-1.5 px-3 rounded-lg text-xs font-bold transition-colors {{ $item->type == 'gas' ? 'bg-orange-50 hover:bg-orange-600 text-orange-600 hover:text-white' : ($item->type == 'mobil' ? 'bg-blue-50 hover:bg-blue-600 text-blue-600 hover:text-white' : ($item->type == 'rental' ? 'bg-emerald-50 hover:bg-emerald-600 text-emerald-600 hover:text-white' : 'bg-gray-100 hover:bg-[#115789] text-gray-700 hover:text-white')) }}">
-                                    {{ $item->type == 'gas' ? 'Pesan Gas' : ($item->type == 'rental' ? 'Sewa Alat' : ($item->type == 'mobil' ? 'Cek Mobil' : ($item->type == 'fasilitas' ? 'Ajukan Izin' : 'Beli Produk'))) }}
+                                @php
+                                    $btnColor = 'bg-[#115789] hover:bg-[#0c446c] active:bg-[#082f4d]';
+                                    $btnLabel = 'Beli Produk';
+                                    if ($item->type == 'gas') {
+                                        $btnColor = 'bg-orange-600 hover:bg-orange-700 active:bg-orange-800';
+                                        $btnLabel = 'Pesan Gas';
+                                    } elseif ($item->type == 'rental') {
+                                        $btnColor = 'bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800';
+                                        $btnLabel = 'Sewa Alat';
+                                    } elseif ($item->type == 'mobil') {
+                                        $btnColor = 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800';
+                                        $btnLabel = 'Cek Mobil';
+                                    } elseif ($item->type == 'fasilitas') {
+                                        $btnColor = 'bg-purple-600 hover:bg-purple-700 active:bg-purple-800';
+                                        $btnLabel = 'Ajukan Izin';
+                                    }
+                                @endphp
+                                <a href="{{ $item->link }}" class="w-full block text-center py-2 px-3 rounded-lg text-xs font-bold transition-all shadow-xs {{ $btnColor }}" style="color: #ffffff !important;">
+                                    {{ $btnLabel }}
                                 </a>
                             </div>
                         </div>
@@ -730,15 +828,31 @@
             }
         }
 
-        /* Wrapper Gambar Rekomendasi Produk */
+        /* Wrapper Gambar Rekomendasi Produk & Pencarian (Anti-Gepeng, Padded, Centered) */
         .rekomendasi-img-wrapper {
-            height: 125px;
+            height: 165px;
             width: 100%;
+            padding: 10px;
+            background-color: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
         }
         @media (min-width: 640px) {
             .rekomendasi-img-wrapper {
-                height: 155px;
+                height: 195px;
+                padding: 14px;
             }
+        }
+        .rekomendasi-img-wrapper img {
+            max-width: 100% !important;
+            max-height: 100% !important;
+            width: auto !important;
+            height: auto !important;
+            object-fit: contain !important;
+            margin: 0 auto;
+            display: block;
         }
 
         /* Kotak Sapaan Dinamis Unit Pelayanan */
@@ -860,16 +974,16 @@
         /* RESPONSIVE MOBILE - 3 COLUMN LAYOUT (CENTER FOCUS) */
         @media (max-width: 768px) {
             #unit-carousel-container {
-                padding-top: 1rem !important;
-                padding-bottom: 2rem !important;
+                padding-top: 2rem !important;
+                padding-bottom: 3.5rem !important;
             }
             .unit-stage-wrapper {
-                height: 200px !important;
+                height: 240px !important;
             }
             .unit-card {
-                width: 90px !important;
-                height: 90px !important;
-                top: 36% !important;
+                width: 96px !important;
+                height: 96px !important;
+                top: 38% !important;
             }
 
             /* Slot Kiri (Background Preview) */
@@ -978,6 +1092,7 @@
                 }
                 this.initUnitCarousel();
                 this.initNavbarMarginSync();
+                this.initLiveSearch();
             },
 
             // Sinkronisasi tinggi layer blur dan padding
@@ -1259,6 +1374,217 @@
 
                 updateCarousel();
                 startAutoSlide();
+            },
+
+            // Inisialisasi Live AJAX Search
+            initLiveSearch() {
+                const searchForm = document.getElementById('live-search-form');
+                const searchInput = document.getElementById('live-search-input');
+                const spinner = document.getElementById('search-spinner');
+                const clearBtn = document.getElementById('search-clear-btn');
+                const resultsSection = document.getElementById('search-results-section');
+                const resultsTitle = document.getElementById('search-results-title');
+                const resultsCount = document.getElementById('search-results-count');
+                const resultsGrid = document.getElementById('search-results-grid');
+                const closeBtn = document.getElementById('btn-close-search');
+                const chips = document.querySelectorAll('.popular-search-chip');
+
+                if (!searchInput || !resultsSection || !resultsGrid) return;
+
+                let debounceTimer = null;
+                let currentController = null;
+
+                const escapeHtml = (str) => {
+                    if (!str) return '';
+                    return String(str)
+                        .replace(/&/g, '&amp;')
+                        .replace(/</g, '&lt;')
+                        .replace(/>/g, '&gt;')
+                        .replace(/"/g, '&quot;')
+                        .replace(/'/g, '&#039;');
+                };
+
+                const buildProductCard = (item) => {
+                    let btnBg = 'bg-[#115789] hover:bg-[#0c446c] active:bg-[#082f4d]';
+                    let btnText = 'Beli Produk';
+
+                    if (item.type === 'gas') {
+                        btnBg = 'bg-orange-600 hover:bg-orange-700 active:bg-orange-800';
+                        btnText = 'Pesan Gas';
+                    } else if (item.type === 'rental') {
+                        btnBg = 'bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800';
+                        btnText = 'Sewa Alat';
+                    } else if (item.type === 'mobil') {
+                        btnBg = 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800';
+                        btnText = 'Cek Mobil';
+                    } else if (item.type === 'fasilitas') {
+                        btnBg = 'bg-purple-600 hover:bg-purple-700 active:bg-purple-800';
+                        btnText = 'Ajukan Izin';
+                    }
+
+                    const badgeBg = item.badge_color || 'bg-[#115789] text-white';
+
+                    let imgHtml = '';
+                    if (item.image) {
+                        let src = item.image;
+                        if (!src.startsWith('http://') && !src.startsWith('https://') && !src.startsWith('User/') && !src.startsWith('Admin/')) {
+                            src = '/storage/' + src;
+                        } else if (!src.startsWith('http://') && !src.startsWith('https://')) {
+                            src = '/' + src;
+                        }
+                        imgHtml = `<img src="${src}" alt="${escapeHtml(item.name)}" loading="lazy" class="max-w-full max-h-full w-auto h-auto object-contain mx-auto group-hover:scale-105 transition-transform duration-300" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="w-full h-full hidden items-center justify-center text-gray-300 bg-gray-100"><i class="bx bx-package text-3xl"></i></div>`;
+                    } else {
+                        imgHtml = `<div class="w-full h-full flex items-center justify-center text-gray-300 bg-gray-100"><i class="bx bx-package text-3xl"></i></div>`;
+                    }
+
+                    let statusText = 'Siap Dipesan';
+                    if (item.type === 'fasilitas') {
+                        statusText = 'Tersedia izin kegiatan';
+                    } else if (item.stock && item.stock > 0) {
+                        statusText = `Stok: ${item.stock} ${item.unit || ''}`;
+                    }
+
+                    const unitText = (item.unit && item.type !== 'fasilitas') ? `<span class="text-[10px] font-normal text-gray-500">/${escapeHtml(item.unit)}</span>` : '';
+
+                    return `
+                    <div class="bg-white rounded-xl sm:rounded-2xl border border-gray-100 shadow-xs hover:shadow-xl transition-all duration-300 p-3 sm:p-4 flex flex-col justify-between group transform hover:-translate-y-1">
+                        <div>
+                            <div class="rekomendasi-img-wrapper relative rounded-lg sm:rounded-xl overflow-hidden bg-slate-50 mb-3 flex items-center justify-center border border-gray-100 p-2 sm:p-3">
+                                ${imgHtml}
+                                <span class="absolute top-2 left-2 px-2 py-0.5 text-[9px] font-bold rounded-md shadow-xs ${badgeBg}" style="color: #ffffff !important;">
+                                    ${escapeHtml(item.category)}
+                                </span>
+                            </div>
+                            <h3 class="text-xs sm:text-sm font-bold text-gray-900 line-clamp-1 mb-1" title="${escapeHtml(item.name)}">
+                                ${escapeHtml(item.name)}
+                            </h3>
+                            <div class="text-xs sm:text-sm font-black text-[#115789] mb-1">
+                                ${escapeHtml(item.price_formatted)} ${unitText}
+                            </div>
+                            <div class="text-[10px] sm:text-[11px] text-gray-400">
+                                ${escapeHtml(statusText)}
+                            </div>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-gray-50">
+                            <a href="${item.link}" class="w-full block text-center py-2 px-3 rounded-lg text-xs font-bold transition-all shadow-xs ${btnBg}" style="color: #ffffff !important;">
+                                ${btnText}
+                            </a>
+                        </div>
+                    </div>`;
+                };
+
+                const performSearch = (query) => {
+                    const trimmed = (query || '').trim();
+
+                    if (clearBtn) {
+                        if (trimmed.length > 0) {
+                            clearBtn.classList.remove('hidden');
+                        } else {
+                            clearBtn.classList.add('hidden');
+                        }
+                    }
+
+                    if (trimmed.length === 0) {
+                        resultsSection.classList.add('hidden');
+                        resultsGrid.innerHTML = '';
+                        return;
+                    }
+
+                    if (spinner) spinner.classList.remove('hidden');
+
+                    if (currentController) {
+                        currentController.abort();
+                    }
+                    currentController = new AbortController();
+
+                    const url = `{{ route('beranda') }}?search=${encodeURIComponent(trimmed)}&ajax=1`;
+                    fetch(url, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json'
+                        },
+                        signal: currentController.signal
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (spinner) spinner.classList.add('hidden');
+                        if (!data || !data.results) return;
+
+                        resultsSection.classList.remove('hidden');
+
+                        if (resultsTitle) {
+                            resultsTitle.innerHTML = `Menampilkan hasil untuk: "<span class="text-[#115789]">${escapeHtml(data.query)}</span>"`;
+                        }
+                        if (resultsCount) {
+                            resultsCount.textContent = `Ditemukan ${data.count} produk / layanan`;
+                        }
+
+                        if (data.results.length === 0) {
+                            resultsGrid.innerHTML = `
+                                <div class="col-span-2 md:col-span-4 text-center py-12">
+                                    <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-blue-50 flex items-center justify-center text-blue-400">
+                                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                                    </div>
+                                    <h3 class="text-base font-bold text-gray-800">Tidak ada produk ditemukan</h3>
+                                    <p class="text-xs text-gray-500 max-w-sm mx-auto mt-1">Coba gunakan kata kunci lain seperti "Mobil Pick Up", "Gas 3kg", "Tenda", atau "Kursi".</p>
+                                </div>`;
+                        } else {
+                            resultsGrid.innerHTML = data.results.map(item => buildProductCard(item)).join('');
+                        }
+
+                        // Scroll smoothly to results container
+                        resultsSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    })
+                    .catch(err => {
+                        if (err.name !== 'AbortError') {
+                            if (spinner) spinner.classList.add('hidden');
+                            console.error("Search AJAX error:", err);
+                        }
+                    });
+                };
+
+                searchInput.addEventListener('input', (e) => {
+                    clearTimeout(debounceTimer);
+                    debounceTimer = setTimeout(() => {
+                        performSearch(e.target.value);
+                    }, 300);
+                });
+
+                if (searchForm) {
+                    searchForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        clearTimeout(debounceTimer);
+                        performSearch(searchInput.value);
+                    });
+                }
+
+                if (clearBtn) {
+                    clearBtn.addEventListener('click', () => {
+                        searchInput.value = '';
+                        performSearch('');
+                        searchInput.focus();
+                    });
+                }
+
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', () => {
+                        searchInput.value = '';
+                        resultsSection.classList.add('hidden');
+                        if (clearBtn) clearBtn.classList.add('hidden');
+                    });
+                }
+
+                chips.forEach(chip => {
+                    chip.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const query = chip.getAttribute('data-query');
+                        if (query) {
+                            searchInput.value = query;
+                            performSearch(query);
+                        }
+                    });
+                });
             },
         };
         // Initialize

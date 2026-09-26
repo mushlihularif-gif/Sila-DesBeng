@@ -30,6 +30,21 @@ class BerandaController extends Controller
         // Handle Search
         if ($search) {
             $searchResults = $this->performGlobalSearch($search);
+            if ($request->ajax() || $request->wantsJson() || $request->has('ajax')) {
+                return response()->json([
+                    'success' => true,
+                    'query' => $search,
+                    'count' => $searchResults->count(),
+                    'results' => $searchResults->values()
+                ]);
+            }
+        } elseif ($request->has('ajax')) {
+            return response()->json([
+                'success' => true,
+                'query' => '',
+                'count' => 0,
+                'results' => []
+            ]);
         }
 
         // Dapatkan tahun yang dipilih (default ke tahun sekarang)
@@ -421,7 +436,7 @@ class BerandaController extends Controller
                         'category' => 'Fasilitas Umum',
                         'badge_color' => 'bg-purple-600 text-white',
                         'unit' => 'acara',
-                        'link' => route('fasilitas.show', $f->id)
+                        'link' => route('user.fasilitas-umum.show', $f->id)
                     ]);
                 }
             }
@@ -649,180 +664,227 @@ class BerandaController extends Controller
     }
 
     /**
-     * Perform global search across all modules
+     * Perform global search across all modules (Intelligent multi-keyword fuzzy search)
      */
     private function performGlobalSearch($search)
     {
-        // Search Rental Items
-        $rentalResults = \App\Models\Barang::searchWhereLike(['nama_barang', 'kategori'], $search)
-            ->get()
-            ->map(function ($item) {
-                return (object) [
-                    'id' => $item->id,
-                    'name' => $item->nama_barang,
-                    'image' => $item->foto,
-                    'price' => $item->harga_sewa,
-                    'price_formatted' => 'Rp ' . number_format($item->harga_sewa, 0, ',', '.'),
-                    'stock' => $item->stok,
-                    'type' => 'rental',
-                    'category' => 'Unit Penyewaan Alat',
-                    'real_category' => $item->kategori,
-                    'unit' => $item->satuan ?? 'unit',
-                    'link' => route('rental.equipment.show', $item->id)
-                ];
-            });
+        $search = trim((string)$search);
+        if (empty($search)) return collect([]);
 
-        // Search Gas Items
-        $gasResults = \App\Models\Gas::searchWhereLike(['jenis_gas', 'kategori'], $search)
-            ->get()
-            ->map(function ($item) {
-                return (object) [
-                    'id' => $item->id,
-                    'name' => $item->jenis_gas,
-                    'image' => $item->foto,
-                    'price' => $item->harga_satuan,
-                    'price_formatted' => 'Rp ' . number_format($item->harga_satuan, 0, ',', '.'),
-                    'stock' => $item->stok,
-                    'type' => 'gas',
-                    'category' => 'Unit Penjualan Gas',
-                    'real_category' => 'Gas',
-                    'unit' => 'tabung',
-                    'link' => route('gas.sales.show', $item->id)
-                ];
-            });
+        $rawSearch = strtolower($search);
+        $cleanSearch = strtolower($search);
+        
+        // Remove noise words
+        $noiseWords = ['desa', 'kelurahan', 'kecamatan', 'kabupaten', 'rt', 'rw', 'unit', 'sewa', 'beli', 'pinjam'];
+        foreach ($noiseWords as $noise) {
+            $cleanSearch = trim(preg_replace('/\b' . preg_quote($noise, '/') . '\b/u', '', $cleanSearch));
+        }
+        if (empty($cleanSearch)) {
+            $cleanSearch = $rawSearch;
+        }
 
-        // Search Mobil Items
-        $mobilResults = \App\Models\Mobil::searchWhereLike(['nama_mobil', 'kategori'], $search)
-            ->get()
-            ->map(function ($item) {
-                return (object) [
-                    'id' => $item->id,
-                    'name' => $item->nama_mobil,
-                    'image' => $item->foto,
-                    'price' => $item->harga_sewa,
-                    'price_formatted' => 'Rp ' . number_format($item->harga_sewa, 0, ',', '.'),
-                    'stock' => $item->stok,
-                    'type' => 'mobil',
-                    'category' => 'Unit Penyewaan Mobil',
-                    'real_category' => $item->kategori,
-                    'unit' => $item->satuan ?? 'hari',
-                    'link' => route('mobil.rental.show', $item->id)
-                ];
-            });
+        // Keywords and synonyms
+        $terms = array_filter(explode(' ', $cleanSearch));
+        $variations = [$cleanSearch, $rawSearch];
 
-        // Search Fasilitas Umum Items
-        $fasilitasResults = \App\Models\FasilitasUmum::searchWhereLike(['nama_fasilitas', 'kategori'], $search)
-            ->get()
-            ->map(function ($item) {
-                return (object) [
-                    'id' => $item->id,
-                    'name' => $item->nama_fasilitas,
-                    'image' => $item->foto,
-                    'price' => 0,
-                    'price_formatted' => 'Peminjaman',
-                    'stock' => $item->stok,
-                    'type' => 'fasilitas',
-                    'category' => 'Fasilitas Umum',
-                    'real_category' => $item->kategori,
-                    'unit' => 'kegiatan',
-                    'link' => route('fasilitas.show', $item->id)
-                ];
-            });
+        if (str_contains($rawSearch, 'pick') || str_contains($rawSearch, 'pikap') || str_contains($rawSearch, 'carry')) {
+            $variations[] = 'pikap';
+            $variations[] = 'pick up';
+            $variations[] = 'pickup';
+            $variations[] = 'carry';
+        }
+        if (str_contains($rawSearch, '3kg') || str_contains($rawSearch, '3 kg')) {
+            $variations[] = '3 kg';
+            $variations[] = '3kg';
+            $variations[] = 'melon';
+            $variations[] = 'lpg';
+        }
+        if (str_contains($rawSearch, '5.5') || str_contains($rawSearch, '5,5')) {
+            $variations[] = '5.5';
+            $variations[] = '5,5';
+            $variations[] = 'bright';
+        }
+        if (str_contains($rawSearch, 'tenda')) {
+            $variations[] = 'tenda';
+            $variations[] = 'terop';
+        }
 
-        // Search BUMDes Members
-        $bumdesResults = \App\Models\BumdesMember::searchWhereLike(['name', 'position'], $search)
-            ->get()
-            ->map(function ($item) {
-                $photoUrl = $item->photo ? $item->photo : 'User/img/avatars/logodomain.png';
-                return (object) [
-                    'id' => $item->id,
-                    'name' => $item->name,
-                    'image' => $photoUrl,
-                    'price' => 0,
-                    'price_formatted' => $item->position,
-                    'stock' => 0,
-                    'type' => 'profile',
-                    'category' => 'Profil BUMDes',
-                    'real_category' => 'Personil',
-                    'unit' => '',
-                    'link' => route('bumdes.detail')
-                ];
-            });
+        $allTerms = array_unique(array_filter(array_merge($terms, $variations)));
 
-        // Search Static Developers
-        $developers = [
-            [
-                'name' => 'Rizqy Hamadi Ken',
-                'image' => 'User/img/avatars/ken.png',
-                'position' => 'Pengembang SiladesBeng',
-                'link' => '#'
-            ],
-            [
-                'name' => 'Mushlihul Arif',
-                'image' => 'User/img/avatars/ayep123.jpg',
-                'position' => 'Pengembang SiladesBeng',
-                'link' => '#'
-            ],
-            [
-                'name' => 'Dicki Wahyudi',
-                'image' => 'User/img/avatars/dicki.png',
-                'position' => 'Pengembang SiladesBeng',
-                'link' => '#'
-            ]
-        ];
-
-        $developerResults = collect($developers)->filter(function ($dev) use ($search) {
-            $cleanSearch = strtolower(str_replace(['desa ', 'kelurahan ', 'kecamatan ', 'kabupaten '], '', strtolower($search)));
-            return \Illuminate\Support\Str::contains(strtolower($dev['name']), $cleanSearch) || 
-                   \Illuminate\Support\Str::contains(strtolower($dev['position']), $cleanSearch);
-        })->map(function ($dev) {
+        // 1. Search Mobil Items
+        $mobilQuery = \App\Models\Mobil::whereNotIn('kategori', ['ambulans', 'kendaraan_operasional']);
+        $mobilQuery->where(function ($q) use ($allTerms, $cleanSearch, $rawSearch) {
+            if (trim($rawSearch) === 'mobil' || trim($rawSearch) === 'sewa mobil') {
+                $q->orWhereRaw('1 = 1');
+            } else {
+                $q->where('nama_mobil', 'LIKE', "%{$cleanSearch}%")
+                  ->orWhere('kategori', 'LIKE', "%{$cleanSearch}%")
+                  ->orWhere('deskripsi', 'LIKE', "%{$cleanSearch}%");
+                foreach ($allTerms as $term) {
+                    if (strlen($term) >= 2 && $term !== 'mobil') {
+                        $q->orWhere('nama_mobil', 'LIKE', "%{$term}%")
+                          ->orWhere('kategori', 'LIKE', "%{$term}%");
+                    }
+                }
+            }
+        });
+        $mobilResults = $mobilQuery->get()->map(function ($item) {
             return (object) [
-                'id' => 'dev-' . \Illuminate\Support\Str::slug($dev['name']),
-                'name' => $dev['name'],
-                'image' => $dev['image'],
-                'price' => 0,
-                'price_formatted' => $dev['position'],
-                'stock' => 0,
-                'type' => 'developer',
-                'category' => 'Tim SiladesBeng',
-                'real_category' => 'Pengembang',
-                'unit' => '',
-                'link' => $dev['link']
+                'id' => $item->id,
+                'name' => $item->nama_mobil,
+                'image' => $item->foto,
+                'price' => $item->harga_sewa,
+                'price_formatted' => 'Rp ' . number_format($item->harga_sewa, 0, ',', '.'),
+                'stock' => $item->stok,
+                'type' => 'mobil',
+                'category' => 'Unit Penyewaan Mobil',
+                'badge_color' => 'bg-blue-600 text-white',
+                'real_category' => $item->kategori,
+                'unit' => $item->satuan ?? 'hari',
+                'link' => route('mobil.rental.show', $item->id)
             ];
         });
 
-        // Search Region
-        $regionResults = \App\Models\Region::with('parent')->where('name', 'LIKE', "%{$search}%")
-            ->get()
-            ->map(function ($item) {
-                $typeStr = ucfirst($item->type ?? 'Wilayah');
-                $parentStr = $item->parent ? $item->parent->name : 'Kabupaten Bengkalis';
-                $description = "{$typeStr} dari {$parentStr}";
+        // 2. Search Gas Items
+        $gasQuery = \App\Models\Gas::query();
+        $gasQuery->where(function ($q) use ($allTerms, $cleanSearch, $rawSearch) {
+            if (trim($rawSearch) === 'gas' || trim($rawSearch) === 'beli gas' || trim($rawSearch) === 'elpiji' || trim($rawSearch) === 'lpg') {
+                $q->orWhereRaw('1 = 1');
+            } else {
+                $q->where('jenis_gas', 'LIKE', "%{$cleanSearch}%")
+                  ->orWhere('kategori', 'LIKE', "%{$cleanSearch}%");
+                foreach ($allTerms as $term) {
+                    if (strlen($term) >= 2 && $term !== 'gas') {
+                        $q->orWhere('jenis_gas', 'LIKE', "%{$term}%")
+                          ->orWhere('kategori', 'LIKE', "%{$term}%");
+                    }
+                }
+            }
+        });
+        $gasResults = $gasQuery->get()->map(function ($item) {
+            return (object) [
+                'id' => $item->id,
+                'name' => $item->jenis_gas,
+                'image' => $item->foto,
+                'price' => $item->harga_satuan,
+                'price_formatted' => 'Rp ' . number_format($item->harga_satuan, 0, ',', '.'),
+                'stock' => $item->stok,
+                'type' => 'gas',
+                'category' => 'Unit Penjualan Gas',
+                'badge_color' => 'bg-orange-500 text-white',
+                'real_category' => 'Gas',
+                'unit' => 'tabung',
+                'link' => route('gas.sales.show', $item->id)
+            ];
+        });
 
-                return (object) [
-                    'id' => $item->id,
-                    'name' => $item->name,
-                    'image' => null,
-                    'price' => 0,
-                    'price_formatted' => $description,
-                    'stock' => 0,
-                    'type' => 'region',
-                    'category' => 'Wilayah / Desa',
-                    'real_category' => 'Wilayah',
-                    'unit' => '',
-                    'link' => '#'
-                ];
-            });
+        // 3. Search Rental Items (Barang)
+        $rentalQuery = \App\Models\Barang::query();
+        $rentalQuery->where(function ($q) use ($allTerms, $cleanSearch, $rawSearch) {
+            if (trim($rawSearch) === 'alat' || trim($rawSearch) === 'sewa alat') {
+                $q->orWhereRaw('1 = 1');
+            } else {
+                $q->where('nama_barang', 'LIKE', "%{$cleanSearch}%")
+                  ->orWhere('kategori', 'LIKE', "%{$cleanSearch}%")
+                  ->orWhere('deskripsi', 'LIKE', "%{$cleanSearch}%");
+                foreach ($allTerms as $term) {
+                    if (strlen($term) >= 2 && $term !== 'alat') {
+                        $q->orWhere('nama_barang', 'LIKE', "%{$term}%")
+                          ->orWhere('kategori', 'LIKE', "%{$term}%");
+                    }
+                }
+            }
+        });
+        $rentalResults = $rentalQuery->get()->map(function ($item) {
+            return (object) [
+                'id' => $item->id,
+                'name' => $item->nama_barang,
+                'image' => $item->foto,
+                'price' => $item->harga_sewa,
+                'price_formatted' => 'Rp ' . number_format($item->harga_sewa, 0, ',', '.'),
+                'stock' => $item->stok,
+                'type' => 'rental',
+                'category' => 'Unit Penyewaan Alat',
+                'badge_color' => 'bg-emerald-600 text-white',
+                'real_category' => $item->kategori,
+                'unit' => $item->satuan ?? 'hari',
+                'link' => route('rental.equipment.show', $item->id)
+            ];
+        });
+
+        // 4. Search Fasilitas Umum Items
+        $fasilitasQuery = \App\Models\FasilitasUmum::query();
+        $fasilitasQuery->where(function ($q) use ($allTerms, $cleanSearch, $rawSearch) {
+            if (trim($rawSearch) === 'fasilitas' || trim($rawSearch) === 'gedung') {
+                $q->orWhereRaw('1 = 1');
+            } else {
+                $q->where('nama_fasilitas', 'LIKE', "%{$cleanSearch}%")
+                  ->orWhere('kategori', 'LIKE', "%{$cleanSearch}%")
+                  ->orWhere('deskripsi', 'LIKE', "%{$cleanSearch}%");
+                foreach ($allTerms as $term) {
+                    if (strlen($term) >= 2 && $term !== 'fasilitas') {
+                        $q->orWhere('nama_fasilitas', 'LIKE', "%{$term}%")
+                          ->orWhere('kategori', 'LIKE', "%{$term}%");
+                    }
+                }
+            }
+        });
+        $fasilitasResults = $fasilitasQuery->get()->map(function ($item) {
+            return (object) [
+                'id' => $item->id,
+                'name' => $item->nama_fasilitas,
+                'image' => $item->foto,
+                'price' => 0,
+                'price_formatted' => 'Izin Kegiatan',
+                'stock' => $item->stok,
+                'type' => 'fasilitas',
+                'category' => 'Fasilitas Umum',
+                'badge_color' => 'bg-purple-600 text-white',
+                'real_category' => $item->kategori,
+                'unit' => 'kegiatan',
+                'link' => route('user.fasilitas-umum.show', $item->id)
+            ];
+        });
+
+        // 5. Search Pasar Daerah Items
+        $pasarQuery = \App\Models\PasarProduk::query();
+        $pasarQuery->where(function ($q) use ($allTerms, $cleanSearch, $rawSearch) {
+            if (trim($rawSearch) === 'pasar' || trim($rawSearch) === 'produk') {
+                $q->orWhereRaw('1 = 1');
+            } else {
+                $q->where('nama_produk', 'LIKE', "%{$cleanSearch}%")
+                  ->orWhere('kategori', 'LIKE', "%{$cleanSearch}%")
+                  ->orWhere('deskripsi', 'LIKE', "%{$cleanSearch}%");
+                foreach ($allTerms as $term) {
+                    if (strlen($term) >= 2 && $term !== 'pasar') {
+                        $q->orWhere('nama_produk', 'LIKE', "%{$term}%")
+                          ->orWhere('kategori', 'LIKE', "%{$term}%");
+                    }
+                }
+            }
+        });
+        $pasarResults = $pasarQuery->get()->map(function ($item) {
+            return (object) [
+                'id' => $item->id,
+                'name' => $item->nama_produk,
+                'image' => $item->foto,
+                'price' => $item->harga,
+                'price_formatted' => 'Rp ' . number_format($item->harga, 0, ',', '.'),
+                'stock' => $item->stok,
+                'type' => 'pasar',
+                'category' => 'Pasar Daerah',
+                'badge_color' => 'bg-amber-600 text-white',
+                'real_category' => $item->kategori,
+                'unit' => $item->satuan ?? 'pcs',
+                'link' => route('pasar.show', $item->id)
+            ];
+        });
 
         return collect([])
-            ->concat($rentalResults)
-            ->concat($gasResults)
             ->concat($mobilResults)
+            ->concat($gasResults)
+            ->concat($rentalResults)
             ->concat($fasilitasResults)
-            ->concat($bumdesResults)
-            ->concat($regionResults)
-            ->concat($developerResults)
-            ->values()
-            ->toArray();
+            ->concat($pasarResults);
     }
 }
