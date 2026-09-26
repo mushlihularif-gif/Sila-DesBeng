@@ -95,11 +95,14 @@
             <!-- Bilah Pencarian Modern & Live AJAX Search -->
             <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
                 <div class="max-w-2xl mx-auto">
-                    <form id="live-search-form" action="{{ route('beranda') }}" method="GET" class="relative">
+                    <form id="live-search-form" action="{{ route('beranda') }}" method="GET" class="relative group">
+                        <!-- Gradient Border ("Warna Kita") -->
+                        <div class="absolute -inset-0.5 bg-gradient-to-r from-blue-600 via-sky-400 to-amber-400 rounded-full opacity-80 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-300 shadow-sm"></div>
+
                         <!-- Search Input Pill Container -->
-                        <div class="relative flex items-center bg-white rounded-full border-2 border-gray-200/90 shadow-md hover:border-blue-500 hover:shadow-lg focus-within:border-blue-600 focus-within:shadow-xl focus-within:ring-4 focus-within:ring-blue-100 transition-all duration-300 p-1 sm:p-1.5">
+                        <div class="relative flex items-center bg-white rounded-full p-1 sm:p-1.5 shadow-sm">
                             <div class="pl-4 sm:pl-5 pr-2 text-gray-400 flex items-center justify-center">
-                                <svg class="w-5 h-5 sm:w-6 sm:h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 sm:w-6 sm:h-6 text-[#115789]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"
                                         d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                 </svg>
@@ -126,20 +129,20 @@
 
                             <!-- Search Submit Button -->
                             <button type="submit" id="search-submit-btn"
-                                class="flex-shrink-0 px-5 sm:px-7 py-2.5 sm:py-3 rounded-full text-white font-bold text-xs sm:text-sm shadow-sm transition-all duration-200 cursor-pointer flex items-center gap-1.5 ml-1" style="background-color: #115789 !important; color: #ffffff !important;">
+                                class="flex-shrink-0 px-6 sm:px-8 py-2.5 sm:py-3 rounded-full text-white font-bold text-xs sm:text-sm shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer flex items-center justify-center gap-1.5 ml-1 bg-gradient-to-r from-blue-600 to-[#115789] hover:from-blue-700 hover:to-[#0d456d] active:scale-95" style="color: #ffffff !important;">
                                 <span>Cari</span>
                             </button>
                         </div>
                     </form>
 
                     <!-- Quick Popular Search Chips (Live AJAX Triggers) -->
-                    <div class="mt-3.5 flex items-center justify-center gap-2 flex-wrap text-xs text-gray-500">
-                        <span class="text-[11px] text-gray-400 font-semibold">Paling sering dicari:</span>
-                        <button type="button" data-query="Gas 3kg" class="popular-search-chip px-3 py-1 rounded-full bg-white hover:bg-blue-50 text-gray-700 hover:text-blue-700 border border-gray-200 shadow-2xs hover:border-blue-300 transition-all text-[11px] font-medium cursor-pointer">Gas 3kg</button>
-                        <button type="button" data-query="Mobil Pick Up" class="popular-search-chip px-3 py-1 rounded-full bg-white hover:bg-blue-50 text-gray-700 hover:text-blue-700 border border-gray-200 shadow-2xs hover:border-blue-300 transition-all text-[11px] font-medium cursor-pointer">Mobil Pick Up</button>
-                        <button type="button" data-query="Tenda" class="popular-search-chip px-3 py-1 rounded-full bg-white hover:bg-blue-50 text-gray-700 hover:text-blue-700 border border-gray-200 shadow-2xs hover:border-blue-300 transition-all text-[11px] font-medium cursor-pointer">Tenda Acara</button>
-                        <button type="button" data-query="Kursi" class="popular-search-chip px-3 py-1 rounded-full bg-white hover:bg-blue-50 text-gray-700 hover:text-blue-700 border border-gray-200 shadow-2xs hover:border-blue-300 transition-all text-[11px] font-medium cursor-pointer">Kursi Lipat</button>
-                        <button type="button" data-query="Pasar" class="popular-search-chip px-3 py-1 rounded-full bg-white hover:bg-blue-50 text-gray-700 hover:text-blue-700 border border-gray-200 shadow-2xs hover:border-blue-300 transition-all text-[11px] font-medium cursor-pointer">Pasar Daerah</button>
+                    <div class="mt-5 sm:mt-7 flex items-center justify-center gap-2 sm:gap-2.5 flex-wrap text-xs text-gray-500">
+                        <span class="text-[12px] text-gray-500 font-semibold mr-1">Paling sering dicari:</span>
+                        <button type="button" data-query="Gas 3kg" class="popular-search-chip px-3.5 py-1.5 rounded-full bg-white hover:bg-blue-50 text-gray-700 hover:text-[#115789] border border-gray-200 shadow-xs hover:border-blue-300 hover:shadow-sm transition-all text-xs font-medium cursor-pointer">Gas 3kg</button>
+                        <button type="button" data-query="Mobil Pick Up" class="popular-search-chip px-3.5 py-1.5 rounded-full bg-white hover:bg-blue-50 text-gray-700 hover:text-[#115789] border border-gray-200 shadow-xs hover:border-blue-300 hover:shadow-sm transition-all text-xs font-medium cursor-pointer">Mobil Pick Up</button>
+                        <button type="button" data-query="Tenda" class="popular-search-chip px-3.5 py-1.5 rounded-full bg-white hover:bg-blue-50 text-gray-700 hover:text-[#115789] border border-gray-200 shadow-xs hover:border-blue-300 hover:shadow-sm transition-all text-xs font-medium cursor-pointer">Tenda Acara</button>
+                        <button type="button" data-query="Kursi" class="popular-search-chip px-3.5 py-1.5 rounded-full bg-white hover:bg-blue-50 text-gray-700 hover:text-[#115789] border border-gray-200 shadow-xs hover:border-blue-300 hover:shadow-sm transition-all text-xs font-medium cursor-pointer">Kursi Lipat</button>
+                        <button type="button" data-query="Pasar" class="popular-search-chip px-3.5 py-1.5 rounded-full bg-white hover:bg-blue-50 text-gray-700 hover:text-[#115789] border border-gray-200 shadow-xs hover:border-blue-300 hover:shadow-sm transition-all text-xs font-medium cursor-pointer">Pasar Daerah</button>
                     </div>
                 </div>
             </div>
@@ -273,11 +276,11 @@
                             $greetingPhrase2 = 'Pilih salah satu layanan di bawah untuk melihat rincian dan pemesanannya.';
                         @endphp
                         <div class="min-h-[58px] sm:min-h-[72px] md:min-h-[80px] flex items-center justify-center px-4">
-                            <h2 class="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black tracking-tight leading-snug">
+                            <h2 class="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-gray-900 tracking-tight leading-snug">
                                 <span id="typewriter-text" 
-                                      class="bg-gradient-to-r from-gray-900 via-[#115789] to-[#2563eb] bg-clip-text text-transparent"
+                                      class="text-gray-900 font-black"
                                       data-phrase1="{{ $greetingPhrase1 }}"
-                                      data-phrase2="{{ $greetingPhrase2 }}">{{ $greetingPhrase1 }}</span><span id="typewriter-cursor" class="text-[#115789] font-normal animate-pulse inline-block ml-0.5">|</span>
+                                      data-phrase2="{{ $greetingPhrase2 }}">{{ $greetingPhrase1 }}</span><span id="typewriter-cursor" class="typewriter-cursor">|</span>
                             </h2>
                         </div>
                     </div>
@@ -498,7 +501,6 @@
                 <div class="max-w-7xl mx-auto relative z-10">
                     <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-6 sm:mb-8">
                         <div>
-                            <span class="text-[11px] sm:text-xs font-bold text-[#115789] uppercase tracking-wider block mb-1">Pilihan Layanan & Produk Warga</span>
                             <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
                                 <span class="bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">Rekomendasi Produk</span> 
                                 <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Buat Kamu</span>
@@ -969,6 +971,19 @@
             opacity: 0;
             z-index: 5;
             pointer-events: none;
+        }
+
+        /* Kursor Kedip Typewriter Ala Tanya Assistant */
+        .typewriter-cursor {
+            display: inline-block;
+            font-weight: 300;
+            color: #111827;
+            margin-left: 2px;
+            animation: typewriter-blink 0.8s step-end infinite;
+        }
+        @keyframes typewriter-blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
         }
 
         /* Tombol Aksi Unit Layanan (Solid, Anti-Washed Out) */
