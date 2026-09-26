@@ -10,7 +10,12 @@ use App\Models\ManualReport;
 use App\Models\Barang;
 use App\Models\Gas;
 use App\Models\Mobil;
+use App\Models\MobilBooking;
 use App\Models\FasilitasUmum;
+use App\Models\FasilitasUmumBooking;
+use App\Models\PasarOrderItem;
+use App\Models\PasarProduk;
+use App\Models\Region;
 use App\Models\BumdesMember;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -181,7 +186,7 @@ class BerandaController extends Controller
     }
 
     /**
-     * Get Popular Products (Top 4 most rented/sold items)
+     * Get Popular Products (Top 4 most rented/sold items with smart fallback)
      */
     private function getPopularProducts($year = null, $regionId = 1)
     {
@@ -191,15 +196,14 @@ class BerandaController extends Controller
         // 1. Get Rental Scores
         $rentalPopularity = RentalBooking::withTrashed()
             ->select('barang_id', DB::raw('SUM(quantity) as total_sold'))
-            ->whereYear('created_at', $year) // Filter by Year
-            ->whereIn('region_id', $regionIds) // Filter by Region
+            ->whereYear('created_at', $year)
+            ->whereIn('region_id', $regionIds)
             ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
             ->whereNotNull('barang_id')
             ->groupBy('barang_id')
             ->with('barang')
             ->get();
 
-        // 2. Map Rental to common format
         $products = $rentalPopularity->map(function ($item) {
             if (!$item->barang) return null;
             return (object) [
@@ -209,26 +213,26 @@ class BerandaController extends Controller
                 'price' => $item->barang->harga_sewa,
                 'price_formatted' => 'Rp ' . number_format($item->barang->harga_sewa, 0, ',', '.'),
                 'stock' => $item->barang->stok,
-                'sold' => $item->total_sold,
+                'sold' => (int)$item->total_sold,
                 'type' => 'rental',
                 'category' => 'Unit Penyewaan Alat',
-                'unit' => $item->barang->satuan ?? 'unit',
+                'badge_color' => 'bg-emerald-600 text-white',
+                'unit' => $item->barang->satuan ?? 'hari',
                 'link' => route('rental.equipment.show', $item->barang->id)
             ];
         })->filter();
 
-        // 3. Get Gas Scores
+        // 2. Get Gas Scores
         $gasPopularity = GasOrder::withTrashed()
             ->select('gas_id', DB::raw('SUM(quantity) as total_sold'))
-            ->whereYear('created_at', $year) // Filter by Year
-            ->whereIn('region_id', $regionIds) // Filter by Region
+            ->whereYear('created_at', $year)
+            ->whereIn('region_id', $regionIds)
             ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
             ->whereNotNull('gas_id')
             ->groupBy('gas_id')
             ->with('gas')
             ->get();
 
-        // 4. Map Gas to common format
         $gasProducts = $gasPopularity->map(function ($item) {
             if (!$item->gas) return null;
             return (object) [
@@ -238,15 +242,45 @@ class BerandaController extends Controller
                 'price' => $item->gas->harga_satuan,
                 'price_formatted' => 'Rp ' . number_format($item->gas->harga_satuan, 0, ',', '.'),
                 'stock' => $item->gas->stok,
-                'sold' => $item->total_sold,
+                'sold' => (int)$item->total_sold,
                 'type' => 'gas',
                 'category' => 'Unit Penjualan Gas',
+                'badge_color' => 'bg-orange-500 text-white',
                 'unit' => 'tabung',
                 'link' => route('gas.sales.show', $item->gas->id)
             ];
         })->filter();
 
-        // 5. Get Pasar Daerah Scores
+        // 3. Get Mobil Scores
+        $mobilPopularity = \App\Models\MobilBooking::withTrashed()
+            ->select('mobil_id', DB::raw('COUNT(id) as total_sold'))
+            ->whereYear('created_at', $year)
+            ->whereIn('region_id', $regionIds)
+            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
+            ->whereNotNull('mobil_id')
+            ->groupBy('mobil_id')
+            ->with('mobil')
+            ->get();
+
+        $mobilProducts = $mobilPopularity->map(function ($item) {
+            if (!$item->mobil) return null;
+            return (object) [
+                'id' => $item->mobil->id,
+                'name' => $item->mobil->nama_mobil,
+                'image' => $item->mobil->foto,
+                'price' => $item->mobil->harga_sewa,
+                'price_formatted' => 'Rp ' . number_format($item->mobil->harga_sewa, 0, ',', '.'),
+                'stock' => $item->mobil->stok,
+                'sold' => (int)$item->total_sold,
+                'type' => 'mobil',
+                'category' => 'Unit Penyewaan Mobil',
+                'badge_color' => 'bg-blue-600 text-white',
+                'unit' => $item->mobil->satuan ?? 'hari',
+                'link' => route('mobil.rental.show', $item->mobil->id)
+            ];
+        })->filter();
+
+        // 4. Get Pasar Daerah Scores
         $pasarPopularity = \App\Models\PasarOrderItem::select('pasar_produk_id', DB::raw('SUM(quantity) as total_sold'))
             ->whereHas('order', function($q) use ($year, $regionIds) {
                 $q->withTrashed()
@@ -258,7 +292,6 @@ class BerandaController extends Controller
             ->with('produk')
             ->get();
 
-        // 6. Map Pasar to common format
         $pasarProducts = $pasarPopularity->map(function ($item) {
             if (!$item->produk) return null;
             return (object) [
@@ -268,16 +301,186 @@ class BerandaController extends Controller
                 'price' => $item->produk->harga,
                 'price_formatted' => 'Rp ' . number_format($item->produk->harga, 0, ',', '.'),
                 'stock' => $item->produk->stok,
-                'sold' => $item->total_sold,
+                'sold' => (int)$item->total_sold,
                 'type' => 'pasar',
                 'category' => 'Pasar Daerah',
+                'badge_color' => 'bg-amber-600 text-white',
                 'unit' => $item->produk->satuan ?? 'pcs',
                 'link' => route('pasar.show', $item->produk->id)
             ];
         })->filter();
 
-        // 7. Merge, Sort, Take 4 (Only Hot)
-        return $products->concat($gasProducts)->concat($pasarProducts)->sortByDesc('sold')->take(4);
+        // Gabungkan produk berdasarkan penjualan terlaris
+        $combined = $products->concat($gasProducts)->concat($mobilProducts)->concat($pasarProducts)->sortByDesc('sold');
+
+        // SMART FALLBACK: Jika riwayat transaksi masih kurang dari 4 (Cold Start)
+        // Isi slot produk dengan produk yang tersedia/ready stock di wilayah tersebut!
+        if ($combined->count() < 4) {
+            $existingKeys = $combined->map(fn($p) => $p->type . '-' . $p->id)->toArray();
+
+            // Fallback 1: Gas Elpiji Ready
+            $fallbackGas = \App\Models\Gas::whereIn('region_id', $regionIds)
+                ->where('stok', '>', 0)
+                ->latest()
+                ->take(2)
+                ->get();
+            foreach ($fallbackGas as $g) {
+                $key = 'gas-' . $g->id;
+                if (!in_array($key, $existingKeys) && $combined->count() < 4) {
+                    $existingKeys[] = $key;
+                    $combined->push((object) [
+                        'id' => $g->id,
+                        'name' => $g->jenis_gas,
+                        'image' => $g->foto,
+                        'price' => $g->harga_satuan,
+                        'price_formatted' => 'Rp ' . number_format($g->harga_satuan, 0, ',', '.'),
+                        'stock' => $g->stok,
+                        'sold' => 0,
+                        'type' => 'gas',
+                        'category' => 'Unit Penjualan Gas',
+                        'badge_color' => 'bg-orange-500 text-white',
+                        'unit' => 'tabung',
+                        'link' => route('gas.sales.show', $g->id)
+                    ]);
+                }
+            }
+
+            // Fallback 2: Alat Sewa Ready
+            $fallbackBarang = \App\Models\Barang::whereIn('region_id', $regionIds)
+                ->where('stok', '>', 0)
+                ->latest()
+                ->take(2)
+                ->get();
+            foreach ($fallbackBarang as $b) {
+                $key = 'rental-' . $b->id;
+                if (!in_array($key, $existingKeys) && $combined->count() < 4) {
+                    $existingKeys[] = $key;
+                    $combined->push((object) [
+                        'id' => $b->id,
+                        'name' => $b->nama_barang,
+                        'image' => $b->foto,
+                        'price' => $b->harga_sewa,
+                        'price_formatted' => 'Rp ' . number_format($b->harga_sewa, 0, ',', '.'),
+                        'stock' => $b->stok,
+                        'sold' => 0,
+                        'type' => 'rental',
+                        'category' => 'Unit Penyewaan Alat',
+                        'badge_color' => 'bg-emerald-600 text-white',
+                        'unit' => $b->satuan ?? 'hari',
+                        'link' => route('rental.equipment.show', $b->id)
+                    ]);
+                }
+            }
+
+            // Fallback 3: Mobil Sewa Ready
+            $fallbackMobil = \App\Models\Mobil::whereIn('region_id', $regionIds)
+                ->whereNotIn('kategori', ['ambulans', 'kendaraan_operasional'])
+                ->where('stok', '>', 0)
+                ->latest()
+                ->take(2)
+                ->get();
+            foreach ($fallbackMobil as $m) {
+                $key = 'mobil-' . $m->id;
+                if (!in_array($key, $existingKeys) && $combined->count() < 4) {
+                    $existingKeys[] = $key;
+                    $combined->push((object) [
+                        'id' => $m->id,
+                        'name' => $m->nama_mobil,
+                        'image' => $m->foto,
+                        'price' => $m->harga_sewa,
+                        'price_formatted' => 'Rp ' . number_format($m->harga_sewa, 0, ',', '.'),
+                        'stock' => $m->stok,
+                        'sold' => 0,
+                        'type' => 'mobil',
+                        'category' => 'Unit Penyewaan Mobil',
+                        'badge_color' => 'bg-blue-600 text-white',
+                        'unit' => $m->satuan ?? 'hari',
+                        'link' => route('mobil.rental.show', $m->id)
+                    ]);
+                }
+            }
+
+            // Fallback 4: Fasilitas Umum Desa
+            $fallbackFasilitas = \App\Models\FasilitasUmum::whereIn('region_id', $regionIds)
+                ->latest()
+                ->take(1)
+                ->get();
+            foreach ($fallbackFasilitas as $f) {
+                $key = 'fasilitas-' . $f->id;
+                if (!in_array($key, $existingKeys) && $combined->count() < 4) {
+                    $existingKeys[] = $key;
+                    $combined->push((object) [
+                        'id' => $f->id,
+                        'name' => $f->nama_fasilitas,
+                        'image' => $f->foto,
+                        'price' => 0,
+                        'price_formatted' => 'Izin Kegiatan',
+                        'stock' => $f->stok ?? 1,
+                        'sold' => 0,
+                        'type' => 'fasilitas',
+                        'category' => 'Fasilitas Umum',
+                        'badge_color' => 'bg-purple-600 text-white',
+                        'unit' => 'acara',
+                        'link' => route('fasilitas.show', $f->id)
+                    ]);
+                }
+            }
+
+            // Fallback 5: Pasar Produk Daerah (Sentral se-Kabupaten)
+            if ($combined->count() < 4) {
+                $fallbackPasar = \App\Models\PasarProduk::where('stok', '>', 0)
+                    ->latest()
+                    ->take(4)
+                    ->get();
+                foreach ($fallbackPasar as $p) {
+                    $key = 'pasar-' . $p->id;
+                    if (!in_array($key, $existingKeys) && $combined->count() < 4) {
+                        $existingKeys[] = $key;
+                        $combined->push((object) [
+                            'id' => $p->id,
+                            'name' => $p->nama_produk,
+                            'image' => $p->foto,
+                            'price' => $p->harga,
+                            'price_formatted' => 'Rp ' . number_format($p->harga, 0, ',', '.'),
+                            'stock' => $p->stok,
+                            'sold' => 0,
+                            'type' => 'pasar',
+                            'category' => 'Pasar Daerah',
+                            'badge_color' => 'bg-amber-600 text-white',
+                            'unit' => $p->satuan ?? 'pcs',
+                            'link' => route('pasar.show', $p->id)
+                        ]);
+                    }
+                }
+            }
+
+            // Fallback 6: Master Produk se-Kabupaten Bengkalis jika desa benar-benar kosong
+            if ($combined->count() < 4) {
+                $globalBarang = \App\Models\Barang::where('stok', '>', 0)->latest()->take(4)->get();
+                foreach ($globalBarang as $b) {
+                    $key = 'rental-' . $b->id;
+                    if (!in_array($key, $existingKeys) && $combined->count() < 4) {
+                        $existingKeys[] = $key;
+                        $combined->push((object) [
+                            'id' => $b->id,
+                            'name' => $b->nama_barang,
+                            'image' => $b->foto,
+                            'price' => $b->harga_sewa,
+                            'price_formatted' => 'Rp ' . number_format($b->harga_sewa, 0, ',', '.'),
+                            'stock' => $b->stok,
+                            'sold' => 0,
+                            'type' => 'rental',
+                            'category' => 'Unit Penyewaan Alat',
+                            'badge_color' => 'bg-emerald-600 text-white',
+                            'unit' => $b->satuan ?? 'hari',
+                            'link' => route('rental.equipment.show', $b->id)
+                        ]);
+                    }
+                }
+            }
+        }
+
+        return $combined->take(4);
     }
     
     /**
