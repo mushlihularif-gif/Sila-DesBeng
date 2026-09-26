@@ -92,27 +92,22 @@
                 </div>
             </div>
 
-            <!-- Bilah Pencarian dengan Batas Gradien & Live AJAX Search -->
-            <div class="max-w-screen-2xl mx-auto px-4 sm:px-5 py-4 sm:py-8">
+            <!-- Bilah Pencarian Modern & Live AJAX Search -->
+            <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
                 <div class="max-w-2xl mx-auto">
-                    <form id="live-search-form" action="{{ route('beranda') }}" method="GET" class="relative group">
-                        <!-- Gradient Border -->
-                        <div
-                            class="absolute -inset-0.5 bg-gradient-to-r from-blue-500 via-blue-400 to-amber-400 rounded-full opacity-80 group-hover:opacity-100 transition-opacity duration-300">
-                        </div>
-
-                        <!-- Search Input -->
-                        <div class="relative flex items-center bg-white rounded-full overflow-hidden shadow-sm">
-                            <div class="pl-4 sm:pl-5 text-gray-400 flex items-center justify-center">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    <form id="live-search-form" action="{{ route('beranda') }}" method="GET" class="relative">
+                        <!-- Search Input Pill Container -->
+                        <div class="relative flex items-center bg-white rounded-full border-2 border-gray-200/90 shadow-md hover:border-blue-500 hover:shadow-lg focus-within:border-blue-600 focus-within:shadow-xl focus-within:ring-4 focus-within:ring-blue-100 transition-all duration-300 p-1 sm:p-1.5">
+                            <div class="pl-4 sm:pl-5 pr-2 text-gray-400 flex items-center justify-center">
+                                <svg class="w-5 h-5 sm:w-6 sm:h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"
                                         d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                 </svg>
                             </div>
 
                             <input type="text" id="live-search-input" name="search" value="{{ $search ?? '' }}" 
-                                placeholder="Cari Mobil Pick Up, Gas 3kg, Tenda, Kursi..." autocomplete="off"
-                                class="flex-1 px-3 sm:px-4 py-3 sm:py-3.5 text-gray-800 text-sm sm:text-[15px] focus:outline-none bg-transparent font-medium">
+                                placeholder="Cari Gas 3kg, Mobil Pick Up, Tenda, Kursi..." autocomplete="off"
+                                class="flex-1 py-2.5 sm:py-3 px-2 text-gray-800 text-sm sm:text-base font-medium placeholder-gray-400 focus:outline-none bg-transparent">
 
                             <!-- Loading Spinner -->
                             <div id="search-spinner" class="hidden pr-3 text-blue-600 animate-spin">
@@ -123,28 +118,28 @@
                             </div>
 
                             <!-- Clear Button -->
-                            <button type="button" id="search-clear-btn" class="{{ (!empty($search)) ? '' : 'hidden' }} px-3 text-gray-400 hover:text-gray-600 transition-colors" title="Hapus pencarian">
+                            <button type="button" id="search-clear-btn" class="{{ (!empty($search)) ? '' : 'hidden' }} px-2 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer" title="Hapus pencarian">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
                                 </svg>
                             </button>
 
-                            <!-- Search Button -->
+                            <!-- Search Submit Button -->
                             <button type="submit" id="search-submit-btn"
-                                class="flex-shrink-0 px-5 sm:px-6 py-3 sm:py-3.5 bg-gradient-to-r from-blue-600 to-[#115789] hover:from-blue-700 hover:to-[#0d456d] text-white font-bold text-xs sm:text-sm transition-all duration-200">
+                                class="flex-shrink-0 px-5 sm:px-7 py-2.5 sm:py-3 rounded-full text-white font-bold text-xs sm:text-sm shadow-sm transition-all duration-200 cursor-pointer flex items-center gap-1.5 ml-1" style="background-color: #115789 !important; color: #ffffff !important;">
                                 <span>Cari</span>
                             </button>
                         </div>
                     </form>
 
                     <!-- Quick Popular Search Chips (Live AJAX Triggers) -->
-                    <div class="mt-3 flex items-center justify-center gap-1.5 flex-wrap text-xs text-gray-500">
-                        <span class="text-[11px] text-gray-400 font-medium">Paling sering dicari:</span>
-                        <button type="button" data-query="Mobil Pick Up" class="popular-search-chip px-2.5 py-1 rounded-full bg-white/80 hover:bg-blue-50 text-gray-700 hover:text-blue-600 border border-gray-200 shadow-xs transition-all text-[11px] font-medium cursor-pointer">Mobil Pick Up</button>
-                        <button type="button" data-query="Gas 3kg" class="popular-search-chip px-2.5 py-1 rounded-full bg-white/80 hover:bg-blue-50 text-gray-700 hover:text-blue-600 border border-gray-200 shadow-xs transition-all text-[11px] font-medium cursor-pointer">Gas 3kg</button>
-                        <button type="button" data-query="Tenda" class="popular-search-chip px-2.5 py-1 rounded-full bg-white/80 hover:bg-blue-50 text-gray-700 hover:text-blue-600 border border-gray-200 shadow-xs transition-all text-[11px] font-medium cursor-pointer">Tenda Acara</button>
-                        <button type="button" data-query="Kursi" class="popular-search-chip px-2.5 py-1 rounded-full bg-white/80 hover:bg-blue-50 text-gray-700 hover:text-blue-600 border border-gray-200 shadow-xs transition-all text-[11px] font-medium cursor-pointer">Kursi Lipat</button>
-                        <button type="button" data-query="Pasar" class="popular-search-chip px-2.5 py-1 rounded-full bg-white/80 hover:bg-blue-50 text-gray-700 hover:text-blue-600 border border-gray-200 shadow-xs transition-all text-[11px] font-medium cursor-pointer">Pasar Daerah</button>
+                    <div class="mt-3.5 flex items-center justify-center gap-2 flex-wrap text-xs text-gray-500">
+                        <span class="text-[11px] text-gray-400 font-semibold">Paling sering dicari:</span>
+                        <button type="button" data-query="Gas 3kg" class="popular-search-chip px-3 py-1 rounded-full bg-white hover:bg-blue-50 text-gray-700 hover:text-blue-700 border border-gray-200 shadow-2xs hover:border-blue-300 transition-all text-[11px] font-medium cursor-pointer">Gas 3kg</button>
+                        <button type="button" data-query="Mobil Pick Up" class="popular-search-chip px-3 py-1 rounded-full bg-white hover:bg-blue-50 text-gray-700 hover:text-blue-700 border border-gray-200 shadow-2xs hover:border-blue-300 transition-all text-[11px] font-medium cursor-pointer">Mobil Pick Up</button>
+                        <button type="button" data-query="Tenda" class="popular-search-chip px-3 py-1 rounded-full bg-white hover:bg-blue-50 text-gray-700 hover:text-blue-700 border border-gray-200 shadow-2xs hover:border-blue-300 transition-all text-[11px] font-medium cursor-pointer">Tenda Acara</button>
+                        <button type="button" data-query="Kursi" class="popular-search-chip px-3 py-1 rounded-full bg-white hover:bg-blue-50 text-gray-700 hover:text-blue-700 border border-gray-200 shadow-2xs hover:border-blue-300 transition-all text-[11px] font-medium cursor-pointer">Kursi Lipat</button>
+                        <button type="button" data-query="Pasar" class="popular-search-chip px-3 py-1 rounded-full bg-white hover:bg-blue-50 text-gray-700 hover:text-blue-700 border border-gray-200 shadow-2xs hover:border-blue-300 transition-all text-[11px] font-medium cursor-pointer">Pasar Daerah</button>
                     </div>
                 </div>
             </div>
@@ -227,23 +222,28 @@
 
                                 <div class="mt-3 pt-2 border-t border-gray-50">
                                     @php
-                                        $btnColor = 'bg-[#115789] hover:bg-[#0c446c] active:bg-[#082f4d]';
+                                        $btnClass = 'btn-action-pasar';
+                                        $btnStyle = 'background-color: #115789 !important; color: #ffffff !important;';
                                         $btnLabel = 'Beli Produk';
                                         if ($item->type == 'gas') {
-                                            $btnColor = 'bg-orange-600 hover:bg-orange-700 active:bg-orange-800';
+                                            $btnClass = 'btn-action-gas';
+                                            $btnStyle = 'background-color: #ea580c !important; color: #ffffff !important;';
                                             $btnLabel = 'Pesan Gas';
                                         } elseif ($item->type == 'rental') {
-                                            $btnColor = 'bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800';
+                                            $btnClass = 'btn-action-rental';
+                                            $btnStyle = 'background-color: #059669 !important; color: #ffffff !important;';
                                             $btnLabel = 'Sewa Alat';
                                         } elseif ($item->type == 'mobil') {
-                                            $btnColor = 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800';
+                                            $btnClass = 'btn-action-mobil';
+                                            $btnStyle = 'background-color: #2563eb !important; color: #ffffff !important;';
                                             $btnLabel = 'Cek Mobil';
                                         } elseif ($item->type == 'fasilitas') {
-                                            $btnColor = 'bg-purple-600 hover:bg-purple-700 active:bg-purple-800';
+                                            $btnClass = 'btn-action-fasilitas';
+                                            $btnStyle = 'background-color: #9333ea !important; color: #ffffff !important;';
                                             $btnLabel = 'Ajukan Izin';
                                         }
                                     @endphp
-                                    <a href="{{ $item->link }}" class="w-full block text-center py-2 px-3 rounded-lg text-xs font-bold transition-all shadow-xs {{ $btnColor }}" style="color: #ffffff !important;">
+                                    <a href="{{ $item->link }}" class="w-full block text-center py-2 px-3 rounded-lg text-xs font-bold transition-all shadow-xs {{ $btnClass }}" style="{{ $btnStyle }}">
                                         {{ $btnLabel }}
                                     </a>
                                 </div>
@@ -266,27 +266,21 @@
             <div id="unit-carousel-container" class="max-w-7xl mx-auto px-4 sm:px-6 pt-8 pb-14 sm:pt-14 sm:pb-20 overflow-hidden relative">
                 <div class="max-w-7xl mx-auto relative z-10">
 
-                    <!-- Sapaan Ramah Pengunjung / Warga -->
-                    <div class="text-center mb-8 sm:mb-12">
-                        @if(auth()->check())
-                            <h2 class="text-2xl sm:text-3xl md:text-4xl font-black text-gray-900 tracking-tight">
-                                Halo, <span class="bg-gradient-to-r from-gray-900 via-[#115789] to-[#60a5fa] bg-clip-text text-transparent">{{ auth()->user()->nama_lengkap ?? auth()->user()->name }}</span>
+                    <!-- Sapaan Ramah Dinamis (Animasi Mengetik & Menghapus Bergantian) -->
+                    <div class="mb-4 sm:mb-6">
+                        @php
+                            $greetingPhrase1 = auth()->check() ? ('Halo, ' . (auth()->user()->nama_lengkap ?? auth()->user()->name)) : 'Halo Warga Bengkalis';
+                            $greetingPhrase2 = 'Pilih salah satu layanan di bawah untuk melihat rincian dan pemesanannya.';
+                        @endphp
+                        <div class="min-h-[58px] sm:min-h-[72px] md:min-h-[80px] flex items-center justify-center px-4">
+                            <h2 class="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black tracking-tight leading-snug">
+                                <span id="typewriter-text" 
+                                      class="bg-gradient-to-r from-gray-900 via-[#115789] to-[#2563eb] bg-clip-text text-transparent"
+                                      data-phrase1="{{ $greetingPhrase1 }}"
+                                      data-phrase2="{{ $greetingPhrase2 }}">{{ $greetingPhrase1 }}</span><span id="typewriter-cursor" class="text-[#115789] font-normal animate-pulse inline-block ml-0.5">|</span>
                             </h2>
-                            <p class="text-xs sm:text-sm text-gray-500 mt-1 max-w-lg mx-auto">
-                                @if(auth()->user()->region)
-                                    Warga {{ auth()->user()->region->name }} &bull; Layanan resmi BUMDes desa Anda siap membantu kebutuhan harian.
-                                @else
-                                    Selamat datang di SiladesBeng &bull; Pilih layanan di bawah untuk kebutuhan Anda.
-                                @endif
-                            </p>
-                        @else
-                            <h2 class="text-2xl sm:text-3xl md:text-4xl font-black text-gray-900 tracking-tight">
-                                Halo Warga Bengkalis
-                            </h2>
-                            <p class="text-xs sm:text-sm text-gray-500 mt-1 max-w-md mx-auto">
-                                Pilih salah satu layanan di bawah untuk melihat rincian dan pemesanannya.
-                            </p>
-                        @endif
+                        </div>
+                    </div>
 
                         <!-- Kotak Narasi Dinamis (Sinkron dengan Carousel 3D) -->
                         <div class="mt-6 sm:mt-8 max-w-2xl mx-auto px-2">
@@ -462,26 +456,27 @@
                                 </div>
                                 @endif
                             </div>
+                        </div>
 
-                            <div class="unit-nav-wrapper absolute -bottom-6 left-0 right-0 flex items-center justify-center gap-2 sm:gap-4 md:gap-12 z-60 px-2 sm:px-4">
-                                <button id="unit-prev" class="bg-white hover:bg-gray-50 text-gray-800 rounded-full p-2 sm:p-3 shadow-lg border border-gray-100 transition-transform active:scale-95 flex-shrink-0">
-                                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
-                                    </svg>
-                                </button>
+                        <!-- Navigasi Unit Carousel (Aliran Dokumen Normal - Anti Tabrakan) -->
+                        <div class="unit-nav-wrapper mt-4 sm:mt-8 mb-4 sm:mb-8 flex items-center justify-center gap-3 sm:gap-6 md:gap-12 px-4 relative z-30">
+                            <button type="button" id="unit-prev" class="bg-white hover:bg-gray-50 text-gray-800 rounded-full p-2.5 sm:p-3.5 shadow-md hover:shadow-lg border border-gray-100 transition-all active:scale-95 flex-shrink-0 cursor-pointer" aria-label="Layanan Sebelumnya">
+                                <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+                                </svg>
+                            </button>
 
-                                <div class="unit-title-box text-center min-w-0 flex-1 max-w-[240px] sm:max-w-none sm:min-w-[300px]">
-                                    <h3 id="unit-title" class="text-sm sm:text-xl md:text-2xl font-bold text-black transition-all duration-300 truncate">
-                                        Unit Penyewaan Alat
-                                    </h3>
-                                </div>
-
-                                <button id="unit-next" class="bg-white hover:bg-gray-50 text-gray-800 rounded-full p-2 sm:p-3 shadow-lg border border-gray-100 transition-transform active:scale-95 flex-shrink-0">
-                                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
-                                    </svg>
-                                </button>
+                            <div class="unit-title-box text-center min-w-0 flex-1 max-w-[240px] sm:max-w-none sm:min-w-[300px]">
+                                <h3 id="unit-title" class="text-base sm:text-xl md:text-2xl font-bold text-gray-900 transition-all duration-300 truncate">
+                                    Unit Penyewaan Alat
+                                </h3>
                             </div>
+
+                            <button type="button" id="unit-next" class="bg-white hover:bg-gray-50 text-gray-800 rounded-full p-2.5 sm:p-3.5 shadow-md hover:shadow-lg border border-gray-100 transition-all active:scale-95 flex-shrink-0 cursor-pointer" aria-label="Layanan Berikutnya">
+                                <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
                         </div>
                         @else
                         <div class="w-full flex flex-col items-center justify-center text-center p-12 bg-white/60 backdrop-blur-md rounded-3xl border border-white/50 shadow-lg mt-4 max-w-4xl mx-auto">
@@ -587,23 +582,28 @@
                             <!-- Button Action (Solid, High-Contrast, Never Washes Out) -->
                             <div class="mt-3 pt-2 border-t border-gray-50">
                                 @php
-                                    $btnColor = 'bg-[#115789] hover:bg-[#0c446c] active:bg-[#082f4d]';
+                                    $btnClass = 'btn-action-pasar';
+                                    $btnStyle = 'background-color: #115789 !important; color: #ffffff !important;';
                                     $btnLabel = 'Beli Produk';
                                     if ($item->type == 'gas') {
-                                        $btnColor = 'bg-orange-600 hover:bg-orange-700 active:bg-orange-800';
+                                        $btnClass = 'btn-action-gas';
+                                        $btnStyle = 'background-color: #ea580c !important; color: #ffffff !important;';
                                         $btnLabel = 'Pesan Gas';
                                     } elseif ($item->type == 'rental') {
-                                        $btnColor = 'bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800';
+                                        $btnClass = 'btn-action-rental';
+                                        $btnStyle = 'background-color: #059669 !important; color: #ffffff !important;';
                                         $btnLabel = 'Sewa Alat';
                                     } elseif ($item->type == 'mobil') {
-                                        $btnColor = 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800';
+                                        $btnClass = 'btn-action-mobil';
+                                        $btnStyle = 'background-color: #2563eb !important; color: #ffffff !important;';
                                         $btnLabel = 'Cek Mobil';
                                     } elseif ($item->type == 'fasilitas') {
-                                        $btnColor = 'bg-purple-600 hover:bg-purple-700 active:bg-purple-800';
+                                        $btnClass = 'btn-action-fasilitas';
+                                        $btnStyle = 'background-color: #9333ea !important; color: #ffffff !important;';
                                         $btnLabel = 'Ajukan Izin';
                                     }
                                 @endphp
-                                <a href="{{ $item->link }}" class="w-full block text-center py-2 px-3 rounded-lg text-xs font-bold transition-all shadow-xs {{ $btnColor }}" style="color: #ffffff !important;">
+                                <a href="{{ $item->link }}" class="w-full block text-center py-2 px-3 rounded-lg text-xs font-bold transition-all shadow-xs {{ $btnClass }}" style="{{ $btnStyle }}">
                                     {{ $btnLabel }}
                                 </a>
                             </div>
@@ -971,11 +971,65 @@
             pointer-events: none;
         }
 
+        /* Tombol Aksi Unit Layanan (Solid, Anti-Washed Out) */
+        .btn-action-gas {
+            background-color: #ea580c !important;
+            color: #ffffff !important;
+        }
+        .btn-action-gas:hover {
+            background-color: #c2410c !important;
+            color: #ffffff !important;
+        }
+        .btn-action-rental {
+            background-color: #059669 !important;
+            color: #ffffff !important;
+        }
+        .btn-action-rental:hover {
+            background-color: #047857 !important;
+            color: #ffffff !important;
+        }
+        .btn-action-mobil {
+            background-color: #2563eb !important;
+            color: #ffffff !important;
+        }
+        .btn-action-mobil:hover {
+            background-color: #1d4ed8 !important;
+            color: #ffffff !important;
+        }
+        .btn-action-fasilitas {
+            background-color: #9333ea !important;
+            color: #ffffff !important;
+        }
+        .btn-action-fasilitas:hover {
+            background-color: #7e22ce !important;
+            color: #ffffff !important;
+        }
+        .btn-action-pasar {
+            background-color: #115789 !important;
+            color: #ffffff !important;
+        }
+        .btn-action-pasar:hover {
+            background-color: #0c446c !important;
+            color: #ffffff !important;
+        }
+
+        /* Navigasi Tombol Geser di Bawah - Aliran Dokumen Normal (Bebas Tabrakan) */
+        .unit-nav-wrapper {
+            position: relative !important;
+            bottom: auto !important;
+            left: auto !important;
+            right: auto !important;
+            width: 100% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+
         /* RESPONSIVE MOBILE - 3 COLUMN LAYOUT (CENTER FOCUS) */
         @media (max-width: 768px) {
             #unit-carousel-container {
                 padding-top: 2rem !important;
-                padding-bottom: 3.5rem !important;
+                padding-bottom: 2.5rem !important;
             }
             .unit-stage-wrapper {
                 height: 240px !important;
@@ -1035,12 +1089,15 @@
 
             /* Navigasi Tombol Geser di Bawah */
             .unit-nav-wrapper {
-                bottom: 4px !important;
-                left: 0 !important;
-                right: 0 !important;
+                position: relative !important;
+                bottom: auto !important;
+                left: auto !important;
+                right: auto !important;
                 width: 100% !important;
+                margin-top: 1rem !important;
+                margin-bottom: 1.5rem !important;
                 padding: 0 16px !important;
-                gap: 10px !important;
+                gap: 12px !important;
                 display: flex !important;
                 align-items: center !important;
                 justify-content: center !important;
@@ -1090,9 +1147,60 @@
                 } catch (e) {
                     console.error("Carousel failed to initialize:", e);
                 }
+                this.initTypewriter();
                 this.initUnitCarousel();
                 this.initNavbarMarginSync();
                 this.initLiveSearch();
+            },
+
+            // Animasi Mengetik dan Menghapus Sapaan (Loop Bergantian)
+            initTypewriter() {
+                const textElem = document.getElementById('typewriter-text');
+                if (!textElem) return;
+
+                const phrase1 = textElem.getAttribute('data-phrase1') || 'Halo Warga Bengkalis';
+                const phrase2 = textElem.getAttribute('data-phrase2') || 'Pilih salah satu layanan di bawah untuk melihat rincian dan pemesanannya.';
+                const phrases = [phrase1, phrase2];
+
+                let phraseIndex = 0;
+                let charIndex = phrases[0].length;
+                let isDeleting = true;
+
+                const typeSpeed = 45;
+                const deleteSpeed = 22;
+                const holdTime = 2400;
+                const betweenTime = 350;
+
+                textElem.textContent = phrases[0];
+
+                const loop = () => {
+                    const currentPhrase = phrases[phraseIndex];
+
+                    if (isDeleting) {
+                        charIndex--;
+                        textElem.textContent = currentPhrase.substring(0, charIndex);
+
+                        if (charIndex === 0) {
+                            isDeleting = false;
+                            phraseIndex = (phraseIndex + 1) % phrases.length;
+                            setTimeout(loop, betweenTime);
+                            return;
+                        }
+                        setTimeout(loop, deleteSpeed);
+                    } else {
+                        charIndex++;
+                        textElem.textContent = currentPhrase.substring(0, charIndex);
+
+                        if (charIndex === currentPhrase.length) {
+                            isDeleting = true;
+                            setTimeout(loop, holdTime);
+                            return;
+                        }
+                        setTimeout(loop, typeSpeed);
+                    }
+                };
+
+                setTimeout(loop, holdTime);
             },
 
             // Sinkronisasi tinggi layer blur dan padding
@@ -1336,8 +1444,6 @@
                         handleNext();
                         resetAutoSlide();
                     });
-                    newNext.parentElement.classList.remove('z-60');
-                    newNext.parentElement.classList.add('z-[60]');
                 }
                 if (prevBtn) {
                     const newPrev = prevBtn.cloneNode(true);
@@ -1405,20 +1511,25 @@
                 };
 
                 const buildProductCard = (item) => {
-                    let btnBg = 'bg-[#115789] hover:bg-[#0c446c] active:bg-[#082f4d]';
+                    let btnClass = 'btn-action-pasar';
+                    let btnStyle = 'background-color: #115789 !important; color: #ffffff !important;';
                     let btnText = 'Beli Produk';
 
                     if (item.type === 'gas') {
-                        btnBg = 'bg-orange-600 hover:bg-orange-700 active:bg-orange-800';
+                        btnClass = 'btn-action-gas';
+                        btnStyle = 'background-color: #ea580c !important; color: #ffffff !important;';
                         btnText = 'Pesan Gas';
                     } else if (item.type === 'rental') {
-                        btnBg = 'bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800';
+                        btnClass = 'btn-action-rental';
+                        btnStyle = 'background-color: #059669 !important; color: #ffffff !important;';
                         btnText = 'Sewa Alat';
                     } else if (item.type === 'mobil') {
-                        btnBg = 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800';
+                        btnClass = 'btn-action-mobil';
+                        btnStyle = 'background-color: #2563eb !important; color: #ffffff !important;';
                         btnText = 'Cek Mobil';
                     } else if (item.type === 'fasilitas') {
-                        btnBg = 'bg-purple-600 hover:bg-purple-700 active:bg-purple-800';
+                        btnClass = 'btn-action-fasilitas';
+                        btnStyle = 'background-color: #9333ea !important; color: #ffffff !important;';
                         btnText = 'Ajukan Izin';
                     }
 
@@ -1467,7 +1578,7 @@
                             </div>
                         </div>
                         <div class="mt-3 pt-2 border-t border-gray-50">
-                            <a href="${item.link}" class="w-full block text-center py-2 px-3 rounded-lg text-xs font-bold transition-all shadow-xs ${btnBg}" style="color: #ffffff !important;">
+                            <a href="${item.link}" class="w-full block text-center py-2 px-3 rounded-lg text-xs font-bold transition-all shadow-xs ${btnClass}" style="${btnStyle}">
                                 ${btnText}
                             </a>
                         </div>
