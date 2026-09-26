@@ -64,7 +64,7 @@ class StaffManagementController extends Controller
             return $this->unitLayanan;
         }
 
-        $region = \App\Models\Region::with('services')->find($user->region_id);
+        $region = \App\Models\Region::with(['services' => fn($q) => $q->wherePivot('is_active', true)])->find($user->region_id);
 
         if (! $region) {
             return $this->unitLayanan;

@@ -4,10 +4,13 @@
     <div class="container-xxl flex-grow-1 container-p-y py-2 py-sm-3">
         <!-- Page Header -->
         <div class="row mb-2 mb-sm-3">
-            <div class="col-12 d-flex justify-content-between align-items-center">
-                <h4 class="fw-bold py-1 mb-0 fs-5 fs-sm-4">
-                    <span class="text-muted fw-light">Unit Layanan /</span> Fasilitas Umum & Aset
-                </h4>
+            <div class="col-12 d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    <h4 class="fw-bold py-1 mb-0 fs-5 fs-sm-4">
+                        <span class="text-muted fw-light">Unit Layanan /</span> Fasilitas Umum & Aset
+                    </h4>
+                    @include('admin.unit.partials.unit_officer_badge', ['unitKey' => 'fasilitas_umum'])
+                </div>
             </div>
         </div>
 

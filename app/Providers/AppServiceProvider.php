@@ -146,28 +146,39 @@ class AppServiceProvider extends ServiceProvider
             if ($user && in_array($user->role, ['super_admin', 'admin', 'admin_kecamatan', 'admin_desa', 'staff'])) {
                 if ($user->role === 'super_admin' || $user->role === 'admin') {
                     // For super_admin, check if the system settings or top region has services enabled
-                    $region = \App\Models\Region::with('services')->find($user->region_id);
-                    if (!$region) $region = \App\Models\Region::first();
+                    $region = \App\Models\Region::with(['services' => fn($q) => $q->wherePivot('is_active', true)])->find($user->region_id);
+                    if (!$region) $region = \App\Models\Region::with(['services' => fn($q) => $q->wherePivot('is_active', true)])->first();
                     if ($region) {
                         $activeServicesMenu = $region->services->pluck('name')->toArray();
-                        $operationalServices = ['Penyewaan Alat', 'Penjualan Gas', 'Penyewaan Mobil', 'Fasilitas Umum', 'Pelaporan Warga', 'Pasar Daerah', 'Layanan Ambulans', 'Pengumuman'];
+                        $operationalServices = ['Penyewaan Alat', 'Penjualan Gas', 'Penyewaan Mobil', 'Penyewaan Transportasi', 'Fasilitas Umum', 'Pelaporan Warga', 'Pasar Daerah', 'Layanan Ambulans', 'Pengumuman'];
                         $hasActiveServices = count(array_intersect($activeServicesMenu, $operationalServices)) > 0;
                     }
                 } else if (in_array($user->role, ['admin_kecamatan', 'admin_desa', 'staff'])) {
                     // Staf memakai region_id warisan pembuatnya, jadi cabang yang
                     // sama dengan admin wilayah sudah tepat.
                     // For admin_kecamatan and admin_desa, check their own region_id
-                    $region = \App\Models\Region::with('services')->find($user->region_id);
+                    $region = \App\Models\Region::with(['services' => fn($q) => $q->wherePivot('is_active', true)])->find($user->region_id);
                     if ($region) {
                         $activeServicesMenu = $region->services->pluck('name')->toArray();
-                        $operationalServices = ['Penyewaan Alat', 'Penjualan Gas', 'Penyewaan Mobil', 'Fasilitas Umum', 'Pelaporan Warga', 'Pasar Daerah', 'Layanan Ambulans', 'Pengumuman'];
+                        $operationalServices = ['Penyewaan Alat', 'Penjualan Gas', 'Penyewaan Mobil', 'Penyewaan Transportasi', 'Fasilitas Umum', 'Pelaporan Warga', 'Pasar Daerah', 'Layanan Ambulans', 'Pengumuman'];
                         $hasActiveServices = count(array_intersect($activeServicesMenu, $operationalServices)) > 0;
                     }
                 }
             }
             
+            $activeUnitsCount = 1; // Kabar dan Informasi Daerah selalu aktif default
+            if (in_array('Penyewaan Alat', $activeServicesMenu)) $activeUnitsCount++;
+            if (in_array('Penjualan Gas', $activeServicesMenu)) $activeUnitsCount++;
+            if (in_array('Penyewaan Mobil', $activeServicesMenu) || in_array('Penyewaan Transportasi', $activeServicesMenu)) $activeUnitsCount++;
+            if (in_array('Fasilitas Umum', $activeServicesMenu)) $activeUnitsCount++;
+            if (in_array('Pasar Daerah', $activeServicesMenu)) $activeUnitsCount++;
+            if (in_array('Pelaporan Warga', $activeServicesMenu)) $activeUnitsCount++;
+            $totalAvailableUnits = 7;
+
             $view->with('hasActiveServices', $hasActiveServices);
             $view->with('activeServicesMenu', $activeServicesMenu);
+            $view->with('activeUnitsCount', $activeUnitsCount);
+            $view->with('totalAvailableUnits', $totalAvailableUnits);
         });
     }
 }

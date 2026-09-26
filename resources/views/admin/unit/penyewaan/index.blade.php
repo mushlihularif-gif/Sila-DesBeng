@@ -4,7 +4,10 @@
     <div class="container-xxl flex-grow-1 container-p-y">
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
             <div class="flex-grow-1">
-                <h4 class="fw-bold m-0 mb-2"><span class="text-muted fw-light">Unit Layanan /</span> Penyewaan Alat</h4>
+                <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                    <h4 class="fw-bold m-0"><span class="text-muted fw-light">Unit Layanan /</span> Penyewaan Alat</h4>
+                    @include('admin.unit.partials.unit_officer_badge', ['unitKey' => 'sewa_alat'])
+                </div>
                 <div class="alert alert-warning d-inline-flex align-items-center p-2 mb-0 text-dark" style="font-size: 0.85rem; border-left: 4px solid #ffab00;">
                     <i class="bx bx-error me-2 fs-5"></i>
                     <div><strong>PENTING:</strong> Tentukan dan Pastikan Ketentuan SOP sesuai dengan ketentuan daerah anda.</div>

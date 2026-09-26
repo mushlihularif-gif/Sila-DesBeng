@@ -98,9 +98,12 @@
                     </div>
                 </div>
                 <div>
-                    <h5 class="fw-bold mb-1 text-primary">
-                        {{ isset($isArchive) && $isArchive ? 'Bukti Pelaporan Warga' : 'Pelaporan Warga' }}
-                    </h5>
+                    <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                        <h5 class="fw-bold mb-0 text-primary">
+                            {{ isset($isArchive) && $isArchive ? 'Bukti Pelaporan Warga' : 'Pelaporan Warga' }}
+                        </h5>
+                        @include('admin.unit.partials.unit_officer_badge', ['unitKey' => 'pelaporan_warga'])
+                    </div>
                     <p class="mb-0 text-primary" style="opacity: 0.85;">
                         {{ isset($isArchive) && $isArchive ? 'Arsip rekam jejak keluhan warga yang telah selesai ditindaklanjuti.' : 'Pantau dan tanggapi keluhan, saran, serta laporan dari warga secara terpusat.' }}
                     </p>

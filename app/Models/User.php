@@ -226,6 +226,24 @@ class User extends Authenticatable
     }
 
     /**
+     * Dapatkan daftar staf penanggung jawab suatu unit di wilayah tertentu.
+     */
+    public static function getStaffForUnit($unitKey, $regionId = null)
+    {
+        $regionId = $regionId ?? auth()->user()?->region_id;
+        if (!$regionId) {
+            return collect();
+        }
+
+        return self::where('role', 'staff')
+            ->where('region_id', $regionId)
+            ->whereHas('staffPermissions', function ($q) use ($unitKey) {
+                $q->where('unit_key', $unitKey);
+            })
+            ->get();
+    }
+
+    /**
      * Izin modul Sistem Platform, disimpan di tabel staff_permissions yang sama
      * dengan izin unit layanan, dibedakan lewat awalan "platform_".
      *
