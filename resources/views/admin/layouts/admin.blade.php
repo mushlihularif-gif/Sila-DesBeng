@@ -759,15 +759,16 @@
                     @endif
 
                     <!-- ========================================================================= -->
-                    <!-- 3. ZONA OPERASIONAL UNIT LAYANAN (Model A: Hub Mandiri Per Layanan)       -->
-                    <!-- Hanya tampil untuk Admin Desa dan Staf (Staf hanya melihat unitnya saja)   -->
+                    <!-- 3. ZONA OPERASIONAL UNIT LAYANAN                                          -->
                     <!-- ========================================================================= -->
-                    @if(!auth()->user()->bolehAksesPlatform() && in_array(auth()->user()->role, ['admin_desa', 'staff']))
+
+                    {{-- 3A. KHUSUS STAF (Hub Mandiri Terisolasi: Hanya Unit yang Ditugaskan) --}}
+                    @if(auth()->user()->isStaff())
                     <li class="menu-header small text-uppercase">
-                        <span class="menu-header-text">Layanan Aktif Desa</span>
+                        <span class="menu-header-text">Unit Tugas Anda</span>
                     </li>
 
-                    {{-- 1. Unit Penyewaan Transportasi --}}
+                    {{-- Staf: Penyewaan Transportasi --}}
                     @if((in_array('Penyewaan Mobil', $activeServicesMenu ?? []) || in_array('Penyewaan Transportasi', $activeServicesMenu ?? [])) && auth()->user()->hasUnitPermission('sewa_mobil'))
                     <li class="menu-item {{ (request()->is('admin/unit/mobil*') || request()->is('admin/unit/supir*') || (request()->is('admin/aktivitas/permintaan-pengajuan*') && request('tab') == 'mobil') || (request()->is('admin/aktivitas/bukti-transaksi*') && request('category') == 'mobil')) ? 'open active show' : '' }}">
                         <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -795,7 +796,7 @@
                                     <div>Data Supir & Petugas</div>
                                 </a>
                             </li>
-                            <li class="menu-item {{ request()->routeIs('admin.laporan.pendapatan') && (request('service') == 'Penyewaan Mobil' || request('service') == 'Penyewaan Transportasi') ? 'active' : '' }}">
+                            <li class="menu-item {{ request()->routeIs('admin.laporan.pendapatan') ? 'active' : '' }}">
                                 <a href="{{ route('admin.laporan.pendapatan', ['service' => 'Penyewaan Mobil']) }}" class="menu-link">
                                     <div>Laporan Unit</div>
                                 </a>
@@ -804,7 +805,7 @@
                     </li>
                     @endif
 
-                    {{-- 2. Unit Penjualan Gas --}}
+                    {{-- Staf: Penjualan Gas --}}
                     @if(in_array('Penjualan Gas', $activeServicesMenu ?? []) && auth()->user()->hasUnitPermission('gas'))
                     <li class="menu-item {{ (request()->is('admin/unit/gas*') || (request()->is('admin/aktivitas/permintaan-pengajuan*') && request('tab') == 'gas') || (request()->is('admin/aktivitas/bukti-transaksi*') && request('category') == 'gas')) ? 'open active show' : '' }}">
                         <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -827,7 +828,7 @@
                                     <div>Bukti Transaksi</div>
                                 </a>
                             </li>
-                            <li class="menu-item {{ request()->routeIs('admin.laporan.pendapatan') && request('service') == 'Penjualan Gas' ? 'active' : '' }}">
+                            <li class="menu-item {{ request()->routeIs('admin.laporan.pendapatan') ? 'active' : '' }}">
                                 <a href="{{ route('admin.laporan.pendapatan', ['service' => 'Penjualan Gas']) }}" class="menu-link">
                                     <div>Laporan Unit</div>
                                 </a>
@@ -836,7 +837,7 @@
                     </li>
                     @endif
 
-                    {{-- 3. Unit Penyewaan Alat --}}
+                    {{-- Staf: Penyewaan Alat --}}
                     @if(in_array('Penyewaan Alat', $activeServicesMenu ?? []) && auth()->user()->hasUnitPermission('sewa_alat'))
                     <li class="menu-item {{ (request()->is('admin/unit/penyewaan*') || (request()->is('admin/aktivitas/permintaan-pengajuan*') && request('tab') == 'rental') || (request()->is('admin/aktivitas/bukti-transaksi*') && request('category') == 'rental')) ? 'open active show' : '' }}">
                         <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -859,7 +860,7 @@
                                     <div>Bukti Transaksi</div>
                                 </a>
                             </li>
-                            <li class="menu-item {{ request()->routeIs('admin.laporan.pendapatan') && request('service') == 'Penyewaan Alat' ? 'active' : '' }}">
+                            <li class="menu-item {{ request()->routeIs('admin.laporan.pendapatan') ? 'active' : '' }}">
                                 <a href="{{ route('admin.laporan.pendapatan', ['service' => 'Penyewaan Alat']) }}" class="menu-link">
                                     <div>Laporan Unit</div>
                                 </a>
@@ -868,7 +869,7 @@
                     </li>
                     @endif
 
-                    {{-- 4. Unit Fasilitas Umum --}}
+                    {{-- Staf: Fasilitas Umum --}}
                     @if((in_array('Fasilitas Umum', $activeServicesMenu ?? []) || in_array('Layanan Ambulans', $activeServicesMenu ?? [])) && auth()->user()->hasUnitPermission('fasilitas_umum'))
                     <li class="menu-item {{ (request()->is('admin/unit/fasilitas_umum*') || request()->is('admin/unit/ambulans*') || (request()->is('admin/aktivitas/permintaan-pengajuan*') && request('tab') == 'fasilitas') || (request()->is('admin/aktivitas/bukti-transaksi*') && request('category') == 'fasilitas')) ? 'open active show' : '' }}">
                         <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -891,7 +892,7 @@
                                     <div>Bukti Transaksi</div>
                                 </a>
                             </li>
-                            <li class="menu-item {{ request()->routeIs('admin.laporan.pendapatan') && request('service') == 'Fasilitas Umum' ? 'active' : '' }}">
+                            <li class="menu-item {{ request()->routeIs('admin.laporan.pendapatan') ? 'active' : '' }}">
                                 <a href="{{ route('admin.laporan.pendapatan', ['service' => 'Fasilitas Umum']) }}" class="menu-link">
                                     <div>Laporan Unit</div>
                                 </a>
@@ -900,7 +901,7 @@
                     </li>
                     @endif
 
-                    {{-- 5. Unit Pasar Daerah --}}
+                    {{-- Staf: Pasar Daerah --}}
                     @if(in_array('Pasar Daerah', $activeServicesMenu ?? []) && auth()->user()->hasUnitPermission('pasar_daerah'))
                     <li class="menu-item {{ (request()->is('admin/unit/pasar-daerah*') || request()->routeIs('admin.kemitraan.*') || (request()->is('admin/aktivitas/permintaan-pengajuan*') && request('tab') == 'pasar') || (request()->is('admin/aktivitas/bukti-transaksi*') && request('category') == 'pasar')) ? 'open active show' : '' }}">
                         <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -928,7 +929,7 @@
                                     <div>Persetujuan Mitra</div>
                                 </a>
                             </li>
-                            <li class="menu-item {{ request()->routeIs('admin.laporan.pendapatan') && request('service') == 'Pasar Daerah' ? 'active' : '' }}">
+                            <li class="menu-item {{ request()->routeIs('admin.laporan.pendapatan') ? 'active' : '' }}">
                                 <a href="{{ route('admin.laporan.pendapatan', ['service' => 'Pasar Daerah']) }}" class="menu-link">
                                     <div>Laporan Unit</div>
                                 </a>
@@ -937,8 +938,8 @@
                     </li>
                     @endif
 
-                    {{-- 6. Unit Pelaporan Warga --}}
-                    @if((in_array('Pelaporan Warga', $activeServicesMenu ?? []) || auth()->user()->role === 'admin_desa') && auth()->user()->hasUnitPermission('pelaporan_warga'))
+                    {{-- Staf: Pelaporan Warga --}}
+                    @if(auth()->user()->hasUnitPermission('pelaporan_warga'))
                     <li class="menu-item {{ request()->routeIs('admin.pelaporan.*') ? 'open active show' : '' }}">
                         <a href="javascript:void(0);" class="menu-link menu-toggle">
                             <i class="menu-icon tf-icons bx bx-conversation text-info"></i>
@@ -959,7 +960,7 @@
                     </li>
                     @endif
 
-                    {{-- 7. Unit Kabar & Informasi Daerah --}}
+                    {{-- Staf: Kabar & Pengumuman --}}
                     @if(auth()->user()->hasUnitPermission('kabar_informasi'))
                     <li class="menu-item {{ request()->routeIs('admin.announcements.*') ? 'open active show' : '' }}">
                         <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -975,6 +976,108 @@
                         </ul>
                     </li>
                     @endif
+                    @endif
+
+                    {{-- 3B. KHUSUS ADMIN DESA (Model Hibrida Ramping: 2 Dropdown Operasional Terpadu) --}}
+                    @if(auth()->user()->role === 'admin_desa')
+                    <li class="menu-header small text-uppercase">
+                        <span class="menu-header-text">Operasional Layanan</span>
+                    </li>
+
+                    <!-- Dropdown 1: Unit Layanan Desa (Produk, Armada & Fasilitas) -->
+                    <li class="menu-item {{ (request()->is('admin/unit*') && !request()->is('admin/unit/supir*')) || request()->routeIs('admin.announcements.*') || request()->routeIs('admin.pelaporan.*') ? 'open active show' : '' }}">
+                        <a href="javascript:void(0);" class="menu-link menu-toggle">
+                            <i class="menu-icon tf-icons bx bx-grid-alt text-primary"></i>
+                            <div>Unit Layanan</div>
+                        </a>
+                        <ul class="menu-sub">
+                            @if(in_array('Penyewaan Mobil', $activeServicesMenu ?? []) || in_array('Penyewaan Transportasi', $activeServicesMenu ?? []))
+                            <li class="menu-item {{ request()->is('admin/unit/mobil*') ? 'active' : '' }}">
+                                <a href="{{ route('admin.unit.mobil.index') }}" class="menu-link">
+                                    <div>Penyewaan Transportasi</div>
+                                </a>
+                            </li>
+                            @endif
+
+                            @if(in_array('Penjualan Gas', $activeServicesMenu ?? []))
+                            <li class="menu-item {{ request()->is('admin/unit/gas*') ? 'active' : '' }}">
+                                <a href="{{ route('admin.unit.penjualan_gas.index') }}" class="menu-link">
+                                    <div>Penjualan Gas</div>
+                                </a>
+                            </li>
+                            @endif
+
+                            @if(in_array('Penyewaan Alat', $activeServicesMenu ?? []))
+                            <li class="menu-item {{ request()->is('admin/unit/penyewaan*') ? 'active' : '' }}">
+                                <a href="{{ route('admin.unit.penyewaan.index') }}" class="menu-link">
+                                    <div>Penyewaan Alat</div>
+                                </a>
+                            </li>
+                            @endif
+
+                            @if(in_array('Fasilitas Umum', $activeServicesMenu ?? []) || in_array('Layanan Ambulans', $activeServicesMenu ?? []))
+                            <li class="menu-item {{ request()->is('admin/unit/fasilitas_umum*') || request()->is('admin/unit/ambulans*') ? 'active' : '' }}">
+                                <a href="{{ route('admin.unit.fasilitas_umum.index') }}" class="menu-link">
+                                    <div>Fasilitas Umum</div>
+                                </a>
+                            </li>
+                            @endif
+
+                            @if(in_array('Pasar Daerah', $activeServicesMenu ?? []))
+                            <li class="menu-item {{ request()->is('admin/unit/pasar-daerah*') ? 'active' : '' }}">
+                                <a href="{{ route('admin.unit.pasar_daerah.index') }}" class="menu-link">
+                                    <div>Pasar Daerah</div>
+                                </a>
+                            </li>
+                            @endif
+
+                            <li class="menu-item {{ request()->routeIs('admin.pelaporan.*') ? 'active' : '' }}">
+                                <a href="{{ Route::has('admin.pelaporan.index') ? route('admin.pelaporan.index') : '#' }}" class="menu-link">
+                                    <div>Pelaporan Warga</div>
+                                </a>
+                            </li>
+
+                            <li class="menu-item {{ request()->routeIs('admin.announcements.*') ? 'active' : '' }}">
+                                <a href="{{ route('admin.announcements.index') }}" class="menu-link">
+                                    <div>Kabar & Pengumuman</div>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- Dropdown 2: Pesanan & Aktivitas Warga -->
+                    <li class="menu-item {{ request()->is('admin/aktivitas*') || request()->is('admin/unit/supir*') || request()->routeIs('admin.kemitraan.*') ? 'open active show' : '' }}">
+                        <a href="javascript:void(0);" class="menu-link menu-toggle">
+                            <i class="menu-icon tf-icons bx bx-time text-warning"></i>
+                            <div>Pesanan & Aktivitas</div>
+                        </a>
+                        <ul class="menu-sub">
+                            <li class="menu-item {{ request()->is('admin/aktivitas/permintaan-pengajuan*') ? 'active' : '' }}">
+                                <a href="{{ route('admin.aktivitas.permintaan-pengajuan.index') }}" class="menu-link">
+                                    <div>Permintaan & Booking</div>
+                                </a>
+                            </li>
+                            <li class="menu-item {{ request()->is('admin/aktivitas/bukti-transaksi*') ? 'active' : '' }}">
+                                <a href="{{ route('admin.aktivitas.bukti-transaksi.index') }}" class="menu-link">
+                                    <div>Bukti Pembayaran</div>
+                                </a>
+                            </li>
+                            @if(in_array('Penyewaan Mobil', $activeServicesMenu ?? []) || in_array('Penyewaan Transportasi', $activeServicesMenu ?? []) || in_array('Fasilitas Umum', $activeServicesMenu ?? []))
+                            <li class="menu-item {{ request()->is('admin/unit/supir*') ? 'active' : '' }}">
+                                <a href="{{ route('supir.index') }}" class="menu-link">
+                                    <div>Data Supir & Petugas</div>
+                                </a>
+                            </li>
+                            @endif
+                            @if(in_array('Pasar Daerah', $activeServicesMenu ?? []))
+                            <li class="menu-item {{ request()->routeIs('admin.kemitraan.*') ? 'active' : '' }}">
+                                <a href="{{ route('admin.kemitraan.index') }}" class="menu-link">
+                                    <div>Persetujuan Mitra</div>
+                                </a>
+                            </li>
+                            @endif
+                        </ul>
+                    </li>
                     @endif
 
                     <!-- ========================================================================= -->
