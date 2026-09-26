@@ -273,14 +273,15 @@
                     <div class="mb-4 sm:mb-6">
                         @php
                             $greetingPhrase1 = auth()->check() ? ('Halo, ' . (auth()->user()->nama_lengkap ?? auth()->user()->name)) : 'Halo Warga Bengkalis';
-                            $greetingPhrase2 = 'Pilih salah satu layanan di bawah untuk melihat rincian dan pemesanannya.';
+                            $greetingPhrase2 = 'Mau cari layanan apa hari ini?';
                         @endphp
                         <div class="min-h-[58px] sm:min-h-[72px] md:min-h-[80px] flex items-center justify-center px-4">
-                            <h2 class="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-gray-900 tracking-tight leading-snug">
+                            <h2 class="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black tracking-tight leading-snug">
                                 <span id="typewriter-text" 
-                                      class="text-gray-900 font-black"
+                                      class="font-black text-[#115789]"
+                                      style="color: #115789 !important;"
                                       data-phrase1="{{ $greetingPhrase1 }}"
-                                      data-phrase2="{{ $greetingPhrase2 }}">{{ $greetingPhrase1 }}</span><span id="typewriter-cursor" class="typewriter-cursor">|</span>
+                                      data-phrase2="{{ $greetingPhrase2 }}">{{ $greetingPhrase1 }}</span><span id="typewriter-cursor" class="typewriter-cursor" style="color: #115789 !important;">|</span>
                             </h2>
                         </div>
                     </div>
@@ -977,7 +978,7 @@
         .typewriter-cursor {
             display: inline-block;
             font-weight: 300;
-            color: #111827;
+            color: #115789;
             margin-left: 2px;
             animation: typewriter-blink 0.8s step-end infinite;
         }
@@ -1174,7 +1175,7 @@
                 if (!textElem) return;
 
                 const phrase1 = textElem.getAttribute('data-phrase1') || 'Halo Warga Bengkalis';
-                const phrase2 = textElem.getAttribute('data-phrase2') || 'Pilih salah satu layanan di bawah untuk melihat rincian dan pemesanannya.';
+                const phrase2 = textElem.getAttribute('data-phrase2') || 'Mau cari layanan apa hari ini?';
                 const phrases = [phrase1, phrase2];
 
                 let phraseIndex = 0;
