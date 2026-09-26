@@ -127,9 +127,9 @@
                                 </svg>
                             </button>
 
-                            <!-- Search Submit Button -->
+                            <!-- Search Submit Button (Solid Biru, Tanpa Gradasi) -->
                             <button type="submit" id="search-submit-btn"
-                                class="flex-shrink-0 px-6 sm:px-8 py-2.5 sm:py-3 rounded-full text-white font-bold text-xs sm:text-sm shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer flex items-center justify-center gap-1.5 ml-1 bg-gradient-to-r from-blue-600 to-[#115789] hover:from-blue-700 hover:to-[#0d456d] active:scale-95" style="color: #ffffff !important;">
+                                class="flex-shrink-0 px-6 sm:px-8 py-2.5 sm:py-3 rounded-full text-white font-bold text-xs sm:text-sm shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer flex items-center justify-center gap-1.5 ml-1 bg-[#2563eb] hover:bg-[#1d4ed8] active:scale-95" style="background-color: #2563eb !important; color: #ffffff !important;">
                                 <span>Cari</span>
                             </button>
                         </div>
@@ -276,12 +276,12 @@
                             $greetingPhrase2 = 'Mau cari layanan apa hari ini?';
                         @endphp
                         <div class="min-h-[58px] sm:min-h-[72px] md:min-h-[80px] flex items-center justify-center px-4">
-                            <h2 class="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black tracking-tight leading-snug">
+                            <h2 class="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-gray-900 tracking-tight leading-snug">
                                 <span id="typewriter-text" 
-                                      class="font-black text-[#115789]"
-                                      style="color: #115789 !important;"
+                                      class="font-black text-gray-900"
+                                      style="color: #111827 !important;"
                                       data-phrase1="{{ $greetingPhrase1 }}"
-                                      data-phrase2="{{ $greetingPhrase2 }}">{{ $greetingPhrase1 }}</span><span id="typewriter-cursor" class="typewriter-cursor" style="color: #115789 !important;">|</span>
+                                      data-phrase2="{{ $greetingPhrase2 }}">{{ $greetingPhrase1 }}</span><span id="typewriter-cursor" class="typewriter-cursor text-gray-900" style="color: #111827 !important;">|</span>
                             </h2>
                         </div>
                     </div>
@@ -978,7 +978,7 @@
         .typewriter-cursor {
             display: inline-block;
             font-weight: 300;
-            color: #115789;
+            color: #111827;
             margin-left: 2px;
             animation: typewriter-blink 0.8s step-end infinite;
         }
