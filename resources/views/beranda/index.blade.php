@@ -368,8 +368,8 @@
                                 <div class="unit-card cursor-pointer hover:scale-105 transition-transform" 
                                      data-index="1" 
                                      data-name="Unit Penjualan Gas"
-                                     data-heading="&quot;Gas di rumah tiba-tiba habis saat lagi memasak?? Mau beli gas tanpa harus antre berdesakan di pangkalan??&quot;"
-                                     data-body="Pesan di sini! Kuota tabung gas elpiji 3kg dan 12kg resmi BUMDes desa Anda siap dipesan dengan harga HET resmi pemerintah."
+                                     data-heading="&quot;Gas di rumah tiba-tiba habis saat lagi memasak?? Mau beli gas tanpa harus repot keluar rumah??&quot;"
+                                     data-body="Pesan di sini! Tabung gas elpiji siap dipesan dengan harga resmi dan langsung diambil di pangkalan resmi desa Anda."
                                      data-badge="Unit Penjualan Gas"
                                      data-box-bg="bg-orange-50/90"
                                      data-box-border="border-orange-200"
@@ -416,8 +416,8 @@
                                 <div class="unit-card cursor-pointer hover:scale-105 transition-transform" 
                                      data-index="4" 
                                      data-name="Pasar Daerah"
-                                     data-heading="&quot;Mau belanja kebutuhan pokok, oleh-oleh khas Bengkalis, lempuk durian, atau hasil laut dan tani segar??&quot;"
-                                     data-body="Belanja di sini! Dukung ekonomi masyarakat desa dengan membeli aneka produk berkualitas langsung dari pedagang lokal Bengkalis."
+                                     data-heading="&quot;Mau belanja aneka barang atau produk dari pedagang dan UMKM lokal di Bengkalis??&quot;"
+                                     data-body="Belanja di sini! Dukung usaha warga sekitar dengan melihat dan membeli produk langsung dari pedagang lokal."
                                      data-badge="Pasar Daerah Bengkalis"
                                      data-box-bg="bg-emerald-50/90"
                                      data-box-border="border-emerald-200"
@@ -727,7 +727,7 @@
                         <div class="backdrop-blur-sm bg-white/60 rounded-3xl p-8 md:p-12 border border-white/70 shadow-xl">
                             <div class="space-y-5 text-gray-700 text-base leading-relaxed text-justify">
                                 <p>
-                                    <span class="font-semibold text-gray-800">SiladesBeng</span> (Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis) merupakan platform digital terpadu berskala kabupaten yang dirancang khusus untuk memodernisasi tata kelola administrasi dan pelayanan publik di seluruh jaringan kecamatan hingga tingkat desa se-Kabupaten Bengkalis. Platform ini mengintegrasikan berbagai pilar layanan esensial masyarakat dan operasional BUMDes dalam satu pintu.
+                                    <span class="font-semibold text-gray-800">SiladesBeng</span> (Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis) merupakan platform digital terpadu berskala kabupaten yang dirancang khusus untuk memodernisasi tata kelola administrasi dan pelayanan publik di seluruh jaringan kecamatan hingga tingkat desa se-Kabupaten Bengkalis. Platform ini mengintegrasikan berbagai pilar layanan esensial masyarakat dan operasional layanan desa dalam satu pintu.
                                 </p>
                                 <p>
                                     Melalui SiladesBeng, masyarakat Kabupaten Bengkalis dapat dengan mudah mengakses beragam unit layanan, mulai dari penyewaan alat, pendistribusian gas, peminjaman mobilitas (kendaraan), hingga pemanfaatan fasilitas umum. Di samping itu, sistem ini juga mewadahi fitur <span class="font-medium text-gray-800">Pelaporan Warga</span> serta pusat informasi <span class="font-medium text-gray-800">Kabar dan Informasi Daerah</span> secara <i>real-time</i>. Kami percaya bahwa ekosistem digital yang transparan dan terukur dari jenjang kabupaten hingga pelosok desa ini merupakan kunci utama untuk mewujudkan pelayanan publik yang prima, memajukan perekonomian daerah, dan membangun kemandirian masyarakat Bengkalis yang berkelanjutan.
