@@ -180,61 +180,96 @@
                                 @php
                                     $iconPath = 'User/img/elemen/fasilitas.png';
                                     $descText = 'yang dapat mengakses layanan ini.';
+                                    $accentColor = '#71dd37';
                                     $sName = strtolower($service->name);
                                     $displayName = $service->name === 'Penyewaan Mobil' ? 'Penyewaan Transportasi' : $service->name;
                                     
                                     if (strpos($sName, 'mobil') !== false || strpos($sName, 'transportasi') !== false) {
                                         $iconPath = 'User/img/elemen/mobil.png';
                                         $descText = 'yang dapat melihat dan menyewa kendaraan transportasi ini.';
+                                        $accentColor = '#03c3ec';
                                     }
                                     elseif (strpos($sName, 'alat') !== false) {
                                         $iconPath = 'User/img/elemen/F1.png';
                                         $descText = 'yang dapat meminjam atau menyewa alat.';
+                                        $accentColor = '#ffab00';
                                     }
                                     elseif (strpos($sName, 'gas') !== false) {
                                         $iconPath = 'User/img/elemen/F2.png';
                                         $descText = 'yang dapat memesan tabung gas.';
+                                        $accentColor = '#ff3e1d';
                                     }
                                     elseif (strpos($sName, 'lapor') !== false) {
                                         $iconPath = 'User/img/elemen/lapor.png';
-                                        $descText = 'yang dapat membuat laporan.';
+                                        $descText = 'yang dapat membuat laporan pengaduan.';
+                                        $accentColor = '#696cff';
+                                    }
+                                    elseif (strpos($sName, 'fasilitas') !== false) {
+                                        $iconPath = 'User/img/elemen/fasilitas.png';
+                                        $descText = 'yang dapat meminjam atau menggunakan fasilitas umum.';
+                                        $accentColor = '#71dd37';
                                     }
                                 @endphp
                                 <div class="col-md-6">
-                                    <div class="card border {{ in_array($service->id, $activeServices) ? 'border-primary shadow-sm bg-label-primary' : 'border-secondary shadow-none bg-light' }} h-100 rounded-3 card-service-item" data-action="{{ $descText }}" style="transition: all 0.2s; max-width: 100%; overflow: hidden;">
-                                        <div class="card-body p-3">
+                                    <div class="card bg-white shadow-sm rounded-4 h-100 card-service-item position-relative" data-action="{{ $descText }}" style="border: 1px solid rgba(67, 89, 113, 0.12); border-left: 4px solid {{ $accentColor }} !important; {{ in_array($service->id, $activeServices) ? 'opacity: 1;' : 'opacity: 0.72;' }}">
+                                        <div class="card-body p-3 p-sm-4 d-flex flex-column justify-content-between">
                                             
-                                            <!-- Main Service Toggle -->
-                                            <div class="d-flex align-items-center mb-2">
-                                                <div class="bg-white rounded p-2 me-3 shadow-sm d-flex align-items-center justify-content-center flex-shrink-0" style="width: 46px; height: 46px;">
-                                                    <img src="{{ asset($iconPath) }}" alt="{{ $displayName }}" class="w-100 h-100 object-contain" style="object-fit: contain;">
-                                                </div>
-                                                <div class="flex-grow-1 overflow-hidden">
-                                                    <span class="fw-bold d-block text-dark text-truncate" style="font-size: 0.95rem;">{{ $displayName }}</span>
-                                                    <div class="form-check form-switch mb-0 mt-1 d-flex align-items-center">
-                                                        <input type="checkbox" name="services[]" value="{{ $service->id }}" class="form-check-input service-main-toggle me-2" style="cursor: pointer; transform: scale(1.15);" {{ in_array($service->id, $activeServices) ? 'checked' : '' }}>
-                                                        <label class="form-check-label small fw-bold status-label-main {{ in_array($service->id, $activeServices) ? 'text-primary' : 'text-secondary' }}" style="font-size: 0.78rem;">{{ in_array($service->id, $activeServices) ? 'Layanan Aktif' : 'Layanan Nonaktif' }}</label>
+                                            <!-- Bagian Atas: Header Unit & Master Switch -->
+                                            <div>
+                                                <div class="d-flex align-items-start justify-content-between gap-2 mb-3">
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="rounded-3 p-2 me-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 52px; height: 52px; background: rgba(67, 89, 113, 0.04); border: 1px solid rgba(67, 89, 113, 0.08);">
+                                                            <img src="{{ asset($iconPath) }}" alt="{{ $displayName }}" class="w-100 h-100" style="object-fit: contain;">
+                                                        </div>
+                                                        <div>
+                                                            <span class="fw-bold d-block text-dark" style="font-size: 0.98rem; line-height: 1.25;">{{ $displayName }}</span>
+                                                            <span class="badge {{ in_array($service->id, $activeServices) ? 'bg-label-success text-success' : 'bg-label-secondary text-secondary' }} rounded-pill px-2 py-1 mt-1 status-badge-pill" style="font-size: 0.72rem; font-weight: 600;">
+                                                                <i class="bx {{ in_array($service->id, $activeServices) ? 'bx-check-circle' : 'bx-x-circle' }} me-1 status-badge-icon"></i><span class="status-badge-text">{{ in_array($service->id, $activeServices) ? 'Aktif' : 'Nonaktif' }}</span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <!-- Switch Master Layanan -->
+                                                    <div class="form-check form-switch mb-0 ps-0 text-end">
+                                                        <input type="checkbox" name="services[]" value="{{ $service->id }}" class="form-check-input service-main-toggle ms-0" style="cursor: pointer; transform: scale(1.25);" {{ in_array($service->id, $activeServices) ? 'checked' : '' }} title="Aktifkan atau Nonaktifkan Layanan">
                                                     </div>
                                                 </div>
-                                            </div>
-                                            <div class="mb-3">
-                                                <small class="status-desc-text {{ in_array($service->id, $activeServices) ? 'text-success' : 'text-danger' }} d-block text-break" style="font-size: 0.72rem; line-height: 1.3;">
-                                                    {{ in_array($service->id, $activeServices) ? 'Layanan ini muncul di beranda warga.' : 'Layanan ini disembunyikan sepenuhnya.' }}
-                                                </small>
+
+                                                <!-- Status Banner Keterangan -->
+                                                <div class="status-banner d-flex align-items-center py-2 px-3 rounded-3 mb-3 {{ in_array($service->id, $activeServices) ? 'bg-label-success text-success' : 'bg-label-secondary text-secondary' }}" style="font-size: 0.78rem;">
+                                                    <i class="bx {{ in_array($service->id, $activeServices) ? 'bx-check-circle' : 'bx-hide' }} me-2 fs-6 status-banner-icon flex-shrink-0"></i>
+                                                    <span class="status-banner-text fw-medium">{{ in_array($service->id, $activeServices) ? 'Layanan tampil aktif di beranda warga' : 'Layanan dinonaktifkan & disembunyikan' }}</span>
+                                                </div>
                                             </div>
 
-                                            <div class="border-top pt-2 mt-2">
-                                                <label class="form-label text-dark fw-bold small mb-2 d-flex align-items-center">
-                                                    <i class="bx bx-shield-quarter text-warning me-1"></i> Hak Akses Eksklusif
-                                                </label>
-                                                
-                                                <div class="form-check form-switch mb-1">
-                                                    <input type="checkbox" name="exclusive_services[]" value="{{ $service->id }}" class="form-check-input exclusive-toggle" style="cursor: pointer; border-color: #ffab00;" {{ in_array($service->id, $exclusiveServices) ? 'checked' : '' }}>
-                                                    <label class="form-check-label small fw-bold text-dark exclusive-label-main">{{ in_array($service->id, $exclusiveServices) ? 'Eksklusif Warga Lokal' : 'Publik (Terbuka Umum)' }}</label>
+                                            <!-- Bagian Bawah: Pengaturan Jangkauan Akses (Eksklusif vs Publik) -->
+                                            <div class="border-top pt-3 mt-2">
+                                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="avatar avatar-xs bg-label-warning text-warning rounded-circle me-2 d-flex align-items-center justify-content-center" style="width: 26px; height: 26px;">
+                                                            <i class="bx bx-shield-quarter" style="font-size: 14px;"></i>
+                                                        </div>
+                                                        <div>
+                                                            <span class="fw-bold text-dark small d-block" style="font-size: 0.82rem;">Jangkauan Akses</span>
+                                                            <small class="text-muted d-block" style="font-size: 0.7rem;">Hak akses penggunaan layanan</small>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <span class="badge {{ in_array($service->id, $exclusiveServices) ? 'bg-label-warning text-warning' : 'bg-label-info text-info' }} rounded-pill px-2 py-1 fw-bold exclusive-badge-pill" style="font-size: 0.72rem;">
+                                                            {{ in_array($service->id, $exclusiveServices) ? 'Eksklusif Warga' : 'Publik Terbuka' }}
+                                                        </span>
+                                                        <div class="form-check form-switch mb-0">
+                                                            <input type="checkbox" name="exclusive_services[]" value="{{ $service->id }}" class="form-check-input exclusive-toggle" style="cursor: pointer;" {{ in_array($service->id, $exclusiveServices) ? 'checked' : '' }} title="Alihkan antara Akses Eksklusif Warga atau Publik Terbuka">
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                                <small class="exclusive-desc-text {{ in_array($service->id, $exclusiveServices) ? 'text-warning' : 'text-primary' }} d-block text-break" style="font-size: 0.75rem;">
-                                                    {{ in_array($service->id, $exclusiveServices) ? 'Hanya warga domisili '.$region->name.' '.$descText : 'Semua warga termasuk dari luar desa dapat mengakses layanan ini.' }}
-                                                </small>
+
+                                                <div class="bg-light rounded-3 p-2 px-3">
+                                                    <small class="exclusive-desc-text text-secondary d-block" style="font-size: 0.75rem; line-height: 1.45;">
+                                                        {{ in_array($service->id, $exclusiveServices) ? 'Hanya warga dengan KTP/domisili '.$region->name.' '.$descText : 'Terbuka untuk semua warga masyarakat, termasuk dari luar desa.' }}
+                                                    </small>
+                                                </div>
                                             </div>
 
                                         </div>
@@ -263,40 +298,44 @@
                                     @if($isPasar)
                                     <div class="col-md-6">
                                         <input type="hidden" name="services[]" value="{{ $service->id }}">
-                                        <div class="card border border-success border-opacity-25 shadow-sm rounded-3 h-100" style="background: #ffffff; max-width: 100%; overflow: hidden;">
-                                            <div class="card-body p-3 d-flex flex-column justify-content-between">
+                                        <div class="card bg-white shadow-sm rounded-4 h-100 position-relative" style="border: 1px solid rgba(67, 89, 113, 0.12); border-left: 4px solid #ffab00 !important;">
+                                            <div class="card-body p-3 p-sm-4 d-flex flex-column justify-content-between">
                                                 <div>
-                                                    <div class="d-flex align-items-center mb-2">
-                                                        <div class="bg-label-success rounded p-2 me-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 46px; height: 46px;">
-                                                            <img src="{{ asset('Admin/img/pasardaerah/PasarDaerah2.png') }}" alt="Pasar Daerah" class="w-100 h-100 object-contain" style="object-fit: contain;">
-                                                        </div>
-                                                        <div class="flex-grow-1 overflow-hidden">
-                                                            <div class="d-flex align-items-center justify-content-between gap-1">
-                                                                <span class="fw-bold d-block text-dark text-truncate" style="font-size: 0.95rem;">Pasar Daerah</span>
-                                                                <span class="badge bg-label-success rounded-pill px-2 py-1 flex-shrink-0" style="font-size: 0.7rem; text-transform: none !important;">
+                                                    <div class="d-flex align-items-start justify-content-between gap-2 mb-3">
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="rounded-3 p-2 me-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 52px; height: 52px; background: rgba(67, 89, 113, 0.04); border: 1px solid rgba(67, 89, 113, 0.08);">
+                                                                <img src="{{ asset('Admin/img/pasardaerah/PasarDaerah2.png') }}" alt="Pasar Daerah" class="w-100 h-100" style="object-fit: contain;">
+                                                            </div>
+                                                            <div>
+                                                                <span class="fw-bold d-block text-dark" style="font-size: 0.98rem; line-height: 1.25;">Pasar Daerah</span>
+                                                                <span class="badge bg-label-success text-success rounded-pill px-2 py-1 mt-1" style="font-size: 0.72rem; font-weight: 600;">
                                                                     <i class="bx bx-check-circle me-1"></i>Selalu Aktif
                                                                 </span>
                                                             </div>
-                                                            <small class="text-success fw-medium d-block text-truncate" style="font-size: 0.72rem;">
-                                                                Marketplace Terpadu se-Kabupaten Bengkalis
-                                                            </small>
                                                         </div>
+                                                        <span class="badge bg-label-warning text-warning rounded-pill px-2 py-1" style="font-size: 0.72rem;">Kabupaten</span>
                                                     </div>
-                                                    <p class="text-muted mb-3 text-break" style="font-size: 0.78rem; line-height: 1.4;">
-                                                        Marketplace bersama seluruh desa. Warga desa Anda dapat membeli produk dari mana pun di Kabupaten Bengkalis, dan UMKM desa dapat berjualan ke seluruh wilayah tanpa dibatasi.
+
+                                                    <div class="status-banner d-flex align-items-center py-2 px-3 rounded-3 mb-3 bg-label-warning text-warning" style="font-size: 0.78rem;">
+                                                        <i class="bx bx-store me-2 fs-6 flex-shrink-0"></i>
+                                                        <span class="fw-medium">Marketplace Terpadu se-Kabupaten Bengkalis</span>
+                                                    </div>
+
+                                                    <p class="text-muted mb-3" style="font-size: 0.78rem; line-height: 1.45;">
+                                                        Marketplace bersama seluruh desa. Warga desa Anda dapat membeli produk UMKM dari seluruh Kabupaten Bengkalis, dan pelaku usaha lokal dapat menjangkau pembeli antar desa tanpa sekat wilayah.
                                                     </p>
                                                 </div>
 
-                                                <div class="bg-light border rounded-3 p-2 px-3">
-                                                    <div class="d-flex align-items-center justify-content-between gap-2">
+                                                <div class="border-top pt-3 mt-2">
+                                                    <div class="bg-light rounded-3 p-2 px-3 d-flex align-items-center justify-content-between">
                                                         <div class="d-flex align-items-center overflow-hidden">
-                                                            <i class="bx bx-globe text-success fs-5 me-2 flex-shrink-0"></i>
+                                                            <i class="bx bx-globe text-warning fs-5 me-2 flex-shrink-0"></i>
                                                             <div class="overflow-hidden">
-                                                                <span class="fw-bold d-block text-dark small text-truncate" style="font-size: 0.78rem;">Publik (Lintas Desa & Kecamatan)</span>
-                                                                <small class="text-muted d-block text-truncate" style="font-size: 0.68rem;">Otomatis terbuka untuk seluruh warga masyarakat.</small>
+                                                                <span class="fw-bold d-block text-dark small" style="font-size: 0.78rem;">Publik Lintas Wilayah</span>
+                                                                <small class="text-muted d-block text-truncate" style="font-size: 0.7rem;">Otomatis terbuka untuk seluruh warga se-Bengkalis.</small>
                                                             </div>
                                                         </div>
-                                                        <i class="bx bxs-lock-alt text-secondary flex-shrink-0" title="Layanan publik kabupaten tidak dapat dinonaktifkan per desa"></i>
+                                                        <i class="bx bxs-lock-alt text-muted flex-shrink-0 ms-2" title="Layanan publik kabupaten tidak dapat dinonaktifkan per desa"></i>
                                                     </div>
                                                 </div>
                                             </div>
@@ -305,40 +344,44 @@
                                     @elseif($isPengumuman)
                                     <div class="col-md-6">
                                         <input type="hidden" name="services[]" value="{{ $service->id }}">
-                                        <div class="card border border-info border-opacity-25 shadow-sm rounded-3 h-100" style="background: #ffffff; max-width: 100%; overflow: hidden;">
-                                            <div class="card-body p-3 d-flex flex-column justify-content-between">
+                                        <div class="card bg-white shadow-sm rounded-4 h-100 position-relative" style="border: 1px solid rgba(67, 89, 113, 0.12); border-left: 4px solid #696cff !important;">
+                                            <div class="card-body p-3 p-sm-4 d-flex flex-column justify-content-between">
                                                 <div>
-                                                    <div class="d-flex align-items-center mb-2">
-                                                        <div class="bg-label-info rounded p-2 me-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 46px; height: 46px;">
-                                                            <img src="{{ asset('User/img/elemen/KabardanInformasiDaerah.png') }}" alt="Kabar dan Informasi Daerah" class="w-100 h-100 object-contain" style="object-fit: contain;">
-                                                        </div>
-                                                        <div class="flex-grow-1 overflow-hidden">
-                                                            <div class="d-flex align-items-center justify-content-between gap-1">
-                                                                <span class="fw-bold d-block text-dark text-truncate" style="font-size: 0.95rem;">Kabar & Informasi</span>
-                                                                <span class="badge bg-label-success rounded-pill px-2 py-1 flex-shrink-0" style="font-size: 0.7rem; text-transform: none !important;">
+                                                    <div class="d-flex align-items-start justify-content-between gap-2 mb-3">
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="rounded-3 p-2 me-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 52px; height: 52px; background: rgba(67, 89, 113, 0.04); border: 1px solid rgba(67, 89, 113, 0.08);">
+                                                                <img src="{{ asset('User/img/elemen/KabardanInformasiDaerah.png') }}" alt="Kabar dan Informasi Daerah" class="w-100 h-100" style="object-fit: contain;">
+                                                            </div>
+                                                            <div>
+                                                                <span class="fw-bold d-block text-dark" style="font-size: 0.98rem; line-height: 1.25;">Kabar & Informasi</span>
+                                                                <span class="badge bg-label-success text-success rounded-pill px-2 py-1 mt-1" style="font-size: 0.72rem; font-weight: 600;">
                                                                     <i class="bx bx-check-circle me-1"></i>Selalu Aktif
                                                                 </span>
                                                             </div>
-                                                            <small class="text-info fw-medium d-block text-truncate" style="font-size: 0.72rem;">
-                                                                Portal Berita & Pengumuman Resmi
-                                                            </small>
                                                         </div>
+                                                        <span class="badge bg-label-primary text-primary rounded-pill px-2 py-1" style="font-size: 0.72rem;">Kabupaten</span>
                                                     </div>
-                                                    <p class="text-muted mb-3 text-break" style="font-size: 0.78rem; line-height: 1.4;">
-                                                        Pusat transparansi berita dan pengumuman. Berita terbuka bagi seluruh masyarakat, sedangkan target pengumuman diatur fleksibel saat membuat pengumuman.
+
+                                                    <div class="status-banner d-flex align-items-center py-2 px-3 rounded-3 mb-3 bg-label-primary text-primary" style="font-size: 0.78rem;">
+                                                        <i class="bx bx-broadcast me-2 fs-6 flex-shrink-0"></i>
+                                                        <span class="fw-medium">Portal Berita & Pengumuman Terpadu</span>
+                                                    </div>
+
+                                                    <p class="text-muted mb-3" style="font-size: 0.78rem; line-height: 1.45;">
+                                                        Pusat transparansi informasi masyarakat. Berita desa dapat dibaca oleh seluruh masyarakat luas, sedangkan sasaran pengumuman dapat diatur secara presisi pada saat admin mempublikasikan materi.
                                                     </p>
                                                 </div>
 
-                                                <div class="bg-light border rounded-3 p-2 px-3">
-                                                    <div class="d-flex align-items-center justify-content-between gap-2">
+                                                <div class="border-top pt-3 mt-2">
+                                                    <div class="bg-light rounded-3 p-2 px-3 d-flex align-items-center justify-content-between">
                                                         <div class="d-flex align-items-center overflow-hidden">
-                                                            <i class="bx bx-news text-info fs-5 me-2 flex-shrink-0"></i>
+                                                            <i class="bx bx-news text-primary fs-5 me-2 flex-shrink-0"></i>
                                                             <div class="overflow-hidden">
-                                                                <span class="fw-bold d-block text-dark small text-truncate" style="font-size: 0.78rem;">Berita Publik &bull; Pengumuman Fleksibel</span>
-                                                                <small class="text-muted d-block text-truncate" style="font-size: 0.68rem;">Target pengumuman ditentukan saat admin posting materi.</small>
+                                                                <span class="fw-bold d-block text-dark small" style="font-size: 0.78rem;">Berita Publik &bull; Pengumuman Fleksibel</span>
+                                                                <small class="text-muted d-block text-truncate" style="font-size: 0.7rem;">Target sasaran diatur saat memposting pengumuman.</small>
                                                             </div>
                                                         </div>
-                                                        <i class="bx bxs-lock-alt text-secondary flex-shrink-0" title="Layanan publik kabupaten tidak dapat dinonaktifkan per desa"></i>
+                                                        <i class="bx bxs-lock-alt text-muted flex-shrink-0 ms-2" title="Layanan publik kabupaten tidak dapat dinonaktifkan per desa"></i>
                                                     </div>
                                                 </div>
                                             </div>
@@ -798,6 +841,12 @@
 .card-service-item {
     max-width: 100%;
     word-wrap: break-word;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.card-service-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px 0 rgba(67, 89, 113, 0.12) !important;
 }
 
 @media (max-width: 575.98px) {
@@ -920,34 +969,31 @@
     const serviceToggles = document.querySelectorAll('.service-main-toggle');
     serviceToggles.forEach(toggle => {
         const updateServiceCard = (el) => {
-            const label = el.nextElementSibling;
             const card = el.closest('.card-service-item');
-            const descContainer = card.querySelector('.status-desc-text');
+            if (!card) return;
+            const badgePill = card.querySelector('.status-badge-pill');
+            const statusBanner = card.querySelector('.status-banner');
             
-            if(label && label.classList.contains('status-label-main')) {
-                if(el.checked) {
-                    label.innerText = 'Layanan Aktif';
-                    label.classList.remove('text-secondary');
-                    label.classList.add('text-primary');
-                    card.classList.remove('border-secondary', 'bg-light');
-                    card.classList.add('border-primary', 'shadow-sm', 'bg-label-primary');
-                    if(descContainer) {
-                        descContainer.innerText = 'Layanan ini muncul di beranda warga.';
-                        descContainer.classList.remove('text-danger');
-                        descContainer.classList.add('text-success');
-                    }
-                } else {
-                    label.innerText = 'Layanan Nonaktif';
-                    label.classList.remove('text-primary');
-                    label.classList.add('text-secondary');
-                    card.classList.remove('border-primary', 'shadow-sm', 'bg-label-primary');
-                    card.classList.add('border-secondary', 'bg-light');
-                    if(descContainer) {
-                        descContainer.innerText = 'Layanan ini disembunyikan sepenuhnya.';
-                        descContainer.classList.remove('text-success');
-                        descContainer.classList.add('text-danger');
-                    }
+            if(el.checked) {
+                if(badgePill) {
+                    badgePill.className = 'badge bg-label-success text-success rounded-pill px-2 py-1 mt-1 status-badge-pill';
+                    badgePill.innerHTML = '<i class="bx bx-check-circle me-1 status-badge-icon"></i><span class="status-badge-text">Aktif</span>';
                 }
+                if(statusBanner) {
+                    statusBanner.className = 'status-banner d-flex align-items-center py-2 px-3 rounded-3 mb-3 bg-label-success text-success';
+                    statusBanner.innerHTML = '<i class="bx bx-check-circle me-2 fs-6 status-banner-icon flex-shrink-0"></i><span class="status-banner-text fw-medium">Layanan tampil aktif di beranda warga</span>';
+                }
+                card.style.opacity = '1';
+            } else {
+                if(badgePill) {
+                    badgePill.className = 'badge bg-label-secondary text-secondary rounded-pill px-2 py-1 mt-1 status-badge-pill';
+                    badgePill.innerHTML = '<i class="bx bx-x-circle me-1 status-badge-icon"></i><span class="status-badge-text">Nonaktif</span>';
+                }
+                if(statusBanner) {
+                    statusBanner.className = 'status-banner d-flex align-items-center py-2 px-3 rounded-3 mb-3 bg-label-secondary text-secondary';
+                    statusBanner.innerHTML = '<i class="bx bx-hide me-2 fs-6 status-banner-icon flex-shrink-0"></i><span class="status-banner-text fw-medium">Layanan dinonaktifkan & disembunyikan</span>';
+                }
+                card.style.opacity = '0.72';
             }
         };
         updateServiceCard(toggle);
@@ -960,35 +1006,26 @@
         const updateExclusiveCard = (el) => {
             const card = el.closest('.card-service-item');
             if (!card) return;
-            const label = card.querySelector('.exclusive-label-main');
+            const badgePill = card.querySelector('.exclusive-badge-pill');
             const descContainer = card.querySelector('.exclusive-desc-text');
-            const isPengumuman = card.querySelector('span.fw-bold') && card.querySelector('span.fw-bold').innerText.includes('Kabar dan Informasi');
             const regionName = "{{ $region->name }}";
             const actionText = card.getAttribute('data-action') || 'yang dapat mengakses layanan ini.';
             
-            if(label && label.classList.contains('exclusive-label-main')) {
-                if(el.checked) {
-                    label.innerText = 'Eksklusif Warga Lokal';
-                    if(descContainer) {
-                        descContainer.classList.remove('text-primary');
-                        descContainer.classList.add('text-warning');
-                        if (isPengumuman) {
-                            descContainer.innerText = 'Pengumuman HANYA tampil untuk warga domisili ' + regionName + '.';
-                        } else {
-                            descContainer.innerText = 'Hanya warga domisili ' + regionName + ' ' + actionText;
-                        }
-                    }
-                } else {
-                    label.innerText = 'Publik (Terbuka Umum)';
-                    if(descContainer) {
-                        descContainer.classList.remove('text-warning');
-                        descContainer.classList.add('text-primary');
-                        if (isPengumuman) {
-                            descContainer.innerText = 'Pengumuman dapat dilihat oleh semua warga termasuk dari desa lain.';
-                        } else {
-                            descContainer.innerText = 'Semua warga termasuk dari luar desa dapat mengakses layanan ini.';
-                        }
-                    }
+            if(el.checked) {
+                if(badgePill) {
+                    badgePill.className = 'badge bg-label-warning text-warning rounded-pill px-2 py-1 fw-bold exclusive-badge-pill';
+                    badgePill.innerText = 'Eksklusif Warga';
+                }
+                if(descContainer) {
+                    descContainer.innerText = 'Hanya warga dengan KTP/domisili ' + regionName + ' ' + actionText;
+                }
+            } else {
+                if(badgePill) {
+                    badgePill.className = 'badge bg-label-info text-info rounded-pill px-2 py-1 fw-bold exclusive-badge-pill';
+                    badgePill.innerText = 'Publik Terbuka';
+                }
+                if(descContainer) {
+                    descContainer.innerText = 'Terbuka untuk semua warga masyarakat, termasuk dari luar desa.';
                 }
             }
         };
