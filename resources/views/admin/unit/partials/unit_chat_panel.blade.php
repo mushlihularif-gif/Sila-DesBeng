@@ -203,6 +203,17 @@
     visibility: visible !important;
     transform: none !important;
 }
+.unit-chat-user-bubble {
+    padding: 14px 16px 10px;
+}
+.unit-chat-product-quote {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px;
+    margin-bottom: 12px;
+    background: rgba(105, 108, 255, 0.08);
+    border-left: 4px solid #696cff;
+}
 .chat-bubble-pop {
     opacity: 1 !important;
     animation: chatBubblePopIn 0.15s ease-out forwards;
@@ -473,13 +484,13 @@
                     const prodUrl = (productInfo.url && productInfo.url !== '#') ? productInfo.url : '';
 
                     quotedHtml = `
-                        <div class="p-2.5 mb-2.5 rounded-3 d-flex align-items-center justify-content-between gap-3 shadow-2xs" style="background: rgba(105, 108, 255, 0.08); border-left: 4px solid #696cff;">
-                            <div class="d-flex align-items-center gap-2.5 overflow-hidden">
-                                ${prodImg ? `<img src="${prodImg}" alt="${prodTitle}" class="rounded flex-shrink-0 shadow-2xs" style="width: 44px; height: 44px; object-fit: cover;" onerror="this.style.display='none'">` : ''}
+                        <div class="unit-chat-product-quote rounded-3 d-flex align-items-center justify-content-between gap-3 shadow-2xs">
+                            <div class="d-flex align-items-center gap-3 overflow-hidden min-w-0">
+                                ${prodImg ? `<img src="${prodImg}" alt="${prodTitle}" class="rounded flex-shrink-0 shadow-2xs" style="width: 48px; height: 48px; object-fit: cover;" onerror="this.style.display='none'">` : ''}
                                 <div class="overflow-hidden min-w-0">
-                                    <div class="text-uppercase text-muted fw-bold mb-0.5" style="font-size: 9.5px; letter-spacing: 0.5px;">Unit Layanan yang Ditanyakan</div>
-                                    <div class="fw-bold text-dark text-truncate" style="font-size: 0.88rem;">${prodTitle}</div>
-                                    ${prodPrice ? `<div class="text-success fw-bold small mt-0.5" style="font-size: 0.82rem;">${prodPrice}</div>` : ''}
+                                    <div class="text-uppercase text-muted fw-bold mb-1" style="font-size: 9.5px; letter-spacing: 0.5px;">Unit Layanan yang Ditanyakan</div>
+                                    <div class="fw-bold text-dark text-truncate" style="font-size: 0.9rem;">${prodTitle}</div>
+                                    ${prodPrice ? `<div class="text-success fw-bold small mt-1" style="font-size: 0.84rem;">${prodPrice}</div>` : ''}
                                 </div>
                             </div>
                             ${prodUrl ? `
@@ -498,7 +509,7 @@
                         ${userAvatarHtml}
                     </div>
                     <div style="max-width: 80%;">
-                        <div class="bg-white text-dark p-2.5 px-3 rounded-3 shadow-xs border" style="border-bottom-left-radius: 2px !important; border-color: rgba(0,0,0,0.06) !important;">
+                        <div class="unit-chat-user-bubble bg-white text-dark rounded-3 shadow-xs border" style="border-bottom-left-radius: 2px !important; border-color: rgba(0,0,0,0.06) !important;">
                             ${quotedHtml}
                             <p class="mb-0" style="font-size: 0.93rem; color: #111b21; white-space: pre-wrap; line-height: 1.45;">${msgText}</p>
                             <div class="text-end mt-1" style="font-size: 10px; color: #667781;">
