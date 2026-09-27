@@ -495,7 +495,7 @@
                             </div>
                             ${prodUrl ? `
                                 <div class="flex-shrink-0">
-                                    <a href="${prodUrl}" target="_blank" class="btn btn-xs btn-outline-primary rounded-pill px-2.5 py-1 text-nowrap" style="font-size: 11px;">
+                                    <a href="${prodUrl}" class="btn btn-xs btn-outline-primary rounded-pill px-2.5 py-1 text-nowrap" style="font-size: 11px;">
                                         <i class="bx bx-show me-1"></i> Detail
                                     </a>
                                 </div>
