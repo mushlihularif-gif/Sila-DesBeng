@@ -11,18 +11,42 @@ use Illuminate\Support\Facades\Auth;
 class UnitChatController extends Controller
 {
     /**
+     * Cari session dengan otorisasi wilayah yang fleksibel dan aman
+     */
+    private function findSession($service, $sessionId)
+    {
+        $admin = Auth::user();
+        if (!$admin) {
+            return null;
+        }
+
+        $query = UnitChatSession::where('service_type', $service);
+
+        // Jika bukan super_admin dan memiliki region_id, filter berdasarkan region_id
+        if (!in_array($admin->role, ['super_admin', 'admin']) && $admin->region_id) {
+            $query->where('region_id', $admin->region_id);
+        } elseif ($admin->region_id) {
+            $query->where(function ($q) use ($admin) {
+                $q->where('region_id', $admin->region_id)
+                  ->orWhereNull('region_id');
+            });
+        }
+
+        return $query->find($sessionId);
+    }
+
+    /**
      * Detail Pesan Chat untuk Admin
      */
     public function getMessages($service, $sessionId)
     {
-        $admin = Auth::user();
-        if (!$admin || !$admin->region_id) {
-            return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 403);
+        $session = $this->findSession($service, $sessionId);
+        if (!$session) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Sesi percakapan tidak ditemukan atau Anda tidak memiliki akses.'
+            ], 404);
         }
-
-        $session = UnitChatSession::where('region_id', $admin->region_id)
-            ->where('service_type', $service)
-            ->findOrFail($sessionId);
 
         // Reset unread count for admin
         $session->update(['unread_admin_count' => 0]);
@@ -44,7 +68,7 @@ class UnitChatController extends Controller
     public function replyChat(Request $request, $service, $sessionId)
     {
         $admin = Auth::user();
-        if (!$admin || !$admin->region_id) {
+        if (!$admin) {
             return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 403);
         }
 
@@ -52,9 +76,13 @@ class UnitChatController extends Controller
             'message' => 'required|string|max:1000',
         ]);
 
-        $session = UnitChatSession::where('region_id', $admin->region_id)
-            ->where('service_type', $service)
-            ->findOrFail($sessionId);
+        $session = $this->findSession($service, $sessionId);
+        if (!$session) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Sesi percakapan tidak ditemukan.'
+            ], 404);
+        }
 
         $msg = UnitChatMessage::create([
             'session_id' => $session->id,
@@ -85,14 +113,13 @@ class UnitChatController extends Controller
      */
     public function resolveChat($service, $sessionId)
     {
-        $admin = Auth::user();
-        if (!$admin || !$admin->region_id) {
-            return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 403);
+        $session = $this->findSession($service, $sessionId);
+        if (!$session) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Sesi percakapan tidak ditemukan.'
+            ], 404);
         }
-
-        $session = UnitChatSession::where('region_id', $admin->region_id)
-            ->where('service_type', $service)
-            ->findOrFail($sessionId);
 
         $session->update([
             'status' => 'resolved',

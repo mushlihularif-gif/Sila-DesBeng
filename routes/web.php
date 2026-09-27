@@ -772,6 +772,13 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
             Route::post('{service}/{id}/resolve', [\App\Http\Controllers\Admin\UnitChatController::class, 'resolveChat'])->name('admin.unit.chat.resolve');
         });
     });
+
+    // Chat Service Alias (dapat diakses lewat /admin/chat-service/ maupun /admin/unit/chat-service/)
+    Route::prefix('chat-service')->group(function () {
+        Route::get('{service}/{id}/messages', [\App\Http\Controllers\Admin\UnitChatController::class, 'getMessages']);
+        Route::post('{service}/{id}/reply', [\App\Http\Controllers\Admin\UnitChatController::class, 'replyChat']);
+        Route::post('{service}/{id}/resolve', [\App\Http\Controllers\Admin\UnitChatController::class, 'resolveChat']);
+    });
     
     // Route Aktivitas
     Route::prefix('aktivitas')->group(function () {

@@ -183,12 +183,23 @@
             stream.innerHTML = '<div class="text-center py-5 my-auto text-muted"><span class="spinner-border spinner-border-sm text-primary me-2"></span>Memuat obrolan...</div>';
         }
 
-        fetch(`{{ url('admin/chat-service') }}/${service}/${sessionId}/messages`, {
+        const fetchUrl = `{{ url('admin/unit/chat-service') }}/${service}/${sessionId}/messages`;
+        const fallbackUrl = `{{ url('admin/chat-service') }}/${service}/${sessionId}/messages`;
+
+        fetch(fetchUrl, {
             headers: {
                 'Accept': 'application/json'
             }
         })
-        .then(res => res.json())
+        .then(res => {
+            if (!res.ok) {
+                return fetch(fallbackUrl, { headers: { 'Accept': 'application/json' } }).then(r => {
+                    if (!r.ok) throw new Error('HTTP ' + r.status);
+                    return r.json();
+                });
+            }
+            return res.json();
+        })
         .then(res => {
             if (res.status === 'success') {
                 const session = res.data.session;
@@ -242,10 +253,23 @@
 
                 // Start polling
                 startAdminUnitChatPolling(service, sessionId);
+            } else {
+                if (!isSilent) {
+                    const stream = document.getElementById(`adminUnitChatMessagesStream_${service}`);
+                    if (stream) {
+                        stream.innerHTML = `<div class="text-center text-danger my-auto py-5"><i class="bx bx-error-circle fs-1 mb-2"></i><p class="small mb-2">${res.message || 'Gagal memuat percakapan.'}</p><button class="btn btn-sm btn-outline-primary" onclick="loadAdminUnitChat('${service}', ${sessionId})">Coba Lagi</button></div>`;
+                    }
+                }
             }
         })
         .catch(err => {
             console.error('Error loading chat:', err);
+            if (!isSilent) {
+                const stream = document.getElementById(`adminUnitChatMessagesStream_${service}`);
+                if (stream) {
+                    stream.innerHTML = `<div class="text-center text-danger my-auto py-5"><i class="bx bx-error-circle fs-1 mb-2"></i><p class="small mb-2">Gagal memuat obrolan (${err.message || 'Koneksi bermasalah'}).</p><button class="btn btn-sm btn-outline-primary" onclick="loadAdminUnitChat('${service}', ${sessionId})">Muat Ulang</button></div>`;
+                }
+            }
         });
     }
 
@@ -311,7 +335,10 @@
         const stream = document.getElementById(`adminUnitChatMessagesStream_${service}`);
         stream.scrollTop = stream.scrollHeight;
 
-        fetch(`{{ url('admin/chat-service') }}/${service}/${state.activeSessionId}/reply`, {
+        const replyUrl = `{{ url('admin/unit/chat-service') }}/${service}/${state.activeSessionId}/reply`;
+        const replyFallbackUrl = `{{ url('admin/chat-service') }}/${service}/${state.activeSessionId}/reply`;
+
+        fetch(replyUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -320,7 +347,20 @@
             },
             body: JSON.stringify({ message: text })
         })
-        .then(res => res.json())
+        .then(res => {
+            if (!res.ok) {
+                return fetch(replyFallbackUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ message: text })
+                }).then(r => r.json());
+            }
+            return res.json();
+        })
         .then(res => {
             if (res.status === 'success') {
                 const preview = document.getElementById(`unitChatPreview_${service}_${state.activeSessionId}`);
@@ -344,14 +384,28 @@
 
         if (!confirm('Tandai sesi obrolan ini telah selesai ditangani?')) return;
 
-        fetch(`{{ url('admin/chat-service') }}/${service}/${state.activeSessionId}/resolve`, {
+        const resolveUrl = `{{ url('admin/unit/chat-service') }}/${service}/${state.activeSessionId}/resolve`;
+        const resolveFallbackUrl = `{{ url('admin/chat-service') }}/${service}/${state.activeSessionId}/resolve`;
+
+        fetch(resolveUrl, {
             method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
                 'Accept': 'application/json'
             }
         })
-        .then(res => res.json())
+        .then(res => {
+            if (!res.ok) {
+                return fetch(resolveFallbackUrl, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    }
+                }).then(r => r.json());
+            }
+            return res.json();
+        })
         .then(res => {
             if (res.status === 'success') {
                 loadAdminUnitChat(service, state.activeSessionId, true);
