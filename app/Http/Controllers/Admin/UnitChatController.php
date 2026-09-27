@@ -52,7 +52,10 @@ class UnitChatController extends Controller
         $session->update(['unread_admin_count' => 0]);
 
         $session->load('user');
-        $messages = $session->messages()->with('sender')->get();
+        $messages = $session->messages()->with('sender')->get()->map(function ($msg) {
+            $msg->time_formatted = $msg->created_at ? $msg->created_at->format('H:i') : '';
+            return $msg;
+        });
 
         $productInfo = null;
         if (!empty($session->item_reference)) {
