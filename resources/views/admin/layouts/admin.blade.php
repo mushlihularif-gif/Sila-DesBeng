@@ -635,15 +635,16 @@
     <style>
         /* Smooth scrolling container for sidebar menu */
         .layout-menu .menu-inner {
+            overflow-y: auto !important;
             scroll-behavior: smooth !important;
             overscroll-behavior: contain;
             scrollbar-width: thin;
-            scrollbar-color: rgba(67, 89, 113, 0.15) transparent;
-            padding-bottom: 220px !important;
+            scrollbar-color: rgba(67, 89, 113, 0.25) transparent;
+            padding-bottom: 320px !important;
         }
 
         .layout-menu .menu-inner::-webkit-scrollbar {
-            width: 4px;
+            width: 5px;
         }
 
         .layout-menu .menu-inner::-webkit-scrollbar-track {
@@ -651,64 +652,100 @@
         }
 
         .layout-menu .menu-inner::-webkit-scrollbar-thumb {
-            background: rgba(67, 89, 113, 0.15);
+            background: rgba(67, 89, 113, 0.2);
             border-radius: 10px;
         }
 
         .layout-menu .menu-inner::-webkit-scrollbar-thumb:hover {
-            background: rgba(67, 89, 113, 0.35);
+            background: rgba(67, 89, 113, 0.4);
         }
 
-        /* Menu Header Styling */
+        /* Menu Header Styling - Clean SaaS Divider without awkward ticks */
         .layout-menu .menu-header {
-            margin-top: 0.6rem !important;
-            margin-bottom: 0.2rem !important;
-            padding: 0.5rem 1.5rem 0.25rem 1.5rem !important;
+            margin-top: 0.9rem !important;
+            margin-bottom: 0.25rem !important;
+            padding: 0.5rem 1.25rem 0.25rem 1.25rem !important;
+        }
+
+        .layout-menu .menu-header::before {
+            display: none !important;
         }
 
         .layout-menu .menu-header .menu-header-text {
-            font-size: 0.7rem !important;
+            font-size: 0.68rem !important;
             font-weight: 700 !important;
-            letter-spacing: 0.8px;
+            letter-spacing: 0.9px !important;
             color: #8592a3 !important;
-            opacity: 0.9;
+            text-transform: uppercase !important;
+            opacity: 0.95;
         }
 
         /* Menu Links & Hover Transitions */
         .layout-menu .menu-item .menu-link {
             border-radius: 8px !important;
-            margin: 1px 0.75rem !important;
-            padding: 0.58rem 1rem !important;
+            margin: 2px 0.75rem !important;
+            padding: 0.6rem 0.95rem !important;
+            font-weight: 500 !important;
+            color: #566a7f !important;
             transition: background-color 0.2s ease, color 0.2s ease, transform 0.15s ease !important;
         }
 
-        .layout-menu .menu-item.open > .menu-link {
-            background-color: rgba(105, 108, 255, 0.06) !important;
-            font-weight: 600;
+        .layout-menu .menu-item .menu-link:hover {
+            background-color: rgba(105, 108, 255, 0.07) !important;
+            color: #696cff !important;
         }
 
+        .layout-menu .menu-item.active:not(.open) > .menu-link {
+            background-color: rgba(105, 108, 255, 0.12) !important;
+            color: #696cff !important;
+            font-weight: 600 !important;
+        }
+
+        .layout-menu .menu-item.open > .menu-link {
+            background-color: rgba(105, 108, 255, 0.08) !important;
+            color: #696cff !important;
+            font-weight: 600 !important;
+        }
+
+        /* Submenu Container: Styled as an elegant nested card/folder */
         .layout-menu .menu-sub {
-            padding-top: 0.25rem;
-            padding-bottom: 0.25rem;
+            background: rgba(67, 89, 113, 0.035) !important;
+            border-radius: 8px !important;
+            margin: 3px 0.75rem 6px 0.75rem !important;
+            padding: 4px 0 4px 0.35rem !important;
+            border-left: 2px solid rgba(105, 108, 255, 0.3) !important;
         }
 
         .layout-menu .menu-sub .menu-item .menu-link {
-            padding-top: 0.45rem !important;
-            padding-bottom: 0.45rem !important;
-            font-size: 0.85rem !important;
+            padding: 0.45rem 0.85rem !important;
+            font-size: 0.84rem !important;
+            font-weight: 500 !important;
+            color: #566a7f !important;
+            margin: 1px 0.25rem 1px 0 !important;
+            border-radius: 6px !important;
+        }
+
+        .layout-menu .menu-sub .menu-item .menu-link:hover {
+            color: #696cff !important;
+            background-color: rgba(105, 108, 255, 0.08) !important;
+            transform: translateX(3px) !important;
         }
 
         .layout-menu .menu-sub .menu-item.active > .menu-link {
-            background-color: rgba(105, 108, 255, 0.1) !important;
+            background-color: rgba(105, 108, 255, 0.12) !important;
             color: #696cff !important;
-            font-weight: 600;
+            font-weight: 600 !important;
         }
 
         /* Unit badge styling */
         .sidebar-unit-badge {
-            font-size: 0.68rem !important;
-            padding: 0.2rem 0.55rem !important;
-            letter-spacing: 0.3px;
+            font-size: 0.65rem !important;
+            font-weight: 700 !important;
+            padding: 0.18rem 0.5rem !important;
+            border-radius: 6px !important;
+            letter-spacing: 0.4px !important;
+            background-color: rgba(105, 108, 255, 0.12) !important;
+            color: #696cff !important;
         }
     </style>
 
@@ -752,7 +789,7 @@
                     </a>
                 </div>
                 <div class="menu-inner-shadow"></div>
-                <ul class="menu-inner py-1">
+                <ul class="menu-inner py-1" style="padding-bottom: 320px !important;">
                     <!-- ========================================================================= -->
                     <!-- 1. ZONA UTAMA                                                             -->
                     <!-- ========================================================================= -->
@@ -1258,21 +1295,26 @@
                         </ul>
                     </li>
 
-                    {{-- Pengaturan Wilayah (Dropdown) --}}
-                    <li class="menu-item {{ request()->routeIs('admin.lokasi-layanan.*') || request()->routeIs('admin.banners.*') || request()->routeIs('admin.region-settings.payment') ? 'open active show' : '' }}">
+                    {{-- Pengaturan & Profil Desa (Dropdown Terpadu) --}}
+                    <li class="menu-item {{ request()->routeIs('admin.lokasi-layanan.*') || request()->routeIs('admin.banners.*') || request()->routeIs('admin.region-settings.payment') || request()->is('admin/SiladesBeng/profile*') || request()->is('admin/SiladesBeng/developer*') || request()->routeIs('admin.SiladesBeng.bumdes.index') || request()->routeIs('admin.SiladesBeng.bumdes.*') ? 'open active show' : '' }}">
                         <a href="javascript:void(0);" class="menu-link menu-toggle">
                             <i class="menu-icon tf-icons bx bx-cog text-secondary"></i>
-                            <div>Pengaturan Wilayah</div>
+                            <div>Pengaturan & Profil</div>
                         </a>
                         <ul class="menu-sub">
-                            <li class="menu-item {{ request()->routeIs('admin.region-settings.payment') ? 'active' : '' }}">
-                                <a href="{{ route('admin.region-settings.payment') }}" class="menu-link">
-                                    <div>Pembayaran Wilayah</div>
+                            <li class="menu-item {{ request()->routeIs('admin.SiladesBeng.bumdes.index') || request()->routeIs('admin.SiladesBeng.bumdes.*') ? 'active' : '' }}">
+                                <a href="{{ route('admin.SiladesBeng.bumdes.index') }}" class="menu-link">
+                                    <div>Profil Desa & BUMDes</div>
                                 </a>
                             </li>
                             <li class="menu-item {{ request()->routeIs('admin.lokasi-layanan.*') ? 'active' : '' }}">
                                 <a href="{{ route('admin.lokasi-layanan.index') }}" class="menu-link">
-                                    <div>Lokasi Layanan</div>
+                                    <div>Lokasi & Peta Layanan</div>
+                                </a>
+                            </li>
+                            <li class="menu-item {{ request()->routeIs('admin.region-settings.payment') ? 'active' : '' }}">
+                                <a href="{{ route('admin.region-settings.payment') }}" class="menu-link">
+                                    <div>Pembayaran Wilayah</div>
                                 </a>
                             </li>
                             <li class="menu-item {{ request()->routeIs('admin.banners.*') ? 'active' : '' }}">
@@ -1280,24 +1322,9 @@
                                     <div>Banner Beranda</div>
                                 </a>
                             </li>
-                        </ul>
-                    </li>
-
-                    {{-- Profil & Info Desa --}}
-                    <li class="menu-item {{ request()->is('admin/SiladesBeng/profile*') || request()->is('admin/SiladesBeng/developer*') || request()->routeIs('admin.SiladesBeng.bumdes.index') || request()->routeIs('admin.SiladesBeng.bumdes.*') ? 'open active show' : '' }}">
-                        <a href="javascript:void(0);" class="menu-link menu-toggle">
-                            <i class="menu-icon tf-icons bx bx-info-circle text-info"></i>
-                            <div>Profil & Info</div>
-                        </a>
-                        <ul class="menu-sub">
                             <li class="menu-item {{ request()->routeIs('admin.SiladesBeng.profile') || request()->routeIs('admin.SiladesBeng.developer.profile') ? 'active' : '' }}">
                                 <a href="{{ route('admin.SiladesBeng.profile') }}" class="menu-link">
-                                    <div>SiladesBeng</div>
-                                </a>
-                            </li>
-                            <li class="menu-item {{ request()->routeIs('admin.SiladesBeng.bumdes.index') || request()->routeIs('admin.SiladesBeng.bumdes.*') ? 'active' : '' }}">
-                                <a href="{{ route('admin.SiladesBeng.bumdes.index') }}" class="menu-link">
-                                    <div>Pemerintah Desa</div>
+                                    <div>Profil Aplikasi</div>
                                 </a>
                             </li>
                         </ul>
@@ -2287,125 +2314,133 @@
             <!-- Sidebar Auto-Scroll & Smart Accordion Engine -->
             <script>
                 (function () {
-                    let activeScrollAnim = null;
-
-                    // Mesin animasi scroll berbasis requestAnimationFrame (kompatibel penuh dengan PerfectScrollbar)
-                    function animateScrollTop(element, target, duration = 300) {
-                        if (!element) return;
-                        if (activeScrollAnim) {
-                            cancelAnimationFrame(activeScrollAnim);
-                            activeScrollAnim = null;
-                        }
-
-                        const start = element.scrollTop;
-                        const change = target - start;
-                        if (Math.abs(change) < 2) return;
-
-                        const startTime = performance.now();
-                        const easeInOutCubic = t => t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
-
-                        function step(now) {
-                            const elapsed = now - startTime;
-                            const progress = Math.min(elapsed / duration, 1);
-                            const current = start + change * easeInOutCubic(progress);
-                            element.scrollTop = current;
-
-                            if (window.Helpers && window.Helpers.menuPsScroll) {
-                                window.Helpers.menuPsScroll.update();
-                            }
-
-                            if (progress < 1) {
-                                activeScrollAnim = requestAnimationFrame(step);
-                            } else {
-                                element.scrollTop = target;
-                                activeScrollAnim = null;
-                                if (window.Helpers && window.Helpers.menuPsScroll) {
+                    // Sinkronisasi posisi indikator scroll PerfectScrollbar jika aktif
+                    function syncMenuScrollbars() {
+                        try {
+                            if (window.Helpers) {
+                                if (window.Helpers.menuPsScroll && typeof window.Helpers.menuPsScroll.update === 'function') {
                                     window.Helpers.menuPsScroll.update();
                                 }
+                                if (window.Helpers.mainMenu && window.Helpers.mainMenu._scrollbar && typeof window.Helpers.mainMenu._scrollbar.update === 'function') {
+                                    window.Helpers.mainMenu._scrollbar.update();
+                                }
                             }
-                        }
-
-                        activeScrollAnim = requestAnimationFrame(step);
+                        } catch (e) {}
                     }
 
-                    // Fungsi untuk menghitung posisi dropdown dan menggesernya naik jika mendekati atau melewati batas bawah layar
+                    // Fungsi untuk menggeser menu naik ke atas agar dropdown dan semua item di dalamnya tampil utuh
                     function ensureMenuInFullView(menuItem) {
                         const menuInner = document.querySelector('#layout-menu .menu-inner');
                         if (!menuInner || !menuItem) return;
 
-                        const itemRect = menuItem.getBoundingClientRect();
-                        const viewportBottom = window.innerHeight;
+                        const sub = menuItem.querySelector('.menu-sub');
+                        if (!sub) return;
 
-                        // Margin aman 48px dari batas bawah layar agar tidak tertutup taskbar
-                        const safetyMargin = 48;
-                        const cutoff = itemRect.bottom - (viewportBottom - safetyMargin);
+                        let bottomEdge = menuItem.getBoundingClientRect().bottom;
+                        const lastChild = sub.lastElementChild;
+                        if (lastChild) {
+                            const lastRect = lastChild.getBoundingClientRect();
+                            if (lastRect.bottom > 0) {
+                                bottomEdge = Math.max(bottomEdge, lastRect.bottom);
+                            }
+                        }
+
+                        const viewportHeight = window.innerHeight;
+                        // Jarak aman 65px di atas batas bawah layar/taskbar Windows
+                        const safetyMargin = 65;
+                        const cutoff = bottomEdge - (viewportHeight - safetyMargin);
 
                         if (cutoff > 0) {
-                            // Berikan ruang nafas ekstra 28px agar menu terlihat lapang di atas batas bawah
-                            const target = menuInner.scrollTop + cutoff + 28;
-                            animateScrollTop(menuInner, target, 320);
+                            const target = menuInner.scrollTop + cutoff + 20;
+                            menuInner.scrollTo({
+                                top: target,
+                                behavior: 'smooth'
+                            });
+                            setTimeout(syncMenuScrollbars, 350);
                         }
                     }
 
-                    // Kaitkan callback global untuk integrasi dengan event onOpened Menu Sneat
+                    // Callback resmi integrasi dengan event onOpened Menu Sneat
                     window.siladesMenuOnOpened = function (item) {
                         ensureMenuInFullView(item);
                     };
 
-                    document.addEventListener('DOMContentLoaded', function () {
-                        const layoutMenu = document.getElementById('layout-menu');
-                        if (!layoutMenu) return;
+                    // Tangkap event click pada toggle menu langsung pada document
+                    document.addEventListener('click', function (e) {
+                        const toggle = e.target.closest('#layout-menu .menu-toggle');
+                        if (!toggle) return;
 
-                        const menuInner = layoutMenu.querySelector('.menu-inner');
+                        const menuItem = toggle.closest('.menu-item');
+                        if (!menuItem) return;
+
+                        const menuInner = document.querySelector('#layout-menu .menu-inner');
                         if (!menuInner) return;
 
-                        // Gunakan fase capture (true) agar dieksekusi sebelum script menu lain mengubah status class
-                        layoutMenu.addEventListener('click', function (e) {
-                            const toggle = e.target.closest('.menu-toggle');
-                            if (!toggle) return;
+                        // Evaluasi status saat klik terjadi (fase capture menjamin status terbaca sebelum class toggle berjalan)
+                        const isCurrentlyOpen = menuItem.classList.contains('open');
 
-                            const menuItem = toggle.closest('.menu-item');
-                            if (!menuItem) return;
+                        if (!isCurrentlyOpen) {
+                            // Menu akan dibuka:
+                            // 1. Simpan posisi scroll saat ini agar bisa kembali turun saat menu ditutup nanti
+                            menuItem.dataset.prevScrollPos = menuInner.scrollTop;
 
-                            // Cek status sebelum kelas open diubah oleh library menu
-                            const isCurrentlyOpen = menuItem.classList.contains('open');
-
-                            if (!isCurrentlyOpen) {
-                                // Accordion: Tutup menu saudara di tingkat yang sama
-                                const parentUl = menuItem.parentElement;
-                                if (parentUl) {
-                                    const siblings = parentUl.querySelectorAll(':scope > .menu-item.open');
-                                    siblings.forEach(function (sib) {
-                                        if (sib !== menuItem) {
-                                            if (window.Helpers && window.Helpers.mainMenu && typeof window.Helpers.mainMenu.close === 'function') {
-                                                window.Helpers.mainMenu.close(sib, true);
-                                            } else {
-                                                sibling.classList.remove('open');
-                                            }
+                            // 2. Accordion: Tutup menu saudara yang terbuka di tingkat yang sama
+                            const parentUl = menuItem.parentElement;
+                            if (parentUl) {
+                                const siblings = parentUl.querySelectorAll(':scope > .menu-item.open');
+                                siblings.forEach(function (sib) {
+                                    if (sib !== menuItem) {
+                                        if (window.Helpers && window.Helpers.mainMenu && typeof window.Helpers.mainMenu.close === 'function') {
+                                            window.Helpers.mainMenu.close(sib, true);
+                                        } else {
+                                            sib.classList.remove('open');
                                         }
+                                    }
+                                });
+                            }
+
+                            // 3. Hitung estimasi tinggi dropdown dan geser ke atas sejak awal animasi agar tidak ada jeda
+                            const sub = menuItem.querySelector('.menu-sub');
+                            if (sub) {
+                                const toggleRect = toggle.getBoundingClientRect();
+                                const subHeight = sub.scrollHeight || 160;
+                                const anticipatedBottom = toggleRect.bottom + subHeight;
+                                const viewportLimit = window.innerHeight - 65;
+                                const anticipatedCutoff = anticipatedBottom - viewportLimit;
+
+                                if (anticipatedCutoff > 0) {
+                                    const targetScroll = menuInner.scrollTop + anticipatedCutoff + 25;
+                                    menuInner.scrollTo({
+                                        top: targetScroll,
+                                        behavior: 'smooth'
                                     });
-                                }
-
-                                // Simpan posisi scroll sebelum dibuka
-                                menuItem.dataset.prevScrollPos = menuInner.scrollTop;
-
-                                // Jalankan pengecekan posisi secara bertahap saat animasi berlangsung
-                                setTimeout(() => ensureMenuInFullView(menuItem), 80);
-                                setTimeout(() => ensureMenuInFullView(menuItem), 180);
-                                setTimeout(() => ensureMenuInFullView(menuItem), 320);
-                                setTimeout(() => ensureMenuInFullView(menuItem), 450);
-                            } else {
-                                // Menu sedang ditutup: kembalikan scroll ke posisi semula secara halus
-                                const prev = menuItem.dataset.prevScrollPos;
-                                if (prev !== undefined) {
-                                    delete menuItem.dataset.prevScrollPos;
-                                    setTimeout(() => {
-                                        animateScrollTop(menuInner, parseFloat(prev), 250);
-                                    }, 100);
+                                    setTimeout(syncMenuScrollbars, 350);
                                 }
                             }
-                        }, true);
-                    });
+
+                            // 4. Verifikasi dan sempurnakan posisi saat animasi selesai
+                            setTimeout(function () {
+                                ensureMenuInFullView(menuItem);
+                            }, 320);
+                            setTimeout(function () {
+                                ensureMenuInFullView(menuItem);
+                            }, 480);
+                        } else {
+                            // Menu akan ditutup:
+                            // Kembalikan posisi scroll ke tempat semula (turun lagi)
+                            const prev = menuItem.dataset.prevScrollPos;
+                            if (prev !== undefined) {
+                                delete menuItem.dataset.prevScrollPos;
+                                setTimeout(function () {
+                                    menuInner.scrollTo({
+                                        top: parseFloat(prev),
+                                        behavior: 'smooth'
+                                    });
+                                    setTimeout(syncMenuScrollbars, 300);
+                                }, 80);
+                            }
+                        }
+                    }, true);
                 })();
             </script>
             @yield('modals')
