@@ -639,6 +639,7 @@
             overscroll-behavior: contain;
             scrollbar-width: thin;
             scrollbar-color: rgba(67, 89, 113, 0.15) transparent;
+            padding-bottom: 220px !important;
         }
 
         .layout-menu .menu-inner::-webkit-scrollbar {
@@ -1733,7 +1734,7 @@
             <script src="{{ asset('Admin/vendor/libs/perfect-scrollbar/perfect-scrollbar.js') }}"></script>
             <script src="{{ asset('Admin/vendor/js/menu.js') }}"></script>
             <script src="{{ asset('Admin/vendor/libs/apex-charts/apexcharts.js') }}"></script>
-            <script src="{{ asset('Admin/js/main.js') }}"></script>
+            <script src="{{ asset('Admin/js/main.js') }}?v={{ time() }}"></script>
             <script src="{{ asset('Admin/js/dashboards-analytics.js') }}"></script>
             {{-- SiladesBeng Global Toast System (Admin) --}}
             <style>
@@ -2285,56 +2286,99 @@
 
             <!-- Sidebar Auto-Scroll & Smart Accordion Engine -->
             <script>
-                document.addEventListener('DOMContentLoaded', function () {
-                    const layoutMenu = document.getElementById('layout-menu');
-                    if (!layoutMenu) return;
+                (function () {
+                    let activeScrollAnim = null;
 
-                    const menuInner = layoutMenu.querySelector('.menu-inner');
-                    if (!menuInner) return;
+                    // Mesin animasi scroll berbasis requestAnimationFrame (kompatibel penuh dengan PerfectScrollbar)
+                    function animateScrollTop(element, target, duration = 300) {
+                        if (!element) return;
+                        if (activeScrollAnim) {
+                            cancelAnimationFrame(activeScrollAnim);
+                            activeScrollAnim = null;
+                        }
 
-                    // Fungsi untuk memastikan dropdown yang terbuka terlihat penuh (geser ke atas jika terpotong di bawah)
-                    function ensureMenuInView(menuItem) {
-                        if (!menuItem || !menuInner) return;
+                        const start = element.scrollTop;
+                        const change = target - start;
+                        if (Math.abs(change) < 2) return;
 
-                        const innerRect = menuInner.getBoundingClientRect();
-                        const itemRect = menuItem.getBoundingClientRect();
+                        const startTime = performance.now();
+                        const easeInOutCubic = t => t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
 
-                        // Buffer 28px agar item paling bawah memiliki ruang yang nyaman dan tidak menabrak batas layar
-                        const bottomOverflow = itemRect.bottom - (innerRect.bottom - 28);
-
-                        if (bottomOverflow > 0) {
-                            if (itemRect.height > innerRect.height - 40) {
-                                // Jika submenu sangat panjang (melebihi container), posisikan judul menu di atas
-                                const topDiff = itemRect.top - innerRect.top - 12;
-                                menuInner.scrollBy({ top: topDiff, behavior: 'smooth' });
-                            } else {
-                                // Geser container ke bawah sehingga item yang terbuka terangkat naik ke atas
-                                menuInner.scrollBy({ top: bottomOverflow, behavior: 'smooth' });
-                            }
+                        function step(now) {
+                            const elapsed = now - startTime;
+                            const progress = Math.min(elapsed / duration, 1);
+                            const current = start + change * easeInOutCubic(progress);
+                            element.scrollTop = current;
 
                             if (window.Helpers && window.Helpers.menuPsScroll) {
                                 window.Helpers.menuPsScroll.update();
                             }
+
+                            if (progress < 1) {
+                                activeScrollAnim = requestAnimationFrame(step);
+                            } else {
+                                element.scrollTop = target;
+                                activeScrollAnim = null;
+                                if (window.Helpers && window.Helpers.menuPsScroll) {
+                                    window.Helpers.menuPsScroll.update();
+                                }
+                            }
+                        }
+
+                        activeScrollAnim = requestAnimationFrame(step);
+                    }
+
+                    // Fungsi untuk menghitung posisi dropdown dan menggesernya naik jika mendekati atau melewati batas bawah layar
+                    function ensureMenuInFullView(menuItem) {
+                        const menuInner = document.querySelector('#layout-menu .menu-inner');
+                        if (!menuInner || !menuItem) return;
+
+                        const itemRect = menuItem.getBoundingClientRect();
+                        const viewportBottom = window.innerHeight;
+
+                        // Margin aman 48px dari batas bawah layar agar tidak tertutup taskbar
+                        const safetyMargin = 48;
+                        const cutoff = itemRect.bottom - (viewportBottom - safetyMargin);
+
+                        if (cutoff > 0) {
+                            // Berikan ruang nafas ekstra 28px agar menu terlihat lapang di atas batas bawah
+                            const target = menuInner.scrollTop + cutoff + 28;
+                            animateScrollTop(menuInner, target, 320);
                         }
                     }
 
-                    // Pasang interaksi pada semua toggle menu di sidebar
-                    layoutMenu.querySelectorAll('.menu-toggle').forEach(function (toggle) {
-                        toggle.addEventListener('click', function () {
-                            const menuItem = this.closest('.menu-item');
+                    // Kaitkan callback global untuk integrasi dengan event onOpened Menu Sneat
+                    window.siladesMenuOnOpened = function (item) {
+                        ensureMenuInFullView(item);
+                    };
+
+                    document.addEventListener('DOMContentLoaded', function () {
+                        const layoutMenu = document.getElementById('layout-menu');
+                        if (!layoutMenu) return;
+
+                        const menuInner = layoutMenu.querySelector('.menu-inner');
+                        if (!menuInner) return;
+
+                        // Gunakan fase capture (true) agar dieksekusi sebelum script menu lain mengubah status class
+                        layoutMenu.addEventListener('click', function (e) {
+                            const toggle = e.target.closest('.menu-toggle');
+                            if (!toggle) return;
+
+                            const menuItem = toggle.closest('.menu-item');
                             if (!menuItem) return;
 
+                            // Cek status sebelum kelas open diubah oleh library menu
                             const isCurrentlyOpen = menuItem.classList.contains('open');
 
                             if (!isCurrentlyOpen) {
-                                // Accordion: Tutup menu terbuka lainnya di level yang sama agar menu tetap ringkas
+                                // Accordion: Tutup menu saudara di tingkat yang sama
                                 const parentUl = menuItem.parentElement;
                                 if (parentUl) {
-                                    const openSiblings = parentUl.querySelectorAll(':scope > .menu-item.open');
-                                    openSiblings.forEach(function (sibling) {
-                                        if (sibling !== menuItem) {
+                                    const siblings = parentUl.querySelectorAll(':scope > .menu-item.open');
+                                    siblings.forEach(function (sib) {
+                                        if (sib !== menuItem) {
                                             if (window.Helpers && window.Helpers.mainMenu && typeof window.Helpers.mainMenu.close === 'function') {
-                                                window.Helpers.mainMenu.close(sibling, true);
+                                                window.Helpers.mainMenu.close(sib, true);
                                             } else {
                                                 sibling.classList.remove('open');
                                             }
@@ -2342,29 +2386,27 @@
                                     });
                                 }
 
-                                // Simpan posisi scroll sebelum menu dibuka
+                                // Simpan posisi scroll sebelum dibuka
                                 menuItem.dataset.prevScrollPos = menuInner.scrollTop;
 
-                                // Jalankan penyesuaian scroll secara bertahap selama animasi pembukaan submenu
-                                setTimeout(function () { ensureMenuInView(menuItem); }, 80);
-                                setTimeout(function () { ensureMenuInView(menuItem); }, 180);
-                                setTimeout(function () { ensureMenuInView(menuItem); }, 320);
+                                // Jalankan pengecekan posisi secara bertahap saat animasi berlangsung
+                                setTimeout(() => ensureMenuInFullView(menuItem), 80);
+                                setTimeout(() => ensureMenuInFullView(menuItem), 180);
+                                setTimeout(() => ensureMenuInFullView(menuItem), 320);
+                                setTimeout(() => ensureMenuInFullView(menuItem), 450);
                             } else {
-                                // Jika menu ditutup kembali, kembalikan posisi scroll secara halus
-                                const prevScroll = menuItem.dataset.prevScrollPos;
-                                if (prevScroll !== undefined) {
+                                // Menu sedang ditutup: kembalikan scroll ke posisi semula secara halus
+                                const prev = menuItem.dataset.prevScrollPos;
+                                if (prev !== undefined) {
                                     delete menuItem.dataset.prevScrollPos;
-                                    setTimeout(function () {
-                                        menuInner.scrollTo({ top: parseFloat(prevScroll), behavior: 'smooth' });
-                                        if (window.Helpers && window.Helpers.menuPsScroll) {
-                                            window.Helpers.menuPsScroll.update();
-                                        }
-                                    }, 200);
+                                    setTimeout(() => {
+                                        animateScrollTop(menuInner, parseFloat(prev), 250);
+                                    }, 100);
                                 }
                             }
-                        });
+                        }, true);
                     });
-                });
+                })();
             </script>
             @yield('modals')
             @stack('modals')

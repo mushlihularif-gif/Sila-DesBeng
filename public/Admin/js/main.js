@@ -15,7 +15,17 @@ let menu, animate;
     menu = new Menu(element, {
       orientation: 'vertical',
       closeChildren: true,
-      accordion: true
+      accordion: true,
+      onOpened: function (instance, item) {
+        if (typeof window.siladesMenuOnOpened === 'function') {
+          window.siladesMenuOnOpened(item);
+        }
+      },
+      onClosed: function (instance, item) {
+        if (typeof window.siladesMenuOnClosed === 'function') {
+          window.siladesMenuOnClosed(item);
+        }
+      }
     });
     // Change parameter to true if you want scroll animation
     window.Helpers.scrollToActive((animate = false));
