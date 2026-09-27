@@ -30,6 +30,12 @@ let menu, animate;
     // Change parameter to true if you want scroll animation
     window.Helpers.scrollToActive((animate = false));
     window.Helpers.mainMenu = menu;
+
+    // Lepaskan PerfectScrollbar dari menu agar scrolling mouse-wheel, touchpad, dan gesture berjalan 100% native tanpa macet
+    if (menu && menu._scrollbar) {
+      menu._scrollbar.destroy();
+      menu._scrollbar = null;
+    }
   });
 
   // Initialize menu togglers and bind click on each
@@ -72,8 +78,8 @@ let menu, animate;
   let menuInnerContainer = document.getElementsByClassName('menu-inner'),
     menuInnerShadow = document.getElementsByClassName('menu-inner-shadow')[0];
   if (menuInnerContainer.length > 0 && menuInnerShadow) {
-    menuInnerContainer[0].addEventListener('ps-scroll-y', function () {
-      if (this.querySelector('.ps__thumb-y').offsetTop) {
+    menuInnerContainer[0].addEventListener('scroll', function () {
+      if (this.scrollTop > 5) {
         menuInnerShadow.style.display = 'block';
       } else {
         menuInnerShadow.style.display = 'none';

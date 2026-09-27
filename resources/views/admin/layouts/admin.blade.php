@@ -633,31 +633,44 @@
     <link rel="stylesheet" href="{{ asset('Admin/vendor/libs/perfect-scrollbar/perfect-scrollbar.css') }}" />
     <!-- Modern Sidebar Enhancements -->
     <style>
-        /* Smooth scrolling container for sidebar menu */
+        /* Native smooth scrolling container for sidebar menu */
         .layout-menu .menu-inner {
             overflow-y: auto !important;
-            scroll-behavior: smooth !important;
-            overscroll-behavior: contain;
-            scrollbar-width: thin;
-            scrollbar-color: rgba(67, 89, 113, 0.25) transparent;
+            overflow-x: hidden !important;
+            -webkit-overflow-scrolling: touch !important;
+            overscroll-behavior-y: contain !important;
+            scrollbar-width: thin !important;
+            scrollbar-color: rgba(67, 89, 113, 0.25) transparent !important;
             padding-bottom: 320px !important;
+            height: calc(100% - 64px) !important;
+            min-height: 0 !important;
         }
 
         .layout-menu .menu-inner::-webkit-scrollbar {
-            width: 5px;
+            width: 5px !important;
         }
 
         .layout-menu .menu-inner::-webkit-scrollbar-track {
-            background: transparent;
+            background: transparent !important;
         }
 
         .layout-menu .menu-inner::-webkit-scrollbar-thumb {
-            background: rgba(67, 89, 113, 0.2);
-            border-radius: 10px;
+            background: rgba(67, 89, 113, 0.2) !important;
+            border-radius: 10px !important;
         }
 
         .layout-menu .menu-inner::-webkit-scrollbar-thumb:hover {
-            background: rgba(67, 89, 113, 0.4);
+            background: rgba(67, 89, 113, 0.45) !important;
+        }
+
+        /* Hilangkan rel scrollbar ganda PerfectScrollbar di sidebar */
+        .layout-menu .ps__rail-y,
+        .layout-menu .ps__rail-x,
+        .layout-menu .ps__thumb-y,
+        .layout-menu .ps__thumb-x {
+            display: none !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
         }
 
         /* Menu Header Styling - Clean SaaS Divider without awkward ticks */
@@ -716,8 +729,16 @@
             border-left: 2px solid rgba(105, 108, 255, 0.3) !important;
         }
 
+        /* Hilangkan titik/lingkaran abu-abu bawaan tema yang menutupi huruf di submenu */
+        .layout-menu .menu-sub > .menu-item > .menu-link::before,
+        .layout-menu .menu-sub .menu-link::before,
+        .layout-menu .menu-sub .menu-link:before {
+            display: none !important;
+            content: none !important;
+        }
+
         .layout-menu .menu-sub .menu-item .menu-link {
-            padding: 0.45rem 0.85rem !important;
+            padding: 0.48rem 0.95rem !important;
             font-size: 0.84rem !important;
             font-weight: 500 !important;
             color: #566a7f !important;
@@ -2314,19 +2335,34 @@
             <!-- Sidebar Auto-Scroll & Smart Accordion Engine -->
             <script>
                 (function () {
-                    // Sinkronisasi posisi indikator scroll PerfectScrollbar jika aktif
-                    function syncMenuScrollbars() {
-                        try {
-                            if (window.Helpers) {
-                                if (window.Helpers.menuPsScroll && typeof window.Helpers.menuPsScroll.update === 'function') {
-                                    window.Helpers.menuPsScroll.update();
-                                }
-                                if (window.Helpers.mainMenu && window.Helpers.mainMenu._scrollbar && typeof window.Helpers.mainMenu._scrollbar.update === 'function') {
-                                    window.Helpers.mainMenu._scrollbar.update();
-                                }
-                            }
-                        } catch (e) {}
+                    // Bersihkan sisa-sisa elemen PerfectScrollbar agar scroll sidebar 100% native
+                    function cleanupSidebarScrollbar() {
+                        const menuInner = document.querySelector('#layout-menu .menu-inner');
+                        if (menuInner) {
+                            menuInner.classList.remove('ps');
+                            menuInner.querySelectorAll('.ps__rail-x, .ps__rail-y').forEach(function (el) {
+                                el.remove();
+                            });
+                        }
+                        if (window.Helpers && window.Helpers.mainMenu && window.Helpers.mainMenu._scrollbar) {
+                            try {
+                                window.Helpers.mainMenu._scrollbar.destroy();
+                            } catch (e) {}
+                            window.Helpers.mainMenu._scrollbar = null;
+                        }
                     }
+
+                    cleanupSidebarScrollbar();
+                    setTimeout(cleanupSidebarScrollbar, 200);
+                    setTimeout(cleanupSidebarScrollbar, 600);
+
+                    // Pastikan scrolling dengan mouse wheel / touchpad selalu responsif dan lancar
+                    document.addEventListener('wheel', function (e) {
+                        const menuInner = e.target.closest('#layout-menu .menu-inner');
+                        if (menuInner) {
+                            menuInner.scrollTop += e.deltaY;
+                        }
+                    }, { passive: true });
 
                     // Fungsi untuk menggeser menu naik ke atas agar dropdown dan semua item di dalamnya tampil utuh
                     function ensureMenuInFullView(menuItem) {
@@ -2346,17 +2382,15 @@
                         }
 
                         const viewportHeight = window.innerHeight;
-                        // Jarak aman 65px di atas batas bawah layar/taskbar Windows
-                        const safetyMargin = 65;
+                        // Jarak aman 70px di atas batas bawah layar/taskbar Windows
+                        const safetyMargin = 70;
                         const cutoff = bottomEdge - (viewportHeight - safetyMargin);
 
                         if (cutoff > 0) {
-                            const target = menuInner.scrollTop + cutoff + 20;
-                            menuInner.scrollTo({
-                                top: target,
+                            menuInner.scrollBy({
+                                top: cutoff + 20,
                                 behavior: 'smooth'
                             });
-                            setTimeout(syncMenuScrollbars, 350);
                         }
                     }
 
@@ -2403,18 +2437,16 @@
                             const sub = menuItem.querySelector('.menu-sub');
                             if (sub) {
                                 const toggleRect = toggle.getBoundingClientRect();
-                                const subHeight = sub.scrollHeight || 160;
+                                const subHeight = sub.scrollHeight || 180;
                                 const anticipatedBottom = toggleRect.bottom + subHeight;
-                                const viewportLimit = window.innerHeight - 65;
+                                const viewportLimit = window.innerHeight - 70;
                                 const anticipatedCutoff = anticipatedBottom - viewportLimit;
 
                                 if (anticipatedCutoff > 0) {
-                                    const targetScroll = menuInner.scrollTop + anticipatedCutoff + 25;
-                                    menuInner.scrollTo({
-                                        top: targetScroll,
+                                    menuInner.scrollBy({
+                                        top: anticipatedCutoff + 20,
                                         behavior: 'smooth'
                                     });
-                                    setTimeout(syncMenuScrollbars, 350);
                                 }
                             }
 
@@ -2436,7 +2468,6 @@
                                         top: parseFloat(prev),
                                         behavior: 'smooth'
                                     });
-                                    setTimeout(syncMenuScrollbars, 300);
                                 }, 80);
                             }
                         }
