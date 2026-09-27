@@ -215,12 +215,11 @@
         activeSessionId: null,
         pollInterval: null,
         productInfo: null,
-        userPhoto: null,
-        renderedMessageIds: new Set()
+        userPhoto: null
     };
 
     function filterAdminUnitChats(service) {
-        const query = document.getElementById(`searchUnitChatInput_${service}`).value.toLowerCase();
+        const query = (document.getElementById(`searchUnitChatInput_${service}`)?.value || '').toLowerCase();
         const items = document.querySelectorAll(`.admin-unit-chat-item-${service}`);
         items.forEach(item => {
             const name = item.getAttribute('data-user-name') || '';
@@ -246,10 +245,6 @@
         
         const isSwitchingSession = (state.activeSessionId !== sessionId);
         state.activeSessionId = sessionId;
-
-        if (isSwitchingSession) {
-            state.renderedMessageIds = new Set();
-        }
 
         // Switch Right Panel Views: Hide Empty State, Show Active Chat Wrapper
         const emptyState = document.getElementById(`adminUnitNoChatSelected_${service}`);
@@ -284,9 +279,11 @@
 
         const stream = document.getElementById(`adminUnitChatMessagesStream_${service}`);
 
-        // Show spinner ONLY on initial user click or session switch (NEVER during silent polling)
-        if (!isSilent && isSwitchingSession && stream) {
-            stream.innerHTML = '<div class="text-center py-5 my-auto text-muted"><span class="spinner-border spinner-border-sm text-primary me-2"></span>Memuat obrolan...</div>';
+        // Show spinner ONLY when switching to a different session or stream is empty, NEVER during silent polling
+        if (!isSilent && (isSwitchingSession || (stream && !stream.querySelector('.admin-unit-msg-bubble')))) {
+            if (stream) {
+                stream.innerHTML = '<div class="text-center py-5 my-auto text-muted"><span class="spinner-border spinner-border-sm text-primary me-2"></span>Memuat obrolan...</div>';
+            }
         }
 
         // Use clean relative endpoints to guarantee compatibility across HTTPS and any domain
@@ -310,6 +307,9 @@
         })
         .then(res => {
             if (res.status === 'success' && res.data) {
+                // Ensure response matches current active session
+                if (state.activeSessionId !== sessionId) return;
+
                 const session = res.data.session || {};
                 const rawMessages = res.data.messages || [];
                 const messages = Array.isArray(rawMessages) ? rawMessages : Object.values(rawMessages);
@@ -328,14 +328,14 @@
                 const avatarWrap = document.getElementById(`unitActiveChatAvatarWrap_${service}`);
                 if (avatarWrap) {
                     if (userPhoto) {
-                        avatarWrap.innerHTML = `<img src="${userPhoto}" alt="${escapeHtml(userName)}" class="rounded-circle w-100 h-100 shadow-2xs" style="object-fit: cover;" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'avatar-initial rounded-circle fw-bold text-white shadow-2xs\' style=\'background: linear-gradient(135deg, #696cff, #4338ca);\'>${userName.charAt(0).toUpperCase()}</div>';">`;
+                        avatarWrap.innerHTML = `<img src="${userPhoto}" alt="${escapeHtml(userName)}" class="rounded-circle w-100 h-100 shadow-2xs" style="object-fit: cover;" onerror="this.style.display='none'">`;
                     } else {
                         const initialChar = userName.charAt(0).toUpperCase() || 'W';
                         avatarWrap.innerHTML = `<div class="avatar-initial rounded-circle fw-bold text-white shadow-2xs" style="background: linear-gradient(135deg, #696cff, #4338ca);">${initialChar}</div>`;
                     }
                 }
 
-                // Update Status Badge in Header: only show if escalated or resolved, NEVER show BOT
+                // Update Status Badge in Header
                 const statusBadge = document.getElementById(`unitActiveChatStatusBadge_${service}`);
                 if (statusBadge) {
                     if (session.status === 'escalated') {
@@ -353,34 +353,33 @@
 
                 // Render Messages safely
                 if (stream) {
-                    if (state.renderedMessageIds.size === 0) {
-                        // Initial full render for this chat session
+                    const hasSpinner = stream.querySelector('.spinner-border') !== null;
+                    const hasExistingBubbles = stream.querySelector('.admin-unit-msg-bubble') !== null;
+
+                    if (isSwitchingSession || hasSpinner || !hasExistingBubbles) {
+                        // Full initial render for this session
                         stream.innerHTML = '';
 
                         if (messages.length === 0) {
                             stream.innerHTML = '<div class="text-center text-muted my-auto py-5"><i class="bx bx-chat fs-1 opacity-50 mb-2"></i><p class="small">Belum ada pesan dalam sesi ini.</p></div>';
                         } else {
                             let firstUserMsgRendered = false;
-                            messages.forEach((msg, idx) => {
-                                try {
-                                    if (!msg) return;
-                                    const isFirstUser = !firstUserMsgRendered && msg.sender_type === 'user';
-                                    if (isFirstUser) firstUserMsgRendered = true;
-                                    renderAdminUnitMessageBubble(service, msg, productInfo, userPhoto, isFirstUser);
-                                    if (msg.id) state.renderedMessageIds.add(msg.id);
-                                } catch (bubbleErr) {
-                                    console.error('Error rendering message bubble at index ' + idx, bubbleErr);
-                                }
+                            messages.forEach(msg => {
+                                if (!msg) return;
+                                const isFirstUser = !firstUserMsgRendered && msg.sender_type === 'user';
+                                if (isFirstUser) firstUserMsgRendered = true;
+                                renderAdminUnitMessageBubble(service, msg, productInfo, userPhoto, isFirstUser);
                             });
                             stream.scrollTop = stream.scrollHeight;
                         }
                     } else {
-                        // Silent polling update: ONLY append new messages, NEVER wipe existing messages!
+                        // Incremental update (polling): ONLY append new messages if not already in DOM
                         let hasNew = false;
                         messages.forEach(msg => {
-                            if (msg && msg.id && !state.renderedMessageIds.has(msg.id)) {
+                            if (!msg) return;
+                            const existingEl = document.getElementById(`adminUnitMsg_${service}_${msg.id}`);
+                            if (!existingEl) {
                                 renderAdminUnitMessageBubble(service, msg, productInfo, userPhoto, false);
-                                state.renderedMessageIds.add(msg.id);
                                 hasNew = true;
                             }
                         });
@@ -396,7 +395,7 @@
         })
         .catch(err => {
             console.error('Error loading chat:', err);
-            if (!isSilent && isSwitchingSession && stream && state.renderedMessageIds.size === 0) {
+            if (!isSilent && stream && !stream.querySelector('.admin-unit-msg-bubble')) {
                 stream.innerHTML = `<div class="text-center text-danger my-auto py-5"><i class="bx bx-error-circle fs-1 mb-2"></i><p class="small mb-2">Gagal memuat obrolan (${err.message || 'Koneksi bermasalah'}).</p><button class="btn btn-sm btn-outline-primary" onclick="loadAdminUnitChat('${service}', ${sessionId})">Muat Ulang</button></div>`;
             }
         });
@@ -406,7 +405,14 @@
         const stream = document.getElementById(`adminUnitChatMessagesStream_${service}`);
         if (!stream || !msg) return;
 
+        // Prevent duplicate rendering
+        const msgUniqueId = msg.id ? `adminUnitMsg_${service}_${msg.id}` : `adminUnitMsg_${service}_temp_${Date.now()}`;
+        if (msg.id && document.getElementById(msgUniqueId)) {
+            return;
+        }
+
         const bubble = document.createElement('div');
+        bubble.id = msgUniqueId;
         
         // Safe time parsing
         let time = msg.time_formatted || '';
@@ -426,7 +432,7 @@
         const msgText = escapeHtml(msg.message || '');
 
         if (msg.sender_type === 'admin') {
-            bubble.className = 'd-flex justify-content-end align-items-end gap-2 mb-2 animate-fade-in';
+            bubble.className = 'admin-unit-msg-bubble d-flex justify-content-end align-items-end gap-2 mb-2 animate-fade-in';
             bubble.innerHTML = `
                 <div style="max-width: 78%;">
                     <div class="p-2.5 px-3 rounded-3 shadow-xs text-dark" style="background: #d9fdd3; border-bottom-right-radius: 2px !important; border: 1px solid rgba(0,0,0,0.04);">
@@ -442,11 +448,11 @@
                 </div>
             `;
         } else if (msg.sender_type === 'user') {
-            bubble.className = 'd-flex justify-content-start align-items-end gap-2 mb-2 animate-fade-in';
+            bubble.className = 'admin-unit-msg-bubble d-flex justify-content-start align-items-end gap-2 mb-2 animate-fade-in';
             
             let userAvatarHtml = '';
             if (userPhoto) {
-                userAvatarHtml = `<img src="${userPhoto}" class="rounded-circle w-100 h-100 shadow-2xs" style="object-fit: cover;" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'avatar-initial rounded-circle fw-bold text-white shadow-2xs\' style=\'background: linear-gradient(135deg, #696cff, #4338ca); font-size: 10px;\'>W</div>';">`;
+                userAvatarHtml = `<img src="${userPhoto}" class="rounded-circle w-100 h-100 shadow-2xs" style="object-fit: cover;" onerror="this.style.display='none'">`;
             } else {
                 userAvatarHtml = `<div class="avatar-initial rounded-circle fw-bold text-white shadow-2xs" style="background: linear-gradient(135deg, #696cff, #4338ca); font-size: 10px;">W</div>`;
             }
@@ -454,19 +460,24 @@
             // Spacious WhatsApp-style Product Quote inside the chat bubble
             let quotedHtml = '';
             if (isFirstUserMsg && productInfo && productInfo.title) {
+                const prodTitle = escapeHtml(productInfo.title || '');
+                const prodPrice = escapeHtml(productInfo.price || '');
+                const prodImg = productInfo.image ? escapeHtml(productInfo.image) : '';
+                const prodUrl = (productInfo.url && productInfo.url !== '#') ? productInfo.url : '';
+
                 quotedHtml = `
                     <div class="p-2.5 mb-2.5 rounded-3 d-flex align-items-center justify-content-between gap-3 shadow-2xs" style="background: rgba(105, 108, 255, 0.08); border-left: 4px solid #696cff;">
                         <div class="d-flex align-items-center gap-2.5 overflow-hidden">
-                            ${productInfo.image ? `<img src="${productInfo.image}" alt="${escapeHtml(productInfo.title)}" class="rounded flex-shrink-0 shadow-2xs" style="width: 44px; height: 44px; object-fit: cover;" onerror="this.style.display='none'">` : ''}
+                            ${prodImg ? `<img src="${prodImg}" alt="${prodTitle}" class="rounded flex-shrink-0 shadow-2xs" style="width: 44px; height: 44px; object-fit: cover;" onerror="this.style.display='none'">` : ''}
                             <div class="overflow-hidden min-w-0">
                                 <div class="text-uppercase text-muted fw-bold mb-0.5" style="font-size: 9.5px; letter-spacing: 0.5px;">Unit Layanan yang Ditanyakan</div>
-                                <div class="fw-bold text-dark text-truncate" style="font-size: 0.88rem;">${escapeHtml(productInfo.title)}</div>
-                                <div class="text-success fw-bold small mt-0.5" style="font-size: 0.82rem;">${escapeHtml(productInfo.price || '')}</div>
+                                <div class="fw-bold text-dark text-truncate" style="font-size: 0.88rem;">${prodTitle}</div>
+                                ${prodPrice ? `<div class="text-success fw-bold small mt-0.5" style="font-size: 0.82rem;">${prodPrice}</div>` : ''}
                             </div>
                         </div>
-                        ${productInfo.url && productInfo.url !== '#' ? `
+                        ${prodUrl ? `
                             <div class="flex-shrink-0">
-                                <a href="${productInfo.url}" target="_blank" class="btn btn-xs btn-outline-primary rounded-pill px-2.5 py-1 text-nowrap" style="font-size: 11px;">
+                                <a href="${prodUrl}" target="_blank" class="btn btn-xs btn-outline-primary rounded-pill px-2.5 py-1 text-nowrap" style="font-size: 11px;">
                                     <i class="bx bx-show me-1"></i> Detail
                                 </a>
                             </div>
@@ -491,7 +502,7 @@
             `;
         } else {
             // Notice / Sambutan Awal Otomatis
-            bubble.className = 'd-flex justify-content-center my-2 animate-fade-in';
+            bubble.className = 'admin-unit-msg-bubble d-flex justify-content-center my-2 animate-fade-in';
             bubble.innerHTML = `
                 <div class="bg-white border rounded-pill px-3 py-1.5 shadow-2xs d-flex align-items-center gap-1.5 text-center text-wrap" style="max-width: 82%; font-size: 11.5px; color: #54656f; line-height: 1.4; background: rgba(255,255,255,0.95) !important;">
                     <i class="bx bx-info-circle text-primary flex-shrink-0" style="font-size: 14px;"></i>
@@ -523,8 +534,6 @@
             time_formatted: nowTime,
             created_at: new Date().toISOString()
         }, state.productInfo, state.userPhoto, false);
-
-        state.renderedMessageIds.add(tempMsgId);
 
         const stream = document.getElementById(`adminUnitChatMessagesStream_${service}`);
         if (stream) stream.scrollTop = stream.scrollHeight;
@@ -559,7 +568,10 @@
         .then(res => {
             if (res.status === 'success') {
                 if (res.data && res.data.chat_message && res.data.chat_message.id) {
-                    state.renderedMessageIds.add(res.data.chat_message.id);
+                    const tempEl = document.getElementById(`adminUnitMsg_${service}_${tempMsgId}`);
+                    if (tempEl) {
+                        tempEl.id = `adminUnitMsg_${service}_${res.data.chat_message.id}`;
+                    }
                 }
                 const preview = document.getElementById(`unitChatPreview_${service}_${state.activeSessionId}`);
                 if (preview) preview.innerText = text;
@@ -608,7 +620,8 @@
         })
         .then(res => {
             if (res.status === 'success') {
-                state.renderedMessageIds = new Set();
+                const stream = document.getElementById(`adminUnitChatMessagesStream_${service}`);
+                if (stream) stream.innerHTML = '';
                 loadAdminUnitChat(service, state.activeSessionId, false);
 
                 const badge = document.getElementById(`unitChatBadge_${service}_${state.activeSessionId}`);
@@ -657,10 +670,13 @@
 
     // Auto load first conversation if available
     @if($firstChatId)
-    document.addEventListener('DOMContentLoaded', function() {
-        setTimeout(function() {
-            loadAdminUnitChat('{{ $serviceType }}', {{ $firstChatId }});
-        }, 150);
-    });
+    function autoInitAdminUnitChat_{{ $serviceType }}() {
+        loadAdminUnitChat('{{ $serviceType }}', {{ $firstChatId }});
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', autoInitAdminUnitChat_{{ $serviceType }});
+    } else {
+        setTimeout(autoInitAdminUnitChat_{{ $serviceType }}, 100);
+    }
     @endif
 </script>
