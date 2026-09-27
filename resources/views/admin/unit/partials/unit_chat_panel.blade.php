@@ -198,11 +198,17 @@
 .wa-chat-item:hover {
     background-color: #f8fafc !important;
 }
-.animate-fade-in {
-    animation: fadeInBubble 0.2s ease-in-out;
+.admin-unit-msg-bubble {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
 }
-@keyframes fadeInBubble {
-    from { opacity: 0; transform: translateY(4px); }
+.chat-bubble-pop {
+    opacity: 1 !important;
+    animation: chatBubblePopIn 0.15s ease-out forwards;
+}
+@keyframes chatBubblePopIn {
+    from { opacity: 0; transform: translateY(3px); }
     to { opacity: 1; transform: translateY(0); }
 }
 </style>
@@ -356,7 +362,7 @@
                     const hasSpinner = stream.querySelector('.spinner-border') !== null;
                     const hasExistingBubbles = stream.querySelector('.admin-unit-msg-bubble') !== null;
 
-                    if (isSwitchingSession || hasSpinner || !hasExistingBubbles) {
+                    if (isSwitchingSession || !isSilent || hasSpinner || !hasExistingBubbles) {
                         // Full initial render for this session
                         stream.innerHTML = '';
 
@@ -411,107 +417,116 @@
             return;
         }
 
-        const bubble = document.createElement('div');
-        bubble.id = msgUniqueId;
-        
-        // Safe time parsing
-        let time = msg.time_formatted || '';
-        if (!time && msg.created_at) {
-            try {
-                const safeDateStr = typeof msg.created_at === 'string' && msg.created_at.includes(' ') && !msg.created_at.includes('T')
-                    ? msg.created_at.replace(' ', 'T')
-                    : msg.created_at;
-                const d = new Date(safeDateStr);
-                if (!isNaN(d.getTime())) {
-                    time = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                }
-            } catch (e) {}
-        }
-        if (!time) time = '';
+        try {
+            const bubble = document.createElement('div');
+            bubble.id = msgUniqueId;
+            
+            // Safe time parsing
+            let time = msg.time_formatted || '';
+            if (!time && msg.created_at) {
+                try {
+                    const safeDateStr = typeof msg.created_at === 'string' && msg.created_at.includes(' ') && !msg.created_at.includes('T')
+                        ? msg.created_at.replace(' ', 'T')
+                        : msg.created_at;
+                    const d = new Date(safeDateStr);
+                    if (!isNaN(d.getTime())) {
+                        time = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    }
+                } catch (e) {}
+            }
+            if (!time) time = '';
 
-        const msgText = escapeHtml(msg.message || '');
+            const msgText = escapeHtml(msg.message || '');
 
-        if (msg.sender_type === 'admin') {
-            bubble.className = 'admin-unit-msg-bubble d-flex justify-content-end align-items-end gap-2 mb-2 animate-fade-in';
-            bubble.innerHTML = `
-                <div style="max-width: 78%;">
-                    <div class="p-2.5 px-3 rounded-3 shadow-xs text-dark" style="background: #d9fdd3; border-bottom-right-radius: 2px !important; border: 1px solid rgba(0,0,0,0.04);">
-                        <p class="mb-0" style="font-size: 0.93rem; color: #111b21; white-space: pre-wrap; line-height: 1.45;">${msgText}</p>
-                        <div class="d-flex align-items-center justify-content-end gap-1 mt-1" style="font-size: 10px; color: #667781;">
-                            <span>${time}</span>
-                            <i class="bx bx-check-double text-primary" style="font-size: 15px;"></i>
+            if (msg.sender_type === 'admin') {
+                bubble.className = 'admin-unit-msg-bubble chat-bubble-pop d-flex justify-content-end align-items-end gap-2 mb-2';
+                bubble.innerHTML = `
+                    <div style="max-width: 78%;">
+                        <div class="p-2.5 px-3 rounded-3 shadow-xs text-dark" style="background: #d9fdd3; border-bottom-right-radius: 2px !important; border: 1px solid rgba(0,0,0,0.04);">
+                            <p class="mb-0" style="font-size: 0.93rem; color: #111b21; white-space: pre-wrap; line-height: 1.45;">${msgText}</p>
+                            <div class="d-flex align-items-center justify-content-end gap-1 mt-1" style="font-size: 10px; color: #667781;">
+                                <span>${time}</span>
+                                <i class="bx bx-check-double text-primary" style="font-size: 15px;"></i>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="avatar avatar-xs flex-shrink-0 mb-1">
-                    <div class="avatar-initial rounded-circle bg-primary text-white fw-bold shadow-2xs" style="font-size: 10px;">AD</div>
-                </div>
-            `;
-        } else if (msg.sender_type === 'user') {
-            bubble.className = 'admin-unit-msg-bubble d-flex justify-content-start align-items-end gap-2 mb-2 animate-fade-in';
-            
-            let userAvatarHtml = '';
-            if (userPhoto) {
-                userAvatarHtml = `<img src="${userPhoto}" class="rounded-circle w-100 h-100 shadow-2xs" style="object-fit: cover;" onerror="this.style.display='none'">`;
-            } else {
-                userAvatarHtml = `<div class="avatar-initial rounded-circle fw-bold text-white shadow-2xs" style="background: linear-gradient(135deg, #696cff, #4338ca); font-size: 10px;">W</div>`;
-            }
+                    <div class="avatar avatar-xs flex-shrink-0 mb-1">
+                        <div class="avatar-initial rounded-circle bg-primary text-white fw-bold shadow-2xs" style="font-size: 10px;">AD</div>
+                    </div>
+                `;
+            } else if (msg.sender_type === 'user') {
+                bubble.className = 'admin-unit-msg-bubble chat-bubble-pop d-flex justify-content-start align-items-end gap-2 mb-2';
+                
+                let userAvatarHtml = '';
+                if (userPhoto) {
+                    userAvatarHtml = `<img src="${userPhoto}" class="rounded-circle w-100 h-100 shadow-2xs" style="object-fit: cover;" onerror="this.style.display='none'">`;
+                } else {
+                    userAvatarHtml = `<div class="avatar-initial rounded-circle fw-bold text-white shadow-2xs" style="background: linear-gradient(135deg, #696cff, #4338ca); font-size: 10px;">W</div>`;
+                }
 
-            // Spacious WhatsApp-style Product Quote inside the chat bubble
-            let quotedHtml = '';
-            if (isFirstUserMsg && productInfo && productInfo.title) {
-                const prodTitle = escapeHtml(productInfo.title || '');
-                const prodPrice = escapeHtml(productInfo.price || '');
-                const prodImg = productInfo.image ? escapeHtml(productInfo.image) : '';
-                const prodUrl = (productInfo.url && productInfo.url !== '#') ? productInfo.url : '';
+                // Spacious WhatsApp-style Product Quote inside the chat bubble
+                let quotedHtml = '';
+                if (isFirstUserMsg && productInfo && productInfo.title) {
+                    const prodTitle = escapeHtml(productInfo.title || '');
+                    const prodPrice = escapeHtml(productInfo.price || '');
+                    const prodImg = productInfo.image ? escapeHtml(productInfo.image) : '';
+                    const prodUrl = (productInfo.url && productInfo.url !== '#') ? productInfo.url : '';
 
-                quotedHtml = `
-                    <div class="p-2.5 mb-2.5 rounded-3 d-flex align-items-center justify-content-between gap-3 shadow-2xs" style="background: rgba(105, 108, 255, 0.08); border-left: 4px solid #696cff;">
-                        <div class="d-flex align-items-center gap-2.5 overflow-hidden">
-                            ${prodImg ? `<img src="${prodImg}" alt="${prodTitle}" class="rounded flex-shrink-0 shadow-2xs" style="width: 44px; height: 44px; object-fit: cover;" onerror="this.style.display='none'">` : ''}
-                            <div class="overflow-hidden min-w-0">
-                                <div class="text-uppercase text-muted fw-bold mb-0.5" style="font-size: 9.5px; letter-spacing: 0.5px;">Unit Layanan yang Ditanyakan</div>
-                                <div class="fw-bold text-dark text-truncate" style="font-size: 0.88rem;">${prodTitle}</div>
-                                ${prodPrice ? `<div class="text-success fw-bold small mt-0.5" style="font-size: 0.82rem;">${prodPrice}</div>` : ''}
+                    quotedHtml = `
+                        <div class="p-2.5 mb-2.5 rounded-3 d-flex align-items-center justify-content-between gap-3 shadow-2xs" style="background: rgba(105, 108, 255, 0.08); border-left: 4px solid #696cff;">
+                            <div class="d-flex align-items-center gap-2.5 overflow-hidden">
+                                ${prodImg ? `<img src="${prodImg}" alt="${prodTitle}" class="rounded flex-shrink-0 shadow-2xs" style="width: 44px; height: 44px; object-fit: cover;" onerror="this.style.display='none'">` : ''}
+                                <div class="overflow-hidden min-w-0">
+                                    <div class="text-uppercase text-muted fw-bold mb-0.5" style="font-size: 9.5px; letter-spacing: 0.5px;">Unit Layanan yang Ditanyakan</div>
+                                    <div class="fw-bold text-dark text-truncate" style="font-size: 0.88rem;">${prodTitle}</div>
+                                    ${prodPrice ? `<div class="text-success fw-bold small mt-0.5" style="font-size: 0.82rem;">${prodPrice}</div>` : ''}
+                                </div>
+                            </div>
+                            ${prodUrl ? `
+                                <div class="flex-shrink-0">
+                                    <a href="${prodUrl}" target="_blank" class="btn btn-xs btn-outline-primary rounded-pill px-2.5 py-1 text-nowrap" style="font-size: 11px;">
+                                        <i class="bx bx-show me-1"></i> Detail
+                                    </a>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                }
+
+                bubble.innerHTML = `
+                    <div class="avatar avatar-xs flex-shrink-0 mb-1">
+                        ${userAvatarHtml}
+                    </div>
+                    <div style="max-width: 80%;">
+                        <div class="bg-white text-dark p-2.5 px-3 rounded-3 shadow-xs border" style="border-bottom-left-radius: 2px !important; border-color: rgba(0,0,0,0.06) !important;">
+                            ${quotedHtml}
+                            <p class="mb-0" style="font-size: 0.93rem; color: #111b21; white-space: pre-wrap; line-height: 1.45;">${msgText}</p>
+                            <div class="text-end mt-1" style="font-size: 10px; color: #667781;">
+                                <span>${time}</span>
                             </div>
                         </div>
-                        ${prodUrl ? `
-                            <div class="flex-shrink-0">
-                                <a href="${prodUrl}" target="_blank" class="btn btn-xs btn-outline-primary rounded-pill px-2.5 py-1 text-nowrap" style="font-size: 11px;">
-                                    <i class="bx bx-show me-1"></i> Detail
-                                </a>
-                            </div>
-                        ` : ''}
+                    </div>
+                `;
+            } else {
+                // Notice / Sambutan Awal Otomatis
+                bubble.className = 'admin-unit-msg-bubble chat-bubble-pop d-flex justify-content-center my-2';
+                bubble.innerHTML = `
+                    <div class="bg-white border rounded-pill px-3 py-1.5 shadow-2xs d-flex align-items-center gap-1.5 text-center text-wrap" style="max-width: 82%; font-size: 11.5px; color: #54656f; line-height: 1.4; background: rgba(255,255,255,0.95) !important;">
+                        <i class="bx bx-info-circle text-primary flex-shrink-0" style="font-size: 14px;"></i>
+                        <span>${msgText}</span>
                     </div>
                 `;
             }
 
-            bubble.innerHTML = `
-                <div class="avatar avatar-xs flex-shrink-0 mb-1">
-                    ${userAvatarHtml}
-                </div>
-                <div style="max-width: 80%;">
-                    <div class="bg-white text-dark p-2.5 px-3 rounded-3 shadow-xs border" style="border-bottom-left-radius: 2px !important; border-color: rgba(0,0,0,0.06) !important;">
-                        ${quotedHtml}
-                        <p class="mb-0" style="font-size: 0.93rem; color: #111b21; white-space: pre-wrap; line-height: 1.45;">${msgText}</p>
-                        <div class="text-end mt-1" style="font-size: 10px; color: #667781;">
-                            <span>${time}</span>
-                        </div>
-                    </div>
-                </div>
-            `;
-        } else {
-            // Notice / Sambutan Awal Otomatis
-            bubble.className = 'admin-unit-msg-bubble d-flex justify-content-center my-2 animate-fade-in';
-            bubble.innerHTML = `
-                <div class="bg-white border rounded-pill px-3 py-1.5 shadow-2xs d-flex align-items-center gap-1.5 text-center text-wrap" style="max-width: 82%; font-size: 11.5px; color: #54656f; line-height: 1.4; background: rgba(255,255,255,0.95) !important;">
-                    <i class="bx bx-info-circle text-primary flex-shrink-0" style="font-size: 14px;"></i>
-                    <span>${msgText}</span>
-                </div>
-            `;
+            stream.appendChild(bubble);
+        } catch (err) {
+            console.error('Error rendering message bubble:', err);
+            const fallback = document.createElement('div');
+            fallback.id = msgUniqueId;
+            fallback.className = 'admin-unit-msg-bubble chat-bubble-pop p-2 mb-2 bg-light rounded text-dark';
+            fallback.innerText = msg.message || '';
+            stream.appendChild(fallback);
         }
-
-        stream.appendChild(bubble);
     }
 
     function sendAdminUnitReply(service) {

@@ -53,9 +53,19 @@ class UnitChatController extends Controller
 
         $session->load('user');
         $messages = $session->messages()->with('sender')->get()->map(function ($msg) {
-            $msg->time_formatted = $msg->created_at ? $msg->created_at->format('H:i') : '';
-            return $msg;
-        })->values();
+            return [
+                'id' => $msg->id,
+                'session_id' => $msg->session_id,
+                'sender_type' => (string) $msg->sender_type,
+                'sender_id' => $msg->sender_id,
+                'message' => (string) ($msg->message ?? ''),
+                'item_data' => $msg->item_data,
+                'is_read' => (bool) $msg->is_read,
+                'time_formatted' => $msg->created_at ? $msg->created_at->format('H:i') : '',
+                'created_at' => $msg->created_at ? $msg->created_at->toISOString() : null,
+                'sender_name' => $msg->sender ? $msg->sender->name : null,
+            ];
+        })->values()->all();
 
         $productInfo = null;
         if (!empty($session->item_reference)) {
@@ -64,7 +74,11 @@ class UnitChatController extends Controller
 
         $userPhoto = null;
         if ($session->user) {
-            $userPhoto = $session->user->profile_photo_url;
+            try {
+                $userPhoto = $session->user->profile_photo_url;
+            } catch (\Throwable $e) {
+                $userPhoto = null;
+            }
         }
 
         return response()->json([
@@ -203,7 +217,15 @@ class UnitChatController extends Controller
             'status' => 'success',
             'message' => 'Pesan balasan berhasil dikirim.',
             'data' => [
-                'chat_message' => $msg,
+                'chat_message' => [
+                    'id' => $msg->id,
+                    'session_id' => $msg->session_id,
+                    'sender_type' => 'admin',
+                    'sender_id' => $admin->id,
+                    'message' => (string) $msg->message,
+                    'time_formatted' => $msg->created_at ? $msg->created_at->format('H:i') : '',
+                    'created_at' => $msg->created_at ? $msg->created_at->toISOString() : null,
+                ],
             ]
         ]);
     }
