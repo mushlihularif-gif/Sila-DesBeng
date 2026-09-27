@@ -631,9 +631,84 @@
     <script src="{{ asset('Admin/vendor/js/helpers.js') }}"></script>
     <script src="{{ asset('Admin/js/config.js') }}"></script>
     <link rel="stylesheet" href="{{ asset('Admin/vendor/libs/perfect-scrollbar/perfect-scrollbar.css') }}" />
-    <!-- Custom CSS for Styling -->
+    <!-- Modern Sidebar Enhancements -->
     <style>
-        /* ... (CSS Anda sebelumnya) ... */
+        /* Smooth scrolling container for sidebar menu */
+        .layout-menu .menu-inner {
+            scroll-behavior: smooth !important;
+            overscroll-behavior: contain;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(67, 89, 113, 0.15) transparent;
+        }
+
+        .layout-menu .menu-inner::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .layout-menu .menu-inner::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .layout-menu .menu-inner::-webkit-scrollbar-thumb {
+            background: rgba(67, 89, 113, 0.15);
+            border-radius: 10px;
+        }
+
+        .layout-menu .menu-inner::-webkit-scrollbar-thumb:hover {
+            background: rgba(67, 89, 113, 0.35);
+        }
+
+        /* Menu Header Styling */
+        .layout-menu .menu-header {
+            margin-top: 0.6rem !important;
+            margin-bottom: 0.2rem !important;
+            padding: 0.5rem 1.5rem 0.25rem 1.5rem !important;
+        }
+
+        .layout-menu .menu-header .menu-header-text {
+            font-size: 0.7rem !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.8px;
+            color: #8592a3 !important;
+            opacity: 0.9;
+        }
+
+        /* Menu Links & Hover Transitions */
+        .layout-menu .menu-item .menu-link {
+            border-radius: 8px !important;
+            margin: 1px 0.75rem !important;
+            padding: 0.58rem 1rem !important;
+            transition: background-color 0.2s ease, color 0.2s ease, transform 0.15s ease !important;
+        }
+
+        .layout-menu .menu-item.open > .menu-link {
+            background-color: rgba(105, 108, 255, 0.06) !important;
+            font-weight: 600;
+        }
+
+        .layout-menu .menu-sub {
+            padding-top: 0.25rem;
+            padding-bottom: 0.25rem;
+        }
+
+        .layout-menu .menu-sub .menu-item .menu-link {
+            padding-top: 0.45rem !important;
+            padding-bottom: 0.45rem !important;
+            font-size: 0.85rem !important;
+        }
+
+        .layout-menu .menu-sub .menu-item.active > .menu-link {
+            background-color: rgba(105, 108, 255, 0.1) !important;
+            color: #696cff !important;
+            font-weight: 600;
+        }
+
+        /* Unit badge styling */
+        .sidebar-unit-badge {
+            font-size: 0.68rem !important;
+            padding: 0.2rem 0.55rem !important;
+            letter-spacing: 0.3px;
+        }
     </style>
 
     <!-- Croppie CSS -->
@@ -978,19 +1053,41 @@
                     @endif
                     @endif
 
-                    {{-- 3B. KHUSUS ADMIN DESA (Model Hibrida Ramping: 2 Dropdown Operasional Terpadu) --}}
+                    <!-- ========================================================================= -->
+                    <!-- 3. ZONA KHUSUS ADMIN DESA (4 Pilar Terpadu: Layanan, Tata Kelola, Sistem)  -->
+                    <!-- ========================================================================= -->
                     @if(auth()->user()->role === 'admin_desa')
+                    
+                    <!-- PILAR 1: LAYANAN DESA -->
                     <li class="menu-header small text-uppercase">
-                        <span class="menu-header-text">Operasional Layanan</span>
+                        <span class="menu-header-text">Layanan Desa</span>
                     </li>
 
-                    <!-- Dropdown 1: Unit Layanan Desa (Produk, Armada & Fasilitas) -->
-                    <li class="menu-item {{ (request()->is('admin/unit*') && !request()->is('admin/unit/supir*')) || request()->routeIs('admin.announcements.*') || request()->routeIs('admin.pelaporan.*') ? 'open active show' : '' }}">
-                        <a href="javascript:void(0);" class="menu-link menu-toggle">
-                            <i class="menu-icon tf-icons bx bx-grid-alt text-primary"></i>
-                            <div>Unit Layanan</div>
+                    <!-- Dropdown 1: Unit Layanan Desa (Katalog Aktivasi & Unit Aktif) -->
+                    <li class="menu-item {{ (request()->is('admin/unit*') && !request()->is('admin/unit/supir*')) || request()->routeIs('admin.announcements.*') || request()->routeIs('admin.pelaporan.*') || request()->routeIs('admin.region-settings.index') ? 'open active show' : '' }}">
+                        <a href="javascript:void(0);" class="menu-link menu-toggle d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center">
+                                <i class="menu-icon tf-icons bx bx-grid-alt text-primary"></i>
+                                <div>Unit Layanan</div>
+                            </div>
+                            <span class="badge bg-label-primary rounded-pill sidebar-unit-badge fw-bold me-2">{{ $activeUnitsCount ?? 2 }}/{{ $totalAvailableUnits ?? 7 }} Aktif</span>
                         </a>
                         <ul class="menu-sub">
+                            <!-- Pusat Aktivasi 7 Unit Layanan -->
+                            <li class="menu-item {{ request()->routeIs('admin.region-settings.index') ? 'active' : '' }}">
+                                <a href="{{ route('admin.region-settings.index') }}" class="menu-link d-flex align-items-center justify-content-between">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bx bx-slider-alt me-2 text-primary" style="font-size: 1.05rem;"></i>
+                                        <span class="fw-semibold">Aktivasi & Katalog Unit</span>
+                                    </div>
+                                    <span class="badge bg-primary text-white rounded-pill px-2 py-0 fw-bold" style="font-size: 0.68rem;">{{ $activeUnitsCount ?? 2 }}/{{ $totalAvailableUnits ?? 7 }}</span>
+                                </a>
+                            </li>
+
+                            <li class="menu-item py-1 px-3 d-flex align-items-center">
+                                <div class="border-top w-100" style="border-color: rgba(67, 89, 113, 0.1) !important;"></div>
+                            </li>
+
                             @if(in_array('Penyewaan Mobil', $activeServicesMenu ?? []) || in_array('Penyewaan Transportasi', $activeServicesMenu ?? []))
                             <li class="menu-item {{ request()->is('admin/unit/mobil*') ? 'active' : '' }}">
                                 <a href="{{ route('admin.unit.mobil.index') }}" class="menu-link">
@@ -1045,11 +1142,11 @@
                         </ul>
                     </li>
 
-                    <!-- Dropdown 2: Pesanan & Aktivitas Warga -->
+                    <!-- Dropdown 2: Pesanan & Transaksi Warga -->
                     <li class="menu-item {{ request()->is('admin/aktivitas*') || request()->is('admin/unit/supir*') || request()->routeIs('admin.kemitraan.*') ? 'open active show' : '' }}">
                         <a href="javascript:void(0);" class="menu-link menu-toggle">
-                            <i class="menu-icon tf-icons bx bx-time text-warning"></i>
-                            <div>Pesanan & Aktivitas</div>
+                            <i class="menu-icon tf-icons bx bx-receipt text-warning"></i>
+                            <div>Pesanan & Transaksi</div>
                         </a>
                         <ul class="menu-sub">
                             <li class="menu-item {{ request()->is('admin/aktivitas/permintaan-pengajuan*') ? 'active' : '' }}">
@@ -1078,31 +1175,8 @@
                             @endif
                         </ul>
                     </li>
-                    @endif
 
-                    <!-- ========================================================================= -->
-                    <!-- 4. PUSAT AKTIVASI LAYANAN (Khusus Admin Desa)                             -->
-                    <!-- Memperlihatkan etalase 7 unit layanan dan status aktif/tersedia          -->
-                    <!-- ========================================================================= -->
-                    @if(auth()->user()->role === 'admin_desa')
-                    <li class="menu-header small text-uppercase">
-                        <span class="menu-header-text">Aktivasi Layanan</span>
-                    </li>
-                    <li class="menu-item {{ request()->routeIs('admin.region-settings.index') ? 'active' : '' }}">
-                        <a href="{{ route('admin.region-settings.index') }}" class="menu-link d-flex align-items-center justify-content-between">
-                            <div class="d-flex align-items-center">
-                                <i class="menu-icon tf-icons bx bx-grid-alt text-primary"></i>
-                                <div>Katalog 7 Layanan</div>
-                            </div>
-                            <span class="badge bg-label-primary rounded-pill px-2 py-1 fw-bold" style="font-size: 0.72rem;">{{ $activeUnitsCount ?? 2 }}/{{ $totalAvailableUnits ?? 7 }} Aktif</span>
-                        </a>
-                    </li>
-                    @endif
-
-                    <!-- ========================================================================= -->
-                    <!-- 5. TATA KELOLA PEMERINTAHAN DESA (Khusus Admin Desa)                      -->
-                    <!-- ========================================================================= -->
-                    @if(auth()->user()->role === 'admin_desa')
+                    <!-- PILAR 2: TATA KELOLA PEMERINTAHAN DESA -->
                     <li class="menu-header small text-uppercase">
                         <span class="menu-header-text">Tata Kelola Desa</span>
                     </li>
@@ -1110,7 +1184,7 @@
                     {{-- Kependudukan (Dropdown) --}}
                     <li class="menu-item {{ request()->routeIs('admin.manajemen-pengguna.*') || request()->routeIs('admin.kyc.*') || request()->routeIs('admin.warga.mutasi.*') || request()->routeIs('admin.wilayah-admins.*') ? 'open active show' : '' }}">
                         <a href="javascript:void(0);" class="menu-link menu-toggle">
-                            <i class="menu-icon tf-icons bx bx-group"></i>
+                            <i class="menu-icon tf-icons bx bx-group text-info"></i>
                             <div>Kependudukan</div>
                         </a>
                         <ul class="menu-sub">
@@ -1140,7 +1214,7 @@
                     {{-- Kelola Staf Layanan --}}
                     <li class="menu-item {{ request()->routeIs('admin.staff.*') ? 'active' : '' }}">
                         <a href="{{ route('admin.staff.index') }}" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-user-voice"></i>
+                            <i class="menu-icon tf-icons bx bx-user-voice text-success"></i>
                             <div>Kelola Staf Layanan</div>
                         </a>
                     </li>
@@ -1148,40 +1222,20 @@
                     {{-- Keuangan Desa --}}
                     <li class="menu-item {{ request()->routeIs('admin.keuangan.*') ? 'active' : '' }}">
                         <a href="{{ route('admin.keuangan.index') }}" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-wallet"></i>
+                            <i class="menu-icon tf-icons bx bx-wallet text-warning"></i>
                             <div>Keuangan & Kas Desa</div>
                         </a>
                     </li>
 
-                    {{-- Lokasi Layanan --}}
-                    <li class="menu-item {{ request()->routeIs('admin.lokasi-layanan.*') ? 'active' : '' }}">
-                        <a href="{{ route('admin.lokasi-layanan.index') }}" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-map-pin"></i>
-                            <div>Lokasi Layanan</div>
-                        </a>
-                    </li>
-
-                    {{-- Banner Beranda --}}
-                    <li class="menu-item {{ request()->routeIs('admin.banners.*') ? 'active' : '' }}">
-                        <a href="{{ route('admin.banners.index') }}" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-image"></i>
-                            <div>Banner Beranda</div>
-                        </a>
-                    </li>
-                    @endif
-
-                    <!-- ========================================================================= -->
-                    <!-- 6. PUSAT LAPORAN & PENGATURAN (Khusus Admin Desa)                         -->
-                    <!-- ========================================================================= -->
-                    @if(auth()->user()->role === 'admin_desa')
+                    <!-- PILAR 3: SISTEM & INFORMASI -->
                     <li class="menu-header small text-uppercase">
-                        <span class="menu-header-text">Laporan & Pengaturan</span>
+                        <span class="menu-header-text">Sistem & Informasi</span>
                     </li>
 
                     {{-- Laporan Rekapitulasi (Dropdown) --}}
                     <li class="menu-item {{ request()->routeIs('admin.laporan.transaksi') || (request()->routeIs('admin.laporan.pendapatan') && !request('service')) || request()->routeIs('admin.laporan.wilayah') ? 'open active show' : '' }}">
                         <a href="javascript:void(0);" class="menu-link menu-toggle">
-                            <i class="menu-icon tf-icons bx bx-bar-chart-alt-2"></i>
+                            <i class="menu-icon tf-icons bx bx-bar-chart-alt-2 text-primary"></i>
                             <div>Laporan Terpadu</div>
                         </a>
                         <ul class="menu-sub">
@@ -1204,20 +1258,45 @@
                     </li>
 
                     {{-- Pengaturan Wilayah (Dropdown) --}}
-                    <li class="menu-item {{ request()->routeIs('admin.region-settings.payment') ? 'open active show' : '' }}">
+                    <li class="menu-item {{ request()->routeIs('admin.lokasi-layanan.*') || request()->routeIs('admin.banners.*') || request()->routeIs('admin.region-settings.payment') ? 'open active show' : '' }}">
                         <a href="javascript:void(0);" class="menu-link menu-toggle">
-                            <i class="menu-icon tf-icons bx bx-cog"></i>
+                            <i class="menu-icon tf-icons bx bx-cog text-secondary"></i>
                             <div>Pengaturan Wilayah</div>
                         </a>
                         <ul class="menu-sub">
-                            <li class="menu-item {{ request()->routeIs('admin.region-settings.index') ? 'active' : '' }}">
-                                <a href="{{ route('admin.region-settings.index') }}" class="menu-link">
-                                    <div>Metode Pengiriman & Layanan</div>
-                                </a>
-                            </li>
                             <li class="menu-item {{ request()->routeIs('admin.region-settings.payment') ? 'active' : '' }}">
                                 <a href="{{ route('admin.region-settings.payment') }}" class="menu-link">
                                     <div>Pembayaran Wilayah</div>
+                                </a>
+                            </li>
+                            <li class="menu-item {{ request()->routeIs('admin.lokasi-layanan.*') ? 'active' : '' }}">
+                                <a href="{{ route('admin.lokasi-layanan.index') }}" class="menu-link">
+                                    <div>Lokasi Layanan</div>
+                                </a>
+                            </li>
+                            <li class="menu-item {{ request()->routeIs('admin.banners.*') ? 'active' : '' }}">
+                                <a href="{{ route('admin.banners.index') }}" class="menu-link">
+                                    <div>Banner Beranda</div>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    {{-- Profil & Info Desa --}}
+                    <li class="menu-item {{ request()->is('admin/SiladesBeng/profile*') || request()->is('admin/SiladesBeng/developer*') || request()->routeIs('admin.SiladesBeng.bumdes.index') || request()->routeIs('admin.SiladesBeng.bumdes.*') ? 'open active show' : '' }}">
+                        <a href="javascript:void(0);" class="menu-link menu-toggle">
+                            <i class="menu-icon tf-icons bx bx-info-circle text-info"></i>
+                            <div>Profil & Info</div>
+                        </a>
+                        <ul class="menu-sub">
+                            <li class="menu-item {{ request()->routeIs('admin.SiladesBeng.profile') || request()->routeIs('admin.SiladesBeng.developer.profile') ? 'active' : '' }}">
+                                <a href="{{ route('admin.SiladesBeng.profile') }}" class="menu-link">
+                                    <div>SiladesBeng</div>
+                                </a>
+                            </li>
+                            <li class="menu-item {{ request()->routeIs('admin.SiladesBeng.bumdes.index') || request()->routeIs('admin.SiladesBeng.bumdes.*') ? 'active' : '' }}">
+                                <a href="{{ route('admin.SiladesBeng.bumdes.index') }}" class="menu-link">
+                                    <div>Pemerintah Desa</div>
                                 </a>
                             </li>
                         </ul>
@@ -1284,14 +1363,15 @@
                     @endif
 
                     <!-- ========================================================================= -->
-                    <!-- 8. PROFIL & INFORMASI DAERAH (Semua Pengguna Admin & Staf)                -->
+                    <!-- 8. PROFIL & INFORMASI DAERAH (Khusus Pengguna Non-Admin Desa)             -->
                     <!-- ========================================================================= -->
+                    @if(auth()->user()->role !== 'admin_desa')
                     <li class="menu-header small text-uppercase">
                         <span class="menu-header-text">Tentang Aplikasi</span>
                     </li>
                     <li class="menu-item {{ request()->is('admin/SiladesBeng/profile*') || request()->is('admin/SiladesBeng/developer*') || request()->routeIs('admin.SiladesBeng.bumdes.index') || request()->routeIs('admin.SiladesBeng.bumdes.*') ? 'open active show' : '' }}">
                         <a href="javascript:void(0);" class="menu-link menu-toggle">
-                            <i class="menu-icon tf-icons bx bx-info-circle"></i>
+                            <i class="menu-icon tf-icons bx bx-info-circle text-info"></i>
                             <div>Profil & Info</div>
                         </a>
                         <ul class="menu-sub">
@@ -1315,6 +1395,7 @@
                             </li>
                         </ul>
                     </li>
+                    @endif
                 </ul>
             </aside>
             <!-- Layout page -->
@@ -2195,6 +2276,90 @@
                                             keepalive: true
                                         });
                                     }
+                                }
+                            }
+                        });
+                    });
+                });
+            </script>
+
+            <!-- Sidebar Auto-Scroll & Smart Accordion Engine -->
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    const layoutMenu = document.getElementById('layout-menu');
+                    if (!layoutMenu) return;
+
+                    const menuInner = layoutMenu.querySelector('.menu-inner');
+                    if (!menuInner) return;
+
+                    // Fungsi untuk memastikan dropdown yang terbuka terlihat penuh (geser ke atas jika terpotong di bawah)
+                    function ensureMenuInView(menuItem) {
+                        if (!menuItem || !menuInner) return;
+
+                        const innerRect = menuInner.getBoundingClientRect();
+                        const itemRect = menuItem.getBoundingClientRect();
+
+                        // Buffer 28px agar item paling bawah memiliki ruang yang nyaman dan tidak menabrak batas layar
+                        const bottomOverflow = itemRect.bottom - (innerRect.bottom - 28);
+
+                        if (bottomOverflow > 0) {
+                            if (itemRect.height > innerRect.height - 40) {
+                                // Jika submenu sangat panjang (melebihi container), posisikan judul menu di atas
+                                const topDiff = itemRect.top - innerRect.top - 12;
+                                menuInner.scrollBy({ top: topDiff, behavior: 'smooth' });
+                            } else {
+                                // Geser container ke bawah sehingga item yang terbuka terangkat naik ke atas
+                                menuInner.scrollBy({ top: bottomOverflow, behavior: 'smooth' });
+                            }
+
+                            if (window.Helpers && window.Helpers.menuPsScroll) {
+                                window.Helpers.menuPsScroll.update();
+                            }
+                        }
+                    }
+
+                    // Pasang interaksi pada semua toggle menu di sidebar
+                    layoutMenu.querySelectorAll('.menu-toggle').forEach(function (toggle) {
+                        toggle.addEventListener('click', function () {
+                            const menuItem = this.closest('.menu-item');
+                            if (!menuItem) return;
+
+                            const isCurrentlyOpen = menuItem.classList.contains('open');
+
+                            if (!isCurrentlyOpen) {
+                                // Accordion: Tutup menu terbuka lainnya di level yang sama agar menu tetap ringkas
+                                const parentUl = menuItem.parentElement;
+                                if (parentUl) {
+                                    const openSiblings = parentUl.querySelectorAll(':scope > .menu-item.open');
+                                    openSiblings.forEach(function (sibling) {
+                                        if (sibling !== menuItem) {
+                                            if (window.Helpers && window.Helpers.mainMenu && typeof window.Helpers.mainMenu.close === 'function') {
+                                                window.Helpers.mainMenu.close(sibling, true);
+                                            } else {
+                                                sibling.classList.remove('open');
+                                            }
+                                        }
+                                    });
+                                }
+
+                                // Simpan posisi scroll sebelum menu dibuka
+                                menuItem.dataset.prevScrollPos = menuInner.scrollTop;
+
+                                // Jalankan penyesuaian scroll secara bertahap selama animasi pembukaan submenu
+                                setTimeout(function () { ensureMenuInView(menuItem); }, 80);
+                                setTimeout(function () { ensureMenuInView(menuItem); }, 180);
+                                setTimeout(function () { ensureMenuInView(menuItem); }, 320);
+                            } else {
+                                // Jika menu ditutup kembali, kembalikan posisi scroll secara halus
+                                const prevScroll = menuItem.dataset.prevScrollPos;
+                                if (prevScroll !== undefined) {
+                                    delete menuItem.dataset.prevScrollPos;
+                                    setTimeout(function () {
+                                        menuInner.scrollTo({ top: parseFloat(prevScroll), behavior: 'smooth' });
+                                        if (window.Helpers && window.Helpers.menuPsScroll) {
+                                            window.Helpers.menuPsScroll.update();
+                                        }
+                                    }, 200);
                                 }
                             }
                         });

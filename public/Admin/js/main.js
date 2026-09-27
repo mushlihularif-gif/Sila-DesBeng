@@ -14,7 +14,8 @@ let menu, animate;
   layoutMenuEl.forEach(function (element) {
     menu = new Menu(element, {
       orientation: 'vertical',
-      closeChildren: false
+      closeChildren: true,
+      accordion: true
     });
     // Change parameter to true if you want scroll animation
     window.Helpers.scrollToActive((animate = false));
