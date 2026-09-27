@@ -125,7 +125,7 @@
                     </div>
                 </div>
 
-                <!-- 2. ACTIVE CHAT WRAPPER (Shown only when a chat is selected) -->
+                <!-- 2. ACTIVE CHAT WRAPPER (Shown when a chat is active) -->
                 <div id="adminUnitActiveChatWrapper_{{ $serviceType }}" class="d-none flex-column flex-grow-1 w-100">
                     
                     <!-- Chat Header (Clean WhatsApp Business / Sneat Style) -->
@@ -159,34 +159,9 @@
                         </div>
                     </div>
 
-                    <!-- Pinned Product Reference Bar (Hidden by default, shown only when productInfo exists) -->
-                    <div id="unitActiveProductBanner_{{ $serviceType }}" class="px-3 py-2 bg-light border-bottom align-items-center justify-content-between gap-3 shadow-2xs d-none" style="background: #f8fafc; border-bottom: 1px solid rgba(67, 89, 113, 0.08);">
-                        <div class="d-flex align-items-center gap-2.5 overflow-hidden">
-                            <div class="position-relative flex-shrink-0" id="unitActiveProductImageWrap_{{ $serviceType }}" style="width: 40px; height: 40px; border-radius: 8px; overflow: hidden; background: #ffffff; border: 1px solid rgba(0,0,0,0.08);">
-                                <img id="unitActiveProductImage_{{ $serviceType }}" src="" alt="Produk" class="w-100 h-100" style="object-fit: cover;" onerror="this.style.display='none'">
-                            </div>
-                            <div class="overflow-hidden">
-                                <div class="d-flex align-items-center gap-1.5">
-                                    <span class="badge bg-label-primary px-1.5 py-0 fw-bold" style="font-size: 9px;">PRODUK DITANYAKAN</span>
-                                    <span id="unitActiveProductTitle_{{ $serviceType }}" class="mb-0 text-truncate fw-bold text-dark" style="font-size: 0.88rem;"></span>
-                                </div>
-                                <div class="d-flex align-items-center gap-1.5 mt-0.5">
-                                    <span id="unitActiveProductPrice_{{ $serviceType }}" class="text-success fw-bold" style="font-size: 0.82rem;"></span>
-                                    <span class="text-muted" style="font-size: 10px;">&bull;</span>
-                                    <span id="unitActiveProductCategory_{{ $serviceType }}" class="text-muted small" style="font-size: 11px;"></span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="flex-shrink-0">
-                            <a id="unitActiveProductLink_{{ $serviceType }}" href="#" target="_blank" class="btn btn-xs btn-outline-primary rounded-pill px-2.5 py-1" style="font-size: 11px;">
-                                <i class="bx bx-show me-1"></i> Detail Unit
-                            </a>
-                        </div>
-                    </div>
-
                     <!-- Chat Stream Messages (WhatsApp / Telegram Wallpaper Background) -->
                     <div class="flex-grow-1 p-3 p-sm-4 overflow-auto d-flex flex-column gap-2" id="adminUnitChatMessagesStream_{{ $serviceType }}" 
-                         style="height: 400px; min-height: 360px; background-color: #efeae2; background-image: radial-gradient(rgba(17, 27, 33, 0.06) 1px, transparent 0); background-size: 18px 18px;">
+                         style="height: 460px; min-height: 400px; background-color: #efeae2; background-image: radial-gradient(rgba(17, 27, 33, 0.06) 1px, transparent 0); background-size: 18px 18px;">
                     </div>
 
                     <!-- Chat Input Area (WhatsApp Web Style) -->
@@ -241,7 +216,7 @@
         pollInterval: null,
         productInfo: null,
         userPhoto: null,
-        lastMessageCount: 0
+        renderedMessageIds: new Set()
     };
 
     function filterAdminUnitChats(service) {
@@ -267,12 +242,14 @@
 
     function loadAdminUnitChat(service, sessionId, isSilent = false) {
         const state = window.unitChatStates[service];
+        if (!state) return;
         
-        // Reset message count if switching sessions
-        if (state.activeSessionId !== sessionId) {
-            state.lastMessageCount = 0;
-        }
+        const isSwitchingSession = (state.activeSessionId !== sessionId);
         state.activeSessionId = sessionId;
+
+        if (isSwitchingSession) {
+            state.renderedMessageIds = new Set();
+        }
 
         // Switch Right Panel Views: Hide Empty State, Show Active Chat Wrapper
         const emptyState = document.getElementById(`adminUnitNoChatSelected_${service}`);
@@ -305,11 +282,11 @@
             }
         }
 
-        if (!isSilent) {
-            const stream = document.getElementById(`adminUnitChatMessagesStream_${service}`);
-            if (stream) {
-                stream.innerHTML = '<div class="text-center py-5 my-auto text-muted"><span class="spinner-border spinner-border-sm text-primary me-2"></span>Memuat obrolan...</div>';
-            }
+        const stream = document.getElementById(`adminUnitChatMessagesStream_${service}`);
+
+        // Show spinner ONLY on initial user click or session switch (NEVER during silent polling)
+        if (!isSilent && isSwitchingSession && stream) {
+            stream.innerHTML = '<div class="text-center py-5 my-auto text-muted"><span class="spinner-border spinner-border-sm text-primary me-2"></span>Memuat obrolan...</div>';
         }
 
         // Use clean relative endpoints to guarantee compatibility across HTTPS and any domain
@@ -334,7 +311,8 @@
         .then(res => {
             if (res.status === 'success' && res.data) {
                 const session = res.data.session || {};
-                const messages = Array.isArray(res.data.messages) ? res.data.messages : [];
+                const rawMessages = res.data.messages || [];
+                const messages = Array.isArray(rawMessages) ? rawMessages : Object.values(rawMessages);
                 const userPhoto = res.data.user_photo || null;
                 const productInfo = res.data.product_info || null;
 
@@ -373,54 +351,10 @@
                     }
                 }
 
-                // Update Compact Product Bar
-                const productBanner = document.getElementById(`unitActiveProductBanner_${service}`);
-                if (productBanner) {
-                    if (productInfo && productInfo.title) {
-                        productBanner.classList.remove('d-none');
-                        productBanner.classList.add('d-flex');
-                        
-                        const titleEl = document.getElementById(`unitActiveProductTitle_${service}`);
-                        if (titleEl) titleEl.innerText = productInfo.title;
-
-                        const catEl = document.getElementById(`unitActiveProductCategory_${service}`);
-                        if (catEl) catEl.innerText = productInfo.category || 'Unit Layanan';
-
-                        const priceEl = document.getElementById(`unitActiveProductPrice_${service}`);
-                        if (priceEl) priceEl.innerText = productInfo.price || '';
-                        
-                        const prodImg = document.getElementById(`unitActiveProductImage_${service}`);
-                        if (prodImg) {
-                            if (productInfo.image) {
-                                prodImg.src = productInfo.image;
-                                prodImg.style.display = 'block';
-                            } else {
-                                prodImg.style.display = 'none';
-                            }
-                        }
-
-                        const prodLink = document.getElementById(`unitActiveProductLink_${service}`);
-                        if (prodLink) {
-                            prodLink.href = productInfo.url || '#';
-                            if (!productInfo.url || productInfo.url === '#') {
-                                prodLink.style.display = 'none';
-                            } else {
-                                prodLink.style.display = 'inline-block';
-                            }
-                        }
-                    } else {
-                        productBanner.classList.add('d-none');
-                        productBanner.classList.remove('d-flex');
-                    }
-                }
-
-                // Render Messages
-                const stream = document.getElementById(`adminUnitChatMessagesStream_${service}`);
+                // Render Messages safely
                 if (stream) {
-                    // In silent polling, skip re-rendering if message count has not changed
-                    if (isSilent && state.lastMessageCount === messages.length && messages.length > 0) {
-                        // Keep current stream content intact
-                    } else {
+                    if (state.renderedMessageIds.size === 0) {
+                        // Initial full render for this chat session
                         stream.innerHTML = '';
 
                         if (messages.length === 0) {
@@ -429,38 +363,41 @@
                             let firstUserMsgRendered = false;
                             messages.forEach((msg, idx) => {
                                 try {
-                                    const isFirstUser = !firstUserMsgRendered && msg && msg.sender_type === 'user';
+                                    if (!msg) return;
+                                    const isFirstUser = !firstUserMsgRendered && msg.sender_type === 'user';
                                     if (isFirstUser) firstUserMsgRendered = true;
                                     renderAdminUnitMessageBubble(service, msg, productInfo, userPhoto, isFirstUser);
+                                    if (msg.id) state.renderedMessageIds.add(msg.id);
                                 } catch (bubbleErr) {
                                     console.error('Error rendering message bubble at index ' + idx, bubbleErr);
                                 }
                             });
+                            stream.scrollTop = stream.scrollHeight;
                         }
-
-                        state.lastMessageCount = messages.length;
-                        stream.scrollTop = stream.scrollHeight;
+                    } else {
+                        // Silent polling update: ONLY append new messages, NEVER wipe existing messages!
+                        let hasNew = false;
+                        messages.forEach(msg => {
+                            if (msg && msg.id && !state.renderedMessageIds.has(msg.id)) {
+                                renderAdminUnitMessageBubble(service, msg, productInfo, userPhoto, false);
+                                state.renderedMessageIds.add(msg.id);
+                                hasNew = true;
+                            }
+                        });
+                        if (hasNew) {
+                            stream.scrollTop = stream.scrollHeight;
+                        }
                     }
                 }
 
-                // Start Polling
+                // Start or maintain polling
                 startAdminUnitChatPolling(service, sessionId);
-            } else {
-                if (!isSilent) {
-                    const stream = document.getElementById(`adminUnitChatMessagesStream_${service}`);
-                    if (stream) {
-                        stream.innerHTML = `<div class="text-center text-danger my-auto py-5"><i class="bx bx-error-circle fs-1 mb-2"></i><p class="small mb-2">${res.message || 'Gagal memuat percakapan.'}</p><button class="btn btn-sm btn-outline-primary" onclick="loadAdminUnitChat('${service}', ${sessionId})">Coba Lagi</button></div>`;
-                    }
-                }
             }
         })
         .catch(err => {
             console.error('Error loading chat:', err);
-            if (!isSilent) {
-                const stream = document.getElementById(`adminUnitChatMessagesStream_${service}`);
-                if (stream) {
-                    stream.innerHTML = `<div class="text-center text-danger my-auto py-5"><i class="bx bx-error-circle fs-1 mb-2"></i><p class="small mb-2">Gagal memuat obrolan (${err.message || 'Koneksi bermasalah'}).</p><button class="btn btn-sm btn-outline-primary" onclick="loadAdminUnitChat('${service}', ${sessionId})">Muat Ulang</button></div>`;
-                }
+            if (!isSilent && isSwitchingSession && stream && state.renderedMessageIds.size === 0) {
+                stream.innerHTML = `<div class="text-center text-danger my-auto py-5"><i class="bx bx-error-circle fs-1 mb-2"></i><p class="small mb-2">Gagal memuat obrolan (${err.message || 'Koneksi bermasalah'}).</p><button class="btn btn-sm btn-outline-primary" onclick="loadAdminUnitChat('${service}', ${sessionId})">Muat Ulang</button></div>`;
             }
         });
     }
@@ -514,15 +451,26 @@
                 userAvatarHtml = `<div class="avatar-initial rounded-circle fw-bold text-white shadow-2xs" style="background: linear-gradient(135deg, #696cff, #4338ca); font-size: 10px;">W</div>`;
             }
 
+            // Spacious WhatsApp-style Product Quote inside the chat bubble
             let quotedHtml = '';
             if (isFirstUserMsg && productInfo && productInfo.title) {
                 quotedHtml = `
-                    <div class="p-2 mb-2 rounded-2 border-start border-3 border-primary d-flex align-items-center gap-2" style="background: rgba(105, 108, 255, 0.08);">
-                        ${productInfo.image ? `<img src="${productInfo.image}" class="rounded flex-shrink-0" style="width: 38px; height: 38px; object-fit: cover;" onerror="this.style.display='none'">` : ''}
-                        <div class="overflow-hidden min-w-0">
-                            <div class="fw-bold text-dark text-truncate" style="font-size: 0.82rem;">${escapeHtml(productInfo.title)}</div>
-                            <div class="text-success fw-bold small" style="font-size: 0.75rem;">${escapeHtml(productInfo.price || '')}</div>
+                    <div class="p-2.5 mb-2.5 rounded-3 d-flex align-items-center justify-content-between gap-3 shadow-2xs" style="background: rgba(105, 108, 255, 0.08); border-left: 4px solid #696cff;">
+                        <div class="d-flex align-items-center gap-2.5 overflow-hidden">
+                            ${productInfo.image ? `<img src="${productInfo.image}" alt="${escapeHtml(productInfo.title)}" class="rounded flex-shrink-0 shadow-2xs" style="width: 44px; height: 44px; object-fit: cover;" onerror="this.style.display='none'">` : ''}
+                            <div class="overflow-hidden min-w-0">
+                                <div class="text-uppercase text-muted fw-bold mb-0.5" style="font-size: 9.5px; letter-spacing: 0.5px;">Unit Layanan yang Ditanyakan</div>
+                                <div class="fw-bold text-dark text-truncate" style="font-size: 0.88rem;">${escapeHtml(productInfo.title)}</div>
+                                <div class="text-success fw-bold small mt-0.5" style="font-size: 0.82rem;">${escapeHtml(productInfo.price || '')}</div>
+                            </div>
                         </div>
+                        ${productInfo.url && productInfo.url !== '#' ? `
+                            <div class="flex-shrink-0">
+                                <a href="${productInfo.url}" target="_blank" class="btn btn-xs btn-outline-primary rounded-pill px-2.5 py-1 text-nowrap" style="font-size: 11px;">
+                                    <i class="bx bx-show me-1"></i> Detail
+                                </a>
+                            </div>
+                        ` : ''}
                     </div>
                 `;
             }
@@ -531,7 +479,7 @@
                 <div class="avatar avatar-xs flex-shrink-0 mb-1">
                     ${userAvatarHtml}
                 </div>
-                <div style="max-width: 78%;">
+                <div style="max-width: 80%;">
                     <div class="bg-white text-dark p-2.5 px-3 rounded-3 shadow-xs border" style="border-bottom-left-radius: 2px !important; border-color: rgba(0,0,0,0.06) !important;">
                         ${quotedHtml}
                         <p class="mb-0" style="font-size: 0.93rem; color: #111b21; white-space: pre-wrap; line-height: 1.45;">${msgText}</p>
@@ -557,7 +505,7 @@
 
     function sendAdminUnitReply(service) {
         const state = window.unitChatStates[service];
-        if (!state.activeSessionId) return;
+        if (!state || !state.activeSessionId) return;
 
         const input = document.getElementById(`adminUnitReplyInput_${service}`);
         const text = input.value.trim();
@@ -567,14 +515,16 @@
 
         // Immediate visual push
         const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const tempMsgId = 'temp_' + Date.now();
         renderAdminUnitMessageBubble(service, {
+            id: tempMsgId,
             sender_type: 'admin',
             message: text,
             time_formatted: nowTime,
             created_at: new Date().toISOString()
         }, state.productInfo, state.userPhoto, false);
 
-        state.lastMessageCount++;
+        state.renderedMessageIds.add(tempMsgId);
 
         const stream = document.getElementById(`adminUnitChatMessagesStream_${service}`);
         if (stream) stream.scrollTop = stream.scrollHeight;
@@ -608,6 +558,9 @@
         })
         .then(res => {
             if (res.status === 'success') {
+                if (res.data && res.data.chat_message && res.data.chat_message.id) {
+                    state.renderedMessageIds.add(res.data.chat_message.id);
+                }
                 const preview = document.getElementById(`unitChatPreview_${service}_${state.activeSessionId}`);
                 if (preview) preview.innerText = text;
 
@@ -626,7 +579,7 @@
 
     function resolveAdminUnitActiveChat(service) {
         const state = window.unitChatStates[service];
-        if (!state.activeSessionId) return;
+        if (!state || !state.activeSessionId) return;
 
         if (!confirm('Tandai sesi obrolan ini telah selesai ditangani?')) return;
 
@@ -655,7 +608,7 @@
         })
         .then(res => {
             if (res.status === 'success') {
-                state.lastMessageCount = 0;
+                state.renderedMessageIds = new Set();
                 loadAdminUnitChat(service, state.activeSessionId, false);
 
                 const badge = document.getElementById(`unitChatBadge_${service}_${state.activeSessionId}`);
@@ -680,6 +633,7 @@
 
     function startAdminUnitChatPolling(service, sessionId) {
         const state = window.unitChatStates[service];
+        if (!state) return;
         if (state.pollInterval) {
             clearInterval(state.pollInterval);
         }

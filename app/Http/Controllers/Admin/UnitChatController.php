@@ -55,7 +55,7 @@ class UnitChatController extends Controller
         $messages = $session->messages()->with('sender')->get()->map(function ($msg) {
             $msg->time_formatted = $msg->created_at ? $msg->created_at->format('H:i') : '';
             return $msg;
-        });
+        })->values();
 
         $productInfo = null;
         if (!empty($session->item_reference)) {
