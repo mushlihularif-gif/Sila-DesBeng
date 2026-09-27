@@ -1,14 +1,19 @@
-{{-- Reusable Admin Unit Chat Panel --}}
+{{-- Reusable Admin Unit Chat Panel (WhatsApp & Telegram Modern Style) --}}
 @php
     $chatServiceTitle = $chatServiceTitle ?? 'Layanan';
     $serviceType = $serviceType ?? 'gas';
 @endphp
 
-<div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+<div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4 wa-chat-container">
     <div class="card-header bg-white border-bottom py-2.5 py-sm-3 px-3 px-sm-4 d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
-        <div>
-            <h5 class="fw-bold mb-1 fs-6 fs-sm-5"><i class="bx bx-chat me-2 text-primary"></i> Chat Warga - {{ $chatServiceTitle }}</h5>
-            <p class="text-muted small mb-0 d-none d-sm-block">Komunikasi langsung dengan warga seputar {{ strtolower($chatServiceTitle) }} (Privasi terjaga, tanpa nomor HP)</p>
+        <div class="d-flex align-items-center gap-2">
+            <div class="avatar avatar-sm bg-label-primary text-primary rounded-circle d-flex align-items-center justify-content-center">
+                <i class="bx bx-chat fs-5"></i>
+            </div>
+            <div>
+                <h5 class="fw-bold mb-0 fs-6 fs-sm-5 text-dark">Chat Warga &bull; {{ $chatServiceTitle }}</h5>
+                <small class="text-muted d-none d-sm-block">Komunikasi langsung real-time seputar unit {{ strtolower($chatServiceTitle) }}</small>
+            </div>
         </div>
         <div class="d-flex align-items-center gap-2 flex-shrink-0">
             <span class="badge bg-label-primary px-3 py-1.5 py-sm-2 rounded-pill font-semibold text-nowrap">
@@ -19,59 +24,76 @@
     
     <div class="card-body p-0">
         <div class="row g-0">
-            <!-- Left Panel: Chat List -->
-            <div class="col-12 col-md-4 col-lg-4 border-end" style="background: #fafafa; min-height: 520px;">
-                <div class="p-3 border-bottom bg-white">
+            <!-- Left Panel: Chat List (WhatsApp Web Style) -->
+            <div class="col-12 col-md-4 col-lg-4 border-end bg-white" style="min-height: 540px;">
+                <div class="p-3 border-bottom" style="background: #f8fafc;">
                     <div class="input-group input-group-merge">
-                        <span class="input-group-text bg-light border-0"><i class="bx bx-search text-muted"></i></span>
-                        <input type="text" id="searchUnitChatInput_{{ $serviceType }}" class="form-control bg-light border-0 ps-0" placeholder="Cari nama warga..." onkeyup="filterAdminUnitChats('{{ $serviceType }}')">
+                        <span class="input-group-text bg-white border-0 ps-3"><i class="bx bx-search text-muted"></i></span>
+                        <input type="text" id="searchUnitChatInput_{{ $serviceType }}" class="form-control bg-white border-0 ps-2 rounded-pill shadow-2xs" placeholder="Cari nama warga..." onkeyup="filterAdminUnitChats('{{ $serviceType }}')" style="font-size: 0.88rem;">
                     </div>
                 </div>
 
-                <div class="overflow-auto" id="adminUnitChatListContainer_{{ $serviceType }}" style="max-height: 510px;">
+                <div class="overflow-auto wa-contact-list" id="adminUnitChatListContainer_{{ $serviceType }}" style="max-height: 520px;">
                     @forelse($chats as $chat)
-                        <div class="admin-unit-chat-item-{{ $serviceType }} p-3 border-bottom d-flex align-items-center gap-3 cursor-pointer transition-all" 
+                        @php
+                            $userPhoto = ($chat->user && $chat->user->profile_photo_url) ? $chat->user->profile_photo_url : null;
+                            $firstChar = strtoupper(substr($chat->user_name ?? ($chat->user->name ?? 'W'), 0, 1));
+                        @endphp
+                        <div class="admin-unit-chat-item-{{ $serviceType }} p-3 border-bottom d-flex align-items-center gap-3 cursor-pointer transition-all wa-chat-item" 
                              id="unitChatItem_{{ $serviceType }}_{{ $chat->id }}"
                              onclick="loadAdminUnitChat('{{ $serviceType }}', {{ $chat->id }})"
                              data-user-name="{{ strtolower($chat->user_name ?? ($chat->user->name ?? 'Warga')) }}"
-                             style="cursor: pointer; border-left: 4px solid transparent;">
-                            <div class="avatar avatar-md flex-shrink-0">
-                                <div class="avatar-initial rounded-circle bg-label-primary fw-bold">
-                                    {{ strtoupper(substr($chat->user_name ?? ($chat->user->name ?? 'W'), 0, 1)) }}
+                             style="cursor: pointer; border-left: 4px solid transparent; transition: background-color 0.15s ease;">
+                            
+                            <!-- Avatar Warga -->
+                            <div class="position-relative flex-shrink-0">
+                                <div class="avatar avatar-md">
+                                    @if($userPhoto)
+                                        <img src="{{ $userPhoto }}" alt="{{ $chat->user_name ?? 'Warga' }}" class="rounded-circle w-100 h-100 shadow-2xs" style="object-fit: cover;">
+                                    @else
+                                        <div class="avatar-initial rounded-circle fw-bold text-white shadow-2xs" style="background: linear-gradient(135deg, #696cff, #4338ca); font-size: 14px;">
+                                            {{ $firstChar }}
+                                        </div>
+                                    @endif
                                 </div>
+                                <span class="position-absolute bottom-0 end-0 bg-success border border-white rounded-circle" style="width: 10px; height: 10px;"></span>
                             </div>
+
                             <div class="flex-grow-1 min-w-0">
                                 <div class="d-flex justify-content-between align-items-center mb-1">
-                                    <h6 class="mb-0 text-truncate fw-semibold" style="font-size: 0.92rem;">
+                                    <h6 class="mb-0 text-truncate fw-bold text-dark" style="font-size: 0.92rem;">
                                         {{ $chat->user_name ?? ($chat->user->name ?? 'Warga') }}
                                     </h6>
                                     <span class="text-muted" style="font-size: 11px;">
                                         {{ $chat->last_message_at ? $chat->last_message_at->format('H:i') : '' }}
                                     </span>
                                 </div>
+                                
                                 @if($chat->item_reference)
-                                    <div class="badge bg-label-info py-0 px-2 mb-1 text-truncate" style="font-size: 10px; max-width: 170px;">
+                                    <div class="badge bg-label-info py-0 px-2 mb-1 text-truncate" style="font-size: 10px; max-width: 175px;">
                                         <i class="bx bx-bookmark me-1"></i>{{ $chat->item_reference }}
                                     </div>
                                 @endif
-                                <p class="mb-0 text-muted small text-truncate" style="max-width: 180px;" id="unitChatPreview_{{ $serviceType }}_{{ $chat->id }}">
+                                
+                                <p class="mb-0 text-muted small text-truncate" style="max-width: 180px; font-size: 0.8rem;" id="unitChatPreview_{{ $serviceType }}_{{ $chat->id }}">
                                     {{ $chat->last_message ?? 'Memulai percakapan...' }}
                                 </p>
-                                <div class="d-flex align-items-center gap-1 mt-1">
+                                
+                                <div class="d-flex align-items-center gap-1 mt-1.5">
                                     @if($chat->status === 'escalated')
-                                        <span class="badge bg-label-warning py-0 px-2" style="font-size: 10px;" id="unitChatBadge_{{ $serviceType }}_{{ $chat->id }}">Perlu Balasan</span>
+                                        <span class="badge bg-label-warning py-0 px-2" style="font-size: 9.5px;" id="unitChatBadge_{{ $serviceType }}_{{ $chat->id }}">Perlu Balasan</span>
                                     @elseif($chat->status === 'resolved')
-                                        <span class="badge bg-label-success py-0 px-2" style="font-size: 10px;" id="unitChatBadge_{{ $serviceType }}_{{ $chat->id }}">Selesai</span>
+                                        <span class="badge bg-label-success py-0 px-2" style="font-size: 9.5px;" id="unitChatBadge_{{ $serviceType }}_{{ $chat->id }}">Selesai</span>
                                     @else
-                                        <span class="badge bg-label-secondary py-0 px-2" style="font-size: 10px;" id="unitChatBadge_{{ $serviceType }}_{{ $chat->id }}">Bot</span>
+                                        <span class="badge bg-label-secondary py-0 px-2" style="font-size: 9.5px;" id="unitChatBadge_{{ $serviceType }}_{{ $chat->id }}">Bot</span>
                                     @endif
 
                                     @if($chat->unread_admin_count > 0)
-                                        <span class="badge bg-danger rounded-pill ms-auto py-0 px-2" style="font-size: 10px;" id="unitChatUnread_{{ $serviceType }}_{{ $chat->id }}">
-                                            {{ $chat->unread_admin_count }} baru
+                                        <span class="badge bg-success rounded-pill ms-auto py-0 px-2" style="font-size: 10px;" id="unitChatUnread_{{ $serviceType }}_{{ $chat->id }}">
+                                            {{ $chat->unread_admin_count }}
                                         </span>
                                     @else
-                                        <span class="badge bg-danger rounded-pill ms-auto py-0 px-2 d-none" style="font-size: 10px;" id="unitChatUnread_{{ $serviceType }}_{{ $chat->id }}"></span>
+                                        <span class="badge bg-success rounded-pill ms-auto py-0 px-2 d-none" style="font-size: 10px;" id="unitChatUnread_{{ $serviceType }}_{{ $chat->id }}"></span>
                                     @endif
                                 </div>
                             </div>
@@ -85,53 +107,115 @@
                 </div>
             </div>
 
-            <!-- Right Panel: Chat Stream & Reply Box -->
-            <div class="col-12 col-md-8 col-lg-8 d-flex flex-column" style="min-height: 520px;">
-                <!-- Chat Header -->
-                <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-white" id="adminUnitActiveChatHeader_{{ $serviceType }}" style="min-height: 65px;">
+            <!-- Right Panel: Active Chat Stream & WhatsApp UI -->
+            <div class="col-12 col-md-8 col-lg-8 d-flex flex-column bg-white position-relative" style="min-height: 540px;">
+                
+                <!-- Chat Header (WhatsApp Web style) -->
+                <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-white" id="adminUnitActiveChatHeader_{{ $serviceType }}" style="min-height: 70px;">
                     <div class="d-flex align-items-center gap-3">
-                        <div class="avatar avatar-sm">
-                            <div class="avatar-initial rounded-circle bg-label-primary fw-bold" id="unitActiveChatAvatar_{{ $serviceType }}">-</div>
+                        <div class="position-relative flex-shrink-0">
+                            <div class="avatar avatar-md" id="unitActiveChatAvatarWrap_{{ $serviceType }}">
+                                <div class="avatar-initial rounded-circle bg-label-primary fw-bold" id="unitActiveChatAvatar_{{ $serviceType }}">-</div>
+                            </div>
+                            <span class="position-absolute bottom-0 end-0 bg-success border border-white rounded-circle" id="unitActiveChatOnlineDot_{{ $serviceType }}" style="width: 11px; height: 11px; display: none;"></span>
                         </div>
                         <div>
-                            <h6 class="mb-0 fw-bold" id="unitActiveChatUserName_{{ $serviceType }}">Pilih salah satu percakapan di sebelah kiri</h6>
-                            <div class="d-flex align-items-center gap-2" id="unitActiveChatSubtitleWrap_{{ $serviceType }}" style="display: none !important;">
-                                <span class="badge bg-label-info py-0 px-2" style="font-size: 10px;" id="unitActiveChatItemRef_{{ $serviceType }}"></span>
-                                <span class="badge bg-label-secondary py-0 px-2" style="font-size: 10px;" id="unitActiveChatStatusBadge_{{ $serviceType }}"></span>
+                            <div class="d-flex align-items-center gap-2">
+                                <h6 class="mb-0 fw-bold text-dark" id="unitActiveChatUserName_{{ $serviceType }}" style="font-size: 0.98rem;">Pilih salah satu percakapan di sebelah kiri</h6>
+                                <span class="badge bg-label-secondary py-0 px-2 fw-semibold" style="font-size: 10px; display: none;" id="unitActiveChatStatusBadge_{{ $serviceType }}"></span>
+                            </div>
+                            <div class="d-flex align-items-center gap-2 mt-0.5" id="unitActiveChatSubtitleWrap_{{ $serviceType }}" style="display: none !important;">
+                                <span class="text-success small fw-medium" style="font-size: 11.5px;"><i class="bx bxs-circle me-1" style="font-size: 8px;"></i>Warga Terhubung</span>
+                                <span class="text-muted" style="font-size: 11px;">&bull;</span>
+                                <span class="badge bg-label-primary py-0 px-2" style="font-size: 10.5px;" id="unitActiveChatItemRef_{{ $serviceType }}"></span>
                             </div>
                         </div>
                     </div>
                     <div id="adminUnitChatActions_{{ $serviceType }}" style="display: none;">
-                        <button type="button" class="btn btn-sm btn-outline-success rounded-pill px-3" onclick="resolveAdminUnitActiveChat('{{ $serviceType }}')">
+                        <button type="button" class="btn btn-sm btn-outline-success rounded-pill px-3 shadow-2xs" onclick="resolveAdminUnitActiveChat('{{ $serviceType }}')">
                             <i class="bx bx-check-double me-1"></i> Tandai Selesai
                         </button>
                     </div>
                 </div>
 
-                <!-- Chat Stream Messages -->
-                <div class="flex-grow-1 p-4 overflow-auto d-flex flex-column gap-3" id="adminUnitChatMessagesStream_{{ $serviceType }}" style="max-height: 420px; min-height: 380px; background: #f8fafc;">
+                <!-- Floating Product Banner (WhatsApp Business / Marketplace Quoted Product Bar) -->
+                <div id="unitActiveProductBanner_{{ $serviceType }}" class="p-2.5 px-3 bg-white border-bottom d-flex align-items-center justify-content-between gap-3 shadow-2xs" style="display: none; background: #ffffff;">
+                    <div class="d-flex align-items-center gap-3 overflow-hidden">
+                        <div class="position-relative flex-shrink-0" style="width: 52px; height: 52px; border-radius: 8px; overflow: hidden; background: #f8fafc; border: 1px solid rgba(0,0,0,0.08);">
+                            <img id="unitActiveProductImage_{{ $serviceType }}" src="" alt="Produk" class="w-100 h-100" style="object-fit: cover;">
+                        </div>
+                        <div class="overflow-hidden">
+                            <div class="d-flex align-items-center gap-1.5 mb-0.5">
+                                <span class="badge bg-label-primary px-1.5 py-0 fw-bold" style="font-size: 9.5px;">PRODUK DITANYAKAN</span>
+                                <span id="unitActiveProductCategory_{{ $serviceType }}" class="text-muted small fw-medium" style="font-size: 11px;"></span>
+                            </div>
+                            <h6 id="unitActiveProductTitle_{{ $serviceType }}" class="mb-0 text-truncate fw-bold text-dark" style="font-size: 0.92rem;"></h6>
+                            <div class="d-flex align-items-center gap-2 mt-0.5">
+                                <span id="unitActiveProductPrice_{{ $serviceType }}" class="text-success fw-bold" style="font-size: 0.84rem;"></span>
+                                <span id="unitActiveProductStatusBadge_{{ $serviceType }}" class="badge bg-label-success py-0 px-1.5" style="font-size: 9.5px;">Tersedia</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <a id="unitActiveProductLink_{{ $serviceType }}" href="#" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1" style="font-size: 11.5px;">
+                            <i class="bx bx-show me-1"></i> Detail Unit
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Chat Stream Messages (WhatsApp / Telegram Wallpaper Background) -->
+                <div class="flex-grow-1 p-3 p-sm-4 overflow-auto d-flex flex-column gap-2" id="adminUnitChatMessagesStream_{{ $serviceType }}" 
+                     style="max-height: 440px; min-height: 380px; background-color: #efeae2; background-image: radial-gradient(rgba(17, 27, 33, 0.05) 1px, transparent 0); background-size: 16px 16px;">
+                    
                     <div class="d-flex flex-column align-items-center justify-content-center h-100 text-muted py-5 my-auto" id="adminUnitEmptyChatPlaceholder_{{ $serviceType }}">
                         <div class="bg-white p-3 rounded-circle shadow-sm mb-3">
                             <i class="bx bx-conversation fs-1 text-primary opacity-75"></i>
                         </div>
-                        <h6 class="fw-bold mb-1">Ruang Obrolan Warga</h6>
+                        <h6 class="fw-bold mb-1 text-dark">Ruang Obrolan Warga</h6>
                         <p class="small text-muted mb-0">Klik nama warga di daftar sebelah kiri untuk membaca dan membalas pesan.</p>
                     </div>
                 </div>
 
-                <!-- Chat Input Area -->
-                <div class="p-3 border-top bg-white" id="adminUnitChatInputContainer_{{ $serviceType }}" style="display: none;">
-                    <div class="input-group">
-                        <input type="text" id="adminUnitReplyInput_{{ $serviceType }}" class="form-control" placeholder="Ketik balasan admin untuk warga..." onkeypress="if(event.key === 'Enter') sendAdminUnitReply('{{ $serviceType }}')">
-                        <button class="btn btn-primary px-4" type="button" onclick="sendAdminUnitReply('{{ $serviceType }}')">
-                            <i class="bx bx-send me-1"></i> Kirim
+                <!-- Chat Input Area (WhatsApp Web Style) -->
+                <div class="p-2.5 p-sm-3 border-top" id="adminUnitChatInputContainer_{{ $serviceType }}" style="display: none; background: #f0f2f5;">
+                    <!-- Quick reply template chips -->
+                    <div class="d-flex align-items-center gap-1.5 mb-2 overflow-auto pb-1" style="white-space: nowrap;">
+                        <span class="text-muted small me-1 flex-shrink-0" style="font-size: 11px;"><i class="bx bx-zap text-warning me-1"></i>Balasan Cepat:</span>
+                        <button type="button" class="btn btn-xs btn-white bg-white border rounded-pill shadow-2xs text-secondary px-2.5 py-1" onclick="insertAdminQuickReply('{{ $serviceType }}', 'Siap, unit ini tersedia dan siap digunakan.')" style="font-size: 11px;">Siap, unit tersedia</button>
+                        <button type="button" class="btn btn-xs btn-white bg-white border rounded-pill shadow-2xs text-secondary px-2.5 py-1" onclick="insertAdminQuickReply('{{ $serviceType }}', 'Bisa langsung melakukan permohonan sewa melalui sistem.')" style="font-size: 11px;">Bisa langsung diajukan</button>
+                        <button type="button" class="btn btn-xs btn-white bg-white border rounded-pill shadow-2xs text-secondary px-2.5 py-1" onclick="insertAdminQuickReply('{{ $serviceType }}', 'Mohon konfirmasi tanggal dan jadwal penggunaan unit.')" style="font-size: 11px;">Konfirmasi jadwal</button>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="flex-grow-1 position-relative">
+                            <input type="text" id="adminUnitReplyInput_{{ $serviceType }}" class="form-control rounded-pill px-3 py-2 bg-white border shadow-2xs" placeholder="Ketik balasan untuk warga (tekan Enter untuk kirim)..." onkeypress="if(event.key === 'Enter') sendAdminUnitReply('{{ $serviceType }}')" style="font-size: 0.92rem; border-color: #d1d7db;">
+                        </div>
+                        <button class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 shadow-sm" type="button" onclick="sendAdminUnitReply('{{ $serviceType }}')" style="width: 42px; height: 42px;" title="Kirim Pesan">
+                            <i class="bx bx-send fs-5"></i>
                         </button>
                     </div>
                 </div>
+
             </div>
         </div>
     </div>
 </div>
+
+<style>
+.wa-chat-container {
+    border: 1px solid rgba(67, 89, 113, 0.12);
+}
+.wa-chat-item:hover {
+    background-color: #f8fafc !important;
+}
+.animate-fade-in {
+    animation: fadeInBubble 0.2s ease-in-out;
+}
+@keyframes fadeInBubble {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+</style>
 
 <script>
     if (typeof window.unitChatStates === 'undefined') {
@@ -139,7 +223,9 @@
     }
     window.unitChatStates['{{ $serviceType }}'] = {
         activeSessionId: null,
-        pollInterval: null
+        pollInterval: null,
+        productInfo: null,
+        userPhoto: null
     };
 
     function filterAdminUnitChats(service) {
@@ -153,6 +239,14 @@
                 item.style.display = 'none';
             }
         });
+    }
+
+    function insertAdminQuickReply(service, text) {
+        const input = document.getElementById(`adminUnitReplyInput_${service}`);
+        if (input) {
+            input.value = text;
+            input.focus();
+        }
     }
 
     function loadAdminUnitChat(service, sessionId, isSilent = false) {
@@ -204,14 +298,30 @@
             if (res.status === 'success') {
                 const session = res.data.session;
                 const messages = res.data.messages;
+                const userPhoto = res.data.user_photo;
+                const productInfo = res.data.product_info;
+
+                state.productInfo = productInfo;
+                state.userPhoto = userPhoto;
 
                 // Update Header
                 const userName = session.user_name || (session.user ? session.user.name : 'Warga');
                 document.getElementById(`unitActiveChatUserName_${service}`).innerText = userName;
-                document.getElementById(`unitActiveChatAvatar_${service}`).innerText = userName.charAt(0).toUpperCase();
+
+                const avatarWrap = document.getElementById(`unitActiveChatAvatarWrap_${service}`);
+                if (avatarWrap) {
+                    if (userPhoto) {
+                        avatarWrap.innerHTML = `<img src="${userPhoto}" alt="${escapeHtml(userName)}" class="rounded-circle w-100 h-100 shadow-2xs" style="object-fit: cover;">`;
+                    } else {
+                        avatarWrap.innerHTML = `<div class="avatar-initial rounded-circle fw-bold text-white shadow-2xs" style="background: linear-gradient(135deg, #696cff, #4338ca);">${userName.charAt(0).toUpperCase()}</div>`;
+                    }
+                }
+
+                const onlineDot = document.getElementById(`unitActiveChatOnlineDot_${service}`);
+                if (onlineDot) onlineDot.style.display = 'block';
 
                 const subtitleWrap = document.getElementById(`unitActiveChatSubtitleWrap_${service}`);
-                subtitleWrap.style.setProperty('display', 'flex', 'important');
+                if (subtitleWrap) subtitleWrap.style.setProperty('display', 'flex', 'important');
 
                 const itemRefEl = document.getElementById(`unitActiveChatItemRef_${service}`);
                 if (session.item_reference) {
@@ -222,15 +332,43 @@
                 }
 
                 const statusBadge = document.getElementById(`unitActiveChatStatusBadge_${service}`);
-                if (session.status === 'escalated') {
-                    statusBadge.className = 'badge bg-label-warning py-0 px-2';
-                    statusBadge.innerText = 'Perlu Balasan';
-                } else if (session.status === 'resolved') {
-                    statusBadge.className = 'badge bg-label-success py-0 px-2';
-                    statusBadge.innerText = 'Selesai';
-                } else {
-                    statusBadge.className = 'badge bg-label-secondary py-0 px-2';
-                    statusBadge.innerText = 'Bot';
+                if (statusBadge) {
+                    statusBadge.style.display = 'inline-block';
+                    if (session.status === 'escalated') {
+                        statusBadge.className = 'badge bg-label-warning py-0 px-2 fw-semibold';
+                        statusBadge.innerText = 'Perlu Balasan';
+                    } else if (session.status === 'resolved') {
+                        statusBadge.className = 'badge bg-label-success py-0 px-2 fw-semibold';
+                        statusBadge.innerText = 'Selesai';
+                    } else {
+                        statusBadge.className = 'badge bg-label-secondary py-0 px-2 fw-semibold';
+                        statusBadge.innerText = 'Bot';
+                    }
+                }
+
+                // Update Floating Product Banner
+                const productBanner = document.getElementById(`unitActiveProductBanner_${service}`);
+                if (productBanner) {
+                    if (productInfo && productInfo.title) {
+                        productBanner.style.setProperty('display', 'flex', 'important');
+                        document.getElementById(`unitActiveProductTitle_${service}`).innerText = productInfo.title;
+                        document.getElementById(`unitActiveProductCategory_${service}`).innerText = productInfo.category || '';
+                        document.getElementById(`unitActiveProductPrice_${service}`).innerText = productInfo.price || '';
+                        
+                        const prodImg = document.getElementById(`unitActiveProductImage_${service}`);
+                        if (prodImg && productInfo.image) {
+                            prodImg.src = productInfo.image;
+                        }
+
+                        const prodLink = document.getElementById(`unitActiveProductLink_${service}`);
+                        if (prodLink) {
+                            prodLink.href = productInfo.url || '#';
+                            if (productInfo.url === '#') prodLink.style.display = 'none';
+                            else prodLink.style.display = 'inline-block';
+                        }
+                    } else {
+                        productBanner.style.display = 'none';
+                    }
                 }
 
                 // Show Actions & Input
@@ -244,8 +382,11 @@
                 if (messages.length === 0) {
                     stream.innerHTML = '<div class="text-center text-muted my-auto py-5"><i class="bx bx-chat fs-1 opacity-50 mb-2"></i><p class="small">Belum ada pesan dalam sesi ini.</p></div>';
                 } else {
+                    let firstUserMsgRendered = false;
                     messages.forEach(msg => {
-                        renderAdminUnitMessageBubble(service, msg);
+                        const isFirstUser = !firstUserMsgRendered && msg.sender_type === 'user';
+                        if (isFirstUser) firstUserMsgRendered = true;
+                        renderAdminUnitMessageBubble(service, msg, productInfo, userPhoto, isFirstUser);
                     });
                 }
 
@@ -273,41 +414,71 @@
         });
     }
 
-    function renderAdminUnitMessageBubble(service, msg) {
+    function renderAdminUnitMessageBubble(service, msg, productInfo, userPhoto, isFirstUserMsg = false) {
         const stream = document.getElementById(`adminUnitChatMessagesStream_${service}`);
         const bubble = document.createElement('div');
         const time = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
         if (msg.sender_type === 'admin') {
-            bubble.className = 'd-flex justify-content-end mb-2';
+            bubble.className = 'd-flex justify-content-end align-items-end gap-2 mb-2 animate-fade-in';
             bubble.innerHTML = `
-                <div style="max-width: 75%;">
-                    <div class="bg-primary text-white p-3 rounded-4 shadow-sm" style="border-bottom-right-radius: 4px !important;">
-                        <p class="mb-0" style="font-size: 0.92rem; white-space: pre-wrap;">${escapeHtml(msg.message)}</p>
+                <div style="max-width: 78%;">
+                    <div class="p-2.5 px-3 rounded-3 shadow-xs text-dark" style="background: #d9fdd3; border-bottom-right-radius: 2px !important; border: 1px solid rgba(0,0,0,0.04);">
+                        <p class="mb-0" style="font-size: 0.93rem; color: #111b21; white-space: pre-wrap; line-height: 1.45;">${escapeHtml(msg.message)}</p>
+                        <div class="d-flex align-items-center justify-content-end gap-1 mt-1" style="font-size: 10px; color: #667781;">
+                            <span>${time}</span>
+                            <i class="bx bx-check-double text-primary" style="font-size: 15px;"></i>
+                        </div>
                     </div>
-                    <div class="text-end text-muted mt-1" style="font-size: 10px;">
-                        <span>${time}</span> &bull; <span class="fw-semibold text-primary">Admin</span>
-                    </div>
+                </div>
+                <div class="avatar avatar-xs flex-shrink-0 mb-1">
+                    <div class="avatar-initial rounded-circle bg-primary text-white fw-bold shadow-2xs" style="font-size: 10px;">AD</div>
                 </div>
             `;
         } else if (msg.sender_type === 'user') {
-            bubble.className = 'd-flex justify-content-start mb-2';
-            bubble.innerHTML = `
-                <div style="max-width: 75%;">
-                    <div class="bg-white text-dark p-3 rounded-4 shadow-sm border" style="border-bottom-left-radius: 4px !important;">
-                        <p class="mb-0" style="font-size: 0.92rem; white-space: pre-wrap;">${escapeHtml(msg.message)}</p>
+            bubble.className = 'd-flex justify-content-start align-items-end gap-2 mb-2 animate-fade-in';
+            
+            let userAvatarHtml = '';
+            if (userPhoto) {
+                userAvatarHtml = `<img src="${userPhoto}" class="rounded-circle w-100 h-100 shadow-2xs" style="object-fit: cover;">`;
+            } else {
+                userAvatarHtml = `<div class="avatar-initial rounded-circle fw-bold text-white shadow-2xs" style="background: linear-gradient(135deg, #696cff, #4338ca); font-size: 10px;">W</div>`;
+            }
+
+            let quotedHtml = '';
+            if (isFirstUserMsg && productInfo && productInfo.title) {
+                quotedHtml = `
+                    <div class="p-2 mb-2 rounded-2 border-start border-3 border-primary d-flex align-items-center gap-2" style="background: rgba(105, 108, 255, 0.08);">
+                        <img src="${productInfo.image}" class="rounded flex-shrink-0" style="width: 38px; height: 38px; object-fit: cover;">
+                        <div class="overflow-hidden min-w-0">
+                            <div class="fw-bold text-dark text-truncate" style="font-size: 0.82rem;">${escapeHtml(productInfo.title)}</div>
+                            <div class="text-success fw-bold small" style="font-size: 0.75rem;">${escapeHtml(productInfo.price)}</div>
+                        </div>
                     </div>
-                    <div class="text-start text-muted mt-1" style="font-size: 10px;">
-                        <span>${time}</span> &bull; <span>Warga</span>
+                `;
+            }
+
+            bubble.innerHTML = `
+                <div class="avatar avatar-xs flex-shrink-0 mb-1">
+                    ${userAvatarHtml}
+                </div>
+                <div style="max-width: 78%;">
+                    <div class="bg-white text-dark p-2.5 px-3 rounded-3 shadow-xs border" style="border-bottom-left-radius: 2px !important; border-color: rgba(0,0,0,0.06) !important;">
+                        ${quotedHtml}
+                        <p class="mb-0" style="font-size: 0.93rem; color: #111b21; white-space: pre-wrap; line-height: 1.45;">${escapeHtml(msg.message)}</p>
+                        <div class="text-end mt-1" style="font-size: 10px; color: #667781;">
+                            <span>${time}</span>
+                        </div>
                     </div>
                 </div>
             `;
         } else {
             // bot / system
-            bubble.className = 'd-flex justify-content-center my-2';
+            bubble.className = 'd-flex justify-content-center my-2 animate-fade-in';
             bubble.innerHTML = `
-                <div class="badge bg-label-secondary px-3 py-2 rounded-pill text-wrap" style="max-width: 85%; font-size: 11px; font-weight: normal; line-height: 1.4;">
-                    <i class="bx bx-bot me-1"></i> ${escapeHtml(msg.message)}
+                <div class="bg-white border rounded-pill px-3 py-1.5 shadow-2xs d-flex align-items-center gap-1.5 text-center text-wrap" style="max-width: 85%; font-size: 11.5px; color: #54656f; line-height: 1.4; background: rgba(255,255,255,0.92) !important;">
+                    <i class="bx bx-bot text-primary flex-shrink-0" style="font-size: 15px;"></i>
+                    <span>${escapeHtml(msg.message)}</span>
                 </div>
             `;
         }
@@ -330,7 +501,7 @@
             sender_type: 'admin',
             message: text,
             created_at: new Date().toISOString()
-        });
+        }, state.productInfo, state.userPhoto, false);
 
         const stream = document.getElementById(`adminUnitChatMessagesStream_${service}`);
         stream.scrollTop = stream.scrollHeight;
