@@ -120,8 +120,8 @@ class UnitChatController extends Controller
                     $info['price'] = 'Rp ' . number_format($item->harga_sewa ?? $item->harga_dalam_desa ?? 0, 0, ',', '.') . ' / hari';
                     $info['category'] = ucfirst($item->kategori ?? 'Transportasi');
                     $info['status'] = $item->status ?? 'Tersedia';
-                    if (\Route::has('admin.unit.mobil.edit')) {
-                        $info['url'] = route('admin.unit.mobil.edit', $item->id);
+                    if (\Route::has('admin.unit.mobil.show')) {
+                        $info['url'] = route('admin.unit.mobil.show', $item->id);
                     }
                 } else {
                     $info['image'] = asset('User/img/elemen/mobil.png');
