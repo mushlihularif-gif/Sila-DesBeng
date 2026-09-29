@@ -307,10 +307,11 @@
 
                     <!-- Judul kategori utama -->
                     <div class="text-center mt-10 sm:mt-16 mb-8 sm:mb-12 relative">
-                        <h3 class="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight">
-                            <span class="bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">Jelajahi</span>
-                            <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Daerah</span>
-                        </h3>
+                        <a href="{{ route('pelayanan') }}" aria-label="Buka halaman Tentang Layanan" class="inline-flex items-center gap-2 text-xl font-extrabold tracking-tight no-underline transition hover:opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#60a5fa] focus-visible:ring-offset-4 sm:text-2xl md:text-3xl">
+                            <span class="bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">Unit</span>
+                            <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Layanan</span>
+                            <i class="bx bx-right-arrow-alt text-[#115789]" aria-hidden="true"></i>
+                        </a>
                     </div>
 
                         @php
