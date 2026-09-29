@@ -287,19 +287,28 @@
                         </div>
                     </div>
 
-                        <!-- Kotak Narasi Dinamis (Sinkron dengan Carousel 3D) -->
-                        <div class="mt-6 sm:mt-8 max-w-2xl mx-auto px-2">
-                            <div id="unit-speech-box" class="unit-speech-box bg-amber-50/90 border border-amber-200 rounded-2xl sm:rounded-3xl p-5 sm:p-7 shadow-sm transition-all duration-300">
+                        <!-- Panel pilihan layanan mengikuti menu 3D yang sedang aktif -->
+                        <div class="mt-6 sm:mt-8 max-w-3xl mx-auto px-2">
+                            <div id="unit-speech-box" class="unit-speech-box bg-amber-50/85 border border-amber-200/80 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-lg shadow-slate-900/5 backdrop-blur-xl transition-all duration-300">
                                 <div id="speech-text-wrapper" class="speech-text-wrapper">
-                                    <p id="speech-heading" class="text-xs sm:text-sm md:text-[15px] font-extrabold text-amber-950 leading-relaxed">Cari kebutuhan rumah atau produk lokal?</p>
-                                    <p id="speech-body" class="text-xs sm:text-[13px] text-gray-700 mt-2.5 sm:mt-3 font-medium leading-relaxed">Pesan gas atau jelajahi produk usaha daerah melalui Pasar Daerah.</p>
-                                    <div id="speech-actions" class="mt-4 flex flex-wrap justify-center gap-2" aria-live="polite"></div>
-                                    <div class="mt-3.5 sm:mt-4 flex items-center justify-center gap-2 flex-wrap">
-                                        <span id="speech-badge" class="px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full bg-amber-100 text-amber-800 border border-amber-300">
-                                            Belanja &amp; Kebutuhan
+                                    <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                                        <div class="min-w-0">
+                                            <span id="speech-badge" class="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-100 px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.12em] text-amber-800">
+                                                <i class="bx bx-grid-alt text-sm" aria-hidden="true"></i>
+                                                <span id="speech-badge-label">Belanja &amp; Kebutuhan</span>
+                                            </span>
+                                            <p id="speech-heading" class="mt-2.5 text-base sm:text-lg font-extrabold text-amber-950 leading-snug">Cari kebutuhan rumah atau produk lokal?</p>
+                                            <p id="speech-body" class="mt-1.5 text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">Pesan gas atau jelajahi produk usaha daerah melalui Pasar Daerah.</p>
+                                        </div>
+                                        <span class="hidden sm:inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/80 bg-white/70 text-[#115789] shadow-sm">
+                                            <i class="bx bx-right-arrow-alt text-2xl" aria-hidden="true"></i>
                                         </span>
-                                        <span class="text-[11px] text-gray-400 font-normal">&bull; Klik ikon untuk melihat pilihan lengkap</span>
                                     </div>
+                                    <div id="speech-actions" class="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2" aria-live="polite"></div>
+                                    <p class="mt-3 flex items-center justify-center gap-1.5 text-[10px] sm:text-[11px] font-medium text-slate-400">
+                                        <i class="bx bx-mouse-alt text-sm" aria-hidden="true"></i>
+                                        Pilih pintasan di atas atau klik ikon menu untuk membuka kategori.
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -1324,6 +1333,7 @@
                 const speechHeading = document.getElementById('speech-heading');
                 const speechBody = document.getElementById('speech-body');
                 const speechBadge = document.getElementById('speech-badge');
+                const speechBadgeLabel = document.getElementById('speech-badge-label');
                 const speechActions = document.getElementById('speech-actions');
 
                 const n = cards.length;
@@ -1379,16 +1389,42 @@
                                 setTimeout(() => {
                                     if (speechHeading) speechHeading.textContent = card.getAttribute('data-heading') || '';
                                     if (speechBody) speechBody.textContent = card.getAttribute('data-body') || '';
-                                    if (speechBadge) speechBadge.textContent = card.getAttribute('data-badge') || '';
+                                    if (speechBadgeLabel) speechBadgeLabel.textContent = card.getAttribute('data-badge') || '';
                                     if (speechActions) {
                                         speechActions.replaceChildren();
                                         let actions = [];
                                         try { actions = JSON.parse(card.getAttribute('data-actions') || '[]'); } catch (error) {}
+                                        const actionIcons = {
+                                            'Belanja Gas': 'bx-gas-pump',
+                                            'Pasar Daerah': 'bx-store-alt',
+                                            'Sewa Alat': 'bx-wrench',
+                                            'Sewa Transportasi': 'bx-car',
+                                            'Fasilitas Umum': 'bx-buildings',
+                                            'Pelaporan Warga': 'bx-message-rounded-error',
+                                            'Buka Kabar Daerah': 'bx-news',
+                                        };
                                         actions.forEach((action) => {
                                             const link = document.createElement('a');
                                             link.href = action.url;
-                                            link.textContent = action.label;
-                                            link.className = 'inline-flex items-center justify-center rounded-xl bg-[#115789] px-4 py-2 text-xs sm:text-sm font-bold text-white shadow-sm transition hover:bg-[#0d4267] focus:outline-none focus:ring-2 focus:ring-[#60a5fa] focus:ring-offset-2';
+                                            link.setAttribute('aria-label', action.label);
+                                            link.className = 'group inline-flex min-h-12 items-center gap-3 rounded-xl border border-slate-200/90 bg-white/85 px-3 py-2.5 text-left text-xs sm:text-sm font-bold text-slate-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-[#115789]/40 hover:bg-white hover:text-[#115789] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#60a5fa] focus:ring-offset-2';
+
+                                            const iconWrap = document.createElement('span');
+                                            iconWrap.className = 'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-lg text-[#115789] transition group-hover:bg-[#115789] group-hover:text-white';
+                                            const icon = document.createElement('i');
+                                            icon.className = `bx ${actionIcons[action.label] || 'bx-right-arrow-alt'}`;
+                                            icon.setAttribute('aria-hidden', 'true');
+                                            iconWrap.appendChild(icon);
+
+                                            const label = document.createElement('span');
+                                            label.className = 'min-w-0 flex-1 leading-snug';
+                                            label.textContent = action.label;
+
+                                            const arrow = document.createElement('i');
+                                            arrow.className = 'bx bx-chevron-right shrink-0 text-lg text-slate-400 transition group-hover:translate-x-0.5 group-hover:text-[#115789]';
+                                            arrow.setAttribute('aria-hidden', 'true');
+
+                                            link.append(iconWrap, label, arrow);
                                             speechActions.appendChild(link);
                                         });
                                     }
@@ -1398,9 +1434,9 @@
                                     const badgeBg = card.getAttribute('data-badge-bg') || 'bg-amber-100 text-amber-800 border-amber-300';
                                     const textColor = card.getAttribute('data-text-color') || 'text-amber-950';
 
-                                    speechBox.className = `unit-speech-box rounded-2xl sm:rounded-3xl p-4 sm:p-6 border shadow-sm transition-all duration-300 ${boxBg} ${boxBorder}`;
-                                    if (speechBadge) speechBadge.className = `px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full border ${badgeBg}`;
-                                    if (speechHeading) speechHeading.className = `text-xs sm:text-sm md:text-[15px] font-extrabold leading-snug ${textColor}`;
+                                    speechBox.className = `unit-speech-box rounded-2xl sm:rounded-3xl p-4 sm:p-6 border shadow-lg shadow-slate-900/5 backdrop-blur-xl transition-all duration-300 ${boxBg} ${boxBorder}`;
+                                    if (speechBadge) speechBadge.className = `inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.12em] ${badgeBg}`;
+                                    if (speechHeading) speechHeading.className = `mt-2.5 text-base sm:text-lg font-extrabold leading-snug ${textColor}`;
 
                                     speechWrapper.classList.remove('fade-out');
                                     speechWrapper.classList.add('fade-in');
