@@ -287,28 +287,21 @@
                         </div>
                     </div>
 
-                        <!-- Panel pilihan layanan mengikuti menu 3D yang sedang aktif -->
-                        <div class="mt-6 sm:mt-8 max-w-3xl mx-auto px-2">
-                            <div id="unit-speech-box" class="unit-speech-box bg-amber-50/85 border border-amber-200/80 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-lg shadow-slate-900/5 backdrop-blur-xl transition-all duration-300">
-                                <div id="speech-text-wrapper" class="speech-text-wrapper">
-                                    <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                                        <div class="min-w-0">
-                                            <span id="speech-badge" class="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-100 px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.12em] text-amber-800">
-                                                <i class="bx bx-grid-alt text-sm" aria-hidden="true"></i>
-                                                <span id="speech-badge-label">Belanja &amp; Kebutuhan</span>
-                                            </span>
-                                            <p id="speech-heading" class="mt-2.5 text-base sm:text-lg font-extrabold text-amber-950 leading-snug">Cari kebutuhan rumah atau produk lokal?</p>
-                                            <p id="speech-body" class="mt-1.5 text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">Pesan gas atau jelajahi produk usaha daerah melalui Pasar Daerah.</p>
-                                        </div>
-                                        <span class="hidden sm:inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/80 bg-white/70 text-[#115789] shadow-sm">
-                                            <i class="bx bx-right-arrow-alt text-2xl" aria-hidden="true"></i>
+                        <!-- Sapaan informasi singkat untuk menu 3D -->
+                        <div class="mt-5 sm:mt-7 max-w-3xl mx-auto px-2">
+                            <div id="unit-speech-box" class="unit-speech-box relative overflow-hidden rounded-2xl border border-white/80 bg-white/75 px-4 py-4 shadow-md shadow-slate-900/5 backdrop-blur-xl transition-all duration-300 sm:rounded-3xl sm:px-6 sm:py-5">
+                                <span class="pointer-events-none absolute inset-y-4 left-0 w-1 rounded-r-full bg-gradient-to-b from-[#115789] via-[#3b82f6] to-[#fbbf24]"></span>
+                                <div id="speech-text-wrapper" class="speech-text-wrapper pl-2 sm:pl-3">
+                                    <div class="flex flex-col gap-2.5 sm:flex-row sm:items-start sm:gap-4">
+                                        <span id="speech-badge" class="inline-flex shrink-0 self-start items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.1em] text-amber-800">
+                                            <i id="speech-badge-icon" class="bx bx-shopping-bag text-sm" aria-hidden="true"></i>
+                                            <span id="speech-badge-label">Belanja &amp; Kebutuhan</span>
                                         </span>
+                                        <div class="min-w-0 sm:pt-0.5">
+                                            <p id="speech-heading" class="text-sm font-extrabold leading-snug text-slate-900 sm:text-base">Cari kebutuhan rumah atau produk lokal?</p>
+                                            <p id="speech-body" class="mt-1 text-xs font-medium leading-relaxed text-slate-600 sm:text-sm">Pesan gas atau jelajahi produk usaha daerah melalui Pasar Daerah.</p>
+                                        </div>
                                     </div>
-                                    <div id="speech-actions" class="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2" aria-live="polite"></div>
-                                    <p class="mt-3 flex items-center justify-center gap-1.5 text-[10px] sm:text-[11px] font-medium text-slate-400">
-                                        <i class="bx bx-mouse-alt text-sm" aria-hidden="true"></i>
-                                        Pilih pintasan di atas atau klik ikon menu untuk membuka kategori.
-                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -353,37 +346,10 @@
                                 ->contains(fn ($unit) => $isServiceActive($unit));
                             $hasKabar = $isServiceActive('Kabar dan Informasi Daerah');
                             $activeCount = (int) $hasBelanja + (int) $hasLayanan + (int) $hasKabar;
-                            $categoryUrl = function ($routeName) use ($isLoggedInWithRegion, $userRegionId) {
-                                $url = route($routeName);
-                                if ($isLoggedInWithRegion) return $url . '?region_id=' . $userRegionId;
-                                if (!auth()->check() && !in_array($routeName, ['pasar.index', 'announcements.index'])) {
-                                    return route('bumdes.profil') . '?redirect=' . $routeName;
-                                }
-                                if (auth()->check() && !auth()->user()->region_id && !in_array($routeName, ['pasar.index', 'announcements.index'])) {
-                                    return route('bumdes.profil') . '?redirect=' . $routeName;
-                                }
-                                return $url;
-                            };
                             $categoryPageUrl = function ($slug) use ($isLoggedInWithRegion, $userRegionId) {
                                 $url = route('service-category.show', ['category' => $slug]);
                                 return $isLoggedInWithRegion ? $url . '?region_id=' . $userRegionId : $url;
                             };
-                            $belanjaActions = [];
-                            if ($isServiceActive('Unit Penjualan Gas')) {
-                                $belanjaActions[] = ['label' => 'Belanja Gas', 'url' => $categoryUrl('gas.sales')];
-                            }
-                            $belanjaActions[] = ['label' => 'Pasar Daerah', 'url' => $categoryUrl('pasar.index')];
-                            $layananActions = [];
-                            foreach ([
-                                ['Unit Penyewaan Alat', 'Sewa Alat', 'rental.equipment'],
-                                ['Unit Penyewaan Transportasi', 'Sewa Transportasi', 'mobil.rental.equipment'],
-                                ['Unit Peminjaman Fasilitas Umum', 'Fasilitas Umum', 'user.fasilitas-umum.equipment'],
-                                ['Pelaporan Warga', 'Pelaporan Warga', 'pelaporan.landing'],
-                            ] as [$serviceName, $label, $routeName]) {
-                                if ($isServiceActive($serviceName)) {
-                                    $layananActions[] = ['label' => $label, 'url' => $categoryUrl($routeName)];
-                                }
-                            }
                         @endphp
 
                         @if($activeCount > 0)
@@ -396,7 +362,7 @@
                                      data-heading="&quot;Cari kebutuhan rumah atau produk lokal?&quot;"
                                      data-body="Pesan gas atau jelajahi produk usaha daerah melalui Pasar Daerah."
                                      data-badge="Belanja &amp; Kebutuhan"
-                                     data-actions='@json($belanjaActions)'
+                                     data-icon="bx-shopping-bag"
                                      data-box-bg="bg-amber-50/90"
                                      data-box-border="border-amber-200"
                                      data-badge-bg="bg-amber-100 text-amber-800 border-amber-300"
@@ -412,7 +378,7 @@
                                      data-heading="&quot;Butuh bantuan layanan dari daerah?&quot;"
                                      data-body="Sewa perlengkapan atau transportasi, gunakan fasilitas umum, dan sampaikan laporan warga dari satu tempat."
                                      data-badge="Layanan Daerah"
-                                     data-actions='@json($layananActions)'
+                                     data-icon="bx-grid-alt"
                                      data-box-bg="bg-blue-50/90"
                                      data-box-border="border-blue-200"
                                      data-badge-bg="bg-blue-100 text-blue-800 border-blue-300"
@@ -428,7 +394,7 @@
                                      data-heading="&quot;Ingin tahu kabar terbaru di daerah?&quot;"
                                      data-body="Baca berita, pengumuman, dan informasi resmi untuk warga."
                                      data-badge="Kabar &amp; Informasi"
-                                     data-actions='@json([['label' => 'Buka Kabar Daerah', 'url' => $categoryUrl('announcements.index')]])'
+                                     data-icon="bx-news"
                                      data-box-bg="bg-sky-50/90"
                                      data-box-border="border-sky-200"
                                      data-badge-bg="bg-sky-100 text-sky-800 border-sky-300"
@@ -1334,7 +1300,7 @@
                 const speechBody = document.getElementById('speech-body');
                 const speechBadge = document.getElementById('speech-badge');
                 const speechBadgeLabel = document.getElementById('speech-badge-label');
-                const speechActions = document.getElementById('speech-actions');
+                const speechBadgeIcon = document.getElementById('speech-badge-icon');
 
                 const n = cards.length;
                 let currentIndex = 0;
@@ -1390,53 +1356,16 @@
                                     if (speechHeading) speechHeading.textContent = card.getAttribute('data-heading') || '';
                                     if (speechBody) speechBody.textContent = card.getAttribute('data-body') || '';
                                     if (speechBadgeLabel) speechBadgeLabel.textContent = card.getAttribute('data-badge') || '';
-                                    if (speechActions) {
-                                        speechActions.replaceChildren();
-                                        let actions = [];
-                                        try { actions = JSON.parse(card.getAttribute('data-actions') || '[]'); } catch (error) {}
-                                        const actionIcons = {
-                                            'Belanja Gas': 'bx-gas-pump',
-                                            'Pasar Daerah': 'bx-store-alt',
-                                            'Sewa Alat': 'bx-wrench',
-                                            'Sewa Transportasi': 'bx-car',
-                                            'Fasilitas Umum': 'bx-buildings',
-                                            'Pelaporan Warga': 'bx-message-rounded-error',
-                                            'Buka Kabar Daerah': 'bx-news',
-                                        };
-                                        actions.forEach((action) => {
-                                            const link = document.createElement('a');
-                                            link.href = action.url;
-                                            link.setAttribute('aria-label', action.label);
-                                            link.className = 'group inline-flex min-h-12 items-center gap-3 rounded-xl border border-slate-200/90 bg-white/85 px-3 py-2.5 text-left text-xs sm:text-sm font-bold text-slate-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-[#115789]/40 hover:bg-white hover:text-[#115789] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#60a5fa] focus:ring-offset-2';
-
-                                            const iconWrap = document.createElement('span');
-                                            iconWrap.className = 'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-lg text-[#115789] transition group-hover:bg-[#115789] group-hover:text-white';
-                                            const icon = document.createElement('i');
-                                            icon.className = `bx ${actionIcons[action.label] || 'bx-right-arrow-alt'}`;
-                                            icon.setAttribute('aria-hidden', 'true');
-                                            iconWrap.appendChild(icon);
-
-                                            const label = document.createElement('span');
-                                            label.className = 'min-w-0 flex-1 leading-snug';
-                                            label.textContent = action.label;
-
-                                            const arrow = document.createElement('i');
-                                            arrow.className = 'bx bx-chevron-right shrink-0 text-lg text-slate-400 transition group-hover:translate-x-0.5 group-hover:text-[#115789]';
-                                            arrow.setAttribute('aria-hidden', 'true');
-
-                                            link.append(iconWrap, label, arrow);
-                                            speechActions.appendChild(link);
-                                        });
-                                    }
+                                    if (speechBadgeIcon) speechBadgeIcon.className = `bx ${card.getAttribute('data-icon') || 'bx-grid-alt'} text-sm`;
 
                                     const boxBg = card.getAttribute('data-box-bg') || 'bg-amber-50/90';
                                     const boxBorder = card.getAttribute('data-box-border') || 'border-amber-200';
                                     const badgeBg = card.getAttribute('data-badge-bg') || 'bg-amber-100 text-amber-800 border-amber-300';
                                     const textColor = card.getAttribute('data-text-color') || 'text-amber-950';
 
-                                    speechBox.className = `unit-speech-box rounded-2xl sm:rounded-3xl p-4 sm:p-6 border shadow-lg shadow-slate-900/5 backdrop-blur-xl transition-all duration-300 ${boxBg} ${boxBorder}`;
-                                    if (speechBadge) speechBadge.className = `inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.12em] ${badgeBg}`;
-                                    if (speechHeading) speechHeading.className = `mt-2.5 text-base sm:text-lg font-extrabold leading-snug ${textColor}`;
+                                    speechBox.className = `unit-speech-box relative overflow-hidden rounded-2xl sm:rounded-3xl px-4 py-4 sm:px-6 sm:py-5 border shadow-md shadow-slate-900/5 backdrop-blur-xl transition-all duration-300 ${boxBg} ${boxBorder}`;
+                                    if (speechBadge) speechBadge.className = `inline-flex shrink-0 self-start items-center gap-1.5 rounded-full border px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.1em] ${badgeBg}`;
+                                    if (speechHeading) speechHeading.className = `text-sm sm:text-base font-extrabold leading-snug ${textColor}`;
 
                                     speechWrapper.classList.remove('fade-out');
                                     speechWrapper.classList.add('fade-in');
