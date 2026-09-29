@@ -388,7 +388,7 @@
                                 @endif
 
                                 @if($hasKabar)
-                                <a href="{{ $categoryUrl('announcements.index') }}" aria-label="Buka Kabar dan Informasi Daerah" class="unit-card cursor-pointer no-underline hover:scale-105 transition-transform focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-300 rounded-2xl"
+                                <a href="{{ route('announcements.index', $isLoggedInWithRegion ? ['region_id' => $userRegionId] : []) }}" aria-label="Buka Kabar dan Informasi Daerah" class="unit-card cursor-pointer no-underline hover:scale-105 transition-transform focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-300 rounded-2xl"
                                      data-index="2"
                                      data-name="Kabar dan Informasi Daerah"
                                      data-heading="&quot;Ingin tahu kabar terbaru di daerah?&quot;"
