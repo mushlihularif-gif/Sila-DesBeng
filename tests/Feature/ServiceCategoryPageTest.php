@@ -32,4 +32,20 @@ class ServiceCategoryPageTest extends TestCase
     {
         $this->get('/kategori-layanan/tidak-ada')->assertNotFound();
     }
+
+    public function test_pelayanan_cards_link_to_their_actual_pages(): void
+    {
+        $response = $this->get(route('pelayanan'));
+
+        $response->assertOk()
+            ->assertSee('class="service-card-link', false)
+            ->assertSee(route('bumdes.profil', ['redirect' => 'rental.equipment']), false)
+            ->assertSee(route('bumdes.laporan'), false)
+            ->assertSee(route('bumdes.profil', ['redirect' => 'gas.sales']), false)
+            ->assertSee(route('bumdes.profil', ['redirect' => 'mobil.rental.equipment']), false)
+            ->assertSee(route('bumdes.profil', ['redirect' => 'user.fasilitas-umum.equipment']), false)
+            ->assertSee(route('bumdes.profil', ['redirect' => 'pelaporan.landing']), false)
+            ->assertSee(route('announcements.index'), false)
+            ->assertSee(route('pasar.index'), false);
+    }
 }

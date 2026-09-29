@@ -31,9 +31,29 @@
 
             {{-- Services Container --}}
             <div class="space-y-6">
+                @php
+                    $needsRegionSelection = [
+                        'rental.equipment',
+                        'gas.sales',
+                        'mobil.rental.equipment',
+                        'user.fasilitas-umum.equipment',
+                        'pelaporan.landing',
+                    ];
+                    $serviceHref = function ($routeName) use ($needsRegionSelection) {
+                        if (auth()->check() && auth()->user()->region_id) {
+                            return route($routeName, ['region_id' => auth()->user()->region_id]);
+                        }
+
+                        if (in_array($routeName, $needsRegionSelection, true)) {
+                            return route('bumdes.profil', ['redirect' => $routeName]);
+                        }
+
+                        return route($routeName);
+                    };
+                @endphp
+
                 {{-- Service 1: Unit Penyewaan Alat --}}
-                <div
-                    class="bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-8 shadow-md hover:shadow-xl transition-all duration-300 border border-white/50 animate-section">
+                <a href="{{ $serviceHref('rental.equipment') }}" class="service-card-link bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-8 shadow-md hover:shadow-xl transition-all duration-300 border border-white/50 animate-section">
                     <div class="flex flex-col sm:flex-row gap-4 sm:gap-8 items-center sm:items-start">
                         <div class="flex-shrink-0">
                             <div class="w-20 h-20 sm:w-32 sm:h-32 flex items-center justify-center">
@@ -51,11 +71,10 @@
                             </p>
                         </div>
                     </div>
-                </div>
+                </a>
 
                 {{-- Service 2: Pelaporan dan Monitoring Usaha --}}
-                <div
-                    class="bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-8 shadow-md hover:shadow-xl transition-all duration-300 border border-white/50 animate-section">
+                <a href="{{ $serviceHref('bumdes.laporan') }}" class="service-card-link bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-8 shadow-md hover:shadow-xl transition-all duration-300 border border-white/50 animate-section">
                     <div class="flex flex-col sm:flex-row gap-4 sm:gap-8 items-center sm:items-start">
                         <div class="flex-shrink-0">
                             <div class="w-20 h-20 sm:w-32 sm:h-32 flex items-center justify-center">
@@ -73,11 +92,10 @@
                             </p>
                         </div>
                     </div>
-                </div>
+                </a>
 
                 {{-- Service 3: Penjualan Gas Daerah --}}
-                <div
-                    class="bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-8 shadow-md hover:shadow-xl transition-all duration-300 border border-white/50 animate-section">
+                <a href="{{ $serviceHref('gas.sales') }}" class="service-card-link bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-8 shadow-md hover:shadow-xl transition-all duration-300 border border-white/50 animate-section">
                     <div class="flex flex-col sm:flex-row gap-4 sm:gap-8 items-center sm:items-start">
                         <div class="flex-shrink-0">
                             <div class="w-20 h-20 sm:w-32 sm:h-32 flex items-center justify-center">
@@ -94,11 +112,10 @@
                             </p>
                         </div>
                     </div>
-                </div>
+                </a>
 
                 {{-- Service 4: Unit Penyewaan Transportasi --}}
-                <div
-                    class="bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-8 shadow-md hover:shadow-xl transition-all duration-300 border border-white/50 animate-section">
+                <a href="{{ $serviceHref('mobil.rental.equipment') }}" class="service-card-link bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-8 shadow-md hover:shadow-xl transition-all duration-300 border border-white/50 animate-section">
                     <div class="flex flex-col sm:flex-row gap-4 sm:gap-8 items-center sm:items-start">
                         <div class="flex-shrink-0">
                             <div class="w-20 h-20 sm:w-32 sm:h-32 flex items-center justify-center">
@@ -114,11 +131,10 @@
                             </p>
                         </div>
                     </div>
-                </div>
+                </a>
 
                 {{-- Service 5: Unit Peminjaman Fasilitas Umum --}}
-                <div
-                    class="bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-8 shadow-md hover:shadow-xl transition-all duration-300 border border-white/50 animate-section">
+                <a href="{{ $serviceHref('user.fasilitas-umum.equipment') }}" class="service-card-link bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-8 shadow-md hover:shadow-xl transition-all duration-300 border border-white/50 animate-section">
                     <div class="flex flex-col sm:flex-row gap-4 sm:gap-8 items-center sm:items-start">
                         <div class="flex-shrink-0">
                             <div class="w-20 h-20 sm:w-32 sm:h-32 flex items-center justify-center">
@@ -134,11 +150,10 @@
                             </p>
                         </div>
                     </div>
-                </div>
+                </a>
 
                 {{-- Service 6: Pelaporan Warga --}}
-                <div
-                    class="bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-8 shadow-md hover:shadow-xl transition-all duration-300 border border-white/50 animate-section">
+                <a href="{{ $serviceHref('pelaporan.landing') }}" class="service-card-link bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-8 shadow-md hover:shadow-xl transition-all duration-300 border border-white/50 animate-section">
                     <div class="flex flex-col sm:flex-row gap-4 sm:gap-8 items-center sm:items-start">
                         <div class="flex-shrink-0">
                             <div class="w-20 h-20 sm:w-32 sm:h-32 flex items-center justify-center">
@@ -154,11 +169,10 @@
                             </p>
                         </div>
                     </div>
-                </div>
+                </a>
 
                 {{-- Service 7: Kabar dan Informasi Daerah --}}
-                <div
-                    class="bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-8 shadow-md hover:shadow-xl transition-all duration-300 border border-white/50 animate-section">
+                <a href="{{ $serviceHref('announcements.index') }}" class="service-card-link bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-8 shadow-md hover:shadow-xl transition-all duration-300 border border-white/50 animate-section">
                     <div class="flex flex-col sm:flex-row gap-4 sm:gap-8 items-center sm:items-start">
                         <div class="flex-shrink-0">
                             <div class="w-20 h-20 sm:w-32 sm:h-32 flex items-center justify-center">
@@ -174,10 +188,9 @@
                             </p>
                         </div>
                     </div>
-                </div>
+                </a>
                 {{-- Service 8: Pasar Daerah --}}
-                <div
-                    class="bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-8 shadow-md hover:shadow-xl transition-all duration-300 border border-white/50 animate-section">
+                <a href="{{ $serviceHref('pasar.index') }}" class="service-card-link bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-8 shadow-md hover:shadow-xl transition-all duration-300 border border-white/50 animate-section">
                     <div class="flex flex-col sm:flex-row gap-4 sm:gap-8 items-center sm:items-start">
                         <div class="flex-shrink-0">
                             <div class="w-20 h-20 sm:w-32 sm:h-32 flex items-center justify-center">
@@ -194,7 +207,7 @@
                             
                         </div>
                     </div>
-                </div>
+                </a>
             </div>
     </section>
 @endsection
@@ -203,6 +216,33 @@
     <style>
         * {
             font-family: 'Inter', sans-serif;
+        }
+
+        .service-card-link {
+            display: block;
+            color: inherit !important;
+            text-decoration: none !important;
+            cursor: pointer;
+        }
+        .service-card-link:focus-visible {
+            outline: 3px solid #60a5fa;
+            outline-offset: 4px;
+        }
+        .service-card-link h3 {
+            transition: color 0.2s ease;
+        }
+        .service-card-link:hover h3,
+        .service-card-link:focus-visible h3 {
+            color: #115789;
+        }
+        .service-card-link::after {
+            content: 'Buka layanan →';
+            display: block;
+            margin-top: 0.75rem;
+            color: #115789;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-align: right;
         }
 
         /* Smooth scroll behavior */
