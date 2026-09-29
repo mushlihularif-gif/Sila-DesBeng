@@ -540,25 +540,24 @@
         // ========================================
         // REGION DROPDOWN LOGIC
         // ========================================
-        function initRegionDropdowns(kabId, kecId, desaId) {
-            const regKab = document.getElementById(kabId);
+        function initRegionDropdowns(kecId, desaId) {
             const regKec = document.getElementById(kecId);
             const regDesa = document.getElementById(desaId);
             
-            if (!regKab || !regKec || !regDesa) return;
+            if (!regKec || !regDesa) return;
 
             if (allRegions.length > 0) {
-                populateRegions(regKab, regKec, regDesa);
+                populateRegions(regKec, regDesa);
             } else {
                 fetch('/api/regions')
                     .then(res => res.json())
                     .then(data => {
                         allRegions = data;
-                        populateRegions(regKab, regKec, regDesa);
+                        populateRegions(regKec, regDesa);
                     })
                     .catch(err => {
                         console.error('Failed to load regions:', err);
-                        regKab.innerHTML = '<option value="">Gagal memuat data wilayah</option>';
+                        regKec.innerHTML = '<option value="">Gagal memuat data wilayah</option>';
                     });
             }
 
@@ -578,11 +577,9 @@
             });
         }
 
-        function populateRegions(regKab, regKec, regDesa) {
+        function populateRegions(regKec, regDesa) {
             const kabupaten = allRegions.find(r => r.type === 'kabupaten' && r.name === 'Kabupaten Bengkalis');
             if (kabupaten) {
-                // regKab is a div now, no need to set innerHTML or value
-                
                 // Populate Kecamatan
                 const kecamatans = allRegions.filter(r => r.type === 'kecamatan' && r.parent_id === kabupaten.id);
                 regKec.innerHTML = '<option value="">Pilih Kecamatan</option>';
@@ -594,7 +591,7 @@
         }
 
         let allRegions = [];
-        initRegionDropdowns('reg-kabupaten', 'reg-kecamatan', 'reg-desa');
-        initRegionDropdowns('google-reg-kabupaten', 'google-reg-kecamatan', 'google-reg-desa');
+        initRegionDropdowns('reg-kecamatan', 'reg-desa');
+        initRegionDropdowns('google-reg-kecamatan', 'google-reg-desa');
     })();
 </script>

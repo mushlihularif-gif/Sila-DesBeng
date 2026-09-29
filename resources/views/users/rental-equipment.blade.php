@@ -61,6 +61,32 @@
                 @endif
             </div>
 
+            @if($filterRegions->isNotEmpty())
+            <form action="{{ route('rental.equipment') }}" method="GET" class="mx-auto mb-8 max-w-3xl rounded-2xl border border-blue-100 bg-white/80 p-4 shadow-sm backdrop-blur sm:p-5">
+                @if($targetRegionId)
+                    <input type="hidden" name="region_id" value="{{ $targetRegionId }}">
+                @endif
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
+                    <div class="flex-1">
+                        <label for="rental-region-filter" class="mb-1.5 block text-sm font-bold text-gray-800">Filter wilayah alat</label>
+                        <select id="rental-region-filter" name="filter_region_id" class="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100">
+                            <option value="">Semua desa dan bagian wilayah</option>
+                            @foreach($filterRegions as $filterRegion)
+                                <option value="{{ $filterRegion->id }}" {{ (string) $filterRegionId === (string) $filterRegion->id ? 'selected' : '' }}>
+                                    {{ $filterRegion->filter_label }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <p class="mt-1.5 text-xs text-gray-500">Pilih desa atau bagian wilayah tertentu untuk mempersempit daftar alat.</p>
+                    </div>
+                    <button type="submit" class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#115789] px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#0d4267] focus:outline-none focus:ring-2 focus:ring-blue-300">
+                        <i class="bx bx-filter-alt text-lg" aria-hidden="true"></i>
+                        Terapkan Filter
+                    </button>
+                </div>
+            </form>
+            @endif
+
             <!-- Category Filter -->
             @php
                 $categories = $items->pluck('kategori')->filter()->unique()->values();

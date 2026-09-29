@@ -183,8 +183,8 @@
         .blur-orb-tl { top: 0; left: 0; }
         .blur-orb-br { bottom: 0; right: 0; }
 
-        /* ============ STAT CARDS ============ */
-        .stat-card {
+        /* ============ DAMPAK LAPORAN ============ */
+        .impact-card {
             background: rgba(255,255,255,0.60);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
@@ -193,44 +193,10 @@
             transition: all 0.3s ease;
             box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
         }
-        .stat-card:hover {
+        .impact-card:hover {
             transform: scale(1.05) translateY(-8px);
             box-shadow: 0 20px 60px rgba(37,99,235,0.15);
         }
-        .stat-icon-wrap { position: relative; display: inline-block; margin-bottom: 20px; }
-        .stat-icon-glow {
-            position: absolute; inset: 0; opacity: 0.3; filter: blur(20px); border-radius: 50%;
-        }
-        .stat-icon {
-            position: relative; width: 80px; height: 80px;
-            border-radius: 16px; display: flex; align-items: center; justify-content: center;
-            font-size: 3rem; transition: transform 0.3s;
-            border: 1px solid rgba(250,204,21,0.2);
-        }
-        .stat-icon:hover { transform: rotate(12deg); }
-        .stat-icon.blue { background: rgba(59,130,246,0.2); }
-        .stat-icon.yellow { background: rgba(250,204,21,0.2); }
-        .stat-icon.purple { background: rgba(168,85,247,0.2); }
-        .stat-icon.green { background: rgba(34,197,94,0.2); }
-
-        .stat-value {
-            font-size: clamp(2.5rem, 4vw, 3.5rem); font-weight: 900;
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            background-clip: text; margin-bottom: 12px;
-        }
-        .stat-value.blue { background-image: linear-gradient(to right, #60a5fa, #2563eb); }
-        .stat-value.yellow { background-image: linear-gradient(to right, #facc15, #f97316); }
-        .stat-value.purple { background-image: linear-gradient(to right, #c084fc, #ec4899); }
-        .stat-value.green { background-image: linear-gradient(to right, #4ade80, #059669); }
-
-        .stat-label { color: #4b5563; font-size: 1rem; font-weight: 600; letter-spacing: 0.05em; }
-        .stat-bar { margin-top: 16px; height: 8px; background: rgba(0,0,0,0.08); border-radius: 9999px; overflow: hidden; }
-        .stat-bar-fill { height: 100%; border-radius: 9999px; width: 0; animation: progress 2s ease-out forwards 0.5s; }
-        .stat-bar-fill.blue { background: linear-gradient(to right, #60a5fa, #2563eb); }
-        .stat-bar-fill.yellow { background: linear-gradient(to right, #facc15, #f97316); }
-        .stat-bar-fill.purple { background: linear-gradient(to right, #c084fc, #ec4899); }
-        .stat-bar-fill.green { background: linear-gradient(to right, #4ade80, #059669); }
-        @keyframes progress { from { width: 0; } to { width: 100%; } }
 
         /* ============ CATEGORY CARDS ============ */
         .cat-card {
@@ -242,18 +208,22 @@
             overflow: hidden; position: relative;
             transition: all 0.3s ease;
             box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            display: block;
+            color: inherit;
+            text-decoration: none;
         }
         .cat-card:hover { transform: scale(1.05); }
+        .cat-card:focus-visible { outline: 3px solid #60a5fa; outline-offset: 3px; }
         .cat-card-overlay {
             position: absolute; inset: 0; opacity: 0;
             transition: opacity 0.5s;
         }
         .cat-card:hover .cat-card-overlay { opacity: 0.1; }
         .cat-icon {
-            position: relative; font-size: 3.5rem; margin-bottom: 16px;
+            position: relative; font-size: 2.5rem; margin-bottom: 12px;
             transition: all 0.5s;
         }
-        .cat-card:hover .cat-icon { transform: scale(1.25) rotate(12deg); filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3)); }
+        .cat-card:hover .cat-icon { transform: scale(1.08); filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2)); }
         .cat-name {
             position: relative; color: #1e3a5f; font-weight: 700;
             font-size: 1.125rem; margin-bottom: 8px;
@@ -414,62 +384,35 @@
     </div>
 </section>
 
-<!-- ==================== STATISTIK ==================== -->
+<!-- ==================== DAMPAK PELAPORAN ==================== -->
 <section id="statistik" class="section section-stats">
     <div class="blur-orb blur-orb-tl"></div>
     <div class="blur-orb blur-orb-br"></div>
     <div class="container mx-auto px-4 md:px-6 relative" style="z-index:10">
         <div class="text-center mb-16">
-            <h2 class="section-title">Statistik Real-Time</h2>
-            <p class="section-subtitle">Transparansi Data Pengaduan Warga se-Kabupaten Bengkalis</p>
+            <h2 class="section-title">Dampak Pelaporan Warga</h2>
+            <p class="section-subtitle">Laporan membantu pengurus mengenali masalah dan menentukan tindak lanjut di lingkungan.</p>
         </div>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-            @php
-                $totalLaporan = \App\Models\Laporan::count() ?? 0;
-                $menunggu = \App\Models\Laporan::where('status', 'Pending')->count() ?? 0;
-                $proses = \App\Models\Laporan::whereIn('status', ['Proses','Diproses'])->count() ?? 0;
-                $selesai = \App\Models\Laporan::where('status', 'Selesai')->count() ?? 0;
-            @endphp
-            <!-- Total Laporan -->
-            <div class="stat-card">
-                <div class="stat-icon-wrap">
-                    <div class="stat-icon-glow" style="background: linear-gradient(to right,#60a5fa,#2563eb)"></div>
-                    <div class="stat-icon blue"><img src="{{ asset('User/img/pelaporanicon/laporkankeluhan.png') }}" alt="Icon" class="w-12 h-12 object-contain"></div>
-                </div>
-                <div class="stat-value blue counter" data-target="{{ $totalLaporan }}">0</div>
-                <div class="stat-label">Total Laporan</div>
-                <div class="stat-bar"><div class="stat-bar-fill blue"></div></div>
-            </div>
-            <!-- Menunggu -->
-            <div class="stat-card">
-                <div class="stat-icon-wrap">
-                    <div class="stat-icon-glow" style="background: linear-gradient(to right,#facc15,#f97316)"></div>
-                    <div class="stat-icon yellow"><img src="{{ asset('User/img/pelaporanicon/menunggu1.png') }}" alt="Icon" class="w-12 h-12 object-contain"></div>
-                </div>
-                <div class="stat-value yellow counter" data-target="{{ $menunggu }}">0</div>
-                <div class="stat-label">Menunggu</div>
-                <div class="stat-bar"><div class="stat-bar-fill yellow"></div></div>
-            </div>
-            <!-- Dalam Proses -->
-            <div class="stat-card">
-                <div class="stat-icon-wrap">
-                    <div class="stat-icon-glow" style="background: linear-gradient(to right,#c084fc,#ec4899)"></div>
-                    <div class="stat-icon purple"><img src="{{ asset('User/img/pelaporanicon/dalamproses1.png') }}" alt="Icon" class="w-12 h-12 object-contain"></div>
-                </div>
-                <div class="stat-value purple counter" data-target="{{ $proses }}">0</div>
-                <div class="stat-label">Dalam Proses</div>
-                <div class="stat-bar"><div class="stat-bar-fill purple"></div></div>
-            </div>
-            <!-- Selesai -->
-            <div class="stat-card">
-                <div class="stat-icon-wrap">
-                    <div class="stat-icon-glow" style="background: linear-gradient(to right,#4ade80,#059669)"></div>
-                    <div class="stat-icon green"><img src="{{ asset('User/img/pelaporanicon/selesai.png') }}" alt="Icon" class="w-12 h-12 object-contain"></div>
-                </div>
-                <div class="stat-value green counter" data-target="{{ $selesai }}">0</div>
-                <div class="stat-label">Selesai</div>
-                <div class="stat-bar"><div class="stat-bar-fill green"></div></div>
-            </div>
+        <p class="mx-auto mb-8 max-w-3xl text-center text-sm text-gray-500">Ilustrasi berikut menunjukkan contoh alur dan hasil yang diharapkan. Tindak lanjut sebenarnya bergantung pada pemeriksaan pengurus wilayah.</p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <article class="impact-card">
+                <div class="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-100 text-3xl text-blue-700"><i class="bx bx-message-rounded-dots" aria-hidden="true"></i></div>
+                <span class="mb-2 inline-block text-xs font-bold uppercase tracking-wider text-blue-700">Langkah 1</span>
+                <h3 class="text-lg font-extrabold text-gray-900">Masalah Dilaporkan</h3>
+                <p class="mt-2 text-sm leading-relaxed text-gray-600">Warga menyampaikan kondisi seperti sampah menumpuk, jalan rusak, atau lampu lingkungan mati.</p>
+            </article>
+            <article class="impact-card">
+                <div class="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-100 text-3xl text-amber-700"><i class="bx bx-task" aria-hidden="true"></i></div>
+                <span class="mb-2 inline-block text-xs font-bold uppercase tracking-wider text-amber-700">Langkah 2</span>
+                <h3 class="text-lg font-extrabold text-gray-900">Pengurus Menindaklanjuti</h3>
+                <p class="mt-2 text-sm leading-relaxed text-gray-600">Laporan diteruskan kepada pengurus wilayah yang sesuai untuk diperiksa dan ditangani.</p>
+            </article>
+            <article class="impact-card">
+                <div class="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-green-100 text-3xl text-green-700"><i class="bx bx-check-circle" aria-hidden="true"></i></div>
+                <span class="mb-2 inline-block text-xs font-bold uppercase tracking-wider text-green-700">Contoh hasil</span>
+                <h3 class="text-lg font-extrabold text-gray-900">Lingkungan Lebih Baik</h3>
+                <p class="mt-2 text-sm leading-relaxed text-gray-600">Contoh tindak lanjut: saluran dibersihkan atau fasilitas yang rusak diperbaiki.</p>
+            </article>
         </div>
     </div>
 </section>
@@ -482,13 +425,24 @@
             <p class="section-subtitle">Pilih kategori sesuai keluhan Anda</p>
         </div>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <div class="cat-card"><div class="cat-icon"><img src="{{ asset('User/img/pelaporanicon/kebersihan.png') }}" alt="Kebersihan" class="h-20 w-auto object-contain mx-auto inline-block"></div><div class="cat-name">Kebersihan</div><div class="cat-desc">Sampah, Parit, Kebersihan</div></div>
-            <div class="cat-card"><div class="cat-icon"><img src="{{ asset('User/img/pelaporanicon/keselamatan.png') }}" alt="Keselamatan" class="h-20 w-auto object-contain mx-auto inline-block"></div><div class="cat-name">Keselamatan</div><div class="cat-desc">Kemalangan, Jenayah</div></div>
-            <div class="cat-card"><div class="cat-icon"><img src="{{ asset('User/img/pelaporanicon/infrastruktur.png') }}" alt="Infrastruktur" class="h-20 w-auto object-contain mx-auto inline-block"></div><div class="cat-name">Infrastruktur</div><div class="cat-desc">Jalan, Lampu, Bangunan</div></div>
-            <div class="cat-card"><div class="cat-icon"><img src="{{ asset('User/img/pelaporanicon/kesehatan.png') }}" alt="Kesehatan" class="h-20 w-auto object-contain mx-auto inline-block"></div><div class="cat-name">Kesehatan</div><div class="cat-desc">Layanan Medis, Sanitasi</div></div>
-            <div class="cat-card"><div class="cat-icon"><img src="{{ asset('User/img/pelaporanicon/lingkungan.png') }}" alt="Lingkungan" class="h-20 w-auto object-contain mx-auto inline-block"></div><div class="cat-name">Lingkungan</div><div class="cat-desc">Pencemaran, Banjir</div></div>
-            <div class="cat-card"><div class="cat-icon"><img src="{{ asset('User/img/pelaporanicon/fasilitas.png') }}" alt="Fasilitas" class="h-20 w-auto object-contain mx-auto inline-block"></div><div class="cat-name">Fasilitas</div><div class="cat-desc">Balai, Taman, Rumah Ibadah</div></div>
-            <div class="cat-card"><div class="cat-icon"><img src="{{ asset('User/img/pelaporanicon/lainnya.png') }}" alt="Lainnya" class="h-20 w-auto object-contain mx-auto inline-block"></div><div class="cat-name">Lainnya</div><div class="cat-desc">Pengaduan Umum</div></div>
+            @php
+                $reportCategories = [
+                    ['label' => 'Kebersihan', 'value' => 'Kebersihan', 'desc' => 'Sampah, parit, kebersihan', 'image' => 'kebersihan.png'],
+                    ['label' => 'Keselamatan', 'value' => 'Keamanan', 'desc' => 'Keselamatan dan keamanan', 'image' => 'keselamatan.png'],
+                    ['label' => 'Infrastruktur', 'value' => 'Infrastruktur', 'desc' => 'Jalan, lampu, bangunan', 'image' => 'infrastruktur.png'],
+                    ['label' => 'Kesehatan', 'value' => 'Pelayanan Publik', 'desc' => 'Layanan medis dan sanitasi', 'image' => 'kesehatan.png'],
+                    ['label' => 'Lingkungan', 'value' => 'Lingkungan', 'desc' => 'Pencemaran dan banjir', 'image' => 'lingkungan.png'],
+                    ['label' => 'Fasilitas', 'value' => 'Fasilitas', 'desc' => 'Balai, taman, rumah ibadah', 'image' => 'fasilitas.png'],
+                    ['label' => 'Lainnya', 'value' => 'Lainnya', 'desc' => 'Pengaduan umum', 'image' => 'lainnya.png'],
+                ];
+            @endphp
+            @foreach($reportCategories as $category)
+            <a href="{{ route('user.laporan.create', ['kategori' => $category['value']]) }}" class="cat-card" aria-label="Buat laporan kategori {{ $category['label'] }}">
+                <div class="cat-icon"><img src="{{ asset('User/img/pelaporanicon/' . $category['image']) }}" alt="" class="h-14 w-auto object-contain mx-auto inline-block sm:h-16"></div>
+                <div class="cat-name">{{ $category['label'] }}</div>
+                <div class="cat-desc">{{ $category['desc'] }}</div>
+            </a>
+            @endforeach
         </div>
     </div>
 </section>
@@ -564,33 +518,8 @@
         });
     });
 
-    // Counter animation
-    const counters = document.querySelectorAll('.counter');
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const el = entry.target;
-                const target = parseInt(el.getAttribute('data-target')) || 0;
-                let current = 0;
-                const step = Math.max(1, Math.ceil(target / 50));
-                
-                const timer = setInterval(() => {
-                    current += step;
-                    if (current >= target) {
-                        current = target;
-                        clearInterval(timer);
-                    }
-                    el.textContent = current.toLocaleString('id-ID');
-                }, 30);
-                
-                observer.unobserve(el);
-            }
-        });
-    }, { threshold: 0.5 });
-    counters.forEach(c => observer.observe(c));
-
     // Fade-in on scroll (simple AOS replacement)
-    const fadeEls = document.querySelectorAll('.stat-card, .cat-card, .step-card');
+    const fadeEls = document.querySelectorAll('.impact-card, .cat-card, .step-card');
     fadeEls.forEach(el => { el.style.opacity = '0'; el.style.transform = 'translateY(30px)'; el.style.transition = 'all 0.6s ease'; });
     const fadeObserver = new IntersectionObserver((entries) => {
         entries.forEach((entry, i) => {

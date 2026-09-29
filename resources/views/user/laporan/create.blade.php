@@ -117,15 +117,15 @@
                             <label class="block font-semibold text-gray-800 mb-2">Kategori <span class="text-red-500">*</span></label>
                             <select name="kategori" required
                                 class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 transition-all shadow-sm @error('kategori') border-red-500 @enderror">
-                                <option value="" disabled {{ old('kategori') ? '' : 'selected' }}>Pilih kategori laporan</option>
-                                <option value="Kebersihan" {{ old('kategori') == 'Kebersihan' ? 'selected' : '' }}>Kebersihan</option>
-                                <option value="Keamanan" {{ old('kategori') == 'Keamanan' ? 'selected' : '' }}>Keamanan</option>
-                                <option value="Fasilitas" {{ old('kategori') == 'Fasilitas' ? 'selected' : '' }}>Fasilitas Umum</option>
-                                <option value="Infrastruktur" {{ old('kategori') == 'Infrastruktur' ? 'selected' : '' }}>Infrastruktur</option>
-                                <option value="Lingkungan" {{ old('kategori') == 'Lingkungan' ? 'selected' : '' }}>Lingkungan</option>
-                                <option value="Pelayanan Publik" {{ old('kategori') == 'Pelayanan Publik' ? 'selected' : '' }}>Pelayanan Publik</option>
-                                <option value="Administrasi" {{ old('kategori') == 'Administrasi' ? 'selected' : '' }}>Administrasi</option>
-                                <option value="Lainnya" {{ old('kategori') == 'Lainnya' ? 'selected' : '' }}>Lainnya</option>
+                                <option value="" disabled {{ old('kategori', request('kategori')) ? '' : 'selected' }}>Pilih kategori laporan</option>
+                                <option value="Kebersihan" {{ old('kategori', request('kategori')) == 'Kebersihan' ? 'selected' : '' }}>Kebersihan</option>
+                                <option value="Keamanan" {{ old('kategori', request('kategori')) == 'Keamanan' ? 'selected' : '' }}>Keselamatan</option>
+                                <option value="Fasilitas" {{ old('kategori', request('kategori')) == 'Fasilitas' ? 'selected' : '' }}>Fasilitas Umum</option>
+                                <option value="Infrastruktur" {{ old('kategori', request('kategori')) == 'Infrastruktur' ? 'selected' : '' }}>Infrastruktur</option>
+                                <option value="Lingkungan" {{ old('kategori', request('kategori')) == 'Lingkungan' ? 'selected' : '' }}>Lingkungan</option>
+                                <option value="Pelayanan Publik" {{ old('kategori', request('kategori')) == 'Pelayanan Publik' ? 'selected' : '' }}>Kesehatan / Pelayanan Publik</option>
+                                <option value="Administrasi" {{ old('kategori', request('kategori')) == 'Administrasi' ? 'selected' : '' }}>Administrasi</option>
+                                <option value="Lainnya" {{ old('kategori', request('kategori')) == 'Lainnya' ? 'selected' : '' }}>Lainnya</option>
                             </select>
                             @error('kategori')
                                 <p class="text-red-500 text-xs mt-1 font-medium">{{ $message }}</p>
@@ -672,6 +672,11 @@
             return;
         }
 
+        if (!window.isSecureContext) {
+            showSiladesBengToast('info', 'Lokasi membutuhkan HTTPS', 'Buka halaman melalui alamat HTTPS, atau tentukan lokasi dengan mengetuk peta.');
+            return;
+        }
+
         // Tampilkan loading state
         btn.disabled = true;
         btn.classList.add('opacity-75', 'cursor-wait');
@@ -679,8 +684,15 @@
         spinner.classList.remove('hidden');
         text.innerText = 'Mendeteksi lokasi Anda...';
 
-        navigator.geolocation.getCurrentPosition(
-            function(position) {
+        const resetButton = () => {
+            btn.disabled = false;
+            btn.classList.remove('opacity-75', 'cursor-wait');
+            icon.classList.remove('hidden');
+            spinner.classList.add('hidden');
+            text.innerText = 'Gunakan Lokasi Saya (GPS)';
+        };
+
+        const applyPosition = (position) => {
                 const lat = position.coords.latitude;
                 const lng = position.coords.longitude;
 
@@ -695,39 +707,42 @@
 
                 // Tampilkan modal konfirmasi seperti klik biasa
                 showLocationModal(lat, lng);
+                resetButton();
+        };
 
-                // Reset tombol
-                btn.disabled = false;
-                btn.classList.remove('opacity-75', 'cursor-wait');
-                icon.classList.remove('hidden');
-                spinner.classList.add('hidden');
-                text.innerText = 'Gunakan Lokasi Saya (GPS)';
-            },
-            function(error) {
-                let msg = 'Gagal mendapatkan lokasi. ';
-                switch(error.code) {
-                    case error.PERMISSION_DENIED:
-                        msg += 'Anda menolak izin akses lokasi. Silakan aktifkan GPS di pengaturan browser Anda.';
-                        break;
-                    case error.POSITION_UNAVAILABLE:
-                        msg += 'Informasi lokasi tidak tersedia.';
-                        break;
-                    case error.TIMEOUT:
-                        msg += 'Permintaan lokasi melebihi batas waktu. Coba lagi.';
-                        break;
-                    default:
-                        msg += 'Terjadi kesalahan yang tidak diketahui.';
+        const reportLocationError = (error) => {
+            let message = 'Lokasi belum berhasil diperoleh. Anda masih dapat mengetuk peta untuk menentukan titik.';
+            if (error.code === error.PERMISSION_DENIED) {
+                message = 'Izin lokasi ditolak. Aktifkan izin lokasi untuk situs ini, atau tentukan titik dengan mengetuk peta.';
+            } else if (error.code === error.POSITION_UNAVAILABLE) {
+                message = 'Perangkat belum dapat menentukan lokasi. Pastikan GPS atau layanan lokasi aktif, lalu coba lagi.';
+            } else if (error.code === error.TIMEOUT) {
+                message = 'Pencarian lokasi membutuhkan waktu terlalu lama. Coba lagi atau tentukan titik dengan mengetuk peta.';
+            }
+
+            resetButton();
+            showSiladesBengToast('info', 'Lokasi belum ditemukan', message);
+        };
+
+        // Mulai dari lokasi jaringan/cache yang lebih cepat. Jika perangkat belum
+        // mendapat posisi, ulangi sekali dengan GPS berakurasi tinggi dan waktu lebih lama.
+        navigator.geolocation.getCurrentPosition(
+            applyPosition,
+            function (error) {
+                const canRetry = error.code === error.TIMEOUT || error.code === error.POSITION_UNAVAILABLE;
+                if (!canRetry) {
+                    reportLocationError(error);
+                    return;
                 }
-                showSiladesBengToast('info', 'Informasi', msg);
 
-                // Reset tombol
-                btn.disabled = false;
-                btn.classList.remove('opacity-75', 'cursor-wait');
-                icon.classList.remove('hidden');
-                spinner.classList.add('hidden');
-                text.innerText = 'Gunakan Lokasi Saya (GPS)';
+                text.innerText = 'Mencoba GPS dengan akurasi tinggi...';
+                navigator.geolocation.getCurrentPosition(
+                    applyPosition,
+                    reportLocationError,
+                    { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 }
+                );
             },
-            { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+            { enableHighAccuracy: false, timeout: 20000, maximumAge: 60000 }
         );
     }
 
@@ -1409,4 +1424,3 @@
     }
 </script>
 @endpush
-
