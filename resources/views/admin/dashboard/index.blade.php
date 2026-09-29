@@ -380,12 +380,20 @@
                             'count' => (\App\Models\PasarProduk::count() ?? 0),
                             'label' => 'Produk',
                             'route' => route('admin.unit.pasar_daerah.index'),
-                            'image' => asset('Admin/img/pasardaerah/PasarDaerah2.png'),
+                            'image' => asset('Admin/img/menu3dberanda/pasar-daerah.webp'),
                             'color' => 'warning'
                         ]
                     ];
 
                     $activeServicesList = isset($activeServices) ? $activeServices : [];
+                    if (auth()->user()->role === 'staff') {
+                        if (auth()->user()->hasUnitPermission('pasar_daerah')) $activeServicesList[] = 'Pasar Daerah';
+                        if (auth()->user()->hasUnitPermission('kabar_informasi')) $activeServicesList[] = 'Pengumuman';
+                    } else {
+                        // Pasar dan portal kabar adalah menu publik sentral.
+                        $activeServicesList = array_merge($activeServicesList, ['Pasar Daerah', 'Pengumuman']);
+                    }
+                    $activeServicesList = array_values(array_unique($activeServicesList));
                     
                     $validServiceCount = 0;
                     foreach($activeServicesList as $s) {
@@ -408,30 +416,61 @@
                  di situlah pekerjaan hariannya. Daftarnya sudah dipersempit ke
                  unit miliknya oleh DashboardController. --}}
             @if(in_array(auth()->user()->role, ['admin_desa', 'admin_rt', 'admin_rw', 'staff']))
-            <div class="row g-2 g-sm-3 mb-4">
-                @foreach($activeServicesList as $serviceName)
-                    @if(isset($unitConfigs[$serviceName]))
-                        @php $config = $unitConfigs[$serviceName]; @endphp
-                        <div class="{{ $colClass }}">
-                            <div class="card unit-card h-100 border-{{ $config['color'] }} hover-lift shadow-sm rounded-3" style="border-top: 3px solid; cursor: pointer;"
-                                onclick="window.location='{{ $config['route'] }}'">
-                                <div class="card-body p-2 p-sm-3 p-md-4 d-flex flex-column align-items-center justify-content-center text-center">
-                                    <div class="avatar mb-2 mb-sm-3 unit-avatar">
-                                        <img src="{{ $config['image'] }}" alt="{{ $config['title'] }}" class="rounded w-100 h-100 object-fit-contain" />
-                                    </div>
-                                    <div class="mt-1 w-100">
-                                        <span class="fw-semibold d-block mb-1 text-muted unit-title">{{ $config['title'] }}</span>
-                                        <h4 class="card-title mb-0 text-{{ $config['color'] }} unit-count">
-                                            <span class="count-up fw-bold" data-value="{{ $config['count'] }}">0</span> 
-                                            <span class="unit-label text-body">{{ $config['label'] }}</span>
-                                        </h4>
+            @php
+                $dashboardGroups = [
+                    'Belanja & Kebutuhan' => [
+                        'image' => asset('Admin/img/pasardaerah/Belanja dan Kebutuhan.png'),
+                        'services' => ['Penjualan Gas', 'Pasar Daerah'],
+                    ],
+                    'Layanan Daerah' => [
+                        'image' => asset('Admin/img/menu3dberanda/layanan-daerah.webp'),
+                        'services' => ['Penyewaan Alat', 'Penyewaan Mobil', 'Fasilitas Umum', 'Pelaporan Warga'],
+                    ],
+                    'Kabar dan Informasi Daerah' => [
+                        'image' => asset('User/img/elemen/KabardanInformasiDaerah.png'),
+                        'services' => ['Pengumuman'],
+                    ],
+                ];
+            @endphp
+            @foreach($dashboardGroups as $groupName => $group)
+                @php
+                    $groupServices = array_values(array_filter($group['services'], fn ($service) => in_array($service, $activeServicesList, true) && isset($unitConfigs[$service])));
+                    $groupColClass = count($groupServices) > 2 ? 'col-6 col-md-4 col-lg-3' : 'col-6 col-md-6';
+                @endphp
+                @if(count($groupServices))
+                <section class="mb-4" aria-label="{{ $groupName }}">
+                    <div class="d-flex align-items-center gap-3 mb-3 px-1">
+                        <img src="{{ $group['image'] }}" alt="" loading="lazy" class="rounded-circle bg-white shadow-sm p-1" style="width: 44px; height: 44px; object-fit: contain;">
+                        <div>
+                            <h5 class="mb-0 fw-bold text-dark">{{ $groupName }}</h5>
+                            <small class="text-muted">{{ count($groupServices) }} menu tersedia</small>
+                        </div>
+                    </div>
+                    <div class="row g-2 g-sm-3">
+                        @foreach($groupServices as $serviceName)
+                            @php $config = $unitConfigs[$serviceName]; @endphp
+                            <div class="{{ $groupColClass }}">
+                                <div class="card unit-card h-100 border-{{ $config['color'] }} hover-lift shadow-sm rounded-3" style="border-top: 3px solid; cursor: pointer;"
+                                    onclick="window.location='{{ $config['route'] }}'">
+                                    <div class="card-body p-2 p-sm-3 p-md-4 d-flex flex-column align-items-center justify-content-center text-center">
+                                        <div class="avatar mb-2 mb-sm-3 unit-avatar">
+                                            <img src="{{ $config['image'] }}" alt="{{ $config['title'] }}" class="rounded w-100 h-100 object-fit-contain" />
+                                        </div>
+                                        <div class="mt-1 w-100">
+                                            <span class="fw-semibold d-block mb-1 text-muted unit-title">{{ $config['title'] }}</span>
+                                            <h4 class="card-title mb-0 text-{{ $config['color'] }} unit-count">
+                                                <span class="count-up fw-bold" data-value="{{ $config['count'] }}">0</span>
+                                                <span class="unit-label text-body">{{ $config['label'] }}</span>
+                                            </h4>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    @endif
-                @endforeach
-            </div>
+                        @endforeach
+                    </div>
+                </section>
+                @endif
+            @endforeach
             @endif
 
                 <!-- Bagian Notifikasi -->
@@ -1281,5 +1320,3 @@
             });
         </script>
     @endsection
-
-

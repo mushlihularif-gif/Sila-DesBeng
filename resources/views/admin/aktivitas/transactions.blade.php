@@ -172,7 +172,7 @@
                         <div class="card-body p-3">
                             <div class="d-flex align-items-center mb-2">
                                 <div class="avatar avatar-md bg-secondary-subtle rounded-3 p-2 me-3 d-flex align-items-center justify-content-center">
-                                    <img src="{{ asset('Admin/img/pasardaerah/PasarDaerah2.png') }}" style="width: 44px; height: 44px; object-fit: contain;">
+                                    <img src="{{ asset('Admin/img/menu3dberanda/pasar-daerah.webp') }}" style="width: 44px; height: 44px; object-fit: contain;">
                                 </div>
                                 <div>
                                     <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Pasar Daerah</small>
@@ -278,7 +278,7 @@
                 @if($isPasarActive)
                 <li class="nav-item" role="presentation">
                     <button class="nav-link {{ $category == 'pasar' || (!$isRentalActive && !$isGasActive && !$isMobilActive && !$isFasilitasActive && ($category == 'rental' || $category == 'all')) ? 'active' : '' }} rounded-pill px-4 fw-semibold" id="pasar-tab" data-bs-toggle="tab" data-bs-target="#pasar-pane" type="button" role="tab">
-                        <img src="{{ asset('Admin/img/pasardaerah/PasarDaerah2.png') }}" class="me-2" style="width: 28px; height: 28px; object-fit: contain;">Pasar Daerah
+                        <img src="{{ asset('Admin/img/menu3dberanda/pasar-daerah.webp') }}" class="me-2" style="width: 28px; height: 28px; object-fit: contain;">Pasar Daerah
                         <span class="badge {{ $category == 'pasar' ? 'bg-white text-primary' : 'bg-primary text-white' }} ms-2 shadow-sm">{{ $pasarPayments->count() }}</span>
                     </button>
                 </li>

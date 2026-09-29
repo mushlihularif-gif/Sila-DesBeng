@@ -122,7 +122,7 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
             <div class="card border-0 shadow-sm h-100 rounded-4 stat-card">
                 <div class="card-body p-2 p-md-3 d-flex flex-column align-items-center justify-content-center text-center">
                     <div class="stat-icon bg-secondary-subtle mb-1 mx-auto d-flex align-items-center justify-content-center">
-                        <img src="{{ asset('Admin/img/pasardaerah/PasarDaerah2.png') }}" style="width: 24px; height: 24px; object-fit: contain;">
+                        <img src="{{ asset('Admin/img/menu3dberanda/pasar-daerah.webp') }}" style="width: 24px; height: 24px; object-fit: contain;">
                     </div>
                     <small class="text-muted text-uppercase fw-bold ls-1 mb-1 text-truncate w-100" style="font-size: 0.65rem;">Pasar Daerah</small>
                     <div class="stat-number text-dark">
@@ -174,7 +174,7 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                     @if($isPasarActive)
                     <li class="nav-item flex-shrink-0" role="presentation">
                         <button class="nav-link {{ !$isRentalActive && !$isGasActive && !$isMobilActive && !$isFasilitasActive ? 'active' : '' }} rounded-pill px-3 py-2 fw-semibold text-nowrap" id="pasar-tab" data-bs-toggle="tab" data-bs-target="#pasar-pane" type="button" role="tab">
-                            <img src="{{ asset('Admin/img/pasardaerah/PasarDaerah2.png') }}" class="me-2" style="width: 20px; height: 20px; object-fit: contain;">Pasar Daerah
+                            <img src="{{ asset('Admin/img/menu3dberanda/pasar-daerah.webp') }}" class="me-2" style="width: 20px; height: 20px; object-fit: contain;">Pasar Daerah
                             <span class="badge bg-white text-primary ms-2 shadow-sm">{{ $pasarOrders->count() }}</span>
                         </button>
                     </li>

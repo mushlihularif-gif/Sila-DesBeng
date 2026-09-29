@@ -283,7 +283,7 @@
                                                 <div>
                                                     <div class="d-flex align-items-center mb-2">
                                                         <div class="bg-label-success rounded p-2 me-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 46px; height: 46px;">
-                                                            <img src="{{ asset('Admin/img/pasardaerah/PasarDaerah2.png') }}" alt="Pasar Daerah" class="w-100 h-100 object-contain" style="object-fit: contain;">
+                                                            <img src="{{ asset('Admin/img/menu3dberanda/pasar-daerah.webp') }}" alt="Pasar Daerah" class="w-100 h-100 object-contain" style="object-fit: contain;">
                                                         </div>
                                                         <div class="flex-grow-1 overflow-hidden">
                                                             <div class="d-flex align-items-center justify-content-between gap-1">
@@ -415,7 +415,7 @@
                                         </button>
 
                                         <button class="nav-link d-flex align-items-center text-start p-3 rounded-4" id="v-pills-pasar-tab" data-bs-toggle="pill" data-bs-target="#box_delivery_pasar" type="button" role="tab" aria-selected="false" style="display: none; transition: all 0.2s;">
-                                            <img src="{{ asset('Admin/img/pasardaerah/PasarDaerah2.png') }}" class="me-3" style="width: 24px; height: 24px; object-fit: contain;">
+                                            <img src="{{ asset('Admin/img/menu3dberanda/pasar-daerah.webp') }}" class="me-3" style="width: 24px; height: 24px; object-fit: contain;">
                                             <div>
                                                 <span class="fw-bold d-block">Pasar Daerah</span>
                                                 <small class="text-muted" style="font-size: 0.75rem;">Ambil Sendiri / Antar</small>
@@ -633,7 +633,7 @@
                                         <!-- Pasar Detail -->
                                         <div class="tab-pane fade" id="box_delivery_pasar" role="tabpanel" aria-labelledby="v-pills-pasar-tab">
                                             <div class="d-flex align-items-center mb-4">
-                                                <img src="{{ asset('Admin/img/pasardaerah/PasarDaerah2.png') }}" class="me-3" style="width: 32px; height: 32px; object-fit: contain;">
+                                                <img src="{{ asset('Admin/img/menu3dberanda/pasar-daerah.webp') }}" class="me-3" style="width: 32px; height: 32px; object-fit: contain;">
                                                 <div>
                                                     <h6 class="fw-bold mb-0 text-primary">Pengaturan Pasar Daerah</h6>
                                                     <small class="text-muted">Metode pengiriman produk dari toko/penjual ke pembeli.</small>

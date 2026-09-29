@@ -936,7 +936,7 @@
                     <li class="menu-item {{ (request()->is('admin/unit/mobil*') || request()->is('admin/unit/supir*') || (request()->is('admin/aktivitas/permintaan-pengajuan*') && request('tab') == 'mobil') || (request()->is('admin/aktivitas/bukti-transaksi*') && request('category') == 'mobil')) ? 'open active show' : '' }}">
                         <a href="javascript:void(0);" class="menu-link menu-toggle">
                             <i class="menu-icon tf-icons bx bx-car text-primary"></i>
-                            <div>Penyewaan Transportasi</div>
+                            <div><small class="d-block text-muted" style="font-size:.65rem; line-height:1.1">Layanan Daerah</small>Penyewaan Transportasi</div>
                         </a>
                         <ul class="menu-sub">
                             <li class="menu-item {{ request()->is('admin/unit/mobil*') ? 'active' : '' }}">
@@ -973,7 +973,7 @@
                     <li class="menu-item {{ (request()->is('admin/unit/gas*') || (request()->is('admin/aktivitas/permintaan-pengajuan*') && request('tab') == 'gas') || (request()->is('admin/aktivitas/bukti-transaksi*') && request('category') == 'gas')) ? 'open active show' : '' }}">
                         <a href="javascript:void(0);" class="menu-link menu-toggle">
                             <i class="menu-icon tf-icons bx bx-gas-pump text-success"></i>
-                            <div>Penjualan Gas</div>
+                            <div><small class="d-block text-muted" style="font-size:.65rem; line-height:1.1">Belanja &amp; Kebutuhan</small>Penjualan Gas</div>
                         </a>
                         <ul class="menu-sub">
                             <li class="menu-item {{ request()->is('admin/unit/gas*') ? 'active' : '' }}">
@@ -1005,7 +1005,7 @@
                     <li class="menu-item {{ (request()->is('admin/unit/penyewaan*') || (request()->is('admin/aktivitas/permintaan-pengajuan*') && request('tab') == 'rental') || (request()->is('admin/aktivitas/bukti-transaksi*') && request('category') == 'rental')) ? 'open active show' : '' }}">
                         <a href="javascript:void(0);" class="menu-link menu-toggle">
                             <i class="menu-icon tf-icons bx bx-wrench text-warning"></i>
-                            <div>Penyewaan Alat</div>
+                            <div><small class="d-block text-muted" style="font-size:.65rem; line-height:1.1">Layanan Daerah</small>Penyewaan Alat</div>
                         </a>
                         <ul class="menu-sub">
                             <li class="menu-item {{ request()->is('admin/unit/penyewaan*') ? 'active' : '' }}">
@@ -1037,7 +1037,7 @@
                     <li class="menu-item {{ (request()->is('admin/unit/fasilitas_umum*') || request()->is('admin/unit/ambulans*') || (request()->is('admin/aktivitas/permintaan-pengajuan*') && request('tab') == 'fasilitas') || (request()->is('admin/aktivitas/bukti-transaksi*') && request('category') == 'fasilitas')) ? 'open active show' : '' }}">
                         <a href="javascript:void(0);" class="menu-link menu-toggle">
                             <i class="menu-icon tf-icons bx bx-buildings text-info"></i>
-                            <div>Fasilitas Umum</div>
+                            <div><small class="d-block text-muted" style="font-size:.65rem; line-height:1.1">Layanan Daerah</small>Fasilitas Umum</div>
                         </a>
                         <ul class="menu-sub">
                             <li class="menu-item {{ request()->is('admin/unit/fasilitas_umum*') ? 'active' : '' }}">
@@ -1068,8 +1068,8 @@
                     @if(in_array('Pasar Daerah', $activeServicesMenu ?? []) && auth()->user()->hasUnitPermission('pasar_daerah'))
                     <li class="menu-item {{ (request()->is('admin/unit/pasar-daerah*') || request()->routeIs('admin.kemitraan.*') || (request()->is('admin/aktivitas/permintaan-pengajuan*') && request('tab') == 'pasar') || (request()->is('admin/aktivitas/bukti-transaksi*') && request('category') == 'pasar')) ? 'open active show' : '' }}">
                         <a href="javascript:void(0);" class="menu-link menu-toggle">
-                            <i class="menu-icon tf-icons bx bx-store text-danger"></i>
-                            <div>Pasar Daerah</div>
+                            <img src="{{ asset('Admin/img/menu3dberanda/pasar-daerah.webp') }}" alt="" class="menu-icon me-2" style="width: 20px; height: 20px; object-fit: contain;">
+                            <div><small class="d-block text-muted" style="font-size:.65rem; line-height:1.1">Belanja &amp; Kebutuhan</small>Pasar Daerah</div>
                         </a>
                         <ul class="menu-sub">
                             <li class="menu-item {{ request()->is('admin/unit/pasar-daerah*') ? 'active' : '' }}">
@@ -1106,7 +1106,7 @@
                     <li class="menu-item {{ request()->routeIs('admin.pelaporan.*') ? 'open active show' : '' }}">
                         <a href="javascript:void(0);" class="menu-link menu-toggle">
                             <i class="menu-icon tf-icons bx bx-conversation text-info"></i>
-                            <div>Pelaporan Warga</div>
+                            <div><small class="d-block text-muted" style="font-size:.65rem; line-height:1.1">Layanan Daerah</small>Pelaporan Warga</div>
                         </a>
                         <ul class="menu-sub">
                             <li class="menu-item {{ request()->routeIs('admin.pelaporan.index') || request()->routeIs('admin.pelaporan.show') ? 'active' : '' }}">
@@ -1128,7 +1128,7 @@
                     <li class="menu-item {{ request()->routeIs('admin.announcements.*') ? 'open active show' : '' }}">
                         <a href="javascript:void(0);" class="menu-link menu-toggle">
                             <i class="menu-icon tf-icons bx bx-news text-primary"></i>
-                            <div>Kabar & Pengumuman</div>
+                            <div><small class="d-block text-muted" style="font-size:.65rem; line-height:1.1">Kabar dan Informasi Daerah</small>Kabar &amp; Pengumuman</div>
                         </a>
                         <ul class="menu-sub">
                             <li class="menu-item {{ request()->routeIs('admin.announcements.*') ? 'active' : '' }}">
@@ -1161,7 +1161,7 @@
                             <span class="badge sidebar-unit-badge">{{ $activeUnitsCount ?? 2 }}/{{ $totalAvailableUnits ?? 7 }} Aktif</span>
                         </a>
                         <ul class="menu-sub">
-                            <!-- Pusat Aktivasi 7 Unit Layanan -->
+                            <!-- Pengaturan dan unit yang dikelompokkan sesuai kategori warga -->
                             <li class="menu-item {{ request()->routeIs('admin.region-settings.index') ? 'active' : '' }}">
                                 <a href="{{ route('admin.region-settings.index') }}" class="menu-link d-flex align-items-center">
                                     <i class="bx bx-slider-alt me-2 text-primary" style="font-size: 1.05rem;"></i>
@@ -1173,15 +1173,7 @@
                                 <div class="border-top w-100" style="border-color: rgba(67, 89, 113, 0.08) !important;"></div>
                             </li>
 
-                            @if(in_array('Penyewaan Mobil', $activeServicesMenu ?? []) || in_array('Penyewaan Transportasi', $activeServicesMenu ?? []))
-                            <li class="menu-item {{ request()->is('admin/unit/mobil*') ? 'active' : '' }}">
-                                <a href="{{ route('admin.unit.mobil.index') }}" class="menu-link d-flex align-items-center">
-                                    <i class="bx bx-car me-2 text-muted"></i>
-                                    <div>Penyewaan Transportasi</div>
-                                </a>
-                            </li>
-                            @endif
-
+                            <li class="menu-item px-2 pt-2 pb-1"><span class="small fw-bold text-uppercase text-muted">Belanja &amp; Kebutuhan</span></li>
                             @if(in_array('Penjualan Gas', $activeServicesMenu ?? []))
                             <li class="menu-item {{ request()->is('admin/unit/gas*') ? 'active' : '' }}">
                                 <a href="{{ route('admin.unit.penjualan_gas.index') }}" class="menu-link d-flex align-items-center">
@@ -1191,6 +1183,24 @@
                             </li>
                             @endif
 
+                            @if(in_array('Pasar Daerah', $activeServicesMenu ?? []))
+                            <li class="menu-item {{ request()->is('admin/unit/pasar-daerah*') ? 'active' : '' }}">
+                                <a href="{{ route('admin.unit.pasar_daerah.index') }}" class="menu-link d-flex align-items-center">
+                                    <img src="{{ asset('Admin/img/menu3dberanda/pasar-daerah.webp') }}" alt="" class="me-2" style="width: 18px; height: 18px; object-fit: contain;">
+                                    <div>Pasar Daerah</div>
+                                </a>
+                            </li>
+                            @endif
+
+                            <li class="menu-item px-2 pt-2 pb-1"><span class="small fw-bold text-uppercase text-muted">Layanan Daerah</span></li>
+                            @if(in_array('Penyewaan Mobil', $activeServicesMenu ?? []) || in_array('Penyewaan Transportasi', $activeServicesMenu ?? []))
+                            <li class="menu-item {{ request()->is('admin/unit/mobil*') ? 'active' : '' }}">
+                                <a href="{{ route('admin.unit.mobil.index') }}" class="menu-link d-flex align-items-center">
+                                    <i class="bx bx-car me-2 text-muted"></i>
+                                    <div>Penyewaan Transportasi</div>
+                                </a>
+                            </li>
+                            @endif
                             @if(in_array('Penyewaan Alat', $activeServicesMenu ?? []))
                             <li class="menu-item {{ request()->is('admin/unit/penyewaan*') ? 'active' : '' }}">
                                 <a href="{{ route('admin.unit.penyewaan.index') }}" class="menu-link d-flex align-items-center">
@@ -1199,7 +1209,6 @@
                                 </a>
                             </li>
                             @endif
-
                             @if(in_array('Fasilitas Umum', $activeServicesMenu ?? []) || in_array('Layanan Ambulans', $activeServicesMenu ?? []))
                             <li class="menu-item {{ request()->is('admin/unit/fasilitas_umum*') || request()->is('admin/unit/ambulans*') ? 'active' : '' }}">
                                 <a href="{{ route('admin.unit.fasilitas_umum.index') }}" class="menu-link d-flex align-items-center">
@@ -1208,16 +1217,6 @@
                                 </a>
                             </li>
                             @endif
-
-                            @if(in_array('Pasar Daerah', $activeServicesMenu ?? []))
-                            <li class="menu-item {{ request()->is('admin/unit/pasar-daerah*') ? 'active' : '' }}">
-                                <a href="{{ route('admin.unit.pasar_daerah.index') }}" class="menu-link d-flex align-items-center">
-                                    <i class="bx bx-store me-2 text-muted"></i>
-                                    <div>Pasar Daerah</div>
-                                </a>
-                            </li>
-                            @endif
-
                             <li class="menu-item {{ request()->routeIs('admin.pelaporan.*') ? 'active' : '' }}">
                                 <a href="{{ Route::has('admin.pelaporan.index') ? route('admin.pelaporan.index') : '#' }}" class="menu-link d-flex align-items-center">
                                     <i class="bx bx-conversation me-2 text-muted"></i>
@@ -1225,6 +1224,7 @@
                                 </a>
                             </li>
 
+                            <li class="menu-item px-2 pt-2 pb-1"><span class="small fw-bold text-uppercase text-muted">Kabar &amp; Informasi Daerah</span></li>
                             <li class="menu-item {{ request()->routeIs('admin.announcements.*') ? 'active' : '' }}">
                                 <a href="{{ route('admin.announcements.index') }}" class="menu-link d-flex align-items-center">
                                     <i class="bx bx-news me-2 text-muted"></i>
@@ -2559,5 +2559,3 @@
 </body>
 
 </html>
-
-

@@ -429,7 +429,7 @@
                             </div>
                             @else
                             <div class="text-center py-5">
-                                <div class="bg-white p-4 rounded-circle d-inline-block shadow-sm mb-3 border"><img src="{{ asset('Admin/img/pasardaerah/PasarDaerah2.png') }}" alt="Pasar" style="width: 48px; height: 48px; object-fit: contain;"></div>
+                                <div class="bg-white p-4 rounded-circle d-inline-block shadow-sm mb-3 border"><img src="{{ asset('Admin/img/menu3dberanda/pasar-daerah.webp') }}" alt="Pasar" style="width: 48px; height: 48px; object-fit: contain;"></div>
                                 <h6 class="fw-bold text-dark mb-1">Belum Ada Riwayat</h6>
                                 <p class="text-muted mb-0">Pengguna ini belum pernah belanja di Pasar Daerah.</p>
                             </div>

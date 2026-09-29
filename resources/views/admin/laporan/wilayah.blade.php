@@ -303,7 +303,7 @@
             <div class="card border-0 shadow-sm h-100 unit-stat-card p-3">
                 <div class="d-flex align-items-center mb-2">
                     <div class="avatar avatar-sm bg-label-primary rounded-3 p-1 me-2 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 32px; height: 32px;">
-                        <img src="{{ asset('Admin/img/pasardaerah/PasarDaerah2.png') }}" style="width: 18px; height: 18px; object-fit: contain;" alt="Pasar Daerah">
+                        <img src="{{ asset('Admin/img/menu3dberanda/pasar-daerah.webp') }}" style="width: 18px; height: 18px; object-fit: contain;" alt="Pasar Daerah">
                     </div>
                     <div class="overflow-hidden">
                         <span class="text-secondary fw-semibold d-block text-truncate" style="font-size: 0.75rem;">Pasar Daerah</span>

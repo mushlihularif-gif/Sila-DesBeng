@@ -46,6 +46,7 @@
     @endpush
 
     {{-- UTAMA --}}<main class="flex-grow relative w-full overflow-hidden">
+        @include('partials.abstract-bg')
 
         <!-- Layer khusus untuk efek blur di belakang navbar (hanya di paling atas) -->
         <div id="navbar-blur-bg">
@@ -265,7 +266,7 @@
                 </div>
             </div>
 
-            <!-- Section Sapaan Ramah & Unit Pelayanan -->
+            <!-- Sapaan dan tiga kategori utama -->
             <div id="unit-carousel-container" class="max-w-7xl mx-auto px-4 sm:px-6 pt-8 pb-14 sm:pt-14 sm:pb-20 overflow-hidden relative">
                 <div class="max-w-7xl mx-auto relative z-10">
 
@@ -290,28 +291,25 @@
                         <div class="mt-6 sm:mt-8 max-w-2xl mx-auto px-2">
                             <div id="unit-speech-box" class="unit-speech-box bg-amber-50/90 border border-amber-200 rounded-2xl sm:rounded-3xl p-5 sm:p-7 shadow-sm transition-all duration-300">
                                 <div id="speech-text-wrapper" class="speech-text-wrapper">
-                                    <p id="speech-heading" class="text-xs sm:text-sm md:text-[15px] font-extrabold text-amber-950 leading-relaxed">
-                                        "Lagi ada rencana pesta, kenduri, atau acara keluarga? Mau sewa tenda dan perlengkapannya?"
-                                    </p>
-                                    <p id="speech-body" class="text-xs sm:text-[13px] text-gray-700 mt-2.5 sm:mt-3 font-medium leading-relaxed">
-                                        Sewa di sini! Cukup pilih tenda, kursi, dan alat acara yang kamu butuhkan langsung dari desa.
-                                    </p>
+                                    <p id="speech-heading" class="text-xs sm:text-sm md:text-[15px] font-extrabold text-amber-950 leading-relaxed">Cari kebutuhan rumah atau produk lokal?</p>
+                                    <p id="speech-body" class="text-xs sm:text-[13px] text-gray-700 mt-2.5 sm:mt-3 font-medium leading-relaxed">Pesan gas atau jelajahi produk usaha daerah melalui Pasar Daerah.</p>
+                                    <div id="speech-actions" class="mt-4 flex flex-wrap justify-center gap-2" aria-live="polite"></div>
                                     <div class="mt-3.5 sm:mt-4 flex items-center justify-center gap-2 flex-wrap">
                                         <span id="speech-badge" class="px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full bg-amber-100 text-amber-800 border border-amber-300">
-                                            Unit Penyewaan Alat
+                                            Belanja &amp; Kebutuhan
                                         </span>
-                                        <span class="text-[11px] text-gray-400 font-normal">&bull; Klik gambar di bawah untuk langsung ke layanan</span>
+                                        <span class="text-[11px] text-gray-400 font-normal">&bull; Pilih menu untuk melihat layanan yang tersedia</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Judul Section Unit Pelayanan -->
+                    <!-- Judul kategori utama -->
                     <div class="text-center mt-10 sm:mt-16 mb-8 sm:mb-12 relative">
                         <h3 class="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight">
-                            <span class="bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">Unit</span> 
-                            <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Pelayanan</span>
+                            <span class="bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">Jelajahi</span>
+                            <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Daerah</span>
                         </h3>
                     </div>
 
@@ -321,144 +319,107 @@
                             
                             $isServiceActive = function($unitName) use ($isLoggedInWithRegion, $activeServices) {
                                 if (!$isLoggedInWithRegion) return true;
-                                
-                                // Pasar Daerah dan Kabar & Informasi Daerah bersifat publik sentral se-Kabupaten
-                                if (in_array($unitName, ['Pasar Daerah', 'Pengumuman dan Event'])) {
+
+                                // Menu informasi dan Pasar Daerah tersedia untuk semua wilayah.
+                                if (in_array($unitName, ['Belanja & Kebutuhan', 'Pasar Daerah', 'Kabar dan Informasi Daerah', 'Pengumuman dan Event'])) {
                                     return true;
                                 }
 
-                                $map = [
-                                    'Unit Penyewaan Alat' => 'Penyewaan Alat',
-                                    'Unit Penjualan Gas' => 'Penjualan Gas',
-                                    'Unit Penyewaan Mobil' => 'Penyewaan Mobil',
-                                    'Unit Penyewaan Transportasi' => 'Penyewaan Mobil',
-                                    'Penyewaan Transportasi' => 'Penyewaan Mobil',
-                                    'Unit Peminjaman Fasilitas Umum' => 'Fasilitas Umum',
-                                    'Pelaporan Warga' => 'Pelaporan Warga'
+                                $serviceNames = [
+                                    'Unit Penyewaan Alat' => ['Penyewaan Alat'],
+                                    'Unit Penjualan Gas' => ['Penjualan Gas'],
+                                    'Unit Penyewaan Mobil' => ['Penyewaan Mobil', 'Penyewaan Transportasi'],
+                                    'Unit Penyewaan Transportasi' => ['Penyewaan Mobil', 'Penyewaan Transportasi'],
+                                    'Unit Peminjaman Fasilitas Umum' => ['Fasilitas Umum'],
+                                    'Pelaporan Warga' => ['Pelaporan Warga'],
                                 ];
-                                
-                                return in_array($map[$unitName] ?? $unitName, $activeServices ?? []);
+
+                                return collect($serviceNames[$unitName] ?? [$unitName])
+                                    ->intersect($activeServices ?? [])->isNotEmpty();
                             };
 
-                            $activeCount = 0;
-                            $allUnits = ['Unit Penyewaan Alat', 'Unit Penjualan Gas', 'Unit Penyewaan Transportasi', 'Unit Peminjaman Fasilitas Umum', 'Pasar Daerah', 'Pelaporan Warga', 'Pengumuman dan Event'];
-                            foreach ($allUnits as $unit) {
-                                if ($isServiceActive($unit)) $activeCount++;
+                            $hasBelanja = $isServiceActive('Belanja & Kebutuhan');
+                            $hasLayanan = collect(['Unit Penyewaan Alat', 'Unit Penyewaan Transportasi', 'Unit Peminjaman Fasilitas Umum', 'Pelaporan Warga'])
+                                ->contains(fn ($unit) => $isServiceActive($unit));
+                            $hasKabar = $isServiceActive('Kabar dan Informasi Daerah');
+                            $activeCount = (int) $hasBelanja + (int) $hasLayanan + (int) $hasKabar;
+                            $categoryUrl = function ($routeName) use ($isLoggedInWithRegion, $userRegionId) {
+                                $url = route($routeName);
+                                if ($isLoggedInWithRegion) return $url . '?region_id=' . $userRegionId;
+                                if (!auth()->check() && !in_array($routeName, ['pasar.index', 'announcements.index'])) {
+                                    return route('bumdes.profil') . '?redirect=' . $routeName;
+                                }
+                                if (auth()->check() && !auth()->user()->region_id && !in_array($routeName, ['pasar.index', 'announcements.index'])) {
+                                    return route('bumdes.profil') . '?redirect=' . $routeName;
+                                }
+                                return $url;
+                            };
+                            $belanjaActions = [];
+                            if ($isServiceActive('Unit Penjualan Gas')) {
+                                $belanjaActions[] = ['label' => 'Belanja Gas', 'url' => $categoryUrl('gas.sales')];
+                            }
+                            $belanjaActions[] = ['label' => 'Pasar Daerah', 'url' => $categoryUrl('pasar.index')];
+                            $layananActions = [];
+                            foreach ([
+                                ['Unit Penyewaan Alat', 'Sewa Alat', 'rental.equipment'],
+                                ['Unit Penyewaan Transportasi', 'Sewa Transportasi', 'mobil.rental.equipment'],
+                                ['Unit Peminjaman Fasilitas Umum', 'Fasilitas Umum', 'user.fasilitas-umum.equipment'],
+                                ['Pelaporan Warga', 'Pelaporan Warga', 'pelaporan.landing'],
+                            ] as [$serviceName, $label, $routeName]) {
+                                if ($isServiceActive($serviceName)) {
+                                    $layananActions[] = ['label' => $label, 'url' => $categoryUrl($routeName)];
+                                }
                             }
                         @endphp
 
                         @if($activeCount > 0)
                         <div class="relative w-full flex justify-center items-center unit-stage-wrapper">
                             <div class="relative w-full max-w-6xl mx-auto h-full">
-                                @if($isServiceActive('Unit Penyewaan Alat'))
+                                @if($hasBelanja)
                                 <div class="unit-card cursor-pointer hover:scale-105 transition-transform" 
                                      data-index="0" 
-                                     data-name="Unit Penyewaan Alat"
-                                     data-heading="&quot;Lagi ada rencana pesta, kenduri, atau acara keluarga? Mau sewa tenda dan perlengkapannya?&quot;"
-                                     data-body="Sewa di sini! Cukup pilih tenda, kursi, dan alat acara yang kamu butuhkan langsung dari desa."
-                                     data-badge="Unit Penyewaan Alat"
+                                     data-name="Belanja &amp; Kebutuhan"
+                                     data-heading="&quot;Cari kebutuhan rumah atau produk lokal?&quot;"
+                                     data-body="Pesan gas atau jelajahi produk usaha daerah melalui Pasar Daerah."
+                                     data-badge="Belanja &amp; Kebutuhan"
+                                     data-actions='@json($belanjaActions)'
                                      data-box-bg="bg-amber-50/90"
                                      data-box-border="border-amber-200"
                                      data-badge-bg="bg-amber-100 text-amber-800 border-amber-300"
-                                     data-text-color="text-amber-950"
-                                     data-url="{{ $isLoggedInWithRegion ? route('rental.equipment') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=rental.equipment' }}">
-                                    <img src="{{ asset('User/img/elemen/F1.png') }}" alt="Alat" loading="lazy">
+                                     data-text-color="text-amber-950">
+                                    <img src="{{ asset('Admin/img/pasardaerah/Belanja dan Kebutuhan.png') }}" alt="Belanja dan Kebutuhan" loading="lazy">
                                 </div>
                                 @endif
 
-                                @if($isServiceActive('Unit Penjualan Gas'))
+                                @if($hasLayanan)
                                 <div class="unit-card cursor-pointer hover:scale-105 transition-transform" 
                                      data-index="1" 
-                                     data-name="Unit Penjualan Gas"
-                                     data-heading="&quot;Gas di dapur tiba-tiba habis saat lagi masak? Mau beli gas tanpa antre?&quot;"
-                                     data-body="Pesan di sini! Tabung gas elpiji 3kg dan 5.5kg siap dipesan dengan harga resmi pangkalan desa."
-                                     data-badge="Unit Penjualan Gas"
-                                     data-box-bg="bg-orange-50/90"
-                                     data-box-border="border-orange-200"
-                                     data-badge-bg="bg-orange-100 text-orange-800 border-orange-300"
-                                     data-text-color="text-orange-950"
-                                     data-url="{{ $isLoggedInWithRegion ? route('gas.sales') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=gas.sales' }}">
-                                    <img src="{{ asset('User/img/elemen/F2.png') }}" alt="Gas" loading="lazy">
-                                </div>
-                                @endif
-
-                                @if($isServiceActive('Unit Penyewaan Transportasi') || $isServiceActive('Unit Penyewaan Mobil'))
-                                <div class="unit-card cursor-pointer hover:scale-105 transition-transform" 
-                                     data-index="2" 
-                                     data-name="Unit Penyewaan Transportasi"
-                                     data-heading="&quot;Butuh kendaraan untuk angkut barang, pindahan rumah, atau bepergian bersama keluarga?&quot;"
-                                     data-body="Sewa di sini! Tersedia mobil pikap dan mobil desa dengan tarif terjangkau dan supir terpercaya."
-                                     data-badge="Unit Penyewaan Transportasi"
+                                     data-name="Layanan Daerah"
+                                     data-heading="&quot;Butuh bantuan layanan dari daerah?&quot;"
+                                     data-body="Sewa perlengkapan atau transportasi, gunakan fasilitas umum, dan sampaikan laporan warga dari satu tempat."
+                                     data-badge="Layanan Daerah"
+                                     data-actions='@json($layananActions)'
                                      data-box-bg="bg-blue-50/90"
                                      data-box-border="border-blue-200"
                                      data-badge-bg="bg-blue-100 text-blue-800 border-blue-300"
-                                     data-text-color="text-blue-950"
-                                     data-url="{{ $isLoggedInWithRegion ? route('mobil.rental.equipment') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=mobil.rental.equipment' }}">
-                                    <img src="{{ asset('User/img/elemen/mobil.png') }}" alt="Transportasi" loading="lazy">
+                                     data-text-color="text-blue-950">
+                                    <img src="{{ asset('Admin/img/menu3dberanda/layanan-daerah.webp') }}" alt="Layanan Daerah" loading="lazy">
                                 </div>
                                 @endif
 
-                                @if($isServiceActive('Unit Peminjaman Fasilitas Umum'))
+                                @if($hasKabar)
                                 <div class="unit-card cursor-pointer hover:scale-105 transition-transform" 
-                                     data-index="3" 
-                                     data-name="Unit Peminjaman Fasilitas Umum"
-                                     data-heading="&quot;Mau adakan acara olahraga, rapat warga, atau kumpul bersama di desa?&quot;"
-                                     data-body="Pinjam di sini! Cek jadwal dan ajukan izin pemakaian lapangan, gedung, atau balai desa dengan mudah."
-                                     data-badge="Fasilitas Umum Desa"
-                                     data-box-bg="bg-purple-50/90"
-                                     data-box-border="border-purple-200"
-                                     data-badge-bg="bg-purple-100 text-purple-800 border-purple-300"
-                                     data-text-color="text-purple-950"
-                                     data-url="{{ $isLoggedInWithRegion ? route('user.fasilitas-umum.equipment') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=user.fasilitas-umum.equipment' }}">
-                                    <img src="{{ asset('User/img/elemen/fasilitas.png') }}" alt="Fasilitas" loading="lazy">
-                                </div>
-                                @endif
-
-                                @if($isServiceActive('Pasar Daerah'))
-                                <div class="unit-card cursor-pointer hover:scale-105 transition-transform" 
-                                     data-index="4" 
-                                     data-name="Pasar Daerah"
-                                     data-heading="&quot;Mau belanja kebutuhan atau jajanan dari pedagang lokal di Bengkalis?&quot;"
-                                     data-body="Belanja di sini! Dukung usaha daerah dengan membeli aneka produk langsung dari penjualnya."
-                                     data-badge="Pasar Daerah Bengkalis"
-                                     data-box-bg="bg-emerald-50/90"
-                                     data-box-border="border-emerald-200"
-                                     data-badge-bg="bg-emerald-100 text-emerald-800 border-emerald-300"
-                                     data-text-color="text-emerald-950"
-                                     data-url="{{ $isLoggedInWithRegion ? route('pasar.index') . '?region_id=' . $userRegionId : route('pasar.index') }}">
-                                    <img src="{{ asset('Admin/img/pasardaerah/PasarDaerah2.png') }}" alt="Pasar Daerah" loading="lazy" onerror="this.src='{{ asset('User/img/elemen/F1.png') }}'">
-                                </div>
-                                @endif
-
-                                @if($isServiceActive('Pelaporan Warga'))
-                                <div class="unit-card cursor-pointer hover:scale-105 transition-transform" 
-                                     data-index="5" 
-                                     data-name="Pelaporan Warga"
-                                     data-heading="&quot;Ada lampu jalan mati, sampah menumpuk, parit tersumbat, atau jalan rusak di dekatmu?&quot;"
-                                     data-body="Lapor di sini! Cukup foto dan kirim laporanmu agar segera diperbaiki oleh pengurus RT, RW, atau kantor desa."
-                                     data-badge="Pelaporan Warga"
-                                     data-box-bg="bg-red-50/90"
-                                     data-box-border="border-red-200"
-                                     data-badge-bg="bg-red-100 text-red-800 border-red-300"
-                                     data-text-color="text-red-950"
-                                     data-url="{{ $isLoggedInWithRegion ? route('pelaporan.landing') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=pelaporan.landing' }}">
-                                    <img src="{{ asset('User/img/elemen/lapor.png') }}" alt="Lapor" loading="lazy">
-                                </div>
-                                @endif
-
-                                @if($isServiceActive('Pengumuman dan Event'))
-                                <div class="unit-card cursor-pointer hover:scale-105 transition-transform" 
-                                     data-index="6" 
+                                     data-index="2"
                                      data-name="Kabar dan Informasi Daerah"
-                                     data-heading="&quot;Mau tahu pengumuman desa, jadwal bantuan sosial, atau kegiatan gotong royong?&quot;"
-                                     data-body="Baca di sini! Dapatkan kabar resmi dan info penting seputar desa langsung dari pengurus kelurahan dan desa."
-                                     data-badge="Kabar dan Informasi Daerah"
+                                     data-heading="&quot;Ingin tahu kabar terbaru di daerah?&quot;"
+                                     data-body="Baca berita, pengumuman, dan informasi resmi untuk warga."
+                                     data-badge="Kabar &amp; Informasi"
+                                     data-actions='@json([['label' => 'Buka Kabar Daerah', 'url' => $categoryUrl('announcements.index')]])'
                                      data-box-bg="bg-sky-50/90"
                                      data-box-border="border-sky-200"
                                      data-badge-bg="bg-sky-100 text-sky-800 border-sky-300"
-                                     data-text-color="text-sky-950"
-                                     data-url="{{ $isLoggedInWithRegion ? route('announcements.index') . '?region_id=' . $userRegionId : route('announcements.index') }}">
-                                    <img src="{{ asset('User/img/elemen/KabardanInformasiDaerah.png') }}" alt="Kabar dan Informasi Daerah" loading="lazy" onerror="this.src='{{ asset('User/img/elemen/F3.png') }}'">
+                                     data-text-color="text-sky-950">
+                                    <img src="{{ asset('User/img/elemen/KabardanInformasiDaerah.png') }}" alt="Kabar dan Informasi Daerah" loading="lazy">
                                 </div>
                                 @endif
                             </div>
@@ -474,7 +435,7 @@
 
                             <div class="unit-title-box text-center min-w-0 flex-1 max-w-[240px] sm:max-w-none sm:min-w-[300px]">
                                 <h3 id="unit-title" class="text-base sm:text-xl md:text-2xl font-bold text-gray-900 transition-all duration-300 truncate">
-                                    Unit Penyewaan Alat
+                                    Belanja &amp; Kebutuhan
                                 </h3>
                             </div>
 
@@ -511,17 +472,17 @@
                             <p class="text-xs sm:text-sm text-gray-500 mt-1">Ketersediaan resmi terdekat di wilayah Anda</p>
                         </div>
 
-                        <!-- Pill Links Pilihan Unit Cepat -->
+                        <!-- Tautan unit cepat dengan label unit yang konsisten -->
                         <div class="flex items-center gap-1.5 flex-wrap">
                             <span class="text-[11px] text-gray-400 font-medium mr-1 hidden sm:inline">Pilih unit:</span>
                             @if(!isset($isServiceActive) || $isServiceActive('Unit Penjualan Gas'))
-                            <a href="{{ $isLoggedInWithRegion ? route('gas.sales') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=gas.sales' }}" class="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-white text-orange-700 hover:bg-orange-600 hover:text-white border border-orange-200 transition-colors shadow-xs">Semua Gas</a>
+                            <a href="{{ $isLoggedInWithRegion ? route('gas.sales') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=gas.sales' }}" class="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-white text-orange-700 hover:bg-orange-600 hover:text-white border border-orange-200 transition-colors shadow-xs">Unit Penjualan Gas</a>
                             @endif
                             @if(!isset($isServiceActive) || $isServiceActive('Unit Penyewaan Alat'))
-                            <a href="{{ $isLoggedInWithRegion ? route('rental.equipment') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=rental.equipment' }}" class="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-white text-emerald-700 hover:bg-emerald-600 hover:text-white border border-emerald-200 transition-colors shadow-xs">Semua Alat</a>
+                            <a href="{{ $isLoggedInWithRegion ? route('rental.equipment') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=rental.equipment' }}" class="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-white text-emerald-700 hover:bg-emerald-600 hover:text-white border border-emerald-200 transition-colors shadow-xs">Unit Penyewaan Alat</a>
                             @endif
                             @if(!isset($isServiceActive) || $isServiceActive('Unit Penyewaan Transportasi') || $isServiceActive('Unit Penyewaan Mobil'))
-                            <a href="{{ $isLoggedInWithRegion ? route('mobil.rental.equipment') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=mobil.rental.equipment' }}" class="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-white text-blue-700 hover:bg-blue-600 hover:text-white border border-blue-200 transition-colors shadow-xs">Semua Transportasi</a>
+                            <a href="{{ $isLoggedInWithRegion ? route('mobil.rental.equipment') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=mobil.rental.equipment' }}" class="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-white text-blue-700 hover:bg-blue-600 hover:text-white border border-blue-200 transition-colors shadow-xs">Unit Penyewaan Kendaraan</a>
                             @endif
                             <a href="{{ route('pasar.index') }}" class="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-white text-amber-700 hover:bg-amber-600 hover:text-white border border-amber-200 transition-colors shadow-xs">Pasar Daerah</a>
                         </div>
@@ -1358,6 +1319,7 @@
                 const speechHeading = document.getElementById('speech-heading');
                 const speechBody = document.getElementById('speech-body');
                 const speechBadge = document.getElementById('speech-badge');
+                const speechActions = document.getElementById('speech-actions');
 
                 const n = cards.length;
                 let currentIndex = 0;
@@ -1413,6 +1375,18 @@
                                     if (speechHeading) speechHeading.textContent = card.getAttribute('data-heading') || '';
                                     if (speechBody) speechBody.textContent = card.getAttribute('data-body') || '';
                                     if (speechBadge) speechBadge.textContent = card.getAttribute('data-badge') || '';
+                                    if (speechActions) {
+                                        speechActions.replaceChildren();
+                                        let actions = [];
+                                        try { actions = JSON.parse(card.getAttribute('data-actions') || '[]'); } catch (error) {}
+                                        actions.forEach((action) => {
+                                            const link = document.createElement('a');
+                                            link.href = action.url;
+                                            link.textContent = action.label;
+                                            link.className = 'inline-flex items-center justify-center rounded-xl bg-[#115789] px-4 py-2 text-xs sm:text-sm font-bold text-white shadow-sm transition hover:bg-[#0d4267] focus:outline-none focus:ring-2 focus:ring-[#60a5fa] focus:ring-offset-2';
+                                            speechActions.appendChild(link);
+                                        });
+                                    }
 
                                     const boxBg = card.getAttribute('data-box-bg') || 'bg-amber-50/90';
                                     const boxBorder = card.getAttribute('data-box-border') || 'border-amber-200';
@@ -1479,16 +1453,11 @@
                     container.addEventListener('mouseleave', startAutoSlide);
                 }
 
-                // Interaksi Klik Kartu: Kartu Tengah langsung buka URL, Kartu Samping berputar ke Tengah
+                // Kartu samping dipilih dahulu, lalu warga memakai pintasan kategori yang tampil.
                 cards.forEach((card, index) => {
                     card.addEventListener('click', (e) => {
                         e.preventDefault();
-                        if (card.classList.contains('state-1')) {
-                            const targetUrl = card.getAttribute('data-url');
-                            if (targetUrl) {
-                                window.location.href = targetUrl;
-                            }
-                        } else {
+                        if (!card.classList.contains('state-1')) {
                             currentIndex = index;
                             updateCarousel();
                             resetAutoSlide();
@@ -1732,4 +1701,3 @@
         })();
     </script>
 @endpush
-

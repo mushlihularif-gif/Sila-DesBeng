@@ -192,7 +192,7 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                 @if($isPasarActive)
                 <li class="nav-item" role="presentation">
                     <button class="nav-link {{ $activeTab == 'pasar' || (!$isRentalActive && !$isGasActive && !$isMobilActive && !$isFasilitasActive && $activeTab == 'rental') ? 'active' : '' }} rounded-pill px-3 py-2 fw-semibold" id="pasar-tab" data-bs-toggle="tab" data-bs-target="#pasar-pane" type="button" role="tab">
-                        <img src="{{ asset('Admin/img/pasardaerah/PasarDaerah2.png') }}" class="me-2" style="width: 22px; height: 22px; object-fit: contain;">Pasar Daerah
+                        <img src="{{ asset('Admin/img/menu3dberanda/pasar-daerah.webp') }}" class="me-2" style="width: 22px; height: 22px; object-fit: contain;">Pasar Daerah
                         @php $pasarTotal = $notificationCounts['pasar']['total'] ?? 0; @endphp
                         @php $pasarCount = $pasarTotal > 0 ? $pasarTotal : $pasarOrders->count(); @endphp
                         <span id="pasar-badge" 

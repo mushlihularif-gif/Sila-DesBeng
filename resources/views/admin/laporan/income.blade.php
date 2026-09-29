@@ -300,7 +300,7 @@
                 <div class="card-body p-2 p-md-3 d-flex flex-column justify-content-between">
                     <div class="d-flex align-items-center mb-2">
                         <div class="avatar avatar-sm bg-secondary-subtle text-secondary rounded-3 p-1 me-2 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; min-width: 32px;">
-                            <img src="{{ asset('Admin/img/pasardaerah/PasarDaerah2.png') }}" style="width: 20px; height: 20px; object-fit: contain;">
+                            <img src="{{ asset('Admin/img/menu3dberanda/pasar-daerah.webp') }}" style="width: 20px; height: 20px; object-fit: contain;">
                         </div>
                         <div class="overflow-hidden">
                             <small class="text-muted text-uppercase fw-bold ls-1 d-block text-truncate" style="font-size: 0.65rem;">Pasar Daerah</small>
@@ -455,7 +455,7 @@
                     <!-- Pasar Item -->
                     <div class="d-flex align-items-center mb-4 p-3 rounded-3 hover-bg-light transition-all border border-dashed-hover">
                           <div class="avatar avatar-md bg-secondary-subtle rounded-3 p-2 me-3 d-flex align-items-center justify-content-center">
-                              <img src="{{ asset('Admin/img/pasardaerah/PasarDaerah2.png') }}" style="width: 24px; height: 24px; object-fit: contain;">
+                              <img src="{{ asset('Admin/img/menu3dberanda/pasar-daerah.webp') }}" style="width: 24px; height: 24px; object-fit: contain;">
                           </div>
                           <div class="flex-grow-1">
                               <div class="d-flex justify-content-between align-items-center mb-1">

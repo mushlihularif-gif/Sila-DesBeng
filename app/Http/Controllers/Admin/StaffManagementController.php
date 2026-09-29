@@ -151,14 +151,27 @@ class StaffManagementController extends Controller
      * Kelompokkan daftar izin mengikuti tab di sidebar, supaya kartu pilihannya
      * tidak tersaji sebagai satu tumpukan datar yang sulit dibaca.
      *
-     * Untuk daftar unit layanan (admin wilayah) tidak ada pengelompokan, jadi
-     * dikembalikan sebagai satu grup tanpa judul.
+     * Unit layanan mengikuti tiga kategori yang juga dipakai di beranda warga.
      */
     private function grupIzin(array $daftar): array
     {
-        // Daftar unit layanan: satu grup polos.
+        // Daftar unit layanan dikelompokkan menurut kategori layanan warga.
         if (! array_intersect(array_keys($daftar), array_keys(User::izinPlatform()))) {
-            return ['' => $daftar];
+            $groups = [
+                'Belanja & Kebutuhan' => ['gas', 'pasar_daerah'],
+                'Layanan Daerah' => ['sewa_alat', 'sewa_mobil', 'fasilitas_umum', 'pelaporan_warga'],
+                'Kabar dan Informasi Daerah' => ['kabar_informasi'],
+            ];
+            $hasil = [];
+
+            foreach ($groups as $namaGrup => $kunciGrup) {
+                $anggota = array_intersect_key($daftar, array_flip($kunciGrup));
+                if ($anggota) {
+                    $hasil[$namaGrup] = $anggota;
+                }
+            }
+
+            return $hasil;
         }
 
         $hasil = [];

@@ -66,7 +66,7 @@
                 <div class="activity-menu-card cursor-pointer w-full sm:w-auto" data-type="pasar">
                     <div class="bg-white rounded-xl sm:rounded-2xl p-2.5 sm:p-6 shadow-md sm:shadow-lg hover:shadow-xl transition-all duration-300 w-full sm:w-48 text-center border-2 sm:border-4 border-transparent flex flex-col justify-center items-center h-full">
                         <div class="mb-1.5 sm:mb-3 flex justify-center">
-                            <img src="{{ asset('Admin/img/pasardaerah/PasarDaerah2.png') }}" alt="Pasar Daerah" class="w-9 h-9 sm:w-16 sm:h-16 object-contain">
+                            <img src="{{ asset('Admin/img/menu3dberanda/pasar-daerah.webp') }}" alt="Pasar Daerah" class="w-9 h-9 sm:w-16 sm:h-16 object-contain">
                         </div>
                         <p class="font-bold text-xs sm:text-lg text-gray-800 leading-tight">Pasar Daerah</p>
                     </div>
@@ -780,4 +780,3 @@
     }
 </script>
 @endpush
-

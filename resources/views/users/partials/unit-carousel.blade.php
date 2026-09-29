@@ -1,119 +1,81 @@
 @php
-    $isServiceActive = function($name) use ($activeServices, $region) {
-        // Jika tidak ada region spesifik (misal diakses manual), tampilkan semua
-        if (!$region) return true; 
-        
-        // Pengumuman dan Pasar bersifat publik sentral yang selalu aktif secara default
-        if (in_array($name, ['Pengumuman dan Event', 'Pasar Daerah'])) return true;
+    $isMenuServiceActive = function ($name) use ($activeServices, $region) {
+        if (!$region || in_array($name, ['Pasar Daerah', 'Pengumuman dan Event'], true)) return true;
 
-        // Mapping nama tampilan ke nama layanan di database
         $map = [
             'Unit Penyewaan Alat' => ['Penyewaan Alat'],
             'Unit Penjualan Gas' => ['Penjualan Gas'],
             'Unit Penyewaan Mobil' => ['Penyewaan Mobil', 'Penyewaan Transportasi'],
-            'Unit Penyewaan Transportasi' => ['Penyewaan Mobil', 'Penyewaan Transportasi'],
             'Unit Peminjaman Fasilitas Umum' => ['Peminjaman Fasilitas Umum', 'Fasilitas Umum'],
-            'Pelaporan Warga' => ['Pelaporan Warga']
+            'Pelaporan Warga' => ['Pelaporan Warga'],
         ];
-        
-        $dbNames = $map[$name] ?? [$name];
-        foreach ($dbNames as $dbName) {
-            if (in_array($dbName, $activeServices ?? [])) return true;
-        }
-        return false;
-    };
 
-    $activeCount = 0;
-    $allUnits = ['Unit Penyewaan Alat', 'Unit Penjualan Gas', 'Unit Penyewaan Transportasi', 'Unit Peminjaman Fasilitas Umum', 'Pasar Daerah', 'Pelaporan Warga', 'Pengumuman dan Event'];
-    foreach ($allUnits as $unit) {
-        if ($isServiceActive($unit)) $activeCount++;
+        return collect($map[$name] ?? [$name])->intersect($activeServices ?? [])->isNotEmpty();
+    };
+    $menuUrl = fn ($routeName) => route($routeName) . ($region ? '?region_id=' . $region->id : '');
+
+    $belanjaLinks = [];
+    if ($isMenuServiceActive('Unit Penjualan Gas')) $belanjaLinks[] = ['label' => 'Gas Daerah', 'route' => 'gas.sales'];
+    $belanjaLinks[] = ['label' => 'Pasar Daerah', 'route' => 'pasar.index'];
+
+    $layananLinks = [];
+    foreach ([
+        ['Unit Penyewaan Alat', 'Penyewaan Alat', 'rental.equipment'],
+        ['Unit Penyewaan Mobil', 'Penyewaan Transportasi', 'mobil.rental.equipment'],
+        ['Unit Peminjaman Fasilitas Umum', 'Fasilitas Umum', 'user.fasilitas-umum.equipment'],
+        ['Pelaporan Warga', 'Pelaporan Warga', 'pelaporan.landing'],
+    ] as [$service, $label, $routeName]) {
+        if ($isMenuServiceActive($service)) $layananLinks[] = ['label' => $label, 'route' => $routeName];
     }
 
-    $index = 0;
+    $categoryMenus = [
+        [
+            'title' => 'Belanja & Kebutuhan',
+            'description' => 'Gas daerah dan produk lokal untuk kebutuhan sehari-hari.',
+            'image' => 'Admin/img/pasardaerah/Belanja dan Kebutuhan.png',
+            'links' => $belanjaLinks,
+        ],
+        [
+            'title' => 'Layanan Daerah',
+            'description' => 'Akses layanan dan fasilitas yang tersedia di wilayah ini.',
+            'image' => 'Admin/img/menu3dberanda/layanan-daerah.webp',
+            'links' => $layananLinks,
+        ],
+        [
+            'title' => 'Kabar dan Informasi Daerah',
+            'description' => 'Berita, pengumuman, dan informasi resmi untuk warga.',
+            'image' => 'User/img/elemen/KabardanInformasiDaerah.png',
+            'links' => [['label' => 'Buka Kabar Daerah', 'route' => 'announcements.index']],
+        ],
+    ];
 @endphp
 
-@if($activeCount > 0)
-            <!-- Unit Pelayanan Section -->
-            <div id="unit-carousel-container" class="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-16 overflow-hidden">
-                <div class="max-w-7xl mx-auto">
-                    <div class="text-center mb-6 sm:mb-16 relative">
-                        <h2 class="text-2xl sm:text-3xl font-bold mb-2">
-                            <span class="text-gray-800">Unit </span>
-                            <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Pelayanan</span>
-                        </h2>
-                    </div>
+<section id="unit-carousel-container" class="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-16 relative z-10">
+    <header class="text-center mb-8 sm:mb-10">
+        <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900">
+            Jelajahi <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Daerah</span>
+        </h2>
+        <p class="mt-2 text-sm sm:text-base text-gray-600">Pilih kebutuhan atau layanan yang ingin Anda akses.</p>
+    </header>
 
-                    <div class="relative w-full flex justify-center items-center unit-stage-wrapper">
-                        <div class="relative w-full max-w-6xl mx-auto h-full">
-
-                            @if($isServiceActive('Unit Penyewaan Alat'))
-                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="{{ $index++ }}" data-name="Unit Penyewaan Alat" onclick="window.location.href='{{ route('rental.equipment') . ($region ? '?region_id=' . $region->id : '') }}'">
-                                <img src="{{ asset('User/img/elemen/F1.png') }}" alt="Alat">
-                            </div>
-                            @endif
-
-                            @if($isServiceActive('Unit Penjualan Gas'))
-                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="{{ $index++ }}" data-name="Unit Penjualan Gas" onclick="window.location.href='{{ route('gas.sales') . ($region ? '?region_id=' . $region->id : '') }}'">
-                                <img src="{{ asset('User/img/elemen/F2.png') }}" alt="Gas">
-                            </div>
-                            @endif
-
-                            @if($isServiceActive('Unit Penyewaan Transportasi') || $isServiceActive('Unit Penyewaan Mobil'))
-                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="{{ $index++ }}" data-name="Unit Penyewaan Transportasi" onclick="window.location.href='{{ route('mobil.rental.equipment') . ($region ? '?region_id=' . $region->id : '') }}'">
-                                <img src="{{ asset('User/img/elemen/mobil.png') }}" alt="Transportasi">
-                            </div>
-                            @endif
-
-                            @if($isServiceActive('Unit Peminjaman Fasilitas Umum'))
-                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="{{ $index++ }}" data-name="Unit Peminjaman Fasilitas Umum" onclick="window.location.href='{{ route('user.fasilitas-umum.equipment') . ($region ? '?region_id=' . $region->id : '') }}'">
-                                <img src="{{ asset('User/img/elemen/fasilitas.png') }}" alt="Fasilitas">
-                            </div>
-                            @endif
-
-                            @if($isServiceActive('Pasar Daerah'))
-                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="{{ $index++ }}" data-name="Pasar Daerah" onclick="window.location.href='{{ route('pasar.index') . ($region ? '?region_id=' . $region->id : '') }}'">
-                                <img src="{{ asset('Admin/img/pasardaerah/PasarDaerah2.png') }}" alt="Pasar Daerah" onerror="this.src='{{ asset('User/img/elemen/F1.png') }}'">
-                            </div>
-                            @endif
-                            
-                            @if($isServiceActive('Pelaporan Warga'))
-                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="{{ $index++ }}" data-name="Pelaporan Warga" onclick="window.location.href='{{ route('pelaporan.landing') . ($region ? '?region_id=' . $region->id : '') }}'">
-                                <img src="{{ asset('User/img/elemen/lapor.png') }}" alt="Lapor">
-                            </div>
-                            @endif
-
-                            @if($isServiceActive('Pengumuman dan Event'))
-                            <div class="unit-card cursor-pointer hover:scale-105 transition-transform" data-index="{{ $index++ }}" data-name="Kabar dan Informasi Daerah" onclick="window.location.href='{{ route('announcements.index') . ($region ? '?region_id=' . $region->id : '') }}'">
-                                <img src="{{ asset('User/img/elemen/KabardanInformasiDaerah.png') }}" alt="Event">
-                            </div>
-                            @endif
-                        </div>
-
-                        <div class="unit-nav-wrapper absolute -bottom-6 left-0 right-0 flex items-center justify-center gap-2 sm:gap-4 md:gap-12 z-[60] px-2 sm:px-4">
-                            <button id="unit-prev"
-                                class="bg-white hover:bg-gray-50 text-gray-800 rounded-full p-2 sm:p-3 shadow-lg border border-gray-100 transition-transform active:scale-95 flex-shrink-0">
-                                <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                        d="M15 19l-7-7 7-7" />
-                                </svg>
-                            </button>
-
-                            <div class="unit-title-box text-center min-w-0 flex-1 max-w-[240px] sm:max-w-none sm:min-w-[300px]">
-                                <h3 id="unit-title"
-                                    class="text-sm sm:text-xl md:text-2xl font-bold text-black transition-all duration-300 truncate">
-                                </h3>
-                            </div>
-
-                            <button id="unit-next"
-                                class="bg-white hover:bg-gray-50 text-gray-800 rounded-full p-2 sm:p-3 shadow-lg border border-gray-100 transition-transform active:scale-95 flex-shrink-0">
-                                <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                        d="M9 5l7 7-7 7" />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+        @foreach($categoryMenus as $menu)
+            @if(count($menu['links']))
+            <article class="group flex flex-col rounded-3xl border border-white/80 bg-white/75 p-5 sm:p-6 text-center shadow-md backdrop-blur-md transition duration-300 hover:-translate-y-1 hover:shadow-xl">
+                <div class="mx-auto flex h-36 w-full items-center justify-center sm:h-40">
+                    <img src="{{ asset($menu['image']) }}" alt="{{ $menu['title'] }}" loading="lazy" class="h-full w-full object-contain drop-shadow-lg transition-transform duration-300 group-hover:scale-105">
                 </div>
-            </div>
-@endif
-
+                <h3 class="mt-4 text-lg sm:text-xl font-extrabold text-gray-900">{{ $menu['title'] }}</h3>
+                <p class="mt-2 min-h-10 text-sm leading-relaxed text-gray-600">{{ $menu['description'] }}</p>
+                <div class="mt-5 flex flex-wrap justify-center gap-2">
+                    @foreach($menu['links'] as $link)
+                    <a href="{{ $menuUrl($link['route']) }}" class="inline-flex min-h-10 items-center justify-center rounded-xl bg-[#115789] px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-[#0d4267] focus:outline-none focus:ring-2 focus:ring-[#60a5fa] focus:ring-offset-2">
+                        {{ $link['label'] }}
+                    </a>
+                    @endforeach
+                </div>
+            </article>
+            @endif
+        @endforeach
+    </div>
+</section>

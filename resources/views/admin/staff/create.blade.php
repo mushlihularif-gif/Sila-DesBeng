@@ -171,7 +171,7 @@
                                         elseif($key == 'fasilitas_umum') $iconImg = asset('User/img/elemen/fasilitas.png');
                                         elseif($key == 'pelaporan_warga') $iconImg = asset('User/img/elemen/lapor.png');
                                         elseif($key == 'kabar_informasi') $iconImg = asset('User/img/elemen/KabardanInformasiDaerah.png');
-                                        elseif($key == 'pasar_daerah') $iconImg = asset('Admin/img/pasardaerah/PasarDaerah2.png');
+                                        elseif($key == 'pasar_daerah') $iconImg = asset('Admin/img/menu3dberanda/pasar-daerah.webp');
                                     @endphp
                                     <div class="col-md-6 col-lg-4">
                                         <input class="unit-card-checkbox" type="checkbox" name="units[]" value="{{ $key }}" id="unit_{{ $key }}" {{ (is_array(old('units')) && in_array($key, old('units'))) ? 'checked' : '' }}>

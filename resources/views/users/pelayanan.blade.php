@@ -181,7 +181,7 @@
                     <div class="flex flex-col sm:flex-row gap-4 sm:gap-8 items-center sm:items-start">
                         <div class="flex-shrink-0">
                             <div class="w-20 h-20 sm:w-32 sm:h-32 flex items-center justify-center">
-                                <img src="{{ asset('Admin/img/pasardaerah/PasarDaerah2.png') }}" alt="Pasar Daerah"
+                                <img src="{{ asset('Admin/img/menu3dberanda/pasar-daerah.webp') }}" alt="Pasar Daerah"
                                     class="w-full h-full object-contain drop-shadow-md">
                             </div>
                         </div>
