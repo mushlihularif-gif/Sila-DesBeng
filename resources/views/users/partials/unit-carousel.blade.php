@@ -32,19 +32,22 @@
         [
             'title' => 'Belanja & Kebutuhan',
             'description' => 'Gas daerah dan produk lokal untuk kebutuhan sehari-hari.',
-            'image' => 'Admin/img/pasardaerah/Belanja dan Kebutuhan.png',
+            'image' => 'Admin/img/menu3dberanda/belanja-kebutuhan.png',
+            'fallback_image' => 'Admin/img/pasardaerah/PasarDaerah.png',
             'links' => $belanjaLinks,
         ],
         [
             'title' => 'Layanan Daerah',
             'description' => 'Akses layanan dan fasilitas yang tersedia di wilayah ini.',
             'image' => 'Admin/img/menu3dberanda/layanan-daerah.webp',
+            'fallback_image' => 'User/img/elemen/fasilitas.png',
             'links' => $layananLinks,
         ],
         [
             'title' => 'Kabar dan Informasi Daerah',
             'description' => 'Berita, pengumuman, dan informasi resmi untuk warga.',
             'image' => 'User/img/elemen/KabardanInformasiDaerah.png',
+            'fallback_image' => 'Admin/img/kabardaerah/KabardanInformasiDaerah.png',
             'links' => [['label' => 'Buka Kabar Daerah', 'route' => 'announcements.index']],
         ],
     ];
@@ -63,7 +66,7 @@
             @if(count($menu['links']))
             <article class="group flex flex-col rounded-3xl border border-white/80 bg-white/75 p-5 sm:p-6 text-center shadow-md backdrop-blur-md transition duration-300 hover:-translate-y-1 hover:shadow-xl">
                 <div class="mx-auto flex h-36 w-full items-center justify-center sm:h-40">
-                    <img src="{{ asset($menu['image']) }}" alt="{{ $menu['title'] }}" loading="lazy" class="h-full w-full object-contain drop-shadow-lg transition-transform duration-300 group-hover:scale-105">
+                    <img src="{{ asset($menu['image']) }}" onerror="this.onerror=null; this.src='{{ asset($menu['fallback_image'] ?? 'User/img/elemen/F3.png') }}';" alt="{{ $menu['title'] }}" loading="lazy" class="h-full w-full object-contain drop-shadow-lg transition-transform duration-300 group-hover:scale-105">
                 </div>
                 <h3 class="mt-4 text-lg sm:text-xl font-extrabold text-gray-900">{{ $menu['title'] }}</h3>
                 <p class="mt-2 min-h-10 text-sm leading-relaxed text-gray-600">{{ $menu['description'] }}</p>

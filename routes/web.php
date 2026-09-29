@@ -1113,3 +1113,49 @@ Route::get('/storage/{path}', function ($path) {
     }
     return response()->file($fullPath);
 })->where('path', '.*')->name('storage.fallback');
+
+// Fallback Route untuk aset statis Admin & User jika hosting belum menyalin ke document root
+Route::get('/{folder}/{subfolder}/{path}', function ($folder, $subfolder, $path) {
+    if (str_contains($path, '..') || str_contains($path, "\0") || str_contains($folder, '..') || str_contains($subfolder, '..')) {
+        abort(403);
+    }
+
+    $decodedPath = urldecode($path);
+    $relative = $folder . '/' . $subfolder . '/' . $decodedPath;
+    $fullPath = base_path('public/' . $relative);
+
+    if (!file_exists($fullPath) || is_dir($fullPath)) {
+        abort(404);
+    }
+
+    // Salin otomatis ke document root hosting jika berbeda (menghindari request PHP berikutnya)
+    if (isset($_SERVER['DOCUMENT_ROOT']) && is_dir($_SERVER['DOCUMENT_ROOT'])) {
+        $destPath = rtrim($_SERVER['DOCUMENT_ROOT'], '/\\') . '/' . $relative;
+        if (!file_exists($destPath)) {
+            @mkdir(dirname($destPath), 0755, true);
+            @copy($fullPath, $destPath);
+        }
+    }
+
+    $extension = strtolower(pathinfo($fullPath, PATHINFO_EXTENSION));
+    $mimes = [
+        'webp' => 'image/webp',
+        'png'  => 'image/png',
+        'jpg'  => 'image/jpeg',
+        'jpeg' => 'image/jpeg',
+        'gif'  => 'image/gif',
+        'svg'  => 'image/svg+xml',
+        'ico'  => 'image/x-icon',
+        'css'  => 'text/css',
+        'js'   => 'application/javascript',
+    ];
+    $contentType = $mimes[$extension] ?? (mime_content_type($fullPath) ?: 'application/octet-stream');
+
+    return response()->file($fullPath, [
+        'Content-Type' => $contentType,
+        'Cache-Control' => 'public, max-age=604800',
+    ]);
+})->where('folder', '[Aa]dmin|[Uu]ser')
+  ->where('subfolder', 'img|vendor|css|js|fonts')
+  ->where('path', '.*')
+  ->name('assets.fallback');

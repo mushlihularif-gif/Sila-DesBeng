@@ -387,7 +387,7 @@
                                      data-box-border="border-amber-200"
                                      data-badge-bg="bg-amber-100 text-amber-800 border-amber-300"
                                      data-text-color="text-amber-950">
-                                    <img src="{{ asset('Admin/img/pasardaerah/Belanja dan Kebutuhan.png') }}" alt="Belanja dan Kebutuhan" loading="lazy">
+                                    <img src="{{ asset('Admin/img/menu3dberanda/belanja-kebutuhan.png') }}" onerror="this.onerror=null; this.src='{{ asset('Admin/img/pasardaerah/PasarDaerah.png') }}';" alt="Belanja dan Kebutuhan" loading="lazy">
                                 </div>
                                 @endif
 
@@ -403,7 +403,7 @@
                                      data-box-border="border-blue-200"
                                      data-badge-bg="bg-blue-100 text-blue-800 border-blue-300"
                                      data-text-color="text-blue-950">
-                                    <img src="{{ asset('Admin/img/menu3dberanda/layanan-daerah.webp') }}" alt="Layanan Daerah" loading="lazy">
+                                    <img src="{{ asset('Admin/img/menu3dberanda/layanan-daerah.webp') }}" onerror="this.onerror=null; this.src='{{ asset('User/img/elemen/fasilitas.png') }}';" alt="Layanan Daerah" loading="lazy">
                                 </div>
                                 @endif
 
@@ -419,7 +419,7 @@
                                      data-box-border="border-sky-200"
                                      data-badge-bg="bg-sky-100 text-sky-800 border-sky-300"
                                      data-text-color="text-sky-950">
-                                    <img src="{{ asset('User/img/elemen/KabardanInformasiDaerah.png') }}" alt="Kabar dan Informasi Daerah" loading="lazy">
+                                    <img src="{{ asset('User/img/elemen/KabardanInformasiDaerah.png') }}" onerror="this.onerror=null; this.src='{{ asset('Admin/img/kabardaerah/KabardanInformasiDaerah.png') }}';" alt="Kabar dan Informasi Daerah" loading="lazy">
                                 </div>
                                 @endif
                             </div>
