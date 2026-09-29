@@ -6,6 +6,7 @@ git pull origin main
 
 echo "Menyinkronkan aset public ke document root..."
 cp -R public/. /home/inon1796/public_html/siladesbeng.inovasia.site/
+cp deploy/index-hosting.php /home/inon1796/public_html/siladesbeng.inovasia.site/index.php
 
 echo "Menyegarkan cache Laravel..."
 php artisan route:clear
