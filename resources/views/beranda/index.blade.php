@@ -298,7 +298,7 @@
                                         <span id="speech-badge" class="px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full bg-amber-100 text-amber-800 border border-amber-300">
                                             Belanja &amp; Kebutuhan
                                         </span>
-                                        <span class="text-[11px] text-gray-400 font-normal">&bull; Pilih menu untuk melihat layanan yang tersedia</span>
+                                        <span class="text-[11px] text-gray-400 font-normal">&bull; Klik ikon untuk melihat pilihan lengkap</span>
                                     </div>
                                 </div>
                             </div>
@@ -354,6 +354,10 @@
                                 }
                                 return $url;
                             };
+                            $categoryPageUrl = function ($slug) use ($isLoggedInWithRegion, $userRegionId) {
+                                $url = route('service-category.show', ['category' => $slug]);
+                                return $isLoggedInWithRegion ? $url . '?region_id=' . $userRegionId : $url;
+                            };
                             $belanjaActions = [];
                             if ($isServiceActive('Unit Penjualan Gas')) {
                                 $belanjaActions[] = ['label' => 'Belanja Gas', 'url' => $categoryUrl('gas.sales')];
@@ -376,7 +380,7 @@
                         <div class="relative w-full flex justify-center items-center unit-stage-wrapper">
                             <div class="relative w-full max-w-6xl mx-auto h-full">
                                 @if($hasBelanja)
-                                <div class="unit-card cursor-pointer hover:scale-105 transition-transform" 
+                                <a href="{{ $categoryPageUrl('belanja-kebutuhan') }}" aria-label="Buka kategori Belanja dan Kebutuhan" class="unit-card cursor-pointer no-underline hover:scale-105 transition-transform focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-300 rounded-2xl"
                                      data-index="0" 
                                      data-name="Belanja &amp; Kebutuhan"
                                      data-heading="&quot;Cari kebutuhan rumah atau produk lokal?&quot;"
@@ -388,11 +392,11 @@
                                      data-badge-bg="bg-amber-100 text-amber-800 border-amber-300"
                                      data-text-color="text-amber-950">
                                     <img src="{{ asset('Admin/img/menu3dberanda/belanja-kebutuhan.png') }}" onerror="this.onerror=null; this.src='{{ asset('Admin/img/pasardaerah/PasarDaerah.png') }}';" alt="Belanja dan Kebutuhan" loading="lazy">
-                                </div>
+                                </a>
                                 @endif
 
                                 @if($hasLayanan)
-                                <div class="unit-card cursor-pointer hover:scale-105 transition-transform" 
+                                <a href="{{ $categoryPageUrl('layanan-daerah') }}" aria-label="Buka kategori Layanan Daerah" class="unit-card cursor-pointer no-underline hover:scale-105 transition-transform focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-300 rounded-2xl"
                                      data-index="1" 
                                      data-name="Layanan Daerah"
                                      data-heading="&quot;Butuh bantuan layanan dari daerah?&quot;"
@@ -404,11 +408,11 @@
                                      data-badge-bg="bg-blue-100 text-blue-800 border-blue-300"
                                      data-text-color="text-blue-950">
                                     <img src="{{ asset('Admin/img/menu3dberanda/layanan-daerah.webp') }}" onerror="this.onerror=null; this.src='{{ asset('User/img/elemen/fasilitas.png') }}';" alt="Layanan Daerah" loading="lazy">
-                                </div>
+                                </a>
                                 @endif
 
                                 @if($hasKabar)
-                                <div class="unit-card cursor-pointer hover:scale-105 transition-transform" 
+                                <a href="{{ $categoryUrl('announcements.index') }}" aria-label="Buka Kabar dan Informasi Daerah" class="unit-card cursor-pointer no-underline hover:scale-105 transition-transform focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-300 rounded-2xl"
                                      data-index="2"
                                      data-name="Kabar dan Informasi Daerah"
                                      data-heading="&quot;Ingin tahu kabar terbaru di daerah?&quot;"
@@ -420,7 +424,7 @@
                                      data-badge-bg="bg-sky-100 text-sky-800 border-sky-300"
                                      data-text-color="text-sky-950">
                                     <img src="{{ asset('User/img/elemen/KabardanInformasiDaerah.png') }}" onerror="this.onerror=null; this.src='{{ asset('Admin/img/kabardaerah/KabardanInformasiDaerah.png') }}';" alt="Kabar dan Informasi Daerah" loading="lazy">
-                                </div>
+                                </a>
                                 @endif
                             </div>
                         </div>
@@ -1452,18 +1456,6 @@
                     container.addEventListener('mouseenter', () => clearInterval(autoSlideInterval));
                     container.addEventListener('mouseleave', startAutoSlide);
                 }
-
-                // Kartu samping dipilih dahulu, lalu warga memakai pintasan kategori yang tampil.
-                cards.forEach((card, index) => {
-                    card.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        if (!card.classList.contains('state-1')) {
-                            currentIndex = index;
-                            updateCarousel();
-                            resetAutoSlide();
-                        }
-                    });
-                });
 
                 updateCarousel();
                 startAutoSlide();

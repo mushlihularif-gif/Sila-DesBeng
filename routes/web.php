@@ -51,6 +51,11 @@ Route::get('/beranda', [App\Http\Controllers\User\BerandaController::class, 'ind
     ->name('beranda')
     ->middleware('role:user,guest');
 
+Route::get('/kategori-layanan/{category}', [App\Http\Controllers\User\ServiceCategoryController::class, 'show'])
+    ->whereIn('category', ['belanja-kebutuhan', 'layanan-daerah'])
+    ->name('service-category.show')
+    ->middleware('role:user,guest');
+
 // Live Search API
 Route::get('/beranda/live-search', [App\Http\Controllers\User\BerandaController::class, 'liveSearch'])
     ->name('beranda.live-search');
