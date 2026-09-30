@@ -277,7 +277,7 @@
                             $greetingPhrase2 = 'Mau cari layanan apa hari ini?';
                         @endphp
                         <div class="min-h-[58px] sm:min-h-[72px] md:min-h-[80px] flex items-center justify-center px-4">
-                            <h2 class="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-gray-900 tracking-tight leading-snug">
+                            <h2 class="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-black text-gray-900 tracking-tight leading-snug">
                                 <span id="typewriter-text" 
                                       class="font-black text-gray-900"
                                       style="color: #111827 !important;"
@@ -632,9 +632,9 @@
             @endif
 
             <!-- Section Tentang Kami -->
-            <div class="relative max-w-7xl mx-auto px-6 py-16 overflow-visible">
+            <div class="relative max-w-7xl mx-auto px-4 py-8 sm:px-6 sm:py-16 overflow-visible">
                 <!-- Background Elements - Hanya 2 Oval -->
-                <div class="absolute inset-0 pointer-events-none" style="left: -200px; right: -200px;">
+                <div id="about-us-background" class="absolute inset-0 pointer-events-none" style="left: -200px; right: -200px;">
                     <svg class="absolute inset-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 1440 500"
                         xmlns="http://www.w3.org/2000/svg">
                         <defs>
@@ -658,8 +658,8 @@
                 <!-- Content -->
                 <div class="relative z-10">
                     <!-- Title -->
-                    <div class="text-center mb-10">
-                        <h2 class="text-3xl font-bold mb-2">
+                    <div class="text-center mb-6 sm:mb-10">
+                        <h2 class="text-2xl sm:text-3xl font-bold mb-2">
                             <span class="bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">Tentang</span> 
                             <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Kami</span>
                         </h2>
@@ -667,8 +667,21 @@
 
                     <!-- Text Content dengan Glass Effect -->
                     <div class="max-w-5xl mx-auto">
-                        <div class="backdrop-blur-sm bg-white/60 rounded-3xl p-8 md:p-12 border border-white/70 shadow-xl">
-                            <div class="space-y-5 text-gray-700 text-base leading-relaxed text-justify">
+                        <div class="backdrop-blur-sm bg-white/70 rounded-2xl sm:rounded-3xl p-5 sm:p-8 md:p-12 border border-white/70 shadow-lg sm:shadow-xl">
+                            <p class="text-sm sm:hidden text-gray-700 leading-relaxed">
+                                SiladesBeng memudahkan warga mengakses layanan desa, berbelanja produk lokal, menyampaikan laporan, dan mendapatkan informasi daerah dalam satu platform.
+                            </p>
+                            <details class="sm:hidden mt-3 border-t border-slate-200/80 pt-3">
+                                <summary class="cursor-pointer list-none text-sm font-bold text-[#115789] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 rounded">
+                                    Baca selengkapnya
+                                    <i class="bx bx-chevron-down ml-1" aria-hidden="true"></i>
+                                </summary>
+                                <div class="mt-3 space-y-3 text-left text-sm leading-relaxed text-gray-600">
+                                    <p>SiladesBeng (Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis) merupakan platform digital terpadu yang mendukung tata kelola dan pelayanan publik dari tingkat kabupaten hingga desa.</p>
+                                    <p>Warga dapat mengakses penyewaan alat, penjualan gas, transportasi, fasilitas umum, Pasar Daerah, Pelaporan Warga, serta Kabar dan Informasi Daerah melalui satu platform.</p>
+                                </div>
+                            </details>
+                            <div class="hidden sm:block space-y-4 text-left md:text-justify text-sm md:text-base text-gray-700 leading-relaxed">
                                 <p>
                                     <span class="font-semibold text-gray-800">SiladesBeng</span> (Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis) merupakan platform digital terpadu berskala kabupaten yang dirancang khusus untuk memodernisasi tata kelola administrasi dan pelayanan publik di seluruh jaringan kecamatan hingga tingkat desa se-Kabupaten Bengkalis. Platform ini mengintegrasikan berbagai pilar layanan esensial masyarakat dan operasional layanan desa dalam satu pintu.
                                 </p>
@@ -987,23 +1000,28 @@
         /* RESPONSIVE MOBILE - 3 COLUMN LAYOUT (CENTER FOCUS) */
         @media (max-width: 768px) {
             #unit-carousel-container {
-                padding-top: 2rem !important;
-                padding-bottom: 2.5rem !important;
+                padding-top: 1rem !important;
+                padding-bottom: 1.5rem !important;
             }
             .unit-stage-wrapper {
-                height: 240px !important;
+                height: 190px !important;
             }
             .unit-card {
-                width: 96px !important;
-                height: 96px !important;
-                top: 38% !important;
+                width: clamp(70px, 20vw, 88px) !important;
+                height: clamp(70px, 20vw, 88px) !important;
+                top: 43% !important;
+            }
+            .unit-card img {
+                width: 84% !important;
+                height: 84% !important;
+                filter: drop-shadow(0 8px 14px rgba(15, 23, 42, 0.16)) !important;
             }
 
             /* Slot Kiri (Background Preview) */
             .state-0 {
-                left: 15% !important;
-                transform: translate(-50%, -50%) scale(0.65) !important;
-                opacity: 0.5 !important;
+                left: 18% !important;
+                transform: translate(-50%, -50%) scale(0.58) !important;
+                opacity: 0.58 !important;
                 z-index: 20 !important;
                 filter: grayscale(20%) !important;
             }
@@ -1011,7 +1029,7 @@
             /* Slot Tengah (Focus Terpusat, Proporsional dan Rapi) */
             .state-1 {
                 left: 50% !important;
-                transform: translate(-50%, -50%) scale(1.15) !important;
+                transform: translate(-50%, -50%) scale(1.08) !important;
                 opacity: 1 !important;
                 z-index: 50 !important;
                 filter: grayscale(0%) drop-shadow(0 8px 16px rgba(0,0,0,0.18)) !important;
@@ -1019,9 +1037,9 @@
 
             /* Slot Kanan (Background Preview) */
             .state-2 {
-                left: 85% !important;
-                transform: translate(-50%, -50%) scale(0.65) !important;
-                opacity: 0.5 !important;
+                left: 82% !important;
+                transform: translate(-50%, -50%) scale(0.58) !important;
+                opacity: 0.58 !important;
                 z-index: 20 !important;
                 filter: grayscale(20%) !important;
             }
@@ -1053,10 +1071,10 @@
                 left: auto !important;
                 right: auto !important;
                 width: 100% !important;
-                margin-top: 1rem !important;
-                margin-bottom: 1.5rem !important;
-                padding: 0 16px !important;
-                gap: 12px !important;
+                margin-top: 0.25rem !important;
+                margin-bottom: 0.75rem !important;
+                padding: 0 8px !important;
+                gap: 8px !important;
                 display: flex !important;
                 align-items: center !important;
                 justify-content: center !important;
@@ -1077,7 +1095,7 @@
             }
             .unit-title-box {
                 min-width: 0 !important;
-                max-width: 210px !important;
+                max-width: 180px !important;
                 flex: 1 !important;
             }
             #unit-title {
@@ -1090,6 +1108,45 @@
                 opacity: 0.25 !important;
                 max-width: 100vw !important;
                 overflow: hidden !important;
+            }
+        }
+
+        @media (max-width: 420px) {
+            #unit-carousel-container {
+                padding-left: 0.75rem !important;
+                padding-right: 0.75rem !important;
+            }
+            .unit-stage-wrapper {
+                height: 170px !important;
+            }
+            .unit-card {
+                width: 70px !important;
+                height: 70px !important;
+            }
+            .unit-card img {
+                width: 82% !important;
+                height: 82% !important;
+            }
+            .unit-title-box {
+                max-width: 150px !important;
+            }
+            #unit-title {
+                font-size: 0.9rem !important;
+            }
+            #unit-speech-box {
+                padding: 0.75rem 0.85rem !important;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .rekomendasi-img-wrapper {
+                height: clamp(112px, 34vw, 138px);
+                padding: 8px;
+            }
+            #about-us-background {
+                left: -48px !important;
+                right: -48px !important;
+                opacity: 0.65;
             }
         }
     </style>
