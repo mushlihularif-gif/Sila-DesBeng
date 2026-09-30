@@ -292,12 +292,12 @@
                             <div id="unit-speech-box" class="unit-speech-box relative overflow-hidden rounded-2xl border border-white/80 bg-white/75 px-4 py-4 shadow-md shadow-slate-900/5 backdrop-blur-xl transition-all duration-300 sm:rounded-3xl sm:px-6 sm:py-5">
                                 <span class="pointer-events-none absolute inset-y-4 left-0 w-1 rounded-r-full bg-gradient-to-b from-[#115789] via-[#3b82f6] to-[#fbbf24]"></span>
                                 <div id="speech-text-wrapper" class="speech-text-wrapper pl-2 sm:pl-3">
-                                    <div class="flex flex-col gap-2.5 sm:flex-row sm:items-start sm:gap-4">
+                                    <div class="flex flex-col items-start gap-2.5">
                                         <span id="speech-badge" class="inline-flex shrink-0 self-start items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.1em] text-amber-800">
                                             <i id="speech-badge-icon" class="bx bx-shopping-bag text-sm" aria-hidden="true"></i>
                                             <span id="speech-badge-label">Belanja &amp; Kebutuhan</span>
                                         </span>
-                                        <div class="min-w-0 sm:pt-0.5">
+                                        <div class="min-w-0 w-full">
                                             <p id="speech-heading" class="text-sm font-extrabold leading-snug text-slate-900 sm:text-base">Cari kebutuhan rumah atau produk lokal?</p>
                                             <p id="speech-body" class="mt-1 text-xs font-medium leading-relaxed text-slate-600 sm:text-sm">Pesan gas atau jelajahi produk usaha daerah melalui Pasar Daerah.</p>
                                         </div>
