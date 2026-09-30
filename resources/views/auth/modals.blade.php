@@ -7,12 +7,12 @@
 
 {{-- Modal Auth Container --}}
 <div id="auth-modal-overlay"
-    class="fixed inset-0 bg-black/40 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300" style="z-index: 9999;">
-    <div class="flex items-center justify-center min-h-screen p-4">
+    class="fixed inset-0 overflow-y-auto bg-black/40 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300" style="z-index: 9999;">
+    <div class="flex min-h-screen items-center justify-center p-3 sm:p-4">
 
         {{-- MODAL LOGIN --}}
         <div id="modal-login"
-            class="modal-content bg-white rounded-2xl shadow-lg max-w-[420px] w-full p-8 transform scale-95 opacity-0 transition-all duration-300 hidden relative">
+            class="modal-content max-h-[calc(100dvh-1.5rem)] overflow-y-auto overscroll-contain bg-white rounded-2xl shadow-lg max-w-[420px] w-full p-5 sm:p-8 transform scale-95 opacity-0 transition-all duration-300 hidden relative">
             <button type="button"
                 class="modal-close absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition z-10">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -114,7 +114,7 @@
 
         {{-- MODAL GOOGLE REGISTER --}}
         <div id="modal-google-register"
-            class="modal-content bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-8 transform scale-95 opacity-0 transition-all duration-300 hidden relative">
+            class="modal-content max-h-[calc(100dvh-1.5rem)] overflow-y-auto overscroll-contain bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-5 sm:p-8 transform scale-95 opacity-0 transition-all duration-300 hidden relative">
             {{-- Close Button --}}
             <button type="button" class="modal-close absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition z-10">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -135,7 +135,7 @@
                 <input type="hidden" name="otp_method" value="email">
                 <!-- Removed Nama Lengkap because it is retrieved from Google Session -->
                 <input type="hidden" name="kabupaten" id="google-reg-kabupaten-input" value="bengkalis">
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                         <select name="kecamatan" id="google-reg-kecamatan" required disabled class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm disabled:bg-gray-100 disabled:cursor-not-allowed">
                             <option value="">Pilih Kecamatan</option>
@@ -172,7 +172,7 @@
 
         {{-- MODAL REGISTER --}}
         <div id="modal-register"
-            class="modal-content bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-8 transform scale-95 opacity-0 transition-all duration-300 hidden relative">
+            class="modal-content max-h-[calc(100dvh-1.5rem)] overflow-y-auto overscroll-contain bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-5 sm:p-8 transform scale-95 opacity-0 transition-all duration-300 hidden relative">
             <button type="button"
                 class="modal-close absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition z-10">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -202,7 +202,7 @@
                 @csrf
                 <input type="hidden" name="otp_method" value="email">
                 
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                         <input type="text" name="username" placeholder="Nama Pengguna" required
                             class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm">
@@ -228,7 +228,7 @@
                         <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path></svg>
                     </div>
                 </div>
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                         <select name="kecamatan" id="reg-kecamatan" required disabled class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm disabled:bg-gray-100 disabled:cursor-not-allowed">
                             <option value="">Pilih Kecamatan</option>
@@ -325,7 +325,7 @@
 
         {{-- MODAL OTP --}}
         <div id="modal-otp"
-            class="modal-content bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 transform scale-95 opacity-0 transition-all duration-300 hidden relative">
+            class="modal-content max-h-[calc(100dvh-1.5rem)] overflow-y-auto overscroll-contain bg-white rounded-3xl shadow-2xl max-w-md w-full p-5 sm:p-8 transform scale-95 opacity-0 transition-all duration-300 hidden relative">
             <button type="button"
                 class="modal-close absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -393,7 +393,7 @@
 
         {{-- MODAL FORGOT PASSWORD OTP --}}
         <div id="modal-forgot-otp"
-            class="modal-content bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 transform scale-95 opacity-0 transition-all duration-300 hidden relative">
+            class="modal-content max-h-[calc(100dvh-1.5rem)] overflow-y-auto overscroll-contain bg-white rounded-3xl shadow-2xl max-w-md w-full p-5 sm:p-8 transform scale-95 opacity-0 transition-all duration-300 hidden relative">
             <button type="button"
                 class="modal-close absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -462,7 +462,7 @@
 
         {{-- MODAL SUCCESS --}}
         <div id="modal-success"
-            class="modal-content bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 transform scale-95 opacity-0 transition-all duration-300 hidden relative">
+            class="modal-content max-h-[calc(100dvh-1.5rem)] overflow-y-auto overscroll-contain bg-white rounded-3xl shadow-2xl max-w-md w-full p-5 sm:p-8 transform scale-95 opacity-0 transition-all duration-300 hidden relative">
             <div class="text-center">
                 <h2 class="text-2xl font-bold text-gray-900 mb-6">Selamat Datang</h2>
 
@@ -483,7 +483,7 @@
         
         {{-- MODAL FORGOT PASSWORD STEP 1: Input Email --}}
         <div id="modal-forgot-password"
-            class="modal-content bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 transform scale-95 opacity-0 transition-all duration-300 hidden relative">
+            class="modal-content max-h-[calc(100dvh-1.5rem)] overflow-y-auto overscroll-contain bg-white rounded-3xl shadow-2xl max-w-md w-full p-5 sm:p-8 transform scale-95 opacity-0 transition-all duration-300 hidden relative">
             <button type="button"
                 class="modal-close absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -528,7 +528,7 @@
 
         {{-- MODAL RESET PASSWORD (Buat Kata Sandi Baru) --}}
         <div id="modal-reset-password"
-            class="modal-content bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 transform scale-95 opacity-0 transition-all duration-300 hidden relative">
+            class="modal-content max-h-[calc(100dvh-1.5rem)] overflow-y-auto overscroll-contain bg-white rounded-3xl shadow-2xl max-w-md w-full p-5 sm:p-8 transform scale-95 opacity-0 transition-all duration-300 hidden relative">
             <button type="button"
                 class="modal-close absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -615,7 +615,7 @@
 
         {{-- MODAL LOGOUT CONFIRMATION --}}
         <div id="modal-logout"
-            class="modal-content bg-white rounded-3xl shadow-2xl max-w-sm w-full p-8 transform scale-95 opacity-0 transition-all duration-300 hidden relative">
+            class="modal-content max-h-[calc(100dvh-1.5rem)] overflow-y-auto overscroll-contain bg-white rounded-3xl shadow-2xl max-w-sm w-full p-5 sm:p-8 transform scale-95 opacity-0 transition-all duration-300 hidden relative">
             <button type="button"
                 class="modal-close absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

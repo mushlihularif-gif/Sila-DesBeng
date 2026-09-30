@@ -3,34 +3,34 @@
 @section('title', 'Buat Laporan Warga')
 
 @section('page')
-    <div class="min-h-screen bg-[#f0f4f8] pt-32 pb-20 text-gray-800 relative">
+    <div class="min-h-screen bg-[#f0f4f8] pt-24 pb-16 sm:pt-32 sm:pb-20 text-gray-800 relative">
         {{-- Custom Vector Abstract Background --}}
         <div class="fixed inset-0 overflow-hidden z-0 pointer-events-none" id="premium-bg">
             <canvas id="abstract-canvas" class="w-full h-full absolute inset-0"></canvas>
         </div>
-        <div class="max-w-4xl mx-auto px-6 relative z-10 mb-20" data-aos="fade-up">
-            <div class="bg-white/60 backdrop-blur-md border border-gray-100 rounded-2xl shadow-sm pt-6 pb-8 px-8 md:pt-8 md:pb-10 md:px-10">
+        <div class="max-w-4xl mx-auto px-3 sm:px-6 relative z-10 mb-12 sm:mb-20" data-aos="fade-up">
+            <div class="bg-white/70 backdrop-blur-md border border-gray-100 rounded-2xl shadow-sm pt-5 pb-6 px-4 sm:pt-6 sm:pb-8 sm:px-8 md:pt-8 md:pb-10 md:px-10">
 
                 {{-- Kop Surat Resmi Pemerintahan --}}
                 <div class="mb-6" style="padding: 0 0 1.5rem;">
                     <div class="flex items-center justify-between">
                         {{-- Logo Kabupaten (Kiri) --}}
-                        <div class="flex-shrink-0 flex justify-center items-center md:pl-4 w-[80px] md:w-[120px]">
-                            <img src="{{ asset('Admin/img/illustrations/logokab.png') }}" alt="Logo Kabupaten Bengkalis" class="h-20 w-20 md:h-[100px] md:w-[100px] object-contain drop-shadow-sm">
+                        <div class="flex-shrink-0 flex justify-center items-center w-11 sm:w-20 md:w-[120px]">
+                            <img src="{{ asset('Admin/img/illustrations/logokab.png') }}" alt="Logo Kabupaten Bengkalis" class="h-11 w-11 sm:h-20 sm:w-20 md:h-[100px] md:w-[100px] object-contain drop-shadow-sm">
                         </div>
 
                         {{-- Judul Tengah --}}
                         <div class="text-center flex-1 px-2 md:px-4">
-                            <h3 class="text-xl md:text-3xl font-bold text-gray-900 uppercase tracking-wide notranslate" translate="no">
+                            <h3 class="text-sm sm:text-xl md:text-3xl font-bold text-gray-900 uppercase tracking-wide notranslate" translate="no">
                                 Form Pelaporan
                             </h3>
-                            <p class="text-xs md:text-sm text-gray-500 mt-2">Sampaikan keluhan atau saran Anda secara jujur dan beretika</p>
-                            <p class="text-[10px] md:text-xs text-gray-400 mt-1">Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis</p>
+                            <p class="text-[10px] sm:text-xs md:text-sm text-gray-500 mt-1 sm:mt-2">Sampaikan keluhan atau saran Anda secara jujur dan beretika</p>
+                            <p class="hidden sm:block text-[10px] md:text-xs text-gray-400 mt-1">Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis</p>
                         </div>
 
                         {{-- Logo SiladesBeng (Kanan) --}}
-                        <div class="flex-shrink-0 flex justify-center items-center md:pr-4 w-[96px] md:w-[140px]">
-                            <img src="{{ asset('Admin/img/illustrations/logodomain.webp') }}" alt="Logo SiladesBeng" class="h-24 w-24 md:h-[115px] md:w-[115px] object-contain drop-shadow-sm">
+                        <div class="flex-shrink-0 flex justify-center items-center w-11 sm:w-24 md:w-[140px]">
+                            <img src="{{ asset('Admin/img/illustrations/logodomain.webp') }}" alt="Logo SiladesBeng" class="h-11 w-11 sm:h-24 sm:w-24 md:h-[115px] md:w-[115px] object-contain drop-shadow-sm">
                         </div>
                     </div>
 
