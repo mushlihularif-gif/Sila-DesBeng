@@ -38,9 +38,8 @@
                             </div>
                             <h2 class="mt-4 text-lg font-extrabold text-gray-900 group-hover:text-[#115789] sm:text-xl">{{ $item['title'] }}</h2>
                             <p class="mt-2 flex-grow text-sm leading-relaxed text-gray-600">{{ $item['description'] }}</p>
-                            <span class="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#115789] px-5 py-2.5 text-sm font-bold text-white shadow-sm transition group-hover:bg-[#0d4267]">
+                            <span class="mt-5 inline-flex items-center justify-center rounded-xl bg-[#2563eb] px-5 py-2.5 text-sm font-bold text-white shadow-sm transition group-hover:bg-[#1d4ed8]">
                                 Buka {{ $item['title'] }}
-                                <i class="bx bx-right-arrow-alt text-lg" aria-hidden="true"></i>
                             </span>
                         </a>
                     @endforeach

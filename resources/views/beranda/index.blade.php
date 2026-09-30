@@ -101,9 +101,9 @@
                         <div class="absolute -inset-0.5 bg-gradient-to-r from-blue-600 via-sky-400 to-amber-400 rounded-full opacity-80 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-300 shadow-sm"></div>
 
                         <!-- Search Input Pill Container -->
-                        <div class="relative flex items-center bg-white rounded-full p-1 sm:p-1.5 shadow-sm">
-                            <div class="pl-4 sm:pl-5 pr-2 text-gray-400 flex items-center justify-center">
-                                <svg class="w-5 h-5 sm:w-6 sm:h-6 text-[#115789]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="relative flex items-center bg-white rounded-full p-0.5 sm:p-1.5 shadow-sm">
+                            <div class="pl-3 sm:pl-5 pr-1.5 sm:pr-2 text-gray-400 flex items-center justify-center">
+                                <svg class="w-4 h-4 sm:w-6 sm:h-6 text-[#115789]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"
                                         d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                 </svg>
@@ -111,7 +111,7 @@
 
                             <input type="text" id="live-search-input" name="search" value="{{ $search ?? '' }}" 
                                 placeholder="Cari Gas 3kg, Mobil Pick Up, Tenda, Kursi..." autocomplete="off"
-                                class="flex-1 py-2.5 sm:py-3 px-2 text-gray-800 text-sm sm:text-base font-medium placeholder-gray-400 focus:outline-none bg-transparent">
+                                class="flex-1 min-w-0 py-2 sm:py-3 px-1.5 sm:px-2 text-gray-800 text-xs sm:text-base font-medium placeholder-gray-400 focus:outline-none bg-transparent">
 
                             <!-- Loading Spinner -->
                             <div id="search-spinner" class="hidden pr-3 text-blue-600 animate-spin">
@@ -130,20 +130,20 @@
 
                             <!-- Search Submit Button (Solid Biru, Tanpa Gradasi) -->
                             <button type="submit" id="search-submit-btn"
-                                class="flex-shrink-0 px-6 sm:px-8 py-2.5 sm:py-3 rounded-full text-white font-bold text-xs sm:text-sm shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer flex items-center justify-center gap-1.5 ml-1 bg-[#2563eb] hover:bg-[#1d4ed8] active:scale-95" style="background-color: #2563eb !important; color: #ffffff !important;">
+                                class="flex-shrink-0 px-4 sm:px-8 py-2 sm:py-3 rounded-full text-white font-bold text-[11px] sm:text-sm shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer flex items-center justify-center gap-1.5 ml-1 bg-[#2563eb] hover:bg-[#1d4ed8] active:scale-95" style="background-color: #2563eb !important; color: #ffffff !important;">
                                 <span>Cari</span>
                             </button>
                         </div>
                     </form>
 
                     <!-- Quick Popular Search Chips (Live AJAX Triggers) -->
-                    <div class="mt-5 sm:mt-7 flex items-center justify-center gap-2 sm:gap-2.5 flex-wrap text-xs text-gray-500">
-                        <span class="text-[12px] text-gray-500 font-semibold mr-1">Paling sering dicari:</span>
-                        <button type="button" data-query="Gas 3kg" class="popular-search-chip px-3.5 py-1.5 rounded-full bg-white hover:bg-blue-50 text-gray-700 hover:text-[#115789] border border-gray-200 shadow-xs hover:border-blue-300 hover:shadow-sm transition-all text-xs font-medium cursor-pointer">Gas 3kg</button>
-                        <button type="button" data-query="Mobil Pick Up" class="popular-search-chip px-3.5 py-1.5 rounded-full bg-white hover:bg-blue-50 text-gray-700 hover:text-[#115789] border border-gray-200 shadow-xs hover:border-blue-300 hover:shadow-sm transition-all text-xs font-medium cursor-pointer">Mobil Pick Up</button>
-                        <button type="button" data-query="Tenda" class="popular-search-chip px-3.5 py-1.5 rounded-full bg-white hover:bg-blue-50 text-gray-700 hover:text-[#115789] border border-gray-200 shadow-xs hover:border-blue-300 hover:shadow-sm transition-all text-xs font-medium cursor-pointer">Tenda Acara</button>
-                        <button type="button" data-query="Kursi" class="popular-search-chip px-3.5 py-1.5 rounded-full bg-white hover:bg-blue-50 text-gray-700 hover:text-[#115789] border border-gray-200 shadow-xs hover:border-blue-300 hover:shadow-sm transition-all text-xs font-medium cursor-pointer">Kursi Lipat</button>
-                        <button type="button" data-query="Pasar" class="popular-search-chip px-3.5 py-1.5 rounded-full bg-white hover:bg-blue-50 text-gray-700 hover:text-[#115789] border border-gray-200 shadow-xs hover:border-blue-300 hover:shadow-sm transition-all text-xs font-medium cursor-pointer">Pasar Daerah</button>
+                    <div class="mt-3 sm:mt-7 flex items-center justify-center gap-1.5 sm:gap-2.5 flex-wrap text-xs text-gray-500">
+                        <span class="text-[10px] sm:text-[12px] text-gray-500 font-semibold mr-0.5 sm:mr-1">Sering dicari:</span>
+                        <button type="button" data-query="Gas 3kg" class="popular-search-chip px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full bg-white hover:bg-blue-50 text-gray-700 hover:text-[#115789] border border-gray-200 shadow-xs hover:border-blue-300 hover:shadow-sm transition-all text-[10px] sm:text-xs font-medium cursor-pointer">Gas 3kg</button>
+                        <button type="button" data-query="Mobil Pick Up" class="popular-search-chip px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full bg-white hover:bg-blue-50 text-gray-700 hover:text-[#115789] border border-gray-200 shadow-xs hover:border-blue-300 hover:shadow-sm transition-all text-[10px] sm:text-xs font-medium cursor-pointer">Mobil Pick Up</button>
+                        <button type="button" data-query="Tenda" class="popular-search-chip px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full bg-white hover:bg-blue-50 text-gray-700 hover:text-[#115789] border border-gray-200 shadow-xs hover:border-blue-300 hover:shadow-sm transition-all text-[10px] sm:text-xs font-medium cursor-pointer">Tenda Acara</button>
+                        <button type="button" data-query="Kursi" class="popular-search-chip px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full bg-white hover:bg-blue-50 text-gray-700 hover:text-[#115789] border border-gray-200 shadow-xs hover:border-blue-300 hover:shadow-sm transition-all text-[10px] sm:text-xs font-medium cursor-pointer">Kursi Lipat</button>
+                        <button type="button" data-query="Pasar" class="popular-search-chip px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full bg-white hover:bg-blue-50 text-gray-700 hover:text-[#115789] border border-gray-200 shadow-xs hover:border-blue-300 hover:shadow-sm transition-all text-[10px] sm:text-xs font-medium cursor-pointer">Pasar Daerah</button>
                     </div>
                 </div>
             </div>
@@ -1003,23 +1003,23 @@
                 padding-bottom: 1.5rem !important;
             }
             .unit-stage-wrapper {
-                height: 190px !important;
+                height: 210px !important;
             }
             .unit-card {
-                width: clamp(70px, 20vw, 88px) !important;
-                height: clamp(70px, 20vw, 88px) !important;
+                width: clamp(88px, 26vw, 110px) !important;
+                height: clamp(88px, 26vw, 110px) !important;
                 top: 43% !important;
             }
             .unit-card img {
-                width: 84% !important;
-                height: 84% !important;
+                width: 96% !important;
+                height: 96% !important;
                 filter: drop-shadow(0 8px 14px rgba(15, 23, 42, 0.16)) !important;
             }
 
             /* Slot Kiri (Background Preview) */
             .state-0 {
                 left: 18% !important;
-                transform: translate(-50%, -50%) scale(0.58) !important;
+                transform: translate(-50%, -50%) scale(0.64) !important;
                 opacity: 0.58 !important;
                 z-index: 20 !important;
                 filter: grayscale(20%) !important;
@@ -1028,7 +1028,7 @@
             /* Slot Tengah (Focus Terpusat, Proporsional dan Rapi) */
             .state-1 {
                 left: 50% !important;
-                transform: translate(-50%, -50%) scale(1.08) !important;
+                transform: translate(-50%, -50%) scale(1.12) !important;
                 opacity: 1 !important;
                 z-index: 50 !important;
                 filter: grayscale(0%) drop-shadow(0 8px 16px rgba(0,0,0,0.18)) !important;
@@ -1037,7 +1037,7 @@
             /* Slot Kanan (Background Preview) */
             .state-2 {
                 left: 82% !important;
-                transform: translate(-50%, -50%) scale(0.58) !important;
+                transform: translate(-50%, -50%) scale(0.64) !important;
                 opacity: 0.58 !important;
                 z-index: 20 !important;
                 filter: grayscale(20%) !important;
@@ -1116,15 +1116,15 @@
                 padding-right: 0.75rem !important;
             }
             .unit-stage-wrapper {
-                height: 170px !important;
+                height: 190px !important;
             }
             .unit-card {
-                width: 70px !important;
-                height: 70px !important;
+                width: 92px !important;
+                height: 92px !important;
             }
             .unit-card img {
-                width: 82% !important;
-                height: 82% !important;
+                width: 94% !important;
+                height: 94% !important;
             }
             .unit-title-box {
                 max-width: 150px !important;
