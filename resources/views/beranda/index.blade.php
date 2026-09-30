@@ -290,10 +290,9 @@
                         <!-- Sapaan informasi singkat untuk menu 3D -->
                         <div class="mt-5 sm:mt-7 max-w-3xl mx-auto px-2">
                             <div id="unit-speech-box" class="unit-speech-box relative overflow-hidden rounded-2xl border border-white/80 bg-white/75 px-4 py-4 shadow-md shadow-slate-900/5 backdrop-blur-xl transition-all duration-300 sm:rounded-3xl sm:px-6 sm:py-5">
-                                <span class="pointer-events-none absolute inset-y-4 left-0 w-1 rounded-r-full bg-gradient-to-b from-[#115789] via-[#3b82f6] to-[#fbbf24]"></span>
-                                <div id="speech-text-wrapper" class="speech-text-wrapper pl-2 sm:pl-3">
-                                    <div class="flex flex-col items-start gap-2.5">
-                                        <span id="speech-badge" class="inline-flex shrink-0 self-start items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.1em] text-amber-800">
+                                <div id="speech-text-wrapper" class="speech-text-wrapper text-center">
+                                    <div class="flex flex-col items-center gap-2.5">
+                                        <span id="speech-badge" class="inline-flex shrink-0 self-center items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.1em] text-amber-800">
                                             <i id="speech-badge-icon" class="bx bx-shopping-bag text-sm" aria-hidden="true"></i>
                                             <span id="speech-badge-label">Belanja &amp; Kebutuhan</span>
                                         </span>
@@ -1421,7 +1420,7 @@
                                     const textColor = card.getAttribute('data-text-color') || 'text-amber-950';
 
                                     speechBox.className = `unit-speech-box relative overflow-hidden rounded-2xl sm:rounded-3xl px-4 py-4 sm:px-6 sm:py-5 border shadow-md shadow-slate-900/5 backdrop-blur-xl transition-all duration-300 ${boxBg} ${boxBorder}`;
-                                    if (speechBadge) speechBadge.className = `inline-flex shrink-0 self-start items-center gap-1.5 rounded-full border px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.1em] ${badgeBg}`;
+                                    if (speechBadge) speechBadge.className = `inline-flex shrink-0 self-center items-center gap-1.5 rounded-full border px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.1em] ${badgeBg}`;
                                     if (speechHeading) speechHeading.className = `text-sm sm:text-base font-extrabold leading-snug ${textColor}`;
 
                                     speechWrapper.classList.remove('fade-out');
