@@ -149,13 +149,26 @@
                     <div class="card-body mt-4">
                         <div class="mb-4">
                             <label class="form-label fw-semibold">Judul <span class="text-danger">*</span></label>
-                            <input type="text" name="title" class="form-control form-control-lg" placeholder="Masukkan judul..." value="{{ isset($announcement) ? $announcement->title : (isset($laporan) ? 'Tindak Lanjut Laporan: ' . $laporan->nama : '') }}" required>
+                            <input type="text" id="announcement-title" name="title" lang="id" spellcheck="true" class="form-control form-control-lg" placeholder="Masukkan judul..." value="{{ isset($announcement) ? $announcement->title : (isset($laporan) ? 'Tindak Lanjut Laporan: ' . $laporan->nama : '') }}" required>
                             <div class="form-text text-muted">Buat judul yang menarik dan padat (maksimal 100 karakter).</div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-semibold">Deskripsi / Isi <span class="text-danger">*</span></label>
-                            <textarea name="description" class="form-control" rows="8" placeholder="Tuliskan isi selengkapnya di sini... (Gunakan bahasa yang jelas dan mudah dipahami)" required>{{ isset($announcement) ? $announcement->description : '' }}</textarea>
+                            <textarea id="announcement-description" name="description" lang="id" spellcheck="true" class="form-control" rows="8" placeholder="Tuliskan isi selengkapnya di sini... (Gunakan bahasa yang jelas dan mudah dipahami)" required>{{ isset($announcement) ? $announcement->description : '' }}</textarea>
                             <div class="form-text text-muted">Jelaskan secara detail informasi yang ingin disampaikan ke warga.</div>
+                        </div>
+                        <div class="rounded-3 border bg-light p-3">
+                            <div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2">
+                                <div>
+                                    <div class="fw-bold text-dark"><i class="bx bx-spell-check text-primary me-1"></i>Review ejaan</div>
+                                    <small class="text-muted">Pemeriksaan lokal untuk typo umum. Kata daerah atau istilah khusus bisa dipilih “Gunakan saja”.</small>
+                                </div>
+                                <button type="button" id="btn-review-text" class="btn btn-outline-primary flex-shrink-0">
+                                    <i class="bx bx-search-alt-2 me-1"></i>Review
+                                </button>
+                            </div>
+                            <div id="review-status" class="small mt-2 text-muted" aria-live="polite">Review judul dan isi sebelum menerbitkan.</div>
+                            <div id="review-findings" class="mt-3 d-none" aria-live="polite"></div>
                         </div>
                     </div>
                 </div>
@@ -318,16 +331,17 @@
 
                         <!-- Hidden actual input to satisfy backend ->has('is_active') -->
                         <input type="checkbox" name="is_active" id="is_active" value="1" class="d-none" checked>
+                        <input type="hidden" name="review_confirmed" id="review-confirmed" value="0">
                         
                         <div class="row g-3 mb-3">
-                            <div class="col-6">
-                                <button type="button" id="btn-publish" onclick="submitWithAnimation('publish', event)" class="btn btn-primary w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3 text-center btn-animated shadow-sm" style="border-radius: 12px;">
+                            <div class="col-12 col-sm-6">
+                                <button type="button" id="btn-publish" disabled onclick="submitWithAnimation('publish', event)" class="btn btn-primary w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3 text-center btn-animated shadow-sm" style="border-radius: 12px;">
                                     <i id="icon-publish" class='bx bx-send fs-1 mb-2'></i>
                                     <span class="fw-bold fs-5">Terbitkan</span>
                                     <small class="d-block text-wrap mt-1 opacity-75" style="font-size: 0.75rem; line-height: 1.2;">Kirim & tampil di aplikasi</small>
                                 </button>
                             </div>
-                            <div class="col-6">
+                            <div class="col-12 col-sm-6">
                                 <button type="button" id="btn-draft" onclick="submitWithAnimation('draft', event)" class="btn btn-outline-secondary w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3 text-center btn-animated" style="border-radius: 12px; border-width: 2px;">
                                     <i id="icon-draft" class='bx bx-archive-in fs-1 mb-2'></i>
                                     <span class="fw-bold fs-5">Simpan Draft</span>
@@ -346,6 +360,12 @@
                             const form = event.target.closest('form');
                             
                             // Check form validity before animating
+                            if (type === 'publish' && document.getElementById('review-confirmed').value !== '1') {
+                                document.getElementById('review-status').textContent = 'Review judul dan isi terlebih dahulu sebelum menerbitkan.';
+                                document.getElementById('btn-review-text').focus();
+                                return;
+                            }
+
                             if (!form.checkValidity()) {
                                 form.reportValidity();
                                 return;
@@ -385,6 +405,216 @@
         </div>
     </form>
 </div>
+
+<script>
+(() => {
+    const titleInput = document.getElementById('announcement-title');
+    const descriptionInput = document.getElementById('announcement-description');
+    const reviewButton = document.getElementById('btn-review-text');
+    const reviewStatus = document.getElementById('review-status');
+    const findingsContainer = document.getElementById('review-findings');
+    const publishButton = document.getElementById('btn-publish');
+    const reviewConfirmed = document.getElementById('review-confirmed');
+
+    if (!titleInput || !descriptionInput || !reviewButton || !reviewStatus || !findingsContainer || !publishButton || !reviewConfirmed) return;
+
+    // Pemeriksaan lokal agar draf tidak dikirim ke layanan pihak ketiga.
+    // Daftar ini sengaja bersifat saran, bukan penentu benar-salah bahasa daerah.
+    const commonCorrections = {
+        aktifitas: 'aktivitas',
+        ijin: 'izin',
+        silahkan: 'silakan',
+        sekedar: 'sekadar',
+        resiko: 'risiko',
+        praktek: 'praktik',
+        apotik: 'apotek',
+        analisa: 'analisis',
+        kwalitas: 'kualitas',
+        nasehat: 'nasihat',
+        jadual: 'jadwal',
+        obyek: 'objek',
+        subyek: 'subjek',
+        sistim: 'sistem',
+        dipersilahkan: 'dipersilakan',
+        merubah: 'mengubah',
+        himbauan: 'imbauan',
+        himbau: 'imbau',
+        kerjasama: 'kerja sama',
+        diatas: 'di atas',
+        dibawah: 'di bawah',
+        disini: 'di sini',
+        disana: 'di sana',
+        kedepan: 'ke depan',
+        kemana: 'ke mana',
+        darimana: 'dari mana',
+        dimana: 'di mana',
+        karna: 'karena',
+    };
+
+    let reviewedSignature = null;
+    let currentFindings = [];
+    const acceptedAsWritten = new Set();
+
+    const textSignature = () => `${titleInput.value}\u0000${descriptionInput.value}`;
+    const issueKey = (issue) => `${issue.field}:${issue.start}:${issue.original.toLocaleLowerCase('id-ID')}:${issue.suggestion}`;
+
+    function preserveCase(original, replacement) {
+        if (original === original.toLocaleUpperCase('id-ID')) return replacement.toLocaleUpperCase('id-ID');
+        if (original[0] === original[0]?.toLocaleUpperCase('id-ID')) {
+            return replacement.charAt(0).toLocaleUpperCase('id-ID') + replacement.slice(1);
+        }
+        return replacement;
+    }
+
+    function collectFindings(field, value) {
+        const findings = [];
+        Object.entries(commonCorrections).forEach(([incorrect, suggestion]) => {
+            const expression = new RegExp(`\\b${incorrect}\\b`, 'giu');
+            for (const match of value.matchAll(expression)) {
+                findings.push({
+                    field,
+                    start: match.index,
+                    end: match.index + match[0].length,
+                    original: match[0],
+                    suggestion: preserveCase(match[0], suggestion),
+                });
+            }
+        });
+
+        const repeatedWord = /\b([\p{L}]+)\s+\1\b/giu;
+        for (const match of value.matchAll(repeatedWord)) {
+            const firstWord = match[1];
+            findings.push({
+                field,
+                start: match.index,
+                end: match.index + match[0].length,
+                original: match[0],
+                suggestion: firstWord,
+            });
+        }
+        return findings;
+    }
+
+    function updatePublicationState() {
+        const sameText = reviewedSignature === textSignature();
+        const unresolved = currentFindings.filter((issue) => !acceptedAsWritten.has(issueKey(issue)));
+        const approved = sameText && unresolved.length === 0;
+        reviewConfirmed.value = approved ? '1' : '0';
+        publishButton.disabled = !approved;
+        publishButton.title = approved ? '' : 'Review dan selesaikan semua saran sebelum menerbitkan';
+        return { approved, unresolved };
+    }
+
+    function invalidateReview() {
+        reviewedSignature = null;
+        currentFindings = [];
+        acceptedAsWritten.clear();
+        findingsContainer.replaceChildren();
+        findingsContainer.classList.add('d-none');
+        reviewConfirmed.value = '0';
+        publishButton.disabled = true;
+        reviewStatus.className = 'small mt-2 text-muted';
+        reviewStatus.textContent = 'Teks berubah. Tekan Review lagi sebelum menerbitkan.';
+    }
+
+    function renderFindings() {
+        findingsContainer.replaceChildren();
+        const { approved, unresolved } = updatePublicationState();
+
+        if (!currentFindings.length) {
+            findingsContainer.classList.add('d-none');
+            reviewStatus.className = 'small mt-2 text-success fw-semibold';
+            reviewStatus.textContent = 'Review selesai. Tidak ditemukan typo umum pada judul dan isi.';
+            return;
+        }
+
+        findingsContainer.classList.remove('d-none');
+        const summary = document.createElement('div');
+        summary.className = approved ? 'alert alert-success py-2 mb-2' : 'alert alert-warning py-2 mb-2';
+        summary.textContent = approved
+            ? 'Semua saran sudah ditinjau. Anda dapat menerbitkan.'
+            : `${unresolved.length} saran belum ditinjau. Pilih Perbaiki atau Gunakan saja untuk setiap temuan.`;
+        findingsContainer.appendChild(summary);
+
+        currentFindings.forEach((issue) => {
+            const row = document.createElement('div');
+            row.className = 'd-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2 border rounded-3 bg-white p-3 mb-2';
+
+            const detail = document.createElement('div');
+            detail.className = 'small';
+            const location = document.createElement('div');
+            location.className = 'text-muted mb-1';
+            location.textContent = issue.field === 'title' ? 'Judul' : 'Deskripsi';
+            const words = document.createElement('div');
+            words.innerHTML = `<span class="text-danger text-decoration-line-through"></span><i class="bx bx-right-arrow-alt mx-1 text-muted"></i><span class="text-success fw-bold"></span>`;
+            words.children[0].textContent = issue.original;
+            words.children[2].textContent = issue.suggestion;
+            detail.append(location, words);
+
+            const buttons = document.createElement('div');
+            buttons.className = 'd-flex gap-2 flex-shrink-0';
+            const accepted = acceptedAsWritten.has(issueKey(issue));
+            const fixButton = document.createElement('button');
+            fixButton.type = 'button';
+            fixButton.className = 'btn btn-sm btn-primary';
+            fixButton.textContent = 'Perbaiki';
+            fixButton.disabled = accepted;
+            fixButton.addEventListener('click', () => {
+                const input = issue.field === 'title' ? titleInput : descriptionInput;
+                const currentValue = input.value;
+                if (currentValue.slice(issue.start, issue.end) !== issue.original) {
+                    invalidateReview();
+                    return;
+                }
+                input.value = currentValue.slice(0, issue.start) + issue.suggestion + currentValue.slice(issue.end);
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+                input.focus();
+            });
+
+            const ignoreButton = document.createElement('button');
+            ignoreButton.type = 'button';
+            ignoreButton.className = accepted ? 'btn btn-sm btn-success' : 'btn btn-sm btn-outline-secondary';
+            ignoreButton.textContent = accepted ? 'Digunakan' : 'Gunakan saja';
+            ignoreButton.addEventListener('click', () => {
+                acceptedAsWritten.add(issueKey(issue));
+                renderFindings();
+            });
+
+            buttons.append(fixButton, ignoreButton);
+            row.append(detail, buttons);
+            findingsContainer.appendChild(row);
+        });
+
+        if (approved) {
+            reviewStatus.className = 'small mt-2 text-success fw-semibold';
+            reviewStatus.textContent = 'Review selesai. Semua saran telah diperbaiki atau digunakan apa adanya.';
+        } else {
+            reviewStatus.className = 'small mt-2 text-warning fw-semibold';
+            reviewStatus.textContent = 'Periksa saran di bawah. Kata daerah atau istilah khusus boleh dipilih Gunakan saja.';
+        }
+    }
+
+    reviewButton.addEventListener('click', () => {
+        reviewButton.disabled = true;
+        reviewButton.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>Memeriksa...';
+        window.setTimeout(() => {
+            acceptedAsWritten.clear();
+            currentFindings = [
+                ...collectFindings('title', titleInput.value),
+                ...collectFindings('description', descriptionInput.value),
+            ].sort((a, b) => a.field.localeCompare(b.field) || a.start - b.start);
+            reviewedSignature = textSignature();
+            renderFindings();
+            reviewButton.disabled = false;
+            reviewButton.innerHTML = '<i class="bx bx-search-alt-2 me-1"></i>Review ulang';
+        }, 180);
+    });
+
+    [titleInput, descriptionInput].forEach((input) => input.addEventListener('input', () => {
+        if (reviewedSignature !== null && reviewedSignature !== textSignature()) invalidateReview();
+    }));
+})();
+</script>
 
 @if($category === 'Berita')
 <script>

@@ -135,6 +135,12 @@ class AnnouncementController extends Controller
 
         $request->validate($rules);
 
+        if ($request->has('is_active') && ! $request->boolean('review_confirmed')) {
+            return back()
+                ->withInput()
+                ->withErrors(['review_confirmed' => 'Review judul dan isi sebelum menerbitkan.']);
+        }
+
         $user = auth()->user();
         $publisherRegionId = $user->role === 'super_admin' ? ($request->target_region_id ?? null) : $user->region_id;
         
@@ -245,6 +251,12 @@ class AnnouncementController extends Controller
         }
 
         $request->validate($rules);
+
+        if ($request->has('is_active') && ! $request->boolean('review_confirmed')) {
+            return back()
+                ->withInput()
+                ->withErrors(['review_confirmed' => 'Review judul dan isi sebelum menerbitkan.']);
+        }
 
         $data = $request->only(['title', 'description', 'type', 'event_date', 'location']);
         $data['is_active'] = $request->has('is_active');
