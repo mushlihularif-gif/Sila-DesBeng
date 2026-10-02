@@ -360,7 +360,7 @@
                         <svg class="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
                         </svg>
-                        <h3 class="text-lg font-bold text-gray-800">Nama dan Alamat Lengkap</h3>
+                        <h3 class="text-lg font-bold text-gray-800">Alamat Pengantaran</h3>
                     </div>
                     
                     <div class="space-y-4">
@@ -370,12 +370,10 @@
     'idNama'   => 'buyer-name',
     'idAlamat' => 'buyer-address',
 ])
-<input type="text" 
+<input type="hidden"
                                name="buyer_name" 
                                id="buyer-name"
-                               placeholder="Nama Lengkap Pemesan" 
-                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                               required>
+                               value="{{ Auth::user()->name }}">
                         <textarea name="buyer_address" 
                                   id="buyer-address"
                                   rows="3" 
@@ -1355,4 +1353,3 @@
     document.addEventListener('turbo:load', initGasMapAndPlaces);
 </script>
 @endpush
-

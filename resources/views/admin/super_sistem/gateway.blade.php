@@ -58,12 +58,18 @@
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold">Penyedia Gateway Aktif</label>
                                 <select name="gateway_provider" class="form-select" required>
-                                    <option value="midtrans" {{ old('gateway_provider', $penyedia) === 'midtrans' ? 'selected' : '' }}>Midtrans</option>
-                                    <option value="xendit" {{ old('gateway_provider', $penyedia) === 'xendit' ? 'selected' : '' }}>Xendit for Platforms</option>
+                                    <option value="midtrans" {{ old('gateway_provider', $penyedia) === 'midtrans' || $penyedia === 'xendit' ? 'selected' : '' }}>Midtrans</option>
+                                    <option value="xendit" disabled>Xendit for Platforms (belum tersedia)</option>
                                 </select>
                                 <small class="text-muted d-block mt-1">
-                                    Pilihan ini berlaku seketika untuk seluruh transaksi warga di semua wilayah.
+                                    Midtrans dipakai untuk checkout. Integrasi transaksi Xendit belum tersedia.
                                 </small>
+                                @if($penyedia === 'xendit')
+                                    <div class="alert alert-warning py-2 px-3 mt-2 mb-0 small">
+                                        Xendit tersimpan sebagai penyedia aktif, tetapi checkout belum terhubung ke Xendit.
+                                        Simpan Midtrans di bawah untuk mengaktifkan kembali pembayaran otomatis.
+                                    </div>
+                                @endif
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold">Fee Platform (%) <span class="text-danger">*</span></label>

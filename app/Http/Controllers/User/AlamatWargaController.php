@@ -20,6 +20,12 @@ class AlamatWargaController extends Controller
         $user = Auth::user();
 
         if (AlamatWarga::milik($user->id)->count() >= self::MAKS_ALAMAT) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'Anda sudah menyimpan ' . self::MAKS_ALAMAT . ' alamat. Hapus salah satunya dulu.',
+                ], 422);
+            }
+
             return back()->with('error',
                 'Anda sudah menyimpan ' . self::MAKS_ALAMAT . ' alamat. Hapus salah satunya dulu.');
         }
@@ -36,6 +42,21 @@ class AlamatWargaController extends Controller
 
         if ($data['is_utama']) {
             $alamat->jadikanUtama();
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Alamat berhasil disimpan ke Alamat Saya.',
+                'alamat' => [
+                    'id' => $alamat->id,
+                    'nama_penerima' => $alamat->nama_penerima,
+                    'label' => $alamat->label,
+                    'alamat' => $alamat->satuBaris(),
+                    'latitude' => $alamat->latitude,
+                    'longitude' => $alamat->longitude,
+                ],
+            ], 201);
         }
 
         return back()->with('success', 'Alamat berhasil disimpan.');

@@ -214,6 +214,23 @@
                     @endif
                 </div>
 
+                <!-- Alamat digunakan untuk pengantaran maupun koordinasi penjemputan -->
+                <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                    <div class="flex items-center gap-3 mb-4">
+                        <i class="bx bx-map-pin text-2xl text-red-600"></i>
+                        <h3 class="text-lg font-bold text-gray-800">Alamat / Titik Layanan</h3>
+                    </div>
+                    @include('partials.pilih-alamat', [
+                        'alamatTersimpan' => $alamatTersimpan ?? collect(),
+                        'idNama' => 'recipient-name',
+                        'idAlamat' => 'delivery-address',
+                    ])
+                    <input type="hidden" name="recipient_name" id="recipient-name" value="{{ Auth::user()->name }}">
+                    <textarea name="delivery_address" id="delivery-address" rows="3"
+                              placeholder="Pilih alamat tersimpan atau tulis alamat baru"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                </div>
+
                 <!-- Antar Method Form -->
                 <div id="antar-form" class="delivery-form-content {{ $defaultMethod == 'antar' ? '' : 'hidden' }}">
                     <!-- Important Note -->
@@ -231,35 +248,6 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Alamat Pengiriman Card -->
-                    <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
-                        <div class="flex items-center gap-3 mb-4">
-                            <svg class="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
-                            </svg>
-                            <h3 class="text-lg font-bold text-gray-800">Alamat Pengiriman</h3>
-                        </div>
-                        
-                        <div class="space-y-4">
-                            @include('partials.pilih-alamat', [
-    'alamatTersimpan' => $alamatTersimpan ?? collect(),
-    'idNama'   => 'recipient-name',
-    'idAlamat' => 'delivery-address',
-])
-<input type="text" 
-                                   name="recipient_name" 
-                                   id="recipient-name"
-                                   placeholder="Nama Lengkap" 
-                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            
-                            <textarea name="delivery_address" 
-                                      id="delivery-address"
-                                      rows="3" 
-                                      placeholder="Alamat Lengkap" 
-                                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
-                        </div>
-                    </div>
-
                     <!-- Keterangan / Tujuan Penyewaan Card -->
                     <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
                         <div class="flex items-center gap-3 mb-4">
@@ -752,28 +740,6 @@
                             </a>
                         </div>
                         @endif
-                    </div>
-
-                    <!-- Nama Penyewa Card -->
-                    <div class="bg-white rounded-2xl shadow-lg p-6 mb-6 hover:shadow-xl transition-all duration-300">
-                        <div class="flex items-center gap-3 mb-4">
-                            <svg class="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
-                            </svg>
-                            <h3 class="text-lg font-bold text-gray-800">Nama Penyewa</h3>
-                        </div>
-                        
-                        <div class="space-y-4">
-                            <input type="text" 
-                                   id="recipient-name-jemput"
-                                   placeholder="Nama Lengkap" 
-                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            
-                            <textarea id="delivery-address-jemput"
-                                      rows="3" 
-                                      placeholder="Alamat Lengkap" 
-                                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
-                        </div>
                     </div>
 
                     <!-- Keterangan / Tujuan Penyewaan Card -->
@@ -1501,12 +1467,11 @@
                         const startDateVal = startDateJemput?.value;
                         const endDateVal = endDateJemput?.value;
                         const rentalPurposeJemput = getEl('rental-purpose-jemput')?.value;
-                        const recipientNameJemput = getEl('recipient-name-jemput')?.value;
-                        const recipientAddressJemput = getEl('delivery-address-jemput')?.value;
+                        const deliveryAddress = getEl('delivery-address')?.value;
 
-                        if (!startDateVal || !endDateVal || !rentalPurposeJemput || !recipientNameJemput || !recipientAddressJemput) {
+                        if (!startDateVal || !endDateVal || !rentalPurposeJemput || !deliveryAddress) {
                             isValid = false;
-                            errorMessage = 'Mohon lengkapi Nama Penyewa, Alamat, Tanggal Mulai, Tanggal Selesai, dan Tujuan Sewa';
+                            errorMessage = 'Mohon pilih alamat, tanggal mulai dan selesai, serta tujuan sewa.';
                         }
                     }
 
@@ -1587,16 +1552,6 @@
                     const rentalPurposeJemput = getEl('rental-purpose-jemput');
                     if (rentalPurposeJemput && rentalPurpose) rentalPurpose.value = rentalPurposeJemput.value;
 
-                    // Copy Recipient Name (Nama Penyewa)
-                    const recipientName = getEl('recipient-name');
-                    const recipientNameJemput = getEl('recipient-name-jemput');
-                    if (recipientNameJemput && recipientName) recipientName.value = recipientNameJemput.value;
-
-                    // Copy Address (Alamat Lengkap)
-                    const deliveryAddress = getEl('delivery-address');
-                    const deliveryAddressJemput = getEl('delivery-address-jemput');
-                    if (deliveryAddressJemput && deliveryAddress) deliveryAddress.value = deliveryAddressJemput.value;
-                    
                     // Copy payment proof file if exists
                     const paymentProofJemput = getEl('payment-proof-jemput');
                     if (paymentProofJemput?.files[0] && paymentProof) {

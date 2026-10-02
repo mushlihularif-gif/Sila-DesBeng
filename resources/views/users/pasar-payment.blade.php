@@ -5,6 +5,8 @@
 @push('styles')
 <style>
     * { font-family: 'Inter', sans-serif; }
+    @keyframes scan-qr { 0% { top: 8%; opacity: 0; } 12% { opacity: 1; } 88% { opacity: 1; } 100% { top: 92%; opacity: 0; } }
+    .qr-scan-line { position: absolute; left: 8%; right: 8%; height: 2px; top: 8%; z-index: 2; pointer-events: none; border-radius: 999px; background: #2563eb; box-shadow: 0 0 12px rgba(37,99,235,.85); animation: scan-qr 2.8s ease-in-out infinite; }
 
 
     /* Header styling consistent with checkout */
@@ -302,6 +304,7 @@
                                 <div class="text-center pt-2">
                                     <p class="text-xs text-slate-500 font-semibold uppercase tracking-wider mb-3">Scan Kode QRIS di Bawah Ini</p>
                                     <div class="inline-block p-4 bg-white rounded-2xl shadow-sm relative group overflow-hidden" style="border: 2px solid #e2e8f0;">
+                                        <span class="qr-scan-line" aria-hidden="true"></span>
                                         @if($qrisImg)
                                             <img src="{{ Storage::url($qrisImg) }}" alt="QRIS Code" class="w-48 h-48 mx-auto object-contain">
                                         @elseif($order->payment_qr_url && $order->payment_qr_url !== 'DUMMY_QR_CODE')
@@ -348,7 +351,7 @@
                     </div>
 
                     <!-- Sandbox Testing Simulator Banner -->
-                    @if(config('services.midtrans.is_production') == false && !in_array(strtolower($order->payment_method), ['tunai', 'transfer manual', 'transfer_manual']))
+                    @if(app()->environment(['local', 'testing']) && config('services.midtrans.is_production') == false && !in_array(strtolower($order->payment_method), ['tunai', 'transfer manual', 'transfer_manual']))
                         <div class="sandbox-box">
                             <div class="flex justify-center items-center gap-2 mb-2">
                                 <svg class="w-5 h-5 text-amber-600 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 9.172V5L8 4z"></path></svg>
@@ -503,4 +506,3 @@
 </style>
 @endpush
 @endsection
-

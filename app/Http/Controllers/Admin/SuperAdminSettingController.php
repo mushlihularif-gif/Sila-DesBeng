@@ -81,16 +81,14 @@ class SuperAdminSettingController extends Controller
     public function gatewayUpdate(Request $request)
     {
         $validated = $request->validateWithBag('umum', [
-            // 'oy' dibuang dari pilihan: tidak ada implementasinya, dan
-            // PenyediaPembayaran::aktif() diam-diam jatuh ke Midtrans kalau
-            // nilainya di luar dua ini - Super Admin mengira memilih OY!
-            // padahal seluruh sistem tetap berjalan di atas Midtrans.
-            // Wajib diisi karena nilai kosong pun berakibat sama.
-            'gateway_provider'        => 'required|in:midtrans,xendit',
+            // Xendit belum terhubung dengan alur pembuatan transaksi. Jangan
+            // biarkan pengaturan menyatakan Xendit aktif ketika checkout masih
+            // hanya memproses pembayaran Midtrans.
+            'gateway_provider'        => 'required|in:midtrans',
             'platform_fee_percentage' => 'required|numeric|min:0|max:100',
         ], [
             'gateway_provider.required' => 'Penyedia gateway wajib dipilih.',
-            'gateway_provider.in'       => 'Penyedia yang didukung sistem baru Midtrans dan Xendit.',
+            'gateway_provider.in'       => 'Saat ini hanya Midtrans yang siap digunakan untuk checkout.',
             'platform_fee_percentage.required' => 'Fee platform wajib diisi.',
         ]);
 

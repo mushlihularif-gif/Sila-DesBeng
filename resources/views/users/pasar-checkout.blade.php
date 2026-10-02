@@ -325,9 +325,10 @@
                         </div>
                         <div class="co-card-body">
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                                <input type="hidden" name="full_name" value="{{ Auth::user()->name }}">
                                 <div class="co-input-group">
-                                    <label class="co-label">Nama Lengkap <span class="required">*</span></label>
-                                    <input type="text" name="full_name" value="{{ Auth::user()->name }}" required class="co-input" readonly>
+                                    <label class="co-label">Pemesan</label>
+                                    <div class="co-input" aria-readonly="true">{{ Auth::user()->name }}</div>
                                 </div>
                                 <div class="co-input-group">
                                     <label class="co-label">No. WhatsApp <span class="required">*</span></label>
@@ -377,14 +378,17 @@
                             <!-- Delivery Form (Hidden) -->
                             <div id="deliveryForm" class="delivery-expand" style="display: none;">
                                 <div class="co-input-group">
-                                    <label class="co-label">
-                                        <span>Alamat Pengiriman <span class="required">*</span></span>
-                                        <button type="button" onclick="useProfileAddress()" class="profile-addr-btn">
-                                            <svg class="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path></svg>
-                                            Gunakan Alamat Profil
-                                        </button>
-                                    </label>
-                                    <textarea name="delivery_address" id="delivery_address" rows="3" class="co-input co-textarea" placeholder="Masukkan alamat lengkap pengiriman..."></textarea>
+                                    <label class="co-label">Alamat Pengiriman <span class="required">*</span></label>
+                                    @include('partials.pilih-alamat', [
+                                        'alamatTersimpan' => $alamatTersimpan ?? collect(),
+                                        'idAlamat' => 'delivery_address',
+                                        'gunakanPetaTerpisah' => true,
+                                        'latitudeName' => 'delivery_latitude',
+                                        'longitudeName' => 'delivery_longitude',
+                                        'latitudeId' => 'delivery_latitude',
+                                        'longitudeId' => 'delivery_longitude',
+                                    ])
+                                    <textarea name="delivery_address" id="delivery_address" rows="3" class="co-input co-textarea" placeholder="Pilih alamat tersimpan atau masukkan alamat baru..."></textarea>
                                 </div>
 
                                 <div class="co-input-group">
@@ -396,8 +400,6 @@
                                         </div>
                                     </div>
                                     <div id="map"></div>
-                                    <input type="hidden" name="delivery_latitude" id="delivery_latitude">
-                                    <input type="hidden" name="delivery_longitude" id="delivery_longitude">
                                     <p class="distance-info" id="distanceInfo" style="display: none;"></p>
                                 </div>
                             </div>
@@ -708,8 +710,10 @@
 
     function initMap() {
         if(map) return;
-        const defaultLat = parseFloat("{{ Auth::user()->latitude ?? '1.482755' }}") || 1.482755;
-        const defaultLon = parseFloat("{{ Auth::user()->longitude ?? '102.138407' }}") || 102.138407;
+        const latTersimpan = parseFloat(document.getElementById('delivery_latitude')?.value);
+        const lonTersimpan = parseFloat(document.getElementById('delivery_longitude')?.value);
+        const defaultLat = Number.isFinite(latTersimpan) ? latTersimpan : (parseFloat("{{ Auth::user()->latitude ?? '1.482755' }}") || 1.482755);
+        const defaultLon = Number.isFinite(lonTersimpan) ? lonTersimpan : (parseFloat("{{ Auth::user()->longitude ?? '102.138407' }}") || 102.138407);
         const defaultLocation = [defaultLat, defaultLon];
         map = L.map('map').setView(defaultLocation, 14);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -742,6 +746,18 @@
         document.getElementById('delivery_latitude').value = latlng.lat;
         document.getElementById('delivery_longitude').value = latlng.lng;
     }
+
+    window.addEventListener('alamat-warga-dipilih', function (event) {
+        const latitude = event.detail?.lat;
+        const longitude = event.detail?.lng;
+        if (latitude == null || longitude == null) return;
+        const titik = L.latLng(Number(latitude), Number(longitude));
+        if (map && marker) {
+            marker.setLatLng(titik);
+            map.setView(titik, 16);
+        }
+        updateCoordinates(titik);
+    });
 
     function toggleDelivery(method) {
         // Toggle selected class and radio checked state
@@ -887,4 +903,3 @@
     });
 </script>
 @endpush
-

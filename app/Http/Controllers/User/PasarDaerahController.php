@@ -382,7 +382,12 @@ class PasarDaerahController extends Controller
         }
 
         $region = $seller;
-        return view('users.pasar-checkout', compact('carts', 'buyer', 'seller', 'region', 'ongkir'));
+        $alamatTersimpan = \App\Models\AlamatWarga::milik(Auth::id())
+            ->with('region')
+            ->orderByDesc('is_utama')
+            ->orderBy('id')
+            ->get();
+        return view('users.pasar-checkout', compact('carts', 'buyer', 'seller', 'region', 'ongkir', 'alamatTersimpan'));
     }
 
     /**
@@ -405,8 +410,8 @@ class PasarDaerahController extends Controller
             'full_name' => 'required|string|max:255',
             'phone' => 'required|string',
             'delivery_address' => 'required_if:delivery_method,antar|string|nullable',
-            'delivery_latitude' => 'required_if:delivery_method,antar|numeric|nullable',
-            'delivery_longitude' => 'required_if:delivery_method,antar|numeric|nullable',
+            'delivery_latitude' => 'required_if:delivery_method,antar|nullable|numeric|between:-90,90',
+            'delivery_longitude' => 'required_if:delivery_method,antar|nullable|numeric|between:-180,180',
             'notes' => 'nullable|string',
             'proof_of_payment' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
         ]);
@@ -675,6 +680,8 @@ class PasarDaerahController extends Controller
 
     public function simulatePayment($id)
     {
+        abort_unless(app()->environment(['local', 'testing']), 404);
+
         $order = PasarOrder::findOrFail($id);
         if ($order->user_id !== Auth::id() && !Auth::user()->is_admin) abort(403);
         

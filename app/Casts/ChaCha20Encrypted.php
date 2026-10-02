@@ -74,13 +74,15 @@ class ChaCha20Encrypted implements CastsAttributes
                         return $plaintext;
                     }
                 }
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 // Lanjut ke fallback OpenSSL jika terjadi error
             }
         }
 
         // 2. Fallback OpenSSL AEAD: Sangat krusial untuk shared hosting / cPanel jika ekstensi libsodium dinonaktifkan
-        if (in_array('chacha20-poly1305', openssl_get_cipher_methods())) {
+        if (function_exists('openssl_decrypt')
+            && function_exists('openssl_get_cipher_methods')
+            && in_array('chacha20-poly1305', openssl_get_cipher_methods(), true)) {
             try {
                 $encryptionKey = $this->deriveKey();
                 $encoded = substr($value, strlen(self::ENCRYPTED_PREFIX));
@@ -97,12 +99,14 @@ class ChaCha20Encrypted implements CastsAttributes
                         return $plain;
                     }
                 }
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 Log::error("ChaCha20 OpenSSL Decrypt Error [{$key}]: " . $e->getMessage());
             }
         }
 
-        return $value;
+        // Baris terenkripsi yang gagal dibuka bukan data legacy/plaintext.
+        // Gagal terang-terangan agar ciphertext tidak bocor ke layar/API.
+        throw new \RuntimeException("Tidak dapat mendekripsi field sensitif [{$key}]. Periksa APP_KEY dan dukungan cipher server.");
     }
 
     /**
@@ -141,13 +145,15 @@ class ChaCha20Encrypted implements CastsAttributes
                 sodium_memzero($encryptionKey);
 
                 return self::ENCRYPTED_PREFIX . base64_encode($nonce . $ciphertext);
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 // Lanjut ke fallback OpenSSL
             }
         }
 
         // 2. Fallback OpenSSL AEAD
-        if (in_array('chacha20-poly1305', openssl_get_cipher_methods())) {
+        if (function_exists('openssl_encrypt')
+            && function_exists('openssl_get_cipher_methods')
+            && in_array('chacha20-poly1305', openssl_get_cipher_methods(), true)) {
             try {
                 $encryptionKey = $this->deriveKey();
                 $nonce = random_bytes(12);
@@ -165,13 +171,14 @@ class ChaCha20Encrypted implements CastsAttributes
                 if ($ciphertext !== false) {
                     return self::ENCRYPTED_PREFIX . base64_encode($nonce . $ciphertext . $tag);
                 }
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 Log::error("ChaCha20 OpenSSL Encrypt Error [{$key}]: " . $e->getMessage());
             }
         }
 
-        // Fallback: simpan apa adanya daripada kehilangan data
-        return $value;
+        // Fail closed: jangan pernah menyimpan PII dalam plaintext jika
+        // ekstensi atau cipher enkripsi tidak tersedia.
+        throw new \RuntimeException("Enkripsi field sensitif [{$key}] tidak tersedia. Aktifkan libsodium atau OpenSSL ChaCha20-Poly1305.");
     }
 
     /**

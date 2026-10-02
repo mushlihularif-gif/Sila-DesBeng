@@ -365,43 +365,20 @@
                         </div>
                     </div>
 
-                    <!-- Form Input Identitas Pemesan & Alamat -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="md:col-span-2">
-                            <label class="block text-xs md:text-sm font-bold text-gray-700 mb-1.5" id="label-recipient-name">
-                                Nama Lengkap Pemesan / Penyewa <span class="text-red-500">*</span>
-                            </label>
-                            <div class="relative">
-                                <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-gray-400">
-                                    <i class="bx bx-user text-lg"></i>
-                                </span>
-                                <input type="text" 
-                                       name="recipient_name" 
-                                       id="recipient-name"
-                                       value="{{ Auth::user()->name ?? '' }}"
-                                       placeholder="Nama Lengkap sesuai KTP" 
-                                       class="w-full pl-10 pr-4 py-3 bg-gray-50/50 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all" 
-                                       required>
-                            </div>
-                        </div>
-
-                        <div class="md:col-span-2">
-                            <label class="block text-xs md:text-sm font-bold text-gray-700 mb-1.5" id="label-delivery-address">
-                                Alamat Domisili / Tempat Tinggal Pemesan <span class="text-red-500">*</span>
-                            </label>
-                            <div class="relative">
-                                <textarea name="delivery_address" 
-                                          id="delivery-address"
-                                          rows="3" 
-                                          placeholder="Masukkan alamat lengkap (Nama Jalan, No. Rumah, RT/RW, Dusun, Desa)" 
-                                          class="w-full px-4 py-3 bg-gray-50/50 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
-                                          required>{{ Auth::user()->address ?? '' }}</textarea>
-                            </div>
-                            <p class="text-[11px] text-gray-400 mt-1" id="address-help-text">
-                                Alamat domisili digunakan untuk verifikasi data peminjam kendaraan.
-                            </p>
-                        </div>
-                    </div>
+                    <!-- Pemesan sudah teridentifikasi dari akun; pilih alamat tersimpan atau isi alamat baru. -->
+                    @include('partials.pilih-alamat', [
+                        'alamatTersimpan' => $alamatTersimpan ?? collect(),
+                        'idNama' => 'recipient-name',
+                        'idAlamat' => 'delivery-address',
+                    ])
+                    <input type="hidden" name="recipient_name" id="recipient-name" value="{{ Auth::user()->name }}">
+                    <label class="block text-xs md:text-sm font-bold text-gray-700 mb-1.5" for="delivery-address">
+                        Alamat / Titik Penjemputan <span class="text-red-500">*</span>
+                    </label>
+                    <textarea name="delivery_address" id="delivery-address" rows="3"
+                              placeholder="Pilih alamat tersimpan atau tulis alamat baru"
+                              class="w-full px-4 py-3 bg-gray-50/50 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
+                              required></textarea>
                 </div>
 
                 <!-- 5. Keterangan / Tujuan Acara -->
@@ -1343,7 +1320,7 @@
         const jenis = jenisInput?.value || 'harian';
 
         if (!recipientName) {
-            Swal.fire({ icon: 'warning', title: 'Data Belum Lengkap', text: 'Silakan isi Nama Lengkap Pemesan.' });
+            Swal.fire({ icon: 'warning', title: 'Profil Belum Lengkap', text: 'Nama pemesan harus tersedia di akun Anda.' });
             return;
         }
         if (!deliveryAddress) {

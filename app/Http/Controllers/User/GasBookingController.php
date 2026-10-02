@@ -434,6 +434,8 @@ class GasBookingController extends Controller
 
     public function simulatePayment($id)
     {
+        abort_unless(app()->environment(['local', 'testing']), 404);
+
         $order = GasOrder::findOrFail($id);
         
         // Ensure the user owns this order

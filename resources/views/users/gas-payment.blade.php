@@ -347,7 +347,7 @@
                         Lihat Riwayat Pesanan
                     </a>
                     
-                    @if($order->status == 'pending')
+                    @if($order->status == 'pending' && app()->environment(['local', 'testing']))
                         <!-- Simulation Button -->
                         <form action="{{ route('user.gas.payment.simulate', $order->id) }}" method="POST" class="w-full sm:w-auto">
                             @csrf

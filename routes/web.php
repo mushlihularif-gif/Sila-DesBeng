@@ -33,11 +33,6 @@ Route::get('/', function () {
     return redirect('beranda');
 });
 
-Route::get('/test-route-123', function() {
-    \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
-    return response('Migrated! ' . \Illuminate\Support\Facades\Artisan::output(), 200);
-});
-
 Route::get('/sitemap.xml', function () {
     $path = public_path('sitemap.xml');
     if (file_exists($path)) {
@@ -284,9 +279,11 @@ Route::get('/gas/payment/{id}/sinkron', [App\Http\Controllers\User\GasBookingCon
     ->name('user.gas.payment.sinkron')
     ->middleware('auth');
 
-Route::post('/gas/payment/{id}/simulate', [App\Http\Controllers\User\GasBookingController::class, 'simulatePayment'])
-    ->name('user.gas.payment.simulate')
-    ->middleware('auth');
+if (app()->environment(['local', 'testing'])) {
+    Route::post('/gas/payment/{id}/simulate', [App\Http\Controllers\User\GasBookingController::class, 'simulatePayment'])
+        ->name('user.gas.payment.simulate')
+        ->middleware('auth');
+}
 
 Route::post('/gas/payment/{id}/cancel', [App\Http\Controllers\User\GasBookingController::class, 'cancelPayment'])
     ->name('user.gas.payment.cancel')
@@ -310,7 +307,10 @@ Route::middleware('auth')->prefix('pasar-daerah')->group(function () {
     Route::get('/checkout', [App\Http\Controllers\User\PasarDaerahController::class, 'checkout'])->name('pasar.checkout');
     Route::post('/order', [App\Http\Controllers\User\PasarDaerahController::class, 'placeOrder'])->name('pasar.order.store');
     Route::get('/payment/{id}', [App\Http\Controllers\User\PasarDaerahController::class, 'payment'])->name('pasar.payment');
-    Route::post('/payment/{id}/simulate', [App\Http\Controllers\User\PasarDaerahController::class, 'simulatePayment'])->name('pasar.payment.simulate');
+    if (app()->environment(['local', 'testing'])) {
+        Route::post('/payment/{id}/simulate', [App\Http\Controllers\User\PasarDaerahController::class, 'simulatePayment'])
+            ->name('pasar.payment.simulate');
+    }
     Route::get('/toko/{id}', [App\Http\Controllers\User\PasarDaerahController::class, 'toko'])
         ->name('pasar.toko')
         ->withoutMiddleware('auth')
@@ -497,9 +497,6 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
     // Manajemen Kemitraan Daerah
     Route::get('/kemitraan', [\App\Http\Controllers\Admin\PartnerApplicationController::class, 'index'])->name('admin.kemitraan.index');
     
-    Route::get('/test_regions', function() {
-        return \App\Models\Region::all();
-    });
     Route::get('/kemitraan/{id}/document', [\App\Http\Controllers\Admin\PartnerApplicationController::class, 'document'])->name('admin.kemitraan.document');
     Route::post('/kemitraan/{id}/approve', [\App\Http\Controllers\Admin\PartnerApplicationController::class, 'approve'])->name('admin.kemitraan.approve');
     Route::post('/kemitraan/{id}/reject', [\App\Http\Controllers\Admin\PartnerApplicationController::class, 'reject'])->name('admin.kemitraan.reject');
@@ -849,7 +846,7 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
     // Route SiladesBeng
     Route::prefix('SiladesBeng')->group(function () {
         Route::get('/profile', [\App\Http\Controllers\Admin\SettingController::class, 'showIsewaProfile'])->name('admin.SiladesBeng.profile');
-        Route::get('/run-mig', function() { \Illuminate\Support\Facades\Artisan::call('migrate'); return \Illuminate\Support\Facades\Artisan::output(); }); Route::get('/developer/{name}', [\App\Http\Controllers\Admin\SettingController::class, 'showDeveloperProfile'])->name('admin.SiladesBeng.developer.profile');
+        Route::get('/developer/{name}', [\App\Http\Controllers\Admin\SettingController::class, 'showDeveloperProfile'])->name('admin.SiladesBeng.developer.profile');
         
         Route::get('/profil-pemerintah', [\App\Http\Controllers\Admin\BumdesController::class, 'index'])->name('admin.SiladesBeng.profile-bumdes');
         Route::prefix('profil-pemerintah')->group(function () {
@@ -953,7 +950,15 @@ Route::middleware(['auth', 'role:user'])->group(function () {
 
 // API Routes for Regions
 Route::get('/api/regions', function () {
-    return response()->json(\App\Models\Region::all());
+    // Endpoint publik ini hanya diperlukan untuk dropdown wilayah. Jangan
+    // serialisasikan seluruh model: kolom payment_info/kontak tidak perlu
+    // dikirim kepada publik.
+    return response()->json(
+        \App\Models\Region::query()
+            ->select(['id', 'name', 'type', 'parent_id'])
+            ->orderBy('name')
+            ->get()
+    );
 });
 
 // Reverse geocoding API proxy (OpenStreetMap Nominatim dengan User-Agent SiladesBeng resmi)
@@ -967,145 +972,11 @@ Route::get('/api/geocode/reverse', function (\Illuminate\Http\Request $request) 
     ]);
 });
 
-Route::get('/dev/setup-region', function () {
-    $user = \App\Models\User::first();
-    if (!$user) return 'No user found';
-
-    // Check if region exists
-    $region = \App\Models\Region::where('name', 'Pematang Duku Timur')->first();
-    if (!$region) {
-        $region = \App\Models\Region::create([
-            'name' => 'Pematang Duku Timur',
-            'type' => 'desa',
-            'profile_text' => 'Pemerintahan Desa Pematang Duku Timur, Kecamatan Bengkalis, Kabupaten Bengkalis.',
-        ]);
-    }
-    
-    // Assign to user
-    $user->region_id = $region->id;
-    $user->save();
-
-    return 'Assigned Region ID: ' . $region->id . ' to User: ' . $user->email;
-});
-
-Route::get('/dev/fix-duplicates', function () {
-    try {
-        $correctKecamatan = \App\Models\Region::where('name', 'Kecamatan Bengkalis')->first();
-        $correctDesa = \App\Models\Region::where('name', 'Desa Pematang Duku Timur')->first();
-        
-        $messages = [];
-
-        if ($correctKecamatan && $correctDesa) {
-            // Fix ALL Duplicate Kecamatan Bengkalis
-            $duplicateKecamatans = \App\Models\Region::whereIn('name', ['Bengkalis', 'Kecamatan Bengkalis'])
-                ->where('type', 'kecamatan')
-                ->where('id', '!=', $correctKecamatan->id)
-                ->get();
-                
-            foreach ($duplicateKecamatans as $dupKec) {
-                // Move children
-                \App\Models\Region::where('parent_id', $dupKec->id)->update(['parent_id' => $correctKecamatan->id]);
-                // Move users
-                \App\Models\User::where('region_id', $dupKec->id)->update(['region_id' => $correctKecamatan->id]);
-                $dupKec->delete();
-                $messages[] = 'Duplicate Kecamatan Bengkalis fixed (ID: ' . $dupKec->id . ').';
-            }
-
-            // Fix ALL Duplicate Desa Pematang Duku Timur
-            $duplicates = \App\Models\Region::whereIn('name', ['Pematang Duku Timur', 'Desa Pematang Duku Timur'])
-                ->where('type', 'desa')
-                ->where('id', '!=', $correctDesa->id)
-                ->get();
-            
-            foreach ($duplicates as $dup) {
-                \App\Models\User::where('region_id', $dup->id)->update(['region_id' => $correctDesa->id]);
-                // Move any child data (like services)
-                foreach($dup->services as $service) {
-                    $correctDesa->services()->syncWithoutDetaching([$service->id => ['is_active' => true]]);
-                }
-                $dup->delete();
-                $messages[] = 'Duplicate Desa Pematang Duku Timur fixed (ID: ' . $dup->id . ').';
-            }
-            
-            // Re-check how many desas are actually under correct kecamatan
-            $totalDesa = \App\Models\Region::where('parent_id', $correctKecamatan->id)->where('type', 'desa')->count();
-            $messages[] = "Total Desa under Kecamatan Bengkalis is now: " . $totalDesa;
-        }
-        
-        return count($messages) > 0 ? implode('<br>', $messages) : 'No duplicates found or missing correct regions.';
-    } catch (\Exception $e) {
-        return 'Error: ' . $e->getMessage();
-    }
-});
-
-Route::get('/dev/check-regions', function () {
-    $regions = \App\Models\Region::orderBy('type')->orderBy('name')->get();
-    $html = '<table border="1" cellpadding="5"><tr><th>ID</th><th>Name</th><th>Type</th><th>Parent ID</th></tr>';
-    foreach ($regions as $r) {
-        $html .= "<tr><td>{$r->id}</td><td>{$r->name}</td><td>{$r->type}</td><td>{$r->parent_id}</td></tr>";
-    }
-    $html .= '</table>';
-    return $html;
-});
-
-Route::get('/dev/create-test-rtrw', function () {
-    // Buat Region RW dan RT jika belum ada
-    $desa = \App\Models\Region::where('type', 'desa')->first();
-    if (!$desa) return "Harap buat data desa terlebih dahulu.";
-
-    $rw = \App\Models\Region::firstOrCreate([
-        'name' => 'RW 01',
-        'type' => 'rw',
-        'parent_id' => $desa->id
-    ]);
-
-    $rt = \App\Models\Region::firstOrCreate([
-        'name' => 'RT 01',
-        'type' => 'rt',
-        'parent_id' => $rw->id
-    ]);
-
-    // Buat User Admin RW
-    $adminRw = \App\Models\User::firstOrCreate(
-        ['email' => 'admin.rw@SiladesBeng.com'],
-        [
-            'name' => 'Bapak Admin RW 01',
-            'username' => 'admin_rw01',
-            'password' => \Illuminate\Support\Facades\Hash::make('password123'),
-            'role' => 'admin_rw',
-            'region_id' => $rw->id,
-            'status' => 'aktif',
-            'phone' => '081234567891',
-            'address' => 'Jl. RW 01'
-        ]
-    );
-
-    // Buat User Admin RT
-    $adminRt = \App\Models\User::firstOrCreate(
-        ['email' => 'admin.rt@SiladesBeng.com'],
-        [
-            'name' => 'Bapak Admin RT 01',
-            'username' => 'admin_rt01',
-            'password' => \Illuminate\Support\Facades\Hash::make('password123'),
-            'role' => 'admin_rt',
-            'region_id' => $rt->id,
-            'status' => 'aktif',
-            'phone' => '081234567892',
-            'address' => 'Jl. RT 01'
-        ]
-    );
-
-    return "Berhasil membuat akun uji coba:<br><br><b>Admin RW:</b><br>Email: admin.rw@SiladesBeng.com<br>Password: password123<br><br><b>Admin RT:</b><br>Email: admin.rt@SiladesBeng.com<br>Password: password123";
-});
+// Route debug, setup data uji, migrasi, dan migrasi enkripsi melalui HTTP
+// sengaja tidak disediakan. Operasi pemeliharaan dijalankan melalui Artisan CLI.
 
 // Chatbot API Route
 Route::post('/chatbot/ask', [\App\Http\Controllers\User\ChatbotController::class, 'ask']);
-
-Route::get('/run-mig-now', function() { \Illuminate\Support\Facades\Artisan::call('migrate'); return \Illuminate\Support\Facades\Artisan::output(); });
-Route::get('/run-encrypt', function() { \Illuminate\Support\Facades\Artisan::call('data:encrypt-existing'); return \Illuminate\Support\Facades\Artisan::output(); });
-
-
-Route::get('/test-berita-view', function() { return view('user.wilayah.berita', ['beritas' => collect(), 'jangkauanOptions' => []]); });
 
 // Fallback Route untuk aset Storage jika symlink dinonaktifkan oleh shared hosting
 Route::get('/storage/{path}', function ($path) {

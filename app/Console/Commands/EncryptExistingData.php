@@ -31,7 +31,7 @@ class EncryptExistingData extends Command
         $this->info('Starting data encryption migration for ChaCha20-Poly1305...');
 
         // 1. Migrate Users
-        $this->info('Encrypting User data (phone, address)...');
+        $this->info('Encrypting User data (name, phone, address, NIK)...');
         $users = User::all();
         $userCount = 0;
 
@@ -45,6 +45,8 @@ class EncryptExistingData extends Command
                 // Get raw attributes from database to check if they need encryption
                 $rawPhone = $user->getRawOriginal('phone');
                 $rawAddress = $user->getRawOriginal('address');
+                $rawName = $user->getRawOriginal('name');
+                $rawNik = $user->getRawOriginal('nik');
                 
                 $needsSave = false;
                 
@@ -55,6 +57,16 @@ class EncryptExistingData extends Command
                 
                 if ($rawAddress && !str_starts_with($rawAddress, '$chacha20$')) {
                     $user->address = $rawAddress;
+                    $needsSave = true;
+                }
+
+                if ($rawName && !str_starts_with($rawName, '$chacha20$')) {
+                    $user->name = $rawName;
+                    $needsSave = true;
+                }
+
+                if ($rawNik && !str_starts_with($rawNik, '$chacha20$')) {
+                    $user->nik = $rawNik;
                     $needsSave = true;
                 }
 

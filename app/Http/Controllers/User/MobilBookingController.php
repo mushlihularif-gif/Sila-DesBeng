@@ -49,8 +49,14 @@ class MobilBookingController extends Controller
 
         // Cek apakah wilayah ini sudah siap gateway Midtrans
         $adaGateway = \App\Support\PenyediaPembayaran::terapkanMidtransWilayah($item->region_id);
+
+        $alamatTersimpan = \App\Models\AlamatWarga::milik(auth()->id())
+            ->with('region')
+            ->orderByDesc('is_utama')
+            ->orderBy('id')
+            ->get();
         
-        return view('users.mobil-rental-booking', compact('item', 'setting', 'quantity', 'sop_mobil', 'isWilayah', 'tarifWilayah', 'kecamatanKhusus', 'adaGateway'));
+        return view('users.mobil-rental-booking', compact('item', 'setting', 'quantity', 'sop_mobil', 'isWilayah', 'tarifWilayah', 'kecamatanKhusus', 'adaGateway', 'alamatTersimpan'));
     }
 
     public function store(Request $request)
@@ -71,8 +77,10 @@ class MobilBookingController extends Controller
             // sehingga rekening wilayah tidak pernah bisa dipakai di unit ini.
             'payment_method' => 'required|in:tunai,transfer,ewallet,bank_transfer_bca,bank_transfer_bri,bank_transfer_bni,bank_transfer_mandiri,bank_transfer_bsi,gopay,qris',
             
-            'recipient_name' => 'required|string|max:255',
+            'recipient_name' => 'nullable|string|max:255',
             'delivery_address' => 'required|string|max:1000',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
             
             // Bukti wajib kalau warga memilih transfer - tanpa itu petugas tidak
             // punya dasar untuk memverifikasi pembayarannya.
@@ -82,6 +90,7 @@ class MobilBookingController extends Controller
         ]);
 
         $item = Mobil::findOrFail($validated['mobil_id']);
+        $validated['recipient_name'] = $validated['recipient_name'] ?: Auth::user()->name;
         
         // Validate availability before proceeding
         if ($item->status !== 'tersedia') {
@@ -160,6 +169,8 @@ class MobilBookingController extends Controller
             'tujuan_wilayah' => $validated['tujuan_wilayah'] ?? null,
             'recipient_name' => $validated['recipient_name'],
             'delivery_address' => $validated['delivery_address'],
+            'latitude' => $validated['latitude'] ?? null,
+            'longitude' => $validated['longitude'] ?? null,
             'payment_method' => $validated['payment_method'],
             'payment_proof' => $paymentProofPath,
             'total_amount' => $totalAmount,

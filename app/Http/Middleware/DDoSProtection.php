@@ -65,11 +65,15 @@ class DDoSProtection
             ], 429);
         }
 
-        // Layer 2: Cek rate limit per detik (deteksi burst/flood)
+        // Cache::increment menggunakan operasi atomik pada cache store yang
+        // mendukungnya. Pola get()+put() sebelumnya dapat kehilangan hit saat
+        // banyak request bersamaan memakai IP yang sama.
         $perSecondKey = 'ddos_sec:' . $ip;
-        $perSecondCount = Cache::get($perSecondKey, 0);
-        
-        if ($perSecondCount >= $this->batas('per_detik', 30)) {
+        Cache::add($perSecondKey, 0, now()->addSecond());
+        $perSecondCount = Cache::increment($perSecondKey);
+
+        // Layer 2: Cek rate limit per detik (deteksi burst/flood)
+        if ($perSecondCount > $this->batas('per_detik', 30)) {
             $this->addStrike($ip, $request);
             
             return response()->json([
@@ -78,13 +82,12 @@ class DDoSProtection
             ], 429);
         }
         
-        Cache::put($perSecondKey, $perSecondCount + 1, now()->addSecond());
-
         // Layer 3: Cek rate limit per menit
         $perMinuteKey = 'ddos_min:' . $ip;
-        $perMinuteCount = Cache::get($perMinuteKey, 0);
-        
-        if ($perMinuteCount >= $this->batas('per_menit', 600)) {
+        Cache::add($perMinuteKey, 0, now()->addMinute());
+        $perMinuteCount = Cache::increment($perMinuteKey);
+
+        if ($perMinuteCount > $this->batas('per_menit', 600)) {
             $this->addStrike($ip, $request);
             
             return response()->json([
@@ -93,8 +96,6 @@ class DDoSProtection
             ], 429);
         }
         
-        Cache::put($perMinuteKey, $perMinuteCount + 1, now()->addMinute());
-
         // Layer 4: Log jika mendekati batas (early warning)
         if ($perMinuteCount >= $this->batas('mencurigakan', 400)) {
             Log::notice('DDOS_PROTECTION: Suspicious activity detected', [

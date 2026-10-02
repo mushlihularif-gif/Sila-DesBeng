@@ -84,6 +84,8 @@ class RentalBookingController extends Controller
             // Penerima & Alamat (Wajib untuk Antar & Jemput)
             'recipient_name' => 'required|string|max:255',
             'delivery_address' => 'required|string',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
 
             // Bukti wajib kalau warga memilih transfer — tanpa itu petugas tidak
             // punya dasar untuk memverifikasi pembayarannya.
@@ -130,6 +132,8 @@ class RentalBookingController extends Controller
             'days_count' => $daysCount,
             'recipient_name' => $validated['recipient_name'] ?? null,
             'delivery_address' => $validated['delivery_address'] ?? null,
+            'latitude' => $validated['latitude'] ?? null,
+            'longitude' => $validated['longitude'] ?? null,
             'payment_method' => $validated['payment_method'],
             'payment_proof' => $paymentProofPath,
             'total_amount' => $totalAmount,
@@ -249,4 +253,3 @@ class RentalBookingController extends Controller
         return response()->json($response);
     }
 }
-
