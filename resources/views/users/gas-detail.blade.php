@@ -30,7 +30,7 @@
                                 <div class="w-full h-full flex-shrink-0 flex-grow-0">
                                     <img src="{{ asset('storage/' . $image) }}" 
                                          alt="{{ $item->jenis_gas }} - Image {{ $index + 1 }}"
-                                          class="product-image">
+                                          class="product-image gas-product-photo">
                                 </div>
                                 @endforeach
                             </div>

@@ -172,7 +172,7 @@
                                             }
                                         @endphp
                                         @if($imgUrl)
-                                        <img src="{{ $imgUrl }}" alt="{{ $item->name }}" loading="lazy" class="max-w-full max-h-full w-auto h-auto object-contain mx-auto group-hover:scale-105 transition-transform duration-300" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                        <img src="{{ $imgUrl }}" alt="{{ $item->name }}" loading="lazy" class="{{ ($item->type ?? '') === 'gas' ? 'gas-product-photo' : '' }}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                         <div class="w-full h-full hidden items-center justify-center text-gray-300 bg-gray-100">
                                             <i class="bx bx-package text-3xl"></i>
                                         </div>
@@ -389,10 +389,14 @@
                         </div>
 
                         <div class="unit-nav-wrapper mt-4 sm:mt-8 mb-4 sm:mb-8 flex flex-col items-center justify-center gap-3 px-4 relative z-30">
-                            <div class="unit-title-box text-center min-w-0 max-w-full">
-                                <h3 id="unit-title" class="text-base sm:text-xl md:text-2xl font-bold text-gray-900 transition-all duration-300 truncate">
-                                    Belanja &amp; Kebutuhan
-                                </h3>
+                            <div class="unit-nav-controls flex w-full max-w-3xl items-center justify-center gap-2 sm:gap-5">
+                                <button type="button" id="unit-prev" class="unit-nav-button" aria-label="Tampilkan layanan sebelumnya">Sebelumnya</button>
+                                <div class="unit-title-box text-center min-w-0 max-w-full flex-1">
+                                    <h3 id="unit-title" class="text-base sm:text-xl md:text-2xl font-bold text-gray-900 transition-all duration-300 truncate">
+                                        Belanja &amp; Kebutuhan
+                                    </h3>
+                                </div>
+                                <button type="button" id="unit-next" class="unit-nav-button" aria-label="Tampilkan layanan berikutnya">Berikutnya</button>
                             </div>
                             <div id="unit-indicators" class="flex items-center justify-center gap-2" aria-label="Pilih kategori layanan"></div>
                         </div>
@@ -455,7 +459,7 @@
                                         }
                                     @endphp
                                     @if($imgUrl)
-                                    <img src="{{ $imgUrl }}" alt="{{ $item->name }}" loading="lazy" class="max-w-full max-h-full w-auto h-auto object-contain mx-auto group-hover:scale-105 transition-transform duration-300" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                    <img src="{{ $imgUrl }}" alt="{{ $item->name }}" loading="lazy" class="{{ ($item->type ?? '') === 'gas' ? 'gas-product-photo' : '' }}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                     <div class="w-full h-full hidden items-center justify-center text-gray-300 bg-gray-100">
                                         <i class="bx bx-package text-3xl"></i>
                                     </div>
@@ -741,11 +745,11 @@
             }
         }
 
-        /* Wrapper Gambar Rekomendasi Produk & Pencarian (Anti-Gepeng, Padded, Centered) */
+        /* Rekomendasi dan hasil pencarian memakai frame penuh yang konsisten. */
         .rekomendasi-img-wrapper {
             height: 165px;
             width: 100%;
-            padding: 10px;
+            padding: 0;
             background-color: #f8fafc;
             display: flex;
             align-items: center;
@@ -755,18 +759,19 @@
         @media (min-width: 640px) {
             .rekomendasi-img-wrapper {
                 height: 195px;
-                padding: 14px;
+                padding: 0;
             }
         }
         .rekomendasi-img-wrapper img {
-            max-width: 100% !important;
-            max-height: 100% !important;
-            width: auto !important;
-            height: auto !important;
-            object-fit: contain !important;
-            margin: 0 auto;
+            max-width: none !important;
+            max-height: none !important;
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+            margin: 0;
             display: block;
         }
+        .rekomendasi-img-wrapper img.gas-product-photo { transform: scale(1.38); }
 
         /* Kotak Sapaan Dinamis Unit Pelayanan */
         .unit-speech-box {
@@ -787,6 +792,8 @@
         .unit-indicator { width: 10px; height: 10px; border: 0; border-radius: 999px; background: #cbd5e1; transition: width .2s ease, background-color .2s ease; }
         .unit-indicator:hover { background: #60a5fa; }
         .unit-indicator.active { width: 26px; background: #115789; }
+        .unit-nav-button { flex-shrink: 0; min-height: 2.5rem; border: 1px solid #cbdce9; border-radius: 999px; background: #fff; padding: .55rem 1rem; color: #115789; font-size: .85rem; font-weight: 700; box-shadow: 0 2px 7px rgba(15, 23, 42, .07); transition: background-color .15s ease, border-color .15s ease; }
+        .unit-nav-button:hover { border-color: #115789; background: #f2f8fc; }
 
         /* --- UNIT CAROUSEL STYLES (4 VISIBLE ITEMS) --- */
         .unit-stage-wrapper {
@@ -1017,6 +1024,7 @@
                 align-items: center !important;
                 justify-content: center !important;
             }
+            .unit-nav-button { min-height: 2.2rem; padding: .45rem .7rem; font-size: .72rem; }
             .unit-title-box {
                 min-width: 0 !important;
                 max-width: 180px !important;
@@ -1244,6 +1252,8 @@
                 if (cards.length === 0) return;
 
                 const titleElement = document.getElementById('unit-title');
+                const nextBtn = document.getElementById('unit-next');
+                const prevBtn = document.getElementById('unit-prev');
                 const indicatorContainer = document.getElementById('unit-indicators');
                 const speechBox = document.getElementById('unit-speech-box');
                 const speechWrapper = document.getElementById('speech-text-wrapper');
@@ -1354,6 +1364,21 @@
                     updateCarousel();
                 };
 
+                const handlePrev = () => {
+                    if (n <= 1) return;
+                    currentIndex = (currentIndex - 1 + n) % n;
+                    updateCarousel();
+                };
+
+                if (nextBtn) {
+                    nextBtn.hidden = n <= 1;
+                    nextBtn.onclick = () => { handleNext(); resetAutoSlide(); };
+                }
+                if (prevBtn) {
+                    prevBtn.hidden = n <= 1;
+                    prevBtn.onclick = () => { handlePrev(); resetAutoSlide(); };
+                }
+
                 const startAutoSlide = () => {
                     if (n <= 1) return;
                     clearInterval(autoSlideInterval);
@@ -1438,7 +1463,7 @@
                         } else if (!src.startsWith('http://') && !src.startsWith('https://')) {
                             src = '/' + src;
                         }
-                        imgHtml = `<img src="${src}" alt="${escapeHtml(item.name)}" loading="lazy" class="max-w-full max-h-full w-auto h-auto object-contain mx-auto group-hover:scale-105 transition-transform duration-300" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        imgHtml = `<img src="${src}" alt="${escapeHtml(item.name)}" loading="lazy" class="${item.type === 'gas' ? 'gas-product-photo' : ''}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                         <div class="w-full h-full hidden items-center justify-center text-gray-300 bg-gray-100"><i class="bx bx-package text-3xl"></i></div>`;
                     } else {
                         imgHtml = `<div class="w-full h-full flex items-center justify-center text-gray-300 bg-gray-100"><i class="bx bx-package text-3xl"></i></div>`;

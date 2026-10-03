@@ -40,12 +40,12 @@
         position: absolute;
         top: 0; left: 0;
         width: 100%; height: 100%;
-        object-fit: contain;
-        padding: 1rem;
+        object-fit: cover;
+        padding: 0;
         transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     }
     .ps-gallery-main:hover img {
-        transform: scale(1.02);
+        transform: scale(1.03);
     }
     .ps-gallery-thumb {
         position: relative;
@@ -62,8 +62,8 @@
         position: absolute;
         top: 0; left: 0;
         width: 100%; height: 100%;
-        object-fit: contain;
-        padding: .25rem;
+        object-fit: cover;
+        padding: 0;
     }
     .ps-gallery-thumb.active {
         border-color: #115789;
