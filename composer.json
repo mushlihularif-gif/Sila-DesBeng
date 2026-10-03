@@ -18,7 +18,7 @@
         "laravel/socialite": "^5.24",
         "laravel/tinker": "^2.10.1",
         "midtrans/midtrans-php": "^2.6",
-        "webklex/php-imap": "^4.1"
+        "webklex/php-imap": "^6.2"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
