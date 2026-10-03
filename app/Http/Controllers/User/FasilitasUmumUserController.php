@@ -14,7 +14,9 @@ class FasilitasUmumUserController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-        $targetRegionId = $request->query('region_id');
+        $targetRegionId = $request->integer('region_id') ?: null;
+        $filterRegionId = $request->integer('filter_region_id') ?: null;
+        $visibleRegionIds = null;
 
         // 1. Gedung & Ruang Publik
         $itemsQuery = FasilitasUmum::with('pengurus')->where('status', '!=', 'Tidak Tersedia');
@@ -27,13 +29,15 @@ class FasilitasUmumUserController extends Controller
         if ($targetRegionId) {
             // Ketika pengunjung memilih desa/wilayah tertentu dari direktori layanan
             $targetRegion = Region::find($targetRegionId);
+            $visibleRegionIds = array_merge([$targetRegionId], Region::getDescendantIds($targetRegionId));
 
             // Fasilitas gedung hanya menampilkan milik wilayah yang dipilih
-            $itemsQuery->where('region_id', $targetRegionId);
+            $itemsQuery->whereIn('region_id', $visibleRegionIds);
 
             // Ambulans/kendaraan menampilkan milik wilayah tersebut atau induknya jika disediakan terpusat
-            $vehicleRegionIds = array_merge([$targetRegionId], Region::getAncestorIds($targetRegionId));
+            $vehicleRegionIds = array_values(array_unique(array_merge($visibleRegionIds, Region::getAncestorIds($targetRegionId))));
             $kendaraansQuery->whereIn('region_id', $vehicleRegionIds);
+            $visibleRegionIds = $vehicleRegionIds;
 
             $region = $targetRegion ?: Region::where('type', 'kabupaten')->first();
         } else {
@@ -43,6 +47,7 @@ class FasilitasUmumUserController extends Controller
             if ($userRegionId) {
                 $relevantRegionIds = array_merge([$userRegionId], Region::getAncestorIds($userRegionId));
                 $allowed = Region::wilayahLayananTerlihat($userRegionId, 'Fasilitas Umum');
+                $visibleRegionIds = array_values(array_unique(array_merge($allowed, $relevantRegionIds)));
 
                 $itemsQuery->where(function($sub) use ($allowed, $relevantRegionIds) {
                     $sub->whereIn('region_id', $allowed)
@@ -59,13 +64,31 @@ class FasilitasUmumUserController extends Controller
             }
         }
 
+        $availableRegionIds = array_values(array_unique(array_merge(
+            (clone $itemsQuery)->whereNotNull('region_id')->distinct()->pluck('region_id')->map(fn ($id) => (int) $id)->all(),
+            (clone $kendaraansQuery)->whereNotNull('region_id')->distinct()->pluck('region_id')->map(fn ($id) => (int) $id)->all(),
+        )));
+        if ($filterRegionId) {
+            $filterIds = \App\Support\RegionCatalogFilter::idsFor($filterRegionId, $visibleRegionIds);
+            $vehicleFilterIds = array_values(array_unique(array_merge(
+                $filterIds,
+                Region::getAncestorIds($filterRegionId)
+            )));
+            if ($visibleRegionIds !== null) {
+                $vehicleFilterIds = array_values(array_intersect($vehicleFilterIds, $visibleRegionIds));
+            }
+            $itemsQuery->whereIn('region_id', $filterIds);
+            $kendaraansQuery->whereIn('region_id', $vehicleFilterIds);
+        }
+
         $items = $itemsQuery->orderBy('created_at', 'desc')->get();
         $kendaraans = $kendaraansQuery->orderBy('created_at', 'desc')->get();
+        $filterRegions = \App\Support\RegionCatalogFilter::options($availableRegionIds, $visibleRegionIds);
 
         // Kontak darurat dan konfigurasi wilayah
         $regionSettings = $region ? ($region->settings ?? []) : [];
 
-        return view('users.fasilitas-umum-equipment', compact('items', 'kendaraans', 'regionSettings', 'region'));
+        return view('users.fasilitas-umum-equipment', compact('items', 'kendaraans', 'regionSettings', 'region', 'targetRegionId', 'filterRegions', 'filterRegionId'));
     }
 
     public function show($id)

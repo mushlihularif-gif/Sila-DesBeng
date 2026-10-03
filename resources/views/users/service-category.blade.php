@@ -9,7 +9,6 @@
     <section class="relative z-10 min-h-screen px-4 pb-20 pt-28 sm:px-6 sm:pt-36">
         <div class="mx-auto max-w-6xl">
             <a href="{{ route('beranda') }}" class="inline-flex items-center gap-2 rounded-full border border-white/80 bg-white/80 px-4 py-2 text-sm font-semibold text-[#115789] shadow-sm backdrop-blur transition hover:bg-white focus:outline-none focus:ring-2 focus:ring-[#60a5fa]">
-                <i class="bx bx-arrow-back" aria-hidden="true"></i>
                 Kembali ke Beranda
             </a>
 

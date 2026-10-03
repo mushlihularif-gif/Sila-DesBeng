@@ -3,50 +3,6 @@
 @section('page')
 <main class="flex-grow relative w-full">
     <section class="relative z-10 min-h-screen pt-32 pb-16">
-        <!-- Elemen Dekoratif Latar Belakang -->
-        <div class="absolute inset-0 pointer-events-none overflow-hidden">
-            <!-- Top Left Blue Wave -->
-            <svg class="absolute top-0 left-0 w-[500px] h-[400px] opacity-30" style="transform: translate(-20%, -10%);">
-                <defs>
-                    <linearGradient id="blueWave1" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" style="stop-color:#60a5fa;stop-opacity:0.6" />
-                        <stop offset="100%" style="stop-color:#93c5fd;stop-opacity:0.3" />
-                    </linearGradient>
-                </defs>
-                <path d="M0,100 Q150,50 300,100 T600,100 L600,0 L0,0 Z" fill="url(#blueWave1)" />
-            </svg>
-
-            <!-- Top Right Geometric Shape -->
-            <div class="absolute top-20 right-0" style="transform: translateX(30%) rotate(15deg);">
-                <svg width="300" height="300" viewBox="0 0 300 300" class="opacity-20">
-                    <rect x="50" y="50" width="80" height="80" fill="#60a5fa" transform="rotate(45 90 90)" opacity="0.4"/>
-                    <rect x="150" y="80" width="60" height="60" fill="#93c5fd" transform="rotate(30 180 110)" opacity="0.3"/>
-                </svg>
-            </div>
-
-            <!-- Bottom Left Yellow Wave -->
-            <svg class="absolute bottom-0 left-0 w-[600px] h-[400px] opacity-40" style="transform: translate(-15%, 20%);">
-                <defs>
-                    <linearGradient id="yellowWave" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" style="stop-color:#fbbf24;stop-opacity:0.5" />
-                        <stop offset="100%" style="stop-color:#fde68a;stop-opacity:0.2" />
-                    </linearGradient>
-                </defs>
-                <path d="M0,200 Q200,150 400,200 T800,200 L800,400 L0,400 Z" fill="url(#yellowWave)" />
-            </svg>
-
-            <!-- Bottom Right Blue Wave -->
-            <svg class="absolute bottom-0 right-0 w-[500px] h-[350px] opacity-35" style="transform: translate(20%, 15%);">
-                <defs>
-                    <linearGradient id="blueWave2" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:0.4" />
-                        <stop offset="100%" style="stop-color:#60a5fa;stop-opacity:0.2" />
-                    </linearGradient>
-                </defs>
-                <path d="M0,150 Q150,100 300,150 T600,150 L600,400 L0,400 Z" fill="url(#blueWave2)" />
-            </svg>
-        </div>
-
         <div class="max-w-7xl mx-auto px-6 relative z-10">
             <!-- Header Section -->
             <div class="text-center mb-12 mt-12">
@@ -62,29 +18,7 @@
             </div>
 
             @if($filterRegions->isNotEmpty())
-            <form action="{{ route('rental.equipment') }}" method="GET" class="mx-auto mb-8 max-w-3xl rounded-2xl border border-blue-100 bg-white/80 p-4 shadow-sm backdrop-blur sm:p-5">
-                @if($targetRegionId)
-                    <input type="hidden" name="region_id" value="{{ $targetRegionId }}">
-                @endif
-                <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
-                    <div class="flex-1">
-                        <label for="rental-region-filter" class="mb-1.5 block text-sm font-bold text-gray-800">Filter wilayah alat</label>
-                        <select id="rental-region-filter" name="filter_region_id" class="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100">
-                            <option value="">Semua desa dan bagian wilayah</option>
-                            @foreach($filterRegions as $filterRegion)
-                                <option value="{{ $filterRegion->id }}" {{ (string) $filterRegionId === (string) $filterRegion->id ? 'selected' : '' }}>
-                                    {{ $filterRegion->filter_label }}
-                                </option>
-                            @endforeach
-                        </select>
-                        <p class="mt-1.5 text-xs text-gray-500">Pilih desa atau bagian wilayah tertentu untuk mempersempit daftar alat.</p>
-                    </div>
-                    <button type="submit" class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#115789] px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#0d4267] focus:outline-none focus:ring-2 focus:ring-blue-300">
-                        <i class="bx bx-filter-alt text-lg" aria-hidden="true"></i>
-                        Terapkan Filter
-                    </button>
-                </div>
-            </form>
+                @include('users.partials.catalog-region-filter', ['catalogRoute' => 'rental.equipment', 'filterLabel' => 'Filter wilayah alat'])
             @endif
 
             <!-- Category Filter -->
@@ -94,11 +28,11 @@
             
             @if($categories->count() > 0)
             <div class="flex flex-wrap justify-center gap-3 mb-10 max-w-4xl mx-auto px-4">
-                <button class="filter-btn active px-6 py-2.5 rounded-full font-semibold text-sm transition-all duration-300 bg-blue-500 text-white shadow-md border border-transparent hover:bg-blue-600 hover:shadow-lg hover:scale-105" data-filter="all">
+                <button class="catalog-filter-btn filter-btn active" data-filter="all">
                     Semua
                 </button>
                 @foreach($categories as $category)
-                <button class="filter-btn px-6 py-2.5 rounded-full font-semibold text-sm transition-all duration-300 bg-white text-gray-600 border border-gray-200 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 shadow-sm hover:shadow-md" data-filter="{{ Str::slug($category) }}">
+                <button class="catalog-filter-btn filter-btn" data-filter="{{ Str::slug($category) }}">
                     {{ ucfirst(str_replace('-', ' ', $category)) }}
                 </button>
                 @endforeach
@@ -107,18 +41,18 @@
 
             <!-- Grid Kartu Produk (2 Kolom di Mobile, 2 di Tablet, 3 di Desktop) -->
             @if($items->count() > 0)
-                <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6 mb-12 sm:mb-16 max-w-6xl mx-auto">
+                <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5 lg:gap-6 mb-12 sm:mb-16 max-w-6xl mx-auto">
                     @foreach($items as $item)
                     <a href="{{ route('rental.equipment.show', $item->id) }}" data-turbo="false" class="block group product-item transition-all duration-500" data-category="{{ $item->kategori ? Str::slug($item->kategori) : '' }}">
-                    <div class="product-card bg-white rounded-2xl sm:rounded-3xl p-2.5 sm:p-6 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 mx-auto w-full max-w-[350px] flex flex-col h-full">
+                    <div class="product-card p-3 sm:p-5">
                         
                         <!-- Gambar Produk -->
-                        <div class="product-image-wrapper mb-2 sm:mb-6 relative aspect-square overflow-hidden rounded-xl sm:rounded-2xl bg-gray-100 flex items-center justify-center group-hover:from-blue-50 group-hover:to-blue-50/30 transition-colors">
+                        <div class="product-image-wrapper mb-3 sm:mb-4">
                             <img src="{{ asset('storage/' . $item->foto) }}" 
                                  alt="{{ $item->nama_barang }}"
                                  loading="lazy"
                                  onerror="this.onerror=null; this.src='{{ asset('User/img/elemen/soundsystem.png') }}';"
-                                 class="product-image w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                 class="product-image">
                             
                             <!-- Status Badge -->
                             @if($item->stok > 0 && strtolower($item->status) != 'disewa')
@@ -139,7 +73,7 @@
                         </div>
 
                         <!-- Info Produk -->
-                        <div class="product-info flex flex-col flex-1 px-1 sm:px-2">
+                        <div class="product-info flex flex-col flex-1 px-0.5 sm:px-1">
                             <!-- Kategori -->
                             @if($item->kategori)
                                 <div class="mb-1.5 sm:mb-4">
@@ -153,7 +87,7 @@
                                 {{ $item->nama_barang }}
                             </h3>
                             
-                            <div class="mt-auto pt-2 sm:pt-3 flex items-end justify-between">
+                            <div class="mt-auto pt-3 flex items-end justify-between gap-2 border-t border-slate-100">
                                 <div class="flex flex-col">
                                     <span class="text-[10px] sm:text-xs text-gray-500 mb-0.5 font-medium">Harga</span>
                                     <p class="text-gray-900 font-bold text-xs sm:text-xl tracking-tight leading-none">
@@ -167,6 +101,7 @@
                                     </p>
                                 </div>
                             </div>
+                            <span class="catalog-card-cta bg-emerald-600">Pilih Alat Sewa</span>
                         </div>
                     </div>
                     </a>
@@ -188,73 +123,7 @@
 @endsection
 
 @push('styles')
-<style>
-    * {
-        font-family: 'Inter', sans-serif;
-    }
-
-    /* Product Cards */
-    .product-card {
-        position: relative;
-        background: white;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .product-card:hover {
-        transform: translateY(-8px);
-    }
-
-    .product-image {
-        transition: transform 0.3s ease;
-    }
-
-    .product-card:hover .product-image {
-        transform: scale(1.05);
-    }
-
-    .product-name {
-        font-size: 1.1rem;
-        font-weight: 700;
-        color: #1f2937;
-        line-height: 1.4;
-        margin-top: 1rem;
-    }
-
-    /* Smooth animations */
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .product-card {
-        animation: fadeInUp 0.6s ease-out;
-        animation-fill-mode: both;
-    }
-
-    .product-card:nth-child(1) { animation-delay: 0.1s; }
-    .product-card:nth-child(2) { animation-delay: 0.2s; }
-    .product-card:nth-child(3) { animation-delay: 0.3s; }
-    .product-card:nth-child(4) { animation-delay: 0.4s; }
-    .product-card:nth-child(5) { animation-delay: 0.5s; }
-    .product-card:nth-child(6) { animation-delay: 0.6s; }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-        .product-name {
-            font-size: 1.125rem;
-        }
-
-        .product-image {
-            height: 200px;
-        }
-    }
-</style>
+@include('users.partials.catalog-ui-styles')
 @endpush
 
 @push('scripts')
@@ -265,16 +134,9 @@
     // Tambahkan status loading untuk gambar
     document.addEventListener('DOMContentLoaded', () => {
         const images = document.querySelectorAll('.product-image');
-        images.forEach(img => {
-            if (img.complete) {
-                img.style.opacity = '1';
-            } else {
-                img.style.opacity = '0';
-                img.addEventListener('load', function() {
-                    this.style.opacity = '1';
-                });
-            }
-        });
+        images.forEach(img => img.addEventListener('error', function () {
+            this.classList.add('image-fallback');
+        }, { once: true }));
 
         // Filter Logic with State Persistence
         const filterBtns = document.querySelectorAll('.filter-btn');
@@ -283,19 +145,9 @@
         // Gunakan path URL untuk membedakan state antar halaman
         const storageKey = 'filter_' + window.location.pathname;
 
-        const activeClasses = ['bg-blue-500', 'text-white', 'shadow-md', 'border-transparent', 'hover:bg-blue-600', 'hover:shadow-lg', 'hover:scale-105', 'active'];
-        const inactiveClasses = ['bg-white', 'text-gray-600', 'border-gray-200', 'hover:bg-blue-50', 'hover:text-blue-600', 'hover:border-blue-200', 'shadow-sm', 'hover:shadow-md'];
-
         function applyFilter(filterValue) {
-            // Update button UI
             filterBtns.forEach(btn => {
-                if (btn.getAttribute('data-filter') === filterValue) {
-                    btn.classList.remove(...inactiveClasses);
-                    btn.classList.add(...activeClasses);
-                } else {
-                    btn.classList.remove(...activeClasses);
-                    btn.classList.add(...inactiveClasses);
-                }
+                btn.classList.toggle('active', btn.getAttribute('data-filter') === filterValue);
             });
 
             // Update items display with smooth opacity

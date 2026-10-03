@@ -53,14 +53,6 @@
                                 </div>
                                 
                                 @if($announcement->images->count() > 1)
-                                    <!-- Controls -->
-                                    <button type="button" id="slider-prev" aria-label="Foto Sebelumnya" class="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/40 hover:bg-black/70 active:scale-95 backdrop-blur-md rounded-full flex items-center justify-center text-white opacity-90 md:opacity-0 md:group-hover:opacity-100 transition-all z-20 cursor-pointer shadow-md">
-                                        <i class="bx bx-chevron-left text-2xl"></i>
-                                    </button>
-                                    <button type="button" id="slider-next" aria-label="Foto Selanjutnya" class="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/40 hover:bg-black/70 active:scale-95 backdrop-blur-md rounded-full flex items-center justify-center text-white opacity-90 md:opacity-0 md:group-hover:opacity-100 transition-all z-20 cursor-pointer shadow-md">
-                                        <i class="bx bx-chevron-right text-2xl"></i>
-                                    </button>
-
                                     <!-- Indicators -->
                                     <div id="slider-indicators" class="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 z-20 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full shadow-md pointer-events-auto">
                                         @for($i = 0; $i < $announcement->images->count(); $i++)
@@ -96,7 +88,6 @@
                                 @foreach($relatedAnnouncements->take(2) as $related)
                                 <li>
                                     <a href="{{ route('announcements.show', $related->id) }}" class="text-blue-700 font-bold hover:text-blue-900 hover:underline text-base flex items-center gap-2">
-                                        <i class="bx bx-chevron-right text-blue-500"></i>
                                         {{ $related->title }}
                                     </a>
                                 </li>
@@ -232,7 +223,7 @@
                                 <p class="text-xs font-semibold text-gray-700 mb-1">Belum Ada Kabar Lainnya</p>
                                 <p class="text-xs text-gray-500 mb-4">Informasi dan berita terbaru akan diperbarui secara berkala di portal SiladesBeng.</p>
                                 <a href="{{ route('announcements.index') }}" class="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-700 bg-white px-3 py-1.5 rounded-full border border-blue-200 shadow-sm">
-                                    <i class="bx bx-arrow-back"></i> Buka Portal Kabar
+                                    Buka Portal Kabar
                                 </a>
                             </div>
                         @endif
@@ -251,11 +242,9 @@
                         <div class="space-y-2 text-xs">
                             <a href="{{ route('pelayanan') }}" class="bg-white/15 hover:bg-white/25 text-white p-2.5 rounded-xl flex items-center justify-between transition-all font-medium border border-white/10">
                                 <span class="flex items-center gap-2"><i class="bx bx-grid-alt"></i> Unit Pelayanan Desa</span>
-                                <i class="bx bx-chevron-right"></i>
                             </a>
                             <a href="{{ route('pelaporan.landing') }}" class="bg-white/15 hover:bg-white/25 text-white p-2.5 rounded-xl flex items-center justify-between transition-all font-medium border border-white/10">
                                 <span class="flex items-center gap-2"><i class="bx bx-message-rounded-dots"></i> Layanan Pengaduan Warga</span>
-                                <i class="bx bx-chevron-right"></i>
                             </a>
                         </div>
                     </div>
@@ -300,14 +289,12 @@
 
         function initSlider() {
             const slider = document.getElementById('slider-main');
-            const prev = document.getElementById('slider-prev');
-            const next = document.getElementById('slider-next');
             const indicatorsContainer = document.getElementById('slider-indicators');
             const indicators = indicatorsContainer ? Array.from(indicatorsContainer.children) : [];
             const total = {{ $announcement->images->count() }};
             let current = 0;
 
-            if (!slider || !prev || !next) return;
+            if (!slider || !indicatorsContainer) return;
 
             function updateSlider() {
                 slider.style.transform = `translateX(-${current * 100}%)`;
@@ -334,22 +321,6 @@
                     autoSlideTimer = null;
                 }
             }
-
-            prev.onclick = function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                current = current > 0 ? current - 1 : total - 1;
-                updateSlider();
-                startAutoSlide();
-            };
-
-            next.onclick = function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                current = (current + 1) % total;
-                updateSlider();
-                startAutoSlide();
-            };
 
             indicators.forEach((ind, i) => {
                 ind.onclick = function(e) {

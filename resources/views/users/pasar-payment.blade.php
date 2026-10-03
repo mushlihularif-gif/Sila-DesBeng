@@ -149,8 +149,8 @@
         
         <!-- Header -->
         <div class="co-header">
-            <a href="{{ route('pasar.index') }}" class="co-back-btn" title="Kembali ke Katalog">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
+            <a href="{{ route('pasar.index') }}" class="co-back-btn px-4 w-auto gap-2" title="Kembali ke Katalog">
+                Kembali ke Katalog
             </a>
             <div>
                 <h1 class="co-title">Pembayaran Pesanan</h1>

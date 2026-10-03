@@ -31,58 +31,21 @@ class RentalUserController extends Controller
             });
         }
 
-        if ($filterRegionId) {
-            $filterRegionIds = array_merge(
-                [$filterRegionId],
-                \App\Models\Region::getDescendantIds($filterRegionId)
-            );
-
-            if ($visibleRegionIds !== null) {
-                $filterRegionIds = array_values(array_intersect($filterRegionIds, $visibleRegionIds));
-            }
-
-            $query->whereIn('region_id', $filterRegionIds);
-        }
-
-        $items = $query->orderBy('created_at', 'desc')->get();
-
-        $availableRegionIds = Barang::where('status', '!=', 'rusak')
-            ->whereNotNull('region_id')
+        $availableRegionIds = (clone $query)->whereNotNull('region_id')
             ->distinct()
             ->pluck('region_id')
             ->map(fn ($id) => (int) $id)
             ->all();
-        $regionTree = \App\Models\Region::query()
-            ->get(['id', 'name', 'parent_id'])
-            ->keyBy('id');
-        $filterableRegionIds = $availableRegionIds;
-        foreach ($availableRegionIds as $availableRegionId) {
-            $current = $regionTree->get($availableRegionId);
-            $depth = 0;
-            while ($current && $depth++ < 20) {
-                $filterableRegionIds[] = (int) $current->id;
-                $current = $current->parent_id ? $regionTree->get($current->parent_id) : null;
-            }
-        }
-        $filterableRegionIds = array_values(array_unique(array_map('intval', $filterableRegionIds)));
 
-        if ($visibleRegionIds !== null) {
-            $filterableRegionIds = array_values(array_intersect($filterableRegionIds, $visibleRegionIds));
+        if ($filterRegionId) {
+            $query->whereIn(
+                'region_id',
+                \App\Support\RegionCatalogFilter::idsFor($filterRegionId, $visibleRegionIds)
+            );
         }
 
-        $filterRegions = $regionTree->only($filterableRegionIds)->sortBy('name')->values();
-        $filterRegions->each(function ($filterRegion) use ($regionTree) {
-            $parts = [$filterRegion->name];
-            $current = $filterRegion;
-            $depth = 0;
-            while ($current->parent_id && $depth++ < 20) {
-                $current = $regionTree->get($current->parent_id);
-                if (!$current) break;
-                $parts[] = $current->name;
-            }
-
-            $filterRegion->filter_label = implode(' › ', array_reverse($parts));
-        });
+        $items = $query->orderBy('created_at', 'desc')->get();
+        $filterRegions = \App\Support\RegionCatalogFilter::options($availableRegionIds, $visibleRegionIds);
 
         return view('users.rental-equipment', compact(
             'items', 'targetRegion', 'filterRegions', 'targetRegionId', 'filterRegionId'

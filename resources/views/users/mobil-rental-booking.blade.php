@@ -859,7 +859,6 @@
                             id="btn-submit-booking"
                             class="px-10 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-extrabold text-base rounded-full shadow-lg hover:shadow-blue-500/25 transition-all duration-300 transform hover:-translate-y-0.5 flex items-center gap-2">
                         <span>Konfirmasi Pemesanan</span>
-                        <i class="bx bx-right-arrow-alt text-xl"></i>
                     </button>
                 </div>
             </form>
@@ -918,7 +917,6 @@
                         id="view-activity-btn"
                         class="w-full px-6 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-extrabold rounded-2xl shadow-lg transition-all text-sm flex items-center justify-center gap-2">
                     <span>Lihat Aktivitas Pemesanan</span>
-                    <i class="bx bx-right-arrow-alt text-lg"></i>
                 </button>
             </div>
         </div>

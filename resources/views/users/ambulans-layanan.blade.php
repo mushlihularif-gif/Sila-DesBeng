@@ -73,15 +73,10 @@
                                 </div>
 
                                 @if($hasMultiple)
-                                <button type="button" onclick="slideAmb({{ $amb->id }}, -1)" class="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/90 text-gray-800 flex items-center justify-center shadow opacity-90 sm:opacity-0 group-hover:opacity-100 transition-all z-10" aria-label="Sebelumnya">
-                                    <i class="bx bx-chevron-left text-xl"></i>
-                                </button>
-                                <button type="button" onclick="slideAmb({{ $amb->id }}, 1)" class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/90 text-gray-800 flex items-center justify-center shadow opacity-90 sm:opacity-0 group-hover:opacity-100 transition-all z-10" aria-label="Berikutnya">
-                                    <i class="bx bx-chevron-right text-xl"></i>
-                                </button>
                                 <div class="absolute bottom-2.5 left-1/2 -translate-x-1/2 flex gap-1.5 z-10 bg-black/40 backdrop-blur-sm px-2.5 py-1 rounded-full">
                                     @foreach($images as $dotIdx => $dot)
-                                    <span class="amb-dot-{{ $amb->id }} {{ $dotIdx === 0 ? 'w-4 bg-white' : 'w-1.5 bg-white/50' }} h-1.5 rounded-full transition-all"></span>
+                                    <button type="button" onclick="setAmbSlide({{ $amb->id }}, {{ $dotIdx }})" aria-label="Tampilkan foto {{ $dotIdx + 1 }}"
+                                            class="amb-dot-{{ $amb->id }} {{ $dotIdx === 0 ? 'w-4 bg-white' : 'w-1.5 bg-white/50' }} h-1.5 rounded-full transition-all"></button>
                                     @endforeach
                                 </div>
                                 @endif
@@ -208,13 +203,11 @@
 @push('scripts')
 <script>
     const ambIndices = {};
-    function slideAmb(id, direction) {
+    function setAmbSlide(id, index) {
         const slider = document.getElementById('slider-amb-' + id);
         const dots = document.querySelectorAll('.amb-dot-' + id);
         if (!slider || dots.length <= 1) return;
-        
-        if (typeof ambIndices[id] === 'undefined') ambIndices[id] = 0;
-        ambIndices[id] = (ambIndices[id] + direction + dots.length) % dots.length;
+        ambIndices[id] = index;
         slider.style.transform = `translateX(-${ambIndices[id] * 100}%)`;
         
         dots.forEach((dot, idx) => {

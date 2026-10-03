@@ -2,66 +2,23 @@
 
 @section('page')
 <main class="flex-grow relative w-full">
-    <section class="relative z-10 min-h-screen pt-32 pb-16">
-        <!-- Decorative Background Elements -->
-        <div class="absolute inset-0 pointer-events-none overflow-hidden">
-            <!-- Top Left Blue Wave -->
-            <svg class="absolute top-0 left-0 w-[500px] h-[400px] opacity-30" style="transform: translate(-20%, -10%);">
-                <defs>
-                    <linearGradient id="blueWave1" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" style="stop-color:#60a5fa;stop-opacity:0.6" />
-                        <stop offset="100%" style="stop-color:#93c5fd;stop-opacity:0.3" />
-                    </linearGradient>
-                </defs>
-                <path d="M0,100 Q150,50 300,100 T600,100 L600,0 L0,0 Z" fill="url(#blueWave1)" />
-            </svg>
-
-            <!-- Top Right Geometric Shape -->
-            <div class="absolute top-20 right-0" style="transform: translateX(30%) rotate(15deg);">
-                <svg width="300" height="300" viewBox="0 0 300 300" class="opacity-20">
-                    <rect x="50" y="50" width="80" height="80" fill="#60a5fa" transform="rotate(45 90 90)" opacity="0.4"/>
-                    <rect x="150" y="80" width="60" height="60" fill="#93c5fd" transform="rotate(30 180 110)" opacity="0.3"/>
-                </svg>
-            </div>
-
-            <!-- Bottom Left Yellow Wave -->
-            <svg class="absolute bottom-0 left-0 w-[600px] h-[400px] opacity-40" style="transform: translate(-15%, 20%);">
-                <defs>
-                    <linearGradient id="yellowWave" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" style="stop-color:#fbbf24;stop-opacity:0.5" />
-                        <stop offset="100%" style="stop-color:#fde68a;stop-opacity:0.2" />
-                    </linearGradient>
-                </defs>
-                <path d="M0,200 Q200,150 400,200 T800,200 L800,400 L0,400 Z" fill="url(#yellowWave)" />
-            </svg>
-
-            <!-- Bottom Right Blue Wave -->
-            <svg class="absolute bottom-0 right-0 w-[500px] h-[350px] opacity-35" style="transform: translate(20%, 15%);">
-                <defs>
-                    <linearGradient id="blueWave2" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:0.4" />
-                        <stop offset="100%" style="stop-color:#60a5fa;stop-opacity:0.2" />
-                    </linearGradient>
-                </defs>
-                <path d="M0,150 Q150,100 300,150 T600,150 L600,400 L0,400 Z" fill="url(#blueWave2)" />
-            </svg>
-        </div>
+    <section class="catalog-detail-section relative z-10 min-h-screen pt-32 pb-16">
 
         <div class="max-w-6xl mx-auto px-6 relative z-10">
             <!-- Header Section with Gradient Text - LEFT ALIGNED -->
-            <div class="mb-12 mt-12">
-                <h1 class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">
-                    Detail
+            <div class="catalog-detail-header mt-4">
+                <h1 class="catalog-detail-heading">
+                    Detail Produk
                 </h1>
             </div>
 
             <!-- Detail Card - HORIZONTAL LAYOUT -->
-            <div class="bg-white rounded-3xl shadow-2xl p-8 md:p-10">
+            <div class="catalog-detail-card">
                 <div class="flex flex-col lg:flex-row gap-8">
                     <!-- Left Side: Product Image + Location -->
                     <div class="lg:w-5/12 flex-shrink-0">
                         <!-- Product Image Carousel -->
-                        <div class="relative aspect-square overflow-hidden rounded-2xl shadow-lg mb-6 group w-full">
+                        <div class="catalog-detail-gallery mb-5 group">
                             @php
                                 $images = collect([$item->foto, $item->foto_2, $item->foto_3])->filter()->values();
                                 $hasMultipleImages = $images->count() > 1;
@@ -74,27 +31,12 @@
                                     <img src="{{ asset('storage/' . $image) }}" 
                                          alt="{{ $item->nama_barang }} - Image {{ $index + 1 }}"
                                          {{ $index === 0 ? 'fetchpriority="high"' : 'loading="lazy"' }}
-                                         class="w-full h-full object-cover product-image">
+                                          class="product-image">
                                 </div>
                                 @endforeach
                             </div>
 
                             @if($hasMultipleImages)
-                            <!-- Navigation Buttons -->
-                            <button id="carousel-prev" type="button"
-                                    class="absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 rounded-full p-2 shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 z-10">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
-                                </svg>
-                            </button>
-
-                            <button id="carousel-next" type="button"
-                                    class="absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 rounded-full p-2 shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 z-10">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
-                                </svg>
-                            </button>
-
                             <!-- Indicators -->
                             <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
                                 @foreach($images as $index => $image)
@@ -142,7 +84,7 @@
                     <!-- Right Side: Product Information -->
                     <div class="lg:w-7/12 flex flex-col">
                         <!-- Product Name -->
-                        <h2 class="text-3xl font-bold text-gray-800 mb-4">{{ $item->nama_barang }}</h2>
+                        <h2 class="catalog-detail-name mb-4">{{ $item->nama_barang }}</h2>
 
                         <!-- Description -->
                         <p class="text-gray-600 text-justify mb-6 leading-relaxed text-sm">
@@ -181,7 +123,7 @@
 
                         <!-- Price -->
                         <div class="mb-6">
-                            <p class="text-3xl font-bold text-red-600">Rp. {{ number_format($item->harga_sewa, 0, ',', '.') }}</p>
+                            <p class="catalog-detail-price">Rp {{ number_format($item->harga_sewa, 0, ',', '.') }}</p>
                         </div>
 
                         <!-- Quantity Selector + Rent Button - SIDE BY SIDE -->
@@ -222,7 +164,7 @@
                             <a href="{{ route('rental.booking', $item->id) }}?quantity={{ $item->stok > 0 ? 1 : 0 }}" 
                                id="rent-button"
                                data-turbo="false"
-                               class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-full transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-center">
+                               class="catalog-detail-primary flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-xl transition-all duration-300 shadow-sm text-center">
                                 Sewa
                             </a>
                         </div>
@@ -246,6 +188,7 @@
 @endsection
 
 @push('styles')
+@include('users.partials.catalog-detail-styles')
 <style>
     * {
         font-family: 'Inter', sans-serif;
@@ -340,8 +283,6 @@
 
         // Image Carousel
         const carousel = document.getElementById('product-carousel');
-        const prevBtn = document.getElementById('carousel-prev');
-        const nextBtn = document.getElementById('carousel-next');
         const indicators = document.querySelectorAll('.carousel-indicator');
 
         if (carousel && indicators.length > 1) {
@@ -370,11 +311,6 @@
                 goToSlide(currentSlide);
             };
 
-            const prevSlide = () => {
-                currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
-                goToSlide(currentSlide);
-            };
-
             const startAutoSlide = () => {
                 clearInterval(autoSlideInterval);
                 autoSlideInterval = setInterval(nextSlide, autoSlideDelay);
@@ -384,20 +320,6 @@
                 clearInterval(autoSlideInterval);
                 startAutoSlide();
             };
-
-            if (prevBtn) {
-                prevBtn.onclick = () => {
-                    prevSlide();
-                    resetAutoSlide();
-                };
-            }
-
-            if (nextBtn) {
-                nextBtn.onclick = () => {
-                    nextSlide();
-                    resetAutoSlide();
-                };
-            }
 
             indicators.forEach((indicator, index) => {
                 indicator.onclick = () => {

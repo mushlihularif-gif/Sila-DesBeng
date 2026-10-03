@@ -11,8 +11,10 @@ class GasSalesUserController extends Controller
     public function index()
     {
         $kategori = request('kategori', '');
-        $targetRegionId = request('region_id');
+        $targetRegionId = request()->integer('region_id') ?: null;
+        $filterRegionId = request()->integer('filter_region_id') ?: null;
         $query = Gas::where('status', '!=', 'rusak');
+        $visibleRegionIds = null;
         
         $isGasCrisis = false;
         $hasKk = false;
@@ -22,7 +24,8 @@ class GasSalesUserController extends Controller
         $targetRegion = null;
         if ($targetRegionId) {
             $targetRegion = \App\Models\Region::find($targetRegionId);
-            $query->where('region_id', $targetRegionId);
+            $visibleRegionIds = array_merge([$targetRegionId], \App\Models\Region::getDescendantIds($targetRegionId));
+            $query->whereIn('region_id', $visibleRegionIds);
 
             if ($targetRegion && $targetRegion->is_gas_crisis) {
                 $isGasCrisis = true;
@@ -30,6 +33,7 @@ class GasSalesUserController extends Controller
         } elseif (auth()->check() && auth()->user()->role === 'user' && auth()->user()->region_id) {
             $user = auth()->user();
             $allowed = \App\Models\Region::wilayahLayananTerlihat($user->region_id, 'Penjualan Gas');
+            $visibleRegionIds = array_values(array_unique(array_map('intval', $allowed)));
             $query->where(function($sub) use ($allowed) {
                 $sub->whereIn('region_id', $allowed)
                     ->orWhereNull('region_id');
@@ -56,11 +60,18 @@ class GasSalesUserController extends Controller
             }
         }
 
+        $availableRegionIds = (clone $query)->whereNotNull('region_id')->distinct()->pluck('region_id')->map(fn ($id) => (int) $id)->all();
+
         if ($kategori) {
             $query->where('kategori', $kategori);
         }
 
+        if ($filterRegionId) {
+            $query->whereIn('region_id', \App\Support\RegionCatalogFilter::idsFor($filterRegionId, $visibleRegionIds));
+        }
+
         $items = $query->orderBy('created_at', 'desc')->get();
+        $filterRegions = \App\Support\RegionCatalogFilter::options($availableRegionIds, $visibleRegionIds);
 
         // Statistik
         $stats = [
@@ -70,7 +81,7 @@ class GasSalesUserController extends Controller
             'selesai'        => GasOrder::where('status', 'completed')->orWhere('status', 'selesai')->count(),
         ];
 
-        return view('users.gas-sales', compact('items', 'kategori', 'stats', 'isGasCrisis', 'hasKk', 'familyCardNumber', 'pendingKk', 'targetRegion'));
+        return view('users.gas-sales', compact('items', 'kategori', 'stats', 'isGasCrisis', 'hasKk', 'familyCardNumber', 'pendingKk', 'targetRegion', 'targetRegionId', 'filterRegions', 'filterRegionId'));
     }
 
 

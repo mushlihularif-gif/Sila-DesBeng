@@ -149,7 +149,6 @@
                                     @if(!empty($notification->link))
                                     <a href="{{ $notification->link }}" class="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-semibold hover:bg-blue-600 transition-colors duration-200 inline-flex items-center gap-1.5 shadow-sm">
                                         <span>Buka Detail</span>
-                                        <i class="fas fa-arrow-right text-xs"></i>
                                     </a>
                                     @endif
 

@@ -3,50 +3,6 @@
 @section('page')
 <main class="flex-grow relative w-full">
     <section class="relative z-10 min-h-screen pt-28 pb-16">
-        <!-- Elemen Dekoratif Latar Belakang -->
-        <div class="absolute inset-0 pointer-events-none overflow-hidden">
-            <!-- Top Left Blue Wave -->
-            <svg class="absolute top-0 left-0 w-[500px] h-[400px] opacity-30" style="transform: translate(-20%, -10%);">
-                <defs>
-                    <linearGradient id="blueWave1" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" style="stop-color:#60a5fa;stop-opacity:0.6" />
-                        <stop offset="100%" style="stop-color:#93c5fd;stop-opacity:0.3" />
-                    </linearGradient>
-                </defs>
-                <path d="M0,100 Q150,50 300,100 T600,100 L600,0 L0,0 Z" fill="url(#blueWave1)" />
-            </svg>
-
-            <!-- Top Right Geometric Shape -->
-            <div class="absolute top-20 right-0" style="transform: translateX(30%) rotate(15deg);">
-                <svg width="300" height="300" viewBox="0 0 300 300" class="opacity-20">
-                    <rect x="50" y="50" width="80" height="80" fill="#60a5fa" transform="rotate(45 90 90)" opacity="0.4"/>
-                    <rect x="150" y="80" width="60" height="60" fill="#93c5fd" transform="rotate(30 180 110)" opacity="0.3"/>
-                </svg>
-            </div>
-
-            <!-- Bottom Left Yellow Wave -->
-            <svg class="absolute bottom-0 left-0 w-[600px] h-[400px] opacity-40" style="transform: translate(-15%, 20%);">
-                <defs>
-                    <linearGradient id="yellowWave" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" style="stop-color:#fbbf24;stop-opacity:0.5" />
-                        <stop offset="100%" style="stop-color:#fde68a;stop-opacity:0.2" />
-                    </linearGradient>
-                </defs>
-                <path d="M0,200 Q200,150 400,200 T800,200 L800,400 L0,400 Z" fill="url(#yellowWave)" />
-            </svg>
-
-            <!-- Bottom Right Blue Wave -->
-            <svg class="absolute bottom-0 right-0 w-[500px] h-[350px] opacity-35" style="transform: translate(20%, 15%);">
-                <defs>
-                    <linearGradient id="blueWave2" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:0.4" />
-                        <stop offset="100%" style="stop-color:#60a5fa;stop-opacity:0.2" />
-                    </linearGradient>
-                </defs>
-                <path d="M0,150 Q150,100 300,150 T600,150 L600,400 L0,400 Z" fill="url(#blueWave2)" />
-            </svg>
-        </div>
-
         <div class="max-w-7xl mx-auto px-6 relative z-10">
             <!-- Header Section -->
             <div class="text-center mb-8">
@@ -62,6 +18,10 @@
                 @endif
             </div>
 
+            @if($filterRegions->isNotEmpty())
+                @include('users.partials.catalog-region-filter', ['catalogRoute' => 'user.fasilitas-umum.equipment', 'filterLabel' => 'Filter wilayah fasilitas'])
+            @endif
+
             <!-- Category Filter -->
             @php
                 $hasGedung = $items->count() > 0;
@@ -72,21 +32,21 @@
             
             @if($totalCount > 0)
             <div class="flex flex-wrap justify-center gap-2.5 mb-8 max-w-4xl mx-auto px-4">
-                <button class="filter-btn active px-5 py-2 rounded-full font-semibold text-xs sm:text-sm transition-all duration-300 bg-blue-500 text-white shadow-md border border-transparent hover:bg-blue-600 hover:shadow-lg hover:scale-105" data-filter="all">
+                <button class="catalog-filter-btn filter-btn active" data-filter="all">
                     Semua ({{ $totalCount }})
                 </button>
                 @if($hasGedung)
-                <button class="filter-btn px-5 py-2 rounded-full font-semibold text-xs sm:text-sm transition-all duration-300 bg-white text-gray-600 border border-gray-200 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 shadow-sm hover:shadow-md" data-filter="gedung">
+                <button class="catalog-filter-btn filter-btn" data-filter="gedung">
                     Gedung & Ruang Publik ({{ $items->count() }})
                 </button>
                 @endif
                 @if($hasAmbulans)
-                <button class="filter-btn px-5 py-2 rounded-full font-semibold text-xs sm:text-sm transition-all duration-300 bg-white text-gray-600 border border-gray-200 hover:bg-red-50 hover:text-red-600 hover:border-red-200 shadow-sm hover:shadow-md" data-filter="ambulans">
+                <button class="catalog-filter-btn filter-btn" data-filter="ambulans">
                     Layanan Ambulans ({{ $kendaraans->where('kategori', 'ambulans')->count() }})
                 </button>
                 @endif
                 @if($hasKendaraanOps)
-                <button class="filter-btn px-5 py-2 rounded-full font-semibold text-xs sm:text-sm transition-all duration-300 bg-white text-gray-600 border border-gray-200 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 shadow-sm hover:shadow-md" data-filter="kendaraan-operasional">
+                <button class="catalog-filter-btn filter-btn" data-filter="kendaraan-operasional">
                     Kendaraan Operasional
                 </button>
                 @endif
@@ -115,22 +75,22 @@
             <!-- Grid Kartu Produk -->
             <!-- Grid Kartu Produk (2 Kolom di Mobile, 2 di Tablet, 3 di Desktop) -->
             @if($totalCount > 0)
-                <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6 mb-12 sm:mb-16 max-w-6xl mx-auto">
+                <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5 lg:gap-6 mb-12 sm:mb-16 max-w-6xl mx-auto">
                     <!-- Gedung & Ruang Publik -->
                     @foreach($items as $item)
                     @php
                         $catSlug = $item->kategori ? Str::slug($item->kategori) : '';
                     @endphp
                     <a href="{{ route('user.fasilitas-umum.show', $item->id) }}" data-turbo="false" class="block group product-item transition-all duration-500" data-category="{{ $catSlug }} gedung">
-                    <div class="product-card bg-white rounded-2xl sm:rounded-3xl p-2.5 sm:p-6 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 mx-auto w-full max-w-[350px] flex flex-col h-full">
+                    <div class="product-card p-3 sm:p-5">
                         
                         <!-- Gambar Produk -->
-                        <div class="product-image-wrapper mb-2 sm:mb-6 relative aspect-square overflow-hidden rounded-xl sm:rounded-2xl bg-gray-100 flex items-center justify-center group-hover:from-blue-50 group-hover:to-blue-50/30 transition-colors">
+                        <div class="product-image-wrapper mb-3 sm:mb-4">
                             <img src="{{ asset('storage/' . $item->foto) }}" 
                                  alt="{{ $item->nama_fasilitas }}"
                                  loading="lazy"
                                  onerror="this.onerror=null; this.src='{{ asset('User/img/elemen/fasilitas.png') }}';"
-                                 class="product-image w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                 class="product-image">
                             
                             <!-- Status Badge -->
                             @if($item->stok > 0 && strtolower($item->status) != 'disewa')
@@ -151,7 +111,7 @@
                         </div>
 
                         <!-- Info Produk -->
-                        <div class="product-info flex flex-col flex-1 px-1 sm:px-2">
+                        <div class="product-info flex flex-col flex-1 px-0.5 sm:px-1">
                             <!-- Kategori -->
                             @if($item->kategori)
                                 <div class="mb-1.5 sm:mb-4">
@@ -174,7 +134,7 @@
                             </div>
                             @endif
                             
-                            <div class="mt-auto pt-2 sm:pt-3 flex items-end justify-between">
+                            <div class="mt-auto pt-3 flex items-end justify-between gap-2 border-t border-slate-100">
                                 <div class="flex flex-col">
                                     <span class="text-[10px] sm:text-xs text-gray-500 mb-0.5 font-medium">Akses Layanan</span>
                                     <p class="text-gray-900 font-bold text-xs sm:text-base tracking-tight leading-none text-blue-600">
@@ -188,6 +148,7 @@
                                     </p>
                                 </div>
                             </div>
+                            <span class="catalog-card-cta bg-[#115789]">Lihat Fasilitas</span>
                         </div>
                     </div>
                     </a>
@@ -202,15 +163,15 @@
                         $kCat = $isAmb ? 'ambulans' : 'kendaraan-operasional';
                     @endphp
                     <div class="block group product-item transition-all duration-500" data-category="{{ $kCat }} kendaraan">
-                    <div class="product-card bg-white rounded-2xl sm:rounded-3xl p-2.5 sm:p-6 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 mx-auto w-full max-w-[350px] flex flex-col h-full">
+                    <div class="product-card p-3 sm:p-5">
                         
                         <!-- Gambar Kendaraan -->
-                        <div class="product-image-wrapper mb-2 sm:mb-6 relative aspect-square overflow-hidden rounded-xl sm:rounded-2xl bg-gray-100 flex items-center justify-center group-hover:from-blue-50 group-hover:to-blue-50/30 transition-colors">
+                        <div class="product-image-wrapper mb-3 sm:mb-4">
                             <img src="{{ $k->foto ? asset('storage/' . $k->foto) : ($isAmb ? asset('Admin/img/elements/ambulance.png') : asset('User/img/elemen/mobil.png')) }}" 
                                  alt="{{ $k->nama_mobil }}"
                                  loading="lazy"
                                  onerror="this.onerror=null; this.src='{{ asset('User/img/elemen/mobil.png') }}';"
-                                 class="product-image w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                 class="product-image">
                             
                             <!-- Status Badge -->
                             <div class="absolute top-2 right-2 sm:top-4 sm:right-4 px-1.5 sm:px-3 py-0.5 sm:py-1.5 text-[8px] sm:text-[10px] font-bold rounded-full {{ $isAmb ? 'bg-red-500' : 'bg-blue-600' }} text-white shadow-md flex items-center gap-0.5 sm:gap-1 tracking-wider uppercase">
@@ -220,7 +181,7 @@
                         </div>
 
                         <!-- Info Kendaraan -->
-                        <div class="product-info flex flex-col flex-1 px-1 sm:px-2">
+                        <div class="product-info flex flex-col flex-1 px-0.5 sm:px-1">
                             <!-- Kategori -->
                             <div class="mb-1.5 sm:mb-4">
                                 <span class="inline-flex items-center px-2 sm:px-3 py-0.5 sm:py-1.5 rounded-md text-[9px] sm:text-[10px] font-bold text-white {{ $isAmb ? 'bg-red-600' : 'bg-indigo-600' }} shadow-sm">
@@ -293,72 +254,9 @@
 @endsection
 
 @push('styles')
+@include('users.partials.catalog-ui-styles')
 <style>
-    * {
-        font-family: 'Inter', sans-serif;
-    }
-
-    /* Product Cards */
-    .product-card {
-        position: relative;
-        background: white;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .product-card:hover {
-        transform: translateY(-8px);
-    }
-
-    .product-image {
-        transition: transform 0.3s ease;
-    }
-
-    .product-card:hover .product-image {
-        transform: scale(1.05);
-    }
-
-    .product-name {
-        font-size: 1.1rem;
-        font-weight: 700;
-        color: #1f2937;
-        line-height: 1.4;
-        margin-top: 1rem;
-    }
-
-    /* Smooth animations */
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .product-card {
-        animation: fadeInUp 0.6s ease-out;
-        animation-fill-mode: both;
-    }
-
-    .product-card:nth-child(1) { animation-delay: 0.1s; }
-    .product-card:nth-child(2) { animation-delay: 0.2s; }
-    .product-card:nth-child(3) { animation-delay: 0.3s; }
-    .product-card:nth-child(4) { animation-delay: 0.4s; }
-    .product-card:nth-child(5) { animation-delay: 0.5s; }
-    .product-card:nth-child(6) { animation-delay: 0.6s; }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-        .product-name {
-            font-size: 1.125rem;
-        }
-
-        .product-image {
-            height: 200px;
-        }
-    }
+    * { font-family: 'Inter', sans-serif; }
 </style>
 @endpush
 
@@ -370,16 +268,9 @@
     // Tambahkan status loading untuk gambar
     document.addEventListener('DOMContentLoaded', () => {
         const images = document.querySelectorAll('.product-image');
-        images.forEach(img => {
-            if (img.complete) {
-                img.style.opacity = '1';
-            } else {
-                img.style.opacity = '0';
-                img.addEventListener('load', function() {
-                    this.style.opacity = '1';
-                });
-            }
-        });
+        images.forEach(img => img.addEventListener('error', function () {
+            this.classList.add('image-fallback');
+        }, { once: true }));
 
         // Filter Logic with State Persistence
         const filterBtns = document.querySelectorAll('.filter-btn');
@@ -388,19 +279,9 @@
         // Gunakan path URL untuk membedakan state antar halaman
         const storageKey = 'filter_' + window.location.pathname;
 
-        const activeClasses = ['bg-blue-500', 'text-white', 'shadow-md', 'border-transparent', 'hover:bg-blue-600', 'hover:shadow-lg', 'hover:scale-105', 'active'];
-        const inactiveClasses = ['bg-white', 'text-gray-600', 'border-gray-200', 'hover:bg-blue-50', 'hover:text-blue-600', 'hover:border-blue-200', 'shadow-sm', 'hover:shadow-md'];
-
         function applyFilter(filterValue) {
-            // Update button UI
             filterBtns.forEach(btn => {
-                if (btn.getAttribute('data-filter') === filterValue) {
-                    btn.classList.remove(...inactiveClasses);
-                    btn.classList.add(...activeClasses);
-                } else {
-                    btn.classList.remove(...activeClasses);
-                    btn.classList.add(...inactiveClasses);
-                }
+                btn.classList.toggle('active', btn.getAttribute('data-filter') === filterValue);
             });
 
             // Update items display with smooth opacity

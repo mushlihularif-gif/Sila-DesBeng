@@ -67,21 +67,6 @@
                         </div>
                     </div>
 
-                    <!-- Navigation Buttons -->
-                    <button id="carousel-prev"
-                        class="absolute left-4 top-1/2 -translate-y-1/2 bg-white hover:bg-gray-50 text-gray-800 rounded-full p-3 shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 z-10">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
-                        </svg>
-                    </button>
-
-                    <button id="carousel-next"
-                        class="absolute right-4 top-1/2 -translate-y-1/2 bg-white hover:bg-gray-50 text-gray-800 rounded-full p-3 shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 z-10">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
-                        </svg>
-                    </button>
-
                     <!-- Indicators (Terkunci 2 Slide) -->
                     <div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2.5 z-10">
                         @for($i = 0; $i < 2; $i++)
@@ -311,7 +296,6 @@
                         <a href="{{ route('pelayanan') }}" aria-label="Buka halaman Tentang Layanan" class="inline-flex items-center gap-2 text-xl font-extrabold tracking-tight no-underline transition hover:opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#60a5fa] focus-visible:ring-offset-4 sm:text-2xl md:text-3xl">
                             <span class="bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">Unit</span>
                             <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Layanan</span>
-                            <i class="bx bx-right-arrow-alt text-[#115789]" aria-hidden="true"></i>
                         </a>
                     </div>
 
@@ -404,25 +388,13 @@
                             </div>
                         </div>
 
-                        <!-- Navigasi Unit Carousel (Aliran Dokumen Normal - Anti Tabrakan) -->
-                        <div class="unit-nav-wrapper mt-4 sm:mt-8 mb-4 sm:mb-8 flex items-center justify-center gap-3 sm:gap-6 md:gap-12 px-4 relative z-30">
-                            <button type="button" id="unit-prev" class="bg-white hover:bg-gray-50 text-gray-800 rounded-full p-2.5 sm:p-3.5 shadow-md hover:shadow-lg border border-gray-100 transition-all active:scale-95 flex-shrink-0 cursor-pointer" aria-label="Layanan Sebelumnya">
-                                <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
-                                </svg>
-                            </button>
-
-                            <div class="unit-title-box text-center min-w-0 flex-1 max-w-[240px] sm:max-w-none sm:min-w-[300px]">
+                        <div class="unit-nav-wrapper mt-4 sm:mt-8 mb-4 sm:mb-8 flex flex-col items-center justify-center gap-3 px-4 relative z-30">
+                            <div class="unit-title-box text-center min-w-0 max-w-full">
                                 <h3 id="unit-title" class="text-base sm:text-xl md:text-2xl font-bold text-gray-900 transition-all duration-300 truncate">
                                     Belanja &amp; Kebutuhan
                                 </h3>
                             </div>
-
-                            <button type="button" id="unit-next" class="bg-white hover:bg-gray-50 text-gray-800 rounded-full p-2.5 sm:p-3.5 shadow-md hover:shadow-lg border border-gray-100 transition-all active:scale-95 flex-shrink-0 cursor-pointer" aria-label="Layanan Berikutnya">
-                                <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
-                                </svg>
-                            </button>
+                            <div id="unit-indicators" class="flex items-center justify-center gap-2" aria-label="Pilih kategori layanan"></div>
                         </div>
                         @else
                         <div class="w-full flex flex-col items-center justify-center text-center p-12 bg-white/60 backdrop-blur-md rounded-3xl border border-white/50 shadow-lg mt-4 max-w-4xl mx-auto">
@@ -576,7 +548,7 @@
                             <p class="text-xs sm:text-base text-gray-500">Pengumuman dan berita terbaru</p>
                         </div>
                         <a href="{{ route('announcements.index') }}" class="hidden md:flex items-center gap-2 text-[#115789] font-semibold hover:text-blue-500 transition-colors">
-                            Lihat Semua <i class="bx bx-right-arrow-alt text-xl"></i>
+                            Lihat Semua
                         </a>
                     </div>
 
@@ -623,7 +595,7 @@
                     <!-- Tombol Lihat Semua Kabar (Muncul di Bawah pada Desktop maupun Mobile) -->
                     <div class="mt-8 text-center">
                         <a href="{{ route('announcements.index') }}" class="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-gray-50 hover:bg-gray-100 text-[#115789] font-semibold rounded-xl transition-all duration-300 border border-gray-200 hover:border-[#115789]/30 shadow-sm hover:shadow w-full sm:w-auto">
-                            Lihat Semua Kabar <i class="bx bx-right-arrow-alt text-xl"></i>
+                            Lihat Semua Kabar
                         </a>
                     </div>
                 </div>
@@ -698,15 +670,6 @@
 
         {{-- DECORATIONS --}}
 
-        <!-- ============================================ -->
-        <!-- AREA UNIT PELAYANAN - Pakai 2.webp (WAVE) Kanan + 5.webp (GEOMETRIS ROTASI) -->
-        <!-- ============================================ -->
-        <img src="{{ asset('User/img/backgrounds/2.webp') }}" class="bg-element bg-wave-right-unit" loading="lazy" />
-
-        <svg class="bg-element bg-squares-right-unit">
-            <image href="{{ asset('User/img/backgrounds/5.webp') }}" width="100%" height="100%" loading="lazy" />
-        </svg>
-
     </main>
 
     {{-- FOOTER --}}
@@ -724,14 +687,6 @@
         /* Gradient Radial untuk Background Tentang Kami */
         .bg-gradient-radial {
             background-image: radial-gradient(circle, var(--tw-gradient-stops));
-        }
-
-        /* Background Elements - kept as they require precise positioning */
-        .bg-element {
-            position: absolute;
-            pointer-events: none;
-            user-select: none;
-            object-fit: contain;
         }
 
         /* --- Product Card Styles (Matches Rental/Gas Page) --- */
@@ -829,25 +784,9 @@
             transform: translateY(0);
         }
 
-        /* Area UNIT PELAYANAN - Pakai 2.webp (WAVE) BESAR + 5.webp (GEOMETRIS) SUPER BESAR */
-        .bg-wave-right-unit {
-            top: 25%;
-            right: -150px;
-            width: 580px;
-            transform: rotate(15deg) scaleX(-1);
-            opacity: 0.92;
-            z-index: 2;
-        }
-
-        /* 5.webp DIPERBESAR LAGI - SUPER BESAR! */
-        .bg-squares-right-unit {
-            top: 20%;
-            right: -230px;
-            width: 580px;
-            transform: rotate(-100deg) scale(1.5);
-            opacity: 0.90;
-            z-index: 2;
-        }
+        .unit-indicator { width: 10px; height: 10px; border: 0; border-radius: 999px; background: #cbd5e1; transition: width .2s ease, background-color .2s ease; }
+        .unit-indicator:hover { background: #60a5fa; }
+        .unit-indicator.active { width: 26px; background: #115789; }
 
         /* --- UNIT CAROUSEL STYLES (4 VISIBLE ITEMS) --- */
         .unit-stage-wrapper {
@@ -1078,36 +1017,18 @@
                 align-items: center !important;
                 justify-content: center !important;
             }
-            #unit-prev, #unit-next {
-                width: 36px !important;
-                height: 36px !important;
-                min-width: 36px !important;
-                padding: 0 !important;
-                display: flex !important;
-                align-items: center !important;
-                justify-content: center !important;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.12) !important;
-            }
-            #unit-prev svg, #unit-next svg {
-                width: 18px !important;
-                height: 18px !important;
-            }
             .unit-title-box {
                 min-width: 0 !important;
                 max-width: 180px !important;
                 flex: 1 !important;
             }
+            .unit-indicator { width: 7px !important; height: 7px !important; }
+            .unit-indicator.active { width: 22px !important; }
             #unit-title {
                 font-size: 0.95rem !important;
                 line-height: 1.25 !important;
             }
 
-            /* Kurangi opasitas latar belakang dekoratif di ponsel agar kontras terbaca */
-            .bg-element {
-                opacity: 0.25 !important;
-                max-width: 100vw !important;
-                overflow: hidden !important;
-            }
         }
 
         @media (max-width: 420px) {
@@ -1260,8 +1181,6 @@
                     window.addEventListener('resize', () => { setTimeout(populateBlurSlides, 200); }, { passive: true });
                 }
 
-                const prevButton = document.getElementById('carousel-prev');
-                const nextButton = document.getElementById('carousel-next');
                 // Use let so we can update the reference after cloning
                 let indicators = document.querySelectorAll('.carousel-indicator');
 
@@ -1293,11 +1212,6 @@
                     goToSlide(currentSlide);
                 };
 
-                const prevSlide = () => {
-                    currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
-                    goToSlide(currentSlide);
-                };
-
                 const startAutoSlide = () => {
                     clearInterval(autoSlideInterval);
                     autoSlideInterval = setInterval(nextSlide, autoSlideDelay);
@@ -1307,24 +1221,6 @@
                     clearInterval(autoSlideInterval);
                     startAutoSlide();
                 };
-
-                if (nextButton) {
-                    const newNext = nextButton.cloneNode(true);
-                    nextButton.parentNode.replaceChild(newNext, nextButton);
-                    newNext.addEventListener('click', () => {
-                        nextSlide();
-                        resetAutoSlide();
-                    });
-                }
-
-                if (prevButton) {
-                    const newPrev = prevButton.cloneNode(true);
-                    prevButton.parentNode.replaceChild(newPrev, prevButton);
-                    newPrev.addEventListener('click', () => {
-                        prevSlide();
-                        resetAutoSlide();
-                    });
-                }
 
                 // Fix: Update indicators reference after cloning
                 const newIndicatorsList = [];
@@ -1348,8 +1244,7 @@
                 if (cards.length === 0) return;
 
                 const titleElement = document.getElementById('unit-title');
-                const nextBtn = document.getElementById('unit-next');
-                const prevBtn = document.getElementById('unit-prev');
+                const indicatorContainer = document.getElementById('unit-indicators');
                 const speechBox = document.getElementById('unit-speech-box');
                 const speechWrapper = document.getElementById('speech-text-wrapper');
                 const speechHeading = document.getElementById('speech-heading');
@@ -1362,6 +1257,24 @@
                 let currentIndex = 0;
                 let autoSlideInterval;
                 const autoSlideDelay = 6500; // 6.5 detik agar warga sempat membaca narasi
+                const indicators = [];
+
+                if (indicatorContainer && n > 1) {
+                    indicatorContainer.replaceChildren();
+                    cards.forEach((card, index) => {
+                        const indicator = document.createElement('button');
+                        indicator.type = 'button';
+                        indicator.className = 'unit-indicator focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#60a5fa]';
+                        indicator.setAttribute('aria-label', `Tampilkan ${card.getAttribute('data-name')}`);
+                        indicator.addEventListener('click', () => {
+                            currentIndex = index;
+                            updateCarousel();
+                            resetAutoSlide();
+                        });
+                        indicatorContainer.appendChild(indicator);
+                        indicators.push(indicator);
+                    });
+                }
 
                 const updateCarousel = () => {
                     cards.forEach((card, index) => {
@@ -1429,17 +1342,15 @@
                             }
                         }
                     });
+
+                    indicators.forEach((indicator, index) => {
+                        indicator.classList.toggle('active', index === currentIndex);
+                    });
                 };
 
                 const handleNext = () => {
                     if (n <= 1) return;
                     currentIndex = (currentIndex + 1) % n;
-                    updateCarousel();
-                };
-
-                const handlePrev = () => {
-                    if (n <= 1) return;
-                    currentIndex = (currentIndex - 1 + n) % n;
                     updateCarousel();
                 };
 
@@ -1454,23 +1365,6 @@
                     clearInterval(autoSlideInterval);
                     startAutoSlide();
                 };
-
-                if (nextBtn) {
-                    const newNext = nextBtn.cloneNode(true);
-                    nextBtn.parentNode.replaceChild(newNext, nextBtn);
-                    newNext.addEventListener('click', () => {
-                        handleNext();
-                        resetAutoSlide();
-                    });
-                }
-                if (prevBtn) {
-                    const newPrev = prevBtn.cloneNode(true);
-                    prevBtn.parentNode.replaceChild(newPrev, prevBtn);
-                    newPrev.addEventListener('click', () => {
-                        handlePrev();
-                        resetAutoSlide();
-                    });
-                }
 
                 // Pause on hover
                 const container = document.getElementById('unit-carousel-container');

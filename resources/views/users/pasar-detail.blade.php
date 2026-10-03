@@ -40,11 +40,12 @@
         position: absolute;
         top: 0; left: 0;
         width: 100%; height: 100%;
-        object-fit: cover;
+        object-fit: contain;
+        padding: 1rem;
         transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     }
     .ps-gallery-main:hover img {
-        transform: scale(1.15);
+        transform: scale(1.02);
     }
     .ps-gallery-thumb {
         position: relative;
@@ -61,7 +62,8 @@
         position: absolute;
         top: 0; left: 0;
         width: 100%; height: 100%;
-        object-fit: cover;
+        object-fit: contain;
+        padding: .25rem;
     }
     .ps-gallery-thumb.active {
         border-color: #115789;
@@ -862,13 +864,13 @@
                 </li>
                 <li>
                     <div class="flex items-center">
-                        <svg class="w-4 h-4 text-gray-400 mx-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        <span class="mx-2 text-gray-300" aria-hidden="true">/</span>
                         <a href="{{ route('pasar.index') }}" class="hover:text-[#115789] transition font-medium">Pasar Daerah</a>
                     </div>
                 </li>
                 <li aria-current="page">
                     <div class="flex items-center">
-                        <svg class="w-4 h-4 text-gray-400 mx-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        <span class="mx-2 text-gray-300" aria-hidden="true">/</span>
                         <span class="text-gray-800 font-semibold line-clamp-1 max-w-[200px] sm:max-w-md">{{ $produk->nama_produk }}</span>
                     </div>
                 </li>
@@ -988,9 +990,6 @@
                                     </div>
                                     <p class="text-xs text-gray-500 truncate mt-0.5">{{ $seller->store_description ?? 'Unit Usaha Resmi BUMDes ' . $cleanRegionName }}</p>
                                 </div>
-                            </div>
-                            <div class="w-8 h-8 rounded-lg bg-white/80 flex items-center justify-center text-gray-400 group-hover:text-[#115789] group-hover:border-[#115789]/30 group-hover:translate-x-0.5 transition-all flex-shrink-0 shadow-2xs" style="border: 1px solid #e2e8f0;">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
                             </div>
                         </a>
                         @else
@@ -1286,7 +1285,6 @@
                 
                 <a href="{{ route('pasar.index') }}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-[#115789] hover:text-white bg-blue-50 hover:bg-[#115789] border border-blue-200 transition-all duration-200 shadow-sm">
                     <span>Lihat Semua</span>
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                 </a>
             </div>
 
@@ -1390,7 +1388,6 @@
                     </div>
                     <span class="category-hub-link">
                         <span>Jelajahi</span>
-                        <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
                     </span>
                 </a>
 
@@ -1405,7 +1402,6 @@
                     </div>
                     <span class="category-hub-link">
                         <span>Jelajahi</span>
-                        <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
                     </span>
                 </a>
 
@@ -1420,7 +1416,6 @@
                     </div>
                     <span class="category-hub-link">
                         <span>Jelajahi</span>
-                        <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
                     </span>
                 </a>
 
@@ -1435,7 +1430,6 @@
                     </div>
                     <span class="category-hub-link">
                         <span>Jelajahi</span>
-                        <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
                     </span>
                 </a>
 
@@ -1450,7 +1444,6 @@
                     </div>
                     <span class="category-hub-link">
                         <span>Jelajahi</span>
-                        <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
                     </span>
                 </a>
             </div>
@@ -1812,4 +1805,3 @@
 </script>
 @endpush
 @endsection
-

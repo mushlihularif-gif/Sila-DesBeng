@@ -9,40 +9,12 @@
     $hasCustomDesc = $rawDeskripsi && !str_starts_with(trim($rawDeskripsi), 'Plat:');
 @endphp
 
-    <section class="relative z-10 min-h-screen pt-28 pb-16">
-        <!-- Elemen Dekoratif Latar Belakang -->
-        <div class="absolute inset-0 pointer-events-none overflow-hidden">
-            <svg class="absolute top-0 left-0 w-[500px] h-[400px] opacity-30" style="transform: translate(-20%, -10%);">
-                <defs>
-                    <linearGradient id="redWave1" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" style="stop-color:#f87171;stop-opacity:0.6" />
-                        <stop offset="100%" style="stop-color:#fca5a5;stop-opacity:0.3" />
-                    </linearGradient>
-                </defs>
-                <path d="M0,100 Q150,50 300,100 T600,100 L600,0 L0,0 Z" fill="url(#redWave1)" />
-            </svg>
-            <div class="absolute top-20 right-0" style="transform: translateX(30%) rotate(15deg);">
-                <svg width="300" height="300" viewBox="0 0 300 300" class="opacity-20">
-                    <rect x="50" y="50" width="80" height="80" fill="#f87171" transform="rotate(45 90 90)" opacity="0.4"/>
-                    <rect x="150" y="80" width="60" height="60" fill="#fca5a5" transform="rotate(30 180 110)" opacity="0.3"/>
-                </svg>
-            </div>
-            <svg class="absolute bottom-0 right-0 w-[500px] h-[350px] opacity-30" style="transform: translate(20%, 15%);">
-                <defs>
-                    <linearGradient id="blueWave2" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:0.4" />
-                        <stop offset="100%" style="stop-color:#60a5fa;stop-opacity:0.2" />
-                    </linearGradient>
-                </defs>
-                <path d="M0,150 Q150,100 300,150 T600,150 L600,400 L0,400 Z" fill="url(#blueWave2)" />
-            </svg>
-        </div>
+    <section class="catalog-detail-section relative z-10 min-h-screen pt-32 pb-16">
 
         <div class="max-w-6xl mx-auto px-6 relative z-10">
             <!-- Navigasi Kembali -->
             <div class="mb-6 flex items-center justify-between">
                 <a href="{{ route('user.ambulans.index') }}" class="inline-flex items-center gap-2 text-sm font-semibold text-gray-600 hover:text-red-600 transition-colors">
-                    <i class="bx bx-left-arrow-alt text-xl"></i>
                     <span>Kembali ke Layanan Ambulans</span>
                 </a>
                 <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-red-50 text-red-600 border border-red-200 rounded-full text-xs font-bold">
@@ -52,12 +24,12 @@
             </div>
 
             <!-- Detail Card -->
-            <div class="bg-white rounded-3xl shadow-2xl p-6 sm:p-8 md:p-10 border border-gray-100">
+            <div class="catalog-detail-card">
                 <div class="flex flex-col lg:flex-row gap-8">
                     <!-- Sisi Kiri: Foto Carousel & Plat -->
                     <div class="lg:w-5/12 flex-shrink-0">
                         <!-- Product Image Carousel -->
-                        <div class="relative aspect-square overflow-hidden rounded-2xl shadow-md mb-4 group w-full bg-gray-100">
+                        <div class="catalog-detail-gallery mb-5 group">
                             @if($images->count() > 0)
                                 <!-- Slider Images Container -->
                                 <div id="product-carousel" class="flex w-full h-full transition-transform duration-500 ease-out">
@@ -66,27 +38,12 @@
                                         <img src="{{ asset('storage/' . $image) }}" 
                                              alt="{{ $ambulans->nama_mobil }} - Foto {{ $index + 1 }}"
                                              {{ $index === 0 ? 'fetchpriority="high"' : 'loading="lazy"' }}
-                                             class="w-full h-full object-cover">
+                                             class="product-image">
                                     </div>
                                     @endforeach
                                 </div>
 
                                 @if($hasMultipleImages)
-                                <!-- Tombol Navigasi Geser Gambar -->
-                                <button id="carousel-prev" type="button" aria-label="Foto Sebelumnya"
-                                        class="absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 rounded-full p-2.5 shadow-lg opacity-90 sm:opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 z-10">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
-                                    </svg>
-                                </button>
-
-                                <button id="carousel-next" type="button" aria-label="Foto Berikutnya"
-                                        class="absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 rounded-full p-2.5 shadow-lg opacity-90 sm:opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 z-10">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
-                                    </svg>
-                                </button>
-
                                 <!-- Dot Indicators -->
                                 <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10 bg-black/30 backdrop-blur-sm px-3 py-1.5 rounded-full">
                                     @foreach($images as $index => $image)
@@ -140,7 +97,7 @@
                             <span class="inline-block px-3 py-1 rounded-full bg-red-100 text-red-700 text-xs font-bold mb-2">
                                 Layanan Kesehatan & Transportasi Medis
                             </span>
-                            <h1 class="text-2xl sm:text-3xl font-black text-gray-900 leading-tight">
+                            <h1 class="catalog-detail-name mb-0">
                                 {{ $ambulans->nama_mobil }}
                             </h1>
                         </div>
@@ -238,12 +195,14 @@
     </section>
 @endsection
 
+@push('styles')
+@include('users.partials.catalog-detail-styles')
+@endpush
+
 @push('scripts')
 <script>
     function initAmbulansCarousel() {
         const carousel = document.getElementById('product-carousel');
-        const prevBtn = document.getElementById('carousel-prev');
-        const nextBtn = document.getElementById('carousel-next');
         const indicators = document.querySelectorAll('.carousel-indicator');
         
         if (!carousel || indicators.length <= 1) return;
@@ -263,20 +222,6 @@
                     indicator.classList.remove('w-6', 'bg-white');
                     indicator.classList.add('w-2', 'bg-white/50');
                 }
-            });
-        }
-
-        if (prevBtn) {
-            prevBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                goToSlide(currentSlide - 1);
-            });
-        }
-
-        if (nextBtn) {
-            nextBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                goToSlide(currentSlide + 1);
             });
         }
 

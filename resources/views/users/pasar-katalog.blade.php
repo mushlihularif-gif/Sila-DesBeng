@@ -208,7 +208,6 @@
                         @php $tokoId = $activeRegion ? $activeRegion->id : $activeDesa->id; @endphp
                         <a href="{{ route('pasar.toko', $tokoId) }}" class="inline-flex items-center justify-center gap-1 px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-xs font-bold text-white transition shadow-sm">
                             <span>Profil Toko</span>
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                         </a>
                     @endif
                     <a href="{{ route('pasar.index', array_filter(request()->except(['kecamatan_id', 'desa_id', 'region_id', 'page']))) }}" class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-gray-200 text-xs font-bold text-gray-700 hover:bg-gray-50 transition shadow-sm">
@@ -403,9 +402,6 @@
                             <span class="ps-modal-store-label">Toko Penjual</span>
                             <span id="modalStoreName" class="ps-modal-store-name">Toko BUMDes</span>
                         </div>
-                    </div>
-                    <div class="ps-modal-store-arrow">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
                     </div>
                 </a>
 
@@ -1601,4 +1597,3 @@
     @endauth
 </script>
 @endpush
-
