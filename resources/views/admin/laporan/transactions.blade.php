@@ -88,7 +88,7 @@
     <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3 mb-4">
         <div>
             <h4 class="fw-bold mb-0">
-                <span class="text-muted fw-light">Data & Laporan /</span> Laporan Transaksi
+                <span class="text-muted fw-light">Data dan Laporan /</span> Laporan Transaksi
             </h4>
         </div>
         <div class="d-flex gap-2 w-100 w-sm-auto justify-content-start justify-content-sm-end">

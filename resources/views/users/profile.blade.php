@@ -131,7 +131,7 @@
                     <div class="bg-yellow-50 border border-yellow-200 rounded-3xl p-6 shadow-sm flex items-center justify-between">
                         <div>
                             <h3 class="font-bold text-yellow-800 text-lg mb-1">Identitas Belum Terverifikasi</h3>
-                            <p class="text-yellow-700 text-sm">Anda belum dapat mengakses layanan publik (seperti meminjam fasilitas) sebelum memverifikasi KTP & Wajah.</p>
+                            <p class="text-yellow-700 text-sm">Anda belum dapat mengakses layanan publik (seperti meminjam fasilitas) sebelum memverifikasi KTP dan Wajah.</p>
                         </div>
                         <a href="{{ route('kyc.index') }}" class="px-6 py-2 bg-yellow-500 hover:bg-yellow-600 text-white font-bold rounded-xl shadow transition shrink-0">
                             Verifikasi Sekarang
@@ -201,7 +201,7 @@
                         </div>
                     </div>
                 </div>
-            </div> {{-- Menutup Grid Utama (Kiri & Kanan) --}}
+            </div> {{-- Menutup grid utama (kiri dan kanan) --}}
         </div>
 
             {{-- KOLOM BAWAH: Detail Tambahan (Di luar grid utama agar otomatis 100% lebar) --}}
@@ -233,7 +233,7 @@
                                    class="w-full px-4 py-2.5 bg-white/60 border border-white/40 rounded-xl text-gray-700 cursor-not-allowed glass-input text-sm">
                         </div>
 
-                        {{-- RW & RT bisa disunting.
+                        {{-- RW dan RT bisa disunting.
                              Kecamatan dan desa di atas memang dikunci — keduanya
                              ditetapkan lewat verifikasi KTP dan diubah lewat
                              pengajuan mutasi, bukan diketik sendiri. Tetapi RW dan
@@ -440,7 +440,7 @@
                                     </p>
                                     <div class="mt-3 pt-2.5 border-t border-red-200/60 flex items-center justify-end">
                                         <button type="button" @click="dismiss()" class="px-3.5 py-1.5 bg-white hover:bg-red-100 text-red-700 border border-red-200 rounded-xl text-xs font-semibold transition cursor-pointer shadow-xs">
-                                            Saya Mengerti & Tutup
+                                            Saya Mengerti dan Tutup
                                         </button>
                                     </div>
                                 </div>
@@ -590,7 +590,7 @@
     </div>
 </section>
 
-{{-- INCLUDE MODALS & SCRIPTS DARI AUTH --}}
+{{-- INCLUDE MODALS DAN SCRIPTS DARI AUTH --}}
 @include('auth.profile-modals')
 @endsection
 
@@ -819,7 +819,7 @@
                 }
             });
 
-            // Delegasi submit event untuk AJAX Form Pembatalan & Pengajuan Mutasi
+            // Delegasi submit event untuk AJAX Form Pembatalan dan Pengajuan Mutasi
             document.addEventListener('submit', async function(e) {
                 const form = e.target.closest('#form-cancel-mutasi, #form-store-mutasi');
                 if (!form) return;

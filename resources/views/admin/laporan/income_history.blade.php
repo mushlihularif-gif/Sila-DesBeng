@@ -45,9 +45,9 @@
                     <table class="table table-hover align-middle mb-0">
                         <thead class="bg-light">
                             <tr>
-                                <th class="ps-4 text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 rounded-top-start-3 py-3">Tanggal & Waktu</th>
-                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 py-3">Pemesan & Lokasi</th>
-                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 py-3">Unit Layanan & Item</th>
+                                <th class="ps-4 text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 rounded-top-start-3 py-3">Tanggal dan Waktu</th>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 py-3">Pemesan dan Lokasi</th>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 py-3">Unit Layanan dan Item</th>
                                 <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 py-3">Metode Bayar</th>
                                 <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 py-3">Nominal Masuk</th>
                                 <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 py-3">Status</th>

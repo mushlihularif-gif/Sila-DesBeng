@@ -448,7 +448,7 @@
                         <button type="submit"
                                 class="px-4 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 text-xs font-bold inline-flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs">
                             <i class="bx bx-trash text-sm"></i>
-                            <span>Batalkan & Hapus Laporan</span>
+                            <span>Batalkan dan Hapus Laporan</span>
                         </button>
                     </form>
                 </div>

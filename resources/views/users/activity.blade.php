@@ -679,7 +679,7 @@
             }
         }
         
-        // Execute immediately if document is already loaded (handles direct navigation & turbo injected script)
+        // Jalankan langsung jika dokumen sudah dimuat (mendukung navigasi langsung dan skrip Turbo)
         if (document.readyState !== 'loading') {
             initActivityPage();
         }

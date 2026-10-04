@@ -108,7 +108,7 @@ class RegionApiController extends Controller
                             ],
                             [
                                 'id' => 2001 + $region->id,
-                                'name' => 'Kaur Keuangan & Perencanaan',
+                                'name' => 'Kaur Keuangan dan Perencanaan',
                                 'position' => 'Kaur Keuangan',
                                 'photo_url' => '',
                                 'level' => 2,
@@ -130,7 +130,7 @@ class RegionApiController extends Controller
                             ],
                             [
                                 'id' => 3001 + $region->id,
-                                'name' => 'Kasi Pelayanan & Kesejahteraan',
+                                'name' => 'Kasi Pelayanan dan Kesejahteraan',
                                 'position' => 'Kasi Pelayanan',
                                 'photo_url' => '',
                                 'level' => 3,
@@ -140,7 +140,7 @@ class RegionApiController extends Controller
                     ],
                     [
                         'level' => 4,
-                        'level_name' => 'Pengurus BUMDes & Kewilayahan',
+                        'level_name' => 'Pengurus BUMDes dan Kewilayahan',
                         'members' => [
                             [
                                 'id' => 4000 + $region->id,
@@ -202,11 +202,11 @@ class RegionApiController extends Controller
                     ],
                     [
                         'level' => 3,
-                        'level_name' => 'Seksi & Pelayanan Terpadu',
+                        'level_name' => 'Seksi dan Pelayanan Terpadu',
                         'members' => [
                             [
                                 'id' => 3000 + $region->id,
-                                'name' => 'Kasi Pemerintahan & Trantib',
+                                'name' => 'Kasi Pemerintahan dan Trantib',
                                 'position' => 'Kepala Seksi',
                                 'photo_url' => '',
                                 'level' => 3,
@@ -214,7 +214,7 @@ class RegionApiController extends Controller
                             ],
                             [
                                 'id' => 3001 + $region->id,
-                                'name' => 'Kasi Pelayanan Umum & Kesra',
+                                'name' => 'Kasi Pelayanan Umum dan Kesra',
                                 'position' => 'Kepala Seksi',
                                 'photo_url' => '',
                                 'level' => 3,

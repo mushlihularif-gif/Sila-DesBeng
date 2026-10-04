@@ -12,7 +12,7 @@
     $cleanRegionName = str_replace(['Desa ', 'Kelurahan '], '', $regionName);
 @endphp
 
-<!-- IN-APP UNIT CHAT WIDGET & MODAL (PRIVASI TERJAGA) -->
+<!-- IN-APP UNIT CHAT WIDGET DAN MODAL (PRIVASI TERJAGA) -->
 <div class="toko-chat-widget" id="unitChatWidget">
     <!-- Header -->
     <div class="toko-chat-header">

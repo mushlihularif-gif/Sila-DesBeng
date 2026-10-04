@@ -13,7 +13,7 @@ class ServiceCategoryController extends Controller
     {
         $definitions = [
             'belanja-kebutuhan' => [
-                'title' => 'Belanja & Kebutuhan',
+                'title' => 'Belanja dan Kebutuhan',
                 'description' => 'Pilih kebutuhan gas rumah tangga atau jelajahi produk lokal dari Pasar Daerah.',
                 'image' => 'Admin/img/menu3dberanda/belanja-kebutuhan.png',
                 'items' => [

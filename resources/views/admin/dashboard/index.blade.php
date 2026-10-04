@@ -418,7 +418,7 @@
             @if(in_array(auth()->user()->role, ['admin_desa', 'admin_rt', 'admin_rw', 'staff']))
             @php
                 $dashboardGroups = [
-                    'Belanja & Kebutuhan' => [
+                    'Belanja dan Kebutuhan' => [
                         'image' => asset('Admin/img/pasardaerah/Belanja dan Kebutuhan.png'),
                         'services' => ['Penjualan Gas', 'Pasar Daerah'],
                     ],

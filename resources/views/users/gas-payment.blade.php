@@ -41,7 +41,7 @@
             
             @if($order->status == 'pending')
                 @if(strtolower($order->payment_method) !== 'tunai')
-                <!-- Countdown & Info Pembayaran -->
+                <!-- Hitung Mundur dan Info Pembayaran -->
                 <div class="bg-gray-50/50 p-8 text-center border-b border-gray-100 flex flex-col items-center justify-center relative overflow-hidden">
                     <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.05)_0,transparent_100%)]"></div>
                     <div class="relative z-10">

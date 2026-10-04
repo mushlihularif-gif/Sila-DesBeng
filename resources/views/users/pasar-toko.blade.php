@@ -60,7 +60,7 @@
         }
     }
 
-    /* Left Card: Store Profile & Identity */
+     /* Kartu kiri: profil dan identitas toko */
     .shopee-left-profile {
         position: relative;
         padding: 24px 28px;
@@ -971,7 +971,7 @@
 
             <div class="shopee-header-grid" style="position: relative; z-index: 20; background: white;">
                 
-                <!-- Left Panel: Store Identity & Fast Actions -->
+                <!-- Panel kiri: identitas dan aksi cepat toko -->
                 <div class="shopee-left-profile" style="position: relative; padding-top: 16px; padding-left: 28px;">
                     
                     <!-- Avatar Melayang Absolute (Overlap Cover) -->
@@ -1086,7 +1086,7 @@
             <!-- TAB 1: PRODUK TOKO (Ulfa UI Products Grid)                            -->
             <!-- ===================================================================== -->
             <div x-show="tab === 'produk'" x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
-                <!-- Shopee In-Store Filter & Search Toolbar -->
+                    <!-- Bilah filter dan pencarian di toko -->
                 <div class="shopee-store-toolbar">
                     <!-- Left: Kategori Pills -->
                     <div class="shopee-toolbar-categories">
@@ -1097,13 +1097,13 @@
                             </a>
                             @foreach($categories as $cat)
                                 <a href="{{ route('pasar.toko', array_merge(['id' => $region->id, 'kategori' => $cat], request()->except(['kategori', 'page']))) }}" class="shopee-sort-btn {{ request('kategori') == $cat ? 'active' : '' }}">
-                                    {{ $cat }}
+                                    {{ str_replace('&', 'dan', $cat) }}
                                 </a>
                             @endforeach
                         </div>
                     </div>
 
-                    <!-- Right: Sorting & Search Bar -->
+                    <!-- Sisi kanan: pengurutan dan bilah pencarian -->
                     <div class="shopee-toolbar-actions">
                         <!-- Sort Dropdown -->
                         <div class="shopee-sort-dropdown">
@@ -1162,7 +1162,7 @@
                                 @endif
                                 
                                 @if($produk->kategori)
-                                    <span class="product-badge" style="text-transform: capitalize;">{{ $produk->kategori }}</span>
+                                    <span class="product-badge" style="text-transform: capitalize;">{{ str_replace('&', 'dan', $produk->kategori) }}</span>
                                 @endif
                                 
                                 <div class="product-actions-overlay">
@@ -1336,7 +1336,7 @@
     </div>
 
     <!-- ========================================================================= -->
-    <!-- INTERACTIVE ORDER MODAL (POPUP ATUR JUMLAH & BELI LANGSUNG)               -->
+    <!-- INTERACTIVE ORDER MODAL (POPUP ATUR JUMLAH DAN BELI LANGSUNG)               -->
     <!-- ========================================================================= -->
     <div class="ps-modal-overlay" id="orderModalOverlay">
         <div class="ps-modal-container">
@@ -1442,7 +1442,7 @@
     </div>
 
     <!-- ========================================================================= -->
-    <!-- IN-APP TOKO CHAT WIDGET & MODAL (PRIVASI TERJAGA - TANPA WA)             -->
+    <!-- IN-APP TOKO CHAT WIDGET DAN MODAL (PRIVASI TERJAGA - TANPA WA)             -->
     <!-- ========================================================================= -->
     <div class="toko-chat-widget" id="tokoChatWidget">
         <!-- Header -->
@@ -2102,4 +2102,3 @@
     }
 </script>
 @endpush
-

@@ -177,7 +177,7 @@ Gunakan bahasa Indonesia yang santai, profesional, dan gunakan emoji secukupnya 
         } elseif (strpos($pesan, 'lapor') !== false || strpos($pesan, 'keluhan') !== false) {
             $reply = 'Untuk melaporkan keluhan, silakan gunakan menu **Pelaporan Warga** di beranda. Isi formulir laporan dan sertakan foto jika ada. Laporan Anda akan segera diproses oleh petugas terkait. ðŸ“';
         } elseif (strpos($pesan, 'halo') !== false || strpos($pesan, 'hai') !== false || strpos($pesan, 'hi') !== false) {
-            $reply = 'Halo! ðŸ‘‹ Saya SiladesBeng Assistant. Maaf, saat ini koneksi ke AI sedang terganggu. Tapi saya tetap bisa membantu! Silakan tanyakan seputar:\n\nâ€¢ **Sewa Alat** - Penyewaan alat berat & pesta\nâ€¢ **Gas LPG** - Pembelian gas subsidi & non-subsidi\nâ€¢ **Pelaporan** - Laporan keluhan warga\n\nAtau coba lagi nanti ya! ðŸ™';
+            $reply = 'Halo! ðŸ‘‹ Saya SiladesBeng Assistant. Maaf, saat ini koneksi ke AI sedang terganggu. Tapi saya tetap bisa membantu! Silakan tanyakan seputar:\n\nâ€¢ **Sewa Alat** - Penyewaan alat berat dan pesta\nâ€¢ **Gas LPG** - Pembelian gas subsidi dan non-subsidi\nâ€¢ **Pelaporan** - Laporan keluhan warga\n\nAtau coba lagi nanti ya! ðŸ™';
         }
         
         return response()->json([
@@ -185,4 +185,3 @@ Gunakan bahasa Indonesia yang santai, profesional, dan gunakan emoji secukupnya 
         ]);
     }
 }
-

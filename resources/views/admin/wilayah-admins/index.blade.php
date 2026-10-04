@@ -233,7 +233,7 @@
     <div class="row mb-4">
         <div class="col-12 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
             <div>
-                <h4 class="fw-bold m-0"><span class="text-muted fw-light">Manajemen /</span> Wilayah &amp; RT/RW</h4>
+                <h4 class="fw-bold m-0"><span class="text-muted fw-light">Manajemen /</span> Wilayah dan RT/RW</h4>
             </div>
             <div class="header-action-btns d-flex flex-wrap gap-2 justify-content-md-end flex-shrink-0" style="position: relative; z-index: 10;">
                 <button type="button" class="btn btn-primary shadow-sm text-nowrap" data-bs-toggle="modal" data-bs-target="#modalTambahAdmin">
@@ -254,12 +254,12 @@
         <ul class="nav nav-pills gap-2 flex-nowrap overflow-x-auto pb-1 w-100" role="tablist" style="max-width: 100%; -webkit-overflow-scrolling: touch;">
             <li class="nav-item flex-shrink-0">
                 <button type="button" class="nav-link {{ $activeTab === 'pejabat' ? 'active' : '' }} rounded-pill shadow-sm px-3 px-sm-4 py-2" role="tab" data-bs-toggle="tab" data-bs-target="#tab-pejabat" aria-controls="tab-pejabat" aria-selected="{{ $activeTab === 'pejabat' ? 'true' : 'false' }}" style="font-size: 0.85rem; white-space: nowrap;">
-                    <i class="bx bx-user-pin me-1"></i> Pejabat RT &amp; RW
+                    <i class="bx bx-user-pin me-1"></i> Pejabat RT dan RW
                 </button>
             </li>
             <li class="nav-item flex-shrink-0">
                 <button type="button" class="nav-link {{ $activeTab === 'struktur' ? 'active' : '' }} rounded-pill shadow-sm px-3 px-sm-4 py-2" role="tab" data-bs-toggle="tab" data-bs-target="#tab-struktur" aria-controls="tab-struktur" aria-selected="{{ $activeTab === 'struktur' ? 'true' : 'false' }}" style="font-size: 0.85rem; white-space: nowrap;">
-                    <i class="bx bx-map-alt me-1"></i> Struktur Wilayah (RW &amp; RT)
+                    <i class="bx bx-map-alt me-1"></i> Struktur Wilayah (RW dan RT)
                 </button>
             </li>
         </ul>
@@ -688,7 +688,7 @@
                     </div>
                     <div class="flex-shrink-0 banner-action-wrap mt-2 mt-md-0">
                         <button type="button" class="btn btn-info text-white rounded-pill px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalTambahAdmin" style="white-space: nowrap;">
-                            <i class="bx bx-plus me-1"></i> Buat Akun &amp; Wilayah Baru
+                            <i class="bx bx-plus me-1"></i> Buat Akun dan Wilayah Baru
                         </button>
                     </div>
                 </div>
@@ -950,7 +950,7 @@
                     <h6 class="fw-bold text-dark mb-1">Belum Ada Rukun Warga (RW) yang Terdaftar</h6>
                     <p class="text-muted small mb-3">Daftarkan RW pertama di desa Anda untuk mulai mengelola struktur RT dan pejabat wilayah.</p>
                     <button type="button" class="btn btn-primary rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#modalTambahAdmin">
-                        <i class="bx bx-plus me-1"></i> Buat Akun &amp; Wilayah Pertama
+                        <i class="bx bx-plus me-1"></i> Buat Akun dan Wilayah Pertama
                     </button>
                 </div>
             </div>
@@ -969,7 +969,7 @@
         <form action="{{ route('admin.wilayah-admins.store') }}" method="POST" class="modal-content border-0 shadow-lg">
             <div class="modal-header border-bottom pb-3">
                 <h5 class="modal-title fw-bold text-primary" id="modalTambahAdminTitle">
-                    <i class="bx bx-user-plus me-2 fs-4"></i>Buat Akun &amp; Wilayah (RT/RW)
+                    <i class="bx bx-user-plus me-2 fs-4"></i>Buat Akun dan Wilayah (RT/RW)
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -1079,7 +1079,7 @@
             </div>
             <div class="modal-footer border-top pt-3">
                 <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Batal</button>
-                <button type="submit" id="btnSubmitTambah" class="btn btn-primary shadow-sm"><i class="bx bx-save me-1"></i> Simpan Akun &amp; Wilayah</button>
+                <button type="submit" id="btnSubmitTambah" class="btn btn-primary shadow-sm"><i class="bx bx-save me-1"></i> Simpan Akun dan Wilayah</button>
             </div>
         </form>
     </div>
@@ -1109,7 +1109,7 @@
                     <!-- Bagian 1: Cari & Pilih Akun Warga -->
                     <!-- Bagian 1: Cari & Pilih Akun Warga -->
                     <div class="col-12 mb-2" id="wargaSearchWrapper">
-                        <label class="form-label fw-bold text-dark"><i class="bx bx-search-alt text-primary me-1"></i> 1. Cari &amp; Pilih Akun Warga</label>
+                        <label class="form-label fw-bold text-dark"><i class="bx bx-search-alt text-primary me-1"></i> 1. Cari dan Pilih Akun Warga</label>
                         <div class="position-relative">
                             <div class="input-group input-group-merge">
                                 <span class="input-group-text bg-white"><i class="bx bx-search text-muted"></i></span>
@@ -1412,7 +1412,7 @@
                 <div class="alert alert-info py-2 px-3 mb-0 d-flex align-items-center rounded-3 shadow-xs">
                     <i class="bx bx-plus-circle fs-4 me-2 flex-shrink-0 text-info"></i>
                     <div class="small">
-                        <strong class="text-info">${formatted} Baru &amp; Tersedia!</strong><br>
+                        <strong class="text-info">${formatted} Baru dan Tersedia!</strong><br>
                         <span class="text-muted">Sistem akan otomatis mendaftarkan <strong>${formatted}</strong> baru di database desa saat disimpan.</span>
                     </div>
                 </div>`;
@@ -1501,7 +1501,7 @@
                 <div class="alert alert-info py-2 px-3 mb-0 d-flex align-items-center rounded-3 shadow-xs">
                     <i class="bx bx-plus-circle fs-4 me-2 flex-shrink-0 text-info"></i>
                     <div class="small">
-                        <strong class="text-info">${formattedRt} di ${selectedRwName} Baru &amp; Tersedia!</strong><br>
+                        <strong class="text-info">${formattedRt} di ${selectedRwName} Baru dan Tersedia!</strong><br>
                         <span class="text-muted">Sistem akan otomatis mendaftarkan <strong>${formattedRt}</strong> di bawah <strong>${selectedRwName}</strong> saat disimpan.</span>
                     </div>
                 </div>`;

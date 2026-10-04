@@ -34,7 +34,7 @@
                 </div>
             </div>
 
-            <!-- Filter & Search Bar -->
+            <!-- Bilah filter dan pencarian -->
             <div class="max-w-5xl mx-auto mb-12 animate-section">
                 <div class="backdrop-blur-sm bg-white/70 rounded-3xl p-4 md:p-6 border border-white/80 shadow-lg">
                     <div class="flex flex-col lg:flex-row gap-6 justify-between items-center w-full">
@@ -443,7 +443,6 @@
     })();
 </script>
 @endpush
-
 
 
 

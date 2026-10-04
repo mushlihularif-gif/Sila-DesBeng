@@ -149,7 +149,7 @@
                 <div class="card-header bg-white border-bottom py-3">
                     <div class="d-flex align-items-center gap-2">
                         <i class="bx bx-info-circle text-primary fs-4"></i>
-                        <h5 class="fw-bold mb-0 text-dark">Informasi & Ketentuan Layanan</h5>
+                        <h5 class="fw-bold mb-0 text-dark">Informasi dan Ketentuan Layanan</h5>
                     </div>
                 </div>
                 <div class="card-body p-4">
@@ -176,7 +176,7 @@
                             <div class="p-3 rounded-3 border bg-white h-100">
                                 <div class="d-flex align-items-center gap-2 mb-1">
                                     <i class="bx bx-shield-check text-success fs-5"></i>
-                                    <span class="fw-bold text-dark small">Biaya & Operasional:</span>
+                                    <span class="fw-bold text-dark small">Biaya dan Operasional:</span>
                                 </div>
                                 <span class="badge bg-label-success fs-7 mb-1">Fasilitas Publik</span>
                                 <small class="text-muted d-block" style="font-size: 0.8rem;">Disediakan oleh Pemerintah Desa untuk kesejahteraan warga.</small>

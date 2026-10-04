@@ -270,7 +270,7 @@
                     </li>
                     <li class="d-flex align-items-start gap-3">
                         <i class='bx bx-check-circle text-success fs-5 mt-1'></i>
-                        <span class="text-muted">Mendorong digitalisasi daerah menuju tata kelola ekonomi mandiri & modern</span>
+                        <span class="text-muted">Mendorong digitalisasi daerah menuju tata kelola ekonomi mandiri dan modern</span>
                     </li>
                 </ul>
             </div>

@@ -91,7 +91,7 @@
                                 <i class="bx bx-error-circle"></i>
                                 Kunci Google Maps belum diisi, jadi peta tidak dapat ditampilkan.
                                 Koordinat masih bisa diisi manual di bawah. Super Admin dapat mengisinya
-                                di <strong>Sistem Platform &rsaquo; Integrasi Payment Gateway</strong>.
+                                di <strong>Integrasi Payment Gateway pada Sistem Platform</strong>.
                             </div>
                         @endif
                     </div>

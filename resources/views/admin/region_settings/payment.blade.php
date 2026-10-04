@@ -17,7 +17,7 @@
                 </div>
             </div>
             <div>
-                <h5 class="fw-bold mb-1 text-primary">Kas & Pembayaran Wilayah</h5>
+                <h5 class="fw-bold mb-1 text-primary">Kas dan Pembayaran Wilayah</h5>
                 <p class="mb-0 text-primary" style="opacity: 0.85;">
                     Kelola rekening bank, e-wallet, sakelar pembayaran otomatis, dan cairkan saldo Midtrans wilayah Anda.
                 </p>
@@ -53,7 +53,7 @@
                     <i class="bx bx-wallet fs-5"></i>
                 </div>
                 <div>
-                    <h6 class="fw-bold mb-0">Saldo & Pencairan</h6>
+                    <h6 class="fw-bold mb-0">Saldo dan Pencairan</h6>
                     <small class="text-muted">Rekening yang Anda isi di bawah dipakai sebagai tujuan pencairan saldo Midtrans wilayah.</small>
                 </div>
             </div>
@@ -69,7 +69,7 @@
                 <div class="avatar avatar-sm bg-primary-subtle text-primary rounded-circle me-3 d-flex justify-content-center align-items-center">
                     <i class="bx bx-credit-card-front fs-5"></i>
                 </div>
-                <h6 class="fw-bold mb-0">Informasi Kas & Pembayaran</h6>
+                <h6 class="fw-bold mb-0">Informasi Kas dan Pembayaran</h6>
             </div>
             <p class="text-muted mb-4">Kelola rekening bank utama, dompet elektronik (e-wallet), dan integrasi otomatis Payment Gateway (Midtrans).</p>
 

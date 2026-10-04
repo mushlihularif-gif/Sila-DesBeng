@@ -37,7 +37,7 @@
                 </button>
                 @if($hasGedung)
                 <button class="catalog-filter-btn filter-btn" data-filter="gedung">
-                    Gedung & Ruang Publik ({{ $items->count() }})
+                    Gedung dan Ruang Publik ({{ $items->count() }})
                 </button>
                 @endif
                 @if($hasAmbulans)
@@ -54,7 +54,7 @@
             @endif
 
             @if(isset($regionSettings['kontak_ambulans']) && $regionSettings['kontak_ambulans'])
-            <!-- Kontak Darurat Medis Cepat (Kompak & Ringkas) -->
+            <!-- Kontak Darurat Medis Cepat (Kompak dan Ringkas) -->
             <div class="mb-8 max-w-6xl mx-auto">
                 <div class="bg-red-50 border border-red-200 rounded-2xl px-4 py-2.5 flex flex-col sm:flex-row items-center justify-between gap-3 text-red-700 shadow-sm">
                     <div class="flex items-center gap-2.5 text-xs sm:text-sm font-semibold">
@@ -62,7 +62,7 @@
                             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
                             <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-600"></span>
                         </span>
-                        <span>Layanan Darurat Medis & Ambulans 24 Jam Desa Siaga</span>
+                        <span>Layanan Darurat Medis dan Ambulans 24 Jam Desa Siaga</span>
                     </div>
                     <a href="https://wa.me/{{ preg_replace('/^0/', '62', $regionSettings['kontak_ambulans']) }}" target="_blank"
                        class="px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm flex-shrink-0">
@@ -76,7 +76,7 @@
             <!-- Grid Kartu Produk (2 Kolom di Mobile, 2 di Tablet, 3 di Desktop) -->
             @if($totalCount > 0)
                 <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5 lg:gap-6 mb-12 sm:mb-16 max-w-6xl mx-auto">
-                    <!-- Gedung & Ruang Publik -->
+                    <!-- Gedung dan Ruang Publik -->
                     @foreach($items as $item)
                     @php
                         $catSlug = $item->kategori ? Str::slug($item->kategori) : '';
@@ -116,7 +116,7 @@
                             @if($item->kategori)
                                 <div class="mb-1.5 sm:mb-4">
                                     <span class="inline-flex items-center px-2 sm:px-3 py-0.5 sm:py-1.5 rounded-md text-[9px] sm:text-[10px] font-bold text-white bg-blue-600 shadow-sm">
-                                        {{ ucfirst(str_replace('-', ' ', $item->kategori)) }}
+                                        {{ str_replace('&', 'dan', ucfirst(str_replace('-', ' ', $item->kategori))) }}
                                     </span>
                                 </div>
                             @endif
@@ -154,7 +154,7 @@
                     </a>
                     @endforeach
 
-                    <!-- Armada Kendaraan & Ambulans -->
+                    <!-- Armada Kendaraan dan Ambulans -->
                     @if(isset($kendaraans))
                     @foreach($kendaraans as $k)
                     @php
@@ -224,7 +224,7 @@
                             <div class="mt-auto pt-2 sm:pt-3">
                                 @if($isAmb)
                                 <a href="{{ route('user.ambulans.show', $k->id) }}" data-turbo="false" class="w-full block text-center py-2 px-3 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white font-bold rounded-xl text-xs sm:text-sm shadow transition-all">
-                                    Detail & Panggil Armada
+                                    Detail dan Panggil Armada
                                 </a>
                                 @else
                                 <span class="w-full block text-center py-2 px-3 bg-blue-50 text-blue-600 font-bold rounded-xl text-xs sm:text-sm border border-blue-200">

@@ -51,7 +51,7 @@
             width: 100% !important;
         }
 
-        /* Penyesuaian Tipografi & Spasi di Ponsel (Mobile) */
+        /* Penyesuaian tipografi dan spasi di ponsel */
         @media (max-width: 767.98px) {
             .bg-decorative {
                 opacity: 0.3 !important;
@@ -152,7 +152,7 @@
     <script>
         (() => {
             /**
-             * Fungsionalitas Navbar & Menu Seluler
+             * Fungsionalitas navbar dan menu seluler
              */
             const Navbar = {
                 init() {

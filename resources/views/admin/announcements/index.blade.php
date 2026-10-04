@@ -1,6 +1,6 @@
 @extends('admin.layouts.admin')
 
-@section('title', 'Kabar dan Informasi Daerah & Pengumuman')
+@section('title', 'Kabar dan Informasi Daerah dan Pengumuman')
 
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
@@ -8,7 +8,7 @@
     <div class="row mb-4">
         <div class="col-12 d-flex justify-content-between align-items-center">
             <h4 class="fw-bold py-3 mb-0">
-                <span class="text-muted fw-light">Sistem /</span> Kabar & Pengumuman
+                <span class="text-muted fw-light">Sistem /</span> Kabar dan Pengumuman
             </h4>
         </div>
     </div>

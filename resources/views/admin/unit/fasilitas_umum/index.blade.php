@@ -23,7 +23,7 @@
                     </div>
                 </div>
                 <div class="min-w-0">
-                    <h6 class="fw-bold mb-0 text-secondary" style="font-size: 0.9rem;">Manajemen Fasilitas Umum & Aset</h6>
+                    <h6 class="fw-bold mb-0 text-secondary" style="font-size: 0.9rem;">Manajemen Fasilitas Umum dan Aset</h6>
                     <p class="mb-0 text-secondary small d-none d-sm-block" style="opacity: 0.85; font-size: 0.78rem;">
                         Kelola data kendaraan operasional (Ambulans, Truk Sampah) dan fasilitas publik (Gedung Serbaguna, Lapangan) yang dapat diakses oleh warga.
                     </p>
@@ -353,7 +353,7 @@
                                 <i class="bx bx-building-house fs-5"></i>
                             </div>
                             <div class="min-w-0">
-                                <h6 class="mb-0 fw-bold text-truncate" style="font-size: 0.95rem;">Daftar Gedung & Fasilitas</h6>
+                                <h6 class="mb-0 fw-bold text-truncate" style="font-size: 0.95rem;">Daftar Gedung dan Fasilitas</h6>
                                 <small class="text-muted d-none d-sm-block" style="font-size: 0.78rem;">Gedung Serbaguna, Balai Pertemuan, Lapangan, dll</small>
                             </div>
                         </div>
@@ -418,7 +418,7 @@
                                                 </h5>
                                                 <div class="d-flex flex-wrap gap-1 align-items-center">
                                                     <span class="badge bg-label-success rounded-pill px-2 py-0.5 card-badge-kategori text-wrap text-start" style="line-height: 1.2; max-width: 100%; word-break: break-word;">
-                                                        {{ $item->kategori }}
+                                                        {{ str_replace('&', 'dan', $item->kategori) }}
                                                     </span>
                                                 </div>
                                             </div>
@@ -501,7 +501,7 @@
                                     <div class="card-header bg-white border-bottom p-4">
                                         <div class="d-flex align-items-center">
                                             <div class="avatar avatar-sm bg-label-info rounded-circle me-3 d-flex justify-content-center align-items-center"><i class="bx bx-book"></i></div>
-                                            <h5 class="mb-0 fw-bold">SOP Peminjaman Gedung & Kendaraan</h5>
+                                            <h5 class="mb-0 fw-bold">SOP Peminjaman Gedung dan Kendaraan</h5>
                                         </div>
                                     </div>
                                     <div class="card-body p-4">

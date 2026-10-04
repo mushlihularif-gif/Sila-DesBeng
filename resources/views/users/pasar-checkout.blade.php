@@ -547,7 +547,7 @@
                                 <div style="font-size: 0.82rem; font-weight: 700; color: #9b2c2c; display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
                                     <span class="flex items-center gap-1.5">
                                         <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
-                                        QRIS &amp; E-Wallet Resmi Layanan
+                                        QRIS dan E-Wallet Resmi Layanan
                                     </span>
                                     <span class="text-[11px] font-semibold text-red-700 bg-red-100 px-2 py-0.5 rounded-md">Scan Barcode</span>
                                 </div>
@@ -656,7 +656,7 @@
 
                         <div class="security-badge">
                             <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-                            Data Anda aman &amp; terenkripsi
+                            Data Anda aman dan terenkripsi
                         </div>
                     </div>
                 </div>
@@ -676,7 +676,7 @@
         const hiddenInput = document.getElementById('payment-method-hidden');
         if (hiddenInput) hiddenInput.value = method;
 
-        // Toggle checked on inputs & selected on radio-cards
+        // Ubah status checked pada input dan selected pada kartu radio
         document.querySelectorAll('.payment-radio-card').forEach(card => {
             const radio = card.querySelector('input[type="radio"]');
             if (radio) {

@@ -199,7 +199,7 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                             <table class="table table-hover align-middle mb-0">
                                 <thead class="bg-light">
                                     <tr>
-                                        <th class="ps-4 py-3 text-secondary text-uppercase small fw-bold">ID & Tanggal</th>
+                                        <th class="ps-4 py-3 text-secondary text-uppercase small fw-bold">ID dan Tanggal</th>
                                         <th class="py-3 text-secondary text-uppercase small fw-bold">Penyewa</th>
                                         <th class="py-3 text-secondary text-uppercase small fw-bold">Alat</th>
                                         <th class="py-3 text-secondary text-uppercase small fw-bold">Total</th>
@@ -268,7 +268,7 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                             <table class="table table-hover align-middle mb-0">
                                 <thead class="bg-light">
                                     <tr>
-                                        <th class="ps-4 py-3 text-secondary text-uppercase small fw-bold">ID & Tanggal</th>
+                                        <th class="ps-4 py-3 text-secondary text-uppercase small fw-bold">ID dan Tanggal</th>
                                         <th class="py-3 text-secondary text-uppercase small fw-bold">Pembeli</th>
                                         <th class="py-3 text-secondary text-uppercase small fw-bold">Produk</th>
                                         <th class="py-3 text-secondary text-uppercase small fw-bold">Total</th>
@@ -336,7 +336,7 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                             <table class="table table-hover align-middle mb-0">
                                 <thead class="bg-light">
                                     <tr>
-                                        <th class="ps-4 py-3 text-secondary text-uppercase small fw-bold">ID & Tanggal</th>
+                                        <th class="ps-4 py-3 text-secondary text-uppercase small fw-bold">ID dan Tanggal</th>
                                         <th class="py-3 text-secondary text-uppercase small fw-bold">Penyewa</th>
                                         <th class="py-3 text-secondary text-uppercase small fw-bold">Mobil</th>
                                         <th class="py-3 text-secondary text-uppercase small fw-bold">Total</th>
@@ -405,7 +405,7 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                             <table class="table table-hover align-middle mb-0">
                                 <thead class="bg-light">
                                     <tr>
-                                        <th class="ps-4 py-3 text-secondary text-uppercase small fw-bold">ID & Tanggal</th>
+                                        <th class="ps-4 py-3 text-secondary text-uppercase small fw-bold">ID dan Tanggal</th>
                                         <th class="py-3 text-secondary text-uppercase small fw-bold">Peminjam</th>
                                         <th class="py-3 text-secondary text-uppercase small fw-bold">Fasilitas</th>
                                         <th class="py-3 text-secondary text-uppercase small fw-bold">Status</th>
@@ -463,7 +463,7 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                             <table class="table table-hover align-middle mb-0">
                                 <thead class="bg-light">
                                     <tr>
-                                        <th class="ps-4 py-3 text-secondary text-uppercase small fw-bold">ID & Tanggal</th>
+                                        <th class="ps-4 py-3 text-secondary text-uppercase small fw-bold">ID dan Tanggal</th>
                                         <th class="py-3 text-secondary text-uppercase small fw-bold">Pelanggan</th>
                                         <th class="py-3 text-secondary text-uppercase small fw-bold">Total Pembayaran</th>
                                         <th class="py-3 text-secondary text-uppercase small fw-bold">Status</th>

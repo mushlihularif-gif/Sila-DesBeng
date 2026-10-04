@@ -26,7 +26,7 @@
                 </p>
             </div>
 
-            <!-- Filter & Search Bar -->
+            <!-- Bilah filter dan pencarian -->
             <div class="max-w-5xl mx-auto mb-12 animate-section flex justify-center">
                 {{-- Search Input (Style gradient) --}}
                 <div class="w-full sm:w-auto">

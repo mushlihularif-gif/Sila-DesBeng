@@ -128,7 +128,7 @@
                 {{-- TAB PENGUMUMAN --}}
                 <div id="tab-content-pengumuman" class="tab-content" style="display: {{ $activeTab === 'pengumuman' ? 'block' : 'none' }};">
                     
-                    {{-- Filter & Search Pengumuman --}}
+                    {{-- Filter dan Pencarian Pengumuman --}}
                     <div class="max-w-4xl mx-auto mb-10">
                         <div class="backdrop-blur-md bg-white/60 rounded-2xl p-4 md:p-6 border border-gray-100 shadow-sm flex flex-col md:flex-row gap-6 justify-between items-center">
                             <div class="flex flex-wrap gap-2 justify-center items-center">

@@ -1,7 +1,7 @@
 {{--
     Pemilih alamat tersimpan untuk formulir pemesanan.
 
-    Warga menyimpan alamatnya sekali di halaman Saldo & Alamat, lalu di sini
+    Warga menyimpan alamatnya sekali di halaman Saldo dan Alamat, lalu di sini
     tinggal memilihnya — tidak perlu mengetik ulang nama penerima dan alamat
     lengkap di setiap unit layanan.
 
@@ -36,7 +36,7 @@
                     'telepon' => $al->no_telepon,
                     'alamat'  => trim($al->satuBaris() . ($al->patokan ? ' (Patokan: ' . $al->patokan . ')' : '')),
                     // Titik peta ikut terbawa. Warga menentukannya sekali di
-                    // halaman Saldo & Alamat, bukan menunjuk peta berulang kali
+                    // halaman Saldo dan Alamat, bukan menunjuk peta berulang kali
                     // di setiap formulir pemesanan.
                     'lat'     => $al->latitude,
                     'lng'     => $al->longitude,

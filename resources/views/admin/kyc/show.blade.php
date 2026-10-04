@@ -76,7 +76,7 @@
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb breadcrumb-style1 mb-1">
                     <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}" class="text-muted">Dashboard</a></li>
-                    <li class="breadcrumb-item text-muted">Permintaan & Aktivitas</li>
+                    <li class="breadcrumb-item text-muted">Permintaan dan Aktivitas</li>
                     <li class="breadcrumb-item"><a href="{{ route('admin.kyc.index') }}" class="text-muted">Verifikasi Identitas</a></li>
                     <li class="breadcrumb-item active text-dark fw-semibold">Detail Pengajuan #{{ $kyc->id }}</li>
                 </ol>
@@ -124,7 +124,7 @@
         <div class="alert alert-success border-success-subtle rounded-3 mb-4 d-flex align-items-center gap-3 py-3 px-4">
             <i class="bx bx-shield-check fs-2 text-success flex-shrink-0"></i>
             <div>
-                <div class="fw-bold text-dark">Verifikasi Selesai & Berkas Fisik Dimusnahkan (Kepatuhan Privasi UU PDP)</div>
+                <div class="fw-bold text-dark">Verifikasi Selesai dan Berkas Fisik Dimusnahkan (Kepatuhan Privasi UU PDP)</div>
                 <div class="small text-muted">Pengajuan ini telah disetujui resmi. Demi melindungi privasi warga dan mencegah ancaman kebocoran data (zero footprint), seluruh file fisik foto e-KTP dan foto wajah/biometrik telah dihapus permanen secara otomatis dari server.</div>
             </div>
         </div>
@@ -247,7 +247,7 @@
                         <div class="p-3 rounded-3 bg-label-success border border-success-subtle d-flex align-items-start gap-3">
                             <i class="bx bx-shield-quarter text-success fs-3 flex-shrink-0 mt-1"></i>
                             <div>
-                                <h6 class="mb-1 fw-bold text-success" style="font-size: 0.9rem;">Status: Terverifikasi & Dilindungi</h6>
+                                <h6 class="mb-1 fw-bold text-success" style="font-size: 0.9rem;">Status: Terverifikasi dan Dilindungi</h6>
                                 <p class="mb-0 text-muted small" style="line-height: 1.45;">Identitas warga telah terverifikasi resmi. Seluruh data kependudukan tersimpan terenkripsi dengan algoritma ChaCha20-Poly1305 dan blind indexing SHA-256.</p>
                             </div>
                         </div>
@@ -612,7 +612,7 @@
                 </div>
                 <div class="modal-footer border-top py-3 px-4 bg-light">
                     <button type="button" class="btn btn-outline-secondary rounded-pill px-4 shadow-none" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-danger rounded-pill px-4 shadow-sm fw-bold">Tolak & Kirim Notifikasi</button>
+                    <button type="submit" class="btn btn-danger rounded-pill px-4 shadow-sm fw-bold">Tolak dan Kirim Notifikasi</button>
                 </div>
             </form>
         </div>
@@ -670,4 +670,3 @@
     }
 </script>
 @endpush
-

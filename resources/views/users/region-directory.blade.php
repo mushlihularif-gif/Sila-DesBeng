@@ -35,7 +35,7 @@
                 </div>
             </div>
 
-            {{-- Kabupaten & Kecamatan Cards --}}
+            {{-- Kartu Kabupaten dan Kecamatan --}}
             <div class="max-w-3xl mx-auto mb-8 animate-section" id="card-container">
                 
 
@@ -490,4 +490,3 @@
 })();
 </script>
 @endpush
-

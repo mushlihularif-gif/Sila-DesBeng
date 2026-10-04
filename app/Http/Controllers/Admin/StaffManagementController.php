@@ -158,7 +158,7 @@ class StaffManagementController extends Controller
         // Daftar unit layanan dikelompokkan menurut kategori layanan warga.
         if (! array_intersect(array_keys($daftar), array_keys(User::izinPlatform()))) {
             $groups = [
-                'Belanja & Kebutuhan' => ['gas', 'pasar_daerah'],
+                'Belanja dan Kebutuhan' => ['gas', 'pasar_daerah'],
                 'Layanan Daerah' => ['sewa_alat', 'sewa_mobil', 'fasilitas_umum', 'pelaporan_warga'],
                 'Kabar dan Informasi Daerah' => ['kabar_informasi'],
             ];
@@ -186,7 +186,9 @@ class StaffManagementController extends Controller
             }
 
             if ($anggota) {
-                $hasil[$namaGrup] = $anggota;
+                // Nama grup di enum adalah identifier internal; tampilkan
+                // konjungsi dalam Bahasa Indonesia pada panel staf.
+                $hasil[str_replace('&', 'dan', $namaGrup)] = $anggota;
             }
         }
 

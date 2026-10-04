@@ -131,7 +131,7 @@
                             </div>
                             <div class="flex items-center gap-1.5 sm:gap-2">
                                 <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm flex-shrink-0" style="background-color: #06b6d4;"></div>
-                                <span class="text-gray-700 font-medium truncate">Kabar & Info Daerah</span>
+                                <span class="text-gray-700 font-medium truncate">Kabar dan Info Daerah</span>
                             </div>
                             <div class="flex items-center gap-1.5 sm:gap-2 col-span-2 sm:col-span-1">
                                 <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm flex-shrink-0" style="background-color: #ec4899;"></div>

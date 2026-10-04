@@ -58,19 +58,19 @@
                                 <li class="nav-item" role="presentation">
                                     <button class="nav-link active" id="step1-tab" data-bs-toggle="pill" data-bs-target="#step1" type="button" role="tab" aria-controls="step1" aria-selected="true">
                                         <span class="step-icon"><i class='bx bx-info-circle'></i></span>
-                                        <span class="step-text d-none d-sm-inline ms-1">Info & Media</span>
+                                        <span class="step-text d-none d-sm-inline ms-1">Info dan Media</span>
                                     </button>
                                 </li>
                                 <li class="nav-item" role="presentation">
                                     <button class="nav-link" id="step2-tab" data-bs-toggle="pill" data-bs-target="#step2" type="button" role="tab" aria-controls="step2" aria-selected="false">
                                         <span class="step-icon"><i class='bx bx-money'></i></span>
-                                        <span class="step-text d-none d-sm-inline ms-1">Harga & Stok</span>
+                                        <span class="step-text d-none d-sm-inline ms-1">Harga dan Stok</span>
                                     </button>
                                 </li>
                                 <li class="nav-item" role="presentation">
                                     <button class="nav-link" id="step3-tab" data-bs-toggle="pill" data-bs-target="#step3" type="button" role="tab" aria-controls="step3" aria-selected="false">
                                         <span class="step-icon"><i class='bx bx-cog'></i></span>
-                                        <span class="step-text d-none d-sm-inline ms-1">Pengaturan & Simpan</span>
+                                        <span class="step-text d-none d-sm-inline ms-1">Pengaturan dan Simpan</span>
                                     </button>
                                 </li>
                             </ul>

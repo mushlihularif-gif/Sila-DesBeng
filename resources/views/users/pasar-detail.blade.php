@@ -580,7 +580,7 @@
         box-sizing: border-box;
     }
 
-    /* ===== DISCOVERY HUB & CATEGORY SCREEN ===== */
+    /* ===== HUB PENJELAJAHAN DAN KATEGORI ===== */
     .discovery-hub-card {
         background: #ffffff;
         border-radius: 24px;
@@ -937,7 +937,7 @@
                         <!-- Category Badge -->
                         <div class="mb-3">
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-100">
-                                {{ $produk->kategori }}
+                                {{ str_replace('&', 'dan', $produk->kategori) }}
                             </span>
                         </div>
 
@@ -946,7 +946,7 @@
                             {{ $produk->nama_produk }}
                         </h1>
 
-                        <!-- Stats Row (Rating & Terjual) -->
+                        <!-- Baris statistik (rating dan jumlah terjual) -->
                         <div class="flex items-center gap-3 text-sm text-gray-500 mb-5">
                             @if($reviews->isNotEmpty())
                             <div class="flex items-center gap-1 font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-200/60 text-xs">
@@ -1084,7 +1084,7 @@
                 </div>
 
                 <!-- ========================================================================= -->
-                <!-- FULL-WIDTH TABBED SECTION (LEGA & TIDAK SESAK)                            -->
+                <!-- FULL-WIDTH TABBED SECTION (LEGA DAN TIDAK SESAK)                            -->
                 <!-- ========================================================================= -->
                 <div class="mt-10 pt-8 border-t border-gray-100">
                     <div x-data="{ tab: 'detail', showReviewForm: false, rating: 5 }">
@@ -1113,7 +1113,7 @@
                             <div class="leading-relaxed whitespace-pre-line text-[15px]">{!! e($produk->deskripsi ?? 'Tidak ada deskripsi lengkap untuk produk ini.') !!}</div>
                         </div>
 
-                        <!-- Tab 2: Ulasan & Rating -->
+                        <!-- Tab 2: Ulasan dan Rating -->
                         <div x-show="tab === 'ulasan'" x-cloak style="display: none;" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0">
                             @if($reviews->isEmpty())
                                 <div class="ps-empty-box max-w-2xl mx-auto mb-6">
@@ -1135,7 +1135,7 @@
                                     @endauth
                                 </div>
                             @else
-                                <!-- Summary & Tulis Ulasan Button -->
+                                <!-- Ringkasan dan tombol tulis ulasan -->
                                 <div class="ps-rating-banner flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
                                     <div class="flex items-center gap-4">
                                         <div class="text-4xl font-black text-amber-500">{{ number_format($averageRating, 1) }}</div>
@@ -1246,7 +1246,7 @@
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                     </div>
                                     <div>
-                                        <h4 class="text-sm font-bold text-gray-900 mb-1">Proses & Pengiriman Cepat</h4>
+                                        <h4 class="text-sm font-bold text-gray-900 mb-1">Proses dan Pengiriman Cepat</h4>
                                         <p class="text-xs text-gray-600 leading-relaxed">Karena penjual berada di desa yang sama, pesanan umumnya diproses dan sampai dalam hitungan jam di hari yang sama.</p>
                                     </div>
                                 </div>
@@ -1255,7 +1255,7 @@
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
                                     </div>
                                     <div>
-                                        <h4 class="text-sm font-bold text-gray-900 mb-1">Garansi & Retur Mudah</h4>
+                                        <h4 class="text-sm font-bold text-gray-900 mb-1">Garansi dan Retur Mudah</h4>
                                         <p class="text-xs text-gray-600 leading-relaxed">Barang tidak sesuai? Hubungi penjual langsung di desa Anda untuk proses penukaran atau pengembalian yang lebih fleksibel.</p>
                                     </div>
                                 </div>
@@ -1267,7 +1267,7 @@
         </div>
 
         <!-- ========================================================================= -->
-        <!-- SECTION: PRODUK TERPOPULER & JELAJAHI PASAR DAERAH                        -->
+        <!-- SECTION: PRODUK TERPOPULER DAN JELAJAHI PASAR DAERAH                        -->
         <!-- ========================================================================= -->
         
         @if(isset($popularProducts) && $popularProducts->isNotEmpty())
@@ -1304,7 +1304,7 @@
                             @endif
 
                             @if($pop->kategori)
-                                <span class="product-badge">{{ $pop->kategori }}</span>
+                                <span class="product-badge">{{ str_replace('&', 'dan', $pop->kategori) }}</span>
                             @endif
 
                             <div class="product-actions-overlay">
@@ -1354,7 +1354,7 @@
         @endif
 
         <!-- ========================================================================= -->
-        <!-- DISCOVERY HUB: KATEGORI & DUKUNGAN BUMDES                                   -->
+        <!-- HUB PENJELAJAHAN: KATEGORI DAN DUKUNGAN BUMDES                                   -->
         <!-- ========================================================================= -->
         <div class="discovery-hub-card">
             <!-- Hub Header -->
@@ -1378,13 +1378,13 @@
             <!-- 5 Interactive Category Cards -->
             <div class="category-hub-grid">
                 <!-- Cat 1 -->
-                <a href="{{ route('pasar.index', ['kategori' => 'Hasil Tani & Bumi']) }}" class="category-hub-item group">
+                    <a href="{{ route('pasar.index', ['kategori' => 'Hasil Tani & Bumi']) }}" class="category-hub-item group">
                     <div>
                         <div class="category-hub-icon" style="background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);">
                             <svg class="w-6 h-6" style="color: #059669;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
                         </div>
-                        <h3 class="category-hub-title group-hover:text-[#115789] transition-colors">Hasil Tani & Bumi</h3>
-                        <p class="category-hub-desc">Padi, sayur segar, buah-buahan & kelapa sawit</p>
+                        <h3 class="category-hub-title group-hover:text-[#115789] transition-colors">Hasil Tani dan Bumi</h3>
+                        <p class="category-hub-desc">Padi, sayur segar, buah-buahan dan kelapa sawit</p>
                     </div>
                     <span class="category-hub-link">
                         <span>Jelajahi</span>
@@ -1392,13 +1392,13 @@
                 </a>
 
                 <!-- Cat 2 -->
-                <a href="{{ route('pasar.index', ['kategori' => 'Pangan & Olahan']) }}" class="category-hub-item group">
+                    <a href="{{ route('pasar.index', ['kategori' => 'Pangan & Olahan']) }}" class="category-hub-item group">
                     <div>
                         <div class="category-hub-icon" style="background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);">
                             <svg class="w-6 h-6" style="color: #ea580c;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
                         </div>
-                        <h3 class="category-hub-title group-hover:text-[#115789] transition-colors">Pangan & Olahan</h3>
-                        <p class="category-hub-desc">Lempuk durian, terasi, kerupuk & olahan laut</p>
+                        <h3 class="category-hub-title group-hover:text-[#115789] transition-colors">Pangan dan Olahan</h3>
+                        <p class="category-hub-desc">Lempuk durian, terasi, kerupuk dan olahan laut</p>
                     </div>
                     <span class="category-hub-link">
                         <span>Jelajahi</span>
@@ -1406,13 +1406,13 @@
                 </a>
 
                 <!-- Cat 3 -->
-                <a href="{{ route('pasar.index', ['kategori' => 'Material & Bangunan']) }}" class="category-hub-item group">
+                    <a href="{{ route('pasar.index', ['kategori' => 'Material & Bangunan']) }}" class="category-hub-item group">
                     <div>
                         <div class="category-hub-icon" style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);">
                             <svg class="w-6 h-6" style="color: #16a34a;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="20" x="4" y="2" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/></svg>
                         </div>
-                        <h3 class="category-hub-title group-hover:text-[#115789] transition-colors">Material & Bangunan</h3>
-                        <p class="category-hub-desc">Semen, pasir, batu bata & kebutuhan konstruksi</p>
+                        <h3 class="category-hub-title group-hover:text-[#115789] transition-colors">Material dan Bangunan</h3>
+                        <p class="category-hub-desc">Semen, pasir, batu bata dan kebutuhan konstruksi</p>
                     </div>
                     <span class="category-hub-link">
                         <span>Jelajahi</span>
@@ -1420,13 +1420,13 @@
                 </a>
 
                 <!-- Cat 4 -->
-                <a href="{{ route('pasar.index', ['kategori' => 'Kerajinan & Kesenian']) }}" class="category-hub-item group">
+                    <a href="{{ route('pasar.index', ['kategori' => 'Kerajinan & Kesenian']) }}" class="category-hub-item group">
                     <div>
                         <div class="category-hub-icon" style="background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);">
                             <svg class="w-6 h-6" style="color: #9333ea;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
                         </div>
-                        <h3 class="category-hub-title group-hover:text-[#115789] transition-colors">Kerajinan & Seni</h3>
-                        <p class="category-hub-desc">Anyaman pandan, kain tenun & souvenir khas</p>
+                        <h3 class="category-hub-title group-hover:text-[#115789] transition-colors">Kerajinan dan Seni</h3>
+                        <p class="category-hub-desc">Anyaman pandan, kain tenun dan suvenir khas</p>
                     </div>
                     <span class="category-hub-link">
                         <span>Jelajahi</span>
@@ -1452,14 +1452,14 @@
             <div class="hub-banner-gradient">
                 <div class="hub-banner-glow"></div>
                 <div class="hub-banner-inner">
-                    <!-- Left Copy & CTAs -->
+                    <!-- Teks utama dan tombol aksi -->
                     <div class="hub-banner-left">
                         <div class="hub-badge-pill">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
                             <span>Belanja Langsung dari BUMDes Desa</span>
                         </div>
                         <h3 class="hub-banner-title">
-                            Dukung Usaha Lokal & Petani Daerah Bengkalis
+                            Dukung Usaha Lokal dan Petani Daerah Bengkalis
                         </h3>
                         <p class="hub-banner-text">
                             Nikmati kemudahan bertransaksi langsung dengan unit usaha BUMDes di desa Anda. Produk dijamin asli, harga transparan langsung dari produsen lokal, dan dikirim cepat oleh kurir desa.
@@ -1490,7 +1490,7 @@
                                     <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg>
                                 </div>
                                 <div>
-                                    <h4 class="hub-benefit-title">Pengiriman Cepat & Fleksibel</h4>
+                                    <h4 class="hub-benefit-title">Pengiriman Cepat dan Fleksibel</h4>
                                     <p class="hub-benefit-sub">Bisa ambil langsung di toko atau diantar kurir lokal satu desa.</p>
                                 </div>
                             </div>
@@ -1522,7 +1522,7 @@
 <div id="copyToast" class="ps-copy-toast">âœ“ Link berhasil disalin!</div>
 
 <!-- ========================================================================= -->
-<!-- INTERACTIVE ORDER MODAL (POPUP ATUR JUMLAH & BELI LANGSUNG)               -->
+<!-- INTERACTIVE ORDER MODAL (POPUP ATUR JUMLAH DAN BELI LANGSUNG)               -->
 <!-- ========================================================================= -->
 <div class="ps-modal-overlay" id="orderModalOverlay">
     <div class="ps-modal-container">
@@ -1783,7 +1783,7 @@
         if (e.target === this) closeOrderModal();
     });
 
-    // Dynamic top spacing & sticky action card position for collapsible master navbar
+    // Jarak atas dinamis dan posisi kartu aksi melekat untuk navbar yang dapat dilipat
     (() => {
         const updateNavSpacing = () => {
             const navbar = document.getElementById('master-navbar');

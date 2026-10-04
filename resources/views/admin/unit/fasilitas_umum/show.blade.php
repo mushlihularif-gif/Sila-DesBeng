@@ -80,14 +80,14 @@
                                         <span class="fw-bold text-dark text-sm-end" style="font-size: 0.88rem;">{{ $fasilitas->nama_fasilitas }}</span>
                                     </div>
                                     <div class="p-2 rounded-3 bg-light d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-1">
-                                        <span class="text-uppercase text-muted fw-bold small" style="font-size: 0.72rem;">Kategori & Kapasitas</span>
+                                        <span class="text-uppercase text-muted fw-bold small" style="font-size: 0.72rem;">Kategori dan Kapasitas</span>
                                         <div class="d-flex align-items-center gap-2">
-                                            <span class="badge bg-label-primary px-2 py-0.5" style="font-size: 0.7rem;">{{ $fasilitas->kategori }}</span>
+                                            <span class="badge bg-label-primary px-2 py-0.5" style="font-size: 0.7rem;">{{ str_replace('&', 'dan', $fasilitas->kategori) }}</span>
                                             <span class="fw-semibold text-dark" style="font-size: 0.82rem;">{{ $fasilitas->stok }} {{ Str::upper($fasilitas->satuan ?? 'UNIT') }}</span>
                                         </div>
                                     </div>
                                     <div class="p-2 rounded-3 bg-light d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-1">
-                                        <span class="text-uppercase text-muted fw-bold small" style="font-size: 0.72rem;">Status Biaya & Tarif</span>
+                                        <span class="text-uppercase text-muted fw-bold small" style="font-size: 0.72rem;">Status Biaya dan Tarif</span>
                                         <div class="text-sm-end">
                                             @if($fasilitas->status_biaya === 'berbayar')
                                                 <span class="badge bg-label-info px-2 py-0.5" style="font-size: 0.7rem;">Multifungsi</span>
@@ -142,7 +142,7 @@
                                 <i class="bx bx-key fs-4"></i>
                             </div>
                             <div class="min-w-0">
-                                <h5 class="fw-bold mb-0 text-dark fs-6 fs-sm-5 text-truncate">Pengurus & Pemegang Kunci Gedung</h5>
+                                <h5 class="fw-bold mb-0 text-dark fs-6 fs-sm-5 text-truncate">Pengurus dan Pemegang Kunci Gedung</h5>
                                 <small class="text-muted d-block" style="font-size: 0.75rem;">Personil penanggung jawab serah terima kunci dan fasilitas</small>
                             </div>
                         </div>
@@ -231,5 +231,3 @@
     }
 </style>
 @endpush
-
-

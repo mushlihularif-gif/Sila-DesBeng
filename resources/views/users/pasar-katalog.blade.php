@@ -99,13 +99,13 @@
                                     <div class="flex flex-wrap gap-2">
                                         <button type="button" onclick="selectCategory(this, 'all')" class="ps-filter-pill {{ request('kategori', 'all') == 'all' ? 'active' : '' }}">Semua</button>
                                         @foreach(['Hasil Tani & Bumi', 'Pangan & Olahan', 'Material & Bangunan', 'Kerajinan & Kesenian', 'Lainnya'] as $cat)
-                                            <button type="button" onclick="selectCategory(this, '{{ $cat }}')" class="ps-filter-pill {{ request('kategori') == $cat ? 'active' : '' }}">{{ $cat }}</button>
+                                            <button type="button" onclick="selectCategory(this, '{{ $cat }}')" class="ps-filter-pill {{ request('kategori') == $cat ? 'active' : '' }}">{{ str_replace('&', 'dan', $cat) }}</button>
                                         @endforeach
                                     </div>
                                     <input type="hidden" name="kategori" id="kategoriInput" value="{{ request('kategori', 'all') }}">
                                 </div>
 
-                                <!-- Wilayah Asal Produk (Kecamatan & Desa di Bengkalis) -->
+                                 <!-- Wilayah Asal Produk (Kecamatan dan Desa di Bengkalis) -->
                                 <div class="mb-3">
                                     <h4 class="text-sm font-bold text-gray-800 mb-2.5 flex items-center">
                                         <svg class="w-4 h-4 mr-1.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -249,7 +249,7 @@
                             @endif
                             
                             @if($produk->kategori)
-                                <span class="product-badge" style="text-transform: capitalize;">{{ $produk->kategori }}</span>
+                                 <span class="product-badge" style="text-transform: capitalize;">{{ str_replace('&', 'dan', $produk->kategori) }}</span>
                             @endif
                             
                             <div class="product-actions-overlay">

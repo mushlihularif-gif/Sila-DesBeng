@@ -534,7 +534,7 @@
                          <thead class="bg-light">
                             <tr>
                                 <th class="ps-4 py-3 text-secondary text-uppercase small fw-bold">Tanggal</th>
-                                <th class="py-3 text-secondary text-uppercase small fw-bold">Item & Kategori</th>
+                                <th class="py-3 text-secondary text-uppercase small fw-bold">Item dan Kategori</th>
                                 <th class="py-3 text-secondary text-uppercase small fw-bold">Nominal</th>
                                 <th class="py-3 text-secondary text-uppercase small fw-bold">Bukti</th>
                                 <th class="text-end pe-4 py-3 text-secondary text-uppercase small fw-bold">Aksi</th>
@@ -643,7 +643,7 @@
                         <div class="col-lg-7 border-end p-4 p-md-4">
                             <div class="d-flex align-items-center mb-3 pb-2 border-bottom">
                                 <i class="bx bx-info-circle fs-5 text-primary me-2"></i>
-                                <span class="fw-bold text-dark text-uppercase small ls-1">Informasi Layanan & Waktu</span>
+                                <span class="fw-bold text-dark text-uppercase small ls-1">Informasi Layanan dan Waktu</span>
                             </div>
                             
                             <div class="row g-3">

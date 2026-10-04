@@ -20,14 +20,14 @@
 
     <div class="card">
         <div class="card-header border-bottom">
-            <h5 class="card-title mb-0">Antrean Verifikasi KTP & Wajah</h5>
+            <h5 class="card-title mb-0">Antrean Verifikasi KTP dan Wajah</h5>
         </div>
         
         <div class="table-responsive text-nowrap">
             <table class="table table-hover">
                 <thead>
                     <tr>
-                        <th>Nama & NIK</th>
+                        <th>Nama dan NIK</th>
                         <th>Kontak</th>
                         <th>Alamat</th>
                         <th>Foto Wajah (Selfie)</th>
@@ -108,7 +108,7 @@
                                             </div>
                                             <div class="modal-footer">
                                                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
-                                                <button type="submit" class="btn btn-danger">Tolak & Hapus Foto</button>
+                                                <button type="submit" class="btn btn-danger">Tolak dan Hapus Foto</button>
                                             </div>
                                         </form>
                                     </div>
@@ -196,4 +196,3 @@
 </script>
 @endpush
 @endsection
-

@@ -216,7 +216,7 @@
                         <thead>
                             <tr>
                                 <th>Tgl</th>
-                                <th>Nama & NIK</th>
+                                <th>Nama dan NIK</th>
                                 <th>Jenis</th>
                                 <th>Rute Mutasi</th>
                                 <th>Status</th>
@@ -409,7 +409,7 @@
                     <table class="table table-modern align-middle w-100">
                         <thead>
                             <tr>
-                                <th>Nama & NIK</th>
+                                <th>Nama dan NIK</th>
                                 <th>Desa Tujuan</th>
                                 <th>Pemohon</th>
                                 <th>Alasan</th>
@@ -489,7 +489,7 @@
                                                     </div>
                                                     <div class="modal-footer border-top">
                                                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
-                                                        <button type="submit" class="btn btn-danger">Tolak & Tahan Warga</button>
+                                                        <button type="submit" class="btn btn-danger">Tolak dan Tahan Warga</button>
                                                     </div>
                                                 </form>
                                             </div>
@@ -591,7 +591,7 @@
                     <table class="table table-modern align-middle w-100">
                         <thead>
                             <tr>
-                                <th>Nama & NIK</th>
+                                <th>Nama dan NIK</th>
                                 <th>Desa Asal</th>
                                 <th>Pemohon</th>
                                 <th>Alasan</th>
@@ -750,7 +750,7 @@
                         <thead>
                             <tr>
                                 <th>Tgl</th>
-                                <th>Nama & NIK</th>
+                                <th>Nama dan NIK</th>
                                 <th>Rute Mutasi</th>
                                 <th>Status</th>
                             </tr>
@@ -1365,7 +1365,6 @@
 </script>
 @endpush
 @endsection
-
 
 
 

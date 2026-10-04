@@ -145,7 +145,7 @@
                     </div>
                 </div>
 
-                <!-- Right Column: Delivery, Proof & Actions -->
+                <!-- Kolom Kanan: Pengiriman, Bukti dan Aksi -->
                 <div class="space-y-4">
                     <!-- Delivery Info Card -->
                     <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm space-y-3">
@@ -374,7 +374,7 @@
 </div>
 
 <!-- ========================================================================= -->
-<!-- MODAL 3: BERI ULASAN & RATING (WEB) -->
+<!-- MODAL 3: BERI ULASAN DAN RATING (WEB) -->
 <!-- ========================================================================= -->
 <div id="modalReview" class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
@@ -404,7 +404,7 @@
                     <i class="fas fa-star cursor-pointer text-amber-400 hover:scale-110 transition-transform" data-star="5" onclick="setWebRating(5)"></i>
                 </div>
                 <input type="hidden" name="rating" id="inputRating" value="5">
-                <p class="text-center text-xs text-amber-600 font-semibold mt-1" id="ratingLabel">Sangat Puas & Rekomended!</p>
+                <p class="text-center text-xs text-amber-600 font-semibold mt-1" id="ratingLabel">Sangat Puas dan Direkomendasikan!</p>
             </div>
 
             <div>
@@ -461,8 +461,8 @@ const ratingDescriptions = {
     1: 'Sangat Kecewa',
     2: 'Kurang Puas',
     3: 'Cukup Baik',
-    4: 'Puas & Bagus',
-    5: 'Sangat Puas & Rekomended!'
+    4: 'Puas dan Bagus',
+    5: 'Sangat Puas dan Direkomendasikan!'
 };
 
 function setWebRating(stars) {

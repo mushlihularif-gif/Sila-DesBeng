@@ -17,7 +17,7 @@
                 </div>
             </div>
             <div>
-                <h5 class="fw-bold mb-1 text-primary" style="font-size: 1rem;">Detail & Layanan Pemerintah Kabupaten</h5>
+                <h5 class="fw-bold mb-1 text-primary" style="font-size: 1rem;">Detail dan Layanan Pemerintah Kabupaten</h5>
                 <p class="mb-0 text-primary small" style="opacity: 0.85; line-height: 1.4;">
                     Kelola informasi kontak pusat, profil, dan tentukan modul unit layanan apa saja yang diaktifkan untuk tingkat Kabupaten Bengkalis.
                 </p>
@@ -50,7 +50,7 @@
             <ul class="mb-0 ps-3 small">
                 <li><strong>Tingkat:</strong> Pemerintah Kabupaten (Admin Pusat)</li>
                 <li><strong>Wilayah:</strong> {{ $region->name }}</li>
-                <li><strong>Cakupan:</strong> Seluruh Kecamatan & Desa se-Kabupaten Bengkalis</li>
+                <li><strong>Cakupan:</strong> Seluruh Kecamatan dan Desa se-Kabupaten Bengkalis</li>
             </ul>
         </div>
     </div>
@@ -162,7 +162,7 @@
                                     <strong class="d-block mb-1 text-dark">Panduan Pengaturan Layanan</strong>
                                     <p class="mb-0 text-dark" style="font-size: 0.85rem; line-height: 1.45;">
                                         <strong>Unit Layanan Daerah:</strong> Anda dapat mengaktifkan unit layanan tingkat kabupaten (Alat, Gas, Transportasi, Fasilitas Umum, Pelaporan) dan menentukan apakah layanannya berstatus eksklusif atau terbuka umum.<br>
-                                        <strong>Layanan Publik Kabupaten:</strong> <em>Pasar Daerah</em> dan <em>Kabar & Informasi Daerah</em> berstatus sentral terbuka untuk seluruh warga se-Kabupaten Bengkalis dan otomatis selalu aktif demi keterbukaan akses ekonomi dan informasi warga.
+                                        <strong>Layanan Publik Kabupaten:</strong> <em>Pasar Daerah</em> dan <em>Kabar dan Informasi Daerah</em> berstatus sentral terbuka untuk seluruh warga se-Kabupaten Bengkalis dan otomatis selalu aktif demi keterbukaan akses ekonomi dan informasi warga.
                                     </p>
                                 </div>
                             </div>
@@ -183,7 +183,7 @@
                                 <div class="badge bg-label-primary px-3 py-2 rounded-pill fw-bold text-start text-wrap" style="font-size: 0.8rem; line-height: 1.4; white-space: normal !important; text-transform: none !important; max-width: 100%;">
                                     <i class="bx bx-cog me-1"></i> Unit Layanan Daerah <span class="fw-normal opacity-75">(Dapat Disesuaikan)</span>
                                 </div>
-                                <small class="text-muted d-none d-sm-inline" style="font-size: 0.75rem;">Aktifkan unit & atur hak akses layanan</small>
+                                <small class="text-muted d-none d-sm-inline" style="font-size: 0.75rem;">Aktifkan unit dan atur hak akses layanan</small>
                             </div>
 
                             <div class="row g-3">
@@ -307,7 +307,7 @@
                                                         <div class="d-flex align-items-center overflow-hidden">
                                                             <i class="bx bx-globe text-success fs-5 me-2 flex-shrink-0"></i>
                                                             <div class="overflow-hidden">
-                                                                <span class="fw-bold d-block text-dark small text-truncate" style="font-size: 0.78rem;">Publik (Lintas Desa & Kecamatan)</span>
+                                                                 <span class="fw-bold d-block text-dark small text-truncate" style="font-size: 0.78rem;">Publik (Lintas Desa dan Kecamatan)</span>
                                                                 <small class="text-muted d-block text-truncate" style="font-size: 0.68rem;">Otomatis terbuka untuk seluruh warga masyarakat.</small>
                                                             </div>
                                                         </div>
@@ -329,7 +329,7 @@
                                                         </div>
                                                         <div class="flex-grow-1 overflow-hidden">
                                                             <div class="d-flex align-items-center justify-content-between gap-1">
-                                                                <span class="fw-bold d-block text-dark text-truncate" style="font-size: 0.95rem;">Kabar & Informasi</span>
+                                                                 <span class="fw-bold d-block text-dark text-truncate" style="font-size: 0.95rem;">Kabar dan Informasi</span>
                                                                 <span class="badge bg-label-success rounded-pill px-2 py-1 flex-shrink-0" style="font-size: 0.7rem; text-transform: none !important;">
                                                                     <i class="bx bx-check-circle me-1"></i>Selalu Aktif
                                                                 </span>
@@ -349,7 +349,7 @@
                                                         <div class="d-flex align-items-center overflow-hidden">
                                                             <i class="bx bx-news text-info fs-5 me-2 flex-shrink-0"></i>
                                                             <div class="overflow-hidden">
-                                                                <span class="fw-bold d-block text-dark small text-truncate" style="font-size: 0.78rem;">Berita Publik &bull; Pengumuman Fleksibel</span>
+                                                                 <span class="fw-bold d-block text-dark small text-truncate" style="font-size: 0.78rem;">Berita Publik dan Pengumuman Fleksibel</span>
                                                                 <small class="text-muted d-block text-truncate" style="font-size: 0.68rem;">Target pengumuman ditentukan saat admin posting materi.</small>
                                                             </div>
                                                         </div>
@@ -375,7 +375,7 @@
                                 <div class="avatar avatar-sm bg-label-info text-info rounded-circle me-3 d-flex justify-content-center align-items-center">
                                     <i class="bx bx-slider-alt fs-5"></i>
                                 </div>
-                                <h6 class="fw-bold mb-0">Pengaturan Pengiriman & Armada (Master-Detail)</h6>
+                                <h6 class="fw-bold mb-0">Pengaturan Pengiriman dan Armada (Master-Detail)</h6>
                             </div>
                             
                             <div class="row g-4" id="main_delivery_section">
@@ -386,7 +386,7 @@
                                             <img src="{{ asset('User/img/elemen/mobil.png') }}" class="me-3" style="width: 24px; height: 24px; object-fit: contain;">
                                             <div>
                                                 <span class="fw-bold d-block">Penyewaan Transportasi</span>
-                                                <small class="text-muted" style="font-size: 0.75rem;">Serah Terima, BBM & Supir</small>
+                                                <small class="text-muted" style="font-size: 0.75rem;">Serah Terima, BBM dan Supir</small>
                                             </div>
                                         </button>
                                         

@@ -221,7 +221,7 @@
                                         </div>
                                         <div class="card-body d-flex flex-column p-2.5 p-sm-3">
                                             <div class="d-flex justify-content-between mb-2">
-                                                <span class="badge bg-label-success rounded-pill px-2 px-sm-3" style="font-size: 0.75rem;">{{ $produk->kategori ?? 'Lainnya' }}</span>
+                                                <span class="badge bg-label-success rounded-pill px-2 px-sm-3" style="font-size: 0.75rem;">{{ str_replace('&', 'dan', $produk->kategori ?? 'Lainnya') }}</span>
                                                 @if($produk->status == 'tersedia')
                                                     <span class="badge bg-success shadow-sm rounded-pill px-2 px-sm-3" style="font-size: 0.75rem;">Tersedia</span>
                                                 @elseif($produk->status == 'habis')
@@ -668,7 +668,7 @@
                                                             <i class="bx bx-qr-scan fs-4"></i>
                                                         </div>
                                                         <div>
-                                                            <div class="fw-bold text-dark">QRIS &amp; E-Wallet (DANA / GoPay / OVO)</div>
+                                                            <div class="fw-bold text-dark">QRIS dan E-Wallet (DANA / GoPay / OVO)</div>
                                                             <small class="text-muted">Tampilkan barcode QRIS resmi toko Anda untuk scan pembayaran instan.</small>
                                                         </div>
                                                     </div>
@@ -712,7 +712,7 @@
                                     <h5 class="fw-bold text-white mb-3"><i class="bx bx-bulb me-2"></i>Tips Layanan Delivery</h5>
                                     <ul class="list-unstyled mb-0" style="opacity: 0.9">
                                         <li class="mb-2"><i class="bx bx-check-circle me-2"></i>Matikan layanan pada opsi <b>Per Kecamatan</b> untuk area yang terlalu jauh atau tidak terjangkau kurir.</li>
-                                        <li class="mb-2"><i class="bx bx-check-circle me-2"></i>Pastikan Kontak WhatsApp telah diaktifkan di menu <b>Pengaturan &gt; Layanan Wilayah</b> agar pembeli mudah berkomunikasi.</li>
+                                        <li class="mb-2"><i class="bx bx-check-circle me-2"></i>Pastikan Kontak WhatsApp telah diaktifkan di menu <b>Layanan Wilayah</b> pada Pengaturan agar pembeli mudah berkomunikasi.</li>
                                         <li class="mb-2"><i class="bx bx-check-circle me-2"></i>Tetapkan harga ongkos kirim yang wajar agar tidak memberatkan pembeli.</li>
                                     </ul>
                                 </div>
@@ -796,7 +796,7 @@
                     <div class="card border-0 shadow-sm rounded-4">
                         <div class="card-header bg-white border-bottom pb-3 pt-3 pt-sm-4 px-3 px-sm-4 d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between gap-2">
                             <div>
-                                <h5 class="mb-0 fw-bold text-dark fs-6 fs-sm-5"><i class="bx bx-star text-warning me-2"></i>Ulasan & Komentar Pembeli</h5>
+                                <h5 class="mb-0 fw-bold text-dark fs-6 fs-sm-5"><i class="bx bx-star text-warning me-2"></i>Ulasan dan Komentar Pembeli</h5>
                                 <small class="text-muted d-none d-sm-block">Kelola dan balas ulasan dari pembeli terhadap produk Anda.</small>
                             </div>
                         </div>
@@ -915,7 +915,7 @@
                                 <i class="bx bx-shield-quarter fs-5"></i>
                             </div>
                             <div>
-                                <h5 class="mb-0 fw-bold fs-6 fs-sm-5">Komplain & Retur Barang</h5>
+                                <h5 class="mb-0 fw-bold fs-6 fs-sm-5">Komplain dan Retur Barang</h5>
                                 <small class="text-muted d-none d-sm-block">Kelola keluhan pembeli terkait barang rusak saat pengiriman, tidak sesuai, atau busuk/basi.</small>
                             </div>
                         </div>
@@ -985,7 +985,7 @@
                                     <tr>
                                         <th class="py-3 ps-4">No. Pesanan / Tanggal</th>
                                         <th class="py-3">Pembeli</th>
-                                        <th class="py-3">Alasan & Solusi Diminta</th>
+                                        <th class="py-3">Alasan dan Solusi Diminta</th>
                                         <th class="py-3">Bukti Foto</th>
                                         <th class="py-3">Status</th>
                                         <th class="py-3 text-center pe-4">Aksi</th>
@@ -1177,7 +1177,7 @@
                                                         </div>
 
                                                         <div class="mb-3">
-                                                            <label class="form-label fw-bold text-dark">Catatan & Instruksi Respon Admin Desa <span class="text-danger">*</span></label>
+                                                            <label class="form-label fw-bold text-dark">Catatan dan Instruksi Respon Admin Desa <span class="text-danger">*</span></label>
                                                             <textarea name="admin_response" rows="3" class="form-control rounded-3" required placeholder="Contoh: Kami mohon maaf atas ketidaknyamanan ini. Barang pengganti akan kami kirimkan hari ini via kurir desa.">{{ $comp->admin_response }}</textarea>
                                                             <small class="text-muted">Catatan ini akan langsung terbaca oleh pembeli di aplikasi mobile / web.</small>
                                                         </div>
@@ -1223,7 +1223,7 @@
                     <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
                         <div class="card-header bg-white border-bottom py-2.5 py-sm-3 px-3 px-sm-4 d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
                             <div>
-                                <h5 class="fw-bold mb-1 fs-6 fs-sm-5"><i class="bx bx-chat me-2 text-primary"></i> Chat & Bantuan Pengelola Toko</h5>
+                                <h5 class="fw-bold mb-1 fs-6 fs-sm-5"><i class="bx bx-chat me-2 text-primary"></i> Chat dan Bantuan Pengelola Toko</h5>
                                 <p class="text-muted small mb-0 d-none d-sm-block">Kelola obrolan langsung dari pembeli yang memerlukan respon pengelola Toko BUMDes.</p>
                             </div>
                             <div class="flex-shrink-0">

@@ -116,7 +116,7 @@
                         <div class="mb-5 flex-grow">
                             <div class="flex items-center justify-between gap-2 mb-2.5">
                                 <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1">
-                                    <i class="bx bx-user-pin text-sm text-red-500"></i> Tim Supir / Penanggung Jawab
+                                    <i class="bx bx-user-pin text-sm text-red-500"></i> Tim Supir dan Penanggung Jawab
                                 </h4>
                                 @if($amb->supirs->count() > 0)
                                 <span class="text-[11px] font-semibold text-gray-500">{{ $amb->supirs->count() }} Orang</span>
@@ -187,7 +187,7 @@
             @if(isset($regionSettings['sop_ambulans']) && $regionSettings['sop_ambulans'])
             <div class="bg-blue-50 border border-blue-100 rounded-2xl p-6 shadow-sm">
                 <h3 class="text-lg font-bold text-blue-900 mb-3 flex items-center gap-2">
-                    <i class='bx bx-info-circle text-blue-600'></i> Ketentuan & SOP Ambulans
+                    <i class='bx bx-info-circle text-blue-600'></i> Ketentuan dan SOP Ambulans
                 </h3>
                 <div class="text-blue-800 text-sm whitespace-pre-wrap leading-relaxed">
                     {{ $regionSettings['sop_ambulans'] }}

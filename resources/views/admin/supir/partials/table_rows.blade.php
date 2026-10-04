@@ -40,7 +40,7 @@
                     <span class="badge bg-label-primary w-100 text-start"><i class="bx bx-car me-1"></i> Penyewaan Transportasi</span>
                 @endif
                 @if($supir->is_fasilitas_umum)
-                    <span class="badge bg-label-danger w-100 text-start"><i class="bx bx-plus-medical me-1"></i> Ambulans & Kendaraan</span>
+                    <span class="badge bg-label-danger w-100 text-start"><i class="bx bx-plus-medical me-1"></i> Ambulans dan Kendaraan</span>
                 @endif
                 @if(!$supir->is_sewa_mobil && !$supir->is_fasilitas_umum)
                     <span class="text-muted fst-italic" style="font-size: 0.8rem;">Belum ada kategori</span>

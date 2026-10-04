@@ -139,7 +139,7 @@
                     </div>
                 </div>
                 <div>
-                    <h5 class="fw-bold mb-1 text-primary">Permintaan & Pengajuan Layanan</h5>
+                    <h5 class="fw-bold mb-1 text-primary">Permintaan dan Pengajuan Layanan</h5>
                     <p class="mb-0 text-primary" style="opacity: 0.85;">
                         Kelola dan pantau seluruh aktivitas pesanan, sewa, dan pengajuan layanan dari warga.
                     </p>

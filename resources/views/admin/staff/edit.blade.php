@@ -82,7 +82,7 @@
         <div class="col-12">
             <div class="card mb-4 border-0 shadow-sm" style="border-radius: 16px;">
                 <div class="card-header bg-white border-bottom py-4 px-4 px-md-5">
-                    <h5 class="mb-0 fw-bold text-primary"><i class="bx bx-edit fs-4 me-2"></i> Edit Informasi & Hak Akses Staf</h5>
+                    <h5 class="mb-0 fw-bold text-primary"><i class="bx bx-edit fs-4 me-2"></i> Edit Informasi dan Hak Akses Staf</h5>
                 </div>
                 <div class="card-body mt-4 px-4 px-md-5 pb-5">
                     <form action="{{ route('admin.staff.update', $staff->id) }}" method="POST">

@@ -74,7 +74,7 @@
                                     </div>
 
                                     <div class="form-section mb-4">
-                                        <h6 class="section-title mb-3"><i class='bx bx-money me-2'></i>Harga & Stok</h6>
+                                        <h6 class="section-title mb-3"><i class='bx bx-money me-2'></i>Harga dan Stok</h6>
                                         <div class="row">
                                             <div class="col-md-6 mb-3">
                                                 <label class="form-label fw-semibold" for="harga">Harga <span class="text-danger">*</span></label>

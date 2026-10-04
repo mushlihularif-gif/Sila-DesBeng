@@ -122,7 +122,7 @@
     <div class="row mb-4">
         <div class="col-12 d-flex justify-content-between align-items-center">
             <h4 class="fw-bold py-3 mb-0">
-                <span class="text-muted fw-light">Permintaan & Aktivitas /</span> Verifikasi Identitas
+                <span class="text-muted fw-light">Permintaan dan Aktivitas /</span> Verifikasi Identitas
             </h4>
         </div>
     </div>

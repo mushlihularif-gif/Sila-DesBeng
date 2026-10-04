@@ -59,19 +59,19 @@
                                 <li class="nav-item" role="presentation">
                                     <button class="nav-link active" id="step1-tab" data-bs-toggle="pill" data-bs-target="#step1" type="button" role="tab" aria-controls="step1" aria-selected="true">
                                         <span class="step-icon"><i class='bx bx-info-circle'></i></span>
-                                        <span class="step-text d-none d-sm-inline ms-1">Info & Media</span>
+                                        <span class="step-text d-none d-sm-inline ms-1">Info dan Media</span>
                                     </button>
                                 </li>
                                 <li class="nav-item" role="presentation">
                                     <button class="nav-link" id="step2-tab" data-bs-toggle="pill" data-bs-target="#step2" type="button" role="tab" aria-controls="step2" aria-selected="false">
                                         <span class="step-icon"><i class='bx bx-money'></i></span>
-                                        <span class="step-text d-none d-sm-inline ms-1">Harga & Stok</span>
+                                        <span class="step-text d-none d-sm-inline ms-1">Harga dan Stok</span>
                                     </button>
                                 </li>
                                 <li class="nav-item" role="presentation">
                                     <button class="nav-link" id="step3-tab" data-bs-toggle="pill" data-bs-target="#step3" type="button" role="tab" aria-controls="step3" aria-selected="false">
                                         <span class="step-icon"><i class='bx bx-cog'></i></span>
-                                        <span class="step-text d-none d-sm-inline ms-1">Pengaturan & Simpan</span>
+                                        <span class="step-text d-none d-sm-inline ms-1">Pengaturan dan Simpan</span>
                                     </button>
                                 </li>
                             </ul>
@@ -493,7 +493,7 @@
                                                 <i class="bx bx-check font-12"></i>
                                             </div>
                                             <div class="flex-grow-1">
-                                                <span class="fw-bold font-12 text-dark">Fleksibel & Kontak Langsung</span>
+                                                <span class="fw-bold font-12 text-dark">Fleksibel dan Kontak Langsung</span>
                                                 <p class="mb-0 font-11 text-muted">
                                                     Nomor WhatsApp personil yang dipilih akan ditampilkan pada sistem agar pemohon dapat menghubungi pengurus untuk serah terima kunci. Kosongkan jika kunci dipegang langsung oleh kantor desa.
                                                 </p>
@@ -695,7 +695,7 @@
                         </div>
                         <div>
                             <h5 class="modal-title fw-bold text-dark mb-0" id="addPengurusModalLabel">Tambah Pengurus Gedung Baru</h5>
-                            <small class="text-muted">Data personil pemegang kunci & pengurus fasilitas</small>
+                            <small class="text-muted">Data personel pemegang kunci dan pengurus fasilitas</small>
                         </div>
                     </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -794,7 +794,7 @@
                             <div class="col-5 text-muted small fw-semibold">No. WhatsApp / HP:</div>
                             <div class="col-7 text-dark small fw-bold" id="detailPengurusKontak">-</div>
                             <div class="col-5 text-muted small fw-semibold">Peran / Tugas:</div>
-                            <div class="col-7 text-dark small">Pengurus & Pemegang Kunci</div>
+                            <div class="col-7 text-dark small">Pengurus dan Pemegang Kunci</div>
                         </div>
                     </div>
                     <div class="d-grid">

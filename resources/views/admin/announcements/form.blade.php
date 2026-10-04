@@ -36,7 +36,7 @@
             @else
                 <ul class="mb-0 ps-3">
                     <li>Gambar/Poster bersifat opsional, namun sangat disarankan agar pengumuman lebih menarik.</li>
-                    <li>Gunakan fitur <strong>Target Audiens</strong> dengan bijak agar pengumuman ini hanya muncul di menu <em>Kabar & Informasi Daerah</em> bagi warga di wilayah yang tepat sasaran.</li>
+                    <li>Gunakan fitur <strong>Target Audiens</strong> dengan bijak agar pengumuman ini hanya muncul di menu <em>Kabar dan Informasi Daerah</em> bagi warga di wilayah yang tepat sasaran.</li>
                     <li>Jangan lupa tentukan tipe kategori yang sesuai agar warga mudah memfilter informasi.</li>
                 </ul>
             @endif
@@ -61,7 +61,7 @@
                 <!-- Card 1: Media & Dokumentasi -->
                 <div class="card shadow-sm mb-4 bg-white border-0" style="border-radius: 16px; overflow: hidden;">
                     <div class="card-header bg-transparent border-bottom py-3">
-                        <h5 class="mb-0 fw-bold text-primary"><i class="bx bx-image-add me-2"></i>Media & Dokumentasi</h5>
+                        <h5 class="mb-0 fw-bold text-primary"><i class="bx bx-image-add me-2"></i>Media dan Dokumentasi</h5>
                     </div>
                     <div class="card-body mt-4">
                         @if($category === 'Berita')
@@ -179,7 +179,7 @@
                 <!-- Card 3: Pengaturan & Kategori -->
                 <div class="card shadow-sm mb-4 bg-white border-0" style="border-radius: 16px; overflow: hidden;">
                     <div class="card-header bg-transparent border-bottom py-3">
-                        <h5 class="mb-0 fw-bold text-primary"><i class="bx bx-cog me-2"></i>Pengaturan & Kategori</h5>
+                        <h5 class="mb-0 fw-bold text-primary"><i class="bx bx-cog me-2"></i>Pengaturan dan Kategori</h5>
                     </div>
                     <div class="card-body mt-4">
                         <div class="mb-4">
@@ -192,7 +192,7 @@
                             <div class="form-text text-muted">Membantu warga memfilter jenis informasi.</div>
                         </div>
                         <div class="mb-4">
-                            <label class="form-label fw-semibold"><i class="bx bx-calendar-event me-1"></i>Tanggal & Waktu (Opsional)</label>
+                            <label class="form-label fw-semibold"><i class="bx bx-calendar-event me-1"></i>Tanggal dan Waktu (Opsional)</label>
                             
                             <div class="row g-2">
                                 <div class="col-7">
@@ -338,7 +338,7 @@
                                 <button type="button" id="btn-publish" disabled onclick="submitWithAnimation('publish', event)" class="btn btn-primary w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3 text-center btn-animated shadow-sm" style="border-radius: 12px;">
                                     <i id="icon-publish" class='bx bx-send fs-1 mb-2'></i>
                                     <span class="fw-bold fs-5">Terbitkan</span>
-                                    <small class="d-block text-wrap mt-1 opacity-75" style="font-size: 0.75rem; line-height: 1.2;">Kirim & tampil di aplikasi</small>
+                                    <small class="d-block text-wrap mt-1 opacity-75" style="font-size: 0.75rem; line-height: 1.2;">Kirim dan tampil di aplikasi</small>
                                 </button>
                             </div>
                             <div class="col-12 col-sm-6">

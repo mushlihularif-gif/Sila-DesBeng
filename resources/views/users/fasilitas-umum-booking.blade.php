@@ -27,7 +27,7 @@
                         <img src="{{ asset('storage/' . $item->foto) }}" alt="{{ $item->nama_fasilitas }}" class="w-20 h-20 object-cover rounded-lg">
                         <div>
                             <h3 class="text-xl font-bold text-gray-800">{{ $item->nama_fasilitas }}</h3>
-                            <span class="text-sm text-gray-600">{{ $item->kategori }} | Stok: {{ $item->stok }} {{ $item->satuan }}</span>
+                            <span class="text-sm text-gray-600">{{ str_replace('&', 'dan', $item->kategori) }} | Stok: {{ $item->stok }} {{ $item->satuan }}</span>
                         </div>
                     </div>
 
@@ -80,7 +80,7 @@
                         </div>
 
                         <div class="mb-2">
-                            <label class="block text-sm font-bold text-gray-700 mb-2">Lokasi Spesifik & Keperluan <span class="text-red-500">*</span></label>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Lokasi Spesifik dan Keperluan <span class="text-red-500">*</span></label>
                             <textarea id="keperluan_kendaraan" rows="3" placeholder="Contoh: Ke RSUD Kabupaten untuk mengantarkan warga yang sakit..." class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required></textarea>
                             <input type="hidden" name="rental_purpose" id="rental-purpose">
                         </div>
@@ -124,12 +124,12 @@
                     </div>
                     </div>
 
-                    <!-- Metode Penggunaan & Lokasi Fasilitas (Gedung/Ruang Publik) -->
+                    <!-- Metode Penggunaan dan Lokasi Fasilitas (Gedung/Ruang Publik) -->
                     <input type="hidden" name="delivery_method" id="delivery-method-input" value="lokasi">
                     <input type="hidden" name="recipient_name" id="recipient-name" value="{{ Auth::user()->name }}">
                     <input type="hidden" name="delivery_address" id="delivery-address" value="{{ $item->lokasi ?? 'Lokasi Gedung / Fasilitas Umum' }}">
 
-                    <!-- Card Lokasi & Cara Peminjaman -->
+                    <!-- Card Lokasi dan Cara Peminjaman -->
                     <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-5 sm:p-6 mb-6">
                         <div class="flex items-start gap-4">
                             <div class="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center flex-shrink-0 shadow-md">
@@ -137,7 +137,7 @@
                             </div>
                             <div class="flex-grow">
                                 <div class="flex flex-wrap items-center justify-between gap-2 mb-1">
-                                    <h4 class="font-bold text-gray-800 text-base sm:text-lg">Lokasi & Penggunaan Fasilitas</h4>
+                                    <h4 class="font-bold text-gray-800 text-base sm:text-lg">Lokasi dan Penggunaan Fasilitas</h4>
                                     <span class="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded-full border border-blue-200">
                                         Penggunaan di Lokasi
                                     </span>
@@ -160,7 +160,7 @@
                         </div>
                     </div>
 
-                    <!-- Petugas Kunci & Penanggung Jawab Gedung -->
+                    <!-- Petugas Kunci dan Penanggung Jawab Gedung -->
                     <div class="bg-white border border-gray-200 rounded-2xl p-5 sm:p-6 mb-6 shadow-sm">
                         <div class="flex items-center justify-between gap-2 mb-4 pb-3 border-b border-gray-100">
                             <div class="flex items-center gap-2.5">
@@ -173,7 +173,7 @@
                                 </div>
                             </div>
                             <span class="px-2.5 py-1 bg-amber-50 text-amber-800 border border-amber-200 rounded-lg text-xs font-bold">
-                                Kunci & Akses
+                                Kunci dan Akses
                             </span>
                         </div>
 
@@ -236,7 +236,7 @@
                         </div>
                     </div>
 
-                    <!-- Info BBM & Supir (Jika dikonfigurasi) -->
+                    <!-- Info BBM dan Supir (Jika dikonfigurasi) -->
                     @if(isset($paymentInfo['fasilitas_bbm_default']) || isset($paymentInfo['fasilitas_supir_default']))
                     <div class="bg-gray-50 p-4 rounded-xl mb-6 border border-gray-200">
                         <h5 class="font-bold text-gray-700 mb-2">Informasi Tambahan (Jika Kendaraan)</h5>
@@ -650,4 +650,3 @@
     };
 </script>
 @endpush
-

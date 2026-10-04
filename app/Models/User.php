@@ -260,8 +260,8 @@ class User extends Authenticatable
             'platform_integrasi'  => ['Integrasi Payment Gateway', 'bx-plug'],
             'platform_penarikan'  => ['Persetujuan Penarikan Saldo', 'bx-money-withdraw'],
             'platform_monitoring' => ['Monitoring Transaksi', 'bx-line-chart'],
-            'platform_keamanan'   => ['Log Keamanan & Audit', 'bx-shield-quarter'],
-            'platform_biaya'      => ['Biaya Server & Domain', 'bx-server'],
+            'platform_keamanan'   => ['Log Keamanan dan Audit', 'bx-shield-quarter'],
+            'platform_biaya'      => ['Biaya Server dan Domain', 'bx-server'],
         ],
         'Manajemen' => [
             'platform_staf'   => ['Kelola Staf', 'bx-user-voice'],

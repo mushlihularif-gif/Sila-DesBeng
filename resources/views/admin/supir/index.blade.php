@@ -6,7 +6,7 @@
 <div class="container-xxl flex-grow-1 container-p-y py-2 py-sm-3">
     <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2 gap-sm-3 mb-2 mb-sm-4 w-100">
         <div class="min-w-0 flex-shrink-1">
-            <h4 class="fw-bold mb-0 mb-sm-1 fs-5 fs-sm-4 text-truncate"><span class="text-muted fw-light">Pengaturan /</span> Data Supir & Pengurus</h4>
+            <h4 class="fw-bold mb-0 mb-sm-1 fs-5 fs-sm-4 text-truncate"><span class="text-muted fw-light">Pengaturan /</span> Data Supir dan Pengurus</h4>
             <p class="text-muted mb-0 small d-none d-sm-block">Kelola supir armada operasional serta petugas / pemegang kunci gedung dan ruang publik desa.</p>
         </div>
         <div class="d-flex gap-1.5 gap-sm-2 w-100 w-sm-auto">
@@ -69,8 +69,8 @@
                 <thead class="table-light">
                     <tr>
                         <th class="ps-4" id="th-col-nama">Profil {{ ($tab ?? 'supir') === 'pengurus_gedung' ? 'Pengurus' : 'Supir' }}</th>
-                        <th>Kontak & Akun</th>
-                        <th>Peran & Kategori</th>
+                        <th>Kontak dan Akun</th>
+                        <th>Peran dan Kategori</th>
                         <th>Status Kesiagaan</th>
                         <th class="text-center pe-4">Aksi</th>
                     </tr>
@@ -179,7 +179,7 @@
                                     </div>
                                     <div class="form-check form-switch d-flex align-items-center">
                                         <input class="form-check-input mt-0 me-3 cursor-pointer bg-danger border-danger" type="checkbox" name="is_fasilitas_umum" value="1" id="is_fasilitas_add" style="width: 2.5em; height: 1.25em;" checked>
-                                        <label class="form-check-label cursor-pointer fw-bold text-danger" for="is_fasilitas_add">Ambulans & Kendaraan Darurat</label>
+                                        <label class="form-check-label cursor-pointer fw-bold text-danger" for="is_fasilitas_add">Ambulans dan Kendaraan Darurat</label>
                                     </div>
                                 </div>
                             </div>
@@ -284,7 +284,7 @@
                                 <label class="form-label text-uppercase text-muted fw-bold mb-2" style="font-size: 0.75rem;">Peruntukan Tugas</label>
                                 <div class="alert alert-success border-0 mb-0 py-2 px-3 rounded-3">
                                     <div class="fw-bold font-13"><i class="bx bx-check-circle me-1"></i> Khusus Fasilitas Umum</div>
-                                    <small class="text-muted d-block mt-0.5">Petugas ini hanya akan muncul saat memilih penugasan di modul Gedung & Ruang Publik.</small>
+                                    <small class="text-muted d-block mt-0.5">Petugas ini hanya akan muncul saat memilih penugasan di modul Gedung dan Ruang Publik.</small>
                                 </div>
                             </div>
                         </div>

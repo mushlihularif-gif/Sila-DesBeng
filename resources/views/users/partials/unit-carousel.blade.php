@@ -30,7 +30,7 @@
 
     $categoryMenus = [
         [
-            'title' => 'Belanja & Kebutuhan',
+            'title' => 'Belanja dan Kebutuhan',
             'description' => 'Gas daerah dan produk lokal untuk kebutuhan sehari-hari.',
             'image' => 'Admin/img/menu3dberanda/belanja-kebutuhan.png',
             'fallback_image' => 'Admin/img/pasardaerah/PasarDaerah.png',

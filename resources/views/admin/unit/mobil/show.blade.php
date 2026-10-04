@@ -8,7 +8,7 @@
                 <h4 class="fw-bold mb-1">
                     <span class="text-muted fw-light">Unit Layanan / Penyewaan Transportasi /</span> Detail Transportasi
                 </h4>
-                <p class="text-muted mb-0">Informasi spesifikasi, skema tarif harian & borongan, serta kebijakan operasional kendaraan</p>
+                <p class="text-muted mb-0">Informasi spesifikasi, skema tarif harian dan borongan, serta kebijakan operasional kendaraan</p>
             </div>
             <div class="d-flex gap-2">
                 <a href="{{ route('admin.unit.mobil.edit', $mobil->id) }}" class="btn btn-warning">
@@ -133,7 +133,7 @@
                     <div class="card-header bg-white border-bottom py-3">
                         <div class="d-flex align-items-center gap-2">
                             <i class="bx bx-detail text-primary fs-4"></i>
-                            <h5 class="fw-bold mb-0 text-dark">Deskripsi & Spesifikasi Kendaraan</h5>
+                            <h5 class="fw-bold mb-0 text-dark">Deskripsi dan Spesifikasi Kendaraan</h5>
                         </div>
                     </div>
                     <div class="card-body p-4">
@@ -148,7 +148,7 @@
                     <div class="card-header bg-white border-bottom py-3">
                         <div class="d-flex align-items-center gap-2">
                             <i class="bx bx-money text-success fs-4"></i>
-                            <h5 class="fw-bold mb-0 text-dark">Skema Tarif & Kebijakan Penyewaan</h5>
+                            <h5 class="fw-bold mb-0 text-dark">Skema Tarif dan Kebijakan Penyewaan</h5>
                         </div>
                     </div>
                     <div class="card-body p-4">
@@ -505,4 +505,3 @@
     }
 </style>
 @endpush
-

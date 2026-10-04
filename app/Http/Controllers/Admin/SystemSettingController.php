@@ -210,7 +210,7 @@ class SystemSettingController extends Controller
         $paymentInfo['ewallet_active'] = $request->has('ewallet_active');
         if ($request->has('payment_gateway_active')) {
             if (empty($request->midtrans_server_key) || empty($request->midtrans_client_key)) {
-                return redirect()->back()->with('error', 'Gagal: Kunci API Midtrans (Server Key & Client Key) wajib diisi jika Anda mengaktifkan Payment Gateway Otomatis. Silakan daftar akun bisnis di midtrans.com terlebih dahulu.')->withInput();
+                return redirect()->back()->with('error', 'Gagal: Kunci API Midtrans (Server Key dan Client Key) wajib diisi jika Anda mengaktifkan Payment Gateway Otomatis. Silakan daftar akun bisnis di midtrans.com terlebih dahulu.')->withInput();
             }
         }
 

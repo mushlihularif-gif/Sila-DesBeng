@@ -111,7 +111,7 @@
                             <!-- Category -->
                             <div class="flex justify-between items-center">
                                 <span class="text-gray-600 font-medium text-sm">Kategori</span>
-                                <span class="text-gray-800 font-semibold text-sm">{{ $item->kategori }}</span>
+                                <span class="text-gray-800 font-semibold text-sm">{{ str_replace('&', 'dan', $item->kategori) }}</span>
                             </div>
                         </div>
 

@@ -114,7 +114,7 @@
                             <!-- Category -->
                             <div class="flex justify-between items-center">
                                 <span class="text-gray-600 font-medium text-sm">Kategori</span>
-                                <span class="text-gray-800 font-semibold text-sm">{{ $item->kategori }}</span>
+                                <span class="text-gray-800 font-semibold text-sm">{{ str_replace('&', 'dan', $item->kategori) }}</span>
                             </div>
                         </div>
 
@@ -128,8 +128,8 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <h4 class="text-xs font-bold text-emerald-900 uppercase tracking-wider">Pengurus & Pemegang Kunci</h4>
-                                    <p class="text-[11px] text-emerald-700">Hubungi personil untuk koordinasi pengecekan & serah terima gedung</p>
+                                    <h4 class="text-xs font-bold text-emerald-900 uppercase tracking-wider">Pengurus dan Pemegang Kunci</h4>
+                                    <p class="text-[11px] text-emerald-700">Hubungi personel untuk koordinasi pengecekan dan serah terima gedung</p>
                                 </div>
                             </div>
                             <div class="space-y-2">
@@ -169,7 +169,7 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <h4 class="text-xs font-bold text-amber-900 uppercase tracking-wider">Pengurus & Pemegang Kunci</h4>
+                                    <h4 class="text-xs font-bold text-amber-900 uppercase tracking-wider">Pengurus dan Pemegang Kunci</h4>
                                     <p class="text-[11px] text-amber-700 mb-0">Belum ada petugas kunci khusus yang ditugaskan untuk gedung ini. Silakan hubungi pengelola BUMDes / kantor desa untuk koordinasi kunci.</p>
                                 </div>
                             </div>

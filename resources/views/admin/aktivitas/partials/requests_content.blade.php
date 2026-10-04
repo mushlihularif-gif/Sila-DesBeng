@@ -494,7 +494,7 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                                 <thead class="bg-light">
                                     <tr>
                                         <th class="ps-4 py-3 text-secondary text-uppercase small fw-bold">Penyewa</th>
-                                        <th class="py-3 text-secondary text-uppercase small fw-bold">Mobil & Opsi</th>
+                                        <th class="py-3 text-secondary text-uppercase small fw-bold">Mobil dan Opsi</th>
                                         <th class="py-3 text-secondary text-uppercase small fw-bold">Waktu Sewa</th>
                                         <th class="py-3 text-secondary text-uppercase small fw-bold">Status</th>
                                         <th class="text-end pe-4 py-3 text-secondary text-uppercase small fw-bold">Aksi</th>
@@ -616,7 +616,7 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                                 <thead class="bg-light">
                                     <tr>
                                         <th class="ps-4 py-3 text-secondary text-uppercase small fw-bold">Penyewa</th>
-                                        <th class="py-3 text-secondary text-uppercase small fw-bold">Fasilitas & Opsi</th>
+                                        <th class="py-3 text-secondary text-uppercase small fw-bold">Fasilitas dan Opsi</th>
                                         <th class="py-3 text-secondary text-uppercase small fw-bold">Waktu Sewa</th>
                                         <th class="py-3 text-secondary text-uppercase small fw-bold">Status</th>
                                         <th class="text-end pe-4 py-3 text-secondary text-uppercase small fw-bold">Aksi</th>
@@ -734,7 +734,7 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                                 <thead class="bg-light">
                                     <tr>
                                         <th class="ps-4 py-3 text-secondary text-uppercase small fw-bold">Pembeli</th>
-                                        <th class="py-3 text-secondary text-uppercase small fw-bold">Pesanan & Produk</th>
+                                        <th class="py-3 text-secondary text-uppercase small fw-bold">Pesanan dan Produk</th>
                                         <th class="py-3 text-secondary text-uppercase small fw-bold">Waktu Pesan</th>
                                         <th class="py-3 text-secondary text-uppercase small fw-bold text-center">Status</th>
                                         <th class="pe-4 py-3 text-secondary text-uppercase small fw-bold text-end">Aksi</th>
@@ -863,7 +863,7 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                 </div>
                 <div class="modal-footer border-top-0 pt-0">
                     <button type="button" class="btn btn-link text-secondary text-decoration-none" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary rounded-pill px-4">Upload & Update Status</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4">Upload dan Update Status</button>
                 </div>
             </form>
         </div>

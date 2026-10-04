@@ -203,7 +203,7 @@
             <!-- Card Informasi Kontak -->
             <div class="card border-0 shadow-sm mb-4" style="border-radius: 16px;">
                 <div class="card-header bg-white border-bottom py-4">
-                    <h5 class="mb-0 fw-bold text-primary"><i class="bx bx-id-card fs-4 me-2 align-middle"></i> Informasi Pribadi & Kontak</h5>
+                    <h5 class="mb-0 fw-bold text-primary"><i class="bx bx-id-card fs-4 me-2 align-middle"></i> Informasi Pribadi dan Kontak</h5>
                 </div>
                 <div class="card-body pt-4">
                     <div class="row">

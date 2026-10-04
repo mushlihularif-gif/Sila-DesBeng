@@ -314,7 +314,7 @@
                                         <small><i class="bx bx-check-circle me-1"></i>Sudah Dibayar</small>
                                     </div>
                                     <input type="hidden" name="status" value="confirmed">
-                                    <button type="submit" class="btn btn-primary w-100 rounded-pill mb-2">Konfirmasi & Mulai Proses</button>
+                                    <button type="submit" class="btn btn-primary w-100 rounded-pill mb-2">Konfirmasi dan Mulai Proses</button>
                                     
                                 @elseif($pesanan->status === 'cancelled')
                                     <div class="alert alert-danger mb-0 py-2 border-0 bg-danger-subtle text-danger-emphasis">

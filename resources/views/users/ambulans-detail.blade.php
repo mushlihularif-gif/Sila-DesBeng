@@ -26,7 +26,7 @@
             <!-- Detail Card -->
             <div class="catalog-detail-card">
                 <div class="flex flex-col lg:flex-row gap-8">
-                    <!-- Sisi Kiri: Foto Carousel & Plat -->
+                    <!-- Sisi Kiri: Foto Carousel dan Plat -->
                     <div class="lg:w-5/12 flex-shrink-0">
                         <!-- Product Image Carousel -->
                         <div class="catalog-detail-gallery mb-5 group">
@@ -69,7 +69,7 @@
                             </div>
                         </div>
 
-                        <!-- Plat Nomor & Info Wilayah -->
+                        <!-- Plat Nomor dan Info Wilayah -->
                         <div class="bg-gray-50 border border-gray-200 rounded-2xl p-4 space-y-2.5 text-xs sm:text-sm">
                             <div class="flex items-center justify-between">
                                 <span class="text-gray-500 font-medium">Plat Nomor Polisi</span>
@@ -90,12 +90,12 @@
                         </div>
                     </div>
 
-                    <!-- Sisi Kanan: Informasi Armada & Supir -->
+                    <!-- Sisi Kanan: Informasi Armada dan Supir -->
                     <div class="lg:w-7/12 flex flex-col">
                         <!-- Judul Armada -->
                         <div class="mb-4">
                             <span class="inline-block px-3 py-1 rounded-full bg-red-100 text-red-700 text-xs font-bold mb-2">
-                                Layanan Kesehatan & Transportasi Medis
+                                    Layanan Kesehatan dan Transportasi Medis
                             </span>
                             <h1 class="catalog-detail-name mb-0">
                                 {{ $ambulans->nama_mobil }}
@@ -104,7 +104,7 @@
 
                         <!-- Deskripsi Armada -->
                         <div class="mb-6">
-                            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Deskripsi & Fasilitas Armada</h3>
+                            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Deskripsi dan Fasilitas Armada</h3>
                             <div class="text-gray-700 text-sm leading-relaxed bg-gray-50/70 rounded-2xl p-4 border border-gray-100">
                                 @if($hasCustomDesc)
                                     <p class="whitespace-pre-line">{{ $rawDeskripsi }}</p>
@@ -119,7 +119,7 @@
                             <div class="flex items-center justify-between gap-2 mb-3">
                                 <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
                                     <i class="bx bx-user-pin text-base text-red-500"></i>
-                                    Tim Supir & Penanggung Jawab
+                                    Tim Supir dan Penanggung Jawab
                                 </h3>
                                 <span class="text-xs font-bold text-gray-500">
                                     {{ $ambulans->supirs->count() }} Supir

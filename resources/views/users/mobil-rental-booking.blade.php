@@ -70,7 +70,7 @@
     }
     $adaLogoEwallet = $ewalletLogoPath !== null && is_file(public_path($ewalletLogoPath));
 
-    // Metode transfer, ewallet & gateway
+    // Metode transfer, ewallet dan gateway
     $methods = $setting?->payment_methods ?? ['tunai'];
     if (!is_array($methods) || empty($methods)) $methods = ['tunai'];
     $hasTransfer = in_array('transfer', $methods);
@@ -193,11 +193,11 @@
                                     </div>
                                     <div class="flex items-start gap-2">
                                         <i class="bx bx-check text-green-600 text-base flex-shrink-0 mt-0.5"></i>
-                                        <span>Unit kendaraan diambil & dikembalikan langsung ke Kantor Pengelola.</span>
+                                        <span>Unit kendaraan diambil dan dikembalikan langsung ke Kantor Pengelola.</span>
                                     </div>
                                     <div class="flex items-start gap-2">
                                         <i class="bx bx-check text-green-600 text-base flex-shrink-0 mt-0.5"></i>
-                                        <span><strong>Wajib</strong> membawa & verifikasi fisik KTP & SIM asli yang aktif saat pengambilan.</span>
+                                        <span><strong>Wajib</strong> membawa dan menjalani verifikasi fisik KTP dan SIM asli yang aktif saat pengambilan.</span>
                                     </div>
                                 </div>
                             </div>
@@ -241,7 +241,7 @@
                                     </div>
                                     <div class="flex items-start gap-2">
                                         <i class="bx bx-check text-green-600 text-base flex-shrink-0 mt-0.5"></i>
-                                        <span>Perjalanan lebih santai & aman tanpa lelah menyetir di jalan.</span>
+                                        <span>Perjalanan lebih santai dan aman tanpa lelah menyetir di jalan.</span>
                                     </div>
                                 </div>
                             </div>
@@ -294,7 +294,7 @@
                     </div>
                 </div>
 
-                <!-- 4. Lokasi & Detail Logistik Pengambilan / Penjemputan -->
+                <!-- 4. Lokasi dan Detail Logistik Pengambilan / Penjemputan -->
                 <div class="bg-white rounded-3xl shadow-xl border border-gray-100 p-6 md:p-8 mb-8">
                     <!-- Heading Dinamis -->
                     <div class="flex items-center gap-3 mb-5 border-b border-gray-100 pb-4">
@@ -303,7 +303,7 @@
                         </div>
                         <div>
                             <h3 id="lokasi-header-title" class="text-lg md:text-xl font-extrabold text-gray-800">
-                                Lokasi Pengambilan & Pengembalian Unit
+                                Lokasi Pengambilan dan Pengembalian Unit
                             </h3>
                             <p id="lokasi-header-desc" class="text-xs text-gray-500">
                                 Informasi serah terima kunci dan kendaraan di Kantor Pengelola
@@ -347,7 +347,7 @@
                             <div class="flex items-start gap-2.5">
                                 <i class="bx bx-info-circle text-amber-600 text-lg flex-shrink-0 mt-0.5"></i>
                                 <div class="text-xs md:text-sm text-amber-800 leading-relaxed">
-                                    <strong class="font-bold">Ketentuan Serah Terima:</strong> Penyewa wajib hadir langsung ke Kantor Pengelola di atas untuk pemeriksaan fisik kendaraan, serah terima kunci, serta verifikasi fisik KTP & SIM asli yang masih aktif.
+                                    <strong class="font-bold">Ketentuan Serah Terima:</strong> Penyewa wajib hadir langsung ke Kantor Pengelola di atas untuk pemeriksaan fisik kendaraan, serah terima kunci, serta verifikasi fisik KTP dan SIM asli yang masih aktif.
                                 </div>
                             </div>
                         </div>
@@ -407,7 +407,7 @@
                     </div>
                 </div>
 
-                <!-- 6. Jadwal Waktu & Jarak / Rute Perjalanan -->
+                <!-- 6. Jadwal Waktu dan Jarak / Rute Perjalanan -->
                 <div class="bg-white rounded-3xl shadow-xl border border-gray-100 p-6 md:p-8 mb-8">
                     <div class="flex items-center justify-between flex-wrap gap-3 mb-6 pb-4 border-b border-gray-100">
                         <div class="flex items-center gap-3">
@@ -416,7 +416,7 @@
                             </div>
                             <div>
                                 <h3 class="text-lg md:text-xl font-extrabold text-gray-800">
-                                    Jadwal & Waktu Penyewaan
+                                    Jadwal dan Waktu Penyewaan
                                 </h3>
                                 <p class="text-xs text-gray-500" id="waktu-section-subtitle">
                                     Tentukan tanggal mulai dan selesai pemakaian kendaraan
@@ -501,7 +501,7 @@
                     </div>
                 </div>
 
-                <!-- 7. Rincian Unit Kendaraan & Kalkulasi Biaya -->
+                <!-- 7. Rincian Unit Kendaraan dan Kalkulasi Biaya -->
                 <div class="bg-white rounded-3xl shadow-xl border border-gray-100 p-6 md:p-8 mb-8">
                     <div class="flex items-center justify-between gap-3 mb-6 pb-4 border-b border-gray-100">
                         <div class="flex items-center gap-3">
@@ -513,7 +513,7 @@
                                     {{ $item->nama_mobil ?? $item->nama_barang }}
                                 </h3>
                                 <p class="text-xs text-gray-500">
-                                    Kategori: <span class="font-semibold text-gray-700 capitalize">{{ $item->kategori ?? 'Kendaraan' }}</span>
+                                    Kategori: <span class="font-semibold text-gray-700 capitalize">{{ str_replace('&', 'dan', $item->kategori ?? 'Kendaraan') }}</span>
                                 </p>
                             </div>
                         </div>
@@ -742,7 +742,7 @@
                         </div>
                     </div>
 
-                    {{-- Gateway Midtrans: Virtual Account & QRIS --}}
+                    {{-- Gateway Midtrans: Virtual Account dan QRIS --}}
                     @if($adaGateway)
                     <div class="mb-5">
                         <div class="flex items-center gap-2 mb-3">
@@ -823,7 +823,7 @@
                     @endif
                 </div>
 
-                <!-- 9. Ketentuan SOP & Persetujuan -->
+                <!-- 9. Ketentuan SOP dan Persetujuan -->
                 @if(!empty($sop_mobil))
                 <div class="bg-white rounded-3xl shadow-xl border border-gray-100 p-6 md:p-8 mb-8">
                     <div class="flex items-center gap-3 mb-4">
@@ -835,7 +835,7 @@
                                 Ketentuan SOP Layanan Transportasi
                             </h3>
                             <p class="text-xs text-gray-500">
-                                Harap membaca dan menyetujui syarat & ketentuan sebelum menyelesaikan pesanan
+                                Harap membaca dan menyetujui syarat dan ketentuan sebelum menyelesaikan pesanan
                             </p>
                         </div>
                     </div>
@@ -1053,8 +1053,8 @@
             if (indSendiri) indSendiri.textContent = 'Opsi Terpilih';
             if (indPengelola) indPengelola.textContent = 'Klik untuk memilih';
 
-            // Adaptasi Tampilan Lokasi & Logistik
-            if (lokasiHeaderTitle) lokasiHeaderTitle.textContent = 'Lokasi Pengambilan & Pengembalian Unit';
+            // Adaptasi Tampilan Lokasi dan Logistik
+            if (lokasiHeaderTitle) lokasiHeaderTitle.textContent = 'Lokasi Pengambilan dan Pengembalian Unit';
             if (lokasiHeaderDesc) lokasiHeaderDesc.textContent = 'Informasi serah terima kunci dan kendaraan di Kantor Pengelola';
             if (lokasiHeaderIcon) lokasiHeaderIcon.className = 'bx bx-store-alt';
 
@@ -1078,7 +1078,7 @@
             if (indPengelola) indPengelola.textContent = 'Opsi Terpilih';
             if (indSendiri) indSendiri.textContent = 'Klik untuk memilih';
 
-            // Adaptasi Tampilan Lokasi & Logistik
+            // Adaptasi Tampilan Lokasi dan Logistik
             if (lokasiHeaderTitle) lokasiHeaderTitle.textContent = 'Titik Lokasi Penjemputan Rombongan';
             if (lokasiHeaderDesc) lokasiHeaderDesc.textContent = 'Supir resmi pengelola akan hadir menjemput di alamat penjemputan berikut';
             if (lokasiHeaderIcon) lokasiHeaderIcon.className = 'bx bx-navigation';
@@ -1150,7 +1150,7 @@
             bbmTermasukBox?.classList.remove('hidden');
         }
 
-        // Atur Input Form Waktu & Jarak
+        // Atur Input Form Waktu dan Jarak
         if (jenis === 'harian') {
             endDateContainer?.classList.remove('hidden');
             boronganRouteContainer?.classList.add('hidden');
@@ -1224,7 +1224,7 @@
         if (totalAmountDisplay) totalAmountDisplay.textContent = 'Rp. ' + total.toLocaleString('id-ID');
     }
 
-    // 4. Slider & Tombol Pill Tabs Jenis Sewa
+    // 4. Slider dan Tombol Pill Tabs Jenis Sewa
     const slider = document.getElementById('jenis-sewa-slider');
     const jenisBtns = document.querySelectorAll('.jenis-sewa-btn');
 
@@ -1280,7 +1280,7 @@
         calculateTotals();
     });
 
-    // Event Listeners Tanggal & Rute
+    // Event Listeners Tanggal dan Rute
     startDateInput?.addEventListener('change', function() {
         if (endDateInput && endDateInput.value < this.value) {
             endDateInput.value = this.value;
@@ -1296,7 +1296,7 @@
     // 5. Inisialisasi Pertama Kali
     updateByJenisSewa(jenisInput ? jenisInput.value : 'harian');
 
-    // 6. Konfirmasi & Pengiriman Form
+    // 6. Konfirmasi dan Pengiriman Form
     const submitBtn = document.getElementById('btn-submit-booking');
     const confirmationModal = document.getElementById('confirmation-modal');
     const cancelConfirmation = document.getElementById('cancel-confirmation');

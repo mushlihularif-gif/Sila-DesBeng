@@ -11,7 +11,7 @@ class ServiceCategoryPageTest extends TestCase
         $response = $this->get(route('service-category.show', 'belanja-kebutuhan'));
 
         $response->assertOk()
-            ->assertSee('Belanja &amp; Kebutuhan', false)
+            ->assertSee('Belanja dan Kebutuhan')
             ->assertSee('Gas Daerah')
             ->assertSee('Pasar Daerah');
     }

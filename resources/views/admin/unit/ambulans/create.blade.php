@@ -486,7 +486,7 @@
                     <div class="card-body text-center p-4">
                         <!-- Nama Preview -->
                         <h5 class="fw-extrabold text-dark mb-1" id="previewNamaMobil">Nama Kendaraan Baru</h5>
-                        <p class="text-muted small mb-4" id="previewSubtext">Layanan Transportasi & Medis Warga</p>
+                        <p class="text-muted small mb-4" id="previewSubtext">Layanan Transportasi dan Medis Warga</p>
 
                         <!-- Container Grafis Mobil Plat Asli -->
                         <div class="position-relative d-inline-block mx-auto mb-4" style="max-width: 320px;">

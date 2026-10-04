@@ -203,7 +203,7 @@
                                 <circle cx="12" cy="12" r="10" fill="#10B981"/>
                                 <path d="M8 12.5L10.5 15L16 9" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
-                            <p class="text-gray-700 leading-relaxed">Mendorong digitalisasi daerah menuju tata kelola ekonomi mandiri & modern</p>
+                            <p class="text-gray-700 leading-relaxed">Mendorong digitalisasi daerah menuju tata kelola ekonomi mandiri dan modern</p>
                         </div>
                     </div>
                 </div>

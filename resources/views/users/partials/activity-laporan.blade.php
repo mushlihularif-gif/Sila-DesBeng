@@ -63,7 +63,7 @@
                     @endif
                 </div>
 
-                <!-- Status & Tombol Aksi -->
+                <!-- Status dan Tombol Aksi -->
                 <div class="text-left sm:text-right flex flex-col justify-between items-start sm:items-end gap-3 mt-4 sm:mt-0">
                     <span class="px-3 py-1 rounded-full text-xs font-bold border {{ $statusBadge['bg'] }}">
                         {{ $statusBadge['label'] }}

@@ -138,7 +138,7 @@
                 <div class="max-w-7xl mx-auto bg-gradient-to-b from-blue-50/60 to-white/90 rounded-2xl sm:rounded-3xl p-4 sm:p-8 border border-blue-100 shadow-sm">
                     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-blue-100">
                         <div>
-                            <span class="text-[11px] sm:text-xs font-bold text-blue-600 uppercase tracking-wider block">Hasil Pencarian Produk & Layanan</span>
+                            <span class="text-[11px] sm:text-xs font-bold text-blue-600 uppercase tracking-wider block">Hasil Pencarian Produk dan Layanan</span>
                             <h2 id="search-results-title" class="text-xl sm:text-2xl font-black text-gray-900">
                                 @if(isset($search) && !empty($search))
                                     Menampilkan hasil untuk: "<span class="text-[#115789]">{{ $search }}</span>"
@@ -183,7 +183,7 @@
                                         @endif
 
                                         <span class="absolute top-2 left-2 px-2 py-0.5 text-[9px] font-bold rounded-md shadow-xs {{ $item->badge_color ?? 'bg-[#115789] text-white' }}" style="color: #ffffff !important;">
-                                            {{ $item->category }}
+                                            {{ str_replace('&', 'dan', $item->category) }}
                                         </span>
                                     </div>
 
@@ -279,7 +279,7 @@
                                     <div class="flex flex-col items-center gap-2.5">
                                         <span id="speech-badge" class="inline-flex shrink-0 self-center items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.1em] text-amber-800">
                                             <i id="speech-badge-icon" class="bx bx-shopping-bag text-sm" aria-hidden="true"></i>
-                                            <span id="speech-badge-label">Belanja &amp; Kebutuhan</span>
+                                            <span id="speech-badge-label">Belanja dan Kebutuhan</span>
                                         </span>
                                         <div class="min-w-0 w-full">
                                             <p id="speech-heading" class="text-sm font-extrabold leading-snug text-slate-900 sm:text-base">Cari kebutuhan rumah atau produk lokal?</p>
@@ -307,7 +307,7 @@
                                 if (!$isLoggedInWithRegion) return true;
 
                                 // Menu informasi dan Pasar Daerah tersedia untuk semua wilayah.
-                                if (in_array($unitName, ['Belanja & Kebutuhan', 'Pasar Daerah', 'Kabar dan Informasi Daerah', 'Pengumuman dan Event'])) {
+                                if (in_array($unitName, ['Belanja dan Kebutuhan', 'Pasar Daerah', 'Kabar dan Informasi Daerah', 'Pengumuman dan Event'])) {
                                     return true;
                                 }
 
@@ -324,7 +324,7 @@
                                     ->intersect($activeServices ?? [])->isNotEmpty();
                             };
 
-                            $hasBelanja = $isServiceActive('Belanja & Kebutuhan');
+                            $hasBelanja = $isServiceActive('Belanja dan Kebutuhan');
                             $hasLayanan = collect(['Unit Penyewaan Alat', 'Unit Penyewaan Transportasi', 'Unit Peminjaman Fasilitas Umum', 'Pelaporan Warga'])
                                 ->contains(fn ($unit) => $isServiceActive($unit));
                             $hasKabar = $isServiceActive('Kabar dan Informasi Daerah');
@@ -341,10 +341,10 @@
                                 @if($hasBelanja)
                                 <a href="{{ $categoryPageUrl('belanja-kebutuhan') }}" aria-label="Buka kategori Belanja dan Kebutuhan" class="unit-card cursor-pointer no-underline hover:scale-105 transition-transform focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-300 rounded-2xl"
                                      data-index="0" 
-                                     data-name="Belanja &amp; Kebutuhan"
+                                     data-name="Belanja dan Kebutuhan"
                                      data-heading="&quot;Cari kebutuhan rumah atau produk lokal?&quot;"
                                      data-body="Pesan gas atau jelajahi produk usaha daerah melalui Pasar Daerah."
-                                     data-badge="Belanja &amp; Kebutuhan"
+                                     data-badge="Belanja dan Kebutuhan"
                                      data-icon="bx-shopping-bag"
                                      data-box-bg="bg-amber-50/90"
                                      data-box-border="border-amber-200"
@@ -376,7 +376,7 @@
                                      data-name="Kabar dan Informasi Daerah"
                                      data-heading="&quot;Ingin tahu kabar terbaru di daerah?&quot;"
                                      data-body="Baca berita, pengumuman, dan informasi resmi untuk warga."
-                                     data-badge="Kabar &amp; Informasi"
+                                     data-badge="Kabar dan Informasi"
                                      data-icon="bx-news"
                                      data-box-bg="bg-sky-50/90"
                                      data-box-border="border-sky-200"
@@ -388,15 +388,15 @@
                             </div>
                         </div>
 
-                        <div class="unit-nav-wrapper mt-4 sm:mt-8 mb-4 sm:mb-8 flex flex-col items-center justify-center gap-3 px-4 relative z-30">
+                        <div class="unit-nav-wrapper mt-4 sm:mt-8 mb-4 sm:mb-8 flex flex-col items-center justify-center gap-3 px-4 relative z-[70]">
                             <div class="unit-nav-controls flex w-full max-w-3xl items-center justify-center gap-2 sm:gap-5">
-                                <button type="button" id="unit-prev" class="unit-nav-button" aria-label="Tampilkan layanan sebelumnya">Sebelumnya</button>
+                                <button type="button" id="unit-prev" class="unit-nav-button" aria-label="Layanan sebelumnya">&lt;</button>
                                 <div class="unit-title-box text-center min-w-0 max-w-full flex-1">
                                     <h3 id="unit-title" class="text-base sm:text-xl md:text-2xl font-bold text-gray-900 transition-all duration-300 truncate">
-                                        Belanja &amp; Kebutuhan
+                                        Belanja dan Kebutuhan
                                     </h3>
                                 </div>
-                                <button type="button" id="unit-next" class="unit-nav-button" aria-label="Tampilkan layanan berikutnya">Berikutnya</button>
+                                <button type="button" id="unit-next" class="unit-nav-button" aria-label="Layanan berikutnya">&gt;</button>
                             </div>
                             <div id="unit-indicators" class="flex items-center justify-center gap-2" aria-label="Pilih kategori layanan"></div>
                         </div>
@@ -471,7 +471,7 @@
 
                                     <!-- Badge Asal Unit -->
                                     <span class="absolute top-2 left-2 px-2 py-0.5 text-[9px] font-bold rounded-md shadow-xs {{ $item->badge_color ?? 'bg-[#115789] text-white' }}" style="color: #ffffff !important;">
-                                        {{ $item->category }}
+                                        {{ str_replace('&', 'dan', $item->category) }}
                                     </span>
                                 </div>
 
@@ -792,7 +792,8 @@
         .unit-indicator { width: 10px; height: 10px; border: 0; border-radius: 999px; background: #cbd5e1; transition: width .2s ease, background-color .2s ease; }
         .unit-indicator:hover { background: #60a5fa; }
         .unit-indicator.active { width: 26px; background: #115789; }
-        .unit-nav-button { flex-shrink: 0; min-height: 2.5rem; border: 1px solid #cbdce9; border-radius: 999px; background: #fff; padding: .55rem 1rem; color: #115789; font-size: .85rem; font-weight: 700; box-shadow: 0 2px 7px rgba(15, 23, 42, .07); transition: background-color .15s ease, border-color .15s ease; }
+        .unit-nav-wrapper { z-index: 70 !important; }
+        .unit-nav-button { position: relative; z-index: 71; display: inline-flex; width: 2.75rem; height: 2.75rem; flex-shrink: 0; align-items: center; justify-content: center; border: 1px solid #cbdce9; border-radius: 999px; background: #fff; padding: 0 0 .15rem; color: #115789; font-size: 1.75rem; font-weight: 700; line-height: 1; box-shadow: 0 2px 7px rgba(15, 23, 42, .07); transition: background-color .15s ease, border-color .15s ease; }
         .unit-nav-button:hover { border-color: #115789; background: #f2f8fc; }
 
         /* --- UNIT CAROUSEL STYLES (4 VISIBLE ITEMS) --- */
@@ -1024,7 +1025,7 @@
                 align-items: center !important;
                 justify-content: center !important;
             }
-            .unit-nav-button { min-height: 2.2rem; padding: .45rem .7rem; font-size: .72rem; }
+            .unit-nav-button { width: 2.25rem; height: 2.25rem; font-size: 1.45rem; }
             .unit-title-box {
                 min-width: 0 !important;
                 max-width: 180px !important;
@@ -1265,8 +1266,6 @@
 
                 const n = cards.length;
                 let currentIndex = 0;
-                let autoSlideInterval;
-                const autoSlideDelay = 6500; // 6.5 detik agar warga sempat membaca narasi
                 const indicators = [];
 
                 if (indicatorContainer && n > 1) {
@@ -1279,7 +1278,6 @@
                         indicator.addEventListener('click', () => {
                             currentIndex = index;
                             updateCarousel();
-                            resetAutoSlide();
                         });
                         indicatorContainer.appendChild(indicator);
                         indicators.push(indicator);
@@ -1372,34 +1370,14 @@
 
                 if (nextBtn) {
                     nextBtn.hidden = n <= 1;
-                    nextBtn.onclick = () => { handleNext(); resetAutoSlide(); };
+                    nextBtn.onclick = handleNext;
                 }
                 if (prevBtn) {
                     prevBtn.hidden = n <= 1;
-                    prevBtn.onclick = () => { handlePrev(); resetAutoSlide(); };
-                }
-
-                const startAutoSlide = () => {
-                    if (n <= 1) return;
-                    clearInterval(autoSlideInterval);
-                    autoSlideInterval = setInterval(handleNext, autoSlideDelay);
-                };
-
-                const resetAutoSlide = () => {
-                    if (n <= 1) return;
-                    clearInterval(autoSlideInterval);
-                    startAutoSlide();
-                };
-
-                // Pause on hover
-                const container = document.getElementById('unit-carousel-container');
-                if (container) {
-                    container.addEventListener('mouseenter', () => clearInterval(autoSlideInterval));
-                    container.addEventListener('mouseleave', startAutoSlide);
+                    prevBtn.onclick = handlePrev;
                 }
 
                 updateCarousel();
-                startAutoSlide();
             },
 
             // Inisialisasi Live AJAX Search

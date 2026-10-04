@@ -33,7 +33,7 @@
                 </button>
                 @foreach($categories as $category)
                 <button class="catalog-filter-btn filter-btn" data-filter="{{ Str::slug($category) }}">
-                    {{ ucfirst(str_replace('-', ' ', $category)) }}
+                    {{ str_replace('&', 'dan', ucfirst(str_replace('-', ' ', $category))) }}
                 </button>
                 @endforeach
             </div>
@@ -79,7 +79,7 @@
                             @if($item->kategori)
                                 <div class="mb-1.5 sm:mb-4">
                                     <span class="inline-flex items-center px-2 sm:px-3 py-0.5 sm:py-1.5 rounded-md text-[9px] sm:text-[10px] font-bold text-white bg-blue-600 shadow-sm">
-                                        {{ ucfirst(str_replace('-', ' ', $item->kategori)) }}
+                                        {{ str_replace('&', 'dan', ucfirst(str_replace('-', ' ', $item->kategori))) }}
                                     </span>
                                 </div>
                             @endif

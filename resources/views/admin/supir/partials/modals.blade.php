@@ -77,7 +77,7 @@
                                     <div class="border rounded-4 p-3 h-100 border-gray-200">
                                         <label class="form-label text-uppercase text-muted fw-bold mb-2" style="font-size: 0.75rem;">Peran Tugas</label>
                                         <div class="alert alert-success border-0 mb-0 py-2 px-3 rounded-3">
-                                            <div class="fw-bold font-13"><i class="bx bx-building-house me-1"></i> Pengurus & Pemegang Kunci</div>
+                                            <div class="fw-bold font-13"><i class="bx bx-building-house me-1"></i> Pengurus dan Pemegang Kunci</div>
                                             <small class="text-muted d-block mt-0.5">Dapat ditugaskan pada gedung serbaguna, balai pertemuan, dan ruang publik.</small>
                                         </div>
                                     </div>
@@ -93,7 +93,7 @@
                                             </div>
                                             <div class="form-check form-switch d-flex align-items-center">
                                                 <input class="form-check-input mt-0 me-3 cursor-pointer bg-danger border-danger" type="checkbox" name="is_fasilitas_umum" value="1" id="is_fasilitas_edit_{{ $supir->id }}" style="width: 2.5em; height: 1.25em;" {{ $supir->is_fasilitas_umum ? 'checked' : '' }}>
-                                                <label class="form-check-label cursor-pointer fw-bold text-danger" for="is_fasilitas_edit_{{ $supir->id }}">Ambulans & Kendaraan</label>
+                                                <label class="form-check-label cursor-pointer fw-bold text-danger" for="is_fasilitas_edit_{{ $supir->id }}">Ambulans dan Kendaraan</label>
                                             </div>
                                         </div>
                                     </div>
@@ -172,7 +172,7 @@
 
                         @if($supir->isPengurusGedung())
                             <div class="p-3 bg-light rounded-3">
-                                <small class="text-muted d-block mb-1" style="font-size: 0.72rem;">Gedung & Fasilitas yang Dikelola</small>
+                                <small class="text-muted d-block mb-1" style="font-size: 0.72rem;">Gedung dan Fasilitas yang Dikelola</small>
                                 @if($supir->fasilitas && $supir->fasilitas->count() > 0)
                                     <div class="d-flex flex-wrap gap-1">
                                         @foreach($supir->fasilitas as $f)
@@ -191,7 +191,7 @@
                                         <span class="badge bg-label-primary px-2.5 py-1"><i class="bx bx-car me-1"></i> Penyewaan Transportasi</span>
                                     @endif
                                     @if($supir->is_fasilitas_umum)
-                                        <span class="badge bg-label-danger px-2.5 py-1"><i class="bx bx-plus-medical me-1"></i> Ambulans & Kendaraan</span>
+                                        <span class="badge bg-label-danger px-2.5 py-1"><i class="bx bx-plus-medical me-1"></i> Ambulans dan Kendaraan</span>
                                     @endif
                                 </div>
                             </div>

@@ -146,7 +146,7 @@
                     <button type="button" 
                             @click="confirmNotification()"
                             class="w-full text-center py-3.5 px-6 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-md shadow-blue-500/25 hover:shadow-lg transition-all cursor-pointer text-sm md:text-base tracking-wide">
-                        Konfirmasi &amp; Buka KTP Digital
+                        Konfirmasi dan Buka KTP Digital
                     </button>
                 </div>
             </div>

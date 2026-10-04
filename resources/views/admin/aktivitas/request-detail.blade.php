@@ -602,7 +602,7 @@
                 </div>
                 <div class="modal-footer border-top-0 pt-0">
                     <button type="button" class="btn btn-link text-secondary text-decoration-none" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary rounded-pill px-4">Upload & Update Status</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4">Upload dan Update Status</button>
                 </div>
             </form>
         </div>
@@ -1054,7 +1054,7 @@ if (returnForm) {
             </div>
             <div class="modal-footer border-top bg-light">
                 <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Batal</button>
-                <button type="button" class="btn btn-primary rounded-pill px-4" onclick="submitInDeliveryWithSupir()">Tugaskan & Berangkatkan</button>
+                <button type="button" class="btn btn-primary rounded-pill px-4" onclick="submitInDeliveryWithSupir()">Tugaskan dan Berangkatkan</button>
             </div>
         </div>
     </div>

@@ -59,7 +59,7 @@
                                 <li class="nav-item" role="presentation">
                                     <button class="nav-link active" id="step1-tab" data-bs-toggle="pill" data-bs-target="#step1" type="button" role="tab" aria-controls="step1" aria-selected="true">
                                         <span class="step-icon"><i class='bx bx-info-circle'></i></span>
-                                        <span class="step-text d-none d-sm-inline ms-1">Info & Media</span>
+                                        <span class="step-text d-none d-sm-inline ms-1">Info dan Media</span>
                                     </button>
                                 </li>
                                 <li class="nav-item" role="presentation">
@@ -77,7 +77,7 @@
                                 <li class="nav-item" role="presentation">
                                     <button class="nav-link" id="step4-tab" data-bs-toggle="pill" data-bs-target="#step4" type="button" role="tab" aria-controls="step4" aria-selected="false">
                                         <span class="step-icon"><i class='bx bx-cog'></i></span>
-                                        <span class="step-text d-none d-sm-inline ms-1">Pengaturan & Simpan</span>
+                                        <span class="step-text d-none d-sm-inline ms-1">Pengaturan dan Simpan</span>
                                     </button>
                                 </li>
                             </ul>

@@ -111,7 +111,7 @@
     // Tentukan metode aktif default
     $defaultMethod = $hasTransfer ? 'transfer' : 'tunai';
 
-    // Pembayaran otomatis (Virtual Account & QRIS) berdiri sendiri dari transfer
+    // Pembayaran otomatis (Virtual Account dan QRIS) berdiri sendiri dari transfer
     // manual. Sebelumnya tombol VA dan QRIS dibungkus @if($hasTransfer), sehingga
     // wilayah yang mematikan transfer manual ikut kehilangan seluruh pembayaran
     // gateway — padahal keduanya tidak berhubungan.
@@ -427,7 +427,7 @@
                         
                         <!-- Right Side: Category and Subtotal -->
                         <div class="text-right">
-                            <p class="text-sm text-gray-600 mb-1">{{ $item->kategori }}</p>
+                            <p class="text-sm text-gray-600 mb-1">{{ str_replace('&', 'dan', $item->kategori) }}</p>
                             <div class="mt-4">
                                 <p class="text-sm text-gray-600 mb-1">Subtotal</p>
                                 <p class="text-xl font-bold text-gray-800" id="subtotal">Rp. {{ number_format($item->harga_satuan * $quantity, 0, ',', '.') }}</p>
@@ -1307,7 +1307,7 @@
 
 <script src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google_maps.api_key') }}&libraries=places"></script>
 <script>
-    // Peta lokasi layanan & Autocomplete
+    // Peta lokasi layanan dan Autocomplete
     function initGasMapAndPlaces() {
         const wadah = document.getElementById('petaLayanan');
         if (wadah && typeof google !== 'undefined' && google.maps && !wadah.dataset.mapInitialized) {

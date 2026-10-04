@@ -10,7 +10,7 @@
             <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3 mb-4">
                 <div>
                     <h4 class="fw-bold mb-1">
-                        <span class="text-muted fw-light">Profil & Info / Pemerintah /</span> Edit Anggota
+                        <span class="text-muted fw-light">Profil dan Info / Pemerintah /</span> Edit Anggota
                     </h4>
                     <p class="text-muted mb-0">Perbarui informasi anggota yang ditampilkan di halaman Profil Pemerintah</p>
                 </div>
@@ -357,4 +357,3 @@ function clearPhoto() {
 }
 </script>
 @endsection
-

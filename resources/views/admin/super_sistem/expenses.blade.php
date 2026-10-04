@@ -4,11 +4,11 @@
 
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Sistem Platform /</span> Biaya Server, Domain &amp; Hosting</h4>
+    <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Sistem Platform /</span> Biaya Server, Domain dan Hosting</h4>
 
     <div class="alert alert-info d-flex align-items-center mb-4">
         <i class="bx bx-info-circle me-2 fs-5"></i>
-        <div>Halaman ini murni pencatatan &amp; pengingat jatuh tempo. Biaya tetap dibayar lewat APBD melalui Diskominfotik — <strong>tidak</strong> ditarik dari saldo BUM Desa atau fee platform manapun.</div>
+        <div>Halaman ini murni pencatatan dan pengingat jatuh tempo. Biaya tetap dibayar lewat APBD melalui Diskominfotik — <strong>tidak</strong> ditarik dari saldo BUM Desa atau fee platform manapun.</div>
     </div>
 
     @if(session('success'))
@@ -63,7 +63,7 @@
                                         @if($expense->status !== 'lunas' || $expense->billing_cycle !== 'sekali_bayar')
                                         <form action="{{ route('admin.sistem-platform.expenses.mark-paid', $expense) }}" method="POST" class="d-inline">
                                             @csrf @method('PUT')
-                                            <button type="submit" class="btn btn-sm btn-outline-success" title="Tandai Lunas &amp; Perpanjang">
+                                            <button type="submit" class="btn btn-sm btn-outline-success" title="Tandai Lunas dan Perpanjang">
                                                 <i class="bx bx-check"></i>
                                             </button>
                                         </form>

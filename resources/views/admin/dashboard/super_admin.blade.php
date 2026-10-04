@@ -107,7 +107,7 @@
                 <div class="card">
                     <div class="card-header pb-2 d-flex justify-content-between align-items-center">
                         <div>
-                            <h5 class="mb-0"><i class="bx bx-server me-2 text-danger"></i>Biaya Server &amp; Domain</h5>
+                            <h5 class="mb-0"><i class="bx bx-server me-2 text-danger"></i>Biaya Server dan Domain</h5>
                             <small class="text-muted">Tagihan berlangganan yang belum lunas, diurutkan dari yang paling dekat.</small>
                         </div>
                         <a href="{{ route('admin.sistem-platform.expenses') }}" class="btn btn-sm btn-outline-danger">Kelola</a>
@@ -161,7 +161,7 @@
                             </div>
                         @else
                             <p class="text-muted small text-center mb-0 py-3">
-                                Tidak ada tagihan aktif. Tambahkan lewat halaman Biaya Server &amp; Domain.
+                                Tidak ada tagihan aktif. Tambahkan lewat halaman Biaya Server dan Domain.
                             </p>
                         @endif
                     </div>
