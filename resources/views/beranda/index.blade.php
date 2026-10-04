@@ -789,12 +789,14 @@
             transform: translateY(0);
         }
 
-        .unit-indicator { width: 10px; height: 10px; border: 0; border-radius: 999px; background: #cbd5e1; transition: width .2s ease, background-color .2s ease; }
-        .unit-indicator:hover { background: #60a5fa; }
-        .unit-indicator.active { width: 26px; background: #115789; }
-        .unit-nav-wrapper { z-index: 70 !important; }
-        .unit-nav-button { position: relative; z-index: 71; display: inline-flex; width: 2.75rem; height: 2.75rem; flex-shrink: 0; align-items: center; justify-content: center; border: 1px solid #cbdce9; border-radius: 999px; background: #fff; padding: 0 0 .15rem; color: #115789; font-size: 1.75rem; font-weight: 700; line-height: 1; box-shadow: 0 2px 7px rgba(15, 23, 42, .07); transition: background-color .15s ease, border-color .15s ease; }
-        .unit-nav-button:hover { border-color: #115789; background: #f2f8fc; }
+        .unit-indicator { width: 9px; height: 9px; border: 2px solid #77add0; border-radius: 999px; background: #fff; transition: width .2s ease, background-color .2s ease, border-color .2s ease; }
+        .unit-indicator:hover { border-color: #115789; background: #dceefa; }
+        .unit-indicator.active { width: 24px; border-color: #115789; background: #115789; }
+        .unit-nav-wrapper { position: relative; z-index: 70 !important; isolation: isolate; }
+        .unit-nav-controls { position: relative; z-index: 71; }
+        .unit-nav-button { position: relative; z-index: 72; display: inline-flex; width: 2.6rem; height: 2.6rem; flex-shrink: 0; align-items: center; justify-content: center; border: 1px solid #115789; border-radius: 999px; background: #115789; padding: 0 0 .14rem; color: #fff; font-size: 1.65rem; font-weight: 700; line-height: 1; box-shadow: 0 3px 9px rgba(17, 87, 137, .22); transition: background-color .15s ease, border-color .15s ease, transform .15s ease; }
+        .unit-nav-button:hover { transform: translateY(-1px); border-color: #0d4267; background: #0d4267; }
+        .unit-nav-button:focus-visible { outline: 3px solid #93c5fd; outline-offset: 3px; }
 
         /* --- UNIT CAROUSEL STYLES (4 VISIBLE ITEMS) --- */
         .unit-stage-wrapper {
