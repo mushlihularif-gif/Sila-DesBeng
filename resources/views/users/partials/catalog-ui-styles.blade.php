@@ -30,14 +30,12 @@
     .product-image-wrapper > .product-image {
         width: 100%;
         height: 100%;
-        padding: 0;
-        object-fit: cover !important;
+        padding: .5rem;
+        object-fit: contain !important;
         transition: transform .25s ease;
     }
     .product-image-wrapper > .product-image.image-fallback { object-fit: contain !important; }
-    .product-image-wrapper > .gas-product-image { transform: scale(1.38); }
-    .product-item:hover .product-image-wrapper > .gas-product-image { transform: scale(1.46); }
-    .product-item:hover .product-image { transform: scale(1.025); }
+    .product-item:hover .product-image { transform: scale(1.035); }
     .product-name {
         margin-top: 0;
         color: #172b3d;

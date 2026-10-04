@@ -390,15 +390,18 @@
 
                         <div class="unit-nav-wrapper mt-4 sm:mt-8 mb-4 sm:mb-8 flex flex-col items-center justify-center gap-3 px-4 relative z-[70]">
                             <div class="unit-nav-controls flex w-full max-w-3xl items-center justify-center gap-2 sm:gap-5">
-                                <button type="button" id="unit-prev" class="unit-nav-button" aria-label="Layanan sebelumnya">&lt;</button>
+                                <button type="button" id="unit-prev" class="unit-nav-button" aria-label="Layanan sebelumnya">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+                                </button>
                                 <div class="unit-title-box text-center min-w-0 max-w-full flex-1">
                                     <h3 id="unit-title" class="text-base sm:text-xl md:text-2xl font-bold text-gray-900 transition-all duration-300 truncate">
                                         Belanja dan Kebutuhan
                                     </h3>
                                 </div>
-                                <button type="button" id="unit-next" class="unit-nav-button" aria-label="Layanan berikutnya">&gt;</button>
+                                <button type="button" id="unit-next" class="unit-nav-button" aria-label="Layanan berikutnya">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+                                </button>
                             </div>
-                            <div id="unit-indicators" class="flex items-center justify-center gap-2" aria-label="Pilih kategori layanan"></div>
                         </div>
                         @else
                         <div class="w-full flex flex-col items-center justify-center text-center p-12 bg-white/60 backdrop-blur-md rounded-3xl border border-white/50 shadow-lg mt-4 max-w-4xl mx-auto">
@@ -749,7 +752,7 @@
         .rekomendasi-img-wrapper {
             height: 165px;
             width: 100%;
-            padding: 0;
+            padding: 8px;
             background-color: #f8fafc;
             display: flex;
             align-items: center;
@@ -759,19 +762,18 @@
         @media (min-width: 640px) {
             .rekomendasi-img-wrapper {
                 height: 195px;
-                padding: 0;
+                padding: 10px;
             }
         }
         .rekomendasi-img-wrapper img {
-            max-width: none !important;
-            max-height: none !important;
-            width: 100% !important;
-            height: 100% !important;
-            object-fit: cover !important;
-            margin: 0;
+            max-width: 100% !important;
+            max-height: 100% !important;
+            width: auto !important;
+            height: auto !important;
+            object-fit: contain !important;
+            margin: 0 auto;
             display: block;
         }
-        .rekomendasi-img-wrapper img.gas-product-photo { transform: scale(1.38); }
 
         /* Kotak Sapaan Dinamis Unit Pelayanan */
         .unit-speech-box {
@@ -789,13 +791,11 @@
             transform: translateY(0);
         }
 
-        .unit-indicator { width: 9px; height: 9px; border: 2px solid #77add0; border-radius: 999px; background: #fff; transition: width .2s ease, background-color .2s ease, border-color .2s ease; }
-        .unit-indicator:hover { border-color: #115789; background: #dceefa; }
-        .unit-indicator.active { width: 24px; border-color: #115789; background: #115789; }
         .unit-nav-wrapper { position: relative; z-index: 70 !important; isolation: isolate; }
         .unit-nav-controls { position: relative; z-index: 71; }
-        .unit-nav-button { position: relative; z-index: 72; display: inline-flex; width: 2.6rem; height: 2.6rem; flex-shrink: 0; align-items: center; justify-content: center; border: 1px solid #115789; border-radius: 999px; background: #115789; padding: 0 0 .14rem; color: #fff; font-size: 1.65rem; font-weight: 700; line-height: 1; box-shadow: 0 3px 9px rgba(17, 87, 137, .22); transition: background-color .15s ease, border-color .15s ease, transform .15s ease; }
-        .unit-nav-button:hover { transform: translateY(-1px); border-color: #0d4267; background: #0d4267; }
+        .unit-nav-button { position: relative; z-index: 72; display: inline-flex; width: 3rem; height: 3rem; flex-shrink: 0; align-items: center; justify-content: center; border: 1px solid #e8edf2; border-radius: 999px; background: #fff; padding: 0; color: #334155; box-shadow: 0 5px 14px rgba(15, 23, 42, .1); transition: background-color .15s ease, border-color .15s ease, color .15s ease, transform .15s ease; }
+        .unit-nav-button svg { width: 1.25rem; height: 1.25rem; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .unit-nav-button:hover { transform: translateY(-1px); border-color: #bfdbeb; background: #f8fbfd; color: #115789; }
         .unit-nav-button:focus-visible { outline: 3px solid #93c5fd; outline-offset: 3px; }
 
         /* --- UNIT CAROUSEL STYLES (4 VISIBLE ITEMS) --- */
@@ -1027,14 +1027,13 @@
                 align-items: center !important;
                 justify-content: center !important;
             }
-            .unit-nav-button { width: 2.25rem; height: 2.25rem; font-size: 1.45rem; }
+            .unit-nav-button { width: 2.5rem; height: 2.5rem; }
+            .unit-nav-button svg { width: 1.1rem; height: 1.1rem; }
             .unit-title-box {
                 min-width: 0 !important;
                 max-width: 180px !important;
                 flex: 1 !important;
             }
-            .unit-indicator { width: 7px !important; height: 7px !important; }
-            .unit-indicator.active { width: 22px !important; }
             #unit-title {
                 font-size: 0.95rem !important;
                 line-height: 1.25 !important;
@@ -1257,7 +1256,6 @@
                 const titleElement = document.getElementById('unit-title');
                 const nextBtn = document.getElementById('unit-next');
                 const prevBtn = document.getElementById('unit-prev');
-                const indicatorContainer = document.getElementById('unit-indicators');
                 const speechBox = document.getElementById('unit-speech-box');
                 const speechWrapper = document.getElementById('speech-text-wrapper');
                 const speechHeading = document.getElementById('speech-heading');
@@ -1268,24 +1266,6 @@
 
                 const n = cards.length;
                 let currentIndex = 0;
-                const indicators = [];
-
-                if (indicatorContainer && n > 1) {
-                    indicatorContainer.replaceChildren();
-                    cards.forEach((card, index) => {
-                        const indicator = document.createElement('button');
-                        indicator.type = 'button';
-                        indicator.className = 'unit-indicator focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#60a5fa]';
-                        indicator.setAttribute('aria-label', `Tampilkan ${card.getAttribute('data-name')}`);
-                        indicator.addEventListener('click', () => {
-                            currentIndex = index;
-                            updateCarousel();
-                        });
-                        indicatorContainer.appendChild(indicator);
-                        indicators.push(indicator);
-                    });
-                }
-
                 const updateCarousel = () => {
                     cards.forEach((card, index) => {
                         // Remove all state classes
@@ -1353,9 +1333,6 @@
                         }
                     });
 
-                    indicators.forEach((indicator, index) => {
-                        indicator.classList.toggle('active', index === currentIndex);
-                    });
                 };
 
                 const handleNext = () => {
