@@ -54,7 +54,7 @@
                                  alt="{{ $item->jenis_gas }}"
                                  loading="lazy"
                                  onerror="this.onerror=null; this.src='{{ asset('User/img/elemen/gas_melon.png') }}';"
-                                  class="product-image">
+                                  class="product-image gas-product-image">
                             
                             <!-- Status Badge -->
                             @if($item->stok > 0)

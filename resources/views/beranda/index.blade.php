@@ -752,7 +752,7 @@
         .rekomendasi-img-wrapper {
             height: 165px;
             width: 100%;
-            padding: 8px;
+            padding: 0;
             background-color: #f8fafc;
             display: flex;
             align-items: center;
@@ -762,18 +762,19 @@
         @media (min-width: 640px) {
             .rekomendasi-img-wrapper {
                 height: 195px;
-                padding: 10px;
+                padding: 0;
             }
         }
         .rekomendasi-img-wrapper img {
-            max-width: 100% !important;
-            max-height: 100% !important;
-            width: auto !important;
-            height: auto !important;
-            object-fit: contain !important;
-            margin: 0 auto;
+            max-width: none !important;
+            max-height: none !important;
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+            margin: 0;
             display: block;
         }
+        .rekomendasi-img-wrapper img.gas-product-photo { transform: scale(1.28); }
 
         /* Kotak Sapaan Dinamis Unit Pelayanan */
         .unit-speech-box {

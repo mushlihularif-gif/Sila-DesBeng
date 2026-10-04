@@ -35,6 +35,8 @@
         transition: transform .25s ease;
     }
     .product-image-wrapper > .product-image.image-fallback { object-fit: contain !important; }
+    .product-image-wrapper > .gas-product-image { transform: scale(1.28); }
+    .product-item:hover .product-image-wrapper > .gas-product-image { transform: scale(1.35); }
     .product-item:hover .product-image { transform: scale(1.05); }
     .product-name {
         margin-top: 0;
