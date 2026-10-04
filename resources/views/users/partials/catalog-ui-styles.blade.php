@@ -20,7 +20,7 @@
         position: relative;
         display: flex;
         width: 100%;
-        aspect-ratio: 4 / 3;
+        aspect-ratio: 1 / 1;
         align-items: center;
         justify-content: center;
         overflow: hidden;
@@ -35,8 +35,6 @@
         transition: transform .25s ease;
     }
     .product-image-wrapper > .product-image.image-fallback { object-fit: contain !important; }
-    .product-image-wrapper > .gas-product-image { transform: scale(1.28); }
-    .product-item:hover .product-image-wrapper > .gas-product-image { transform: scale(1.35); }
     .product-item:hover .product-image { transform: scale(1.05); }
     .product-name {
         margin-top: 0;

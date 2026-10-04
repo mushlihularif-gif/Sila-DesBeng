@@ -750,8 +750,9 @@
 
         /* Rekomendasi dan hasil pencarian memakai frame penuh yang konsisten. */
         .rekomendasi-img-wrapper {
-            height: 165px;
+            height: auto;
             width: 100%;
+            aspect-ratio: 1 / 1;
             padding: 0;
             background-color: #f8fafc;
             display: flex;
@@ -761,7 +762,8 @@
         }
         @media (min-width: 640px) {
             .rekomendasi-img-wrapper {
-                height: 195px;
+                height: auto;
+                aspect-ratio: 1 / 1;
                 padding: 0;
             }
         }
@@ -794,9 +796,9 @@
 
         .unit-nav-wrapper { position: relative; z-index: 70 !important; isolation: isolate; }
         .unit-nav-controls { position: relative; z-index: 71; }
-        .unit-nav-button { position: relative; z-index: 72; display: inline-flex; width: 3rem; height: 3rem; flex-shrink: 0; align-items: center; justify-content: center; border: 1px solid #2563eb; border-radius: 999px; background: #2563eb; padding: 0; color: #fff; box-shadow: 0 5px 14px rgba(37, 99, 235, .28); transition: background-color .15s ease, border-color .15s ease, box-shadow .15s ease, transform .15s ease; }
+        .unit-nav-button { position: relative; z-index: 72; display: inline-flex; width: 3rem; height: 3rem; flex-shrink: 0; align-items: center; justify-content: center; border: 1px solid #e8edf2; border-radius: 999px; background: #fff; padding: 0; color: #334155; box-shadow: 0 5px 14px rgba(15, 23, 42, .1); transition: background-color .15s ease, border-color .15s ease, color .15s ease, transform .15s ease; }
         .unit-nav-button svg { width: 1.25rem; height: 1.25rem; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-        .unit-nav-button:hover { transform: translateY(-1px); border-color: #1d4ed8; background: #1d4ed8; color: #fff; box-shadow: 0 7px 17px rgba(37, 99, 235, .34); }
+        .unit-nav-button:hover { transform: translateY(-1px); border-color: #bfdbeb; background: #f8fbfd; color: #115789; }
         .unit-nav-button:focus-visible { outline: 3px solid #93c5fd; outline-offset: 3px; }
 
         /* --- UNIT CAROUSEL STYLES (4 VISIBLE ITEMS) --- */

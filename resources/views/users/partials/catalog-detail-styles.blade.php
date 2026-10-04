@@ -8,6 +8,7 @@
     .catalog-detail-gallery #product-carousel > div { min-width: 100%; flex: 0 0 100%; }
     .catalog-detail-gallery .product-image { width: 100%; height: 100%; padding: 0; object-fit: cover !important; transition: transform .25s ease; }
     .catalog-detail-gallery:hover .product-image { transform: scale(1.05); }
+    .catalog-detail-gallery .gas-product-photo { transform: none; }
     .catalog-detail-name { color: #172b3d; font-size: clamp(1.4rem, 2.4vw, 1.85rem); font-weight: 800; line-height: 1.2; letter-spacing: -.02em; }
     .catalog-detail-price { color: #2563eb !important; font-size: clamp(1.5rem, 2.5vw, 2rem); font-weight: 850; }
     .catalog-detail-primary { background: #2563eb !important; }
