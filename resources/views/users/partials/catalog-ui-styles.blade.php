@@ -20,7 +20,7 @@
         position: relative;
         display: flex;
         width: 100%;
-        aspect-ratio: 1 / 1;
+        aspect-ratio: 4 / 3;
         align-items: center;
         justify-content: center;
         overflow: hidden;
@@ -30,12 +30,12 @@
     .product-image-wrapper > .product-image {
         width: 100%;
         height: 100%;
-        padding: .5rem;
-        object-fit: contain !important;
+        padding: 0;
+        object-fit: cover !important;
         transition: transform .25s ease;
     }
     .product-image-wrapper > .product-image.image-fallback { object-fit: contain !important; }
-    .product-item:hover .product-image { transform: scale(1.035); }
+    .product-item:hover .product-image { transform: scale(1.05); }
     .product-name {
         margin-top: 0;
         color: #172b3d;
