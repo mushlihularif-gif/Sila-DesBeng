@@ -1,11 +1,24 @@
 @extends('layouts.user')
 
 @section('page')
-@include('partials.abstract-bg')
 <section class="relative z-10 min-h-screen pt-40 pb-16">
+    {{-- Background profil sebelumnya --}}
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+        <img src="{{ asset('User/img/backgrounds/3.webp') }}" alt="Background"
+             class="absolute inset-0 w-full h-full object-cover opacity-60">
+    </div>
+
+    <div class="absolute top-0 left-0 w-[700px] h-[550px] pointer-events-none">
+        <div class="absolute inset-0 bg-gradient-to-br from-blue-400/50 via-blue-500/30 to-transparent rounded-br-[40%]"></div>
+    </div>
+
+    <div class="absolute bottom-0 right-0 w-[650px] h-[450px] pointer-events-none">
+        <div class="absolute inset-0 bg-gradient-to-tl from-yellow-300/40 via-yellow-400/25 to-transparent rounded-tl-[40%]"></div>
+    </div>
+
     <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6">
         <div class="mb-8">
-            <h1 class="text-3xl md:text-4xl font-bold text-slate-900 flex items-center gap-3">
+            <h1 class="text-3xl md:text-4xl font-bold text-white drop-shadow-[0_4px_12px_rgba(0,0,0,0.3)] flex items-center gap-3">
                 Profil Saya
                 @if($user->verification_status === 'verified')
                 <img src="{{ asset('images/verified-badge.png?v=2') }}" class="w-8 h-8 md:w-9 md:h-9 object-contain drop-shadow-md select-none inline-block" alt="Warga Terverifikasi" title="Warga Terverifikasi">
@@ -922,10 +935,9 @@
     
     /* Glass morphism dengan prefix webkit */
     .glass-card {
-        background: rgba(255, 255, 255, 0.78);
+        background: rgba(255, 255, 255, 0.3);
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
-        border-color: rgba(255, 255, 255, 0.9) !important;
     }
     
     .glass-input {
