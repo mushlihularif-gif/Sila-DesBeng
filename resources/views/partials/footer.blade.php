@@ -1,12 +1,12 @@
 <style>
-    .footer-logo-1 { width: 4rem; height: 4rem; }
+    .footer-logo-1 { width: 18rem; }
     .footer-logo-2 { width: 20rem; margin-top: -1.5rem; margin-left: -10px; }
     @media (min-width: 640px) {
-        .footer-logo-1 { width: 4.5rem; height: 4.5rem; }
+        .footer-logo-1 { width: 20rem; }
         .footer-logo-2 { width: 24rem; margin-top: -2.5rem; }
     }
     @media (min-width: 768px) {
-        .footer-logo-1 { width: 5rem; height: 5rem; }
+        .footer-logo-1 { width: 28rem; }
         .footer-logo-2 { width: 32rem; margin-top: -5rem; }
     }
 </style>
@@ -16,11 +16,8 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 lg:gap-8 mb-0">
 
             <div class="flex flex-col items-center md:items-start">
-                <div class="flex items-center gap-3">
-                    <img src="{{ asset('Admin/img/illustrations/logodomain.webp') }}" alt="Logo SegiDaerah"
-                        class="footer-logo-1 object-contain relative z-10">
-                    <span class="text-2xl font-extrabold tracking-tight">SegiDaerah</span>
-                </div>
+                <img src="{{ asset('User/img/logo/logosdfooter.webp') }}?v={{ time() }}" alt="SiladesBeng Logo"
+                    class="footer-logo-1 h-auto object-contain relative z-10">
 
                 <img src="{{ asset('User/img/logo/bklss.png') }}?v={{ time() }}" alt="Bengkalis Bermasa"
                     class="footer-logo-2 h-auto object-contain relative z-0">
@@ -43,7 +40,7 @@
                     </a>
                     <a href="{{ route('SiladesBeng.profile') }}"
                         class="text-base sm:text-lg font-medium hover:text-blue-300 transition-colors duration-200">
-                        Tentang SegiDaerah
+                        Profil SiladesBeng
                     </a>
                 </div>
             </div>
