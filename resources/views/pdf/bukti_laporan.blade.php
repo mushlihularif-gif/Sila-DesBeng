@@ -482,7 +482,7 @@
 
             <!-- Disclaimer -->
             <div class="disclaimer">
-                Dokumen ini diterbitkan secara resmi oleh Platform E-Government Segidaerah.<br>
+                Dokumen ini diterbitkan secara resmi oleh Platform E-Government SegiDaerah.<br>
                 Keaslian dokumen dapat diverifikasi dengan memindai QR Code di atas menggunakan kamera ponsel.<br>
                 Dicetak pada: {{ now()->format('d F Y, H:i') }} WIB &bull; ID: SDB-{{ str_pad($laporan->id, 5, '0', STR_PAD_LEFT) }}
                 @if($laporan->bukti || $laporan->lokasi)
@@ -593,7 +593,7 @@
             <div class="lampiran-footer">
                 Halaman ini merupakan bagian yang tidak terpisahkan dari Surat Bukti Pelaporan Masyarakat<br>
                 Nomor: SDB/{{ date('Y') }}/{{ date('m') }}/{{ str_pad($laporan->id, 5, '0', STR_PAD_LEFT) }}.<br>
-                Platform E-Government Segidaerah &copy; {{ date('Y') }} - Kecamatan Bengkalis
+                Platform E-Government SegiDaerah &copy; {{ date('Y') }} - Kecamatan Bengkalis
             </div>
 
         </div>

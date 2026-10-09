@@ -1101,7 +1101,7 @@
                     <i class="bx bx-info-circle fs-4 me-3 mt-1"></i>
                     <div>
                         <h6 class="alert-heading mb-1 fw-bold">Panduan Penunjukan Admin</h6>
-                        <span style="font-size: 0.85rem; line-height: 1.4; display: block;">Gunakan formulir ini untuk mencari akun warga yang telah terdaftar di <strong>Segidaerah</strong>, lalu ubah statusnya menjadi pengurus RT atau RW agar mereka dapat mengelola data kependudukan wilayahnya.</span>
+                        <span style="font-size: 0.85rem; line-height: 1.4; display: block;">Gunakan formulir ini untuk mencari akun warga yang telah terdaftar di <strong>SegiDaerah</strong>, lalu ubah statusnya menjadi pengurus RT atau RW agar mereka dapat mengelola data kependudukan wilayahnya.</span>
                     </div>
                 </div>
                 

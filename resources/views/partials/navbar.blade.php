@@ -198,7 +198,7 @@
             </div>
             
             <a href="{{ route('announcements.index') }}" class="sd-nav-link {{ request()->routeIs('announcements.*') ? 'active' : '' }}">Kabar dan Informasi Daerah</a>
-            <a href="{{ route('SiladesBeng.profile') }}" class="sd-nav-link {{ request()->routeIs('SiladesBeng.profile') ? 'active' : '' }}">Profil SiladesBeng</a>
+            <a href="{{ route('SiladesBeng.profile') }}" class="sd-nav-link {{ request()->routeIs('SiladesBeng.profile') ? 'active' : '' }}">Profil SegiDaerah</a>
             <a href="{{ route('kemitraan.create') }}" class="sd-nav-link {{ request()->routeIs('kemitraan.*') ? 'active' : '' }}">Gabung Kemitraan</a>
             @auth
                 @if(in_array(auth()->user()->role, ['admin_rt', 'admin_rw']))
@@ -468,7 +468,7 @@
             Pasar Daerah
         </a>
         <a href="{{ route('SiladesBeng.profile') }}" class="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium transition {{ request()->routeIs('SiladesBeng.profile') ? 'text-blue-600 bg-blue-50 border-l-4 border-blue-500' : '' }}">
-            Profil SiladesBeng
+            Profil SegiDaerah
         </a>
         <a href="{{ route('kemitraan.create') }}" class="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium transition {{ request()->routeIs('kemitraan.*') ? 'text-blue-600 bg-blue-50 border-l-4 border-blue-500' : '' }}">
             Gabung Kemitraan

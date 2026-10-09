@@ -66,7 +66,7 @@ class GeocodeHelper
             curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
             curl_setopt($ch, CURLOPT_TIMEOUT, 4);
             curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 2);
-            curl_setopt($ch, CURLOPT_USERAGENT, 'Segidaerah/1.0 (layanan@bengkaliskab.go.id)');
+            curl_setopt($ch, CURLOPT_USERAGENT, 'SegiDaerah/1.0 (layanan@bengkaliskab.go.id)');
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
                 'Accept: application/json',
                 'Accept-Language: id,id-ID;q=0.9,en;q=0.8'
@@ -165,7 +165,7 @@ class GeocodeHelper
             $ch = curl_init($url);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
-            curl_setopt($ch, CURLOPT_USERAGENT, 'Segidaerah/1.0 (layanan@bengkaliskab.go.id)');
+            curl_setopt($ch, CURLOPT_USERAGENT, 'SegiDaerah/1.0 (layanan@bengkaliskab.go.id)');
             curl_setopt($ch, CURLOPT_TIMEOUT, 6);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
             $raw = curl_exec($ch);

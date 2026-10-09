@@ -1,6 +1,6 @@
 @extends('layouts.user')
 
-@section('title', 'Detail Laporan #' . str_pad($laporan->id, 3, '0', STR_PAD_LEFT) . ' - Segidaerah')
+@section('title', 'Detail Laporan #' . str_pad($laporan->id, 3, '0', STR_PAD_LEFT) . ' - SegiDaerah')
 
 @push('styles')
 <style>
@@ -27,7 +27,7 @@
 
 @section('page')
 <main class="flex-grow relative w-full">
-    {{-- Background Gelombang Interaktif Segidaerah --}}
+    {{-- Background Gelombang Interaktif SegiDaerah --}}
     @include('partials.abstract-bg')
 
     <section class="relative z-10 min-h-screen pt-32 sm:pt-36 md:pt-40 pb-20">
@@ -55,7 +55,7 @@
                     <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Laporan Warga</span>
                 </h1>
                 <p class="text-gray-600 text-sm sm:text-base max-w-xl mx-auto">
-                    Pantau perkembangan, bukti dokumentasi, dan tindak lanjut laporan pengaduan Anda di Segidaerah.
+                    Pantau perkembangan, bukti dokumentasi, dan tindak lanjut laporan pengaduan Anda di SegiDaerah.
                 </p>
             </div>
 

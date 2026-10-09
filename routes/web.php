@@ -87,9 +87,15 @@ Route::get('/layanandaerah/{slug}', [App\Http\Controllers\User\BumdesUserControl
     ->middleware('role:user,guest');
 
 
-Route::get('/profil-SiladesBeng', [App\Http\Controllers\User\IsewaProfileController::class, 'index'])
+Route::get('/profil-SegiDaerah', [App\Http\Controllers\User\IsewaProfileController::class, 'index'])
     ->name('SiladesBeng.profile')
     ->middleware('role:user,guest');
+Route::get('/profil-SiladesBeng', function () {
+    return redirect('/profil-SegiDaerah');
+});
+Route::get('/profil-Segidaerah', function () {
+    return redirect('/profil-SegiDaerah');
+});
 
 Route::get('/kemitraan/gabung', [App\Http\Controllers\PartnerApplicationController::class, 'create'])
     ->name('kemitraan.create')

@@ -40,7 +40,7 @@
                     </a>
                     <a href="{{ route('SiladesBeng.profile') }}"
                         class="text-base sm:text-lg font-medium hover:text-blue-300 transition-colors duration-200">
-                        Profil SiladesBeng
+                        Profil SegiDaerah
                     </a>
                 </div>
             </div>

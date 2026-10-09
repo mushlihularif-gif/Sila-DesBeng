@@ -5,28 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="google" content="notranslate">
     <meta name="google-site-verification" content="YWYtf5GuDbvTc2XBoW-gAYQ3ovUXtIywC1WabfyxIcc" />
-    <title>@yield('title', 'Segidaerah - Sistem Sinergi Layanan dan Aspirasi Daerah Kecamatan Bengkalis')</title>
+    <title>@yield('title', 'SegiDaerah - Sistem Sinergi Layanan dan Aspirasi Daerah Kecamatan Bengkalis')</title>
 
     {{-- SEO & META DATA --}}
-    <meta name="description" content="Segidaerah (Sistem Sinergi Layanan dan Aspirasi Daerah Kecamatan Bengkalis) menyediakan layanan dan informasi bagi desa-desa di Kecamatan Bengkalis.">
-    <meta name="keywords" content="Segidaerah, Sistem Sinergi Layanan dan Aspirasi Daerah Kecamatan Bengkalis, layanan desa Kecamatan Bengkalis, aspirasi desa, informasi daerah">
-    <meta name="author" content="Segidaerah - Kecamatan Bengkalis">
+    <meta name="description" content="SegiDaerah (Sistem Sinergi Layanan dan Aspirasi Daerah Kecamatan Bengkalis) menyediakan layanan dan informasi bagi desa-desa di Kecamatan Bengkalis.">
+    <meta name="keywords" content="SegiDaerah, Sistem Sinergi Layanan dan Aspirasi Daerah Kecamatan Bengkalis, layanan desa Kecamatan Bengkalis, aspirasi desa, informasi daerah">
+    <meta name="author" content="SegiDaerah - Kecamatan Bengkalis">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="{{ url()->current() }}">
 
     {{-- Open Graph / Media Sosial Preview --}}
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ url()->current() }}">
-    <meta property="og:title" content="Segidaerah - Sistem Sinergi Layanan dan Aspirasi Daerah Kecamatan Bengkalis">
-    <meta property="og:description" content="Segidaerah menyediakan layanan dan informasi bagi desa-desa di Kecamatan Bengkalis.">
+    <meta property="og:title" content="SegiDaerah - Sistem Sinergi Layanan dan Aspirasi Daerah Kecamatan Bengkalis">
+    <meta property="og:description" content="SegiDaerah menyediakan layanan dan informasi bagi desa-desa di Kecamatan Bengkalis.">
     <meta property="og:image" content="{{ asset('Admin/img/illustrations/logodomain.webp') }}">
-    <meta property="og:site_name" content="Segidaerah">
+    <meta property="og:site_name" content="SegiDaerah">
 
     {{-- Twitter Cards --}}
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:url" content="{{ url()->current() }}">
-    <meta name="twitter:title" content="Segidaerah - Sistem Sinergi Layanan dan Aspirasi Daerah Kecamatan Bengkalis">
-    <meta name="twitter:description" content="Segidaerah menyediakan layanan dan informasi bagi desa-desa di Kecamatan Bengkalis.">
+    <meta name="twitter:title" content="SegiDaerah - Sistem Sinergi Layanan dan Aspirasi Daerah Kecamatan Bengkalis">
+    <meta name="twitter:description" content="SegiDaerah menyediakan layanan dan informasi bagi desa-desa di Kecamatan Bengkalis.">
     <meta name="twitter:image" content="{{ asset('Admin/img/illustrations/logodomain.webp') }}">
 
     {{-- JSON-LD Structured Data Schema untuk Mesin Pencari Google --}}
@@ -34,7 +34,7 @@
     {!! json_encode([
       '@context' => 'https://schema.org',
       '@type' => 'GovernmentOrganization',
-      'name' => 'Segidaerah',
+      'name' => 'SegiDaerah',
       'alternateName' => [
         'Sistem Sinergi Layanan dan Aspirasi Daerah Kecamatan Bengkalis',
         'Segi Daerah'
@@ -252,7 +252,7 @@
 
     <script>
     // ==========================================
-    // GLOBAL TOAST NOTIFICATION - Segidaerah
+    // GLOBAL TOAST NOTIFICATION - SegiDaerah
     // ==========================================
     window.showSiladesBengToast = function(type, title, message, duration) {
         duration = duration || 5000;

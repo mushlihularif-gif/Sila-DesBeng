@@ -342,7 +342,7 @@
 <div class="chatbot-fab notranslate" translate="no" id="chatbot-fab">
     <div class="chatbot-tooltip notranslate" translate="no" id="chatbot-tooltip"><span id="tooltip-text"></span><span class="cursor">|</span></div>
     <div class="notification-badge" id="chatbot-badge">1</div>
-    <img src="{{ asset('User/img/logo/logocb.webp') }}" alt="Segidaerah Assistant" draggable="false">
+    <img src="{{ asset('User/img/logo/logocb.webp') }}" alt="SegiDaerah Assistant" draggable="false">
 </div>
 
 <!-- Chat Window -->
@@ -351,7 +351,7 @@
         <div class="chatbot-header-info">
             <img src="{{ asset('User/img/logo/logocb.webp') }}" alt="AI">
             <div>
-                <h4 class="chatbot-title">Segidaerah Assistant</h4>
+                <h4 class="chatbot-title">SegiDaerah Assistant</h4>
                 <div class="chatbot-subtitle"><span class="online-dot"></span> Online - Siap Membantu</div>
             </div>
         </div>
@@ -361,7 +361,7 @@
     <div class="chatbot-messages" id="chatbot-messages">
         <!-- Default Welcome Message -->
         <div class="msg-bubble msg-bot">
-            Halo! Saya Segidaerah Assistant.<br><br>Ada yang bisa saya bantu hari ini seputar layanan di Kecamatan Bengkalis atau pelaporan warga?
+            Halo! Saya SegiDaerah Assistant.<br><br>Ada yang bisa saya bantu hari ini seputar layanan di Kecamatan Bengkalis atau pelaporan warga?
         </div>
     </div>
     

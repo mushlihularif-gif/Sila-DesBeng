@@ -1,6 +1,6 @@
 @extends('layouts.user')
 
-@section('title', 'Unit Penjualan Gas - Segidaerah')
+@section('title', 'Unit Penjualan Gas - SegiDaerah')
 
 @section('page')
 <main class="flex-grow relative w-full">

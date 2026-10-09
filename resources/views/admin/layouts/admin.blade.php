@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, user-scalable=yes, minimum-scale=1.0, maximum-scale=5.0" />
-    <title>Dashboard - Segidaerah Admin</title>
+    <title>Dashboard - SegiDaerah Admin</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="description" content="" />
     <link rel="icon" type="image/png" href="{{ asset('Admin/img/illustrations/logodomain.webp') }}?v={{ time() }}" />
@@ -1475,7 +1475,7 @@
                         <ul class="menu-sub">
                             <li class="menu-item {{ request()->routeIs('admin.SiladesBeng.profile') || request()->routeIs('admin.SiladesBeng.developer.profile') ? 'active' : '' }}">
                                 <a href="{{ route('admin.SiladesBeng.profile') }}" class="menu-link">
-                                    <div>Segidaerah</div>
+                                    <div>SegiDaerah</div>
                                 </a>
                             </li>
                             <li class="menu-item {{ request()->routeIs('admin.SiladesBeng.bumdes.index') || request()->routeIs('admin.SiladesBeng.bumdes.*') ? 'active' : '' }}">

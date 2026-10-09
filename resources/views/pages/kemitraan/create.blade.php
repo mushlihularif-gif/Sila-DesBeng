@@ -1,6 +1,6 @@
 @extends('layouts.user')
 
-@section('title', 'Gabung Kemitraan - Segidaerah')
+@section('title', 'Gabung Kemitraan - SegiDaerah')
 
 @push('styles')
 <style>
@@ -62,7 +62,7 @@
                 </p>
             @else
                 <p class="text-gray-700 text-lg max-w-2xl mx-auto mb-6 animate-fade-in-up" style="animation-delay: 100ms;">
-                    Pemerintah Desa Anda sudah bergabung dengan Segidaerah!
+                    Pemerintah Desa Anda sudah bergabung dengan SegiDaerah!
                 </p>
                 
                 <p class="text-gray-500 text-sm max-w-2xl mx-auto mb-10 animate-fade-in-up bg-green-50/50 p-3 rounded-xl border border-green-200" style="animation-delay: 150ms;">
@@ -411,9 +411,9 @@
                                 <p class="text-sm text-gray-400 mt-1">Sistem Sinergi Layanan dan Aspirasi Daerah Kecamatan Bengkalis</p>
                             </div>
 
-                            {{-- Logo Segidaerah (Kanan) --}}
+                            {{-- Logo SegiDaerah (Kanan) --}}
                             <div class="flex-shrink-0 flex justify-center pr-4" style="width: 110px;">
-                                <img src="{{ asset('Admin/img/illustrations/logodomain.webp') }}" alt="Logo Segidaerah" class="object-contain" style="width: 100px; height: 100px;">
+                                <img src="{{ asset('Admin/img/illustrations/logodomain.webp') }}" alt="Logo SegiDaerah" class="object-contain" style="width: 100px; height: 100px;">
                             </div>
                         </div>
 
