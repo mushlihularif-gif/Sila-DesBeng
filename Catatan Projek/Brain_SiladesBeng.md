@@ -3,10 +3,10 @@
 Dokumen ini berfungsi sebagai pusat memori dan dokumentasi (pengganti Obsidian Vault) untuk memastikan rekam jejak pengembangan sistem tetap terjaga secara persisten.
 
 ## 1. Identitas Proyek
-- **Nama Sistem:** SiladesBeng (Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis)
+- **Nama Sistem:** SiladesBeng (Sistem Sinergi Layanan dan Aspirasi Desa di Kecamatan Bengkalis)
 - **Kompetisi:** KMIPN VIII Tahun 2026 (Kategori E-Government)
 - **Tim Pengembang:** Tim Gen Hello World (Politeknik Negeri Bengkalis)
-- **Skala Implementasi:** Skala Kabupaten (Mencakup Kabupaten, 8 Kecamatan, 155 Desa, dan 47 Kelurahan di Bengkalis).
+- **Skala Implementasi saat ini:** Kecamatan Bengkalis dan desa/kelurahan di dalamnya.
 - **Aturan Ketat Lomba:** TIDAK BOLEH MENGGUNAKAN EMOJI DALAM SISTEM MAUPUN DOKUMENTASI.
 
 ## 2. Arsitektur dan Inovasi Utama
@@ -748,7 +748,7 @@ ull.
 Pada Agustus 2026, otak utama **SiladesBeng Assistant** (terletak di ChatbotController.php) telah ditraining secara masif dan komprehensif agar memahami arsitektur, filosofi, dan aturan privasi aplikasi secara mutlak. Berikut adalah kerangka pengetahuan (System Prompt) yang telah ditanamkan ke dalam AI:
 
 ### 1. Identitas & Ejaan Mutlak
-- **Penulisan Resmi:** Wajib dieja sebagai **SiladesBeng** (S besar, B besar, dan d kecil). Singkatan dari *Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis*.
+- **Penulisan Resmi:** Wajib dieja sebagai **SiladesBeng** (S besar, B besar, dan d kecil). Singkatan dari *Sistem Sinergi Layanan dan Aspirasi Desa di Kecamatan Bengkalis*.
 - **Cakupan Layanan:** Fokus pada Kecamatan Bengkalis dan desa/kelurahan di dalamnya. Nama resmi sistem tetap merujuk Kabupaten Bengkalis.
 - **Filosofi Maskot:** Robot bertanjak bermotif kain songket. Warna biru laut (Maritim Bengkalis) dan Kuning Keemasan (Kesejahteraan Ekonomi Tanah Melayu).
 - **Pencipta:** Tim Gen Hello World (Rizqy Hamadi Ken - Full Stack, Mushlihul Arif - UI/UX & Frontend, Dicki Wahyudi - Mobile Dev), dibimbing oleh Nurmi Hidayasari, ST., M.Kom.
@@ -925,7 +925,7 @@ Ketika dewan juri membandingkan dokumen proposal awal (yang mencantumkan 6 layan
 #### Slide 1: Cover / Identitas Resmi
 - **Waktu Alokasi:** 00:00 – 00:30 (30 Detik)
 - **Judul Besar:** SILADESBENG
-- **Sub-Judul:** Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis
+- **Sub-Judul:** Sistem Sinergi Layanan dan Aspirasi Desa di Kecamatan Bengkalis
 - **Tagline:** "Integrasi Daerah, Menuju Bengkalis Bermarwah"
 - **Kategori:** E-Government (G2C, G2G, G2B) - KMIPN VIII Tahun 2026
 - **Identitas Tim:**
@@ -933,7 +933,7 @@ Ketika dewan juri membandingkan dokumen proposal awal (yang mencantumkan 6 layan
   - Anggota: Rizqy Hamadi Ken (Full Stack), M. Mushlihul Arif (Security & UI/UX), Dicki Wahyudi (Mobile Developer)
   - Dosen Pembimbing: Nurmi Hidayasari, ST., M.Kom.
 - **Narasi Pembuka:**
-  "Selamat pagi/siang Dewan Juri yang terhormat. Kami dari Tim Gen Hello World, Politeknik Negeri Bengkalis, mempersembahkan SILADESBENG: Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis, platform terpadu yang menjembatani layanan publik dan tata kelola pemerintahan dari tingkat RT hingga Kabupaten tanpa bottleneck."
+  "Selamat pagi/siang Dewan Juri yang terhormat. Kami dari Tim Gen Hello World, Politeknik Negeri Bengkalis, mempersembahkan SILADESBENG: Sistem Sinergi Layanan dan Aspirasi Desa di Kecamatan Bengkalis, platform layanan untuk desa-desa di kecamatan ini."
 
 #### Slide 2: Latar Belakang Masalah & Kesenjangan di Daerah
 - **Waktu Alokasi:** 00:30 – 01:15 (45 Detik)
@@ -1174,7 +1174,7 @@ Pekerjaan yang perlu diselesaikan di Google Cloud Platform Console:
 
 - **Status Pendaftaran:** SELESAI DAN TERVERIFIKASI RESMI (22 September 2026).
 - **Identitas Nomenklatur:**
-  - **Nama Lengkap:** SiladesBeng - Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis.
+  - **Nama Lengkap:** SiladesBeng - Sistem Sinergi Layanan dan Aspirasi Desa di Kecamatan Bengkalis.
   - **URL Domain:** `https://siladesbeng.inovasia.site`
 - **Pekerjaan Teknis yang Diselesaikan:**
   1. **On-Page SEO & Metadata (`resources/views/layouts/app.blade.php`):**

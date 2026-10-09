@@ -26,7 +26,7 @@
                             Langkah Awal Mewujudkan Digitalisasi Bengkalis
                         </p>
                         <p class="text-gray-700 leading-relaxed mb-4">
-                            <span class="font-semibold text-gray-800">SiladesBeng</span> (Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis) berfokus pada informasi dan layanan untuk desa-desa di Kecamatan Bengkalis. Sistem ini dirancang untuk memudahkan warga menemukan layanan, menyampaikan laporan, serta memeriksa keaslian bukti digital melalui QR dan HMAC-SHA256.
+                            <span class="font-semibold text-gray-800">SiladesBeng</span> (Sistem Sinergi Layanan dan Aspirasi Desa di Kecamatan Bengkalis) menyediakan informasi dan akses layanan bagi warga desa-desa di Kecamatan Bengkalis. Warga dapat menggunakan layanan yang tersedia, menyampaikan laporan, dan membaca informasi daerah melalui satu platform.
                         </p>
                         <p class="text-gray-700 leading-relaxed">
                             SiladesBeng menyediakan informasi layanan desa, Pelaporan Warga, dan Kabar dan Informasi Daerah dalam satu platform. Cakupan implementasi dan evaluasi penelitian ini dibatasi pada Kecamatan Bengkalis dan desa-desa di dalamnya.

@@ -1,4 +1,4 @@
-Halo Gaiss!! Selamat Datang di Sila DesBeng - Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis ( Government to Citizen ) 🔥
+Halo Gaiss!! Selamat Datang di SiladesBeng - Sistem Sinergi Layanan dan Aspirasi Desa di Kecamatan Bengkalis ( Government to Citizen ) 🔥
 - Kompetisi Mahasiswa Informatika Politeknik Nasional
 
 Server lokal

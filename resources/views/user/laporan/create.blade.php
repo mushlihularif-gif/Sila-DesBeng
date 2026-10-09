@@ -25,7 +25,7 @@
                                 Form Pelaporan
                             </h3>
                             <p class="text-[10px] sm:text-xs md:text-sm text-gray-500 mt-1 sm:mt-2">Sampaikan keluhan atau saran Anda secara jujur dan beretika</p>
-                            <p class="hidden sm:block text-[10px] md:text-xs text-gray-400 mt-1">Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis</p>
+                            <p class="hidden sm:block text-[10px] md:text-xs text-gray-400 mt-1">Sistem Sinergi Layanan dan Aspirasi Desa di Kecamatan Bengkalis</p>
                         </div>
 
                         {{-- Logo SiladesBeng (Kanan) --}}

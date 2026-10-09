@@ -655,16 +655,16 @@
                                     <i class="bx bx-chevron-down ml-1" aria-hidden="true"></i>
                                 </summary>
                                 <div class="mt-3 space-y-3 text-left text-sm leading-relaxed text-gray-600">
-                                    <p>SiladesBeng (Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis) merupakan platform digital dengan cakupan layanan dan informasi desa-desa di Kecamatan Bengkalis.</p>
+                                    <p>SiladesBeng (Sistem Sinergi Layanan dan Aspirasi Desa di Kecamatan Bengkalis) merupakan platform digital untuk layanan dan informasi desa-desa di Kecamatan Bengkalis.</p>
                                     <p>Warga dapat mengakses penyewaan alat, penjualan gas, transportasi, fasilitas umum, Pasar Daerah, Pelaporan Warga, serta Kabar dan Informasi Daerah melalui satu platform.</p>
                                 </div>
                             </details>
                             <div class="hidden sm:block space-y-4 text-left md:text-justify text-sm md:text-base text-gray-700 leading-relaxed">
                                 <p>
-                                    <span class="font-semibold text-gray-800">SiladesBeng</span> (Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis) merupakan platform digital yang menjadi pusat informasi dan akses layanan bagi desa-desa di Kecamatan Bengkalis. Cakupan uji coba dan pengembangan penelitian ini dibatasi pada kecamatan tersebut.
+                                    <span class="font-semibold text-gray-800">SiladesBeng</span> (Sistem Sinergi Layanan dan Aspirasi Desa di Kecamatan Bengkalis) merupakan platform digital yang menjadi pusat informasi dan akses layanan bagi desa-desa di kecamatan ini. Cakupan uji coba dan pengembangan penelitian ini dibatasi pada Kecamatan Bengkalis.
                                 </p>
                                 <p>
-                                    Warga di desa-desa Kecamatan Bengkalis dapat mengakses informasi layanan, menyampaikan <span class="font-medium text-gray-800">Pelaporan Warga</span>, membaca <span class="font-medium text-gray-800">Kabar dan Informasi Daerah</span>, serta membuka bukti digital melalui QR untuk memeriksa hasil verifikasi HMAC-SHA256. Pelaksanaan dan evaluasi sistem dilakukan dalam cakupan kecamatan ini.
+                                    Warga di desa-desa Kecamatan Bengkalis dapat mengakses informasi layanan, menyampaikan <span class="font-medium text-gray-800">Pelaporan Warga</span>, dan membaca <span class="font-medium text-gray-800">Kabar dan Informasi Daerah</span>. Sistem ini dikembangkan dan diuji untuk kebutuhan masyarakat di Kecamatan Bengkalis.
                                 </p>
                             </div>
                         </div>

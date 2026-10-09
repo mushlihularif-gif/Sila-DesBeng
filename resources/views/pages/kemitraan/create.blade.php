@@ -388,7 +388,7 @@
                                 <p class="text-base text-gray-500 mt-2">
                                     {{ $isJoined ? 'Daftarkan wilayah Anda untuk bergabung' : 'Daftarkan desa Anda untuk bergabung' }}
                                 </p>
-                                <p class="text-sm text-gray-400 mt-1">Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis</p>
+                                <p class="text-sm text-gray-400 mt-1">Sistem Sinergi Layanan dan Aspirasi Desa di Kecamatan Bengkalis</p>
                             </div>
 
                             {{-- Logo SiladesBeng (Kanan) --}}
@@ -1241,4 +1241,3 @@
 @endif
 
 @endsection
-
