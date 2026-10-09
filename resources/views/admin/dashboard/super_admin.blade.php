@@ -12,7 +12,7 @@
                     <span class="text-muted fw-light">Sistem Platform /</span> Dashboard
                 </h4>
                 <p class="text-muted mb-0">
-                    Rangkuman seluruh modul SegiDaerah. Halaman ini melihat platform secara keseluruhan,
+                    Rangkuman seluruh modul Segidaerah. Halaman ini melihat platform secara keseluruhan,
                     bukan operasional per desa.
                 </p>
             </div>

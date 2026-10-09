@@ -1,6 +1,6 @@
 @extends('layouts.user')
 
-@section('title', $category['title'] . ' - SegiDaerah')
+@section('title', $category['title'] . ' - Segidaerah')
 
 @section('page')
 <main class="relative flex-grow w-full">

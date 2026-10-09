@@ -40,7 +40,7 @@ class OtpMail extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Kode Verifikasi (OTP) - SegiDaerah',
+            subject: 'Kode Verifikasi (OTP) - Segidaerah',
         );
     }
 

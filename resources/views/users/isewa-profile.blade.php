@@ -26,10 +26,10 @@
                             Langkah Awal Mewujudkan Digitalisasi Bengkalis
                         </p>
                         <p class="text-gray-700 leading-relaxed mb-4">
-                            Perjalanan <span class="font-semibold text-gray-800">SegiDaerah</span> (Sistem Sinergi Layanan dan Aspirasi Daerah Kecamatan Bengkalis) bermula dari sebuah visi besar untuk mendorong percepatan digitalisasi pelayanan publik di wilayah Kecamatan Bengkalis. Gagasan ini lahir sebagai solusi inovatif untuk memutus kendala jarak dan mengoptimalkan potensi daerah melalui pemanfaatan teknologi. Mimpi utama kami adalah menghubungkan seluruh jaringan desa dan kelurahan ke dalam satu ekosistem digital yang canggih, terpadu, dan mudah diakses oleh seluruh lapisan masyarakat.
+                            Perjalanan <span class="font-semibold text-gray-800">Segidaerah</span> (Sistem Sinergi Layanan dan Aspirasi Daerah Kecamatan Bengkalis) bermula dari sebuah visi besar untuk mendorong percepatan digitalisasi pelayanan publik di wilayah Kecamatan Bengkalis. Gagasan ini lahir sebagai solusi inovatif untuk memutus kendala jarak dan mengoptimalkan potensi daerah melalui pemanfaatan teknologi. Mimpi utama kami adalah menghubungkan seluruh jaringan desa dan kelurahan ke dalam satu ekosistem digital yang canggih, terpadu, dan mudah diakses oleh seluruh lapisan masyarakat.
                         </p>
                         <p class="text-gray-700 leading-relaxed">
-                            Sebagai wujud nyata dari visi tersebut, SegiDaerah hadir mengintegrasikan berbagai pilar layanan esensial daerah, mulai dari sarana mobilitas (kendaraan), pemanfaatan fasilitas umum, penyewaan alat, pendistribusian gas, hingga Pasar Daerah. Lebih jauh lagi, kami juga menghadirkan ruang interaksi inklusif melalui fitur Pelaporan Warga dan Informasi Pengumuman. Cerita SegiDaerah adalah cerita tentang inovasi dan kolaborasi bagaimana sentuhan teknologi mentransformasi cara aparatur dan masyarakat berinteraksi demi mewujudkan tata kelola Bengkalis yang mandiri, produktif, dan berkelanjutan.
+                            Sebagai wujud nyata dari visi tersebut, Segidaerah hadir mengintegrasikan berbagai pilar layanan esensial daerah, mulai dari sarana mobilitas (kendaraan), pemanfaatan fasilitas umum, penyewaan alat, pendistribusian gas, hingga Pasar Daerah. Lebih jauh lagi, kami juga menghadirkan ruang interaksi inklusif melalui fitur Pelaporan Warga dan Informasi Pengumuman. Cerita Segidaerah adalah cerita tentang inovasi dan kolaborasi bagaimana sentuhan teknologi mentransformasi cara aparatur dan masyarakat berinteraksi demi mewujudkan tata kelola Bengkalis yang mandiri, produktif, dan berkelanjutan.
                         </p>
                     </div>
                     
@@ -37,7 +37,7 @@
                     <div class="relative flex-shrink-0 hidden md:block">
                         <div class="relative">
                             <img src="{{ asset('User/img/avatars/logodomain.webp') }}" 
-                                 alt="Logo SegiDaerah"
+                                 alt="Logo Segidaerah"
                                  class="w-72 h-72 lg:w-80 lg:h-80 object-contain drop-shadow-xl scale-110">
                             <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-white/60"></div>
                         </div>
@@ -219,11 +219,11 @@
                 </div>
             </div>
 
-            <!-- Struktur Pengembang SegiDaerah Section -->
+            <!-- Struktur Pengembang Segidaerah Section -->
             <div class="mb-16 animate-section">
                 <h2 class="text-3xl md:text-4xl font-bold mb-12 text-center">
                     <span class="bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">Struktur Pengembang</span>
-                    <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">SegiDaerah</span>
+                    <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Segidaerah</span>
                 </h2>
                 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">

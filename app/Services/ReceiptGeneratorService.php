@@ -190,7 +190,7 @@ class ReceiptGeneratorService
         $y += $lineHeight;
         $this->addText($image, 'Hormat Kami', 130, $y, $normalSize, $black, $fontPath);
         
-        // Tambahkan QR Code Validasi & Branding SegiDaerah
+        // Tambahkan QR Code Validasi & Branding Segidaerah
         $token = hash_hmac('sha256', $booking->id . $booking->order_number, config('app.key'));
         $qrUrl = url("/validasi/transaksi/rental/{$booking->id}?token={$token}");
         $this->addFooterTtd($image, $y, $qrUrl, $fontPath, $normalSize, $black);
@@ -390,7 +390,7 @@ class ReceiptGeneratorService
         $y += $lineHeight;
         $this->addText($image, 'Hormat Kami', 130, $y, $normalSize, $black, $fontPath);
         
-        // Tambahkan QR Code Validasi & Branding SegiDaerah
+        // Tambahkan QR Code Validasi & Branding Segidaerah
         $token = hash_hmac('sha256', $order->id . $order->order_number, config('app.key'));
         $qrUrl = url("/validasi/transaksi/gas/{$order->id}?token={$token}");
         $this->addFooterTtd($image, $y, $qrUrl, $fontPath, $normalSize, $black);
@@ -573,7 +573,7 @@ class ReceiptGeneratorService
         $y += $lineHeight;
         $this->addText($image, 'Hormat Kami', 130, $y, $normalSize, $black, $fontPath);
         
-        // Tambahkan QR Code Validasi & Branding SegiDaerah
+        // Tambahkan QR Code Validasi & Branding Segidaerah
         $token = hash_hmac('sha256', $booking->id . $booking->order_number, config('app.key'));
         $qrUrl = url("/validasi/transaksi/mobil/{$booking->id}?token={$token}");
         $this->addFooterTtd($image, $y, $qrUrl, $fontPath, $normalSize, $black);
@@ -719,7 +719,7 @@ class ReceiptGeneratorService
         $y += $lineHeight;
         $this->addText($image, 'Hormat Kami', 130, $y, $normalSize, $black, $fontPath);
         
-        // Tambahkan QR Code Validasi & Branding SegiDaerah
+        // Tambahkan QR Code Validasi & Branding Segidaerah
         $token = hash_hmac('sha256', $booking->id . $booking->order_number, config('app.key'));
         $qrUrl = url("/validasi/transaksi/fasilitas/{$booking->id}?token={$token}");
         $this->addFooterTtd($image, $y, $qrUrl, $fontPath, $normalSize, $black);
@@ -1041,7 +1041,7 @@ class ReceiptGeneratorService
         $y += $lineHeight;
         $this->addText($image, 'Hormat Kami', 130, $y, $normalSize, $black, $fontPath);
         
-        // Tambahkan QR Code Validasi & Branding SegiDaerah
+        // Tambahkan QR Code Validasi & Branding Segidaerah
         $token = hash_hmac('sha256', $order->id . $order->order_number, config('app.key'));
         $qrUrl = url("/validasi/transaksi/pasar-daerah/{$order->id}?token={$token}");
         $this->addFooterTtd($image, $y, $qrUrl, $fontPath, $normalSize, $black);
@@ -1094,7 +1094,7 @@ class ReceiptGeneratorService
                     // Copy QR Code ke main image
                     imagecopyresampled($image, $qrImage, $qrX, $yQr, 0, 0, $qrSize, $qrSize, imagesx($qrImage), imagesy($qrImage));
                     
-                    // Tambahkan Logo SegiDaerah di tengah QR Code
+                    // Tambahkan Logo Segidaerah di tengah QR Code
                     // Gunakan proporsi aman (18% lebar QR) dengan padding 2px agar modul koreksi error QR tetap utuh dan mudah di-scan kamera HP
                     $logoPath = public_path('Admin/img/illustrations/logodomain-256.png');
                     if (file_exists($logoPath)) {
@@ -1120,11 +1120,11 @@ class ReceiptGeneratorService
             // Abaikan jika API gagal, lanjut render teks saja
         }
         
-        // 2. Tambahkan Branding SegiDaerah di bawah QR (Rata Tengah)
+        // 2. Tambahkan Branding Segidaerah di bawah QR (Rata Tengah)
         $yBranding = $yQr + $qrSize + 40;
         
         // Menghitung bounding box teks agar bisa rata tengah
-        $bboxTitle = imagettfbbox($normalSize + 4, 0, $fontPath, 'SegiDaerah');
+        $bboxTitle = imagettfbbox($normalSize + 4, 0, $fontPath, 'Segidaerah');
         $titleWidth = $bboxTitle[2] - $bboxTitle[0];
         $titleX = ($imageWidth - $titleWidth) / 2;
         
@@ -1132,7 +1132,7 @@ class ReceiptGeneratorService
         $descWidth = $bboxDesc[2] - $bboxDesc[0];
         $descX = ($imageWidth - $descWidth) / 2;
         
-        $this->addText($image, 'SegiDaerah', $titleX, $yBranding, $normalSize + 4, $black, $fontPath, true); // Bold
+        $this->addText($image, 'Segidaerah', $titleX, $yBranding, $normalSize + 4, $black, $fontPath, true); // Bold
         $this->addText($image, 'Platform E-Government Kab. Bengkalis', $descX, $yBranding + 35, $normalSize - 4, $black, $fontPath);
     }
 }

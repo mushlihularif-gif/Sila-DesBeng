@@ -411,7 +411,7 @@
                                 </svg>
                             </div>
                             <h3 class="text-2xl font-bold text-gray-800 mb-3">Unit Pelayanan Belum Tersedia</h3>
-                            <p class="text-gray-500 max-w-lg text-lg leading-relaxed">Mohon maaf, desa atau kelurahan Anda belum mengaktifkan layanan SegiDaerah.</p>
+                            <p class="text-gray-500 max-w-lg text-lg leading-relaxed">Mohon maaf, desa atau kelurahan Anda belum mengaktifkan layanan Segidaerah.</p>
                         </div>
                         @endif
                 </div>
@@ -647,7 +647,7 @@
                     <div class="max-w-5xl mx-auto">
                         <div class="backdrop-blur-sm bg-white/70 rounded-2xl sm:rounded-3xl p-5 sm:p-8 md:p-12 border border-white/70 shadow-lg sm:shadow-xl">
                             <p class="text-sm sm:hidden text-gray-700 leading-relaxed">
-                                SegiDaerah memudahkan warga mengakses layanan desa, berbelanja produk lokal, menyampaikan laporan, dan mendapatkan informasi daerah dalam satu platform.
+                                Segidaerah memudahkan warga mengakses layanan desa, berbelanja produk lokal, menyampaikan laporan, dan mendapatkan informasi daerah dalam satu platform.
                             </p>
                             <details class="sm:hidden mt-3 border-t border-slate-200/80 pt-3">
                                 <summary class="cursor-pointer list-none text-sm font-bold text-[#115789] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 rounded">
@@ -655,16 +655,16 @@
                                     <i class="bx bx-chevron-down ml-1" aria-hidden="true"></i>
                                 </summary>
                                 <div class="mt-3 space-y-3 text-left text-sm leading-relaxed text-gray-600">
-                                    <p>SegiDaerah (Sistem Sinergi Layanan dan Aspirasi Daerah Kecamatan Bengkalis) merupakan platform digital terpadu yang dirancang untuk mendukung tata kelola administrasi dan pelayanan publik secara modern, transparan, dan efisien.</p>
+                                    <p>Segidaerah (Sistem Sinergi Layanan dan Aspirasi Daerah Kecamatan Bengkalis) merupakan platform digital terpadu yang dirancang untuk mendukung tata kelola administrasi dan pelayanan publik secara modern, transparan, dan efisien.</p>
                                     <p>Warga dapat mengakses penyewaan alat, penjualan gas, transportasi, fasilitas umum, Pasar Daerah, Pelaporan Warga, serta Kabar dan Informasi Daerah melalui satu platform.</p>
                                 </div>
                             </details>
                             <div class="hidden sm:block space-y-4 text-left md:text-justify text-sm md:text-base text-gray-700 leading-relaxed">
                                 <p>
-                                    <span class="font-semibold text-gray-800">SegiDaerah</span> (Sistem Sinergi Layanan dan Aspirasi Daerah Kecamatan Bengkalis) merupakan platform digital terpadu yang dirancang khusus untuk memodernisasi tata kelola administrasi dan pelayanan publik di wilayah Kecamatan Bengkalis. Platform ini hadir sebagai solusi inovatif yang mengintegrasikan berbagai pilar layanan esensial masyarakat dan operasional layanan daerah ke dalam satu pintu yang modern, transparan, dan mudah dijangkau.
+                                    <span class="font-semibold text-gray-800">Segidaerah</span> (Sistem Sinergi Layanan dan Aspirasi Daerah Kecamatan Bengkalis) merupakan platform digital terpadu yang dirancang khusus untuk memodernisasi tata kelola administrasi dan pelayanan publik di wilayah Kecamatan Bengkalis. Platform ini hadir sebagai solusi inovatif yang mengintegrasikan berbagai pilar layanan esensial masyarakat dan operasional layanan daerah ke dalam satu pintu yang modern, transparan, dan mudah dijangkau.
                                 </p>
                                 <p>
-                                    Melalui SegiDaerah, masyarakat Kecamatan Bengkalis dapat dengan mudah mengakses beragam unit layanan, mulai dari penyewaan alat, pendistribusian gas, sarana transportasi, pemanfaatan fasilitas umum, hingga Pasar Daerah untuk produk usaha lokal. Di samping itu, sistem ini juga mewadahi fitur <span class="font-medium text-gray-800">Pelaporan Warga</span> serta pusat informasi <span class="font-medium text-gray-800">Kabar dan Informasi Daerah</span> secara <i>real-time</i>. Kami percaya bahwa digitalisasi layanan daerah merupakan langkah penting menuju pelayanan publik yang prima, penguatan perekonomian daerah, dan kemandirian masyarakat yang berkelanjutan.
+                                    Melalui Segidaerah, masyarakat Kecamatan Bengkalis dapat dengan mudah mengakses beragam unit layanan, mulai dari penyewaan alat, pendistribusian gas, sarana transportasi, pemanfaatan fasilitas umum, hingga Pasar Daerah untuk produk usaha lokal. Di samping itu, sistem ini juga mewadahi fitur <span class="font-medium text-gray-800">Pelaporan Warga</span> serta pusat informasi <span class="font-medium text-gray-800">Kabar dan Informasi Daerah</span> secara <i>real-time</i>. Kami percaya bahwa digitalisasi layanan daerah merupakan langkah penting menuju pelayanan publik yang prima, penguatan perekonomian daerah, dan kemandirian masyarakat yang berkelanjutan.
                                 </p>
                             </div>
                         </div>

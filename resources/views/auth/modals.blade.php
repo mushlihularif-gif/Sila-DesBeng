@@ -451,7 +451,7 @@
                 <h2 class="text-2xl font-bold text-gray-900 mb-6">Selamat Datang</h2>
 
                 <div class="flex justify-center mb-6">
-                    <img src="{{ asset('Admin/img/illustrations/logodomain.webp') }}" alt="Logo SegiDaerah"
+                    <img src="{{ asset('Admin/img/illustrations/logodomain.webp') }}" alt="Logo Segidaerah"
                         class="h-32">
                 </div>
 
@@ -481,7 +481,7 @@
             </div>
 
             <div class="flex justify-center mb-8">
-                <img src="{{ asset('Admin/img/illustrations/logodomain.webp') }}" alt="Logo SegiDaerah" class="h-32">
+                <img src="{{ asset('Admin/img/illustrations/logodomain.webp') }}" alt="Logo Segidaerah" class="h-32">
             </div>
 
             <form action="{{ route('auth.forgot-password') }}" method="POST" class="space-y-6">
@@ -616,7 +616,7 @@
                     </div>
                 </div>
                 <h2 class="text-2xl font-bold text-gray-900 mb-2">Keluar Akun?</h2>
-                <p class="text-sm text-gray-500">Apakah Anda yakin ingin keluar dari SegiDaerah?</p>
+                <p class="text-sm text-gray-500">Apakah Anda yakin ingin keluar dari Segidaerah?</p>
             </div>
 
             <div class="flex gap-3">

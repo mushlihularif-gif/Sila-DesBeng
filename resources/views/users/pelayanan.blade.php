@@ -106,7 +106,7 @@
                         <div class="flex-1">
                             <h3 class="text-lg sm:text-2xl font-bold text-gray-900 mb-2 sm:mb-4 text-center sm:text-left">Penjualan Gas Daerah</h3>
                             <p class="text-xs sm:text-base text-gray-700 leading-relaxed text-justify">
-                                Warga dapat membeli tabung gas seperti gas LPG 3 kg secara digital melalui SegiDaerah.
+                                Warga dapat membeli tabung gas seperti gas LPG 3 kg secara digital melalui Segidaerah.
                                 Proses pencatatan transaksi, validasi pembayaran, dan laporan penjualan dilakukan otomatis
                                 oleh sistem untuk menjamin transparansi dan keakuratan data.
                             </p>

@@ -3,7 +3,7 @@
 Dokumen ini berfungsi sebagai pusat memori dan dokumentasi (pengganti Obsidian Vault) untuk memastikan rekam jejak pengembangan sistem tetap terjaga secara persisten.
 
 ## 1. Identitas Proyek
-- **Nama Sistem:** SegiDaerah (Sistem Sinergi Layanan dan Aspirasi Daerah Kecamatan Bengkalis)
+- **Nama Sistem:** Segidaerah (Sistem Sinergi Layanan dan Aspirasi Daerah Kecamatan Bengkalis)
 - **Kompetisi:** KMIPN VIII Tahun 2026 (Kategori E-Government)
 - **Tim Pengembang:** Tim Gen Hello World (Politeknik Negeri Bengkalis)
 - **Skala Implementasi saat ini:** Kecamatan Bengkalis dan desa/kelurahan di dalamnya.
@@ -748,7 +748,7 @@ ull.
 Pada Agustus 2026, otak utama **SiladesBeng Assistant** (terletak di ChatbotController.php) telah ditraining secara masif dan komprehensif agar memahami arsitektur, filosofi, dan aturan privasi aplikasi secara mutlak. Berikut adalah kerangka pengetahuan (System Prompt) yang telah ditanamkan ke dalam AI:
 
 ### 1. Identitas & Ejaan Mutlak
-- **Penulisan Resmi:** Wajib dieja sebagai **SegiDaerah**. Singkatan dari *Sistem Sinergi Layanan dan Aspirasi Daerah Kecamatan Bengkalis*.
+- **Penulisan Resmi:** Wajib dieja sebagai **Segidaerah**. Singkatan dari *Sistem Sinergi Layanan dan Aspirasi Daerah Kecamatan Bengkalis*.
 - **Cakupan Layanan:** Fokus pada Kecamatan Bengkalis dan desa/kelurahan di dalamnya. Nama resmi sistem tetap merujuk Kabupaten Bengkalis.
 - **Filosofi Maskot:** Robot bertanjak bermotif kain songket. Warna biru laut (Maritim Bengkalis) dan Kuning Keemasan (Kesejahteraan Ekonomi Tanah Melayu).
 - **Pencipta:** Tim Gen Hello World (Rizqy Hamadi Ken - Full Stack, Mushlihul Arif - UI/UX & Frontend, Dicki Wahyudi - Mobile Dev), dibimbing oleh Nurmi Hidayasari, ST., M.Kom.
@@ -1174,7 +1174,7 @@ Pekerjaan yang perlu diselesaikan di Google Cloud Platform Console:
 
 - **Status Pendaftaran:** SELESAI DAN TERVERIFIKASI RESMI (22 September 2026).
 - **Identitas Nomenklatur:**
-  - **Nama Lengkap:** SegiDaerah - Sistem Sinergi Layanan dan Aspirasi Daerah Kecamatan Bengkalis.
+  - **Nama Lengkap:** Segidaerah - Sistem Sinergi Layanan dan Aspirasi Daerah Kecamatan Bengkalis.
   - **URL Domain:** `https://siladesbeng.inovasia.site`
 - **Pekerjaan Teknis yang Diselesaikan:**
   1. **On-Page SEO & Metadata (`resources/views/layouts/app.blade.php`):**

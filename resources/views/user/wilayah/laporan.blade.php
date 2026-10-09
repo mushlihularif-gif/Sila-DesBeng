@@ -1,6 +1,6 @@
 @extends('layouts.user')
 
-@section('title', 'Kelola Laporan Warga - SegiDaerah')
+@section('title', 'Kelola Laporan Warga - Segidaerah')
 
 @push('styles')
 <style>

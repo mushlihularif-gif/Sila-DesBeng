@@ -25,7 +25,7 @@ class FonnteService
      */
     public function sendOtp($target, $otpCode)
     {
-        $message = "*SegiDaerah (Sistem Sinergi Layanan dan Aspirasi Daerah Kecamatan Bengkalis)*\n\n";
+        $message = "*Segidaerah (Sistem Sinergi Layanan dan Aspirasi Daerah Kecamatan Bengkalis)*\n\n";
         $message .= "Kode OTP Anda adalah: *$otpCode*\n\n";
         $message .= "_Kode ini rahasia. Jangan berikan kepada siapa pun._";
 

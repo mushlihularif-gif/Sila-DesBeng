@@ -139,7 +139,7 @@
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold small">Keterangan / Profil Wilayah</label>
-                                    <input type="text" name="profile_text" value="{{ old('profile_text', $region->profile_text) }}" class="form-control" placeholder="Cth: Pusat Layanan Terpadu SegiDaerah Bengkalis">
+                                    <input type="text" name="profile_text" value="{{ old('profile_text', $region->profile_text) }}" class="form-control" placeholder="Cth: Pusat Layanan Terpadu Segidaerah Bengkalis">
                                 </div>
                             </div>
                         </div>

@@ -1,6 +1,6 @@
 @extends('admin.layouts.admin')
 
-@section('title', 'Profil SegiDaerah')
+@section('title', 'Profil Segidaerah')
 
 @section('styles')
 <style>
@@ -93,7 +93,7 @@
             <div class="row align-items-center">
                 <div class="col-lg-8">
                     <div class="text-center mb-3 d-block d-lg-none">
-                        <img src="{{ asset('User/img/avatars/logodomain.webp') }}" alt="Logo SegiDaerah" class="img-fluid" style="max-width: 130px;">
+                        <img src="{{ asset('User/img/avatars/logodomain.webp') }}" alt="Logo Segidaerah" class="img-fluid" style="max-width: 130px;">
                     </div>
                     <h3 class="text-primary fw-bold mb-2 fs-4 fs-md-3">
                         Cerita Kami
@@ -102,14 +102,14 @@
                         Langkah Awal Mewujudkan Digitalisasi Bengkalis
                     </h5>
                     <p class="text-muted lh-lg mb-3 mb-md-4 text-start text-md-justify" style="font-size: 0.9rem;">
-                        Perjalanan <span class="fw-bold text-dark">SegiDaerah</span> (Sistem Sinergi Layanan dan Aspirasi Daerah Kecamatan Bengkalis) bermula dari sebuah visi besar untuk mendorong percepatan digitalisasi pelayanan publik di wilayah Kecamatan Bengkalis. Gagasan ini lahir sebagai solusi inovatif untuk memutus kendala jarak dan mengoptimalkan potensi daerah melalui pemanfaatan teknologi. Mimpi utama kami adalah menghubungkan seluruh jaringan desa dan kelurahan ke dalam satu ekosistem digital yang canggih, terpadu, dan mudah diakses oleh seluruh lapisan masyarakat.
+                        Perjalanan <span class="fw-bold text-dark">Segidaerah</span> (Sistem Sinergi Layanan dan Aspirasi Daerah Kecamatan Bengkalis) bermula dari sebuah visi besar untuk mendorong percepatan digitalisasi pelayanan publik di wilayah Kecamatan Bengkalis. Gagasan ini lahir sebagai solusi inovatif untuk memutus kendala jarak dan mengoptimalkan potensi daerah melalui pemanfaatan teknologi. Mimpi utama kami adalah menghubungkan seluruh jaringan desa dan kelurahan ke dalam satu ekosistem digital yang canggih, terpadu, dan mudah diakses oleh seluruh lapisan masyarakat.
                     </p>
                     <p class="text-muted lh-lg mb-0 text-start text-md-justify" style="font-size: 0.9rem;">
-                        Sebagai wujud nyata dari visi tersebut, SegiDaerah hadir mengintegrasikan berbagai pilar layanan esensial daerah, mulai dari sarana mobilitas (kendaraan), pemanfaatan fasilitas umum, penyewaan alat, pendistribusian gas, hingga Pasar Daerah. Lebih jauh lagi, kami juga menghadirkan ruang interaksi inklusif melalui fitur Pelaporan Warga dan Informasi Pengumuman. Cerita SegiDaerah adalah cerita tentang inovasi dan kolaborasi bagaimana sentuhan teknologi mentransformasi cara aparatur dan masyarakat berinteraksi demi mewujudkan tata kelola Bengkalis yang mandiri, produktif, dan berkelanjutan.
+                        Sebagai wujud nyata dari visi tersebut, Segidaerah hadir mengintegrasikan berbagai pilar layanan esensial daerah, mulai dari sarana mobilitas (kendaraan), pemanfaatan fasilitas umum, penyewaan alat, pendistribusian gas, hingga Pasar Daerah. Lebih jauh lagi, kami juga menghadirkan ruang interaksi inklusif melalui fitur Pelaporan Warga dan Informasi Pengumuman. Cerita Segidaerah adalah cerita tentang inovasi dan kolaborasi bagaimana sentuhan teknologi mentransformasi cara aparatur dan masyarakat berinteraksi demi mewujudkan tata kelola Bengkalis yang mandiri, produktif, dan berkelanjutan.
                     </p>
                 </div>
                 <div class="col-lg-4 text-center d-none d-lg-block">
-                    <img src="{{ asset('User/img/avatars/logodomain.webp') }}" alt="Logo SegiDaerah" class="img-fluid" style="max-width: 250px;">
+                    <img src="{{ asset('User/img/avatars/logodomain.webp') }}" alt="Logo Segidaerah" class="img-fluid" style="max-width: 250px;">
                 </div>
             </div>
         </div>
@@ -289,9 +289,9 @@
         </div>
     </div>
 
-    <!-- Struktur Pengembang SegiDaerah Section -->
+    <!-- Struktur Pengembang Segidaerah Section -->
     <div class="mb-4 animate-section">
-        <h4 class="fw-bold mb-4 mt-2 text-center text-primary">Struktur Pengembang SegiDaerah</h4>
+        <h4 class="fw-bold mb-4 mt-2 text-center text-primary">Struktur Pengembang Segidaerah</h4>
         <div class="row g-4 justify-content-center">
             <!-- Card 1: Rizqy Hamadi Ken -->
             <div class="col-sm-6 col-md-4">

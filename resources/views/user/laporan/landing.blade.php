@@ -1,5 +1,5 @@
 @extends('layouts.user')
-@section('title', 'Pelaporan Warga - SegiDaerah')
+@section('title', 'Pelaporan Warga - Segidaerah')
 @push('styles')
 <style>
         * { font-family: 'Inter', sans-serif; }

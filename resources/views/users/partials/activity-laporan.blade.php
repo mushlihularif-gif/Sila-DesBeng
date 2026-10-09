@@ -95,7 +95,7 @@
             <i class="bx bx-folder-open text-3xl"></i>
         </div>
         <h4 class="font-bold text-gray-800 text-base mb-1">Belum Ada Riwayat Laporan</h4>
-        <p class="text-gray-500 text-sm">Anda belum pernah membuat laporan warga di SegiDaerah.</p>
+        <p class="text-gray-500 text-sm">Anda belum pernah membuat laporan warga di Segidaerah.</p>
     </div>
     @endif
 @endforelse
