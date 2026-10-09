@@ -27,45 +27,20 @@ class SaldoWargaController extends Controller
     {
         $user = Auth::user();
 
-        $saldo = DompetWarga::saldo($user->id);
-
-        // Sebaran saldo, sejajar dengan ringkasan di halaman Keuangan wilayah.
-        $rincian = DompetWarga::ringkasan($user->id);
-
-        $riwayat = SaldoWarga::where('user_id', $user->id)
-            ->with('region')
-            ->latest()
-            ->paginate(15);
-
-        // Seluruh pengajuan penarikan, bukan hanya yang berjalan — warga perlu
-        // melihat yang sudah cair dan yang dibatalkan juga, seperti daftar
-        // pengajuan di sisi admin.
-        $pengajuan = SaldoWarga::where('user_id', $user->id)
-            ->where('type', SaldoWarga::PENARIKAN)
-            ->with('petugas')
-            ->latest()
-            ->get();
-
-        $rekeningTerakhir = $pengajuan->firstWhere('no_rekening', '!=', null);
-
-        // Buku alamat warga. Sehalaman dengan saldo karena keduanya sama-sama
-        // "data saya" — bukan bagian dari alur pemesanan mana pun.
+        // Buku alamat warga
         $alamat = \App\Models\AlamatWarga::milik($user->id)
             ->with('region')
             ->orderByDesc('is_utama')
             ->orderBy('id')
             ->get();
 
-        // Pilihan desa/kelurahan untuk formulir alamat, dibatasi kabupaten ini.
+        // Pilihan desa/kelurahan untuk formulir alamat
         $desa = \App\Models\Region::whereIn('type', ['desa', 'kelurahan'])
             ->with('parent')
             ->orderBy('name')
             ->get();
 
-        return view('users.saldo.index', compact(
-            'saldo', 'rincian', 'riwayat', 'pengajuan', 'rekeningTerakhir',
-            'alamat', 'desa'
-        ));
+        return view('users.saldo.index', compact('alamat', 'desa'));
     }
 
     public function tarik(Request $request)

@@ -419,6 +419,7 @@ Route::post('/auth/register-google', [App\Http\Controllers\Auth\GoogleController
 // Pembukuannya sudah lama berjalan lewat DompetWarga, tetapi sebelum rute ini
 // ada, warga tidak punya satu pun halaman untuk melihat apalagi mencairkannya.
 Route::middleware(['auth', 'role:user'])->group(function () {
+    Route::get('/alamat', [\App\Http\Controllers\User\SaldoWargaController::class, 'index'])->name('user.alamat.index');
     Route::get('/saldo', [\App\Http\Controllers\User\SaldoWargaController::class, 'index'])->name('user.saldo.index');
     Route::post('/saldo/tarik', [\App\Http\Controllers\User\SaldoWargaController::class, 'tarik'])->name('user.saldo.tarik');
     Route::post('/saldo/{saldo}/batal', [\App\Http\Controllers\User\SaldoWargaController::class, 'batal'])->name('user.saldo.batal');

@@ -1,6 +1,6 @@
 @extends('layouts.user')
 
-@section('title', 'Saldo dan Alamat')
+@section('title', 'Alamat Tersimpan')
 
 @push('styles')
 <style>
@@ -16,8 +16,8 @@
 
         <div class="relative max-w-3xl mx-auto px-4">
             <h1 class="text-3xl md:text-4xl font-bold text-center mb-8">
-                <span class="bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">Saldo </span>
-                <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">dan Alamat</span>
+                <span class="bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">Alamat </span>
+                <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Tersimpan</span>
             </h1>
 
             @if(session('success'))
@@ -37,157 +37,6 @@
                     </ul>
                 </div>
             @endif
-
-            {{-- Kartu saldo + sebaran. Angka "tersedia" saja tidak cukup: saldo
-                 yang sedang diajukan penarikan ikut terpotong dari situ, dan tanpa
-                 rinciannya warga akan mengira uangnya hilang. --}}
-            <div class="rounded-3xl shadow-lg overflow-hidden mb-6 text-white relative"
-                 style="background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 55%, #60a5fa 100%);">
-                <div class="absolute rounded-full" style="width:260px;height:260px;right:-90px;top:-110px;background:rgba(255,255,255,.10);"></div>
-                <div class="relative px-6 py-7">
-                    <p class="text-sm opacity-90 mb-1">Saldo Tersedia</p>
-                    <p class="text-4xl font-extrabold tracking-tight">
-                        Rp {{ number_format($rincian['tersedia'], 0, ',', '.') }}
-                    </p>
-
-                    @if($rincian['diajukan'] > 0 || $rincian['diproses'] > 0)
-                    <div class="flex flex-wrap gap-2 mt-4">
-                        @if($rincian['diajukan'] > 0)
-                            <span class="inline-flex items-center rounded-full px-3 py-1 text-xs" style="background:rgba(255,255,255,.18)">
-                                Menunggu diproses Rp {{ number_format($rincian['diajukan'], 0, ',', '.') }}
-                            </span>
-                        @endif
-                        @if($rincian['diproses'] > 0)
-                            <span class="inline-flex items-center rounded-full px-3 py-1 text-xs" style="background:rgba(255,255,255,.18)">
-                                Sedang ditransfer Rp {{ number_format($rincian['diproses'], 0, ',', '.') }}
-                            </span>
-                        @endif
-                    </div>
-                    @endif
-
-                    <div class="grid grid-cols-3 gap-3 mt-5 pt-4" style="border-top:1px solid rgba(255,255,255,.25)">
-                        <div>
-                            <p class="text-xs opacity-80">Total Masuk</p>
-                            <p class="font-bold">Rp {{ number_format($rincian['total_masuk'], 0, ',', '.') }}</p>
-                        </div>
-                        <div>
-                            <p class="text-xs opacity-80">Sudah Cair</p>
-                            <p class="font-bold">Rp {{ number_format($rincian['sudah_cair'], 0, ',', '.') }}</p>
-                        </div>
-                        <div>
-                            <p class="text-xs opacity-80">Terpakai Belanja</p>
-                            <p class="font-bold">Rp {{ number_format($rincian['terpakai'], 0, ',', '.') }}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {{-- Pengajuan Dana --}}
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="font-bold text-gray-800">Pengajuan Dana</h2>
-                    @if($saldo >= \App\Models\SaldoWarga::MINIMAL_PENARIKAN)
-                        <button type="button" id="btn-buka-form"
-                                class="text-sm font-semibold text-blue-600 hover:text-blue-700">
-                            + Ajukan Penarikan
-                        </button>
-                    @endif
-                </div>
-
-                {{-- Formulir. Tersembunyi sampai ditekan supaya daftar pengajuan
-                     yang jadi isi utama bagian ini tidak terdorong ke bawah. --}}
-                @if($saldo >= \App\Models\SaldoWarga::MINIMAL_PENARIKAN)
-                <form action="{{ route('user.saldo.tarik') }}" method="POST"
-                      id="form-tarik" class="space-y-3 mb-5 pb-5 border-b border-gray-100 {{ $errors->any() ? '' : 'hidden' }}">
-                    @csrf
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1" for="amount">Jumlah</label>
-                            <input type="number" name="amount" id="amount" required
-                                   min="{{ \App\Models\SaldoWarga::MINIMAL_PENARIKAN }}" max="{{ (int) $saldo }}"
-                                   value="{{ old('amount', (int) $saldo) }}"
-                                   class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1" for="nama_bank">Bank / E-Wallet</label>
-                            <input type="text" name="nama_bank" id="nama_bank" required
-                                   value="{{ old('nama_bank', $rekeningTerakhir->nama_bank ?? '') }}"
-                                   placeholder="BRI, BSI, DANA"
-                                   class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1" for="no_rekening">Nomor Rekening</label>
-                            <input type="text" name="no_rekening" id="no_rekening" required
-                                   value="{{ old('no_rekening', $rekeningTerakhir->no_rekening ?? '') }}"
-                                   class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1" for="nama_pemilik">Nama Pemilik Rekening</label>
-                        <input type="text" name="nama_pemilik" id="nama_pemilik" required
-                               value="{{ old('nama_pemilik', $rekeningTerakhir->nama_pemilik ?? auth()->user()->name) }}"
-                               class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm">
-                    </div>
-                    <div class="flex gap-2">
-                        <button type="button" id="btn-tutup-form"
-                                class="px-5 py-2.5 rounded-xl border border-gray-300 text-gray-700 text-sm font-semibold hover:bg-gray-50 transition">
-                            Batal
-                        </button>
-                        <button type="submit"
-                                class="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition">
-                            Kirim Pengajuan
-                        </button>
-                    </div>
-                </form>
-                @endif
-
-                @forelse($pengajuan as $p)
-                    @php
-                        $gaya = match ($p->status) {
-                            \App\Models\SaldoWarga::SELESAI  => ['bg-green-50 border-green-200', 'text-green-700'],
-                            \App\Models\SaldoWarga::DIPROSES => ['bg-blue-50 border-blue-200', 'text-blue-700'],
-                            \App\Models\SaldoWarga::DITOLAK  => ['bg-gray-50 border-gray-200', 'text-gray-500'],
-                            default                          => ['bg-amber-50 border-amber-200', 'text-amber-700'],
-                        };
-                    @endphp
-                    <div class="flex items-start justify-between gap-3 rounded-xl border px-4 py-3 mb-2 {{ $gaya[0] }}">
-                        <div class="min-w-0">
-                            <p class="font-bold text-gray-800">Rp {{ number_format((float) $p->amount, 0, ',', '.') }}</p>
-                            <p class="text-xs text-gray-600 truncate">
-                                {{ $p->nama_bank }} &middot; {{ $p->no_rekening }} &middot; a.n. {{ $p->nama_pemilik }}
-                            </p>
-                            <p class="text-xs mt-1 {{ $gaya[1] }}">
-                                {{ $p->labelStatus() }} &middot; diajukan {{ $p->created_at->diffForHumans() }}
-                                @if($p->diselesaikan_pada)
-                                    &middot; selesai {{ \Carbon\Carbon::parse($p->diselesaikan_pada)->diffForHumans() }}
-                                @endif
-                            </p>
-                            @if($p->catatan)
-                                <p class="text-xs text-gray-500 mt-1">{{ $p->catatan }}</p>
-                            @endif
-                        </div>
-                        @if($p->status === \App\Models\SaldoWarga::MENUNGGU)
-                            <form action="{{ route('user.saldo.batal', $p->id) }}" method="POST"
-                                  data-konfirmasi="Batalkan pengajuan penarikan Rp {{ number_format((float) $p->amount, 0, ',', '.') }}? Saldo Anda akan kembali tersedia."
-                                  data-konfirmasi-judul="Batalkan Pengajuan"
-                                  data-konfirmasi-ya="Ya, Batalkan">
-                                @csrf
-                                <button type="submit" class="flex-shrink-0 text-xs font-semibold text-red-600 hover:text-red-700 underline">
-                                    Batalkan
-                                </button>
-                            </form>
-                        @endif
-                    </div>
-                @empty
-                    <p class="text-sm text-gray-500 py-2">
-                        @if($saldo < \App\Models\SaldoWarga::MINIMAL_PENARIKAN)
-                            Penarikan tersedia mulai Rp {{ number_format(\App\Models\SaldoWarga::MINIMAL_PENARIKAN, 0, ',', '.') }}.
-                        @else
-                            Belum ada pengajuan.
-                        @endif
-                    </p>
-                @endforelse
-            </div>
 
             {{-- Buku Alamat --}}
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-6">
@@ -377,35 +226,6 @@
                     <p class="text-sm text-gray-500 py-2">Belum ada alamat tersimpan.</p>
                 @endforelse
             </div>
-
-            {{-- Riwayat --}}
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-                <h2 class="font-bold text-gray-800 mb-4">Riwayat Saldo</h2>
-
-                @forelse($riwayat as $r)
-                    @php $masuk = $r->type === \App\Models\SaldoWarga::REFUND; @endphp
-                    <div class="flex items-start justify-between gap-3 py-3 {{ ! $loop->last ? 'border-b border-gray-100' : '' }}">
-                        <div class="min-w-0">
-                            <p class="font-semibold text-gray-800 text-sm">{{ $r->labelJenis() }}</p>
-                            @if($r->catatan)
-                                <p class="text-xs text-gray-500 mt-0.5">{{ $r->catatan }}</p>
-                            @endif
-                            <p class="text-xs text-gray-400 mt-0.5">
-                                {{ $r->created_at->translatedFormat('d M Y, H:i') }} WIB &middot; {{ $r->labelStatus() }}
-                            </p>
-                        </div>
-                        <p class="flex-shrink-0 font-bold {{ $masuk ? 'text-green-600' : 'text-gray-800' }}">
-                            {{ $masuk ? '+' : '−' }} Rp {{ number_format((float) $r->amount, 0, ',', '.') }}
-                        </p>
-                    </div>
-                @empty
-                    <p class="text-sm text-gray-500 py-2">Belum ada riwayat.</p>
-                @endforelse
-
-                @if($riwayat->hasPages())
-                    <div class="mt-4">{{ $riwayat->links() }}</div>
-                @endif
-            </div>
         </div>
     </section>
 </main>
@@ -413,19 +233,6 @@
 
 @push('scripts')
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const form  = document.getElementById('form-tarik');
-        const buka  = document.getElementById('btn-buka-form');
-        const tutup = document.getElementById('btn-tutup-form');
-        if (!form) return;
-
-        if (buka)  buka.addEventListener('click',  () => {
-            form.classList.remove('hidden');
-            form.querySelector('#amount')?.focus();
-        });
-        if (tutup) tutup.addEventListener('click', () => form.classList.add('hidden'));
-    });
-
     // ---- Buku alamat ----
     // Satu formulir dipakai untuk tambah dan ubah; yang berubah hanya action
     // dan method-nya, supaya tidak ada dua formulir yang harus dijaga selaras.
