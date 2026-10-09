@@ -49,7 +49,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 text-center animate-section">
             <h1 class="text-2xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4 animate-fade-in-up">
                 <span class="bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">Peta Kemitraan </span>
-                <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Segidaerah</span>
+                <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Daerah</span>
             </h1>
 
             @if(!$isJoined)
