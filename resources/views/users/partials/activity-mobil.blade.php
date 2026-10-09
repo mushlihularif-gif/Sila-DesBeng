@@ -10,7 +10,7 @@
                                 @endif
                             </div>
                             <div class="flex-1">
-                                <h3 class="text-xl font-bold text-gray-800 mb-2">{{ $booking->mobil?->nama_mobil ?? 'Sewa Transportasi' }}</h3>
+                                <h3 class="text-xl font-bold text-gray-800 mb-2">{{ $booking->mobil?->nama_mobil ?? 'Transportasi' }}</h3>
                                 <p class="text-sm text-gray-600 mb-4">
                                     {{ \Carbon\Carbon::parse($booking->created_at)->locale('id')->isoFormat('dddd, DD MMMM YYYY HH:mm') }} WIB
                                 </p>
