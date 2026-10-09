@@ -26,10 +26,10 @@
                             Digitalisasi Layanan Desa di Kecamatan Bengkalis
                         </p>
                         <p class="text-gray-700 leading-relaxed mb-4">
-                            <span class="font-semibold text-gray-800">SiladesBeng</span> (Sistem Sinergi Layanan dan Aspirasi Desa di Kecamatan Bengkalis) merupakan platform digital terpadu untuk mendukung pelayanan dan kegiatan usaha desa di Kecamatan Bengkalis. Melalui satu platform, warga dapat menemukan layanan, menyampaikan laporan, berbelanja produk lokal, dan membaca informasi daerah.
+                            <span class="font-semibold text-gray-800">SegiDaerah</span> (Sistem Sinergi Layanan dan Aspirasi Daerah Kecamatan Bengkalis) merupakan platform digital terpadu untuk mendukung pelayanan dan kegiatan usaha desa di Kecamatan Bengkalis. Melalui satu platform, warga dapat menemukan layanan, menyampaikan laporan, berbelanja produk lokal, dan membaca informasi daerah.
                         </p>
                         <p class="text-gray-700 leading-relaxed">
-                            SiladesBeng membantu warga mengakses layanan dengan lebih mudah, sekaligus membantu pengelola desa mencatat pesanan, mengatur layanan, dan menyampaikan informasi secara lebih tertata. Pengembangan dan penerapan sistem ini berfokus pada desa-desa di Kecamatan Bengkalis.
+                            SegiDaerah membantu warga mengakses layanan dengan lebih mudah, sekaligus membantu pengelola desa mencatat pesanan, mengatur layanan, dan menyampaikan informasi secara lebih tertata. Pengembangan dan penerapan sistem ini berfokus pada desa-desa di Kecamatan Bengkalis.
                         </p>
                     </div>
                     
@@ -37,7 +37,7 @@
                     <div class="relative flex-shrink-0 hidden md:block">
                         <div class="relative">
                             <img src="{{ asset('User/img/avatars/logodomain.webp') }}" 
-                                 alt="SiladesBeng Logo" 
+                                 alt="Logo SegiDaerah"
                                  class="w-72 h-72 lg:w-80 lg:h-80 object-contain drop-shadow-xl scale-110">
                             <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-white/60"></div>
                         </div>
@@ -219,11 +219,11 @@
                 </div>
             </div>
 
-            <!-- Struktur Pengembang SiladesBeng Section -->
+            <!-- Struktur Pengembang SegiDaerah Section -->
             <div class="mb-16 animate-section">
                 <h2 class="text-3xl md:text-4xl font-bold mb-12 text-center">
                     <span class="bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">Struktur Pengembang</span>
-                    <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">SiladesBeng</span>
+                    <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">SegiDaerah</span>
                 </h2>
                 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">

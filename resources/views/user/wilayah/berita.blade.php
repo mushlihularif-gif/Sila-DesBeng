@@ -1,6 +1,6 @@
 @extends('layouts.user')
 
-@section('title', 'Kelola Kabar dan Berita - SiladesBeng')
+@section('title', 'Kelola Kabar dan Berita - SegiDaerah')
 
 @push('styles')
 <style>
@@ -443,7 +443,6 @@
     })();
 </script>
 @endpush
-
 
 
 

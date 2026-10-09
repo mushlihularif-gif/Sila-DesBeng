@@ -1,6 +1,6 @@
 @extends('layouts.user')
 
-@section('title', 'Gabung Kemitraan - SiladesBeng')
+@section('title', 'Gabung Kemitraan - SegiDaerah')
 
 @push('styles')
 <style>
@@ -49,7 +49,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 text-center animate-section">
             <h1 class="text-2xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4 animate-fade-in-up">
                 <span class="bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">Peta Kemitraan </span>
-                <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">SiladesBeng</span>
+                <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">SegiDaerah</span>
             </h1>
 
             @if(!$isJoined)
@@ -62,7 +62,7 @@
                 </p>
             @else
                 <p class="text-gray-700 text-lg max-w-2xl mx-auto mb-6 animate-fade-in-up" style="animation-delay: 100ms;">
-                    Pemerintah Desa Anda sudah berpartisipasi dalam SiladesBeng!
+                    Pemerintah Desa Anda sudah bergabung dengan SegiDaerah!
                 </p>
                 
                 <p class="text-gray-500 text-sm max-w-2xl mx-auto mb-10 animate-fade-in-up bg-green-50/50 p-3 rounded-xl border border-green-200" style="animation-delay: 150ms;">
@@ -388,12 +388,12 @@
                                 <p class="text-base text-gray-500 mt-2">
                                     {{ $isJoined ? 'Daftarkan wilayah Anda untuk bergabung' : 'Daftarkan desa Anda untuk bergabung' }}
                                 </p>
-                                <p class="text-sm text-gray-400 mt-1">Sistem Sinergi Layanan dan Aspirasi Desa di Kecamatan Bengkalis</p>
+                                <p class="text-sm text-gray-400 mt-1">Sistem Sinergi Layanan dan Aspirasi Daerah Kecamatan Bengkalis</p>
                             </div>
 
-                            {{-- Logo SiladesBeng (Kanan) --}}
+                            {{-- Logo SegiDaerah (Kanan) --}}
                             <div class="flex-shrink-0 flex justify-center pr-4" style="width: 110px;">
-                                <img src="{{ asset('Admin/img/illustrations/logodomain.webp') }}" alt="Logo SiladesBeng" class="object-contain" style="width: 100px; height: 100px;">
+                                <img src="{{ asset('Admin/img/illustrations/logodomain.webp') }}" alt="Logo SegiDaerah" class="object-contain" style="width: 100px; height: 100px;">
                             </div>
                         </div>
 

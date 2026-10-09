@@ -1,6 +1,6 @@
 @extends('layouts.user')
 
-@section('title', 'Kelola Pengumuman - SiladesBeng')
+@section('title', 'Kelola Pengumuman - SegiDaerah')
 
 @push('styles')
 <style>
@@ -399,7 +399,6 @@
     })();
 </script>
 @endpush
-
 
 
 

@@ -300,8 +300,8 @@ class PartnerApplicationController extends Controller
             // We tell them to use their existing password
         } else {
             // Generate password yang mudah diketik (Tidak full acak)
-            // Format: Silades + 4 angka acak (contoh: Silades1945)
-            $password = 'Silades' . rand(1000, 9999);
+            // Format: Segi + 4 angka acak (contoh: Segi1945)
+            $password = 'Segi' . rand(1000, 9999);
 
             // Create Admin User for this region
             $newAdmin = User::create([

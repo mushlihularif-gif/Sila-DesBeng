@@ -411,7 +411,7 @@
                                 </svg>
                             </div>
                             <h3 class="text-2xl font-bold text-gray-800 mb-3">Unit Pelayanan Belum Tersedia</h3>
-                            <p class="text-gray-500 max-w-lg text-lg leading-relaxed">Mohon maaf, Kelurahan atau Desa Anda saat ini belum mengaktifkan layanan operasional di sistem SiladesBeng.</p>
+                            <p class="text-gray-500 max-w-lg text-lg leading-relaxed">Mohon maaf, desa atau kelurahan Anda belum mengaktifkan layanan SegiDaerah.</p>
                         </div>
                         @endif
                 </div>
@@ -647,7 +647,7 @@
                     <div class="max-w-5xl mx-auto">
                         <div class="backdrop-blur-sm bg-white/70 rounded-2xl sm:rounded-3xl p-5 sm:p-8 md:p-12 border border-white/70 shadow-lg sm:shadow-xl">
                             <p class="text-sm sm:hidden text-gray-700 leading-relaxed">
-                                SiladesBeng memudahkan warga mengakses layanan desa, berbelanja produk lokal, menyampaikan laporan, dan mendapatkan informasi daerah dalam satu platform.
+                                SegiDaerah memudahkan warga mengakses layanan desa, berbelanja produk lokal, menyampaikan laporan, dan mendapatkan informasi daerah dalam satu platform.
                             </p>
                             <details class="sm:hidden mt-3 border-t border-slate-200/80 pt-3">
                                 <summary class="cursor-pointer list-none text-sm font-bold text-[#115789] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 rounded">
@@ -655,13 +655,13 @@
                                     <i class="bx bx-chevron-down ml-1" aria-hidden="true"></i>
                                 </summary>
                                 <div class="mt-3 space-y-3 text-left text-sm leading-relaxed text-gray-600">
-                                    <p>SiladesBeng (Sistem Sinergi Layanan dan Aspirasi Desa di Kecamatan Bengkalis) merupakan platform digital untuk layanan dan informasi desa-desa di Kecamatan Bengkalis.</p>
+                                    <p>SegiDaerah (Sistem Sinergi Layanan dan Aspirasi Daerah Kecamatan Bengkalis) merupakan platform digital untuk layanan dan informasi desa-desa di Kecamatan Bengkalis.</p>
                                     <p>Warga dapat mengakses penyewaan alat, penjualan gas, transportasi, fasilitas umum, Pasar Daerah, Pelaporan Warga, serta Kabar dan Informasi Daerah melalui satu platform.</p>
                                 </div>
                             </details>
                             <div class="hidden sm:block space-y-4 text-left md:text-justify text-sm md:text-base text-gray-700 leading-relaxed">
                                 <p>
-                                    <span class="font-semibold text-gray-800">SiladesBeng</span> (Sistem Sinergi Layanan dan Aspirasi Desa di Kecamatan Bengkalis) merupakan platform digital yang menjadi pusat informasi dan akses layanan bagi desa-desa di kecamatan ini. Cakupan uji coba dan pengembangan penelitian ini dibatasi pada Kecamatan Bengkalis.
+                                    <span class="font-semibold text-gray-800">SegiDaerah</span> (Sistem Sinergi Layanan dan Aspirasi Daerah Kecamatan Bengkalis) merupakan platform digital yang menjadi pusat informasi dan akses layanan bagi desa-desa di kecamatan ini. Cakupan uji coba dan pengembangan penelitian ini dibatasi pada Kecamatan Bengkalis.
                                 </p>
                                 <p>
                                     Warga di desa-desa Kecamatan Bengkalis dapat mengakses informasi layanan, menyampaikan <span class="font-medium text-gray-800">Pelaporan Warga</span>, dan membaca <span class="font-medium text-gray-800">Kabar dan Informasi Daerah</span>. Sistem ini dikembangkan dan diuji untuk kebutuhan masyarakat di Kecamatan Bengkalis.

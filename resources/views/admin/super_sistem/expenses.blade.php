@@ -95,7 +95,7 @@
                         @csrf
                         <div class="mb-3">
                             <label class="form-label fw-semibold">Nama Item</label>
-                            <input type="text" name="item_name" class="form-control" placeholder="Contoh: Domain siladesbeng.id" required value="{{ old('item_name') }}">
+                            <input type="text" name="item_name" class="form-control" placeholder="Contoh: Domain segidaerah.com" required value="{{ old('item_name') }}">
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-semibold">Kategori</label>

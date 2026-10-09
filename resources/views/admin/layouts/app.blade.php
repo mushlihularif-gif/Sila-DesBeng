@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{{ $title ?? 'SiladesBeng Admin' }}</title>
+    <title>{{ $title ?? 'SegiDaerah Admin' }}</title>
     <link rel="icon" type="image/png" href="{{ asset('Admin/img/favicon/logoisewa.png') }}" />
     <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="{{ asset('Admin/vendor/fonts/boxicons.css') }}" />
@@ -44,4 +44,3 @@
     @include('partials.dialog-konfirmasi')
 </body>
 </html>
-

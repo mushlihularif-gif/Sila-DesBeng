@@ -1,6 +1,6 @@
 @extends('admin.layouts.admin')
 
-@section('title', 'Profil SiladesBeng')
+@section('title', 'Profil SegiDaerah')
 
 @section('styles')
 <style>
@@ -93,7 +93,7 @@
             <div class="row align-items-center">
                 <div class="col-lg-8">
                     <div class="text-center mb-3 d-block d-lg-none">
-                        <img src="{{ asset('User/img/avatars/logodomain.webp') }}" alt="SiladesBeng Logo" class="img-fluid" style="max-width: 130px;">
+                        <img src="{{ asset('User/img/avatars/logodomain.webp') }}" alt="Logo SegiDaerah" class="img-fluid" style="max-width: 130px;">
                     </div>
                     <h3 class="text-primary fw-bold mb-2 fs-4 fs-md-3">
                         Cerita Kami
@@ -102,14 +102,14 @@
                         Digitalisasi Layanan Desa di Kecamatan Bengkalis
                     </h5>
                     <p class="text-muted lh-lg mb-3 mb-md-4 text-start text-md-justify" style="font-size: 0.9rem;">
-                        <span class="fw-bold text-dark">SiladesBeng</span> (Sistem Sinergi Layanan dan Aspirasi Desa di Kecamatan Bengkalis) merupakan platform digital terpadu untuk mendukung pelayanan dan kegiatan usaha desa di kecamatan ini. Melalui satu platform, warga dapat menemukan layanan, menyampaikan laporan, berbelanja produk lokal, dan membaca informasi daerah.
+                        <span class="fw-bold text-dark">SegiDaerah</span> (Sistem Sinergi Layanan dan Aspirasi Daerah Kecamatan Bengkalis) merupakan platform digital terpadu untuk mendukung pelayanan dan kegiatan usaha desa di kecamatan ini. Melalui satu platform, warga dapat menemukan layanan, menyampaikan laporan, berbelanja produk lokal, dan membaca informasi daerah.
                     </p>
                     <p class="text-muted lh-lg mb-0 text-start text-md-justify" style="font-size: 0.9rem;">
-                        SiladesBeng menggabungkan layanan kendaraan, fasilitas umum, penyewaan alat, pemesanan gas, Pasar Daerah, Pelaporan Warga, serta Kabar dan Informasi Daerah. Layanan ini dirancang agar lebih mudah dijangkau dan dikelola oleh masyarakat serta pengelola desa di Kecamatan Bengkalis.
+                        SegiDaerah menggabungkan layanan kendaraan, fasilitas umum, penyewaan alat, pemesanan gas, Pasar Daerah, Pelaporan Warga, serta Kabar dan Informasi Daerah. Layanan ini dirancang agar lebih mudah dijangkau dan dikelola oleh masyarakat serta pengelola desa di Kecamatan Bengkalis.
                     </p>
                 </div>
                 <div class="col-lg-4 text-center d-none d-lg-block">
-                    <img src="{{ asset('User/img/avatars/logodomain.webp') }}" alt="SiladesBeng Logo" class="img-fluid" style="max-width: 250px;">
+                    <img src="{{ asset('User/img/avatars/logodomain.webp') }}" alt="Logo SegiDaerah" class="img-fluid" style="max-width: 250px;">
                 </div>
             </div>
         </div>
@@ -289,9 +289,9 @@
         </div>
     </div>
 
-    <!-- Struktur Pengembang SiladesBeng Section -->
+    <!-- Struktur Pengembang SegiDaerah Section -->
     <div class="mb-4 animate-section">
-        <h4 class="fw-bold mb-4 mt-2 text-center text-primary">Struktur Pengembang SiladesBeng</h4>
+        <h4 class="fw-bold mb-4 mt-2 text-center text-primary">Struktur Pengembang SegiDaerah</h4>
         <div class="row g-4 justify-content-center">
             <!-- Card 1: Rizqy Hamadi Ken -->
             <div class="col-sm-6 col-md-4">

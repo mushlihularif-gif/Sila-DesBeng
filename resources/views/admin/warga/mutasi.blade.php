@@ -137,7 +137,7 @@
             <div>
                 <h5 class="fw-bold mb-1 text-info">Sistem Mutasi Lintas Wilayah</h5>
                 <p class="mb-0 text-info" style="opacity: 0.85; line-height: 1.5; font-size: 0.88rem;">
-                    <span class="fw-bold text-decoration-underline text-danger">PENTING:</span> Ini <b>bukan</b> fitur untuk mengurus surat pindah administrasi secara fisik. Fitur ini khusus digunakan untuk <strong class="text-dark shadow-sm" style="background-color: rgba(255, 255, 255, 0.7); padding: 3px 6px; border-radius: 4px;">memindahkan domisili akun digital warga (Mutasi Akun) agar mereka bisa mengakses layanan SiladesBeng di wilayah barunya jika mereka pindah domisili.</strong><br><br>
+                    <span class="fw-bold text-decoration-underline text-danger">PENTING:</span> Ini <b>bukan</b> fitur untuk mengurus surat pindah administrasi secara fisik. Fitur ini khusus digunakan untuk <strong class="text-dark shadow-sm" style="background-color: rgba(255, 255, 255, 0.7); padding: 3px 6px; border-radius: 4px;">memindahkan domisili akun digital warga (Mutasi Akun) antardesa di Kecamatan Bengkalis.</strong><br><br>
                     Pemindahan akun ini menggunakan sistem <b>Persetujuan Dua Tahap Berantai</b>: Pengajuan mandiri oleh warga wajib disetujui pelepasannya oleh Pemerintah Desa Asal terlebih dahulu, kemudian diverifikasi dan disetujui penerimaannya oleh Pemerintah Desa Tujuan sebelum akun warga resmi berpindah domisili.
                 </p>
             </div>
@@ -1365,7 +1365,6 @@
 </script>
 @endpush
 @endsection
-
 
 
 

@@ -12,7 +12,7 @@
         <div class="p-8">
             <div class="text-center mb-10">
                 <h2 class="text-3xl font-bold text-gray-900">Verifikasi Identitas</h2>
-                <p class="mt-2 text-sm text-gray-600">Selesaikan verifikasi untuk mendapatkan fitur penuh SiladesBeng.</p>
+                <p class="mt-2 text-sm text-gray-600">Selesaikan verifikasi untuk mendapatkan fitur penuh SegiDaerah.</p>
             </div>
 
             <!-- Stepper -->
@@ -286,7 +286,7 @@
     <div class="bg-white p-8 rounded-2xl shadow-2xl relative z-10 flex flex-col items-center">
         <div class="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
         <p class="text-lg font-bold text-gray-800" id="loading-text">Memproses Data KTP...</p>
-        <p class="text-sm text-gray-500 mt-2 text-center max-w-xs">Sistem SiladesBeng sedang mengekstrak data KTP Anda. Mohon tunggu sebentar...</p>
+        <p class="text-sm text-gray-500 mt-2 text-center max-w-xs">Sistem SegiDaerah sedang mengekstrak data KTP Anda. Mohon tunggu sebentar...</p>
     </div>
 </div>
 </main>

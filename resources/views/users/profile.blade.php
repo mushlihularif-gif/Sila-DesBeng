@@ -505,7 +505,7 @@
                             <h4 class="font-bold text-sm mb-1.5" style="color: #9a3412;">Pemberitahuan Penting Pemindahan Wilayah Akun:</h4>
                             <ul class="space-y-2 text-xs sm:text-sm text-gray-600 leading-relaxed list-disc list-outside pl-4">
                                 <li>
-                                    <strong class="text-gray-800">Bukan Pengurusan Berkas Kependudukan Sipil:</strong> Fitur ini khusus untuk memindahkan data wilayah akun Anda di aplikasi <strong>SiladesBeng</strong>, bukan layanan pembuatan Surat Pindah Domisili resmi (SKPWNI) dari Disdukcapil atau Kantor Desa.
+                                    <strong class="text-gray-800">Bukan Pengurusan Berkas Kependudukan Sipil:</strong> Fitur ini khusus untuk memindahkan data wilayah akun Anda di aplikasi <strong>SegiDaerah</strong>, bukan layanan pembuatan Surat Pindah Domisili resmi (SKPWNI) dari Disdukcapil atau Kantor Desa.
                                 </li>
                                 <li>
                                     <strong class="text-gray-800">Tujuan Pemindahan Akun:</strong> Setiap desa memiliki kebijakan layanan mandiri (seperti kuota tabung gas subsidi per KK, peminjaman fasilitas desa, dan koordinasi pelaporan RT/RW yang khusus untuk warga desa setempat). Pemindahan ini memastikan akun Anda terdaftar di desa tujuan sehingga Anda dapat mengakses layanan yang berlaku di desa tersebut setelah diverifikasi oleh pihak desa asal dan tujuan.

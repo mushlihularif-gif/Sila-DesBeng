@@ -160,9 +160,9 @@
                 {{-- Title at the top --}}
                 <h2 class="text-3xl font-bold text-gray-900 mb-8">Berhasil Diperbarui</h2>
                 
-                {{-- SiladesBeng Logo below title --}}
+                {{-- Logo SegiDaerah --}}
                 <div class="flex justify-center mb-8">
-                    <img src="{{ asset('User/img/logo/iSewa.png') }}" alt="SiladesBeng Logo" class="h-32 w-auto object-contain">
+                    <img src="{{ asset('Admin/img/illustrations/logodomain.webp') }}" alt="Logo SegiDaerah" class="h-32 w-auto object-contain">
                 </div>
 
                 <p class="text-lg font-semibold text-gray-800 mb-2">Kata Sandi Telah Diperbarui</p>

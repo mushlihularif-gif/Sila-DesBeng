@@ -180,13 +180,13 @@
                     {{-- Konten Kartu --}}
                     <div class="relative z-10 h-full flex flex-col justify-between" style="padding: 3.5% 5.5%;">
 
-                        {{-- Header: Pemerintah Kabupaten Bengkalis + KTP DIGITAL - SILADESBENG --}}
+                        {{-- Header: Pemerintah Kabupaten Bengkalis + KTP DIGITAL - SEGIDAERAH --}}
                         <div class="text-center">
                             <p style="font-weight: 900; font-size: clamp(9.5px, 2.25vw, 15px); color: #0a243a; text-transform: uppercase; letter-spacing: 0.1em; line-height: 1.35; margin: 0;">
                                 PEMERINTAH KABUPATEN BENGKALIS
                             </p>
                             <p style="font-weight: 900; font-size: clamp(9.5px, 2.25vw, 15px); color: #0a243a; text-transform: uppercase; letter-spacing: 0.1em; line-height: 1.35; margin: 0;">
-                                KTP DIGITAL - SILADESBENG
+                                KTP DIGITAL - SEGIDAERAH
                             </p>
                             {{-- Garis Tebal Merah Putih --}}
                             <div style="width: 80%; margin: 8px auto 0 auto; box-shadow: 0 1px 3px rgba(0,0,0,0.18); border-radius: 3px; overflow: hidden;">

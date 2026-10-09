@@ -61,9 +61,10 @@
             max-width: 1536px; margin: 0 auto; padding: 0 16px;
             display: flex; align-items: center; justify-content: space-between;
         }
+        .sd-nav-logo { display: flex; align-items: center; gap: 8px; color: #115789; font-size: 1.15rem; font-weight: 800; text-decoration: none; white-space: nowrap; }
         .sd-nav-logo img { height: 46px; width: auto; object-fit: contain; padding: 4px 0; }
-        @media (min-width: 640px) { .sd-nav-logo img { height: 72px; padding: 6px 0; } }
-        @media (min-width: 1024px) { .sd-nav-logo img { height: 96px; padding: 8px 0; } }
+        @media (min-width: 640px) { .sd-nav-logo img { height: 56px; padding: 6px 0; } }
+        @media (min-width: 1024px) { .sd-nav-logo img { height: 64px; padding: 8px 0; } }
         
         .sd-nav-links { display: flex; align-items: center; gap: 32px; margin-left: auto; margin-right: 32px; }
         .sd-nav-link {
@@ -156,12 +157,13 @@
         : 0;
 @endphp
 
-<!-- ==================== SILA DESBENG NAVBAR ==================== -->
+<!-- ==================== SEGIDAERAH NAVBAR ==================== -->
 <nav class="sd-navbar" id="master-navbar">
     <div class="sd-nav-container">
         <!-- Logo -->
         <a href="{{ route('beranda') }}" class="sd-nav-logo">
-            <img src="{{ asset('Admin/img/illustrations/logodomain.webp') }}?v={{ time() }}" alt="SiladesBeng Logo">
+            <img src="{{ asset('Admin/img/illustrations/logodomain.webp') }}" alt="">
+            <span>SegiDaerah</span>
         </a>
 
         <!-- Menu Desktop -->
@@ -198,7 +200,7 @@
             </div>
             
             <a href="{{ route('announcements.index') }}" class="sd-nav-link {{ request()->routeIs('announcements.*') ? 'active' : '' }}">Kabar dan Informasi Daerah</a>
-            <a href="{{ route('SiladesBeng.profile') }}" class="sd-nav-link {{ request()->routeIs('SiladesBeng.profile') ? 'active' : '' }}">Profil SiladesBeng</a>
+            <a href="{{ route('SiladesBeng.profile') }}" class="sd-nav-link {{ request()->routeIs('SiladesBeng.profile') ? 'active' : '' }}">Tentang SegiDaerah</a>
             <a href="{{ route('kemitraan.create') }}" class="sd-nav-link {{ request()->routeIs('kemitraan.*') ? 'active' : '' }}">Gabung Kemitraan</a>
             @auth
                 @if(in_array(auth()->user()->role, ['admin_rt', 'admin_rw']))
@@ -447,7 +449,7 @@
     
     {{-- Header Sidebar --}}
     <div class="py-5 px-5 flex items-center justify-between border-b bg-white">
-        <img src="{{ asset('Admin/img/illustrations/logodomain.webp') }}?v={{ time() }}" class="h-10" alt="SiladesBeng">
+        <img src="{{ asset('Admin/img/illustrations/logodomain.webp') }}" class="h-10" alt="SegiDaerah">
         <button id="sidebar-close" type="button" class="p-2 hover:bg-gray-100 rounded-lg transition">
             <svg class="w-6 h-6 text-gray-600" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -474,7 +476,7 @@
             Pasar Daerah
         </a>
         <a href="{{ route('SiladesBeng.profile') }}" class="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium transition {{ request()->routeIs('SiladesBeng.profile') ? 'text-blue-600 bg-blue-50 border-l-4 border-blue-500' : '' }}">
-            Profil SiladesBeng
+            Tentang SegiDaerah
         </a>
         <a href="{{ route('kemitraan.create') }}" class="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium transition {{ request()->routeIs('kemitraan.*') ? 'text-blue-600 bg-blue-50 border-l-4 border-blue-500' : '' }}">
             Gabung Kemitraan

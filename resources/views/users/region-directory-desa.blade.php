@@ -54,7 +54,7 @@
 
                 {{-- Empty state --}}
                 <div id="empty-state" class="hidden text-center py-10">
-                    <p class="text-gray-500 font-medium text-lg">Tidak tersedia atau Desa belum bergabung dengan SiladesBeng</p>
+                    <p class="text-gray-500 font-medium text-lg">Tidak tersedia atau desa belum bergabung dengan SegiDaerah.</p>
                 </div>
             </div>
 
@@ -468,5 +468,4 @@
 })();
 </script>
 @endpush
-
 

@@ -1,6 +1,6 @@
 @extends('layouts.user')
 
-@section('title', 'Kabar dan Informasi Daerah - SiladesBeng')
+@section('title', 'Kabar dan Informasi Daerah - SegiDaerah')
 
 @section('page')
 <main class="flex-grow relative w-full">

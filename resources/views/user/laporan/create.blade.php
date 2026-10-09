@@ -25,12 +25,12 @@
                                 Form Pelaporan
                             </h3>
                             <p class="text-[10px] sm:text-xs md:text-sm text-gray-500 mt-1 sm:mt-2">Sampaikan keluhan atau saran Anda secara jujur dan beretika</p>
-                            <p class="hidden sm:block text-[10px] md:text-xs text-gray-400 mt-1">Sistem Sinergi Layanan dan Aspirasi Desa di Kecamatan Bengkalis</p>
+                            <p class="hidden sm:block text-[10px] md:text-xs text-gray-400 mt-1">Sistem Sinergi Layanan dan Aspirasi Daerah Kecamatan Bengkalis</p>
                         </div>
 
-                        {{-- Logo SiladesBeng (Kanan) --}}
+                        {{-- Logo SegiDaerah (Kanan) --}}
                         <div class="flex-shrink-0 flex justify-center items-center w-11 sm:w-24 md:w-[140px]">
-                            <img src="{{ asset('Admin/img/illustrations/logodomain.webp') }}" alt="Logo SiladesBeng" class="h-11 w-11 sm:h-24 sm:w-24 md:h-[115px] md:w-[115px] object-contain drop-shadow-sm">
+                            <img src="{{ asset('Admin/img/illustrations/logodomain.webp') }}" alt="Logo SegiDaerah" class="h-11 w-11 sm:h-24 sm:w-24 md:h-[115px] md:w-[115px] object-contain drop-shadow-sm">
                         </div>
                     </div>
 

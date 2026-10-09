@@ -11,7 +11,7 @@
     }
 @endphp
 
-@section('title', 'Toko BUMDes ' . $cleanRegionName . ' - Pasar Daerah SiladesBeng')
+@section('title', 'Toko BUMDes ' . $cleanRegionName . ' - Pasar Daerah SegiDaerah')
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('css/pasar-daerah.css') }}">

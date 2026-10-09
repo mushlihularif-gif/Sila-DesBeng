@@ -89,7 +89,7 @@
             // Basic validation
             if (code.length < 4) {
                 e.preventDefault();
-                showSiladesBengToast('warning', 'Perhatian', 'Silahkan lengkapi 4 digit kode OTP');
+                showSiladesBengToast('warning', 'Perhatian', 'Silakan lengkapi 4 digit kode OTP');
             }
         });
     });

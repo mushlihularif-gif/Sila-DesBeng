@@ -221,7 +221,7 @@
                                     <i class="bx bx-news text-2xl"></i>
                                 </div>
                                 <p class="text-xs font-semibold text-gray-700 mb-1">Belum Ada Kabar Lainnya</p>
-                                <p class="text-xs text-gray-500 mb-4">Informasi dan berita terbaru akan diperbarui secara berkala di portal SiladesBeng.</p>
+                                <p class="text-xs text-gray-500 mb-4">Informasi dan berita terbaru akan diperbarui secara berkala di portal SegiDaerah.</p>
                                 <a href="{{ route('announcements.index') }}" class="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-700 bg-white px-3 py-1.5 rounded-full border border-blue-200 shadow-sm">
                                     Buka Portal Kabar
                                 </a>
@@ -229,12 +229,12 @@
                         @endif
                     </div>
 
-                    {{-- 4. Layanan Terpadu SiladesBeng --}}
+                    {{-- 4. Layanan Terpadu SegiDaerah --}}
                     <div class="backdrop-blur-sm bg-gradient-to-br from-[#115789] to-blue-700 rounded-3xl p-6 text-white shadow-lg relative overflow-hidden">
                         <div class="absolute -right-6 -bottom-6 w-28 h-28 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
                         <h4 class="font-bold text-white text-base mb-1.5 flex items-center gap-2">
                             <i class="bx bx-cube text-xl text-yellow-300"></i>
-                            Layanan SiladesBeng
+                            Layanan SegiDaerah
                         </h4>
                         <p class="text-xs text-blue-100 mb-4 leading-relaxed">
                             Manfaatkan kemudahan akses layanan desa terintegrasi untuk seluruh warga.

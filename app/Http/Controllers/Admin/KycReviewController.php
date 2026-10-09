@@ -200,7 +200,7 @@ class KycReviewController extends Controller
 
             DB::commit();
 
-            $fonnte->sendNotification($user->phone, "*SiladesBeng (Sistem Sinergi Layanan dan Aspirasi Desa di Kecamatan Bengkalis)*\n\nSelamat! Akun Anda telah berhasil diverifikasi. Anda sekarang mendapatkan lencana Centang Biru (Identitas Terverifikasi).");
+            $fonnte->sendNotification($user->phone, "*SegiDaerah (Sistem Sinergi Layanan dan Aspirasi Daerah Kecamatan Bengkalis)*\n\nSelamat! Akun Anda telah berhasil diverifikasi. Anda sekarang mendapatkan lencana Centang Biru (Identitas Terverifikasi).");
 
             return redirect()->route('admin.kyc.index')->with('success', 'Verifikasi disetujui. Foto KTP dan Wajah telah dihapus permanen.');
         } catch (\Exception $e) {
@@ -253,7 +253,7 @@ class KycReviewController extends Controller
 
             DB::commit();
 
-            $fonnte->sendNotification($user->phone, "*SiladesBeng (Sistem Sinergi Layanan dan Aspirasi Desa di Kecamatan Bengkalis)*\n\nMohon maaf, verifikasi identitas Anda ditolak.\nAlasan: {$request->admin_notes}\nSilakan ajukan ulang melalui menu Profil.");
+            $fonnte->sendNotification($user->phone, "*SegiDaerah (Sistem Sinergi Layanan dan Aspirasi Daerah Kecamatan Bengkalis)*\n\nMohon maaf, verifikasi identitas Anda ditolak.\nAlasan: {$request->admin_notes}\nSilakan ajukan ulang melalui menu Profil.");
 
             return redirect()->route('admin.kyc.index')->with('success', 'Verifikasi ditolak. Foto KTP dan Wajah telah dihapus permanen.');
         } catch (\Exception $e) {

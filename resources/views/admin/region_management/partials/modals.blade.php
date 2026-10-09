@@ -43,7 +43,7 @@
                         </div>
                         <div class="col-12">
                             <label class="form-label">Email <span class="text-danger">*</span></label>
-                            <input type="email" name="email" class="form-control" placeholder="Contoh: {{ strtolower(str_replace(' ', '', $region->name)) }}@SiladesBeng.com" required>
+                            <input type="email" name="email" class="form-control" placeholder="Contoh: nama@contoh.com" required>
                             <div class="form-text">Bisa menggunakan email asli atau email khusus untuk akun ini.</div>
                         </div>
                         <div class="col-12">

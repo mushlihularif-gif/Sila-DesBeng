@@ -995,7 +995,7 @@
                         <label class="form-label fw-bold text-dark">Email Resmi / Pribadi</label>
                         <div class="input-group input-group-merge">
                             <span class="input-group-text"><i class="bx bx-envelope"></i></span>
-                            <input type="email" name="email" class="form-control" style="padding-left: 10px !important;" placeholder="rt01@SiladesBeng.com" required>
+                            <input type="email" name="email" class="form-control" style="padding-left: 10px !important;" placeholder="nama@contoh.com" required>
                         </div>
                     </div>
                     <div class="col-12 mb-2">
@@ -1101,7 +1101,7 @@
                     <i class="bx bx-info-circle fs-4 me-3 mt-1"></i>
                     <div>
                         <h6 class="alert-heading mb-1 fw-bold">Panduan Penunjukan Admin</h6>
-                        <span style="font-size: 0.85rem; line-height: 1.4; display: block;">Gunakan formulir ini untuk mencari akun warga yang telah terdaftar di <strong>SiladesBeng</strong>, lalu ubah statusnya menjadi pengurus RT atau RW agar mereka dapat mengelola data kependudukan wilayahnya.</span>
+                        <span style="font-size: 0.85rem; line-height: 1.4; display: block;">Gunakan formulir ini untuk mencari akun warga yang telah terdaftar di <strong>SegiDaerah</strong>, lalu ubah statusnya menjadi pengurus RT atau RW agar mereka dapat mengelola data kependudukan wilayahnya.</span>
                     </div>
                 </div>
                 
