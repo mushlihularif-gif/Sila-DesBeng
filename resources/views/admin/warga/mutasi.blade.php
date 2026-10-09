@@ -844,17 +844,16 @@
                     <div class="row">
                         <div class="col-md-6 mb-4">
                             <label class="form-label fw-semibold">Dari Kecamatan <span class="text-danger">*</span></label>
-                            <select id="selectKecamatanTarik" class="form-select" style="width: 100%;" required>
-                                <option value="">Pilih Kecamatan Asal...</option>
-                                @foreach(\App\Models\Region::where('type', 'kecamatan')->where('name', 'Kecamatan Bengkalis')->get() as $k)
-                                    <option value="{{ $k->id }}">{{ $k->name }}</option>
-                                @endforeach
-                            </select>
+                            <div class="form-control bg-light border d-flex align-items-center justify-content-between py-2">
+                                <span class="fw-semibold text-dark">Kecamatan Bengkalis</span>
+                                <span class="badge bg-label-primary rounded-pill" style="font-size: 0.7rem;">Terkunci</span>
+                            </div>
+                            <input type="hidden" id="selectKecamatanTarik" value="{{ \App\Models\Region::where('type', 'kecamatan')->where('name', 'Kecamatan Bengkalis')->value('id') }}">
                         </div>
                         <div class="col-md-6 mb-4">
                             <label class="form-label fw-semibold">Dari Desa <span class="text-danger">*</span></label>
-                            <select id="selectDesaTarik" class="form-select" style="width: 100%;" required disabled>
-                                <option value="">Pilih Kecamatan Terlebih Dahulu</option>
+                            <select id="selectDesaTarik" class="form-select" style="width: 100%;" required>
+                                <option value="">Pilih Desa Asal...</option>
                             </select>
                         </div>
                     </div>
@@ -965,17 +964,16 @@
                     <div class="row">
                         <div class="col-md-6 mb-4">
                             <label class="form-label fw-semibold">Kecamatan Tujuan <span class="text-danger">*</span></label>
-                            <select id="selectKecamatan" class="form-select" style="width: 100%;" required>
-                                <option value="">Pilih Kecamatan...</option>
-                                @foreach(\App\Models\Region::where('type', 'kecamatan')->where('name', 'Kecamatan Bengkalis')->get() as $k)
-                                    <option value="{{ $k->id }}">{{ $k->name }}</option>
-                                @endforeach
-                            </select>
+                            <div class="form-control bg-light border d-flex align-items-center justify-content-between py-2">
+                                <span class="fw-semibold text-dark">Kecamatan Bengkalis</span>
+                                <span class="badge bg-label-primary rounded-pill" style="font-size: 0.7rem;">Terkunci</span>
+                            </div>
+                            <input type="hidden" id="selectKecamatan" value="{{ \App\Models\Region::where('type', 'kecamatan')->where('name', 'Kecamatan Bengkalis')->value('id') }}">
                         </div>
                         <div class="col-md-6 mb-4">
                             <label class="form-label fw-semibold">Desa Tujuan <span class="text-danger">*</span></label>
-                            <select name="to_region_id" id="selectDesa" class="form-select" style="width: 100%;" required disabled>
-                                <option value="">Pilih Kecamatan Terlebih Dahulu</option>
+                            <select name="to_region_id" id="selectDesa" class="form-select" style="width: 100%;" required>
+                                <option value="">Pilih Desa Tujuan...</option>
                             </select>
                         </div>
                     </div>
@@ -1098,6 +1096,21 @@
         });
 
         // Cascading Dropdown Ekspor (Kecamatan -> Desa)
+        function initSelectDesaDorong() {
+            var kecId = $('#selectKecamatan').val();
+            var desaSelect = $('#selectDesa');
+            desaSelect.empty().append('<option value="">Pilih Desa Tujuan...</option>');
+            if (kecId) {
+                var filtered = allDesas.filter(function(d) {
+                    return d.parent_id == kecId && d.id != currentAdminRegionId;
+                });
+                filtered.forEach(function(d) {
+                    desaSelect.append(new Option(d.name, d.id));
+                });
+                desaSelect.prop('disabled', false);
+            }
+        }
+        initSelectDesaDorong();
         $('#selectKecamatan').on('change', function() {
             var kecId = $(this).val();
             var desaSelect = $('#selectDesa');
@@ -1208,6 +1221,21 @@
         }
 
         // Cascading Dropdown Tarik (Kecamatan -> Desa)
+        function initSelectDesaTarik() {
+            var kecId = $('#selectKecamatanTarik').val();
+            var desaSelect = $('#selectDesaTarik');
+            desaSelect.empty().append('<option value="">Pilih Desa Asal...</option>');
+            if (kecId) {
+                var filtered = allDesas.filter(function(d) {
+                    return d.parent_id == kecId && d.id != currentAdminRegionId;
+                });
+                filtered.forEach(function(d) {
+                    desaSelect.append(new Option(d.name, d.id));
+                });
+                desaSelect.prop('disabled', false);
+            }
+        }
+        initSelectDesaTarik();
         $('#selectKecamatanTarik').on('change', function() {
             var kecId = $(this).val();
             var desaSelect = $('#selectDesaTarik');

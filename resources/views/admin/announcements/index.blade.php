@@ -209,14 +209,11 @@
                             @if(in_array(auth()->user()->role, ['super_admin', 'admin']))
                             <div class="col-12 col-md-4">
                                 <label class="form-label fw-semibold text-muted small mb-1">Kecamatan</label>
-                                <select id="filter_kecamatan_id" name="filter_kecamatan_id" class="form-select bg-light border-0" onchange="this.form.submit()">
-                                        <option value="">Kecamatan Bengkalis</option>
-                                    @foreach($kecamatanOptions as $opt)
-                                        <option value="{{ $opt->id }}" {{ request('filter_kecamatan_id') == $opt->id ? 'selected' : '' }}>
-                                            {{ $opt->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
+                                <div class="form-control bg-light border-0 d-flex align-items-center justify-content-between px-3 py-2">
+                                    <span class="fw-semibold text-dark small">Kecamatan Bengkalis</span>
+                                    <span class="badge bg-label-primary rounded-pill" style="font-size: 0.65rem;">Terkunci</span>
+                                </div>
+                                <input type="hidden" id="filter_kecamatan_id" name="filter_kecamatan_id" value="{{ request('filter_kecamatan_id') }}">
                             </div>
                             <div class="col-12 col-md-3">
                                 <label class="form-label fw-semibold text-muted small mb-1">Desa/Kelurahan</label>

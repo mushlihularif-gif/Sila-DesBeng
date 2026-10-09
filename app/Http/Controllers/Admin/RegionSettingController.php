@@ -191,18 +191,12 @@ class RegionSettingController extends Controller
             ];
         }
 
-        // Jaga agar Layanan Ambulans & Fasilitas Umum tetap aktif jika wilayah memiliki armada/gedung
-        $ambulanceServiceId = \App\Models\Service::whereIn('slug', ['layanan-ambulans', 'ambulans'])->value('id');
-        if ($ambulanceServiceId && \App\Models\Mobil::where('region_id', $region->id)->where('kategori', 'ambulans')->exists()) {
-            $syncData[$ambulanceServiceId] = [
-                'is_active' => true,
-                'is_exclusive' => false
-            ];
-        }
-
-        $fasilitasServiceId = \App\Models\Service::whereIn('slug', ['fasilitas-umum', 'peminjaman-fasilitas-umum'])->value('id');
-        if ($fasilitasServiceId && \App\Models\FasilitasUmum::where('region_id', $region->id)->exists()) {
-            if (!isset($syncData[$fasilitasServiceId])) {
+        // Jaga agar Fasilitas Umum tetap aktif jika wilayah memiliki armada ambulans atau gedung/fasilitas umum
+        $hasAmbulans = \App\Models\Mobil::where('region_id', $region->id)->where('kategori', 'ambulans')->exists();
+        $hasGedung = \App\Models\FasilitasUmum::where('region_id', $region->id)->exists();
+        if ($hasAmbulans || $hasGedung) {
+            $fasilitasServiceId = \App\Models\Service::where('slug', 'fasilitas-umum')->value('id');
+            if ($fasilitasServiceId && !isset($syncData[$fasilitasServiceId])) {
                 $syncData[$fasilitasServiceId] = [
                     'is_active' => true,
                     'is_exclusive' => false

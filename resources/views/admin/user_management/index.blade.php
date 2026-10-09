@@ -116,14 +116,11 @@
                         </div>
                     </div>
                     <div class="col-6 col-md-3">
-                        <select id="filter_kecamatan_id" name="filter_kecamatan_id" class="form-select modern-select shadow-sm bg-white">
-                                <option value="{{ $filter_kecamatan_id }}">Kecamatan Bengkalis</option>
-                            @foreach($kecamatanOptions as $opt)
-                                <option value="{{ $opt->id }}" {{ $filter_kecamatan_id == $opt->id ? 'selected' : '' }}>
-                                    {{ $opt->name }}
-                                </option>
-                            @endforeach
-                        </select>
+                        <div class="form-control modern-select shadow-sm bg-light border-0 d-flex align-items-center justify-content-between px-3" style="height: 44px;">
+                            <span class="fw-semibold text-dark small">Kecamatan Bengkalis</span>
+                            <span class="badge bg-label-primary rounded-pill" style="font-size: 0.65rem;">Fokus</span>
+                        </div>
+                        <input type="hidden" id="filter_kecamatan_id" name="filter_kecamatan_id" value="{{ $filter_kecamatan_id }}">
                     </div>
                     <div class="col-6 col-md-4">
                         <select id="filter_desa_id" name="filter_desa_id" class="form-select modern-select shadow-sm bg-white">

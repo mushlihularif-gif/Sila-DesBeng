@@ -234,16 +234,18 @@
 
             <div class="space-y-6 sm:space-y-12">
                 <div class="bg-white/60 backdrop-blur-md rounded-2xl shadow-sm border border-gray-100 overflow-hidden animate-section">
-                    {{-- Header with Dropdown --}}
+                    {{-- Header Wilayah (Non-Dropdown, Tetap & Terkunci) --}}
                     <div class="bg-gradient-to-r from-gray-50 to-white px-3 sm:px-6 py-3 sm:py-4 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-stretch sm:items-center relative gap-2.5 sm:gap-4">
-                        <div class="flex items-center gap-2 sm:gap-3 flex-1 min-w-0 w-full">
-                            <svg class="w-5 h-5 sm:w-7 sm:h-7 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                            <div class="relative flex-1 min-w-0 w-full">
-                                <select id="kecamatan-selector" class="block w-full pl-3 sm:pl-6 pr-8 sm:pr-10 py-2 sm:py-3 text-xs sm:text-base md:text-lg font-bold text-gray-800 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#115789] focus:border-[#115789] cursor-pointer transition-colors truncate">
-                                    @foreach($kecamatans as $kecamatan)
-                                        <option value="{{ $kecamatan->id }}" class="text-gray-900 font-medium py-1">{{ $kecamatan->name }}</option>
-                                    @endforeach
-                                </select>
+                        <div class="flex items-center gap-2.5 sm:gap-3 flex-1 min-w-0 w-full">
+                            <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 shrink-0 border border-blue-100">
+                                <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <div class="text-xs sm:text-sm font-bold text-gray-800 tracking-tight flex items-center gap-2">
+                                    <span class="text-sm sm:text-base md:text-lg font-bold text-gray-900">{{ $kecamatans->first()->name ?? 'Kecamatan Bengkalis' }}</span>
+                                    <span class="text-[10px] sm:text-[11px] font-semibold bg-blue-100/70 text-blue-700 px-2 py-0.5 rounded-full">Fokus Wilayah</span>
+                                </div>
+                                <input type="hidden" id="kecamatan-selector" value="{{ $kecamatans->first()->id ?? '' }}">
                             </div>
                         </div>
                         
@@ -277,64 +279,82 @@
                                     </div>
                                     
                                     <div class="flex flex-col gap-3 mt-4">
-                                        @if($desa->services->count() > 0)
-                                            @foreach($desa->services as $service)
-                                                @php
-                                                    $nameLower = strtolower($service->name);
-                                                    $iconColor = 'color: #6b7280;';
-                                                    $bgColor = 'background-color: #f9fafb;';
-                                                    
-                                                    if (strpos($nameLower, 'alat') !== false) {
-                                                        $iconColor = 'color: #f97316;';
-                                                        $bgColor = 'background-color: #fff7ed;';
-                                                    } elseif (strpos($nameLower, 'gas') !== false) {
-                                                    $iconColor = 'color: #3b82f6;';
-                                                    $bgColor = 'background-color: #eff6ff;';
-                                                } elseif (strpos($nameLower, 'mobil') !== false || strpos($nameLower, 'kendaraan') !== false) {
-                                                    $iconColor = 'color: #10b981;';
-                                                    $bgColor = 'background-color: #ecfdf5;';
-                                                } elseif (strpos($nameLower, 'fasilitas') !== false) {
-                                                    $iconColor = 'color: #a855f7;';
-                                                    $bgColor = 'background-color: #faf5ff;';
-                                                } elseif (strpos($nameLower, 'lapor') !== false) {
-                                                    $iconColor = 'color: #ef4444;';
-                                                    $bgColor = 'background-color: #fef2f2;';
-                                                } elseif (strpos($nameLower, 'pengumuman') !== false || strpos($nameLower, 'event') !== false) {
-                                                    $iconColor = 'color: #06b6d4;';
-                                                    $bgColor = 'background-color: #ecfeff;';
+                                        @php
+                                            $canonicalServices = [
+                                                'Penyewaan Alat' => [
+                                                    'icon' => '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>',
+                                                    'color' => 'color: #f97316;',
+                                                    'bg' => 'background-color: #fff7ed;',
+                                                ],
+                                                'Penjualan Gas' => [
+                                                    'icon' => '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"></path></svg>',
+                                                    'color' => 'color: #3b82f6;',
+                                                    'bg' => 'background-color: #eff6ff;',
+                                                ],
+                                                'Pelaporan Warga' => [
+                                                    'icon' => '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"></path></svg>',
+                                                    'color' => 'color: #ef4444;',
+                                                    'bg' => 'background-color: #fef2f2;',
+                                                ],
+                                                'Penyewaan Mobil' => [
+                                                    'icon' => '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>',
+                                                    'color' => 'color: #10b981;',
+                                                    'bg' => 'background-color: #ecfdf5;',
+                                                ],
+                                                'Fasilitas Umum' => [
+                                                    'icon' => '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>',
+                                                    'color' => 'color: #a855f7;',
+                                                    'bg' => 'background-color: #faf5ff;',
+                                                ],
+                                                'Pasar Daerah' => [
+                                                    'icon' => '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>',
+                                                    'color' => 'color: #115789;',
+                                                    'bg' => 'background-color: #e0f2fe;',
+                                                ],
+                                            ];
+
+                                            $desaActiveCanonical = [];
+                                            if ($desa->services && $desa->services->count() > 0) {
+                                                foreach($desa->services as $s) {
+                                                    if (isset($s->pivot) && !$s->pivot->is_active) continue;
+                                                    $sName = strtolower($s->name);
+                                                    if (str_contains($sName, 'alat')) {
+                                                        $desaActiveCanonical['Penyewaan Alat'] = true;
+                                                    } elseif (str_contains($sName, 'gas')) {
+                                                        $desaActiveCanonical['Penjualan Gas'] = true;
+                                                    } elseif (str_contains($sName, 'lapor')) {
+                                                        $desaActiveCanonical['Pelaporan Warga'] = true;
+                                                    } elseif (str_contains($sName, 'mobil') || str_contains($sName, 'kendaraan') || str_contains($sName, 'transportasi')) {
+                                                        $desaActiveCanonical['Penyewaan Mobil'] = true;
+                                                    } elseif (str_contains($sName, 'fasilitas') || str_contains($sName, 'ambulan')) {
+                                                        // Fasilitas Umum sudah mencakup Fasilitas & Ambulans, tidak dipisahkan
+                                                        $desaActiveCanonical['Fasilitas Umum'] = true;
+                                                    } elseif (str_contains($sName, 'pasar') || str_contains($sName, 'toko')) {
+                                                        $desaActiveCanonical['Pasar Daerah'] = true;
+                                                    }
                                                 }
-                                            @endphp
-                                            <div class="flex items-center gap-3">
-                                                <div class="flex items-center justify-center w-8 h-8 rounded-full shrink-0" style="{{ $bgColor }} {{ $iconColor }}">
-                                                    @if(strpos($nameLower, 'alat') !== false)
-                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                                    @elseif(strpos($nameLower, 'gas') !== false)
-                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"></path></svg>
-                                                    @elseif(strpos($nameLower, 'mobil') !== false || strpos($nameLower, 'kendaraan') !== false)
-                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
-                                                    @elseif(strpos($nameLower, 'fasilitas') !== false)
-                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
-                                                    @elseif(strpos($nameLower, 'lapor') !== false)
-                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"></path></svg>
-                                                    @elseif(strpos($nameLower, 'pengumuman') !== false || strpos($nameLower, 'event') !== false || strpos($nameLower, 'berita') !== false || strpos($nameLower, 'kabar') !== false)
-                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path></svg>
-                                                    @elseif(strpos($nameLower, 'pasar') !== false || strpos($nameLower, 'toko') !== false || strpos($nameLower, 'jual') !== false)
-                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                                                    @else
-                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                                    @endif
-                                                </div>
-                                                <span class="text-sm font-semibold text-gray-800">
-                                                    {{ (strpos(strtolower($service->name), 'pengumuman') !== false || strpos(strtolower($service->name), 'event') !== false) ? 'Kabar dan Informasi Daerah' : $service->name }}
-                                                </span>
+                                            }
+                                        @endphp
+
+                                        @if(count($desaActiveCanonical) > 0)
+                                            @foreach($canonicalServices as $sName => $meta)
+                                                @if(isset($desaActiveCanonical[$sName]))
+                                                    <div class="flex items-center gap-3">
+                                                        <div class="flex items-center justify-center w-8 h-8 rounded-full shrink-0" style="{{ $meta['bg'] }} {{ $meta['color'] }}">
+                                                            {!! $meta['icon'] !!}
+                                                        </div>
+                                                        <span class="text-sm font-semibold text-gray-800">
+                                                            {{ $sName }}
+                                                        </span>
+                                                    </div>
+                                                @endif
+                                            @endforeach
+                                        @else
+                                            <div class="flex items-center gap-2 mt-1">
+                                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                                <span class="text-xs text-gray-500 italic">Belum ada unit layanan aktif</span>
                                             </div>
-                                        @endforeach
-                                    @else
-                                        <div class="flex items-center gap-2 mt-1">
-                                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                            <span class="text-xs text-gray-500 italic">Belum ada layanan aktif</span>
-                                        </div>
-                                    @endif
+                                        @endif
                                     </div>
                                 </div>
                                 @endif
@@ -595,27 +615,27 @@
                                     {{-- Kabupaten (Fixed) --}}
                                     <div>
                                         <label class="block text-xs font-semibold text-gray-500 mb-1 uppercase">Kabupaten</label>
-                                        <div class="py-2.5 px-4 w-full border border-gray-300 rounded-lg bg-gray-100 text-gray-600 text-[15px] font-bold shadow-sm">
-                                            Bengkalis
+                                        <div class="py-2.5 px-4 w-full border border-gray-300 rounded-lg bg-gray-100 text-gray-700 text-sm font-bold shadow-sm flex items-center justify-between">
+                                            <span>Bengkalis</span>
+                                            <span class="text-[11px] bg-gray-200 text-gray-600 px-2 py-0.5 rounded font-normal">Terkunci</span>
                                         </div>
                                     </div>
                                     
-                                    {{-- Kecamatan --}}
+                                    {{-- Kecamatan (Fixed - Non Dropdown) --}}
                                     <div>
                                         <label class="block text-xs font-semibold text-gray-500 mb-1 uppercase">Kecamatan</label>
-                                        <select id="sel_kecamatan" class="py-2 px-3 block w-full border border-gray-300 rounded-lg bg-white text-[#1f2937] text-sm font-semibold shadow-sm focus:ring-2 focus:ring-[#115789]/30" required onchange="onKecamatanChange()">
-                                            <option value="" disabled selected>Pilih Kecamatan</option>
-                                            @foreach($kecamatans as $kecamatan)
-                                                <option value="{{ $kecamatan->id }}">{{ $kecamatan->name }}</option>
-                                            @endforeach
-                                        </select>
+                                        <div class="py-2.5 px-4 w-full border border-gray-300 rounded-lg bg-gray-100 text-gray-700 text-sm font-bold shadow-sm flex items-center justify-between">
+                                            <span>{{ $kecamatans->first()->name ?? 'Kecamatan Bengkalis' }}</span>
+                                            <span class="text-[11px] bg-gray-200 text-gray-600 px-2 py-0.5 rounded font-normal">Terkunci</span>
+                                        </div>
+                                        <input type="hidden" id="sel_kecamatan" value="{{ $kecamatans->first()->id ?? '' }}">
                                     </div>
 
-                                    {{-- Kelurahan/Desa --}}
+                                    {{-- Kelurahan/Desa (Langsung Aktif) --}}
                                     <div>
                                         <label class="block text-xs font-semibold text-gray-500 mb-1 uppercase">Desa / Kelurahan</label>
-                                        <select id="sel_desa" class="py-2 px-3 block w-full border border-gray-300 rounded-lg bg-gray-100 text-gray-500 text-sm font-semibold shadow-sm focus:ring-2 focus:ring-[#115789]/30" disabled onchange="onDesaChange()">
-                                            <option value="" disabled selected>Pilih Desa</option>
+                                        <select id="sel_desa" class="py-2 px-3 block w-full border border-gray-300 rounded-lg bg-white text-gray-900 text-sm font-semibold shadow-sm focus:ring-2 focus:ring-[#115789]/30" required onchange="onDesaChange()">
+                                            <option value="" disabled selected>Pilih Desa / Kelurahan</option>
                                         </select>
                                     </div>
                                 </div>
@@ -1074,20 +1094,24 @@
     }
 
     // Handler untuk Mode Desa Belum Bergabung (isJoined == false)
-    function onKecamatanChange() {
-        if (!selKec || !selDesa) return;
-        const kecId = selKec.value;
-        selDesa.innerHTML = '<option value="" disabled selected>Pilih Desa/Kelurahan</option>';
-        selDesa.disabled = !kecId;
-        
+    function initDesaPilihan() {
+        if (!selDesa) return;
+        const kecId = selKec ? selKec.value : (allRegions.find(r => r.type === 'kecamatan')?.id || '');
+        selDesa.innerHTML = '<option value="" disabled selected>Pilih Desa / Kelurahan</option>';
         if (kecId) {
-            const desas = getChildren(kecId).filter(r => r.type === 'desa');
-            desas.forEach(d => {
+            const desas = getChildren(kecId).filter(r => ['desa', 'kelurahan'].includes(r.type));
+            desas.sort((a, b) => a.name.localeCompare(b.name)).forEach(d => {
                 const opt = document.createElement('option');
-                opt.value = d.id; opt.textContent = d.name;
+                opt.value = d.id;
+                opt.textContent = d.name;
                 selDesa.appendChild(opt);
             });
+            selDesa.disabled = false;
         }
+    }
+
+    function onKecamatanChange() {
+        initDesaPilihan();
         updateFormHiddenValuesDesa();
     }
 

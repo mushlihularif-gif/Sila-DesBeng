@@ -523,34 +523,24 @@
                     @csrf
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        {{-- Pilih Kecamatan Tujuan --}}
+                        {{-- Kecamatan Tujuan (Terkunci & Non-Dropdown) --}}
                         <div>
-                            <label for="select-kecamatan-mutasi" class="block text-sm font-bold text-gray-800 mb-2">Kecamatan Tujuan</label>
-                            <div class="relative">
-                                <select id="select-kecamatan-mutasi" 
-                                        class="appearance-none w-full px-4 py-2.5 pr-10 bg-white/80 border border-white/60 rounded-xl focus:border-blue-400 focus:ring-2 focus:ring-blue-200/50 outline-none transition glass-input text-gray-800 text-sm" 
-                                        required>
-                                    <option value="">-- Pilih Kecamatan Tujuan --</option>
-                                    @foreach($kecamatansData as $kec)
-                                        <option value="{{ $kec->id }}">{{ $kec->name }}</option>
-                                    @endforeach
-                                </select>
-                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
-                                    <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path>
-                                    </svg>
-                                </div>
+                            <label class="block text-sm font-bold text-gray-800 mb-2">Kecamatan Tujuan</label>
+                            <div class="w-full px-4 py-2.5 bg-gray-100 border border-gray-200 rounded-xl text-gray-700 text-sm font-semibold flex items-center justify-between">
+                                <span>Kecamatan Bengkalis</span>
+                                <span class="text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded font-normal">Terkunci</span>
                             </div>
+                            <input type="hidden" id="select-kecamatan-mutasi" value="{{ $kecamatansData->first()->id ?? '' }}">
                         </div>
 
-                        {{-- Pilih Desa Tujuan --}}
+                        {{-- Pilih Desa Tujuan (Langsung Aktif) --}}
                         <div>
                             <label for="select-desa-mutasi" class="block text-sm font-bold text-gray-800 mb-2">Desa Tujuan</label>
                             <div class="relative">
                                 <select name="to_region_id" id="select-desa-mutasi" 
-                                        class="appearance-none w-full px-4 py-2.5 pr-10 bg-white/80 border border-white/60 rounded-xl focus:border-blue-400 focus:ring-2 focus:ring-blue-200/50 outline-none transition glass-input text-gray-800 text-sm disabled:opacity-60 disabled:cursor-not-allowed" 
-                                        required disabled>
-                                    <option value="">-- Pilih Kecamatan Terlebih Dahulu --</option>
+                                        class="appearance-none w-full px-4 py-2.5 pr-10 bg-white/80 border border-white/60 rounded-xl focus:border-blue-400 focus:ring-2 focus:ring-blue-200/50 outline-none transition glass-input text-gray-800 text-sm" 
+                                        required>
+                                    <option value="">-- Pilih Desa Tujuan --</option>
                                 </select>
                                 <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4">
                                     <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -721,6 +711,15 @@
             }) : []),
             currentUserDesaId: {{ $userDesaId ?? ($user->region_id ?? 0) }}
         };
+
+        function autoInitDesaMutasi() {
+            const hiddenKec = document.getElementById('select-kecamatan-mutasi');
+            const autoKecId = hiddenKec ? hiddenKec.value : (Object.keys(window.MUTASI_DATA.desasByKecamatan)[0] || null);
+            if (autoKecId) {
+                populateDesaDropdown(autoKecId);
+            }
+        }
+        autoInitDesaMutasi();
 
         function populateDesaDropdown(kecId) {
             const selectDesaMutasi = document.getElementById('select-desa-mutasi');
