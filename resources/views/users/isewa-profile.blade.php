@@ -23,13 +23,13 @@
                             <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Kami</span>
                         </h2>
                         <p class="text-lg font-bold text-gray-800 mb-4">
-                            Langkah Awal Mewujudkan Digitalisasi Bengkalis
+                            Digitalisasi Layanan Desa di Kecamatan Bengkalis
                         </p>
                         <p class="text-gray-700 leading-relaxed mb-4">
-                            <span class="font-semibold text-gray-800">SiladesBeng</span> (Sistem Sinergi Layanan dan Aspirasi Desa di Kecamatan Bengkalis) menyediakan informasi dan akses layanan bagi warga desa-desa di Kecamatan Bengkalis. Warga dapat menggunakan layanan yang tersedia, menyampaikan laporan, dan membaca informasi daerah melalui satu platform.
+                            <span class="font-semibold text-gray-800">SiladesBeng</span> (Sistem Sinergi Layanan dan Aspirasi Desa di Kecamatan Bengkalis) merupakan platform digital terpadu untuk mendukung pelayanan dan kegiatan usaha desa di Kecamatan Bengkalis. Melalui satu platform, warga dapat menemukan layanan, menyampaikan laporan, berbelanja produk lokal, dan membaca informasi daerah.
                         </p>
                         <p class="text-gray-700 leading-relaxed">
-                            SiladesBeng menyediakan informasi layanan desa, Pelaporan Warga, dan Kabar dan Informasi Daerah dalam satu platform. Cakupan implementasi dan evaluasi penelitian ini dibatasi pada Kecamatan Bengkalis dan desa-desa di dalamnya.
+                            SiladesBeng membantu warga mengakses layanan dengan lebih mudah, sekaligus membantu pengelola desa mencatat pesanan, mengatur layanan, dan menyampaikan informasi secara lebih tertata. Pengembangan dan penerapan sistem ini berfokus pada desa-desa di Kecamatan Bengkalis.
                         </p>
                     </div>
                     
@@ -57,35 +57,35 @@
                             <div class="w-3 h-3 rounded-full bg-blue-500 mt-2 flex-shrink-0"></div>
                             <div>
                                 <h3 class="font-bold text-lg text-gray-900">Inovatif</h3>
-                                <p class="text-gray-600">Selalu berinovasi untuk memberikan solusi terbaik yang sesuai dengan kebutuhan daerah</p>
+                                <p class="text-gray-600">Menghadirkan layanan digital yang menjawab kebutuhan warga dan pengelola desa di Kecamatan Bengkalis.</p>
                             </div>
                         </div>
                         <div class="flex items-start gap-4">
                             <div class="w-3 h-3 rounded-full bg-blue-500 mt-2 flex-shrink-0"></div>
                             <div>
                                 <h3 class="font-bold text-lg text-gray-900">Efisien</h3>
-                                <p class="text-gray-600">Mengoptimalkan proses manual menjadi digital untuk penghematan waktu dan sumber daya</p>
+                                <p class="text-gray-600">Membantu proses pemesanan, pencatatan, dan penyampaian informasi berjalan lebih praktis.</p>
                             </div>
                         </div>
                         <div class="flex items-start gap-4">
                             <div class="w-3 h-3 rounded-full bg-blue-500 mt-2 flex-shrink-0"></div>
                             <div>
                                 <h3 class="font-bold text-lg text-gray-900">Terpercaya</h3>
-                                <p class="text-gray-600">Menjaga integritas data dengan sistem keamanan yang handal dan terpercaya</p>
+                                <p class="text-gray-600">Mendorong layanan yang tertib, jelas, dan dapat dipertanggungjawabkan.</p>
                             </div>
                         </div>
                         <div class="flex items-start gap-4">
                             <div class="w-3 h-3 rounded-full bg-blue-500 mt-2 flex-shrink-0"></div>
                             <div>
                                 <h3 class="font-bold text-lg text-gray-900">Kemudahan</h3>
-                                <p class="text-gray-600">Menyediakan antarmuka yang intuitif dan mudah digunakan untuk semua kalangan</p>
+                                <p class="text-gray-600">Menyediakan layanan yang mudah dipahami dan digunakan oleh masyarakat.</p>
                             </div>
                         </div>
                         <div class="flex items-start gap-4">
                             <div class="w-3 h-3 rounded-full bg-blue-500 mt-2 flex-shrink-0"></div>
                             <div>
                                 <h3 class="font-bold text-lg text-gray-900">Aksesibilitas</h3>
-                                <p class="text-gray-600">Dapat diakses kapan saja dan dimana saja melalui perangkat apapun</p>
+                                <p class="text-gray-600">Memberi akses informasi dan layanan melalui perangkat yang digunakan sehari-hari.</p>
                             </div>
                         </div>
                     </div>
@@ -108,7 +108,7 @@
                             </svg>
                             <div>
                                 <h3 class="font-bold text-lg text-gray-900">Sarana Mobilitas</h3>
-                                <p class="text-gray-600">Fasilitas transportasi untuk mendukung operasional instansi dan mobilitas masyarakat di Kecamatan Bengkalis.</p>
+                                <p class="text-gray-600">Memudahkan warga mengakses layanan pemesanan kendaraan di Kecamatan Bengkalis.</p>
                             </div>
                         </div>
                         <!-- Service 2: Fasilitas Umum -->
@@ -119,7 +119,7 @@
                             </svg>
                             <div>
                                 <h3 class="font-bold text-lg text-gray-900">Pemanfaatan Fasilitas Umum</h3>
-                                <p class="text-gray-600">Sistem reservasi digital terpadu untuk penggunaan fasilitas umum seperti gedung pertemuan, lapangan, dan ruang publik lainnya.</p>
+                                <p class="text-gray-600">Membantu warga mengajukan penggunaan gedung pertemuan, lapangan, dan fasilitas umum lainnya.</p>
                             </div>
                         </div>
                         <!-- Service 3: Penyewaan Alat -->
@@ -130,7 +130,7 @@
                             </svg>
                             <div>
                                 <h3 class="font-bold text-lg text-gray-900">Penyewaan Alat</h3>
-                                <p class="text-gray-600">Layanan peminjaman dan penyewaan peralatan pendukung acara dengan sistem inventarisasi dan pencatatan yang akurat.</p>
+                                <p class="text-gray-600">Menyediakan informasi ketersediaan dan pemesanan alat untuk mendukung kegiatan masyarakat.</p>
                             </div>
                         </div>
                         <!-- Service 4: Pendistribusian Gas -->
@@ -141,7 +141,7 @@
                             </svg>
                             <div>
                                 <h3 class="font-bold text-lg text-gray-900">Pendistribusian Gas</h3>
-                                <p class="text-gray-600">Manajemen terintegrasi untuk memantau proses ketersediaan dan pendistribusian gas secara merata dan transparan.</p>
+                                <p class="text-gray-600">Menyajikan informasi ketersediaan dan membantu proses pemesanan gas di wilayah layanan.</p>
                             </div>
                         </div>
                         <!-- Service 5: Pelaporan Warga -->
@@ -152,7 +152,7 @@
                             </svg>
                             <div>
                                 <h3 class="font-bold text-lg text-gray-900">Pelaporan Warga</h3>
-                                <p class="text-gray-600">Wadah interaktif bagi masyarakat untuk menyampaikan aspirasi, aduan, dan masukan langsung kepada instansi daerah dengan respons cepat.</p>
+                                <p class="text-gray-600">Menjadi sarana bagi warga untuk menyampaikan aspirasi dan aduan serta mengikuti tindak lanjutnya.</p>
                             </div>
                         </div>
                         <!-- Service 6: Informasi Pengumuman -->
@@ -163,7 +163,17 @@
                             </svg>
                             <div>
                                 <h3 class="font-bold text-lg text-gray-900">Informasi Pengumuman</h3>
-                                <p class="text-gray-600">Pusat penyebaran informasi resmi, berita terkini, dan pengumuman penting dari pemerintah daerah untuk seluruh lapisan masyarakat.</p>
+                                <p class="text-gray-600">Menyediakan berita dan pengumuman bagi warga desa-desa di Kecamatan Bengkalis.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <svg class="w-6 h-6 flex-shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="12" cy="12" r="10" fill="#10B981"/>
+                                <path d="M8 12.5L10.5 15L16 9" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <div>
+                                <h3 class="font-bold text-lg text-gray-900">Pasar Daerah</h3>
+                                <p class="text-gray-600">Memperkenalkan produk usaha lokal dan membantu warga berbelanja dari desa-desa di Kecamatan Bengkalis.</p>
                             </div>
                         </div>
                     </div>
@@ -182,28 +192,28 @@
                                 <circle cx="12" cy="12" r="10" fill="#10B981"/>
                                 <path d="M8 12.5L10.5 15L16 9" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
-                            <p class="text-gray-700 leading-relaxed">Meningkatkan efisiensi dan profesionalitas pengelolaan unit usaha daerah</p>
+                            <p class="text-gray-700 leading-relaxed">Mendukung pengelolaan layanan dan unit usaha desa yang lebih tertata.</p>
                         </div>
                         <div class="flex items-start gap-4">
                             <svg class="w-6 h-6 flex-shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <circle cx="12" cy="12" r="10" fill="#10B981"/>
                                 <path d="M8 12.5L10.5 15L16 9" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
-                            <p class="text-gray-700 leading-relaxed">Menyediakan layanan digital yang mudah diakses oleh masyarakat dan pelaku usaha daerah</p>
+                            <p class="text-gray-700 leading-relaxed">Memudahkan warga mengakses layanan dan informasi di Kecamatan Bengkalis.</p>
                         </div>
                         <div class="flex items-start gap-4">
                             <svg class="w-6 h-6 flex-shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <circle cx="12" cy="12" r="10" fill="#10B981"/>
                                 <path d="M8 12.5L10.5 15L16 9" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
-                            <p class="text-gray-700 leading-relaxed">Membangun kepercayaan masyarakat melalui transparansi data digital</p>
+                            <p class="text-gray-700 leading-relaxed">Mendorong pelayanan yang terbuka, jelas, dan responsif terhadap kebutuhan warga.</p>
                         </div>
                         <div class="flex items-start gap-4">
                             <svg class="w-6 h-6 flex-shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <circle cx="12" cy="12" r="10" fill="#10B981"/>
                                 <path d="M8 12.5L10.5 15L16 9" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
-                            <p class="text-gray-700 leading-relaxed">Mendorong digitalisasi daerah menuju tata kelola ekonomi mandiri dan modern</p>
+                            <p class="text-gray-700 leading-relaxed">Mendukung kemajuan usaha lokal dan kemandirian desa melalui pemanfaatan teknologi.</p>
                         </div>
                     </div>
                 </div>

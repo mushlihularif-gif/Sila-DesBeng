@@ -99,13 +99,13 @@
                         Cerita Kami
                     </h3>
                     <h5 class="fw-semibold text-dark mb-3 mb-md-4 fs-6 fs-md-5">
-                        Langkah Awal Mewujudkan Digitalisasi Bengkalis
+                        Digitalisasi Layanan Desa di Kecamatan Bengkalis
                     </h5>
                     <p class="text-muted lh-lg mb-3 mb-md-4 text-start text-md-justify" style="font-size: 0.9rem;">
-                        <span class="fw-bold text-dark">SiladesBeng</span> adalah Sistem Sinergi Layanan dan Aspirasi Desa di Kecamatan Bengkalis. Platform ini mendukung akses informasi layanan, Pelaporan Warga, dan Kabar dan Informasi Daerah bagi masyarakat di kecamatan ini.
+                        <span class="fw-bold text-dark">SiladesBeng</span> (Sistem Sinergi Layanan dan Aspirasi Desa di Kecamatan Bengkalis) merupakan platform digital terpadu untuk mendukung pelayanan dan kegiatan usaha desa di kecamatan ini. Melalui satu platform, warga dapat menemukan layanan, menyampaikan laporan, berbelanja produk lokal, dan membaca informasi daerah.
                     </p>
                     <p class="text-muted lh-lg mb-0 text-start text-md-justify" style="font-size: 0.9rem;">
-                        Sebagai wujud nyata dari visi tersebut, SiladesBeng hadir mengintegrasikan berbagai pilar layanan esensial daerah, mulai dari sarana mobilitas (kendaraan), pemanfaatan fasilitas umum, hingga penyewaan alat dan pendistribusian gas. Lebih jauh lagi, kami juga menghadirkan ruang interaksi inklusif melalui fitur Pelaporan Warga dan Informasi Pengumuman. Cerita SiladesBeng adalah cerita tentang inovasi dan kolaborasi bagaimana sentuhan teknologi mentransformasi cara aparatur dan masyarakat berinteraksi demi mewujudkan tata kelola Bengkalis yang mandiri, produktif, dan berkelanjutan.
+                        SiladesBeng menggabungkan layanan kendaraan, fasilitas umum, penyewaan alat, pemesanan gas, Pasar Daerah, Pelaporan Warga, serta Kabar dan Informasi Daerah. Layanan ini dirancang agar lebih mudah dijangkau dan dikelola oleh masyarakat serta pengelola desa di Kecamatan Bengkalis.
                     </p>
                 </div>
                 <div class="col-lg-4 text-center d-none d-lg-block">
@@ -126,7 +126,7 @@
                             <div class="icon-bullet"></div>
                             <div>
                                 <h6 class="fw-bold text-dark mb-1">Inovatif</h6>
-                                <p class="text-muted small mb-0">Selalu berinovasi untuk memberikan solusi terbaik yang sesuai dengan kebutuhan daerah</p>
+                                <p class="text-muted small mb-0">Menghadirkan layanan digital yang menjawab kebutuhan warga dan pengelola desa di Kecamatan Bengkalis.</p>
                             </div>
                         </div>
                     </div>
@@ -135,7 +135,7 @@
                             <div class="icon-bullet"></div>
                             <div>
                                 <h6 class="fw-bold text-dark mb-1">Efisien</h6>
-                                <p class="text-muted small mb-0">Mengoptimalkan proses manual menjadi digital untuk penghematan waktu dan sumber daya</p>
+                                <p class="text-muted small mb-0">Membantu proses pemesanan, pencatatan, dan penyampaian informasi berjalan lebih praktis.</p>
                             </div>
                         </div>
                     </div>
@@ -144,7 +144,7 @@
                             <div class="icon-bullet"></div>
                             <div>
                                 <h6 class="fw-bold text-dark mb-1">Terpercaya</h6>
-                                <p class="text-muted small mb-0">Menjaga integritas data dengan sistem keamanan yang handal dan terpercaya</p>
+                                <p class="text-muted small mb-0">Mendorong layanan yang tertib, jelas, dan dapat dipertanggungjawabkan.</p>
                             </div>
                         </div>
                     </div>
@@ -153,7 +153,7 @@
                             <div class="icon-bullet"></div>
                             <div>
                                 <h6 class="fw-bold text-dark mb-1">Kemudahan</h6>
-                                <p class="text-muted small mb-0">Menyediakan antarmuka yang intuitif dan mudah digunakan untuk semua kalangan</p>
+                                <p class="text-muted small mb-0">Menyediakan layanan yang mudah dipahami dan digunakan oleh masyarakat.</p>
                             </div>
                         </div>
                     </div>
@@ -162,7 +162,7 @@
                             <div class="icon-bullet"></div>
                             <div>
                                 <h6 class="fw-bold text-dark mb-1">Aksesibilitas</h6>
-                                <p class="text-muted small mb-0">Dapat diakses kapan saja dan dimana saja melalui perangkat apapun</p>
+                                <p class="text-muted small mb-0">Memberi akses informasi dan layanan melalui perangkat yang digunakan sehari-hari.</p>
                             </div>
                         </div>
                     </div>
@@ -183,7 +183,19 @@
                             <i class='bx bx-car fs-4'></i>
                         </div>
                         <h6 class="fw-bold text-dark mb-2">Sarana Mobilitas</h6>
-                        <p class="text-muted small mb-0">Fasilitas penyediaan sarana transportasi terpadu guna mendukung efisiensi pergerakan operasional instansi dan kemudahan mobilitas masyarakat di berbagai wilayah kabupaten.</p>
+                        <p class="text-muted small mb-0">Memudahkan warga mengakses layanan pemesanan kendaraan di Kecamatan Bengkalis.</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Service 7: Pasar Daerah -->
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body p-4">
+                        <div class="icon-box mb-3">
+                            <i class='bx bx-store fs-4'></i>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-2">Pasar Daerah</h6>
+                        <p class="text-muted small mb-0">Memperkenalkan produk usaha lokal dan membantu warga berbelanja dari desa-desa di Kecamatan Bengkalis.</p>
                     </div>
                 </div>
             </div>
@@ -195,7 +207,7 @@
                             <i class='bx bx-building-house fs-4'></i>
                         </div>
                         <h6 class="fw-bold text-dark mb-2">Pemanfaatan Fasilitas Umum</h6>
-                        <p class="text-muted small mb-0">Sistem reservasi digital terpadu untuk penggunaan fasilitas umum seperti gedung pertemuan, lapangan, dan ruang publik lainnya.</p>
+                        <p class="text-muted small mb-0">Membantu warga mengajukan penggunaan gedung pertemuan, lapangan, dan fasilitas umum lainnya.</p>
                     </div>
                 </div>
             </div>
@@ -207,7 +219,7 @@
                             <i class='bx bx-wrench fs-4'></i>
                         </div>
                         <h6 class="fw-bold text-dark mb-2">Penyewaan Alat</h6>
-                        <p class="text-muted small mb-0">Layanan peminjaman dan penyewaan peralatan pendukung acara dengan sistem inventarisasi dan pencatatan yang akurat.</p>
+                        <p class="text-muted small mb-0">Menyediakan informasi ketersediaan dan pemesanan alat untuk mendukung kegiatan masyarakat.</p>
                     </div>
                 </div>
             </div>
@@ -219,7 +231,7 @@
                             <i class='bx bx-package fs-4'></i>
                         </div>
                         <h6 class="fw-bold text-dark mb-2">Pendistribusian Gas</h6>
-                        <p class="text-muted small mb-0">Manajemen terintegrasi untuk memantau proses ketersediaan dan pendistribusian gas secara merata dan transparan.</p>
+                        <p class="text-muted small mb-0">Menyajikan informasi ketersediaan dan membantu proses pemesanan gas di wilayah layanan.</p>
                     </div>
                 </div>
             </div>
@@ -231,7 +243,7 @@
                             <i class='bx bx-message-alt-detail fs-4'></i>
                         </div>
                         <h6 class="fw-bold text-dark mb-2">Pelaporan Warga</h6>
-                        <p class="text-muted small mb-0">Wadah interaktif bagi masyarakat untuk menyampaikan aspirasi, aduan, dan masukan langsung kepada instansi daerah dengan respons cepat.</p>
+                        <p class="text-muted small mb-0">Menjadi sarana bagi warga untuk menyampaikan aspirasi dan aduan serta mengikuti tindak lanjutnya.</p>
                     </div>
                 </div>
             </div>
@@ -243,7 +255,7 @@
                             <i class='bx bx-news fs-4'></i>
                         </div>
                         <h6 class="fw-bold text-dark mb-2">Informasi Pengumuman</h6>
-                        <p class="text-muted small mb-0">Pusat penyebaran informasi resmi, berita terkini, dan pengumuman penting dari pemerintah daerah untuk seluruh lapisan masyarakat.</p>
+                        <p class="text-muted small mb-0">Menyediakan berita dan pengumuman bagi warga desa-desa di Kecamatan Bengkalis.</p>
                     </div>
                 </div>
             </div>
@@ -258,19 +270,19 @@
                 <ul class="list-unstyled mb-0 d-flex flex-column gap-3">
                     <li class="d-flex align-items-start gap-3">
                         <i class='bx bx-check-circle text-success fs-5 mt-1'></i>
-                        <span class="text-muted">Meningkatkan efisiensi dan profesionalitas pengelolaan unit usaha daerah</span>
+                        <span class="text-muted">Mendukung pengelolaan layanan dan unit usaha desa yang lebih tertata.</span>
                     </li>
                     <li class="d-flex align-items-start gap-3">
                         <i class='bx bx-check-circle text-success fs-5 mt-1'></i>
-                        <span class="text-muted">Menyediakan layanan digital yang mudah diakses oleh masyarakat dan pelaku usaha daerah</span>
+                        <span class="text-muted">Memudahkan warga mengakses layanan dan informasi di Kecamatan Bengkalis.</span>
                     </li>
                     <li class="d-flex align-items-start gap-3">
                         <i class='bx bx-check-circle text-success fs-5 mt-1'></i>
-                        <span class="text-muted">Membangun kepercayaan masyarakat melalui transparansi data digital</span>
+                        <span class="text-muted">Mendorong pelayanan yang terbuka, jelas, dan responsif terhadap kebutuhan warga.</span>
                     </li>
                     <li class="d-flex align-items-start gap-3">
                         <i class='bx bx-check-circle text-success fs-5 mt-1'></i>
-                        <span class="text-muted">Mendorong digitalisasi daerah menuju tata kelola ekonomi mandiri dan modern</span>
+                        <span class="text-muted">Mendukung kemajuan usaha lokal dan kemandirian desa melalui pemanfaatan teknologi.</span>
                     </li>
                 </ul>
             </div>
