@@ -34,17 +34,23 @@ class RegionSettingController extends Controller
         // Bootstrapping initial admin region if not connected
         if (empty($user->region_id)) {
             $kabupaten = Region::firstOrCreate(
-                ['name' => 'Bengkalis', 'type' => 'kabupaten'],
+                ['name' => 'Kabupaten Bengkalis', 'type' => 'kabupaten'],
                 ['profile_text' => 'Kabupaten Bengkalis']
             );
             $kecamatan = Region::firstOrCreate(
-                ['name' => 'Bengkalis', 'type' => 'kecamatan', 'parent_id' => $kabupaten->id],
+                ['name' => 'Kecamatan Bengkalis', 'type' => 'kecamatan', 'parent_id' => $kabupaten->id],
                 ['profile_text' => 'Kecamatan Bengkalis']
             );
-            $desa = Region::firstOrCreate(
-                ['name' => 'Pematang Duku Timur', 'type' => 'desa', 'parent_id' => $kecamatan->id],
-                ['profile_text' => 'Pemerintahan Desa Pematang Duku Timur, Kecamatan Bengkalis, Kabupaten Bengkalis.']
-            );
+            $desa = Region::where('type', 'desa')
+                ->where('parent_id', $kecamatan->id)
+                ->whereIn('name', ['Pematang Duku Timur', 'Desa Pematang Duku Timur'])
+                ->first();
+            if (! $desa) {
+                $desa = Region::firstOrCreate(
+                    ['name' => 'Desa Pematang Duku Timur', 'type' => 'desa', 'parent_id' => $kecamatan->id],
+                    ['profile_text' => 'Pemerintahan Desa Pematang Duku Timur, Kecamatan Bengkalis, Kabupaten Bengkalis.']
+                );
+            }
             if (in_array($user->role, ['super_admin', 'admin'])) {
                 $user->region_id = $kabupaten->id;
             } else {
@@ -219,20 +225,7 @@ class RegionSettingController extends Controller
             return redirect()->route('admin.dashboard')->with('error', 'Anda tidak terhubung dengan wilayah mana pun.');
         }
 
-        // Halaman ini menyesuaikan diri dengan penyedia yang dinyalakan Super Admin:
-        // Midtrans menuntut tiap wilayah punya akun sendiri (kunci diisi di sini),
-        // sedangkan Xendit memakai kredensial induk (wilayah cukup punya sub-akun).
-        $penyedia   = \App\Support\PenyediaPembayaran::aktif();
-        $labelPenyedia = \App\Support\PenyediaPembayaran::label();
-        $kunciDiWilayah = \App\Support\PenyediaPembayaran::kunciDiisiOlehWilayah();
-        $kesiapan   = \App\Support\PenyediaPembayaran::kesiapanWilayah($region->id);
-
-        // Saldo dan pencairannya sudah pindah ke Manajemen → Keuangan
-        // (App\Http\Controllers\Admin\KeuanganController). Halaman ini tinggal
-        // mengurus konfigurasinya saja: rekening tujuan & sakelar gateway.
-        return view('admin.region_settings.payment', compact(
-            'region', 'penyedia', 'labelPenyedia', 'kunciDiWilayah', 'kesiapan'
-        ));
+        return view('admin.region_settings.payment', compact('region'));
     }
 
     public function paymentUpdate(Request $request)
@@ -256,34 +249,8 @@ class RegionSettingController extends Controller
         $paymentInfo['ewallet_account_name'] = $request->ewallet_account_name;
         $paymentInfo['ewallet_active'] = $request->has('ewallet_active');
         
-        // Menyalakan gateway TIDAK lagi menuntut kunci API dari perangkat desa.
-        // Penyiapan teknisnya urusan Diskominfotik; yang wajib dari desa adalah
-        // rekening tujuan, karena ke situlah pemasukan wilayahnya diteruskan.
-        if ($request->has('payment_gateway_active')) {
-            if (empty($request->bank_name) || empty($request->account_number)) {
-                return redirect()->back()
-                    ->with('error', 'Gagal: Nomor rekening wilayah wajib diisi sebelum mengaktifkan pembayaran otomatis, '
-                        . 'karena ke rekening itulah pemasukan diteruskan.')
-                    ->withInput();
-            }
-        }
-
         $paymentInfo['card_theme'] = $request->card_theme;
         $paymentInfo['cash_only_active'] = $request->has('cash_only_active');
-        $paymentInfo['payment_gateway_active'] = $request->has('payment_gateway_active');
-
-        // Midtrans dan Xendit sama-sama kredensial platform sekarang (satu akun
-        // Diskominfotik untuk semua wilayah) — form ini tidak lagi menawarkan
-        // kolom kunci apa pun. Baris ini hanya membuang sisa kunci per-wilayah
-        // dari masa sebelum sentralisasi, supaya tidak ada rahasia menganggur
-        // di payment_info. PenyediaPembayaran::kunciDiisiOlehWilayah() tersisa
-        // sebagai satu tempat keputusan kalau nanti ada penyedia yang kembali
-        // menuntut kunci per wilayah.
-        unset(
-            $paymentInfo['midtrans_server_key'],
-            $paymentInfo['midtrans_client_key'],
-            $paymentInfo['midtrans_is_production'],
-        );
 
         $region->update([
             'payment_info' => $paymentInfo,

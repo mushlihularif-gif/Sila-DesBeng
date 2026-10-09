@@ -70,12 +70,14 @@ class ProfileController extends Controller
             $currentDesaId = $user->region_id;
         }
 
-        $kecamatans = \App\Models\Region::where('type', 'kecamatan')
-            ->with(['children' => function($q) {
-                $q->where('type', 'desa')->orderBy('name');
-            }])
-            ->orderBy('name')
-            ->get();
+        $kecamatanFokus = \App\Models\Region::where('type', 'kecamatan')
+            ->where('name', 'Kecamatan Bengkalis')
+            ->first();
+        $kecamatans = $kecamatanFokus
+            ? collect([$kecamatanFokus->load(['children' => function($q) {
+                $q->whereIn('type', ['desa', 'kelurahan'])->orderBy('name');
+            }])])
+            : collect();
 
         return view('users.profile', compact('user', 'kecamatan_name', 'desa_name', 'rw_name', 'rt_name', 'kecamatans', 'currentDesaId'));
     }

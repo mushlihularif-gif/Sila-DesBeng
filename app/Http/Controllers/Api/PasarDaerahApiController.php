@@ -21,6 +21,30 @@ use Illuminate\Support\Facades\Storage;
 
 class PasarDaerahApiController extends Controller
 {
+    private function desaIdsKecamatanBengkalis(): array
+    {
+        $kecamatanId = Region::where('type', 'kecamatan')->where('name', 'Kecamatan Bengkalis')->value('id');
+        abort_if(! $kecamatanId, 404, 'Kecamatan Bengkalis belum terdaftar.');
+
+        return Region::where('parent_id', $kecamatanId)
+            ->whereIn('type', ['desa', 'kelurahan'])
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+    }
+
+    private function pembeliDalamKecamatanBengkalis(?User $user): bool
+    {
+        if (! $user?->region_id) {
+            return false;
+        }
+
+        $kecamatanId = Region::where('type', 'kecamatan')->where('name', 'Kecamatan Bengkalis')->value('id');
+
+        return $kecamatanId
+            && in_array((int) $kecamatanId, Region::garisLayananUntukWarga((int) $user->region_id), true);
+    }
+
     /**
      * Get all active products
      */
@@ -29,7 +53,8 @@ class PasarDaerahApiController extends Controller
         $query = PasarProduk::with('region')
             ->withCount('reviews')
             ->withAvg('reviews', 'rating')
-            ->where('status', 'tersedia');
+            ->where('status', 'tersedia')
+            ->whereIn('region_id', $this->desaIdsKecamatanBengkalis());
 
         // Filter by category
         if ($request->has('category') && $request->category !== 'Semua') {
@@ -77,7 +102,9 @@ class PasarDaerahApiController extends Controller
      */
     public function getProductDetail($id)
     {
-        $product = PasarProduk::with('region')->find($id);
+        $product = PasarProduk::with('region')
+            ->whereIn('region_id', $this->desaIdsKecamatanBengkalis())
+            ->find($id);
 
         if (!$product) {
             return response()->json([
@@ -185,7 +212,7 @@ class PasarDaerahApiController extends Controller
             'comment' => 'nullable|string|max:1000',
         ]);
 
-        $product = PasarProduk::findOrFail($id);
+        $product = PasarProduk::whereIn('region_id', $this->desaIdsKecamatanBengkalis())->findOrFail($id);
         $user = $request->user();
 
         $review = PasarReview::create([
@@ -207,7 +234,8 @@ class PasarDaerahApiController extends Controller
      */
     public function getSellerProfile($region_id)
     {
-        $region = Region::find($region_id);
+        abort_unless(in_array((int) $region_id, $this->desaIdsKecamatanBengkalis(), true), 404);
+        $region = Region::findOrFail($region_id);
         $seller = User::where('region_id', $region_id)
             ->whereIn('role', ['admin_desa', 'admin'])
             ->first();
@@ -250,6 +278,7 @@ class PasarDaerahApiController extends Controller
         ];
 
         $dbCategories = PasarProduk::where('status', 'tersedia')
+            ->whereIn('region_id', $this->desaIdsKecamatanBengkalis())
             ->whereNotNull('kategori')
             ->where('kategori', '!=', '')
             ->select('kategori')
@@ -271,9 +300,13 @@ class PasarDaerahApiController extends Controller
     public function getCart(Request $request)
     {
         $user = $request->user();
+        if (! $this->pembeliDalamKecamatanBengkalis($user)) {
+            return response()->json(['status' => 'error', 'message' => 'Pasar Daerah hanya melayani warga Kecamatan Bengkalis.'], 403);
+        }
         
         $cartItems = PasarCart::with('produk')
             ->where('user_id', $user->id)
+            ->whereHas('produk', fn ($query) => $query->whereIn('region_id', $this->desaIdsKecamatanBengkalis()))
             ->get();
 
         $formattedCart = $cartItems->map(function ($item) {
@@ -306,7 +339,20 @@ class PasarDaerahApiController extends Controller
         ]);
 
         $user = $request->user();
-        $produk = PasarProduk::find($request->pasar_produk_id);
+        if (! $this->pembeliDalamKecamatanBengkalis($user)) {
+            return response()->json(['status' => 'error', 'message' => 'Pasar Daerah hanya melayani warga Kecamatan Bengkalis.'], 403);
+        }
+        $produk = PasarProduk::whereIn('region_id', $this->desaIdsKecamatanBengkalis())->find($request->pasar_produk_id);
+        if (! $produk) {
+            return response()->json(['status' => 'error', 'message' => 'Produk hanya tersedia dari desa-desa di Kecamatan Bengkalis.'], 404);
+        }
+
+        $otherSellerInCart = PasarCart::where('user_id', $user->id)
+            ->whereHas('produk', fn ($query) => $query->where('region_id', '!=', $produk->region_id))
+            ->exists();
+        if ($otherSellerInCart) {
+            return response()->json(['status' => 'error', 'message' => 'Satu pesanan hanya dapat berisi produk dari satu toko.'], 422);
+        }
 
         if ($produk->stok < $request->quantity) {
             return response()->json([
@@ -353,6 +399,9 @@ class PasarDaerahApiController extends Controller
         ]);
 
         $user = $request->user();
+        if (! $this->pembeliDalamKecamatanBengkalis($user)) {
+            return response()->json(['status' => 'error', 'message' => 'Pasar Daerah hanya melayani warga Kecamatan Bengkalis.'], 403);
+        }
         $cartItem = PasarCart::where('id', $request->cart_item_id)
             ->where('user_id', $user->id)
             ->first();
@@ -362,6 +411,7 @@ class PasarDaerahApiController extends Controller
         }
 
         $produk = $cartItem->produk;
+        abort_unless($produk && in_array((int) $produk->region_id, $this->desaIdsKecamatanBengkalis(), true), 404);
         if ($produk->stok < $request->quantity) {
             return response()->json(['status' => 'error', 'message' => 'Stok tidak mencukupi'], 400);
         }
@@ -394,6 +444,9 @@ class PasarDaerahApiController extends Controller
     public function checkout(Request $request)
     {
         $user = $request->user();
+        if (! $this->pembeliDalamKecamatanBengkalis($user)) {
+            return response()->json(['status' => 'error', 'message' => 'Pasar Daerah hanya melayani warga Kecamatan Bengkalis.'], 403);
+        }
 
         // KYC Validation Check
         $status = strtolower(trim($user->verification_status ?? ''));
@@ -414,13 +467,27 @@ class PasarDaerahApiController extends Controller
             'notes' => 'nullable|string',
             'delivery_method' => 'required|string|in:Ambil Sendiri,Diantar',
             // Default to COD if not specified
-            'payment_method' => 'nullable|string'
+            'payment_method' => 'nullable|string|in:tunai,bank_transfer,transfer_manual,qris,COD',
+            'proof_of_payment' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
         ]);
-        $cartItems = PasarCart::with('produk')->where('user_id', $user->id)->get();
+        $desaIds = $this->desaIdsKecamatanBengkalis();
+        $cartItems = PasarCart::with('produk')->where('user_id', $user->id)
+            ->whereHas('produk', fn ($query) => $query->whereIn('region_id', $desaIds))
+            ->get();
 
         if ($cartItems->isEmpty()) {
             return response()->json(['status' => 'error', 'message' => 'Keranjang kosong'], 400);
         }
+
+        $sellerIds = $cartItems->pluck('produk.region_id')->unique();
+        if ($sellerIds->count() !== 1) {
+            return response()->json(['status' => 'error', 'message' => 'Satu pesanan hanya dapat berisi produk dari satu toko.'], 422);
+        }
+        $sellerRegionId = (int) $sellerIds->first();
+        $paymentMethod = $request->input('payment_method') ?: 'tunai';
+        $paymentProofPath = $request->hasFile('proof_of_payment')
+            ? $request->file('proof_of_payment')->store('payment_proofs/pasar', 'public')
+            : null;
 
         DB::beginTransaction();
         try {
@@ -438,17 +505,18 @@ class PasarDaerahApiController extends Controller
             // Create Order
             $order = PasarOrder::create([
                 'user_id' => $user->id,
-                'region_id' => $user->region_id,
+                'region_id' => $sellerRegionId,
                 'total_amount' => $totalAmount,
                 'shipping_cost' => 0, // Simplified for now
                 'grand_total' => $totalAmount,
                 'delivery_method' => $request->delivery_method,
-                'payment_method' => $request->payment_method ?? 'COD',
+                'payment_method' => $paymentMethod === 'transfer_manual' ? 'Transfer Manual' : ucfirst($paymentMethod),
+                'proof_of_payment' => $paymentProofPath,
                 'delivery_address' => $request->delivery_method == 'Diantar' ? $request->delivery_address : null,
                 'full_name' => $user->name,
                 'phone' => $user->phone ?? '00000000',
                 'notes' => $request->notes,
-                'status' => 'Menunggu Pembayaran',
+                'status' => 'waiting',
             ]);
 
             // Create Order Items and decrease stock
@@ -474,7 +542,7 @@ class PasarDaerahApiController extends Controller
             \App\Models\AdminNotification::create([
                 'type' => 'pasar_order',
                 'reference_id' => $order->id,
-                'region_id' => $user->region_id,
+                'region_id' => $sellerRegionId,
                 'title' => 'Pesanan Pasar Daerah Baru (Via Mobile)',
                 'message' => 'Pesanan Rp ' . number_format($totalAmount, 0, ',', '.') . ' dari ' . $user->name,
                 'is_read' => false,
@@ -704,6 +772,7 @@ class PasarDaerahApiController extends Controller
      */
     public function getChatHistory(Request $request, $region_id)
     {
+        abort_unless(in_array((int) $region_id, $this->desaIdsKecamatanBengkalis(), true), 404);
         $user = $request->user();
         $sessionToken = $request->header('X-Chat-Session-Token') ?: $request->get('session_token');
 
@@ -762,6 +831,7 @@ class PasarDaerahApiController extends Controller
         ]);
 
         $user = $request->user();
+        abort_unless(in_array((int) $region_id, $this->desaIdsKecamatanBengkalis(), true), 404);
         $sessionToken = $request->session_token ?: ($request->header('X-Chat-Session-Token') ?: \Illuminate\Support\Str::random(32));
         $region = Region::findOrFail($region_id);
 
@@ -880,11 +950,11 @@ class PasarDaerahApiController extends Controller
             } elseif (str_contains($q, 'stok') || str_contains($q, 'ready') || str_contains($q, 'ada')) {
                 $botReply = "Stok produk di Toko BUMDes {$cleanRegionName} selalu terpantau ready dan siap segera dikemas.";
             } elseif (str_contains($q, 'kirim') || str_contains($q, 'antar') || str_contains($q, 'desa') || str_contains($q, 'kecamatan')) {
-                $botReply = "Tentu bisa! Kami melayani pengiriman kurir lokal antar-desa dan antar-kecamatan se-Kabupaten Bengkalis.";
+                $botReply = "Tentu bisa! Kami melayani pengiriman kurir lokal antardesa di Kecamatan Bengkalis, sesuai jangkauan toko.";
             } elseif (str_contains($q, 'ongkir') || str_contains($q, 'biaya') || str_contains($q, 'tarif')) {
                 $botReply = "Ongkir dalam satu desa flat Rp 5.000 (bahkan gratis promo tertentu). Pengiriman antar-desa sekitar Rp 10.000.";
             } elseif (str_contains($q, 'cod') || str_contains($q, 'bayar') || str_contains($q, 'transfer') || str_contains($q, 'qris')) {
-                $botReply = "Bisa bayar COD tunai saat kurir tiba, atau lewat QRIS dan Transfer Bank Virtual Account saat checkout.";
+                $botReply = "Pembayaran tersedia secara tunai, transfer manual, atau QRIS toko. Petugas akan memeriksa pembayaran manual yang dilaporkan.";
             } elseif (str_contains($q, 'retur') || str_contains($q, 'rusak') || str_contains($q, 'garansi') || str_contains($q, 'komplain')) {
                 $botReply = "Jika produk tidak sesuai atau terdapat kerusakan saat diterima, Kakak bisa langsung mengajukan komplain dan retur di menu riwayat transaksi. Kami menjamin penggantian barang baru atau pengembalian dana 100%.";
             } elseif (str_contains($q, 'lokasi') || str_contains($q, 'alamat') || str_contains($q, 'ambil')) {
@@ -930,6 +1000,7 @@ class PasarDaerahApiController extends Controller
      */
     public function escalateToAdmin(Request $request, $region_id)
     {
+        abort_unless(in_array((int) $region_id, $this->desaIdsKecamatanBengkalis(), true), 404);
         $user = $request->user();
         $sessionToken = $request->session_token ?: $request->header('X-Chat-Session-Token');
         $region = Region::findOrFail($region_id);

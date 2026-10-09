@@ -1807,7 +1807,7 @@
                     <footer class="content-footer footer bg-white border-top mt-auto">
                         <div class="container-xxl py-4 text-center">
                             <p class="mb-1 text-muted">
-                                &copy; {{ date('Y') }} <strong>Sistem Sinergi Layanan dan Aspirasi Desa</strong> di Kabupaten Bengkalis
+                                &copy; {{ date('Y') }} <strong>Sistem Sinergi Layanan dan Aspirasi Desa</strong> di Kecamatan Bengkalis
                             </p>
 
                         </div>

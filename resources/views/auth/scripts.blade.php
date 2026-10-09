@@ -540,58 +540,55 @@
         // ========================================
         // REGION DROPDOWN LOGIC
         // ========================================
-        function initRegionDropdowns(kecId, desaId) {
-            const regKec = document.getElementById(kecId);
-            const regDesa = document.getElementById(desaId);
-            
-            if (!regKec || !regDesa) return;
-
-            if (allRegions.length > 0) {
-                populateRegions(regKec, regDesa);
-            } else {
-                fetch('/api/regions')
-                    .then(res => res.json())
-                    .then(data => {
-                        allRegions = data;
-                        populateRegions(regKec, regDesa);
-                    })
-                    .catch(err => {
-                        console.error('Failed to load regions:', err);
-                        regKec.innerHTML = '<option value="">Gagal memuat data wilayah</option>';
-                    });
-            }
-
-            // Handle Kecamatan change
-            regKec.addEventListener('change', function() {
-                const kecVal = parseInt(this.value);
-                regDesa.innerHTML = '<option value="">Pilih Desa/Kelurahan</option>';
-                regDesa.disabled = true;
-
-                if (kecVal) {
-                    const desas = allRegions.filter(r => r.type === 'desa' && r.parent_id === kecVal);
-                    desas.sort((a,b) => a.name.localeCompare(b.name)).forEach(d => {
-                        regDesa.innerHTML += `<option value="${d.id}">${d.name}</option>`;
-                    });
-                    regDesa.disabled = false;
-                }
-            });
-        }
-
-        function populateRegions(regKec, regDesa) {
-            const kabupaten = allRegions.find(r => r.type === 'kabupaten' && r.name === 'Kabupaten Bengkalis');
-            if (kabupaten) {
-                // Populate Kecamatan
-                const kecamatans = allRegions.filter(r => r.type === 'kecamatan' && r.parent_id === kabupaten.id);
-                regKec.innerHTML = '<option value="">Pilih Kecamatan</option>';
-                kecamatans.sort((a,b) => a.name.localeCompare(b.name)).forEach(k => {
-                    regKec.innerHTML += `<option value="${k.id}">${k.name.replace('Kecamatan ', '')}</option>`;
-                });
-                regKec.disabled = false;
-            }
-        }
-
         let allRegions = [];
-        initRegionDropdowns('reg-kecamatan', 'reg-desa');
-        initRegionDropdowns('google-reg-kecamatan', 'google-reg-desa');
+        const namaKecamatanFokus = 'Kecamatan Bengkalis';
+
+        function isiPilihanDesa(selectId) {
+            const selectDesa = document.getElementById(selectId);
+            if (!selectDesa) return;
+
+            const kecamatan = allRegions.find(r => r.type === 'kecamatan' && r.name === namaKecamatanFokus);
+            selectDesa.innerHTML = '<option value="">Pilih Desa/Kelurahan</option>';
+            selectDesa.disabled = true;
+
+            if (!kecamatan) {
+                selectDesa.innerHTML = '<option value="">Data Kecamatan Bengkalis tidak tersedia</option>';
+                return;
+            }
+
+            allRegions
+                .filter(r => ['desa', 'kelurahan'].includes(r.type) && Number(r.parent_id) === Number(kecamatan.id))
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .forEach(desa => {
+                    selectDesa.insertAdjacentHTML('beforeend', `<option value="${desa.id}">${desa.name}</option>`);
+                });
+
+            selectDesa.disabled = false;
+        }
+
+        function initPilihanDesa(selectId) {
+            const selectDesa = document.getElementById(selectId);
+            if (!selectDesa) return;
+
+            const muatDesa = () => isiPilihanDesa(selectId);
+            if (allRegions.length) {
+                muatDesa();
+                return;
+            }
+
+            fetch('/api/regions')
+                .then(res => res.json())
+                .then(data => {
+                    allRegions = data;
+                    muatDesa();
+                })
+                .catch(err => {
+                    console.error('Gagal memuat daftar desa:', err);
+                    selectDesa.innerHTML = '<option value="">Gagal memuat daftar desa</option>';
+                });
+        }
+
+        initPilihanDesa('reg-desa');
+        initPilihanDesa('google-reg-desa');
     })();
 </script>

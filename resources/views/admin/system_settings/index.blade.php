@@ -19,7 +19,7 @@
             <div>
                 <h5 class="fw-bold mb-1 text-primary" style="font-size: 1rem;">Detail dan Layanan Pemerintah Kabupaten</h5>
                 <p class="mb-0 text-primary small" style="opacity: 0.85; line-height: 1.4;">
-                    Kelola informasi kontak pusat, profil, dan tentukan modul unit layanan apa saja yang diaktifkan untuk tingkat Kabupaten Bengkalis.
+                    Kelola informasi profil dan modul layanan untuk cakupan Kecamatan Bengkalis.
                 </p>
             </div>
         </div>
@@ -50,7 +50,7 @@
             <ul class="mb-0 ps-3 small">
                 <li><strong>Tingkat:</strong> Pemerintah Kabupaten (Admin Pusat)</li>
                 <li><strong>Wilayah:</strong> {{ $region->name }}</li>
-                <li><strong>Cakupan:</strong> Seluruh Kecamatan dan Desa se-Kabupaten Bengkalis</li>
+                <li><strong>Cakupan:</strong> Kecamatan Bengkalis dan desa-desa di dalamnya</li>
             </ul>
         </div>
     </div>
@@ -161,8 +161,8 @@
                                 <div>
                                     <strong class="d-block mb-1 text-dark">Panduan Pengaturan Layanan</strong>
                                     <p class="mb-0 text-dark" style="font-size: 0.85rem; line-height: 1.45;">
-                                        <strong>Unit Layanan Daerah:</strong> Anda dapat mengaktifkan unit layanan tingkat kabupaten (Alat, Gas, Transportasi, Fasilitas Umum, Pelaporan) dan menentukan apakah layanannya berstatus eksklusif atau terbuka umum.<br>
-                                        <strong>Layanan Publik Kabupaten:</strong> <em>Pasar Daerah</em> dan <em>Kabar dan Informasi Daerah</em> berstatus sentral terbuka untuk seluruh warga se-Kabupaten Bengkalis dan otomatis selalu aktif demi keterbukaan akses ekonomi dan informasi warga.
+                                        <strong>Unit Layanan Desa:</strong> Layanan alat, gas, transportasi, fasilitas umum, dan pelaporan dikelola sesuai wilayah desa yang terdaftar.<br>
+                                        <strong>Layanan Kecamatan Bengkalis:</strong> <em>Pasar Daerah</em> dan <em>Kabar dan Informasi Daerah</em> tersedia untuk warga desa-desa di Kecamatan Bengkalis.
                                     </p>
                                 </div>
                             </div>
@@ -293,7 +293,7 @@
                                                                 </span>
                                                             </div>
                                                             <small class="text-success fw-medium d-block text-truncate" style="font-size: 0.72rem;">
-                                                                Marketplace Terpadu se-Kabupaten Bengkalis
+                                                                 Marketplace Terpadu Kecamatan Bengkalis
                                                             </small>
                                                         </div>
                                                     </div>

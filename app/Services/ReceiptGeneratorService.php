@@ -802,16 +802,16 @@ class ReceiptGeneratorService
             'transfer' => 'Transfer Manual',
             'tunai' => 'Tunai (Cash)',
             'cash' => 'Tunai (Cash)',
-            'qris' => 'QRIS (Digital Payment)',
-            'gopay' => 'GoPay (Digital Payment)',
-            'shopeepay' => 'ShopeePay (Digital Payment)',
-            'bank_transfer' => 'Virtual Account / Bank Transfer',
-            'midtrans' => 'Payment Gateway (Digital)',
+            'qris' => 'QRIS Manual',
+            'bank_transfer' => 'Transfer Bank Manual',
+            'transfer_manual' => 'Transfer Manual',
+            'gopay' => 'GoPay (Metode Lama)',
+            'shopeepay' => 'ShopeePay (Metode Lama)',
             'credit_card' => 'Kartu Kredit',
         ];
         
         $methodLower = strtolower(trim($method));
-        return $labels[$methodLower] ?? ucwords(str_replace('_', ' ', $methodLower)) . ' (Digital Payment)';
+        return $labels[$methodLower] ?? ucwords(str_replace('_', ' ', $methodLower));
     }
 
     /**
@@ -1136,6 +1136,4 @@ class ReceiptGeneratorService
         $this->addText($image, 'Platform E-Government Kab. Bengkalis', $descX, $yBranding + 35, $normalSize - 4, $black, $fontPath);
     }
 }
-
-
 

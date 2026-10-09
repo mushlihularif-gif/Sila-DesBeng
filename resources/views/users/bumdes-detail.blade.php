@@ -12,7 +12,7 @@
             <!-- Header Section -->
             <div class="text-center mb-16">
                 <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-8">
-                    {{ $region ? $region->name : 'Kabupaten Bengkalis' }}
+                    {{ $region ? $region->name : 'Kecamatan Bengkalis' }}
                 </h1>
             </div>
 
@@ -23,7 +23,7 @@
             <div class="mb-16 mt-24">
                 <div class="text-center mb-12">
                     <h2 class="text-3xl md:text-4xl font-bold">
-                        <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Pemerintah {{ $region ? $region->name : 'Kabupaten Bengkalis' }}</span>
+                        <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Pemerintah {{ $region ? $region->name : 'Kecamatan Bengkalis' }}</span>
                     </h2>
                     <p class="text-gray-500 text-sm mt-2">Struktur Organisasi dan Tata Kerja Pemerintahan</p>
                 </div>

@@ -111,8 +111,6 @@
     // Tentukan metode pembayaran aktif default
     $defaultPaymentMethod = $hasTransfer ? 'transfer' : 'tunai';
 
-    // Gateway Midtrans
-    $adaGateway = $adaGateway ?? false;
 @endphp
 
 @section('page')
@@ -528,85 +526,6 @@
                             </div>
                         </div>
 
-                        {{-- Gateway Midtrans: Virtual Account dan QRIS --}}
-                        @if($adaGateway)
-                        <div class="mb-5">
-                            <div class="flex items-center gap-2 mb-3">
-                                <span class="text-xs font-bold uppercase tracking-wider text-gray-500">Virtual Account</span>
-                                <span class="flex-1 h-px bg-gray-200"></span>
-                                <span class="text-[10px] text-gray-400">Terverifikasi otomatis</span>
-                            </div>
-                            <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
-                                <button type="button" onclick="pilihMetodeSewa('bank_transfer_bca')" id="btn-sewa-bank_transfer_bca"
-                                        class="payment-method-btn group relative py-4 px-2 rounded-2xl font-bold transition-all duration-300 bg-white shadow-sm border border-gray-100 hover:border-blue-300 hover:shadow-md hover:-translate-y-1">
-                                    <div class="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                    <div class="flex flex-col items-center justify-center gap-2 text-center h-full relative z-10">
-                                        <div class="h-10 flex items-center justify-center"><img src="{{ asset('Admin/img/banks/bca.png') }}" alt="BCA" class="h-9 max-w-full object-contain transform group-hover:scale-110 transition-transform"></div>
-                                    </div>
-                                </button>
-                                <button type="button" onclick="pilihMetodeSewa('bank_transfer_bri')" id="btn-sewa-bank_transfer_bri"
-                                        class="payment-method-btn group relative py-4 px-2 rounded-2xl font-bold transition-all duration-300 bg-white shadow-sm border border-gray-100 hover:border-orange-300 hover:shadow-md hover:-translate-y-1">
-                                    <div class="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                    <div class="flex flex-col items-center justify-center gap-2 text-center h-full relative z-10">
-                                        <div class="h-10 flex items-center justify-center"><img src="{{ asset('Admin/img/banks/bri.png') }}" alt="BRI" class="h-9 max-w-full object-contain transform group-hover:scale-110 transition-transform"></div>
-                                    </div>
-                                </button>
-                                <button type="button" onclick="pilihMetodeSewa('bank_transfer_mandiri')" id="btn-sewa-bank_transfer_mandiri"
-                                        class="payment-method-btn group relative py-4 px-2 rounded-2xl font-bold transition-all duration-300 bg-white shadow-sm border border-gray-100 hover:border-yellow-400 hover:shadow-md hover:-translate-y-1">
-                                    <div class="absolute inset-0 bg-gradient-to-br from-yellow-500/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                    <div class="flex flex-col items-center justify-center gap-2 text-center h-full relative z-10">
-                                        <div class="h-10 flex items-center justify-center"><img src="{{ asset('Admin/img/banks/mandiri.png') }}" alt="Mandiri" class="h-9 max-w-full object-contain transform group-hover:scale-110 transition-transform"></div>
-                                    </div>
-                                </button>
-                                <button type="button" onclick="pilihMetodeSewa('bank_transfer_bni')" id="btn-sewa-bank_transfer_bni"
-                                        class="payment-method-btn group relative py-4 px-2 rounded-2xl font-bold transition-all duration-300 bg-white shadow-sm border border-gray-100 hover:border-orange-500 hover:shadow-md hover:-translate-y-1">
-                                    <div class="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                    <div class="flex flex-col items-center justify-center gap-2 text-center h-full relative z-10">
-                                        <div class="h-10 flex items-center justify-center"><img src="{{ asset('Admin/img/banks/bni.png') }}" alt="BNI" class="h-9 max-w-full object-contain transform group-hover:scale-110 transition-transform"></div>
-                                    </div>
-                                </button>
-                                <button type="button" onclick="pilihMetodeSewa('bank_transfer_bsi')" id="btn-sewa-bank_transfer_bsi"
-                                        class="payment-method-btn group relative py-4 px-2 rounded-2xl font-bold transition-all duration-300 bg-white shadow-sm border border-gray-100 hover:border-teal-300 hover:shadow-md hover:-translate-y-1">
-                                    <div class="absolute inset-0 bg-gradient-to-br from-teal-500/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                    <div class="flex flex-col items-center justify-center gap-2 text-center h-full relative z-10">
-                                        <div class="h-10 flex items-center justify-center"><img src="{{ asset('Admin/img/banks/bsi.png') }}" alt="BSI" class="h-9 max-w-full object-contain transform group-hover:scale-110 transition-transform"></div>
-                                    </div>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="mb-6">
-                            <div class="flex items-center gap-2 mb-3">
-                                <span class="text-xs font-bold uppercase tracking-wider text-gray-500">QRIS</span>
-                                <span class="flex-1 h-px bg-gray-200"></span>
-                                <span class="text-[10px] text-gray-400">Pindai dari aplikasi apa pun</span>
-                            </div>
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                                <button type="button"
-                                        onclick="pilihMetodeSewa('qris')"
-                                        id="btn-sewa-qris"
-                                        class="payment-method-btn group relative py-4 px-2 rounded-2xl font-bold transition-all duration-300 bg-white shadow-sm border border-gray-100 hover:border-red-500 hover:shadow-md hover:-translate-y-1 overflow-hidden">
-                                    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(239,68,68,0.08)_0%,transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                                    <!-- Mini scanning line effect on hover -->
-                                    <div class="absolute top-0 left-0 right-0 h-0.5 bg-red-500 opacity-0 group-hover:opacity-100 group-hover:animate-[scan_1.5s_ease-in-out_infinite] blur-[1px]"></div>
-                                    
-                                    <div class="flex flex-col items-center justify-center gap-3 text-center h-full relative z-10">
-                                        <div class="bg-white p-1 rounded-lg shadow-sm group-hover:shadow border border-gray-50 transform group-hover:scale-110 transition-all">
-                                            <img src="{{ asset('Admin/img/banks/qris.svg') }}" alt="QRIS" class="h-6 object-contain" onerror="this.src='{{ asset('assets/img/payment_logos/dana.png') }}'">
-                                        </div>
-                                        <span class="text-[10px] uppercase tracking-widest text-gray-700 group-hover:text-red-600 font-black">All E-Wallet</span>
-                                    </div>
-                                </button>
-                            </div>
-                        </div>
-                        <div id="midtrans-payment-sewa" class="payment-content hidden">
-                            <div class="bg-blue-50 border border-blue-200 rounded-2xl p-5 text-center mb-6">
-                                <svg class="w-10 h-10 mx-auto mb-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                </svg>
-                                <p class="text-sm font-semibold text-blue-700">Pembayaran akan dilakukan melalui Midtrans secara otomatis setelah konfirmasi.</p>
-                            </div>
-                        </div>
-                        @endif
                     </div>
 
                     @if(!empty($sop_penyewaan_alat))
@@ -990,9 +909,7 @@
             var panelTransfer = document.getElementById('transfer-payment-sewa');
             var panelTunai = document.getElementById('cash-payment');
             var panelEwallet = document.getElementById('ewallet-payment-sewa');
-            var panelMidtrans = document.getElementById('midtrans-payment-sewa');
-
-            [panelTransfer, panelTunai, panelEwallet, panelMidtrans].forEach(function (el) {
+            [panelTransfer, panelTunai, panelEwallet].forEach(function (el) {
                 if (el) el.classList.add('hidden');
             });
 
@@ -1002,8 +919,6 @@
                 if (panelTransfer) panelTransfer.classList.remove('hidden');
             } else if (metode === 'ewallet') {
                 if (panelEwallet) panelEwallet.classList.remove('hidden');
-            } else {
-                if (panelMidtrans) panelMidtrans.classList.remove('hidden');
             }
 
             // Highlight active button
@@ -1608,7 +1523,7 @@
                         receiptId = data.receipt_id;
 
                         const metodeDipakai = getEl('payment-method-hidden')?.value || 'tunai';
-                        const metodeManual = ['tunai', 'transfer'];
+                        const metodeManual = ['tunai', 'transfer', 'ewallet'];
 
                         if (metodeManual.includes(metodeDipakai)) {
                             Swal.fire({
@@ -1621,25 +1536,8 @@
                             }).then(() => {
                                 window.location.href = '{{ route("user.activity") }}';
                             });
-                        } else if (data.gateway_gagal) {
-                            Swal.fire({
-                                icon: 'warning',
-                                title: 'Pembayaran Otomatis Bermasalah',
-                                text: data.message,
-                                confirmButtonColor: '#3b82f6',
-                            }).then(() => {
-                                window.location.href = '{{ route("user.activity") }}';
-                            });
-                        } else if (data.snap_token && window.snap) {
-                            window.snap.pay(data.snap_token, {
-                                onSuccess: () => window.location.href = '{{ route("user.activity") }}',
-                                onPending: () => window.location.href = '{{ route("user.activity") }}',
-                                onError:   () => window.location.href = '{{ route("user.activity") }}',
-                                onClose:   () => window.location.href = '{{ route("user.activity") }}',
-                            });
                         } else {
-                            successModal.style.display = 'flex';
-                            successModal.classList.remove('hidden');
+                            Swal.fire({ icon: 'error', title: 'Metode pembayaran tidak tersedia', text: 'Pilih tunai atau pembayaran manual.' });
                         }
                     } else {
                         Swal.fire({
@@ -1698,10 +1596,5 @@
         document.addEventListener('turbo:load', initRentalBooking);
     })();
 </script>
-
-@if(config('midtrans.client_key'))
-<script src="{{ config('midtrans.is_production') ? 'https://app.midtrans.com/snap/snap.js' : 'https://app.sandbox.midtrans.com/snap/snap.js' }}"
-        data-client-key="{{ config('midtrans.client_key') }}"></script>
-@endif
 
 @endpush

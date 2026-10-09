@@ -1279,7 +1279,7 @@
                     </div>
                     <div>
                         <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900 leading-tight">Produk Terpopuler</h2>
-                        <p class="text-xs sm:text-sm text-slate-500 font-medium">Pilihan produk unggulan khas daerah Kabupaten Bengkalis</p>
+                        <p class="text-xs sm:text-sm text-slate-500 font-medium">Pilihan produk unggulan dari desa-desa Kecamatan Bengkalis</p>
                     </div>
                 </div>
                 
@@ -1325,7 +1325,7 @@
                             <a href="{{ route('pasar.show', $pop->id) }}" style="text-decoration:none;">
                                 <h3 class="product-name" style="font-size: 1.05rem; line-height: 1.4; margin-bottom: 6px;">{{ $pop->nama_produk }}</h3>
                             </a>
-                            <p class="product-desc" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">{{ $pop->deskripsi ?? 'Produk khas daerah Kabupaten Bengkalis.' }}</p>
+                            <p class="product-desc" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">{{ $pop->deskripsi ?? 'Produk khas desa di Kecamatan Bengkalis.' }}</p>
                             
                             <div class="product-price-row">
                                 <span class="product-price">Rp {{ number_format($pop->harga, 0, ',', '.') }}</span>

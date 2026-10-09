@@ -208,17 +208,8 @@ class SystemSettingController extends Controller
         $paymentInfo['ewallet_number'] = $request->ewallet_number;
         $paymentInfo['ewallet_account_name'] = $request->ewallet_account_name;
         $paymentInfo['ewallet_active'] = $request->has('ewallet_active');
-        if ($request->has('payment_gateway_active')) {
-            if (empty($request->midtrans_server_key) || empty($request->midtrans_client_key)) {
-                return redirect()->back()->with('error', 'Gagal: Kunci API Midtrans (Server Key dan Client Key) wajib diisi jika Anda mengaktifkan Payment Gateway Otomatis. Silakan daftar akun bisnis di midtrans.com terlebih dahulu.')->withInput();
-            }
-        }
-
         $paymentInfo['card_theme'] = $request->card_theme;
         $paymentInfo['cash_only_active'] = $request->has('cash_only_active');
-        $paymentInfo['payment_gateway_active'] = $request->has('payment_gateway_active');
-        $paymentInfo['midtrans_server_key'] = $request->midtrans_server_key;
-        $paymentInfo['midtrans_client_key'] = $request->midtrans_client_key;
 
         $region->update([
             'payment_info' => $paymentInfo,

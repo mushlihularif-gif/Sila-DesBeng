@@ -10,7 +10,7 @@
         <i class="bx bx-info-circle me-2 fs-5"></i>
         <div>
             Halaman ini menampilkan <strong>kesehatan sistem</strong> (jumlah dan status transaksi lintas desa).
-            Sejak Midtrans dipusatkan di akun Diskominfotik, dana gateway wilayah mendarat di sini dulu -
+            Ringkasan dana transaksi yang tercatat dan perlu ditindaklanjuti -
             rinciannya per wilayah ada di <a href="{{ route('admin.sistem-platform.penarikan.index') }}">Penarikan Saldo Wilayah</a>.
         </div>
     </div>

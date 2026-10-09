@@ -21,10 +21,10 @@ class PenarikanSaldo extends Model
 
     /**
      * Diskominfotik TIDAK BISA memproses pengajuan ini - rekening salah, nama
-     * tidak cocok, dana Midtrans belum settle, dsb.
+     * tidak cocok atau saldo belum tersedia.
      *
      * Nilai kolomnya masih 'ditolak' (warisan), tapi maknanya bukan menolak
-     * hak: uang itu milik wilayah, Diskominfotik cuma penampung karena Midtrans
+     * hak: uang itu milik wilayah dan pencairannya mengikuti persetujuan admin.
      * hanya mengizinkan satu rekening pencairan per akun. Ini melaporkan
      * kendala teknis, dan saldonya kembali utuh.
      */

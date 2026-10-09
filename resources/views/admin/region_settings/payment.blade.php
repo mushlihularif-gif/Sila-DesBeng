@@ -19,7 +19,7 @@
             <div>
                 <h5 class="fw-bold mb-1 text-primary">Kas dan Pembayaran Wilayah</h5>
                 <p class="mb-0 text-primary" style="opacity: 0.85;">
-                    Kelola rekening bank, e-wallet, sakelar pembayaran otomatis, dan cairkan saldo Midtrans wilayah Anda.
+                    Kelola informasi rekening bank, pembayaran tunai, dan dompet elektronik wilayah Anda.
                 </p>
             </div>
         </div>
@@ -54,7 +54,7 @@
                 </div>
                 <div>
                     <h6 class="fw-bold mb-0">Saldo dan Pencairan</h6>
-                    <small class="text-muted">Rekening yang Anda isi di bawah dipakai sebagai tujuan pencairan saldo Midtrans wilayah.</small>
+                    <small class="text-muted">Informasi pembayaran ini digunakan untuk pembayaran manual.</small>
                 </div>
             </div>
             <a href="{{ route('admin.keuangan.index') }}" class="btn btn-outline-success rounded-pill px-4">
@@ -71,7 +71,7 @@
                 </div>
                 <h6 class="fw-bold mb-0">Informasi Kas dan Pembayaran</h6>
             </div>
-            <p class="text-muted mb-4">Kelola rekening bank utama, dompet elektronik (e-wallet), dan integrasi otomatis Payment Gateway (Midtrans).</p>
+            <p class="text-muted mb-4">Kelola rekening bank utama, pembayaran tunai, dan dompet elektronik untuk pembayaran manual.</p>
 
             <form action="{{ route('admin.region-settings.payment.update') }}" method="POST">
                 @csrf
@@ -194,7 +194,7 @@
                         </div>
                     </div>
 
-                    <!-- Kolom Kanan: E-Wallet & Midtrans -->
+                    <!-- Kolom Kanan: Pembayaran Tunai dan E-Wallet -->
                     <div class="col-md-6">
                         <!-- Cash Only (Bayar di Tempat) -->
                         <div class="card border-0 shadow-none bg-label-success rounded-3 mb-3">
@@ -272,52 +272,6 @@
                             </div>
                         </div>
 
-                        <!-- Payment Gateway -->
-                        {{-- Kredensial gateway (Midtrans maupun Xendit) dipegang Diskominfotik
-                             di panel Super Admin. Wilayah tidak pernah menyentuh kunci API —
-                             cukup mengaktifkan sakelar dan memastikan rekening di atas benar. --}}
-                        <div class="card border-0 shadow-none bg-label-warning rounded-3 mb-3">
-                            <div class="card-body p-3">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <h6 class="fw-bold text-warning mb-0">
-                                        <i class="bx bx-bolt-circle me-1"></i>Pembayaran Otomatis
-                                    </h6>
-                                    <span class="badge bg-label-secondary rounded-pill">{{ $labelPenyedia }}</span>
-                                </div>
-
-                                {{-- Status kesiapan: menjawab "kenapa pembayaran otomatis saya belum jalan" --}}
-                                <div class="alert {{ $kesiapan['siap'] ? 'alert-success' : 'alert-warning' }} p-2 mb-3" style="font-size: 0.82rem;">
-                                    <i class="bx {{ $kesiapan['siap'] ? 'bx-check-circle' : 'bx-error-circle' }} me-1"></i>
-                                    {{ $kesiapan['alasan'] }}
-                                </div>
-
-                                <div class="form-check form-switch mb-0 d-flex align-items-center">
-                                    <input class="form-check-input me-2" type="checkbox" name="payment_gateway_active" id="payment_gateway_active" value="1"
-                                           style="width: 2.5em; height: 1.2em; cursor: pointer;"
-                                           {{ old('payment_gateway_active', $region->payment_info['payment_gateway_active'] ?? false) ? 'checked' : '' }}
-                                           onchange="document.getElementById('gateway_fields').style.display = this.checked ? 'block' : 'none'">
-                                    <label class="form-check-label fw-semibold text-warning" for="payment_gateway_active" style="cursor: pointer;">
-                                        Aktifkan Pembayaran Otomatis
-                                    </label>
-                                </div>
-
-                                <div id="gateway_fields" class="mt-3"
-                                     style="display: {{ old('payment_gateway_active', $region->payment_info['payment_gateway_active'] ?? false) ? 'block' : 'none' }}; border-top: 1px dashed #ffab00; padding-top: 15px;">
-
-                                    {{-- Kredensial gateway sepenuhnya dipegang Diskominfotik, apa pun
-                                         penyedianya. Untuk Midtrans, pemasukan mendarat di rekening
-                                         Diskominfotik dulu sebagai saldo wilayah (lihat kartu Saldo
-                                         Wilayah di atas) baru dicairkan lewat pengajuan penarikan. --}}
-                                    <div class="alert alert-warning p-2 mb-0" style="font-size: 0.8rem;">
-                                        <i class="bx bx-check-shield me-1"></i>
-                                        Pembayaran otomatis disiapkan oleh <strong>Diskominfotik</strong> lewat {{ $labelPenyedia }}.
-                                        Anda tidak perlu memasukkan kunci API apa pun.
-                                        Pastikan <strong>nomor rekening di sebelah kiri sudah benar</strong>,
-                                        karena ke situlah pemasukan wilayah Anda dicairkan.
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
 

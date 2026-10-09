@@ -425,8 +425,21 @@ class ReportController extends Controller
         $year = $request->input('year', now()->year);
         $month = $request->input('month', now()->month);
         
-        $selectedKecamatanId = $request->input('kecamatan_id');
+        $selectedKecamatanId = \App\Models\Region::where('type', 'kecamatan')
+            ->where('name', 'Kecamatan Bengkalis')
+            ->value('id');
+        abort_if(! $selectedKecamatanId, 404, 'Kecamatan Bengkalis belum terdaftar.');
+        $desaIdsDalamCakupan = \App\Models\Region::where('parent_id', $selectedKecamatanId)
+            ->whereIn('type', ['desa', 'kelurahan'])
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
         $selectedDesaId = $request->input('desa_id');
+        if ($selectedDesaId && $selectedDesaId !== 'all'
+            && ! in_array((int) $selectedDesaId, $desaIdsDalamCakupan, true)) {
+            $selectedDesaId = 'all';
+        }
+        $regionIdsDalamCakupan = array_merge([(int) $selectedKecamatanId], $desaIdsDalamCakupan);
         
         // Base query for transactions (NOT strict, to see descendant activity)
         $baseRental = $this->applyRegionFilter(\App\Models\RentalBooking::withTrashed(), 'barang', false);
@@ -435,6 +448,13 @@ class ReportController extends Controller
         $baseFasilitas = $this->applyRegionFilter(\App\Models\FasilitasUmumBooking::withTrashed(), 'fasilitas', false);
         $baseLaporan = $this->applyRegionFilter(\App\Models\Laporan::query(), 'user', false);
         $basePasar = \App\Models\PasarOrder::withTrashed();
+
+        $baseRental->whereHas('barang', fn ($q) => $q->whereIn('region_id', $regionIdsDalamCakupan));
+        $baseGas->whereHas('gas', fn ($q) => $q->whereIn('region_id', $regionIdsDalamCakupan));
+        $baseMobil->whereHas('mobil', fn ($q) => $q->whereIn('region_id', $regionIdsDalamCakupan));
+        $baseFasilitas->whereHas('fasilitas', fn ($q) => $q->whereIn('region_id', $regionIdsDalamCakupan));
+        $baseLaporan->whereHas('user', fn ($q) => $q->whereIn('region_id', $regionIdsDalamCakupan));
+        $basePasar->whereIn('region_id', $regionIdsDalamCakupan);
 
         $user = auth()->user();
         $regionId = $user->region_id;
@@ -511,14 +531,14 @@ class ReportController extends Controller
         $kecamatanList = collect();
         $desaList = collect();
         if (in_array(auth()->user()->role, ['super_admin', 'admin'])) {
-            $kecamatanList = \App\Models\Region::where('type', 'kecamatan')->get();
+            $kecamatanList = \App\Models\Region::whereKey($selectedKecamatanId)->get();
             if ($selectedKecamatanId && $selectedKecamatanId !== 'all') {
-                $desaList = \App\Models\Region::where('type', 'desa')->where('parent_id', $selectedKecamatanId)->get();
+                $desaList = \App\Models\Region::whereIn('type', ['desa', 'kelurahan'])->where('parent_id', $selectedKecamatanId)->get();
             } else {
-                $desaList = \App\Models\Region::where('type', 'desa')->get();
+                $desaList = \App\Models\Region::whereIn('type', ['desa', 'kelurahan'])->where('parent_id', $selectedKecamatanId)->get();
             }
         } elseif (auth()->user()->role === 'admin_kecamatan') {
-            $desaList = \App\Models\Region::where('type', 'desa')->where('parent_id', auth()->user()->region_id)->get();
+            $desaList = \App\Models\Region::whereIn('type', ['desa', 'kelurahan'])->where('parent_id', auth()->user()->region_id)->get();
         }
 
         // Dynamic Year Generation

@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Region;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
@@ -49,7 +51,7 @@ class AuthController extends Controller
             'google_id' => 'required|string',
             'location_name' => 'nullable|string',
             'phone' => 'nullable|string',
-            'region_id' => 'nullable|integer',
+            'region_id' => ['nullable', 'integer', $this->desaKecamatanBengkalisRule()],
         ]);
 
         $user = User::where('email', $request->email)->first();
@@ -154,7 +156,7 @@ class AuthController extends Controller
             'username' => 'required|string|max:255|unique:users,username',
             'email' => 'required|string|email|max:255|unique:users',
             'phone' => 'required|string|max:20',
-            'region_id' => 'required|exists:regions,id',
+            'region_id' => ['required', $this->desaKecamatanBengkalisRule()],
             'password' => 'required|string|min:8|confirmed',
         ]);
 
@@ -594,5 +596,16 @@ class AuthController extends Controller
             'status' => 'success',
             'message' => 'Password berhasil diperbarui',
         ], 200);
+    }
+
+    private function desaKecamatanBengkalisRule(): \Illuminate\Validation\Rules\Exists
+    {
+        $kecamatanId = Region::where('type', 'kecamatan')
+            ->where('name', 'Kecamatan Bengkalis')
+            ->value('id') ?? -1;
+
+        return Rule::exists('regions', 'id')->where(function ($query) use ($kecamatanId) {
+            $query->whereIn('type', ['desa', 'kelurahan'])->where('parent_id', $kecamatanId);
+        });
     }
 }

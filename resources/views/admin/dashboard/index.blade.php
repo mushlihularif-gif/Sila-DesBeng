@@ -254,18 +254,11 @@
                                     <span class="badge bg-label-warning rounded-pill">Tahun {{ $selectedYear }}</span>
                                 </div>
                                 <div class="d-flex flex-column flex-sm-row gap-2 mt-3 mt-sm-0">
-                                    @if(in_array(auth()->user()->role, ['super_admin', 'admin']))
-                                    <select class="form-select form-select-sm" id="kecamatanSelect" style="min-width: 150px;">
-                                        <option value="all" {{ empty($selectedKecamatanId) || $selectedKecamatanId == 'all' ? 'selected' : '' }}>Semua Kecamatan</option>
-                                        @foreach($kecamatanList ?? [] as $kecamatan)
-                                            <option value="{{ $kecamatan->id }}" {{ $selectedKecamatanId == $kecamatan->id ? 'selected' : '' }}>{{ $kecamatan->name }}</option>
-                                        @endforeach
-                                    </select>
-                                    @endif
+                                    <span class="badge bg-label-primary py-2">Kecamatan Bengkalis</span>
 
                                     @if(in_array(auth()->user()->role, ['super_admin', 'admin', 'admin_kecamatan']))
                                     <select class="form-select form-select-sm" id="desaSelect" style="min-width: 150px;">
-                                        <option value="all" {{ empty($selectedDesaId) || $selectedDesaId == 'all' ? 'selected' : '' }}>Semua Desa</option>
+                                        <option value="all" {{ empty($selectedDesaId) || $selectedDesaId == 'all' ? 'selected' : '' }}>Semua Desa di Kecamatan Bengkalis</option>
                                         @foreach($desaList ?? [] as $desa)
                                             <option value="{{ $desa->id }}" {{ $selectedDesaId == $desa->id ? 'selected' : '' }}>{{ $desa->name }}</option>
                                         @endforeach
@@ -280,17 +273,11 @@
                                     <script>
                                         function updateFilters(isKecamatanChange = false) {
                                             let year = document.getElementById('tahunSelect').value;
-                                            let kecamatanSelect = document.getElementById('kecamatanSelect');
                                             let desaSelect = document.getElementById('desaSelect');
                                             
                                             let url = "{{ route('admin.dashboard') }}?year=" + year;
                                             
-                                            if (kecamatanSelect && kecamatanSelect.value !== 'all') {
-                                                url += "&kecamatan_id=" + kecamatanSelect.value;
-                                            }
-                                            
-                                            // Only append desa_id if we didn't just change the kecamatan (resetting desa filter)
-                                            if (desaSelect && desaSelect.value !== 'all' && !isKecamatanChange) {
+                                            if (desaSelect && desaSelect.value !== 'all') {
                                                 url += "&desa_id=" + desaSelect.value;
                                             }
                                             
@@ -299,11 +286,6 @@
 
                                         document.getElementById('tahunSelect').addEventListener('change', () => updateFilters(false));
                                         
-                                        let kecSel = document.getElementById('kecamatanSelect');
-                                        if (kecSel) {
-                                            kecSel.addEventListener('change', () => updateFilters(true));
-                                        }
-
                                         let desaSel = document.getElementById('desaSelect');
                                         if (desaSel) {
                                             desaSel.addEventListener('change', () => updateFilters(false));

@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Halaman Keuangan wilayah: saldo Midtrans dan pencairannya.
+ * Halaman Keuangan wilayah: ringkasan saldo dan pencairannya.
  *
  * Dipisah dari Pengaturan → Pembayaran Wilayah dengan sengaja. Yang di
  * Pengaturan sifatnya konfigurasi sekali-atur (nomor rekening, sakelar

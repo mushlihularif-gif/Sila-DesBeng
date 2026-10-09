@@ -846,7 +846,7 @@
                             <label class="form-label fw-semibold">Dari Kecamatan <span class="text-danger">*</span></label>
                             <select id="selectKecamatanTarik" class="form-select" style="width: 100%;" required>
                                 <option value="">Pilih Kecamatan Asal...</option>
-                                @foreach(\App\Models\Region::where('type', 'kecamatan')->orderBy('name')->get() as $k)
+                                @foreach(\App\Models\Region::where('type', 'kecamatan')->where('name', 'Kecamatan Bengkalis')->get() as $k)
                                     <option value="{{ $k->id }}">{{ $k->name }}</option>
                                 @endforeach
                             </select>
@@ -967,7 +967,7 @@
                             <label class="form-label fw-semibold">Kecamatan Tujuan <span class="text-danger">*</span></label>
                             <select id="selectKecamatan" class="form-select" style="width: 100%;" required>
                                 <option value="">Pilih Kecamatan...</option>
-                                @foreach(\App\Models\Region::where('type', 'kecamatan')->orderBy('name')->get() as $k)
+                                @foreach(\App\Models\Region::where('type', 'kecamatan')->where('name', 'Kecamatan Bengkalis')->get() as $k)
                                     <option value="{{ $k->id }}">{{ $k->name }}</option>
                                 @endforeach
                             </select>
@@ -1365,7 +1365,6 @@
 </script>
 @endpush
 @endsection
-
 
 
 

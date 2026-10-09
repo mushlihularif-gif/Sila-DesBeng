@@ -50,6 +50,18 @@ class LaporanController extends Controller
         ]);
 
         $user = auth()->user();
+        $kecamatanFokusId = \App\Models\Region::where('type', 'kecamatan')
+            ->where('name', 'Kecamatan Bengkalis')
+            ->value('id');
+        $cakupanIds = $kecamatanFokusId
+            ? array_map('intval', array_merge([$kecamatanFokusId], \App\Models\Region::getDescendantIds($kecamatanFokusId)))
+            : [];
+        if (! in_array((int) $user->region_id, $cakupanIds, true)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Pelaporan warga hanya tersedia untuk desa dan kelurahan di Kecamatan Bengkalis.',
+            ], 403);
+        }
 
         // Prepare data TANPA bukti dulu
         $data = [

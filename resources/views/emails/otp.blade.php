@@ -85,7 +85,7 @@
                     <tr>
                         <td style="background-color: #f8fafc; padding: 24px 30px; text-align: center; border-top: 1px solid #e2e8f0;">
                             <p style="margin: 0 0 4px 0; font-size: 13px; font-weight: 600; color: #334155;">
-                                SiladesBeng &bull; Kabupaten Bengkalis
+                                SiladesBeng &bull; Kabupaten Bengkalis | Cakupan layanan: Kecamatan Bengkalis
                             </p>
                             <p style="margin: 0 0 10px 0; font-size: 12px; color: #64748b;">
                                 Menghubungkan Layanan, Mempercepat Kemajuan Daerah
@@ -103,4 +103,3 @@
     </table>
 </body>
 </html>
-

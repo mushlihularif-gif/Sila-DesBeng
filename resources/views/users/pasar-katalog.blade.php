@@ -16,7 +16,7 @@
                     <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Pasar Daerah</span>
                 </h1>
                 <p class="text-gray-600 text-sm md:text-base max-w-2xl mx-auto">
-                    Temukan dan dukung produk asli dari instansi dan unit usaha daerah di seluruh Kabupaten Bengkalis.
+                    Temukan produk dan usaha dari desa-desa di Kecamatan Bengkalis.
                 </p>
             </div>
 
@@ -44,7 +44,7 @@
                             <!-- Filter Toggle Button -->
                             <button type="button" onclick="toggleFilterMenu()" class="ps-header-cart" title="Filter Pencarian">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
-                                @if((request('kategori') && request('kategori') != 'all') || (request('kecamatan_id') && request('kecamatan_id') != 'all') || (request('desa_id') && request('desa_id') != 'all') || (request('region_id') && request('region_id') != 'all') || (request('sort') && request('sort') != 'terbaru'))
+                                @if((request('kategori') && request('kategori') != 'all') || (request('desa_id') && request('desa_id') != 'all') || (request('region_id') && request('region_id') != 'all') || (request('sort') && request('sort') != 'terbaru'))
                                     <span class="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
                                 @endif
                             </button>
@@ -105,32 +105,18 @@
                                     <input type="hidden" name="kategori" id="kategoriInput" value="{{ request('kategori', 'all') }}">
                                 </div>
 
-                                 <!-- Wilayah Asal Produk (Kecamatan dan Desa di Bengkalis) -->
+                                  <!-- Wilayah Asal Produk -->
                                 <div class="mb-3">
                                     <h4 class="text-sm font-bold text-gray-800 mb-2.5 flex items-center">
                                         <svg class="w-4 h-4 mr-1.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
                                         </svg>
-                                        Wilayah Bengkalis
+                                         Desa di Kecamatan Bengkalis
                                     </h4>
                                     
-                                    <!-- Kecamatan -->
-                                    <div class="mb-3">
-                                        <label class="block text-xs font-semibold text-gray-600 mb-1">Kecamatan</label>
-                                        <div class="relative">
-                                            <select name="kecamatan_id" id="filterKecamatanSelect" onchange="onFilterKecamatanChange(this.value)" class="w-full appearance-none px-3.5 py-2.5 pr-9 text-xs sm:text-sm border border-gray-200 rounded-xl bg-gray-50 text-gray-800 font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all shadow-sm">
-                                                <option value="all">Semua Kecamatan di Bengkalis</option>
-                                                @foreach($kecamatans as $kec)
-                                                    <option value="{{ $kec->id }}" {{ request('kecamatan_id') == $kec->id ? 'selected' : '' }}>
-                                                        {{ $kec->name }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">
-                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                                            </div>
-                                        </div>
+                                    <div class="mb-3 rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-semibold text-gray-700">
+                                        Kecamatan Bengkalis
                                     </div>
 
                                     <!-- Desa / Kelurahan -->
@@ -138,7 +124,7 @@
                                         <label class="block text-xs font-semibold text-gray-600 mb-1">Desa / Kelurahan</label>
                                         <div class="relative">
                                             <select name="desa_id" id="filterDesaSelect" class="w-full appearance-none px-3.5 py-2.5 pr-9 text-xs sm:text-sm border border-gray-200 rounded-xl bg-gray-50 text-gray-800 font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all shadow-sm">
-                                                <option value="all">Semua Desa / Kelurahan</option>
+                                                <option value="all">Semua Desa / Kelurahan di Kecamatan Bengkalis</option>
                                                 @foreach($desas as $desa)
                                                     <option value="{{ $desa->id }}" data-parent="{{ $desa->parent_id }}" {{ request('desa_id') == $desa->id ? 'selected' : '' }}>
                                                         {{ $desa->name }}
@@ -166,11 +152,10 @@
             
             @php
                 $activeDesa = (request('desa_id') && request('desa_id') != 'all') ? \App\Models\Region::with('parent')->find(request('desa_id')) : null;
-                $activeKecamatan = (request('kecamatan_id') && request('kecamatan_id') != 'all') ? \App\Models\Region::find(request('kecamatan_id')) : null;
                 $activeRegion = (request('region_id') && request('region_id') != 'all') ? \App\Models\Region::with('parent')->find(request('region_id')) : null;
             @endphp
 
-            @if($activeRegion || $activeDesa || $activeKecamatan)
+            @if($activeRegion || $activeDesa)
             <div class="mb-6 p-4 bg-gradient-to-r from-blue-50 via-sky-50 to-white rounded-2xl border border-blue-100 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-section">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
@@ -184,8 +169,6 @@
                                     @if($activeDesa->parent)
                                         <span class="text-gray-500 font-normal text-xs">(Kec. {{ $activeDesa->parent->name }})</span>
                                     @endif
-                                @elseif($activeKecamatan)
-                                    Kecamatan {{ $activeKecamatan->name }}
                                 @elseif($activeRegion)
                                     Toko {{ $activeRegion->name }}
                                 @endif
@@ -195,8 +178,6 @@
                         <p class="text-xs text-gray-500 mt-0.5">
                             @if($activeDesa)
                                 Menampilkan produk asli daerah dari unit usaha di Desa {{ $activeDesa->name }}.
-                            @elseif($activeKecamatan)
-                                Menampilkan seluruh produk dari unit usaha di wilayah Kecamatan {{ $activeKecamatan->name }}.
                             @elseif($activeRegion)
                                 Menampilkan seluruh katalog produk dari unit usaha BUMDes {{ $activeRegion->name }}.
                             @endif
@@ -210,9 +191,9 @@
                             <span>Profil Toko</span>
                         </a>
                     @endif
-                    <a href="{{ route('pasar.index', array_filter(request()->except(['kecamatan_id', 'desa_id', 'region_id', 'page']))) }}" class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-gray-200 text-xs font-bold text-gray-700 hover:bg-gray-50 transition shadow-sm">
+                    <a href="{{ route('pasar.index', array_filter(request()->except(['desa_id', 'region_id', 'page']))) }}" class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-gray-200 text-xs font-bold text-gray-700 hover:bg-gray-50 transition shadow-sm">
                         <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                        <span>Semua Wilayah</span>
+                        <span>Katalog Kecamatan Bengkalis</span>
                     </a>
                 </div>
             </div>
@@ -1500,54 +1481,6 @@
         document.getElementById('kategoriInput').value = category;
     }
 
-    function onFilterKecamatanChange(kecId, keepSelection = false) {
-        const desaSelect = document.getElementById('filterDesaSelect');
-        if (!desaSelect) return;
-        
-        const options = desaSelect.querySelectorAll('option');
-        const currentDesa = desaSelect.value;
-        let isCurrentVisible = false;
-
-        options.forEach(opt => {
-            if (opt.value === 'all') {
-                opt.hidden = false;
-                opt.style.display = '';
-                return;
-            }
-            
-            const parentId = opt.getAttribute('data-parent');
-            if (!kecId || kecId === 'all' || parentId === String(kecId)) {
-                opt.hidden = false;
-                opt.style.display = '';
-                if (opt.value === currentDesa) {
-                    isCurrentVisible = true;
-                }
-            } else {
-                opt.hidden = true;
-                opt.style.display = 'none';
-            }
-        });
-
-        if (!keepSelection && !isCurrentVisible && currentDesa !== 'all') {
-            desaSelect.value = 'all';
-        }
-    }
-
-    function initFilterDesaOptions() {
-        const kecSelect = document.getElementById('filterKecamatanSelect');
-        if (kecSelect) {
-            onFilterKecamatanChange(kecSelect.value, true);
-        }
-    }
-
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initFilterDesaOptions);
-    } else {
-        initFilterDesaOptions();
-    }
-    document.addEventListener('turbo:load', initFilterDesaOptions);
-    document.addEventListener('turbo:render', initFilterDesaOptions);
-    
     function resetFilters() {
         const sortInput = document.getElementById('sortInput');
         if (sortInput) sortInput.value = 'terbaru';
@@ -1555,13 +1488,8 @@
         const catInput = document.getElementById('kategoriInput');
         if (catInput) catInput.value = 'all';
         
-        const kecSelect = document.getElementById('filterKecamatanSelect');
-        if (kecSelect) kecSelect.value = 'all';
-        
         const desaSelect = document.getElementById('filterDesaSelect');
         if (desaSelect) desaSelect.value = 'all';
-        
-        onFilterKecamatanChange('all');
 
         const form = document.getElementById('filterForm');
         if (form) form.submit();

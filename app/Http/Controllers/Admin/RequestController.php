@@ -594,7 +594,7 @@ class RequestController extends Controller
         // Batalkan pemasukannya DAN kembalikan uangnya ke dompet warga bila
         // pesanan ini sudah terbayar. Dulu di sini hanya ditandai 'rejected' —
         // uangnya lenyap dari saldo wilayah tanpa pernah menjadi milik siapa pun,
-        // padahal fisiknya ada di rekening Midtrans Diskominfotik.
+                    // padahal pembayarannya langsung ke rekening wilayah.
         $walletRefType = $type === 'gas' ? 'gas' : $type;
         \App\Models\WalletTransaction::batalkanDanRefund(
             $walletRefType,

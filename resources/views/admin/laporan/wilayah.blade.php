@@ -124,15 +124,11 @@
                 
                 @if(auth()->check() && in_array(auth()->user()->role, ['super_admin', 'admin']))
                 <div class="col-12 col-md-4 col-lg-4">
-                    <label class="form-label text-muted small fw-semibold mb-1">Filter Kecamatan</label>
+                    <label class="form-label text-muted small fw-semibold mb-1">Cakupan Kecamatan</label>
                     <div class="input-group input-group-merge rounded-3 shadow-none border">
                         <span class="input-group-text bg-light text-primary border-0"><i class="bx bx-map-pin"></i></span>
-                        <select id="filter-kecamatan" class="form-select bg-light border-0 ps-0">
-                            <option value="all">Semua Kecamatan</option>
-                            @foreach($kecamatanList as $kec)
-                                <option value="{{ $kec->id }}" {{ $selectedKecamatanId == $kec->id ? 'selected' : '' }}>{{ $kec->name }}</option>
-                            @endforeach
-                        </select>
+                        <span class="form-control bg-light border-0 ps-0">Kecamatan Bengkalis</span>
+                        <input type="hidden" id="filter-kecamatan" value="{{ $selectedKecamatanId }}">
                     </div>
                 </div>
                 @endif
@@ -143,7 +139,7 @@
                     <div class="input-group input-group-merge rounded-3 shadow-none border">
                         <span class="input-group-text bg-light text-primary border-0"><i class="bx bx-buildings"></i></span>
                         <select id="filter-desa" class="form-select bg-light border-0 ps-0">
-                            <option value="all">Semua Desa</option>
+                            <option value="all">Semua Desa / Kelurahan di Kecamatan Bengkalis</option>
                             @foreach($desaList as $desa)
                                 <option value="{{ $desa->id }}" {{ $selectedDesaId == $desa->id ? 'selected' : '' }}>{{ $desa->name }}</option>
                             @endforeach

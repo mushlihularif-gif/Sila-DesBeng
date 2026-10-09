@@ -151,7 +151,7 @@
                                     <strong class="d-block mb-1 text-dark">Panduan Pengaturan Layanan</strong>
                                     <p class="mb-0 text-dark" style="font-size: 0.85rem; line-height: 1.45;">
                                         <strong>Unit Layanan Mandiri Desa:</strong> Anda dapat mengaktifkan unit usaha lokal desa Anda (Alat, Gas, Transportasi, Fasilitas Umum, Pelaporan) dan menentukan apakah layanannya eksklusif hanya untuk warga domisili desa Anda atau terbuka untuk warga luar.<br>
-                                        <strong>Layanan Publik Kabupaten:</strong> <em>Pasar Daerah</em> dan <em>Kabar dan Informasi Daerah</em> berstatus sentral terbuka untuk seluruh warga se-Kabupaten Bengkalis dan otomatis selalu aktif demi keterbukaan akses ekonomi dan informasi warga.
+                                        <strong>Layanan Kecamatan Bengkalis:</strong> <em>Pasar Daerah</em> dan <em>Kabar dan Informasi Daerah</em> tersedia bagi warga desa-desa di Kecamatan Bengkalis.
                                     </p>
                                 </div>
                             </div>
@@ -318,11 +318,11 @@
 
                                                     <div class="status-banner d-flex align-items-center py-2 px-3 rounded-3 mb-3 bg-label-warning text-warning" style="font-size: 0.78rem;">
                                                         <i class="bx bx-store me-2 fs-6 flex-shrink-0"></i>
-                                                        <span class="fw-medium">Marketplace Terpadu se-Kabupaten Bengkalis</span>
+                                                        <span class="fw-medium">Marketplace Terpadu Kecamatan Bengkalis</span>
                                                     </div>
 
                                                     <p class="text-muted mb-3" style="font-size: 0.78rem; line-height: 1.45;">
-                                                        Marketplace bersama seluruh desa. Warga desa Anda dapat membeli produk UMKM dari seluruh Kabupaten Bengkalis, dan pelaku usaha lokal dapat menjangkau pembeli antar desa tanpa sekat wilayah.
+                                                        Marketplace bersama desa-desa di Kecamatan Bengkalis. Warga dapat menemukan produk usaha lokal dari desa-desa dalam kecamatan ini.
                                                     </p>
                                                 </div>
 

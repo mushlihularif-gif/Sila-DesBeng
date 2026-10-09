@@ -571,6 +571,12 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <div id="payment-proof-manual" class="mt-3 {{ in_array($defaultMethod, ['bank_transfer', 'qris'], true) ? '' : 'hidden' }}">
+                                <label for="proof-of-payment" class="block text-sm font-bold text-slate-700 mb-1">Bukti Pembayaran <span class="font-normal text-slate-500">(opsional)</span></label>
+                                <input type="file" name="proof_of_payment" id="proof-of-payment" accept=".jpg,.jpeg,.png,.pdf" {{ in_array($defaultMethod, ['bank_transfer', 'qris'], true) ? '' : 'disabled' }} class="block w-full rounded-xl border border-slate-200 bg-white p-2 text-sm text-slate-600">
+                                <p class="mt-1 text-xs text-slate-500">Lampirkan bukti transfer atau pembayaran QRIS agar dapat diperiksa pengelola.</p>
+                            </div>
                         </div>
                     </div>
 
@@ -697,6 +703,14 @@
                 detailEl.style.display = (m === method) ? 'block' : 'none';
             }
         });
+
+        const paymentProof = document.getElementById('payment-proof-manual');
+        if (paymentProof) {
+            const manual = ['bank_transfer', 'qris'].includes(method);
+            paymentProof.classList.toggle('hidden', !manual);
+            const proofInput = document.getElementById('proof-of-payment');
+            if (proofInput) proofInput.disabled = !manual;
+        }
     }
 
     // Constants
@@ -844,26 +858,7 @@
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                const keHalamanBayar = () => {
-                    window.location.href = `/pasar-daerah/payment/${data.order_id}`;
-                };
-
-                // Popup Midtrans hanya untuk pembayaran gateway. Tunai dan
-                // transfer manual tidak punya snap_token, jadi langsung ke
-                // halaman pembayaran seperti sebelumnya.
-                if (data.snap_token && window.snap) {
-                    // Semua jalur keluar berakhir di halaman pembayaran supaya
-                    // statusnya selalu terlihat — termasuk saat popup ditutup
-                    // tanpa membayar.
-                    window.snap.pay(data.snap_token, {
-                        onSuccess: keHalamanBayar,
-                        onPending: keHalamanBayar,
-                        onError: keHalamanBayar,
-                        onClose: keHalamanBayar,
-                    });
-                } else {
-                    keHalamanBayar();
-                }
+                window.location.href = `/pasar-daerah/payment/${data.order_id}`;
             } else {
                 showSiladesBengToast('error', 'Gagal', data.message || 'Terjadi kesalahan.');
                 btn.disabled = false;

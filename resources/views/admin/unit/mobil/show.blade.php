@@ -310,6 +310,7 @@
                                                         Rp. {{ number_format($mobil->harga_luar_desa_wilayah ?? 0, 0, ',', '.') }}
                                                     </td>
                                                 </tr>
+                                                {{-- Detail tarif luar Kecamatan Bengkalis sudah tidak berlaku.
                                                 <tr>
                                                     <td class="ps-3 py-2.5 align-middle">
                                                         <span class="text-danger fw-semibold d-flex align-items-center">
@@ -384,7 +385,11 @@
                                                             </div>
                                                         </td>
                                                     </tr>
+                                                --}}
                                                 @endif
+                                                <tr>
+                                                    <td colspan="2" class="p-3 text-muted small">Rute luar Kecamatan Bengkalis tidak tersedia pada cakupan layanan saat ini.</td>
+                                                </tr>
                                             </tbody>
                                         </table>
                                     </div>

@@ -55,25 +55,8 @@ return [
         'port'         => env('GMAIL_INBOX_PORT', 993),
     ],
 
-    'midtrans' => [
-        'merchant_id' => env('MIDTRANS_MERCHANT_ID'),
-        'client_key' => env('MIDTRANS_CLIENT_KEY'),
-        'server_key' => env('MIDTRANS_SERVER_KEY'),
-        'is_production' => env('MIDTRANS_IS_PRODUCTION', false),
-    ],
-
     'ocr_space' => [
         'api_key' => env('OCR_SPACE_API_KEY', 'helloworld'),
-    ],
-
-    // Xendit xenPlatform. Kredensial INDUK dipegang Diskominfotik; dana tiap
-    // wilayah diarahkan ke sub-akunnya lewat header for-user-id saat transaksi
-    // dibuat, sehingga pemasukan langsung menjadi saldo wilayah bersangkutan.
-    // ID sub-akun disimpan per wilayah di regions.payment_info, bukan di sini.
-    'xendit' => [
-        'secret_key'     => env('XENDIT_SECRET_KEY'),
-        'callback_token' => env('XENDIT_CALLBACK_TOKEN'),
-        'is_production'  => env('XENDIT_IS_PRODUCTION', false),
     ],
 
     // Gemini: dipakai chatbot warga dan sebagai cadangan pembacaan KTP

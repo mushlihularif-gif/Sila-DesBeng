@@ -655,16 +655,16 @@
                                     <i class="bx bx-chevron-down ml-1" aria-hidden="true"></i>
                                 </summary>
                                 <div class="mt-3 space-y-3 text-left text-sm leading-relaxed text-gray-600">
-                                    <p>SiladesBeng (Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis) merupakan platform digital terpadu yang mendukung tata kelola dan pelayanan publik dari tingkat kabupaten hingga desa.</p>
+                                    <p>SiladesBeng (Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis) merupakan platform digital dengan cakupan layanan dan informasi desa-desa di Kecamatan Bengkalis.</p>
                                     <p>Warga dapat mengakses penyewaan alat, penjualan gas, transportasi, fasilitas umum, Pasar Daerah, Pelaporan Warga, serta Kabar dan Informasi Daerah melalui satu platform.</p>
                                 </div>
                             </details>
                             <div class="hidden sm:block space-y-4 text-left md:text-justify text-sm md:text-base text-gray-700 leading-relaxed">
                                 <p>
-                                    <span class="font-semibold text-gray-800">SiladesBeng</span> (Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis) merupakan platform digital terpadu berskala kabupaten yang dirancang khusus untuk memodernisasi tata kelola administrasi dan pelayanan publik di seluruh jaringan kecamatan hingga tingkat desa se-Kabupaten Bengkalis. Platform ini mengintegrasikan berbagai pilar layanan esensial masyarakat dan operasional layanan desa dalam satu pintu.
+                                    <span class="font-semibold text-gray-800">SiladesBeng</span> (Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis) merupakan platform digital yang menjadi pusat informasi dan akses layanan bagi desa-desa di Kecamatan Bengkalis. Cakupan uji coba dan pengembangan penelitian ini dibatasi pada kecamatan tersebut.
                                 </p>
                                 <p>
-                                    Melalui SiladesBeng, masyarakat Kabupaten Bengkalis dapat dengan mudah mengakses beragam unit layanan, mulai dari penyewaan alat, pendistribusian gas, penyewaan transportasi, hingga pemanfaatan fasilitas umum. Di samping itu, sistem ini juga mewadahi fitur <span class="font-medium text-gray-800">Pelaporan Warga</span> serta pusat informasi <span class="font-medium text-gray-800">Kabar dan Informasi Daerah</span> secara <i>real-time</i>. Kami percaya bahwa ekosistem digital yang transparan dan terukur dari jenjang kabupaten hingga pelosok desa ini merupakan kunci utama untuk mewujudkan pelayanan publik yang prima, memajukan perekonomian daerah, dan membangun kemandirian masyarakat Bengkalis yang berkelanjutan.
+                                    Warga di desa-desa Kecamatan Bengkalis dapat mengakses informasi layanan, menyampaikan <span class="font-medium text-gray-800">Pelaporan Warga</span>, membaca <span class="font-medium text-gray-800">Kabar dan Informasi Daerah</span>, serta membuka bukti digital melalui QR untuk memeriksa hasil verifikasi HMAC-SHA256. Pelaksanaan dan evaluasi sistem dilakukan dalam cakupan kecamatan ini.
                                 </p>
                             </div>
                         </div>

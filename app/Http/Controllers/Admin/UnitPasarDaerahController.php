@@ -53,23 +53,6 @@ class UnitPasarDaerahController extends Controller
 
         $tab = $request->get('tab', 'produk');
 
-        // Data Kecamatan
-                $adminKecamatanId = null;
-        $currRegion = auth()->user()->region;
-        while ($currRegion) {
-            if (strtolower($currRegion->type) === 'kecamatan') {
-                $adminKecamatanId = $currRegion->id;
-                break;
-            }
-            $currRegion = $currRegion->parent;
-        }
-
-        $queryKecamatan = Region::where('type', 'kecamatan')->orderBy('name', 'asc');
-        if ($adminKecamatanId) {
-            $queryKecamatan->where('id', '!=', $adminKecamatanId);
-        }
-        $semuaKecamatan = $queryKecamatan->get();
-
         // Data Ulasan
         $reviews = \App\Models\PasarReview::whereHas('produk', function($query) use ($admin) {
                 $query->where('region_id', $admin->region_id);
@@ -92,7 +75,7 @@ class UnitPasarDaerahController extends Controller
         $totalUnreadChats = $chats->sum('unread_admin_count');
 
         return view('admin.unit.pasar_daerah.index', compact(
-            'produks', 'settings', 'pesanans', 'status', 'laporans', 'startDate', 'endDate', 'totalPendapatan', 'tab', 'semuaKecamatan', 'admin', 'reviews', 'complaints', 'chats', 'totalUnreadChats'
+            'produks', 'settings', 'pesanans', 'status', 'laporans', 'startDate', 'endDate', 'totalPendapatan', 'tab', 'admin', 'reviews', 'complaints', 'chats', 'totalUnreadChats'
         ));
     }
 
@@ -240,10 +223,6 @@ class UnitPasarDaerahController extends Controller
             'sop_pasar' => 'nullable|string',
             'ongkir_dalam_desa' => 'required|numeric|min:0',
             'ongkir_luar_desa' => 'required|numeric|min:0',
-            'tipe_ongkir_luar_kecamatan' => 'required|in:pukul_rata,per_kecamatan',
-            'ongkir_luar_kecamatan' => 'nullable|numeric|min:0',
-            'ongkir_kecamatan_khusus' => 'nullable|array',
-            'ongkir_kecamatan_khusus.*' => 'nullable|numeric|min:0',
             // Payment settings
             'enable_cod' => 'nullable',
             'enable_bank_transfer' => 'nullable',
@@ -264,22 +243,7 @@ class UnitPasarDaerahController extends Controller
         $settings['ongkir_dalam_desa'] = $request->input('ongkir_dalam_desa');
         $settings['ongkir_luar_desa'] = $request->input('ongkir_luar_desa');
         
-        $tipe = $request->input('tipe_ongkir_luar_kecamatan');
-        $settings['tipe_ongkir_luar_kecamatan'] = $tipe;
-        
-        if ($tipe == 'pukul_rata') {
-            $settings['ongkir_luar_kecamatan'] = $request->input('ongkir_luar_kecamatan') ?? 25000;
-        } else {
-            $khusus = [];
-            if ($request->has('ongkir_kecamatan_khusus')) {
-                foreach ($request->input('ongkir_kecamatan_khusus') as $kec_id => $harga) {
-                    if ($harga !== null && $harga !== '') {
-                        $khusus[$kec_id] = $harga;
-                    }
-                }
-            }
-            $settings['ongkir_kecamatan_khusus'] = $khusus;
-        }
+        unset($settings['tipe_ongkir_luar_kecamatan'], $settings['ongkir_luar_kecamatan'], $settings['ongkir_kecamatan_khusus']);
 
         // Simpan Pengaturan Pembayaran Toko
         $settings['enable_cod'] = $request->has('enable_cod');

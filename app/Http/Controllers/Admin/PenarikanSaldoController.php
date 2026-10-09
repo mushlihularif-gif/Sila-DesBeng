@@ -119,10 +119,9 @@ class PenarikanSaldoController extends Controller
     /**
      * Tandai pengajuan TIDAK BISA DIPROSES — bukan menolak haknya.
      *
-     * Uang itu milik wilayah; Diskominfotik memegangnya semata karena Midtrans
-     * hanya mengizinkan satu rekening pencairan per akun. Jadi yang dilaporkan
-     * di sini adalah kendala teknis (rekening salah ketik, nama tidak cocok
-     * dengan data bank, dana Midtrans belum settle, pengajuan dobel), dan
+     * Uang itu milik wilayah. Yang dilaporkan di sini adalah kendala teknis
+     * (rekening salah ketik, nama tidak cocok dengan data bank, saldo belum
+     * tersedia, atau pengajuan dobel), dan
      * saldonya kembali utuh ke wilayah.
      */
     public function reject(Request $request, PenarikanSaldo $penarikan)

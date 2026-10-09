@@ -17,9 +17,10 @@ class PartnerApplicationApiController extends Controller
      */
     public function getRegions()
     {
-        $kecamatans = Region::where('type', 'kecamatan')
+        $kecamatanFokus = Region::where('type', 'kecamatan')->where('name', 'Kecamatan Bengkalis')->firstOrFail();
+        $kecamatans = Region::whereKey($kecamatanFokus->id)
             ->with(['children' => function($query) {
-                $query->where('type', 'desa')->with(['users' => function($u) {
+                $query->whereIn('type', ['desa', 'kelurahan'])->with(['users' => function($u) {
                     $u->whereIn('role', ['admin_desa', 'admin']);
                 }]);
             }])
@@ -55,7 +56,10 @@ class PartnerApplicationApiController extends Controller
      */
     public function checkDesaAdmin($id)
     {
-        $desa = Region::where('type', 'desa')->with(['users' => function($u) {
+        $kecamatanFokusId = Region::where('type', 'kecamatan')->where('name', 'Kecamatan Bengkalis')->value('id');
+        $desa = Region::whereIn('type', ['desa', 'kelurahan'])
+            ->where('parent_id', $kecamatanFokusId)
+            ->with(['users' => function($u) {
             $u->whereIn('role', ['admin_desa', 'admin']);
         }])->find($id);
 
@@ -105,6 +109,32 @@ class PartnerApplicationApiController extends Controller
         }
 
         $validated = $validator->validated();
+
+        $kecamatanFokus = Region::where('type', 'kecamatan')->where('name', 'Kecamatan Bengkalis')->firstOrFail();
+        $parent = Region::findOrFail($validated['parent_region_id']);
+        $allowedParentIds = array_map('intval', array_merge(
+            [$kecamatanFokus->parent_id, $kecamatanFokus->id],
+            Region::getDescendantIds($kecamatanFokus->id)
+        ));
+        $parentTypes = match ($validated['region_type']) {
+            'kecamatan' => ['kabupaten'],
+            'desa' => ['kecamatan'],
+            'rw' => ['desa', 'kelurahan'],
+            'rt' => ['rw'],
+            default => [],
+        };
+        $parentIsInScope = in_array((int) $parent->id, $allowedParentIds, true)
+            && in_array($parent->type, $parentTypes, true);
+        $kecamatanIsInScope = $validated['region_type'] !== 'kecamatan'
+            || ((int) $parent->id === (int) $kecamatanFokus->parent_id
+                && mb_strtolower(trim($validated['region_name'])) === mb_strtolower($kecamatanFokus->name));
+
+        if (! $parentIsInScope || ! $kecamatanIsInScope) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Pengajuan kemitraan hanya tersedia untuk Kecamatan Bengkalis dan desa/kelurahan di dalamnya.',
+            ], 422);
+        }
 
         if ($request->hasFile('document')) {
             $path = $request->file('document')->store('partner_applications', 'public');

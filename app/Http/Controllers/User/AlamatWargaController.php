@@ -4,8 +4,10 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Models\AlamatWarga;
+use App\Models\Region;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 /**
  * Buku alamat warga — simpan sekali, pakai berulang saat memesan.
@@ -105,11 +107,17 @@ class AlamatWargaController extends Controller
 
     private function validasi(Request $request): array
     {
+        $kecamatanId = Region::where('type', 'kecamatan')
+            ->where('name', 'Kecamatan Bengkalis')
+            ->value('id') ?? -1;
+
         return $request->validate([
             'label'         => 'nullable|string|max:50',
             'nama_penerima' => 'required|string|max:255',
             'no_telepon'    => 'required|string|max:20',
-            'region_id'     => 'nullable|exists:regions,id',
+            'region_id'     => ['nullable', Rule::exists('regions', 'id')->where(fn ($query) => $query
+                ->whereIn('type', ['desa', 'kelurahan'])
+                ->where('parent_id', $kecamatanId))],
             'detail_alamat' => 'required|string|max:1000',
             'rt'            => 'nullable|string|max:10',
             'rw'            => 'nullable|string|max:10',

@@ -34,7 +34,7 @@
             <p>Terima kasih telah bergabung dengan SiladesBeng!</p>
         </div>
         <div class="footer">
-            <p>&copy; {{ date('Y') }} SiladesBeng. Kabupaten Bengkalis.</p>
+            <p>&copy; {{ date('Y') }} SiladesBeng. Kabupaten Bengkalis | Cakupan layanan: Kecamatan Bengkalis.</p>
         </div>
     </div>
 </body>

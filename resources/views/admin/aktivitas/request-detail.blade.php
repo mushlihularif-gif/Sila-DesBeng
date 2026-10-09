@@ -112,10 +112,8 @@
                                     <p class="text-muted mb-1 text-uppercase small ls-1">Metode Pembayaran</p>
                                     <p class="fw-semibold">
                                         @php
-                                            // Nilainya tersimpan dalam dua bentuk: saat pesanan dibuat
-                                            // memakai ucfirst() sehingga jadi 'Bank_transfer_bsi',
-                                            // sedangkan saat metode diganti jadi 'Bank Transfer BSI'.
-                                            // Keduanya dinormalkan dulu supaya labelnya konsisten.
+                                            // Normalisasi variasi format metode pembayaran lama agar
+                                            // riwayat transaksi tetap dapat dibaca secara konsisten.
                                             $kunciBayar = strtolower(str_replace(' ', '_', (string) ($request->payment_method ?? '')));
 
                                             $petaBayar = [
@@ -123,13 +121,13 @@
                                                 'transfer'              => ['Transfer Manual', 'primary'],
                                                 'transfer_manual'       => ['Transfer Manual', 'primary'],
                                                 'ewallet'               => ['E-Wallet', 'info'],
-                                                'gopay'                 => ['GoPay', 'info'],
-                                                'qris'                  => ['QRIS', 'danger'],
-                                                'bank_transfer_bca'     => ['BCA Virtual Account', 'primary'],
-                                                'bank_transfer_bni'     => ['BNI Virtual Account', 'primary'],
-                                                'bank_transfer_bri'     => ['BRI Virtual Account', 'primary'],
-                                                'bank_transfer_mandiri' => ['Mandiri Virtual Account', 'primary'],
-                                                'bank_transfer_bsi'     => ['BSI Virtual Account', 'primary'],
+                                                'gopay'                 => ['GoPay (metode lama)', 'info'],
+                                                'qris'                  => ['QRIS manual', 'danger'],
+                                                'bank_transfer_bca'     => ['Transfer BCA (metode lama)', 'primary'],
+                                                'bank_transfer_bni'     => ['Transfer BNI (metode lama)', 'primary'],
+                                                'bank_transfer_bri'     => ['Transfer BRI (metode lama)', 'primary'],
+                                                'bank_transfer_mandiri' => ['Transfer Mandiri (metode lama)', 'primary'],
+                                                'bank_transfer_bsi'     => ['Transfer BSI (metode lama)', 'primary'],
                                             ];
 
                                             [$labelBayar, $warnaBayar] = $petaBayar[$kunciBayar]

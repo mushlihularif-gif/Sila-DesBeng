@@ -256,7 +256,7 @@ class TransactionController extends Controller
             $m = strtolower($method ?? '');
             if (str_contains($m, 'transfer') || str_contains($m, 'bank')) {
                 $transferCount++;
-            } elseif (str_contains($m, 'qris') || str_contains($m, 'gopay') || str_contains($m, 'ovo') || str_contains($m, 'dana') || str_contains($m, 'shopee') || str_contains($m, 'linkaja') || str_contains($m, 'midtrans') || str_contains($m, 'digital') || str_contains($m, 'gateway')) {
+            } elseif (str_contains($m, 'qris') || str_contains($m, 'gopay') || str_contains($m, 'ovo') || str_contains($m, 'dana') || str_contains($m, 'shopee') || str_contains($m, 'linkaja') || str_contains($m, 'digital')) {
                 $digitalCount++;
             } else {
                 // Asumsi jika bukan transfer dan bukan digital, maka Tunai / Cash

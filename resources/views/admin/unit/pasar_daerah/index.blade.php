@@ -504,6 +504,7 @@
                                             <small class="text-muted mt-1 d-block">Ongkos kirim untuk pembeli dari desa tetangga di dalam 1 kecamatan.</small>
                                         </div>
 
+                                        {{-- Ongkir lintas kecamatan tidak tersedia dalam cakupan ini.
                                         <hr class="my-4 text-light">
 
                                         <div class="mb-4">
@@ -585,6 +586,10 @@
                                                 </div>
                                                 <small class="text-danger mt-2 d-block"><i class="bx bx-info-circle me-1"></i>Kecamatan yang dimatikan (switch abu-abu) berarti toko Anda TIDAK melayani pengiriman ke daerah tersebut.</small>
                                             </div>
+                                        </div>
+                                        --}}
+                                        <div class="alert alert-info py-2 small">
+                                            Pengiriman Pasar Daerah dibatasi antardesa/kelurahan dalam Kecamatan Bengkalis.
                                         </div>
                                         
                                         <hr class="my-4 text-light">

@@ -6,7 +6,7 @@
 |--------------------------------------------------------------------------
 |
 | SATU-SATUNYA file yang perlu diubah kalau mau menambah layanan pihak ketiga
-| baru (Xendit, OY!, Fonnte/Wablas untuk WA, Firebase, dsb). Tidak perlu
+| baru (Fonnte/Wablas untuk WA, Firebase, dsb). Tidak perlu
 | migration, tidak perlu tambah kolom, tidak perlu edit form: halaman
 | "Integrasi & API Key Platform" merender dirinya sendiri dari file ini.
 |
@@ -212,128 +212,6 @@ return [
                 'hint'        => 'Kosongkan bagian ini hanya kalau tahu persis nama model penggantinya.',
                 'config'      => 'services.gemini.model',
                 'env'         => 'GEMINI_MODEL',
-            ],
-        ],
-    ],
-
-    'xendit' => [
-        'label'       => 'Payment Gateway — Xendit (xenPlatform)',
-        'icon'        => 'bx-transfer-alt',
-        'description' => 'Kredensial induk milik Diskominfotik. Tiap desa/kecamatan menjadi sub-akun dengan saldo dan rekening sendiri, tanpa perlu menyentuh kunci API.',
-        'console_url' => 'https://dashboard.xendit.co/settings/developers#api-keys',
-        'notes'       => [
-            'Dipakai untuk model "pemasukan dipegang daerah masing-masing": pembayaran dikirim dengan header for-user-id berisi ID sub-akun wilayah, sehingga dana langsung masuk ke saldo wilayah itu, bukan ke saldo induk.',
-            'Perangkat desa TIDAK pernah memasukkan kunci apa pun. Mereka hanya mengisi nomor rekening di halaman Pembayaran Wilayah, dan verifikasi sub-akunnya bisa diurus Diskominfotik atas nama desa.',
-            'Callback Xendit diverifikasi lewat header X-CALLBACK-TOKEN. Token ini berbeda dari Secret Key dan diambil dari menu Webhook di dashboard.',
-            'Kunci lingkungan uji dan produksi berbeda. Pastikan sakelar Mode Production di bawah sesuai dengan kunci yang dimasukkan.',
-            'URL callback yang didaftarkan di dashboard Xendit: {APP_URL}/api/payment/callback/xendit',
-        ],
-        'mode_field' => 'is_production',
-        'tautan' => [
-            [
-                'label'          => 'Buka Dashboard Xendit',
-                'ikon'           => 'bx-link-external',
-                'url_sandbox'    => 'https://dashboard.xendit.co/',
-                'url_production' => 'https://dashboard.xendit.co/',
-                'catatan'        => 'Tempat menyalin Secret Key dan Callback Token, serta mengelola sub-akun tiap wilayah.',
-            ],
-        ],
-        'fields' => [
-            'secret_key' => [
-                'label'       => 'Secret Key (API Key induk)',
-                'type'        => 'secret',
-                'min'         => 20,
-                'max'         => 255,
-                'placeholder' => 'xnd_...',
-                'hint'        => 'Awalan tidak dipaksakan — Xendit dapat mengubah formatnya. Keabsahannya diuji langsung ke Xendit saat disimpan.',
-                'config'      => 'services.xendit.secret_key',
-                'env'         => 'XENDIT_SECRET_KEY',
-            ],
-            'callback_token' => [
-                'label'       => 'Callback Token (X-CALLBACK-TOKEN)',
-                'type'        => 'secret',
-                'min'         => 10,
-                'max'         => 255,
-                'placeholder' => 'diambil dari menu Webhook di dashboard',
-                'hint'        => 'Dipakai memverifikasi bahwa callback benar-benar dari Xendit. BUKAN Secret Key.',
-                'config'      => 'services.xendit.callback_token',
-                'env'         => 'XENDIT_CALLBACK_TOKEN',
-            ],
-            'is_production' => [
-                'label'  => 'Aktifkan Mode Production',
-                'type'   => 'boolean',
-                'hint'   => 'Matikan selama masih memakai kunci lingkungan uji.',
-                'config' => 'services.xendit.is_production',
-                'env'    => 'XENDIT_IS_PRODUCTION',
-            ],
-        ],
-    ],
-
-    'midtrans' => [
-        'label'       => 'Payment Gateway — Midtrans',
-        'icon'        => 'bx-credit-card',
-        'description' => 'Kredensial pembayaran yang dipakai seluruh transaksi dari semua desa/kecamatan.',
-        'console_url' => 'https://dashboard.midtrans.com/settings/config_info',
-        'notes'       => [
-            'Sakelar Mode Production di bawah adalah pengaturan APLIKASI INI, bukan pengaturan di akun Midtrans. Ia menentukan aplikasi menghubungi api.sandbox.midtrans.com atau api.midtrans.com.',
-            'Sakelar dan kunci harus sepasang. JANGAN menebak dari awalan kunci: akun Midtrans yang lebih baru memakai awalan "Mid-" untuk Sandbox MAUPUN Production. Panel ini menguji kuncinya langsung ke server Midtrans saat disimpan, lalu memberi tahu lingkungan mana yang menerimanya.',
-            'URL notifikasi pembayaran yang didaftarkan di dashboard Midtrans: {APP_URL}/api/payment/callback',
-        ],
-
-        // Tautan keluar yang ditampilkan di kartu. Dipilih otomatis mengikuti
-        // nilai field 'is_production' yang tersimpan.
-        'mode_field' => 'is_production',
-        'tautan' => [
-            [
-                'label'          => 'Buka Dashboard Midtrans',
-                'ikon'           => 'bx-link-external',
-                'url_sandbox'    => 'https://dashboard.sandbox.midtrans.com/',
-                'url_production' => 'https://dashboard.midtrans.com/',
-                'catatan'        => 'Tempat menyalin Merchant ID dan kunci. Perlu login akun Midtrans milik instansi.',
-            ],
-            [
-                'label'        => 'Simulator Pembayaran',
-                'ikon'         => 'bx-test-tube',
-                'url_sandbox'  => 'https://simulator.sandbox.midtrans.com/',
-                'hanya_sandbox' => true,
-                'catatan'      => 'Alat publik Midtrans untuk menandai transaksi Sandbox sebagai lunas. Tanpa login, dan tidak bisa menyentuh transaksi Production.',
-            ],
-        ],
-        'fields' => [
-            'merchant_id' => [
-                'label'       => 'Merchant ID',
-                'type'        => 'text',
-                'min'         => 5,
-                'max'         => 50,
-                'placeholder' => 'M225547813',
-                'config'      => 'services.midtrans.merchant_id',
-                'env'         => 'MIDTRANS_MERCHANT_ID',
-            ],
-            'server_key' => [
-                'label'       => 'Server Key (rahasia)',
-                'type'        => 'secret',
-                'min'         => 20,
-                'max'         => 255,
-                'placeholder' => 'Mid-server-xxxxxxxxxxxxxxxxxxxx',
-                'hint'        => 'Awalan tidak menentukan lingkungan (akun baru memakai Mid- untuk keduanya). Kebenarannya diuji langsung ke Midtrans saat disimpan.',
-                'config'      => 'services.midtrans.server_key',
-                'env'         => 'MIDTRANS_SERVER_KEY',
-            ],
-            'client_key' => [
-                'label'       => 'Client Key',
-                'type'        => 'secret',
-                'min'         => 20,
-                'max'         => 255,
-                'placeholder' => 'Mid-client-xxxxxxxxxxxxxxxxxxxx',
-                'config'      => 'services.midtrans.client_key',
-                'env'         => 'MIDTRANS_CLIENT_KEY',
-            ],
-            'is_production' => [
-                'label'  => 'Aktifkan Mode Production',
-                'type'   => 'boolean',
-                'hint'   => 'Matikan selama masih memakai kunci Sandbox.',
-                'config' => 'services.midtrans.is_production',
-                'env'    => 'MIDTRANS_IS_PRODUCTION',
             ],
         ],
     ],

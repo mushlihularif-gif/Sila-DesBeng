@@ -9,9 +9,7 @@
     <div class="alert alert-info d-flex align-items-start mb-4">
         <i class="bx bx-info-circle me-2 fs-5 mt-1"></i>
         <div>
-            Midtrans sekarang satu akun milik Diskominfotik: uang gateway dari <strong>semua</strong> wilayah
-            mendarat di rekening ini lebih dulu, dibukukan sebagai saldo tiap wilayah. Daftar di bawah adalah
-            pengajuan admin daerah untuk mencairkan saldo itu ke rekening wilayahnya sendiri.
+            Daftar di bawah berisi pengajuan admin wilayah untuk mencairkan saldo yang tercatat ke rekening wilayahnya sendiri.
             Menyetujui di sini <strong>tidak</strong> mentransfer uang secara otomatis — transfernya lewat
             m-banking seperti biasa, tombol Setujui hanya menandai sudah dikirim.
         </div>
@@ -317,7 +315,7 @@
                                                             <i class="bx bx-info-circle me-1"></i>
                                                             Ini bukan menolak hak wilayah atas uangnya — saldo mereka kembali utuh
                                                             dan bisa diajukan lagi. Pakai ini untuk kendala teknis: rekening salah,
-                                                            nama tidak cocok dengan data bank, atau dana Midtrans belum settle.
+                                                            nama tidak cocok dengan data bank, atau saldo belum tersedia.
                                                         </div>
                                                         <label class="form-label small">Kendalanya apa? <span class="text-danger">*</span></label>
                                                         <textarea name="catatan_admin" class="form-control form-control-sm" rows="3" required

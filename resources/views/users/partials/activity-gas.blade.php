@@ -207,11 +207,6 @@
                                         <a href="{{ route('user.gas.payment', $order->id) }}" class="block w-full px-4 py-2 bg-orange-500 text-white text-center rounded-lg text-sm font-semibold hover:bg-orange-600 transition-colors shadow-sm">
                                             Bayar Sekarang
                                         </a>
-                                        <button type="button" 
-                                                class="w-full px-4 py-2 border border-blue-500 text-blue-500 rounded-lg text-sm font-semibold hover:bg-blue-50 transition-colors"
-                                                onclick="openChangeMethodModal({{ $order->id }}, '{{ $order->payment_channel }}')">
-                                            <i class="fas fa-exchange-alt mr-1"></i>Ubah Metode Pembayaran
-                                        </button>
                                     </div>
                                     @endif
 

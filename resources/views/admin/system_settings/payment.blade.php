@@ -12,7 +12,7 @@
             <i class="bx bx-credit-card-front me-2"></i>Informasi Kas & Pembayaran
         </h5>
         <div class="card-body mt-4">
-            <p class="text-muted mb-4">Kelola rekening bank utama, dompet elektronik (e-wallet), dan integrasi otomatis Payment Gateway (Midtrans).</p>
+            <p class="text-muted mb-4">Kelola rekening bank utama, pembayaran tunai, dan dompet elektronik untuk pembayaran manual.</p>
 
             @if(session('success'))
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -105,7 +105,7 @@
                         </div>
                     </div>
 
-                    <!-- Kolom Kanan: E-Wallet & Midtrans -->
+                    <!-- Kolom Kanan: Pembayaran Tunai dan E-Wallet -->
                     <div class="col-md-6">
                         <!-- Cash Only (Bayar di Tempat) -->
                         <div class="card border border-success shadow-none mb-3 bg-label-success">
@@ -155,36 +155,6 @@
                             </div>
                         </div>
 
-                        <!-- Payment Gateway -->
-                        <div class="card border border-warning shadow-none mb-3 bg-label-warning">
-                            <div class="card-body p-3">
-                                <h6 class="fw-bold text-warning mb-2"><i class="bx bx-bolt-circle me-1"></i>Payment Gateway Otomatis</h6>
-                                <p class="text-warning small mb-2">
-                                    Aktifkan untuk menerima pembayaran otomatis (Midtrans VA/QRIS).
-                                </p>
-                                <div class="alert alert-danger p-2 mb-3 shadow-sm" style="font-size: 0.85rem; border-left: 4px solid #ff3e1d;">
-                                    <strong><i class="bx bx-error-circle me-1"></i>PENTING:</strong> Pastikan Daerah Anda Sudah Mendaftar Midtrans!
-                                </div>
-                                <div class="form-check form-switch mb-0 d-flex align-items-center">
-                                    <input class="form-check-input me-2" type="checkbox" name="payment_gateway_active" id="payment_gateway_active" value="1" style="width: 2.5em; height: 1.2em; cursor: pointer;" {{ (old('payment_gateway_active', $region->payment_info['payment_gateway_active'] ?? false)) ? 'checked' : '' }} onchange="document.getElementById('midtrans_fields').style.display = this.checked ? 'block' : 'none'">
-                                    <label class="form-check-label fw-semibold text-warning" for="payment_gateway_active" style="cursor: pointer;">Aktifkan Gateway</label>
-                                </div>
-                                
-                                <div id="midtrans_fields" class="mt-3" style="display: {{ (old('payment_gateway_active', $region->payment_info['payment_gateway_active'] ?? false)) ? 'block' : 'none' }}; border-top: 1px dashed #ffab00; padding-top: 15px;">
-                                    <div class="alert alert-warning p-2 mb-3" style="font-size: 0.8rem;">
-                                        <i class="bx bx-info-circle me-1"></i>Masukkan kunci API Midtrans pusat Anda. Jika dibiarkan kosong, pembayaran tidak akan diproses.
-                                    </div>
-                                    <div class="mb-2">
-                                        <label class="form-label text-warning fw-semibold" style="font-size: 0.8rem;">Midtrans Server Key</label>
-                                        <input type="text" name="midtrans_server_key" class="form-control form-control-sm border-warning bg-white" value="{{ old('midtrans_server_key', $region->payment_info['midtrans_server_key'] ?? '') }}" placeholder="SB-Mid-server-xxx">
-                                    </div>
-                                    <div class="mb-2">
-                                        <label class="form-label text-warning fw-semibold" style="font-size: 0.8rem;">Midtrans Client Key</label>
-                                        <input type="text" name="midtrans_client_key" class="form-control form-control-sm border-warning bg-white" value="{{ old('midtrans_client_key', $region->payment_info['midtrans_client_key'] ?? '') }}" placeholder="SB-Mid-client-xxx">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
 

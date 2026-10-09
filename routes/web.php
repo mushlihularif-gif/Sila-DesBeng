@@ -6,13 +6,13 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\SuperAdminSettingController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\UnitPenyewaanController;
 use App\Http\Controllers\Admin\GasController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\SystemSettingController;
-use App\Http\Controllers\Admin\SuperAdminSettingController;
 
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\Admin\ProfileController;
@@ -271,14 +271,6 @@ Route::get('/gas/booking/{id}/pending', [App\Http\Controllers\User\GasBookingCon
     ->name('user.gas.payment.pending')
     ->middleware('auth');
 
-Route::get('/gas/payment/{id}/qr', [App\Http\Controllers\User\GasBookingController::class, 'qrPembayaran'])
-    ->name('user.gas.payment.qr')
-    ->middleware('auth');
-
-Route::get('/gas/payment/{id}/sinkron', [App\Http\Controllers\User\GasBookingController::class, 'sinkronPembayaran'])
-    ->name('user.gas.payment.sinkron')
-    ->middleware('auth');
-
 if (app()->environment(['local', 'testing'])) {
     Route::post('/gas/payment/{id}/simulate', [App\Http\Controllers\User\GasBookingController::class, 'simulatePayment'])
         ->name('user.gas.payment.simulate')
@@ -287,10 +279,6 @@ if (app()->environment(['local', 'testing'])) {
 
 Route::post('/gas/payment/{id}/cancel', [App\Http\Controllers\User\GasBookingController::class, 'cancelPayment'])
     ->name('user.gas.payment.cancel')
-    ->middleware('auth');
-
-Route::post('/gas/payment/{id}/change-method', [App\Http\Controllers\User\GasBookingController::class, 'changePaymentMethod'])
-    ->name('user.gas.payment.change_method')
     ->middleware('auth');
 
 // === PASAR DAERAH (User) ===
@@ -534,7 +522,7 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
     Route::post('/region-settings/toggle-delivery', [\App\Http\Controllers\Admin\RegionSettingController::class, 'toggleDelivery'])->name('admin.region-settings.toggle-delivery');
     Route::get('/pengaturan-pembayaran-wilayah', [\App\Http\Controllers\Admin\RegionSettingController::class, 'paymentIndex'])->name('admin.region-settings.payment');
     Route::put('/pengaturan-pembayaran-wilayah', [\App\Http\Controllers\Admin\RegionSettingController::class, 'paymentUpdate'])->name('admin.region-settings.payment.update');
-    // Keuangan wilayah: saldo Midtrans & pencairannya. Dipisah dari Pengaturan
+    // Keuangan wilayah: ringkasan saldo dan pencairannya. Dipisah dari Pengaturan
     // karena ini pekerjaan berulang (lihat uang masuk, cairkan), bukan
     // konfigurasi sekali-atur seperti nomor rekening.
     Route::get('/keuangan', [\App\Http\Controllers\Admin\KeuanganController::class, 'index'])->name('admin.keuangan.index');
@@ -635,7 +623,6 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
     // akses sebagian saja. super_admin tetap lolos ke semuanya.
     Route::prefix('sistem-platform')->group(function () {
         Route::get('/gateway', [SuperAdminSettingController::class, 'gateway'])->name('admin.sistem-platform.gateway')->middleware('platform.permission:platform_integrasi');
-        Route::put('/gateway', [SuperAdminSettingController::class, 'gatewayUpdate'])->name('admin.sistem-platform.gateway.update')->middleware('platform.permission:platform_integrasi');
         // Satu route untuk semua kategori kredensial — kategori baru cukup didaftarkan
         // di config/api_providers.php, tanpa menambah route.
         Route::put('/gateway/kredensial/{category}', [SuperAdminSettingController::class, 'credentialUpdate'])->name('admin.sistem-platform.credential.update')->middleware('platform.permission:platform_integrasi');
@@ -953,12 +940,19 @@ Route::get('/api/regions', function () {
     // Endpoint publik ini hanya diperlukan untuk dropdown wilayah. Jangan
     // serialisasikan seluruh model: kolom payment_info/kontak tidak perlu
     // dikirim kepada publik.
-    return response()->json(
-        \App\Models\Region::query()
-            ->select(['id', 'name', 'type', 'parent_id'])
-            ->orderBy('name')
-            ->get()
-    );
+    $kecamatan = \App\Models\Region::where('type', 'kecamatan')
+        ->where('name', 'Kecamatan Bengkalis')
+        ->firstOrFail();
+    $ids = array_merge([$kecamatan->id], \App\Models\Region::getDescendantIds($kecamatan->id));
+    if ($kecamatan->parent_id) {
+        $ids[] = $kecamatan->parent_id;
+    }
+
+    return response()->json(\App\Models\Region::query()
+        ->select(['id', 'name', 'type', 'parent_id'])
+        ->whereIn('id', $ids)
+        ->orderBy('name')
+        ->get());
 });
 
 // Reverse geocoding API proxy (OpenStreetMap Nominatim dengan User-Agent SiladesBeng resmi)

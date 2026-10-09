@@ -46,11 +46,6 @@ class MobilBooking extends Model
         'completion_time',
         'region_id',
         'dengan_supir',
-        'snap_token',
-        'payment_channel',
-        'payment_expiry_time',
-        'payment_va_number',
-        'payment_qr_url',
     ];
 
     protected $casts = [

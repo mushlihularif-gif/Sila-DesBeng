@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Region;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -21,7 +23,12 @@ class AuthController extends Controller
                 'email' => 'required|email|unique:users,email',
                 'phone' => 'required|string|max:20',
                 'password' => 'required|string|min:8|confirmed',
-                'region_id' => 'required|exists:regions,id',
+                'region_id' => [
+                    'required',
+                    Rule::exists('regions', 'id')->where(fn ($query) => $query
+                        ->whereIn('type', ['desa', 'kelurahan'])
+                        ->where('parent_id', Region::where('type', 'kecamatan')->where('name', 'Kecamatan Bengkalis')->value('id') ?? -1)),
+                ],
                 'otp_method' => 'required|in:email,whatsapp',
             ], [
                 'username.unique' => 'Username sudah digunakan',

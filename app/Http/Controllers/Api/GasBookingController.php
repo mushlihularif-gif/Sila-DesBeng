@@ -30,7 +30,7 @@ class GasBookingController extends Controller
             'latitude' => 'nullable|numeric|between:-90,90',
             'longitude' => 'nullable|numeric|between:-180,180',
             'quantity' => 'required|integer|min:1|max:100',
-            'payment_method' => 'required|in:tunai,bank_transfer_bca,bank_transfer_bri,bank_transfer_bni,bank_transfer_mandiri,bank_transfer_bsi,gopay,qris',
+            'payment_method' => 'required|in:tunai,transfer',
             'payment_proof' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
         ]);
 
@@ -127,87 +127,6 @@ class GasBookingController extends Controller
             'receipt_number' => $receipt->receipt_number,
         ];
 
-        // Midtrans Integration using Core API
-        if ($validated['payment_method'] !== 'tunai') {
-            // Kunci milik wilayah gasnya, bukan kunci platform - lihat catatan yang
-            // sama di User\GasBookingController.
-            if (! \App\Support\PenyediaPembayaran::terapkanMidtransWilayah($gas->region_id)) {
-                \Illuminate\Support\Facades\Log::warning('Gateway API dilewati: wilayah belum siap', [
-                    'order_number' => $order->order_number,
-                    'region_id'    => $gas->region_id,
-                ]);
-
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Pembayaran otomatis untuk wilayah ini sedang tidak tersedia.',
-                ], 422);
-            }
-
-            $paymentMethod = $validated['payment_method'];
-
-            // Snap, bukan Core API. Akun ini hanya punya Snap; Core API menolak
-            // seluruh kanal dengan 402 "Payment channel is not activated".
-            //
-            // Aplikasi Flutter tidak bisa membuka popup, jadi yang dikirim
-            // balik adalah redirect_url - dibuka di webview. snap_token ikut
-            // disertakan untuk berjaga kalau nanti dipasang SDK Snap mobile.
-            $params = [
-                'transaction_details' => [
-                    'order_id' => $orderNumber,
-                    'gross_amount' => $totalAmount,
-                ],
-                'customer_details' => [
-                    'first_name' => $validated['buyer_name'],
-                    'email' => $user->email,
-                    'phone' => $user->phone ?? '081234567890',
-                ],
-                'item_details' => [
-                    [
-                        'id' => (string) $gas->id,
-                        'price' => $gas->harga_satuan,
-                        'quantity' => $validated['quantity'],
-                        'name' => $gas->jenis_gas,
-                    ],
-                ],
-            ];
-
-            $kanal = \App\Support\PenyediaPembayaran::kanalSnap($paymentMethod);
-            if ($kanal) {
-                $params['enabled_payments'] = [$kanal];
-            }
-
-            try {
-                $snap = \Midtrans\Snap::createTransaction($params);
-
-                $order->payment_channel = $paymentMethod;
-                $order->snap_token = $snap->token;
-                $order->payment_expiry_time = now()->addDay();
-                $order->save();
-
-                $response['snap_token'] = $snap->token;
-                $response['snap_redirect_url'] = $snap->redirect_url;
-            } catch (\Exception $e) {
-                // TIDAK ADA nomor VA palsu. Versi sebelumnya mengisi
-                // rand(10000,99999).rand(100000,999999) sebagai nomor VA dan
-                // 'DUMMY_QR_CODE' sebagai QR, sehingga aplikasi mobile
-                // menampilkan tagihan yang tidak pernah ada di Midtrans.
-                \Illuminate\Support\Facades\Illuminate\Support\Facades\Log::error('Midtrans Snap gagal (mobile)', [
-                    'order_number' => $orderNumber,
-                    'metode'       => $paymentMethod,
-                    'pesan'        => $e->getMessage(),
-                ]);
-
-                $order->payment_channel = $paymentMethod;
-                $order->save();
-
-                $response['snap_token'] = null;
-                $response['snap_redirect_url'] = null;
-                $response['gateway_gagal'] = true;
-                $response['message'] = 'Pesanan tersimpan, tetapi pembayaran otomatis '
-                    . 'sedang tidak dapat diproses. Silakan pilih tunai atau hubungi petugas desa.';
-            }
-        }
-
         // Create notification for user
         \App\Models\Notification::create([
             'user_id' => $order->user_id,
@@ -218,26 +137,6 @@ class GasBookingController extends Controller
             'link' => '/unit-penjualan-gas',
             'icon' => 'fas fa-clock text-yellow-500'
         ]);
-
-        if ($validated['payment_method'] !== 'tunai') {
-            $response['payment_data'] = [
-                // va_number dan qr_url kini SELALU null untuk pembayaran gateway:
-                // sejak pindah ke Snap, nomor VA diterbitkan dan ditampilkan di
-                // halaman Midtrans, bukan disimpan di sisi kita. Keduanya
-                // dipertahankan supaya bentuk jawabannya tidak berubah bagi
-                // pemanggil lama, tapi aplikasi harus memakai snap_redirect_url.
-                'va_number' => $order->payment_va_number,
-                'qr_url' => $order->payment_qr_url,
-                'channel' => $order->payment_channel,
-                'expiry_time' => $order->payment_expiry_time ? $order->payment_expiry_time->toDateTimeString() : null,
-                'total_amount' => $totalAmount,
-
-                // Inilah yang harus dibuka aplikasi — di webview atau peramban
-                // luar. Popup Snap tidak tersedia di aplikasi mobile.
-                'snap_redirect_url' => $response['snap_redirect_url'] ?? null,
-                'snap_token' => $response['snap_token'] ?? null,
-            ];
-        }
 
         return response()->json($response);
     }

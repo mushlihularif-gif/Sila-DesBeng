@@ -7,7 +7,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * Kredensial layanan pihak ketiga (Google OAuth, Google Maps, Midtrans, dst).
+ * Kredensial layanan pihak ketiga (Google OAuth, Google Maps, dan lainnya).
  *
  * ATURAN UTAMA: satu kategori = tepat satu baris.
  * Kolom `category` unik dan semua penyimpanan lewat put() memakai

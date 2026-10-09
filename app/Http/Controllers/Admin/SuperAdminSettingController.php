@@ -31,77 +31,7 @@ class SuperAdminSettingController extends Controller
         $providers = config('api_providers', []);
         $tersimpan = ApiCredential::allCached();
 
-        // Kesiapan tiap wilayah di bawah penyedia yang sedang aktif. Tanpa ini
-        // Super Admin memilih penyedia tanpa tahu akibatnya: berapa desa yang
-        // langsung bisa menerima pembayaran, dan berapa yang justru terhenti.
-        $penyedia      = \App\Support\PenyediaPembayaran::aktif();
-        $labelPenyedia = \App\Support\PenyediaPembayaran::label();
-        $kunciDiWilayah = \App\Support\PenyediaPembayaran::kunciDiisiOlehWilayah();
-        $platformSiap  = \App\Support\PenyediaPembayaran::platformSiap();
-
-        $kesiapanWilayah = \App\Models\Region::whereIn('type', ['desa', 'kecamatan'])
-            ->orderBy('name')
-            ->get()
-            ->map(function ($region) {
-                $status = \App\Support\PenyediaPembayaran::kesiapanWilayah($region->id);
-
-                return [
-                    'nama'   => $region->name,
-                    'tipe'   => $region->type,
-                    'siap'   => $status['siap'],
-                    'alasan' => $status['alasan'],
-                ];
-            });
-
-        $jumlahSiap = $kesiapanWilayah->where('siap', true)->count();
-
-        // Hanya kartu kredensial gateway yang SEDANG aktif yang ditampilkan.
-        // Menampilkan keduanya sekaligus menyesatkan: Super Admin bisa mengisi
-        // kunci Xendit dengan rapi lalu heran kenapa transaksinya tetap lewat
-        // Midtrans. Kartu penyedia lain tidak ikut disaring.
-        $penyediaLain = $penyedia === \App\Support\PenyediaPembayaran::MIDTRANS
-            ? \App\Support\PenyediaPembayaran::XENDIT
-            : \App\Support\PenyediaPembayaran::MIDTRANS;
-
-        $labelPenyediaLain = $providers[$penyediaLain]['label'] ?? ucfirst($penyediaLain);
-
-        unset($providers[$penyediaLain]);
-
-        return view('admin.super_sistem.gateway', compact(
-            'settings', 'providers', 'tersimpan',
-            'penyedia', 'labelPenyedia', 'kunciDiWilayah', 'platformSiap',
-            'kesiapanWilayah', 'jumlahSiap', 'penyediaLain', 'labelPenyediaLain'
-        ));
-    }
-
-    /**
-     * Simpan pengaturan gateway yang sifatnya bisnis, bukan kredensial
-     * (penyedia aktif & fee platform).
-     */
-    public function gatewayUpdate(Request $request)
-    {
-        $validated = $request->validateWithBag('umum', [
-            // Xendit belum terhubung dengan alur pembuatan transaksi. Jangan
-            // biarkan pengaturan menyatakan Xendit aktif ketika checkout masih
-            // hanya memproses pembayaran Midtrans.
-            'gateway_provider'        => 'required|in:midtrans',
-            'platform_fee_percentage' => 'required|numeric|min:0|max:100',
-        ], [
-            'gateway_provider.required' => 'Penyedia gateway wajib dipilih.',
-            'gateway_provider.in'       => 'Saat ini hanya Midtrans yang siap digunakan untuk checkout.',
-            'platform_fee_percentage.required' => 'Fee platform wajib diisi.',
-        ]);
-
-        $settings = SystemSetting::instance();
-        $settings->gateway_provider = $validated['gateway_provider'];
-        $settings->platform_fee_percentage = $validated['platform_fee_percentage'];
-        $settings->save();
-
-        Log::info('SuperAdmin: Pengaturan gateway umum diperbarui oleh ' . auth()->user()->email);
-
-        return redirect()
-            ->route('admin.sistem-platform.gateway')
-            ->with('success', 'Pengaturan gateway berhasil diperbarui.');
+        return view('admin.super_sistem.gateway', compact('settings', 'providers', 'tersimpan'));
     }
 
     /**
@@ -120,11 +50,6 @@ class SuperAdminSettingController extends Controller
         [$rules, $attributes, $messages] = $this->buildCredentialValidation($provider);
 
         $validated = $request->validateWithBag($category, $rules, $messages, $attributes);
-
-        // Pemeriksaan silang khusus Midtrans: sakelar mode dan awalan kunci harus
-        // sepasang. Kalau tidak, Midtrans menolak dengan 401 dan pembayaran gagal
-        // tanpa pesan yang jelas — lebih baik dicegat di sini.
-        $this->periksaPasanganKunciMidtrans($request, $category);
 
         $credentials = [];
 
@@ -147,16 +72,9 @@ class SuperAdminSettingController extends Controller
 
         Log::info("SuperAdmin: Kredensial [{$category}] ditimpa oleh " . auth()->user()->email);
 
-        // Kredensial yang bisa diperiksa langsung ke penyedianya, diuji di sini.
-        // Prinsipnya: JANGAN menebak sah/tidaknya kunci dari bentuk teksnya —
-        // penyedia bisa mengubah format kapan saja (Midtrans membuang awalan
-        // "SB-", Google AI Studio berpindah dari "AIza" ke "AQ."). Satu-satunya
-        // jawaban yang bisa dipercaya datang dari server penyedianya sendiri.
+        // Uji API key Gemini setelah disimpan. Provider lain belum memiliki
+        // pemeriksaan koneksi otomatis.
         $uji = match (true) {
-            $category === 'midtrans' && ! empty($credentials['server_key']) => $this->ujiKoneksiMidtrans(
-                $credentials['server_key'],
-                (bool) ($credentials['is_production'] ?? false)
-            ),
             $category === 'gemini' && ! empty($credentials['api_key']) => $this->ujiKoneksiGemini(
                 $credentials['api_key']
             ),
@@ -198,105 +116,6 @@ class SuperAdminSettingController extends Controller
         return redirect()
             ->route('admin.sistem-platform.gateway')
             ->with('success', "Kredensial {$provider['label']} dihapus. Sistem kembali memakai nilai dari file .env.");
-    }
-
-    /**
-     * Uji kunci Midtrans ke server aslinya, dipanggil tepat setelah disimpan.
-     *
-     * Midtrans tidak punya endpoint "ping", jadi caranya menanyakan status sebuah
-     * order id yang pasti tidak ada. Yang dibaca adalah KODE balasannya:
-     *
-     *   404 -> kunci diterima, hanya transaksinya yang tidak ada  => kunci VALID
-     *   401 -> kredensial ditolak                                 => kunci SALAH
-     *   lainnya / CURL error                                      => jaringan/luar dugaan
-     *
-     * Tujuannya supaya salah ketik atau kelebihan karakter ketahuan di panel admin,
-     * bukan baru ketahuan ketika warga sudah berada di halaman pembayaran.
-     *
-     * @return array{status:string, pesan:string}
-     */
-    private function ujiKoneksiMidtrans(string $serverKey, bool $produksi, bool $ulangi = false): array
-    {
-        $serverKeyAsal    = \Midtrans\Config::$serverKey;
-        $produksiAsal     = \Midtrans\Config::$isProduction;
-        $curlOptionsAsal  = \Midtrans\Config::$curlOptions;
-
-        try {
-            // Spasi di ujung kunci membuat header HTTP tidak sah, sehingga curl
-            // gagal SEBELUM sempat mengirim permintaan — gejalanya mirip "server
-            // tidak menjawab" padahal masalahnya salah salin.
-            \Midtrans\Config::$serverKey = trim($serverKey);
-            \Midtrans\Config::$isProduction = $produksi;
-            // Jangan biarkan penyimpanan menggantung kalau Midtrans lambat.
-            //
-            // CURLOPT_HTTPHEADER WAJIB disertakan meski kosong: ApiRequestor.php:117
-            // membaca Config::$curlOptions[CURLOPT_HTTPHEADER] tanpa isset(), jadi
-            // opsi curl kustom tanpa kunci itu memicu "Undefined array key 10023"
-            // sebelum permintaan HTTP-nya sempat terkirim.
-            \Midtrans\Config::$curlOptions = [
-                CURLOPT_TIMEOUT        => 10,
-                CURLOPT_CONNECTTIMEOUT => 5,
-                CURLOPT_HTTPHEADER     => [],
-            ];
-
-            \Midtrans\Transaction::status('SILADESBENG-UJI-' . uniqid());
-
-            // Praktis tidak akan sampai sini; kalau iya, berarti kunci diterima.
-            return ['status' => 'valid', 'pesan' => 'Kunci diterima Midtrans.'];
-        } catch (\Throwable $e) {
-            $kode = (int) $e->getCode();
-
-            if ($kode === 404) {
-                return [
-                    'status' => 'valid',
-                    'pesan'  => 'Kunci diterima Midtrans (' . ($produksi ? 'Production' : 'Sandbox') . ').',
-                ];
-            }
-
-            if ($kode === 401 || $kode === 403) {
-                // Ditolak di mode yang dipilih. Coba lingkungan satunya: kalau di
-                // sana diterima, berarti kuncinya benar dan hanya sakelarnya yang
-                // keliru — jauh lebih berguna daripada sekadar bilang "ditolak".
-                if (! $ulangi) {
-                    $lain = $this->ujiKoneksiMidtrans($serverKey, ! $produksi, true);
-
-                    if ($lain['status'] === 'valid') {
-                        $modeBenar = $produksi ? 'Sandbox' : 'Production';
-                        $modeSalah = $produksi ? 'Production' : 'Sandbox';
-
-                        return [
-                            'status' => 'salah_mode',
-                            'pesan'  => "Kunci ini SAH, tetapi milik lingkungan {$modeBenar}, sedangkan "
-                                . "sakelar sedang di {$modeSalah}. Ubah sakelar Mode Production agar cocok.",
-                        ];
-                    }
-                }
-
-                return [
-                    'status' => 'ditolak',
-                    'pesan'  => 'Midtrans MENOLAK Server Key ini di kedua lingkungan. Periksa kembali '
-                        . 'apakah ada salah ketik atau karakter yang ikut tersalin, lalu salin ulang dari dashboard Midtrans.',
-                ];
-            }
-
-            if (stripos($e->getMessage(), 'CURL') !== false) {
-                return [
-                    'status' => 'tidak_terhubung',
-                    'pesan'  => 'Tidak bisa menghubungi server Midtrans, jadi kunci belum bisa dipastikan benar. '
-                        . 'Periksa koneksi internet server.',
-                ];
-            }
-
-            return [
-                'status' => 'tidak_pasti',
-                'pesan'  => 'Balasan Midtrans di luar dugaan, kunci belum bisa dipastikan benar. '
-                    . 'Rinciannya tercatat di log aplikasi.',
-            ];
-        } finally {
-            \Midtrans\Config::$serverKey = $serverKeyAsal;
-            \Midtrans\Config::$isProduction = $produksiAsal;
-            \Midtrans\Config::$curlOptions = $curlOptionsAsal;
-        }
     }
 
     /**
@@ -366,54 +185,6 @@ class SuperAdminSettingController extends Controller
             'status' => 'tidak_pasti',
             'pesan'  => 'Google menjawab dengan kode ' . $statusTerakhir . ', kunci belum bisa dipastikan benar.',
         ];
-    }
-
-    /**
-     * Pastikan sakelar Mode Production cocok dengan awalan kunci Midtrans.
-     *
-     * Midtrans memisahkan Sandbox dan Production sebagai dua lingkungan penuh:
-     * kunci SB-Mid- hanya sah di api.sandbox.midtrans.com, kunci Mid- hanya sah
-     * di api.midtrans.com. Sakelar di panel ini menentukan alamat mana yang
-     * dihubungi aplikasi, jadi salah pasang = semua transaksi ditolak 401.
-     */
-    private function periksaPasanganKunciMidtrans(Request $request, string $category): void
-    {
-        if ($category !== 'midtrans') {
-            return;
-        }
-
-        $produksi = $request->boolean('is_production');
-        $galat = [];
-
-        foreach (['server_key' => 'Server Key', 'client_key' => 'Client Key'] as $field => $label) {
-            $nilai = trim((string) $request->input($field));
-
-            if ($nilai === '') {
-                continue;
-            }
-
-            // Kunci Midtrans tidak pernah memuat spasi. Spasi di tengah tidak
-            // terhapus oleh trim() dan akan membuat permintaan gagal sebelum
-            // terkirim, jadi dicegat di sini dengan pesan yang jelas.
-            if (preg_match('/\s/', $nilai)) {
-                $galat[$field] = "{$label} memuat spasi. Kunci Midtrans tidak pernah mengandung spasi — "
-                    . 'kemungkinan ada karakter ikut tersalin. Salin ulang langsung dari dashboard Midtrans.';
-                continue;
-            }
-
-            // CATATAN: JANGAN menebak lingkungan dari awalan kunci.
-            // Dulu Midtrans memakai awalan "SB-Mid-" untuk sandbox, tetapi akun
-            // yang lebih baru memakai "Mid-" untuk KEDUANYA. Sudah dibuktikan
-            // dengan kunci sandbox milik instansi ini: awalannya "Mid-server-",
-            // diterima api.sandbox.midtrans.com dan ditolak api.midtrans.com.
-            // Penentuan lingkungan dilakukan lewat uji koneksi sungguhan di
-            // ujiKoneksiMidtrans(), bukan dari bentuk teksnya.
-        }
-
-        if ($galat) {
-            throw \Illuminate\Validation\ValidationException::withMessages($galat)
-                ->errorBag($category);
-        }
     }
 
     /**
@@ -496,9 +267,8 @@ class SuperAdminSettingController extends Controller
         $walletHealth = [
             // sum(), bukan count() - sebelumnya menghitung JUMLAH BARIS, jadi
             // angkanya kebetulan cocok dengan rupiah hanya kalau tiap transaksi
-            // pas Rp 1. Sejak Midtrans dipusatkan di akun Diskominfotik, angka
-            // ini bukan lagi sekadar indikator kesehatan sistem - ini rupiah
-            // sungguhan yang jadi tanggung jawab Diskominfotik mencairkannya.
+            // pas Rp 1. Angka ini menunjukkan dana transaksi yang masih tertahan
+            // dan perlu diselesaikan melalui proses keuangan.
             'total_tertahan' => (float) WalletTransaction::where('type', 'ditahan')->where('status', 'pending')->sum('amount'),
             'total_gagal_verifikasi' => WalletTransaction::where('status', 'rejected')->count(),
             'jumlah_region_aktif' => WalletTransaction::distinct('region_id')->count('region_id'),

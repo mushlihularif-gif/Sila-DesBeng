@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\MutasiPenduduk;
+use App\Models\Region;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -99,12 +100,19 @@ class MutasiAdminController extends Controller
     public function searchGlobal(Request $request)
     {
         $search = trim($request->get('q', ''));
+        $kecamatanId = Region::where('type', 'kecamatan')
+            ->where('name', 'Kecamatan Bengkalis')
+            ->value('id');
+        abort_if(! $kecamatanId, 404, 'Kecamatan Bengkalis belum terdaftar.');
+        $regionIdsFokus = array_merge([(int) $kecamatanId], Region::getDescendantIds($kecamatanId));
         $region_id = $request->get('region_id');
         
         $query = User::whereIn('role', ['user', 'warga'])->with('region.parent');
+        $query->whereIn('region_id', $regionIdsFokus);
 
         if ($region_id) {
             $regionIds = array_merge([(int)$region_id], \App\Models\Region::getDescendantIds($region_id));
+            $regionIds = array_intersect($regionIds, $regionIdsFokus);
             $query->whereIn('region_id', $regionIds);
         }
 
@@ -223,6 +231,8 @@ class MutasiAdminController extends Controller
         }
         
         if (!$user) return redirect()->back()->with('error', 'Warga tidak ditemukan.');
+        $kecamatanId = Region::where('type', 'kecamatan')->where('name', 'Kecamatan Bengkalis')->value('id');
+        abort_if(! $kecamatanId || ! in_array((int) $user->region_id, array_map('intval', Region::getDescendantIds($kecamatanId)), true), 422, 'Warga berada di luar Kecamatan Bengkalis.');
         if ($user->region_id == $admin->region_id) return redirect()->back()->with('error', 'Warga ini sudah di desa Anda.');
 
         $existing = MutasiPenduduk::where('user_id', $user->id)->whereIn('status', ['pending', 'pending_asal', 'pending_tujuan'])->first();
@@ -253,7 +263,13 @@ class MutasiAdminController extends Controller
     {
         $request->validate([
             'user_id' => 'required|exists:users,id',
-            'to_region_id' => 'required|exists:regions,id',
+            'to_region_id' => [
+                'required',
+                \Illuminate\Validation\Rule::exists('regions', 'id')->where(function ($query) {
+                    $kecamatanId = Region::where('type', 'kecamatan')->where('name', 'Kecamatan Bengkalis')->value('id') ?? -1;
+                    $query->whereIn('type', ['desa', 'kelurahan'])->where('parent_id', $kecamatanId);
+                }),
+            ],
             'reason' => 'required|string'
         ]);
 

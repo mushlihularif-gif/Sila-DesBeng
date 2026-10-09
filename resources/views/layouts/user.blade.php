@@ -138,16 +138,6 @@
 @endsection
 
 @push('scripts')
-    {{-- Midtrans Snap. Halaman pemesanan memanggil window.snap.pay(), jadi
-         berkas ini harus ada di layout warga - bukan hanya di layouts.app.
-         Alamatnya mengikuti lingkungan: snap.js sandbox dengan kunci produksi
-         (atau sebaliknya) membuat popup gagal terbuka tanpa pesan apa pun. --}}
-    @if(config('services.midtrans.client_key'))
-    <script type="text/javascript"
-            src="{{ \App\Support\PenyediaPembayaran::alamatSnapJs() }}"
-            data-client-key="{{ config('services.midtrans.client_key') }}"></script>
-    @endif
-
     {{-- Skrip Global --}}
     <script>
         (() => {

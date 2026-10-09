@@ -26,10 +26,10 @@
                             Langkah Awal Mewujudkan Digitalisasi Bengkalis
                         </p>
                         <p class="text-gray-700 leading-relaxed mb-4">
-                            Perjalanan <span class="font-semibold text-gray-800">SiladesBeng</span> (Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis) bermula dari sebuah visi besar untuk mendorong percepatan digitalisasi pelayanan publik di wilayah Kabupaten Bengkalis. Gagasan ini lahir sebagai solusi inovatif untuk memutus kendala jarak dan mengoptimalkan potensi daerah melalui pemanfaatan teknologi. Mimpi utama kami adalah menghubungkan seluruh jaringan kecamatan hingga pelosok daerah ke dalam satu ekosistem digital yang canggih, terpadu, dan mudah diakses oleh seluruh lapisan masyarakat.
+                            <span class="font-semibold text-gray-800">SiladesBeng</span> (Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis) berfokus pada informasi dan layanan untuk desa-desa di Kecamatan Bengkalis. Sistem ini dirancang untuk memudahkan warga menemukan layanan, menyampaikan laporan, serta memeriksa keaslian bukti digital melalui QR dan HMAC-SHA256.
                         </p>
                         <p class="text-gray-700 leading-relaxed">
-                            Sebagai wujud nyata dari visi tersebut, SiladesBeng hadir mengintegrasikan berbagai pilar layanan esensial daerah, mulai dari sarana mobilitas (kendaraan), pemanfaatan fasilitas umum, hingga penyewaan alat dan pendistribusian gas. Lebih jauh lagi, kami juga menghadirkan ruang interaksi inklusif melalui fitur Pelaporan Warga dan Informasi Pengumuman. Cerita SiladesBeng adalah cerita tentang inovasi dan kolaborasi bagaimana sentuhan teknologi mentransformasi cara dan masyarakat aparatur berinteraksi demi mewujudkan tata kelola Bengkalis yang mandiri, produktif, dan berkelanjutan.
+                            SiladesBeng menyediakan informasi layanan desa, Pelaporan Warga, dan Kabar dan Informasi Daerah dalam satu platform. Cakupan implementasi dan evaluasi penelitian ini dibatasi pada Kecamatan Bengkalis dan desa-desa di dalamnya.
                         </p>
                     </div>
                     
@@ -108,7 +108,7 @@
                             </svg>
                             <div>
                                 <h3 class="font-bold text-lg text-gray-900">Sarana Mobilitas</h3>
-                                <p class="text-gray-600">Fasilitas penyediaan sarana transportasi terpadu guna mendukung efisiensi pergerakan operasional instansi dan kemudahan mobilitas masyarakat di berbagai wilayah kabupaten.</p>
+                                <p class="text-gray-600">Fasilitas transportasi untuk mendukung operasional instansi dan mobilitas masyarakat di Kecamatan Bengkalis.</p>
                             </div>
                         </div>
                         <!-- Service 2: Fasilitas Umum -->

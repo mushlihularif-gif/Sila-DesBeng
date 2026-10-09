@@ -13,7 +13,15 @@ class MutasiUserController extends Controller
     public function store(Request $request)
     {
         $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
-            'to_region_id' => 'required|exists:regions,id',
+            'to_region_id' => [
+                'required',
+                \Illuminate\Validation\Rule::exists('regions', 'id')->where(function ($query) {
+                    $kecamatanId = Region::where('type', 'kecamatan')
+                        ->where('name', 'Kecamatan Bengkalis')
+                        ->value('id') ?? -1;
+                    $query->whereIn('type', ['desa', 'kelurahan'])->where('parent_id', $kecamatanId);
+                }),
+            ],
             'reason' => 'required|string|max:500',
             'alamat_baru' => 'nullable|string|max:255',
             'rt_baru' => 'nullable|string|max:10',
@@ -21,7 +29,7 @@ class MutasiUserController extends Controller
             'ktp_image' => 'nullable|image|max:10240', // Maks 10MB
         ], [
             'to_region_id.required' => 'Silakan pilih desa tujuan.',
-            'to_region_id.exists' => 'Desa tujuan tidak valid.',
+            'to_region_id.exists' => 'Desa tujuan harus berada di Kecamatan Bengkalis.',
             'reason.required' => 'Alasan kepindahan wajib diisi.',
             'reason.max' => 'Alasan kepindahan maksimal 500 karakter.',
             'ktp_image.image' => 'Berkas KTP harus berupa gambar.',
@@ -67,10 +75,10 @@ class MutasiUserController extends Controller
         $fromDesaId = $user->region_id;
         if ($user->region_id) {
             $curr = Region::find($user->region_id);
-            while ($curr && $curr->type !== 'desa' && $curr->parent_id) {
+            while ($curr && ! in_array($curr->type, ['desa', 'kelurahan'], true) && $curr->parent_id) {
                 $curr = Region::find($curr->parent_id);
             }
-            if ($curr && $curr->type === 'desa') {
+            if ($curr && in_array($curr->type, ['desa', 'kelurahan'], true)) {
                 $fromDesaId = $curr->id;
             }
         }

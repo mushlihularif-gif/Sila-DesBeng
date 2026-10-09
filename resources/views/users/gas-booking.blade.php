@@ -88,7 +88,7 @@
     // curiga pada halaman pembayarannya sendiri.
     $adaLogoEwallet = $ewalletLogoPath !== null && is_file(public_path($ewalletLogoPath));
 
-    // Tentukan metode pembayaran yang tersedia dengan fallback yang lebih baik
+    // Tentukan metode pembayaran manual yang tersedia dengan fallback yang lebih baik
     $methods = $setting?->payment_methods ?? ['transfer', 'tunai'];
     if (!is_array($methods) || empty($methods)) {
         $methods = ['transfer', 'tunai'];
@@ -103,7 +103,7 @@
         && !empty($setting->ewallet_name) && !empty($setting->ewallet_number);
     
     // Pastikan setidaknya satu metode tersedia
-    if (!$hasTransfer && !$hasTunai) {
+    if (!$hasTransfer && !$hasTunai && !$hasEwallet) {
         $hasTransfer = true;
         $hasTunai = true;
     }
@@ -111,11 +111,6 @@
     // Tentukan metode aktif default
     $defaultMethod = $hasTransfer ? 'transfer' : 'tunai';
 
-    // Pembayaran otomatis (Virtual Account dan QRIS) berdiri sendiri dari transfer
-    // manual. Sebelumnya tombol VA dan QRIS dibungkus @if($hasTransfer), sehingga
-    // wilayah yang mematikan transfer manual ikut kehilangan seluruh pembayaran
-    // gateway — padahal keduanya tidak berhubungan.
-    $adaGateway = \App\Support\PenyediaPembayaran::kesiapanWilayah($item->region_id)['siap'] ?? false;
 @endphp
 
 @section('page')
@@ -448,7 +443,7 @@
                          sehingga wilayah yang hanya menyalakan salah satunya tidak
                          memunculkan tombol pembayaran sama sekali — pembeli melihat
                          judul "Metode Pembayaran" dengan ruang kosong di bawahnya. --}}
-                    @if($hasTransfer || $hasTunai || $adaGateway)
+                    @if($hasTransfer || $hasTunai || $hasEwallet)
 
                     {{-- KELOMPOK 1 — Bayar langsung ke desa.
                          Diletakkan paling atas karena inilah cara yang uangnya
@@ -637,106 +632,7 @@
                         </div>
                     </div>
 
-                    {{-- KELOMPOK 2 — Virtual Account.
-                         Bergantung pada kesiapan gateway wilayah, bukan pada sakelar
-                         transfer manual. --}}
-                    @if($adaGateway)
-                    <div class="mb-5">
-                        <div class="flex items-center gap-2 mb-3">
-                            <span class="text-xs font-bold uppercase tracking-wider text-gray-500">Virtual Account</span>
-                            <span class="flex-1 h-px bg-gray-200"></span>
-                            <span class="text-[10px] text-gray-400">Terverifikasi otomatis</span>
-                        </div>
-                        <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
-                        <!-- Bank BCA -->
-                        <button type="button" 
-                                onclick="setPaymentMethod('bank_transfer_bca')"
-                                id="btn-bank_transfer_bca"
-                                class="payment-method-btn group relative py-4 px-2 rounded-2xl font-bold transition-all duration-300 bg-white shadow-sm border border-gray-100 hover:border-blue-300 hover:shadow-md hover:-translate-y-1">
-                            <div class="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                            <div class="flex flex-col items-center justify-center gap-2 text-center h-full relative z-10">
-                                <div class="h-10 flex items-center justify-center"><img src="{{ asset('Admin/img/banks/bca.png') }}" alt="BCA" class="h-9 max-w-full object-contain transform group-hover:scale-110 transition-transform"></div>
-                            </div>
-                        </button>
-
-                        <!-- Bank BRI -->
-                        <button type="button" 
-                                onclick="setPaymentMethod('bank_transfer_bri')"
-                                id="btn-bank_transfer_bri"
-                                class="payment-method-btn group relative py-4 px-2 rounded-2xl font-bold transition-all duration-300 bg-white shadow-sm border border-gray-100 hover:border-orange-300 hover:shadow-md hover:-translate-y-1">
-                            <div class="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                            <div class="flex flex-col items-center justify-center gap-2 text-center h-full relative z-10">
-                                <div class="h-10 flex items-center justify-center"><img src="{{ asset('Admin/img/banks/bri.png') }}" alt="BRI" class="h-9 max-w-full object-contain transform group-hover:scale-110 transition-transform"></div>
-                            </div>
-                        </button>
-
-                        <!-- Bank Mandiri -->
-                        <button type="button" 
-                                onclick="setPaymentMethod('bank_transfer_mandiri')"
-                                id="btn-bank_transfer_mandiri"
-                                class="payment-method-btn group relative py-4 px-2 rounded-2xl font-bold transition-all duration-300 bg-white shadow-sm border border-gray-100 hover:border-yellow-400 hover:shadow-md hover:-translate-y-1">
-                            <div class="absolute inset-0 bg-gradient-to-br from-yellow-500/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                            <div class="flex flex-col items-center justify-center gap-2 text-center h-full relative z-10">
-                                <div class="h-10 flex items-center justify-center"><img src="{{ asset('Admin/img/banks/mandiri.png') }}" alt="Mandiri" class="h-9 max-w-full object-contain transform group-hover:scale-110 transition-transform"></div>
-                            </div>
-                        </button>
-
-                        <!-- Bank BNI -->
-                        <button type="button" 
-                                onclick="setPaymentMethod('bank_transfer_bni')"
-                                id="btn-bank_transfer_bni"
-                                class="payment-method-btn group relative py-4 px-2 rounded-2xl font-bold transition-all duration-300 bg-white shadow-sm border border-gray-100 hover:border-orange-500 hover:shadow-md hover:-translate-y-1">
-                            <div class="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                            <div class="flex flex-col items-center justify-center gap-2 text-center h-full relative z-10">
-                                <div class="h-10 flex items-center justify-center"><img src="{{ asset('Admin/img/banks/bni.png') }}" alt="BNI" class="h-9 max-w-full object-contain transform group-hover:scale-110 transition-transform"></div>
-                            </div>
-                        </button>
-
-                        <!-- Bank BSI -->
-                        <button type="button"
-                                onclick="setPaymentMethod('bank_transfer_bsi')"
-                                id="btn-bank_transfer_bsi"
-                                class="payment-method-btn group relative py-4 px-2 rounded-2xl font-bold transition-all duration-300 bg-white shadow-sm border border-gray-100 hover:border-teal-300 hover:shadow-md hover:-translate-y-1">
-                            <div class="absolute inset-0 bg-gradient-to-br from-teal-500/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                            <div class="flex flex-col items-center justify-center gap-2 text-center h-full relative z-10">
-                                <div class="h-10 flex items-center justify-center"><img src="{{ asset('Admin/img/banks/bsi.png') }}" alt="BSI" class="h-9 max-w-full object-contain transform group-hover:scale-110 transition-transform"></div>
-                            </div>
-                        </button>
-
-
-                        </div>
-                    </div>
-
-                    {{-- KELOMPOK 3 — QRIS. Dipisah karena cara bayarnya berbeda
-                         sama sekali: memindai kode, bukan menyalin nomor rekening. --}}
-                    <div class="mb-6">
-                        <div class="flex items-center gap-2 mb-3">
-                            <span class="text-xs font-bold uppercase tracking-wider text-gray-500">QRIS</span>
-                            <span class="flex-1 h-px bg-gray-200"></span>
-                            <span class="text-[10px] text-gray-400">Pindai dari aplikasi apa pun</span>
-                        </div>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                        <!-- QRIS -->
-                        <button type="button"
-                                onclick="setPaymentMethod('qris')"
-                                id="btn-qris"
-                                class="payment-method-btn group relative py-4 px-2 rounded-2xl font-bold transition-all duration-300 bg-white shadow-sm border border-gray-100 hover:border-red-500 hover:shadow-md hover:-translate-y-1 overflow-hidden">
-                            <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(239,68,68,0.08)_0%,transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                            <!-- Mini scanning line effect on hover -->
-                            <div class="absolute top-0 left-0 right-0 h-0.5 bg-red-500 opacity-0 group-hover:opacity-100 group-hover:animate-[scan_1.5s_ease-in-out_infinite] blur-[1px]"></div>
-                            
-                            <div class="flex flex-col items-center justify-center gap-3 text-center h-full relative z-10">
-                                <div class="bg-white p-1 rounded-lg shadow-sm group-hover:shadow border border-gray-50 transform group-hover:scale-110 transition-all">
-                                    <img src="{{ asset('Admin/img/banks/qris.svg') }}" alt="QRIS" class="h-6 object-contain" onerror="this.src='{{ asset('assets/img/payment_logos/dana.png') }}'">
-                                </div>
-                                <span class="text-[10px] uppercase tracking-widest text-gray-700 group-hover:text-red-600 font-black">All E-Wallet</span>
-                            </div>
-                        </button>
-                        </div>
-                    </div>
-                    @endif {{-- $adaGateway --}}
-
-                    @if(! $hasTransfer && ! $hasTunai && ! $adaGateway)
+                    @if(! $hasTransfer && ! $hasTunai && ! $hasEwallet)
                         {{-- Tidak mungkin dicapai lewat @if pembungkus di atas, tetapi
                              ditulis agar keadaan "tidak ada metode apa pun" punya
                              tampilan, bukan ruang kosong. --}}
@@ -747,12 +643,6 @@
                     @endif
                     @endif {{-- ada metode --}}
                     <input type="hidden" name="payment_method" id="payment-method-hidden" value="{{ $defaultMethod }}">
-
-
-                    <!-- Midtrans Payment Card -->
-                    <div id="midtrans-payment" class="payment-content hidden">
-                    </div>
-
 
 
                 </div>
@@ -1058,25 +948,20 @@
                 selectedBtn.classList.add('active', 'shadow-md', 'transform', 'scale-105');
             }
 
-            const midtransPaymentCard = document.getElementById('midtrans-payment');
             const cashPaymentCard = document.getElementById('cash-payment');
             const transferPaymentCard = document.getElementById('transfer-payment');
             const ewalletPaymentCard = document.getElementById('ewallet-payment');
 
-            [midtransPaymentCard, cashPaymentCard, transferPaymentCard, ewalletPaymentCard].forEach(function (el) {
+            [cashPaymentCard, transferPaymentCard, ewalletPaymentCard].forEach(function (el) {
                 if (el) el.classList.add('hidden');
             });
 
-            // 'transfer' dan 'ewallet' = langsung ke rekening/dompet wilayah,
-            // ditangani manual dengan bukti bayar. Sisanya (VA/QRIS) lewat gateway.
             if (method === 'tunai') {
                 if (cashPaymentCard) cashPaymentCard.classList.remove('hidden');
             } else if (method === 'transfer') {
                 if (transferPaymentCard) transferPaymentCard.classList.remove('hidden');
             } else if (method === 'ewallet') {
                 if (ewalletPaymentCard) ewalletPaymentCard.classList.remove('hidden');
-            } else {
-                if (midtransPaymentCard) midtransPaymentCard.classList.remove('hidden');
             }
 
             // Blok transfer dan e-wallet sama-sama punya input bernama
@@ -1207,37 +1092,8 @@
                             }).then(() => {
                                 window.location.href = '{{ route("user.activity") }}';
                             });
-                        } else if (data.gateway_gagal) {
-                            // Gateway menolak. Pesanannya tetap tersimpan, jadi warga
-                            // diberi tahu apa adanya dan diarahkan ke Aktivitas untuk
-                            // mengganti metode — bukan disodori nomor VA karangan.
-                            Swal.fire({
-                                icon: 'warning',
-                                title: 'Pembayaran Otomatis Bermasalah',
-                                text: data.message,
-                                confirmButtonColor: '#3b82f6',
-                            }).then(() => {
-                                window.location.href = '{{ route("user.activity") }}';
-                            });
-                        } else if (data.snap_token && window.snap) {
-                            // Popup Midtrans terbuka dengan kanal yang sudah dipilih
-                            // warga di halaman ini. Semua jalur keluar berakhir di
-                            // halaman instruksi supaya statusnya selalu terlihat —
-                            // termasuk saat popup ditutup tanpa membayar.
-                            const keHalamanBayar = () => {
-                                window.location.href = '/gas/payment/' + data.order_id;
-                            };
-
-                            window.snap.pay(data.snap_token, {
-                                onSuccess: keHalamanBayar,
-                                onPending: keHalamanBayar,
-                                onError: keHalamanBayar,
-                                onClose: keHalamanBayar,
-                            });
                         } else {
-                            // snap.js gagal dimuat (jaringan warga, pemblokir iklan).
-                            // Halaman instruksi tetap menampilkan status pesanannya.
-                            window.location.href = '/gas/payment/' + data.order_id;
+                            window.location.href = '{{ route("user.activity") }}';
                         }
                     } else {
                         Swal.fire({

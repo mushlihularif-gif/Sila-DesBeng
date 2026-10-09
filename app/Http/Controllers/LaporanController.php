@@ -74,6 +74,21 @@ class LaporanController extends Controller
         return array_values(array_unique(array_map('intval', $ids)));
     }
 
+    private function wargaDalamCakupan(User $user): bool
+    {
+        $kecamatanId = Region::where('type', 'kecamatan')
+            ->where('name', 'Kecamatan Bengkalis')
+            ->value('id');
+        if (! $kecamatanId || ! $user->region_id) {
+            return false;
+        }
+
+        $cakupanIds = Region::getDescendantIds($kecamatanId);
+        $cakupanIds[] = $kecamatanId;
+
+        return in_array((int) $user->region_id, array_map('intval', $cakupanIds), true);
+    }
+
     /**
      * Siapa yang boleh membuka surat bukti sebuah laporan.
      *
@@ -125,6 +140,7 @@ class LaporanController extends Controller
     public function create()
     {
         $user = auth()->user();
+        abort_unless($this->wargaDalamCakupan($user), 403, 'Formulir pelaporan hanya tersedia bagi warga Kecamatan Bengkalis.');
         
         // TODO (KYC): Validasi KYC dimatikan sementara untuk kemudahan development
         // if ($user->verification_status !== 'verified') {
@@ -206,6 +222,11 @@ class LaporanController extends Controller
         ]);
 
         $user = auth()->user();
+        if (! $this->wargaDalamCakupan($user)) {
+            return back()->withInput()->withErrors([
+                'lokasi' => 'Pelaporan warga hanya tersedia untuk desa dan kelurahan di Kecamatan Bengkalis.',
+            ]);
+        }
 
         // Wilayah tujuan wajib berada di dalam desa warga sendiri.
         //
@@ -227,7 +248,7 @@ class LaporanController extends Controller
 
         // Jika tujuan_laporan adalah 'desa', arahkan langsung ke Region Desa
         if ($validated['tujuan_laporan'] === 'desa') {
-            $desaRegion = \App\Models\Region::where('type', 'desa')->first();
+            $desaRegion = $this->desaWarga($user->region_id);
             if ($desaRegion) {
                 $targetRegionId = $desaRegion->id;
             }

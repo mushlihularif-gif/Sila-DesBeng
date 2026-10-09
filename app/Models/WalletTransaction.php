@@ -42,7 +42,7 @@ class WalletTransaction extends Model
      * tidak pernah tercatat di ledger sama sekali, sehingga saldo wilayah
      * selalu meleset dari uang yang sungguh-sungguh diterima.
      *
-     * Gateway (Midtrans) ditahan dulu (escrow) sampai pesanan dikonfirmasi
+     * Pembayaran yang masih perlu verifikasi ditahan sampai pesanan dikonfirmasi
      * selesai/diterima — lihat status transition di RequestController.
      * Transfer manual & tunai langsung "masuk" karena uangnya tidak pernah
      * singgah di Diskominfotik: transfer manual langsung ke rekening wilayah,
@@ -86,12 +86,9 @@ class WalletTransaction extends Model
      * wilayah, e-wallet) — uang yang penerimaannya memang cuma bisa dipastikan
      * oleh manusia.
      *
-     * Baris gateway SENGAJA tidak ikut. Satu-satunya yang berhak menyatakan
-     * uang gateway benar-benar masuk adalah webhook penyedia pembayaran (lihat
-     * PaymentCallbackController). Kalau tombol "selesai" di panel admin ikut
-     * memverifikasi baris gateway, pesanan yang kode bayarnya kedaluwarsa tanpa
-     * pernah dibayar akan berubah menjadi saldo yang bisa dicairkan — uang yang
-     * tidak pernah ada. Ini sungguh terjadi pada pesanan gas #24 dan #25.
+     * Pembayaran melalui gateway tidak termasuk jalur yang digunakan aplikasi.
+     * Fungsi ini hanya mengubah catatan pembayaran manual setelah petugas
+     * memeriksa transaksi.
      *
      * Dipanggil dari SEMUA jalur penyelesaian pesanan, supaya hasilnya tidak
      * bergantung pada tombol mana yang kebetulan ditekan admin.

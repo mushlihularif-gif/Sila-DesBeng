@@ -81,9 +81,21 @@ public function index(Request $request)
     $baseLaporan = $this->applyRegionFilter(\App\Models\Laporan::query(), 'user');
     $baseKyc = $this->applyRegionFilter(\App\Models\KycVerification::query(), 'user');
 
-    // Filter by specific region if requested
-    $selectedKecamatanId = request('kecamatan_id');
+    // Dashboard operasional dibatasi ke desa-desa Kecamatan Bengkalis.
+    $selectedKecamatanId = \App\Models\Region::where('type', 'kecamatan')
+        ->where('name', 'Kecamatan Bengkalis')
+        ->value('id');
+    abort_if(! $selectedKecamatanId, 404, 'Kecamatan Bengkalis belum terdaftar.');
     $selectedDesaId = request('desa_id');
+
+    $desaFokusIds = \App\Models\Region::where('parent_id', $selectedKecamatanId)
+        ->whereIn('type', ['desa', 'kelurahan'])
+        ->pluck('id')
+        ->map(fn ($id) => (string) $id)
+        ->all();
+    if ($selectedDesaId && $selectedDesaId !== 'all' && ! in_array((string) $selectedDesaId, $desaFokusIds, true)) {
+        $selectedDesaId = 'all';
+    }
     
     if ($selectedDesaId && $selectedDesaId !== 'all') {
         $userFilter = function($q) use ($selectedDesaId) { $q->where('region_id', $selectedDesaId); };
@@ -343,21 +355,14 @@ public function index(Request $request)
         $baseUser->where('region_id', $selectedDesaId);
     }
 
-    // Ambil daftar Kecamatan & Desa untuk dropdown filter
-    $kecamatanList = collect();
-    $desaList = collect();
-    
-    if (in_array(auth()->user()->role, ['super_admin', 'admin'])) {
-        $kecamatanList = \App\Models\Region::where('type', 'kecamatan')->get();
-        if ($selectedKecamatanId && $selectedKecamatanId !== 'all') {
-            $desaList = \App\Models\Region::where('type', 'desa')->where('parent_id', $selectedKecamatanId)->get();
-        } else {
-            $desaList = \App\Models\Region::where('type', 'desa')->get();
-        }
-    } elseif (auth()->user()->role === 'admin_kecamatan') {
-        $desaList = \App\Models\Region::where('type', 'desa')
-                        ->where('parent_id', auth()->user()->region_id)
-                        ->get();
+    // Dropdown hanya memuat desa di Kecamatan Bengkalis.
+    $desaList = \App\Models\Region::where('parent_id', $selectedKecamatanId)
+        ->whereIn('type', ['desa', 'kelurahan'])
+        ->orderBy('name')
+        ->get();
+
+    if (auth()->user()->role === 'admin_kecamatan') {
+        $desaList = $desaList->where('parent_id', auth()->user()->region_id)->values();
     } elseif (in_array(auth()->user()->role, ['admin_desa'])) {
         $desaList = \App\Models\Region::where('id', auth()->user()->region_id)->get();
     }
@@ -376,7 +381,6 @@ public function index(Request $request)
         'pasarCount' => $pasarCount ?? 0,
         'selectedYear' => $selectedYear,
         'availableYears' => $availableYears,
-        'kecamatanList' => $kecamatanList,
         'desaList' => $desaList,
         'selectedKecamatanId' => $selectedKecamatanId,
         'selectedDesaId' => $selectedDesaId,

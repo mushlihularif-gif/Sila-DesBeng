@@ -13,11 +13,9 @@ use App\Models\WalletTransaction;
  * bisa berbeda (angka tersimpan vs jumlah baris sungguhan). Sumber kebenaran
  * tunggal: wallet_transactions.
  *
- * Sejak Midtrans dipusatkan di akun Diskominfotik, uang gateway dari semua
- * wilayah mendarat di SATU rekening. "Saldo wilayah" di sini adalah bagian
- * uang itu yang menjadi hak satu wilayah tapi belum dicairkan ke rekening
- * banknya. Transfer manual TIDAK masuk hitungan ini - uangnya sudah langsung
- * di rekening wilayah sejak awal, tidak pernah singgah di Diskominfotik.
+ * "Saldo wilayah" adalah bagian dana yang tercatat sebagai hak wilayah dan
+ * belum dicairkan ke rekening banknya. Pembayaran manual langsung ke rekening
+ * wilayah tidak masuk hitungan ini.
  */
 class SaldoWilayah
 {

@@ -117,7 +117,7 @@
                     </div>
                     <div class="col-6 col-md-3">
                         <select id="filter_kecamatan_id" name="filter_kecamatan_id" class="form-select modern-select shadow-sm bg-white">
-                            <option value="">-- Semua Kecamatan --</option>
+                                <option value="{{ $filter_kecamatan_id }}">Kecamatan Bengkalis</option>
                             @foreach($kecamatanOptions as $opt)
                                 <option value="{{ $opt->id }}" {{ $filter_kecamatan_id == $opt->id ? 'selected' : '' }}>
                                     {{ $opt->name }}

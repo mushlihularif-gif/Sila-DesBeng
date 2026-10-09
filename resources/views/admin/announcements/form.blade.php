@@ -765,7 +765,7 @@
         }
 
         function updateKecamatan() {
-            kecSelect.innerHTML = '<option value="">-- Semua Kecamatan --</option>';
+            kecSelect.innerHTML = '<option value="">Kecamatan Bengkalis</option>';
             desaSelect.innerHTML = '<option value="">-- Pilih --</option>';
             if(rwSelect) rwSelect.innerHTML = '<option value="">-- Pilih --</option>';
             desaSelect.disabled = true;

@@ -26,7 +26,7 @@
             <!-- Regional Hierarchy Section -->
             <div class="mb-8 sm:mb-12 animate-section">
                 <h2 class="text-xl sm:text-3xl md:text-4xl font-bold text-center text-gray-800 mb-1 sm:mb-2">
-                    Kabupaten Bengkalis
+                    Kecamatan Bengkalis
                 </h2>
                 <h3 class="text-base sm:text-xl md:text-2xl font-bold text-center pb-2 bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent mb-4 sm:mb-8">
                     Grafik Umum
@@ -34,24 +34,12 @@
 
                 <!-- Global Filters -->
                 <div class="max-w-5xl mx-auto flex flex-col sm:flex-row justify-center items-stretch sm:items-center gap-2 sm:gap-4 bg-white/40 backdrop-blur-md p-2.5 sm:p-4 rounded-2xl border border-white/50 shadow-lg w-full">
-                    <div class="w-full sm:w-auto px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm border border-gray-300 rounded-xl bg-white/80 backdrop-blur-md text-gray-800 font-bold flex items-center justify-center cursor-not-allowed shadow-sm sm:min-w-[180px]">
-                        Kabupaten Bengkalis
-                    </div>
-                    
-                    <div class="relative w-full sm:w-auto sm:min-w-[220px]">
-                        <select id="kecamatanSelect" class="w-full appearance-none px-3 sm:px-4 py-2 sm:py-3 pr-8 sm:pr-10 text-xs sm:text-sm border border-gray-300 rounded-xl bg-white/80 backdrop-blur-md text-gray-800 font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 hover:bg-white transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm">
-                            <option value="all">Semua Kecamatan</option>
-                            @foreach($kecamatans as $kec)
-                                <option value="{{ $kec->id }}" {{ $kecamatanId == $kec->id ? 'selected' : '' }}>{{ $kec->name }}</option>
-                            @endforeach
-                        </select>
-                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 sm:px-4 text-gray-600">
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                        </div>
-                    </div>
+                     <div class="w-full sm:w-auto px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm border border-gray-300 rounded-xl bg-white/80 backdrop-blur-md text-gray-800 font-bold flex items-center justify-center cursor-not-allowed shadow-sm sm:min-w-[220px]">
+                         Wilayah terkunci: Kecamatan Bengkalis
+                     </div>
 
                     <div class="relative w-full sm:w-auto sm:min-w-[220px]">
-                        <select id="desaSelect" class="w-full appearance-none px-3 sm:px-4 py-2 sm:py-3 pr-8 sm:pr-10 text-xs sm:text-sm border border-gray-300 rounded-xl bg-white/80 backdrop-blur-md text-gray-800 font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 hover:bg-white transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm" {{ $kecamatanId === 'all' ? 'disabled' : '' }}>
+                         <select id="desaSelect" class="w-full appearance-none px-3 sm:px-4 py-2 sm:py-3 pr-8 sm:pr-10 text-xs sm:text-sm border border-gray-300 rounded-xl bg-white/80 backdrop-blur-md text-gray-800 font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 hover:bg-white transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm">
                             <option value="all">Semua Kelurahan/Desa</option>
                             @foreach($desas as $desa)
                                 <option value="{{ $desa->id }}" {{ $desaId == $desa->id ? 'selected' : '' }}>{{ $desa->name }}</option>
@@ -90,7 +78,7 @@
                             <div id="kinerjaChart" class="w-full min-h-[220px] sm:min-h-[300px]" data-chart='@json($kinerjaData)'></div>
                         </div>
                         <p class="text-xs sm:text-sm text-gray-600 mt-4 leading-relaxed">
-                            Grafik menunjukkan perkembangan tingkat aktivitas secara unit Layanan Daerah Kabupaten Bengkalis. Data diambil dari total pendapatan per bulan. Informasi ini membantu dalam memahami tren kinerja dan mengidentifikasi area yang perlu ditingkatkan.
+                            Grafik menunjukkan perkembangan aktivitas layanan di Kecamatan Bengkalis. Data diambil dari transaksi yang tercatat dan dapat difilter menurut desa.
                         </p>
                     </div>
                 </div>
@@ -374,19 +362,16 @@
         // Elements
         const globalYearSelect = document.getElementById('globalYearSelect');
         const monthSelect = document.getElementById('pendapatan-month');
-        const kecamatanSelect = document.getElementById('kecamatanSelect');
         const desaSelect = document.getElementById('desaSelect');
 
         // AJAX Update function
         const redirectWithFilters = async () => {
             const url = new URL(window.location.href);
             // Get current active selects since DOM might have changed
-            const currentKecamatan = document.getElementById('kecamatanSelect');
             const currentDesa = document.getElementById('desaSelect');
             const currentYear = document.getElementById('globalYearSelect');
             const currentMonth = document.getElementById('pendapatan-month');
 
-            if (currentKecamatan) url.searchParams.set('kecamatan_id', currentKecamatan.value || 'all');
             if (currentDesa) url.searchParams.set('desa_id', currentDesa.value || 'all');
             if (currentYear) url.searchParams.set('year', currentYear.value || new Date().getFullYear());
             if (currentMonth) url.searchParams.set('month', currentMonth.value || new Date().getMonth() + 1);
@@ -418,7 +403,6 @@
                     laporanContainer.innerHTML = newLaporanContainer.innerHTML;
                     
                     // Re-bind events to new DOM elements
-                    const newKecamatan = document.getElementById('kecamatanSelect');
                     const newDesa = document.getElementById('desaSelect');
                     const newYear = document.getElementById('globalYearSelect');
                     const newMonth = document.getElementById('pendapatan-month');
@@ -427,12 +411,6 @@
                     if (newMonth) {
                         newMonth.value = new URLSearchParams(window.location.search).get('month') || '{{ date("m") }}';
                         newMonth.addEventListener('change', redirectWithFilters);
-                    }
-                    if (newKecamatan) {
-                        newKecamatan.addEventListener('change', function() {
-                            if (newDesa) newDesa.value = 'all';
-                            redirectWithFilters();
-                        });
                     }
                     if (newDesa) newDesa.addEventListener('change', redirectWithFilters);
 
@@ -474,12 +452,6 @@
         // Initial Bindings
         if (globalYearSelect) globalYearSelect.addEventListener('change', redirectWithFilters);
         if (monthSelect) monthSelect.addEventListener('change', redirectWithFilters);
-        if (kecamatanSelect) {
-            kecamatanSelect.addEventListener('change', function() {
-                if (desaSelect) desaSelect.value = 'all';
-                redirectWithFilters();
-            });
-        }
         if (desaSelect) desaSelect.addEventListener('change', redirectWithFilters);
         };
 

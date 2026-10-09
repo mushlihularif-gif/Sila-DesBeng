@@ -45,14 +45,14 @@ class SecurityHeaders
         // Content Security Policy - Mengontrol sumber daya yang boleh dimuat
         $csp = implode('; ', [
             "default-src 'self'",
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://maps.googleapis.com https://accounts.google.com https://cdn.skypack.dev https://code.jquery.com https://unpkg.com https://app.sandbox.midtrans.com https://app.midtrans.com",
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://maps.googleapis.com https://accounts.google.com https://cdn.skypack.dev https://code.jquery.com https://unpkg.com",
             "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com https://unpkg.com",
-            "img-src 'self' data: blob: https://*.googleapis.com https://*.gstatic.com https://lh3.googleusercontent.com https://www.google.com https://*.tile.openstreetmap.org storage: https://app.sandbox.midtrans.com https://app.midtrans.com",
+            "img-src 'self' data: blob: https://*.googleapis.com https://*.gstatic.com https://lh3.googleusercontent.com https://www.google.com https://*.tile.openstreetmap.org storage:",
             "font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com",
-            "connect-src 'self' data: blob: https://maps.googleapis.com https://cdn.jsdelivr.net https://app.sandbox.midtrans.com https://app.midtrans.com",
+            "connect-src 'self' data: blob: https://maps.googleapis.com https://cdn.jsdelivr.net",
             "worker-src 'self' blob:",
             "child-src 'self' blob:",
-            "frame-src https://accounts.google.com https://app.sandbox.midtrans.com https://app.midtrans.com",
+            "frame-src https://accounts.google.com",
             "object-src 'none'",
             "base-uri 'self'",
             "form-action 'self'",

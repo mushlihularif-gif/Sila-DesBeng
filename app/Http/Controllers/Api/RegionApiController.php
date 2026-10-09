@@ -13,14 +13,17 @@ class RegionApiController extends Controller
      */
     public function getHierarchy()
     {
-        $kabupaten = Region::where('type', 'kabupaten')->first();
+        $kecamatanFokus = Region::where('type', 'kecamatan')
+            ->where('name', 'Kecamatan Bengkalis')
+            ->first();
+        $kabupaten = $kecamatanFokus?->parent;
         
         if (!$kabupaten) {
             return response()->json(['status' => 'error', 'message' => 'Kabupaten tidak ditemukan'], 404);
         }
 
-        $kecamatans = Region::where('type', 'kecamatan')->orderBy('name')->get()->map(function ($kec) {
-            $desas = Region::where('type', 'desa')->where('parent_id', $kec->id)->orderBy('name')->get()->map(function ($desa) {
+        $kecamatans = collect([$kecamatanFokus])->map(function ($kec) {
+            $desas = Region::whereIn('type', ['desa', 'kelurahan'])->where('parent_id', $kec->id)->orderBy('name')->get()->map(function ($desa) {
                 return [
                     'id' => $desa->id,
                     'name' => $desa->name,
@@ -51,6 +54,13 @@ class RegionApiController extends Controller
      */
     public function getProfile($regionId)
     {
+        $kecamatanFokus = Region::where('type', 'kecamatan')->where('name', 'Kecamatan Bengkalis')->firstOrFail();
+        $wilayahFokus = array_map('intval', array_merge(
+            [$kecamatanFokus->id],
+            Region::getDescendantIds($kecamatanFokus->id)
+        ));
+        abort_unless(in_array((int) $regionId, $wilayahFokus, true), 404);
+
         $region = Region::with(['services' => function($q) {
             $q->where('is_active', true);
         }])->find($regionId);

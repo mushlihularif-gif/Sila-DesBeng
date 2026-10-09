@@ -40,28 +40,21 @@ class BumdesLaporanController extends Controller
         $availableYears = array_values($allYears);
         rsort($availableYears);
 
-        // Handle Cascading Region Selection
-        $kabupatenId = 1; // Hardcode Kabupaten Bengkalis
-        $kecamatanId = $request->input('kecamatan_id', 'all');
-        $desaId = $request->input('desa_id', 'all');
-        
-        // Determine the effective regionId for data fetching
-        $regionId = $kabupatenId;
-        if ($desaId !== 'all' && !empty($desaId)) {
-            $regionId = (int)$desaId;
-        } elseif ($kecamatanId !== 'all' && !empty($kecamatanId)) {
-            $regionId = (int)$kecamatanId;
-        }
-
-        // Prepare Region Data for Dropdowns
-        $kecamatans = \App\Models\Region::where('parent_id', $kabupatenId)
-            ->where('type', 'kecamatan')
+        $kecamatan = Region::where('type', 'kecamatan')
+            ->where('name', 'Kecamatan Bengkalis')
+            ->firstOrFail();
+        $kecamatanId = $kecamatan->id;
+        $desas = Region::where('parent_id', $kecamatanId)
+            ->whereIn('type', ['desa', 'kelurahan'])
+            ->orderBy('name')
             ->get();
-        
-        $desas = collect([]);
-        if ($kecamatanId !== 'all' && !empty($kecamatanId)) {
-            $desas = \App\Models\Region::where('parent_id', $kecamatanId)->get();
+
+        $desaId = $request->input('desa_id', 'all');
+        $selectedDesa = $desas->firstWhere('id', (int) $desaId);
+        if ($desaId !== 'all' && ! $selectedDesa) {
+            $desaId = 'all';
         }
+        $regionId = $selectedDesa?->id ?? $kecamatanId;
 
         // Get Kinerja BUMDes data (monthly revenue)
         $kinerjaData = $this->getKinerjaData($year, $regionId);
@@ -78,7 +71,6 @@ class BumdesLaporanController extends Controller
             'totalPendapatanData',
             'year',
             'availableYears', // Pass available years
-            'kecamatans',
             'desas',
             'kecamatanId',
             'desaId'

@@ -210,7 +210,7 @@
                             <div class="col-12 col-md-4">
                                 <label class="form-label fw-semibold text-muted small mb-1">Kecamatan</label>
                                 <select id="filter_kecamatan_id" name="filter_kecamatan_id" class="form-select bg-light border-0" onchange="this.form.submit()">
-                                    <option value="">-- Semua Kecamatan --</option>
+                                        <option value="">Kecamatan Bengkalis</option>
                                     @foreach($kecamatanOptions as $opt)
                                         <option value="{{ $opt->id }}" {{ request('filter_kecamatan_id') == $opt->id ? 'selected' : '' }}>
                                             {{ $opt->name }}

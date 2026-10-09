@@ -13,17 +13,17 @@ class UserManagementController extends Controller
         $search = $request->get('search');
         $filter_kecamatan_id = $request->get('filter_kecamatan_id');
         $filter_desa_id = $request->get('filter_desa_id');
-        
-        // Jika kecamatan tidak dipilih, pastikan desa juga dikosongkan
-        if (empty($filter_kecamatan_id)) {
+        $kecamatanFokus = \App\Models\Region::where('type', 'kecamatan')
+            ->where('name', 'Kecamatan Bengkalis')
+            ->firstOrFail();
+        $desaFokus = \App\Models\Region::whereIn('type', ['desa', 'kelurahan'])
+            ->where('parent_id', $kecamatanFokus->id)
+            ->get();
+
+        // Filter dan daftar warga hanya mencakup Kecamatan Bengkalis.
+        $filter_kecamatan_id = $kecamatanFokus->id;
+        if ($filter_desa_id && ! $desaFokus->contains('id', (int) $filter_desa_id)) {
             $filter_desa_id = null;
-        } else if ($filter_desa_id) {
-            // Validasi apakah desa yang dipilih benar-benar berada di bawah kecamatan yang dipilih
-            // (Mencegah bug ketika pindah kecamatan tapi ID desa sebelumnya masih terkirim)
-            $desa = \App\Models\Region::find($filter_desa_id);
-            if (!$desa || $desa->parent_id != $filter_kecamatan_id) {
-                $filter_desa_id = null;
-            }
         }
         
         // Tentukan filter wilayah yang paling spesifik yang dipilih
@@ -79,12 +79,10 @@ class UserManagementController extends Controller
         $desaOptions = collect();
         
         if (in_array($user->role, ['super_admin', 'admin'])) {
-            $kecamatanOptions = \App\Models\Region::where('type', 'kecamatan')->orderBy('name')->get();
-            if ($filter_kecamatan_id) {
-                $desaOptions = \App\Models\Region::where('type', 'desa')->where('parent_id', $filter_kecamatan_id)->orderBy('name')->get();
-            }
+            $kecamatanOptions = collect([$kecamatanFokus]);
+            $desaOptions = $desaFokus->sortBy('name')->values();
         } elseif ($user->role === 'admin_kecamatan') {
-            $desaOptions = \App\Models\Region::where('type', 'desa')->where('parent_id', $user->region_id)->orderBy('name')->get();
+            $desaOptions = $desaFokus->sortBy('name')->values();
         }
 
         if ($request->ajax()) {

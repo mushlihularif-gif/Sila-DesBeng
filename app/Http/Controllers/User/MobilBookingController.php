@@ -45,10 +45,7 @@ class MobilBookingController extends Controller
 
         $isWilayah = ($item->tipe_tarif_borongan ?? 'jarak') === 'wilayah';
         $tarifWilayah = json_decode($item->tarif_borongan_wilayah, true) ?? [];
-        $kecamatanKhusus = \App\Models\Region::where('type', 'kecamatan')->orderBy('name', 'asc')->get();
-
-        // Cek apakah wilayah ini sudah siap gateway Midtrans
-        $adaGateway = \App\Support\PenyediaPembayaran::terapkanMidtransWilayah($item->region_id);
+        $adaGateway = false;
 
         $alamatTersimpan = \App\Models\AlamatWarga::milik(auth()->id())
             ->with('region')
@@ -56,7 +53,7 @@ class MobilBookingController extends Controller
             ->orderBy('id')
             ->get();
         
-        return view('users.mobil-rental-booking', compact('item', 'setting', 'quantity', 'sop_mobil', 'isWilayah', 'tarifWilayah', 'kecamatanKhusus', 'adaGateway', 'alamatTersimpan'));
+        return view('users.mobil-rental-booking', compact('item', 'setting', 'quantity', 'sop_mobil', 'isWilayah', 'tarifWilayah', 'adaGateway', 'alamatTersimpan'));
     }
 
     public function store(Request $request)
@@ -71,11 +68,11 @@ class MobilBookingController extends Controller
             'start_date' => 'required|date|after_or_equal:today',
             'end_date' => 'nullable|date|after_or_equal:start_date',
             'distance_km' => 'nullable|integer|min:1',
-            'tujuan_wilayah' => 'nullable|string',
+            'tujuan_wilayah' => 'nullable|in:dalam_desa,luar_desa',
             // 'transfer' = transfer manual ke rekening wilayah, dibuktikan lewat
             // unggahan yang ditinjau petugas. Sebelumnya terkunci 'tunai' saja,
             // sehingga rekening wilayah tidak pernah bisa dipakai di unit ini.
-            'payment_method' => 'required|in:tunai,transfer,ewallet,bank_transfer_bca,bank_transfer_bri,bank_transfer_bni,bank_transfer_mandiri,bank_transfer_bsi,gopay,qris',
+            'payment_method' => 'required|in:tunai,transfer,ewallet',
             
             'recipient_name' => 'nullable|string|max:255',
             'delivery_address' => 'required|string|max:1000',
@@ -122,11 +119,8 @@ class MobilBookingController extends Controller
                     $pricePerUnit = $tarifWilayah['harga_dalam_desa'] ?? 0;
                 } elseif ($tujuan === 'luar_desa') {
                     $pricePerUnit = $tarifWilayah['harga_luar_desa'] ?? 0;
-                } elseif (str_starts_with($tujuan, 'kec_')) {
-                    $kecId = str_replace('kec_', '', $tujuan);
-                    $pricePerUnit = $tarifWilayah['harga_kecamatan_khusus'][$kecId] ?? 0;
                 } else {
-                    $pricePerUnit = $tarifWilayah['harga_luar_kecamatan'] ?? 0;
+                    $pricePerUnit = $tarifWilayah['harga_dalam_desa'] ?? 0;
                 }
             } else {
                 // Berdasarkan Jarak
@@ -220,52 +214,6 @@ class MobilBookingController extends Controller
                 'receipt_id' => $booking->id,
                 'receipt_number' => $receipt->receipt_number,
             ];
-
-            $lewatGateway = ! in_array($validated['payment_method'], ['tunai', 'transfer', 'ewallet'], true);
-
-            if ($lewatGateway) {
-                $siap = \App\Support\PenyediaPembayaran::terapkanMidtransWilayah($item->region_id);
-                if (! $siap) $lewatGateway = false;
-            }
-
-            if ($lewatGateway) {
-                $params = [
-                    'transaction_details' => [
-                        'order_id' => $booking->order_number,
-                        'gross_amount' => (int) $totalAmount,
-                    ],
-                    'customer_details' => [
-                        'first_name' => $validated['recipient_name'],
-                        'email' => Auth::user()->email,
-                        'phone' => Auth::user()->phone ?? '081234567890',
-                    ],
-                    'item_details' => [[
-                        'id' => $item->id,
-                        'price' => (int) ($totalAmount),
-                        'quantity' => 1,
-                        'name' => ($item->nama_mobil ?? $item->nama_barang ?? 'Sewa Transportasi'),
-                    ]],
-                ];
-
-                $kanal = \App\Support\PenyediaPembayaran::kanalSnap($validated['payment_method']);
-                if ($kanal) $params['enabled_payments'] = [$kanal];
-
-                try {
-                    $snap = \Midtrans\Snap::createTransaction($params);
-                    $booking->snap_token = $snap->token;
-                    $booking->payment_channel = $validated['payment_method'];
-                    $booking->payment_expiry_time = now()->addDay();
-                    $booking->save();
-                    $response['snap_token'] = $snap->token;
-                } catch (\Exception $e) {
-                    \Illuminate\Support\Facades\Log::error('Midtrans Snap Mobil gagal', ['error' => $e->getMessage()]);
-                    $booking->payment_channel = $validated['payment_method'];
-                    $booking->save();
-                    $response['snap_token'] = null;
-                    $response['gateway_gagal'] = true;
-                    $response['message'] = 'Pesanan tersimpan, tetapi pembayaran otomatis sedang tidak dapat diproses.';
-                }
-            }
 
             return response()->json($response);
         }

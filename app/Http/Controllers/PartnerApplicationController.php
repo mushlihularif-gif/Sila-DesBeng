@@ -13,18 +13,23 @@ class PartnerApplicationController extends Controller
 {
     public function create()
     {
-        // 1. Ambil data direktori kecamatan dan desa
-        $kecamatans = Region::where('type', 'kecamatan')
+        $kecamatanFokus = Region::where('type', 'kecamatan')->where('name', 'Kecamatan Bengkalis')->firstOrFail();
+        $wilayahIds = array_merge([$kecamatanFokus->id], Region::getDescendantIds($kecamatanFokus->id));
+        if ($kecamatanFokus->parent_id) {
+            $wilayahIds[] = $kecamatanFokus->parent_id;
+        }
+
+        // Pilihan pendaftaran kemitraan dibatasi ke Kecamatan Bengkalis.
+        $kecamatans = Region::whereKey($kecamatanFokus->id)
             ->with(['children' => function($query) {
-                $query->where('type', 'desa')
+                $query->whereIn('type', ['desa', 'kelurahan'])
                       ->with(['services' => function($q) {
                           $q->wherePivot('is_active', true);
                       }, 'users']);
             }])
             ->get();
 
-        // 2. Ambil seluruh region untuk kalkulasi relasi
-        $regions = Region::all();
+        $regions = Region::whereIn('id', $wilayahIds)->get();
 
         $isJoined = false;
         $userDesa = null;
@@ -327,6 +332,21 @@ class PartnerApplicationController extends Controller
         ]);
 
         $induk = Region::find($validated['parent_region_id']);
+
+        $kecamatanFokus = Region::where('type', 'kecamatan')->where('name', 'Kecamatan Bengkalis')->firstOrFail();
+        $parentDiCakupan = in_array((int) $induk->id, array_map('intval', array_merge(
+            [$kecamatanFokus->parent_id, $kecamatanFokus->id],
+            Region::getDescendantIds($kecamatanFokus->id)
+        )), true);
+        $tujuanKecamatanFokus = $validated['region_type'] !== 'kecamatan'
+            || ((int) $validated['parent_region_id'] === (int) $kecamatanFokus->parent_id
+                && mb_strtolower(trim($validated['region_name'])) === mb_strtolower($kecamatanFokus->name));
+
+        if (! $parentDiCakupan || ! $tujuanKecamatanFokus) {
+            return back()->withInput()->withErrors([
+                'parent_region_id' => 'Pengajuan kemitraan hanya tersedia untuk Kecamatan Bengkalis dan desa/kelurahan di dalamnya.',
+            ]);
+        }
 
         if (! in_array($validated['region_type'], self::TURUNAN[$induk->type] ?? [], true)) {
             return back()->withInput()->withErrors([

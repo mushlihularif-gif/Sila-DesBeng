@@ -21,13 +21,19 @@ class AdminPelaporanController extends Controller
     {
         $user = auth()->user();
 
-        // Kominfo mengawasi seluruh kabupaten. Ditulis eksplisit, bukan
-        // menumpang pada Region::getDescendantIds(null) yang kebetulan
-        // mengembalikan seluruh pohon karena where('parent_id', null) menjadi
-        // IS NULL — perilaku yang sama juga membuat admin biasa tanpa wilayah
-        // ikut melihat semuanya.
+        $kecamatanFokus = Region::where('type', 'kecamatan')
+            ->where('name', 'Kecamatan Bengkalis')
+            ->first();
+        if (! $kecamatanFokus) {
+            return [];
+        }
+
+        $cakupanIds = Region::getDescendantIds($kecamatanFokus->id);
+        $cakupanIds[] = $kecamatanFokus->id;
+        $cakupanIds = array_map('intval', $cakupanIds);
+
         if ($user->role === 'super_admin') {
-            return Region::pluck('id')->all();
+            return $cakupanIds;
         }
 
         if (! $user->region_id) {
@@ -36,7 +42,7 @@ class AdminPelaporanController extends Controller
 
         $allowedIds = Region::getDescendantIds($user->region_id);
         $allowedIds[] = $user->region_id;
-        return $allowedIds;
+        return array_values(array_intersect($cakupanIds, array_map('intval', $allowedIds)));
     }
 
     /**

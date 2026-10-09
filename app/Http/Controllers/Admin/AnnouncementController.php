@@ -13,6 +13,17 @@ use App\Models\Region;
 
 class AnnouncementController extends Controller
 {
+    private function wilayahKecamatanBengkalisIds(): array
+    {
+        $kecamatan = Region::where('type', 'kecamatan')->where('name', 'Kecamatan Bengkalis')->firstOrFail();
+
+        return array_map('intval', array_merge(
+            [$kecamatan->id],
+            Region::getDescendantIds($kecamatan->id),
+            $kecamatan->parent_id ? [$kecamatan->parent_id] : []
+        ));
+    }
+
     use \App\Traits\ChecksStaffDelegation;
 
     public function index(Request $request)
@@ -28,6 +39,7 @@ class AnnouncementController extends Controller
         // --- Query Berita Daerah ---
         $beritasQuery = Announcement::with(['admin', 'laporan', 'region'])
             ->where('post_category', 'Berita')
+            ->whereIn('region_id', $this->wilayahKecamatanBengkalisIds())
             ->orderBy('created_at', 'desc');
             
         if ($user->role !== 'super_admin') {
@@ -49,6 +61,7 @@ class AnnouncementController extends Controller
         // --- Query Pengumuman Warga ---
         $pengumumansQuery = Announcement::with(['admin', 'laporan', 'region'])
             ->where('post_category', 'Pengumuman')
+            ->whereIn('region_id', $this->wilayahKecamatanBengkalisIds())
             ->orderBy('created_at', 'desc');
             
         if ($user->role !== 'super_admin') {
@@ -60,6 +73,16 @@ class AnnouncementController extends Controller
         $filter_type = $request->get('type');
         $filter_kecamatan_id = $request->get('filter_kecamatan_id');
         $filter_desa_id = $request->get('filter_desa_id');
+        if (in_array($user->role, ['super_admin', 'admin'], true)) {
+            $kecamatanFokusId = Region::where('type', 'kecamatan')->where('name', 'Kecamatan Bengkalis')->value('id');
+            $filter_kecamatan_id = $kecamatanFokusId;
+            if ($filter_desa_id && ! Region::whereKey($filter_desa_id)
+                ->whereIn('type', ['desa', 'kelurahan'])
+                ->where('parent_id', $kecamatanFokusId)
+                ->exists()) {
+                $filter_desa_id = null;
+            }
+        }
 
         if ($tab === 'pengumuman') {
             if ($filter_type) {
@@ -80,9 +103,11 @@ class AnnouncementController extends Controller
         $desaOptions = collect();
 
         if (in_array($user->role, ['super_admin', 'admin'])) {
-            $kecamatanOptions = Region::where('type', 'kecamatan')->orderBy('name')->get();
-            if ($filter_kecamatan_id) {
-                $desaOptions = Region::where('type', 'desa')->where('parent_id', $filter_kecamatan_id)->orderBy('name')->get();
+            $kecamatanFokusId = Region::where('type', 'kecamatan')->where('name', 'Kecamatan Bengkalis')->value('id');
+            $kecamatanOptions = Region::whereKey($kecamatanFokusId)->get();
+            $filter_kecamatan_id = $kecamatanFokusId;
+            if ($kecamatanFokusId) {
+                $desaOptions = Region::whereIn('type', ['desa', 'kelurahan'])->where('parent_id', $kecamatanFokusId)->orderBy('name')->get();
             }
         } elseif ($user->role === 'admin_kecamatan') {
             $desaOptions = Region::where('type', 'desa')->where('parent_id', $user->region_id)->orderBy('name')->get();
@@ -101,7 +126,8 @@ class AnnouncementController extends Controller
         }
         
         $user = auth()->user();
-        $regions = Region::where('type', '!=', 'rt')->get();
+        $wilayahDiizinkan = $this->wilayahKecamatanBengkalisIds();
+        $regions = Region::whereIn('id', $wilayahDiizinkan)->get();
         
         $userRole = $user->role;
         
@@ -116,6 +142,7 @@ class AnnouncementController extends Controller
     public function store(Request $request)
     {
         $category = $request->post_category ?? 'Pengumuman';
+        $wilayahDiizinkan = $this->wilayahKecamatanBengkalisIds();
         
         $rules = [
             'title' => 'required|string|max:255',
@@ -130,7 +157,7 @@ class AnnouncementController extends Controller
             $rules['images.*'] = 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120';
         } else {
             $rules['image'] = 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120';
-            $rules['target_region_id'] = 'required|exists:regions,id';
+            $rules['target_region_id'] = ['required', \Illuminate\Validation\Rule::in($wilayahDiizinkan)];
         }
 
         $request->validate($rules);
@@ -210,7 +237,9 @@ class AnnouncementController extends Controller
             }
         }
             
-        $regions = Region::where('type', '!=', 'rt')->get();
+        $regions = Region::whereIn('id', $this->wilayahKecamatanBengkalisIds())
+            ->where('type', '!=', 'rt')
+            ->get();
         $userRole = $user->role;
 
         $regions->transform(function ($region) {
@@ -247,7 +276,8 @@ class AnnouncementController extends Controller
             $rules['images.*'] = 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120';
         } else {
             $rules['image'] = 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120';
-            $rules['target_region_id'] = 'required|exists:regions,id';
+            $wilayahDiizinkan = $this->wilayahKecamatanBengkalisIds();
+            $rules['target_region_id'] = ['required', \Illuminate\Validation\Rule::in($wilayahDiizinkan)];
         }
 
         $request->validate($rules);

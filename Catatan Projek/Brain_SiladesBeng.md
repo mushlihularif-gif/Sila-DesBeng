@@ -21,7 +21,7 @@ Dokumen ini berfungsi sebagai pusat memori dan dokumentasi (pengganti Obsidian V
 - **Matriks Eskalasi Pelaporan (Zero-Bottleneck):** Laporan warga masuk ke RT, jika tidak tertangani akan otomatis/manual naik ke RW, lalu ke Desa, hingga Kecamatan/Kabupaten. Pimpinan daerah memiliki Hak Pantau Real-Time.
 - **SiladesBeng Assistant (Kecerdasan Buatan):** Asisten virtual interaktif bermaskot robot bertanjak corak songket Melayu untuk memandu warga.
 - **Keamanan Berlapis (Defense in Depth):** Autentikasi, RBAC (Role-Based Access Control), dan Enkripsi tingkat lanjut (AES-256 dan ChaCha20-Poly1305).
-- **Omnichannel Payment:** Mendukung pembayaran digital (Midtrans), transfer manual, dan tunai (Cash on Delivery).
+- **Metode Pembayaran:** Transfer manual/QRIS toko dan tunai/COD. Gateway pembayaran otomatis telah dinonaktifkan; bukti transaksi tetap diverifikasi melalui QR bertanda tangan HMAC.
 
 ## 3. Riwayat Pekerjaan yang Telah Diselesaikan
 - **Konsolidasi Modul dan UI:**
@@ -68,8 +68,8 @@ Dokumen ini berfungsi sebagai pusat memori dan dokumentasi (pengganti Obsidian V
   - **Solusi UX Cerdas (AJAX on-the-fly):** Admin dapat menambahkan kategori baru langsung dari form "Tambah Produk" menggunakan modal *pop-up*. Kategori disimpan via AJAX di *background*, dan langsung muncul terpilih secara otomatis tanpa me-*refresh* halaman, memberikan pengalaman *seamless* dan tidak *nge-freeze*.
   - **Konsistensi Data (Teks Mati):** Apabila kategori dihapus dari master data, produk yang sudah dibuat menggunakan kategori tersebut TIDAK akan terhapus atau kehilangan kategorinya (mempertahankan kategori lama sebagai teks mati di database produk). Hal ini mencegah kerusakan riwayat transaksi masa lalu.
 
-- **Standardisasi Nomenklatur Skala Kabupaten & Optimasi UI:**
-  - **[SELESAI]** Menyelaraskan seluruh *copywriting* di aplikasi agar sesuai dengan visi *Cerita Kami* (Profil SiladesBeng) yang berskala Kabupaten.
+- **Identitas Kabupaten dan Cakupan Operasional Kecamatan & Optimasi UI:**
+  - **[SELESAI]** Mempertahankan nama resmi SiladesBeng sebagai sistem Kabupaten Bengkalis, dengan cakupan operasional layanan saat ini di Kecamatan Bengkalis.
   - Mengubah istilah berkonteks lokal (contoh: "Gas Desa", "Dana Desa", "Aspirasi Desa") menjadi **"Gas Daerah"**, **"Dana Daerah"**, dan **"Aspirasi Daerah"** agar konsisten secara makro.
   - Memperjelas nama menu **"Kabar Daerah"** menjadi **"Kabar dan Informasi Daerah"** untuk menghindari bias persepsi (memastikan pengguna tahu bahwa halaman tersebut berisi berita, artikel liputan, sekaligus pengumuman resmi).
   - Melakukan kompresi *lossless* pada aset gambar UI baru (misal: penggantian maskot *event.png* ke *KabardanInformasiDaerah.png*, serta *Berita.png* dan *Pengumuman1.png* untuk tab informasi) via skrip PHP *backend* demi menjaga *loading speed* web tetap optimal tanpa mengorbankan kualitas HD aset visual perlombaan.
@@ -162,9 +162,9 @@ o` pada judul 'Form Pelaporan' untuk mencegah browser secara sepihak menerjemahk
         7. **Pasar Daerah (BARU)**
       - **Aset Ikon:** Ikon kustom tas belanja kuning-oranye dengan logo SilaDesBeng (SB) di badan tas telah ditempatkan di `public/Admin/img/pasardaerah/PasarDaerah.png`. Resolusi asli: 4500x4500px. Kompresi lossless PNG Level 9 berhasil dilakukan: 2.13 MB -> 1.4 MB (hemat 33.9%), kualitas HD terjaga.
       - **Arsitektur Final (Disetujui):**
-        - *Cakupan:* Lintas desa se-Kabupaten Bengkalis. Warga Desa A bisa membeli produk Desa Z. Filter pencarian berdasarkan Kecamatan, Desa, dan Kategori.
+        - *Cakupan saat ini:* Desa dan kelurahan di Kecamatan Bengkalis. Warga dapat membeli produk lintas desa dalam kecamatan. Filter pencarian berdasarkan Desa dan Kategori.
         - *Kategori Fixed (5):* Hasil Tani & Bumi, Pangan & Olahan, Material & Bangunan, Kerajinan & Kesenian, Lainnya. Dikunci oleh sistem, Admin Desa tidak bisa bikin sendiri.
-        - *Metode Pembayaran (3):* Tunai/COD, Transfer Manual (upload bukti), Midtrans Otomatis (VA/QRIS/GoPay). Replikasi dari modul Gas.
+        - *Metode Pembayaran:* Tunai/COD, transfer manual, atau QRIS toko dengan unggahan bukti opsional. Tidak menggunakan gateway otomatis.
         - *Metode Pengiriman (2):* Ambil Sendiri (gratis) dan Diantar (ongkir otomatis).
         - *Ongkir Otomatis:* Algoritma Haversine di backend PHP (gratis, tanpa API berbayar). Admin set tarif per Km dan koordinat toko. Warga kirim GPS dari HP. Sistem hitung jarak dan total ongkir secara otomatis.
         - *Siklus Status Pesanan:* Pending -> Confirmed -> Processing (Diproses/Dikemas) -> Ready/In Delivery (Siap Diambil/Sedang Dikirim) -> Completed (Selesai) -> Cancelled/Rejected (Batal/Ditolak).
@@ -172,19 +172,19 @@ o` pada judul 'Form Pelaporan' untuk mencegah browser secara sepihak menerjemahk
         - *Fitur Keranjang Belanja:* Fitur baru yang belum ada di modul manapun. Warga bisa menambah beberapa produk sekaligus sebelum checkout.
       - **Rencana Fitur Inti:**
         - *Sisi Admin:* **(SELESAI)** CRUD Produk, Kategori Fixed (5 pilihan), Kelola Pesanan Masuk, Pengaturan On/Off, SOP Toko, Tarif Ongkir per Km. Controller (`UnitPasarDaerahController`) dan seluruh View Admin terkait telah diimplementasikan sepenuhnya dengan integrasi titik peta LeafletJS untuk ongkir.
-        - *Sisi User:* **(SELESAI)** Katalog Produk (lintas desa), Detail Produk, Keranjang Belanja, Checkout (Ambil/Antar + Tunai/Transfer/Midtrans), Riwayat Pesanan di tab Aktivitas, Bukti Transaksi + QR Code. Tampilan disempurnakan menggunakan SweetAlert2 untuk notifikasi dan penyesuaian copywriting yang mematuhi standar desain "Layanan Daerah".
+        - *Sisi User:* **(SELESAI)** Katalog produk desa-desa Kecamatan Bengkalis, Detail Produk, Keranjang Belanja, Checkout manual, Riwayat Pesanan di tab Aktivitas, dan Bukti Transaksi + QR Code HMAC.
         - *Fitur yang TIDAK dibuat (terlalu kompleks):* Chat Penjual-Pembeli, Rating/Review, Wishlist, Retur, Multi-Seller C2C.
       
       - **Penyempurnaan Akses Global & UI/UX (SELESAI):**
-        - **[Routing Global (Bypass Filter Wilayah)] (SELESAI):** Layanan Pasar Daerah dan Kabar & Informasi Daerah adalah layanan yang bersifat lintas desa (skala Kabupaten). Sebelumnya pengguna/tamu tertahan oleh *middleware* yang memaksa mereka memilih desa terlebih dahulu. Kini *middleware* `region.service:pasar-daerah` telah dihapus dari rute katalog, dan *redirect* di Beranda dimodifikasi sehingga akses ke 2 layanan ini 100% langsung masuk ke katalog tanpa terhalang gerbang "Pilih Wilayah". Layanan unit spesifik lainnya tetap dibatasi oleh filter wilayah.
+        - **[Cakupan Layanan Kecamatan Bengkalis] (SELESAI):** Pasar Daerah dan Kabar dan Informasi Daerah tersedia bagi desa/kelurahan dalam Kecamatan Bengkalis. Formulir dan API memvalidasi wilayah pada server, bukan hanya menyembunyikan pilihan kecamatan lain di UI.
         - **[Penyelarasan UI/UX Pasar Daerah] (SELESAI):** Perombakan total *interface* Pasar Daerah (Katalog, Checkout, Payment) menggunakan templat global `@extends('layouts.user')`. Sinkronisasi visual 100% dengan Kabar Daerah, mencakup implementasi latar belakang partikel animasi `<canvas>` dinamis, warna *font* tipografi biru bergradasi (`bg-gradient-to-r from-[#115789] to-[#60a5fa]`), serta layout grid produk bergaya *e-commerce* padat (`grid-cols-2` hingga `grid-cols-4`). Fitur interaktif *Keranjang Belanja* (Cart Sidebar) juga dipoles dengan animasi *slide-over* modern dan notifikasi *toast*.
 
 
 ### 5. Konsep Arsitektur Finansial & Hak Akses (Untuk KMIPN)
 
-### 5.1 Desentralisasi Finansial (Rekening BUMDes)
+### 5.1 Pembayaran Manual (Rekening Pengelola)
 - Sistem pembayaran dirancang **tidak menahan uang** di rekening pusat aplikasi (Kabupaten). Warga langsung transfer ke rekening BUMDes desa masing-masing atau bayar tunai (Walk-In). Hal ini menghindari masalah birokrasi penahanan APBDes.
-- **Sistem Pembayaran Hibrida:** Mendukung transaksi *online* (via Midtrans) dan transaksi manual/langsung (Admin BUMDes memasukkan pesanan warga yang tidak memiliki HP/Gaptek via POS sederhana). Laporan keuangan membedakan tag *sistem* dan *manual* namun tetap menjumlahkan subtotalnya demi transparansi auditor.
+- **Alur Pembayaran Saat Ini:** Warga membayar tunai atau melalui transfer/QRIS manual ke pengelola. Petugas memeriksa bukti pembayaran; bukti transaksi digital tetap menggunakan QR HMAC. Tidak ada checkout gateway otomatis.
 - **Warga Tanpa HP (Walk-In):** Warga datang langsung ke kantor BUMDes, pesan secara lisan, bayar tunai. Admin menggunakan fitur "Tambah Transaksi Manual" (sudah ada di `ReportController@storeManualTransaction`) untuk mencatatnya ke sistem.
 - **Hierarki Data & Privasi APBDes:** Pimpinan (Camat/Bupati) hanya disajikan data dalam bentuk Persentase Pertumbuhan (%), bukan nominal Rupiah mentah. Ini melindungi APBDes agar tidak dipotong secara sepihak dan memposisikan pimpinan sebagai 'Pengawas/Pembina' (Politik), bukan pengurus bisnis.
 
@@ -554,7 +554,7 @@ Dalam persiapan pengajuan pendanaan lomba KMIPN dan strategi implementasi sistem
 - **Status Lomba:** Dengan *Pay-as-you-go*, sebagian besar traffic ter-cover oleh *Free Credit* bulanan. Namun, untuk keperluan RAB (jaga-jaga lonjakan request saat demo), dialokasikan dana *buffer* sebesar **Rp 50.000** untuk Google Maps API dan **Rp 50.000** untuk Gemini AI API.
 
 **3. Layanan & Fitur Pendukung Lainnya:**
-- **Midtrans (Payment Gateway):** Rp 0 (Gratis Pendaftaran). Hanya ada biaya admin dari pihak Midtrans saat terjadi transaksi (biaya pendaftaran dan integrasi sistem tetap Rp 0).
+- **Pembayaran Layanan:** Tidak menggunakan gateway otomatis. Pembayaran dilakukan tunai atau transfer/QRIS manual; biaya provider gateway tidak menjadi komponen operasional saat ini.
 - **WhatsApp Gateway (Fonnte):** Langganan 1 bulan khusus saat final lomba berlangsung (Rp 140.000) agar notifikasi dan OTP WhatsApp warga bisa didemokan ke juri secara real-time.
 - **E-KYC (KTP & Wajah):** Menggunakan API OCR.space gratis (API Key: helloworld) untuk keperluan demo. Jika diimplementasikan penuh oleh pemerintah, disarankan menggunakan Vendor KYC resmi berbayar.
 - **Firebase Cloud Messaging (FCM):** Rp 0. Digunakan untuk mengirimkan notifikasi *Push Notification* (pop-up HP) secara *real-time* ke aplikasi Android warga. Layanan ini disediakan gratis 100% oleh Google Firebase.
@@ -749,7 +749,7 @@ Pada Agustus 2026, otak utama **SiladesBeng Assistant** (terletak di ChatbotCont
 
 ### 1. Identitas & Ejaan Mutlak
 - **Penulisan Resmi:** Wajib dieja sebagai **SiladesBeng** (S besar, B besar, dan d kecil). Singkatan dari *Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis*.
-- **Skala Ekosistem:** Berskala Kabupaten, meliputi 155 Desa dan 47 Kelurahan. (AI DILARANG menyebutnya terbatas pada "BUMDes", melainkan dikelola oleh Pemerintah Daerah / Kabupaten).
+- **Cakupan Layanan:** Fokus pada Kecamatan Bengkalis dan desa/kelurahan di dalamnya. Nama resmi sistem tetap merujuk Kabupaten Bengkalis.
 - **Filosofi Maskot:** Robot bertanjak bermotif kain songket. Warna biru laut (Maritim Bengkalis) dan Kuning Keemasan (Kesejahteraan Ekonomi Tanah Melayu).
 - **Pencipta:** Tim Gen Hello World (Rizqy Hamadi Ken - Full Stack, Mushlihul Arif - UI/UX & Frontend, Dicki Wahyudi - Mobile Dev), dibimbing oleh Nurmi Hidayasari, ST., M.Kom.
 
@@ -761,11 +761,10 @@ AI telah diajari langkah-langkah (*Tutorial*) presisi untuk menggunakan aplikasi
 - **Pasar Daerah:** Memiliki algoritma *Ongkir Hybrid* lintas desa secara otomatis.
 - **Pelaporan Warga:** Matriks Eskalasi berjenjang (Zero-Bottleneck) dari RT -> RW -> Desa -> Kecamatan.
 
-### 3. Pemahaman Pembayaran Inklusif (Omnichannel)
-AI mengetahui 3 metode bayar yang tersedia bagi warga:
-1. **Digital (Midtrans):** QRIS/Virtual Account (Otomatis Lunas).
-2. **Transfer Manual:** Wajib unggah struk foto.
-3. **Tunai (Cash / COD):** Membayar uang kertas ke petugas di lokasi.
+### 3. Pemahaman Metode Pembayaran
+AI menjelaskan pembayaran manual yang tersedia bagi warga:
+1. **Transfer Manual atau QRIS toko:** Bukti dapat dilampirkan dan diperiksa petugas.
+2. **Tunai (Cash / COD):** Membayar langsung kepada petugas/kurir sesuai instruksi pesanan.
 
 ### 4. Sistem Pertahanan & Bahasa Psikologis (Customer Service Empathy)
 - **Anti-Malware & XSS:** Sistem menggunakan Karantina *Private Storage* dan Validasi MIME Type. AI diinstruksikan untuk MENGABAIKAN semua tautan URL/Link yang dikirim warga untuk mencegah *Phishing*.
@@ -1046,7 +1045,7 @@ Buka peramban dengan 3 tab yang sudah dalam posisi login:
 #### Langkah 3: Layanan Ekonomi & Transparansi Keuangan (1,5 Menit)
 1. **Tunjukkan Unit Layanan Terpadu (Tab C):**
    - Buka modul layanan aset (Peminjaman Fasilitas Umum atau Pemesanan Gas Daerah).
-   - Perlihatkan alur pemesanan: Mendukung pembayaran digital instan via Midtrans (QRIS/VA) maupun pembayaran tunai/COD bagi masyarakat non-digital.
+   - Perlihatkan alur pemesanan dengan pembayaran tunai atau transfer/QRIS manual, serta bukti transaksi digital ber-QR HMAC.
 2. **Dashboard Laporan & Mutasi:**
    - Buka menu Laporan Pendapatan & Mutasi.
    - Tunjukkan bahwa setiap transaksi langsung mengalir ke buku kas digital secara otomatis.

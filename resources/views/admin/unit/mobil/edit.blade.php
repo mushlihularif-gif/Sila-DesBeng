@@ -527,6 +527,7 @@
                                                     <small class="text-muted mt-1 d-block">Tarif untuk tujuan ke desa tetangga di dalam 1 kecamatan.</small>
                                                 </div>
 
+                                                {{-- Tarif ke luar Kecamatan Bengkalis sudah tidak tersedia.
                                                 <hr class="my-4 text-light">
 
                                                 <div class="mb-4">
@@ -614,6 +615,10 @@
                                                         </div>
                                                         <small class="text-danger mt-2 d-block"><i class="bx bx-info-circle me-1"></i>Kecamatan yang dimatikan (switch abu-abu) berarti Anda TIDAK melayani penyewaan borongan ke daerah tersebut.</small>
                                                     </div>
+                                                </div>
+                                                --}}
+                                                <div class="alert alert-info py-2 small mb-0">
+                                                    Rute sewa borongan hanya tersedia di desa/kelurahan Kecamatan Bengkalis.
                                                 </div>
                                             </div>
 

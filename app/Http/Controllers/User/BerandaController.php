@@ -71,44 +71,30 @@ class BerandaController extends Controller
         $availableYears = array_values($allYears);
         rsort($availableYears);
 
-        // Handle Cascading Region Selection
-        $kabupatenId = 1; // Hardcode Kabupaten Bengkalis
-        $kecamatanId = $request->input('kecamatan_id', 'all');
+        // Cakupan layanan publik dibatasi pada satu kecamatan.
+        $kecamatanId = Region::where('type', 'kecamatan')
+            ->where('name', 'Kecamatan Bengkalis')
+            ->value('id');
+        abort_if(! $kecamatanId, 404, 'Kecamatan Bengkalis belum terdaftar.');
         $desaId = $request->input('desa_id', 'all');
-        
-        // Determine the effective regionId for data fetching
-        $regionId = $kabupatenId;
-        if ($desaId !== 'all' && !empty($desaId)) {
-            $regionId = (int)$desaId;
-        } elseif ($kecamatanId !== 'all' && !empty($kecamatanId)) {
-            $regionId = (int)$kecamatanId;
-        } else {
-            // Default to user's region if logged in and no filter is explicitly applied
-            if (auth()->check() && auth()->user()->region_id) {
-                $userRegion = \App\Models\Region::find(auth()->user()->region_id);
-                if ($userRegion) {
-                    if ($userRegion->type === 'desa' || $userRegion->type === 'kelurahan') {
-                        $desaId = $userRegion->id;
-                        $kecamatanId = $userRegion->parent_id ?? 'all';
-                        $regionId = $userRegion->id;
-                    } elseif ($userRegion->type === 'kecamatan') {
-                        $kecamatanId = $userRegion->id;
-                        $regionId = $userRegion->id;
-                    }
-                }
-            }
+        $desas = Region::where('parent_id', $kecamatanId)
+            ->whereIn('type', ['desa', 'kelurahan'])
+            ->orderBy('name')
+            ->get();
+        $desaDipilih = $desas->firstWhere('id', (int) $desaId);
+        if ($desaId !== 'all' && ! $desaDipilih) {
+            $desaId = 'all';
         }
 
-        // Prepare Region Data for Dropdowns
-        $kecamatans = \App\Models\Region::where('parent_id', $kabupatenId)
-            ->where('type', 'kecamatan')
-            ->get();
-        
-        $desas = collect([]);
-        if ($kecamatanId !== 'all' && !empty($kecamatanId)) {
-            $desas = \App\Models\Region::where('parent_id', $kecamatanId)
-                ->where('type', 'desa')
-                ->get();
+        $regionId = $desaDipilih?->id ?? $kecamatanId;
+        if ($desaId === 'all' && auth()->check() && auth()->user()->region_id) {
+            $userRegion = Region::find(auth()->user()->region_id);
+            if ($userRegion && in_array((int) $userRegion->id, array_map('intval', Region::getDescendantIds($kecamatanId)), true)) {
+                if (in_array($userRegion->type, ['desa', 'kelurahan'], true)) {
+                    $desaId = $userRegion->id;
+                    $regionId = $userRegion->id;
+                }
+            }
         }
 
         // Get Kinerja BUMDes data (monthly revenue)
@@ -198,7 +184,6 @@ class BerandaController extends Controller
             'activeServices',
             'activeBanners',
             'recentAnnouncements',
-            'kecamatans',
             'desas',
             'kecamatanId',
             'desaId'
@@ -474,7 +459,7 @@ class BerandaController extends Controller
                 }
             }
 
-            // Fallback 6: Master Produk se-Kabupaten Bengkalis jika desa benar-benar kosong
+            // Fallback 6: Master produk di desa-desa Kecamatan Bengkalis jika desa terpilih kosong
             if ($combined->count() < 4) {
                 $globalBarang = \App\Models\Barang::where('stok', '>', 0)->latest()->take(4)->get();
                 foreach ($globalBarang as $b) {

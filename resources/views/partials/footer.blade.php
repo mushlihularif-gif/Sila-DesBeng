@@ -122,7 +122,7 @@
         <div class="border-t border-white/20 mb-6 sm:mb-8"></div>
 
         <div class="text-center text-xs sm:text-sm text-gray-100 font-medium tracking-wide px-2">
-            <p>&copy; 2026 Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis</p>
+            <p>&copy; 2026 Sistem Sinergi Layanan dan Aspirasi Desa di Kabupaten Bengkalis &mdash; Cakupan layanan Kecamatan Bengkalis</p>
         </div>
     </div>
 </footer>

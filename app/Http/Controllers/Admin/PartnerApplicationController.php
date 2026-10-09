@@ -16,6 +16,52 @@ use App\Models\Notification;
 
 class PartnerApplicationController extends Controller
 {
+    private ?array $cakupanFokusCached = null;
+
+    private function wilayahFokusIds(): array
+    {
+        if ($this->cakupanFokusCached !== null) {
+            return $this->cakupanFokusCached;
+        }
+
+        $kecamatan = Region::where('type', 'kecamatan')->where('name', 'Kecamatan Bengkalis')->firstOrFail();
+
+        $this->cakupanFokusCached = array_map('intval', array_merge(
+            $kecamatan->parent_id ? [$kecamatan->parent_id] : [],
+            [$kecamatan->id],
+            Region::getDescendantIds($kecamatan->id)
+        ));
+
+        return $this->cakupanFokusCached;
+    }
+
+    private function pengajuanDalamCakupan(PartnerApplication $application): bool
+    {
+        if (! in_array((int) $application->parent_region_id, $this->wilayahFokusIds(), true)) {
+            return false;
+        }
+
+        if ($application->region_type === 'kecamatan') {
+            $kecamatan = Region::where('type', 'kecamatan')->where('name', 'Kecamatan Bengkalis')->first();
+            $parent = $kecamatan?->parent_id;
+            $nama = strtolower(trim(preg_replace('/^kecamatan\\s*/i', '', $application->region_name)));
+
+            return $parent && (int) $application->parent_region_id === (int) $parent
+                && $nama === strtolower(preg_replace('/^kecamatan\\s*/i', '', $kecamatan->name));
+        }
+
+        $induk = Region::find($application->parent_region_id);
+        $indukTipe = match ($application->region_type) {
+            'desa' => 'kecamatan',
+            'rw' => ['desa', 'kelurahan'],
+            'rt' => 'rw',
+            default => null,
+        };
+
+        return $induk && ($indukTipe === $induk->type
+            || (is_array($indukTipe) && in_array($induk->type, $indukTipe, true)));
+    }
+
     /** Tipe wilayah yang sah berada di bawah tipe induk tertentu. */
     private const TURUNAN = [
         'kabupaten' => ['kecamatan'],
@@ -70,17 +116,19 @@ class PartnerApplicationController extends Controller
 
         $user = auth()->user();
 
-        // Filter applications based on the admin's region and its descendants
+        // Semua peran hanya meninjau pengajuan untuk Kecamatan Bengkalis.
         if ($user->role === 'super_admin') {
-            // Super Admin sees ALL pending applications, especially Kabupaten/Kecamatan
-            $applications = PartnerApplication::where('status', 'pending')->latest()->get();
+            $applications = PartnerApplication::where('status', 'pending')->latest()->get()
+                ->filter(fn ($application) => $this->pengajuanDalamCakupan($application))
+                ->values();
         } else {
-            // Region Admin sees applications that have their region or any descendant as parent
             $allowedRegionIds = array_merge([$user->region_id], Region::getDescendantIds($user->region_id));
             $applications = PartnerApplication::where('status', 'pending')
                 ->whereIn('parent_region_id', $allowedRegionIds)
                 ->latest()
-                ->get();
+                ->get()
+                ->filter(fn ($application) => $this->pengajuanDalamCakupan($application))
+                ->values();
         }
 
         return view('admin.partner-applications.index', compact('applications'));
@@ -91,6 +139,7 @@ class PartnerApplicationController extends Controller
         $this->pastikanPeninjau();
 
         $application = PartnerApplication::findOrFail($id);
+        abort_unless($this->pengajuanDalamCakupan($application), 404);
 
         $user = auth()->user();
         if ($user->role !== 'super_admin') {
@@ -132,6 +181,7 @@ class PartnerApplicationController extends Controller
 
         $request->validate(['reason' => 'required|string']);
         $application = PartnerApplication::findOrFail($id);
+        abort_unless($this->pengajuanDalamCakupan($application), 404);
 
         // Security check
         $user = auth()->user();
@@ -302,6 +352,7 @@ class PartnerApplicationController extends Controller
 
         $request->validate(['reason' => 'required|string']);
         $application = PartnerApplication::findOrFail($id);
+        abort_unless($this->pengajuanDalamCakupan($application), 404);
         
         $user = auth()->user();
         if ($user->role !== 'super_admin') {

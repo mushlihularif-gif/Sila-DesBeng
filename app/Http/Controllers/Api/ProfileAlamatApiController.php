@@ -4,10 +4,23 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\AlamatWarga;
+use App\Models\Region;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class ProfileAlamatApiController extends Controller
 {
+    private function regionAlamatKecamatanBengkalis(): \Illuminate\Validation\Rules\Exists
+    {
+        $kecamatanId = Region::where('type', 'kecamatan')
+            ->where('name', 'Kecamatan Bengkalis')
+            ->value('id') ?? -1;
+
+        return Rule::exists('regions', 'id')->where(fn ($query) => $query
+            ->whereIn('type', ['desa', 'kelurahan'])
+            ->where('parent_id', $kecamatanId));
+    }
+
     public function index(Request $request)
     {
         $user = $request->user();
@@ -39,7 +52,7 @@ class ProfileAlamatApiController extends Controller
             'label'         => 'nullable|string|max:50',
             'nama_penerima' => 'required|string|max:100',
             'no_telepon'    => 'required|string|max:20',
-            'region_id'     => 'nullable|exists:regions,id',
+            'region_id'     => ['nullable', $this->regionAlamatKecamatanBengkalis()],
             'detail_alamat' => 'required|string|max:255',
             'rt'            => 'nullable|string|max:10',
             'rw'            => 'nullable|string|max:10',
@@ -107,7 +120,7 @@ class ProfileAlamatApiController extends Controller
             'label'         => 'nullable|string|max:50',
             'nama_penerima' => 'sometimes|required|string|max:100',
             'no_telepon'    => 'sometimes|required|string|max:20',
-            'region_id'     => 'nullable|exists:regions,id',
+            'region_id'     => ['nullable', $this->regionAlamatKecamatanBengkalis()],
             'detail_alamat' => 'sometimes|required|string|max:255',
             'rt'            => 'nullable|string|max:10',
             'rw'            => 'nullable|string|max:10',

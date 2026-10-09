@@ -58,8 +58,7 @@ class RentalBookingController extends Controller
             ->orderBy('id')
             ->get();
 
-        // Cek apakah wilayah ini sudah siap gateway Midtrans
-        $adaGateway = \App\Support\PenyediaPembayaran::terapkanMidtransWilayah($item->region_id);
+        $adaGateway = false;
 
         return view('users.rental-booking', compact('item', 'setting', 'quantity', 'sop_penyewaan_alat', 'alamatTersimpan', 'adaGateway'));
     }
@@ -79,7 +78,7 @@ class RentalBookingController extends Controller
             // 'transfer' = transfer manual ke rekening wilayah, dibuktikan lewat
             // unggahan yang ditinjau petugas. Sebelumnya terkunci 'tunai' saja,
             // sehingga rekening wilayah tidak pernah bisa dipakai di unit ini.
-            'payment_method' => 'required|in:tunai,transfer,ewallet,bank_transfer_bca,bank_transfer_bri,bank_transfer_bni,bank_transfer_mandiri,bank_transfer_bsi,gopay,qris',
+            'payment_method' => 'required|in:tunai,transfer,ewallet',
 
             // Penerima & Alamat (Wajib untuk Antar & Jemput)
             'recipient_name' => 'required|string|max:255',
@@ -184,71 +183,6 @@ class RentalBookingController extends Controller
             'receipt_id' => $booking->id, // Gunakan ID pesanan untuk rute bukti transaksi
             'receipt_number' => $receipt->receipt_number,
         ];
-
-        // Gateway logic
-        $lewatGateway = ! in_array($validated['payment_method'], ['tunai', 'transfer', 'ewallet'], true);
-
-        if ($lewatGateway) {
-            $siap = \App\Support\PenyediaPembayaran::terapkanMidtransWilayah($item->region_id);
-            if (! $siap) {
-                \Illuminate\Support\Facades\Log::warning('Gateway dilewati: wilayah belum siap', [
-                    'region_id' => $item->region_id,
-                ]);
-                $lewatGateway = false;
-            }
-        }
-
-        if ($lewatGateway) {
-            $paymentMethod = $validated['payment_method'];
-
-            $params = [
-                'transaction_details' => [
-                    'order_id' => $booking->order_number,
-                    'gross_amount' => $totalAmount,
-                ],
-                'customer_details' => [
-                    'first_name' => $validated['recipient_name'] ?? Auth::user()->name,
-                    'email' => Auth::user()->email,
-                    'phone' => Auth::user()->phone ?? '081234567890',
-                ],
-                'item_details' => [
-                    [
-                        'id' => $item->id,
-                        'price' => $item->harga_sewa,
-                        'quantity' => $validated['quantity'] * $daysCount, // Assuming price is per unit per day
-                        'name' => $item->nama_barang,
-                    ],
-                ],
-            ];
-
-            $kanal = \App\Support\PenyediaPembayaran::kanalSnap($paymentMethod);
-            if ($kanal) {
-                $params['enabled_payments'] = [$kanal];
-            }
-
-            try {
-                $snap = \Midtrans\Snap::createTransaction($params);
-
-                $booking->payment_channel = $paymentMethod;
-                $booking->snap_token = $snap->token;
-                $booking->payment_expiry_time = now()->addDay();
-                $booking->save();
-
-                $response['snap_token'] = $snap->token;
-            } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::error('Midtrans Snap gagal membuat transaksi', [
-                    'order_number' => $booking->order_number,
-                    'pesan'        => $e->getMessage(),
-                ]);
-
-                $booking->payment_channel = $paymentMethod;
-                $booking->save();
-
-                $response['snap_token'] = null;
-                $response['gateway_gagal'] = true;
-                $response['message'] = 'Pesanan tersimpan, tetapi pembayaran otomatis sedang tidak dapat diproses.';
-            }
-        }
 
         return response()->json($response);
     }
