@@ -16,7 +16,7 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 lg:gap-8 mb-0">
 
             <div class="flex flex-col items-center md:items-start">
-                <img src="{{ asset('User/img/logo/logosdfooter.webp') }}?v={{ time() }}" alt="SiladesBeng Logo"
+                <img src="{{ asset('User/img/logo/logosdfooter.webp') }}?v={{ time() }}" alt="SegiDaerah Logo"
                     class="footer-logo-1 h-auto object-contain relative z-10">
 
                 <img src="{{ asset('User/img/logo/bklss.png') }}?v={{ time() }}" alt="Bengkalis Bermasa"
@@ -69,8 +69,8 @@
                                 d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
                     </div>
-                    <a href="mailto:SiladesBengdigital@gmail.com"
-                        class="text-sm sm:text-[15px] hover:text-blue-300 transition-colors">SiladesBengdigital@gmail.com</a>
+                    <a href="mailto:segidaerahdigital@gmail.com"
+                        class="text-sm sm:text-[15px] hover:text-blue-300 transition-colors">segidaerahdigital@gmail.com</a>
                 </div>
 
                 {{-- Phone --}}
