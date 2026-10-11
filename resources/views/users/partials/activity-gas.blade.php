@@ -204,7 +204,7 @@
                                     <!-- Pending Payment Actions -->
                                     @if($order->status === 'pending' && strtolower($order->payment_method) !== 'tunai')
                                     <div class="pt-4 border-t border-gray-200 mb-2 space-y-2">
-                                        <a href="{{ route('user.gas.payment', $order->id) }}" class="block w-full px-4 py-2 bg-orange-500 text-white text-center rounded-lg text-sm font-semibold hover:bg-orange-600 transition-colors shadow-sm">
+                                        <a href="{{ route('user.gas.payment', $order->id) }}" class="block w-full px-4 py-2 bg-blue-600 text-white text-center rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors shadow-sm" style="background-color: #2563eb !important;">
                                             Bayar Sekarang
                                         </a>
                                     </div>

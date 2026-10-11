@@ -103,7 +103,7 @@
                                     </p>
                                 </div>
                             </div>
-                            <span class="catalog-card-cta bg-orange-600">Pesan Gas</span>
+                            <span class="catalog-card-cta bg-blue-600" style="background-color: #2563eb !important;">Pesan Gas</span>
                         </div>
                     </div>
                     </a>
@@ -205,7 +205,7 @@
         <form action="{{ route('user.gas.verify-kk') }}" method="POST" enctype="multipart/form-data" class="p-6">
             @csrf
             <div class="mb-6 text-center">
-                <div class="w-20 h-20 bg-orange-100 text-orange-500 rounded-2xl mx-auto flex items-center justify-center text-4xl mb-4">
+                <div class="w-20 h-20 bg-blue-100 text-blue-600 rounded-2xl mx-auto flex items-center justify-center text-4xl mb-4">
                     <i class='bx bx-id-card'></i>
                 </div>
                 <p class="text-sm text-gray-600">Ambil foto Kartu Keluarga (KK) asli secara jelas. Pastikan NIK anggota keluarga dapat terbaca oleh sistem kami.</p>
@@ -213,10 +213,10 @@
             
             <div class="mb-6">
                 <label class="block text-sm font-bold text-gray-800 mb-2">Foto Kartu Keluarga</label>
-                <input type="file" name="kk_image" accept="image/*" capture="environment" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-orange-500" required>
+                <input type="file" name="kk_image" accept="image/*" capture="environment" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
             </div>
 
-            <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all hover:-translate-y-1 flex items-center justify-center gap-2">
+            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all hover:-translate-y-1 flex items-center justify-center gap-2" style="background-color: #2563eb !important;">
                 <i class='bx bx-upload'></i> KIRIM DAN VERIFIKASI
             </button>
         </form>

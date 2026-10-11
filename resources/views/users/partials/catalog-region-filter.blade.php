@@ -19,7 +19,7 @@
                 @endforeach
             </select>
         </div>
-        <button type="submit" class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#115789] px-7 py-3 text-base font-bold text-white shadow-md transition hover:bg-[#0d4267] focus:outline-none focus:ring-2 focus:ring-blue-300">
+        <button type="submit" class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-blue-600 px-7 py-3 text-base font-bold text-white shadow-md transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300" style="background-color: #2563eb !important;">
             <i class="bx bx-filter-alt text-lg" aria-hidden="true"></i>
             Terapkan Filter
         </button>

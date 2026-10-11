@@ -58,15 +58,15 @@
         transition: background-color .15s ease, border-color .15s ease, color .15s ease;
     }
     .catalog-filter-btn:hover:not(.active) {
-        border-color: #b8cfdf;
-        background: #f3f8fb;
-        color: #115789;
+        border-color: #93c5fd;
+        background: #eff6ff;
+        color: #2563eb;
     }
     .catalog-filter-btn.active {
-        border-color: #115789;
-        background: #115789;
+        border-color: #2563eb;
+        background: #2563eb;
         color: #fff;
-        box-shadow: 0 2px 6px rgba(17, 87, 137, .18);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, .25);
     }
     .catalog-card-cta {
         display: flex;
@@ -76,14 +76,22 @@
         margin-top: 1rem;
         border-radius: .7rem;
         padding: .55rem .75rem;
-        color: #fff;
+        background-color: #2563eb !important;
+        color: #fff !important;
         font-size: .85rem;
         font-weight: 750;
         line-height: 1.2;
         text-align: center;
-        transition: filter .15s ease;
+        box-shadow: 0 2px 6px rgba(37, 99, 235, 0.2);
+        transition: all .2s ease;
     }
-    .product-item:hover .catalog-card-cta { filter: brightness(.94); }
+    .product-item:hover .catalog-card-cta,
+    .catalog-card-cta:hover {
+        background-color: #1d4ed8 !important;
+        box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+        transform: translateY(-1px);
+        filter: none;
+    }
     @media (max-width: 639px) {
         .product-card { border-radius: 1rem; }
         .product-image-wrapper { border-radius: .75rem; }

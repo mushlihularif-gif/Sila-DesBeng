@@ -101,7 +101,7 @@
                                     </p>
                                 </div>
                             </div>
-                            <span class="catalog-card-cta bg-emerald-600">Pilih Alat Sewa</span>
+                            <span class="catalog-card-cta bg-blue-600" style="background-color: #2563eb !important;">Pilih Alat Sewa</span>
                         </div>
                     </div>
                     </a>

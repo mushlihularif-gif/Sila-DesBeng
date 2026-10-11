@@ -110,7 +110,7 @@
                                     </p>
                                 </div>
                             </div>
-                            <span class="catalog-card-cta bg-[#115789]">Pilih Kendaraan</span>
+                            <span class="catalog-card-cta bg-blue-600" style="background-color: #2563eb !important;">Pilih Kendaraan</span>
                         </div>
                     </div>
                     </a>

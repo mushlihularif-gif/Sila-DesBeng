@@ -148,7 +148,7 @@
                                     </p>
                                 </div>
                             </div>
-                            <span class="catalog-card-cta bg-[#115789]">Lihat Fasilitas</span>
+                            <span class="catalog-card-cta bg-blue-600" style="background-color: #2563eb !important;">Lihat Fasilitas</span>
                         </div>
                     </div>
                     </a>
