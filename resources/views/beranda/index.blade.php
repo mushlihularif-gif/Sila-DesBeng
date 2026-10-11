@@ -415,11 +415,11 @@
                 <div class="max-w-7xl mx-auto relative z-10">
                     <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-6 sm:mb-8">
                         <div>
-                            <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-                                <span>Rekomendasi Produk</span> 
-                                <span class="bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent">Buat Kamu</span>
+                            <h2 class="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2">
+                                <span class="bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">Rekomendasi Produk</span> 
+                                <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Buat Kamu</span>
                             </h2>
-                            <p class="text-xs sm:text-sm text-slate-500 mt-1">Ketersediaan resmi terdekat di wilayah Anda</p>
+                            <p class="text-xs sm:text-base text-gray-500">Ketersediaan resmi terdekat di wilayah Anda</p>
                         </div>
 
                         <!-- Filter unit cepat (Konsisten & Elegan) -->
