@@ -70,7 +70,18 @@ class GasSalesUserController extends Controller
             $query->whereIn('region_id', \App\Support\RegionCatalogFilter::idsFor($filterRegionId, $visibleRegionIds));
         }
 
-        $items = $query->orderBy('created_at', 'desc')->get();
+        $sort = request('sort', 'terbaru');
+        if ($sort === 'terlama') {
+            $query->orderBy('created_at', 'asc');
+        } elseif ($sort === 'termurah') {
+            $query->orderBy('harga_satuan', 'asc');
+        } elseif ($sort === 'termahal') {
+            $query->orderBy('harga_satuan', 'desc');
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+
+        $items = $query->get();
         $filterRegions = \App\Support\RegionCatalogFilter::options($availableRegionIds, $visibleRegionIds);
 
         // Statistik

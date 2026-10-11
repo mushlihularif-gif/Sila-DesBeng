@@ -44,7 +44,18 @@ class RentalUserController extends Controller
             );
         }
 
-        $items = $query->orderBy('created_at', 'desc')->get();
+        $sort = request('sort', 'terbaru');
+        if ($sort === 'terlama') {
+            $query->orderBy('created_at', 'asc');
+        } elseif ($sort === 'termurah') {
+            $query->orderBy('harga_sewa', 'asc');
+        } elseif ($sort === 'termahal') {
+            $query->orderBy('harga_sewa', 'desc');
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+
+        $items = $query->get();
         $filterRegions = \App\Support\RegionCatalogFilter::options($availableRegionIds, $visibleRegionIds);
 
         return view('users.rental-equipment', compact(

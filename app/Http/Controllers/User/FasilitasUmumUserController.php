@@ -81,8 +81,23 @@ class FasilitasUmumUserController extends Controller
             $kendaraansQuery->whereIn('region_id', $vehicleFilterIds);
         }
 
-        $items = $itemsQuery->orderBy('created_at', 'desc')->get();
-        $kendaraans = $kendaraansQuery->orderBy('created_at', 'desc')->get();
+        $sort = request('sort', 'terbaru');
+        if ($sort === 'terlama') {
+            $itemsQuery->orderBy('created_at', 'asc');
+            $kendaraansQuery->orderBy('created_at', 'asc');
+        } elseif ($sort === 'termurah') {
+            $itemsQuery->orderBy('harga_sewa', 'asc');
+            $kendaraansQuery->orderBy('created_at', 'asc');
+        } elseif ($sort === 'termahal') {
+            $itemsQuery->orderBy('harga_sewa', 'desc');
+            $kendaraansQuery->orderBy('created_at', 'desc');
+        } else {
+            $itemsQuery->orderBy('created_at', 'desc');
+            $kendaraansQuery->orderBy('created_at', 'desc');
+        }
+
+        $items = $itemsQuery->get();
+        $kendaraans = $kendaraansQuery->get();
         $filterRegions = \App\Support\RegionCatalogFilter::options($availableRegionIds, $visibleRegionIds);
 
         // Kontak darurat dan konfigurasi wilayah
