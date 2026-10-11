@@ -182,9 +182,9 @@
                                         </div>
                                         @endif
 
-                                        <!-- Badge Asal Unit (Elegan, Frosted Glass dengan Indikator Brand Biru) -->
-                                        <span class="absolute top-2.5 left-2.5 px-2.5 py-0.5 text-[10px] font-semibold rounded-md bg-white/95 backdrop-blur-xs text-slate-700 border border-slate-200/80 shadow-xs inline-flex items-center gap-1.5">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-[#2563eb]"></span>
+                                        <!-- Badge Asal Unit (Pojok Kiri Atas) -->
+                                        <span class="rekomendasi-unit-badge" style="position: absolute !important; top: 8px !important; left: 8px !important; z-index: 10 !important;">
+                                            <span class="badge-dot"></span>
                                             <span>{{ str_replace('&', 'dan', $item->category) }}</span>
                                         </span>
                                     </div>
@@ -464,9 +464,9 @@
                                     </div>
                                     @endif
 
-                                    <!-- Badge Asal Unit (Elegan, Frosted Glass dengan Indikator Brand Biru) -->
-                                    <span class="absolute top-2.5 left-2.5 px-2.5 py-0.5 text-[10px] font-semibold rounded-md bg-white/95 backdrop-blur-xs text-slate-700 border border-slate-200/80 shadow-xs inline-flex items-center gap-1.5">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-[#2563eb]"></span>
+                                    <!-- Badge Asal Unit (Pojok Kiri Atas) -->
+                                    <span class="rekomendasi-unit-badge" style="position: absolute !important; top: 8px !important; left: 8px !important; z-index: 10 !important;">
+                                        <span class="badge-dot"></span>
                                         <span>{{ str_replace('&', 'dan', $item->category) }}</span>
                                     </span>
                                 </div>
@@ -760,6 +760,39 @@
             display: block;
         }
         .rekomendasi-img-wrapper img.gas-product-photo { transform: scale(1.28); }
+
+        /* Badge Asal Unit Produk (Pojok Kiri Atas - Kebal Bug Posisi) */
+        .rekomendasi-unit-badge {
+            position: absolute !important;
+            top: 8px !important;
+            left: 8px !important;
+            right: auto !important;
+            bottom: auto !important;
+            z-index: 10 !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 5px !important;
+            background: rgba(255, 255, 255, 0.95) !important;
+            backdrop-filter: blur(4px) !important;
+            -webkit-backdrop-filter: blur(4px) !important;
+            border: 1px solid rgba(226, 232, 240, 0.9) !important;
+            border-radius: 6px !important;
+            padding: 3px 8px !important;
+            font-size: 10px !important;
+            font-weight: 600 !important;
+            color: #334155 !important;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+            line-height: 1.2 !important;
+            pointer-events: none !important;
+        }
+        .rekomendasi-unit-badge .badge-dot {
+            width: 6px !important;
+            height: 6px !important;
+            border-radius: 50% !important;
+            background-color: #2563eb !important;
+            display: inline-block !important;
+            flex-shrink: 0 !important;
+        }
 
         /* Kotak Sapaan Dinamis Unit Pelayanan */
         .unit-speech-box {
@@ -1392,8 +1425,8 @@
                         <div>
                             <div class="rekomendasi-img-wrapper relative rounded-lg sm:rounded-xl overflow-hidden bg-slate-50 mb-3 flex items-center justify-center border border-gray-100 p-2 sm:p-3">
                                 ${imgHtml}
-                                <span class="absolute top-2.5 left-2.5 px-2.5 py-0.5 text-[10px] font-semibold rounded-md bg-white/95 backdrop-blur-xs text-slate-700 border border-slate-200/80 shadow-xs inline-flex items-center gap-1.5">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-[#2563eb]"></span>
+                                <span class="rekomendasi-unit-badge" style="position: absolute !important; top: 8px !important; left: 8px !important; z-index: 10 !important;">
+                                    <span class="badge-dot"></span>
                                     <span>${escapeHtml(item.category)}</span>
                                 </span>
                             </div>
