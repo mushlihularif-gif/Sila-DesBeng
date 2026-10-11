@@ -33,16 +33,16 @@
                 </h3>
 
                 <!-- Global Filters -->
-                <div class="max-w-5xl mx-auto flex flex-col sm:flex-row justify-center items-stretch sm:items-center gap-2 sm:gap-4 bg-white/40 backdrop-blur-md p-2.5 sm:p-4 rounded-2xl border border-white/50 shadow-lg w-full">
-                     <div class="w-full sm:w-auto px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm border border-gray-300 rounded-xl bg-gray-50/90 backdrop-blur-md text-gray-700 font-bold flex items-center justify-center gap-2 cursor-not-allowed shadow-sm sm:min-w-[200px] select-none" title="Wilayah Terkunci: Kecamatan Bengkalis">
+                <div class="max-w-5xl mx-auto flex flex-col sm:flex-row justify-center items-stretch sm:items-center gap-2 sm:gap-4 bg-white/40 backdrop-blur-md p-2.5 sm:p-4 rounded-2xl border border-white/50 shadow-lg w-full sm:w-fit">
+                     <div class="h-11 sm:h-12 px-4 text-xs sm:text-sm border border-gray-300 rounded-xl bg-gray-50/90 backdrop-blur-md text-gray-700 font-bold flex items-center justify-center gap-2 cursor-not-allowed shadow-sm whitespace-nowrap flex-shrink-0 select-none" title="Wilayah Terkunci: Kecamatan Bengkalis">
                          <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
                              <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
                          </svg>
-                         <span>Kecamatan Bengkalis</span>
+                         <span class="whitespace-nowrap">Kecamatan Bengkalis</span>
                      </div>
 
                     <div class="relative w-full sm:w-auto sm:min-w-[220px]">
-                         <select id="desaSelect" class="w-full appearance-none px-3 sm:px-4 py-2 sm:py-3 pr-8 sm:pr-10 text-xs sm:text-sm border border-gray-300 rounded-xl bg-white/80 backdrop-blur-md text-gray-800 font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 hover:bg-white transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm">
+                         <select id="desaSelect" class="w-full h-11 sm:h-12 appearance-none px-3 sm:px-4 pr-8 sm:pr-10 text-xs sm:text-sm border border-gray-300 rounded-xl bg-white/80 backdrop-blur-md text-gray-800 font-bold focus:outline-none focus:border-gray-400 hover:bg-white transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm">
                             <option value="all">Semua Kelurahan/Desa</option>
                             @foreach($desas as $desa)
                                 <option value="{{ $desa->id }}" {{ $desaId == $desa->id ? 'selected' : '' }}>{{ $desa->name }}</option>
@@ -54,7 +54,7 @@
                     </div>
 
                     <div class="relative w-full sm:w-auto sm:min-w-[110px]">
-                        <select id="globalYearSelect" translate="no" class="w-full appearance-none px-3 sm:px-4 py-2 sm:py-3 pr-8 sm:pr-10 text-xs sm:text-sm border border-gray-300 rounded-xl bg-white/80 backdrop-blur-md text-gray-800 font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 hover:bg-white transition-all shadow-sm">
+                        <select id="globalYearSelect" translate="no" class="w-full h-11 sm:h-12 appearance-none px-3 sm:px-4 pr-8 sm:pr-10 text-xs sm:text-sm border border-gray-300 rounded-xl bg-white/80 backdrop-blur-md text-gray-800 font-bold focus:outline-none focus:border-gray-400 hover:bg-white transition-all shadow-sm">
                             @foreach($availableYears as $optYear)
                                 <option value="{{ $optYear }}" {{ $optYear == $year ? 'selected' : '' }}>{{ $optYear }}</option>
                             @endforeach
