@@ -182,23 +182,25 @@
                                         </div>
                                         @endif
 
-                                        <span class="absolute top-2 left-2 px-2 py-0.5 text-[9px] font-bold rounded-md shadow-xs {{ $item->badge_color ?? 'bg-[#115789] text-white' }}" style="color: #ffffff !important;">
-                                            {{ str_replace('&', 'dan', $item->category) }}
+                                        <!-- Badge Asal Unit (Elegan, Frosted Glass dengan Indikator Brand Biru) -->
+                                        <span class="absolute top-2.5 left-2.5 px-2.5 py-0.5 text-[10px] font-semibold rounded-md bg-white/95 backdrop-blur-xs text-slate-700 border border-slate-200/80 shadow-xs inline-flex items-center gap-1.5">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-[#2563eb]"></span>
+                                            <span>{{ str_replace('&', 'dan', $item->category) }}</span>
                                         </span>
                                     </div>
 
-                                    <h3 class="text-xs sm:text-sm font-bold text-gray-900 line-clamp-1 mb-1" title="{{ $item->name }}">
+                                    <h3 class="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-[#2563eb] transition-colors line-clamp-1 mb-1" title="{{ $item->name }}">
                                         {{ $item->name }}
                                     </h3>
 
-                                    <div class="text-xs sm:text-sm font-black text-[#115789] mb-1">
+                                    <div class="text-xs sm:text-sm font-black text-[#2563eb] mb-1">
                                         {{ $item->price_formatted }}
                                         @if(!empty($item->unit) && $item->type != 'fasilitas')
-                                        <span class="text-[10px] font-normal text-gray-500">/{{ $item->unit }}</span>
+                                        <span class="text-[10px] font-normal text-slate-400">/{{ $item->unit }}</span>
                                         @endif
                                     </div>
 
-                                    <div class="text-[10px] sm:text-[11px] text-gray-400">
+                                    <div class="text-[10px] sm:text-[11px] text-slate-400 font-medium">
                                         @if($item->type == 'fasilitas')
                                             Tersedia izin kegiatan
                                         @elseif(isset($item->stock) && $item->stock > 0)
@@ -209,30 +211,20 @@
                                     </div>
                                 </div>
 
-                                <div class="mt-3 pt-2 border-t border-gray-50">
+                                <div class="mt-3 pt-2.5 border-t border-slate-100">
                                     @php
-                                        $btnClass = 'btn-action-pasar';
-                                        $btnStyle = 'background-color: #115789 !important; color: #ffffff !important;';
                                         $btnLabel = 'Beli Produk';
                                         if ($item->type == 'gas') {
-                                            $btnClass = 'btn-action-gas';
-                                            $btnStyle = 'background-color: #ea580c !important; color: #ffffff !important;';
                                             $btnLabel = 'Pesan Gas';
                                         } elseif ($item->type == 'rental') {
-                                            $btnClass = 'btn-action-rental';
-                                            $btnStyle = 'background-color: #059669 !important; color: #ffffff !important;';
                                             $btnLabel = 'Sewa Alat';
                                         } elseif ($item->type == 'mobil') {
-                                            $btnClass = 'btn-action-mobil';
-                                            $btnStyle = 'background-color: #2563eb !important; color: #ffffff !important;';
-                                            $btnLabel = 'Sewa Transportasi';
+                                            $btnLabel = 'Sewa Kendaraan';
                                         } elseif ($item->type == 'fasilitas') {
-                                            $btnClass = 'btn-action-fasilitas';
-                                            $btnStyle = 'background-color: #9333ea !important; color: #ffffff !important;';
                                             $btnLabel = 'Ajukan Izin';
                                         }
                                     @endphp
-                                    <a href="{{ $item->link }}" class="w-full block text-center py-2 px-3 rounded-lg text-xs font-bold transition-all shadow-xs {{ $btnClass }}" style="{{ $btnStyle }}">
+                                    <a href="{{ $item->link }}" class="w-full block text-center py-2 sm:py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold text-white transition-all shadow-xs hover:shadow-md hover:shadow-blue-500/25 btn-action-brand" style="background-color: #2563eb !important; color: #ffffff !important;">
                                         {{ $btnLabel }}
                                     </a>
                                 </div>
@@ -423,33 +415,33 @@
                 <div class="max-w-7xl mx-auto relative z-10">
                     <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-6 sm:mb-8">
                         <div>
-                            <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
-                                <span class="bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">Rekomendasi Produk</span> 
-                                <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Buat Kamu</span>
+                            <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+                                <span>Rekomendasi Produk</span> 
+                                <span class="bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent">Buat Kamu</span>
                             </h2>
-                            <p class="text-xs sm:text-sm text-gray-500 mt-1">Ketersediaan resmi terdekat di wilayah Anda</p>
+                            <p class="text-xs sm:text-sm text-slate-500 mt-1">Ketersediaan resmi terdekat di wilayah Anda</p>
                         </div>
 
-                        <!-- Tautan unit cepat dengan label unit yang konsisten -->
+                        <!-- Filter unit cepat (Konsisten & Elegan) -->
                         <div class="flex items-center gap-1.5 flex-wrap">
-                            <span class="text-[11px] text-gray-400 font-medium mr-1 hidden sm:inline">Pilih unit:</span>
+                            <span class="text-[11px] text-slate-400 font-medium mr-1 hidden sm:inline">Pilih unit:</span>
                             @if(!isset($isServiceActive) || $isServiceActive('Unit Penjualan Gas'))
-                            <a href="{{ $isLoggedInWithRegion ? route('gas.sales') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=gas.sales' }}" class="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-white text-orange-700 hover:bg-orange-600 hover:text-white border border-orange-200 transition-colors shadow-xs">Unit Penjualan Gas</a>
+                            <a href="{{ $isLoggedInWithRegion ? route('gas.sales') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=gas.sales' }}" class="px-3 py-1.5 text-xs font-semibold rounded-full bg-white text-slate-700 hover:bg-blue-600 hover:text-white border border-slate-200 hover:border-blue-600 transition-all shadow-2xs hover:shadow-xs">Unit Penjualan Gas</a>
                             @endif
                             @if(!isset($isServiceActive) || $isServiceActive('Unit Penyewaan Alat'))
-                            <a href="{{ $isLoggedInWithRegion ? route('rental.equipment') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=rental.equipment' }}" class="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-white text-emerald-700 hover:bg-emerald-600 hover:text-white border border-emerald-200 transition-colors shadow-xs">Unit Penyewaan Alat</a>
+                            <a href="{{ $isLoggedInWithRegion ? route('rental.equipment') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=rental.equipment' }}" class="px-3 py-1.5 text-xs font-semibold rounded-full bg-white text-slate-700 hover:bg-blue-600 hover:text-white border border-slate-200 hover:border-blue-600 transition-all shadow-2xs hover:shadow-xs">Unit Penyewaan Alat</a>
                             @endif
                             @if(!isset($isServiceActive) || $isServiceActive('Unit Penyewaan Transportasi') || $isServiceActive('Unit Penyewaan Mobil'))
-                            <a href="{{ $isLoggedInWithRegion ? route('mobil.rental.equipment') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=mobil.rental.equipment' }}" class="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-white text-blue-700 hover:bg-blue-600 hover:text-white border border-blue-200 transition-colors shadow-xs">Unit Penyewaan Kendaraan</a>
+                            <a href="{{ $isLoggedInWithRegion ? route('mobil.rental.equipment') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=mobil.rental.equipment' }}" class="px-3 py-1.5 text-xs font-semibold rounded-full bg-white text-slate-700 hover:bg-blue-600 hover:text-white border border-slate-200 hover:border-blue-600 transition-all shadow-2xs hover:shadow-xs">Unit Penyewaan Kendaraan</a>
                             @endif
-                            <a href="{{ route('pasar.index') }}" class="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-white text-amber-700 hover:bg-amber-600 hover:text-white border border-amber-200 transition-colors shadow-xs">Pasar Daerah</a>
+                            <a href="{{ route('pasar.index') }}" class="px-3 py-1.5 text-xs font-semibold rounded-full bg-white text-slate-700 hover:bg-blue-600 hover:text-white border border-slate-200 hover:border-blue-600 transition-all shadow-2xs hover:shadow-xs">Pasar Daerah</a>
                         </div>
                     </div>
 
                     <!-- Grid Kartu Rekomendasi (2 Kolom di HP, 4 Kolom di Desktop) -->
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
                         @foreach($popularProducts as $item)
-                        <div class="bg-white rounded-xl sm:rounded-2xl border border-gray-100 shadow-xs hover:shadow-xl transition-all duration-300 p-3 sm:p-4 flex flex-col justify-between group transform hover:-translate-y-1">
+                        <div class="bg-white rounded-xl sm:rounded-2xl border border-slate-100 shadow-xs hover:shadow-xl hover:border-blue-100 transition-all duration-300 p-3 sm:p-4 flex flex-col justify-between group transform hover:-translate-y-1">
                             <div>
                                 <!-- Image Container (Anti-Gepeng, Padded, Centered) -->
                                 <div class="rekomendasi-img-wrapper relative rounded-lg sm:rounded-xl overflow-hidden bg-slate-50 mb-3 flex items-center justify-center border border-gray-100 p-2 sm:p-3">
@@ -472,27 +464,28 @@
                                     </div>
                                     @endif
 
-                                    <!-- Badge Asal Unit -->
-                                    <span class="absolute top-2 left-2 px-2 py-0.5 text-[9px] font-bold rounded-md shadow-xs {{ $item->badge_color ?? 'bg-[#115789] text-white' }}" style="color: #ffffff !important;">
-                                        {{ str_replace('&', 'dan', $item->category) }}
+                                    <!-- Badge Asal Unit (Elegan, Frosted Glass dengan Indikator Brand Biru) -->
+                                    <span class="absolute top-2.5 left-2.5 px-2.5 py-0.5 text-[10px] font-semibold rounded-md bg-white/95 backdrop-blur-xs text-slate-700 border border-slate-200/80 shadow-xs inline-flex items-center gap-1.5">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-[#2563eb]"></span>
+                                        <span>{{ str_replace('&', 'dan', $item->category) }}</span>
                                     </span>
                                 </div>
 
                                 <!-- Product Title -->
-                                <h3 class="text-xs sm:text-sm font-bold text-gray-900 line-clamp-1 mb-1" title="{{ $item->name }}">
+                                <h3 class="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-[#2563eb] transition-colors line-clamp-1 mb-1" title="{{ $item->name }}">
                                     {{ $item->name }}
                                 </h3>
 
-                                <!-- Price -->
-                                <div class="text-xs sm:text-sm font-black text-[#115789] mb-1">
+                                <!-- Price (Vibrant SegiDaerah Brand Blue #2563eb) -->
+                                <div class="text-xs sm:text-sm font-black text-[#2563eb] mb-1">
                                     {{ $item->price_formatted }}
                                     @if(!empty($item->unit) && $item->type != 'fasilitas')
-                                    <span class="text-[10px] font-normal text-gray-500">/{{ $item->unit }}</span>
+                                    <span class="text-[10px] font-normal text-slate-400">/{{ $item->unit }}</span>
                                     @endif
                                 </div>
 
                                 <!-- Status / Info -->
-                                <div class="text-[10px] sm:text-[11px] text-gray-400">
+                                <div class="text-[10px] sm:text-[11px] text-slate-400 font-medium">
                                     @if($item->type == 'fasilitas')
                                         Tersedia izin kegiatan
                                     @elseif(isset($item->stock) && $item->stock > 0)
@@ -503,31 +496,21 @@
                                 </div>
                             </div>
 
-                            <!-- Button Action (Solid, High-Contrast, Never Washes Out) -->
-                            <div class="mt-3 pt-2 border-t border-gray-50">
+                            <!-- Button Action (Konsisten Biru Brand SegiDaerah #2563eb - Premium & Elegan) -->
+                            <div class="mt-3 pt-2.5 border-t border-slate-100">
                                 @php
-                                    $btnClass = 'btn-action-pasar';
-                                    $btnStyle = 'background-color: #115789 !important; color: #ffffff !important;';
                                     $btnLabel = 'Beli Produk';
                                     if ($item->type == 'gas') {
-                                        $btnClass = 'btn-action-gas';
-                                        $btnStyle = 'background-color: #ea580c !important; color: #ffffff !important;';
                                         $btnLabel = 'Pesan Gas';
                                     } elseif ($item->type == 'rental') {
-                                        $btnClass = 'btn-action-rental';
-                                        $btnStyle = 'background-color: #059669 !important; color: #ffffff !important;';
                                         $btnLabel = 'Sewa Alat';
                                     } elseif ($item->type == 'mobil') {
-                                        $btnClass = 'btn-action-mobil';
-                                        $btnStyle = 'background-color: #2563eb !important; color: #ffffff !important;';
-                                        $btnLabel = 'Sewa Transportasi';
+                                        $btnLabel = 'Sewa Kendaraan';
                                     } elseif ($item->type == 'fasilitas') {
-                                        $btnClass = 'btn-action-fasilitas';
-                                        $btnStyle = 'background-color: #9333ea !important; color: #ffffff !important;';
                                         $btnLabel = 'Ajukan Izin';
                                     }
                                 @endphp
-                                <a href="{{ $item->link }}" class="w-full block text-center py-2 px-3 rounded-lg text-xs font-bold transition-all shadow-xs {{ $btnClass }}" style="{{ $btnStyle }}">
+                                <a href="{{ $item->link }}" class="w-full block text-center py-2 sm:py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold text-white transition-all shadow-xs hover:shadow-md hover:shadow-blue-500/25 btn-action-brand" style="background-color: #2563eb !important; color: #ffffff !important;">
                                     {{ $btnLabel }}
                                 </a>
                             </div>
@@ -894,46 +877,25 @@
             50% { opacity: 0; }
         }
 
-        /* Tombol Aksi Unit Layanan (Solid, Anti-Washed Out) */
-        .btn-action-gas {
-            background-color: #ea580c !important;
-            color: #ffffff !important;
-        }
-        .btn-action-gas:hover {
-            background-color: #c2410c !important;
-            color: #ffffff !important;
-        }
-        .btn-action-rental {
-            background-color: #059669 !important;
-            color: #ffffff !important;
-        }
-        .btn-action-rental:hover {
-            background-color: #047857 !important;
-            color: #ffffff !important;
-        }
-        .btn-action-mobil {
+        /* Tombol Aksi Unit Layanan (Solid SegiDaerah Brand Blue #2563eb - Konsisten Ala Shopee/Tokopedia) */
+        .btn-action-gas,
+        .btn-action-rental,
+        .btn-action-mobil,
+        .btn-action-fasilitas,
+        .btn-action-pasar,
+        .btn-action-brand {
             background-color: #2563eb !important;
             color: #ffffff !important;
         }
-        .btn-action-mobil:hover {
+        .btn-action-gas:hover,
+        .btn-action-rental:hover,
+        .btn-action-mobil:hover,
+        .btn-action-fasilitas:hover,
+        .btn-action-pasar:hover,
+        .btn-action-brand:hover {
             background-color: #1d4ed8 !important;
             color: #ffffff !important;
-        }
-        .btn-action-fasilitas {
-            background-color: #9333ea !important;
-            color: #ffffff !important;
-        }
-        .btn-action-fasilitas:hover {
-            background-color: #7e22ce !important;
-            color: #ffffff !important;
-        }
-        .btn-action-pasar {
-            background-color: #115789 !important;
-            color: #ffffff !important;
-        }
-        .btn-action-pasar:hover {
-            background-color: #0c446c !important;
-            color: #ffffff !important;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.28) !important;
         }
 
         /* Navigasi Tombol Geser di Bawah - Aliran Dokumen Normal (Bebas Tabrakan) */
@@ -1391,29 +1353,16 @@
                 };
 
                 const buildProductCard = (item) => {
-                    let btnClass = 'btn-action-pasar';
-                    let btnStyle = 'background-color: #115789 !important; color: #ffffff !important;';
                     let btnText = 'Beli Produk';
-
                     if (item.type === 'gas') {
-                        btnClass = 'btn-action-gas';
-                        btnStyle = 'background-color: #ea580c !important; color: #ffffff !important;';
                         btnText = 'Pesan Gas';
                     } else if (item.type === 'rental') {
-                        btnClass = 'btn-action-rental';
-                        btnStyle = 'background-color: #059669 !important; color: #ffffff !important;';
                         btnText = 'Sewa Alat';
                     } else if (item.type === 'mobil') {
-                        btnClass = 'btn-action-mobil';
-                        btnStyle = 'background-color: #2563eb !important; color: #ffffff !important;';
-                        btnText = 'Sewa Transportasi';
+                        btnText = 'Sewa Kendaraan';
                     } else if (item.type === 'fasilitas') {
-                        btnClass = 'btn-action-fasilitas';
-                        btnStyle = 'background-color: #9333ea !important; color: #ffffff !important;';
                         btnText = 'Ajukan Izin';
                     }
-
-                    const badgeBg = item.badge_color || 'bg-[#115789] text-white';
 
                     let imgHtml = '';
                     if (item.image) {
@@ -1436,29 +1385,30 @@
                         statusText = `Stok: ${item.stock} ${item.unit || ''}`;
                     }
 
-                    const unitText = (item.unit && item.type !== 'fasilitas') ? `<span class="text-[10px] font-normal text-gray-500">/${escapeHtml(item.unit)}</span>` : '';
+                    const unitText = (item.unit && item.type !== 'fasilitas') ? `<span class="text-[10px] font-normal text-slate-400">/${escapeHtml(item.unit)}</span>` : '';
 
                     return `
-                    <div class="bg-white rounded-xl sm:rounded-2xl border border-gray-100 shadow-xs hover:shadow-xl transition-all duration-300 p-3 sm:p-4 flex flex-col justify-between group transform hover:-translate-y-1">
+                    <div class="bg-white rounded-xl sm:rounded-2xl border border-slate-100 shadow-xs hover:shadow-xl hover:border-blue-100 transition-all duration-300 p-3 sm:p-4 flex flex-col justify-between group transform hover:-translate-y-1">
                         <div>
                             <div class="rekomendasi-img-wrapper relative rounded-lg sm:rounded-xl overflow-hidden bg-slate-50 mb-3 flex items-center justify-center border border-gray-100 p-2 sm:p-3">
                                 ${imgHtml}
-                                <span class="absolute top-2 left-2 px-2 py-0.5 text-[9px] font-bold rounded-md shadow-xs ${badgeBg}" style="color: #ffffff !important;">
-                                    ${escapeHtml(item.category)}
+                                <span class="absolute top-2.5 left-2.5 px-2.5 py-0.5 text-[10px] font-semibold rounded-md bg-white/95 backdrop-blur-xs text-slate-700 border border-slate-200/80 shadow-xs inline-flex items-center gap-1.5">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-[#2563eb]"></span>
+                                    <span>${escapeHtml(item.category)}</span>
                                 </span>
                             </div>
-                            <h3 class="text-xs sm:text-sm font-bold text-gray-900 line-clamp-1 mb-1" title="${escapeHtml(item.name)}">
+                            <h3 class="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-[#2563eb] transition-colors line-clamp-1 mb-1" title="${escapeHtml(item.name)}">
                                 ${escapeHtml(item.name)}
                             </h3>
-                            <div class="text-xs sm:text-sm font-black text-[#115789] mb-1">
+                            <div class="text-xs sm:text-sm font-black text-[#2563eb] mb-1">
                                 ${escapeHtml(item.price_formatted)} ${unitText}
                             </div>
-                            <div class="text-[10px] sm:text-[11px] text-gray-400">
+                            <div class="text-[10px] sm:text-[11px] text-slate-400 font-medium">
                                 ${escapeHtml(statusText)}
                             </div>
                         </div>
-                        <div class="mt-3 pt-2 border-t border-gray-50">
-                            <a href="${item.link}" class="w-full block text-center py-2 px-3 rounded-lg text-xs font-bold transition-all shadow-xs ${btnClass}" style="${btnStyle}">
+                        <div class="mt-3 pt-2.5 border-t border-slate-100">
+                            <a href="${item.link}" class="w-full block text-center py-2 sm:py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold text-white transition-all shadow-xs hover:shadow-md hover:shadow-blue-500/25 btn-action-brand" style="background-color: #2563eb !important; color: #ffffff !important;">
                                 ${btnText}
                             </a>
                         </div>
