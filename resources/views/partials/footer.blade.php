@@ -17,10 +17,10 @@
 
             <div class="flex flex-col items-center md:items-start">
                 <img src="{{ asset('User/img/logo/logosdfooter.webp') }}?v={{ time() }}" alt="SegiDaerah Logo"
-                    class="footer-logo-1 h-auto object-contain relative z-10">
+                    class="footer-logo-1 max-w-full h-auto object-contain relative z-10">
 
                 <img src="{{ asset('User/img/logo/bklss.png') }}?v={{ time() }}" alt="Bengkalis Bermasa"
-                    class="footer-logo-2 h-auto object-contain relative z-0">
+                    class="footer-logo-2 max-w-full h-auto object-contain relative z-0">
             </div>
 
             {{-- Column 2: Navigation --}}
