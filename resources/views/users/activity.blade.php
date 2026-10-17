@@ -566,9 +566,71 @@
                                     text: data.message,
                                     confirmButtonColor: '#3b82f6'
                                 });
+                                const emptyStates = {
+                                    rental: `<div class="bg-white rounded-2xl shadow-lg p-12 text-center border border-gray-100">
+                                        <div class="w-16 h-16 bg-sky-50 text-sky-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                                            <i class="fas fa-tools text-2xl"></i>
+                                        </div>
+                                        <h4 class="text-lg font-bold text-gray-800 mb-1">Belum Ada Riwayat Penyewaan</h4>
+                                        <p class="text-sm text-gray-500 mb-4">Temukan dan sewa berbagai perlengkapan atau alat usaha yang Anda butuhkan dengan mudah!</p>
+                                        <a href="{{ route('rental.equipment') }}" class="inline-flex items-center gap-2 px-6 py-2.5 bg-sky-500 text-white rounded-xl font-semibold hover:bg-sky-600 transition-colors shadow-sm">
+                                            <i class="fas fa-boxes-stacked"></i> Sewa Alat Sekarang
+                                        </a>
+                                    </div>`,
+                                    gas: `<div class="bg-white rounded-2xl shadow-lg p-12 text-center border border-gray-100">
+                                        <div class="w-16 h-16 bg-sky-50 text-sky-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                                            <i class="fas fa-fire-flame-curved text-2xl"></i>
+                                        </div>
+                                        <h4 class="text-lg font-bold text-gray-800 mb-1">Belum Ada Riwayat Pesanan Gas</h4>
+                                        <p class="text-sm text-gray-500 mb-4">Pesan tabung gas LPG resmi untuk kebutuhan rumah tangga Anda dengan mudah dan cepat!</p>
+                                        <a href="{{ route('gas.sales') }}" class="inline-flex items-center gap-2 px-6 py-2.5 bg-sky-500 text-white rounded-xl font-semibold hover:bg-sky-600 transition-colors shadow-sm">
+                                            <i class="fas fa-gas-pump"></i> Pesan Gas Sekarang
+                                        </a>
+                                    </div>`,
+                                    mobil: `<div class="bg-white rounded-2xl shadow-lg p-12 text-center border border-gray-100">
+                                        <div class="w-16 h-16 bg-sky-50 text-sky-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                                            <i class="fas fa-car-side text-2xl"></i>
+                                        </div>
+                                        <h4 class="text-lg font-bold text-gray-800 mb-1">Belum Ada Riwayat Sewa Transportasi</h4>
+                                        <p class="text-sm text-gray-500 mb-4">Butuh armada kendaraan untuk operasional atau bepergian? Sewa transportasi desa sekarang!</p>
+                                        <a href="{{ route('mobil.rental.equipment') }}" class="inline-flex items-center gap-2 px-6 py-2.5 bg-sky-500 text-white rounded-xl font-semibold hover:bg-sky-600 transition-colors shadow-sm">
+                                            <i class="fas fa-car"></i> Sewa Transportasi Sekarang
+                                        </a>
+                                    </div>`,
+                                    fasilitas: `<div class="bg-white rounded-2xl shadow-lg p-12 text-center border border-gray-100">
+                                        <div class="w-16 h-16 bg-sky-50 text-sky-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                                            <i class="fas fa-building text-2xl"></i>
+                                        </div>
+                                        <h4 class="text-lg font-bold text-gray-800 mb-1">Belum Ada Riwayat Peminjaman Fasilitas</h4>
+                                        <p class="text-sm text-gray-500 mb-4">Ajukan peminjaman gedung serbaguna, balai pertemuan, atau fasilitas umum desa lainnya!</p>
+                                        <a href="{{ route('user.fasilitas-umum.equipment') }}" class="inline-flex items-center gap-2 px-6 py-2.5 bg-sky-500 text-white rounded-xl font-semibold hover:bg-sky-600 transition-colors shadow-sm">
+                                            <i class="fas fa-calendar-plus"></i> Pinjam Fasilitas Sekarang
+                                        </a>
+                                    </div>`,
+                                    pasar: `<div class="bg-white rounded-2xl shadow-lg p-12 text-center border border-gray-100">
+                                        <div class="w-16 h-16 bg-sky-50 text-sky-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                                            <i class="fas fa-shopping-bag text-2xl"></i>
+                                        </div>
+                                        <h4 class="text-lg font-bold text-gray-800 mb-1">Belum Ada Riwayat Belanja</h4>
+                                        <p class="text-sm text-gray-500 mb-4">Yuk jelajahi produk lokal segar dan berkualitas dari Pasar Daerah BUMDes!</p>
+                                        <a href="{{ route('pasar.index') }}" class="inline-flex items-center gap-2 px-6 py-2.5 bg-sky-500 text-white rounded-xl font-semibold hover:bg-sky-600 transition-colors shadow-sm">
+                                            <i class="fas fa-store"></i> Belanja di Pasar Daerah
+                                        </a>
+                                    </div>`,
+                                    laporan: `<div class="bg-white rounded-2xl shadow-lg p-12 text-center border border-gray-100">
+                                        <div class="w-16 h-16 bg-sky-50 text-sky-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                                            <i class="fas fa-bullhorn text-2xl"></i>
+                                        </div>
+                                        <h4 class="text-lg font-bold text-gray-800 mb-1">Belum Ada Riwayat Laporan</h4>
+                                        <p class="text-sm text-gray-500 mb-4">Sampaikan aspirasi, aduan, atau kendala fasilitas di lingkungan Anda untuk segera ditangani!</p>
+                                        <a href="{{ route('pelaporan.landing') }}" class="inline-flex items-center gap-2 px-6 py-2.5 bg-sky-500 text-white rounded-xl font-semibold hover:bg-sky-600 transition-colors shadow-sm">
+                                            <i class="fas fa-paper-plane"></i> Buat Laporan Warga
+                                        </a>
+                                    </div>`
+                                };
                                 const section = document.getElementById(`${type}-section`);
                                 if(section) {
-                                    section.innerHTML = '<div class="bg-white rounded-2xl shadow-lg p-8 text-center"><p class="text-gray-500">Belum ada riwayat aktivitas</p></div>';
+                                    section.innerHTML = emptyStates[type] || '<div class="bg-white rounded-2xl shadow-lg p-8 text-center"><p class="text-gray-500">Belum ada riwayat aktivitas</p></div>';
                                 }
                             } else {
                                  await Swal.fire({

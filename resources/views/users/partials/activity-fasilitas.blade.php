@@ -47,8 +47,15 @@
                 </div>
                 @empty
                 @if($fasilitasBookings->currentPage() == 1)
-                <div class="bg-white rounded-2xl shadow-lg p-8 text-center">
-                    <p class="text-gray-500">Belum ada riwayat peminjaman fasilitas umum</p>
+                <div class="bg-white rounded-2xl shadow-lg p-12 text-center border border-gray-100">
+                    <div class="w-16 h-16 bg-sky-50 text-sky-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <i class="fas fa-building text-2xl"></i>
+                    </div>
+                    <h4 class="text-lg font-bold text-gray-800 mb-1">Belum Ada Riwayat Peminjaman Fasilitas</h4>
+                    <p class="text-sm text-gray-500 mb-4">Ajukan peminjaman gedung serbaguna, balai pertemuan, atau fasilitas umum desa lainnya!</p>
+                    <a href="{{ route('user.fasilitas-umum.equipment') }}" class="inline-flex items-center gap-2 px-6 py-2.5 bg-sky-500 text-white rounded-xl font-semibold hover:bg-sky-600 transition-colors shadow-sm">
+                        <i class="fas fa-calendar-plus"></i> Pinjam Fasilitas Sekarang
+                    </a>
                 </div>
                 @endif
                 @endforelse

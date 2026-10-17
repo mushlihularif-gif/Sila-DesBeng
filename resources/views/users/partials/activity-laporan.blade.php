@@ -90,12 +90,15 @@
     </div>
 @empty
     @if($laporans->currentPage() == 1)
-    <div class="bg-white rounded-2xl shadow-lg p-10 text-center border border-gray-100">
-        <div class="w-16 h-16 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-3">
-            <i class="bx bx-folder-open text-3xl"></i>
+    <div class="bg-white rounded-2xl shadow-lg p-12 text-center border border-gray-100">
+        <div class="w-16 h-16 bg-sky-50 text-sky-500 rounded-full flex items-center justify-center mx-auto mb-3">
+            <i class="fas fa-bullhorn text-2xl"></i>
         </div>
-        <h4 class="font-bold text-gray-800 text-base mb-1">Belum Ada Riwayat Laporan</h4>
-        <p class="text-gray-500 text-sm">Anda belum pernah membuat laporan warga di SegiDaerah.</p>
+        <h4 class="text-lg font-bold text-gray-800 mb-1">Belum Ada Riwayat Laporan</h4>
+        <p class="text-sm text-gray-500 mb-4">Sampaikan aspirasi, aduan, atau kendala fasilitas di lingkungan Anda untuk segera ditangani!</p>
+        <a href="{{ route('pelaporan.landing') }}" class="inline-flex items-center gap-2 px-6 py-2.5 bg-sky-500 text-white rounded-xl font-semibold hover:bg-sky-600 transition-colors shadow-sm">
+            <i class="fas fa-paper-plane"></i> Buat Laporan Warga
+        </a>
     </div>
     @endif
 @endforelse
