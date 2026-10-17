@@ -254,7 +254,7 @@
                     <h4 class="text-lg font-bold text-gray-800 mb-1">Belum Ada Riwayat Pesanan Gas</h4>
                     <p class="text-sm text-gray-500 mb-4">Pesan tabung gas LPG resmi untuk kebutuhan rumah tangga Anda dengan mudah dan cepat!</p>
                     <a href="{{ route('gas.sales') }}" class="inline-flex items-center gap-2 px-6 py-2.5 bg-sky-500 text-white rounded-xl font-semibold hover:bg-sky-600 transition-colors shadow-sm">
-                        <i class="fas fa-gas-pump"></i> Pesan Gas Sekarang
+                        <i class="fas fa-fire-flame-simple"></i> Pesan Gas Sekarang
                     </a>
                 </div>
                 @endif

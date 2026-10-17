@@ -312,7 +312,7 @@
                 @if($rentalBookings->currentPage() == 1)
                 <div class="bg-white rounded-2xl shadow-lg p-12 text-center border border-gray-100">
                     <div class="w-16 h-16 bg-sky-50 text-sky-500 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <i class="fas fa-tools text-2xl"></i>
+                        <i class="fas fa-box-open text-2xl"></i>
                     </div>
                     <h4 class="text-lg font-bold text-gray-800 mb-1">Belum Ada Riwayat Penyewaan</h4>
                     <p class="text-sm text-gray-500 mb-4">Temukan dan sewa berbagai perlengkapan atau alat usaha yang Anda butuhkan dengan mudah!</p>
