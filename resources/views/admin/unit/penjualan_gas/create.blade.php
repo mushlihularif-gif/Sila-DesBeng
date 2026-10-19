@@ -51,6 +51,8 @@
 
                         <form action="{{ route('admin.unit.penjualan_gas.store') }}" method="POST" enctype="multipart/form-data">
                             @csrf
+    <input type="hidden" id="latitude" name="latitude" value="{{ old('latitude') }}">
+    <input type="hidden" id="longitude" name="longitude" value="{{ old('longitude') }}">
                             
                             
                             <!-- STEPS NAVIGATION -->

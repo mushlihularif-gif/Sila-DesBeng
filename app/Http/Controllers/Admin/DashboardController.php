@@ -897,10 +897,9 @@ public function index(Request $request)
      */
     public function notificationsUpdate(Request $request)
     {
-        // Tangani pembaruan preferensi notifikasi
-        // Anda dapat menyimpan preferensi ini ke database jika diperlukan
-
-        return back()->with('success', 'Notification preferences updated successfully!');
+        // Retire the old template form: it never stored or applied preferences.
+        return redirect()->route('admin.settings.notifications')
+            ->with('info', 'Notifikasi layanan dapat dibaca melalui pusat notifikasi.');
     }
     /**
      * Tampilkan Halaman Pemeliharaan

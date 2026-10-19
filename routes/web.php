@@ -747,6 +747,8 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
             Route::put('pasar-daerah/pesanan/{id}', [\App\Http\Controllers\Admin\UnitPasarDaerahController::class, 'pesananUpdate'])->name('admin.unit.pasar_daerah.pesanan.update');
             Route::get('pasar-daerah/laporan/transaksi', [\App\Http\Controllers\Admin\UnitPasarDaerahController::class, 'laporan'])->name('admin.unit.pasar_daerah.laporan');
             
+            Route::post('pasar-daerah/pesanan/{id}/cancellation/{action}', [\App\Http\Controllers\Admin\UnitPasarDaerahController::class, 'handleCancellation'])->name('admin.unit.pasar_daerah.cancellation');
+
             // Profil Toko & Ulasan
             Route::get('pasar-daerah/profile/edit', [\App\Http\Controllers\Admin\UnitPasarDaerahController::class, 'profile'])->name('admin.unit.pasar_daerah.profile');
             Route::post('pasar-daerah/profile/edit', [\App\Http\Controllers\Admin\UnitPasarDaerahController::class, 'updateProfile'])->name('admin.unit.pasar_daerah.profile.update');
@@ -937,6 +939,10 @@ Route::middleware(['auth', 'role:user'])->group(function () {
         Route::get('/pengumuman', [\App\Http\Controllers\User\WilayahAdminController::class, 'indexPengumuman'])->name('pengumuman.index');
         Route::post('/pengumuman', [\App\Http\Controllers\User\WilayahAdminController::class, 'storePengumuman'])->name('pengumuman.store');
         
+        Route::get('/konten/{announcement}/edit', [\App\Http\Controllers\User\WilayahAdminController::class, 'editKonten'])->name('konten.edit');
+        Route::put('/konten/{announcement}', [\App\Http\Controllers\User\WilayahAdminController::class, 'updateKonten'])->name('konten.update');
+        Route::delete('/konten/{announcement}', [\App\Http\Controllers\User\WilayahAdminController::class, 'destroyKonten'])->name('konten.destroy');
+
         Route::get('/warga', [\App\Http\Controllers\User\WilayahAdminController::class, 'indexWarga'])->name('warga.index');
     });
 });

@@ -125,7 +125,7 @@ class HistoryController extends Controller
                 $title .= ' (+' . ($order->items->count() - 1) . ' produk)';
             }
             
-            $imageUrl = url('User/img/elemen/pasar.png');
+            $imageUrl = url('User/img/elemen/PasarDaerah.png');
             if ($firstProduct && $firstProduct->foto) {
                 $imageUrl = url('storage/' . $firstProduct->foto);
             }

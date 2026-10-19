@@ -185,8 +185,7 @@
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             var defaultIcon = L.icon({
-                iconUrl: '{{ asset("User/img/marker-icon.png") }}',
-                shadowUrl: '{{ asset("User/img/marker-shadow.png") }}',
+                iconUrl: '{{ asset("images/map-marker.svg") }}',
                 iconSize: [25, 41],
                 iconAnchor: [12, 41],
                 popupAnchor: [1, -34],

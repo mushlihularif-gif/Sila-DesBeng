@@ -11,7 +11,7 @@
                     <img src="{{ asset('storage/' . $firstItem->produk->foto) }}" 
                          alt="{{ $firstItem->product_name }}" 
                          class="w-full sm:w-32 h-48 sm:h-32 object-cover rounded-xl flex-shrink-0 shadow-sm"
-                         onerror="this.src='{{ asset('User/img/elemen/pasar.png') }}'">
+                         onerror="this.onerror=null;this.src='{{ asset('User/img/elemen/PasarDaerah.png') }}'">
                 @else
                     <div class="w-full sm:w-32 h-48 sm:h-32 bg-gray-100 rounded-xl flex items-center justify-center flex-shrink-0">
                         <i class="fas fa-store text-4xl text-gray-400"></i>

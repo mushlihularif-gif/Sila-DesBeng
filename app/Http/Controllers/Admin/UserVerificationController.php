@@ -111,7 +111,7 @@ class UserVerificationController extends Controller
 
             // Hanya berikan watermark pada KTP/KK, foto wajah dibiarkan bersih
             if ($type === 'ktp' || $type === 'kk') {
-                $watermarkPath = public_path('Admin/img/watermarkprivasi/WatermarkPrivasi.png');
+                $watermarkPath = public_path('Admin/img/watermarkprivasi/WatermarkPrivasiFIX.png');
                 if (file_exists($watermarkPath)) {
                     $watermark = $manager->read($watermarkPath);
                     $watermarkWidth = intval($width * 0.9);

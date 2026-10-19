@@ -111,66 +111,68 @@ class MobilBookingApiController extends Controller
             'distance_km' => 'nullable|numeric|min:0',
         ]);
 
-        $mobil = Mobil::findOrFail($request->mobil_id);
+        return \Illuminate\Support\Facades\DB::transaction(function () use ($request) {
+            $mobil = Mobil::query()->lockForUpdate()->findOrFail($request->mobil_id);
 
-        if (!$mobil->hasStock(1)) {
+            if (!$mobil->hasStock(1)) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Kendaraan sedang tidak tersedia.',
+                ], 422);
+            }
+
+            $startDate = \Carbon\Carbon::parse($request->start_date);
+            $endDate = \Carbon\Carbon::parse($request->end_date);
+            $daysCount = $startDate->diffInDays($endDate) + 1;
+            $totalAmount = $mobil->harga_sewa * $daysCount;
+
+            $booking = MobilBooking::create([
+                'user_id' => $request->user()->id,
+                'mobil_id' => $mobil->id,
+                'quantity' => 1,
+                'start_date' => $request->start_date,
+                'end_date' => $request->end_date,
+                'recipient_name' => $request->recipient_name,
+                'delivery_address' => $request->delivery_address,
+                'delivery_method' => $request->delivery_method ?? 'jemput',
+                'payment_method' => $request->payment_method,
+                'rental_purpose' => $request->rental_purpose,
+                'dengan_supir' => $request->dengan_supir ?? false,
+                'distance_km' => $request->distance_km,
+                'total_amount' => $totalAmount,
+                'status' => 'pending',
+                'region_id' => $mobil->region_id,
+            ]);
+
+            // Kurangi stok
+            $mobil->decreaseStock(1);
+
+            // Notifikasi untuk User
+            \App\Models\Notification::create([
+                'user_id' => $request->user()->id,
+                'type' => 'status_berubah',
+                'title' => 'Pemesanan Berhasil',
+                'message' => 'Pemesanan Mobil (Order ID: ' . $booking->order_number . ') berhasil dibuat.',
+                'link' => '/unit-penyewaan-mobil',
+                'icon' => 'fas fa-car text-blue-500',
+            ]);
+
             return response()->json([
-                'status' => 'error',
-                'message' => 'Kendaraan sedang tidak tersedia.',
-            ], 422);
-        }
-
-        $startDate = \Carbon\Carbon::parse($request->start_date);
-        $endDate = \Carbon\Carbon::parse($request->end_date);
-        $daysCount = $startDate->diffInDays($endDate) + 1;
-        $totalAmount = $mobil->harga_sewa * $daysCount;
-
-        $booking = MobilBooking::create([
-            'user_id' => $request->user()->id,
-            'mobil_id' => $mobil->id,
-            'quantity' => 1,
-            'start_date' => $request->start_date,
-            'end_date' => $request->end_date,
-            'recipient_name' => $request->recipient_name,
-            'delivery_address' => $request->delivery_address,
-            'delivery_method' => $request->delivery_method ?? 'jemput',
-            'payment_method' => $request->payment_method,
-            'rental_purpose' => $request->rental_purpose,
-            'dengan_supir' => $request->dengan_supir ?? false,
-            'distance_km' => $request->distance_km,
-            'total_amount' => $totalAmount,
-            'status' => 'pending',
-            'region_id' => $request->user()->region_id,
-        ]);
-
-        // Kurangi stok
-        $mobil->decreaseStock(1);
-
-        // Notifikasi untuk User
-        \App\Models\Notification::create([
-            'user_id' => $user->id,
-            'type' => 'status_berubah',
-            'title' => 'Pemesanan Berhasil',
-            'message' => 'Pemesanan Mobil (Order ID: ' . $booking->order_number . ') berhasil dibuat.',
-            'link' => '/unit-penyewaan/mobil',
-            'icon' => 'fas fa-car text-blue-500',
-        ]);
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Pemesanan kendaraan berhasil dibuat.',
-            'data' => [
-                'id' => $booking->id,
-                'order_number' => $booking->order_number,
-                'item_name' => $mobil->nama_mobil,
-                'days_count' => $daysCount,
-                'total_amount' => (float) $totalAmount,
-                'dengan_supir' => $booking->dengan_supir,
-                'status' => $booking->status,
-                'start_date' => $booking->start_date->format('Y-m-d'),
-                'end_date' => $booking->end_date->format('Y-m-d'),
-            ],
-        ], 201);
+                'status' => 'success',
+                'message' => 'Pemesanan kendaraan berhasil dibuat.',
+                'data' => [
+                    'id' => $booking->id,
+                    'order_number' => $booking->order_number,
+                    'item_name' => $mobil->nama_mobil,
+                    'days_count' => $daysCount,
+                    'total_amount' => (float) $totalAmount,
+                    'dengan_supir' => $booking->dengan_supir,
+                    'status' => $booking->status,
+                    'start_date' => $booking->start_date->format('Y-m-d'),
+                    'end_date' => $booking->end_date->format('Y-m-d'),
+                ],
+            ], 201);
+        });
     }
 
     /**

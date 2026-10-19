@@ -87,7 +87,8 @@ class MobilBookingController extends Controller
         ]);
 
         $item = Mobil::findOrFail($validated['mobil_id']);
-        $validated['recipient_name'] = $validated['recipient_name'] ?: Auth::user()->name;
+        $validated['recipient_name'] = ($validated['recipient_name'] ?? null) ?: Auth::user()->name;
+        $validated['end_date'] = $validated['end_date'] ?? $validated['start_date'];
         
         // Validate availability before proceeding
         if ($item->status !== 'tersedia') {
@@ -148,78 +149,69 @@ class MobilBookingController extends Controller
             $paymentProofPath = $request->file('payment_proof')->store('payment_proofs', 'public');
         }
 
-        $booking = MobilBooking::create([
-            'user_id' => Auth::id(),
-            'mobil_id' => $validated['mobil_id'],
-            'region_id' => $item->region_id ?? Auth::user()->region_id,
-            'jenis_sewa' => $validated['jenis_sewa'],
-            'dengan_supir' => $denganSupir,
-            'delivery_method' => $deliveryMethod,
-            'rental_purpose' => $validated['rental_purpose'],
-            'quantity' => $validated['quantity'],
-            'start_date' => $validated['start_date'],
-            'end_date' => $validated['end_date'],
-            'distance_km' => $validated['distance_km'] ?? 1,
-            'tujuan_wilayah' => $validated['tujuan_wilayah'] ?? null,
-            'recipient_name' => $validated['recipient_name'],
-            'delivery_address' => $validated['delivery_address'],
-            'latitude' => $validated['latitude'] ?? null,
-            'longitude' => $validated['longitude'] ?? null,
-            'payment_method' => $validated['payment_method'],
-            'payment_proof' => $paymentProofPath,
-            'total_amount' => $totalAmount,
-            'status' => 'pending',
-        ]);
+        return \Illuminate\Support\Facades\DB::transaction(function () use ($request, $validated, $item, $denganSupir, $deliveryMethod, $paymentProofPath, $totalAmount) {
+            $booking = MobilBooking::create([
+                'user_id' => Auth::id(),
+                'mobil_id' => $validated['mobil_id'],
+                'region_id' => $item->region_id ?? Auth::user()->region_id,
+                'jenis_sewa' => $validated['jenis_sewa'],
+                'dengan_supir' => $denganSupir,
+                'delivery_method' => $deliveryMethod,
+                'rental_purpose' => $validated['rental_purpose'],
+                'quantity' => $validated['quantity'],
+                'start_date' => $validated['start_date'],
+                'end_date' => $validated['end_date'],
+                'distance_km' => $validated['distance_km'] ?? 1,
+                'tujuan_wilayah' => $validated['tujuan_wilayah'] ?? null,
+                'recipient_name' => $validated['recipient_name'],
+                'delivery_address' => $validated['delivery_address'],
+                'latitude' => $validated['latitude'] ?? null,
+                'longitude' => $validated['longitude'] ?? null,
+                'payment_method' => $validated['payment_method'],
+                'payment_proof' => $paymentProofPath,
+                'total_amount' => $totalAmount,
+                'status' => 'pending',
+            ]);
 
-        // Catat pergerakan dana ke ledger wilayah — sebelumnya tidak tercatat
-        // sama sekali di sini, lihat catatan yang sama di RentalBookingController.
-        \App\Models\WalletTransaction::catatPemasukan(
-            regionId: $item->region_id,
-            referenceType: 'mobil',
-            referenceId: $booking->id,
-            amount: $totalAmount,
-            paymentMethod: $validated['payment_method'],
-            proofPath: $paymentProofPath,
-        );
+            // Catat pergerakan dana ke ledger wilayah — sebelumnya tidak tercatat
+            // sama sekali di sini, lihat catatan yang sama di RentalBookingController.
+            \App\Models\WalletTransaction::catatPemasukan(
+                regionId: $item->region_id,
+                referenceType: 'mobil',
+                referenceId: $booking->id,
+                amount: $totalAmount,
+                paymentMethod: $validated['payment_method'],
+                proofPath: $paymentProofPath,
+            );
 
-        $receipt = \App\Models\TransactionReceipt::create([
-            'booking_type' => 'mobil',
-            'booking_id' => $booking->id,
-            'receipt_number' => \App\Models\TransactionReceipt::generateReceiptNumber('mobil'),
-            'user_id' => Auth::id(),
-            'amount' => $totalAmount,
-            'issued_at' => now(),
-        ]);
+            // Buat notifikasi admin
+            \App\Models\AdminNotification::create([
+                'type' => 'mobil_order',
+                'reference_id' => $booking->id,
+                'region_id' => $item->region_id,
+                'title' => 'Permintaan Penyewaan Transportasi Baru',
+                'message' => 'Permintaan sewa transportasi ' . ($item->nama_mobil ?? $item->nama_barang) . ' (' . ($denganSupir ? 'Dengan Supir' : 'Lepas Kunci') . ') dari ' . Auth::user()->name,
+                'is_read' => false,
+            ]);
 
-        $booking->update(['receipt_path' => $receipt->receipt_number]);
+            // Notifikasi ke pemesan
+            \App\Services\NotificationService::notifyOrderCreated('mobil', $booking, ($item->nama_mobil ?? $item->nama_barang));
 
-        // Buat notifikasi admin
-        \App\Models\AdminNotification::create([
-            'type' => 'mobil_order',
-            'reference_id' => $booking->id,
-            'region_id' => $item->region_id,
-            'title' => 'Permintaan Penyewaan Transportasi Baru',
-            'message' => 'Permintaan sewa transportasi ' . ($item->nama_mobil ?? $item->nama_barang) . ' (' . ($denganSupir ? 'Dengan Supir' : 'Lepas Kunci') . ') dari ' . Auth::user()->name,
-            'is_read' => false,
-        ]);
+            if ($request->wantsJson() || $request->ajax()) {
+                $response = [
+                    'success' => true,
+                    'message' => 'Pemesanan transportasi berhasil dibuat! Menunggu konfirmasi admin.',
+                    'booking_id' => $booking->id,
+                    'receipt_id' => $booking->id,
+                    'receipt_number' => $booking->order_number,
+                ];
 
-        // Notifikasi ke pemesan
-        \App\Services\NotificationService::notifyOrderCreated('mobil', $booking, ($item->nama_mobil ?? $item->nama_barang));
+                return response()->json($response);
+            }
 
-        if ($request->wantsJson() || $request->ajax()) {
-            $response = [
-                'success' => true,
-                'message' => 'Pemesanan transportasi berhasil dibuat! Menunggu konfirmasi admin.',
-                'booking_id' => $booking->id,
-                'receipt_id' => $booking->id,
-                'receipt_number' => $receipt->receipt_number,
-            ];
-
-            return response()->json($response);
-        }
-
-        return redirect()->route('user.dashboard')
-            ->with('success', 'Pemesanan transportasi berhasil dibuat! Menunggu konfirmasi admin.')
-            ->with('show_receipt', $receipt->id);
+            return redirect()->route('user.activity')
+                ->with('success', 'Pemesanan transportasi berhasil dibuat! Menunggu konfirmasi admin.')
+                ->with('show_receipt', $booking->id);
+        });
     }
 }

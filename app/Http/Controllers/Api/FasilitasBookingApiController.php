@@ -108,68 +108,70 @@ class FasilitasBookingApiController extends Controller
             'dengan_supir' => 'nullable|boolean',
         ]);
 
-        $fasilitas = FasilitasUmum::findOrFail($request->fasilitas_id);
+        return \Illuminate\Support\Facades\DB::transaction(function () use ($request) {
+            $fasilitas = FasilitasUmum::query()->lockForUpdate()->findOrFail($request->fasilitas_id);
 
-        if ($fasilitas->stok !== null && $fasilitas->stok <= 0) {
+            if ($fasilitas->stok !== null && $fasilitas->stok < ($request->quantity ?? 1)) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Fasilitas sedang tidak tersedia.',
+                ], 422);
+            }
+
+            $startDate = \Carbon\Carbon::parse($request->start_date);
+            $endDate = \Carbon\Carbon::parse($request->end_date);
+            $daysCount = $startDate->diffInDays($endDate) + 1;
+
+            // Fasilitas untuk acara sosial biasanya gratis
+            $totalAmount = 0;
+
+            $booking = FasilitasUmumBooking::create([
+                'user_id' => $request->user()->id,
+                'fasilitas_id' => $fasilitas->id,
+                'start_date' => $request->start_date,
+                'end_date' => $request->end_date,
+                'quantity' => $request->quantity ?? 1,
+                'rental_purpose' => $request->rental_purpose,
+                'jenis_acara' => $request->jenis_acara ?? 'sosial',
+                'butuh_gudang' => $request->butuh_gudang ?? false,
+                'total_amount' => $totalAmount,
+                'status' => 'pending',
+                'delivery_method' => $request->delivery_method,
+                'dengan_supir' => $request->dengan_supir ?? false,
+                'region_id' => $fasilitas->region_id,
+            ]);
+
+            // Kurangi stok jika ada
+            if ($fasilitas->stok !== null) {
+                $fasilitas->decreaseStock($request->quantity ?? 1);
+            }
+
+            // Notifikasi untuk User
+            \App\Models\Notification::create([
+                'user_id' => $request->user()->id,
+                'type' => 'status_berubah',
+                'title' => 'Pemesanan Berhasil',
+                'message' => 'Pemesanan Fasilitas (Order ID: ' . $booking->order_number . ') berhasil dibuat.',
+                'link' => '/unit-peminjaman-fasilitas-umum',
+                'icon' => 'fas fa-calendar-check text-green-500',
+            ]);
+
             return response()->json([
-                'status' => 'error',
-                'message' => 'Fasilitas sedang tidak tersedia.',
-            ], 422);
-        }
-
-        $startDate = \Carbon\Carbon::parse($request->start_date);
-        $endDate = \Carbon\Carbon::parse($request->end_date);
-        $daysCount = $startDate->diffInDays($endDate) + 1;
-
-        // Fasilitas untuk acara sosial biasanya gratis
-        $totalAmount = 0;
-
-        $booking = FasilitasUmumBooking::create([
-            'user_id' => $request->user()->id,
-            'fasilitas_id' => $fasilitas->id,
-            'start_date' => $request->start_date,
-            'end_date' => $request->end_date,
-            'quantity' => $request->quantity ?? 1,
-            'rental_purpose' => $request->rental_purpose,
-            'jenis_acara' => $request->jenis_acara ?? 'sosial',
-            'butuh_gudang' => $request->butuh_gudang ?? false,
-            'total_amount' => $totalAmount,
-            'status' => 'pending',
-            'delivery_method' => $request->delivery_method,
-            'dengan_supir' => $request->dengan_supir ?? false,
-            'region_id' => $request->user()->region_id,
-        ]);
-
-        // Kurangi stok jika ada
-        if ($fasilitas->stok !== null) {
-            $fasilitas->decreaseStock($request->quantity ?? 1);
-        }
-
-        // Notifikasi untuk User
-        \App\Models\Notification::create([
-            'user_id' => $user->id,
-            'type' => 'status_berubah',
-            'title' => 'Pemesanan Berhasil',
-            'message' => 'Pemesanan Fasilitas (Order ID: ' . $booking->order_number . ') berhasil dibuat.',
-            'link' => '/unit-penyewaan/fasilitas',
-            'icon' => 'fas fa-calendar-check text-green-500',
-        ]);
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Pemesanan fasilitas berhasil dibuat.',
-            'data' => [
-                'id' => $booking->id,
-                'order_number' => $booking->order_number,
-                'item_name' => $fasilitas->nama_fasilitas,
-                'days_count' => $daysCount,
-                'jenis_acara' => $booking->jenis_acara,
-                'total_amount' => (float) $totalAmount,
-                'status' => $booking->status,
-                'start_date' => $booking->start_date->format('Y-m-d'),
-                'end_date' => $booking->end_date->format('Y-m-d'),
-            ],
-        ], 201);
+                'status' => 'success',
+                'message' => 'Pemesanan fasilitas berhasil dibuat.',
+                'data' => [
+                    'id' => $booking->id,
+                    'order_number' => $booking->order_number,
+                    'item_name' => $fasilitas->nama_fasilitas,
+                    'days_count' => $daysCount,
+                    'jenis_acara' => $booking->jenis_acara,
+                    'total_amount' => (float) $totalAmount,
+                    'status' => $booking->status,
+                    'start_date' => $booking->start_date->format('Y-m-d'),
+                    'end_date' => $booking->end_date->format('Y-m-d'),
+                ],
+            ], 201);
+        });
     }
 
     /**

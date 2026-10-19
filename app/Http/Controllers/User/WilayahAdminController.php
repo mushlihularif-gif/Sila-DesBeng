@@ -137,7 +137,9 @@ class WilayahAdminController extends Controller
         
         $allowedRegionIds = $this->wilayahDiurus($user);
         
-        $query = \App\Models\Announcement::with(['admin', 'region'])->whereIn('region_id', $allowedRegionIds)->orderBy('created_at', 'desc');
+        $query = \App\Models\Announcement::with(['admin', 'region'])->where('post_category', 'Pengumuman')->where(function ($q) use ($allowedRegionIds, $user) {
+            $q->whereIn('region_id', $allowedRegionIds)->orWhere('admin_id', $user->id);
+        })->orderBy('created_at', 'desc');
         
         if ($request->filled('type')) {
             $query->where('type', $request->type);
@@ -177,7 +179,7 @@ class WilayahAdminController extends Controller
             'event_date' => 'nullable|date',
             'location' => 'nullable|string|max:255',
             'description' => 'required|string',
-            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120'
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120'
         ]);
 
         $user = auth()->user();
@@ -219,7 +221,9 @@ class WilayahAdminController extends Controller
         
         $allowedRegionIds = $this->wilayahDiurus($user);
         
-        $query = \App\Models\Announcement::with(['admin', 'region'])->whereIn('region_id', $allowedRegionIds)->orderBy('created_at', 'desc');
+        $query = \App\Models\Announcement::with(['admin', 'region'])->where('post_category', 'Berita')->where(function ($q) use ($allowedRegionIds, $user) {
+            $q->whereIn('region_id', $allowedRegionIds)->orWhere('admin_id', $user->id);
+        })->orderBy('created_at', 'desc');
         
         if ($request->filled('type')) {
             $query->where('type', $request->type);
@@ -259,7 +263,7 @@ class WilayahAdminController extends Controller
             'event_date' => 'nullable|date',
             'location' => 'nullable|string|max:255',
             'description' => 'required|string',
-            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120'
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120'
         ]);
 
         $user = auth()->user();
@@ -293,6 +297,58 @@ class WilayahAdminController extends Controller
         \App\Services\NotificationService::broadcastAnnouncement($berita);
 
         return back()->with('success', 'Berita baru berhasil dipublikasikan!');
+    }
+
+    private function kontenMilikSendiri(\App\Models\Announcement $announcement): void
+    {
+        abort_unless((int) $announcement->admin_id === (int) auth()->id(), 403);
+        abort_unless(in_array($announcement->post_category, ['Berita', 'Pengumuman']), 404);
+    }
+
+    public function editKonten(\App\Models\Announcement $announcement)
+    {
+        $this->kontenMilikSendiri($announcement);
+        $regionIds = auth()->user()->region_id
+            ? array_merge([auth()->user()->region_id], \App\Models\Region::getAncestorIds(auth()->user()->region_id))
+            : [];
+        $regions = \App\Models\Region::whereIn('id', $regionIds)->get();
+
+        return view('user.wilayah.konten-edit', compact('announcement', 'regions'));
+    }
+
+    public function updateKonten(Request $request, \App\Models\Announcement $announcement)
+    {
+        $this->kontenMilikSendiri($announcement);
+        $regionIds = auth()->user()->region_id
+            ? array_merge([auth()->user()->region_id], \App\Models\Region::getAncestorIds(auth()->user()->region_id))
+            : [];
+        $data = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'type' => 'required|string|max:50',
+            'target_region_id' => ['required', \Illuminate\Validation\Rule::in($regionIds)],
+            'event_date' => 'nullable|date',
+            'location' => 'nullable|string|max:255',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
+        ]);
+        $data['region_id'] = $data['target_region_id'];
+        unset($data['target_region_id'], $data['image']);
+        if ($request->hasFile('image')) {
+            $data['image_path'] = $request->file('image')->store('announcements', 'public');
+        }
+        $announcement->update($data);
+
+        return redirect()->route($announcement->post_category === 'Berita' ? 'wilayah.berita.index' : 'wilayah.pengumuman.index')
+            ->with('success', 'Konten berhasil diperbarui.');
+    }
+
+    public function destroyKonten(\App\Models\Announcement $announcement)
+    {
+        $this->kontenMilikSendiri($announcement);
+        $route = $announcement->post_category === 'Berita' ? 'wilayah.berita.index' : 'wilayah.pengumuman.index';
+        $announcement->delete();
+
+        return redirect()->route($route)->with('success', 'Konten berhasil dihapus.');
     }
 
     public function indexWarga(Request $request)

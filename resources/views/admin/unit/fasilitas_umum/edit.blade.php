@@ -51,6 +51,8 @@
 
                         <form id="formFasilitasUmum" action="{{ route('admin.unit.fasilitas_umum.update', $fasilitas->id) }}" method="POST" enctype="multipart/form-data">
                             @csrf
+    <input type="hidden" id="latitude" name="latitude" value="{{ old('latitude', $fasilitas->latitude) }}">
+    <input type="hidden" id="longitude" name="longitude" value="{{ old('longitude', $fasilitas->longitude) }}">
                             @method('PUT')
 
                             

@@ -140,7 +140,7 @@
                         <div class="d-flex flex-wrap align-items-center gap-3">
                             <button type="button" class="btn btn-light rounded-pill shadow-sm px-4 fw-bold text-success"
                                     data-bs-toggle="modal" data-bs-target="#modalTarikSaldo">
-                                <i class="bx bx-money-withdraw me-1"></i> Tarik Saldo
+                                <i class="bx bx-money me-1"></i> Tarik Saldo
                             </button>
                             <small style="opacity: 0.85;">
                                 Cair ke {{ $tujuan['bank']['tersedia'] ? $tujuan['bank']['nama'] : 'rekening wilayah' }},
@@ -249,7 +249,7 @@
                         <li class="nav-item">
                             <button type="button" class="nav-link active rounded-pill shadow-sm px-4" role="tab"
                                     data-bs-toggle="tab" data-bs-target="#tab-penarikan">
-                                <i class="bx bx-money-withdraw me-1"></i> Riwayat Penarikan
+                                <i class="bx bx-money me-1"></i> Riwayat Penarikan
                             </button>
                         </li>
                         <li class="nav-item">

@@ -96,65 +96,67 @@ class RentalBookingApiController extends Controller
             'delivery_method' => 'nullable|in:antar,jemput',
         ]);
 
-        $barang = Barang::findOrFail($request->barang_id);
+        return \Illuminate\Support\Facades\DB::transaction(function () use ($request) {
+            $barang = Barang::query()->lockForUpdate()->findOrFail($request->barang_id);
 
-        if (!$barang->hasStock($request->quantity)) {
-            return response()->json([
-                'status' => 'error',
-                'message' => "Stok tidak mencukupi. Tersedia: {$barang->stok}",
-            ], 422);
-        }
+            if (!$barang->hasStock($request->quantity)) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => "Stok tidak mencukupi. Tersedia: {$barang->stok}",
+                ], 422);
+            }
 
-        $startDate = \Carbon\Carbon::parse($request->start_date);
-        $endDate = \Carbon\Carbon::parse($request->end_date);
-        $daysCount = $startDate->diffInDays($endDate) + 1;
-        $totalAmount = $barang->harga_sewa * $request->quantity * $daysCount;
+            $startDate = \Carbon\Carbon::parse($request->start_date);
+            $endDate = \Carbon\Carbon::parse($request->end_date);
+            $daysCount = $startDate->diffInDays($endDate) + 1;
+            $totalAmount = $barang->harga_sewa * $request->quantity * $daysCount;
 
-        $booking = RentalBooking::create([
-            'user_id' => $request->user()->id,
-            'barang_id' => $barang->id,
-            'order_number' => RentalBooking::generateOrderNumber(),
-            'quantity' => $request->quantity,
-            'start_date' => $request->start_date,
-            'end_date' => $request->end_date,
-            'days_count' => $daysCount,
-            'recipient_name' => $request->recipient_name,
-            'delivery_address' => $request->delivery_address,
-            'delivery_method' => $request->delivery_method ?? 'jemput',
-            'payment_method' => $request->payment_method,
-            'rental_purpose' => $request->rental_purpose,
-            'total_amount' => $totalAmount,
-            'status' => 'pending',
-        ]);
-
-        // Kurangi stok
-        $barang->decreaseStock($request->quantity);
-
-        // Notifikasi untuk User
-        \App\Models\Notification::create([
-            'user_id' => $user->id,
-            'type' => 'status_berubah',
-            'title' => 'Pemesanan Berhasil',
-            'message' => 'Pemesanan Alat Sewa (Order ID: ' . $booking->order_number . ') berhasil dibuat.',
-            'link' => '/unit-penyewaan/alat',
-            'icon' => 'fas fa-tools text-purple-500',
-        ]);
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Pemesanan alat sewa berhasil dibuat.',
-            'data' => [
-                'id' => $booking->id,
-                'order_number' => $booking->order_number,
-                'item_name' => $barang->nama_barang,
-                'quantity' => $booking->quantity,
+            $booking = RentalBooking::create([
+                'user_id' => $request->user()->id,
+                'barang_id' => $barang->id,
+                'order_number' => RentalBooking::generateOrderNumber(),
+                'quantity' => $request->quantity,
+                'start_date' => $request->start_date,
+                'end_date' => $request->end_date,
                 'days_count' => $daysCount,
-                'total_amount' => (float) $totalAmount,
-                'status' => $booking->status,
-                'start_date' => $booking->start_date->format('Y-m-d'),
-                'end_date' => $booking->end_date->format('Y-m-d'),
-            ],
-        ], 201);
+                'recipient_name' => $request->recipient_name,
+                'delivery_address' => $request->delivery_address,
+                'delivery_method' => $request->delivery_method ?? 'jemput',
+                'payment_method' => $request->payment_method,
+                'rental_purpose' => $request->rental_purpose,
+                'total_amount' => $totalAmount,
+                'status' => 'pending',
+            ]);
+
+            // Kurangi stok
+            $barang->decreaseStock($request->quantity);
+
+            // Notifikasi untuk User
+            \App\Models\Notification::create([
+                'user_id' => $request->user()->id,
+                'type' => 'status_berubah',
+                'title' => 'Pemesanan Berhasil',
+                'message' => 'Pemesanan Alat Sewa (Order ID: ' . $booking->order_number . ') berhasil dibuat.',
+                'link' => '/unit-penyewaan-alat',
+                'icon' => 'fas fa-tools text-purple-500',
+            ]);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Pemesanan alat sewa berhasil dibuat.',
+                'data' => [
+                    'id' => $booking->id,
+                    'order_number' => $booking->order_number,
+                    'item_name' => $barang->nama_barang,
+                    'quantity' => $booking->quantity,
+                    'days_count' => $daysCount,
+                    'total_amount' => (float) $totalAmount,
+                    'status' => $booking->status,
+                    'start_date' => $booking->start_date->format('Y-m-d'),
+                    'end_date' => $booking->end_date->format('Y-m-d'),
+                ],
+            ], 201);
+        });
     }
 
     /**

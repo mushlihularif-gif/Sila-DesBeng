@@ -133,14 +133,14 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Sewa Kendaraan (Mobil, Pick-Up)
     Route::get('/mobil', [\App\Http\Controllers\Api\MobilBookingApiController::class, 'index']);
-    Route::get('/mobil/{id}', [\App\Http\Controllers\Api\MobilBookingApiController::class, 'show']);
+    Route::get('/mobil/{id}', [\App\Http\Controllers\Api\MobilBookingApiController::class, 'show'])->whereNumber('id');
     Route::post('/mobil/booking', [\App\Http\Controllers\Api\MobilBookingApiController::class, 'store']);
     Route::get('/mobil/my-bookings', [\App\Http\Controllers\Api\MobilBookingApiController::class, 'myBookings']);
     Route::delete('/mobil/booking/{id}/cancel', [\App\Http\Controllers\Api\MobilBookingApiController::class, 'cancel']);
 
     // Sewa Fasilitas Umum (Gedung, Lapangan, Ambulans)
     Route::get('/fasilitas', [\App\Http\Controllers\Api\FasilitasBookingApiController::class, 'index']);
-    Route::get('/fasilitas/{id}', [\App\Http\Controllers\Api\FasilitasBookingApiController::class, 'show']);
+    Route::get('/fasilitas/{id}', [\App\Http\Controllers\Api\FasilitasBookingApiController::class, 'show'])->whereNumber('id');
     Route::post('/fasilitas/booking', [\App\Http\Controllers\Api\FasilitasBookingApiController::class, 'store']);
     Route::get('/fasilitas/my-bookings', [\App\Http\Controllers\Api\FasilitasBookingApiController::class, 'myBookings']);
     Route::delete('/fasilitas/booking/{id}/cancel', [\App\Http\Controllers\Api\FasilitasBookingApiController::class, 'cancel']);

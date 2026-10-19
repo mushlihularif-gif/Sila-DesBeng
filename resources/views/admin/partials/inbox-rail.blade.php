@@ -211,7 +211,7 @@
                 return pesanInfo('bx-error-circle', data.pesan || 'Gagal memuat kotak masuk.');
             }
             if (!data.messages.length) {
-                return pesanInfo('bx-inbox', 'Tidak ada email.');
+                return pesanInfo('bx-envelope', 'Tidak ada email.');
             }
 
             gambarDaftar(data.messages);

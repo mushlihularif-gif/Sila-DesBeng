@@ -384,17 +384,17 @@
                         </div>
                     </div>
                     
-                    @if($pesanan->payment_proof)
+                    @if($pesanan->proof_of_payment)
                     <!-- PAYMENT PROOF CARD -->
                     <div class="card shadow-sm border-0 rounded-4 mb-4">
                         <div class="card-header bg-white border-bottom py-3">
                             <h6 class="mb-0 fw-bold">Bukti Pembayaran</h6>
                         </div>
                         <div class="card-body p-4 text-center">
-                            <a href="{{ asset('storage/' . $pesanan->payment_proof) }}" target="_blank" class="d-block border rounded-3 overflow-hidden shadow-sm hover-shadow transition-all mb-3">
-                                <img src="{{ asset('storage/' . $pesanan->payment_proof) }}" alt="Bukti Pembayaran" class="img-fluid w-100" style="object-fit: cover; max-height: 250px;">
+                            <a href="{{ asset('storage/' . $pesanan->proof_of_payment) }}" target="_blank" class="d-block border rounded-3 overflow-hidden shadow-sm hover-shadow transition-all mb-3">
+                                <img src="{{ asset('storage/' . $pesanan->proof_of_payment) }}" alt="Bukti Pembayaran" class="img-fluid w-100" style="object-fit: cover; max-height: 250px;">
                             </a>
-                            <a href="{{ asset('storage/' . $pesanan->payment_proof) }}" download class="btn btn-outline-primary btn-sm rounded-pill px-4">
+                            <a href="{{ asset('storage/' . $pesanan->proof_of_payment) }}" download class="btn btn-outline-primary btn-sm rounded-pill px-4">
                                 <i class="bx bx-download me-1"></i> Unduh Bukti
                             </a>
                         </div>
@@ -446,21 +446,45 @@
 </div>
 
 <script>
+let cancellationBusy = false;
 function showCancellationRejectModal(id, type) {
-    showSiladesBengToast('warning', 'Perhatian', "Fitur penolakan pembatalan belum diimplementasikan di view ini.");
+    Swal.fire({
+        title: 'Tolak pembatalan', input: 'textarea', inputLabel: 'Alasan penolakan',
+        inputAttributes: { maxlength: 500 }, showCancelButton: true,
+        confirmButtonText: 'Tolak pembatalan', cancelButtonText: 'Kembali',
+        inputValidator: value => !value.trim() ? 'Isi alasan penolakan.' : undefined
+    }).then(result => {
+        if (result.isConfirmed) submitCancellation('reject', result.value.trim());
+    });
 }
 function handleCancellation(id, type, action) {
     konfirmasi({
         judul: 'Setujui Pembatalan',
-        pesan: 'Apakah Anda yakin ingin menyetujui pembatalan pesanan ini?',
-        jenis: 'peringatan',
-        tombolYa: 'Ya, Setujui'
-    }).then(function (setuju) {
-        if (! setuju) return;
-        // Fungsi ini masih rintisan: belum ada pemanggilan ke server.
-        showSiladesBengToast('warning', 'Belum Tersedia',
-            'Persetujuan pembatalan belum terhubung ke server.');
-    });
+        pesan: 'Pesanan akan dibatalkan dan stok dikembalikan. Jika pembayaran diterima secara tunai atau transfer manual, pengembalian uang perlu diselesaikan oleh pengelola.',
+        jenis: 'peringatan', tombolYa: 'Ya, Setujui'
+    }).then(setuju => { if (setuju) submitCancellation('approve'); });
+}
+async function submitCancellation(action, reason = null) {
+    if (cancellationBusy) return;
+    cancellationBusy = true;
+    const urls = {
+        approve: @json(route('admin.unit.pasar_daerah.cancellation', ['id' => $pesanan->id, 'action' => 'approve'])),
+        reject: @json(route('admin.unit.pasar_daerah.cancellation', ['id' => $pesanan->id, 'action' => 'reject']))
+    };
+    try {
+        const response = await fetch(urls[action], {
+            method: 'POST',
+            headers: { 'X-CSRF-TOKEN': @json(csrf_token()), 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify({ admin_response: reason })
+        });
+        const data = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.message || 'Pembatalan gagal diproses.');
+        window.location.reload();
+    } catch (error) {
+        showSiladesBengToast('error', 'Gagal', error.message);
+    } finally {
+        cancellationBusy = false;
+    }
 }
 </script>
 @endsection

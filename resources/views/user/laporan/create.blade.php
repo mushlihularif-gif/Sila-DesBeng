@@ -490,6 +490,7 @@
     let map, marker, geocoder;
     let isLeafletActive = false, leafletMap = null, leafletMarker = null;
     let pendingLat = null, pendingLng = null, pendingAddress = null;
+    let locationRequest = 0;
 
     // Fallback otomatis jika Google Maps API Key bermasalah/dibatasi referer
     window.gm_authFailure = function() {
@@ -518,6 +519,7 @@
     }
 
     function initMap() {
+        if (isLeafletActive) return;
         const pakning = { lat: 1.0916, lng: 102.0724 };
 
         if (window.google && window.google.maps && window.google.maps.Geocoder) {
@@ -554,33 +556,39 @@
             showLocationModal(event.latLng.lat(), event.latLng.lng());
         });
 
-        document.getElementById("btn-confirm").addEventListener("click", confirmLocation);
-        document.getElementById("btn-cancel").addEventListener("click", cancelLocation);
-
-        document.getElementById("location-modal").addEventListener("click", function(e) {
-            if (e.target === this) cancelLocation();
-        });
     }
 
+    // Shared by Google Maps and the Leaflet fallback, including late API failures.
+    document.getElementById("btn-confirm").onclick = confirmLocation;
+    document.getElementById("btn-cancel").onclick = cancelLocation;
+    document.getElementById("location-modal").onclick = function(e) {
+        if (e.target === this) cancelLocation();
+    };
+
     function showLocationModal(lat, lng) {
+        const requestId = ++locationRequest;
+        const update = address => {
+            if (requestId === locationRequest) updateLocationUI(address, lat, lng);
+        };
         pendingLat = lat;
         pendingLng = lng;
 
         // Tampilkan modal terlebih dahulu dengan pesan sementara
-        updateLocationUI("Mendeteksi nama lokasi...", lat, lng);
+        update(`Titik Koordinat: ${lat.toFixed(6)}, ${lng.toFixed(6)}`);
 
         function fallbackReverseProxy() {
+            if (requestId !== locationRequest) return;
             fetch(`/api/geocode/reverse?lat=${lat}&lng=${lng}`)
                 .then(res => res.json())
                 .then(data => {
                     if (data && data.address) {
-                        updateLocationUI(data.address, lat, lng);
+                        update(data.address);
                     } else {
-                        updateLocationUI(`Titik Koordinat: ${lat.toFixed(6)}, ${lng.toFixed(6)}`, lat, lng);
+                        update(`Titik Koordinat: ${lat.toFixed(6)}, ${lng.toFixed(6)}`);
                     }
                 })
                 .catch(() => {
-                    updateLocationUI(`Titik Koordinat: ${lat.toFixed(6)}, ${lng.toFixed(6)}`, lat, lng);
+                    update(`Titik Koordinat: ${lat.toFixed(6)}, ${lng.toFixed(6)}`);
                 });
         }
 
@@ -588,7 +596,7 @@
         if (geocoder) {
             geocoder.geocode({ location: { lat: lat, lng: lng } }, function(results, status) {
                 if (status === "OK" && results && results[0] && results[0].formatted_address) {
-                    updateLocationUI(results[0].formatted_address, lat, lng);
+                    update(results[0].formatted_address);
                 } else {
                     fallbackReverseProxy();
                 }
@@ -625,6 +633,8 @@
     }
 
     function confirmLocation() {
+        if (!Number.isFinite(pendingLat) || !Number.isFinite(pendingLng)) return;
+        ++locationRequest;
         const modalInput = document.getElementById("modal-address-input");
         if (modalInput && modalInput.value.trim() !== '') {
             pendingAddress = modalInput.value.trim();
@@ -644,6 +654,7 @@
     }
 
     function cancelLocation() {
+        ++locationRequest;
         pendingLat = null;
         pendingLng = null;
         pendingAddress = null;

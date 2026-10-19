@@ -100,10 +100,10 @@
                                placeholder="Cari nama wilayah...">
                     </div>
                     <button class="btn btn-sm btn-outline-secondary rounded-pill" type="button" id="bukaSemua">
-                        <i class="bx bx-expand-vertical me-1"></i> Buka Semua
+                        <i class="bx bx-expand me-1"></i> Buka Semua
                     </button>
                     <button class="btn btn-sm btn-outline-secondary rounded-pill" type="button" id="tutupSemua">
-                        <i class="bx bx-collapse-vertical me-1"></i> Tutup
+                        <i class="bx bx-collapse me-1"></i> Tutup
                     </button>
                 </div>
             </div>

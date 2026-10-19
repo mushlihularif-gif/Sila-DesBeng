@@ -302,8 +302,53 @@ class UnitPasarDaerahController extends Controller
     }
 
     /**
-     * Update order status.
+     * Review a cancellation within the operator's own market region.
      */
+    public function handleCancellation(Request $request, $id, $action)
+    {
+        abort_unless(in_array($action, ['approve', 'reject']), 404);
+        $admin = $request->user();
+        abort_unless($admin && $admin->isAdmin() && $admin->hasUnitPermission('pasar_daerah') && $admin->region_id, 403);
+        $data = $request->validate([
+            'admin_response' => [$action === 'reject' ? 'required' : 'nullable', 'string', 'max:500'],
+        ]);
+
+        return \Illuminate\Support\Facades\DB::transaction(function () use ($request, $id, $action, $admin, $data) {
+            $order = \App\Models\PasarOrder::where('region_id', $admin->region_id)->lockForUpdate()->findOrFail($id);
+            if ($order->cancellation_status !== 'pending' || in_array($order->status, ['cancelled', 'rejected', 'completed'])) {
+                return response()->json(['success' => false, 'message' => 'Permintaan pembatalan sudah diproses atau pesanan sudah selesai.'], 409);
+            }
+            $order->cancellation_status = $action === 'approve' ? 'approved' : 'rejected';
+            $order->admin_cancellation_response = $data['admin_response'] ?? null;
+            if ($action === 'approve') {
+                foreach ($order->items()->orderBy('pasar_produk_id')->get() as $item) {
+                    $product = $item->produk()->lockForUpdate()->first();
+                    if ($product) {
+                        $product->increaseStock($item->quantity);
+                    }
+                }
+                \App\Models\WalletTransaction::batalkanDanRefund('pasar', $order->id, 'Pembatalan pesanan disetujui pengelola.');
+                $order->status = 'cancelled';
+            }
+            $order->save();
+            $message = $action === 'approve' ? 'Permintaan pembatalan disetujui.' : 'Permintaan pembatalan ditolak.';
+            \App\Models\Notification::create([
+                'user_id' => $order->user_id,
+                'admin_id' => $admin->id,
+                'type' => 'status_berubah',
+                'title' => $message,
+                'message' => 'Pesanan #' . $order->order_number . ': ' . $message . ' ' . ($data['admin_response'] ?? ''),
+                'link' => route('user.activity', [], false),
+            ]);
+            \App\Models\ActivityLog::create([
+                'user_id' => $admin->id, 'action' => 'Cancellation Review',
+                'description' => $message . ' Pesanan pasar #' . $order->order_number,
+                'ip_address' => $request->ip(),
+            ]);
+            return response()->json(['success' => true, 'message' => $message]);
+        });
+    }
+
     public function pesananUpdate(Request $request, $id)
     {
         $admin = Auth::user();
@@ -466,6 +511,11 @@ class UnitPasarDaerahController extends Controller
     /**
      * Detail Pesan Chat untuk Admin
      */
+    public function chats()
+    {
+        return redirect()->route('admin.unit.pasar_daerah.index', ['tab' => 'chat']);
+    }
+
     public function chatMessages($id)
     {
         $admin = Auth::user();

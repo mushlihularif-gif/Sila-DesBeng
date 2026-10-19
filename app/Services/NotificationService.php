@@ -187,32 +187,32 @@ class NotificationService
             if (!$userId) return;
 
             $title = 'Pesanan Berhasil Dibuat';
-            $link = route('activity.index');
+            $link = route('user.activity');
             $icon = 'bx bx-cart';
 
             switch ($type) {
                 case 'gas':
                     $title = 'Pesanan Gas Berhasil Dibuat';
                     $message = 'Pesanan ' . $itemName . ' berhasil diajukan dan sedang menunggu konfirmasi Admin.';
-                    $link = route('activity.index', ['tab' => 'gas']);
+                    $link = route('user.activity', ['tab' => 'gas']);
                     $icon = 'bx bx-gas-pump';
                     break;
                 case 'rental':
                     $title = 'Permintaan Sewa Alat Terkirim';
                     $message = 'Permintaan sewa untuk "' . $itemName . '" berhasil dikirim dan sedang menunggu konfirmasi Admin.';
-                    $link = route('activity.index', ['tab' => 'rental']);
+                    $link = route('user.activity', ['tab' => 'rental']);
                     $icon = 'bx bx-wrench';
                     break;
                 case 'mobil':
                     $title = 'Pemesanan Sewa Transportasi Terkirim';
                     $message = 'Pemesanan transportasi "' . $itemName . '" berhasil dibuat dan sedang menunggu konfirmasi Admin.';
-                    $link = route('activity.index', ['tab' => 'mobil']);
+                    $link = route('user.activity', ['tab' => 'mobil']);
                     $icon = 'bx bx-car';
                     break;
                 case 'fasilitas':
                     $title = 'Permohonan Peminjaman Fasilitas Terkirim';
                     $message = 'Permohonan peminjaman "' . $itemName . '" berhasil diajukan dan menunggu persetujuan Admin.';
-                    $link = route('activity.index', ['tab' => 'fasilitas']);
+                    $link = route('user.activity', ['tab' => 'fasilitas']);
                     $icon = 'bx bx-buildings';
                     break;
                 default:

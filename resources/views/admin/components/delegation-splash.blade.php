@@ -11,7 +11,7 @@
                 </div>
                 <div class="card-body text-center p-5">
                     <div class="mb-4">
-                        <img src="{{ asset('Admin/img/illustrations/man-with-laptop-light.png') }}" alt="Delegasi Staf" class="img-fluid" style="max-height: 150px;">
+                        <i class="bx bx-user-circle text-primary" style="font-size: 6rem;" aria-hidden="true"></i>
                     </div>
                     
                     <h5 class="mb-3 text-dark fw-semibold">

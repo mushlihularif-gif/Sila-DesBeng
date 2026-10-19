@@ -51,6 +51,8 @@
 
                         <form action="{{ route('admin.unit.penyewaan.update', $barang->id) }}" method="POST" enctype="multipart/form-data">
                             @csrf
+    <input type="hidden" id="latitude" name="latitude" value="{{ old('latitude', $barang->latitude) }}">
+    <input type="hidden" id="longitude" name="longitude" value="{{ old('longitude', $barang->longitude) }}">
                             @method('PUT')
                             
                             
