@@ -13,6 +13,14 @@
     RewriteCond %{HTTP:x-xsrf-token} .
     RewriteRule .* - [E=HTTP_X_XSRF_TOKEN:%{HTTP:X-XSRF-Token}]
 
+    # Jangan layani konfigurasi, repository, atau skrip dari direktori unggahan.
+    RewriteRule (^|/)\.(?!well-known/) - [F,L]
+    RewriteRule \.(bak|backup|sql|sqlite|env|log)(/|$) - [F,L,NC]
+    RewriteRule ^storage/.*\.(php[0-9]?|phtml|phar|cgi|pl|py|sh|html?|svg)(/|$) - [F,L,NC]
+    RewriteRule ^storage/(kyc|verifications)(/|$) - [F,L,NC]
+    # Les fichiers sensibles passent par Laravel, même si public/storage est un symlink.
+    RewriteRule ^storage/(receipts|payment_proofs|delivery_proofs|surat_pengantar|laporan|pasar_orders/proofs|pasar_complaints|pasar/complaints|help-tickets|partner_applications|manual-reports)/ index.php [L,NC]
+
     # Redirect Trailing Slashes If Not A Folder...
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_URI} (.+)/$

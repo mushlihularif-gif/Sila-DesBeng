@@ -127,7 +127,7 @@ class KycController extends Controller
         $request->validate([
             'kyc_id' => 'required|exists:kyc_verifications,id',
             'face_data' => 'nullable|array',
-            'face_image' => 'nullable|string', // Base64 image (opsional jika perangkat terkendala)
+            'face_image' => 'nullable|string|max:7000000',
             'edited_nik' => 'nullable|string|max:30',
             'edited_nama' => 'nullable|string|max:255',
             'edited_alamat' => 'nullable|string',

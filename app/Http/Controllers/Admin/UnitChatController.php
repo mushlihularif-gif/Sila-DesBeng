@@ -20,17 +20,13 @@ class UnitChatController extends Controller
             return null;
         }
 
-        $query = UnitChatSession::where('service_type', $service);
-
-        // Jika bukan super_admin dan memiliki region_id, filter berdasarkan region_id
-        if (!in_array($admin->role, ['super_admin', 'admin']) && $admin->region_id) {
-            $query->where('region_id', $admin->region_id);
-        } elseif ($admin->region_id) {
-            $query->where(function ($q) use ($admin) {
-                $q->where('region_id', $admin->region_id)
-                  ->orWhereNull('region_id');
-            });
+        $permissions = ['gas' => 'gas', 'penyewaan' => 'sewa_alat',
+            'mobil' => 'sewa_mobil', 'fasilitas_umum' => 'fasilitas_umum'];
+        $permission = $permissions[$service] ?? null;
+        if (!$permission || !$admin->isAdmin() || !$admin->region_id || !$admin->hasUnitPermission($permission)) {
+            return null;
         }
+        $query = UnitChatSession::where('service_type', $service)->where('region_id', $admin->region_id);
 
         return $query->find($sessionId);
     }
@@ -51,7 +47,7 @@ class UnitChatController extends Controller
         // Reset unread count for admin
         $session->update(['unread_admin_count' => 0]);
 
-        $session->load('user');
+        $session->load('user:id,name,avatar');
         $messages = $session->messages()->with('sender')->get()->map(function ($msg) {
             return [
                 'id' => $msg->id,

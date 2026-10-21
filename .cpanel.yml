@@ -30,6 +30,7 @@ deployment:
     - /bin/cp $APPPATH/deploy/index-hosting.php $WEBROOT/index.php
     # Segarkan cache konfigurasi supaya perubahan .env ikut terbaca.
     - /opt/alt/php82/usr/bin/php $APPPATH/artisan config:clear
+    - /opt/alt/php82/usr/bin/php $APPPATH/artisan security:invalidate-auth --once
     - /opt/alt/php82/usr/bin/php $APPPATH/artisan config:cache
     - /opt/alt/php82/usr/bin/php $APPPATH/artisan route:cache
     - /opt/alt/php82/usr/bin/php $APPPATH/artisan view:cache

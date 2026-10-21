@@ -15,6 +15,9 @@ abstract class Controller
     protected function applyRegionFilter($query, $userRelationName = 'user', $strict = false)
     {
         $currentUser = auth()->user();
+        if (!$currentUser || !$currentUser->isAdmin()) {
+            return $query->whereRaw('1 = 0');
+        }
         
         // Dapatkan region_id. Jika admin/super_admin tidak punya region_id, fallback ke Region pertama (Kabupaten)
         $regionId = $currentUser->region_id;
@@ -51,7 +54,8 @@ abstract class Controller
             }
         }
         
-        return $query;
+        // Akun operasional tanpa penempatan wilayah tidak boleh melihat semua data.
+        return $query->whereRaw('1 = 0');
     }
 
     /**

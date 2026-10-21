@@ -12,7 +12,8 @@ class AdminLaporanController extends Controller
      */
     public function exportAllPdf()
     {
-        $laporans = Laporan::with('user')
+        abort_unless(auth()->user()?->isAdmin(), 403);
+        $laporans = app(\App\Services\ReportAccess::class)->administrativeQuery(auth()->user())->with('user')
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -31,7 +32,9 @@ class AdminLaporanController extends Controller
      */
     public function exportDetailPdf($id)
     {
-        $laporan = Laporan::with(['user', 'rating'])->findOrFail($id);
+        abort_unless(auth()->user()?->isAdmin(), 403);
+        $laporan = app(\App\Services\ReportAccess::class)->administrativeQuery(auth()->user())
+            ->with(['user', 'rating'])->findOrFail($id);
 
         return Pdf::loadView('exports.laporan-admin-detail-pdf', [
             'laporan' => $laporan,

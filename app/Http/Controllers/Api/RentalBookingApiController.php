@@ -128,8 +128,9 @@ class RentalBookingApiController extends Controller
                 'status' => 'pending',
             ]);
 
-            // Kurangi stok
-            $barang->decreaseStock($request->quantity);
+            \App\Models\WalletTransaction::catatPemasukan($barang->region_id, 'rental', $booking->id, $totalAmount, $request->payment_method);
+
+            // Stok dialokasikan saat admin menyetujui, sama seperti pemesanan web.
 
             // Notifikasi untuk User
             \App\Models\Notification::create([
@@ -165,51 +166,29 @@ class RentalBookingApiController extends Controller
     public function storePackage(Request $request)
     {
         $request->validate([
-            'package_name' => 'required|string|max:255',
-            'items_description' => 'required|string|max:1000',
-            'total_amount' => 'required|numeric|min:0',
-            'duration_days' => 'required|integer|min:1',
-            'start_date' => 'required|date|after_or_equal:today',
-            'end_date' => 'required|date|after_or_equal:start_date',
-            'recipient_name' => 'required|string|max:255',
-            'payment_method' => 'nullable|string|max:50',
+            'items' => 'required|array|min:1|max:20',
+            'items.*.barang_id' => 'required|integer|distinct|exists:barang,id',
+            'items.*.quantity' => 'required|integer|min:1|max:100',
         ]);
-
-        $startDate = \Carbon\Carbon::parse($request->start_date);
-        $endDate = \Carbon\Carbon::parse($request->end_date);
-        $daysCount = $startDate->diffInDays($endDate) + 1;
-
-        $booking = RentalBooking::create([
-            'user_id' => $request->user()->id,
-            'barang_id' => null,
-            'order_number' => RentalBooking::generateOrderNumber(),
-            'quantity' => 1,
-            'start_date' => $request->start_date,
-            'end_date' => $request->end_date,
-            'days_count' => $daysCount,
-            'recipient_name' => $request->recipient_name,
-            'delivery_address' => null,
-            'delivery_method' => 'antar',
-            'payment_method' => $request->payment_method ?? 'tunai',
-            'rental_purpose' => "[PAKET] {$request->package_name}: {$request->items_description}",
-            'total_amount' => $request->total_amount,
-            'status' => 'pending',
-        ]);
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Pemesanan paket alat berhasil dibuat.',
-            'data' => [
-                'id' => $booking->id,
-                'order_number' => $booking->order_number,
-                'package_name' => $request->package_name,
-                'days_count' => $daysCount,
-                'total_amount' => (float) $request->total_amount,
-                'status' => $booking->status,
-                'start_date' => $booking->start_date->format('Y-m-d'),
-                'end_date' => $booking->end_date->format('Y-m-d'),
-            ],
-        ], 201);
+        return \Illuminate\Support\Facades\DB::transaction(function () use ($request) {
+            $bookings = [];
+            foreach ($request->items as $item) {
+                $itemRequest = clone $request;
+                $itemRequest->merge(['barang_id' => $item['barang_id'], 'quantity' => $item['quantity']]);
+                $response = $this->store($itemRequest);
+                if ($response->getStatusCode() !== 201) {
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        'items' => $response->getData()->message ?? 'Paket tidak tersedia.',
+                    ]);
+                }
+                $bookings[] = $response->getData()->data;
+            }
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Pesanan paket dibuat sesuai harga katalog.',
+                'data' => ['bookings' => $bookings, 'total_amount' => array_sum(array_column($bookings, 'total_amount'))],
+            ], 201);
+        });
     }
 
     /**
@@ -249,38 +228,17 @@ class RentalBookingApiController extends Controller
      */
     public function cancel(Request $request, $id)
     {
-        $booking = RentalBooking::withoutGlobalScopes()
-            ->where('id', $id)
-            ->where('user_id', $request->user()->id)
-            ->first();
-
-        if (!$booking) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Booking tidak ditemukan.',
-            ], 404);
-        }
-
-        if (!$booking->canBeCancelled()) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Booking ini tidak dapat dibatalkan.',
-            ], 422);
-        }
-
-        // Kembalikan stok
-        if ($booking->barang) {
-            $booking->barang->increaseStock($booking->quantity);
-        }
-
-        $booking->update([
-            'status' => 'cancelled',
-            'cancellation_reason' => $request->reason ?? 'Dibatalkan oleh pengguna',
-        ]);
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Booking berhasil dibatalkan.',
-        ]);
+        $request->validate(['reason' => 'nullable|string|max:500']);
+        return \Illuminate\Support\Facades\DB::transaction(function () use ($request, $id) {
+            $booking = RentalBooking::withoutGlobalScopes()->whereKey($id)
+                ->where('user_id', $request->user()->id)->lockForUpdate()->firstOrFail();
+            if ($booking->status !== 'pending') {
+                return response()->json(['status' => 'error', 'message' => 'Hanya booking pending yang dapat dibatalkan langsung.'], 422);
+            }
+            // Pending belum mengalokasikan stok. Pembatalan tidak boleh menambah persediaan.
+            $booking->update(['status' => 'cancelled', 'cancellation_reason' => $request->reason ?? 'Dibatalkan oleh pengguna']);
+            \App\Models\WalletTransaction::batalkanDanRefund('rental', $booking->id, 'Dibatalkan oleh pengguna');
+            return response()->json(['status' => 'success', 'message' => 'Booking berhasil dibatalkan.']);
+        });
     }
 }

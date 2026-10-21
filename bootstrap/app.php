@@ -22,6 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $schedule->command('penarikan:ingatkan')->dailyAt('08:00');
     })
     ->withMiddleware(function (Middleware $middleware) {
+        $middleware->api(append: ['throttle:api']);
         // Register global middleware (Skenario 1, 2: Security Headers & Input Sanitization)
         $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
         $middleware->append(\App\Http\Middleware\SanitizeInput::class);

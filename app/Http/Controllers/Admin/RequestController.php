@@ -374,7 +374,7 @@ class RequestController extends Controller
             DB::beginTransaction();
 
             if ($type === 'rental') {
-                $model = RentalBooking::with('barang')->findOrFail($id);
+                $model = RentalBooking::with('barang')->lockForUpdate()->findOrFail($id);
                 
                 // Periksa apakah sudah disetujui
                 if ($model->status !== 'pending') {
@@ -420,7 +420,7 @@ class RequestController extends Controller
                 $model->update($updateData);
 
             } elseif ($type === 'mobil') {
-                $model = MobilBooking::with('mobil')->findOrFail($id);
+                $model = MobilBooking::with('mobil')->lockForUpdate()->findOrFail($id);
                 if ($model->status !== 'pending') throw new \Exception("Permintaan sudah diproses sebelumnya.");
 
                 // PESSIMISTIC LOCK
@@ -434,14 +434,14 @@ class RequestController extends Controller
                 $model->update($updateData);
 
             } elseif ($type === 'fasilitas') {
-                $model = FasilitasUmumBooking::with('fasilitas')->findOrFail($id);
+                $model = FasilitasUmumBooking::with('fasilitas')->lockForUpdate()->findOrFail($id);
                 if ($model->status !== 'pending') throw new \Exception("Permintaan sudah diproses sebelumnya.");
 
                 // PESSIMISTIC LOCK
                 $fasilitas = \App\Models\FasilitasUmum::where('id', $model->fasilitas_id)->lockForUpdate()->firstOrFail();
-                if ($fasilitas->stok < 1) throw new \Exception("Fasilitas sedang tidak tersedia.");
+                if ($fasilitas->stok < $model->quantity) throw new \Exception("Fasilitas sedang tidak tersedia.");
                 
-                $fasilitas->decrement('stok');
+                $fasilitas->decrement('stok', $model->quantity);
                 if ($fasilitas->stok == 0) {
                     $fasilitas->update(['status' => 'disewa']);
                 }
@@ -451,7 +451,7 @@ class RequestController extends Controller
                 $model->update($updateData);
 
             } else {
-                $model = GasOrder::findOrFail($id);
+                $model = GasOrder::lockForUpdate()->findOrFail($id);
                 
                 // Periksa apakah sudah disetujui
                 if ($model->status !== 'pending') {
@@ -548,92 +548,97 @@ class RequestController extends Controller
             'reason' => 'required|string|max:500',
         ]);
 
-        $notificationService = new NotificationService();
+        return DB::transaction(function () use ($request, $id, $type) {
+            [$modelClass] = self::WILAYAH_PER_TIPE[$type];
+            $locked = $modelClass::lockForUpdate()->findOrFail($id);
+            abort_unless($locked->status === 'pending', 409, 'Hanya permintaan pending yang dapat ditolak.');
+            $notificationService = new NotificationService();
 
-        if ($type === 'rental') {
-            $model = RentalBooking::findOrFail($id);
-            // RentalBooking menggunakan ENUM Ketat: pending, confirmed, in_progress, completed, cancelled
-            // Kami menggunakan 'cancelled' untuk mewakili Penolakan oleh Admin, dan menjelaskan dalam catatan
-            $newStatus = 'cancelled';
-            $model->update([
-                'status' => $newStatus,
-                'admin_notes' => "Ditolak: " . $request->reason,
-                'cancellation_reason' => "Ditolak Admin: " . $request->reason,
-                // Pastikan cancellation_status tidak 'pending' untuk menghindari kebingungan
-                'cancellation_status' => null 
-            ]);
-        } elseif ($type === 'mobil') {
-            $model = MobilBooking::findOrFail($id);
-            $newStatus = 'rejected';
-            $model->update([
-                'status' => $newStatus,
-                'admin_notes' => "Ditolak: " . $request->reason,
-                'cancellation_reason' => "Ditolak Admin: " . $request->reason,
-                'cancellation_status' => null 
-            ]);
-        } elseif ($type === 'fasilitas') {
-            $model = FasilitasUmumBooking::findOrFail($id);
-            $newStatus = 'rejected';
-            $model->update([
-                'status' => $newStatus,
-                'admin_notes' => "Ditolak: " . $request->reason,
-                'cancellation_reason' => "Ditolak Admin: " . $request->reason,
-                'cancellation_status' => null 
-            ]);
-        } else {
-            $model = GasOrder::findOrFail($id);
-            // GasOrder menggunakan status string, kemungkinan mendukung 'rejected'
-            $newStatus = 'rejected';
-            $model->update([
-                'status' => $newStatus,
-                'rejection_reason' => $request->reason,
-                'handled_by' => auth()->id()
-            ]);
-        }
-
-        // Batalkan pemasukannya DAN kembalikan uangnya ke dompet warga bila
-        // pesanan ini sudah terbayar. Dulu di sini hanya ditandai 'rejected' —
-        // uangnya lenyap dari saldo wilayah tanpa pernah menjadi milik siapa pun,
-                    // padahal pembayarannya langsung ke rekening wilayah.
-        $walletRefType = $type === 'gas' ? 'gas' : $type;
-        \App\Models\WalletTransaction::batalkanDanRefund(
-            $walletRefType,
-            $model->id,
-            'Pesanan ditolak admin: ' . $request->reason
-        );
-
-        // Otomatis bebaskan Supir jika order ditolak
-        if (in_array($type, ['mobil', 'fasilitas']) && isset($model->assigned_supir_id)) {
-            $supirToFree = \App\Models\Supir::find($model->assigned_supir_id);
-            if ($supirToFree) {
-                $supirToFree->status = 'Tersedia';
-                $supirToFree->save();
+            if ($type === 'rental') {
+                $model = $locked;
+                // RentalBooking menggunakan ENUM Ketat: pending, confirmed, in_progress, completed, cancelled
+                // Kami menggunakan 'cancelled' untuk mewakili Penolakan oleh Admin, dan menjelaskan dalam catatan
+                $newStatus = 'cancelled';
+                $model->update([
+                    'status' => $newStatus,
+                    'admin_notes' => "Ditolak: " . $request->reason,
+                    'cancellation_reason' => "Ditolak Admin: " . $request->reason,
+                    // Pastikan cancellation_status tidak 'pending' untuk menghindari kebingungan
+                    'cancellation_status' => null
+                ]);
+            } elseif ($type === 'mobil') {
+                $model = $locked;
+                $newStatus = 'rejected';
+                $model->update([
+                    'status' => $newStatus,
+                    'admin_notes' => "Ditolak: " . $request->reason,
+                    'cancellation_reason' => "Ditolak Admin: " . $request->reason,
+                    'cancellation_status' => null
+                ]);
+            } elseif ($type === 'fasilitas') {
+                $model = $locked;
+                $newStatus = 'rejected';
+                $model->update([
+                    'status' => $newStatus,
+                    'admin_notes' => "Ditolak: " . $request->reason,
+                    'cancellation_reason' => "Ditolak Admin: " . $request->reason,
+                    'cancellation_status' => null
+                ]);
+            } else {
+                $model = $locked;
+                // GasOrder menggunakan status string, kemungkinan mendukung 'rejected'
+                $newStatus = 'rejected';
+                $model->update([
+                    'status' => $newStatus,
+                    'rejection_reason' => $request->reason,
+                    'handled_by' => auth()->id()
+                ]);
             }
-        }
 
-        // Kirim notifikasi penolakan ke pengguna
-        $notificationService->notifyOrderRejected($model, $request->reason, $type);
+            // Batalkan pemasukannya DAN kembalikan uangnya ke dompet warga bila
+            // pesanan ini sudah terbayar. Dulu di sini hanya ditandai 'rejected' —
+            // uangnya lenyap dari saldo wilayah tanpa pernah menjadi milik siapa pun,
+                        // padahal pembayarannya langsung ke rekening wilayah.
+            $walletRefType = $type === 'gas' ? 'gas' : $type;
+            \App\Models\WalletTransaction::batalkanDanRefund(
+                $walletRefType,
+                $model->id,
+                'Pesanan ditolak admin: ' . $request->reason
+            );
 
-        // Audit log for rejection
-        ActivityLog::create([
-            'action' => 'reject_request',
-            'description' => "Admin rejected {$type} request #{$id}. Reason: {$request->reason}",
-            'user_id' => auth()->id(),
-            'ip_address' => $request->ip(),
-        ]);
+            // Otomatis bebaskan Supir jika order ditolak
+            if (in_array($type, ['mobil', 'fasilitas']) && isset($model->assigned_supir_id)) {
+                $supirToFree = \App\Models\Supir::find($model->assigned_supir_id);
+                if ($supirToFree) {
+                    $supirToFree->status = 'Tersedia';
+                    $supirToFree->save();
+                }
+            }
 
-        $message = "Permintaan {$type} ditolak dengan alasan: {$request->reason}";
+            // Kirim notifikasi penolakan ke pengguna
+            $notificationService->notifyOrderRejected($model, $request->reason, $type);
 
-        if ($request->wantsJson() || $request->ajax()) {
-            return response()->json([
-                'success' => true,
-                'message' => $message,
-                'status' => $newStatus
+            // Audit log for rejection
+            ActivityLog::create([
+                'action' => 'reject_request',
+                'description' => "Admin rejected {$type} request #{$id}. Reason: {$request->reason}",
+                'user_id' => auth()->id(),
+                'ip_address' => $request->ip(),
             ]);
-        }
 
-        session()->flash('warning', $message);
-        return redirect()->back();
+            $message = "Permintaan {$type} ditolak dengan alasan: {$request->reason}";
+
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $message,
+                    'status' => $newStatus
+                ]);
+            }
+
+            session()->flash('warning', $message);
+            return redirect()->back();
+        });
     }
 
     public function updateStatus(Request $request, $type, $id)
@@ -645,6 +650,9 @@ class RequestController extends Controller
             'assigned_supir_id' => 'nullable|exists:supirs,id',
         ]);
 
+        if (in_array($request->status, ['confirmed', 'approved'], true)) {
+            return $this->approve($request, $id, $type);
+        }
         $notificationService = new NotificationService();
 
         if ($type === 'rental') {
@@ -665,6 +673,13 @@ class RequestController extends Controller
 
         try {
             DB::beginTransaction();
+            $order = $order->newQuery()->lockForUpdate()->findOrFail($id);
+            $oldStatus = $order->status;
+            if (in_array($oldStatus, ['pending', 'completed', 'returned', 'cancelled', 'rejected'], true)) {
+                DB::rollBack();
+                return response()->json(['success' => false, 'message' => 'Status pesanan tidak dapat diubah dari keadaan ini.'], 409);
+            }
+            $order->handled_by = auth()->id();
 
             // Buat stempel waktu otomatis berdasarkan status
             switch ($newStatus) {
@@ -737,7 +752,7 @@ class RequestController extends Controller
                         }
                         
                         if ($order->barang) {
-                            $order->barang->increaseStock($order->quantity);
+                            $order->barang->increment('stok', $order->quantity);
                             
                             // Check if stock is still low even after return (rare but possible)
                             if ($order->barang->stok < 5 && $order->barang->stok > 0) {
@@ -752,7 +767,7 @@ class RequestController extends Controller
                     } elseif ($type === 'fasilitas' && $oldStatus !== 'completed') {
                         if (!$order->relationLoaded('fasilitas')) $order->load('fasilitas');
                         if ($order->fasilitas) {
-                            $order->fasilitas->increment('stok');
+                            $order->fasilitas->increment('stok', $order->quantity);
                             $order->fasilitas->update(['status' => 'tersedia']);
                         }
                     }
@@ -836,17 +851,20 @@ class RequestController extends Controller
 
     public function uploadDeliveryProof(Request $request, $type, $id)
     {
+        $this->pastikanBolehMenangani($type, $id);
+        abort_unless(in_array($type, ['rental', 'gas', 'mobil'], true), 404);
         $request->validate([
-            'delivery_proof' => 'required|image|mimes:jpeg,png,jpg',
+            'delivery_proof' => 'required|image|mimes:jpeg,png,jpg|max:5120',
         ]);
 
         try {
             DB::beginTransaction();
 
-            if ($type === 'rental') {
-                $order = \App\Models\RentalBooking::findOrFail($id);
-            } else {
-                $order = GasOrder::findOrFail($id);
+            [$model] = self::WILAYAH_PER_TIPE[$type];
+            $order = $model::query()->lockForUpdate()->findOrFail($id);
+            if (in_array($order->status, ['pending', 'cancelled', 'rejected', 'completed', 'returned'], true)) {
+                DB::rollBack();
+                return response()->json(['success' => false, 'message' => 'Pesanan belum aktif atau sudah selesai.'], 409);
             }
 
             // Simpan gambar
@@ -908,13 +926,15 @@ class RequestController extends Controller
             
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal: ' . $e->getMessage()
+                'message' => 'Bukti pengiriman gagal disimpan. Silakan coba kembali.'
             ], 500);
         }
     }
 
     public function handleCancellation(Request $request, $type, $id, $action)
     {
+        $this->pastikanBolehMenangani($type, $id);
+        $request->validate(['admin_response' => 'nullable|string|max:2000']);
         if (!in_array($action, ['approve', 'reject'])) {
             return response()->json([
                 'success' => false,
@@ -922,102 +942,111 @@ class RequestController extends Controller
             ], 400);
         }
 
-        if ($type === 'rental') {
-            $order = \App\Models\RentalBooking::findOrFail($id);
-        } else {
-            $order = GasOrder::findOrFail($id);
-        }
+        return DB::transaction(function () use ($request, $type, $id, $action) {
+            [$model] = self::WILAYAH_PER_TIPE[$type];
+            $order = $model::query()->lockForUpdate()->findOrFail($id);
 
-        if ($order->cancellation_status !== 'pending') {
+            if ($order->cancellation_status !== 'pending') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tidak ada permintaan pembatalan yang pending'
+                ], 400);
+            }
+
+            abort_if(in_array($order->status, ['cancelled', 'rejected', 'completed', 'returned'], true), 409);
+            $previousStatus = $order->status;
+            $order->cancellation_status = $action === 'approve' ? 'approved' : 'rejected';
+            $order->admin_cancellation_response = $request->admin_response;
+            $order->handled_by = auth()->id();
+
+            $message = '';
+            if ($action === 'approve') {
+                $order->status = 'cancelled'; // Update status utama jadi cancelled
+                $message = 'Permintaan pembatalan disetujui';
+            
+                // Logika pengembalian dana atau stok jika perlu (biasanya stok dikembalikan jika dibatalkan)
+                 if ($type === 'rental' && $previousStatus !== 'pending') {
+                    $order->load('barang');
+                    if ($order->barang) {
+                        $order->barang->increment('stok', $order->quantity);
+                    }
+                }
+            
+                if ($previousStatus !== 'pending' && $type === 'fasilitas' && $order->fasilitas) {
+                    $order->fasilitas->increment('stok', $order->quantity);
+                    $order->fasilitas->update(['status' => 'tersedia']);
+                }
+                if ($previousStatus !== 'pending' && $type === 'gas' && $order->gas) {
+                    $order->gas->increment('stok', $order->quantity);
+                }
+                if ($previousStatus !== 'pending' && $type === 'mobil' && $order->mobil) {
+                    $order->mobil->update(['status' => 'tersedia']);
+                }
+                // Otomatis bebaskan Supir jika batal
+                if (in_array($type, ['mobil', 'fasilitas']) && $order->assigned_supir_id) {
+                    $supirToFree = \App\Models\Supir::find($order->assigned_supir_id);
+                    if ($supirToFree) {
+                        $supirToFree->status = 'Tersedia';
+                        $supirToFree->save();
+                    }
+                }
+            
+                \App\Models\WalletTransaction::batalkanDanRefund($type, $order->id, 'Pembatalan disetujui');
+                // Kirim notifikasi ke pengguna
+                Notification::create([
+                    'title' => 'Pembatalan Disetujui',
+                    'message' => "Permintaan pembatalan pesanan #{$order->order_number} Anda telah disetujui.",
+                    'type' => 'cancellation_approved',
+                    'user_id' => $order->user_id,
+                    'admin_id' => auth()->id(),
+                ]);
+
+            } else {
+                // Jika ditolak, status utama tetap seperti sebelumnya (misal: pending atau confirmed)
+                // Tidak perlu ubah $order->status
+                $message = 'Permintaan pembatalan ditolak';
+            
+                // Kirim notifikasi ke pengguna
+                Notification::create([
+                    'title' => 'Pembatalan Ditolak',
+                    'message' => "Permintaan pembatalan pesanan #{$order->order_number} ditolak. Alasan: {$request->admin_response}",
+                    'type' => 'cancellation_rejected',
+                    'user_id' => $order->user_id,
+                    'admin_id' => auth()->id(),
+                ]);
+            }
+
+            // Log Activity
+            \App\Models\ActivityLog::create([
+                'user_id' => auth()->id(),
+                'action' => 'Cancellation Review',
+                'description' => ucfirst($action) . " permintaan pembatalan pesanan #{$order->order_number}",
+                'ip_address' => $request->ip()
+            ]);
+
+            $order->save();
+
             return response()->json([
-                'success' => false,
-                'message' => 'Tidak ada permintaan pembatalan yang pending'
-            ], 400);
-        }
-
-        $order->cancellation_status = $action === 'approve' ? 'approved' : 'rejected';
-        $order->admin_cancellation_response = $request->admin_response;
-        $order->handled_by = auth()->id();
-
-        $message = '';
-        if ($action === 'approve') {
-            $order->status = 'cancelled'; // Update status utama jadi cancelled
-            $message = 'Permintaan pembatalan disetujui';
-            
-            // Logika pengembalian dana atau stok jika perlu (biasanya stok dikembalikan jika dibatalkan)
-             if ($type === 'rental') {
-                $order->load('barang');
-                if ($order->barang) {
-                    $order->barang->increaseStock($order->quantity);
-                }
-            }
-            
-            // Otomatis bebaskan Supir jika batal
-            if (in_array($type, ['mobil', 'fasilitas']) && $order->assigned_supir_id) {
-                $supirToFree = \App\Models\Supir::find($order->assigned_supir_id);
-                if ($supirToFree) {
-                    $supirToFree->status = 'Tersedia';
-                    $supirToFree->save();
-                }
-            }
-            
-            // Kirim notifikasi ke pengguna
-            Notification::create([
-                'title' => 'Pembatalan Disetujui',
-                'message' => "Permintaan pembatalan pesanan #{$order->order_number} Anda telah disetujui.",
-                'type' => 'cancellation_approved',
-                'user_id' => $order->user_id,
-                'admin_id' => auth()->id(),
+                'success' => true,
+                'message' => $message
             ]);
-
-        } else {
-            // Jika ditolak, status utama tetap seperti sebelumnya (misal: pending atau confirmed)
-            // Tidak perlu ubah $order->status
-            $message = 'Permintaan pembatalan ditolak';
-            
-            // Kirim notifikasi ke pengguna
-            Notification::create([
-                'title' => 'Pembatalan Ditolak',
-                'message' => "Permintaan pembatalan pesanan #{$order->order_number} ditolak. Alasan: {$request->admin_response}",
-                'type' => 'cancellation_rejected',
-                'user_id' => $order->user_id,
-                'admin_id' => auth()->id(),
-            ]);
-        }
-
-        // Log Activity
-        \App\Models\ActivityLog::create([
-            'user_id' => auth()->id(),
-            'action' => 'Cancellation Review',
-            'description' => ucfirst($action) . " permintaan pembatalan pesanan #{$order->order_number}",
-            'ip_address' => $request->ip()
-        ]);
-
-        $order->save();
-
-        return response()->json([
-            'success' => true,
-            'message' => $message
-        ]);
+        });
     }
     public function returnRental(Request $request, $id)
     {
+        $this->pastikanBolehMenangani('rental', $id);
         $request->validate([
             'return_time' => 'required|date',
         ]);
 
         $notificationService = new NotificationService();
-        $order = \App\Models\RentalBooking::with('barang')->findOrFail($id);
-
-        if ($order->status === 'completed') {
-            return response()->json([
-                'success' => false,
-                'message' => 'Pesanan sudah selesai sebelumnya.'
-            ], 400);
-        }
-
         try {
             DB::beginTransaction();
+            $order = RentalBooking::with('barang')->lockForUpdate()->findOrFail($id);
+            if (!in_array($order->status, ['confirmed', 'in_progress', 'being_prepared', 'in_delivery', 'arrived', 'delivered', 'picked_up'], true)) {
+                DB::rollBack();
+                return response()->json(['success' => false, 'message' => 'Pesanan belum aktif atau sudah selesai.'], 409);
+            }
 
             // Perbarui waktu
             $order->return_time = $request->return_time;
@@ -1030,7 +1059,7 @@ class RequestController extends Controller
             $quantity = $order->quantity;
 
             // Tambah stok kembali
-            $barang->increaseStock($quantity);
+            $barang->increment('stok', $quantity);
 
             // Notifikasi
             $notificationService->notifyRentalCompleted($order);
@@ -1060,7 +1089,7 @@ class RequestController extends Controller
             DB::rollBack();
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+                'message' => 'Pengembalian gagal diproses. Silakan coba kembali.'
             ], 500);
         }
     }

@@ -87,92 +87,33 @@ class MediaController extends Controller
         return null;
     }
 
-    /**
-     * Defense in Depth: Serve KTP/Face image with Dynamic Watermark
-     * Mencegah Admin melakukan screenshot data sensitif warga.
-     *
-     * @param string $filename
-     * @return \Illuminate\Http\Response|StreamedResponse
-     */
     public function secureKtpImage($filename)
     {
-        $filename = basename($filename);
-        if (empty($filename) || str_contains($filename, '..') || str_contains($filename, "\0")) {
-            abort(404);
-        }
-        
-        // Cek semua kemungkinan path penyimpanan dari berbagai sistem (KYC & Manual)
-        $possiblePaths = [
-            'kyc/ktp/' . $filename,
-            'kyc/face/' . $filename,
-            'verifications/ktp/' . $filename,
-            'verifications/face/' . $filename,
-            $filename
-        ];
-
-        $fullPath = null;
-        foreach ($possiblePaths as $p) {
-            if (\Illuminate\Support\Facades\Storage::disk('private')->exists($p)) {
-                $fullPath = \Illuminate\Support\Facades\Storage::disk('private')->path($p);
-                break;
-            }
-        }
-
-        if (!$fullPath) abort(404, 'File gambar tidak ditemukan.');
-
-        // Membaca file gambar dari storage private
-        $fileContent = file_get_contents($fullPath);
-        
-        // Coba dekripsi jika dienkripsi dengan ChaCha20
-        $decryptedContent = \App\Services\FileEncryptionService::decrypt($fileContent);
-        
-        // Jika hasil dekripsi kosong, asumsikan ini file lama yang belum dienkripsi
-        $imageContent = $decryptedContent ?: $fileContent;
-
-        if ($imageContent) {
-            try {
-                $manager = \Intervention\Image\ImageManager::gd();
-                $image = $manager->read($imageContent);
-
-                // Cek apakah file ini adalah KTP (bukan face photo)
-                // Deteksi dari nama path atau file. Asumsikan jika ada kata 'face', itu wajah.
-                $isFace = str_contains($fullPath, 'face');
-
-                if (!$isFace) {
-                    $watermarkPath = public_path('Admin/img/watermarkprivasi/WatermarkPrivasiFIX.png');
-                    if (file_exists($watermarkPath)) {
-                        $watermark = $manager->read($watermarkPath);
-                        $watermarkWidth = intval($image->width() * 0.9);
-                        $watermark->scaleDown(width: $watermarkWidth);
-                        $image->place($watermark, 'center');
-                    }
-                }
-
-                $encoded = $image->toJpeg(85);
-                $finalImage = $encoded->toString();
-
-                // Bersihkan output buffer sebelumnya (mencegah karakter whitespace/error nyempil di gambar)
-                while (ob_get_level() > 0) {
-                    ob_end_clean();
-                }
-
-                return response($finalImage)->header('Content-Type', 'image/jpeg');
-            } catch (\Exception $e) {
-                \Log::error('MediaController Image Error: ' . $e->getMessage());
-                // Fallback to original decrypted content if manipulation fails
-                return response($imageContent)->header('Content-Type', 'image/jpeg');
-            }
-        }
-
-        // Jika gambar gagal diproses (bukan gambar valid)
-        while (ob_get_level() > 0) {
-            ob_end_clean();
-        }
-        return response($imageContent)->header('Content-Type', 'image/jpeg');
+        return $this->identityImage($filename, 'ktp');
     }
 
     public function secureFaceImage($filename)
     {
-        return $this->secureKtpImage($filename);
+        return $this->identityImage($filename, 'face');
+    }
+
+    private function identityImage(string $filename, string $type)
+    {
+        abort_unless(preg_match('/\\A[a-zA-Z0-9_.-]+\\z/', $filename)
+            && !str_contains($filename, '..'), 404);
+        $paths = ["kyc/{$type}/{$filename}", "verifications/{$type}/{$filename}"];
+        $column = $type . '_image_path';
+        $kyc = \App\Models\KycVerification::whereIn($column, $paths)->first();
+        $media = app(\App\Services\IdentityMediaService::class);
+        if ($kyc) {
+            abort_unless($kyc->status === 'pending' && $kyc->user, 404);
+            $media->authorize($kyc->user);
+            return $media->render($kyc->$column, $type);
+        }
+        $column = $type . '_photo_path';
+        $owner = \App\Models\User::whereIn($column, $paths)->firstOrFail();
+        abort_unless($owner->verification_status === 'pending', 404);
+        $media->authorize($owner, true);
+        return $media->render($owner->$column, $type);
     }
 }

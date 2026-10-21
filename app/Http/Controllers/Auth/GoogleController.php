@@ -24,12 +24,17 @@ class GoogleController extends Controller
     {
         try {
             $socialUser = Socialite::driver('google')->user();
+            abort_unless(($socialUser->user['email_verified'] ?? $socialUser->user['verified_email'] ?? false) === true, 401);
 
             $findUser = User::where('google_id', $socialUser->id)
                             ->orWhere('email', $socialUser->email)
                             ->first();
 
             if ($findUser) {
+                abort_if($findUser->google_id && $findUser->google_id !== $socialUser->id, 401);
+                $googleOwnsEmail = str_ends_with(strtolower($socialUser->email), '@gmail.com')
+                    || !empty($socialUser->user['hd']);
+                abort_if(!$findUser->google_id && !$googleOwnsEmail, 403);
                 // User exists
                 if (!$findUser->google_id) {
                     // Explicitly set fields instead of mass assignment
@@ -69,7 +74,7 @@ class GoogleController extends Controller
             }
 
         } catch (\Exception $e) {
-            return redirect()->route('beranda')->with('error', 'Login Google gagal: ' . $e->getMessage());
+            return redirect()->route('beranda')->with('error', 'Login Google gagal. Silakan coba lagi atau masuk dengan password.');
         }
     }
 
@@ -94,14 +99,8 @@ class GoogleController extends Controller
         $existingUser = User::where('email', $googleData['email'])->first();
 
         if ($existingUser) {
-            $newUser = $existingUser;
-            $newUser->name = $googleData['name'];
-            $newUser->phone = $request->phone;
-            $newUser->region_id = $request->region_id;
-            $newUser->google_id = $googleData['id'];
-            $newUser->status = 'aktif';
-            $newUser->email_verified_at = now();
-            $newUser->save();
+            session()->forget('google_register_data');
+            return response()->json(['success' => false, 'message' => 'Akun sudah terdaftar. Silakan login kembali.'], 409);
         } else {
             // Generate unique username
             $baseUsername = strtolower(str_replace(' ', '', $googleData['name']));
@@ -118,7 +117,7 @@ class GoogleController extends Controller
                 'name' => $googleData['name'],
                 'email' => $googleData['email'],
                 'username' => $username,
-                'password' => Hash::make(uniqid()), // Random password
+                'password' => Hash::make(\Illuminate\Support\Str::random(64)),
                 'phone' => $request->phone,
                 'address' => '-',
                 'gender' => 'laki-laki',

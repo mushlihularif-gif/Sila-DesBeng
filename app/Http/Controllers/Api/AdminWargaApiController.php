@@ -11,7 +11,7 @@ class AdminWargaApiController extends Controller
 {
     public function index(Request $request)
     {
-        $users = User::select('id', 'name', 'email', 'phone', 'rt', 'rw', 'address', 'verification_status', 'created_at')
+        $users = $this->scopedCitizens()->select('id', 'name', 'email', 'phone', 'rt', 'rw', 'address', 'verification_status', 'created_at')
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(function ($user) {
@@ -30,7 +30,7 @@ class AdminWargaApiController extends Controller
                     'address' => $user->address ?? '-',
                     'verification_status' => $user->verification_status ?? 'unverified',
                     'kyc_status' => $kyc ? $kyc->status : null,
-                    'kyc_nik' => $kyc ? $kyc->nik_from_ocr : $user->nik,
+                    'kyc_nik' => $this->maskedNik($kyc ? $kyc->nik_from_ocr : $user->nik),
                     'kyc_name' => $kyc ? $kyc->name_from_ocr : $user->name,
                     'registered_date' => $user->created_at ? $user->created_at->format('d M Y') : '-',
                 ];
@@ -44,7 +44,7 @@ class AdminWargaApiController extends Controller
 
     public function show($id)
     {
-        $user = User::findOrFail($id);
+        $user = $this->scopedCitizens()->findOrFail($id);
         $kyc = KycVerification::where('user_id', $id)->latest()->first();
         $rtStr = $user->rt ? 'RT ' . str_pad($user->rt, 2, '0', STR_PAD_LEFT) : 'RT 02';
         $rwStr = $user->rw ? 'RW ' . str_pad($user->rw, 2, '0', STR_PAD_LEFT) : 'RW 01';
@@ -65,7 +65,7 @@ class AdminWargaApiController extends Controller
                 'kyc' => $kyc ? [
                     'id' => $kyc->id,
                     'status' => $kyc->status,
-                    'nik' => $kyc->nik_from_ocr,
+                    'nik' => $this->maskedNik($kyc->nik_from_ocr),
                     'name' => $kyc->name_from_ocr,
                     'address' => $kyc->address_from_ocr,
                     'rt' => $kyc->rt_from_ocr,
@@ -78,49 +78,33 @@ class AdminWargaApiController extends Controller
         ]);
     }
 
+    private function scopedCitizens(): \Illuminate\Database\Eloquent\Builder
+    {
+        $admin = auth()->user();
+        abort_unless($admin && in_array($admin->role, ['admin_rt', 'admin_rw'], true), 403);
+        $query = User::query()->where('role', 'user');
+        if (!$admin->region_id || !$admin->rw || ($admin->role === 'admin_rt' && !$admin->rt)) {
+            return $query->whereRaw('1 = 0');
+        }
+        $query->whereIn('region_id', array_merge([$admin->region_id], \App\Models\Region::getDescendantIds($admin->region_id)))
+            ->where('rw', $admin->rw);
+        if ($admin->role === 'admin_rt') $query->where('rt', $admin->rt);
+        return $query;
+    }
+
+    private function maskedNik(?string $nik): ?string
+    {
+        return $nik ? str_repeat('*', max(0, strlen($nik) - 4)) . substr($nik, -4) : null;
+    }
+
     public function approveKyc(Request $request, $id)
     {
-        $kyc = KycVerification::where('user_id', $id)
-            ->where('status', 'pending')
-            ->latest()
-            ->firstOrFail();
-
-        $kyc->update([
-            'status' => 'approved',
-            'reviewed_by' => $request->user()->id,
-            'reviewed_at' => now(),
-            'admin_notes' => $request->notes ?? 'Disetujui oleh Admin.',
-        ]);
-
-        $user = User::findOrFail($id);
-        $user->update(['verification_status' => 'verified']);
-
-        return response()->json([
-            'success' => true,
-            'message' => "Verifikasi warga {$user->name} berhasil disetujui.",
-        ]);
+        // RT/RW melihat warga wilayahnya; keputusan KYC mengikuti kewenangan dashboard.
+        abort(403, 'Verifikasi identitas harus ditinjau admin desa/kecamatan melalui dashboard KYC.');
     }
 
     public function rejectKyc(Request $request, $id)
     {
-        $kyc = KycVerification::where('user_id', $id)
-            ->where('status', 'pending')
-            ->latest()
-            ->firstOrFail();
-
-        $kyc->update([
-            'status' => 'rejected',
-            'reviewed_by' => $request->user()->id,
-            'reviewed_at' => now(),
-            'admin_notes' => $request->notes ?? 'Ditolak oleh Admin.',
-        ]);
-
-        $user = User::findOrFail($id);
-        $user->update(['verification_status' => 'rejected']);
-
-        return response()->json([
-            'success' => true,
-            'message' => "Verifikasi warga {$user->name} ditolak.",
-        ]);
+        abort(403, 'Verifikasi identitas harus ditinjau admin desa/kecamatan melalui dashboard KYC.');
     }
 }

@@ -396,7 +396,7 @@
         .then(res => {
             if (res.status === 'success') {
                 const session = res.data.session;
-                if (session.session_token && !sessionToken) {
+                if (session.session_token) {
                     localStorage.setItem(tokenKey, session.session_token);
                 }
 

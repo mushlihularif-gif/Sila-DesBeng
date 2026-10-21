@@ -25,9 +25,7 @@ class ReceiptController extends Controller
         $booking = RentalBooking::withTrashed()->findOrFail($id);
         
         // Periksa apakah pengguna memiliki pesanan ini atau adalah admin
-        if ((int)$booking->user_id !== (int)auth()->id() && !in_array(auth()->user()->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'admin'])) {
-            abort(403, 'Unauthorized access');
-        }
+        abort_unless(app(\App\Services\BookingAccess::class)->canView($booking, 'rental', auth()->user()), 403);
         
         // Selalu buat ulang bukti transaksi untuk memastikan data/status terbaru
         $path = $this->receiptService->generateRentalReceipt($booking);
@@ -54,9 +52,7 @@ class ReceiptController extends Controller
         $booking = RentalBooking::withTrashed()->findOrFail($id);
         
         // Periksa apakah pengguna memiliki pesanan ini atau adalah admin
-        if ((int)$booking->user_id !== (int)auth()->id() && !in_array(auth()->user()->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'admin'])) {
-            abort(403, 'Unauthorized access');
-        }
+        abort_unless(app(\App\Services\BookingAccess::class)->canView($booking, 'rental', auth()->user()), 403);
         
         // Selalu buat ulang bukti transaksi untuk memastikan data/status terbaru
         $path = $this->receiptService->generateRentalReceipt($booking);
@@ -81,9 +77,7 @@ class ReceiptController extends Controller
         $order = GasOrder::withTrashed()->findOrFail($id);
         
         // Periksa apakah pengguna memiliki pesanan ini atau adalah admin
-        if ((int)$order->user_id !== (int)auth()->id() && !in_array(auth()->user()->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'admin'])) {
-            abort(403, 'Unauthorized access');
-        }
+        abort_unless(app(\App\Services\BookingAccess::class)->canView($order, 'gas', auth()->user()), 403);
         
         // Selalu buat ulang bukti transaksi untuk memastikan data/status terbaru
         $path = $this->receiptService->generateGasReceipt($order);
@@ -110,9 +104,7 @@ class ReceiptController extends Controller
         $order = GasOrder::withTrashed()->findOrFail($id);
         
         // Periksa apakah pengguna memiliki pesanan ini atau adalah admin
-        if ((int)$order->user_id !== (int)auth()->id() && !in_array(auth()->user()->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'admin'])) {
-            abort(403, 'Unauthorized access');
-        }
+        abort_unless(app(\App\Services\BookingAccess::class)->canView($order, 'gas', auth()->user()), 403);
         
         // Selalu buat ulang bukti transaksi untuk memastikan data/status terbaru
         $path = $this->receiptService->generateGasReceipt($order);
@@ -135,9 +127,7 @@ class ReceiptController extends Controller
     {
         $booking = \App\Models\MobilBooking::withTrashed()->findOrFail($id);
         
-        if ((int)$booking->user_id !== (int)auth()->id() && !in_array(auth()->user()->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'admin'])) {
-            abort(403, 'Unauthorized access');
-        }
+        abort_unless(app(\App\Services\BookingAccess::class)->canView($booking, 'mobil', auth()->user()), 403);
         
         $path = $this->receiptService->generateMobilReceipt($booking);
         
@@ -161,9 +151,7 @@ class ReceiptController extends Controller
     {
         $booking = \App\Models\MobilBooking::withTrashed()->findOrFail($id);
         
-        if ((int)$booking->user_id !== (int)auth()->id() && !in_array(auth()->user()->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'admin'])) {
-            abort(403, 'Unauthorized access');
-        }
+        abort_unless(app(\App\Services\BookingAccess::class)->canView($booking, 'mobil', auth()->user()), 403);
         
         $path = $this->receiptService->generateMobilReceipt($booking);
         
@@ -185,9 +173,7 @@ class ReceiptController extends Controller
     {
         $booking = \App\Models\FasilitasUmumBooking::withTrashed()->findOrFail($id);
         
-        if ((int)$booking->user_id !== (int)auth()->id() && !in_array(auth()->user()->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'admin'])) {
-            abort(403, 'Unauthorized access');
-        }
+        abort_unless(app(\App\Services\BookingAccess::class)->canView($booking, 'fasilitas', auth()->user()), 403);
         
         $path = $this->receiptService->generateFasilitasReceipt($booking);
         
@@ -211,9 +197,7 @@ class ReceiptController extends Controller
     {
         $booking = \App\Models\FasilitasUmumBooking::withTrashed()->findOrFail($id);
         
-        if ((int)$booking->user_id !== (int)auth()->id() && !in_array(auth()->user()->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'admin'])) {
-            abort(403, 'Unauthorized access');
-        }
+        abort_unless(app(\App\Services\BookingAccess::class)->canView($booking, 'fasilitas', auth()->user()), 403);
         
         $path = $this->receiptService->generateFasilitasReceipt($booking);
         
@@ -234,9 +218,7 @@ class ReceiptController extends Controller
     {
         $order = \App\Models\PasarOrder::withTrashed()->findOrFail($id);
         
-        if ((int)$order->user_id !== (int)auth()->id() && !in_array(auth()->user()->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'admin', 'staff'])) {
-            abort(403, 'Unauthorized access');
-        }
+        abort_unless(app(\App\Services\BookingAccess::class)->canView($order, 'pasar', auth()->user()), 403);
         
         $path = $this->receiptService->generatePasarReceipt($order);
         
@@ -260,9 +242,7 @@ class ReceiptController extends Controller
     {
         $order = \App\Models\PasarOrder::withTrashed()->findOrFail($id);
         
-        if ((int)$order->user_id !== (int)auth()->id() && !in_array(auth()->user()->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'admin', 'staff'])) {
-            abort(403, 'Unauthorized access');
-        }
+        abort_unless(app(\App\Services\BookingAccess::class)->canView($order, 'pasar', auth()->user()), 403);
         
         $path = $this->receiptService->generatePasarReceipt($order);
         

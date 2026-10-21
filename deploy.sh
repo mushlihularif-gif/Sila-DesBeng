@@ -12,5 +12,6 @@ echo "Menyegarkan cache Laravel..."
 php artisan route:clear
 php artisan view:clear
 php artisan config:clear
+php artisan security:invalidate-auth --once
 
 echo "Deploy selesai dengan sukses."

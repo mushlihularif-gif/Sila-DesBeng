@@ -32,6 +32,7 @@ class AuthController extends Controller
             ]);
         }
 
+        abort_if($user->status !== 'aktif', 403, 'Akun tidak aktif.');
         $token = $user->createToken('flutter-mobile-app')->plainTextToken;
 
         return response()->json([
@@ -46,19 +47,35 @@ class AuthController extends Controller
     public function loginGoogle(Request $request)
     {
         $request->validate([
-            'email' => 'required|email',
-            'name' => 'required|string',
-            'google_id' => 'required|string',
+            'id_token' => 'required|string|max:8192',
             'location_name' => 'nullable|string',
             'phone' => 'nullable|string',
             'region_id' => ['nullable', 'integer', $this->desaKecamatanBengkalisRule()],
         ]);
 
-        $user = User::where('email', $request->email)->first();
+        $identity = app(\App\Services\GoogleIdentityService::class)->verify($request->id_token);
+        // Identitas berasal dari token bertanda tangan Google, bukan data klien.
+        $request->merge([
+            'email' => $identity['email'],
+            'name' => $identity['name'] ?? 'Warga',
+            'google_id' => $identity['sub'],
+        ]);
+        $user = User::where('google_id', $identity['sub'])->first();
+        if (!$user) {
+            $user = User::where('email', $identity['email'])->first();
+            // Akun Google yang berbeda tidak boleh menimpa tautan yang sudah ada.
+            abort_if($user && $user->google_id && $user->google_id !== $identity['sub'], 401);
+            // Untuk email pihak ketiga, Google tidak menjamin pemilik email masih sama.
+            $googleOwnsEmail = str_ends_with(strtolower($identity['email']), '@gmail.com')
+                || !empty($identity['hd']);
+            abort_if($user && !$user->google_id && !$googleOwnsEmail, 403,
+                'Silakan masuk dengan password dan tautkan akun Google dari pengaturan.');
+        }
 
-        // 1. Pengguna SUDAH TERDAFTAR di database -> Langsung login!
+        // Pengguna terdaftar: token Google sudah diverifikasi.
         if ($user) {
-            if ($request->region_id && (!$user->region_id || $user->region_id == 1)) {
+            abort_if($user->status !== 'aktif', 403, 'Akun tidak aktif.');
+            if ($user->role === 'user' && $request->region_id && !$user->region_id) {
                 $user->region_id = $request->region_id;
             }
             if ($request->phone && ($user->phone == '-' || empty($user->phone))) {
@@ -115,7 +132,7 @@ class AuthController extends Controller
             'email' => $request->email,
             'name' => $request->name,
             'username' => $username,
-            'password' => Hash::make(uniqid()),
+            'password' => Hash::make(\Illuminate\Support\Str::random(64)),
             'nik' => null,
             'phone' => $request->phone,
             'address' => $request->location_name ?? '-',
@@ -126,6 +143,8 @@ class AuthController extends Controller
             'email_verified_at' => now(),
         ]);
 
+        $user->forceFill(['role' => 'user', 'status' => 'aktif', 'email_verified_at' => now()])->save();
+        abort_if($user->status !== 'aktif', 403, 'Akun tidak aktif.');
         $token = $user->createToken('flutter-mobile-app')->plainTextToken;
         $user->load('region');
 
@@ -160,7 +179,7 @@ class AuthController extends Controller
             'password' => 'required|string|min:8|confirmed',
         ]);
 
-        $otpCode = str_pad(rand(0, 9999), 4, '0', STR_PAD_LEFT);
+        $otpCode = str_pad(random_int(0, 9999), 4, '0', STR_PAD_LEFT);
         
         // Simpan data pendaftaran ke Cache selama 5 menit
         $cacheKey = 'register_otp_' . $request->email;
@@ -212,7 +231,7 @@ class AuthController extends Controller
             ], 400);
         }
 
-        $otpCode = str_pad(rand(0, 9999), 4, '0', STR_PAD_LEFT);
+        $otpCode = str_pad(random_int(0, 9999), 4, '0', STR_PAD_LEFT);
         $tempData['otp_code'] = $otpCode;
         
         Cache::put($cacheKey, $tempData, now()->addMinutes(5));
@@ -275,6 +294,8 @@ class AuthController extends Controller
 
         Cache::forget($cacheKey);
 
+        $user->forceFill(['role' => 'user', 'status' => 'aktif', 'email_verified_at' => now()])->save();
+        abort_if($user->status !== 'aktif', 403, 'Akun tidak aktif.');
         $token = $user->createToken('flutter-mobile-app')->plainTextToken;
 
         return response()->json([
@@ -467,7 +488,7 @@ class AuthController extends Controller
         ]);
 
         $user = User::where('email', $request->email_or_phone)
-                    ->orWhere('phone', $request->email_or_phone)
+                    ->orWhere('phone_hash', hash_hmac('sha256', $request->email_or_phone, config('app.key')))
                     ->first();
 
         if (!$user) {
@@ -478,7 +499,7 @@ class AuthController extends Controller
         }
 
         // Generate 4 digit OTP
-        $otpCode = str_pad(rand(0, 9999), 4, '0', STR_PAD_LEFT);
+        $otpCode = str_pad(random_int(0, 9999), 4, '0', STR_PAD_LEFT);
 
         $user->otp_code = $otpCode;
         $user->otp_expires_at = now()->addMinutes(5);
@@ -505,7 +526,7 @@ class AuthController extends Controller
         ]);
 
         $user = User::where('email', $request->email_or_phone)
-                    ->orWhere('phone', $request->email_or_phone)
+                    ->orWhere('phone_hash', hash_hmac('sha256', $request->email_or_phone, config('app.key')))
                     ->first();
 
         if (!$user) {
@@ -555,7 +576,7 @@ class AuthController extends Controller
         ]);
 
         $user = User::where('email', $request->email_or_phone)
-                    ->orWhere('phone', $request->email_or_phone)
+                    ->orWhere('phone_hash', hash_hmac('sha256', $request->email_or_phone, config('app.key')))
                     ->first();
 
         if (!$user) {
@@ -590,7 +611,9 @@ class AuthController extends Controller
         $user->password = Hash::make($request->password);
         $user->reset_token = null;
         $user->reset_token_expires_at = null;
+        $user->remember_token = null;
         $user->save();
+        $user->tokens()->delete();
 
         return response()->json([
             'status' => 'success',

@@ -26,6 +26,18 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        \Illuminate\Support\Facades\RateLimiter::for('auth-sensitive', function ($request) {
+            $account = hash('sha256', strtolower((string) $request->input('email', $request->input('username', $request->input('email_or_phone', $request->ip())))));
+            return [
+                \Illuminate\Cache\RateLimiting\Limit::perMinute(10)->by('auth-ip:' . $request->ip()),
+                \Illuminate\Cache\RateLimiting\Limit::perMinutes(5, 10)->by('auth-account:' . $account),
+            ];
+        });
+        \Illuminate\Support\Facades\RateLimiter::for('chat-write', fn ($request) =>
+            \Illuminate\Cache\RateLimiting\Limit::perMinute(20)->by('chat:' . $request->ip()));
+        \Illuminate\Support\Facades\RateLimiter::for('api', fn ($request) =>
+            \Illuminate\Cache\RateLimiting\Limit::perMinute(120)->by('api:' . $request->ip()));
+
         \Illuminate\Pagination\Paginator::useBootstrapFive();
         
         // Force HTTPS in production to avoid mixed content or blocked cleartext traffic on mobile

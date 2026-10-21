@@ -773,18 +773,13 @@ class PasarDaerahApiController extends Controller
     public function getChatHistory(Request $request, $region_id)
     {
         abort_unless(in_array((int) $region_id, $this->desaIdsKecamatanBengkalis(), true), 404);
-        $user = $request->user();
-        $sessionToken = $request->header('X-Chat-Session-Token') ?: $request->get('session_token');
+        $user = \Illuminate\Support\Facades\Auth::guard('sanctum')->user();
+        $sessionToken = \App\Services\ChatSessionToken::read($request);
 
         $query = PasarChatSession::where('region_id', $region_id);
 
         if ($user) {
-            $query->where(function($q) use ($user, $sessionToken) {
-                $q->where('user_id', $user->id);
-                if ($sessionToken) {
-                    $q->orWhere('session_token', $sessionToken);
-                }
-            });
+            $query->where('user_id', $user->id);
         } else {
             if (!$sessionToken) {
                 return response()->json([
@@ -795,7 +790,7 @@ class PasarDaerahApiController extends Controller
                     ]
                 ]);
             }
-            $query->where('session_token', $sessionToken);
+            $query->whereNull('user_id')->where('session_token', $sessionToken);
         }
 
         $session = $query->with(['messages'])->latest()->first();
@@ -830,30 +825,28 @@ class PasarDaerahApiController extends Controller
             'session_token' => 'nullable|string|max:64',
         ]);
 
-        $user = $request->user();
+        $user = \Illuminate\Support\Facades\Auth::guard('sanctum')->user();
         abort_unless(in_array((int) $region_id, $this->desaIdsKecamatanBengkalis(), true), 404);
-        $sessionToken = $request->session_token ?: ($request->header('X-Chat-Session-Token') ?: \Illuminate\Support\Str::random(32));
+        $sessionToken = \App\Services\ChatSessionToken::read($request);
         $region = Region::findOrFail($region_id);
 
         $session = null;
         if ($user) {
             $session = PasarChatSession::where('region_id', $region_id)
-                ->where(function($q) use ($user, $sessionToken) {
-                    $q->where('user_id', $user->id)
-                      ->orWhere('session_token', $sessionToken);
-                })
+                ->where('user_id', $user->id)
                 ->whereIn('status', ['bot', 'escalated'])
                 ->latest()
                 ->first();
         } else {
             $session = PasarChatSession::where('region_id', $region_id)
-                ->where('session_token', $sessionToken)
+                ->whereNull('user_id')->where('session_token', $sessionToken)
                 ->whereIn('status', ['bot', 'escalated'])
                 ->latest()
                 ->first();
         }
 
         if (!$session) {
+            $sessionToken = \Illuminate\Support\Str::random(64);
             $session = PasarChatSession::create([
                 'region_id' => $region_id,
                 'user_id' => $user ? $user->id : null,
@@ -986,7 +979,7 @@ class PasarDaerahApiController extends Controller
         return response()->json([
             'status' => 'success',
             'data' => [
-                'session_token' => $sessionToken,
+                'session_token' => $session->session_token,
                 'session' => $session->fresh(),
                 'user_message' => $userMsg,
                 'bot_message' => isset($botMsg) ? $botMsg : null,
@@ -1001,28 +994,25 @@ class PasarDaerahApiController extends Controller
     public function escalateToAdmin(Request $request, $region_id)
     {
         abort_unless(in_array((int) $region_id, $this->desaIdsKecamatanBengkalis(), true), 404);
-        $user = $request->user();
-        $sessionToken = $request->session_token ?: $request->header('X-Chat-Session-Token');
+        $user = \Illuminate\Support\Facades\Auth::guard('sanctum')->user();
+        $sessionToken = \App\Services\ChatSessionToken::read($request);
         $region = Region::findOrFail($region_id);
 
         $session = null;
         if ($user) {
             $session = PasarChatSession::where('region_id', $region_id)
-                ->where(function($q) use ($user, $sessionToken) {
-                    $q->where('user_id', $user->id)
-                      ->orWhere('session_token', $sessionToken);
-                })
+                ->where('user_id', $user->id)
                 ->latest()
                 ->first();
         } elseif ($sessionToken) {
             $session = PasarChatSession::where('region_id', $region_id)
-                ->where('session_token', $sessionToken)
+                ->whereNull('user_id')->where('session_token', $sessionToken)
                 ->latest()
                 ->first();
         }
 
         if (!$session) {
-            $sessionToken = $sessionToken ?: \Illuminate\Support\Str::random(32);
+            $sessionToken = \Illuminate\Support\Str::random(64);
             $session = PasarChatSession::create([
                 'region_id' => $region_id,
                 'user_id' => $user ? $user->id : null,

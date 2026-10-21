@@ -313,10 +313,10 @@ Route::middleware('auth')->prefix('pasar-daerah')->group(function () {
     Route::get('/toko/{id}/chat/history', [App\Http\Controllers\User\PasarDaerahController::class, 'getChatHistory'])
         ->name('pasar.chat.history')
         ->withoutMiddleware('auth');
-    Route::post('/toko/{id}/chat/send', [App\Http\Controllers\User\PasarDaerahController::class, 'sendChatMessage'])
+    Route::post('/toko/{id}/chat/send', [App\Http\Controllers\User\PasarDaerahController::class, 'sendChatMessage'])->middleware('throttle:chat-write')
         ->name('pasar.chat.send')
         ->withoutMiddleware('auth');
-    Route::post('/toko/{id}/chat/escalate', [App\Http\Controllers\User\PasarDaerahController::class, 'escalateToAdmin'])
+    Route::post('/toko/{id}/chat/escalate', [App\Http\Controllers\User\PasarDaerahController::class, 'escalateToAdmin'])->middleware('throttle:chat-write')
         ->name('pasar.chat.escalate')
         ->withoutMiddleware('auth');
         
@@ -404,14 +404,14 @@ Route::post('/auth/resend-otp', [AuthController::class, 'resendOtp'])->name('aut
 Route::get('/auth/login', function () {
     return redirect()->route('beranda')->with('open_login_modal', true);
 })->name('login');
-Route::post('/auth/login', [AuthController::class, 'login'])->name('auth.login');
+Route::post('/auth/login', [AuthController::class, 'login'])->name('auth.login')->middleware('throttle:auth-sensitive');
 Route::post('/auth/logout', [AuthController::class, 'logout'])->name('auth.logout')->middleware('auth');
 
 Route::post('/auth/forgot-password', [AuthController::class, 'forgotPassword'])->name('auth.forgot-password')->middleware('throttle:3,5');
 Route::get('/auth/forgot-password/otp', [AuthController::class, 'showForgotOtpForm'])->name('auth.forgot-password.otp.view');
-Route::post('/auth/forgot-password/verify-otp', [AuthController::class, 'verifyForgotPasswordOtp'])->name('auth.forgot-password.verify-otp')->middleware('throttle:100,5');
+Route::post('/auth/forgot-password/verify-otp', [AuthController::class, 'verifyForgotPasswordOtp'])->name('auth.forgot-password.verify-otp')->middleware('throttle:auth-sensitive');
 Route::get('/auth/forgot-password/reset', [AuthController::class, 'showResetPasswordForm'])->name('auth.forgot-password.reset.view');
-Route::post('/auth/forgot-password/reset', [AuthController::class, 'resetForgotPassword'])->name('auth.forgot-password.reset')->middleware('throttle:100,5');
+Route::post('/auth/forgot-password/reset', [AuthController::class, 'resetForgotPassword'])->name('auth.forgot-password.reset')->middleware('throttle:auth-sensitive');
 Route::post('/auth/forgot-password/resend-otp', [AuthController::class, 'resendForgotPasswordOtp'])->name('auth.forgot-password.resend-otp')->middleware('throttle:3,5');
 
 // Google Auth Routes
@@ -983,61 +983,20 @@ Route::get('/api/geocode/reverse', function (\Illuminate\Http\Request $request) 
 // sengaja tidak disediakan. Operasi pemeliharaan dijalankan melalui Artisan CLI.
 
 // Chatbot API Route
-Route::post('/chatbot/ask', [\App\Http\Controllers\User\ChatbotController::class, 'ask']);
+Route::post('/chatbot/ask', [\App\Http\Controllers\User\ChatbotController::class, 'ask'])->middleware('throttle:chat-write');
 
 // Fallback Route untuk aset Storage jika symlink dinonaktifkan oleh shared hosting
 Route::get('/storage/{path}', function ($path) {
-    if (str_contains($path, '..') || str_contains($path, "\0")) {
-        abort(403);
-    }
-    $fullPath = storage_path('app/public/' . $path);
-    if (!file_exists($fullPath) || is_dir($fullPath)) {
-        abort(404);
-    }
-    return response()->file($fullPath);
+    return app(\App\Services\PublicAssetService::class)->serve(
+        storage_path('app/public'), $path, false
+    );
 })->where('path', '.*')->name('storage.fallback');
 
 // Fallback Route untuk aset statis Admin & User jika hosting belum menyalin ke document root
 Route::get('/{folder}/{subfolder}/{path}', function ($folder, $subfolder, $path) {
-    if (str_contains($path, '..') || str_contains($path, "\0") || str_contains($folder, '..') || str_contains($subfolder, '..')) {
-        abort(403);
-    }
-
-    $decodedPath = urldecode($path);
-    $relative = $folder . '/' . $subfolder . '/' . $decodedPath;
-    $fullPath = base_path('public/' . $relative);
-
-    if (!file_exists($fullPath) || is_dir($fullPath)) {
-        abort(404);
-    }
-
-    // Salin otomatis ke document root hosting jika berbeda (menghindari request PHP berikutnya)
-    if (isset($_SERVER['DOCUMENT_ROOT']) && is_dir($_SERVER['DOCUMENT_ROOT'])) {
-        $destPath = rtrim($_SERVER['DOCUMENT_ROOT'], '/\\') . '/' . $relative;
-        if (!file_exists($destPath)) {
-            @mkdir(dirname($destPath), 0755, true);
-            @copy($fullPath, $destPath);
-        }
-    }
-
-    $extension = strtolower(pathinfo($fullPath, PATHINFO_EXTENSION));
-    $mimes = [
-        'webp' => 'image/webp',
-        'png'  => 'image/png',
-        'jpg'  => 'image/jpeg',
-        'jpeg' => 'image/jpeg',
-        'gif'  => 'image/gif',
-        'svg'  => 'image/svg+xml',
-        'ico'  => 'image/x-icon',
-        'css'  => 'text/css',
-        'js'   => 'application/javascript',
-    ];
-    $contentType = $mimes[$extension] ?? (mime_content_type($fullPath) ?: 'application/octet-stream');
-
-    return response()->file($fullPath, [
-        'Content-Type' => $contentType,
-        'Cache-Control' => 'public, max-age=604800',
-    ]);
+    return app(\App\Services\PublicAssetService::class)->serve(
+        public_path($folder . '/' . $subfolder), $path, true
+    );
 })->where('folder', '[Aa]dmin|[Uu]ser')
   ->where('subfolder', 'img|vendor|css|js|fonts')
   ->where('path', '.*')

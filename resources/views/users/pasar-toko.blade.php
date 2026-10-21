@@ -1979,7 +1979,7 @@
             if (res.status === 'success' && res.data.session) {
                 const session = res.data.session;
                 isChatEscalated = (session.status === 'escalated');
-                if (session.session_token && !chatSessionToken) {
+                if (session.session_token) {
                     chatSessionToken = session.session_token;
                     localStorage.setItem(chatStorageKey, chatSessionToken);
                 }
@@ -2098,7 +2098,7 @@
         if (!text) return '';
         const div = document.createElement('div');
         div.textContent = text;
-        return div.innerHTML;
+        return div.innerHTML.replace(/"/g, "&quot;").replace(/'/g, "&#039;");
     }
 </script>
 @endpush

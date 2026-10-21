@@ -101,31 +101,8 @@ class LaporanController extends Controller
      */
     private function bolehMelihatLaporan(Laporan $laporan, ?User $user): bool
     {
-        if (! $user) {
-            return false;
-        }
+        return app(\App\Services\ReportAccess::class)->canView($laporan, $user);
 
-        if ((int) $laporan->user_id === (int) $user->id) {
-            return true;
-        }
-
-        if ($user->role === 'super_admin') {
-            return true;
-        }
-
-        $peranWilayah = ['admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'staff'];
-
-        // Tanpa wilayah, tidak ada yang bisa dijangkau. Region::getDescendantIds(null)
-        // justru mengembalikan SELURUH pohon wilayah, jadi tanpa penjaga ini
-        // admin yang region_id-nya kosong malah melihat satu kabupaten penuh.
-        if (! in_array($user->role, $peranWilayah, true) || ! $user->region_id) {
-            return false;
-        }
-
-        $jangkauan = Region::getDescendantIds($user->region_id);
-        $jangkauan[] = $user->region_id;
-
-        return in_array((int) $laporan->region_id, array_map('intval', $jangkauan), true);
     }
 
     public function index()

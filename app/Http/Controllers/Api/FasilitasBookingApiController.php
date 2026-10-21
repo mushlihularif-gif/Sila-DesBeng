@@ -101,9 +101,10 @@ class FasilitasBookingApiController extends Controller
             'start_date' => 'required|date|after_or_equal:today',
             'end_date' => 'required|date|after_or_equal:start_date',
             'rental_purpose' => 'nullable|string|max:500',
-            'jenis_acara' => 'nullable|in:sosial,pribadi',
+            'jenis_acara' => 'nullable|in:sosial,komersial,pribadi',
             'butuh_gudang' => 'nullable|boolean',
-            'quantity' => 'nullable|integer|min:1',
+            'quantity' => 'nullable|integer|min:1|max:100',
+            'payment_method' => 'nullable|in:tunai,transfer',
             'delivery_method' => 'nullable|string',
             'dengan_supir' => 'nullable|boolean',
         ]);
@@ -122,8 +123,11 @@ class FasilitasBookingApiController extends Controller
             $endDate = \Carbon\Carbon::parse($request->end_date);
             $daysCount = $startDate->diffInDays($endDate) + 1;
 
-            // Fasilitas untuk acara sosial biasanya gratis
-            $totalAmount = 0;
+            // Harga mengikuti katalog dan kebijakan yang sama dengan web.
+            $jenisAcara = $request->jenis_acara === 'pribadi' ? 'komersial' : ($request->jenis_acara ?? 'sosial');
+            $totalAmount = $fasilitas->status_biaya === 'berbayar' && $jenisAcara === 'komersial'
+                ? $daysCount * $fasilitas->harga_sewa * ($request->quantity ?? 1) : 0;
+            $paymentMethod = $totalAmount > 0 ? ($request->payment_method ?? 'tunai') : null;
 
             $booking = FasilitasUmumBooking::create([
                 'user_id' => $request->user()->id,
@@ -132,7 +136,8 @@ class FasilitasBookingApiController extends Controller
                 'end_date' => $request->end_date,
                 'quantity' => $request->quantity ?? 1,
                 'rental_purpose' => $request->rental_purpose,
-                'jenis_acara' => $request->jenis_acara ?? 'sosial',
+                'jenis_acara' => $jenisAcara,
+                'payment_method' => $paymentMethod,
                 'butuh_gudang' => $request->butuh_gudang ?? false,
                 'total_amount' => $totalAmount,
                 'status' => 'pending',
@@ -141,10 +146,10 @@ class FasilitasBookingApiController extends Controller
                 'region_id' => $fasilitas->region_id,
             ]);
 
-            // Kurangi stok jika ada
-            if ($fasilitas->stok !== null) {
-                $fasilitas->decreaseStock($request->quantity ?? 1);
+            if ($totalAmount > 0) {
+                \App\Models\WalletTransaction::catatPemasukan($fasilitas->region_id, 'fasilitas', $booking->id, $totalAmount, $paymentMethod);
             }
+            // Stok dialokasikan saat admin menyetujui, sama seperti pemesanan web.
 
             // Notifikasi untuk User
             \App\Models\Notification::create([
@@ -214,38 +219,17 @@ class FasilitasBookingApiController extends Controller
      */
     public function cancel(Request $request, $id)
     {
-        $booking = FasilitasUmumBooking::withoutGlobalScopes()
-            ->where('id', $id)
-            ->where('user_id', $request->user()->id)
-            ->first();
-
-        if (!$booking) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Booking tidak ditemukan.',
-            ], 404);
-        }
-
-        if ($booking->status !== 'pending') {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Hanya booking dengan status pending yang bisa dibatalkan.',
-            ], 422);
-        }
-
-        // Kembalikan stok jika ada
-        if ($booking->fasilitas && $booking->fasilitas->stok !== null) {
-            $booking->fasilitas->increaseStock($booking->quantity ?? 1);
-        }
-
-        $booking->update([
-            'status' => 'cancelled',
-            'cancellation_reason' => $request->reason ?? 'Dibatalkan oleh pengguna',
-        ]);
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Booking fasilitas berhasil dibatalkan.',
-        ]);
+        $request->validate(['reason' => 'nullable|string|max:500']);
+        return \Illuminate\Support\Facades\DB::transaction(function () use ($request, $id) {
+            $booking = FasilitasUmumBooking::withoutGlobalScopes()->whereKey($id)
+                ->where('user_id', $request->user()->id)->lockForUpdate()->firstOrFail();
+            if ($booking->status !== 'pending') {
+                return response()->json(['status' => 'error', 'message' => 'Hanya booking pending yang dapat dibatalkan langsung.'], 422);
+            }
+            // Pending belum mengalokasikan stok. Pembatalan tidak boleh menambah persediaan.
+            $booking->update(['status' => 'cancelled', 'cancellation_reason' => $request->reason ?? 'Dibatalkan oleh pengguna']);
+            \App\Models\WalletTransaction::batalkanDanRefund('fasilitas', $booking->id, 'Dibatalkan oleh pengguna');
+            return response()->json(['status' => 'success', 'message' => 'Booking berhasil dibatalkan.']);
+        });
     }
 }

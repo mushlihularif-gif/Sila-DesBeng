@@ -109,6 +109,13 @@ class User extends Authenticatable
         'remember_token',
         'otp_code',
         'reset_token',
+        'ktp_photo_path',
+        'face_photo_path',
+        'nik_hash',
+        'name_hash',
+        'phone_hash',
+        'fcm_token',
+        'google_id',
     ];
 
     /**

@@ -82,66 +82,11 @@ class UserVerificationController extends Controller
         $user = User::findOrFail($id);
         $this->pastikanDalamJangkauan($user);
 
+        abort_unless(in_array($type, ['ktp', 'face'], true), 404);
+        abort_unless($user->verification_status === 'pending', 404);
         $path = $type === 'ktp' ? $user->ktp_photo_path : $user->face_photo_path;
-
-        if (!$path || !Storage::disk('private')->exists($path)) {
-            abort(404, 'File tidak ditemukan.');
-        }
-
-        $filePath = storage_path('app/private/' . $path);
-
-        try {
-            // Membaca file gambar dari storage private
-            $fileContent = file_get_contents($filePath);
-            
-            // Coba dekripsi jika dienkripsi dengan ChaCha20
-            $decryptedContent = \App\Services\FileEncryptionService::decrypt($fileContent);
-            
-            // Jika hasil dekripsi kosong, asumsikan ini file lama yang belum dienkripsi
-            $imageContent = $decryptedContent ?: $fileContent;
-
-            // Buat image manager dengan GD driver
-            $manager = \Intervention\Image\ImageManager::gd();
-            
-            // Baca gambar dari binary data
-            $image = $manager->read($imageContent);
-
-            $width = $image->width();
-            $height = $image->height();
-
-            // Hanya berikan watermark pada KTP/KK, foto wajah dibiarkan bersih
-            if ($type === 'ktp' || $type === 'kk') {
-                $watermarkPath = public_path('Admin/img/watermarkprivasi/WatermarkPrivasiFIX.png');
-                if (file_exists($watermarkPath)) {
-                    $watermark = $manager->read($watermarkPath);
-                    $watermarkWidth = intval($width * 0.9);
-                    $watermark->scaleDown(width: $watermarkWidth);
-                    $image->place($watermark, 'center');
-                }
-            }
-
-            // Encode gambar sebagai JPEG
-            $encoded = $image->toJpeg(85);
-
-            return response($encoded->toString(), 200, [
-                'Content-Type' => 'image/jpeg',
-                'Content-Disposition' => 'inline',
-                // Header keamanan: larang browser menyimpan cache gambar
-                'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
-                'Pragma' => 'no-cache',
-                'Expires' => '0',
-            ]);
-        } catch (\Exception $e) {
-            // Fallback: jika watermark gagal, tetap tampilkan gambar asli yang sudah didekripsi
-            \Log::warning('Watermark gagal diterapkan: ' . $e->getMessage());
-            
-            // Return raw image bytes karena $imageContent sudah didekripsi
-            return response($imageContent, 200, [
-                'Content-Type' => 'image/jpeg',
-                'Content-Disposition' => 'inline',
-                'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
-            ]);
-        }
+        abort_unless($path, 404);
+        return app(\App\Services\IdentityMediaService::class)->render($path, $type);
     }
 
     public function approve($id)

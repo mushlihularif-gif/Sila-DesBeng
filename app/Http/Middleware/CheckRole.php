@@ -80,7 +80,7 @@ class CheckRole
         }
         
         $user = Auth::guard($guard)->user();
-        Log::info('CheckRole: User ' . $user->email . ' (Role: ' . $user->role . ') accessing ' . $request->path());
+        abort_if($user->status === 'non_aktif', 403, 'Akun tidak aktif.');
         
         // If no roles specified (only 'auth'), just check authentication (already passed above)
         if (empty($roles) || (count($roles) === 1 && $roles[0] === 'sanctum')) {

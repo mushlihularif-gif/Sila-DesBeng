@@ -345,10 +345,10 @@
                 const avatarWrap = document.getElementById(`unitActiveChatAvatarWrap_${service}`);
                 if (avatarWrap) {
                     if (userPhoto) {
-                        avatarWrap.innerHTML = `<img src="${userPhoto}" alt="${escapeHtml(userName)}" class="rounded-circle w-100 h-100 shadow-2xs" style="object-fit: cover;" onerror="this.style.display='none'">`;
+                        avatarWrap.innerHTML = `<img src="${escapeHtml(userPhoto)}" alt="${escapeHtml(userName)}" class="rounded-circle w-100 h-100 shadow-2xs" style="object-fit: cover;" onerror="this.style.display='none'">`;
                     } else {
                         const initialChar = userName.charAt(0).toUpperCase() || 'W';
-                        avatarWrap.innerHTML = `<div class="avatar-initial rounded-circle fw-bold text-white shadow-2xs" style="background: linear-gradient(135deg, #696cff, #4338ca);">${initialChar}</div>`;
+                        avatarWrap.innerHTML = `<div class="avatar-initial rounded-circle fw-bold text-white shadow-2xs" style="background: linear-gradient(135deg, #696cff, #4338ca);">${escapeHtml(initialChar)}</div>`;
                     }
                 }
 
@@ -413,7 +413,7 @@
         .catch(err => {
             console.error('Error loading chat:', err);
             if (!isSilent && stream && !stream.querySelector('.admin-unit-msg-bubble')) {
-                stream.innerHTML = `<div class="text-center text-danger my-auto py-5"><i class="bx bx-error-circle fs-1 mb-2"></i><p class="small mb-2">Gagal memuat obrolan (${err.message || 'Koneksi bermasalah'}).</p><button class="btn btn-sm btn-outline-primary" onclick="loadAdminUnitChat('${service}', ${sessionId})">Muat Ulang</button></div>`;
+                stream.innerHTML = `<div class="text-center text-danger my-auto py-5"><i class="bx bx-error-circle fs-1 mb-2"></i><p class="small mb-2">Gagal memuat obrolan (${escapeHtml(err.message || 'Koneksi bermasalah')}).</p><button class="btn btn-sm btn-outline-primary" onclick="loadAdminUnitChat('${service}', ${sessionId})">Muat Ulang</button></div>`;
             }
         });
     }
@@ -470,7 +470,7 @@
                 
                 let userAvatarHtml = '';
                 if (userPhoto) {
-                    userAvatarHtml = `<img src="${userPhoto}" class="rounded-circle w-100 h-100 shadow-2xs" style="object-fit: cover;" onerror="this.style.display='none'">`;
+                    userAvatarHtml = `<img src="${escapeHtml(userPhoto)}" class="rounded-circle w-100 h-100 shadow-2xs" style="object-fit: cover;" onerror="this.style.display='none'">`;
                 } else {
                     userAvatarHtml = `<div class="avatar-initial rounded-circle fw-bold text-white shadow-2xs" style="background: linear-gradient(135deg, #696cff, #4338ca); font-size: 10px;">W</div>`;
                 }
@@ -481,7 +481,7 @@
                     const prodTitle = escapeHtml(productInfo.title || '');
                     const prodPrice = escapeHtml(productInfo.price || '');
                     const prodImg = productInfo.image ? escapeHtml(productInfo.image) : '';
-                    const prodUrl = (productInfo.url && productInfo.url !== '#') ? productInfo.url : '';
+                    const prodUrl = escapeHtml(safeChatProductUrl(productInfo.url));
 
                     quotedHtml = `
                         <div class="unit-chat-product-quote rounded-3 d-flex align-items-center justify-content-between gap-3 shadow-2xs">
@@ -682,6 +682,14 @@
                 loadAdminUnitChat(service, sessionId, true);
             }
         }, 4000);
+    }
+
+    function safeChatProductUrl(value) {
+        if (!value || value === '#') return '';
+        try {
+            const url = new URL(value, window.location.origin);
+            return ['http:', 'https:'].includes(url.protocol) && url.origin === window.location.origin ? url.href : '';
+        } catch (_) { return ''; }
     }
 
     function escapeHtml(str) {

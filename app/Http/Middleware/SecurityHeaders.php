@@ -57,7 +57,9 @@ class SecurityHeaders
             "base-uri 'self'",
             "form-action 'self'",
         ]);
-        $response->headers->set('Content-Security-Policy', $csp);
+        if (!$response->headers->has('Content-Security-Policy')) {
+            $response->headers->set('Content-Security-Policy', $csp);
+        }
 
         // Mencegah caching pada level browser (bfcache) untuk menghindari isu status auth tidak sinkron
         // (contoh: user sudah login, tapi ketika menekan tombol Back terlihat seperti Guest)

@@ -210,11 +210,15 @@
     var unitServiceCode = '{{ $service }}';
     var unitRegionId = '{{ $regionId }}';
     var unitChatSessionToken = localStorage.getItem(`unitChatToken_${unitServiceCode}_${unitRegionId}`);
-    if (!unitChatSessionToken) {
-        unitChatSessionToken = 'session_' + Math.random().toString(36).substr(2, 9);
-        localStorage.setItem(`unitChatToken_${unitServiceCode}_${unitRegionId}`, unitChatSessionToken);
+    unitChatSessionToken = unitChatSessionToken || '';
+    function rememberChatToken(data) {
+        const token = data?.session?.session_token || data?.session_token;
+        if (token) {
+            unitChatSessionToken = token;
+            localStorage.setItem(`unitChatToken_${unitServiceCode}_${unitRegionId}`, token);
+        }
     }
-    
+
     var isUnitChatEscalated = false;
     var isUnitChatOpen = false;
     var unitChatHasPushedItem = false;
@@ -227,7 +231,7 @@
     var unitItemImage = '{{ addslashes($itemImage) }}';
 
     function escapeHtml(unsafe) {
-        return (unsafe || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        return String(unsafe ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
     }
 
     window.chatAboutCurrentItem = function() {
@@ -344,6 +348,7 @@
         .then(res => res.json())
         .then(data => {
             if (data.status === 'success' && data.data && data.data.messages) {
+                rememberChatToken(data.data);
                 const msgs = data.data.messages;
                 if (msgs.length > 0) {
                     if (data.data.session && data.data.session.status === 'escalated') {
@@ -400,6 +405,7 @@
         .then(res => res.json())
         .then(data => {
             if (data.status === 'success') {
+                rememberChatToken(data.data);
                 if (!silent) {
                     if (data.data.bot_message) {
                         setTimeout(() => {
@@ -452,6 +458,7 @@
         .then(res => res.json())
         .then(data => {
             if (data.status === 'success') {
+                rememberChatToken(data.data);
                 isUnitChatEscalated = true;
                 const qr = document.getElementById('unitQuickReplies');
                 if (qr) qr.style.display = 'none';

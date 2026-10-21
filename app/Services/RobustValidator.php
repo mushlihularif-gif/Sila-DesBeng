@@ -12,8 +12,11 @@ class RobustValidator extends BaseValidator
      */
     public function validateImage($attribute, $value, $parameters = [])
     {
-        $mimes = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
-        return $this->validateMimes($attribute, $value, $mimes);
+        $mimes = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'];
+        if (!$this->validateMimes($attribute, $value, $mimes)) return false;
+        $size = @getimagesize($value->getPathname());
+        return $size && $size[0] > 0 && $size[1] > 0
+            && $size[0] * $size[1] <= 25000000;
     }
 
     /**
@@ -93,23 +96,7 @@ class RobustValidator extends BaseValidator
             }
         }
 
-        // 3. Fallback: Ekstensi klien yang diunggah cocok dengan whitelist parameter
-        // Berguna saat server shared hosting membatasi akses parser biner atau MIME detection
-        $clientExt = strtolower($value->getClientOriginalExtension());
-        if ($clientExt && in_array($clientExt, $normalized, true)) {
-            $dangerousExts = ['php', 'phtml', 'php3', 'php4', 'php5', 'phar', 'exe', 'sh', 'bat', 'cmd', 'cgi', 'pl', 'py', 'js', 'html', 'htm'];
-            if (!in_array($clientExt, $dangerousExts, true)) {
-                // Periksa keamanan isi file: tidak boleh mengandung tag script PHP
-                if ($path && file_exists($path) && filesize($path) > 0) {
-                    $firstChunk = @file_get_contents($path, false, null, 0, 2048);
-                    if ($firstChunk && (stripos($firstChunk, '<?php') !== false || stripos($firstChunk, '<?=') !== false)) {
-                        return false;
-                    }
-                }
-                return true;
-            }
-        }
-
+        // Nama/ekstensi kiriman klien bukan bukti tipe berkas.
         return false;
     }
 }

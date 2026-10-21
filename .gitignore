@@ -22,6 +22,8 @@
 /storage/pail
 /storage/framework/views/*
 !/storage/framework/views/.gitignore
+/storage/framework/sessions/*
+!/storage/framework/sessions/.gitignore
 /vendor
 Homestead.json
 Homestead.yaml
@@ -39,3 +41,5 @@ security/*.log
 
 # Arsip vendor untuk unggahan manual, jangan pernah masuk repo
 vendor.zip
+*.bak
+*.backup

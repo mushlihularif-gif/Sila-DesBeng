@@ -5,14 +5,14 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BerandaController;
 
 // Public Routes (Bisa diakses tanpa login)
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/login/google', [AuthController::class, 'loginGoogle']);
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/register/verify-otp', [AuthController::class, 'verifyOtp']);
-Route::post('/register/resend-otp', [AuthController::class, 'resendRegisterOtp']);
-Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
-Route::post('/forgot-password/verify-otp', [AuthController::class, 'verifyForgotPasswordOtp']);
-Route::post('/forgot-password/reset', [AuthController::class, 'resetForgotPassword']);
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:auth-sensitive');
+Route::post('/login/google', [AuthController::class, 'loginGoogle'])->middleware('throttle:auth-sensitive');
+Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:auth-sensitive');
+Route::post('/register/verify-otp', [AuthController::class, 'verifyOtp'])->middleware('throttle:auth-sensitive');
+Route::post('/register/resend-otp', [AuthController::class, 'resendRegisterOtp'])->middleware('throttle:auth-sensitive');
+Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->middleware('throttle:auth-sensitive');
+Route::post('/forgot-password/verify-otp', [AuthController::class, 'verifyForgotPasswordOtp'])->middleware('throttle:auth-sensitive');
+Route::post('/forgot-password/reset', [AuthController::class, 'resetForgotPassword'])->middleware('throttle:auth-sensitive');
 Route::get('/banners', [BerandaController::class, 'banners']);
 Route::get('/services', [BerandaController::class, 'services']);
 Route::get('/unit-pelayanan', [BerandaController::class, 'unitPelayanan']);
@@ -30,8 +30,8 @@ Route::get('/popular', [BerandaController::class, 'popular']);
     Route::get('/pasar-daerah/seller/{region_id}', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'getSellerProfile']);
     Route::get('/pasar-daerah/categories', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'getCategories']);
     Route::get('/pasar-daerah/seller/{region_id}/chat/history', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'getChatHistory']);
-    Route::post('/pasar-daerah/seller/{region_id}/chat/send', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'sendChatMessage']);
-    Route::post('/pasar-daerah/seller/{region_id}/chat/escalate', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'escalateToAdmin']);
+    Route::post('/pasar-daerah/seller/{region_id}/chat/send', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'sendChatMessage'])->middleware('throttle:chat-write');
+    Route::post('/pasar-daerah/seller/{region_id}/chat/escalate', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'escalateToAdmin'])->middleware('throttle:chat-write');
 
     // Wilayah (Regions) - Public for registration
     Route::get('/kemitraan/regions', [\App\Http\Controllers\Api\PartnerApplicationApiController::class, 'getRegions']);
@@ -89,7 +89,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/notifications/delete-all', [\App\Http\Controllers\Api\NotificationController::class, 'deleteAll']);
     
     // Chatbot (Gemini AI)
-    Route::post('/chatbot', [\App\Http\Controllers\User\ChatbotController::class, 'ask']);
+    Route::post('/chatbot', [\App\Http\Controllers\User\ChatbotController::class, 'ask'])->middleware('throttle:chat-write');
 
     // Pasar Daerah (Cart & Checkout)
     Route::get('/pasar-daerah/cart', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'getCart']);
@@ -152,8 +152,8 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::prefix('unit-chat')->group(function () {
     Route::get('/unread-counts', [\App\Http\Controllers\Api\UnitChatApiController::class, 'getUnreadCounts']);
     Route::get('/{service}/history', [\App\Http\Controllers\Api\UnitChatApiController::class, 'getChatHistory']);
-    Route::post('/{service}/send', [\App\Http\Controllers\Api\UnitChatApiController::class, 'sendChatMessage']);
-    Route::post('/{service}/escalate', [\App\Http\Controllers\Api\UnitChatApiController::class, 'escalateChat']);
+    Route::post('/{service}/send', [\App\Http\Controllers\Api\UnitChatApiController::class, 'sendChatMessage'])->middleware('throttle:chat-write');
+    Route::post('/{service}/escalate', [\App\Http\Controllers\Api\UnitChatApiController::class, 'escalateChat'])->middleware('throttle:chat-write');
 });
 
 Route::get('/ping', function() { return 'pong'; });

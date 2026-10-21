@@ -144,8 +144,9 @@ class MobilBookingApiController extends Controller
                 'region_id' => $mobil->region_id,
             ]);
 
-            // Kurangi stok
-            $mobil->decreaseStock(1);
+            \App\Models\WalletTransaction::catatPemasukan($mobil->region_id, 'mobil', $booking->id, $totalAmount, $request->payment_method);
+
+            // Stok dialokasikan saat admin menyetujui, sama seperti pemesanan web.
 
             // Notifikasi untuk User
             \App\Models\Notification::create([
@@ -216,38 +217,17 @@ class MobilBookingApiController extends Controller
      */
     public function cancel(Request $request, $id)
     {
-        $booking = MobilBooking::withoutGlobalScopes()
-            ->where('id', $id)
-            ->where('user_id', $request->user()->id)
-            ->first();
-
-        if (!$booking) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Booking tidak ditemukan.',
-            ], 404);
-        }
-
-        if ($booking->status !== 'pending') {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Hanya booking dengan status pending yang bisa dibatalkan.',
-            ], 422);
-        }
-
-        // Kembalikan stok
-        if ($booking->mobil) {
-            $booking->mobil->increaseStock(1);
-        }
-
-        $booking->update([
-            'status' => 'cancelled',
-            'cancellation_reason' => $request->reason ?? 'Dibatalkan oleh pengguna',
-        ]);
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Booking kendaraan berhasil dibatalkan.',
-        ]);
+        $request->validate(['reason' => 'nullable|string|max:500']);
+        return \Illuminate\Support\Facades\DB::transaction(function () use ($request, $id) {
+            $booking = MobilBooking::withoutGlobalScopes()->whereKey($id)
+                ->where('user_id', $request->user()->id)->lockForUpdate()->firstOrFail();
+            if ($booking->status !== 'pending') {
+                return response()->json(['status' => 'error', 'message' => 'Hanya booking pending yang dapat dibatalkan langsung.'], 422);
+            }
+            // Pending belum mengalokasikan stok. Pembatalan tidak boleh menambah persediaan.
+            $booking->update(['status' => 'cancelled', 'cancellation_reason' => $request->reason ?? 'Dibatalkan oleh pengguna']);
+            \App\Models\WalletTransaction::batalkanDanRefund('mobil', $booking->id, 'Dibatalkan oleh pengguna');
+            return response()->json(['status' => 'success', 'message' => 'Booking berhasil dibatalkan.']);
+        });
     }
 }

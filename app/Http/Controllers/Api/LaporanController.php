@@ -230,15 +230,9 @@ class LaporanController extends Controller
     public function getAdminReports(Request $request)
     {
         $user = $request->user();
-        
-        $query = Laporan::with('user')->where('region_id', $user->region_id);
-
-        if ($user->role === 'admin_rt') {
-            $query->where('rt', $user->rt)
-                  ->where('rw', $user->rw);
-        } elseif ($user->role === 'admin_rw') {
-            $query->where('rw', $user->rw);
-        }
+        abort_unless($user && $user->isAdmin(), 403);
+        $query = app(\App\Services\ReportAccess::class)->administrativeQuery($user)
+            ->with('user:id,name,avatar');
 
         $reports = $query->latest()->get();
 
@@ -250,8 +244,16 @@ class LaporanController extends Controller
 
     public function forwardReport(Request $request, $id)
     {
-        $laporan = Laporan::findOrFail($id);
         $user = $request->user();
+        abort_unless($user && $user->isAdmin(), 403);
+        $request->validate([
+            'action' => 'required|in:forward_rw,forward_desa,reject,resolve,process,process_rw',
+            'catatan' => 'nullable|string|max:2000',
+        ]);
+        $laporan = app(\App\Services\ReportAccess::class)->administrativeQuery($user)->findOrFail($id);
+        abort_if($request->action === 'forward_rw' && $user->role !== 'admin_rt', 403);
+        abort_if($request->action === 'forward_desa' && !in_array($user->role, ['admin_rt', 'admin_rw'], true), 403);
+        abort_if($request->action === 'process_rw' && $user->role !== 'admin_rw', 403);
         $action = $request->action; // 'forward_rw', 'forward_desa', 'reject', 'resolve'
         $catatan = $request->catatan;
 
@@ -328,26 +330,8 @@ class LaporanController extends Controller
      */
     private function bolehMelihatLaporan(Laporan $laporan, $user): bool
     {
-        if ((int) $laporan->user_id === (int) $user->id) {
-            return true;
-        }
+        return app(\App\Services\ReportAccess::class)->canView($laporan, $user);
 
-        if ($user->role === 'super_admin') {
-            return true;
-        }
-
-        $peranWilayah = ['admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'staff'];
-
-        // Tanpa wilayah tidak ada yang terjangkau. Region::getDescendantIds(null)
-        // justru mengembalikan seluruh pohon wilayah.
-        if (! in_array($user->role, $peranWilayah, true) || ! $user->region_id) {
-            return false;
-        }
-
-        $jangkauan = Region::getDescendantIds($user->region_id);
-        $jangkauan[] = $user->region_id;
-
-        return in_array((int) $laporan->region_id, array_map('intval', $jangkauan), true);
     }
 
     public function show($id)
@@ -400,7 +384,9 @@ class LaporanController extends Controller
                 'handler_name' => $laporan->admin ? $laporan->admin->name : 'Pemerintah Desa Bengkalis',
                 'user' => [
                     'name' => $laporan->user ? $laporan->user->name : $laporan->nama,
-                    'nik' => $laporan->user ? $laporan->user->nik : null,
+                    'nik' => $laporan->user?->nik
+                        ? ((int) $laporan->user_id === (int) $user->id ? $laporan->user->nik : str_repeat('*', max(0, strlen($laporan->user->nik) - 4)) . substr($laporan->user->nik, -4))
+                        : null,
                     'is_verified' => $laporan->user && $laporan->user->kycVerification && $laporan->user->kycVerification->status === 'approved',
                 ]
             ]

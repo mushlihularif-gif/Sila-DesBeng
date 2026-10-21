@@ -17,8 +17,9 @@ class UnitChatApiController extends Controller
      */
     public function getChatHistory(Request $request, $service)
     {
+        $this->validateChat($request, $service);
         $user = Auth::guard('sanctum')->user() ?: Auth::guard('web')->user();
-        $sessionToken = $request->header('X-Chat-Session-Token') ?: $request->get('session_token');
+        $sessionToken = \App\Services\ChatSessionToken::read($request);
         $regionId = $request->get('region_id') ?: ($user ? $user->region_id : null);
 
         if (!$regionId) {
@@ -35,15 +36,15 @@ class UnitChatApiController extends Controller
                 ->first();
         }
 
-        if (!$session && $sessionToken) {
+        if (!$user && !$session && $sessionToken) {
             $session = UnitChatSession::where('service_type', $service)
                 ->where('region_id', $regionId)
-                ->where('session_token', $sessionToken)
+                ->whereNull('user_id')->where('session_token', $sessionToken)
                 ->first();
         }
 
         if (!$session) {
-            $newToken = $sessionToken ?: Str::random(32);
+            $newToken = Str::random(64);
             $userName = $user ? $user->name : 'Warga';
 
             $session = UnitChatSession::create([
@@ -71,7 +72,7 @@ class UnitChatApiController extends Controller
             $session->update(['unread_user_count' => 0]);
         }
 
-        $messages = $session->messages()->with('sender')->get()->map(function ($msg) {
+        $messages = $session->messages()->with('sender:id,name,avatar')->get()->map(function ($msg) {
             $msg->message = str_replace(
                 ['BUMDes', 'BUMDES', 'bumdes', 'Petugas Desa', 'petugas desa'],
                 ['Layanan Daerah', 'Layanan Daerah', 'layanan daerah', 'Petugas Layanan', 'petugas layanan'],
@@ -95,12 +96,15 @@ class UnitChatApiController extends Controller
      */
     public function sendChatMessage(Request $request, $service)
     {
+        $this->validateChat($request, $service);
         $request->validate([
             'message' => 'required|string|max:1000',
+            'item_data' => 'nullable|string|max:4000',
+            'item_reference' => 'nullable|string|max:4000',
         ]);
 
         $user = Auth::guard('sanctum')->user() ?: Auth::guard('web')->user();
-        $sessionToken = $request->header('X-Chat-Session-Token') ?: $request->get('session_token');
+        $sessionToken = \App\Services\ChatSessionToken::read($request);
         $regionId = $request->get('region_id') ?: ($user ? $user->region_id : null);
         $itemRef = $request->get('item_reference');
 
@@ -117,15 +121,15 @@ class UnitChatApiController extends Controller
                 ->first();
         }
 
-        if (!$session && $sessionToken) {
+        if (!$user && !$session && $sessionToken) {
             $session = UnitChatSession::where('service_type', $service)
                 ->where('region_id', $regionId)
-                ->where('session_token', $sessionToken)
+                ->whereNull('user_id')->where('session_token', $sessionToken)
                 ->first();
         }
 
         if (!$session) {
-            $sessionToken = $sessionToken ?: Str::random(32);
+            $sessionToken = Str::random(64);
             $session = UnitChatSession::create([
                 'service_type' => $service,
                 'region_id' => $regionId,
@@ -222,8 +226,9 @@ class UnitChatApiController extends Controller
      */
     public function escalateChat(Request $request, $service)
     {
+        $this->validateChat($request, $service);
         $user = Auth::guard('sanctum')->user() ?: Auth::guard('web')->user();
-        $sessionToken = $request->header('X-Chat-Session-Token') ?: $request->get('session_token');
+        $sessionToken = \App\Services\ChatSessionToken::read($request);
         $regionId = $request->get('region_id') ?: ($user ? $user->region_id : null);
 
         if (!$regionId) {
@@ -239,10 +244,10 @@ class UnitChatApiController extends Controller
                 ->first();
         }
 
-        if (!$session && $sessionToken) {
+        if (!$user && !$session && $sessionToken) {
             $session = UnitChatSession::where('service_type', $service)
                 ->where('region_id', $regionId)
-                ->where('session_token', $sessionToken)
+                ->whereNull('user_id')->where('session_token', $sessionToken)
                 ->first();
         }
 
@@ -279,7 +284,7 @@ class UnitChatApiController extends Controller
     public function getUnreadCounts(Request $request)
     {
         $user = Auth::guard('sanctum')->user() ?: Auth::guard('web')->user();
-        $sessionToken = $request->header('X-Chat-Session-Token') ?: $request->get('session_token');
+        $sessionToken = \App\Services\ChatSessionToken::read($request);
 
         $counts = [
             'gas' => 0,
@@ -298,7 +303,7 @@ class UnitChatApiController extends Controller
                 }
             }
         } elseif ($sessionToken) {
-            $sessions = UnitChatSession::where('session_token', $sessionToken)->get();
+            $sessions = UnitChatSession::whereNull('user_id')->where('session_token', $sessionToken)->get();
             foreach ($sessions as $s) {
                 if (isset($counts[$s->service_type])) {
                     $counts[$s->service_type] = $s->unread_user_count;
@@ -381,5 +386,10 @@ class UnitChatApiController extends Controller
         }
 
         return "Pesan Anda telah kami terima. Untuk respon cepat langsung dari petugas pengelola, silakan klik tombol 'Chat Petugas'.";
+    }
+    private function validateChat(Request $request, string $service): void
+    {
+        abort_unless(in_array($service, ['gas', 'penyewaan', 'mobil', 'fasilitas_umum'], true), 404);
+        $request->validate(['region_id' => 'nullable|integer|exists:regions,id']);
     }
 }
