@@ -63,7 +63,7 @@
                             <img src="{{ asset('User/img/slidebanner/kuncislide1r.png') }}?v={{ time() }}" class="w-full h-auto object-contain object-top" style="max-height: 500px;" alt="Slide 1">
                         </div>
                         <div class="carousel-slide w-full min-w-full flex-shrink-0 relative">
-                            <img src="{{ asset('User/img/slidebanner/kuncislide2r.png') }}?v={{ time() }}" class="w-full h-auto object-contain object-top" style="max-height: 500px;" alt="Slide 2">
+                            <img src="{{ asset('User/img/slidebanner/slide2sd.png') }}?v={{ time() }}" class="w-full h-auto object-contain object-top" style="max-height: 500px;" alt="Slide 2">
                         </div>
                     </div>
 

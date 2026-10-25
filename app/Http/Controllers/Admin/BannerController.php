@@ -12,11 +12,15 @@ class BannerController extends Controller
 {
     public function index()
     {
+        // Perbarui slide bawaan jika masih merujuk ke file lama
+        Banner::where('image_path', 'banners/kuncislide2r.png')
+            ->update(['image_path' => 'banners/slide2sd.png']);
+
         // Auto-seed slide bawaan sistem (terkunci) jika belum ada
         if (Banner::where('is_locked', true)->count() == 0) {
             $lockedSlides = [
                 ['file' => 'kuncislide1r.png', 'title' => 'Slide Bawaan Sistem 1'],
-                ['file' => 'kuncislide2r.png', 'title' => 'Slide Bawaan Sistem 2'],
+                ['file' => 'slide2sd.png', 'title' => 'Slide Bawaan Sistem 2'],
             ];
 
             foreach ($lockedSlides as $index => $slide) {

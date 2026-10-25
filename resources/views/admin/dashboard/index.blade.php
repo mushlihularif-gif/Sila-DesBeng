@@ -212,11 +212,11 @@
                                             @endif
                                         </div>
 
-                                        <div class="carousel-inner rounded-3 shadow-sm">
+                                         <div class="carousel-inner rounded-3 shadow-sm">
                                             @if($banners->count() > 0)
                                                 @foreach($banners as $index => $banner)
                                                     <div class="carousel-item {{ $index == 0 ? 'active' : '' }}" data-bs-interval="3000">
-                                                        <img src="{{ Storage::url($banner->image_path) }}" class="d-block w-100 rounded-3" alt="Banner {{ $index + 1 }}" onerror="this.onerror=null; this.src='{{ asset('User/img/slidebanner/kuncislide' . (($index % 2) + 1) . 'r.png') }}';">
+                                                        <img src="{{ Storage::url($banner->image_path) }}" class="d-block w-100 rounded-3" alt="Banner {{ $index + 1 }}" onerror="this.onerror=null; this.src='{{ asset('User/img/slidebanner/' . (($index % 2) == 1 ? 'slide2sd.png' : 'kuncislide1r.png')) }}';">
                                                     </div>
                                                 @endforeach
                                             @else
@@ -224,7 +224,7 @@
                                                     <img src="{{ asset('User/img/slidebanner/kuncislide1r.png') }}?v={{ time() }}" class="d-block w-100 rounded-3" alt="Slide 1">
                                                 </div>
                                                 <div class="carousel-item" data-bs-interval="3000">
-                                                    <img src="{{ asset('User/img/slidebanner/kuncislide2r.png') }}?v={{ time() }}" class="d-block w-100 rounded-3" alt="Slide 2">
+                                                    <img src="{{ asset('User/img/slidebanner/slide2sd.png') }}?v={{ time() }}" class="d-block w-100 rounded-3" alt="Slide 2">
                                                 </div>
                                             @endif
                                         </div>
