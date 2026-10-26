@@ -55,6 +55,15 @@ Paket PHP lama disimpan, bukan dihapus. Konfigurasi Laragon/PATH sebelum penggan
 - Tes regresi gagal sebelum perbaikan dan lulus sesudahnya. Hasil keseluruhan: **55 tes PHP / 206 assertions**, **10 tes JavaScript** lulus pada PHP 8.2.35.
 - Akses UI hosting sebelumnya dihentikan alat karena URL browser Windows tidak dapat diverifikasi. Tidak ada konfigurasi hosting yang diubah melalui akses tersebut. Tampilan diagnostik **Sistem Platform → Log Keamanan** dapat digunakan pemilik untuk melihat PHP/SAPI, Laravel terpasang, debug, dan upload progress pada worker web.
 
+## Pemulihan dependensi hosting — 27 Oktober 2026
+
+- Screenshot diagnostik dari pemilik menunjukkan worker **PHP 8.5.12 / litespeed**, Laravel **12.64.0**, debug nonaktif, session upload progress nonaktif/tidak tersedia, dan serialize handler `php`. Ini memperbarui status pengamatan sebelumnya: worker yang melayani halaman sudah melaporkan rilis perbaikan PHP2Shell; Laravel vendor produksi masih tertinggal dari lockfile **12.69.3**.
+- Composer 2.10.3 dipasang pemilik di `~/bin/composer`. Instalasi awal terhenti karena `proc_open` dinonaktifkan pada CLI PHP 8.2. Pengaktifan empat fungsi proses hanya untuk invocation Composer memungkinkan proses berlanjut, tanpa mengedit php.ini web.
+- Percobaan berikutnya gagal karena perubahan lokal di `vendor/google/apiclient-services`. Log menunjukkan beberapa paket sudah dihapus/diproses, tetapi instalasi, autoload, dan cache belum selesai. Pemeriksaan HEAD `/beranda` sekitar 00:05 WIB, 27 Oktober, menghasilkan HTTP 500. Belum ada bukti bahwa Laravel hosting berhasil naik ke 12.69.3.
+- `deploy/repair-dependencies.sh` memasang paket lockfile di staging privat dengan scripts/plugins dinonaktifkan, memeriksa kebutuhan platform, kemudian memindahkan seluruh vendor lama beserta perubahan lokalnya ke `~/segidaerah-recovery/run-*/vendor-before`. Tidak menggunakan `discard-changes`, reset Git vendor, atau menghapus salinan lama. Cache bootstrap disalin ke direktori privat yang sama.
+- Setelah penggantian vendor, skrip membuat autoload pada lokasi aplikasi yang sebenarnya, membersihkan cache bootstrap seperti hook Laravel, menjalankan package discovery, dan membangun ulang cache. Empat fungsi proses hanya diaktifkan untuk proses Composer; perintah Artisan memakai konfigurasi CLI biasa.
+- `tests/deploy/repair-dependencies.test.sh` menguji alur dengan PHP/Composer tiruan di folder sementara: jalur berhasil menjaga salinan perubahan vendor dan cache; kegagalan unduhan menjaga vendor aktif. Kedua skenario dan pemeriksaan sintaks Bash lulus. Ini tidak menggantikan verifikasi hasil instalasi dan HTTP pada hosting setelah pemilik menjalankan skrip.
+
 ## Referensi resmi
 
 - [PHP: pengumuman keamanan Oktober 2026](https://www.php.net/archive/2026.php)
