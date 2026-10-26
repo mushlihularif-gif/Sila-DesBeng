@@ -1430,7 +1430,11 @@
             animate();
         };
 
-        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', window.initAbstractCanvas, { once: true });
+    } else {
         setTimeout(window.initAbstractCanvas, 100);
     }
 </script>

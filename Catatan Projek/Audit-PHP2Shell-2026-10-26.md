@@ -8,7 +8,7 @@ PHP2Shell nyata. Perbaikan keamanan aplikasi pada commit `9161503` tidak memperb
 - PHP lokal awal: CLI **8.2.31**, Laragon/Apache dikonfigurasi ke **8.3.25**. Keduanya di bawah rilis PHP2Shell yang diperbaiki. Apache/Laragon tidak sedang berjalan ketika diperiksa.
 - Paket Windows resmi **8.2.35-1** dan **8.3.36-1** dipasang berdampingan dengan versi lama di `D:/laragon/bin/php`. SHA256 diverifikasi terhadap metadata PHP resmi sebelum ekstraksi. Rebuild `-1` juga membawa Brotli 1.2.1 untuk CVE-2026-111497. PHP tetap melaporkan versi tanpa akhiran `-1`; versi Brotli diperiksa melalui cURL.
 - Konfigurasi php.ini baru menggunakan `session.upload_progress.enabled=Off`. Ini diterapkan pada konfigurasi startup, bukan melalui kode Laravel atau .user.ini.
-- Halaman publik online memberi HTTP 200 dan header `Server: LiteSpeed`, tanpa X-Powered-By. **Tidak membuktikan versi/patch PHP produksi.** Belum ada akses atau konfirmasi paket dari hosting; status PHP produksi tetap belum terverifikasi.
+- Halaman publik online memberi HTTP 200 dan header `Server: LiteSpeed`, tanpa X-Powered-By. **Tidak membuktikan versi/patch PHP produksi.** Rumahweb menyatakan hosting sudah dipatch melalui pemberitahuan yang diberikan pemilik; build dan konfigurasi worker domain belum diverifikasi langsung.
 
 ## Apa yang diperbaiki PHP
 
@@ -44,6 +44,16 @@ Paket PHP lama disimpan, bukan dihapus. Konfigurasi Laragon/PATH sebelum penggan
 - User PATH kini memilih PHP 8.2.35-1; pengaturan Laragon dan Apache menunjuk PHP 8.3.36-1. Buka ulang terminal/aplikasi yang masih mewarisi PATH lama sebelum memakai perintah `php`. Laragon perlu dibuka ulang untuk membaca pilihan baru. Tidak ada worker lokal yang berjalan saat penggantian.
 - Versi PHP lama/backup tidak dihapus dan tidak dipilih dalam konfigurasi baru. Jangan mengaktifkan kembali versi lama, termasuk PHP 8.1 yang masih tersimpan di Laragon.
 - Pemeriksaan produksi hanya HEAD halaman publik; tidak membuktikan seluruh fitur online atau ketiadaan kompromi. Akses log hosting dan bukti patch worker belum tersedia.
+
+## Pemeriksaan lanjutan online dan bukti deployment
+
+- Pemberitahuan Rumahweb yang diberikan pemilik, tertanggal 22 Oktober 2026, menyatakan patch PHP2Shell sudah diterapkan pada hosting melalui backport CloudLinux. Ini merupakan pernyataan penyedia; versi dan konfigurasi worker domain belum dibaca langsung. Nomor versi upstream yang tidak berubah tidak otomatis berarti paket belum dipatch.
+- Tangkapan layar cPanel Terminal dari pemilik menunjukkan `git pull` fast-forward dari `42cd37b` ke `6f573e4`, diikuti keberhasilan cache konfigurasi dan Blade. Tangkapan layar tidak menampilkan versi PHP worker web, versi vendor Laravel produksi, atau hasil penyalinan public ke document root.
+- Browser berhasil membuka beranda, direktori layanan, halaman pengantar pelaporan, dan formulir laporan kategori Infrastruktur. Pemeriksaan tidak mengirim laporan atau membuat transaksi produksi.
+- Formulir laporan memunculkan `SyntaxError: Unexpected end of input`. Penyebab yang direproduksi lokal adalah kurung penutup yang hilang pada skrip animasi latar, bukan skrip peta. Blok diperbaiki dan inisialisasi animasi pada halaman formulir/daftar laporan kini menunggu DOM siap serta tetap berjalan ketika fungsi sudah tersedia.
+- Metadata JSON-LD pada layout publik memuat hasil kompilasi directive Blade sebagai nama properti pengganti `@context`. Pembuatan array dipindahkan ke blok PHP agar `@context` tetap literal; serialisasi memakai JSON_HEX_* untuk keamanan penyisipan dalam elemen script.
+- Tes regresi gagal sebelum perbaikan dan lulus sesudahnya. Hasil keseluruhan: **55 tes PHP / 206 assertions**, **10 tes JavaScript** lulus pada PHP 8.2.35.
+- Akses UI hosting sebelumnya dihentikan alat karena URL browser Windows tidak dapat diverifikasi. Tidak ada konfigurasi hosting yang diubah melalui akses tersebut. Tampilan diagnostik **Sistem Platform → Log Keamanan** dapat digunakan pemilik untuk melihat PHP/SAPI, Laravel terpasang, debug, dan upload progress pada worker web.
 
 ## Referensi resmi
 

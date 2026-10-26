@@ -6,6 +6,18 @@ use Tests\TestCase;
 
 class ServiceCategoryPageTest extends TestCase
 {
+    public function test_public_layout_has_valid_organization_schema_without_blade_directives(): void
+    {
+        $response = $this->get(route('service-category.show', 'belanja-kebutuhan'));
+        $response->assertOk();
+        $this->assertSame(1, preg_match('/<script type="application\/ld\+json">(.*?)<\/script>/s', $response->getContent(), $matches));
+        $schema = json_decode($matches[1], true, 512, JSON_THROW_ON_ERROR);
+        $this->assertSame('https://schema.org', $schema['@context'] ?? null);
+        $this->assertSame('GovernmentOrganization', $schema['@type']);
+        $this->assertSame('SegiDaerah', $schema['name']);
+        $this->assertStringNotContainsString('<?php', $matches[1]);
+    }
+
     public function test_guest_can_open_belanja_category_and_find_its_destinations(): void
     {
         $response = $this->get(route('service-category.show', 'belanja-kebutuhan'));

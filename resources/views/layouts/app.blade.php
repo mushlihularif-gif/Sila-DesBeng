@@ -30,8 +30,8 @@
     <meta name="twitter:image" content="{{ asset('Admin/img/illustrations/logodomain.webp') }}">
 
     {{-- JSON-LD Structured Data Schema untuk Mesin Pencari Google --}}
-    <script type="application/ld+json">
-    {!! json_encode([
+    @php
+    $organizationSchema = [
       '@context' => 'https://schema.org',
       '@type' => 'GovernmentOrganization',
       'name' => 'SegiDaerah',
@@ -42,7 +42,10 @@
       'url' => 'https://siladesbeng.inovasia.site',
       'logo' => asset('Admin/img/illustrations/logodomain.webp'),
       'description' => 'Sistem Sinergi Layanan dan Aspirasi Daerah Kecamatan Bengkalis'
-    ], JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) !!}
+    ];
+    @endphp
+    <script type="application/ld+json">
+    {!! json_encode($organizationSchema, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) !!}
     </script>
 
     {{-- GOOGLE FONTS + FAVICON --}}
