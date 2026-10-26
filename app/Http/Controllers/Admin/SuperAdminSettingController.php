@@ -282,6 +282,16 @@ class SuperAdminSettingController extends Controller
      */
     public function securityLog()
     {
+        // Diambil dari worker web yang melayani halaman ini, bukan PHP CLI deployment.
+        // Jangan tampilkan phpinfo(), path konfigurasi, environment, atau kredensial.
+        $runtime = [
+            'php' => PHP_VERSION,
+            'handler' => PHP_SAPI,
+            'laravel' => app()->version(),
+            'debug' => (bool) config('app.debug'),
+            'upload_progress' => ini_get('session.upload_progress.enabled'),
+            'serialize_handler' => ini_get('session.serialize_handler'),
+        ];
         $logPath = storage_path('logs/laravel.log');
         $lines = [];
 
@@ -305,7 +315,7 @@ class SuperAdminSettingController extends Controller
             ->limit(50)
             ->get();
 
-        return view('admin.super_sistem.security-log', compact('lines', 'recentStaffAccounts'));
+        return view('admin.super_sistem.security-log', compact('lines', 'recentStaffAccounts', 'runtime'));
     }
 
     /**

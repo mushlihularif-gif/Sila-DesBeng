@@ -7,6 +7,30 @@
     <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Sistem Platform /</span> Log Keamanan dan Audit</h4>
 
     <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-1"><i class="bx bx-shield-quarter me-2 text-primary"></i>PHP dan Laravel pada Server Web</h5>
+            <small class="text-muted">Nilai dari proses yang melayani halaman ini. Versi PHP terminal cPanel bisa berbeda.</small>
+        </div>
+        <div class="card-body">
+            <dl class="row mb-3">
+                <dt class="col-sm-4">PHP / handler</dt><dd class="col-sm-8">{{ $runtime['php'] }} / {{ $runtime['handler'] }}</dd>
+                <dt class="col-sm-4">Laravel terpasang</dt><dd class="col-sm-8">{{ $runtime['laravel'] }}</dd>
+                <dt class="col-sm-4">Mode debug</dt><dd class="col-sm-8 {{ $runtime['debug'] ? 'text-danger fw-bold' : '' }}">{{ $runtime['debug'] ? 'Aktif — nonaktifkan pada produksi' : 'Nonaktif' }}</dd>
+                <dt class="col-sm-4">Session upload progress</dt><dd class="col-sm-8">{{ filter_var($runtime['upload_progress'], FILTER_VALIDATE_BOOLEAN) ? 'Aktif' : 'Nonaktif / tidak tersedia' }}</dd>
+                <dt class="col-sm-4">Session serialize handler</dt><dd class="col-sm-8">{{ $runtime['serialize_handler'] ?: 'Tidak tersedia' }}</dd>
+            </dl>
+            <div class="alert alert-warning mb-0">
+                <strong>Pemeriksaan PHP2Shell, 26 Oktober 2026:</strong>
+                perbaikan upstream tersedia pada PHP 8.2.35, 8.3.36, 8.4.27, dan 8.5.12.
+                Jika hosting memakai backport CloudLinux, minta bukti build/changelog paket dan restart worker kepada penyedia.
+                Versi dan nilai di atas saja tidak membuktikan seluruh server aman.
+                Untuk mitigasi session upload progress, gunakan php.ini atau konfigurasi server sebelum parsing request; jangan hanya mengandalkan .user.ini atau ini_set().
+                <a href="https://www.php.net/archive/2026.php" target="_blank" rel="noopener noreferrer">Advisori resmi PHP</a>.
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
         <div class="card-header d-flex justify-content-between align-items-center">
             <div>
                 <h5 class="mb-1"><i class="bx bx-user-plus me-2 text-primary"></i>Akun Staf Terbaru Dibuat</h5>
