@@ -7,6 +7,7 @@ PHP_BIN="${SEGIDAERAH_PHP:-/opt/alt/php82/usr/bin/php}"
 COMPOSER_BIN="${SEGIDAERAH_COMPOSER:-$HOME/bin/composer}"
 RECOVERY_ROOT="${SEGIDAERAH_RECOVERY_ROOT:-$HOME/segidaerah-recovery}"
 RUN_DIR=""
+STAGE_DIR=""
 SWAPPED=0
 
 report_failure() {
@@ -15,6 +16,12 @@ report_failure() {
         printf '\nPemulihan berhenti (kode %s).\n' "$result" >&2
         if [ "$SWAPPED" -eq 0 ]; then
             printf 'Vendor aktif belum diganti oleh skrip ini.\n' >&2
+            # Only this run's generated staging data is disposable. Never clean
+            # vendor-before, cache-before, or a different recovery run here.
+            if [ -n "$RUN_DIR" ] && [ "$STAGE_DIR" = "$RUN_DIR/install" ] && [ -d "$STAGE_DIR" ] && [ ! -L "$STAGE_DIR" ]; then
+                rm -rf -- "$STAGE_DIR"
+                printf 'Berkas instalasi sementara yang gagal sudah dibersihkan.\n' >&2
+            fi
         else
             printf 'Vendor baru sudah dipasang; tahap berikutnya gagal. Salinan vendor sebelumnya: %s/vendor-before\n' "$RUN_DIR" >&2
         fi

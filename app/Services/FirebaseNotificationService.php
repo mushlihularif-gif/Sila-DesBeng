@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use Google\Client as GoogleClient;
+use Google\Auth\Credentials\ServiceAccountCredentials;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -34,12 +34,11 @@ class FirebaseNotificationService
         }
 
         try {
-            $client = new GoogleClient();
-            $client->setAuthConfig($this->credentialsPath);
-            $client->addScope('https://www.googleapis.com/auth/firebase.messaging');
-            
-            // fetch access token
-            $token = $client->fetchAccessTokenWithAssertion();
+            $credentials = new ServiceAccountCredentials(
+                'https://www.googleapis.com/auth/firebase.messaging',
+                $this->credentialsPath
+            );
+            $token = $credentials->fetchAuthToken();
             
             return $token['access_token'] ?? null;
             

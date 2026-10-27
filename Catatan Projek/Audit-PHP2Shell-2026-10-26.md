@@ -64,6 +64,15 @@ Paket PHP lama disimpan, bukan dihapus. Konfigurasi Laragon/PATH sebelum penggan
 - Setelah penggantian vendor, skrip membuat autoload pada lokasi aplikasi yang sebenarnya, membersihkan cache bootstrap seperti hook Laravel, menjalankan package discovery, dan membangun ulang cache. Empat fungsi proses hanya diaktifkan untuk proses Composer; perintah Artisan memakai konfigurasi CLI biasa.
 - `tests/deploy/repair-dependencies.test.sh` menguji alur dengan PHP/Composer tiruan di folder sementara: jalur berhasil menjaga salinan perubahan vendor dan cache; kegagalan unduhan menjaga vendor aktif. Kedua skenario dan pemeriksaan sintaks Bash lulus. Ini tidak menggantikan verifikasi hasil instalasi dan HTTP pada hosting setelah pemilik menjalankan skrip.
 
+## Penyesuaian setelah kuota hosting terlampaui — 27 Oktober 2026
+
+- Log pemilik menunjukkan staging `run-20261027-113623-G4VsCt/install` gagal ketika mengekstrak `google/apiclient-services`: **Disk quota exceeded**. Pesan kemungkinan nama file berbeda kapitalisasi adalah fallback generik Composer; penyebab yang tercatat adalah kuota akun. Batas byte vs inode belum dibaca langsung. Skrip berhenti sebelum mengganti vendor aktif.
+- Pemeriksaan semua referensi PHP aplikasi menemukan penggunaan Google Client hanya untuk verifikasi ID token dan OAuth service-account Firebase. Tidak ada penggunaan kelas layanan Google yang dihasilkan seperti YouTube. `google/apiclient` dan `google/apiclient-services` dikeluarkan dari dependensi. Aplikasi kini memakai `google/auth` untuk service-account dan `firebase/php-jwt` untuk verifikasi ID token melalui JWKS Google yang alamatnya tetap. Google Auth terkunci pada 1.55.2; Laravel tetap 12.69.3.
+- Verifikasi login mempertahankan pemeriksaan tanda tangan, audience, issuer, email terverifikasi, subject, dan waktu kedaluwarsa. Algoritme dan kunci diverifikasi pustaka JWT terhadap JWKS Google; tidak mengambil lokasi kunci dari token. Kedua layanan Firebase menggunakan scope `firebase.messaging` dan endpoint HTTP v1 yang sama.
+- Tes baru memakai kunci RSA sementara dan HTTP tiruan: token valid untuk kedua issuer Google diterima; signature palsu, kid tidak dikenal, HMAC menggantikan RSA, token kedaluwarsa/belum berlaku, audience/issuer salah, dan klaim identitas tidak valid ditolak. Kedua layanan Firebase menghasilkan assertion bertanda tangan dengan scope yang tepat dan menggunakan access token pada request FCM. Tidak ada pengiriman notifikasi produksi.
+- **59 tes PHP / 233 assertions**, **10 tes JavaScript**, dan **2 uji alur pemulihan** lulus. Composer validate, audit lockfile, dan pemeriksaan kebutuhan platform PHP 8.3.36 lokal lulus. Verifikasi hosting tetap menunggu pemasangan ulang selesai.
+- Skrip pemulihan sekarang membersihkan hanya folder staging milik percobaan saat ini jika gagal sebelum penggantian vendor. Vendor sebelumnya dan cache backup tidak dihapus. Folder `install` dari percobaan lama di atas perlu dibersihkan sekali untuk menyediakan ruang sebelum pull; jangan menghapus seluruh folder recovery atau `vendor-before`.
+
 ## Referensi resmi
 
 - [PHP: pengumuman keamanan Oktober 2026](https://www.php.net/archive/2026.php)

@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use Google\Client;
+use Google\Auth\Credentials\ServiceAccountCredentials;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -28,6 +28,9 @@ class FirebaseService
 
         try {
             $accessToken = $this->getAccessToken();
+            if (!$accessToken) {
+                return false;
+            }
 
             $message = [
                 'message' => [
@@ -62,11 +65,12 @@ class FirebaseService
     {
         $credentialsPath = storage_path('app/firebase-auth.json');
         
-        $client = new Client();
-        $client->setAuthConfig($credentialsPath);
-        $client->addScope('https://www.googleapis.com/auth/firebase.messaging');
-        $client->fetchAccessTokenWithAssertion();
-        
-        return $client->getAccessToken()['access_token'];
+        $credentials = new ServiceAccountCredentials(
+            'https://www.googleapis.com/auth/firebase.messaging',
+            $credentialsPath
+        );
+        $token = $credentials->fetchAuthToken();
+
+        return $token['access_token'] ?? null;
     }
 }

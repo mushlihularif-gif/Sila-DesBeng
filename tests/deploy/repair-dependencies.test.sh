@@ -16,13 +16,13 @@ if [ "${1:-}" = '-r' ]; then exit 0; fi
 shift
 action="${1:-}"
 if [ "$action" = install ]; then
-    [ "${MOCK_FAIL_INSTALL:-0}" -eq 0 ] || exit 7
     stage=''
     for arg in "$@"; do
         case "$arg" in --working-dir=*) stage="${arg#*=}" ;; esac
     done
     test -n "$stage"
     mkdir -p "$stage/vendor/composer" "$stage/vendor/laravel/framework/src/Illuminate/Foundation"
+    [ "${MOCK_FAIL_INSTALL:-0}" -eq 0 ] || exit 7
     printf '{}\n' >"$stage/vendor/composer/installed.json"
     touch "$stage/vendor/laravel/framework/src/Illuminate/Foundation/Application.php"
 elif [ "$action" = dump-autoload ]; then
@@ -55,6 +55,7 @@ for scenario in success failed-download; do
         test -f "$project/vendor/google/apiclient-services/preserved.txt"
         test ! -f "$project/vendor/autoload.php"
         test "$(find "$project/backups" -name vendor-before | wc -l)" -eq 0
+        test "$(find "$project/backups" -name install | wc -l)" -eq 0
     fi
     printf 'PASS: %s\n' "$scenario"
 done
