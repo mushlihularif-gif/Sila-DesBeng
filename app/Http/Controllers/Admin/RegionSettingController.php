@@ -70,14 +70,13 @@ class RegionSettingController extends Controller
             return redirect()->route('admin.dashboard')->with('error', 'Anda tidak terhubung dengan wilayah mana pun.');
         }
 
-        $allServices = Service::all();
+        $allServices = Service::available()->get();
         $activeServices = $region->services->pluck('id')->toArray();
         $exclusiveServices = $region->services->where('pivot.is_exclusive', true)->pluck('id')->toArray();
 
-        $hasFasilitasKendaraan = \App\Models\FasilitasUmum::where('region_id', $region->id)
+        $hasFasilitasKendaraan = \App\Models\FasilitasUmum::inCatalog()->where('region_id', $region->id)
             ->where(function($q) {
                 $q->where('nama_fasilitas', 'like', '%mobil%')
-                  ->orWhere('nama_fasilitas', 'like', '%ambulan%')
                   ->orWhere('nama_fasilitas', 'like', '%bus%')
                   ->orWhere('nama_fasilitas', 'like', '%pick%up%');
             })->exists();
@@ -104,7 +103,7 @@ class RegionSettingController extends Controller
             'contact_phone' => 'nullable|string',
             'contact_email' => 'nullable|email',
             'services' => 'nullable|array',
-            'services.*' => 'exists:services,id'
+            'services.*' => [\Illuminate\Validation\Rule::exists('services', 'id')->whereNotIn('slug', Service::RETIRED_SLUGS)]
         ]);
 
         $mobilServiceId = \App\Models\Service::where('name', 'Penyewaan Mobil')->value('id');
@@ -191,10 +190,10 @@ class RegionSettingController extends Controller
             ];
         }
 
-        // Jaga agar Fasilitas Umum tetap aktif jika wilayah memiliki armada ambulans atau gedung/fasilitas umum
-        $hasAmbulans = \App\Models\Mobil::where('region_id', $region->id)->where('kategori', 'ambulans')->exists();
-        $hasGedung = \App\Models\FasilitasUmum::where('region_id', $region->id)->exists();
-        if ($hasAmbulans || $hasGedung) {
+        // Jaga agar Fasilitas Umum tetap aktif jika wilayah memiliki kendaraan operasional atau gedung/fasilitas umum
+        $hasOperationalVehicle = \App\Models\Mobil::where('region_id', $region->id)->where('kategori', 'kendaraan_operasional')->exists();
+        $hasGedung = \App\Models\FasilitasUmum::inCatalog()->where('region_id', $region->id)->exists();
+        if ($hasOperationalVehicle || $hasGedung) {
             $fasilitasServiceId = \App\Models\Service::where('slug', 'fasilitas-umum')->value('id');
             if ($fasilitasServiceId && !isset($syncData[$fasilitasServiceId])) {
                 $syncData[$fasilitasServiceId] = [

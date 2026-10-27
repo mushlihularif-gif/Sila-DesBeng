@@ -14,7 +14,7 @@ class MobilBookingApiController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Mobil::where('status', 'tersedia')
+        $query = Mobil::inCatalog()->where('status', 'tersedia')
             ->where('stok', '>', 0);
 
         $user = $request->user('sanctum');
@@ -56,7 +56,7 @@ class MobilBookingApiController extends Controller
      */
     public function show($id)
     {
-        $item = Mobil::find($id);
+        $item = Mobil::inCatalog()->find($id);
 
         if (!$item) {
             return response()->json([
@@ -112,7 +112,7 @@ class MobilBookingApiController extends Controller
         ]);
 
         return \Illuminate\Support\Facades\DB::transaction(function () use ($request) {
-            $mobil = Mobil::query()->lockForUpdate()->findOrFail($request->mobil_id);
+            $mobil = Mobil::inCatalog()->lockForUpdate()->findOrFail($request->mobil_id);
 
             if (!$mobil->hasStock(1)) {
                 return response()->json([

@@ -19,11 +19,11 @@ class FasilitasUmumUserController extends Controller
         $visibleRegionIds = null;
 
         // 1. Gedung & Ruang Publik
-        $itemsQuery = FasilitasUmum::with('pengurus')->where('status', '!=', 'Tidak Tersedia');
+        $itemsQuery = FasilitasUmum::inCatalog()->with('pengurus')->where('status', '!=', 'Tidak Tersedia');
 
-        // 2. Armada Ambulans & Kendaraan Layanan
+        // 2. Kendaraan Operasional
         $kendaraansQuery = Mobil::with('supirs')
-            ->whereIn('kategori', ['ambulans', 'kendaraan_operasional'])
+            ->where('kategori', 'kendaraan_operasional')
             ->where('status', '!=', 'rusak');
 
         if ($targetRegionId) {
@@ -34,7 +34,7 @@ class FasilitasUmumUserController extends Controller
             // Fasilitas gedung hanya menampilkan milik wilayah yang dipilih
             $itemsQuery->whereIn('region_id', $visibleRegionIds);
 
-            // Ambulans/kendaraan menampilkan milik wilayah tersebut atau induknya jika disediakan terpusat
+            // Kendaraan operasional menampilkan milik wilayah tersebut atau induknya jika disediakan terpusat
             $vehicleRegionIds = array_values(array_unique(array_merge($visibleRegionIds, Region::getAncestorIds($targetRegionId))));
             $kendaraansQuery->whereIn('region_id', $vehicleRegionIds);
             $visibleRegionIds = $vehicleRegionIds;
@@ -108,7 +108,7 @@ class FasilitasUmumUserController extends Controller
 
     public function show($id)
     {
-        $item = FasilitasUmum::with('pengurus')->findOrFail($id);
+        $item = FasilitasUmum::inCatalog()->with('pengurus')->findOrFail($id);
         
         // Rekening & metode pembayaran milik WILAYAH layanan ini, bukan rekening
         // pusat. Pemasukan tiap daerah menjadi tanggung jawab daerahnya sendiri.

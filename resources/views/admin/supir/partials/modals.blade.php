@@ -93,7 +93,7 @@
                                             </div>
                                             <div class="form-check form-switch d-flex align-items-center">
                                                 <input class="form-check-input mt-0 me-3 cursor-pointer bg-danger border-danger" type="checkbox" name="is_fasilitas_umum" value="1" id="is_fasilitas_edit_{{ $supir->id }}" style="width: 2.5em; height: 1.25em;" {{ $supir->is_fasilitas_umum ? 'checked' : '' }}>
-                                                <label class="form-check-label cursor-pointer fw-bold text-danger" for="is_fasilitas_edit_{{ $supir->id }}">Ambulans dan Kendaraan</label>
+                                                <label class="form-check-label cursor-pointer fw-bold text-danger" for="is_fasilitas_edit_{{ $supir->id }}">Kendaraan Operasional</label>
                                             </div>
                                         </div>
                                     </div>
@@ -191,7 +191,7 @@
                                         <span class="badge bg-label-primary px-2.5 py-1"><i class="bx bx-car me-1"></i> Penyewaan Transportasi</span>
                                     @endif
                                     @if($supir->is_fasilitas_umum)
-                                        <span class="badge bg-label-danger px-2.5 py-1"><i class="bx bx-plus-medical me-1"></i> Ambulans dan Kendaraan</span>
+                                        <span class="badge bg-label-danger px-2.5 py-1"><i class="bx bx-car me-1"></i> Kendaraan Operasional</span>
                                     @endif
                                 </div>
                             </div>

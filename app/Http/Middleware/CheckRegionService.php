@@ -44,7 +44,6 @@ class CheckRegionService
         // Resolve target slugs and aliases
         $targetSlugs = match($serviceSlug) {
             'peminjaman-fasilitas-umum', 'fasilitas-umum' => ['peminjaman-fasilitas-umum', 'fasilitas-umum'],
-            'layanan-ambulans', 'ambulans' => ['layanan-ambulans', 'ambulans', 'fasilitas-umum', 'penyewaan-mobil'],
             'penyewaan-mobil' => ['penyewaan-mobil'],
             'penyewaan-alat' => ['penyewaan-alat'],
             'penjualan-gas' => ['penjualan-gas'],
@@ -64,10 +63,8 @@ class CheckRegionService
             // Fallback khusus jika wilayah atau leluhurnya memiliki data produk/armada langsung
             $hasProducts = false;
             if (in_array('fasilitas-umum', $targetSlugs) || in_array('peminjaman-fasilitas-umum', $targetSlugs)) {
-                $hasProducts = \App\Models\FasilitasUmum::whereIn('region_id', $relevantRegionIds)->where('status', '!=', 'Tidak Tersedia')->exists()
-                    || \App\Models\Mobil::whereIn('region_id', $relevantRegionIds)->whereIn('kategori', ['ambulans', 'kendaraan_operasional'])->exists();
-            } elseif (in_array('layanan-ambulans', $targetSlugs)) {
-                $hasProducts = \App\Models\Mobil::whereIn('region_id', $relevantRegionIds)->where('kategori', 'ambulans')->exists();
+                $hasProducts = \App\Models\FasilitasUmum::inCatalog()->whereIn('region_id', $relevantRegionIds)->where('status', '!=', 'Tidak Tersedia')->exists()
+                    || \App\Models\Mobil::whereIn('region_id', $relevantRegionIds)->where('kategori', 'kendaraan_operasional')->exists();
             } elseif (in_array('penyewaan-mobil', $targetSlugs)) {
                 $hasProducts = \App\Models\Mobil::whereIn('region_id', $relevantRegionIds)->whereNotIn('kategori', ['ambulans', 'kendaraan_operasional'])->exists();
             } elseif (in_array('penyewaan-alat', $targetSlugs)) {

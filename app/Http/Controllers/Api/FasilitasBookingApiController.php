@@ -14,7 +14,7 @@ class FasilitasBookingApiController extends Controller
      */
     public function index(Request $request)
     {
-        $query = FasilitasUmum::where('status', 'tersedia');
+        $query = FasilitasUmum::inCatalog()->where('status', 'tersedia');
 
         $user = $request->user('sanctum');
         if ($user && $user->region_id) {
@@ -23,11 +23,9 @@ class FasilitasBookingApiController extends Controller
 
         $items = $query->get()
             ->map(function ($item) {
-                $isAmbulance = str_contains(strtolower($item->nama_fasilitas), 'ambulan');
                 $isVehicle = str_contains(strtolower($item->nama_fasilitas), 'mobil')
                     || str_contains(strtolower($item->nama_fasilitas), 'bus')
-                    || str_contains(strtolower($item->nama_fasilitas), 'kendaraan')
-                    || $isAmbulance;
+                    || str_contains(strtolower($item->nama_fasilitas), 'kendaraan');
 
                 return [
                     'id' => $item->id,
@@ -40,7 +38,7 @@ class FasilitasBookingApiController extends Controller
                     'image_2' => $item->foto_2 ? asset('storage/' . $item->foto_2) : null,
                     'image_3' => $item->foto_3 ? asset('storage/' . $item->foto_3) : null,
                     'type' => 'fasilitas',
-                    'is_ambulance' => $isAmbulance,
+                    'is_ambulance' => false,
                     'is_vehicle' => $isVehicle,
                     'opsi_supir' => $item->opsi_supir,
                     'bbm_ditanggung' => $item->bbm_ditanggung,
@@ -58,7 +56,7 @@ class FasilitasBookingApiController extends Controller
      */
     public function show($id)
     {
-        $item = FasilitasUmum::find($id);
+        $item = FasilitasUmum::inCatalog()->find($id);
 
         if (!$item) {
             return response()->json([
@@ -66,8 +64,6 @@ class FasilitasBookingApiController extends Controller
                 'message' => 'Fasilitas tidak ditemukan.',
             ], 404);
         }
-
-        $isAmbulance = str_contains(strtolower($item->nama_fasilitas), 'ambulan');
 
         return response()->json([
             'status' => 'success',
@@ -82,7 +78,7 @@ class FasilitasBookingApiController extends Controller
                 'image_2' => $item->foto_2 ? asset('storage/' . $item->foto_2) : null,
                 'image_3' => $item->foto_3 ? asset('storage/' . $item->foto_3) : null,
                 'type' => 'fasilitas',
-                'is_ambulance' => $isAmbulance,
+                'is_ambulance' => false,
                 'opsi_supir' => $item->opsi_supir,
                 'nama_supir' => $item->nama_supir,
                 'kontak_supir' => $item->kontak_supir,
@@ -110,7 +106,7 @@ class FasilitasBookingApiController extends Controller
         ]);
 
         return \Illuminate\Support\Facades\DB::transaction(function () use ($request) {
-            $fasilitas = FasilitasUmum::query()->lockForUpdate()->findOrFail($request->fasilitas_id);
+            $fasilitas = FasilitasUmum::inCatalog()->lockForUpdate()->findOrFail($request->fasilitas_id);
 
             if ($fasilitas->stok !== null && $fasilitas->stok < ($request->quantity ?? 1)) {
                 return response()->json([

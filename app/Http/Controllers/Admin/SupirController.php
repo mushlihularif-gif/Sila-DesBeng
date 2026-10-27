@@ -19,7 +19,7 @@ class SupirController extends Controller
             $tab = 'supir';
         }
 
-        $query = Supir::with(['user', 'ambulans', 'fasilitas']);
+        $query = Supir::with(['user', 'kendaraanOperasional', 'fasilitas']);
         if ($user && $user->role === 'admin_desa' && $user->region_id) {
             $query->where('region_id', $user->region_id);
             $users = \App\Models\User::where('region_id', $user->region_id)->get();
@@ -93,7 +93,7 @@ class SupirController extends Controller
 
         $newSupir = Supir::create($data);
 
-        // Respons AJAX (misal dari modal penambahan langsung di form ambulans atau fasilitas umum)
+        // Respons AJAX (misal dari modal penambahan langsung di form kendaraan operasional atau fasilitas umum)
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
                 'success' => true,

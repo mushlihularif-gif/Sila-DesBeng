@@ -723,7 +723,7 @@
                                                 <img src="{{ asset('User/img/elemen/fasilitas.png') }}" class="me-3" style="width: 32px; height: 32px; object-fit: contain;">
                                                 <div>
                                                     <h6 class="fw-bold mb-0 text-primary">Pengaturan Fasilitas Umum</h6>
-                                                    <small class="text-muted">Metode penggunaan fasilitas (Gedung, Ambulans, Lapangan, dll).</small>
+                                                    <small class="text-muted">Metode penggunaan fasilitas (Gedung, Kendaraan Operasional, Lapangan, dll).</small>
                                                 </div>
                                             </div>
                                             
@@ -735,7 +735,7 @@
                 <img src="{{ asset('Admin/img/elements/antar.png') }}" alt="Layanan Kunjungan / Antar / Panggilan" style="width: 45px; height: 45px; object-fit: contain;" class="me-3">
                 <div>
                     <span class="text-dark fw-bold d-block" style="font-size: 1.05rem;">Layanan Kunjungan / Antar / Panggilan</span>
-                    <span class="text-muted small d-block mb-0">Fasilitas (seperti ambulans, dan transportasi lain) atau petugas datang ke titik lokasi warga</span>
+                    <span class="text-muted small d-block mb-0">Fasilitas (seperti kendaraan operasional, dan transportasi lain) atau petugas datang ke titik lokasi warga</span>
                 </div>
             </div>
             <div class="dynamic-keterangan mt-2" style="display: none;">

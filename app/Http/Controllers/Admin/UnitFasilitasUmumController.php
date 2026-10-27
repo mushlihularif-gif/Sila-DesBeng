@@ -21,7 +21,7 @@ class UnitFasilitasUmumController extends Controller
 
     public function index(Request $request)
     {
-        if ($splash = $this->checkDelegation($request, 'fasilitas_umum', 'Fasilitas Umum & Ambulans')) {
+        if ($splash = $this->checkDelegation($request, 'fasilitas_umum', 'Fasilitas Umum')) {
             return $splash;
         }
 
@@ -29,7 +29,7 @@ class UnitFasilitasUmumController extends Controller
         $search = $request->get('search');
         $tab = $request->get('tab', 'kendaraan'); // default tab
         
-        $fasilitas = FasilitasUmum::query()
+        $fasilitas = FasilitasUmum::inCatalog()
             ->when($user->region_id, function($q, $regionId) {
                 return $q->where(function($query) use ($regionId) {
                     $query->where('region_id', $regionId)
@@ -43,9 +43,9 @@ class UnitFasilitasUmumController extends Controller
             ->paginate(6, ['*'], 'page_gedung')
             ->appends(['search' => $search, 'tab' => 'gedung']);
             
-        // Ambil kendaraan publik (Ambulans, Kendaraan Operasional, dsb)
+        // Ambil kendaraan operasional desa yang masih tersedia.
         $mobils = Mobil::query()
-            ->whereIn('kategori', ['ambulans', 'kendaraan_operasional'])
+            ->where('kategori', 'kendaraan_operasional')
             ->when($user->region_id, function($q, $regionId) {
                 return $q->where('region_id', $regionId);
             })
@@ -230,13 +230,13 @@ class UnitFasilitasUmumController extends Controller
 
     public function show($id)
     {
-        $fasilitas = FasilitasUmum::with(['pengurus', 'region'])->findOrFail($id);
+        $fasilitas = FasilitasUmum::inCatalog()->with(['pengurus', 'region'])->findOrFail($id);
         return view('admin.unit.fasilitas_umum.show', compact('fasilitas'));
     }
 
     public function edit($id)
     {
-        $fasilitas = FasilitasUmum::with('pengurus')->findOrFail($id);
+        $fasilitas = FasilitasUmum::inCatalog()->with('pengurus')->findOrFail($id);
         $user = auth()->user();
         $savedLocations = \App\Models\LokasiLayanan::untukWilayah($user ? $user->region_id : null);
             
@@ -261,7 +261,7 @@ class UnitFasilitasUmumController extends Controller
 
     public function destroy($id)
     {
-        $fasilitas = FasilitasUmum::findOrFail($id);
+        $fasilitas = FasilitasUmum::inCatalog()->findOrFail($id);
 
         if ($fasilitas->foto) Storage::disk('public')->delete($fasilitas->foto);
         if ($fasilitas->foto_2) Storage::disk('public')->delete($fasilitas->foto_2);
@@ -293,7 +293,7 @@ class UnitFasilitasUmumController extends Controller
             'pengurus_ids.*' => 'exists:supirs,id',
         ]);
 
-        $fasilitas = FasilitasUmum::findOrFail($id);
+        $fasilitas = FasilitasUmum::inCatalog()->findOrFail($id);
 
         $hargaBersih = 0;
         if ($request->status_biaya === 'berbayar' && $request->harga_sewa) {

@@ -1033,8 +1033,8 @@
                     @endif
 
                     {{-- Staf: Fasilitas Umum --}}
-                    @if((in_array('Fasilitas Umum', $activeServicesMenu ?? []) || in_array('Layanan Ambulans', $activeServicesMenu ?? [])) && auth()->user()->hasUnitPermission('fasilitas_umum'))
-                    <li class="menu-item {{ (request()->is('admin/unit/fasilitas_umum*') || request()->is('admin/unit/ambulans*') || (request()->is('admin/aktivitas/permintaan-pengajuan*') && request('tab') == 'fasilitas') || (request()->is('admin/aktivitas/bukti-transaksi*') && request('category') == 'fasilitas')) ? 'open active show' : '' }}">
+                    @if((in_array('Fasilitas Umum', $activeServicesMenu ?? [])) && auth()->user()->hasUnitPermission('fasilitas_umum'))
+                    <li class="menu-item {{ (request()->is('admin/unit/fasilitas_umum*') || request()->is('admin/unit/kendaraan-operasional*') || (request()->is('admin/aktivitas/permintaan-pengajuan*') && request('tab') == 'fasilitas') || (request()->is('admin/aktivitas/bukti-transaksi*') && request('category') == 'fasilitas')) ? 'open active show' : '' }}">
                         <a href="javascript:void(0);" class="menu-link menu-toggle">
                             <i class="menu-icon tf-icons bx bx-buildings text-info"></i>
                             <div><small class="d-block text-muted" style="font-size:.65rem; line-height:1.1">Layanan Daerah</small>Fasilitas Umum</div>
@@ -1209,8 +1209,8 @@
                                 </a>
                             </li>
                             @endif
-                            @if(in_array('Fasilitas Umum', $activeServicesMenu ?? []) || in_array('Layanan Ambulans', $activeServicesMenu ?? []))
-                            <li class="menu-item {{ request()->is('admin/unit/fasilitas_umum*') || request()->is('admin/unit/ambulans*') ? 'active' : '' }}">
+                            @if(in_array('Fasilitas Umum', $activeServicesMenu ?? []))
+                            <li class="menu-item {{ request()->is('admin/unit/fasilitas_umum*') || request()->is('admin/unit/kendaraan-operasional*') ? 'active' : '' }}">
                                 <a href="{{ route('admin.unit.fasilitas_umum.index') }}" class="menu-link d-flex align-items-center">
                                     <i class="bx bx-buildings me-2 text-muted"></i>
                                     <div>Fasilitas Umum</div>

@@ -151,8 +151,8 @@ class BerandaController extends Controller
 
             // Jaminan ketersediaan: Jika admin telah menambahkan produk/armada di wilayah ini,
             // maka otomatis layanan tersebut aktif dan dapat diakses warga dari Beranda
-            if (\App\Models\FasilitasUmum::whereIn('region_id', $relevantIds)->where('status', '!=', 'Tidak Tersedia')->exists()
-                || \App\Models\Mobil::whereIn('region_id', $relevantIds)->whereIn('kategori', ['ambulans', 'kendaraan_operasional'])->exists()) {
+            if (\App\Models\FasilitasUmum::inCatalog()->whereIn('region_id', $relevantIds)->where('status', '!=', 'Tidak Tersedia')->exists()
+                || \App\Models\Mobil::whereIn('region_id', $relevantIds)->where('kategori', 'kendaraan_operasional')->exists()) {
                 $activeServices[] = 'Fasilitas Umum';
             }
             if (\App\Models\Barang::whereIn('region_id', $relevantIds)->exists()) {
@@ -406,7 +406,7 @@ class BerandaController extends Controller
             }
 
             // Fallback 4: Fasilitas Umum Desa
-            $fallbackFasilitas = \App\Models\FasilitasUmum::whereIn('region_id', $regionIds)
+            $fallbackFasilitas = \App\Models\FasilitasUmum::inCatalog()->whereIn('region_id', $regionIds)
                 ->latest()
                 ->take(1)
                 ->get();
@@ -822,7 +822,7 @@ class BerandaController extends Controller
 
         // 4. Search Fasilitas Umum Items (Only if fasilitas intent or general search)
         if (!$hasSpecificIntent || $isFasilitasIntent) {
-            $fasilitasQuery = \App\Models\FasilitasUmum::query();
+            $fasilitasQuery = \App\Models\FasilitasUmum::inCatalog();
             $fasilitasQuery->where(function ($q) use ($allTerms, $cleanSearch, $rawSearch) {
                 if (trim($rawSearch) === 'fasilitas' || trim($rawSearch) === 'gedung') {
                     $q->orWhereRaw('1 = 1');

@@ -6,6 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Mobil extends Model
 {
+    public function scopeInCatalog($query)
+    {
+        return $query->where(fn ($q) => $q->whereNull('kategori')->orWhere('kategori', '!=', 'ambulans'));
+    }
+
     protected $table = 'mobils';
 
     protected $fillable = [

@@ -400,8 +400,8 @@ public function index(Request $request)
     $data['unitMobil'] = Mobil::whereNotIn('kategori', ['ambulans', 'kendaraan_operasional'])
         ->when($adminRegionId, fn($q) => $q->where('region_id', $adminRegionId))
         ->count();
-    $data['unitFasilitas'] = FasilitasUmum::when($adminRegionId, fn($q) => $q->where(fn($sub) => $sub->where('region_id', $adminRegionId)->orWhereNull('region_id')))->count()
-        + Mobil::whereIn('kategori', ['ambulans', 'kendaraan_operasional'])
+    $data['unitFasilitas'] = FasilitasUmum::inCatalog()->when($adminRegionId, fn($q) => $q->where(fn($sub) => $sub->where('region_id', $adminRegionId)->orWhereNull('region_id')))->count()
+        + Mobil::where('kategori', 'kendaraan_operasional')
             ->when($adminRegionId, fn($q) => $q->where('region_id', $adminRegionId))
             ->count();
 

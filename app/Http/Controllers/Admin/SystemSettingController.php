@@ -24,16 +24,15 @@ class SystemSettingController extends Controller
             $region = Region::first();
         }
 
-        $allServices = Service::all();
+        $allServices = Service::available()->get();
         $activeServices = $region ? $region->services->pluck('id')->toArray() : [];
         $exclusiveServices = $region ? $region->services->where('pivot.is_exclusive', true)->pluck('id')->toArray() : [];
 
         $hasFasilitasKendaraan = false;
         if ($region) {
-            $hasFasilitasKendaraan = \App\Models\FasilitasUmum::where('region_id', $region->id)
+            $hasFasilitasKendaraan = \App\Models\FasilitasUmum::inCatalog()->where('region_id', $region->id)
                 ->where(function($q) {
                     $q->where('nama_fasilitas', 'like', '%mobil%')
-                      ->orWhere('nama_fasilitas', 'like', '%ambulan%')
                       ->orWhere('nama_fasilitas', 'like', '%bus%')
                       ->orWhere('nama_fasilitas', 'like', '%pick%up%');
                 })->exists();
@@ -60,7 +59,7 @@ class SystemSettingController extends Controller
             'contact_phone' => 'nullable|string',
             'contact_email' => 'nullable|email',
             'services' => 'nullable|array',
-            'services.*' => 'exists:services,id'
+            'services.*' => [\Illuminate\Validation\Rule::exists('services', 'id')->whereNotIn('slug', Service::RETIRED_SLUGS)]
         ]);
 
         $mobilServiceId = \App\Models\Service::where('name', 'Penyewaan Mobil')->value('id');
@@ -127,7 +126,7 @@ class SystemSettingController extends Controller
         }
         if ($request->has('fasilitas_bbm')) {
             $paymentInfo['fasilitas_bbm_default'] = $request->fasilitas_bbm;
-            \App\Models\FasilitasUmum::where('region_id', $region->id)->update([
+            \App\Models\FasilitasUmum::inCatalog()->where('region_id', $region->id)->update([
                 'bbm_ditanggung' => $request->fasilitas_bbm,
                 'opsi_supir' => $request->fasilitas_supir
             ]);

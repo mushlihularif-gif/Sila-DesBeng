@@ -235,14 +235,6 @@ Route::post('/fasilitas-umum/booking', [App\Http\Controllers\User\FasilitasUmumB
     ->middleware('auth');
 
 Route::middleware('auth')->group(function () {
-    // Ambulans User
-    Route::get('/layanan-ambulans', [App\Http\Controllers\User\AmbulansUserController::class, 'index'])
-        ->name('user.ambulans.index')
-        ->middleware(['role:user', 'region.service:layanan-ambulans']);
-    Route::get('/layanan-ambulans/{id}', [App\Http\Controllers\User\AmbulansUserController::class, 'show'])
-        ->name('user.ambulans.show')
-        ->middleware(['role:user,guest']);
-        
     // Verifikasi Identitas
     Route::redirect('/profile/verifikasi', '/kyc', 301)->name('user.verifikasi.index');
     Route::post('/profile/verifikasi', [App\Http\Controllers\User\VerificationController::class, 'store'])->name('user.verifikasi.store');
@@ -719,15 +711,15 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
             ]);
         });
 
-        // Ambulans Darurat & Kendaraan Operasional
-        Route::resource('ambulans', \App\Http\Controllers\Admin\UnitAmbulansController::class)->names([
-            'index' => 'admin.unit.ambulans.index',
-            'create' => 'admin.unit.ambulans.create',
-            'store' => 'admin.unit.ambulans.store',
-            'show' => 'admin.unit.ambulans.show',
-            'edit' => 'admin.unit.ambulans.edit',
-            'update' => 'admin.unit.ambulans.update',
-            'destroy' => 'admin.unit.ambulans.destroy',
+        // Kendaraan Operasional
+        Route::resource('kendaraan-operasional', \App\Http\Controllers\Admin\UnitKendaraanOperasionalController::class)->middleware('staff.permission:fasilitas_umum')->names([
+            'index' => 'admin.unit.kendaraan_operasional.index',
+            'create' => 'admin.unit.kendaraan_operasional.create',
+            'store' => 'admin.unit.kendaraan_operasional.store',
+            'show' => 'admin.unit.kendaraan_operasional.show',
+            'edit' => 'admin.unit.kendaraan_operasional.edit',
+            'update' => 'admin.unit.kendaraan_operasional.update',
+            'destroy' => 'admin.unit.kendaraan_operasional.destroy',
         ]);
         
         // Pasar Daerah

@@ -326,8 +326,8 @@
                                                         $desaActiveCanonical['Pelaporan Warga'] = true;
                                                     } elseif (str_contains($sName, 'mobil') || str_contains($sName, 'kendaraan') || str_contains($sName, 'transportasi')) {
                                                         $desaActiveCanonical['Penyewaan Mobil'] = true;
-                                                    } elseif (str_contains($sName, 'fasilitas') || str_contains($sName, 'ambulan')) {
-                                                        // Fasilitas Umum sudah mencakup Fasilitas & Ambulans, tidak dipisahkan
+                                                    } elseif (str_contains($sName, 'fasilitas')) {
+                                                        // Gunakan nama layanan fasilitas yang sama di seluruh halaman.
                                                         $desaActiveCanonical['Fasilitas Umum'] = true;
                                                     } elseif (str_contains($sName, 'pasar') || str_contains($sName, 'toko')) {
                                                         $desaActiveCanonical['Pasar Daerah'] = true;

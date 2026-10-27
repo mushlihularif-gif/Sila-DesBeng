@@ -11,7 +11,7 @@ class MobilRentalUserController extends Controller
     {
         $targetRegionId = request()->integer('region_id') ?: null;
         $filterRegionId = request()->integer('filter_region_id') ?: null;
-        $query = Mobil::where('status', '!=', 'rusak')
+        $query = Mobil::inCatalog()->where('status', '!=', 'rusak')
                       ->where(function($q) {
                           $q->whereNotIn('kategori', ['ambulans', 'kendaraan_operasional'])->orWhereNull('kategori');
                       });
@@ -55,7 +55,7 @@ class MobilRentalUserController extends Controller
 
     public function show($id)
     {
-        $item = Mobil::findOrFail($id);
+        $item = Mobil::inCatalog()->findOrFail($id);
         
         // Rekening & metode pembayaran milik WILAYAH layanan ini, bukan rekening
         // pusat. Pemasukan tiap daerah menjadi tanggung jawab daerahnya sendiri.

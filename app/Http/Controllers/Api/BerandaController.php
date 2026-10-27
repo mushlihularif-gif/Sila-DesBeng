@@ -86,7 +86,7 @@ class BerandaController extends Controller
      */
     public function services()
     {
-        $services = \Illuminate\Support\Facades\Cache::remember('api.beranda.services', 300, function () {
+        $services = \Illuminate\Support\Facades\Cache::remember('api.beranda.services.v2', 300, function () {
             // Simple aggregation of services for mobile display
             $rentals = Barang::where('status', 'tersedia')->take(10)->get()->map(function($item) {
                 return [
@@ -108,7 +108,7 @@ class BerandaController extends Controller
                 ];
             });
 
-            $mobils = \App\Models\Mobil::where('status', 'tersedia')->take(10)->get()->map(function($item) {
+            $mobils = \App\Models\Mobil::inCatalog()->where('status', 'tersedia')->take(10)->get()->map(function($item) {
                 return [
                     'id' => $item->id,
                     'name' => $item->nama_mobil,
@@ -118,7 +118,7 @@ class BerandaController extends Controller
                 ];
             });
 
-            $fasilitas = \App\Models\FasilitasUmum::where('status', 'tersedia')->take(10)->get()->map(function($item) {
+            $fasilitas = \App\Models\FasilitasUmum::inCatalog()->where('status', 'tersedia')->take(10)->get()->map(function($item) {
                 return [
                     'id' => $item->id,
                     'name' => $item->nama_fasilitas,
@@ -183,7 +183,7 @@ class BerandaController extends Controller
 
     public function popular(Request $request)
     {
-        $allPopular = \Illuminate\Support\Facades\Cache::remember('api.beranda.popular', 300, function () {
+        $allPopular = \Illuminate\Support\Facades\Cache::remember('api.beranda.popular.v2', 300, function () {
             $limitPerCategory = 5;
 
             // Pasar Daerah - Most ordered
@@ -244,7 +244,7 @@ class BerandaController extends Controller
                 });
 
             // Sewa Mobil
-            $mobilProducts = \App\Models\Mobil::where('status', 'tersedia')
+            $mobilProducts = \App\Models\Mobil::inCatalog()->where('status', 'tersedia')
                 ->withCount('bookings')
                 ->orderBy('bookings_count', 'desc')
                 ->take($limitPerCategory)

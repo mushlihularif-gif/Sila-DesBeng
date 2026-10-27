@@ -6,6 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class FasilitasUmum extends Model
 {
+    public function scopeInCatalog($query)
+    {
+        // Legacy imports also stored ambulance units in this table.
+        return $query->where('nama_fasilitas', 'not like', '%ambulan%');
+    }
+
     protected $table = 'fasilitas_umums';
 
     protected $fillable = [

@@ -138,7 +138,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/mobil/my-bookings', [\App\Http\Controllers\Api\MobilBookingApiController::class, 'myBookings']);
     Route::delete('/mobil/booking/{id}/cancel', [\App\Http\Controllers\Api\MobilBookingApiController::class, 'cancel']);
 
-    // Sewa Fasilitas Umum (Gedung, Lapangan, Ambulans)
+    // Sewa Fasilitas Umum (Gedung, Lapangan, Kendaraan Operasional)
     Route::get('/fasilitas', [\App\Http\Controllers\Api\FasilitasBookingApiController::class, 'index']);
     Route::get('/fasilitas/{id}', [\App\Http\Controllers\Api\FasilitasBookingApiController::class, 'show'])->whereNumber('id');
     Route::post('/fasilitas/booking', [\App\Http\Controllers\Api\FasilitasBookingApiController::class, 'store']);

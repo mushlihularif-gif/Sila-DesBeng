@@ -10,7 +10,7 @@
                     <span class="text-gray-800">Unit </span>
                     <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Peminjaman Fasilitas Umum</span>
                 </h1>
-                <p class="text-gray-500 text-sm max-w-xl mx-auto mb-3">Layanan peminjaman gedung, ruang serbaguna, dan armada siaga untuk kebutuhan masyarakat desa.</p>
+                <p class="text-gray-500 text-sm max-w-xl mx-auto mb-3">Layanan peminjaman gedung, ruang serbaguna, dan kendaraan operasional untuk kebutuhan masyarakat desa.</p>
                 @if(isset($region) && $region)
                 <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-blue-50 border border-blue-200 rounded-full text-blue-700 text-sm font-semibold shadow-sm">
                     <i class="bx bx-map-pin"></i> Wilayah: {{ $region->name }}
@@ -25,7 +25,6 @@
             <!-- Category Filter -->
             @php
                 $hasGedung = $items->count() > 0;
-                $hasAmbulans = isset($kendaraans) && $kendaraans->where('kategori', 'ambulans')->isNotEmpty();
                 $hasKendaraanOps = isset($kendaraans) && $kendaraans->where('kategori', 'kendaraan_operasional')->isNotEmpty();
                 $totalCount = $items->count() + (isset($kendaraans) ? $kendaraans->count() : 0);
             @endphp
@@ -40,11 +39,6 @@
                     Gedung dan Ruang Publik ({{ $items->count() }})
                 </button>
                 @endif
-                @if($hasAmbulans)
-                <button class="catalog-filter-btn filter-btn" data-filter="ambulans">
-                    Layanan Ambulans ({{ $kendaraans->where('kategori', 'ambulans')->count() }})
-                </button>
-                @endif
                 @if($hasKendaraanOps)
                 <button class="catalog-filter-btn filter-btn" data-filter="kendaraan-operasional">
                     Kendaraan Operasional
@@ -53,24 +47,6 @@
             </div>
             @endif
 
-            @if(isset($regionSettings['kontak_ambulans']) && $regionSettings['kontak_ambulans'])
-            <!-- Kontak Darurat Medis Cepat (Kompak dan Ringkas) -->
-            <div class="mb-8 max-w-6xl mx-auto">
-                <div class="bg-red-50 border border-red-200 rounded-2xl px-4 py-2.5 flex flex-col sm:flex-row items-center justify-between gap-3 text-red-700 shadow-sm">
-                    <div class="flex items-center gap-2.5 text-xs sm:text-sm font-semibold">
-                        <span class="flex h-2.5 w-2.5 relative flex-shrink-0">
-                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-600"></span>
-                        </span>
-                        <span>Layanan Darurat Medis dan Ambulans 24 Jam Desa Siaga</span>
-                    </div>
-                    <a href="https://wa.me/{{ preg_replace('/^0/', '62', $regionSettings['kontak_ambulans']) }}" target="_blank"
-                       class="px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm flex-shrink-0">
-                        <i class="bx bxs-phone-call"></i> Panggil Ambulans Darurat
-                    </a>
-                </div>
-            </div>
-            @endif
 
             <!-- Grid Kartu Produk -->
             <!-- Grid Kartu Produk (2 Kolom di Mobile, 2 di Tablet, 3 di Desktop) -->
@@ -154,29 +130,28 @@
                     </a>
                     @endforeach
 
-                    <!-- Armada Kendaraan dan Ambulans -->
+                    <!-- Kendaraan Operasional Desa -->
                     @if(isset($kendaraans))
                     @foreach($kendaraans as $k)
                     @php
-                        $isAmb = $k->kategori === 'ambulans';
                         $supir = $k->supirs->first();
-                        $kCat = $isAmb ? 'ambulans' : 'kendaraan-operasional';
+                        $kCat = 'kendaraan-operasional';
                     @endphp
                     <div class="block group product-item transition-all duration-500" data-category="{{ $kCat }} kendaraan">
                     <div class="product-card p-3 sm:p-5">
                         
                         <!-- Gambar Kendaraan -->
                         <div class="product-image-wrapper mb-3 sm:mb-4">
-                            <img src="{{ $k->foto ? asset('storage/' . $k->foto) : ($isAmb ? asset('Admin/img/elements/ambulance.png') : asset('User/img/elemen/mobil.png')) }}" 
+                            <img src="{{ $k->foto ? asset('storage/' . $k->foto) : asset('User/img/elemen/mobil.png') }}"
                                  alt="{{ $k->nama_mobil }}"
                                  loading="lazy"
                                  onerror="this.onerror=null; this.src='{{ asset('User/img/elemen/mobil.png') }}';"
                                  class="product-image">
                             
                             <!-- Status Badge -->
-                            <div class="absolute top-2 right-2 sm:top-4 sm:right-4 px-1.5 sm:px-3 py-0.5 sm:py-1.5 text-[8px] sm:text-[10px] font-bold rounded-full {{ $isAmb ? 'bg-red-500' : 'bg-blue-600' }} text-white shadow-md flex items-center gap-0.5 sm:gap-1 tracking-wider uppercase">
-                                <i class="bx {{ $isAmb ? 'bxs-ambulance' : 'bx-car' }}"></i>
-                                <span>{{ $isAmb ? 'Ambulans Siaga' : 'Kendaraan Desa' }}</span>
+                            <div class="absolute top-2 right-2 sm:top-4 sm:right-4 px-1.5 sm:px-3 py-0.5 sm:py-1.5 text-[8px] sm:text-[10px] font-bold rounded-full bg-blue-600 text-white shadow-md flex items-center gap-0.5 sm:gap-1 tracking-wider uppercase">
+                                <i class="bx bx-car"></i>
+                                <span>Kendaraan Desa</span>
                             </div>
                         </div>
 
@@ -184,8 +159,8 @@
                         <div class="product-info flex flex-col flex-1 px-0.5 sm:px-1">
                             <!-- Kategori -->
                             <div class="mb-1.5 sm:mb-4">
-                                <span class="inline-flex items-center px-2 sm:px-3 py-0.5 sm:py-1.5 rounded-md text-[9px] sm:text-[10px] font-bold text-white {{ $isAmb ? 'bg-red-600' : 'bg-indigo-600' }} shadow-sm">
-                                    {{ $isAmb ? 'Ambulans Siaga Medis' : 'Kendaraan Operasional' }}
+                                <span class="inline-flex items-center px-2 sm:px-3 py-0.5 sm:py-1.5 rounded-md text-[9px] sm:text-[10px] font-bold text-white bg-indigo-600 shadow-sm">
+                                    Kendaraan Operasional
                                 </span>
                             </div>
 
@@ -195,13 +170,13 @@
 
                             <div class="text-[10px] sm:text-xs text-gray-500 mb-3 flex items-center gap-1 font-medium">
                                 <i class="bx bx-id-card text-gray-400"></i>
-                                <span>{{ str_replace('Plat: ', '', $k->deskripsi) }}</span>
+                                <span>{{ $k->plat_nomor ?: str_replace('Plat: ', '', $k->deskripsi ?? '') }}</span>
                             </div>
 
                             @if($supir)
                             <div class="bg-gray-50 rounded-xl p-2 sm:p-2.5 mb-3 border border-gray-100 flex items-center justify-between gap-1.5">
                                 <div class="flex items-center gap-2 overflow-hidden">
-                                    <div class="w-6 h-6 rounded-full {{ $isAmb ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600' }} flex items-center justify-center font-bold text-[10px] flex-shrink-0">
+                                    <div class="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-[10px] flex-shrink-0">
                                         {{ substr($supir->nama, 0, 1) }}
                                     </div>
                                     <div class="truncate">
@@ -215,22 +190,13 @@
                                 </a>
                                 @endif
                             </div>
-                            @elseif($isAmb)
-                            <div class="bg-gray-50 rounded-xl p-2 sm:p-2.5 mb-3 border border-dashed border-gray-200 text-center">
-                                <span class="text-[10px] text-gray-400 italic">Supir siaga belum ditugaskan</span>
-                            </div>
                             @endif
                             
                             <div class="mt-auto pt-2 sm:pt-3">
-                                @if($isAmb)
-                                <a href="{{ route('user.ambulans.show', $k->id) }}" data-turbo="false" class="w-full block text-center py-2 px-3 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white font-bold rounded-xl text-xs sm:text-sm shadow transition-all">
-                                    Detail dan Panggil Armada
-                                </a>
-                                @else
                                 <span class="w-full block text-center py-2 px-3 bg-blue-50 text-blue-600 font-bold rounded-xl text-xs sm:text-sm border border-blue-200">
                                     Unit Layanan Desa
                                 </span>
-                                @endif
+
                             </div>
                         </div>
                     </div>

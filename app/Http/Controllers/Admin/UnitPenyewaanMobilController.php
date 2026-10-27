@@ -130,7 +130,7 @@ class UnitPenyewaanMobilController extends Controller
             'harga_sewa' => 'required|string',
             'stok' => 'required|integer',
             'status' => 'required|in:tersedia,disewa,rusak',
-            'kategori' => 'required|string',
+            'kategori' => 'required|string|not_in:ambulans,kendaraan_operasional',
             'lokasi' => 'required|string',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
@@ -232,13 +232,13 @@ class UnitPenyewaanMobilController extends Controller
 
     public function show($id)
     {
-        $mobil = Mobil::findOrFail($id);
+        $mobil = Mobil::inCatalog()->findOrFail($id);
         return view('admin.unit.mobil.show', compact('mobil'));
     }
 
     public function edit($id)
     {
-        $mobil = Mobil::findOrFail($id);
+        $mobil = Mobil::inCatalog()->findOrFail($id);
         // Lokasi diambil dari daftar milik WILAYAH, bukan lagi SELECT DISTINCT
         // pada tabel produk unit ini. Query lama tidak menyaring region_id sama
         // sekali, sehingga admin satu desa ikut melihat nama lokasi desa lain;
@@ -256,7 +256,7 @@ class UnitPenyewaanMobilController extends Controller
 
     public function destroy($id)
     {
-        $mobil = Mobil::findOrFail($id);
+        $mobil = Mobil::inCatalog()->findOrFail($id);
 
         if ($mobil->foto) Storage::disk('public')->delete($mobil->foto);
         if ($mobil->foto_2) Storage::disk('public')->delete($mobil->foto_2);
@@ -275,7 +275,7 @@ class UnitPenyewaanMobilController extends Controller
             'harga_sewa' => 'required|string',
             'stok' => 'required|integer',
             'status' => 'required|in:tersedia,disewa,rusak',
-            'kategori' => 'required|string',
+            'kategori' => 'required|string|not_in:ambulans,kendaraan_operasional',
             'lokasi' => 'required|string',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
@@ -319,7 +319,7 @@ class UnitPenyewaanMobilController extends Controller
             return back()->withErrors(['is_harian_active' => 'Minimal salah satu layanan (Sewa Harian atau Sewa Borongan) harus diaktifkan.'])->withInput();
         }
 
-        $mobil = Mobil::findOrFail($id);
+        $mobil = Mobil::inCatalog()->findOrFail($id);
 
         
         

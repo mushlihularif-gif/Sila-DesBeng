@@ -210,10 +210,6 @@
                                         $iconPath = 'User/img/elemen/lapor.png';
                                         $descText = 'yang dapat membuat laporan.';
                                     }
-                                    elseif (strpos($sName, 'ambulans') !== false) {
-                                        $iconPath = 'User/img/elemen/fasilitas.png';
-                                        $descText = 'yang dapat memesan ambulans.';
-                                    }
                                 @endphp
                                 <div class="col-md-6">
                                     <div class="card border {{ in_array($service->id, $activeServices) ? 'border-primary shadow-sm bg-label-primary' : 'border-secondary shadow-none bg-light' }} h-100 rounded-3 card-service-item" data-action="{{ $descText }}" style="transition: all 0.2s; max-width: 100%; overflow: hidden;">
@@ -695,7 +691,7 @@
                                                 <img src="{{ asset('User/img/elemen/fasilitas.png') }}" class="me-3" style="width: 32px; height: 32px; object-fit: contain;">
                                                 <div>
                                                     <h6 class="fw-bold mb-0 text-primary">Pengaturan Fasilitas Umum</h6>
-                                                    <small class="text-muted">Metode penggunaan fasilitas (Gedung, Ambulans, Lapangan, dll).</small>
+                                                    <small class="text-muted">Metode penggunaan fasilitas (Gedung, Kendaraan Operasional, Lapangan, dll).</small>
                                                 </div>
                                             </div>
                                             
@@ -707,7 +703,7 @@
                                                                 <img src="{{ asset('Admin/img/elements/antar.png') }}" alt="Layanan Kunjungan / Antar / Panggilan" style="width: 45px; height: 45px; object-fit: contain;" class="me-3">
                                                                 <div>
                                                                     <span class="text-dark fw-bold d-block" style="font-size: 1.05rem;">Layanan Kunjungan / Antar / Panggilan</span>
-                                                                    <span class="text-muted small d-block mb-0">Fasilitas (seperti ambulans, transportasi lain) atau petugas datang ke lokasi warga</span>
+                                                                    <span class="text-muted small d-block mb-0">Fasilitas (seperti kendaraan operasional, transportasi lain) atau petugas datang ke lokasi warga</span>
                                                                 </div>
                                                             </div>
                                                             <div class="dynamic-keterangan mt-2" style="display: none;">

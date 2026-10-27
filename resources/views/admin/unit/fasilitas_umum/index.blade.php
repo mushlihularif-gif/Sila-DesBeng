@@ -25,7 +25,7 @@
                 <div class="min-w-0">
                     <h6 class="fw-bold mb-0 text-secondary" style="font-size: 0.9rem;">Manajemen Fasilitas Umum dan Aset</h6>
                     <p class="mb-0 text-secondary small d-none d-sm-block" style="opacity: 0.85; font-size: 0.78rem;">
-                        Kelola data kendaraan operasional (Ambulans, Truk Sampah) dan fasilitas publik (Gedung Serbaguna, Lapangan) yang dapat diakses oleh warga.
+                        Kelola data kendaraan operasional (Truk Sampah) dan fasilitas publik (Gedung Serbaguna, Lapangan) yang dapat diakses oleh warga.
                     </p>
                 </div>
             </div>
@@ -206,11 +206,11 @@
                             </div>
                             <div class="min-w-0">
                                 <h6 class="mb-0 fw-bold text-truncate" style="font-size: 0.95rem;">Daftar Kendaraan Layanan</h6>
-                                <small class="text-muted d-none d-sm-block" style="font-size: 0.78rem;">Ambulans Darurat, Mobil Siaga, Truk Sampah, dll</small>
+                                <small class="text-muted d-none d-sm-block" style="font-size: 0.78rem;">Mobil Operasional, Truk Sampah, dll</small>
                             </div>
                         </div>
                         <div class="flex-shrink-0">
-                            <a href="{{ route('admin.unit.ambulans.create') }}" class="btn btn-primary btn-sm rounded-pill px-2.5 px-sm-3 py-1.5 shadow-sm d-inline-flex align-items-center fw-semibold text-nowrap" style="font-size: 0.8rem;">
+                            <a href="{{ route('admin.unit.kendaraan_operasional.create') }}" class="btn btn-primary btn-sm rounded-pill px-2.5 px-sm-3 py-1.5 shadow-sm d-inline-flex align-items-center fw-semibold text-nowrap" style="font-size: 0.8rem;">
                                 <i class="bx bx-plus me-1"></i> <span>Tambah</span><span class="d-none d-sm-inline ms-1">Kendaraan</span>
                             </a>
                         </div>
@@ -269,13 +269,10 @@
                                                     {{ $mobil->nama_mobil }}
                                                 </h5>
                                                 <div class="d-flex flex-wrap gap-1 align-items-center">
-                                                    @if($mobil->kategori === 'ambulans')
-                                                        <span class="badge bg-label-danger rounded-pill card-badge-kategori"><i class="bx bx-plus-medical me-1"></i>Ambulans</span>
-                                                    @else
                                                         <span class="badge bg-label-secondary rounded-pill card-badge-kategori"><i class="bx bx-car me-1"></i>Operasional</span>
-                                                    @endif
+
                                                     @php
-                                                        $plat = str_replace('Plat: ', '', $mobil->deskripsi);
+                                                        $plat = $mobil->plat_nomor ?: str_replace('Plat: ', '', $mobil->deskripsi ?? '');
                                                     @endphp
                                                     @if($plat && $plat !== '-')
                                                         <span class="badge bg-light text-dark border font-monospace card-status-badge">{{ $plat }}</span>
@@ -283,9 +280,9 @@
                                                 </div>
                                             </div>
 
-                                            @if($mobil->kategori === 'ambulans')
+                                            @if($mobil->supirs->isNotEmpty())
                                                 <div class="mt-1 mb-1.5 mb-sm-2">
-                                                    <small class="text-muted d-block mb-0.5 fw-semibold" style="font-size: 0.7rem;"><i class="bx bx-user-pin me-1"></i>Supir Siaga:</small>
+                                                    <small class="text-muted d-block mb-0.5 fw-semibold" style="font-size: 0.7rem;"><i class="bx bx-user-pin me-1"></i>Supir Penanggung Jawab:</small>
                                                     @if($mobil->supirs && $mobil->supirs->count() > 0)
                                                         <div class="d-flex flex-wrap gap-1">
                                                             @foreach($mobil->supirs as $supir)
@@ -299,15 +296,15 @@
                                             @endif
                                             
                                             <div class="mt-auto pt-2 pt-sm-3 border-top d-flex gap-1 flex-nowrap justify-content-center">
-                                                <a href="{{ route('admin.unit.ambulans.show', $mobil->id) }}"
+                                                <a href="{{ route('admin.unit.kendaraan_operasional.show', $mobil->id) }}"
                                                     class="btn btn-sm btn-outline-info flex-grow-1 card-btn-action text-nowrap d-inline-flex align-items-center justify-content-center" title="Lihat Detail">
                                                     <i class="bx bx-info-circle"></i><span class="d-none d-sm-inline ms-1">Detail</span>
                                                 </a>
-                                                <a href="{{ route('admin.unit.ambulans.edit', $mobil->id) }}"
+                                                <a href="{{ route('admin.unit.kendaraan_operasional.edit', $mobil->id) }}"
                                                     class="btn btn-sm btn-outline-warning flex-grow-1 card-btn-action text-nowrap d-inline-flex align-items-center justify-content-center" title="Ubah">
                                                     <i class="bx bx-edit"></i><span class="d-none d-sm-inline ms-1">Edit</span>
                                                 </a>
-                                                <form action="{{ route('admin.unit.ambulans.destroy', $mobil->id) }}" method="POST"
+                                                <form action="{{ route('admin.unit.kendaraan_operasional.destroy', $mobil->id) }}" method="POST"
                                                     data-konfirmasi="Apakah Anda yakin ingin menghapus kendaraan ini?" class="d-flex flex-grow-1 m-0 p-0">
                                                     @csrf
                                                     @method('DELETE')
@@ -335,9 +332,9 @@
                                 </div>
                                 <h5 class="fw-bold text-muted mb-2">Belum Ada Kendaraan</h5>
                                 <p class="text-muted mb-3 small" style="max-width: 400px; margin: 0 auto;">
-                                    Belum ada data kendaraan operasional (misalnya Ambulans Darurat).
+                                    Belum ada data kendaraan operasional (misalnya mobil operasional desa).
                                 </p>
-                                <a href="{{ route('admin.unit.ambulans.create') }}" class="btn btn-primary btn-sm rounded-pill px-3 py-1.5 shadow-sm">
+                                <a href="{{ route('admin.unit.kendaraan_operasional.create') }}" class="btn btn-primary btn-sm rounded-pill px-3 py-1.5 shadow-sm">
                                     <i class="bx bx-plus-circle me-1"></i> Tambah Kendaraan
                                 </a>
                             </div>

@@ -116,7 +116,7 @@
                         <i class="bx bx-bulb fs-4 me-3 mt-1"></i>
                         <div>
                             <h6 class="alert-heading fw-bold mb-1">Panduan Supir Kendaraan</h6>
-                            <p class="mb-0 small">Data supir ini akan tersedia untuk ditugaskan pada pesanan <strong>Penyewaan Transportasi</strong> dan layanan darurat <strong>Ambulans Desa</strong>.</p>
+                            <p class="mb-0 small">Data supir ini akan tersedia untuk ditugaskan pada pesanan <strong>Penyewaan Transportasi</strong> dan <strong>Kendaraan Operasional Desa</strong>.</p>
                         </div>
                     </div>
 
@@ -159,7 +159,7 @@
 
                     <div class="mb-4 bg-label-info p-3 rounded-4 border-0">
                         <label class="form-label text-uppercase fw-bold text-info mb-1" style="font-size: 0.75rem;"><i class="bx bx-link-alt me-1"></i>Tautkan Akun Aplikasi (Opsional)</label>
-                        <p class="text-info mb-2" style="font-size: 0.75rem;">Notifikasi order atau ambulans akan dikirimkan ke akun warga ini.</p>
+                        <p class="text-info mb-2" style="font-size: 0.75rem;">Notifikasi order atau kendaraan operasional akan dikirimkan ke akun warga ini.</p>
                         <select name="user_id" class="form-select bg-white border-info text-dark shadow-none py-2" style="cursor: pointer; font-size: 0.88rem;">
                             <option value="" selected>-- Tidak Ditautkan (Hanya Data Profil) --</option>
                             @foreach($users as $u)
@@ -179,7 +179,7 @@
                                     </div>
                                     <div class="form-check form-switch d-flex align-items-center">
                                         <input class="form-check-input mt-0 me-3 cursor-pointer bg-danger border-danger" type="checkbox" name="is_fasilitas_umum" value="1" id="is_fasilitas_add" style="width: 2.5em; height: 1.25em;" checked>
-                                        <label class="form-check-label cursor-pointer fw-bold text-danger" for="is_fasilitas_add">Ambulans dan Kendaraan Darurat</label>
+                                        <label class="form-check-label cursor-pointer fw-bold text-danger" for="is_fasilitas_add">Kendaraan Operasional Darurat</label>
                                     </div>
                                 </div>
                             </div>

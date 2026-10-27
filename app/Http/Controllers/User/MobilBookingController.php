@@ -19,7 +19,7 @@ class MobilBookingController extends Controller
             return redirect()->back()->with('show_kyc_modal', true);
         }
 
-        $item = Mobil::findOrFail($itemId);
+        $item = Mobil::inCatalog()->findOrFail($itemId);
 
         // Validasi: Warga hanya bisa memesan layanan di wilayahnya sendiri
         if ($item->region_id && Auth::user()->region_id && ! in_array($item->region_id, \App\Models\Region::wilayahLayananTerlihat(Auth::user()->region_id, 'Penyewaan Mobil'))) {
@@ -86,7 +86,7 @@ class MobilBookingController extends Controller
             'rental_purpose' => 'required|string|max:1000',
         ]);
 
-        $item = Mobil::findOrFail($validated['mobil_id']);
+        $item = Mobil::inCatalog()->findOrFail($validated['mobil_id']);
         $validated['recipient_name'] = ($validated['recipient_name'] ?? null) ?: Auth::user()->name;
         $validated['end_date'] = $validated['end_date'] ?? $validated['start_date'];
         

@@ -49,10 +49,10 @@ class Supir extends Model
         return $this->belongsTo(User::class);
     }
 
-    // Hanya untuk Ambulans yang menggunakan tabel pivot mobil_supir
-    public function ambulans()
+    // Penugasan kendaraan operasional menggunakan tabel pivot mobil_supir
+    public function kendaraanOperasional()
     {
-        return $this->belongsToMany(Mobil::class, 'mobil_supir', 'supir_id', 'mobil_id');
+        return $this->belongsToMany(Mobil::class, 'mobil_supir', 'supir_id', 'mobil_id')->where('kategori', 'kendaraan_operasional');
     }
 
     // Khusus untuk Gedung & Ruang Publik yang menggunakan tabel pivot fasilitas_pengurus

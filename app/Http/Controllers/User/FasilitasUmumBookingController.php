@@ -18,7 +18,7 @@ class FasilitasUmumBookingController extends Controller
             return redirect()->back()->with('show_kyc_modal', true);
         }
 
-        $item = FasilitasUmum::with('pengurus')->findOrFail($itemId);
+        $item = FasilitasUmum::inCatalog()->with('pengurus')->findOrFail($itemId);
 
         // Validasi: Warga hanya bisa memesan layanan di wilayahnya sendiri
         $userRegionId = Auth::user()->region_id;
@@ -80,7 +80,7 @@ class FasilitasUmumBookingController extends Controller
             'payment_proof' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
         ]);
 
-        $item = FasilitasUmum::findOrFail($validated['fasilitas_id']);
+        $item = FasilitasUmum::inCatalog()->findOrFail($validated['fasilitas_id']);
         
         $deliveryMethod = $validated['delivery_method'] ?? 'lokasi';
         $recipientName = $validated['recipient_name'] ?? (Auth::user()->name ?? 'Warga');
