@@ -21,7 +21,6 @@
                         <div class="catalog-detail-gallery mb-5 group">
                             @php
                                 $images = collect([$item->foto, $item->foto_2, $item->foto_3])->filter()->values();
-                                $hasMultipleImages = $images->count() > 1;
                             @endphp
 
                             <!-- Images Container -->
@@ -35,17 +34,7 @@
                                 @endforeach
                             </div>
 
-                            @if($hasMultipleImages)
-                            <!-- Indicators -->
-                            <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
-                                @foreach($images as $index => $image)
-                                <button type="button"
-                                        class="carousel-indicator {{ $index === 0 ? 'w-8 bg-white' : 'w-2.5 bg-white/50' }} h-2.5 rounded-full shadow-md transition-all duration-300 hover:bg-white/75"
-                                        data-slide="{{ $index }}">
-                                </button>
-                                @endforeach
-                            </div>
-                            @endif
+                            @include('users.partials.product-gallery-controls')
                         </div>
 
                         <!-- Location - Below Image -->
@@ -247,66 +236,6 @@
             if (value < 1) qtyInput.value = 1;
             if (value > maxStock) qtyInput.value = maxStock;
         });
-    }
-
-    // Image Carousel
-    const carousel = document.getElementById('product-carousel');
-    const indicators = document.querySelectorAll('.carousel-indicator');
-
-    if (carousel && indicators.length > 1) {
-        let currentSlide = 0;
-        const totalSlides = indicators.length;
-        let autoSlideInterval;
-        const autoSlideDelay = 5000; // 5 seconds
-
-        const goToSlide = (slideIndex) => {
-            currentSlide = slideIndex;
-            carousel.style.transform = `translateX(-${slideIndex * 100}%)`;
-
-            // Update indicators
-            indicators.forEach((indicator, index) => {
-                if (index === slideIndex) {
-                    indicator.classList.remove('w-2.5', 'bg-white/50');
-                    indicator.classList.add('w-8', 'bg-white');
-                } else {
-                    indicator.classList.remove('w-8', 'bg-white');
-                    indicator.classList.add('w-2.5', 'bg-white/50');
-                }
-            });
-        };
-
-        const nextSlide = () => {
-            currentSlide = (currentSlide + 1) % totalSlides;
-            goToSlide(currentSlide);
-        };
-
-        const startAutoSlide = () => {
-            clearInterval(autoSlideInterval);
-            autoSlideInterval = setInterval(nextSlide, autoSlideDelay);
-        };
-
-        const resetAutoSlide = () => {
-            clearInterval(autoSlideInterval);
-            startAutoSlide();
-        };
-
-        // Indicator buttons
-        indicators.forEach((indicator, index) => {
-            indicator.addEventListener('click', () => {
-                goToSlide(index);
-                resetAutoSlide();
-            });
-        });
-
-        // Start auto-slide
-        startAutoSlide();
-
-        // Pause on hover
-        const carouselContainer = carousel.parentElement;
-        if (carouselContainer) {
-            carouselContainer.addEventListener('mouseenter', () => clearInterval(autoSlideInterval));
-            carouselContainer.addEventListener('mouseleave', startAutoSlide);
-        }
     }
 
     // Order logic is now handled via inline onclick in the button html

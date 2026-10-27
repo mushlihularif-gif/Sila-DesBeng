@@ -4,7 +4,6 @@
 @php
     $cleanPlat = $ambulans->plat_nomor ?: str_replace('Plat: ', '', $ambulans->deskripsi);
     $images = collect([$ambulans->foto, $ambulans->foto_2, $ambulans->foto_3])->filter()->values();
-    $hasMultipleImages = $images->count() > 1;
     $rawDeskripsi = $ambulans->deskripsi;
     $hasCustomDesc = $rawDeskripsi && !str_starts_with(trim($rawDeskripsi), 'Plat:');
 @endphp
@@ -43,18 +42,7 @@
                                     @endforeach
                                 </div>
 
-                                @if($hasMultipleImages)
-                                <!-- Dot Indicators -->
-                                <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10 bg-black/30 backdrop-blur-sm px-3 py-1.5 rounded-full">
-                                    @foreach($images as $index => $image)
-                                    <button type="button"
-                                            class="carousel-indicator {{ $index === 0 ? 'w-6 bg-white' : 'w-2 bg-white/50' }} h-2 rounded-full transition-all duration-300 hover:bg-white/90"
-                                            data-slide="{{ $index }}"
-                                            aria-label="Slide {{ $index + 1 }}">
-                                    </button>
-                                    @endforeach
-                                </div>
-                                @endif
+                                @include('users.partials.product-gallery-controls', ['galleryAutoplay' => false])
                             @else
                                 <div class="w-full h-full flex flex-col items-center justify-center text-gray-400 p-6 text-center">
                                     <i class="bx bx-car text-6xl text-red-300 mb-2"></i>
@@ -197,70 +185,4 @@
 
 @push('styles')
 @include('users.partials.catalog-detail-styles')
-@endpush
-
-@push('scripts')
-<script>
-    function initAmbulansCarousel() {
-        const carousel = document.getElementById('product-carousel');
-        const indicators = document.querySelectorAll('.carousel-indicator');
-        
-        if (!carousel || indicators.length <= 1) return;
-
-        let currentSlide = 0;
-        const totalSlides = indicators.length;
-
-        function goToSlide(slideIndex) {
-            currentSlide = (slideIndex + totalSlides) % totalSlides;
-            carousel.style.transform = `translateX(-${currentSlide * 100}%)`;
-            
-            indicators.forEach((indicator, index) => {
-                if (index === currentSlide) {
-                    indicator.classList.remove('w-2', 'bg-white/50');
-                    indicator.classList.add('w-6', 'bg-white');
-                } else {
-                    indicator.classList.remove('w-6', 'bg-white');
-                    indicator.classList.add('w-2', 'bg-white/50');
-                }
-            });
-        }
-
-        indicators.forEach((indicator) => {
-            indicator.addEventListener('click', function(e) {
-                e.preventDefault();
-                const targetSlide = parseInt(this.getAttribute('data-slide'));
-                goToSlide(targetSlide);
-            });
-        });
-
-        // Touch swipe support for mobile
-        let touchStartX = 0;
-        let touchEndX = 0;
-
-        carousel.addEventListener('touchstart', function(e) {
-            touchStartX = e.changedTouches[0].screenX;
-        }, { passive: true });
-
-        carousel.addEventListener('touchend', function(e) {
-            touchEndX = e.changedTouches[0].screenX;
-            handleSwipe();
-        }, { passive: true });
-
-        function handleSwipe() {
-            const threshold = 40;
-            if (touchEndX < touchStartX - threshold) {
-                goToSlide(currentSlide + 1);
-            }
-            if (touchEndX > touchStartX + threshold) {
-                goToSlide(currentSlide - 1);
-            }
-        }
-    }
-
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initAmbulansCarousel);
-    } else {
-        initAmbulansCarousel();
-    }
-</script>
 @endpush
