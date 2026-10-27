@@ -1,122 +1,120 @@
 <script>
-    const UnitCarousel = {
-        init() {
-            this.initUnitCarousel();
-        },
+(() => {
+    const init = () => {
+        const cards = Array.from(document.querySelectorAll('.unit-card'));
+        if (cards.length === 0) return;
 
-        initUnitCarousel() {
-            const cards = Array.from(document.querySelectorAll('.unit-card'));
-            if (cards.length === 0) return;
+        const titleElement = document.getElementById('unit-title');
+        const nextBtn = document.getElementById('unit-next');
+        const prevBtn = document.getElementById('unit-prev');
+        const speechBox = document.getElementById('unit-speech-box');
+        const speechWrapper = document.getElementById('speech-text-wrapper');
+        const speechHeading = document.getElementById('speech-heading');
+        const speechBody = document.getElementById('speech-body');
+        const speechBadge = document.getElementById('speech-badge');
+        const speechBadgeLabel = document.getElementById('speech-badge-label');
+        const speechBadgeIcon = document.getElementById('speech-badge-icon');
 
-            const titleElement = document.getElementById('unit-title');
-            const nextBtn = document.getElementById('unit-next');
-            const prevBtn = document.getElementById('unit-prev');
+        const n = cards.length;
+        let currentIndex = 0;
+        const updateCarousel = () => {
+            cards.forEach((card, index) => {
+                // Remove all state classes
+                card.className = card.className.replace(/\bstate-\d\b/g, '').trim();
 
-            const stateClasses = ['state-0', 'state-1', 'state-2', 'state-3', 'state-4', 'state-5'];
-            
-            // Inisialisasi posisi secara dinamis sesuai jumlah cards
-            let positions = [];
-            const n = cards.length;
-            
-            if (n === 1) {
-                positions = [1];
-            } else if (n === 2) {
-                positions = [1, 2];
-            } else if (n === 3) {
-                positions = [1, 2, 0];
-            } else {
-                // Untuk n >= 4
-                positions = Array.from({length: n}, (_, i) => {
-                    if (i === 0) return 1; // Center
-                    if (i === 1) return 2; // Right
-                    if (i === 2) return 3; // Far Right
-                    if (i === n - 1) return 0; // Left
-                    if (i === n - 2) return 4; // Far Left
-                    return 5; // Hidden off-screen
-                });
-            }
+                let diff = (index - currentIndex) % n;
+                if (diff < 0) diff += n;
 
-            let autoSlideInterval;
-            const autoSlideDelay = 3000;
+                let state = 5; // Default Hidden
 
-            const updateCarousel = () => {
-                cards.forEach((card, index) => {
-                    card.classList.remove(...stateClasses);
-                    const currentPos = positions[index];
-                    card.classList.add(stateClasses[currentPos] || 'state-3');
+                if (n === 1) {
+                    if (diff === 0) state = 1;
+                } else if (n === 2) {
+                    if (diff === 0) state = 1;
+                    if (diff === 1) state = 2;
+                } else if (n === 3) {
+                    if (diff === 0) state = 1;
+                    if (diff === 1) state = 2;
+                    if (diff === 2) state = 0;
+                } else {
+                    if (diff === 0) state = 1; // Center
+                    else if (diff === 1) state = 2; // Right
+                    else if (diff === 2) state = 3; // Far Right (Hidden, fading out)
+                    else if (diff === n - 2) state = 4; // Far Left (Hidden, fading in)
+                    else if (diff === n - 1) state = 0; // Left
+                    else state = 5; // Deep Hidden
+                }
 
-                    if (currentPos === 1 && titleElement) {
+                card.classList.add(`state-${state}`);
+
+                if (diff === 0) {
+                    // 1. Update Title Navigasi Bawah
+                    if (titleElement) {
                         titleElement.style.opacity = '0';
                         setTimeout(() => {
                             titleElement.textContent = card.getAttribute('data-name');
                             titleElement.style.opacity = '1';
-                        }, 200);
+                        }, 180);
                     }
-                });
-            };
 
-            const handleNext = () => {
-                if (n === 1) return;
-                
-                // Shift positions array to the right cyclically
-                positions.unshift(positions.pop());
-                updateCarousel();
-            };
+                    // 2. Update Kotak Narasi Dinamis Atas
+                    if (speechBox && speechWrapper) {
+                        speechWrapper.classList.remove('fade-in');
+                        speechWrapper.classList.add('fade-out');
 
-            const handlePrev = () => {
-                if (n === 1) return;
-                
-                // Shift positions array to the left cyclically
-                positions.push(positions.shift());
-                updateCarousel();
-            };
+                        setTimeout(() => {
+                            if (speechHeading) speechHeading.textContent = card.getAttribute('data-heading') || '';
+                            if (speechBody) speechBody.textContent = card.getAttribute('data-body') || '';
+                            if (speechBadgeLabel) speechBadgeLabel.textContent = card.getAttribute('data-badge') || '';
+                            if (speechBadgeIcon) speechBadgeIcon.className = `bx ${card.getAttribute('data-icon') || 'bx-grid-alt'} text-sm`;
 
-            const startAutoSlide = () => {
-                if (n <= 1) return;
-                clearInterval(autoSlideInterval);
-                autoSlideInterval = setInterval(handleNext, autoSlideDelay);
-            };
+                            const boxBg = card.getAttribute('data-box-bg') || 'bg-amber-50/90';
+                            const boxBorder = card.getAttribute('data-box-border') || 'border-amber-200';
+                            const badgeBg = card.getAttribute('data-badge-bg') || 'bg-amber-100 text-amber-800 border-amber-300';
+                            const textColor = card.getAttribute('data-text-color') || 'text-amber-950';
 
-            const resetAutoSlide = () => {
-                if (n <= 1) return;
-                clearInterval(autoSlideInterval);
-                startAutoSlide();
-            };
+                            speechBox.className = `unit-speech-box relative overflow-hidden rounded-2xl sm:rounded-3xl px-4 py-4 sm:px-6 sm:py-5 border shadow-md shadow-slate-900/5 backdrop-blur-xl transition-all duration-300 ${boxBg} ${boxBorder}`;
+                            if (speechBadge) speechBadge.className = `inline-flex shrink-0 self-center items-center gap-1.5 rounded-full border px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.1em] ${badgeBg}`;
+                            if (speechHeading) speechHeading.className = `text-sm sm:text-base font-extrabold leading-snug ${textColor}`;
 
-            if (nextBtn) {
-                const newNext = nextBtn.cloneNode(true);
-                nextBtn.parentNode.replaceChild(newNext, nextBtn);
-                newNext.addEventListener('click', () => {
-                    handleNext();
-                    resetAutoSlide();
-                });
-            }
-            if (prevBtn) {
-                const newPrev = prevBtn.cloneNode(true);
-                prevBtn.parentNode.replaceChild(newPrev, prevBtn);
-                newPrev.addEventListener('click', () => {
-                    handlePrev();
-                    resetAutoSlide();
-                });
-            }
+                            speechWrapper.classList.remove('fade-out');
+                            speechWrapper.classList.add('fade-in');
+                        }, 180);
+                    }
+                }
+            });
 
-            const container = document.getElementById('unit-carousel-container');
-            if (container) {
-                container.addEventListener('mouseenter', () => clearInterval(autoSlideInterval));
-                container.addEventListener('mouseleave', startAutoSlide);
-            }
+        };
 
+        const handleNext = () => {
+            if (n <= 1) return;
+            currentIndex = (currentIndex + 1) % n;
             updateCarousel();
-            startAutoSlide();
+        };
 
-        },
+        const handlePrev = () => {
+            if (n <= 1) return;
+            currentIndex = (currentIndex - 1 + n) % n;
+            updateCarousel();
+        };
+
+        if (nextBtn) {
+            nextBtn.hidden = n <= 1;
+            nextBtn.onclick = handleNext;
+        }
+        if (prevBtn) {
+            prevBtn.hidden = n <= 1;
+            prevBtn.onclick = handlePrev;
+        }
+
+        updateCarousel();
+
     };
-    
-    document.addEventListener('DOMContentLoaded', () => {
-        UnitCarousel.init();
-    });
-    
-    document.addEventListener('turbo:load', () => {
-        UnitCarousel.init();
-    });
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", init, { once: true });
+    } else {
+        init();
+    }
+    document.addEventListener("turbo:load", init);
+})();
 </script>

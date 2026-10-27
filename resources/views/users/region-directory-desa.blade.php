@@ -355,11 +355,9 @@
     }
 
 </style>
-    @include('users.partials.unit-carousel-styles')
 @endpush
 
 @push('scripts')
-    @include('users.partials.unit-carousel-scripts')
 <script>
 (function() {
     function initDesaSearch() {
@@ -468,4 +466,3 @@
 })();
 </script>
 @endpush
-

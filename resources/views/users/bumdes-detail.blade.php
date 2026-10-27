@@ -2,12 +2,8 @@
 
 @section('page')
 <main class="flex-grow relative w-full">
+    @include('partials.abstract-bg')
     <section class="relative z-10 min-h-screen pt-40 pb-16">
-        <!-- Decorative Background Elements -->
-        <div class="absolute inset-0 z-0 pointer-events-none">
-            <img src="{{ asset('Admin/img/elements/background.webp') }}" class="w-full h-full object-cover" alt="Background">
-        </div>
-
         <div class="max-w-7xl mx-auto px-6 relative z-10">
             <!-- Header Section -->
             <div class="text-center mb-16">
@@ -229,7 +225,6 @@
 @endsection
 
 @push('styles')
-@include('users.partials.unit-carousel-styles')
 <style>
     * {
         font-family: 'Inter', sans-serif;
@@ -274,8 +269,4 @@
         animation: fadeIn 0.6s ease-out;
     }
 </style>
-@endpush
-
-@push('scripts')
-    @include('users.partials.unit-carousel-scripts')
 @endpush

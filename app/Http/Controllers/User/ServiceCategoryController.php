@@ -72,10 +72,13 @@ class ServiceCategoryController extends Controller
 
         abort_unless(isset($definitions[$category]), 404);
 
-        $regionId = auth()->user()?->region_id ?: $request->integer('region_id');
+        $request->validate(['region_id' => ['nullable', 'integer', 'min:1']]);
+        // An explicitly selected village takes precedence over the user's home region.
+        $regionId = $request->integer('region_id') ?: auth()->user()?->region_id;
         $region = $regionId
             ? Region::with(['services' => fn ($query) => $query->wherePivot('is_active', true)])->find($regionId)
             : null;
+        abort_if($regionId && !$region, 404);
         $activeServices = $region?->services->pluck('name')->all();
         $definition = $definitions[$category];
 
@@ -107,6 +110,12 @@ class ServiceCategoryController extends Controller
             'category' => $definition,
             'items' => $items,
             'region' => $region,
+            'backUrl' => $region && $request->query('from') === 'region'
+                ? route('bumdes.detail', ['slug' => \Illuminate\Support\Str::slug($region->name), 'id' => $region->id]) . '#unit-carousel-container'
+                : route('beranda') . '#unit-carousel-container',
+            'backLabel' => $region && $request->query('from') === 'region'
+                ? 'Kembali ke ' . $region->name
+                : 'Kembali ke Beranda',
         ]);
     }
 }

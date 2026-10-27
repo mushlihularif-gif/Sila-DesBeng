@@ -8,8 +8,8 @@
 
     <section class="relative z-10 min-h-screen px-4 pb-20 pt-28 sm:px-6 sm:pt-36">
         <div class="mx-auto max-w-6xl">
-            <a href="{{ route('beranda') }}" class="inline-flex items-center gap-2 rounded-full border border-white/80 bg-white/80 px-4 py-2 text-sm font-semibold text-[#115789] shadow-sm backdrop-blur transition hover:bg-white focus:outline-none focus:ring-2 focus:ring-[#60a5fa]">
-                Kembali ke Beranda
+            <a href="{{ $backUrl }}" class="inline-flex items-center gap-2 rounded-full border border-white/80 bg-white/80 px-4 py-2 text-sm font-semibold text-[#115789] shadow-sm backdrop-blur transition hover:bg-white focus:outline-none focus:ring-2 focus:ring-[#60a5fa]">
+                {{ $backLabel }}
             </a>
 
             <header class="mx-auto mb-10 mt-8 max-w-3xl text-center sm:mb-12">
@@ -29,7 +29,7 @@
             </header>
 
             @if($items->isNotEmpty())
-                <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                <div class="mx-auto grid grid-cols-1 gap-5 {{ $items->count() === 1 ? 'max-w-md' : ($items->count() === 2 ? 'max-w-4xl sm:grid-cols-2' : 'sm:grid-cols-2 lg:grid-cols-3') }}">
                     @foreach($items as $item)
                         <a href="{{ $item['url'] }}" class="group flex min-h-64 flex-col items-center rounded-3xl border border-white/80 bg-white/80 p-6 text-center shadow-md backdrop-blur-md transition duration-300 hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-[#60a5fa] focus:ring-offset-2 focus:ring-offset-transparent">
                             <div class="flex h-28 w-full items-center justify-center">
