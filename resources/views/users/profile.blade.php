@@ -241,7 +241,7 @@
                              sebagai baris `regions`, sedangkan pohon wilayah belum
                              memuat satu pun. Akibatnya warga yang RT/RW-nya tidak
                              terbaca OCR tidak akan pernah bisa melengkapinya —
-                             padahal laporan warga disalurkan berdasarkan RT/RW. --}}
+                             karena layanan publik disalurkan berdasarkan domisili RT/RW. --}}
                         <div>
                             <label class="block text-sm font-bold text-gray-800 mb-2">RW</label>
                             <input type="text" name="rw" value="{{ old('rw', $user->rw) }}"
@@ -330,7 +330,7 @@
                 </div>
                 <div>
                     <h3 class="text-xl font-bold text-gray-800">Penyesuaian Wilayah Akun Layanan (Mutasi Desa)</h3>
-                    <p class="text-gray-600 text-sm mt-1">Pemindahan cakupan desa pada akun Anda untuk menyesuaikan hak akses fasilitas, layanan daerah, dan pelaporan di desa tujuan.</p>
+                    <p class="text-gray-600 text-sm mt-1">Pemindahan cakupan desa pada akun Anda untuk menyesuaikan hak akses fasilitas, layanan daerah, dan pemesanan di desa tujuan.</p>
                 </div>
             </div>
 
@@ -508,7 +508,7 @@
                                     <strong class="text-gray-800">Bukan Pengurusan Berkas Kependudukan Sipil:</strong> Fitur ini khusus untuk memindahkan data wilayah akun Anda di aplikasi <strong>SegiDaerah</strong>, bukan layanan pembuatan Surat Pindah Domisili resmi (SKPWNI) dari Disdukcapil atau Kantor Desa.
                                 </li>
                                 <li>
-                                    <strong class="text-gray-800">Tujuan Pemindahan Akun:</strong> Setiap desa memiliki kebijakan layanan mandiri (seperti kuota tabung gas subsidi per KK, peminjaman fasilitas desa, dan koordinasi pelaporan RT/RW yang khusus untuk warga desa setempat). Pemindahan ini memastikan akun Anda terdaftar di desa tujuan sehingga Anda dapat mengakses layanan yang berlaku di desa tersebut setelah diverifikasi oleh pihak desa asal dan tujuan.
+                                    <strong class="text-gray-800">Tujuan Pemindahan Akun:</strong> Setiap desa memiliki kebijakan layanan mandiri (seperti kuota tabung gas subsidi per KK, peminjaman fasilitas desa, yang khusus untuk warga desa setempat). Pemindahan ini memastikan akun Anda terdaftar di desa tujuan sehingga Anda dapat mengakses layanan yang berlaku di desa tersebut setelah diverifikasi oleh pihak desa asal dan tujuan.
                                 </li>
                             </ul>
                         </div>

@@ -161,7 +161,7 @@
                                 <div>
                                     <strong class="d-block mb-1 text-dark">Panduan Pengaturan Layanan</strong>
                                     <p class="mb-0 text-dark" style="font-size: 0.85rem; line-height: 1.45;">
-                                        <strong>Unit Layanan Desa:</strong> Layanan alat, gas, transportasi, fasilitas umum, dan pelaporan dikelola sesuai wilayah desa yang terdaftar.<br>
+                                        <strong>Unit Layanan Desa:</strong> Layanan alat, gas, transportasi, fasilitas umum, dan pasar daerah dikelola sesuai wilayah desa yang terdaftar.<br>
                                         <strong>Layanan Kecamatan Bengkalis:</strong> <em>Pasar Daerah</em> dan <em>Kabar dan Informasi Daerah</em> tersedia untuk warga desa-desa di Kecamatan Bengkalis.
                                     </p>
                                 </div>

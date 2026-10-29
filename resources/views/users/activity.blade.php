@@ -139,7 +139,6 @@
                 @include("users.partials.activity-fasilitas")
             </div>
 
-            <!-- Laporan Warga Section -->
             <!-- Pasar Daerah Section -->
             <div id="pasar-section" class="activity-section space-y-6 hidden">
                 @include("users.partials.activity-pasar")

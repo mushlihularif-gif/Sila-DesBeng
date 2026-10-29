@@ -43,14 +43,13 @@ IDENTITAS & FILOSOFI SISTEM:
 - Pengembang Sistem (Tim Gen Hello World dari Politeknik Negeri Bengkalis): Rizqy Hamadi Ken (Full Stack Developer), Mushlihul Arif (UI/UX Designer & Frontend Developer), dan Dicki Wahyudi (Mobile Developer). Dosen pembimbing: Nurmi Hidayasari, ST., M.Kom.
 - PEMIMPIN DAERAH (WAJIB TAHU): Bupati Bengkalis saat ini adalah Ibu Kasmarni, S.Sos., MMP., dan Wakil Bupati Bengkalis adalah Bapak Dr. H. Bagus Santoso, MP. Jawab dengan penuh rasa hormat dan bangga jika pengguna menanyakan nama mereka!
 
-DAFTAR 7 UNIT LAYANAN UTAMA (WAJIB HAFAL):
+DAFTAR 6 UNIT LAYANAN UTAMA (WAJIB HAFAL):
 1. Unit Penyewaan Alat: Sewa alat berat/pesta (tenda, kursi) resmi.
 2. Unit Penjualan Gas LPG: Beli gas subsidi 3kg & non-subsidi. (Dilengkapi Mode Krisis Gas).
 3. Unit Penyewaan Transportasi: Sewa kendaraan mobilitas warga.
-4. Unit Peminjaman Fasilitas Umum: Peminjaman gedung pertemuan/lapangan.
+4. Unit Peminjaman Fasilitas Umum: Peminjaman gedung pertemuan/lapangan olahraga.
 5. Pasar Daerah (E-Commerce): Katalog produk usaha lokal dari desa-desa di Kecamatan Bengkalis. Warga murni bertindak sebagai pembeli, BUKAN sebagai penjual! Dilengkapi dengan 'Ongkos Kirim Hybrid' otomatis.
-6. Pelaporan Warga: Komplain infrastruktur. Memiliki sistem 'Matriks Eskalasi (Zero-Bottleneck)' dari RT->RW->Desa.
-7. Kabar dan Informasi Daerah: Portal berita resmi.
+6. Kabar dan Informasi Daerah: Portal berita resmi.
 
 TUTORIAL PENGGUNAAN FITUR SISTEM (Bukan Unit Layanan, melainkan panduan):
 - Cara Verifikasi Akun Baru (KYC): Masuk ke menu Profil. Wajib Scan KTP. Lalu Scan Wajah sambil BERKEDIP (Liveness Detection) membuktikan manusia asli.
@@ -177,9 +176,9 @@ Gunakan bahasa Indonesia yang santai, profesional, dan gunakan emoji secukupnya 
         } elseif (strpos($pesan, 'gas') !== false) {
             $reply = 'Untuk pembelian gas LPG, silakan masuk ke menu **Distribusi Gas LPG**. Pastikan Anda sudah melengkapi profil dengan NIK Anda ya agar kuota pembelian subsidi bisa disesuaikan.';
         } elseif (strpos($pesan, 'lapor') !== false || strpos($pesan, 'keluhan') !== false) {
-            $reply = 'Untuk melaporkan keluhan, silakan gunakan menu **Pelaporan Warga** di beranda. Isi formulir laporan dan sertakan foto jika ada. Laporan Anda akan segera diproses oleh petugas terkait. ðŸ“';
+            $reply = 'Untuk pengaduan dan aspirasi keluhan masyarakat, silakan gunakan platform resmi pemerintah SP4N-LAPOR! melalui situs lapor.go.id atau aplikasi SP4N Lapor.';
         } elseif (strpos($pesan, 'halo') !== false || strpos($pesan, 'hai') !== false || strpos($pesan, 'hi') !== false) {
-            $reply = 'Halo! 👋 Saya SegiDaerah Assistant. Maaf, saat ini koneksi ke AI sedang terganggu. Saya tetap bisa membantu menjawab pertanyaan tentang layanan, pasar daerah, informasi, dan pelaporan warga di Kecamatan Bengkalis. Silakan coba lagi nanti ya! 🙏';
+            $reply = 'Halo! Saya SegiDaerah Assistant. Maaf, saat ini koneksi ke AI sedang terganggu. Saya tetap bisa membantu menjawab pertanyaan tentang layanan daerah, pasar daerah, dan informasi di Kecamatan Bengkalis. Silakan coba lagi nanti ya!';
         }
         
         return response()->json([

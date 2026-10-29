@@ -150,7 +150,7 @@
                                 <div>
                                     <strong class="d-block mb-1 text-dark">Panduan Pengaturan Layanan</strong>
                                     <p class="mb-0 text-dark" style="font-size: 0.85rem; line-height: 1.45;">
-                                        <strong>Unit Layanan Mandiri Desa:</strong> Anda dapat mengaktifkan unit usaha lokal desa Anda (Alat, Gas, Transportasi, Fasilitas Umum, Pelaporan) dan menentukan apakah layanannya eksklusif hanya untuk warga domisili desa Anda atau terbuka untuk warga luar.<br>
+                                        <strong>Unit Layanan Mandiri Desa:</strong> Anda dapat mengaktifkan unit usaha lokal desa Anda (Alat, Gas, Transportasi, Fasilitas Umum, Pasar Daerah) dan menentukan apakah layanannya eksklusif hanya untuk warga domisili desa Anda atau terbuka untuk warga luar.<br>
                                         <strong>Layanan Kecamatan Bengkalis:</strong> <em>Pasar Daerah</em> dan <em>Kabar dan Informasi Daerah</em> tersedia bagi warga desa-desa di Kecamatan Bengkalis.
                                     </p>
                                 </div>

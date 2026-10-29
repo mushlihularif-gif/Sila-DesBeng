@@ -8,18 +8,6 @@
         <span class="text-muted fw-light">Sistem / {{ $category }} /</span> {{ isset($announcement) ? 'Edit' : 'Buat Baru' }}
     </h4>
 
-    @if(isset($laporan))
-        <div class="alert alert-info d-flex align-items-center mb-4 shadow-sm" style="border-left: 5px solid #03c3ec; border-radius: 10px;" role="alert">
-            <span class="alert-icon text-info me-3">
-                <i class="bx bx-info-circle bx-md"></i>
-            </span>
-            <div>
-                <strong class="fs-5">Menindaklanjuti Laporan Warga!</strong><br>
-                Anda sedang membuat event/berita berdasarkan laporan: <em>"{{ $laporan->nama }}"</em> dari {{ $laporan->user->name ?? 'Warga' }}.
-            </div>
-        </div>
-    @endif
-
     <!-- Panduan Cerdas -->
     <div class="alert alert-primary d-flex align-items-center mb-4 shadow-sm" style="border-left: 5px solid #696cff; border-radius: 10px; background-color: #f4f5ff;" role="alert">
         <span class="alert-icon text-primary me-3">
@@ -50,10 +38,6 @@
         @endif
 
         <input type="hidden" name="post_category" value="{{ $category }}">
-
-        @if(isset($laporan))
-            <input type="hidden" name="laporan_id" value="{{ $laporan->id }}">
-        @endif
 
         <div class="row">
             <!-- Left Column -->

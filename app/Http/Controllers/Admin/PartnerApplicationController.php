@@ -257,7 +257,7 @@ class PartnerApplicationController extends Controller
             ]
         );
 
-        // If Desa/Kelurahan, auto-activate services (Penyewaan, Gas, Pelaporan)
+        // If Desa/Kelurahan, auto-activate services (Penyewaan, Gas, Fasilitas Umum, Pasar Daerah)
         //
         // syncWithoutDetaching, bukan attach: firstOrCreate di atas sering
         // MENEMUKAN wilayah yang sudah ada (formulir pemohon memilih desa dari

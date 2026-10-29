@@ -520,7 +520,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 totalEl.textContent = data.currentMonthTotal;
             }
 
-            // Update 5 unit layanan & pelaporan counts
+            // Update 5 unit layanan counts
             if (data.serviceTotals) {
                 const countRental = document.getElementById('count-rental');
                 const countGas = document.getElementById('count-gas');

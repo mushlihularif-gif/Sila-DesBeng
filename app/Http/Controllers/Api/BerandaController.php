@@ -147,7 +147,6 @@ class BerandaController extends Controller
             ['slug' => 'pasar-daerah', 'title' => 'Pasar Daerah', 'image' => 'PasarDaerah.png', 'color' => 'teal', 'action' => 'Toko Daerah'],
             ['slug' => 'penyewaan-mobil', 'title' => 'Penyewaan Transportasi', 'image' => 'mobil.png', 'color' => 'blue', 'action' => 'Sewa Transportasi'],
             ['slug' => 'penyewaan-alat', 'title' => 'Penyewaan Alat', 'image' => 'F1.png', 'color' => 'orange', 'action' => 'Sewa Alat'],
-            ['slug' => 'pelaporan-warga', 'title' => 'Pelaporan', 'image' => 'lapor.png', 'color' => 'red', 'action' => 'Buat Laporan'],
             ['slug' => 'penjualan-gas', 'title' => 'Pembelian Gas', 'image' => 'F2.png', 'color' => 'green', 'action' => 'Beli Gas'],
             ['slug' => 'fasilitas-umum', 'title' => 'Fasilitas Umum', 'image' => 'fasilitas.png', 'color' => 'purple', 'action' => 'Sewa Fasilitas'],
         ];

@@ -162,7 +162,7 @@ class AppServiceProvider extends ServiceProvider
                     if (!$region) $region = \App\Models\Region::with(['services' => fn($q) => $q->wherePivot('is_active', true)])->first();
                     if ($region) {
                         $activeServicesMenu = $region->services->pluck('name')->toArray();
-                        $operationalServices = ['Penyewaan Alat', 'Penjualan Gas', 'Penyewaan Mobil', 'Penyewaan Transportasi', 'Fasilitas Umum', 'Pelaporan Warga', 'Pasar Daerah', 'Pengumuman'];
+                        $operationalServices = ['Penyewaan Alat', 'Penjualan Gas', 'Penyewaan Mobil', 'Penyewaan Transportasi', 'Fasilitas Umum', 'Pasar Daerah', 'Pengumuman'];
                         $hasActiveServices = count(array_intersect($activeServicesMenu, $operationalServices)) > 0;
                     }
                 } else if (in_array($user->role, ['admin_kecamatan', 'admin_desa', 'staff'])) {
@@ -172,7 +172,7 @@ class AppServiceProvider extends ServiceProvider
                     $region = \App\Models\Region::with(['services' => fn($q) => $q->wherePivot('is_active', true)])->find($user->region_id);
                     if ($region) {
                         $activeServicesMenu = $region->services->pluck('name')->toArray();
-                        $operationalServices = ['Penyewaan Alat', 'Penjualan Gas', 'Penyewaan Mobil', 'Penyewaan Transportasi', 'Fasilitas Umum', 'Pelaporan Warga', 'Pasar Daerah', 'Pengumuman'];
+                        $operationalServices = ['Penyewaan Alat', 'Penjualan Gas', 'Penyewaan Mobil', 'Penyewaan Transportasi', 'Fasilitas Umum', 'Pasar Daerah', 'Pengumuman'];
                         $hasActiveServices = count(array_intersect($activeServicesMenu, $operationalServices)) > 0;
                     }
                 }
@@ -184,8 +184,7 @@ class AppServiceProvider extends ServiceProvider
             if (in_array('Penyewaan Mobil', $activeServicesMenu) || in_array('Penyewaan Transportasi', $activeServicesMenu)) $activeUnitsCount++;
             if (in_array('Fasilitas Umum', $activeServicesMenu)) $activeUnitsCount++;
             if (in_array('Pasar Daerah', $activeServicesMenu)) $activeUnitsCount++;
-            if (in_array('Pelaporan Warga', $activeServicesMenu)) $activeUnitsCount++;
-            $totalAvailableUnits = 7;
+                        $totalAvailableUnits = 6;
 
             $view->with('hasActiveServices', $hasActiveServices);
             $view->with('activeServicesMenu', $activeServicesMenu);

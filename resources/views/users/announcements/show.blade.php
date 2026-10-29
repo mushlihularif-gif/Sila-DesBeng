@@ -186,21 +186,6 @@
                     </div>
                     @endif
 
-                    {{-- 2. Laporan Reference Card --}}
-                    @if($announcement->laporan)
-                    <div class="backdrop-blur-sm bg-white/80 rounded-3xl p-6 shadow-md border border-white/80 relative overflow-hidden">
-                        <div class="absolute -right-4 -top-4 opacity-5"><svg class="w-20 h-20 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg></div>
-                        <h3 class="text-md font-bold text-gray-800 mb-2">Tindak Lanjut Laporan Warga</h3>
-                        <p class="text-xs text-gray-600 mb-4 leading-relaxed">Pengumuman ini diterbitkan sebagai tindak lanjut dari laporan warga berikut:</p>
-                        
-                        <div class="bg-gray-50 rounded-2xl p-4 border border-gray-100">
-                            <p class="text-blue-600 font-bold mb-1.5 text-sm line-clamp-2">"{{ $announcement->laporan->nama }}"</p>
-                            <p class="text-xs text-gray-500 mb-3">Oleh: <span class="font-semibold text-gray-700">{{ $announcement->laporan->user->name ?? 'Warga' }}</span></p>
-                            <span class="inline-flex px-2.5 py-1 bg-green-100 text-green-700 text-xs rounded-md border border-green-200 font-semibold">Sedang Diproses</span>
-                        </div>
-                    </div>
-                    @endif
-
                     {{-- 3. Rekomendasi / Kabar Daerah Lainnya --}}
                     <div class="backdrop-blur-sm bg-white/90 rounded-3xl p-6 shadow-md border border-white/80">
                         <h3 class="text-md font-bold text-gray-800 mb-5 border-b border-gray-200 pb-3 flex items-center justify-between">

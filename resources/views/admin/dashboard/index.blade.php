@@ -335,20 +335,13 @@
                         ],
                         'Fasilitas Umum' => [
                             'title' => 'Unit Peminjaman Fasilitas Umum',
-                            'count' => ($unitFasilitas ?? ((\App\Models\FasilitasUmum::inCatalog()->when(auth()->user() && auth()->user()->region_id, fn($q) => $q->where(fn($sub) => $sub->where('region_id', auth()->user()->region_id)->orWhereNull('region_id')))->count() ?? 0) + (\App\Models\Mobil::where('kategori', 'kendaraan_operasional')->when(auth()->user() && auth()->user()->region_id, fn($q) => $q->where('region_id', auth()->user()->region_id))->count() ?? 0))),
+                            'count' => ($unitFasilitas ?? ((\App\Models\FasilitasUmum::inCatalog()->when(auth()->user() && auth()->user()->region_id, fn($q) => $q->where(fn($sub) => $sub->where('region_id', auth()->user()->region_id)->orWhereNull('region_id')))->count() ?? 0))),
                             'label' => 'Fasilitas',
                             'route' => route('admin.unit.fasilitas_umum.index'),
                             'image' => asset('User/img/elemen/fasilitas.png'),
                             'color' => 'success'
                         ],
-                        'Pelaporan Warga' => [
-                            'title' => 'Pelaporan Warga',
-                            'count' => $laporanPendingCount,
-                            'label' => 'Pending',
-                            'route' => Route::has('admin.laporan.index') ? route('admin.laporan.index') : '#',
-                            'image' => asset('User/img/elemen/lapor.png'),
-                            'color' => 'primary'
-                        ],
+
                         'Pengumuman' => [
                             'title' => 'Kabar dan Informasi Daerah',
                             'count' => (\App\Models\Announcement::count() ?? 0),
@@ -406,7 +399,7 @@
                     ],
                     'Layanan Daerah' => [
                         'image' => asset('Admin/img/menu3dberanda/layanan-daerah.webp'),
-                        'services' => ['Penyewaan Alat', 'Penyewaan Mobil', 'Fasilitas Umum', 'Pelaporan Warga'],
+                        'services' => ['Penyewaan Alat', 'Penyewaan Mobil', 'Fasilitas Umum'],
                     ],
                     'Kabar dan Informasi Daerah' => [
                         'image' => asset('User/img/elemen/KabardanInformasiDaerah.png'),
@@ -496,9 +489,6 @@
                                         } elseif ($request->type == 'pasar_daerah') {
                                             $icon = 'bx-store-alt'; $bgClass = 'bg-label-primary text-primary'; $badgeClass = 'bg-label-primary'; $serviceName = 'Pasar Daerah';
                                             $detailLink = Route::has('admin.unit.pasar_daerah.pesanan.show') ? route('admin.unit.pasar_daerah.pesanan.show', $request->id) : '#';
-                                        } elseif ($request->type == 'laporan') {
-                                            $icon = 'bx-message-error'; $bgClass = 'bg-label-secondary text-secondary'; $badgeClass = 'bg-label-secondary'; $serviceName = 'Pelaporan Warga';
-                                            $detailLink = '#';
                                         } elseif ($request->type == 'kyc') {
                                             $icon = 'bx-id-card'; $bgClass = 'bg-label-info text-info'; $badgeClass = 'bg-label-info'; $serviceName = 'Verifikasi Identitas';
                                             $detailLink = route('admin.kyc.show', $request->id);

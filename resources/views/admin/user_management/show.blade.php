@@ -245,9 +245,6 @@
                         <li class="nav-item">
                             <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-pasar" role="tab"><i class="bx bx-store-alt me-1"></i> Pasar</button>
                         </li>
-                        <li class="nav-item">
-                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-laporan" role="tab"><i class="bx bx-message-error me-1"></i> Pelaporan</button>
-                        </li>
                     </ul>
                 </div>
                 
@@ -432,42 +429,6 @@
                                 <div class="bg-white p-4 rounded-circle d-inline-block shadow-sm mb-3 border"><img src="{{ asset('Admin/img/menu3dberanda/pasar-daerah.webp') }}" alt="Pasar" style="width: 48px; height: 48px; object-fit: contain;"></div>
                                 <h6 class="fw-bold text-dark mb-1">Belum Ada Riwayat</h6>
                                 <p class="text-muted mb-0">Pengguna ini belum pernah belanja di Pasar Daerah.</p>
-                            </div>
-                            @endif
-                        </div>
-
-                        <!-- Tab Laporan -->
-                        <div class="tab-pane fade" id="tab-laporan" role="tabpanel">
-                            @if($user->laporans->count() > 0)
-                            <div class="table-responsive w-100">
-                                <table class="table table-modern align-middle">
-                                    <thead class="text-muted" style="font-size: 0.75rem; letter-spacing: 1px;">
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>TANGGAL</th>
-                                            <th>JUDUL LAPORAN</th>
-                                            <th>KATEGORI</th>
-                                            <th class="text-end">STATUS</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach($user->laporans as $trans)
-                                        <tr>
-                                            <td class="fw-bold text-primary">#{{ $trans->id }}</td>
-                                            <td><span class="text-muted">{{ $trans->created_at->format('d M Y') }}</span></td>
-                                            <td class="fw-semibold">{{ Str::limit($trans->title, 30) }}</td>
-                                            <td>{{ $trans->category ?? 'N/A' }}</td>
-                                            <td class="text-end"><span class="badge bg-label-{{ $trans->status === 'selesai' ? 'success' : ($trans->status === 'pending' ? 'warning' : 'secondary') }}">{{ ucfirst($trans->status ?: 'N/A') }}</span></td>
-                                        </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                            @else
-                            <div class="text-center py-5">
-                                <div class="bg-white p-4 rounded-circle d-inline-block shadow-sm mb-3 border"><img src="{{ asset('User/img/elemen/lapor.png') }}" alt="Pelaporan" style="width: 48px; height: 48px; object-fit: contain;"></div>
-                                <h6 class="fw-bold text-dark mb-1">Belum Ada Riwayat</h6>
-                                <p class="text-muted mb-0">Pengguna ini belum pernah membuat pelaporan.</p>
                             </div>
                             @endif
                         </div>

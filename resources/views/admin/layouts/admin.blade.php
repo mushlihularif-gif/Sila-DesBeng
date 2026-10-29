@@ -1567,7 +1567,7 @@
                                                     <button type="button" class="btn btn-sm notif-filter-btn" data-filter="gas">Gas LPG</button>
                                                     <button type="button" class="btn btn-sm notif-filter-btn" data-filter="pasar">Pasar Desa</button>
                                                     <button type="button" class="btn btn-sm notif-filter-btn" data-filter="kyc">Verifikasi Identitas</button>
-                                                    <button type="button" class="btn btn-sm notif-filter-btn" data-filter="laporan">Laporan Warga</button>
+                                                    
                                                     <button type="button" class="btn btn-sm notif-filter-btn" data-filter="mutasi">Mutasi Penduduk</button>
                                                 </div>
                                                 <button type="button" class="notif-scroll-arrow notif-scroll-next" aria-label="Geser ke kanan">

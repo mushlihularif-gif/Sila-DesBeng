@@ -72,110 +72,6 @@ class NotificationService
     }
 
     // ==========================================
-    // 2. PELAPORAN WARGA
-    // ==========================================
-
-    public static function notifyLaporanSubmitted($laporan)
-    {
-        try {
-            Notification::create([
-                'user_id' => $laporan->user_id,
-                'laporan_id' => $laporan->id,
-                'type' => 'laporan_submitted',
-                'title' => 'Laporan Berhasil Terkirim',
-                'message' => 'Laporan pengaduan Anda mengenai "' . $laporan->kategori . '" telah berhasil terkirim dan sedang menunggu tanggapan petugas.',
-                'link' => '#',
-                'icon' => 'bx bx-file',
-                'is_read' => false,
-                'sent_at' => now(),
-            ]);
-        } catch (\Throwable $e) {
-            Log::error('NotificationService error [notifyLaporanSubmitted]: ' . $e->getMessage());
-        }
-    }
-
-    public static function notifyLaporanResponded($laporan, $responderTitle, $notes)
-    {
-        try {
-            Notification::create([
-                'user_id' => $laporan->user_id,
-                'laporan_id' => $laporan->id,
-                'type' => 'laporan_proses',
-                'title' => 'Laporan Ditanggapi (' . $responderTitle . ')',
-                'message' => 'Laporan Anda sedang ditindaklanjuti oleh pengurus ' . $responderTitle . '. Catatan: ' . $notes,
-                'link' => '#',
-                'icon' => 'bx bx-chat',
-                'is_read' => false,
-                'sent_at' => now(),
-            ]);
-        } catch (\Throwable $e) {
-            Log::error('NotificationService error [notifyLaporanResponded]: ' . $e->getMessage());
-        }
-    }
-
-    public static function notifyLaporanEscalated($laporan, $level)
-    {
-        try {
-            Notification::create([
-                'user_id' => $laporan->user_id,
-                'laporan_id' => $laporan->id,
-                'type' => 'laporan_eskalasi',
-                'title' => 'Laporan Diteruskan (Eskalasi)',
-                'message' => 'Laporan Anda telah diteruskan ke tingkat ' . strtoupper($level) . ' untuk penanganan lebih lanjut.',
-                'link' => '#',
-                'icon' => 'bx bx-trending-up',
-                'is_read' => false,
-                'sent_at' => now(),
-            ]);
-        } catch (\Throwable $e) {
-            Log::error('NotificationService error [notifyLaporanEscalated]: ' . $e->getMessage());
-        }
-    }
-
-    public static function notifyLaporanResolved($laporan, $notes = null)
-    {
-        try {
-            $msg = 'Laporan Anda telah diselesaikan oleh petugas. Terima kasih atas partisipasi aktif Anda dalam membangun desa.';
-            if ($notes) {
-                $msg .= ' Catatan: ' . $notes;
-            }
-
-            Notification::create([
-                'user_id' => $laporan->user_id,
-                'laporan_id' => $laporan->id,
-                'type' => 'laporan_selesai',
-                'title' => 'Laporan Selesai Ditangani',
-                'message' => $msg,
-                'link' => '#',
-                'icon' => 'bx bx-check-circle',
-                'is_read' => false,
-                'sent_at' => now(),
-            ]);
-        } catch (\Throwable $e) {
-            Log::error('NotificationService error [notifyLaporanResolved]: ' . $e->getMessage());
-        }
-    }
-
-    public static function notifyLaporanRejected($laporan, $notes)
-    {
-        try {
-            Notification::create([
-                'user_id' => $laporan->user_id,
-                'laporan_id' => $laporan->id,
-                'type' => 'laporan_ditolak',
-                'title' => 'Laporan Ditolak',
-                'message' => 'Mohon maaf, laporan pengaduan Anda ditolak. Alasan: ' . $notes,
-                'link' => '#',
-                'icon' => 'bx bx-x-circle',
-                'is_read' => false,
-                'sent_at' => now(),
-            ]);
-        } catch (\Throwable $e) {
-            Log::error('NotificationService error [notifyLaporanRejected]: ' . $e->getMessage());
-        }
-    }
-
-    // ==========================================
     // 3. PEMESANAN UNIT LAYANAN (GAS, SEWA, MOBIL, FASILITAS)
     // ==========================================
 
@@ -392,7 +288,7 @@ class NotificationService
                 'user_id' => $user->id,
                 'type' => 'role_promoted',
                 'title' => 'Pengangkatan Jabatan Pengurus Wilayah',
-                'message' => 'Selamat! Akun Anda telah resmi diangkat menjadi ' . $roleTitle . ' di ' . $regionName . '. Anda kini dapat mengelola layanan administrasi dan pelaporan warga pada wilayah Anda.',
+                'message' => 'Selamat! Akun Anda telah resmi diangkat menjadi ' . $roleTitle . ' di ' . $regionName . '. Anda kini dapat mengelola layanan administrasi pada wilayah Anda.',
                 'link' => route('beranda'),
                 'icon' => 'bx bx-shield-quarter',
                 'is_read' => false,
