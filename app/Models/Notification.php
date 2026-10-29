@@ -9,6 +9,11 @@ class Notification extends Model
 {
     use HasFactory;
 
+    protected static function booted(): void
+    {
+        static::created(fn (self $notification) => app(\App\Services\NotificationDeliveryService::class)->enqueue($notification));
+    }
+
     protected $fillable = [
         'user_id',
         'laporan_id',
@@ -35,10 +40,7 @@ class Notification extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function laporan()
-    {
-        return $this->belongsTo(Laporan::class);
-    }
+    
 
     public function admin()
     {

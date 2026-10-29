@@ -78,7 +78,6 @@ public function index(Request $request)
     $baseMobil = $this->applyRegionFilter(\App\Models\MobilBooking::withTrashed());
     $baseFasilitas = $this->applyRegionFilter(\App\Models\FasilitasUmumBooking::withTrashed());
     $basePasar = $this->applyRegionFilter(\App\Models\PasarOrder::withTrashed());
-    $baseLaporan = $this->applyRegionFilter(\App\Models\Laporan::query(), 'user');
     $baseKyc = $this->applyRegionFilter(\App\Models\KycVerification::query(), 'user');
 
     // Dashboard operasional dibatasi ke desa-desa Kecamatan Bengkalis.
@@ -104,7 +103,6 @@ public function index(Request $request)
         $baseMobil->whereHas('user', $userFilter);
         $baseFasilitas->whereHas('user', $userFilter);
         $basePasar->whereHas('user', $userFilter);
-        $baseLaporan->whereHas('user', $userFilter);
         $baseKyc->whereHas('user', $userFilter);
     } elseif ($selectedKecamatanId && $selectedKecamatanId !== 'all') {
         $desaIdsUnderKecamatan = \App\Models\Region::where('parent_id', $selectedKecamatanId)->pluck('id')->toArray();
@@ -116,7 +114,6 @@ public function index(Request $request)
         $baseMobil->whereHas('user', $userFilter);
         $baseFasilitas->whereHas('user', $userFilter);
         $basePasar->whereHas('user', $userFilter);
-        $baseLaporan->whereHas('user', $userFilter);
         $baseKyc->whereHas('user', $userFilter);
     }
 
@@ -132,8 +129,6 @@ public function index(Request $request)
         $fasilitasRequests = $baseFasilitas->clone()->with(['user', 'fasilitas' => function($q) { $q->withTrashed(); }])->where(function($q) { $q->where('status', 'pending')->orWhere('cancellation_status', 'pending'); })->get()->map(function ($i) { $i->type = 'fasilitas_umum'; $i->item_name = $i->fasilitas->nama_fasilitas ?? 'Fasilitas'; return $i; });
         
         $pasarRequests = $basePasar->clone()->with('user')->where(function($q) { $q->where('status', 'waiting')->orWhere('cancellation_status', 'pending'); })->get()->map(function ($i) { $i->type = 'pasar_daerah'; $i->item_name = 'Pesanan Pasar'; return $i; });
-        
-        $laporanRequests = $baseLaporan->clone()->with('user')->where('status', 'Pending')->get()->map(function ($i) { $i->type = 'laporan'; $i->item_name = 'Laporan Warga'; return $i; });
         
         $kycRequests = collect();
         if (in_array(auth()->user()->role, ['admin_desa', 'admin_kecamatan'])) {
@@ -177,7 +172,6 @@ public function index(Request $request)
             ->concat($mobilRequests)
             ->concat($fasilitasRequests)
             ->concat($pasarRequests)
-            ->concat($laporanRequests)
             ->concat($kycRequests)
             ->concat($mutasiRequests)
             ->sortByDesc('created_at')
@@ -187,8 +181,7 @@ public function index(Request $request)
             + $gasRequests->count() 
             + $mobilRequests->count() 
             + $fasilitasRequests->count() 
-            + $pasarRequests->count() 
-            + $laporanRequests->count()
+            + $pasarRequests->count()
             + $kycRequests->count()
             + $mutasiRequests->count();
     }

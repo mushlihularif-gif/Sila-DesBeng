@@ -21,10 +21,7 @@ class Rating extends Model
         'is_published' => 'boolean',
     ];
 
-    public function laporan()
-    {
-        return $this->belongsTo(Laporan::class);
-    }
+    
 
     public function user()
     {

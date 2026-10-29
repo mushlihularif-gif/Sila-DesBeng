@@ -59,13 +59,7 @@ class ServiceCategoryController extends Controller
                         'route' => 'user.fasilitas-umum.equipment',
                         'services' => ['Fasilitas Umum', 'Peminjaman Fasilitas Umum'],
                     ],
-                    [
-                        'title' => 'Pelaporan Warga',
-                        'description' => 'Sampaikan laporan mengenai kondisi lingkungan sekitar.',
-                        'image' => 'User/img/elemen/lapor.png',
-                        'route' => 'pelaporan.landing',
-                        'services' => ['Pelaporan Warga'],
-                    ],
+                    
                 ],
             ],
         ];

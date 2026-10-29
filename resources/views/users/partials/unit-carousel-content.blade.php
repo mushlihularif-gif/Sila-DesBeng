@@ -25,15 +25,14 @@
                 'Unit Penyewaan Mobil' => ['Penyewaan Mobil', 'Penyewaan Transportasi'],
                 'Unit Penyewaan Transportasi' => ['Penyewaan Mobil', 'Penyewaan Transportasi'],
                 'Unit Peminjaman Fasilitas Umum' => ['Fasilitas Umum', 'Peminjaman Fasilitas Umum'],
-                'Pelaporan Warga' => ['Pelaporan Warga'],
-            ];
+                            ];
 
             return collect($serviceNames[$unitName] ?? [$unitName])
                 ->intersect($activeServices ?? [])->isNotEmpty();
         };
 
         $hasBelanja = $isServiceActive('Belanja dan Kebutuhan');
-        $hasLayanan = collect(['Unit Penyewaan Alat', 'Unit Penyewaan Transportasi', 'Unit Peminjaman Fasilitas Umum', 'Pelaporan Warga'])
+        $hasLayanan = collect(['Unit Penyewaan Alat', 'Unit Penyewaan Transportasi', 'Unit Peminjaman Fasilitas Umum'])
             ->contains(fn ($unit) => $isServiceActive($unit));
         $hasKabar = $isServiceActive('Kabar dan Informasi Daerah');
         $activeCount = (int) $hasBelanja + (int) $hasLayanan + (int) $hasKabar;
@@ -70,7 +69,7 @@
                  data-index="1"
                  data-name="Layanan Daerah"
                  data-heading="&quot;Butuh bantuan layanan dari daerah?&quot;"
-                 data-body="Sewa perlengkapan atau transportasi, gunakan fasilitas umum, dan sampaikan laporan warga dari satu tempat."
+                 data-body="Sewa perlengkapan atau transportasi, gunakan fasilitas umum, dari satu tempat."
                  data-badge="Layanan Daerah"
                  data-icon="bx-grid-alt"
                  data-box-bg="bg-blue-50/90"

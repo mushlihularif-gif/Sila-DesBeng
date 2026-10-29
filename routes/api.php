@@ -42,7 +42,23 @@ Route::get('/popular', [BerandaController::class, 'popular']);
     Route::get('/kemitraan/check-desa/{id}', [\App\Http\Controllers\Api\PartnerApplicationApiController::class, 'checkDesaAdmin']);
 
 // Protected Routes (Harus mengirimkan Bearer Token dari hasil Login)
+Route::post('/webhooks/fonnte-status', [\App\Http\Controllers\NotificationChannelController::class, 'webhook'])->middleware('throttle:60,1');
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/notification-settings', [\App\Http\Controllers\NotificationChannelController::class, 'index']);
+    Route::post('/notification-settings', [\App\Http\Controllers\NotificationChannelController::class, 'update']);
+    Route::post('/notification-settings/code', [\App\Http\Controllers\NotificationChannelController::class, 'sendCode'])->middleware('throttle:3,1');
+    Route::post('/notification-settings/verify', [\App\Http\Controllers\NotificationChannelController::class, 'verifyCode'])->middleware('throttle:5,1');
+    Route::get('/notification-destination/{kind}/{notification}', [\App\Http\Controllers\NotificationChannelController::class, 'open'])->whereNumber('notification');
+    Route::prefix('content')->group(function () {
+        Route::get('/', [\App\Http\Controllers\ContentWorkspaceController::class, 'index']);
+        Route::post('/', [\App\Http\Controllers\ContentWorkspaceController::class, 'store'])->middleware('throttle:20,1');
+        Route::post('/ai', [\App\Http\Controllers\ContentWorkspaceController::class, 'ai'])->middleware('throttle:10,1');
+        Route::get('/{announcement}', [\App\Http\Controllers\ContentWorkspaceController::class, 'state']);
+        Route::get('/{announcement}/sources', [\App\Http\Controllers\ContentWorkspaceController::class, 'sources']);
+        Route::post('/{announcement}/claim', [\App\Http\Controllers\ContentWorkspaceController::class, 'claim']);
+        Route::post('/{announcement}/action', [\App\Http\Controllers\ContentWorkspaceController::class, 'action']);
+        Route::post('/{announcement}/images', [\App\Http\Controllers\ContentWorkspaceController::class, 'images']);
+    });
     Route::get('/user', [AuthController::class, 'user']);
     Route::post('/profile/update', [AuthController::class, 'updateProfile']);
     Route::post('/profile/password', [AuthController::class, 'updatePassword']);
@@ -66,13 +82,6 @@ Route::middleware('auth:sanctum')->group(function () {
     // KYC
     Route::post('/kyc/process', [\App\Http\Controllers\Api\KycController::class, 'process']);
     Route::post('/kyc/submit', [\App\Http\Controllers\Api\KycController::class, 'submit']);
-    
-    // Laporan
-    Route::post('/laporan', [\App\Http\Controllers\Api\LaporanController::class, 'store']);
-    Route::get('/my-reports', [\App\Http\Controllers\Api\LaporanController::class, 'getMyReports']);
-    Route::get('/laporan/{id}', [\App\Http\Controllers\Api\LaporanController::class, 'show']);
-    Route::get('/admin-reports', [\App\Http\Controllers\Api\LaporanController::class, 'getAdminReports']);
-    Route::post('/admin-reports/{id}/forward', [\App\Http\Controllers\Api\LaporanController::class, 'forwardReport']);
     
     // Gas
     Route::get('/gas', [\App\Http\Controllers\Api\GasController::class, 'index']);

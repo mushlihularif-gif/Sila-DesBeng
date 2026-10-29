@@ -88,13 +88,13 @@ class FirebaseNotificationService
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . $accessToken,
             'Content-Type' => 'application/json',
-        ])->post($url, $message);
+        ])->connectTimeout(5)->timeout(15)->post($url, $message);
 
         if ($response->successful()) {
-            Log::info("Push Notification sent successfully to {$fcmToken}");
+            Log::info('Push notification accepted by Firebase.');
             return true;
         } else {
-            Log::error("Failed to send Push Notification: " . $response->body());
+            Log::warning('Firebase rejected a push notification.', ['status'=>$response->status()]);
             return false;
         }
     }

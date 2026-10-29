@@ -72,15 +72,7 @@
                     </div>
                 </div>
 
-                <!-- Pelaporan Warga Card -->
-                <div class="activity-menu-card cursor-pointer w-full sm:w-auto" data-type="laporan">
-                    <div class="bg-white rounded-xl sm:rounded-2xl p-2.5 sm:p-6 shadow-md sm:shadow-lg hover:shadow-xl transition-all duration-300 w-full sm:w-48 text-center border-2 sm:border-4 border-transparent flex flex-col justify-center items-center h-full">
-                        <div class="mb-1.5 sm:mb-3 flex justify-center">
-                            <img src="{{ asset('User/img/elemen/lapor.png') }}" alt="Laporan Warga" class="w-9 h-9 sm:w-16 sm:h-16 object-contain">
-                        </div>
-                        <p class="font-bold text-xs sm:text-lg text-gray-800 leading-tight">Laporan Warga</p>
-                    </div>
-                </div>
+                
             </div>
 
             <!-- Clear History Buttons (Moved to Top) -->
@@ -116,12 +108,7 @@
                         data-type="pasar">
                     <i class="fas fa-trash-alt mr-2"></i>Bersihkan Riwayat Pasar Daerah
                 </button>
-                <button type="button" 
-                        class="clear-history-btn bg-red-100 text-red-600 px-6 py-2 rounded-full font-semibold hover:bg-red-200 transition-colors hidden"
-                        id="clear-laporan-btn"
-                        data-type="laporan">
-                    <i class="fas fa-trash-alt mr-2"></i>Bersihkan Riwayat Laporan Warga
-                </button>
+                
             </div>
 
             <div class="flex flex-wrap justify-center gap-2 lg:gap-3 mt-2 mb-6" id="status-filters">
@@ -158,9 +145,7 @@
                 @include("users.partials.activity-pasar")
             </div>
 
-            <div id="laporan-section" class="activity-section space-y-6 hidden">
-                @include("users.partials.activity-laporan")
-            </div>
+            
 
         </div>
     </section>
@@ -524,7 +509,6 @@
                     if(type === 'gas') typeText = 'Pesanan Gas';
                     else if(type === 'mobil') typeText = 'Transportasi';
                     else if(type === 'fasilitas') typeText = 'Fasilitas Umum';
-                    else if(type === 'laporan') typeText = 'Laporan Warga';
                     else if(type === 'pasar') typeText = 'Pasar Daerah';
 
                     const result = await Swal.fire({
@@ -617,17 +601,7 @@
                                             <i class="fas fa-store"></i> Belanja di Pasar Daerah
                                         </a>
                                     </div>`,
-                                    laporan: `<div class="bg-white rounded-2xl shadow-lg p-12 text-center border border-gray-100">
-                                        <div class="w-16 h-16 bg-sky-50 text-sky-500 rounded-full flex items-center justify-center mx-auto mb-3">
-                                            <i class="fas fa-bullhorn text-2xl"></i>
-                                        </div>
-                                        <h4 class="text-lg font-bold text-gray-800 mb-1">Belum Ada Riwayat Laporan</h4>
-                                        <p class="text-sm text-gray-500 mb-4">Sampaikan aspirasi, aduan, atau kendala fasilitas di lingkungan Anda untuk segera ditangani!</p>
-                                        <a href="{{ route('pelaporan.landing') }}" class="inline-flex items-center gap-2 px-6 py-2.5 bg-sky-500 text-white rounded-xl font-semibold hover:bg-sky-600 transition-colors shadow-sm">
-                                            <i class="fas fa-paper-plane"></i> Buat Laporan Warga
-                                        </a>
-                                    </div>`
-                                };
+                                    };
                                 const section = document.getElementById(`${type}-section`);
                                 if(section) {
                                     section.innerHTML = emptyStates[type] || '<div class="bg-white rounded-2xl shadow-lg p-8 text-center"><p class="text-gray-500">Belum ada riwayat aktivitas</p></div>';
@@ -660,16 +634,14 @@
                 mobil: 1,
                 fasilitas: 1,
                 pasar: 1,
-                laporan: 1
-            };
+};
             let hasMorePages = {
                 rental: true,
                 gas: true,
                 mobil: true,
                 fasilitas: true,
                 pasar: true,
-                laporan: true
-            };
+};
 
             function loadMoreActivity() {
                 if (isLoading) return;

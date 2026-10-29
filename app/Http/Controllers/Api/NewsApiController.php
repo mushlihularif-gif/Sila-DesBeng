@@ -14,7 +14,7 @@ class NewsApiController extends Controller
     public function index(Request $request)
     {
         $query = Announcement::with(['region', 'admin', 'images'])
-            ->where('is_active', true);
+            ->visibleTo(auth('sanctum')->user());
 
         // Filter by type if provided
         if ($request->filled('type') && $request->type !== 'Semua') {
@@ -44,17 +44,17 @@ class NewsApiController extends Controller
             });
         }
 
-        $news = $query->orderBy('created_at', 'desc')->get();
+        $news = $query->orderBy('published_at', 'desc')->limit(100)->get();
 
         // Format to match mobile expectations
         $formatted = $news->map(function ($item) {
             $images = [];
             if ($item->image_path) {
-                $images[] = asset('storage/' . $item->image_path);
+                $images[] = $item->mediaUrl();
             }
             if ($item->images && $item->images->count() > 0) {
                 foreach ($item->images as $img) {
-                    $imgUrl = asset('storage/' . $img->image_path);
+                    $imgUrl = $img->url;
                     if (!in_array($imgUrl, $images)) {
                         $images[] = $imgUrl;
                     }
@@ -76,81 +76,21 @@ class NewsApiController extends Controller
                 'images' => $images,
                 'location' => $item->location,
                 'author' => $item->admin ? $item->admin->name : 'Admin Desa',
+                'publisher' => $item->publisher?->name,
+                'workflow_state' => $item->workflow_state,
+                'published_at' => $item->published_at?->toIso8601String(),
+                'ends_at' => $item->ends_at?->toIso8601String(),
+                'cancellation_reason' => $item->workflow_state === 'cancelled' ? $item->rejection_reason : null,
+                'views_count' => (int)$item->views_count,
+                'photo_credits' => $item->images->pluck('contributor_name')->filter()->unique()->values(),
+                'text_credits' => \Illuminate\Support\Facades\DB::table('announcement_sources')->where('announcement_id',$item->id)->where('is_staged',false)->where('uses_text',true)->pluck('contributor_name')->unique()->values(),
             ];
         })->toArray();
-
-        // Also include CommunityEvent if querying for Pengumuman or all
-        if (!$request->filled('post_category') || $request->post_category === 'Pengumuman') {
-            $user = auth('sanctum')->user();
-            
-            // Hanya tampilkan event komunitas (pengumuman RT/RW) jika user sudah login
-            if ($user) {
-                $eventQuery = \App\Models\CommunityEvent::query();
-
-                // Optional: Filter by user's RT/RW
-                // if ($user->rt) {
-                //     $eventQuery->where(function($q) use ($user) {
-                //         $q->whereNull('rt')->orWhere('rt', $user->rt);
-                //     });
-                // }
-
-                if ($request->filled('type') && $request->type !== 'Semua') {
-                $type = $request->type;
-                if ($type === 'Acara / Event' || $type === 'Event' || $type === 'Acara') {
-                    $eventQuery->whereIn('tipe', ['kegiatan_sosial', 'acara', 'Event']);
-                } elseif ($type === 'Gotong Royong') {
-                    $eventQuery->whereIn('tipe', ['gotong_royong', 'Gotong Royong']);
-                } elseif ($type === 'Pengumuman') {
-                    $eventQuery->whereIn('tipe', ['rapat', 'pengumuman', 'Pengumuman']);
-                }
-            }
-
-            if ($request->filled('search')) {
-                $search = $request->search;
-                $eventQuery->where(function ($q) use ($search) {
-                    $q->where('judul', 'like', "%{$search}%")
-                      ->orWhere('catatan', 'like', "%{$search}%")
-                      ->orWhere('lokasi', 'like', "%{$search}%");
-                });
-            }
-
-            $events = $eventQuery->orderBy('created_at', 'desc')->get();
-
-            $eventItems = $events->map(function ($ev) {
-                $displayCategory = 'Gotong Royong';
-                if ($ev->tipe === 'kegiatan_sosial' || $ev->tipe === 'acara') $displayCategory = 'Acara / Event';
-                if ($ev->tipe === 'rapat' || $ev->tipe === 'pengumuman') $displayCategory = 'Pengumuman';
-
-                $desc = $ev->catatan ?? '';
-                if ($ev->jadwal) {
-                    $desc = ($desc ? $desc . "\n" : '') . "Jadwal: " . $ev->jadwal;
-                }
-
-                $image = null;
-                if ($ev->poster_path) {
-                    $image = asset('storage/' . $ev->poster_path);
-                }
-
-                return [
-                    'id' => 900000 + $ev->id,
-                    'title' => $ev->judul,
-                    'category' => $displayCategory,
-                    'date' => $ev->created_at ? $ev->created_at->format('Y-m-d') : date('Y-m-d'),
-                    'desc' => $desc,
-                    'image' => $image,
-                    'location' => $ev->lokasi . ($ev->rw ? ' (' . $ev->rw . ($ev->rt ? ' - ' . $ev->rt : '') . ')' : ''),
-                    'author' => $ev->koordinator ?? 'Koordinator Wilayah',
-                ];
-            })->toArray();
-
-                $formatted = array_merge($formatted, $eventItems);
-            }
-        }
 
         return response()->json([
             'status' => 'success',
             'data' => $formatted
-        ]);
+        ])->header('Cache-Control','private, no-store');
     }
 
     /**
@@ -158,22 +98,23 @@ class NewsApiController extends Controller
      */
     public function show($id)
     {
-        $item = Announcement::with(['region', 'admin', 'images'])->findOrFail($id);
+        $item = Announcement::with(['region', 'admin', 'images'])->visibleTo(auth('sanctum')->user())->findOrFail($id);
         
         $images = [];
         if ($item->image_path) {
-            $images[] = asset('storage/' . $item->image_path);
+            $images[] = $item->mediaUrl();
         }
         if ($item->images && $item->images->count() > 0) {
             foreach ($item->images as $img) {
                 // Avoid duplicating the main image if it's somehow in both
-                $imgUrl = asset('storage/' . $img->image_path);
+                $imgUrl = $img->url;
                 if (!in_array($imgUrl, $images)) {
                     $images[] = $imgUrl;
                 }
             }
         }
 
+        app(\App\Services\ContentViewService::class)->record($item, request());
         $formatted = [
             'id' => $item->id,
             'title' => $item->title,
@@ -184,11 +125,19 @@ class NewsApiController extends Controller
             'images' => $images,
             'location' => $item->location,
             'author' => $item->admin ? $item->admin->name : 'Admin Desa',
+                'publisher' => $item->publisher?->name,
+                'workflow_state' => $item->workflow_state,
+                'published_at' => $item->published_at?->toIso8601String(),
+                'ends_at' => $item->ends_at?->toIso8601String(),
+                'cancellation_reason' => $item->workflow_state === 'cancelled' ? $item->rejection_reason : null,
+                'views_count' => (int)$item->views_count,
+                'photo_credits' => $item->images->pluck('contributor_name')->filter()->unique()->values(),
+                'text_credits' => \Illuminate\Support\Facades\DB::table('announcement_sources')->where('announcement_id',$item->id)->where('is_staged',false)->where('uses_text',true)->pluck('contributor_name')->unique()->values(),
         ];
 
         return response()->json([
             'status' => 'success',
             'data' => $formatted
-        ]);
+        ])->header('Cache-Control','private, no-store');
     }
 }

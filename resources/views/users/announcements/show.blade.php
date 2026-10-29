@@ -33,21 +33,34 @@
                             </h1>
                             <div class="text-sm font-medium">
                                 <p class="text-blue-600 mb-1">
-                                    {{ $announcement->admin->name ?? 'Admin Sistem' }} - <span class="text-orange-500 font-bold">Pemerintah {{ $announcement->region->public_name ?? 'Pusat' }}</span>
+                                    Dikirim oleh {{ $announcement->admin->name ?? 'Pengelola' }} · {{ $announcement->region->public_name ?? 'Daerah' }}
+                                    @if($announcement->publisher)<br>Diterbitkan oleh {{ $announcement->publisher->name }}@endif
                                 </p>
                                 <p class="text-gray-500">
-                                    {{ $announcement->region->public_name ?? 'Pusat' }}, {{ \Carbon\Carbon::parse($announcement->created_at)->locale('id')->translatedFormat('l, d M Y H:i') }} WIB
+                                    {{ $announcement->region->public_name ?? 'Pusat' }}, {{ \Carbon\Carbon::parse($announcement->published_at ?? $announcement->created_at)->locale('id')->translatedFormat('l, d M Y H:i') }} WIB
                                 </p>
                             </div>
                         </div>
 
+                        @if($announcement->workflow_state === 'cancelled')
+                            <div class="p-4 mb-4 rounded-xl bg-red-50 text-red-800"><strong>Kegiatan dibatalkan.</strong> {{ $announcement->rejection_reason }}</div>
+                        @elseif($announcement->ends_at?->isPast())
+                            <div class="p-4 mb-4 rounded-xl bg-slate-100">Pengumuman ini sudah berakhir.</div>
+                        @endif
+                        <p class="text-sm text-gray-500 mb-4">Dilihat {{ number_format($announcement->views_count ?? 0, 0, ',', '.') }} kali · Terbit {{ $announcement->published_at?->format('d-m-Y H:i') ?? $announcement->created_at->format('d-m-Y H:i') }} WIB</p>
+                        @php
+                            $sources = \Illuminate\Support\Facades\DB::table('announcement_sources')->where('announcement_id', $announcement->id)->where('is_staged',false)->get();
+                            $photoCredits = $announcement->images->pluck('contributor_name')->filter()->unique();
+                        @endphp
+                        @if($photoCredits->isNotEmpty())<p class="text-sm text-gray-600 mb-2">Dokumentasi: {{ $photoCredits->implode(', ') }}</p>@endif
+                        @if($sources->where('uses_text', true)->isNotEmpty())<p class="text-sm text-gray-600 mb-4">Informasi kegiatan: {{ $sources->where('uses_text', true)->pluck('contributor_name')->unique()->implode(', ') }}</p>@endif
                         {{-- Image/Banner --}}
                         <div class="w-full h-64 md:h-[450px] bg-gray-100 relative group overflow-hidden rounded-2xl mb-8 shadow-sm">
                             @if($announcement->images && $announcement->images->count() > 0)
                                 <div class="flex transition-transform duration-700 ease-in-out h-full" id="slider-main">
                                     @foreach($announcement->images as $img)
                                         <div class="w-full h-full flex-shrink-0 relative">
-                                            <img src="{{ Storage::url($img->image_path) }}" alt="{{ $announcement->title }}" class="w-full h-full object-cover">
+                                            <img src="{{ $img->url }}" alt="{{ $announcement->title }}" class="w-full h-full object-cover">
                                         </div>
                                     @endforeach
                                 </div>
@@ -62,7 +75,7 @@
                                 @endif
                             @elseif($announcement->cover_image)
                                 <div class="w-full h-full flex-shrink-0 relative">
-                                    <img src="{{ Storage::url($announcement->cover_image) }}" alt="{{ $announcement->title }}" class="w-full h-full object-cover">
+                                    <img src="{{ $announcement->cover_url }}" alt="{{ $announcement->title }}" class="w-full h-full object-cover">
                                 </div>
                             @else
                                 <div class="w-full h-full flex flex-col items-center justify-center text-gray-400 bg-slate-50">
@@ -76,6 +89,11 @@
                         <div class="prose prose-lg max-w-none text-gray-700 leading-relaxed text-justify">
                             {!! nl2br(e($announcement->description)) !!}
                         </div>
+                        @auth
+                        @if($announcement->post_category === 'Berita')
+                        <form method="post" action="{{ route('content.store') }}" class="mt-6">@csrf<input type="hidden" name="category" value="Berita"><input type="hidden" name="contribution_to" value="{{ $announcement->id }}"><button class="px-4 py-3 rounded-xl border border-blue-500 text-blue-700">Tambah Dokumentasi Kegiatan Ini</button></form>
+                        @endif
+                        @endauth
 
                         {{-- Baca Juga (Detik Style) --}}
                         @if($relatedAnnouncements->count() > 0)
@@ -109,7 +127,7 @@
                             <a href="{{ route('announcements.show', $related->id) }}" class="group flex flex-col gap-3">
                                 <div class="w-full h-40 rounded-xl overflow-hidden bg-gray-100 relative shadow-sm">
                                     @if($related->cover_image)
-                                        <img src="{{ Storage::url($related->cover_image) }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                        <img src="{{ $related->cover_url }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                                     @else
                                         <div class="w-full h-full flex items-center justify-center text-gray-400 bg-slate-50">
                                             <i class="bx bx-news text-4xl"></i>
@@ -199,7 +217,7 @@
                                     <div class="flex gap-4 items-start p-2 rounded-2xl hover:bg-blue-50 transition-colors">
                                         <div class="w-16 h-16 rounded-xl overflow-hidden bg-gray-100 shrink-0 border border-gray-200 shadow-sm">
                                             @if($related->cover_image)
-                                                <img src="{{ Storage::url($related->cover_image) }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform">
+                                                <img src="{{ $related->cover_url }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform">
                                             @else
                                                 <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-200 opacity-60"><svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path></svg></div>
                                             @endif
@@ -243,9 +261,7 @@
                             <a href="{{ route('pelayanan') }}" class="bg-white/15 hover:bg-white/25 text-white p-2.5 rounded-xl flex items-center justify-between transition-all font-medium border border-white/10">
                                 <span class="flex items-center gap-2"><i class="bx bx-grid-alt"></i> Unit Pelayanan Desa</span>
                             </a>
-                            <a href="{{ route('pelaporan.landing') }}" class="bg-white/15 hover:bg-white/25 text-white p-2.5 rounded-xl flex items-center justify-between transition-all font-medium border border-white/10">
-                                <span class="flex items-center gap-2"><i class="bx bx-message-rounded-dots"></i> Layanan Pengaduan Warga</span>
-                            </a>
+                            
                         </div>
                     </div>
 

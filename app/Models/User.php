@@ -184,10 +184,7 @@ class User extends Authenticatable
     // RELASI DARI I_VILAGGE
     // ===================================
     
-    public function laporans()
-    {
-        return $this->hasMany(Laporan::class);
-    }
+    
 
     public function ratings()
     {
@@ -199,10 +196,7 @@ class User extends Authenticatable
         return $this->hasMany(Notification::class);
     }
 
-    public function handledLaporans()
-    {
-        return $this->hasMany(Laporan::class, 'admin_id');
-    }
+    
 
     public function isAdmin()
     {
@@ -362,7 +356,7 @@ class User extends Authenticatable
     /** Kunci izin untuk staf UNIT LAYANAN, lawan dari IZIN_PLATFORM_GRUP. */
     public const IZIN_UNIT = [
         'gas', 'sewa_alat', 'sewa_mobil', 'fasilitas_umum',
-        'pasar_daerah', 'kabar_informasi', 'pelaporan_warga',
+        'pasar_daerah', 'kabar_informasi',
     ];
 
     /**
@@ -380,8 +374,7 @@ class User extends Authenticatable
         'fasilitas_umum'  => 'Fasilitas Umum',
         'pasar_daerah'    => 'Pasar Daerah',
         'kabar_informasi' => 'Kabar dan Informasi Daerah',
-        'pelaporan_warga' => 'Pelaporan Warga',
-    ];
+            ];
 
     /**
      * Nama layanan yang benar-benar dipegang staf ini.
@@ -483,7 +476,7 @@ class User extends Authenticatable
     public function getUnitPermissions()
     {
         if ($this->isSuperAdmin()) {
-            return collect(['gas', 'sewa_alat', 'sewa_mobil', 'fasilitas_umum', 'pasar_daerah', 'kabar_informasi', 'pelaporan_warga']);
+            return collect(['gas', 'sewa_alat', 'sewa_mobil', 'fasilitas_umum', 'pasar_daerah', 'kabar_informasi']);
         }
         return $this->staffPermissions()->pluck('unit_key');
     }

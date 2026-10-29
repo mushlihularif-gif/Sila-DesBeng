@@ -301,7 +301,7 @@ class AuthController extends Controller
                 'ip_address' => $request->ip()
             ]);
 
-            return redirect($redirectUrl)->with('success', 'Login berhasil');
+            return redirect()->intended($redirectUrl)->with('success', 'Login berhasil');
         } catch (\Illuminate\Validation\ValidationException $e) {
             return redirect()->back()->withErrors($e->errors())->withInput()->with('open_login_modal', true);
         } catch (\Exception $e) {

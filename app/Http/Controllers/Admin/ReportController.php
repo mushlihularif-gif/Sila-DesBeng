@@ -446,14 +446,12 @@ class ReportController extends Controller
         $baseGas = $this->applyRegionFilter(\App\Models\GasOrder::withTrashed(), 'gas', false);
         $baseMobil = $this->applyRegionFilter(\App\Models\MobilBooking::withTrashed(), 'mobil', false);
         $baseFasilitas = $this->applyRegionFilter(\App\Models\FasilitasUmumBooking::withTrashed(), 'fasilitas', false);
-        $baseLaporan = $this->applyRegionFilter(\App\Models\Laporan::query(), 'user', false);
         $basePasar = \App\Models\PasarOrder::withTrashed();
 
         $baseRental->whereHas('barang', fn ($q) => $q->whereIn('region_id', $regionIdsDalamCakupan));
         $baseGas->whereHas('gas', fn ($q) => $q->whereIn('region_id', $regionIdsDalamCakupan));
         $baseMobil->whereHas('mobil', fn ($q) => $q->whereIn('region_id', $regionIdsDalamCakupan));
         $baseFasilitas->whereHas('fasilitas', fn ($q) => $q->whereIn('region_id', $regionIdsDalamCakupan));
-        $baseLaporan->whereHas('user', fn ($q) => $q->whereIn('region_id', $regionIdsDalamCakupan));
         $basePasar->whereIn('region_id', $regionIdsDalamCakupan);
 
         $user = auth()->user();
@@ -471,7 +469,6 @@ class ReportController extends Controller
             if (!$user->hasUnitPermission('gas')) $baseGas->whereRaw('1 = 0');
             if (!$user->hasUnitPermission('sewa_mobil')) $baseMobil->whereRaw('1 = 0');
             if (!$user->hasUnitPermission('fasilitas_umum')) $baseFasilitas->whereRaw('1 = 0');
-            if (!$user->hasUnitPermission('pelaporan_warga')) $baseLaporan->whereRaw('1 = 0');
             if (!$user->hasUnitPermission('pasar_daerah')) $basePasar->whereRaw('1 = 0');
         }
 
@@ -481,7 +478,6 @@ class ReportController extends Controller
             $baseGas->whereHas('gas', function($q) use ($selectedDesaId) { $q->where('region_id', $selectedDesaId); });
             $baseMobil->whereHas('mobil', function($q) use ($selectedDesaId) { $q->where('region_id', $selectedDesaId); });
             $baseFasilitas->whereHas('fasilitas', function($q) use ($selectedDesaId) { $q->where('region_id', $selectedDesaId); });
-            $baseLaporan->whereHas('user', function($q) use ($selectedDesaId) { $q->where('region_id', $selectedDesaId); });
             $basePasar->where('region_id', $selectedDesaId);
         } elseif ($selectedKecamatanId && $selectedKecamatanId !== 'all') {
             $desaIds = \App\Models\Region::where('parent_id', $selectedKecamatanId)->pluck('id')->toArray();
@@ -490,7 +486,6 @@ class ReportController extends Controller
             $baseGas->whereHas('gas', function($q) use ($desaIds) { $q->whereIn('region_id', $desaIds); });
             $baseMobil->whereHas('mobil', function($q) use ($desaIds) { $q->whereIn('region_id', $desaIds); });
             $baseFasilitas->whereHas('fasilitas', function($q) use ($desaIds) { $q->whereIn('region_id', $desaIds); });
-            $baseLaporan->whereHas('user', function($q) use ($desaIds) { $q->whereIn('region_id', $desaIds); });
             $basePasar->whereIn('region_id', $desaIds);
         }
 
@@ -508,8 +503,7 @@ class ReportController extends Controller
             ->whereYear('created_at', $year)->whereNotIn('status', ['pending', 'cancelled', 'rejected'])->groupBy('month')->pluck('total', 'month');
         $pasarMonthly = $basePasar->clone()->selectRaw('COUNT(*) as total, MONTH(created_at) as month')
             ->whereYear('created_at', $year)->whereNotIn('status', ['pending', 'cancelled', 'rejected'])->groupBy('month')->pluck('total', 'month');
-        $laporanMonthly = $baseLaporan->clone()->selectRaw('COUNT(*) as total, MONTH(created_at) as month')
-            ->whereYear('created_at', $year)->groupBy('month')->pluck('total', 'month');
+        $laporanMonthly = collect();
 
         for ($i = 1; $i <= 12; $i++) {
             $monthName = $months[$i - 1];
@@ -547,7 +541,7 @@ class ReportController extends Controller
         $mobilYears = \App\Models\MobilBooking::withTrashed()->selectRaw('YEAR(created_at) as year')->distinct()->pluck('year')->toArray();
         $fasilitasYears = \App\Models\FasilitasUmumBooking::withTrashed()->selectRaw('YEAR(created_at) as year')->distinct()->pluck('year')->toArray();
         $pasarYears = \App\Models\PasarOrder::withTrashed()->selectRaw('YEAR(created_at) as year')->distinct()->pluck('year')->toArray();
-        $laporanYears = \App\Models\Laporan::selectRaw('YEAR(created_at) as year')->distinct()->pluck('year')->toArray();
+        $laporanYears = [];
         
         $availableYears = array_unique(array_merge($rentalYears, $gasYears, $mobilYears, $fasilitasYears, $pasarYears, $laporanYears, [now()->year]));
         rsort($availableYears);

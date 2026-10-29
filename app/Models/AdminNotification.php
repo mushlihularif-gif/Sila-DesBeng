@@ -6,6 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class AdminNotification extends Model
 {
+    protected static function booted(): void
+    {
+        static::created(fn (self $notification) => app(\App\Services\NotificationDeliveryService::class)->enqueueAdmin($notification));
+    }
     protected $fillable = [
         'type',
         'reference_id',

@@ -112,7 +112,7 @@ class BerandaController extends Controller
                                            ->get();
                                            
         // Get Recent Announcements
-        $announcementQuery = \App\Models\Announcement::with(['region'])
+        $announcementQuery = \App\Models\Announcement::with(['region'])->visibleTo(auth()->user())
             ->where('is_active', true)
             ->orderBy('created_at', 'desc');
 
@@ -580,14 +580,7 @@ class BerandaController extends Controller
                 ->whereIn('region_id', $regionIds)
                 ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
                 ->count();
-                
-            // Count laporan
-            $laporanCount = \App\Models\Laporan::whereYear('created_at', $year)
-                ->whereMonth('created_at', $month)
-                ->whereHas('user', function($q) use ($regionIds) {
-                    $q->whereIn('region_id', $regionIds);
-                })
-                ->count();
+            $laporanCount = 0;
                 
             // Count announcements
             $pengumumanCount = \App\Models\Announcement::whereYear('created_at', $year)

@@ -38,9 +38,9 @@ class BerandaController extends Controller
      */
     public function announcements()
     {
-        $formatted = \Illuminate\Support\Facades\Cache::remember('api.beranda.announcements', 300, function () {
+        $formatted = (function () {
             $announcements = Announcement::with(['region', 'admin', 'images'])
-                ->where('is_active', true)
+                ->visibleTo(auth('sanctum')->user())
                 ->orderBy('created_at', 'desc')
                 ->take(5)
                 ->get();
@@ -49,11 +49,11 @@ class BerandaController extends Controller
             return $announcements->map(function ($item) {
                 $images = [];
                 if ($item->image_path) {
-                    $images[] = asset('storage/' . $item->image_path);
+                    $images[] = $item->mediaUrl();
                 }
                 if ($item->images && $item->images->count() > 0) {
                     foreach ($item->images as $img) {
-                        $imgUrl = asset('storage/' . $img->image_path);
+                        $imgUrl = $img->url;
                         if (!in_array($imgUrl, $images)) {
                             $images[] = $imgUrl;
                         }
@@ -73,7 +73,7 @@ class BerandaController extends Controller
                     'author' => $item->admin ? $item->admin->name : 'Admin Desa',
                 ];
             });
-        });
+        })();
 
         return response()->json([
             'status' => 'success',

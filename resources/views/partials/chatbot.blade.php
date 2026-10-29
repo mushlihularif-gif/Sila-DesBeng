@@ -361,7 +361,7 @@
     <div class="chatbot-messages" id="chatbot-messages">
         <!-- Default Welcome Message -->
         <div class="msg-bubble msg-bot">
-            Halo! Saya SegiDaerah Assistant.<br><br>Ada yang bisa saya bantu hari ini seputar layanan di Kecamatan Bengkalis atau pelaporan warga?
+            Halo! Saya SegiDaerah Assistant.<br><br>Ada yang bisa saya bantu hari ini seputar layanan di Kecamatan Bengkalis?
         </div>
     </div>
     

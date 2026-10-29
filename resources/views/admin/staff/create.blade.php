@@ -169,7 +169,6 @@
                                         elseif($key == 'gas') $iconImg = asset('User/img/elemen/F2.png');
                                         elseif($key == 'sewa_mobil') $iconImg = asset('User/img/elemen/mobil.png');
                                         elseif($key == 'fasilitas_umum') $iconImg = asset('User/img/elemen/fasilitas.png');
-                                        elseif($key == 'pelaporan_warga') $iconImg = asset('User/img/elemen/lapor.png');
                                         elseif($key == 'kabar_informasi') $iconImg = asset('User/img/elemen/KabardanInformasiDaerah.png');
                                         elseif($key == 'pasar_daerah') $iconImg = asset('Admin/img/menu3dberanda/pasar-daerah.webp');
                                     @endphp

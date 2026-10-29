@@ -498,7 +498,7 @@
                                             $detailLink = Route::has('admin.unit.pasar_daerah.pesanan.show') ? route('admin.unit.pasar_daerah.pesanan.show', $request->id) : '#';
                                         } elseif ($request->type == 'laporan') {
                                             $icon = 'bx-message-error'; $bgClass = 'bg-label-secondary text-secondary'; $badgeClass = 'bg-label-secondary'; $serviceName = 'Pelaporan Warga';
-                                            $detailLink = Route::has('admin.pelaporan.show') ? route('admin.pelaporan.show', $request->id) : (Route::has('admin.laporan.show') ? route('admin.laporan.show', $request->id) : '#');
+                                            $detailLink = '#';
                                         } elseif ($request->type == 'kyc') {
                                             $icon = 'bx-id-card'; $bgClass = 'bg-label-info text-info'; $badgeClass = 'bg-label-info'; $serviceName = 'Verifikasi Identitas';
                                             $detailLink = route('admin.kyc.show', $request->id);

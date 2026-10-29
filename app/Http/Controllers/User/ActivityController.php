@@ -60,13 +60,7 @@ class ActivityController extends Controller
                     ->paginate(5);
                 $html = view('users.partials.activity-pasar', ['pasarOrders' => $items, 'setting' => $setting])->render();
                 $hasMore = $items->hasMorePages();
-            } elseif ($tab === 'laporan') {
-                $items = \App\Models\Laporan::where('user_id', $user->id)
-                    ->orderBy('created_at', 'desc')
-                    ->paginate(5);
-                $html = view('users.partials.activity-laporan', ['laporans' => $items, 'setting' => $setting])->render();
-                $hasMore = $items->hasMorePages();
-            }
+}
 
             return response()->json([
                 'html' => $html,
@@ -80,15 +74,13 @@ class ActivityController extends Controller
         $mobilBookings = \App\Models\MobilBooking::where('user_id', $user->id)->with('mobil')->orderBy('created_at', 'desc')->paginate(5);
         $fasilitasBookings = \App\Models\FasilitasUmumBooking::where('user_id', $user->id)->with('fasilitas')->orderBy('created_at', 'desc')->paginate(5);
         $pasarOrders = \App\Models\PasarOrder::where('user_id', $user->id)->with('items.produk')->orderBy('created_at', 'desc')->paginate(5);
-        $laporans = \App\Models\Laporan::where('user_id', $user->id)->orderBy('created_at', 'desc')->paginate(5);
         
         return view('users.activity', compact(
             'rentalBookings', 
             'gasOrders', 
             'mobilBookings', 
-            'fasilitasBookings', 
-            'laporans', 
-            'pasarOrders',
+            'fasilitasBookings',
+'pasarOrders',
             'setting'
         ));
     }
@@ -170,11 +162,7 @@ class ActivityController extends Controller
             $order = \App\Models\FasilitasUmumBooking::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
         } elseif ($type === 'pasar') {
             $order = \App\Models\PasarOrder::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
-        } elseif ($type === 'laporan') {
-            $order = \App\Models\Laporan::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
-            $order->delete();
-            return response()->json(['success' => true, 'message' => 'Riwayat berhasil dihapus']);
-        } else {
+} else {
             return response()->json(['success' => false, 'message' => 'Tipe tidak valid'], 400);
         }
 
@@ -207,17 +195,7 @@ class ActivityController extends Controller
             } elseif ($type === 'fasilitas') {
                 $query = \App\Models\FasilitasUmumBooking::where('user_id', Auth::id());
             } elseif ($type === 'pasar') {
-                $query = \App\Models\PasarOrder::where('user_id', Auth::id());
-            } elseif ($type === 'laporan') {
-                $query = \App\Models\Laporan::where('user_id', Auth::id());
-                // For laporan, we can delete all
-                $orders = $query->get();
-                $count = $orders->count();
-                foreach ($orders as $order) {
-                    $order->delete();
-                }
-                return response()->json(['success' => true, 'message' => "Berhasil menghapus {$count} riwayat aktivitas."]);
-            } else {
+                $query = \App\Models\PasarOrder::where('user_id', Auth::id());} else {
                 return response()->json(['success' => false, 'message' => 'Tipe tidak valid'], 400);
             }
 

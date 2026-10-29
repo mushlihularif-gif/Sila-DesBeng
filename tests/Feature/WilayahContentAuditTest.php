@@ -43,19 +43,19 @@ class WilayahContentAuditTest extends TestCase
         return Request::create('/wilayah/konten/1', 'PUT', ['title' => 'Judul diperbarui', 'description' => 'Isi diperbarui', 'type' => 'Event', 'target_region_id' => $region]);
     }
 
-    public function test_author_can_edit_and_delete_their_content_published_to_a_parent_region(): void
+    public function test_legacy_editor_redirects_and_cannot_bypass_handling_lock(): void
     {
         $content = $this->content();
         $controller = app(WilayahAdminController::class);
-        $view = $controller->editKonten($content);
-        $this->assertSame('user.wilayah.konten-edit', $view->name());
-        $this->assertEqualsCanonicalizing([1, 2], $view->getData()['regions']->pluck('id')->all());
-        $response = $controller->updateKonten($this->updateRequest(), $content);
-        $this->assertSame(route('wilayah.berita.index'), $response->getTargetUrl());
-        $this->assertSame('Judul diperbarui', $content->fresh()->title);
-        $this->assertSame('Berita', $content->fresh()->post_category);
-        $controller->destroyKonten($content);
-        $this->assertSame(0, Announcement::count());
+        $response = $controller->editKonten($content);
+        $this->assertSame(route('content.show', $content), $response->getTargetUrl());
+        foreach (['update', 'delete'] as $action) {
+            try {
+                $action === 'update' ? $controller->updateKonten($this->updateRequest(), $content) : $controller->destroyKonten($content);
+                $this->fail('Legacy mutation bypassed shared editor');
+            } catch (HttpException $e) { $this->assertSame(409, $e->getStatusCode()); }
+        }
+        $this->assertSame('Judul awal', $content->fresh()->title);
     }
 
     public function test_another_author_cannot_edit_or_delete_content(): void
@@ -71,7 +71,7 @@ class WilayahContentAuditTest extends TestCase
                 };
                 $this->fail('Expected authorization failure');
             } catch (HttpException $e) {
-                $this->assertSame(403, $e->getStatusCode());
+                $this->assertSame($action === 'edit' ? 403 : 409, $e->getStatusCode());
             }
         }
         $this->assertSame('Judul awal', $content->fresh()->title);
@@ -83,8 +83,8 @@ class WilayahContentAuditTest extends TestCase
         try {
             app(WilayahAdminController::class)->updateKonten($this->updateRequest(3), $content);
             $this->fail('Expected validation failure');
-        } catch (ValidationException $e) {
-            $this->assertArrayHasKey('target_region_id', $e->errors());
+        } catch (HttpException $e) {
+            $this->assertSame(409, $e->getStatusCode());
         }
         $this->assertSame(1, $content->fresh()->region_id);
     }

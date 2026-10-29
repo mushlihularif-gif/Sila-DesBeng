@@ -100,7 +100,7 @@
             <div>
                 <h6 class="fw-bold mb-1 text-primary">Panduan Evaluasi Wilayah</h6>
                 <p class="mb-0 text-primary small" style="opacity: 0.9; line-height: 1.5;">
-                    Halaman ini merangkum indeks aktivitas dari <strong>5 sektor layanan daerah</strong> (Penyewaan Alat, Gas LPG, Transportasi, Fasilitas Umum, Pasar Daerah) serta <strong>Pelaporan Warga</strong> dalam bentuk poin tren. Nilai nominal keuangan disamarkan demi menjaga privasi antar wilayah.
+                    Halaman ini merangkum indeks aktivitas dari <strong>5 sektor layanan daerah</strong> (Penyewaan Alat, Gas LPG, Transportasi, Fasilitas Umum, Pasar Daerah) dalam bentuk poin tren. Nilai nominal keuangan disamarkan demi menjaga privasi antar wilayah.
                 </p>
             </div>
         </div>
@@ -197,7 +197,7 @@
                     </div>
                     <div>
                         <h3 class="fw-bold mb-1 text-dark" id="current-month-total">{{ $currentMonthTotal }}</h3>
-                        <small class="text-muted" style="font-size: 0.75rem;">Total transaksi dan laporan tercatat bulan ini</small>
+                        <small class="text-muted" style="font-size: 0.75rem;">Total transaksi tercatat bulan ini</small>
                     </div>
                 </div>
             </div>
@@ -228,7 +228,7 @@
         </div>
     </div>
 
-    <!-- Aktivitas 5 Sektor Layanan Daerah & Pelaporan Warga -->
+    <!-- Aktivitas 5 Sektor Layanan Daerah -->
     <div class="row g-2 g-md-3 mb-4">
         <!-- Penyewaan Alat -->
         <div class="col-6 col-md-4 col-xl-2">
@@ -310,21 +310,7 @@
             </div>
         </div>
 
-        <!-- Pelaporan Warga -->
-        <div class="col-6 col-md-4 col-xl-2">
-            <div class="card border-0 shadow-sm h-100 unit-stat-card p-3">
-                <div class="d-flex align-items-center mb-2">
-                    <div class="avatar avatar-sm bg-label-danger rounded-3 p-1 me-2 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 32px; height: 32px;">
-                        <img src="{{ asset('User/img/elemen/lapor.png') }}" style="width: 18px; height: 18px; object-fit: contain;" alt="Pelaporan Warga">
-                    </div>
-                    <div class="overflow-hidden">
-                        <span class="text-secondary fw-semibold d-block text-truncate" style="font-size: 0.75rem;">Pelaporan Warga</span>
-                    </div>
-                </div>
-                <h5 class="fw-bold mb-0 text-dark" id="count-laporan">{{ $serviceTotals['laporan'] ?? 0 }}</h5>
-                <small class="text-muted" style="font-size: 0.72rem;">Laporan Masuk</small>
-            </div>
-        </div>
+        
     </div>
 
     <!-- Chart Section -->
@@ -335,7 +321,7 @@
                     <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2">
                         <div>
                             <h5 class="card-title fw-bold text-dark mb-1">Tren Kinerja Layanan</h5>
-                            <small class="text-muted" id="chart-subtitle">Grafik akumulasi aktivitas 5 sektor layanan daerah dan pelaporan warga tahun {{ $year }}</small>
+                            <small class="text-muted" id="chart-subtitle">Grafik akumulasi aktivitas 5 sektor layanan daerah tahun {{ $year }}</small>
                         </div>
                         <div class="d-flex align-items-center">
                             <span class="badge bg-label-primary rounded-pill px-3 py-2 fw-medium d-inline-flex align-items-center" style="font-size: 0.8rem; text-transform: none !important; letter-spacing: normal;">
@@ -541,20 +527,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 const countMobil = document.getElementById('count-mobil');
                 const countFasilitas = document.getElementById('count-fasilitas');
                 const countPasar = document.getElementById('count-pasar');
-                const countLaporan = document.getElementById('count-laporan');
 
                 if (countRental) countRental.textContent = data.serviceTotals.rental || 0;
                 if (countGas) countGas.textContent = data.serviceTotals.gas || 0;
                 if (countMobil) countMobil.textContent = data.serviceTotals.mobil || 0;
                 if (countFasilitas) countFasilitas.textContent = data.serviceTotals.fasilitas || 0;
                 if (countPasar) countPasar.textContent = data.serviceTotals.pasar || 0;
-                if (countLaporan) countLaporan.textContent = data.serviceTotals.laporan || 0;
             }
 
             // Update subtitle tahun
             const subtitle = document.getElementById('chart-subtitle');
             if (subtitle && yearSelect) {
-                subtitle.textContent = 'Grafik akumulasi aktivitas 5 sektor layanan daerah & pelaporan warga tahun ' + yearSelect.value;
+                subtitle.textContent = 'Grafik akumulasi aktivitas 5 sektor layanan daerah tahun ' + yearSelect.value;
             }
         })
         .catch(function(err) { 

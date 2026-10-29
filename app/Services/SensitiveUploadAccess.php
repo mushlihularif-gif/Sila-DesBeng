@@ -2,12 +2,12 @@
 
 namespace App\Services;
 
-use App\Models\{Laporan, PasarComplaint, HelpTicket, PartnerApplication, Region, ManualReport};
+use App\Models\{PasarComplaint, HelpTicket, PartnerApplication, Region, ManualReport};
 
 class SensitiveUploadAccess
 {
     public const PREFIXES = ['receipts/', 'payment_proofs/', 'delivery_proofs/', 'surat_pengantar/',
-        'laporan/', 'pasar_orders/proofs/', 'pasar_complaints/', 'pasar/complaints/',
+        'pasar_orders/proofs/', 'pasar_complaints/', 'pasar/complaints/',
         'help-tickets/', 'partner_applications/', 'manual-reports/'];
 
     public function authorize(string $path): void
@@ -16,15 +16,6 @@ class SensitiveUploadAccess
         $user = auth()->user() ?: auth('sanctum')->user();
         abort_unless($user, 401);
 
-        if (str_starts_with($path, 'laporan/')) {
-            foreach (Laporan::where('bukti', 'like', '%' . $path . '%')->cursor() as $report) {
-                if (in_array($path, $report->bukti_array, true)) {
-                    abort_unless(app(ReportAccess::class)->canView($report, $user), 403);
-                    return;
-                }
-            }
-            abort(404);
-        }
         if (str_starts_with($path, 'help-tickets/')) {
             $ticket = HelpTicket::where('screenshot', $path)->firstOrFail();
             abort_unless((int) $ticket->user_id === (int) $user->id || $user->role === 'admin', 403);

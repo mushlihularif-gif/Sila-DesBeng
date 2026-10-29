@@ -889,12 +889,7 @@
                             <div>Laporan Pendapatan</div>
                         </a>
                     </li>
-                    <li class="menu-item {{ request()->routeIs('admin.pelaporan.*') ? 'active' : '' }}">
-                        <a href="{{ route('admin.pelaporan.index') }}" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-conversation"></i>
-                            <div>Pelaporan Warga</div>
-                        </a>
-                    </li>
+                    
 
                     <li class="menu-header small text-uppercase">
                         <span class="menu-header-text">Data Kependudukan</span>
@@ -1101,27 +1096,7 @@
                     </li>
                     @endif
 
-                    {{-- Staf: Pelaporan Warga --}}
-                    @if(auth()->user()->hasUnitPermission('pelaporan_warga'))
-                    <li class="menu-item {{ request()->routeIs('admin.pelaporan.*') ? 'open active show' : '' }}">
-                        <a href="javascript:void(0);" class="menu-link menu-toggle">
-                            <i class="menu-icon tf-icons bx bx-conversation text-info"></i>
-                            <div><small class="d-block text-muted" style="font-size:.65rem; line-height:1.1">Layanan Daerah</small>Pelaporan Warga</div>
-                        </a>
-                        <ul class="menu-sub">
-                            <li class="menu-item {{ request()->routeIs('admin.pelaporan.index') || request()->routeIs('admin.pelaporan.show') ? 'active' : '' }}">
-                                <a href="{{ Route::has('admin.pelaporan.index') ? route('admin.pelaporan.index') : '#' }}" class="menu-link">
-                                    <div>Laporan Masuk</div>
-                                </a>
-                            </li>
-                            <li class="menu-item {{ request()->routeIs('admin.pelaporan.archive') ? 'active' : '' }}">
-                                <a href="{{ route('admin.pelaporan.archive') }}" class="menu-link">
-                                    <div>Arsip dan Bukti Laporan</div>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                    @endif
+                    
 
                     {{-- Staf: Kabar dan Pengumuman --}}
                     @if(auth()->user()->hasUnitPermission('kabar_informasi'))
@@ -1152,7 +1127,7 @@
                     </li>
 
                     <!-- Dropdown 1: Unit Layanan Desa (Katalog Aktivasi dan Unit Aktif) -->
-                    <li class="menu-item {{ (request()->is('admin/unit*') && !request()->is('admin/unit/supir*')) || request()->routeIs('admin.announcements.*') || request()->routeIs('admin.pelaporan.*') || request()->routeIs('admin.region-settings.index') ? 'open active show' : '' }}">
+                    <li class="menu-item {{ (request()->is('admin/unit*') && !request()->is('admin/unit/supir*')) || request()->routeIs('admin.announcements.*') || request()->routeIs('admin.region-settings.index') ? 'open active show' : '' }}">
                         <a href="javascript:void(0);" class="menu-link menu-toggle d-flex align-items-center justify-content-between">
                             <div class="d-flex align-items-center">
                                 <i class="menu-icon tf-icons bx bx-grid-alt text-primary"></i>
@@ -1217,12 +1192,7 @@
                                 </a>
                             </li>
                             @endif
-                            <li class="menu-item {{ request()->routeIs('admin.pelaporan.*') ? 'active' : '' }}">
-                                <a href="{{ Route::has('admin.pelaporan.index') ? route('admin.pelaporan.index') : '#' }}" class="menu-link d-flex align-items-center">
-                                    <i class="bx bx-conversation me-2 text-muted"></i>
-                                    <div>Pelaporan Warga</div>
-                                </a>
-                            </li>
+                            
 
                             <li class="menu-item px-2 pt-2 pb-1"><span class="small fw-bold text-uppercase text-muted">Kabar dan Informasi Daerah</span></li>
                             <li class="menu-item {{ request()->routeIs('admin.announcements.*') ? 'active' : '' }}">
@@ -1641,7 +1611,7 @@
                                                     $targetUrl = route('admin.warga.mutasi.index');
                                                 } elseif (in_array($notif->type, ['laporan', 'pengumuman'])) {
                                                     $cat = 'laporan'; $icon = 'bx-message-square-error'; $color = 'danger';
-                                                    $targetUrl = ($notif->reference_id && Route::has('admin.pelaporan.show')) ? route('admin.pelaporan.show', $notif->reference_id) : (Route::has('admin.pelaporan.index') ? route('admin.pelaporan.index') : route('admin.aktivitas.permintaan-pengajuan.index'));
+                                                    $targetUrl = route('admin.aktivitas.permintaan-pengajuan.index');
                                                 } else {
                                                     $targetUrl = route('admin.aktivitas.permintaan-pengajuan.index');
                                                 }

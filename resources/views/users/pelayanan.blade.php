@@ -37,7 +37,7 @@
                         'gas.sales',
                         'mobil.rental.equipment',
                         'user.fasilitas-umum.equipment',
-                        'pelaporan.landing',
+                        
                     ];
                     $serviceHref = function ($routeName) use ($needsRegionSelection) {
                         if (auth()->check() && auth()->user()->region_id) {
@@ -73,26 +73,7 @@
                     </div>
                 </a>
 
-                {{-- Service 2: Pelaporan dan Monitoring Usaha --}}
-                <a href="{{ $serviceHref('bumdes.laporan') }}" class="service-card-link bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-8 shadow-md hover:shadow-xl transition-all duration-300 border border-white/50 animate-section">
-                    <div class="flex flex-col sm:flex-row gap-4 sm:gap-8 items-center sm:items-start">
-                        <div class="flex-shrink-0">
-                            <div class="w-20 h-20 sm:w-32 sm:h-32 flex items-center justify-center">
-                                <img src="{{ asset('User/img/elemen/C2.png') }}" alt="Pelaporan dan Monitoring Usaha"
-                                    class="w-full h-full object-contain drop-shadow-md">
-                            </div>
-                        </div>
-                        <div class="flex-1">
-                            <h3 class="text-lg sm:text-2xl font-bold text-gray-900 mb-2 sm:mb-4 text-center sm:text-left">Pelaporan dan Monitoring Usaha</h3>
-                            <p class="text-xs sm:text-base text-gray-700 leading-relaxed text-justify">
-                                Laporan keuangan, laporan transaksi, serta kinerja unit usaha secara otomatis dan real-time.
-                                Sistem ini membantu meningkatkan akuntabilitas dan mempermudah evaluasi pengelolaan dana
-                                daerah
-                                dengan laporan digital yang rapi dan terintegrasi.
-                            </p>
-                        </div>
-                    </div>
-                </a>
+                
 
                 {{-- Service 3: Penjualan Gas Daerah --}}
                 <a href="{{ $serviceHref('gas.sales') }}" class="service-card-link bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-8 shadow-md hover:shadow-xl transition-all duration-300 border border-white/50 animate-section">
@@ -152,24 +133,7 @@
                     </div>
                 </a>
 
-                {{-- Service 6: Pelaporan Warga --}}
-                <a href="{{ $serviceHref('pelaporan.landing') }}" class="service-card-link bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-8 shadow-md hover:shadow-xl transition-all duration-300 border border-white/50 animate-section">
-                    <div class="flex flex-col sm:flex-row gap-4 sm:gap-8 items-center sm:items-start">
-                        <div class="flex-shrink-0">
-                            <div class="w-20 h-20 sm:w-32 sm:h-32 flex items-center justify-center">
-                                <img src="{{ asset('User/img/elemen/lapor.png') }}" alt="Pelaporan Warga"
-                                    class="w-full h-full object-contain drop-shadow-md">
-                            </div>
-                        </div>
-                        <div class="flex-1">
-                            <h3 class="text-lg sm:text-2xl font-bold text-gray-900 mb-2 sm:mb-4 text-center sm:text-left">Pelaporan Warga</h3>
-                            <p class="text-xs sm:text-base text-gray-700 leading-relaxed text-justify">
-                                Wadah digital bagi masyarakat untuk menyampaikan laporan, kritik, masukan, atau keluhan terkait daerah secara langsung ke pemerintah daerah.
-                                Setiap pelaporan dapat dipantau status tindak lanjutnya sehingga komunikasi menjadi lebih dua arah dan cepat.
-                            </p>
-                        </div>
-                    </div>
-                </a>
+                
 
                 {{-- Service 7: Kabar dan Informasi Daerah --}}
                 <a href="{{ $serviceHref('announcements.index') }}" class="service-card-link bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-8 shadow-md hover:shadow-xl transition-all duration-300 border border-white/50 animate-section">

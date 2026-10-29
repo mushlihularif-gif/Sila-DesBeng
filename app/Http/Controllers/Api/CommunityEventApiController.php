@@ -14,7 +14,7 @@ class CommunityEventApiController extends Controller
     {
         $userId = $request->user()->id;
 
-        $events = CommunityEvent::orderBy('created_at', 'desc')->get()->map(function ($event) use ($userId) {
+        $events = CommunityEvent::where('user_id',$userId)->orderBy('created_at', 'desc')->get()->map(function ($event) use ($userId) {
             $event->is_joined = EventParticipant::where('event_id', $event->id)
                 ->where('user_id', $userId)
                 ->exists();
@@ -30,52 +30,12 @@ class CommunityEventApiController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'judul' => 'required|string|max:255',
-            'tipe' => 'required|in:gotong_royong,rapat,kegiatan_sosial',
-            'target_scope' => 'nullable|string',
-            'rw' => 'nullable|string',
-            'rt' => 'nullable|string',
-            'koordinator' => 'nullable|string',
-            'jadwal' => 'nullable|string',
-            'lokasi' => 'nullable|string',
-            'catatan' => 'nullable|string',
-            'peralatan' => 'nullable|array',
-            'poster' => 'nullable|image|max:5120',
-        ]);
-
-        $posterPath = null;
-        if ($request->hasFile('poster')) {
-            $posterPath = $request->file('poster')->store('events/posters', 'public');
-        }
-
-        $event = CommunityEvent::create([
-            'user_id' => $request->user()->id,
-            'judul' => $request->judul,
-            'tipe' => $request->tipe,
-            'target_scope' => $request->target_scope,
-            'rw' => $request->rw,
-            'rt' => $request->rt,
-            'koordinator' => $request->koordinator,
-            'jadwal' => $request->jadwal,
-            'lokasi' => $request->lokasi,
-            'catatan' => $request->catatan,
-            'peralatan' => $request->peralatan,
-            'poster_path' => $posterPath,
-            'status' => 'upcoming',
-            'jumlah_peserta' => 0,
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Event berhasil dibuat dan dibroadcast.',
-            'data' => $event,
-        ], 201);
+        return response()->json(['message'=>'Gunakan alur kiriman Kabar/Pengumuman untuk peninjauan wilayah.', 'workspace_url'=>route('content.index'), 'api_endpoint'=>url('/api/content')],409);
     }
 
     public function toggleJoin(Request $request, $id)
     {
-        $event = CommunityEvent::findOrFail($id);
+        $event = CommunityEvent::where('user_id',$request->user()->id)->findOrFail($id);
         $userId = $request->user()->id;
 
         $existing = EventParticipant::where('event_id', $id)

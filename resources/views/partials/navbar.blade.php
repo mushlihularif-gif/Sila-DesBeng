@@ -168,7 +168,7 @@
         <div class="sd-nav-links">
             <a href="{{ route('beranda') }}" class="sd-nav-link {{ request()->routeIs('beranda') ? 'active' : '' }}">Beranda</a>
             <div class="relative group flex items-center">
-                <button class="sd-nav-link gap-1 p-0 bg-transparent border-none outline-none cursor-pointer {{ request()->routeIs('pelayanan') || request()->routeIs('bumdes.profil') || request()->routeIs('bumdes.laporan') ? 'active' : '' }}">
+                <button class="sd-nav-link gap-1 p-0 bg-transparent border-none outline-none cursor-pointer {{ request()->routeIs('pelayanan') || request()->routeIs('bumdes.profil') ? 'active' : '' }}">
                     Layanan
                     <svg class="w-4 h-4 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                 </button>
@@ -184,10 +184,7 @@
                             <a href="{{ route('pelayanan') }}" class="block px-4 py-2.5 text-gray-800 hover:bg-blue-50 hover:border-l-[3px] hover:border-l-blue-500 transition-all duration-150 whitespace-nowrap {{ request()->routeIs('pelayanan') ? 'bg-blue-50 border-l-[3px] border-l-blue-500 font-medium' : 'border-l-[3px] border-l-transparent' }}">
                                 <span class="text-[15px] font-normal text-center block">Tentang Layanan</span>
                             </a>
-                            <div class="h-px bg-gray-100 mx-3 my-1"></div>
-                            <a href="{{ route('bumdes.laporan') }}" class="block px-4 py-2.5 text-gray-800 hover:bg-blue-50 hover:border-l-[3px] hover:border-l-blue-500 transition-all duration-150 whitespace-nowrap {{ request()->routeIs('bumdes.laporan') ? 'bg-blue-50 border-l-[3px] border-l-blue-500 font-medium' : 'border-l-[3px] border-l-transparent' }}">
-                                <span class="text-[15px] font-normal text-center block">Grafik Layanan</span>
-                            </a>
+                            
                             <div class="h-px bg-gray-100 mx-3 my-1"></div>
                             <a href="{{ route('pasar.index') }}" class="block px-4 py-2.5 text-gray-800 hover:bg-blue-50 hover:border-l-[3px] hover:border-l-blue-500 transition-all duration-150 whitespace-nowrap {{ request()->routeIs('pasar.*') ? 'bg-blue-50 border-l-[3px] border-l-blue-500 font-medium' : 'border-l-[3px] border-l-transparent' }}">
                                 <span class="text-[15px] font-normal text-center block">Pasar Daerah</span>
@@ -211,10 +208,7 @@
                         <div class="absolute top-full left-1/2 -translate-x-1/2 pt-2 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                             <div class="min-w-[200px] bg-white rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.1)] border border-gray-200 overflow-hidden">
                                 <div class="py-1.5">
-                                    <a href="{{ route('wilayah.laporan.index') }}" class="block px-4 py-2.5 text-gray-800 hover:bg-blue-50 hover:border-l-[3px] hover:border-l-blue-500 transition-all duration-150 whitespace-nowrap {{ request()->routeIs('wilayah.laporan.*') ? 'bg-blue-50 border-l-[3px] border-l-blue-500 font-medium' : 'border-l-[3px] border-l-transparent' }}">
-                                        <span class="text-[15px] font-normal text-center block">Kelola Laporan Warga</span>
-                                    </a>
-                                    <div class="h-px bg-gray-100 mx-3 my-1"></div>
+                                    
                                     <a href="{{ route('wilayah.berita.index') }}" class="block px-4 py-2.5 text-gray-800 hover:bg-blue-50 hover:border-l-[3px] hover:border-l-blue-500 transition-all duration-150 whitespace-nowrap {{ request()->routeIs('wilayah.berita.*') ? 'bg-blue-50 border-l-[3px] border-l-blue-500 font-medium' : 'border-l-[3px] border-l-transparent' }}">
                                         <span class="text-[15px] font-normal text-center block">Kelola Kabar dan Berita</span>
                                     </a>
@@ -461,9 +455,7 @@
         <a href="{{ route('pelayanan') }}" class="block pl-10 pr-6 py-2.5 text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition {{ request()->routeIs('pelayanan') ? 'text-blue-600 font-medium border-l-4 border-blue-500' : '' }}">
             Tentang Layanan
         </a>
-        <a href="{{ route('bumdes.laporan') }}" class="block pl-10 pr-6 py-2.5 text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition {{ request()->routeIs('bumdes.laporan') ? 'text-blue-600 font-medium border-l-4 border-blue-500' : '' }}">
-            Grafik Layanan
-        </a>
+        
         <a href="{{ route('pasar.index') }}" class="block pl-10 pr-6 py-2.5 text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition {{ request()->routeIs('pasar.*') ? 'text-blue-600 font-medium border-l-4 border-blue-500' : '' }}">
             Pasar Daerah
         </a>

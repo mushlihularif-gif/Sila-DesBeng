@@ -55,13 +55,33 @@ Route::get('/kategori-layanan/{category}', [App\Http\Controllers\User\ServiceCat
 Route::get('/beranda/live-search', [App\Http\Controllers\User\BerandaController::class, 'liveSearch'])
     ->name('beranda.live-search');
 
+Route::get('/konten-media/{announcement}/{image}', [\App\Http\Controllers\ContentWorkspaceController::class, 'media'])->whereNumber('image')->name('content.media');
+Route::get('/buka-web/notifikasi/{kind}/{notification}', [\App\Http\Controllers\NotificationChannelController::class, 'open'])->whereNumber('notification')->name('notification-link.web');
+Route::get('/buka-aplikasi/notifikasi/{kind}/{notification}', [\App\Http\Controllers\NotificationChannelController::class, 'open'])->whereNumber('notification')->name('notification-link.app');
+Route::get('/.well-known/assetlinks.json', [\App\Http\Controllers\NotificationChannelController::class, 'assetLinks']);
+Route::prefix('pengaturan-notifikasi')->name('notification-settings.')->middleware('auth')->group(function () {
+    Route::get('/', [\App\Http\Controllers\NotificationChannelController::class, 'index'])->name('index');
+    Route::post('/', [\App\Http\Controllers\NotificationChannelController::class, 'update'])->name('update');
+    Route::post('/kode', [\App\Http\Controllers\NotificationChannelController::class, 'sendCode'])->middleware('throttle:3,1')->name('send-code');
+    Route::post('/verifikasi', [\App\Http\Controllers\NotificationChannelController::class, 'verifyCode'])->middleware('throttle:5,1')->name('verify-code');
+});
+Route::prefix('kelola-kabar')->name('content.')->middleware(['auth'])->group(function () {
+    Route::get('/', [\App\Http\Controllers\ContentWorkspaceController::class, 'index'])->name('index');
+    Route::post('/', [\App\Http\Controllers\ContentWorkspaceController::class, 'store'])->middleware('throttle:20,1')->name('store');
+    Route::post('/ai', [\App\Http\Controllers\ContentWorkspaceController::class, 'ai'])->middleware('throttle:10,1')->name('ai');
+    Route::get('/{announcement}', [\App\Http\Controllers\ContentWorkspaceController::class, 'show'])->name('show');
+    Route::get('/{announcement}/state', [\App\Http\Controllers\ContentWorkspaceController::class, 'state'])->middleware('throttle:90,1')->name('state');
+    Route::get('/{announcement}/sources', [\App\Http\Controllers\ContentWorkspaceController::class, 'sources'])->name('sources');
+    Route::post('/{announcement}/claim', [\App\Http\Controllers\ContentWorkspaceController::class, 'claim'])->middleware('throttle:30,1')->name('claim');
+    Route::post('/{announcement}/action', [\App\Http\Controllers\ContentWorkspaceController::class, 'action'])->middleware('throttle:90,1')->name('action');
+    Route::post('/{announcement}/images', [\App\Http\Controllers\ContentWorkspaceController::class, 'images'])->middleware('throttle:20,1')->name('images');
+});
+
 // Kabar Daerah / Pengumuman
 Route::get('/kabar-daerah', [App\Http\Controllers\User\AnnouncementController::class, 'index'])
-    ->name('announcements.index')
-    ->middleware('role:user,guest');
+    ->name('announcements.index');
 Route::get('/kabar-daerah/{id}', [App\Http\Controllers\User\AnnouncementController::class, 'show'])
-    ->name('announcements.show')
-    ->middleware('role:user,guest');
+    ->name('announcements.show');
 
 
 Route::get('/pelayanan', function () {
@@ -76,10 +96,6 @@ Route::get('/layanandaerah/profil-layanan', [App\Http\Controllers\User\RegionDir
 
 Route::get('/layanandaerah/profil-layanan/kecamatan/{id}', [App\Http\Controllers\User\RegionDirectoryController::class, 'showDesa'])
     ->name('bumdes.profil.desa')
-    ->middleware('role:user,guest');
-
-Route::get('/layanandaerah/laporan', [App\Http\Controllers\User\BumdesLaporanController::class, 'index'])
-    ->name('bumdes.laporan')
     ->middleware('role:user,guest');
 
 Route::get('/layanandaerah/{slug}', [App\Http\Controllers\User\BumdesUserController::class, 'show'])
@@ -103,54 +119,6 @@ Route::get('/kemitraan/gabung', [App\Http\Controllers\PartnerApplicationControll
 Route::post('/kemitraan/gabung', [App\Http\Controllers\PartnerApplicationController::class, 'store'])
     ->name('kemitraan.store')
     ->middleware('role:user,guest');
-
-// Validasi QR Code Surat Bukti Laporan (Publik, tanpa login)
-Route::get('/validasi/laporan/{id}', function ($id) {
-    $token = request('token');
-    $laporan = \App\Models\Laporan::with(['user', 'region'])->find($id);
-    
-    $valid = false;
-    $handler_name = 'Sistem SiladesBeng';
-
-    if ($laporan && $token) {
-        $expectedToken = hash_hmac('sha256', $laporan->id . $laporan->created_at, config('app.key'));
-        $valid = hash_equals($expectedToken, $token);
-
-        if ($valid) {
-            // Tentukan nama handler (penanggung jawab terakhir)
-            if ($laporan->admin_id) {
-                $handler = \App\Models\User::find($laporan->admin_id);
-                if ($handler) $handler_name = $handler->name;
-            } elseif ($laporan->rw_handler_id) {
-                $handler = \App\Models\User::find($laporan->rw_handler_id);
-                if ($handler) $handler_name = $handler->name;
-            } elseif ($laporan->rt_handler_id) {
-                $handler = \App\Models\User::find($laporan->rt_handler_id);
-                if ($handler) $handler_name = $handler->name;
-            }
-
-            // Fallback ke Nama Lengkap Admin Desa jika belum ada handler spesifik
-            if (empty($handler_name) || $handler_name === 'Sistem SiladesBeng') {
-                $desaId = $laporan->region_id ?? $laporan->user?->region_id;
-                $adminDesa = \App\Models\User::where('role', 'admin_desa')
-                    ->where('region_id', $desaId)
-                    ->first();
-
-                if ($adminDesa && !empty($adminDesa->name)) {
-                    $handler_name = $adminDesa->name;
-                } else {
-                    $handler_name = 'Pemerintah Desa';
-                }
-            }
-        }
-    }
-    
-    return view('pages.validasi.laporan', [
-        'valid' => $valid,
-        'laporan' => $valid ? $laporan : null,
-        'handler_name' => $handler_name,
-    ]);
-})->name('validasi.laporan');
 
 // Validasi QR Code Bukti Transaksi (Publik, tanpa login)
 Route::get('/validasi/transaksi/{type}/{id}', function ($type, $id) {
@@ -805,17 +773,6 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
         Route::get('/bukti-transaksi/{id}/{type}/download', [\App\Http\Controllers\Admin\TransactionController::class, 'downloadProof'])->name('admin.aktivitas.bukti-transaksi.download');
     });
     
-    // Route Pelaporan Warga (Admin Desa ke atas)
-    Route::prefix('pelaporan')->middleware('staff.permission:pelaporan_warga')->group(function () {
-        Route::get('/arsip', [\App\Http\Controllers\Admin\AdminPelaporanController::class, 'archive'])->name('admin.pelaporan.archive');
-        Route::get('/', [\App\Http\Controllers\Admin\AdminPelaporanController::class, 'index'])->name('admin.pelaporan.index');
-        Route::get('/{id}', [\App\Http\Controllers\Admin\AdminPelaporanController::class, 'show'])->name('admin.pelaporan.show');
-        Route::post('/{id}/respond', [\App\Http\Controllers\Admin\AdminPelaporanController::class, 'respond'])->name('admin.pelaporan.respond');
-        Route::post('/{id}/escalate', [\App\Http\Controllers\Admin\AdminPelaporanController::class, 'escalate'])->name('admin.pelaporan.escalate');
-        Route::post('/{id}/resolve', [\App\Http\Controllers\Admin\AdminPelaporanController::class, 'resolve'])->name('admin.pelaporan.resolve');
-        Route::post('/{id}/reject', [\App\Http\Controllers\Admin\AdminPelaporanController::class, 'reject'])->name('admin.pelaporan.reject');
-    });
-    
     // Route Laporan
     Route::prefix('laporan')->group(function () {
         Route::get('/transaksi', [\App\Http\Controllers\Admin\ReportController::class, 'transactions'])->name('admin.laporan.transaksi');
@@ -863,40 +820,9 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
     });
 });
 
-// ==========================================
-// ROUTES PELAPORAN WARGA (I_VILAGGE MERGE)
-// ==========================================
-
 Route::post('/kritik-saran', [\App\Http\Controllers\KritikSaranController::class, 'store'])->name('kritik-saran.store');
 
-// Landing Page Pelaporan Warga (Tidak perlu login)
-Route::get('/pelaporan-warga', function () {
-    return view('user.laporan.landing');
-})->name('pelaporan.landing')->middleware('region.service:pelaporan-warga');
-
 Route::middleware(['auth', 'role:user'])->group(function () {
-    Route::prefix('user/laporan')->name('user.laporan.')->group(function () {
-        Route::get('/', [\App\Http\Controllers\LaporanController::class, 'index'])->name('index');
-        // Membuat laporan menuruti sakelar layanan wilayah. Sebelumnya middleware
-        // ini cuma menempel di halaman landing, sehingga wilayah yang mematikan
-        // Pelaporan Warga tetap menerima laporan lewat form ini. Melihat dan
-        // menghapus laporan lama sengaja dibiarkan lolos: warga tetap berhak atas
-        // riwayatnya sendiri meski layanannya kemudian dimatikan.
-        Route::get('/create', [\App\Http\Controllers\LaporanController::class, 'create'])
-            ->name('create')->middleware('region.service:pelaporan-warga');
-        Route::post('/', [\App\Http\Controllers\LaporanController::class, 'store'])
-            ->name('store')->middleware('region.service:pelaporan-warga');
-        Route::get('/export/{id}', [\App\Http\Controllers\LaporanController::class, 'exportPdf'])->name('export');
-        Route::get('/{laporan}', [\App\Http\Controllers\LaporanController::class, 'show'])->name('show');
-        // Rute edit/update dihapus: LaporanController tidak punya method edit()
-        // maupun update(), tidak ada view user/laporan/edit.blade.php, dan tidak
-        // satu pun halaman menautnya — membukanya selalu berakhir 500.
-        Route::delete('/{laporan}', [\App\Http\Controllers\LaporanController::class, 'destroy'])->name('destroy');
-    });
-
-    Route::post('/laporan/{laporan}/rating', [\App\Http\Controllers\RatingController::class, 'store'])->name('laporan.rating.store');
-    Route::put('/laporan/{laporan}/rating', [\App\Http\Controllers\RatingController::class, 'update'])->name('laporan.rating.update');
-
     Route::prefix('help-center')->name('help-center.')->group(function () {
         Route::get('/', [\App\Http\Controllers\HelpCenterController::class, 'index'])->name('index');
         Route::get('/tickets', [\App\Http\Controllers\HelpCenterController::class, 'myTickets'])->name('my-tickets');
@@ -906,25 +832,9 @@ Route::middleware(['auth', 'role:user'])->group(function () {
         Route::post('/tickets/{id}/close', [\App\Http\Controllers\HelpCenterController::class, 'close'])->name('close');
     });
     
-    // Notifikasi pelaporan dipisah pathnya
-    Route::prefix('laporan-notifications')->name('laporan-notifications.')->group(function () {
-        Route::get('/', [\App\Http\Controllers\NotificationController::class, 'index'])->name('index');
-        Route::match(['get', 'post', 'patch'], '/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('mark-as-read');
-        Route::post('/mark-all-read', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('mark-all-read');
-        Route::delete('/{id}', [\App\Http\Controllers\NotificationController::class, 'destroy'])->name('destroy');
-        Route::delete('/clear/read', [\App\Http\Controllers\NotificationController::class, 'clearRead'])->name('clear-read');
-    });
-
     // Fitur Khusus Admin RT/RW di Frontend
     // TODO (KYC): Middleware CheckAdminWilayahKyc dimatikan sementara agar proses development tampilan tidak terhambat scan KTP.
     Route::prefix('wilayah')->name('wilayah.')->middleware(['role:admin_rt,admin_rw'])->group(function () {
-        Route::get('/laporan', [\App\Http\Controllers\User\WilayahAdminController::class, 'indexLaporan'])->name('laporan.index');
-        Route::get('/laporan/{id}', [\App\Http\Controllers\User\WilayahAdminController::class, 'showLaporan'])->name('laporan.show');
-        Route::post('/laporan/{id}/respond', [\App\Http\Controllers\User\WilayahAdminController::class, 'respondLaporan'])->name('laporan.respond');
-        Route::post('/laporan/{id}/escalate', [\App\Http\Controllers\User\WilayahAdminController::class, 'escalateLaporan'])->name('laporan.escalate');
-        Route::post('/laporan/{id}/resolve', [\App\Http\Controllers\User\WilayahAdminController::class, 'resolveLaporan'])->name('laporan.resolve');
-        Route::get('/laporan/{id}/cetak', [\App\Http\Controllers\User\WilayahAdminController::class, 'cetakBukti'])->name('laporan.cetak');
-        
         Route::get('/berita', [\App\Http\Controllers\User\WilayahAdminController::class, 'indexBerita'])->name('berita.index');
         Route::post('/berita', [\App\Http\Controllers\User\WilayahAdminController::class, 'storeBerita'])->name('berita.store');
         

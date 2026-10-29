@@ -13,9 +13,9 @@ class AnnouncementController extends Controller
     {
         // 1. Berita Daerah (Global / Se-Kabupaten)
         $beritasQuery = Announcement::with(['region', 'admin', 'images'])
-            ->where('is_active', true)
+            ->visibleTo(auth()->user())
             ->where('post_category', 'Berita')
-            ->orderBy('created_at', 'desc');
+            ->orderBy('published_at', 'desc');
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -30,21 +30,9 @@ class AnnouncementController extends Controller
         // 2. Pengumuman Warga (Sesuai domisili)
         $user = auth()->user();
         $pengumumanQuery = Announcement::with(['region', 'admin'])
-            ->where('is_active', true)
+            ->visibleTo(auth()->user())
             ->where('post_category', 'Pengumuman')
-            ->orderBy('created_at', 'desc');
-
-        // Filter berdasarkan wilayah pengguna
-        if ($user && $user->region_id) {
-            $ancestorIds = Region::getAncestorIds($user->region_id);
-            $relevantRegionIds = array_merge([$user->region_id], $ancestorIds);
-            
-            $pengumumanQuery->where(function($q) use ($relevantRegionIds) {
-                $q->whereIn('target_audience_id', $relevantRegionIds)
-                  ->orWhere('target_audience_type', 'all')
-                  ->orWhereNull('target_audience_id'); // Untuk data lama yang tidak punya target khusus
-            });
-        }
+            ->orderBy('published_at', 'desc');
 
         if ($request->filled('type')) {
             $pengumumanQuery->where('type', $request->type);
@@ -68,14 +56,16 @@ class AnnouncementController extends Controller
     public function show($id)
     {
         $announcement = Announcement::with(['region', 'admin', 'laporan', 'laporan.user', 'images'])
-            ->where('is_active', true)
+            ->visibleTo(auth()->user())
             ->findOrFail($id);
+
+        app(\App\Services\ContentViewService::class)->record($announcement, request());
 
         // Ambil rekomendasi kabar dari kategori yang sama terlebih dahulu
         $relatedAnnouncements = Announcement::where('is_active', true)
             ->where('id', '!=', $id)
             ->where('post_category', $announcement->post_category)
-            ->orderBy('created_at', 'desc')
+            ->orderBy('published_at', 'desc')
             ->take(4)
             ->get();
 
@@ -84,7 +74,7 @@ class AnnouncementController extends Controller
             $excludeIds = array_merge([$id], $relatedAnnouncements->pluck('id')->toArray());
             $otherAnnouncements = Announcement::where('is_active', true)
                 ->whereNotIn('id', $excludeIds)
-                ->orderBy('created_at', 'desc')
+                ->orderBy('published_at', 'desc')
                 ->take(4 - $relatedAnnouncements->count())
                 ->get();
             $relatedAnnouncements = $relatedAnnouncements->concat($otherAnnouncements);

@@ -2,22 +2,13 @@
 
 namespace App\Services;
 
-use App\Models\Laporan;
 use App\Models\Region;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 
 class ReportAccess
 {
-    public function administrativeQuery(?User $user): Builder
-    {
-        $query = Laporan::query();
-        if (!$user || !$user->isAdmin()) {
-            return $query->whereRaw('1 = 0');
-        }
-        if ($user->role === 'super_admin') {
-            return $query;
-        }
+    public function administrativeQuery($user) { return collect(); }
         if (!$user->region_id || ($user->role === 'staff' && !$user->hasUnitPermission('pelaporan_warga'))) {
             return $query->whereRaw('1 = 0');
         }

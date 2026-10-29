@@ -24,7 +24,8 @@
             </div>
 
             <!-- Action Buttons -->
-            <div class="flex justify-end mb-6 gap-4">
+            <div class="flex flex-wrap justify-end mb-6 gap-4">
+                <a href="{{ route('notification-settings.index') }}" class="px-5 py-2.5 border border-blue-500 text-blue-700 bg-white rounded-lg text-sm font-semibold">Atur WhatsApp dan Notifikasi Aplikasi</a>
                 @if($unreadCount > 0)
                 <form action="{{ route('user.notifications.readAll') }}" method="POST">
                     @csrf

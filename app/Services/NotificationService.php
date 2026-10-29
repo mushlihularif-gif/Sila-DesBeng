@@ -6,7 +6,6 @@ use App\Models\Notification;
 use App\Models\AdminNotification;
 use App\Models\User;
 use App\Models\Region;
-use App\Models\Laporan;
 use App\Models\MutasiPenduduk;
 use App\Models\PartnerApplication;
 use App\Models\Announcement;
@@ -85,7 +84,7 @@ class NotificationService
                 'type' => 'laporan_submitted',
                 'title' => 'Laporan Berhasil Terkirim',
                 'message' => 'Laporan pengaduan Anda mengenai "' . $laporan->kategori . '" telah berhasil terkirim dan sedang menunggu tanggapan petugas.',
-                'link' => route('user.laporan.show', $laporan->id),
+                'link' => '#',
                 'icon' => 'bx bx-file',
                 'is_read' => false,
                 'sent_at' => now(),
@@ -104,7 +103,7 @@ class NotificationService
                 'type' => 'laporan_proses',
                 'title' => 'Laporan Ditanggapi (' . $responderTitle . ')',
                 'message' => 'Laporan Anda sedang ditindaklanjuti oleh pengurus ' . $responderTitle . '. Catatan: ' . $notes,
-                'link' => route('user.laporan.show', $laporan->id),
+                'link' => '#',
                 'icon' => 'bx bx-chat',
                 'is_read' => false,
                 'sent_at' => now(),
@@ -123,7 +122,7 @@ class NotificationService
                 'type' => 'laporan_eskalasi',
                 'title' => 'Laporan Diteruskan (Eskalasi)',
                 'message' => 'Laporan Anda telah diteruskan ke tingkat ' . strtoupper($level) . ' untuk penanganan lebih lanjut.',
-                'link' => route('user.laporan.show', $laporan->id),
+                'link' => '#',
                 'icon' => 'bx bx-trending-up',
                 'is_read' => false,
                 'sent_at' => now(),
@@ -147,7 +146,7 @@ class NotificationService
                 'type' => 'laporan_selesai',
                 'title' => 'Laporan Selesai Ditangani',
                 'message' => $msg,
-                'link' => route('user.laporan.show', $laporan->id),
+                'link' => '#',
                 'icon' => 'bx bx-check-circle',
                 'is_read' => false,
                 'sent_at' => now(),
@@ -166,7 +165,7 @@ class NotificationService
                 'type' => 'laporan_ditolak',
                 'title' => 'Laporan Ditolak',
                 'message' => 'Mohon maaf, laporan pengaduan Anda ditolak. Alasan: ' . $notes,
-                'link' => route('user.laporan.show', $laporan->id),
+                'link' => '#',
                 'icon' => 'bx bx-x-circle',
                 'is_read' => false,
                 'sent_at' => now(),
@@ -428,6 +427,7 @@ class NotificationService
 
     public static function broadcastNewProduct($unitName, $productName, $regionId = null, $link = null)
     {
+        if (!$regionId) return;
         try {
             $query = User::where('role', 'user');
             if ($regionId) {
@@ -459,6 +459,7 @@ class NotificationService
 
     public static function broadcastStockUpdate($productName, $stock, $satuan = 'tabung', $regionId = null, $link = null)
     {
+        if (!$regionId) return;
         try {
             $query = User::where('role', 'user');
             if ($regionId) {
@@ -490,6 +491,7 @@ class NotificationService
 
     public static function broadcastAnnouncement($announcement)
     {
+        if (!$announcement->is_active || !in_array($announcement->workflow_state,['published','cancelled'],true)) return;
         try {
             $isBerita = ($announcement->post_category === 'Berita');
             $type = $isBerita ? 'berita' : 'pengumuman';
@@ -499,7 +501,13 @@ class NotificationService
             $link = route('announcements.show', $announcement->id);
 
             $query = User::where('role', 'user');
-            if (!$isBerita && $announcement->target_audience_id) {
+            if (!$isBerita && !$announcement->target_audience_id) return;
+            if ($isBerita) {
+                $village = Region::whereIn('id',Region::garisLayananUntukWarga($announcement->region_id))->whereIn('type',['desa','kelurahan'])->value('id');
+                if (!$village) return;
+                $query->whereIn('region_id',[$village,...Region::getDescendantIds($village)]);
+            }
+            if (!$isBerita) {
                 $descendantIds = Region::getDescendantIds($announcement->target_audience_id);
                 $descendantIds[] = $announcement->target_audience_id;
                 $query->whereIn('region_id', $descendantIds);
@@ -507,6 +515,10 @@ class NotificationService
             $targetUsers = $query->get();
 
             $shortDesc = \Illuminate\Support\Str::limit(strip_tags($announcement->description), 140);
+            if ($announcement->workflow_state === 'cancelled') {
+                $title = '[Dibatalkan] '.$announcement->title;
+                $shortDesc = \Illuminate\Support\Str::limit(strip_tags($announcement->rejection_reason),140);
+            }
 
             foreach ($targetUsers as $targetUser) {
                 Notification::create([
@@ -516,13 +528,14 @@ class NotificationService
                     'message' => $shortDesc,
                     'link' => $link,
                     'icon' => $icon,
-                    'image' => $announcement->image_path,
+                    'image' => null,
                     'is_read' => false,
                     'sent_at' => now(),
                 ]);
             }
         } catch (\Throwable $e) {
             Log::error('NotificationService error [broadcastAnnouncement]: ' . $e->getMessage());
+            throw $e; // Publication and its notification records must commit together.
         }
     }
 

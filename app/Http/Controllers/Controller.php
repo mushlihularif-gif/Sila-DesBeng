@@ -108,8 +108,7 @@ abstract class Controller
             'sewa_mobil'     => 'mobil',
             'fasilitas_umum' => 'fasilitas',
             'pasar_daerah'   => 'pasar',
-            'pelaporan_warga' => 'pelapor',
-        ];
+                    ];
 
         $izinStaf = $currentUser->staffPermissions()->pluck('unit_key')->all();
         $kataKunci = [];

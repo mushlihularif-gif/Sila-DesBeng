@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Laporan;
 use App\Models\User;
 use App\Models\Announcement;
 use Illuminate\Support\Facades\Storage;
@@ -21,33 +20,24 @@ class WilayahAdminApiController extends Controller
         $rw = $user->rw;
 
         // Base Query untuk Laporan
-        $laporanQuery = Laporan::where('region_id', $regionId);
+        $totalLaporan = 0; $laporanPending = 0; $laporanSelesai = 0; $oldestPending = null; $laporanTerbaru = collect();
+        $slaStatus = 'nonaktif'; $oldestPendingMinutes = 0;
         
         // Base Query untuk Warga
         $wargaQuery = User::where('region_id', $regionId)->where('role', 'user');
 
         if ($user->role === 'admin_rt') {
-            $laporanQuery->where('rt', $rt)->where('rw', $rw);
+            
             $wargaQuery->where('rt', $rt)->where('rw', $rw);
         } elseif ($user->role === 'admin_rw') {
-            $laporanQuery->where('rw', $rw);
+            
             $wargaQuery->where('rw', $rw);
         }
 
-        // Ambil Data Statistik Laporan
-        $totalLaporan = (clone $laporanQuery)->count();
-        $laporanPending = (clone $laporanQuery)->where('status', 'Pending')->count();
-        $laporanSelesai = (clone $laporanQuery)->where('status', 'Selesai')->count();
+        
 
         // Ambil Data Warga
         $totalWarga = (clone $wargaQuery)->count();
-        
-        // Cek SLA (Target Respon)
-        // Kita hitung berdasarkan laporan pending tertua
-        // Jika ada laporan pending, SLA = (Waktu sekarang) - (Waktu laporan dibuat)
-        $oldestPending = (clone $laporanQuery)->where('status', 'Pending')->orderBy('created_at', 'asc')->first();
-        $slaStatus = 'aman';
-        $oldestPendingMinutes = 0;
         
         if ($oldestPending) {
             $oldestPendingMinutes = $oldestPending->created_at->diffInMinutes(now());
@@ -59,8 +49,7 @@ class WilayahAdminApiController extends Controller
             }
         }
 
-        // Ambil data laporan terbaru (Feed/Aktivitas)
-        $laporanTerbaru = (clone $laporanQuery)->with('user:id,name,avatar')->orderBy('created_at', 'desc')->take(5)->get();
+        
 
         $user->load(['region', 'file']);
         $avatarUrl = null;
@@ -111,39 +100,7 @@ class WilayahAdminApiController extends Controller
 
     public function storeBerita(Request $request)
     {
-        $user = $request->user();
-
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'type' => 'required|string',
-            'description' => 'required|string',
-            'location' => 'nullable|string|max:255',
-            'event_date' => 'nullable|date',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
-        ]);
-
-        $imagePath = null;
-        if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('announcements', 'public');
-        }
-
-        $berita = Announcement::create([
-            'title' => $request->title,
-            'type' => $request->type, // e.g. Berita, Kegiatan, Artikel
-            'description' => $request->description,
-            'location' => $request->location,
-            'event_date' => $request->event_date,
-            'image_path' => $imagePath,
-            'region_id' => $user->region_id,
-            'admin_id' => $user->id,
-            'post_category' => 'Berita',
-            'is_active' => true,
-        ]);
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Berita berhasil dipublikasikan!',
-            'data' => $berita
-        ], 201);
+        return response()->json(['message' => 'Publikasi langsung tidak lagi tersedia. Gunakan alur kiriman dan editor Kabar terbaru.', 'workspace_url' => route('content.index')], 409);
     }
+
 }

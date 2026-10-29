@@ -78,8 +78,7 @@ class StaffManagementController extends Controller
             'Penyewaan Transportasi' => 'sewa_mobil',
             'Fasilitas Umum'         => 'fasilitas_umum',
             'Pasar Daerah'           => 'pasar_daerah',
-            'Pelaporan Warga'        => 'pelaporan_warga',
-        ];
+                    ];
 
         $aktif = [];
 
@@ -159,7 +158,7 @@ class StaffManagementController extends Controller
         if (! array_intersect(array_keys($daftar), array_keys(User::izinPlatform()))) {
             $groups = [
                 'Belanja dan Kebutuhan' => ['gas', 'pasar_daerah'],
-                'Layanan Daerah' => ['sewa_alat', 'sewa_mobil', 'fasilitas_umum', 'pelaporan_warga'],
+                'Layanan Daerah' => ['sewa_alat', 'sewa_mobil', 'fasilitas_umum'],
                 'Kabar dan Informasi Daerah' => ['kabar_informasi'],
             ];
             $hasil = [];

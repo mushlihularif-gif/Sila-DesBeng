@@ -58,8 +58,8 @@ class FonnteService
 
         // Jika tidak ada token (misal di local yang belum disetting), log saja
         if (empty($this->token)) {
-            Log::warning("Fonnte Token is empty. Simulated WhatsApp message to $target: $message");
-            return ['status' => true, 'message' => 'Simulated'];
+            Log::warning('Fonnte is not configured; WhatsApp message was not sent.');
+            return ['status' => false, 'message' => 'Pengiriman WhatsApp belum dikonfigurasi.', 'code' => 'not_configured'];
         }
 
         try {
@@ -78,15 +78,15 @@ class FonnteService
             $result = $response->json();
 
             if (isset($result['status']) && $result['status'] === true) {
-                return ['status' => true, 'message' => 'Pesan terkirim'];
+                return ['status' => true, 'message' => 'Pesan diterima penyedia untuk dikirim.', 'provider_id' => $result['id'][0] ?? null];
             } else {
-                Log::error('Fonnte API Error: ' . json_encode($result));
-                return ['status' => false, 'message' => $result['reason'] ?? 'Gagal mengirim pesan'];
+                Log::warning('Fonnte rejected a send request.', ['status' => $response->status()]);
+                return ['status' => false, 'message' => 'Penyedia belum menerima pesan.', 'code' => $response->status() === 429 ? 'rate_limited' : 'provider_rejected', 'retryable' => $response->status() === 429];
             }
 
         } catch (\Exception $e) {
-            Log::error('Fonnte HTTP Error: ' . $e->getMessage());
-            return ['status' => false, 'message' => 'Terjadi kesalahan koneksi'];
+            Log::warning('Fonnte request did not return a confirmed result.');
+            return ['status' => false, 'message' => 'Hasil pengiriman belum dapat dikonfirmasi.', 'code' => 'unknown'];
         }
     }
 

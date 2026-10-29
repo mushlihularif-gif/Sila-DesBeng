@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Laporan;
 use App\Models\GasOrder;
 use App\Models\RentalBooking;
 use App\Models\MobilBooking;
@@ -96,22 +95,7 @@ class HistoryController extends Controller
             ]);
         }
 
-        // 5. Laporan Warga
-        $laporans = Laporan::where('user_id', $user->id)->get();
-        foreach ($laporans as $laporan) {
-            $history->push([
-                'id' => $laporan->id,
-                'category' => 'Laporan Warga',
-                'title' => $laporan->judul_laporan ?? 'Laporan',
-                'price' => 'Prioritas: ' . ($laporan->tingkat_prioritas ?? 'Normal'), // Use price field for priority display
-                'date' => Carbon::parse($laporan->created_at)->isoFormat('dddd, D MMMM Y HH:mm') . ' WIB',
-                'status' => $this->mapStatus($laporan->status),
-                'payment' => '-', // No payment for laporan
-                'image' => url('User/img/elemen/lapor.png'),
-                'raw_date' => $laporan->created_at,
-                'raw_data' => $laporan
-            ]);
-        }
+        
 
         // 6. Pasar Daerah Orders (BUMDes)
         $pasarOrders = PasarOrder::where('user_id', $user->id)
