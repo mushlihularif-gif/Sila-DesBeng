@@ -8,8 +8,14 @@ class FasilitasUmum extends Model
 {
     public function scopeInCatalog($query)
     {
-        // Legacy imports also stored ambulance units in this table.
-        return $query->where('nama_fasilitas', 'not like', '%ambulan%');
+        return $query->where('nama_fasilitas', 'not like', '%ambulan%')
+            ->where(function($q) {
+                $q->whereNull('kategori')
+                  ->orWhere(function($sub) {
+                      $sub->where('kategori', 'not like', '%kendaraan%')
+                          ->where('kategori', 'not like', '%ambulan%');
+                  });
+            });
     }
 
     protected $table = 'fasilitas_umums';

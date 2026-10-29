@@ -27,7 +27,7 @@ class UnitFasilitasUmumController extends Controller
 
         $user = auth()->user();
         $search = $request->get('search');
-        $tab = $request->get('tab', 'kendaraan'); // default tab
+        $tab = $request->get('tab', 'gedung'); // default tab
         
         $fasilitas = FasilitasUmum::inCatalog()
             ->when($user->region_id, function($q, $regionId) {
@@ -43,18 +43,7 @@ class UnitFasilitasUmumController extends Controller
             ->paginate(6, ['*'], 'page_gedung')
             ->appends(['search' => $search, 'tab' => 'gedung']);
             
-        // Ambil kendaraan operasional desa yang masih tersedia.
-        $mobils = Mobil::query()
-            ->where('kategori', 'kendaraan_operasional')
-            ->when($user->region_id, function($q, $regionId) {
-                return $q->where('region_id', $regionId);
-            })
-            ->with('supirs')
-            ->when($search, function ($query, $search) {
-                return $query->searchWhereLike(['nama_mobil', 'kategori'], $search);
-            })
-            ->paginate(6, ['*'], 'page_kendaraan')
-            ->appends(['search' => $search, 'tab' => 'kendaraan']);
+        $mobils = collect();
             
         $region = Region::find($user->region_id);
         

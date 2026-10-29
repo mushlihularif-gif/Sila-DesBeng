@@ -25,7 +25,7 @@
                 <div class="min-w-0">
                     <h6 class="fw-bold mb-0 text-secondary" style="font-size: 0.9rem;">Manajemen Fasilitas Umum dan Aset</h6>
                     <p class="mb-0 text-secondary small d-none d-sm-block" style="opacity: 0.85; font-size: 0.78rem;">
-                        Kelola data kendaraan operasional (Truk Sampah) dan fasilitas publik (Gedung Serbaguna, Lapangan) yang dapat diakses oleh warga.
+                        Kelola data fasilitas publik (Gedung Serbaguna, Balai Pertemuan, Lapangan Olahraga) yang dapat diakses oleh warga.
                     </p>
                 </div>
             </div>
@@ -171,12 +171,7 @@
             <div class="bg-light p-1 rounded-pill mb-2 mb-sm-3 border border-light-subtle shadow-sm w-100 overflow-hidden">
                 <ul class="nav nav-pills nav-pills-scrollable mb-0" role="tablist">
                     <li class="nav-item">
-                        <button type="button" class="nav-link {{ $tab == 'kendaraan' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-kendaraan" aria-controls="navs-top-kendaraan" aria-selected="{{ $tab == 'kendaraan' ? 'true' : 'false' }}">
-                            <i class="bx bx-car me-1"></i> Kendaraan
-                        </button>
-                    </li>
-                    <li class="nav-item">
-                        <button type="button" class="nav-link {{ $tab == 'gedung' ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-gedung" aria-controls="navs-top-gedung" aria-selected="{{ $tab == 'gedung' ? 'true' : 'false' }}">
+                        <button type="button" class="nav-link {{ ($tab == 'gedung' || $tab == 'kendaraan') ? 'active' : '' }}" role="tab" data-bs-toggle="tab" data-bs-target="#navs-top-gedung" aria-controls="navs-top-gedung" aria-selected="{{ ($tab == 'gedung' || $tab == 'kendaraan') ? 'true' : 'false' }}">
                             <i class="bx bx-building-house me-1"></i> Gedung & Ruang Publik
                         </button>
                     </li>
@@ -197,153 +192,8 @@
             </div>
             
             <div class="tab-content">
-                <!-- TAB 1: KENDARAAN OPERASIONAL -->
-                <div class="tab-pane fade {{ $tab == 'kendaraan' ? 'show active' : '' }}" id="navs-top-kendaraan" role="tabpanel">
-                    <div class="d-flex justify-content-between align-items-center mb-2 mb-sm-3 bg-white p-2.5 p-sm-3 rounded-4 shadow-sm gap-2">
-                        <div class="d-flex align-items-center min-w-0">
-                            <div class="avatar avatar-sm bg-info-subtle text-info rounded-circle me-2 me-sm-3 d-flex justify-content-center align-items-center flex-shrink-0" style="width: 34px; height: 34px;">
-                                <i class="bx bx-car fs-5"></i>
-                            </div>
-                            <div class="min-w-0">
-                                <h6 class="mb-0 fw-bold text-truncate" style="font-size: 0.95rem;">Daftar Kendaraan Layanan</h6>
-                                <small class="text-muted d-none d-sm-block" style="font-size: 0.78rem;">Mobil Operasional, Truk Sampah, dll</small>
-                            </div>
-                        </div>
-                        <div class="flex-shrink-0">
-                            <a href="{{ route('admin.unit.kendaraan_operasional.create') }}" class="btn btn-primary btn-sm rounded-pill px-2.5 px-sm-3 py-1.5 shadow-sm d-inline-flex align-items-center fw-semibold text-nowrap" style="font-size: 0.8rem;">
-                                <i class="bx bx-plus me-1"></i> <span>Tambah</span><span class="d-none d-sm-inline ms-1">Kendaraan</span>
-                            </a>
-                        </div>
-                    </div>
-
-                    @if($mobils->count() > 0)
-                        <div class="row row-cols-2 row-cols-md-3 row-cols-xl-4 g-2 g-md-3">
-                            @foreach ($mobils as $mobil)
-                                @php
-                                    $validMobilPhotos = [];
-                                    foreach (['foto', 'foto_2', 'foto_3'] as $mCol) {
-                                        if (!empty($mobil->$mCol) && \Illuminate\Support\Facades\Storage::disk('public')->exists($mobil->$mCol)) {
-                                            $validMobilPhotos[] = $mobil->$mCol;
-                                        }
-                                    }
-                                    $mFotoCount = count($validMobilPhotos);
-                                @endphp
-                                <div class="col">
-                                    <div class="card h-100 product-card shadow-sm border-0">
-                                        <div class="position-relative">
-                                            <div id="carouselMobil{{ $mobil->id }}" class="carousel slide" data-bs-ride="carousel">
-                                                <div class="carousel-inner">
-                                                    @if ($mFotoCount > 0)
-                                                        @foreach ($validMobilPhotos as $idx => $photo)
-                                                            <div class="carousel-item {{ $idx === 0 ? 'active' : '' }}">
-                                                                <img src="{{ asset('storage/' . $photo) }}" class="card-img-top"
-                                                                    alt="{{ $mobil->nama_mobil }}"
-                                                                    onerror="this.parentElement.innerHTML='<div class=\'d-flex align-items-center justify-content-center bg-light text-muted w-100 carousel-placeholder\'><i class=\'bx bx-car\' style=\'font-size: 48px; color: #cbd5e1;\'></i></div>';">
-                                                            </div>
-                                                        @endforeach
-                                                    @else
-                                                        <div class="carousel-item active">
-                                                            <div class="d-flex align-items-center justify-content-center bg-light text-muted w-100 carousel-placeholder">
-                                                                <i class="bx bx-car" style="font-size: 48px; color: #cbd5e1;"></i>
-                                                            </div>
-                                                        </div>
-                                                    @endif
-                                                </div>
-                                                @if($mFotoCount > 1)
-                                                    <button class="carousel-control-prev" type="button"
-                                                        data-bs-target="#carouselMobil{{ $mobil->id }}" data-bs-slide="prev">
-                                                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                                        <span class="visually-hidden">Previous</span>
-                                                    </button>
-                                                    <button class="carousel-control-next" type="button"
-                                                        data-bs-target="#carouselMobil{{ $mobil->id }}" data-bs-slide="next">
-                                                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                                        <span class="visually-hidden">Next</span>
-                                                    </button>
-                                                @endif
-                                            </div>
-                                        </div>
-                                        <div class="card-body d-flex flex-column p-2 p-sm-3">
-                                            <div class="mb-1">
-                                                <h5 class="card-title fw-bold text-capitalize mb-1 text-truncate" title="{{ $mobil->nama_mobil }}">
-                                                    {{ $mobil->nama_mobil }}
-                                                </h5>
-                                                <div class="d-flex flex-wrap gap-1 align-items-center">
-                                                        <span class="badge bg-label-secondary rounded-pill card-badge-kategori"><i class="bx bx-car me-1"></i>Operasional</span>
-
-                                                    @php
-                                                        $plat = $mobil->plat_nomor ?: str_replace('Plat: ', '', $mobil->deskripsi ?? '');
-                                                    @endphp
-                                                    @if($plat && $plat !== '-')
-                                                        <span class="badge bg-light text-dark border font-monospace card-status-badge">{{ $plat }}</span>
-                                                    @endif
-                                                </div>
-                                            </div>
-
-                                            @if($mobil->supirs->isNotEmpty())
-                                                <div class="mt-1 mb-1.5 mb-sm-2">
-                                                    <small class="text-muted d-block mb-0.5 fw-semibold" style="font-size: 0.7rem;"><i class="bx bx-user-pin me-1"></i>Supir Penanggung Jawab:</small>
-                                                    @if($mobil->supirs && $mobil->supirs->count() > 0)
-                                                        <div class="d-flex flex-wrap gap-1">
-                                                            @foreach($mobil->supirs as $supir)
-                                                                <span class="badge bg-label-primary card-status-badge text-truncate" style="max-width: 100%;" title="{{ $supir->kontak }}">{{ $supir->nama }}</span>
-                                                            @endforeach
-                                                        </div>
-                                                    @else
-                                                        <span class="badge bg-label-warning card-status-badge">Belum ada supir</span>
-                                                    @endif
-                                                </div>
-                                            @endif
-                                            
-                                            <div class="mt-auto pt-2 pt-sm-3 border-top d-flex gap-1 flex-nowrap justify-content-center">
-                                                <a href="{{ route('admin.unit.kendaraan_operasional.show', $mobil->id) }}"
-                                                    class="btn btn-sm btn-outline-info flex-grow-1 card-btn-action text-nowrap d-inline-flex align-items-center justify-content-center" title="Lihat Detail">
-                                                    <i class="bx bx-info-circle"></i><span class="d-none d-sm-inline ms-1">Detail</span>
-                                                </a>
-                                                <a href="{{ route('admin.unit.kendaraan_operasional.edit', $mobil->id) }}"
-                                                    class="btn btn-sm btn-outline-warning flex-grow-1 card-btn-action text-nowrap d-inline-flex align-items-center justify-content-center" title="Ubah">
-                                                    <i class="bx bx-edit"></i><span class="d-none d-sm-inline ms-1">Edit</span>
-                                                </a>
-                                                <form action="{{ route('admin.unit.kendaraan_operasional.destroy', $mobil->id) }}" method="POST"
-                                                    data-konfirmasi="Apakah Anda yakin ingin menghapus kendaraan ini?" class="d-flex flex-grow-1 m-0 p-0">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger w-100 card-btn-action text-nowrap d-inline-flex align-items-center justify-content-center" title="Hapus">
-                                                        <i class="bx bx-trash"></i><span class="d-none d-sm-inline ms-1">Hapus</span>
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                        
-                        @if ($mobils->hasPages())
-                            <div class="mt-3 d-flex justify-content-center">
-                                {{ $mobils->links() }}
-                            </div>
-                        @endif
-                    @else
-                        <div class="card border-0 shadow-sm rounded-4">
-                            <div class="card-body text-center py-4 py-sm-5">
-                                <div class="empty-state-icon mb-3">
-                                    <i class="bx bx-car" style="font-size: 80px; color: #d1d5db;"></i>
-                                </div>
-                                <h5 class="fw-bold text-muted mb-2">Belum Ada Kendaraan</h5>
-                                <p class="text-muted mb-3 small" style="max-width: 400px; margin: 0 auto;">
-                                    Belum ada data kendaraan operasional (misalnya mobil operasional desa).
-                                </p>
-                                <a href="{{ route('admin.unit.kendaraan_operasional.create') }}" class="btn btn-primary btn-sm rounded-pill px-3 py-1.5 shadow-sm">
-                                    <i class="bx bx-plus-circle me-1"></i> Tambah Kendaraan
-                                </a>
-                            </div>
-                        </div>
-                    @endif
-                </div>
-
-                <!-- TAB 2: GEDUNG & RUANG PUBLIK -->
-                <div class="tab-pane fade {{ $tab == 'gedung' ? 'show active' : '' }}" id="navs-top-gedung" role="tabpanel">
+                <!-- TAB GEDUNG & RUANG PUBLIK -->
+                <div class="tab-pane fade {{ ($tab == 'gedung' || $tab == 'kendaraan') ? 'show active' : '' }}" id="navs-top-gedung" role="tabpanel">
                     <div class="d-flex justify-content-between align-items-center mb-2 mb-sm-3 bg-white p-2.5 p-sm-3 rounded-4 shadow-sm gap-2">
                         <div class="d-flex align-items-center min-w-0">
                             <div class="avatar avatar-sm bg-success-subtle text-success rounded-circle me-2 me-sm-3 d-flex justify-content-center align-items-center flex-shrink-0" style="width: 34px; height: 34px;">
@@ -498,7 +348,7 @@
                                     <div class="card-header bg-white border-bottom p-4">
                                         <div class="d-flex align-items-center">
                                             <div class="avatar avatar-sm bg-label-info rounded-circle me-3 d-flex justify-content-center align-items-center"><i class="bx bx-book"></i></div>
-                                            <h5 class="mb-0 fw-bold">SOP Peminjaman Gedung dan Kendaraan</h5>
+                                            <h5 class="mb-0 fw-bold">SOP Peminjaman Gedung dan Fasilitas Publik</h5>
                                         </div>
                                     </div>
                                     <div class="card-body p-4">
@@ -540,7 +390,7 @@
                                                         </div>
                                                     </div>
                                                     <div class="card-body">
-                                                        <p class="text-muted small mb-2">Kerusakan fasilitas/kendaraan sepenuhnya menjadi tanggung jawab penyewa.</p>
+                                                        <p class="text-muted small mb-2">Kerusakan fasilitas publik sepenuhnya menjadi tanggung jawab penyewa.</p>
                                                         
                                                         <div class="mb-3">
                                                             <textarea class="form-control border-light-subtle shadow-sm rounded-3" name="sop_ditanggung" id="sop_ditanggung_text" rows="8">{{ $sop_ditanggung }}</textarea>
@@ -592,7 +442,7 @@
                                         <h5 class="fw-bold text-white mb-3"><i class="bx bx-bulb me-2"></i>Tips Menulis SOP</h5>
                                         <ul class="list-unstyled mb-0" style="opacity: 0.9">
                                             <li class="mb-2"><i class="bx bx-check-circle me-2"></i>Sertakan biaya (jika ada) atau infokan jika gratis</li>
-                                            <li class="mb-2"><i class="bx bx-check-circle me-2"></i>Jelaskan prosedur pengembalian aset/kendaraan</li>
+                                            <li class="mb-2"><i class="bx bx-check-circle me-2"></i>Jelaskan prosedur pengembalian aset/kunci fasilitas</li>
                                             <li class="mb-2"><i class="bx bx-check-circle me-2"></i>Aturan denda jika terjadi kerusakan/keterlambatan</li>
                                             <li class="mb-2"><i class="bx bx-check-circle me-2"></i>Syarat dokumen yang harus dibawa warga</li>
                                         </ul>

@@ -10,7 +10,7 @@
                     <span class="text-gray-800">Unit </span>
                     <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Peminjaman Fasilitas Umum</span>
                 </h1>
-                <p class="text-gray-500 text-sm max-w-xl mx-auto mb-3">Layanan peminjaman gedung, ruang serbaguna, dan kendaraan operasional untuk kebutuhan masyarakat desa.</p>
+                <p class="text-gray-500 text-sm max-w-xl mx-auto mb-3">Layanan peminjaman gedung, balai pertemuan, dan fasilitas publik untuk kebutuhan masyarakat daerah.</p>
                 @if(isset($region) && $region)
                 <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-blue-50 border border-blue-200 rounded-full text-blue-700 text-sm font-semibold shadow-sm">
                     <i class="bx bx-map-pin"></i> Wilayah: {{ $region->name }}
@@ -24,31 +24,23 @@
 
             <!-- Category Filter -->
             @php
-                $hasGedung = $items->count() > 0;
-                $hasKendaraanOps = isset($kendaraans) && $kendaraans->where('kategori', 'kendaraan_operasional')->isNotEmpty();
-                $totalCount = $items->count() + (isset($kendaraans) ? $kendaraans->count() : 0);
+                $totalCount = $items->count();
+                $categories = $items->pluck('kategori')->filter()->unique();
             @endphp
             
-            @if($totalCount > 0)
+            @if($totalCount > 0 && $categories->count() > 1)
             <div class="flex flex-wrap justify-center gap-2.5 mb-8 max-w-4xl mx-auto px-4">
                 <button class="catalog-filter-btn filter-btn active" data-filter="all">
                     Semua ({{ $totalCount }})
                 </button>
-                @if($hasGedung)
-                <button class="catalog-filter-btn filter-btn" data-filter="gedung">
-                    Gedung dan Ruang Publik ({{ $items->count() }})
+                @foreach($categories as $categoryName)
+                <button class="catalog-filter-btn filter-btn" data-filter="{{ Str::slug($categoryName) }}">
+                    {{ ucfirst(str_replace('-', ' ', $categoryName)) }} ({{ $items->where('kategori', $categoryName)->count() }})
                 </button>
-                @endif
-                @if($hasKendaraanOps)
-                <button class="catalog-filter-btn filter-btn" data-filter="kendaraan-operasional">
-                    Kendaraan Operasional
-                </button>
-                @endif
+                @endforeach
             </div>
             @endif
 
-
-            <!-- Grid Kartu Produk -->
             <!-- Grid Kartu Produk (2 Kolom di Mobile, 2 di Tablet, 3 di Desktop) -->
             @if($totalCount > 0)
                 <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5 lg:gap-6 mb-12 sm:mb-16 max-w-6xl mx-auto">
@@ -114,7 +106,7 @@
                                 <div class="flex flex-col">
                                     <span class="text-[10px] sm:text-xs text-gray-500 mb-0.5 font-medium">Akses Layanan</span>
                                     <p class="text-gray-900 font-bold text-xs sm:text-base tracking-tight leading-none text-blue-600">
-                                        Fasilitas Desa
+                                        Fasilitas Publik
                                     </p>
                                 </div>
                                 <div class="text-right flex flex-col">
@@ -129,80 +121,6 @@
                     </div>
                     </a>
                     @endforeach
-
-                    <!-- Kendaraan Operasional Desa -->
-                    @if(isset($kendaraans))
-                    @foreach($kendaraans as $k)
-                    @php
-                        $supir = $k->supirs->first();
-                        $kCat = 'kendaraan-operasional';
-                    @endphp
-                    <div class="block group product-item transition-all duration-500" data-category="{{ $kCat }} kendaraan">
-                    <div class="product-card p-3 sm:p-5">
-                        
-                        <!-- Gambar Kendaraan -->
-                        <div class="product-image-wrapper mb-3 sm:mb-4">
-                            <img src="{{ $k->foto ? asset('storage/' . $k->foto) : asset('User/img/elemen/mobil.png') }}"
-                                 alt="{{ $k->nama_mobil }}"
-                                 loading="lazy"
-                                 onerror="this.onerror=null; this.src='{{ asset('User/img/elemen/mobil.png') }}';"
-                                 class="product-image">
-                            
-                            <!-- Status Badge -->
-                            <div class="absolute top-2 right-2 sm:top-4 sm:right-4 px-1.5 sm:px-3 py-0.5 sm:py-1.5 text-[8px] sm:text-[10px] font-bold rounded-full bg-blue-600 text-white shadow-md flex items-center gap-0.5 sm:gap-1 tracking-wider uppercase">
-                                <i class="bx bx-car"></i>
-                                <span>Kendaraan Desa</span>
-                            </div>
-                        </div>
-
-                        <!-- Info Kendaraan -->
-                        <div class="product-info flex flex-col flex-1 px-0.5 sm:px-1">
-                            <!-- Kategori -->
-                            <div class="mb-1.5 sm:mb-4">
-                                <span class="inline-flex items-center px-2 sm:px-3 py-0.5 sm:py-1.5 rounded-md text-[9px] sm:text-[10px] font-bold text-white bg-indigo-600 shadow-sm">
-                                    Kendaraan Operasional
-                                </span>
-                            </div>
-
-                            <h3 class="product-name text-xs sm:text-base font-bold text-gray-800 mb-1 sm:mb-2 line-clamp-2 mt-0">
-                                {{ $k->nama_mobil }}
-                            </h3>
-
-                            <div class="text-[10px] sm:text-xs text-gray-500 mb-3 flex items-center gap-1 font-medium">
-                                <i class="bx bx-id-card text-gray-400"></i>
-                                <span>{{ $k->plat_nomor ?: str_replace('Plat: ', '', $k->deskripsi ?? '') }}</span>
-                            </div>
-
-                            @if($supir)
-                            <div class="bg-gray-50 rounded-xl p-2 sm:p-2.5 mb-3 border border-gray-100 flex items-center justify-between gap-1.5">
-                                <div class="flex items-center gap-2 overflow-hidden">
-                                    <div class="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-[10px] flex-shrink-0">
-                                        {{ substr($supir->nama, 0, 1) }}
-                                    </div>
-                                    <div class="truncate">
-                                        <span class="text-[9px] text-gray-400 block leading-none">Penanggung Jawab</span>
-                                        <span class="text-[11px] font-bold text-gray-800 truncate block leading-tight mt-0.5">{{ $supir->nama }}</span>
-                                    </div>
-                                </div>
-                                @if($supir->kontak)
-                                <a href="https://wa.me/{{ preg_replace('/^0/', '62', $supir->kontak) }}" target="_blank" class="px-2 py-1 bg-green-500 hover:bg-green-600 text-white rounded-lg text-[10px] font-bold flex items-center gap-0.5 flex-shrink-0 transition-colors">
-                                    <i class="bx bxl-whatsapp text-xs"></i> WA
-                                </a>
-                                @endif
-                            </div>
-                            @endif
-                            
-                            <div class="mt-auto pt-2 sm:pt-3">
-                                <span class="w-full block text-center py-2 px-3 bg-blue-50 text-blue-600 font-bold rounded-xl text-xs sm:text-sm border border-blue-200">
-                                    Unit Layanan Desa
-                                </span>
-
-                            </div>
-                        </div>
-                    </div>
-                    </div>
-                    @endforeach
-                    @endif
                 </div>
             @else
                 <div class="text-center py-20">

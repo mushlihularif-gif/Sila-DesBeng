@@ -53,49 +53,16 @@
                         <p class="text-xs text-gray-500 mt-2">* Format: PDF/JPG/PNG. Maksimal ukuran file: 5MB.</p>
                     </div>
 
-                    <!-- Keterangan / Tujuan Penyewaan -->
-                    @if($item->kategori == 'Kendaraan')
-                    <div class="mb-6 bg-blue-50 border border-blue-200 p-5 rounded-xl">
-                        <h4 class="font-bold text-gray-800 mb-3 flex items-center">
-                            <svg class="w-5 h-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                            Detail Tujuan Kendaraan
-                        </h4>
-                        
-                        <div class="mb-4">
-                            <label class="block text-sm font-bold text-gray-700 mb-2">Jangkauan Lokasi <span class="text-red-500">*</span></label>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                                <label class="border border-gray-300 rounded-lg p-3 cursor-pointer bg-white hover:bg-blue-50 hover:border-blue-300 flex items-center gap-2 transition-colors">
-                                    <input type="radio" name="zona_kendaraan" value="Dalam Desa" class="w-4 h-4 text-blue-600 focus:ring-blue-500" required>
-                                    <span class="text-sm font-semibold text-gray-700">Dalam Desa</span>
-                                </label>
-                                <label class="border border-gray-300 rounded-lg p-3 cursor-pointer bg-white hover:bg-blue-50 hover:border-blue-300 flex items-center gap-2 transition-colors">
-                                    <input type="radio" name="zona_kendaraan" value="Luar Desa" class="w-4 h-4 text-blue-600 focus:ring-blue-500">
-                                    <span class="text-sm font-semibold text-gray-700">Luar Desa</span>
-                                </label>
-                                <label class="border border-gray-300 rounded-lg p-3 cursor-pointer bg-white hover:bg-blue-50 hover:border-blue-300 flex items-center gap-2 transition-colors">
-                                    <input type="radio" name="zona_kendaraan" value="Luar Kota" class="w-4 h-4 text-blue-600 focus:ring-blue-500">
-                                    <span class="text-sm font-semibold text-gray-700">Luar Kota</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="mb-2">
-                            <label class="block text-sm font-bold text-gray-700 mb-2">Lokasi Spesifik dan Keperluan <span class="text-red-500">*</span></label>
-                            <textarea id="keperluan_kendaraan" rows="3" placeholder="Contoh: Ke RSUD Kabupaten untuk mengantarkan warga yang sakit..." class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required></textarea>
-                            <input type="hidden" name="rental_purpose" id="rental-purpose">
-                        </div>
-                    </div>
-                    @else
+                    <!-- Keterangan / Tujuan Peminjaman -->
                     <div class="mb-6">
                         <label class="block text-sm font-bold text-gray-700 mb-2">Keterangan / Tujuan Peminjaman <span class="text-red-500">*</span></label>
-                        <textarea name="rental_purpose" id="rental-purpose" rows="3" placeholder="Contoh: Untuk acara RT, rapat desa, dll." class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required></textarea>
+                        <textarea name="rental_purpose" id="rental-purpose" rows="3" placeholder="Contoh: Untuk acara RT, rapat warga, musyawarah desa, senam pagi, dll." class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required></textarea>
                         
                         <div class="mt-3 flex items-center gap-2">
                             <input type="checkbox" name="butuh_gudang" id="butuh_gudang" value="1" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
-                            <label for="butuh_gudang" class="text-sm text-gray-700 font-medium cursor-pointer">Saya juga membutuhkan kunci akses fasilitas Gudang (Opsional)</label>
+                            <label for="butuh_gudang" class="text-sm text-gray-700 font-medium cursor-pointer">Saya juga membutuhkan kunci akses fasilitas pendukung/gudang (Opsional)</label>
                         </div>
                     </div>
-                    @endif
 
                     <!-- Jumlah -->
                     <div class="mb-6">
@@ -236,20 +203,7 @@
                         </div>
                     </div>
 
-                    <!-- Info BBM dan Supir (Jika dikonfigurasi) -->
-                    @if(isset($paymentInfo['fasilitas_bbm_default']) || isset($paymentInfo['fasilitas_supir_default']))
-                    <div class="bg-gray-50 p-4 rounded-xl mb-6 border border-gray-200">
-                        <h5 class="font-bold text-gray-700 mb-2">Informasi Tambahan (Jika Kendaraan)</h5>
-                        <ul class="list-disc pl-5 text-sm text-gray-600 space-y-1">
-                            @if(isset($paymentInfo['fasilitas_bbm_default']))
-                            <li>BBM: <span class="font-semibold">{{ $paymentInfo['fasilitas_bbm_default'] }}</span></li>
-                            @endif
-                            @if(isset($paymentInfo['fasilitas_supir_default']))
-                            <li>Supir: <span class="font-semibold">{{ $paymentInfo['fasilitas_supir_default'] }}</span></li>
-                            @endif
-                        </ul>
-                    </div>
-                    @endif
+
 
                     @php
                         // Fasilitas berbayar hanya ditagih untuk acara komersial;
@@ -544,19 +498,8 @@
 
         confirmBtns.forEach(btn => {
             btn.addEventListener('click', () => {
-                let purposeVal = '';
-                if (document.getElementById('keperluan_kendaraan')) {
-                    const zona = document.querySelector('input[name="zona_kendaraan"]:checked');
-                    const detail = document.getElementById('keperluan_kendaraan').value;
-                    if (!zona || !detail) {
-                        Swal.fire({ icon: 'warning', title: 'Data Belum Lengkap', text: 'Mohon pilih Jangkauan Lokasi dan isi Lokasi Spesifik.' });
-                        return;
-                    }
-                    purposeVal = `[Tujuan: ${zona.value}] ${detail}`;
-                    document.getElementById('rental-purpose').value = purposeVal;
-                } else {
-                    purposeVal = document.getElementById('rental-purpose').value;
-                }
+                const purposeInput = document.getElementById('rental-purpose');
+                const purposeVal = purposeInput ? purposeInput.value.trim() : '';
 
                 const startDate = document.getElementById('start-date').value;
                 const endDate = document.getElementById('end-date').value;

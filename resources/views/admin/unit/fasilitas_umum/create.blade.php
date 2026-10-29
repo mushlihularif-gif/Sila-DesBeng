@@ -201,89 +201,6 @@
                                         <small class="text-muted">Biaya ini akan ditagihkan jika warga memilih kategori Acara Pribadi.</small>
                                     </div>
                                     
-                                    <!-- Opsi Supir & BBM (Hanya muncul jika kategori Kendaraan) -->
-                                    <div class="col-12 kendaraan-options" style="display:none;">
-                                        <div class="form-section mb-4 border border-info bg-light">
-                                            <h6 class="section-title mb-3 text-info">
-                                                <i class='bx bx-car me-2'></i>Pengaturan Kendaraan (Supir & BBM)
-                                            </h6>
-                                            <p class="text-muted small mb-3">Aktifkan opsi layanan untuk unit kendaraan ini. Biarkan tidak aktif jika tidak menyediakan opsi tersebut.</p>
-                                            
-                                            <div class="row g-3">
-                                                <!-- Opsi Supir -->
-                                                <div class="col-md-6">
-                                                    <div class="p-3 border rounded bg-white">
-                                                        <div class="d-flex justify-content-between align-items-center mb-2">
-                                                            <div class="d-flex align-items-center gap-2">
-                                                                <img src="{{ asset('User/img/iconbaru/supirsendiri.png') }}" style="width: 40px; height: 40px; object-fit: contain;">
-                                                                <h6 class="mb-0 fw-bold">Sewa Tanpa Supir (Bawa Sendiri)</h6>
-                                                            </div>
-                                                            <div class="form-check form-switch fs-5 mb-0">
-                                                                <input class="form-check-input cursor-pointer" type="radio" name="supir_switch" id="switch_supir_sendiri" value="Sediakan Supir Sendiri" onchange="updateSupirStatus()">
-                                                            </div>
-                                                        </div>
-                                                        <div class="text-muted small mb-0 fw-semibold" id="status_supir_sendiri">Tidak Aktif</div>
-                                                    </div>
-                                                </div>
-
-                                                <div class="col-md-6">
-                                                    <div class="p-3 border rounded bg-white">
-                                                        <div class="d-flex justify-content-between align-items-center mb-2">
-                                                            <div class="d-flex align-items-center gap-2">
-                                                                <img src="{{ asset('User/img/iconbaru/disediakansupir.png') }}" style="width: 40px; height: 40px; object-fit: contain;">
-                                                                <h6 class="mb-0 fw-bold">Sewa Dengan Supir Pengelola</h6>
-                                                            </div>
-                                                            <div class="form-check form-switch fs-5 mb-0">
-                                                                <input class="form-check-input cursor-pointer" type="radio" name="supir_switch" id="switch_supir_disediakan" value="Disediakan" onchange="updateSupirStatus()">
-                                                            </div>
-                                                        </div>
-                                                        <div class="text-muted small mb-0 fw-semibold" id="status_supir_disediakan">Tidak Aktif</div>
-                                                        
-                                                        
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            
-                                            <input type="hidden" name="opsi_supir" id="opsi_supir">
-                                            
-                                            <hr class="my-4 text-muted">
-
-                                            <div class="row g-3">
-                                                <!-- Opsi BBM -->
-                                                <div class="col-md-6">
-                                                    <div class="p-3 border rounded bg-white">
-                                                        <div class="d-flex justify-content-between align-items-center mb-2">
-                                                            <div class="d-flex align-items-center gap-2">
-                                                                <img src="{{ asset('User/img/iconbaru/bbmdisediakan.png') }}" style="width: 40px; height: 40px; object-fit: contain;">
-                                                                <h6 class="mb-0 fw-bold">BBM Disediakan Pengelola</h6>
-                                                            </div>
-                                                            <div class="form-check form-switch fs-5 mb-0">
-                                                                <input class="form-check-input cursor-pointer" type="radio" name="bbm_switch" id="switch_bbm_disediakan" value="Disediakan" onchange="updateBbmStatus()">
-                                                            </div>
-                                                        </div>
-                                                        <div class="text-muted small mb-0 fw-semibold" id="status_bbm_disediakan">Tidak Aktif</div>
-                                                    </div>
-                                                </div>
-
-                                                <div class="col-md-6">
-                                                    <div class="p-3 border rounded bg-white">
-                                                        <div class="d-flex justify-content-between align-items-center mb-2">
-                                                            <div class="d-flex align-items-center gap-2">
-                                                                <img src="{{ asset('User/img/iconbaru/bbmditanggungpengguna.png') }}" style="width: 40px; height: 40px; object-fit: contain;">
-                                                                <h6 class="mb-0 fw-bold">BBM Ditanggung Penyewa</h6>
-                                                            </div>
-                                                            <div class="form-check form-switch fs-5 mb-0">
-                                                                <input class="form-check-input cursor-pointer" type="radio" name="bbm_switch" id="switch_bbm_pengguna" value="Ditanggung Pengguna" onchange="updateBbmStatus()">
-                                                            </div>
-                                                        </div>
-                                                        <div class="text-muted small mb-0 fw-semibold" id="status_bbm_pengguna">Tidak Aktif</div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <input type="hidden" name="bbm_ditanggung" id="bbm_ditanggung">
-                                        </div>
-                                    </div>
-                                    
                                     <div class="col-12">
                                         <label class="form-label fw-semibold" for="deskripsi">
                                             Deskripsi <span class="text-danger">*</span>
@@ -1328,27 +1245,6 @@
             alert('Silakan masukkan nama satuan.');
         }
     });
-
-    // Script untuk memunculkan Opsi Supir & BBM hanya jika kategori = Kendaraan
-    function toggleKendaraanOptions() {
-        const kategori = document.getElementById('kategori').value;
-        const vehicleOptions = document.querySelectorAll('.kendaraan-options');
-        
-        vehicleOptions.forEach(function(el) {
-            if(kategori && kategori.toLowerCase().includes('kendaraan')) {
-                el.style.display = 'block';
-            } else {
-                el.style.display = 'none';
-                // Reset value saat disembunyikan
-                const select = el.querySelector('select');
-                if(select) select.value = '';
-            }
-        });
-    }
-
-    document.getElementById('kategori').addEventListener('change', toggleKendaraanOptions);
-    // Jalankan saat pertama dimuat
-    document.addEventListener('DOMContentLoaded', toggleKendaraanOptions);
 
     
     function nextStep(tabId) {

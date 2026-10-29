@@ -26,15 +26,17 @@ class RetiredAmbulanceTest extends TestCase
             $t->boolean('is_harian_active')->default(false); $t->boolean('is_borongan_active')->default(false); $t->timestamps();
         });
         Schema::create('fasilitas_umums', function (Blueprint $t) {
-            $t->id(); $t->string('nama_fasilitas'); $t->string('status')->default('tersedia');
+            $t->id(); $t->string('nama_fasilitas'); $t->string('status')->default('tersedia'); $t->unsignedBigInteger('region_id')->nullable(); $t->string('kategori')->nullable(); $t->decimal('harga_sewa')->default(0); $t->timestamps();
         });
+        Schema::create('fasilitas_pengurus', function (Blueprint $t) { $t->unsignedBigInteger('fasilitas_id'); $t->unsignedBigInteger('pengurus_id'); });
+        Schema::create('unit_chat_sessions', function (Blueprint $t) { $t->id(); $t->unsignedBigInteger('region_id')->nullable(); $t->unsignedBigInteger('user_id')->nullable(); $t->string('service_type')->nullable(); $t->timestamp('last_message_at')->nullable(); $t->integer('unread_admin_count')->default(0); });
         Schema::create('supirs', function (Blueprint $t) {
             $t->id(); $t->unsignedBigInteger('region_id'); $t->string('nama'); $t->string('tipe');
         });
         Schema::create('mobil_supir', function (Blueprint $t) { $t->unsignedBigInteger('mobil_id'); $t->unsignedBigInteger('supir_id'); });
         Schema::create('services', function (Blueprint $t) { $t->id(); $t->string('name'); $t->string('slug'); });
         Schema::create('region_services', function (Blueprint $t) { $t->unsignedBigInteger('region_id'); $t->unsignedBigInteger('service_id'); $t->boolean('is_active'); $t->timestamps(); });
-        Schema::create('regions', function (Blueprint $t) { $t->id(); $t->string('name'); });
+        Schema::create('regions', function (Blueprint $t) { $t->id(); $t->string('name'); $t->string('type')->default('desa'); $t->text('payment_info')->nullable(); $t->text('settings')->nullable(); });
         DB::table('regions')->insert(['id' => 12, 'name' => 'Desa sendiri']);
         DB::table('mobils')->insert([
             ['id' => 1, 'region_id' => 12, 'nama_mobil' => 'Ambulans lama', 'kategori' => 'ambulans'],
@@ -164,5 +166,22 @@ class RetiredAmbulanceTest extends TestCase
                 $this->assertArrayHasKey('services.0', $e->errors());
             }
         }
+    }
+
+    public function test_user_fasilitas_umum_catalog_excludes_operational_vehicles_and_ambulances(): void
+    {
+        $response = app(FasilitasUmumUserController::class)->index(\Illuminate\Http\Request::create('/fasilitas-umum'));
+        $data = $response->getData();
+        $this->assertArrayHasKey('items', $data);
+        $this->assertArrayNotHasKey('kendaraans', $data);
+        $this->assertSame([2], $data['items']->pluck('id')->all());
+    }
+
+    public function test_admin_fasilitas_umum_index_defaults_to_gedung_and_has_no_operational_vehicles(): void
+    {
+        $response = app(\App\Http\Controllers\Admin\UnitFasilitasUmumController::class)->index(\Illuminate\Http\Request::create('/admin/fasilitas_umum'));
+        $data = $response->getData();
+        $this->assertSame('gedung', $data['tab']);
+        $this->assertCount(0, $data['mobils']);
     }
 }

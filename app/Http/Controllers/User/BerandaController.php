@@ -151,8 +151,7 @@ class BerandaController extends Controller
 
             // Jaminan ketersediaan: Jika admin telah menambahkan produk/armada di wilayah ini,
             // maka otomatis layanan tersebut aktif dan dapat diakses warga dari Beranda
-            if (\App\Models\FasilitasUmum::inCatalog()->whereIn('region_id', $relevantIds)->where('status', '!=', 'Tidak Tersedia')->exists()
-                || \App\Models\Mobil::whereIn('region_id', $relevantIds)->where('kategori', 'kendaraan_operasional')->exists()) {
+            if (\App\Models\FasilitasUmum::inCatalog()->whereIn('region_id', $relevantIds)->where('status', '!=', 'Tidak Tersedia')->exists()) {
                 $activeServices[] = 'Fasilitas Umum';
             }
             if (\App\Models\Barang::whereIn('region_id', $relevantIds)->exists()) {

@@ -190,10 +190,9 @@ class RegionSettingController extends Controller
             ];
         }
 
-        // Jaga agar Fasilitas Umum tetap aktif jika wilayah memiliki kendaraan operasional atau gedung/fasilitas umum
-        $hasOperationalVehicle = \App\Models\Mobil::where('region_id', $region->id)->where('kategori', 'kendaraan_operasional')->exists();
+        // Jaga agar Fasilitas Umum tetap aktif jika wilayah memiliki gedung/fasilitas umum
         $hasGedung = \App\Models\FasilitasUmum::inCatalog()->where('region_id', $region->id)->exists();
-        if ($hasOperationalVehicle || $hasGedung) {
+        if ($hasGedung) {
             $fasilitasServiceId = \App\Models\Service::where('slug', 'fasilitas-umum')->value('id');
             if ($fasilitasServiceId && !isset($syncData[$fasilitasServiceId])) {
                 $syncData[$fasilitasServiceId] = [
