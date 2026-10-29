@@ -39,6 +39,9 @@ Thumbs.db
 .env.staging
 security/*.log
 
+# Catatan Projek (pindah ke D:\Mushlihul 'Arif\SegiDaerah Audit)
+/Catatan Projek/
+
 # Arsip vendor untuk unggahan manual, jangan pernah masuk repo
 vendor.zip
 *.bak
