@@ -3,6 +3,7 @@
 @section('title', 'Katalog Pasar Daerah - SegiDaerah')
 
 @section('page')
+<div class="pt-28 px-4 text-center"><a href="{{ route('market.seller.home') }}" class="inline-block rounded-xl bg-blue-600 px-6 py-3 font-bold text-white">Mulai Jualan / Toko Saya</a><p class="mt-2 text-sm">Punya hasil kebun, makanan, atau produk lainnya? Daftarkan toko Anda di sini.</p></div>
 <main class="flex-grow relative w-full bg-gray-50/50">
     @include('partials.abstract-bg')
     
@@ -212,7 +213,7 @@
                         <svg class="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
                     </div>
                     <h3 class="text-2xl font-bold text-gray-800 mb-3">Tidak Ada Produk</h3>
-                    <p class="text-gray-500 max-w-md mx-auto">Belum ada instansi atau unit usaha daerah yang mendaftarkan produk di kategori/lokasi ini.<br>Coba ubah pencarian atau filter Anda.</p>
+                    <p class="text-gray-500 max-w-md mx-auto">Belum ada toko yang menambahkan produk di kategori/lokasi ini.<br>Coba ubah pencarian atau filter Anda.</p>
                 </div>
                 @else
                 
@@ -220,7 +221,7 @@
                 <div class="products-grid" id="productsGrid">
                     @foreach($produks as $produk)
                     <div class="product-card" data-product-id="{{ $produk->id }}">
-                        <div class="product-image-wrapper" style="cursor: pointer;" onclick="openOrderModal({{ $produk->id }}, '{{ addslashes($produk->nama_produk) }}', '{{ $produk->foto ? Storage::url($produk->foto) : '' }}', '{{ addslashes($produk->deskripsi ?? 'Tidak ada deskripsi.') }}', {{ $produk->harga }}, {{ $produk->stok ?? 10 }}, 'Toko Desa {{ addslashes($produk->region->name ?? 'Desa') }}', '{{ route('pasar.toko', $produk->region_id ?? 1) }}')">
+                        <div class="product-image-wrapper" style="cursor: pointer;" onclick="openOrderModal(...{{ \Illuminate\Support\Js::from([$produk->id,$produk->nama_produk,$produk->foto ? Storage::url($produk->foto) : '',$produk->deskripsi ?? '',$produk->harga,$produk->stok,$produk->store?->name ?? ('Pasar '.$produk->region->name),$produk->store_id ? route('market.store',$produk->store_id) : route('pasar.toko',$produk->region_id)]) }})">
                             @if($produk->foto)
                                 <img src="{{ Storage::url($produk->foto) }}" alt="{{ $produk->nama_produk }}" onerror="this.onerror=null; this.src='{{ asset('User/img/elemen/PasarDaerah.png') }}';">
                             @else
@@ -234,7 +235,7 @@
                             @endif
                             
                             <div class="product-actions-overlay">
-                                <button type="button" class="product-action-btn" title="Lihat Detail" onclick="event.stopPropagation(); openOrderModal({{ $produk->id }}, '{{ addslashes($produk->nama_produk) }}', '{{ $produk->foto ? Storage::url($produk->foto) : '' }}', '{{ addslashes($produk->deskripsi ?? 'Tidak ada deskripsi.') }}', {{ $produk->harga }}, {{ $produk->stok ?? 10 }}, 'Toko Desa {{ addslashes($produk->region->name ?? 'Desa') }}', '{{ route('pasar.toko', $produk->region_id ?? 1) }}')">
+                                <button type="button" class="product-action-btn" title="Lihat Detail" onclick="event.stopPropagation(); openOrderModal(...{{ \Illuminate\Support\Js::from([$produk->id,$produk->nama_produk,$produk->foto ? Storage::url($produk->foto) : '',$produk->deskripsi ?? '',$produk->harga,$produk->stok,$produk->store?->name ?? ('Pasar '.$produk->region->name),$produk->store_id ? route('market.store',$produk->store_id) : route('pasar.toko',$produk->region_id)]) }})">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                                 </button>
                                 
@@ -248,7 +249,7 @@
                             </div>
                         </div>
                         <div class="product-info">
-                            <h3 class="product-name" style="font-size: 1.1rem; line-height: 1.4; margin-bottom: 8px; cursor: pointer;" onclick="openOrderModal({{ $produk->id }}, '{{ addslashes($produk->nama_produk) }}', '{{ $produk->foto ? Storage::url($produk->foto) : '' }}', '{{ addslashes($produk->deskripsi ?? 'Tidak ada deskripsi.') }}', {{ $produk->harga }}, {{ $produk->stok ?? 10 }}, 'Toko Desa {{ addslashes($produk->region->name ?? 'Desa') }}', '{{ route('pasar.toko', $produk->region_id ?? 1) }}')">{{ $produk->nama_produk }}</h3>
+                            <h3 class="product-name" style="font-size: 1.1rem; line-height: 1.4; margin-bottom: 8px; cursor: pointer;" onclick="openOrderModal(...{{ \Illuminate\Support\Js::from([$produk->id,$produk->nama_produk,$produk->foto ? Storage::url($produk->foto) : '',$produk->deskripsi ?? '',$produk->harga,$produk->stok,$produk->store?->name ?? ('Pasar '.$produk->region->name),$produk->store_id ? route('market.store',$produk->store_id) : route('pasar.toko',$produk->region_id)]) }})">{{ $produk->nama_produk }}</h3>
                             <p class="product-desc" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 8px;">{{ $produk->deskripsi ?? 'Produk khas daerah Bengkalis.' }}</p>
                             
                             <div style="display: flex; align-items: center; gap: 5px; margin-bottom: 12px; font-size: 11px; color: #64748b;">
@@ -257,7 +258,7 @@
                                     <circle cx="12" cy="10" r="3"></circle>
                                 </svg>
                                 <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                    {{ $produk->region ? $produk->region->name : 'Bengkalis' }}
+                                    {{ $produk->store?->name ?? $produk->region?->name ?? 'Bengkalis' }}
                                     @if($produk->region && $produk->region->parent)
                                         <span style="color: #94a3b8;">&bull; Kec. {{ $produk->region->parent->name }}</span>
                                     @endif
@@ -268,7 +269,7 @@
                                 
                                 @auth
                                     @if($produk->stok > 0)
-                                        <button type="button" class="btn-add-cart" onclick="openOrderModal({{ $produk->id }}, '{{ addslashes($produk->nama_produk) }}', '{{ $produk->foto ? Storage::url($produk->foto) : '' }}', '{{ addslashes($produk->deskripsi ?? 'Tidak ada deskripsi.') }}', {{ $produk->harga }}, {{ $produk->stok ?? 10 }}, 'Toko Desa {{ addslashes($produk->region->name ?? 'Desa') }}', '{{ route('pasar.toko', $produk->region_id ?? 1) }}')">
+                                        <button type="button" class="btn-add-cart" onclick="openOrderModal(...{{ \Illuminate\Support\Js::from([$produk->id,$produk->nama_produk,$produk->foto ? Storage::url($produk->foto) : '',$produk->deskripsi ?? '',$produk->harga,$produk->stok,$produk->store?->name ?? ('Pasar '.$produk->region->name),$produk->store_id ? route('market.store',$produk->store_id) : route('pasar.toko',$produk->region_id)]) }})">
                                             + Keranjang
                                         </button>
                                     @else
@@ -1361,9 +1362,6 @@
     function addToCartFromModal(isDirectBuy = false) {
         if (!currentModalProduct) return;
 
-        if (!isDirectBuy) {
-            showToast(`${currentModalProduct.name} (${modalQty}x) ditambahkan ke keranjang!`);
-        }
         
         fetch("{{ route('pasar.cart.add') }}", {
             method: "POST",
@@ -1378,17 +1376,11 @@
             })
         }).then(res => res.json())
           .then(data => {
+            if (!data.success) throw new Error(data.message || 'Produk belum berhasil ditambahkan.');
             closeOrderModal();
-            if (isDirectBuy) {
-                window.location.href = "{{ route('pasar.checkout') }}";
-            } else {
-                fetchCartItems(); 
-            }
-        }).catch(err => {
-            if (isDirectBuy) {
-                window.location.href = "{{ route('pasar.checkout') }}";
-            }
-        });
+            if (isDirectBuy) window.location.href = data.checkout_url || "{{ route('pasar.cart') }}";
+            else { showToast('Produk ditambahkan ke keranjang.'); fetchCartItems(); }
+        }).catch(err => showToast(err.message || 'Koneksi terputus. Coba lagi.'));
     }
 
     document.getElementById('closeModalBtn')?.addEventListener('click', closeOrderModal);

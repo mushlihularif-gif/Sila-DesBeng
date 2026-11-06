@@ -17,7 +17,6 @@ class RegionSeeder extends Seeder
         $serviceMobil = \App\Models\Service::firstOrCreate(['slug' => 'penyewaan-mobil'], ['name' => 'Penyewaan Mobil']);
         $serviceFasilitas = \App\Models\Service::firstOrCreate(['slug' => 'fasilitas-umum'], ['name' => 'Fasilitas Umum']);
         $serviceGas = \App\Models\Service::firstOrCreate(['slug' => 'penjualan-gas'], ['name' => 'Penjualan Gas']);
-        $serviceLaporan = \App\Models\Service::firstOrCreate(['slug' => 'pelaporan-warga'], ['name' => 'Pelaporan Warga']);
         // Pasar Daerah sempat tertinggal di sini, sehingga menunya tidak pernah
         // muncul di sidebar maupun tab Permintaan & Pengajuan: keduanya menyaring
         // dengan daftar layanan aktif wilayah, dan layanannya sendiri belum ada.
@@ -54,7 +53,6 @@ class RegionSeeder extends Seeder
             $serviceMobil->id => ['is_active' => true],
             $serviceFasilitas->id => ['is_active' => true],
             $serviceGas->id => ['is_active' => true],
-            $serviceLaporan->id => ['is_active' => true],
         ]);
 
         // 6. Migrate existing users and data to Desa Pematang Duku Timur
@@ -75,7 +73,7 @@ class RegionSeeder extends Seeder
         \App\Models\User::where('role', 'user')->whereNull('region_id')->update(['region_id' => $desaPDT->id]);
 
         // 7. Migrate all data to Desa Pematang Duku Timur
-        $tables = ['barang', 'gas', 'laporans', 'rental_bookings', 'gas_orders', 'bumdes_members', 'manual_reports'];
+        $tables = ['barang', 'gas', 'rental_bookings', 'gas_orders', 'bumdes_members', 'manual_reports'];
         foreach ($tables as $table) {
             \Illuminate\Support\Facades\DB::table($table)->whereNull('region_id')->update(['region_id' => $desaPDT->id]);
         }

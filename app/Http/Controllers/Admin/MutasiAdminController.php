@@ -61,7 +61,7 @@ class MutasiAdminController extends Controller
 
         // Daftar warga desa admin untuk mutasi keluar (ekspor)
         $regionIds = $region_id ? array_merge([(int)$region_id], \App\Models\Region::getDescendantIds($region_id)) : [];
-        $wargaDesa = User::whereIn('role', ['user', 'warga'])
+        $wargaDesa = User::whereIn('role', ['user'])
             ->when($region_id, function($q) use ($regionIds) {
                 $q->whereIn('region_id', $regionIds);
             })
@@ -107,7 +107,7 @@ class MutasiAdminController extends Controller
         $regionIdsFokus = array_merge([(int) $kecamatanId], Region::getDescendantIds($kecamatanId));
         $region_id = $request->get('region_id');
         
-        $query = User::whereIn('role', ['user', 'warga'])->with('region.parent');
+        $query = User::whereIn('role', ['user'])->with('region.parent');
         $query->whereIn('region_id', $regionIdsFokus);
 
         if ($region_id) {
@@ -189,7 +189,7 @@ class MutasiAdminController extends Controller
 
         $regionIds = array_merge([(int)$admin->region_id], \App\Models\Region::getDescendantIds($admin->region_id));
 
-        $users = User::whereIn('role', ['user', 'warga'])
+        $users = User::whereIn('role', ['user'])
             ->whereIn('region_id', $regionIds)
             ->get()
             ->filter(function($u) use ($search) {
@@ -307,7 +307,7 @@ class MutasiAdminController extends Controller
     {
         $mutasi = MutasiPenduduk::with(['user', 'fromRegion', 'toRegion'])->findOrFail($id);
         $admin = Auth::user();
-        $isSuperOrKec = in_array($admin->role, ['super_admin', 'admin_kecamatan']);
+        $isSuperOrKec = in_array($admin->role, ['super_admin']);
 
         // ALUR DUA TAHAP UNTUK PENGAJUAN MANDIRI OLEH WARGA
         if ($mutasi->requested_by === 'user') {
@@ -415,7 +415,7 @@ class MutasiAdminController extends Controller
         $mutasi = MutasiPenduduk::with(['user', 'fromRegion', 'toRegion'])->findOrFail($id);
         $admin = Auth::user();
 
-        $isSuperOrKec = in_array($admin->role, ['super_admin', 'admin_kecamatan']);
+        $isSuperOrKec = in_array($admin->role, ['super_admin']);
         $berhakReject = false;
         $rejectedByRole = 'admin';
 
@@ -476,17 +476,30 @@ class MutasiAdminController extends Controller
 
     public function showKtp($id)
     {
-        $mutasi = MutasiPenduduk::findOrFail($id);
         $admin = Auth::user();
-
-        if ($mutasi->from_region_id != $admin->region_id && $mutasi->to_region_id != $admin->region_id && !in_array($admin->role, ['super_admin', 'admin_kecamatan'])) {
-            abort(403);
+        abort_unless($admin && in_array($admin->role, ['super_admin', 'admin_desa', 'admin_rw', 'admin_rt'], true), 403);
+        $query = MutasiPenduduk::query();
+        $globalAdmin = $admin->role === 'super_admin' || ($admin->role === 'admin' && !$admin->region_id);
+        if (!$globalAdmin) {
+            abort_unless($admin->region_id && ($region = Region::find($admin->region_id)), 403);
+            $types = ['admin_desa'=>['desa','kelurahan'], 'admin_rw'=>['rw'], 'admin_rt'=>['rt']];
+            abort_if(isset($types[$admin->role]) && !in_array($region->type, $types[$admin->role], true), 403);
+            $allowedRegions = [$region->id, ...Region::getDescendantIds($region->id)];
+            $query->where(fn ($q) => $q->whereIn('from_region_id', $allowedRegions)->orWhereIn('to_region_id', $allowedRegions));
         }
-        if (!$mutasi->ktp_image_path) abort(404, 'KTP tidak ditemukan atau sudah dihapus.');
+        $mutasi = $query->findOrFail($id);
+        $path = $mutasi->ktp_image_path;
+        // Uploads use the configured private disk, not storage/app/private.
+        // Reject traversal and other private directories even if a stored path
+        // has been corrupted. Never render active content as an identity image.
+        abort_unless(is_string($path) && preg_match('~\Amutasi_ktp/[A-Za-z0-9_-]+\.(?:jpe?g|png|gif|bmp|webp|avif)\z~i', $path), 404);
+        $disk = \Illuminate\Support\Facades\Storage::disk('private');
+        abort_unless($disk->exists($path), 404, 'KTP tidak ditemukan atau sudah dihapus.');
+        abort_unless(in_array($disk->mimeType($path), ['image/jpeg','image/png','image/gif','image/bmp','image/x-ms-bmp','image/webp','image/avif'], true), 404);
 
-        $path = storage_path('app/private/' . $mutasi->ktp_image_path);
-        if (!file_exists($path)) abort(404, 'File fisik tidak ditemukan.');
-
-        return response()->file($path);
+        return $disk->response($path, null, [
+            'Cache-Control' => 'private, no-store, max-age=0',
+            'X-Content-Type-Options' => 'nosniff',
+        ]);
     }
 }

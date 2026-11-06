@@ -107,7 +107,7 @@
         <!-- Filter & Search Bar with Generous Padding -->
         <div class="card-body filter-card-body">
             <form id="filter-form" class="row g-3 align-items-center" method="GET" action="{{ route('admin.manajemen-pengguna.index') }}">
-                @if(in_array(auth()->user()->role, ['super_admin', 'admin']))
+                @if(in_array(auth()->user()->role, ['super_admin']))
                     <div class="col-12 col-md-5">
                         <div class="input-group modern-search shadow-sm bg-white">
                             <span class="input-group-text"><i class="bx bx-search"></i></span>

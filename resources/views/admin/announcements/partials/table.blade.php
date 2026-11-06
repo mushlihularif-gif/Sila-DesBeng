@@ -29,9 +29,7 @@
                 </td>
                 <td>
                     <strong>{{ \Illuminate\Support\Str::limit($item->title, 40) }}</strong>
-                    @if($item->laporan_id)
-                        <br><small class="text-muted"><i class="bx bx-link"></i> Terhubung Laporan #{{ $item->laporan_id }}</small>
-                    @endif
+
                 </td>
                 <td>{{ $item->admin->name ?? 'Sistem' }}</td>
                 <td>

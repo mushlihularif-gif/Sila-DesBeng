@@ -11,28 +11,40 @@ use Illuminate\Validation\Rule;
 
 class RegionManagementController extends Controller
 {
-    public function index($region_id = null)
+    private function manager(): User
     {
         $user = auth()->user();
-        $isSuperAdmin = in_array($user->role, ['super_admin', 'admin']);
+        abort_unless($user && in_array($user->role, ['super_admin', 'admin_desa', 'admin_rw'], true), 403);
+        if (!$user->isSuperAdmin()) {
+            abort_unless($user->region_id && (User::REGION_ROLES[$user->region?->type] ?? null) === $user->role, 403);
+        }
+        return $user;
+    }
+
+    private function assertRegionScope(Region $region, bool $includeOwn = false): void
+    {
+        $user = $this->manager();
+        if ($user->isSuperAdmin()) return;
+        $ids = Region::getDescendantIds($user->region_id);
+        if ($includeOwn) $ids[] = $user->region_id;
+        abort_unless(in_array((int) $region->id, array_map('intval', $ids), true), 404);
+    }
+
+    public function index($region_id = null)
+    {
+        $user = $this->manager();
+        $isSuperAdmin = $user->isSuperAdmin();
         
         // Izinkan super_admin untuk melihat halaman ini (kebutuhan testing)
-        if (!in_array($user->role, ['admin_kecamatan', 'admin_desa', 'admin_rw', 'super_admin', 'admin'])) {
+        if (!in_array($user->role, ['admin_desa', 'admin_rw', 'super_admin'])) {
             return redirect()->back()->with('error', 'Anda tidak memiliki hak akses ke halaman ini.');
         }
 
         if ($region_id) {
-            $parentRegion = Region::with(['children.users.file'])->find($region_id);
+            $parentRegion = Region::with(['children.users.file'])->findOrFail($region_id);
+            $this->assertRegionScope($parentRegion, true);
         } elseif ($isSuperAdmin) {
-            if (auth()->user()->role === 'super_admin') {
-                $parentRegion = null;
-            } else {
-                // Admin Kabupaten: Tampilkan Kabupaten Bengkalis (root region)
-                $parentRegion = Region::with(['children.users.file'])->whereNull('parent_id')->orWhere('parent_id', 0)->first();
-                if (!$parentRegion) {
-                    $parentRegion = Region::with(['children.users.file'])->where('type', 'kabupaten')->first();
-                }
-            }
+            $parentRegion = null;
         } else {
             // Admin tingkat lain (Kecamatan, Desa, RW, dll)
             $parentRegion = Region::with(['children.users.file'])->find($user->region_id);
@@ -79,17 +91,17 @@ class RegionManagementController extends Controller
             'name' => 'required|string|max:255',
             'type' => ['required', Rule::in(['kabupaten', 'kecamatan', 'desa', 'kelurahan', 'rw', 'rt'])],
             'parent_id' => 'nullable|exists:regions,id',
-            'admin_name' => 'nullable|string|max:255',
+            'admin_name' => 'required_with:admin_email|nullable|string|max:255',
             'admin_email' => 'nullable|string|email|max:255|unique:users,email',
             'admin_password' => 'required_with:admin_email|string|min:8',
         ]);
 
-        $user = auth()->user();
+        $user = $this->manager();
         
         // Tentukan parent: Jika request membawa parent_id, gunakan itu. Jika tidak, gunakan region milik user.
         $targetParentId = $request->input('parent_id', $user->region_id);
         
-        $isSuperAdmin = in_array($user->role, ['super_admin', 'admin']);
+        $isSuperAdmin = $user->isSuperAdmin();
         if ($isSuperAdmin && !$request->filled('parent_id') && $request->type !== 'kabupaten') {
              $kabupaten = Region::where('type', 'kabupaten')->first() ?? Region::whereNull('parent_id')->first();
              $targetParentId = $kabupaten ? $kabupaten->id : 0;
@@ -102,6 +114,13 @@ class RegionManagementController extends Controller
         $parentRegion = Region::find($targetParentId);
         if (!$parentRegion && !($isSuperAdmin && ($targetParentId === 0 || $targetParentId === null))) {
             return back()->with('error', 'Wilayah parent tidak ditemukan.');
+        }
+
+        if ($parentRegion) $this->assertRegionScope($parentRegion, true);
+        $allowedChildren = ['kabupaten' => ['kecamatan'], 'kecamatan' => ['desa', 'kelurahan'], 'desa' => ['rw'], 'kelurahan' => ['rw'], 'rw' => ['rt']];
+        abort_unless($parentRegion ? in_array($request->type, $allowedChildren[$parentRegion->type] ?? [], true) : ($user->isSuperAdmin() && $request->type === 'kabupaten'), 422);
+        if ($request->filled('admin_email')) {
+            abort_unless(isset(User::REGION_ROLES[$request->type]), 422, 'Wilayah ini tidak memiliki peran admin.');
         }
 
         // Validasikan tipe turunan yang diizinkan
@@ -137,14 +156,7 @@ class RegionManagementController extends Controller
         ]);
 
         if ($request->filled('admin_name') && $request->filled('admin_email')) {
-            $roleMapping = [
-                'kabupaten' => 'admin', // admin_kabupaten
-                'kecamatan' => 'admin_kecamatan',
-                'desa' => 'admin_desa',
-                'kelurahan' => 'admin_desa',
-                'rw' => 'admin_rw',
-                'rt' => 'admin_rt',
-            ];
+            $roleMapping = User::REGION_ROLES;
             
             $role = $roleMapping[$request->type] ?? null;
             
@@ -175,9 +187,10 @@ class RegionManagementController extends Controller
         ]);
 
         $region = Region::findOrFail($id);
+        $this->assertRegionScope($region);
         
-        $user = auth()->user();
-        $isSuperAdmin = in_array($user->role, ['super_admin', 'admin']);
+        $user = $this->manager();
+        $isSuperAdmin = $user->isSuperAdmin();
 
         // Verifikasi bahwa region ini benar anak dari region admin
         if (!$isSuperAdmin && $region->parent_id !== $user->region_id) {
@@ -197,9 +210,10 @@ class RegionManagementController extends Controller
     public function destroy($id)
     {
         $region = Region::findOrFail($id);
+        $this->assertRegionScope($region);
         
-        $user = auth()->user();
-        $isSuperAdmin = in_array($user->role, ['super_admin', 'admin']);
+        $user = $this->manager();
+        $isSuperAdmin = $user->isSuperAdmin();
         
         if (!$isSuperAdmin && $region->parent_id !== $user->region_id) {
             return back()->with('error', 'Akses ditolak.');
@@ -232,23 +246,17 @@ class RegionManagementController extends Controller
         ]);
 
         $region = Region::findOrFail($region_id);
+        $this->assertRegionScope($region);
         
-        $user = auth()->user();
-        $isSuperAdmin = in_array($user->role, ['super_admin', 'admin']);
+        $user = $this->manager();
+        $isSuperAdmin = $user->isSuperAdmin();
         
         if (!$isSuperAdmin && $region->parent_id !== $user->region_id) {
             return back()->with('error', 'Akses ditolak.');
         }
 
         // Tentukan Role
-        $roleMapping = [
-            'kabupaten' => 'admin',
-            'kecamatan' => 'admin_kecamatan',
-            'desa' => 'admin_desa',
-            'kelurahan' => 'admin_desa',
-            'rw' => 'admin_rw',
-            'rt' => 'admin_rt',
-        ];
+        $roleMapping = User::REGION_ROLES;
         
         $role = $roleMapping[$region->type] ?? null;
         
@@ -275,16 +283,18 @@ class RegionManagementController extends Controller
      */
     public function destroyAdmin($user_id)
     {
-        $user = auth()->user();
+        $user = $this->manager();
         
-        if (!in_array($user->role, ['admin_kecamatan', 'admin_desa', 'super_admin', 'admin', 'admin_rw'])) {
+        if (!in_array($user->role, ['admin_desa', 'super_admin', 'admin_rw'])) {
             return redirect()->back()->with('error', 'Anda tidak memiliki hak akses.');
         }
 
         $targetUser = User::findOrFail($user_id);
+        abort_unless($targetUser->region && $targetUser->id !== $user->id, 403);
+        $this->assertRegionScope($targetUser->region);
         
         // Pastikan user tersebut adalah akun pengurus wilayah
-        if (!in_array($targetUser->role, ['admin', 'admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt'])) {
+        if (!in_array($targetUser->role, ['admin_desa', 'admin_rw', 'admin_rt'])) {
             return back()->with('error', 'Hanya akun pengurus wilayah yang dapat dihapus.');
         }
 

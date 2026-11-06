@@ -37,6 +37,7 @@ class PartnerApplicationController extends Controller
 
     private function pengajuanDalamCakupan(PartnerApplication $application): bool
     {
+        if (!isset(User::REGION_ROLES[$application->region_type])) return false;
         if (! in_array((int) $application->parent_region_id, $this->wilayahFokusIds(), true)) {
             return false;
         }
@@ -83,14 +84,7 @@ class PartnerApplicationController extends Controller
     ];
 
     /** Role yang diberikan untuk tiap tingkat wilayah. */
-    private const PETA_ROLE = [
-        'kabupaten' => 'super_admin',
-        'kecamatan' => 'admin_kecamatan',
-        'desa'      => 'admin_desa',
-        'kelurahan' => 'admin_desa',
-        'rw'        => 'admin_rw',
-        'rt'        => 'admin_rt',
-    ];
+    private const PETA_ROLE = User::REGION_ROLES;
 
     /**
      * Menyetujui kemitraan berarti membuat wilayah baru DAN mencetak akun admin
@@ -103,8 +97,10 @@ class PartnerApplicationController extends Controller
      */
     private function pastikanPeninjau(): void
     {
+        $actor = auth()->user();
+        abort_unless($actor && ($actor->isSuperAdmin() || ($actor->region_id && (User::REGION_ROLES[$actor->region?->type] ?? null) === $actor->role)), 403);
         abort_unless(
-            in_array(auth()->user()?->role, ['super_admin', 'admin', 'admin_kecamatan', 'admin_desa', 'admin_rw'], true),
+            in_array(auth()->user()?->role, ['super_admin', 'admin_desa', 'admin_rw'], true),
             403,
             'Peninjauan kemitraan hanya untuk admin wilayah dan Super Admin.'
         );
@@ -267,7 +263,7 @@ class PartnerApplicationController extends Controller
         // Layanan yang sudah sengaja dimatikan wilayah juga tidak dinyalakan
         // paksa - hanya yang belum ada yang ditambahkan.
         if (in_array($application->region_type, ['desa', 'kelurahan'], true)) {
-            $baru = Service::whereNotIn('id', $region->services()->pluck('services.id'))->pluck('id');
+            $baru = Service::available()->whereNotIn('id', $region->services()->pluck('services.id'))->pluck('id');
 
             $region->services()->syncWithoutDetaching(
                 $baru->mapWithKeys(fn ($id) => [$id => ['is_active' => true]])->all()

@@ -5,7 +5,7 @@ namespace Tests\Feature;
 use App\Http\Controllers\{MediaController};
 use App\Http\Controllers\Api\{AuthController, UnitChatApiController};
 use App\Models\{User, Laporan};
-use App\Services\{BookingAccess, GoogleIdentityService, PublicAssetService, ReportAccess};
+use App\Services\{BookingAccess, GoogleIdentityService, PublicAssetService};
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Http\{Request, UploadedFile};
 use Illuminate\Support\Facades\{Auth, DB, Schema, Storage, Validator};
@@ -239,26 +239,18 @@ class SecurityAuditRegressionTest extends TestCase
         }
     }
 
-    public function test_citizen_cannot_list_or_update_administrative_reports(): void
+    public function test_retired_report_endpoints_are_unavailable_to_every_role(): void
     {
-        $controller = app(\App\Http\Controllers\Api\LaporanController::class);
-        $this->assertDenied(fn () => $controller->getAdminReports($this->request()), 403);
-        $this->assertDenied(fn () => $controller->forwardReport($this->request(['action' => 'resolve']), 1), 403);
-    }
-
-    public function test_report_admin_is_scoped_by_region_and_rt_rw(): void
-    {
-        DB::table('laporans')->insert([
-            ['id' => 1, 'user_id' => 2, 'region_id' => 7, 'rt' => '01', 'rw' => '02'],
-            ['id' => 2, 'user_id' => 2, 'region_id' => 7, 'rt' => '02', 'rw' => '02'],
-            ['id' => 3, 'user_id' => 2, 'region_id' => 8, 'rt' => '01', 'rw' => '02'],
-        ]);
-        $admin = Auth::user(); $admin->role = 'admin_rt'; $admin->rt = '01'; $admin->rw = '02';
-        $this->assertSame([1], app(ReportAccess::class)->administrativeQuery($admin)->pluck('id')->all());
-        $admin->role = 'staff';
-        $this->assertSame(0, app(ReportAccess::class)->administrativeQuery($admin)->count());
-        $admin->role = 'admin_desa'; $admin->region_id = null;
-        $this->assertSame(0, app(ReportAccess::class)->administrativeQuery($admin)->count());
+        $routes = \Illuminate\Support\Facades\Route::getRoutes()->getRoutes();
+        foreach ($routes as $route) {
+            $this->assertStringNotContainsString('LaporanController', $route->getActionName());
+            $this->assertStringNotContainsString('AdminPelaporanController', $route->getActionName());
+        }
+        foreach (['user','admin_rt','admin_rw','admin_desa','admin_kecamatan','admin','super_admin','staff'] as $role) {
+            $user = Auth::user(); $user->role = $role;
+            $this->actingAs($user)->getJson('/api/admin-reports')->assertNotFound();
+            $this->postJson('/api/laporan',['deskripsi'=>'Kiriman yang tidak boleh diterima'])->assertNotFound();
+        }
     }
 
     public function test_receipt_requires_owner_or_region_unit_permission(): void
@@ -273,14 +265,14 @@ class SecurityAuditRegressionTest extends TestCase
         $this->assertTrue(app(BookingAccess::class)->canView($booking, 'pasar', User::find(2)));
     }
 
-    public function test_public_storage_report_image_requires_ownership(): void
+    public function test_retired_report_evidence_remains_private_even_for_the_former_owner(): void
     {
         DB::table('laporans')->insert(['user_id' => 2, 'region_id' => 8, 'rt' => '01', 'rw' => '01', 'bukti' => 'laporan/test.jpg']);
         Storage::disk('public')->put('laporan/test.jpg', UploadedFile::fake()->image('test.jpg')->get());
         $asset = fn () => app(PublicAssetService::class)->serve(Storage::disk('public')->path(''), 'laporan/test.jpg', false);
-        $this->assertDenied($asset, 403);
+        $this->assertDenied($asset, 404);
         Auth::setUser(User::find(2));
-        $this->assertSame(200, $asset()->getStatusCode());
+        $this->assertDenied($asset, 404);
     }
 
     public function test_assets_reject_traversal_and_executable_files(): void
@@ -304,5 +296,49 @@ class SecurityAuditRegressionTest extends TestCase
     {
         for ($i = 0; $i < 10; $i++) $this->postJson('/api/login', [])->assertUnprocessable();
         $this->postJson('/api/login', [])->assertStatus(429);
+    }
+
+    public function test_user_management_enforces_region_for_detail_status_and_removal(): void
+    {
+        $admin=new User(); $admin->id=99; $admin->role='admin_desa'; $admin->region_id=7;
+        Auth::setUser($admin);
+        $controller=app(\App\Http\Controllers\Admin\UserManagementController::class);
+        foreach ([fn ()=>$controller->show(2),fn ()=>$controller->toggleStatus($this->request(),2),fn ()=>$controller->kick($this->request(),2)] as $action) {
+            try { $action(); $this->fail('A different village must be inaccessible.'); }
+            catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) { $this->assertSame(User::class,$e->getModel()); }
+        }
+        $this->assertSame('aktif',User::findOrFail(2)->status);
+        $this->assertSame(8,(int)User::findOrFail(2)->region_id);
+        $controller->toggleStatus($this->request(),1);
+        $this->assertSame('non_aktif',User::findOrFail(1)->status);
+        $controller->kick($this->request(),1);
+        $this->assertNull(User::findOrFail(1)->region_id);
+    }
+
+    public function test_service_staff_and_unassigned_regional_admin_cannot_manage_residents(): void
+    {
+        $controller=app(\App\Http\Controllers\Admin\UserManagementController::class);
+        foreach ([['staff',7],['admin_desa',null]] as [$role,$region]) {
+            $admin=new User(); $admin->id=99; $admin->role=$role; $admin->region_id=$region; Auth::setUser($admin);
+            $this->assertDenied(fn ()=>$controller->index($this->request()),403);
+            $this->assertDenied(fn ()=>$controller->show(1),403);
+            $this->assertDenied(fn ()=>$controller->toggleStatus($this->request(),1),403);
+            $this->assertDenied(fn ()=>$controller->kick($this->request(),1),403);
+        }
+    }
+
+    public function test_user_detail_loads_transaction_history_without_retired_report_relationship(): void
+    {
+        foreach (['rental_bookings','gas_orders','mobil_bookings','fasilitas_umum_bookings','pasar_orders'] as $table) {
+            Schema::create($table,function (Blueprint $t) { $t->id(); $t->unsignedBigInteger('user_id'); $t->timestamps(); $t->softDeletes(); });
+        }
+        $admin=new User(); $admin->id=99; $admin->role='admin_desa'; $admin->region_id=7; Auth::setUser($admin);
+        $view=app(\App\Http\Controllers\Admin\UserManagementController::class)->show(1);
+        $user=$view->getData()['user'];
+        $this->assertSame(1,$user->id);
+        $this->assertFalse($user->relationLoaded('laporans'));
+        foreach (['rentalTransactions','gasTransactions','mobilTransactions','fasilitasTransactions','pasarTransactions'] as $relation) {
+            $this->assertTrue($user->relationLoaded($relation));
+        }
     }
 }

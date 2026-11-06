@@ -47,7 +47,7 @@ class WilayahPlatformController extends Controller
             ->select('region_id', DB::raw('count(*) as n'))
             ->groupBy('region_id')->pluck('n', 'region_id');
 
-        $pengurus = User::whereIn('role', ['admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt'])
+        $pengurus = User::whereIn('role', ['admin_desa', 'admin_rw', 'admin_rt'])
             ->whereNotNull('region_id')
             ->orderBy('name')
             ->get(['id', 'name', 'email', 'role', 'region_id'])

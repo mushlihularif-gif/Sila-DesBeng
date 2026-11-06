@@ -18,7 +18,7 @@ class UnitKendaraanOperasionalController extends Controller
 
     private function vehicles()
     {
-        return Mobil::where('region_id', $this->regionId())->where('kategori', 'kendaraan_operasional');
+        return Mobil::inCatalog()->where('region_id', $this->regionId())->where('kategori', 'kendaraan_operasional');
     }
 
     private function drivers()
@@ -26,9 +26,13 @@ class UnitKendaraanOperasionalController extends Controller
         return Supir::where('region_id', $this->regionId())->where('tipe', 'supir')->orderBy('nama')->get();
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        return redirect()->route('admin.unit.fasilitas_umum.index', ['tab' => 'kendaraan']);
+        $search = trim((string) $request->input('search', ''));
+        $kendaraans = $this->vehicles()->with('supirs')
+            ->when($search !== '', fn ($q) => $q->where('nama_mobil', 'like', '%'.mb_substr($search, 0, 100).'%'))
+            ->latest('id')->paginate(12)->withQueryString();
+        return view('admin.unit.kendaraan_operasional.index', compact('kendaraans', 'search'));
     }
 
     public function create()
@@ -50,7 +54,7 @@ class UnitKendaraanOperasionalController extends Controller
     {
         $regionId = $this->regionId();
         return $request->validate([
-            'nama_mobil' => 'required|string|max:255',
+            'nama_mobil' => ['required', 'string', 'max:255', 'not_regex:/ambulan/i'],
             'kategori' => 'nullable|in:kendaraan_operasional',
             'nomor_plat' => 'nullable|string|max:20',
             'deskripsi' => 'nullable|string|max:5000',
@@ -96,23 +100,25 @@ class UnitKendaraanOperasionalController extends Controller
         if ($service) {
             RegionService::updateOrInsert(['region_id' => $this->regionId(), 'service_id' => $service->id], ['is_active' => true, 'updated_at' => now()]);
         }
-        return $this->index()->with('success', 'Kendaraan operasional berhasil ditambahkan.');
+        return redirect()->route('admin.unit.kendaraan_operasional.index')->with('success', 'Kendaraan operasional berhasil ditambahkan.');
     }
 
     public function update(Request $request, $id)
     {
         $kendaraan = $this->vehicles()->findOrFail($id);
         $this->saveVehicle($request, $kendaraan, $this->validated($request));
-        return $this->index()->with('success', 'Kendaraan operasional berhasil diubah.');
+        return redirect()->route('admin.unit.kendaraan_operasional.index')->with('success', 'Kendaraan operasional berhasil diubah.');
     }
 
     public function destroy($id)
     {
         $kendaraan = $this->vehicles()->findOrFail($id);
+        abort_if(\App\Models\MobilBooking::withTrashed()->where('mobil_id', $kendaraan->id)->exists(), 409,
+            'Kendaraan memiliki riwayat pesanan dan tidak dapat dihapus.');
         $photos = array_filter([$kendaraan->foto, $kendaraan->foto_2, $kendaraan->foto_3]);
         $kendaraan->supirs()->detach();
         $kendaraan->delete();
         foreach ($photos as $photo) Storage::disk('public')->delete($photo);
-        return $this->index()->with('success', 'Kendaraan operasional berhasil dihapus.');
+        return redirect()->route('admin.unit.kendaraan_operasional.index')->with('success', 'Kendaraan operasional berhasil dihapus.');
     }
 }

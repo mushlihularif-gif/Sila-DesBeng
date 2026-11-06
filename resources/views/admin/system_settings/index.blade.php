@@ -206,10 +206,6 @@
                                         $iconPath = 'User/img/elemen/F2.png';
                                         $descText = 'yang dapat memesan tabung gas.';
                                     }
-                                    elseif (strpos($sName, 'lapor') !== false) {
-                                        $iconPath = 'User/img/elemen/lapor.png';
-                                        $descText = 'yang dapat membuat laporan.';
-                                    }
                                 @endphp
                                 <div class="col-md-6">
                                     <div class="card border {{ in_array($service->id, $activeServices) ? 'border-primary shadow-sm bg-label-primary' : 'border-secondary shadow-none bg-light' }} h-100 rounded-3 card-service-item" data-action="{{ $descText }}" style="transition: all 0.2s; max-width: 100%; overflow: hidden;">

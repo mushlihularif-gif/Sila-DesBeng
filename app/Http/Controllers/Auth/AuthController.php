@@ -107,7 +107,7 @@ class AuthController extends Controller
                     }
                     
                     $user = User::where('email', $otpEmail)->first();
-                    if ($user) {
+                    if ($user && $user->hasSupportedRole()) {
                         $user->status = 'aktif';
                         $user->email_verified_at = now();
                         $user->save();
@@ -260,7 +260,7 @@ class AuthController extends Controller
                 return redirect()->back()->with('error', 'Username atau Password yang Anda masukkan salah.')->with('open_login_modal', true)->withInput();
             }
 
-            if ($user->status !== 'aktif') {
+            if ($user->status !== 'aktif' || !$user->hasSupportedRole()) {
                 \Illuminate\Support\Facades\RateLimiter::hit($throttleKey, 300);
                 \Illuminate\Support\Facades\RateLimiter::hit($accountThrottleKey, 300);
                 return redirect()->back()->with('error', 'Akun belum aktif')->with('open_login_modal', true)->withInput();
@@ -286,7 +286,7 @@ class AuthController extends Controller
             $request->session()->regenerate();
 
             // Redirect based on user role
-            $adminRoles = ['admin', 'super_admin', 'admin_kecamatan', 'admin_desa'];
+            $adminRoles = ['super_admin', 'admin_desa'];
             if (in_array($user->role, $adminRoles)) {
                 $redirectUrl = route('admin.dashboard');
             } else {
@@ -461,7 +461,8 @@ class AuthController extends Controller
             }
 
             // Update password using explicit assignment
-            $user = User::find($sessionData['user_id']);
+            $user = User::findOrFail($sessionData['user_id']);
+            abort_unless($user->hasSupportedRole() && $user->status === 'aktif', 403);
             $user->password = Hash::make($validated['password']);
             $user->save();
 

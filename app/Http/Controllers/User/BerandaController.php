@@ -160,7 +160,7 @@ class BerandaController extends Controller
             if (\App\Models\Gas::whereIn('region_id', $relevantIds)->exists()) {
                 $activeServices[] = 'Penjualan Gas';
             }
-            if (\App\Models\Mobil::whereIn('region_id', $relevantIds)->whereNotIn('kategori', ['ambulans', 'kendaraan_operasional'])->exists()) {
+            if (\App\Models\Mobil::inCatalog()->whereIn('region_id', $relevantIds)->forRental()->exists()) {
                 $activeServices[] = 'Penyewaan Mobil';
                 $activeServices[] = 'Penyewaan Transportasi';
             }
@@ -377,8 +377,8 @@ class BerandaController extends Controller
             }
 
             // Fallback 3: Mobil Sewa Ready
-            $fallbackMobil = \App\Models\Mobil::whereIn('region_id', $regionIds)
-                ->whereNotIn('kategori', ['ambulans', 'kendaraan_operasional'])
+            $fallbackMobil = \App\Models\Mobil::inCatalog()->whereIn('region_id', $regionIds)
+                ->forRental()
                 ->where('stok', '>', 0)
                 ->latest()
                 ->take(2)
@@ -432,7 +432,7 @@ class BerandaController extends Controller
 
             // Fallback 5: Pasar Produk Daerah (Sentral se-Kabupaten)
             if ($combined->count() < 4) {
-                $fallbackPasar = \App\Models\PasarProduk::where('stok', '>', 0)
+                $fallbackPasar = \App\Models\PasarProduk::visibleStore()->where('stok', '>', 0)
                     ->latest()
                     ->take(4)
                     ->get();
@@ -706,7 +706,7 @@ class BerandaController extends Controller
 
         // 1. Search Mobil Items (Only if mobil intent or general search)
         if (!$hasSpecificIntent || $isMobilIntent) {
-            $mobilQuery = \App\Models\Mobil::whereNotIn('kategori', ['ambulans', 'kendaraan_operasional']);
+            $mobilQuery = \App\Models\Mobil::inCatalog()->forRental();
             $mobilQuery->where(function ($q) use ($allTerms, $cleanSearch, $rawSearch) {
                 if (trim($rawSearch) === 'mobil' || trim($rawSearch) === 'sewa mobil' || trim($rawSearch) === 'transportasi' || trim($rawSearch) === 'sewa transportasi') {
                     $q->orWhereRaw('1 = 1');
@@ -850,7 +850,7 @@ class BerandaController extends Controller
 
         // 5. Search Pasar Daerah Items (Only if pasar intent or general search)
         if (!$hasSpecificIntent || $isPasarIntent) {
-            $pasarQuery = \App\Models\PasarProduk::query();
+            $pasarQuery = \App\Models\PasarProduk::visibleStore();
             $pasarQuery->where(function ($q) use ($allTerms, $cleanSearch, $rawSearch) {
                 if (trim($rawSearch) === 'pasar' || trim($rawSearch) === 'produk') {
                     $q->orWhereRaw('1 = 1');

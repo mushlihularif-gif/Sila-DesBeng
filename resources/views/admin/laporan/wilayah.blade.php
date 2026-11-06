@@ -122,7 +122,7 @@
                     </div>
                 </div>
                 
-                @if(auth()->check() && in_array(auth()->user()->role, ['super_admin', 'admin']))
+                @if(auth()->check() && in_array(auth()->user()->role, ['super_admin']))
                 <div class="col-12 col-md-4 col-lg-4">
                     <label class="form-label text-muted small fw-semibold mb-1">Cakupan Kecamatan</label>
                     <div class="input-group input-group-merge rounded-3 shadow-none border">
@@ -133,7 +133,7 @@
                 </div>
                 @endif
                 
-                @if(auth()->check() && in_array(auth()->user()->role, ['super_admin', 'admin', 'admin_kecamatan']))
+                @if(auth()->check() && in_array(auth()->user()->role, ['super_admin']))
                 <div class="col-12 col-md-4 col-lg-5">
                     <label class="form-label text-muted small fw-semibold mb-1">Filter Desa / Kelurahan</label>
                     <div class="input-group input-group-merge rounded-3 shadow-none border">

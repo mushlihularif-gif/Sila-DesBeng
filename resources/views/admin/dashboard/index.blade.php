@@ -143,7 +143,7 @@
                                         }
 
                                         $role = auth()->user()->role;
-                                        if (in_array($role, ['super_admin', 'admin'])) {
+                                        if (in_array($role, ['super_admin'])) {
                                             $regionName = 'Pemerintah Kabupaten Bengkalis';
                                             $kinerjaTitle = 'Kinerja Tingkat Kabupaten';
                                             $pendapatanTitle = 'Jumlah Pendapatan Layanan Kabupaten';
@@ -256,7 +256,7 @@
                                 <div class="d-flex flex-column flex-sm-row gap-2 mt-3 mt-sm-0">
                                     <span class="badge bg-label-primary py-2">Kecamatan Bengkalis</span>
 
-                                    @if(in_array(auth()->user()->role, ['super_admin', 'admin', 'admin_kecamatan']))
+                                    @if(in_array(auth()->user()->role, ['super_admin']))
                                     <select class="form-select form-select-sm" id="desaSelect" style="min-width: 150px;">
                                         <option value="all" {{ empty($selectedDesaId) || $selectedDesaId == 'all' ? 'selected' : '' }}>Semua Desa di Kecamatan Bengkalis</option>
                                         @foreach($desaList ?? [] as $desa)
@@ -304,10 +304,6 @@
 
             <!-- Kartu Unit - Lebar Penuh -->
             @php
-                    $laporanPendingCount = 0;
-                    if(class_exists('\App\Models\Laporan')) {
-                        $laporanPendingCount = \App\Models\Laporan::where('status', 'Pending')->count() ?? 0;
-                    }
                     $unitConfigs = [
                         'Penyewaan Alat' => [
                             'title' => 'Unit Penyewaan Alat',
@@ -327,7 +323,7 @@
                         ],
                         'Penyewaan Mobil' => [
                             'title' => 'Unit Penyewaan Transportasi',
-                            'count' => ($unitMobil ?? (\App\Models\Mobil::whereNotIn('kategori', ['ambulans', 'kendaraan_operasional'])->when(auth()->user() && auth()->user()->region_id, fn($q) => $q->where('region_id', auth()->user()->region_id))->count() ?? 0)),
+                            'count' => ($unitMobil ?? (\App\Models\Mobil::inCatalog()->forRental()->when(auth()->user() && auth()->user()->region_id, fn($q) => $q->where('region_id', auth()->user()->region_id))->count() ?? 0)),
                             'label' => 'Kendaraan',
                             'route' => route('admin.unit.mobil.index'),
                             'image' => asset('User/img/elemen/mobil.png'),
@@ -390,7 +386,7 @@
                  tidak melihat satu pun kartu layanan yang dipegangnya, padahal
                  di situlah pekerjaan hariannya. Daftarnya sudah dipersempit ke
                  unit miliknya oleh DashboardController. --}}
-            @if(in_array(auth()->user()->role, ['admin_desa', 'admin_rt', 'admin_rw', 'staff']))
+            @if(in_array(auth()->user()->role, ['admin_desa', 'admin_rt', 'admin_rw']))
             @php
                 $dashboardGroups = [
                     'Belanja dan Kebutuhan' => [

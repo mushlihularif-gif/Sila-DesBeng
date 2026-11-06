@@ -11,10 +11,7 @@ class MobilRentalUserController extends Controller
     {
         $targetRegionId = request()->integer('region_id') ?: null;
         $filterRegionId = request()->integer('filter_region_id') ?: null;
-        $query = Mobil::inCatalog()->where('status', '!=', 'rusak')
-                      ->where(function($q) {
-                          $q->whereNotIn('kategori', ['ambulans', 'kendaraan_operasional'])->orWhereNull('kategori');
-                      });
+        $query = Mobil::forRental()->where('status', '!=', 'rusak');
 
         $targetRegion = null;
         $visibleRegionIds = null;
@@ -39,15 +36,17 @@ class MobilRentalUserController extends Controller
         $sort = request('sort', 'terbaru');
         if ($sort === 'terlama') {
             $query->orderBy('created_at', 'asc');
-        } elseif ($sort === 'termurah') {
-            $query->orderBy('harga_mulai', 'asc');
-        } elseif ($sort === 'termahal') {
-            $query->orderBy('harga_mulai', 'desc');
         } else {
             $query->orderBy('created_at', 'desc');
         }
 
         $items = $query->get();
+        // harga_mulai includes daily and regional package tariffs; it is an
+        // accessor, not a database column. Sort the already-loaded catalog by
+        // the same value shown on its cards.
+        if (in_array($sort, ['termurah', 'termahal'], true)) {
+            $items = $items->sortBy(fn ($item) => $item->harga_mulai, SORT_REGULAR, $sort === 'termahal')->values();
+        }
         $filterRegions = \App\Support\RegionCatalogFilter::options($availableRegionIds, $visibleRegionIds);
         
         return view('users.mobil-rental-equipment', compact('items', 'targetRegion', 'targetRegionId', 'filterRegions', 'filterRegionId'));

@@ -26,6 +26,7 @@ class PasarOrder extends Model
         'order_number',
         'user_id',
         'region_id',
+        'store_id', 'payment_settings_snapshot',
         'total_amount',
         'shipping_cost',
         'grand_total',
@@ -33,6 +34,7 @@ class PasarOrder extends Model
         'payment_method',
         'proof_of_payment',
         'delivery_address',
+        'delivery_region_id',
         'delivery_latitude',
         'delivery_longitude',
         'distance_km',
@@ -53,6 +55,7 @@ class PasarOrder extends Model
     ];
 
     protected $casts = [
+        'payment_settings_snapshot' => 'array',
         'total_amount' => 'decimal:2',
         'shipping_cost' => 'decimal:2',
         'grand_total' => 'decimal:2',
@@ -75,6 +78,8 @@ class PasarOrder extends Model
         return $this->belongsTo(Region::class);
     }
 
+    public function store() { return $this->belongsTo(MarketStore::class, 'store_id'); }
+
     public function items()
     {
         return $this->hasMany(PasarOrderItem::class, 'pasar_order_id');
@@ -84,6 +89,24 @@ class PasarOrder extends Model
     {
         return $this->hasOne(PasarComplaint::class, 'pasar_order_id');
     }
+
+    public function isCashPayment(): bool
+    {
+        return in_array(strtolower($this->payment_method), ['tunai', 'cod', 'cash'], true);
+    }
+
+    public function paymentTransactions()
+    {
+        return $this->hasMany(WalletTransaction::class, 'reference_id')->where('reference_type', 'pasar');
+    }
+
+    public function paymentIsVerified(): bool
+    {
+        if ($this->store_id) return \Illuminate\Support\Facades\DB::table('market_payments')->where('pasar_order_id',$this->id)->where('status','verified')->exists();
+        return $this->paymentTransactions()->where('status', 'verified')->exists();
+    }
+
+    public function marketPayment() { return $this->hasOne(MarketPayment::class, 'pasar_order_id'); }
 
     public static function generateOrderNumber()
     {

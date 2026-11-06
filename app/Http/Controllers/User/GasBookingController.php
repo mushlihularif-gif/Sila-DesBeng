@@ -135,7 +135,7 @@ class GasBookingController extends Controller
             'title' => 'Menunggu Pembayaran',
             'message' => 'Pesanan gas Anda (Order ID: ' . $order->order_number . ') berhasil dibuat. Silakan selesaikan pembayaran sebelum batas waktu habis.',
             'is_read' => false,
-            'link' => route('user.activity'),
+            'link' => \App\Services\NotificationService::orderLink($order, 'gas'),
             'icon' => 'fas fa-clock text-yellow-500'
         ]);
 
@@ -205,7 +205,7 @@ class GasBookingController extends Controller
             'title' => 'Pembayaran Gas Dibatalkan',
             'message' => 'Pesanan gas Anda (Order ID: ' . $order->order_number . ') telah dibatalkan oleh sistem karena batas waktu pembayaran telah habis.',
             'is_read' => false,
-            'link' => route('user.activity'),
+            'link' => \App\Services\NotificationService::orderLink($order, 'gas'),
             'icon' => 'fas fa-times-circle text-red-500'
         ]);
 

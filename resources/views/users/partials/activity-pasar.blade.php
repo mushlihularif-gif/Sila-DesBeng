@@ -26,7 +26,7 @@
                         </span>
                         @if($order->region)
                             <span class="text-xs text-gray-500 font-medium">
-                                <i class="fas fa-map-marker-alt text-red-500 mr-1"></i>BUMDes {{ $order->region->name }}
+                                <i class="fas fa-map-marker-alt text-red-500 mr-1"></i>{{ $order->store?->name ?? ('BUMDes '.$order->region->name) }}
                             </span>
                         @endif
                     </div>
@@ -43,6 +43,10 @@
                         Total <strong>{{ $order->items->sum('quantity') }}</strong> Produk • Metode: <strong>{{ $order->delivery_method ?? 'Diantar Kurir Lokal' }}</strong>
                     </p>
 
+                    @if($order->store_id)
+                        <p class="text-sm mt-3">Pembayaran: {{ ['pending'=>'Menunggu konfirmasi penjual','verified'=>'Diterima penjual','refund_pending'=>'Menunggu penjual mengembalikan uang','refunded'=>'Pengembalian uang dicatat penjual','cancelled'=>'Dibatalkan'][$order->marketPayment?->status ?? 'pending'] ?? 'Periksa status' }}</p>
+                        <a class="inline-block text-blue-600 font-bold mt-2" href="{{ route('market.chat',[$order->store_id,$order->user_id]) }}">Chat Penjual</a>
+                    @endif
                     <!-- Complaint Banner if exists -->
                     @if($complaint)
                     <div class="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-2.5">
@@ -66,8 +70,9 @@
                         <div class="flex items-center justify-start sm:justify-end gap-2 mb-2">
                             @php
                                 $statusConfig = [
+                                    'delivered' => ['text' => 'Telah Diantar', 'color' => 'text-sky-600', 'bg' => 'bg-sky-50', 'border' => 'border-sky-200'],
                                     'completed' => ['text' => 'Selesai', 'color' => 'text-green-600', 'bg' => 'bg-green-50', 'border' => 'border-green-200'],
-                                    'pending' => ['text' => 'Menunggu Pembayaran', 'color' => 'text-yellow-600', 'bg' => 'bg-yellow-50', 'border' => 'border-yellow-200'],
+                                    'pending' => ['text' => $order->isCashPayment() ? 'Menunggu Penjual' : 'Menunggu Pembayaran', 'color' => 'text-yellow-600', 'bg' => 'bg-yellow-50', 'border' => 'border-yellow-200'],
                                     'paid' => ['text' => 'Sudah Dibayar', 'color' => 'text-blue-600', 'bg' => 'bg-blue-50', 'border' => 'border-blue-200'],
                                     'confirmed' => ['text' => 'Diproses Toko', 'color' => 'text-blue-600', 'bg' => 'bg-blue-50', 'border' => 'border-blue-200'],
                                     'in_delivery' => ['text' => 'Dalam Pengiriman', 'color' => 'text-sky-600', 'bg' => 'bg-sky-50', 'border' => 'border-sky-200'],
@@ -132,7 +137,7 @@
                     <div class="border-t border-gray-200 pt-3 space-y-1.5 text-xs text-gray-600">
                         <div class="flex justify-between">
                             <span>Subtotal Produk</span>
-                            <span class="font-semibold">Rp {{ number_format($order->total_price, 0, ',', '.') }}</span>
+                            <span class="font-semibold">Rp {{ number_format($order->total_amount, 0, ',', '.') }}</span>
                         </div>
                         <div class="flex justify-between">
                             <span>Biaya Pengantaran</span>
@@ -179,7 +184,7 @@
                                 <a href="{{ route('pasar.payment', $order->id) }}" class="flex-1 text-center px-4 py-2.5 bg-green-500 text-white rounded-xl text-sm font-semibold hover:bg-green-600 transition-colors shadow-sm">
                                     <i class="fas fa-wallet mr-1.5"></i> Selesaikan Pembayaran
                                 </a>
-                            @elseif(in_array($order->status, ['paid', 'confirmed', 'in_delivery']))
+                            @elseif(in_array($order->status, ['confirmed', 'in_delivery', 'delivered']))
                                 <!-- Tombol Komplain -->
                                 @if(!$complaint)
                                     <button type="button" 
@@ -230,7 +235,7 @@
             <i class="fas fa-shopping-bag text-2xl"></i>
         </div>
         <h4 class="text-lg font-bold text-gray-800 mb-1">Belum Ada Riwayat Belanja</h4>
-        <p class="text-sm text-gray-500 mb-4">Yuk jelajahi produk lokal segar dan berkualitas dari Pasar Daerah BUMDes!</p>
+        <p class="text-sm text-gray-500 mb-4">Yuk jelajahi produk lokal segar dan berkualitas dari Pasar Daerah!</p>
         <a href="{{ route('pasar.index') }}" class="inline-flex items-center gap-2 px-6 py-2.5 bg-sky-500 text-white rounded-xl font-semibold hover:bg-sky-600 transition-colors shadow-sm">
             <i class="fas fa-store"></i> Belanja di Pasar Daerah
         </a>

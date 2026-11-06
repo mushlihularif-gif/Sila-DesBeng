@@ -8,21 +8,36 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use App\Services\ImageCompressorService;
+use Illuminate\Validation\Rule;
 
 class SupirController extends Controller
 {
-    public function index(Request $request)
+    private function manager()
     {
         $user = Auth::user();
+        abort_unless($user && in_array($user->role, ['admin_desa', 'super_admin'], true), 403);
+        abort_if($user->role === 'admin_desa' && !$user->region_id, 403);
+        return $user;
+    }
+
+    private function scopedSupirs()
+    {
+        $user = $this->manager();
+        return Supir::query()->when($user->role !== 'super_admin', fn ($q) => $q->where('region_id', $user->region_id));
+    }
+
+    public function index(Request $request)
+    {
+        $user = $this->manager();
         $tab = $request->get('tab', 'supir');
         if (!in_array($tab, ['supir', 'pengurus_gedung'])) {
             $tab = 'supir';
         }
 
-        $query = Supir::with(['user', 'kendaraanOperasional', 'fasilitas']);
+        $query = $this->scopedSupirs()->with(['user', 'kendaraanOperasional', 'fasilitas']);
         if ($user && $user->role === 'admin_desa' && $user->region_id) {
             $query->where('region_id', $user->region_id);
-            $users = \App\Models\User::where('region_id', $user->region_id)->get();
+            $users = \App\Models\User::whereIn('region_id', [$user->region_id, ...\App\Models\Region::getDescendantIds($user->region_id)])->get();
         } else {
             $users = \App\Models\User::all();
         }
@@ -57,6 +72,9 @@ class SupirController extends Controller
 
     public function store(Request $request)
     {
+        $admin = $this->manager();
+        $regionId = $admin->region_id ?: $request->input('region_id');
+        validator(['region_id'=>$regionId], ['region_id'=>['required',Rule::exists('regions','id')->whereIn('type',['desa','kelurahan'])]])->validate();
         // Default tipe ke 'supir' jika tidak dikirim dari form
         if (!$request->filled('tipe')) {
             $request->merge(['tipe' => 'supir']);
@@ -67,7 +85,7 @@ class SupirController extends Controller
             'tipe' => 'required|in:supir,pengurus_gedung',
             'kontak' => 'nullable|string|max:50',
             'status' => 'required|in:Tersedia,Sedang Bertugas,Tidak Aktif',
-            'user_id' => 'nullable|exists:users,id',
+            'user_id' => ['nullable', Rule::exists('users','id')->whereIn('region_id', [$regionId, ...\App\Models\Region::getDescendantIds($regionId)])],
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192'
         ]);
 
@@ -109,6 +127,7 @@ class SupirController extends Controller
 
     public function update(Request $request, Supir $supir)
     {
+        $supir = $this->scopedSupirs()->findOrFail($supir->id);
         if (!$request->filled('tipe')) {
             $request->merge(['tipe' => $supir->tipe ?? 'supir']);
         }
@@ -118,7 +137,7 @@ class SupirController extends Controller
             'tipe' => 'required|in:supir,pengurus_gedung',
             'kontak' => 'nullable|string|max:50',
             'status' => 'required|in:Tersedia,Sedang Bertugas,Tidak Aktif',
-            'user_id' => 'nullable|exists:users,id',
+            'user_id' => ['nullable', Rule::exists('users','id')->whereIn('region_id', [$supir->region_id, ...\App\Models\Region::getDescendantIds($supir->region_id)])],
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192'
         ]);
 
@@ -150,6 +169,7 @@ class SupirController extends Controller
 
     public function destroy(Supir $supir)
     {
+        $supir = $this->scopedSupirs()->findOrFail($supir->id);
         $tab = $supir->tipe ?? 'supir';
         if ($supir->foto) Storage::disk('public')->delete($supir->foto);
         $supir->delete();

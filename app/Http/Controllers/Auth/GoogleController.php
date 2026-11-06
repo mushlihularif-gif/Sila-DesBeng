@@ -13,6 +13,25 @@ use Laravel\Socialite\Facades\Socialite;
 
 class GoogleController extends Controller
 {
+    public function showRegistrationForm(Request $request)
+    {
+        // The profile form lives in the home-page modal. Only the OAuth
+        // callback may populate its trusted identity data in the session.
+        if ($request->user()) {
+            return redirect()->route('beranda');
+        }
+
+        $identity = $request->session()->get('google_register_data');
+        if (!is_array($identity) || empty($identity['id']) || empty($identity['email']) || empty($identity['name'])) {
+            $request->session()->forget('google_register_data');
+            return redirect()->route('beranda')
+                ->with('open_login_modal', true)
+                ->with('error', 'Sesi pendaftaran Google telah berakhir. Silakan masuk dengan Google lagi.');
+        }
+
+        return redirect()->route('beranda')->with('show_google_register', true);
+    }
+
     // Redirect to Google
     public function redirectToGoogle()
     {
@@ -31,6 +50,7 @@ class GoogleController extends Controller
                             ->first();
 
             if ($findUser) {
+                abort_unless($findUser->hasSupportedRole() && $findUser->status === 'aktif', 403);
                 abort_if($findUser->google_id && $findUser->google_id !== $socialUser->id, 401);
                 $googleOwnsEmail = str_ends_with(strtolower($socialUser->email), '@gmail.com')
                     || !empty($socialUser->user['hd']);
@@ -59,7 +79,7 @@ class GoogleController extends Controller
                     'ip_address' => request()->ip()
                 ]);
 
-                return redirect()->intended($findUser->role === 'admin' ? route('admin.dashboard') : route('beranda'));
+                return redirect()->intended(in_array($findUser->role, ['super_admin', 'admin_desa'], true) ? route('admin.dashboard') : route('beranda'));
 
             } else {
                 // User Baru - Tampilkan Form Lengkapi Profil Google

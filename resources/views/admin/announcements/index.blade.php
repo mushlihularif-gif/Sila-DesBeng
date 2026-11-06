@@ -206,7 +206,7 @@
                                     <option value="Gotong Royong" {{ request('type') == 'Gotong Royong' ? 'selected' : '' }}>Gotong Royong</option>
                                 </select>
                             </div>
-                            @if(in_array(auth()->user()->role, ['super_admin', 'admin']))
+                            @if(in_array(auth()->user()->role, ['super_admin']))
                             <div class="col-12 col-md-4">
                                 <label class="form-label fw-semibold text-muted small mb-1">Kecamatan</label>
                                 <div class="form-control bg-light border-0 d-flex align-items-center justify-content-between px-3 py-2">

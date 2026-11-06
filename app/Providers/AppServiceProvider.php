@@ -155,7 +155,7 @@ class AppServiceProvider extends ServiceProvider
             // false untuk staf, sehingga blok menu Unit Layanan tidak pernah
             // dirender dan seluruh sistem izin unit jadi tidak berfungsi —
             // staf hanya melihat Dashboard dan Profil.
-            if ($user && in_array($user->role, ['super_admin', 'admin', 'admin_kecamatan', 'admin_desa', 'staff'])) {
+            if ($user && in_array($user->role, ['super_admin', 'admin_desa'])) {
                 if ($user->role === 'super_admin' || $user->role === 'admin') {
                     // For super_admin, check if the system settings or top region has services enabled
                     $region = \App\Models\Region::with(['services' => fn($q) => $q->wherePivot('is_active', true)])->find($user->region_id);
@@ -165,7 +165,7 @@ class AppServiceProvider extends ServiceProvider
                         $operationalServices = ['Penyewaan Alat', 'Penjualan Gas', 'Penyewaan Mobil', 'Penyewaan Transportasi', 'Fasilitas Umum', 'Pasar Daerah', 'Pengumuman'];
                         $hasActiveServices = count(array_intersect($activeServicesMenu, $operationalServices)) > 0;
                     }
-                } else if (in_array($user->role, ['admin_kecamatan', 'admin_desa', 'staff'])) {
+                } else if (in_array($user->role, ['admin_desa'])) {
                     // Staf memakai region_id warisan pembuatnya, jadi cabang yang
                     // sama dengan admin wilayah sudah tepat.
                     // For admin_kecamatan and admin_desa, check their own region_id

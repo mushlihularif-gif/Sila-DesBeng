@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Foundation\Application;
-use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -12,9 +11,6 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withSchedule(function (\Illuminate\Console\Scheduling\Schedule $schedule) {
-        // MATRIKS ESKALASI: Cek batas SLA pelaporan warga setiap jam
-        $schedule->command('laporan:auto-escalate')->hourly();
-
         // Pengingat pencairan saldo wilayah yang didiamkan Diskominfotik.
         // Harian, bukan tiap jam: perintahnya sendiri sudah menahan pengingat
         // ganda per hari, dan uang tertahan bukan hal yang perlu diteriakkan
@@ -42,8 +38,5 @@ return Application::configure(basePath: dirname(__DIR__))
         // $middleware->throttleWithRedis = false; // Use default cache
 
     })
-    ->withExceptions(function (Exceptions $exceptions) {
-        $exceptions->renderable(function (\Illuminate\Session\TokenMismatchException $e, $request) {
-            return redirect('/beranda')->with('error', 'Sesi halaman telah berakhir (Kedaluwarsa). Silakan ulangi tindakan Anda atau login kembali.');
-        });
-    })->create();
+    ->withExceptions()
+    ->create();

@@ -31,6 +31,9 @@ class DatabaseSeeder extends Seeder
             VillageSeeder::class,
         ]);
 
+        // Akun contoh hanya untuk pengembangan; jangan menanam sandi contoh di hosting.
+        if (!app()->environment(['local', 'testing'])) return;
+
         // Create Admin User
         User::firstOrCreate(
             ['email' => 'admin@isewa.com'],
@@ -40,7 +43,7 @@ class DatabaseSeeder extends Seeder
                 'phone' => '081234567890',
                 'address' => 'Kantor BUMDes Desa Pematang Duku Timur',
                 'gender' => 'laki-laki',
-                'role' => 'admin',
+                'role' => 'super_admin',
                 'status' => 'aktif',
                 'email_verified_at' => now(),
                 'password' => Hash::make('admin123'),
@@ -58,24 +61,6 @@ class DatabaseSeeder extends Seeder
                 'gender' => 'perempuan',
                 'role' => 'user',
                 'status' => 'aktif',
-                'email_verified_at' => now(),
-                'password' => Hash::make('password123'),
-            ]
-        );
-
-        // Create Admin Kecamatan User
-        $regionKecamatan = \App\Models\Region::where('type', 'kecamatan')->first();
-        User::firstOrCreate(
-            ['email' => 'adminkecamatan@isewa.com'],
-            [
-                'username' => 'adminkecamatan',
-                'name' => 'Admin Kecamatan',
-                'phone' => '087654321098',
-                'address' => 'Kantor Camat',
-                'gender' => 'laki-laki',
-                'role' => 'admin_kecamatan',
-                'status' => 'aktif',
-                'region_id' => $regionKecamatan ? $regionKecamatan->id : null,
                 'email_verified_at' => now(),
                 'password' => Hash::make('password123'),
             ]

@@ -79,7 +79,7 @@ return [
     'google_maps' => [
         'label'       => 'Google Maps',
         'icon'        => 'bx-map-alt',
-        'description' => 'Peta lokasi pada form Laporan Warga dan pemesanan gas.',
+        'description' => 'Peta lokasi pada pemesanan dan layanan daerah.',
         'console_url' => 'https://console.cloud.google.com/google/maps-apis/credentials',
         'notes'       => [
             'Ini API key biasa, bukan OAuth client — dibuat lewat menu "Create credentials > API key".',

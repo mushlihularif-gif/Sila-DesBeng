@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\Laporan;
 use App\Models\RentalBooking;
 use App\Models\GasOrder;
 use App\Models\User;
@@ -21,8 +20,7 @@ class ClearProposalMockupSeeder extends Seeder
         // Matikan constraint sementara agar tidak error saat delete
         DB::statement('SET FOREIGN_KEY_CHECKS=0;');
 
-        // Hapus transaksi dan laporan yang memiliki tanda DUMMY_PROPOSAL
-        Laporan::where('catatan_admin', 'DUMMY_PROPOSAL')->delete();
+        // Hapus transaksi yang memiliki tanda DUMMY_PROPOSAL
         RentalBooking::where('admin_notes', 'DUMMY_PROPOSAL')->delete();
         GasOrder::where('notes', 'DUMMY_PROPOSAL')->delete();
 

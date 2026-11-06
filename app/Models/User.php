@@ -12,6 +12,15 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
+    public const ROLES = ['user', 'admin_rt', 'admin_rw', 'admin_desa', 'super_admin'];
+    public const REGION_ROLES = ['desa' => 'admin_desa', 'kelurahan' => 'admin_desa', 'rw' => 'admin_rw', 'rt' => 'admin_rt'];
+
+    public function hasSupportedRole(): bool
+    {
+        return in_array($this->role, self::ROLES, true);
+    }
+
+
     /**
      * KEAMANAN: Auto-generate UUID saat membuat record baru.
      * UUID digunakan sebagai public identifier untuk mencegah ID Guessing.
@@ -200,17 +209,17 @@ class User extends Authenticatable
 
     public function isAdmin()
     {
-        return in_array($this->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin', 'admin_rw', 'admin_rt', 'staff']);
+        return in_array($this->role, ['super_admin', 'admin_desa', 'admin_rw', 'admin_rt'], true);
     }
 
     public function isStaff()
     {
-        return $this->role === 'staff';
+        return false; // Akun staf lama tidak lagi memiliki akses.
     }
 
     public function isSuperAdmin()
     {
-        return in_array($this->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin']);
+        return $this->role === 'super_admin';
     }
 
     public function staffPermissions()
@@ -220,42 +229,17 @@ class User extends Authenticatable
 
     public function hasUnitPermission($unitKey)
     {
-        if ($this->isSuperAdmin()) {
-            return true;
-        }
-        return $this->staffPermissions()->where('unit_key', $unitKey)->exists();
+        return in_array($this->role, ['super_admin', 'admin_desa'], true)
+            && in_array($unitKey, self::IZIN_UNIT, true);
     }
 
-    /**
-     * Dapatkan daftar staf penanggung jawab suatu unit di wilayah tertentu.
-     */
+    /** Kompatibilitas pemanggil lama; akun staf tidak lagi diaktifkan. */
     public static function getStaffForUnit($unitKey, $regionId = null)
     {
-        $regionId = $regionId ?? auth()->user()?->region_id;
-        if (!$regionId) {
-            return collect();
-        }
-
-        return self::where('role', 'staff')
-            ->where('region_id', $regionId)
-            ->whereHas('staffPermissions', function ($q) use ($unitKey) {
-                $q->where('unit_key', $unitKey);
-            })
-            ->get();
+        return collect();
     }
 
-    /**
-     * Izin modul Sistem Platform, disimpan di tabel staff_permissions yang sama
-     * dengan izin unit layanan, dibedakan lewat awalan "platform_".
-     *
-     * Dikelompokkan MENGIKUTI TAB DI SIDEBAR.
-     *
-     * Tiap izin sengaja setara satu SUB-MENU, bukan satu grup. Memberi izin
-     * "Manajemen" secara utuh tidak bermakna — yang dibuka staf selalu halaman
-     * tertentu, jadi pilihannya pun harus setingkat halaman.
-     *
-     * Bentuk: 'Nama Tab' => ['kunci_izin' => ['label', 'ikon boxicons']]
-     */
+    /** Daftar modul Sistem Platform, dikelompokkan mengikuti sidebar. */
     public const IZIN_PLATFORM_GRUP = [
         'Sistem Platform' => [
             'platform_integrasi'  => ['Integrasi Payment Gateway', 'bx-plug'],
@@ -265,7 +249,6 @@ class User extends Authenticatable
             'platform_biaya'      => ['Biaya Server dan Domain', 'bx-server'],
         ],
         'Manajemen' => [
-            'platform_staf'   => ['Kelola Staf', 'bx-user-voice'],
             'platform_banner' => ['Banner', 'bx-image'],
         ],
         'Data & Laporan' => [
@@ -301,24 +284,10 @@ class User extends Authenticatable
         return array_keys(self::IZIN_PLATFORM_GRUP[$namaGrup] ?? []);
     }
 
-    /**
-     * Izin modul platform.
-     *
-     * BEDA dengan hasUnitPermission(): di sini HANYA super_admin yang otomatis
-     * lolos. Admin kabupaten/kecamatan/desa TIDAK, karena modul ini memuat
-     * kredensial API dan log keamanan seluruh platform.
-     */
+    /** Modul platform hanya dapat diakses Super Admin. */
     public function hasPlatformPermission(string $permissionKey): bool
     {
-        if ($this->role === 'super_admin') {
-            return true;
-        }
-
-        if ($this->role !== 'staff') {
-            return false;
-        }
-
-        return $this->staffPermissions()->where('unit_key', $permissionKey)->exists();
+        return $this->isSuperAdmin() && array_key_exists($permissionKey, self::izinPlatform());
     }
 
     /**
@@ -327,30 +296,13 @@ class User extends Authenticatable
      */
     public function bolehAksesPlatform(): bool
     {
-        if ($this->role === 'super_admin') {
-            return true;
-        }
-
-        if ($this->role !== 'staff') {
-            return false;
-        }
-
-        return $this->staffPermissions()
-            ->whereIn('unit_key', array_keys(self::izinPlatform()))
-            ->exists();
+        return $this->isSuperAdmin();
     }
 
-    /**
-     * True untuk akun staf yang MURNI bekerja di tingkat platform.
-     *
-     * Dipakai menyembunyikan menu operasional per wilayah (Manajemen,
-     * Data & Laporan, Pengaturan). Tanpa ini mereka ikut melihat laporan
-     * transaksi dan pendapatan desa, karena banyak menu disaring dengan
-     * kondisi negatif `role !== 'super_admin'` yang dilewati role 'staff'.
-     */
+    /** Kompatibilitas pemanggil lama; akun staf tidak lagi diaktifkan. */
     public function hanyaPlatform(): bool
     {
-        return $this->role === 'staff' && $this->bolehAksesPlatform();
+        return false;
     }
 
     /** Kunci izin untuk staf UNIT LAYANAN, lawan dari IZIN_PLATFORM_GRUP. */
@@ -359,14 +311,7 @@ class User extends Authenticatable
         'pasar_daerah', 'kabar_informasi',
     ];
 
-    /**
-     * Nama layanan wilayah yang diwakili tiap kunci izin unit.
-     *
-     * Izin dan layanan memakai kosakata berbeda: izinnya bernama 'sewa_alat',
-     * sedangkan RegionService menamainya 'Penyewaan Alat'. Peta ini sebelumnya
-     * hanya ada sebagai properti privat di StaffManagementController, sehingga
-     * dashboard tidak punya cara mengetahui unit apa yang dipegang seorang staf.
-     */
+    /** Nama layanan untuk masing-masing kunci izin unit. */
     public const NAMA_UNIT = [
         'gas'             => 'Penjualan Gas',
         'sewa_alat'       => 'Penyewaan Alat',
@@ -376,48 +321,16 @@ class User extends Authenticatable
         'kabar_informasi' => 'Kabar dan Informasi Daerah',
             ];
 
-    /**
-     * Nama layanan yang benar-benar dipegang staf ini.
-     *
-     * Mengembalikan array kosong untuk yang bukan staf — pemanggilnya yang
-     * memutuskan arti "kosong", karena bagi admin wilayah kosong berarti
-     * "tidak dibatasi", sedangkan bagi staf berarti "belum diberi unit".
-     */
+    /** Kompatibilitas pemanggil lama; akun staf tidak lagi diaktifkan. */
     public function layananDipegang(): array
     {
-        if ($this->role !== 'staff') {
-            return [];
-        }
-
-        return $this->staffPermissions()
-            ->whereIn('unit_key', self::IZIN_UNIT)
-            ->pluck('unit_key')
-            ->flatMap(function ($kunci) {
-                if ($kunci === 'sewa_mobil') {
-                    return ['Penyewaan Mobil', 'Penyewaan Transportasi'];
-                }
-                return [self::NAMA_UNIT[$kunci] ?? null];
-            })
-            ->filter()
-            ->values()
-            ->all();
+        return [];
     }
 
-    /**
-     * True untuk staf yang memegang minimal satu unit layanan.
-     *
-     * Dipakai menampilkan grup menu tempat pekerjaan mereka sebenarnya berada:
-     * Permintaan & Pengajuan, Bukti Transaksi, dan laporan per unit. Tanpa
-     * penanda ini, staf unit hanya melihat halaman induk barangnya saja dan
-     * tidak punya jalan menuju pesanan yang harus mereka proses.
-     */
+    /** Kompatibilitas pemanggil lama; akun staf tidak lagi diaktifkan. */
     public function punyaIzinUnit(): bool
     {
-        if ($this->role !== 'staff') {
-            return false;
-        }
-
-        return $this->staffPermissions()->whereIn('unit_key', self::IZIN_UNIT)->exists();
+        return false;
     }
 
     /**
@@ -435,20 +348,10 @@ class User extends Authenticatable
         return false;
     }
 
-    /**
-     * Boleh melihat sebuah menu yang dibagi bersama admin wilayah.
-     *
-     * $rolesBiasa = role non-staf yang selama ini sudah berhak. Staf hanya lolos
-     * kalau izin platform-nya dicentang. Bentuk ini dipakai supaya penambahan
-     * akses untuk staf platform tidak mengubah sedikit pun hak admin wilayah.
-     */
+    /** Periksa peran yang didukung untuk menu bersama. */
     public function bolehMenu(array $rolesBiasa, string $izinPlatform): bool
     {
-        if ($this->role === 'staff') {
-            return $this->hasPlatformPermission($izinPlatform);
-        }
-
-        return in_array($this->role, $rolesBiasa, true);
+        return $this->hasSupportedRole() && in_array($this->role, $rolesBiasa, true);
     }
 
     /**
@@ -456,29 +359,13 @@ class User extends Authenticatable
      */
     public function labelRole(): string
     {
-        $peta = [
-            'super_admin'     => 'Super Admin',
-            'admin'           => 'Admin Pusat',
-            'admin_kecamatan' => 'Admin Kecamatan',
-            'admin_desa'      => 'Admin Desa',
-            'admin_rw'        => 'Admin RW',
-            'admin_rt'        => 'Admin RT',
-            'user'            => 'Pengguna',
-        ];
-
-        if ($this->role === 'staff') {
-            return $this->hanyaPlatform() ? 'Staf Platform' : 'Staf Unit';
-        }
-
-        return $peta[$this->role] ?? ucfirst($this->role);
+        return ['user' => 'Warga', 'admin_rt' => 'Admin RT', 'admin_rw' => 'Admin RW',
+            'admin_desa' => 'Admin Desa', 'super_admin' => 'Super Admin'][$this->role] ?? 'Peran tidak didukung';
     }
 
     public function getUnitPermissions()
     {
-        if ($this->isSuperAdmin()) {
-            return collect(['gas', 'sewa_alat', 'sewa_mobil', 'fasilitas_umum', 'pasar_daerah', 'kabar_informasi']);
-        }
-        return $this->staffPermissions()->pluck('unit_key');
+        return in_array($this->role, ['super_admin', 'admin_desa'], true) ? collect(self::IZIN_UNIT) : collect();
     }
 
     public function region()

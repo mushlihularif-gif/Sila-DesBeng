@@ -18,7 +18,7 @@ class UserVerificationController extends Controller
     private function pastikanPeninjau(): void
     {
         abort_unless(
-            in_array(Auth::user()?->role, ['super_admin', 'admin', 'admin_kecamatan', 'admin_desa'], true),
+            in_array(Auth::user()?->role, ['super_admin', 'admin_desa'], true),
             403,
             'Peninjauan verifikasi identitas hanya untuk admin wilayah dan Super Admin.'
         );
@@ -34,7 +34,7 @@ class UserVerificationController extends Controller
     {
         $admin = Auth::user();
 
-        if ($admin->role === 'super_admin' || ($admin->role === 'admin' && ! $admin->region_id)) {
+        if ($admin->role === 'super_admin') {
             return null;
         }
 

@@ -162,7 +162,7 @@ class RequestController extends Controller
         }
 
         // Buat query untuk pasar daerah
-        $pasarQuery = \App\Models\PasarOrder::where('region_id', $user->region_id)->withTrashed()->with(['user', 'items.produk']);
+        $pasarQuery = \App\Models\PasarOrder::whereNull('store_id')->where('region_id', $user->region_id)->withTrashed()->with(['user', 'items.produk']);
         if ($status !== 'all') {
             if ($status === 'in_process') {
                 $pasarQuery->whereIn('status', ['paid', 'confirmed', 'in_delivery']);
@@ -253,7 +253,7 @@ class RequestController extends Controller
         $baseGT = $this->applyRegionFilter(GasOrder::withTrashed(), 'gas', true);
         $baseMT = $this->applyRegionFilter(MobilBooking::withTrashed(), 'mobil', true);
         $baseFT = $this->applyRegionFilter(FasilitasUmumBooking::withTrashed(), 'fasilitas', true);
-        $basePT = \App\Models\PasarOrder::where('region_id', $user->region_id)->withTrashed();
+        $basePT = \App\Models\PasarOrder::whereNull('store_id')->where('region_id', $user->region_id)->withTrashed();
 
         // Hitung statistik (Include deleted for history functionality)
         $stats = [
@@ -898,6 +898,7 @@ class RequestController extends Controller
                     'message' => "Bukti pengiriman untuk pesanan #{$order->order_number} telah tersedia.",
                     'type' => 'delivery_proof',
                     'user_id' => $order->user_id,
+                    'link' => \App\Services\NotificationService::orderLink($order),
                     'admin_id' => auth()->id(),
                 ]);
                 
@@ -998,6 +999,7 @@ class RequestController extends Controller
                     'message' => "Permintaan pembatalan pesanan #{$order->order_number} Anda telah disetujui.",
                     'type' => 'cancellation_approved',
                     'user_id' => $order->user_id,
+                    'link' => \App\Services\NotificationService::orderLink($order),
                     'admin_id' => auth()->id(),
                 ]);
 
@@ -1012,6 +1014,7 @@ class RequestController extends Controller
                     'message' => "Permintaan pembatalan pesanan #{$order->order_number} ditolak. Alasan: {$request->admin_response}",
                     'type' => 'cancellation_rejected',
                     'user_id' => $order->user_id,
+                    'link' => \App\Services\NotificationService::orderLink($order),
                     'admin_id' => auth()->id(),
                 ]);
             }

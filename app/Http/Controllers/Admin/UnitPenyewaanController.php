@@ -204,7 +204,7 @@ class UnitPenyewaanController extends Controller
         }
 
         // Broadcast produk baru ke warga
-        \App\Services\NotificationService::broadcastNewProduct('Penyewaan Alat', $barang->nama_barang, $barang->region_id ?? (auth()->user()->region_id ?? null), route('rental.equipment'));
+        \App\Services\NotificationService::broadcastNewProduct('Penyewaan Alat', $barang->nama_barang, $barang->region_id ?? (auth()->user()->region_id ?? null), route('rental.equipment.show', $barang->id));
 
         return redirect()->route('admin.unit.penyewaan.index')->with('success', 'Barang berhasil ditambahkan.');
     }

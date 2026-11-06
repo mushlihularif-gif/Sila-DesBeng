@@ -117,7 +117,7 @@
                 <div class="accordion mt-3" id="regionAccordion">
                     @foreach($childrenRegions as $index => $child)
                         @php
-                            $adminRoles = ['admin_rt', 'admin_rw', 'admin_desa', 'admin_kecamatan', 'super_admin', 'admin'];
+                            $adminRoles = ['admin_rt', 'admin_rw', 'admin_desa', 'super_admin'];
                             $childAdmins = $child->users->whereIn('role', $adminRoles);
                         @endphp
                         <div class="accordion-item card mb-3 shadow-sm border-0">
@@ -141,7 +141,9 @@
                                                     <i class='bx bx-sitemap me-1 d-none d-sm-inline'></i>{{ $child->children->count() }} Sub-Wilayah
                                                 </span>
                                             @endif
-                                            @if($childAdmins->count() > 0)
+                                            @if(!isset(\App\Models\User::REGION_ROLES[$child->type]))
+                                                <span class="badge bg-label-secondary">Wilayah referensi</span>
+                                            @elseif($childAdmins->count() > 0)
                                                 <span class="badge bg-label-success px-2 px-sm-3 py-1 py-sm-2 rounded-pill d-inline-flex align-items-center" style="font-size: 0.75rem;">
                                                     <i class='bx bx-check-circle me-1'></i> Akun Aktif
                                                 </span>
@@ -194,9 +196,11 @@
                                                     <div class="text-center py-3">
                                                         <i class='bx bx-user-circle text-muted fs-1 mb-2'></i>
                                                         <p class="text-muted mb-2">Belum ada akun pengurus untuk wilayah ini.</p>
-                                                        <button type="button" class="btn btn-sm btn-primary w-100" data-bs-toggle="modal" data-bs-target="#generateAdminModal{{ $child->id }}">
+                                                        @if(isset(\App\Models\User::REGION_ROLES[$child->type]))
+<button type="button" class="btn btn-sm btn-primary w-100" data-bs-toggle="modal" data-bs-target="#generateAdminModal{{ $child->id }}">
                                                             <i class="bx bx-user-plus me-1"></i> Buat Akun Pengurus
                                                         </button>
+@endif
                                                     </div>
                                                 @endif
                                             </div>
@@ -297,9 +301,11 @@
                                                     <div class="text-center py-3">
                                                         <i class='bx bx-user-circle text-muted fs-1 mb-2'></i>
                                                         <p class="text-muted mb-2">Belum ada akun pengurus untuk wilayah ini.</p>
-                                                        <button type="button" class="btn btn-sm btn-primary w-100" data-bs-toggle="modal" data-bs-target="#generateAdminModal{{ $child->id }}">
+                                                        @if(isset(\App\Models\User::REGION_ROLES[$child->type]))
+<button type="button" class="btn btn-sm btn-primary w-100" data-bs-toggle="modal" data-bs-target="#generateAdminModal{{ $child->id }}">
                                                             <i class="bx bx-user-plus me-1"></i> Buat Akun Pengurus
                                                         </button>
+@endif
                                                     </div>
                                                 @endif
                                             </div>
@@ -372,9 +378,11 @@
                                                                  </div>
                                                                  <div class="d-flex gap-2 ms-auto ms-sm-0 mt-1 mt-sm-0">
                                                                      @if(!$subAdmin)
-                                                                         <button type="button" class="btn btn-sm rounded-circle px-2" style="background: #e8f0fe; color: #0d6efd; border: none;" data-bs-toggle="modal" data-bs-target="#generateAdminModal{{ $sub->id }}" title="Buat Akun">
+                                                                         @if(isset(\App\Models\User::REGION_ROLES[$sub->type]))
+<button type="button" class="btn btn-sm rounded-circle px-2" style="background: #e8f0fe; color: #0d6efd; border: none;" data-bs-toggle="modal" data-bs-target="#generateAdminModal{{ $sub->id }}" title="Buat Akun">
                                                                              <i class="bx bx-user-plus"></i>
                                                                          </button>
+@endif
                                                                      @else
                                                                          <form action="{{ route('admin.kelola-wilayah.destroy-admin', $subAdmin->id) }}" method="POST" onsubmit="return confirm('Yakin hapus akun pengurus ini?');">
                                                                              @csrf @method('DELETE')
@@ -448,9 +456,10 @@
                                                     </div>
                                                 </div>
 
-                                                <div class="d-flex align-items-center mb-3">
+                                                @if(isset(\App\Models\User::REGION_ROLES[$subType]))
+<div class="d-flex align-items-center mb-3">
                                                     <div class="flex-grow-1 border-bottom"></div>
-                                                    <span class="px-3 text-muted small fw-semibold">BUAT AKUN ADMIN (OPSIONAL)</span>
+                                                    <span class="px-3 text-muted small fw-semibold">AKUN PENGURUS (OPSIONAL)</span>
                                                     <div class="flex-grow-1 border-bottom"></div>
                                                 </div>
                                                 
@@ -475,10 +484,11 @@
                                                         <label class="form-label fw-semibold">Password <span class="text-danger">*</span></label>
                                                         <div class="input-group input-group-merge">
                                                             <span class="input-group-text"><i class="bx bx-lock-alt"></i></span>
-                                                            <input type="text" name="admin_password" class="form-control" placeholder="Masukkan password minimal 8 karakter" required minlength="8">
+                                                            <input type="text" name="admin_password" class="form-control" placeholder="Isi jika membuat akun pengurus" minlength="8">
                                                         </div>
                                                     </div>
                                                 </div>
+@endif
                                             </div>
                                             <div class="modal-footer border-top-0 pt-0">
                                                 <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Batal</button>
@@ -538,9 +548,10 @@
                         </div>
                     </div>
 
-                    <div class="d-flex align-items-center mb-3">
+                    @if(isset(\App\Models\User::REGION_ROLES[$targetType]))
+<div class="d-flex align-items-center mb-3">
                         <div class="flex-grow-1 border-bottom"></div>
-                        <span class="px-3 text-muted small fw-semibold">BUAT AKUN ADMIN (OPSIONAL)</span>
+                        <span class="px-3 text-muted small fw-semibold">AKUN PENGURUS (OPSIONAL)</span>
                         <div class="flex-grow-1 border-bottom"></div>
                     </div>
                     
@@ -569,6 +580,7 @@
                             </div>
                         </div>
                     </div>
+@endif
                 </div>
                 <div class="modal-footer border-top-0 pt-0">
                     <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Batal</button>

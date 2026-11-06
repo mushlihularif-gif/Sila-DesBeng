@@ -154,7 +154,7 @@ class MobilBookingApiController extends Controller
                 'type' => 'status_berubah',
                 'title' => 'Pemesanan Berhasil',
                 'message' => 'Pemesanan Mobil (Order ID: ' . $booking->order_number . ') berhasil dibuat.',
-                'link' => '/unit-penyewaan-mobil',
+                'link' => \App\Services\NotificationService::orderLink($booking, 'mobil'),
                 'icon' => 'fas fa-car text-blue-500',
             ]);
 

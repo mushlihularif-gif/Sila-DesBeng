@@ -125,7 +125,7 @@
                                                         <input name="level" class="form-check-input me-2 mt-1" type="radio" value="1" id="level_1" {{ old('level', $member->level ?? 1) == 1 ? 'checked' : '' }} required>
                                                         <span>
                                                             <strong class="text-primary d-block">Tingkat 1 - Pimpinan Utama</strong>
-                                                            <small class="text-muted d-block" style="font-size: 0.78rem;">Baris paling atas / puncak (Contoh: {{ in_array(auth()->user()->role, ['admin', 'super_admin']) ? 'Bupati' : (auth()->user()->role == 'admin_kecamatan' ? 'Camat' : 'Kepala Desa / Lurah') }})</small>
+                                                            <small class="text-muted d-block" style="font-size: 0.78rem;">Baris paling atas / puncak (Contoh: {{ in_array(auth()->user()->role, ['super_admin']) ? 'Bupati' : (auth()->user()->role == 'admin_kecamatan' ? 'Camat' : 'Kepala Desa / Lurah') }})</small>
                                                         </span>
                                                     </label>
                                                 </div>
@@ -136,7 +136,7 @@
                                                         <input name="level" class="form-check-input me-2 mt-1" type="radio" value="2" id="level_2" {{ old('level', $member->level ?? 1) == 2 ? 'checked' : '' }} required>
                                                         <span>
                                                             <strong class="text-info d-block">Tingkat 2 - Pimpinan Kedua / Sekretaris</strong>
-                                                            <small class="text-muted d-block" style="font-size: 0.78rem;">Baris kedua di bawah Pimpinan Utama (Contoh: {{ in_array(auth()->user()->role, ['admin', 'super_admin']) ? 'Wakil Bupati / Sekda' : (auth()->user()->role == 'admin_kecamatan' ? 'Sekretaris Camat (Sekcam)' : 'Sekretaris Desa (Sekdes)') }})</small>
+                                                            <small class="text-muted d-block" style="font-size: 0.78rem;">Baris kedua di bawah Pimpinan Utama (Contoh: {{ in_array(auth()->user()->role, ['super_admin']) ? 'Wakil Bupati / Sekda' : (auth()->user()->role == 'admin_kecamatan' ? 'Sekretaris Camat (Sekcam)' : 'Sekretaris Desa (Sekdes)') }})</small>
                                                         </span>
                                                     </label>
                                                 </div>
@@ -147,7 +147,7 @@
                                                         <input name="level" class="form-check-input me-2 mt-1" type="radio" value="3" id="level_3" {{ old('level', $member->level ?? 1) == 3 ? 'checked' : '' }} required>
                                                         <span>
                                                             <strong class="text-success d-block">Tingkat 3 - Kepala Seksi / Kaur / Unit</strong>
-                                                            <small class="text-muted d-block" style="font-size: 0.78rem;">Baris ketiga di bawah Sekretaris (Contoh: {{ in_array(auth()->user()->role, ['admin', 'super_admin']) ? 'Kepala Dinas / Bagian' : (auth()->user()->role == 'admin_kecamatan' ? 'Kasi Trantib / Kasi PMD' : 'Kasi Pem, Kaur Keuangan, Kepala Unit Usaha') }})</small>
+                                                            <small class="text-muted d-block" style="font-size: 0.78rem;">Baris ketiga di bawah Sekretaris (Contoh: {{ in_array(auth()->user()->role, ['super_admin']) ? 'Kepala Dinas / Bagian' : (auth()->user()->role == 'admin_kecamatan' ? 'Kasi Trantib / Kasi PMD' : 'Kasi Pem, Kaur Keuangan, Kepala Unit Usaha') }})</small>
                                                         </span>
                                                     </label>
                                                 </div>
@@ -158,7 +158,7 @@
                                                         <input name="level" class="form-check-input me-2 mt-1" type="radio" value="4" id="level_4" {{ old('level', $member->level ?? 1) == 4 ? 'checked' : '' }} required>
                                                         <span>
                                                             <strong class="text-secondary d-block">Tingkat 4 - Staf Pelaksana / Aparatur</strong>
-                                                            <small class="text-muted d-block" style="font-size: 0.78rem;">Baris keempat di bawah Kepala Seksi/Unit (Contoh: {{ in_array(auth()->user()->role, ['admin', 'super_admin']) ? 'Staf Teknis' : (auth()->user()->role == 'admin_kecamatan' ? 'Staf Kecamatan' : 'Kepala Dusun (Kadus), Staf') }})</small>
+                                                            <small class="text-muted d-block" style="font-size: 0.78rem;">Baris keempat di bawah Kepala Seksi/Unit (Contoh: {{ in_array(auth()->user()->role, ['super_admin']) ? 'Staf Teknis' : (auth()->user()->role == 'admin_kecamatan' ? 'Staf Kecamatan' : 'Kepala Dusun (Kadus), Staf') }})</small>
                                                         </span>
                                                     </label>
                                                 </div>

@@ -8,7 +8,14 @@ class Mobil extends Model
 {
     public function scopeInCatalog($query)
     {
-        return $query->where(fn ($q) => $q->whereNull('kategori')->orWhere('kategori', '!=', 'ambulans'));
+        return $query->whereRaw('LOWER(nama_mobil) NOT LIKE ?', ['%ambulan%'])
+            ->where(fn ($q) => $q->whereNull('kategori')->orWhereRaw('LOWER(kategori) NOT LIKE ?', ['%ambulan%']));
+    }
+
+    public function scopeForRental($query)
+    {
+        return $query->inCatalog()->where(fn ($q) => $q->whereNull('kategori')
+            ->orWhereRaw('LOWER(TRIM(kategori)) != ?', ['kendaraan_operasional']));
     }
 
     protected $table = 'mobils';

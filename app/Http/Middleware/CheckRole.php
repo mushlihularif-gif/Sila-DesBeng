@@ -40,7 +40,7 @@ class CheckRole
             }
 
             // Custom handle for Guest accessing Admin routes
-            $adminRoles = ['admin', 'super_admin', 'admin_kecamatan', 'admin_desa', 'rw', 'rt', 'staff'];
+            $adminRoles = ['admin', 'super_admin', 'admin_desa', 'admin_rw', 'admin_rt'];
             if (count(array_intersect($adminRoles, $roles)) > 0) {
                 Log::warning('SECURITY: Unauthorized access attempt', [
                     'ip' => $request->ip(),
@@ -80,7 +80,12 @@ class CheckRole
         }
         
         $user = Auth::guard($guard)->user();
+        abort_unless($user->hasSupportedRole(), 403, 'Peran akun tidak didukung. Hubungi pengelola.');
         abort_if($user->status === 'non_aktif', 403, 'Akun tidak aktif.');
+        if (in_array($user->role, ['admin_desa', 'admin_rw', 'admin_rt'], true)) {
+            abort_unless($user->region_id && (\App\Models\User::REGION_ROLES[$user->region?->type] ?? null) === $user->role,
+                403, 'Penempatan wilayah akun belum sesuai. Hubungi pengelola.');
+        }
         
         // If no roles specified (only 'auth'), just check authentication (already passed above)
         if (empty($roles) || (count($roles) === 1 && $roles[0] === 'sanctum')) {
@@ -98,7 +103,7 @@ class CheckRole
         foreach ($requiredRoles as $role) {
             if ($role === 'admin') {
                 // 'admin' pseudo-role matches any of the new admin hierarchy
-                if (in_array($user->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin', 'staff'])) {
+                if (in_array($user->role, ['super_admin', 'admin_desa'])) {
                     return $next($request);
                 }
             } else if ($role === 'user') {
@@ -121,7 +126,7 @@ class CheckRole
 
         // Special case: If admin tries to access user-only pages, redirect to admin dashboard
         // Pengecualian: rw dan rt diizinkan mengakses halaman frontend user
-        $isAdminUser = in_array($user->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin', 'staff']);
+        $isAdminUser = in_array($user->role, ['super_admin', 'admin_desa']);
         if ($isAdminUser && (in_array('user', $requiredRoles) || $allowGuest)) {
             // Handle AJAX request
             if ($request->expectsJson() || $request->ajax()) {

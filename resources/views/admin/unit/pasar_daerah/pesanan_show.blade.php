@@ -3,6 +3,9 @@
 @section('title', 'Detail Pesanan Pasar Daerah')
 
 @section('content')
+@php
+    $paymentVerified = $pesanan->paymentIsVerified();
+@endphp
 <div class="container-fluid py-4">
     <style>
         @keyframes pulse {
@@ -164,7 +167,7 @@
                                     @endif
                                     <div>
                                         <h6 class="fw-bold mb-1">{{ $item->produk->nama_produk ?? $item->product_name }}</h6>
-                                        <small class="text-muted">Rp {{ number_format($item->price, 0, ',', '.') }} x {{ $item->quantity }}</small>
+                                        <small class="text-muted">Rp {{ number_format($item->product_price, 0, ',', '.') }} x {{ $item->quantity }}</small>
                                     </div>
                                 </div>
                                 <div>
@@ -178,7 +181,7 @@
                     </div>
 
                     <!-- DELIVERY STATUS WORKFLOW -->
-                    @if(in_array($pesanan->status, ['confirmed', 'in_delivery', 'completed']))
+                    @if(in_array($pesanan->status, ['confirmed', 'in_delivery', 'delivered', 'completed']))
                     <div class="card shadow-sm border-0 rounded-4 mb-4 animate-fade-in-up">
                         <div class="card-header bg-white border-bottom py-3">
                             <h5 class="mb-0 fw-bold text-dark"><i class="bx bx-map-alt me-2 text-primary"></i>Status Pengiriman</h5>
@@ -208,16 +211,16 @@
                                 <!-- Step 2: In Delivery -->
                                 <div class="d-flex gap-3 position-relative pb-4">
                                     <div class="d-flex flex-column align-items-center" style="width: 40px; min-width: 40px;">
-                                        <div class="rounded-circle {{ in_array($pesanan->status, ['in_delivery', 'completed']) ? 'bg-success text-white' : ($pesanan->status == 'confirmed' ? 'bg-primary text-white animate-pulse' : 'bg-white border text-secondary') }} d-flex align-items-center justify-content-center shadow-sm" style="width: 32px; height: 32px; z-index: 2;">
+                                        <div class="rounded-circle {{ in_array($pesanan->status, ['in_delivery', 'delivered', 'completed']) ? 'bg-success text-white' : ($pesanan->status == 'confirmed' ? 'bg-primary text-white animate-pulse' : 'bg-white border text-secondary') }} d-flex align-items-center justify-content-center shadow-sm" style="width: 32px; height: 32px; z-index: 2;">
                                             <i class="bx bx-car fs-4"></i>
                                         </div>
                                         <div class="h-100 border-start border-2 border-primary-subtle position-absolute" style="left: 19px; top: 32px; bottom: 0;"></div>
                                     </div>
                                     <div class="flex-grow-1 pb-4">
-                                        <div class="card border-0 {{ in_array($pesanan->status, ['in_delivery', 'completed']) ? 'bg-success-subtle bg-opacity-10' : ($pesanan->status == 'confirmed' ? 'bg-white border border-primary border-2 shadow-sm' : 'bg-light') }} rounded-3">
+                                        <div class="card border-0 {{ in_array($pesanan->status, ['in_delivery', 'delivered', 'completed']) ? 'bg-success-subtle bg-opacity-10' : ($pesanan->status == 'confirmed' ? 'bg-white border border-primary border-2 shadow-sm' : 'bg-light') }} rounded-3">
                                             <div class="card-body p-3 d-flex justify-content-between align-items-center flex-wrap gap-3">
                                                 <div>
-                                                    <h6 class="fw-bold {{ in_array($pesanan->status, ['in_delivery', 'completed']) ? 'text-success' : 'text-dark' }} mb-1">Dalam Pengiriman</h6>
+                                                    <h6 class="fw-bold {{ in_array($pesanan->status, ['in_delivery', 'delivered', 'completed']) ? 'text-success' : 'text-dark' }} mb-1">Dalam Pengiriman</h6>
                                                 </div>
                                                 @if($pesanan->status == 'confirmed')
                                                     <form action="{{ route('admin.unit.pasar_daerah.pesanan.update', $pesanan->id) }}" method="POST" class="d-inline">
@@ -292,7 +295,7 @@
                 <!-- RIGHT COLUMN -->
                 <div class="col-lg-4">
                     <!-- STATUS UPDATE WIDGET (For non-workflow states) -->
-                    @if(!in_array($pesanan->status, ['confirmed', 'in_delivery', 'completed']))
+                    @if(!in_array($pesanan->status, ['confirmed', 'in_delivery', 'delivered', 'completed']))
                     <div class="card shadow-sm border-0 rounded-4 mb-4">
                         <div class="card-header bg-white border-bottom py-3">
                             <h6 class="mb-0 fw-bold">Update Status Pesanan</h6>
@@ -304,10 +307,10 @@
                                 
                                 @if($pesanan->status === 'pending')
                                     <div class="alert alert-warning mb-3 py-2 border-0 bg-warning-subtle text-warning-emphasis">
-                                        <small><i class="bx bx-time-five me-1"></i>Menunggu Pembayaran</small>
+                                        <small><i class="bx bx-time-five me-1"></i>{{ $pesanan->isCashPayment() ? 'Bayar tunai saat pesanan diterima' : 'Menunggu Pembayaran' }}</small>
                                     </div>
-                                    <input type="hidden" name="status" value="paid">
-                                    <button type="submit" class="btn btn-info w-100 rounded-pill mb-2">Konfirmasi Pembayaran (Tandai Paid)</button>
+                                    <input type="hidden" name="status" value="{{ $pesanan->isCashPayment() ? 'confirmed' : 'paid' }}">
+                                    <button type="submit" class="btn btn-info w-100 rounded-pill mb-2">{{ $pesanan->isCashPayment() ? 'Terima dan Proses Pesanan COD' : 'Konfirmasi Pembayaran Diterima' }}</button>
                                     
                                 @elseif($pesanan->status === 'paid')
                                     <div class="alert alert-info mb-3 py-2 border-0 bg-info-subtle text-info-emphasis">
@@ -335,7 +338,7 @@
                             <form id="reject-form" action="{{ route('admin.unit.pasar_daerah.pesanan.update', $pesanan->id) }}" method="POST" class="d-none">
                                 @csrf
                                 @method('PUT')
-                                <input type="hidden" name="status" value="rejected">
+                                <input type="hidden" name="status" value="{{ $pesanan->status === 'paid' ? 'cancelled' : 'rejected' }}">
                             </form>
                             @endif
                         </div>
@@ -350,7 +353,7 @@
                         <div class="card-body p-4">
                             <div class="d-flex justify-content-between mb-2">
                                 <span class="text-muted">Total Belanja</span>
-                                <span class="fw-semibold">Rp {{ number_format($pesanan->total_price, 0, ',', '.') }}</span>
+                                <span class="fw-semibold">Rp {{ number_format($pesanan->total_amount, 0, ',', '.') }}</span>
                             </div>
                             <div class="d-flex justify-content-between mb-3">
                                 <span class="text-muted">Ongkos Kirim</span>
@@ -364,7 +367,7 @@
 
                             <div class="mb-3">
                                 <p class="text-muted mb-1 text-uppercase small ls-1">Metode Pembayaran</p>
-                                @if(strtolower($pesanan->payment_method) == 'tunai')
+                                @if($pesanan->isCashPayment())
                                     <span class="badge bg-secondary rounded-pill px-3 py-2"><i class="bx bx-money me-1"></i> COD / Tunai</span>
                                 @else
                                     <span class="badge bg-info rounded-pill px-3 py-2"><i class="bx bx-credit-card me-1"></i> {{ str_replace('_', ' ', strtoupper($pesanan->payment_method)) }}</span>
@@ -373,7 +376,7 @@
 
                             <div>
                                 <p class="text-muted mb-1 text-uppercase small ls-1">Status Pembayaran</p>
-                                @if(in_array($pesanan->status, ['paid', 'confirmed', 'in_delivery', 'completed']))
+                                @if($paymentVerified && !in_array($pesanan->status, ['cancelled', 'rejected']))
                                     <span class="text-success fw-bold d-flex align-items-center"><i class="bx bx-check-circle fs-5 me-1"></i> Lunas</span>
                                 @elseif(in_array($pesanan->status, ['cancelled', 'rejected']))
                                     <span class="text-danger fw-bold d-flex align-items-center"><i class="bx bx-x-circle fs-5 me-1"></i> Dibatalkan</span>
@@ -381,6 +384,15 @@
                                     <span class="text-warning fw-bold d-flex align-items-center"><i class="bx bx-time fs-5 me-1"></i> Belum Lunas</span>
                                 @endif
                             </div>
+                            @if($pesanan->isCashPayment() && !$paymentVerified && in_array($pesanan->status, ['confirmed', 'in_delivery', 'delivered', 'completed']))
+                                <form action="{{ route('admin.unit.pasar_daerah.pesanan.update', $pesanan->id) }}" method="POST" class="mt-3">
+                                    @csrf
+                                    @method('PUT')
+                                    <input type="hidden" name="status" value="payment_received">
+                                    <p class="small text-muted">Tekan setelah uang tunai benar-benar diterima dari pembeli.</p>
+                                    <button type="submit" class="btn btn-success w-100">Catat Uang Tunai Diterima</button>
+                                </form>
+                            @endif
                         </div>
                     </div>
                     
@@ -420,14 +432,14 @@
                     @endif
 
                     <!-- RECEIPT CARD -->
-                    @if(in_array($pesanan->status, ['paid', 'confirmed', 'in_delivery', 'completed']))
+                    @if(in_array($pesanan->status, ['paid', 'confirmed', 'in_delivery', 'delivered', 'completed']))
                     <div class="card shadow-sm border-0 rounded-4">
                         <div class="card-header bg-white border-bottom py-3">
                             <h6 class="mb-0 fw-bold">Bukti Transaksi (Nota)</h6>
                         </div>
                         <div class="card-body p-4 text-center">
                             <i class="bx bx-receipt text-primary opacity-50 mb-3" style="font-size: 3rem;"></i>
-                            <p class="text-muted small mb-3">Bukti transaksi berisi rincian pesanan dan status pembayaran (Lunas) beserta QR Code validasi.</p>
+                            <p class="text-muted small mb-3">Bukti transaksi berisi rincian dan status pesanan beserta QR Code validasi. Penerimaan pembayaran tercatat pada ringkasan tagihan.</p>
                             <div class="d-grid gap-2">
                                 <a href="{{ route('receipt.pasar.view', $pesanan->id) }}" target="_blank" class="btn btn-primary rounded-pill">
                                     <i class="bx bx-show me-1"></i> Lihat Nota

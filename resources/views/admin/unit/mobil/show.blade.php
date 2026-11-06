@@ -386,7 +386,6 @@
                                                         </td>
                                                     </tr>
                                                 --}}
-                                                @endif
                                                 <tr>
                                                     <td colspan="2" class="p-3 text-muted small">Rute luar Kecamatan Bengkalis tidak tersedia pada cakupan layanan saat ini.</td>
                                                 </tr>

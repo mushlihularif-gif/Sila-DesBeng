@@ -13,6 +13,17 @@ use Illuminate\Support\Facades\Log;
 
 class NotificationService
 {
+    public static function orderLink($order, ?string $type = null): string
+    {
+        if (!$type) {
+            foreach (BookingAccess::TYPES as $candidate => [$model]) {
+                if ($order instanceof $model) { $type = $candidate; break; }
+            }
+        }
+        return route('user.activity', isset(BookingAccess::TYPES[$type ?? ''])
+            ? ['tab' => $type, 'order' => $order->id] : []);
+    }
+
     // ==========================================
     // 1. VERIFIKASI IDENTITAS (KYC)
     // ==========================================
@@ -89,25 +100,25 @@ class NotificationService
                 case 'gas':
                     $title = 'Pesanan Gas Berhasil Dibuat';
                     $message = 'Pesanan ' . $itemName . ' berhasil diajukan dan sedang menunggu konfirmasi Admin.';
-                    $link = route('user.activity', ['tab' => 'gas']);
+                    $link = self::orderLink($order, 'gas');
                     $icon = 'bx bx-gas-pump';
                     break;
                 case 'rental':
                     $title = 'Permintaan Sewa Alat Terkirim';
                     $message = 'Permintaan sewa untuk "' . $itemName . '" berhasil dikirim dan sedang menunggu konfirmasi Admin.';
-                    $link = route('user.activity', ['tab' => 'rental']);
+                    $link = self::orderLink($order, 'rental');
                     $icon = 'bx bx-wrench';
                     break;
                 case 'mobil':
                     $title = 'Pemesanan Sewa Transportasi Terkirim';
                     $message = 'Pemesanan transportasi "' . $itemName . '" berhasil dibuat dan sedang menunggu konfirmasi Admin.';
-                    $link = route('user.activity', ['tab' => 'mobil']);
+                    $link = self::orderLink($order, 'mobil');
                     $icon = 'bx bx-car';
                     break;
                 case 'fasilitas':
                     $title = 'Permohonan Peminjaman Fasilitas Terkirim';
                     $message = 'Permohonan peminjaman "' . $itemName . '" berhasil diajukan dan menunggu persetujuan Admin.';
-                    $link = route('user.activity', ['tab' => 'fasilitas']);
+                    $link = self::orderLink($order, 'fasilitas');
                     $icon = 'bx bx-buildings';
                     break;
                 default:
@@ -479,6 +490,7 @@ class NotificationService
             'message' => $message,
             'type' => 'approval_success',
             'user_id' => $order->user_id,
+            'link' => self::orderLink($order),
             'admin_id' => auth()->id(),
         ]);
     }
@@ -514,6 +526,7 @@ class NotificationService
             'message' => $message,
             'type' => 'status_update',
             'user_id' => $order->user_id,
+            'link' => self::orderLink($order),
             'admin_id' => auth()->id(),
         ]);
     }
@@ -535,6 +548,7 @@ class NotificationService
             'message' => "Mohon maaf, permintaan {$itemName} Anda ditolak. Alasan: {$reason}",
             'type' => 'rejection',
             'user_id' => $order->user_id,
+            'link' => self::orderLink($order),
             'admin_id' => auth()->id(),
         ]);
     }
@@ -557,6 +571,7 @@ class NotificationService
             'message' => "Mohon maaf, stok {$itemName} tidak mencukupi. Silakan ajukan ulang atau hubungi admin.",
             'type' => 'approval_failed',
             'user_id' => $order->user_id,
+            'link' => self::orderLink($order),
             'admin_id' => auth()->id(),
         ]);
 
@@ -590,6 +605,7 @@ class NotificationService
             'message' => "Terima kasih! Penyewaan {$itemName} telah selesai. Berikan penilaian Anda terhadap layanan kami.",
             'type' => 'rental_completed',
             'user_id' => $booking->user_id,
+            'link' => self::orderLink($booking),
             'admin_id' => auth()->id(),
         ]);
     }

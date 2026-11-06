@@ -922,22 +922,22 @@ class ReceiptGeneratorService
         // Nama Penerima
         $y += 85;
         $this->addText($image, 'Nama Penerima', $labelX, $y, $normalSize, $black, $fontPath, true);
-        $this->addText($image, ': ' . ($order->recipient_name ?? $order->user->name), $valueX, $y, $normalSize, $black, $fontPath);
+        $this->addText($image, ': ' . ($order->full_name ?? $order->user->name), $valueX, $y, $normalSize, $black, $fontPath);
 
         // No HP
         $y += $lineHeight;
         $this->addText($image, 'No. Handphone', $labelX, $y, $normalSize, $black, $fontPath, true);
-        $this->addText($image, ': ' . ($order->recipient_phone ?? '-'), $valueX, $y, $normalSize, $black, $fontPath);
+        $this->addText($image, ': ' . ($order->phone ?? '-'), $valueX, $y, $normalSize, $black, $fontPath);
 
         // Alamat Pengiriman
         $y += $lineHeight;
         $this->addText($image, 'Alamat', $labelX, $y, $normalSize, $black, $fontPath, true);
-        $this->addText($image, ': ' . ($order->shipping_address ?? '-'), $valueX, $y, $normalSize, $black, $fontPath);
+        $this->addText($image, ': ' . ($order->delivery_address ?? '-'), $valueX, $y, $normalSize, $black, $fontPath);
         
         // Metode Pengiriman
         $y += $lineHeight;
         $this->addText($image, 'Metode Pengiriman', $labelX, $y, $normalSize, $black, $fontPath, true);
-        $shippingMethod = ($order->shipping_method == 'delivery') ? 'Diantar (Kurir)' : (($order->shipping_method == 'pickup') ? 'Ambil Sendiri' : '-');
+        $shippingMethod = in_array($order->delivery_method, ['antar', 'Diantar'], true) ? 'Diantar (Kurir)' : 'Ambil Sendiri';
         $this->addText($image, ': ' . $shippingMethod, $valueX, $y, $normalSize, $black, $fontPath);
         
         // Pemisah
@@ -997,13 +997,13 @@ class ReceiptGeneratorService
         // Data Tabel (Loop item pasar)
         $y += 60;
         foreach($order->items as $item) {
-            $productName = $item->produk->nama_produk ?? $item->product_name;
+            $productName = $item->product_name;
             // Potong nama produk jika terlalu panjang
             if(strlen($productName) > 30) {
                 $productName = substr($productName, 0, 27) . '...';
             }
             $quantity = (string)$item->quantity;
-            $unitPrice = 'Rp. ' . number_format($item->price, 0, ',', '.');
+            $unitPrice = 'Rp. ' . number_format($item->product_price, 0, ',', '.');
             $subtotal = 'Rp. ' . number_format($item->subtotal, 0, ',', '.');
             
             $this->addText($image, $productName, $col1, $y, $normalSize, $black, $fontPath);
@@ -1021,7 +1021,7 @@ class ReceiptGeneratorService
         // Subtotal
         $y += 60;
         $this->addText($image, 'Total Harga Produk', 530, $y, $normalSize, $black, $fontPath);
-        $this->addText($image, 'Rp. ' . number_format($order->total_price, 0, ',', '.'), 980, $y, $normalSize, $black, $fontPath);
+        $this->addText($image, 'Rp. ' . number_format($order->total_amount, 0, ',', '.'), 980, $y, $normalSize, $black, $fontPath);
         
         // Ongkos Kirim
         $y += $lineHeight;

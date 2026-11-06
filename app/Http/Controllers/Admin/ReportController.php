@@ -33,10 +33,10 @@ class ReportController extends Controller
         $fasilitasQuery = $this->applyRegionFilter(\App\Models\FasilitasUmumBooking::withTrashed(), 'fasilitas', true)->with(['user', 'fasilitas'])->orderByDesc('created_at');
 
         // Query Pasar Daerah
-        $pasarQuery = \App\Models\PasarOrder::withTrashed()->with('user')->orderByDesc('created_at');
+        $pasarQuery = \App\Models\PasarOrder::whereNull('store_id')->withTrashed()->with('user')->orderByDesc('created_at');
         $user = auth()->user();
         $regionId = $user->region_id;
-        if (!$regionId && in_array($user->role, ['super_admin', 'admin'])) {
+        if (!$regionId && in_array($user->role, ['super_admin'])) {
             $firstRegion = \App\Models\Region::first();
             if ($firstRegion) $regionId = $firstRegion->id;
         }
@@ -127,7 +127,7 @@ class ReportController extends Controller
             ->map(fn($y) => (int)$y)
             ->toArray();
             
-        $pasarYears = \App\Models\PasarOrder::withTrashed()
+        $pasarYears = \App\Models\PasarOrder::whereNull('store_id')->withTrashed()
             ->selectRaw('YEAR(created_at) as year')
             ->distinct()
             ->pluck('year')
@@ -165,7 +165,7 @@ class ReportController extends Controller
             ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
             ->sum('total_amount') : 0;
             
-        $totalPasar = $canViewPasar ? \App\Models\PasarOrder::withTrashed()->whereYear('created_at', $year)
+        $totalPasar = $canViewPasar ? \App\Models\PasarOrder::whereNull('store_id')->withTrashed()->whereYear('created_at', $year)
             ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
             ->sum('grand_total') : 0;
         
@@ -251,7 +251,7 @@ class ReportController extends Controller
         }
 
         // Pendapatan dari sistem (PasarOrder)
-        $pasarMonthly = $canViewPasar ? \App\Models\PasarOrder::withTrashed()->selectRaw('SUM(grand_total) as total, MONTH(created_at) as month')
+        $pasarMonthly = $canViewPasar ? \App\Models\PasarOrder::whereNull('store_id')->withTrashed()->selectRaw('SUM(grand_total) as total, MONTH(created_at) as month')
             ->whereYear('created_at', $year)
             ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
             ->groupBy('month')
@@ -304,7 +304,7 @@ class ReportController extends Controller
             ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
             ->count() : 0;
 
-        $pasarCount = $canViewPasar ? \App\Models\PasarOrder::withTrashed()->whereYear('created_at', $year)
+        $pasarCount = $canViewPasar ? \App\Models\PasarOrder::whereNull('store_id')->withTrashed()->whereYear('created_at', $year)
             ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
             ->count() : 0;
             
@@ -337,7 +337,7 @@ class ReportController extends Controller
             ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
             ->sum('total_amount') : 0;
             
-        $prevTotalPasar = $canViewPasar ? \App\Models\PasarOrder::withTrashed()->whereYear('created_at', $prevYear)
+        $prevTotalPasar = $canViewPasar ? \App\Models\PasarOrder::whereNull('store_id')->withTrashed()->whereYear('created_at', $prevYear)
             ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
             ->sum('grand_total') : 0;
             
@@ -446,7 +446,7 @@ class ReportController extends Controller
         $baseGas = $this->applyRegionFilter(\App\Models\GasOrder::withTrashed(), 'gas', false);
         $baseMobil = $this->applyRegionFilter(\App\Models\MobilBooking::withTrashed(), 'mobil', false);
         $baseFasilitas = $this->applyRegionFilter(\App\Models\FasilitasUmumBooking::withTrashed(), 'fasilitas', false);
-        $basePasar = \App\Models\PasarOrder::withTrashed();
+        $basePasar = \App\Models\PasarOrder::whereNull('store_id')->withTrashed();
 
         $baseRental->whereHas('barang', fn ($q) => $q->whereIn('region_id', $regionIdsDalamCakupan));
         $baseGas->whereHas('gas', fn ($q) => $q->whereIn('region_id', $regionIdsDalamCakupan));
@@ -456,11 +456,11 @@ class ReportController extends Controller
 
         $user = auth()->user();
         $regionId = $user->region_id;
-        if (!$regionId && in_array($user->role, ['super_admin', 'admin'])) {
+        if (!$regionId && in_array($user->role, ['super_admin'])) {
             $firstRegion = \App\Models\Region::first();
             if ($firstRegion) $regionId = $firstRegion->id;
         }
-        if ($regionId && !in_array($user->role, ['super_admin', 'admin'])) {
+        if ($regionId && !in_array($user->role, ['super_admin'])) {
             $basePasar->where('region_id', $regionId);
         }
 
@@ -524,15 +524,13 @@ class ReportController extends Controller
         // Daftar Kecamatan & Desa untuk filter
         $kecamatanList = collect();
         $desaList = collect();
-        if (in_array(auth()->user()->role, ['super_admin', 'admin'])) {
+        if (in_array(auth()->user()->role, ['super_admin'])) {
             $kecamatanList = \App\Models\Region::whereKey($selectedKecamatanId)->get();
             if ($selectedKecamatanId && $selectedKecamatanId !== 'all') {
                 $desaList = \App\Models\Region::whereIn('type', ['desa', 'kelurahan'])->where('parent_id', $selectedKecamatanId)->get();
             } else {
                 $desaList = \App\Models\Region::whereIn('type', ['desa', 'kelurahan'])->where('parent_id', $selectedKecamatanId)->get();
             }
-        } elseif (auth()->user()->role === 'admin_kecamatan') {
-            $desaList = \App\Models\Region::whereIn('type', ['desa', 'kelurahan'])->where('parent_id', auth()->user()->region_id)->get();
         }
 
         // Dynamic Year Generation
@@ -540,7 +538,7 @@ class ReportController extends Controller
         $gasYears = \App\Models\GasOrder::withTrashed()->selectRaw('YEAR(created_at) as year')->distinct()->pluck('year')->toArray();
         $mobilYears = \App\Models\MobilBooking::withTrashed()->selectRaw('YEAR(created_at) as year')->distinct()->pluck('year')->toArray();
         $fasilitasYears = \App\Models\FasilitasUmumBooking::withTrashed()->selectRaw('YEAR(created_at) as year')->distinct()->pluck('year')->toArray();
-        $pasarYears = \App\Models\PasarOrder::withTrashed()->selectRaw('YEAR(created_at) as year')->distinct()->pluck('year')->toArray();
+        $pasarYears = \App\Models\PasarOrder::whereNull('store_id')->withTrashed()->selectRaw('YEAR(created_at) as year')->distinct()->pluck('year')->toArray();
         $laporanYears = [];
         
         $availableYears = array_unique(array_merge($rentalYears, $gasYears, $mobilYears, $fasilitasYears, $pasarYears, $laporanYears, [now()->year]));
@@ -630,7 +628,7 @@ class ReportController extends Controller
                 ->count() : 0;
                 
             // Hitung pesanan pasar daerah
-            $pasarCount = $canViewPasar ? $this->applyRegionFilter(\App\Models\PasarOrder::withTrashed(), 'user', true)->whereYear('created_at', $year)
+            $pasarCount = $canViewPasar ? $this->applyRegionFilter(\App\Models\PasarOrder::whereNull('store_id')->withTrashed(), 'user', true)->whereYear('created_at', $year)
                 ->whereMonth('created_at', $month)
                 ->whereNotIn('status', ['waiting', 'processing', 'cancelled', 'rejected'])
                 ->count() : 0;
@@ -711,12 +709,12 @@ class ReportController extends Controller
             ->count() : 0;
             
         // Pendapatan Pasar Daerah
-        $pasarRevenue = $canViewPasar ? \App\Models\PasarOrder::withTrashed()->whereYear('created_at', $year)
+        $pasarRevenue = $canViewPasar ? \App\Models\PasarOrder::whereNull('store_id')->withTrashed()->whereYear('created_at', $year)
             ->whereMonth('created_at', $month)
             ->whereNotIn('status', ['waiting', 'processing', 'cancelled', 'rejected'])
             ->sum('grand_total') : 0;
             
-        $pasarTransactions = $canViewPasar ? \App\Models\PasarOrder::withTrashed()->whereYear('created_at', $year)
+        $pasarTransactions = $canViewPasar ? \App\Models\PasarOrder::whereNull('store_id')->withTrashed()->whereYear('created_at', $year)
             ->whereMonth('created_at', $month)
             ->whereNotIn('status', ['waiting', 'processing', 'cancelled', 'rejected'])
             ->count() : 0;
@@ -873,7 +871,7 @@ class ReportController extends Controller
     public function clearLogs(Request $request)
     {
         // Hanya super_admin atau admin kabupaten yang boleh membersihkan log
-        if (!in_array(auth()->user()->role, ['admin', 'super_admin'])) {
+        if (!in_array(auth()->user()->role, ['super_admin'])) {
             return back()->with('error', 'Akses ditolak. Anda tidak memiliki izin untuk membersihkan log.');
         }
 
@@ -1243,16 +1241,16 @@ class ReportController extends Controller
         if ($isPasarActive) {
             $user = auth()->user();
             $regionId = $user->region_id;
-            if (!$regionId && in_array($user->role, ['super_admin', 'admin'])) {
+            if (!$regionId && in_array($user->role, ['super_admin'])) {
                 $firstRegion = \App\Models\Region::first();
                 if ($firstRegion) $regionId = $firstRegion->id;
             }
 
-            $pasarQuery = \App\Models\PasarOrder::withTrashed()
+            $pasarQuery = \App\Models\PasarOrder::whereNull('store_id')->withTrashed()
                 ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
                 ->with(['user']);
             
-            if ($regionId && !in_array($user->role, ['super_admin', 'admin'])) {
+            if ($regionId && !in_array($user->role, ['super_admin'])) {
                 $pasarQuery->where('region_id', $regionId);
             }
             

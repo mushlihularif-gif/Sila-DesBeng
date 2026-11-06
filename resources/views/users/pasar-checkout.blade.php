@@ -310,6 +310,8 @@
         </div>
 
         <form id="checkoutForm" action="{{ route('pasar.order.store') }}" method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="store_key" value="{{ $storeKey }}">
+            <p class="mb-4 font-bold">Pesanan dari {{ $marketStore?->name ?? $seller->name }}</p>
             @csrf
             <div class="flex flex-col lg:flex-row gap-8">
                 <!-- Main Form -->
@@ -348,6 +350,7 @@
                         </div>
                         <div class="co-card-body">
                             <div class="radio-grid">
+                                @if($shippingConfig['pickup'])
                                 <label class="radio-card delivery-radio-card selected" onclick="toggleDelivery('jemput')">
                                     <input type="radio" name="delivery_method" value="jemput" checked onchange="toggleDelivery(this.value)">
                                     <div class="radio-indicator"></div>
@@ -355,25 +358,30 @@
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
                                     </div>
                                     <div class="radio-info">
-                                        <div class="radio-title">Ambil Sendiri</div>
-                                        <div class="radio-desc">Ambil di lokasi seller/toko</div>
+                                        <div class="radio-title">Ambil di toko</div>
+                                        <div class="radio-desc">Tanpa ongkir</div>
                                         <span class="radio-badge" style="background: #d1fae5; color: #059669;">GRATIS</span>
                                     </div>
                                 </label>
+                                @endif
 
+                                @if($shippingConfig['delivery'])
                                 <label class="radio-card delivery-radio-card" onclick="toggleDelivery('antar')">
-                                    <input type="radio" name="delivery_method" value="antar" onchange="toggleDelivery(this.value)">
+                                    <input type="radio" name="delivery_method" value="antar" @checked(!$shippingConfig['pickup']) onchange="toggleDelivery(this.value)">
                                     <div class="radio-indicator"></div>
                                     <div class="radio-icon" style="background: linear-gradient(135deg, #dbeafe, #eff6ff); color: #2563eb;">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"></path></svg>
                                     </div>
                                     <div class="radio-info">
-                                        <div class="radio-title">Diantar Kurir Lokal</div>
-                                        <div class="radio-desc">Pengantaran langsung di dalam desa</div>
-                                        <span class="radio-badge" style="background: #dbeafe; color: #1d4ed8;">ADA ONGKIR</span>
+                                        <div class="radio-title">Diantar oleh toko</div>
+                                        <div class="radio-desc">Ongkir mengikuti alamat tujuan</div>
                                     </div>
                                 </label>
+                                @endif
                             </div>
+                            <p id="shippingQuoteStatus" role="status" aria-live="polite" class="mt-3 text-sm"></p>
+                            <button type="button" class="text-sm text-blue-600 underline" onclick="refreshShippingQuote()">Periksa ulang ongkir</button>
+                            <input type="hidden" name="quoted_shipping_cost" id="quoted_shipping_cost" value="">
 
                             <!-- Delivery Form (Hidden) -->
                             <div id="deliveryForm" class="delivery-expand" style="display: none;">
@@ -383,25 +391,39 @@
                                         'alamatTersimpan' => $alamatTersimpan ?? collect(),
                                         'idAlamat' => 'delivery_address',
                                         'gunakanPetaTerpisah' => true,
+                                        'pilihWilayahPasar' => true,
+                                        'sembunyikanSimpan' => true,
                                         'latitudeName' => 'delivery_latitude',
                                         'longitudeName' => 'delivery_longitude',
                                         'latitudeId' => 'delivery_latitude',
                                         'longitudeId' => 'delivery_longitude',
                                     ])
+                                    <label class="co-label" for="delivery_region_id">Desa atau kelurahan tujuan <span class="required">*</span></label>
+                                    <select class="co-input mb-3" name="delivery_region_id" id="delivery_region_id" onchange="refreshShippingQuote()">
+                                        <option value="">Pilih wilayah tujuan</option>
+                                        @foreach($shippingRegions->groupBy('parent_id') as $destinations)
+                                            <optgroup label="{{ $destinations->first()->parent?->name }}">
+                                                @foreach($destinations as $destination)
+                                                    <option value="{{ $destination->id }}" @selected(old('delivery_region_id', $buyer?->id) == $destination->id)>{{ $destination->name }}</option>
+                                                @endforeach
+                                            </optgroup>
+                                        @endforeach
+                                    </select>
+                                    <label class="co-label" for="delivery_address">Alamat lengkap dan patokan <span class="required">*</span></label>
                                     <textarea name="delivery_address" id="delivery_address" rows="3" class="co-input co-textarea" placeholder="Pilih alamat tersimpan atau masukkan alamat baru..."></textarea>
                                 </div>
 
-                                <div class="co-input-group">
-                                    <label class="co-label">Titik Lokasi Antar <span class="required">*</span></label>
+                                <details class="co-input-group" id="deliveryMapDetails">
+                                    <summary class="co-label">Tambahkan titik peta (opsional)</summary>
                                     <div class="map-info" style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 12px; border-radius: 12px; margin-bottom: 12px; display: flex; gap: 8px; align-items: flex-start;">
                                         <svg class="w-5 h-5 text-emerald-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                         <div style="font-size: 0.8rem; color: #166534;">
-                                            Geser <b>marker merah</b> pada peta tepat di atas rumah Anda. Titik ini akan digunakan sebagai <b>panduan jalan bagi kurir</b> untuk mengantar barang.
+                                            Ketuk lokasi rumah atau geser penanda merah untuk membantu pengantar. Peta tidak menentukan ongkir.
                                         </div>
                                     </div>
                                     <div id="map"></div>
                                     <p class="distance-info" id="distanceInfo" style="display: none;"></p>
-                                </div>
+                                </details>
                             </div>
                         </div>
                     </div>
@@ -424,7 +446,7 @@
                                 $isQris = $region->settings['enable_qris'] ?? (!empty($region->settings['qris_image']) || !empty($region->settings['qris_ewallet_number']));
                                 $qrisImage = $region->settings['qris_image'] ?? null;
                                 $qrisNumber = $region->settings['qris_ewallet_number'] ?? '';
-                                $defaultMethod = $isCod ? 'tunai' : ($isBank ? 'bank_transfer' : ($isQris ? 'qris' : 'tunai'));
+                                $defaultMethod = $isCod ? 'tunai' : ($isBank ? 'bank_transfer' : ($isQris ? 'qris' : ''));
 
                                 // Bank Logo Mapping
                                 $bankLogos = [
@@ -642,15 +664,9 @@
                                     <span class="value" id="summaryGrandTotal">Rp {{ number_format($totalAmount, 0, ',', '.') }}</span>
                                 </div>
 
-                                @if($ongkir == -1)
-                                    <div class="p-3 mb-4 rounded-xl border border-red-200 bg-red-50 text-red-600 text-sm font-semibold flex items-center gap-2">
-                                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                        <span>Toko belum melayani pengiriman ke kecamatan Anda.</span>
-                                    </div>
-                                    <button type="button" disabled class="co-submit-btn" style="background: #94a3b8; box-shadow: none; cursor: not-allowed; opacity: 1;">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
-                                        Pengiriman Tidak Tersedia
-                                    </button>
+                                @if(!$isCod && !$isBank && !$isQris)
+                                    <p class="mb-4 text-sm text-red-600" role="alert">Toko belum menyediakan metode pembayaran. Hubungi pengelola toko sebelum memesan.</p>
+                                    <button type="button" disabled class="co-submit-btn">Pembayaran Belum Tersedia</button>
                                 @else
                                     <button type="button" onclick="submitOrder()" id="btnSubmit" class="co-submit-btn">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
@@ -673,6 +689,7 @@
 @endsection
 
 @push('scripts')
+<script src="{{ asset('js/market-shipping-quote.js') }}"></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
@@ -715,15 +732,32 @@
 
     // Constants
     const baseTotal = {{ $totalAmount }};
-    const fixedOngkir = {{ $ongkir == -1 ? 0 : $ongkir }};
+
     const storeLat = parseFloat("{{ $carts->first()->produk->latitude ?? '1.482755' }}") || 1.482755;
     const storeLon = parseFloat("{{ $carts->first()->produk->longitude ?? '102.138407' }}") || 102.138407;
 
-    let currentOngkir = fixedOngkir;
+    let quoteState = { pending: true, available: false, cost: null, message: 'Menghitung ongkir…' };
+    let orderSubmitting = false;
+    const shippingQuotes = new MarketShippingQuote(async params => {
+        const url = new URL(@json(route('pasar.shipping.quote')), window.location.origin);
+        Object.entries(params).forEach(([key, value]) => { if (value !== '') url.searchParams.set(key, value); });
+        const response = await fetch(url, { headers: { Accept: 'application/json' } });
+        const result = await response.json();
+        if (!response.ok) throw new Error(Object.values(result.errors || {}).flat()[0] || result.message || 'Ongkir belum berhasil dimuat. Coba lagi.');
+        return result;
+    }, result => { quoteState = result; updateSummary(); });
+    function refreshShippingQuote() {
+        const method = document.querySelector('input[name="delivery_method"]:checked')?.value || 'antar';
+        const destination = document.getElementById('delivery_region_id');
+        destination.disabled = method !== 'antar';
+        destination.required = method === 'antar';
+        document.getElementById('delivery_address').required = method === 'antar';
+        shippingQuotes.refresh({ store_id: @json($marketStore?->id ?? ''), seller_id: @json($seller->id), delivery_method: method, delivery_region_id: method === 'antar' ? destination.value : '' });
+    }
     let map, marker;
 
     function initMap() {
-        if(map) return;
+        if(map || !window.L) return;
         const latTersimpan = parseFloat(document.getElementById('delivery_latitude')?.value);
         const lonTersimpan = parseFloat(document.getElementById('delivery_longitude')?.value);
         const defaultLat = Number.isFinite(latTersimpan) ? latTersimpan : (parseFloat("{{ Auth::user()->latitude ?? '1.482755' }}") || 1.482755);
@@ -751,7 +785,7 @@
             })
         }).addTo(map);
 
-        updateCoordinates(marker.getLatLng());
+
         marker.on('dragend', e => updateCoordinates(marker.getLatLng()));
         map.on('click', e => { marker.setLatLng(e.latlng); updateCoordinates(e.latlng); });
     }
@@ -762,9 +796,12 @@
     }
 
     window.addEventListener('alamat-warga-dipilih', function (event) {
+        document.getElementById('delivery_region_id').value = event.detail?.village_id || '';
+        refreshShippingQuote();
         const latitude = event.detail?.lat;
         const longitude = event.detail?.lng;
         if (latitude == null || longitude == null) return;
+        if (!window.L) return;
         const titik = L.latLng(Number(latitude), Number(longitude));
         if (map && marker) {
             marker.setLatLng(titik);
@@ -791,12 +828,13 @@
         const form = document.getElementById('deliveryForm');
         if (method === 'antar') {
             form.style.display = 'block';
-            setTimeout(() => { initMap(); map.invalidateSize(); }, 150);
+
             updateSummary();
         } else {
             form.style.display = 'none';
             updateSummary();
         }
+        refreshShippingQuote();
     }
 
     function formatMoney(amount) {
@@ -804,23 +842,22 @@
     }
 
     function updateSummary() {
-        const deliveryMethod = document.querySelector('input[name="delivery_method"]:checked').value;
-        const appliedOngkir = deliveryMethod === 'antar' ? currentOngkir : 0;
-        const grandTotal = baseTotal + appliedOngkir;
-        
-        if (deliveryMethod === 'antar' && currentOngkir === 0) {
-            document.getElementById('summaryOngkir').innerHTML = `<span style="color:#10b981; font-weight:bold;">Gratis</span>`;
-        } else {
-            document.getElementById('summaryOngkir').innerText = formatMoney(appliedOngkir);
-        }
-        
-        document.getElementById('summaryDistance').innerText = '';
-        document.getElementById('summaryGrandTotal').innerText = formatMoney(grandTotal);
-        document.getElementById('transferAmount').innerText = formatMoney(grandTotal);
+        const available = quoteState.available && !quoteState.pending;
+        const grandTotal = available ? baseTotal + Number(quoteState.cost) : null;
+        document.getElementById('summaryOngkir').textContent = available ? (quoteState.cost === 0 ? 'Gratis' : formatMoney(quoteState.cost)) : (quoteState.pending ? 'Menghitung…' : 'Belum tersedia');
+        document.getElementById('shippingQuoteStatus').textContent = quoteState.message;
+        document.getElementById('summaryDistance').textContent = '';
+        document.getElementById('summaryGrandTotal').textContent = available ? formatMoney(grandTotal) : '—';
+        document.getElementById('transferAmount').textContent = available ? formatMoney(grandTotal) : '—';
+        document.getElementById('quoted_shipping_cost').value = available ? quoteState.cost : '';
+        const btn = document.getElementById('btnSubmit');
+        if (btn) btn.disabled = !available || orderSubmitting;
     }
 
     function useProfileAddress() {
-        document.getElementById('delivery_address').value = `{{ Auth::user()->address }}`;
+        document.getElementById('delivery_address').value = @json(Auth::user()->address ?? '');
+        document.getElementById('delivery_region_id').value = @json($buyer?->id);
+        refreshShippingQuote();
         const lat = {{ Auth::user()->latitude ?? 'null' }};
         const lon = {{ Auth::user()->longitude ?? 'null' }};
         if(lat && lon && map) {
@@ -832,6 +869,7 @@
     }
 
     function submitOrder() {
+        if (orderSubmitting || quoteState.pending || !quoteState.available) return;
         const form = document.getElementById('checkoutForm');
         const deliveryMethod = document.querySelector('input[name="delivery_method"]:checked').value;
 
@@ -845,6 +883,7 @@
         if (!form.checkValidity()) { form.reportValidity(); return; }
 
         const btn = document.getElementById('btnSubmit');
+        orderSubmitting = true;
         btn.disabled = true;
         btn.innerHTML = '<svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg> Memproses...';
 
@@ -853,22 +892,24 @@
         fetch(form.action, {
             method: 'POST',
             body: formData,
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
                 window.location.href = `/pasar-daerah/payment/${data.order_id}`;
             } else {
-                showSiladesBengToast('error', 'Gagal', data.message || 'Terjadi kesalahan.');
-                btn.disabled = false;
+                showSiladesBengToast('error', 'Gagal', Object.values(data.errors || {}).flat()[0] || data.message || 'Terjadi kesalahan.');
+                orderSubmitting = false;
+                refreshShippingQuote();
                 btn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg> Buat Pesanan Sekarang';
             }
         })
         .catch(error => {
             console.error('Error:', error);
             showSiladesBengToast('error', 'Error', 'Terjadi kesalahan pada sistem.');
-            btn.disabled = false;
+            orderSubmitting = false;
+            updateSummary();
             btn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg> Buat Pesanan Sekarang';
         });
     }
@@ -891,6 +932,9 @@
             }).observe(header, { attributes: true });
         }
 
+        document.getElementById('deliveryMapDetails').addEventListener('toggle', event => {
+            if (event.target.open) { initMap(); if (map) setTimeout(() => map.invalidateSize(), 150); }
+        });
         // Init state
         toggleDelivery(document.querySelector('input[name="delivery_method"]:checked').value);
         setPaymentMethod(document.getElementById('payment-method-hidden').value);

@@ -20,6 +20,11 @@
                 </h1>
             </div>
 
+            @if($focusedOrder ?? null)
+                <p class="mb-6 text-center text-sm text-slate-600">Menampilkan pesanan yang dipilih dari notifikasi.
+                    <a class="text-blue-700 underline" href="{{ route('user.activity', ['tab'=>$focusedTab]) }}">Lihat semua pesanan</a>
+                </p>
+            @endif
             <!-- Menu Pilihan (Grid 3 Kolom di Mobile, Flex di Layar Lebar) -->
             <div class="grid grid-cols-3 sm:flex sm:flex-row justify-center gap-2 sm:gap-6 mb-8 sm:mb-10 items-stretch sm:items-center">
                 <!-- Penyewaan Card -->
@@ -244,31 +249,8 @@
                 });
             }
 
-            // Restore active tab from localStorage if exists
-            const savedTab = localStorage.getItem('active_activity_tab');
-            if (savedTab) {
-                menuCards.forEach(c => c.classList.remove('active'));
-                const targetCard = Array.from(menuCards).find(c => c.dataset.type === savedTab);
-                if (targetCard) targetCard.classList.add('active');
-            }
-
-            // Initial State
-            const activeCard = document.querySelector('.activity-menu-card.active');
-            if (activeCard && activeCard.dataset.type === 'gas') {
-                 if(rentalSection) rentalSection.classList.add('hidden');
-                 if(gasSection) gasSection.classList.remove('hidden');
-                 if(clearRentalBtn) {
-                     clearRentalBtn.classList.add('hidden');
-                     clearRentalBtn.style.display = 'none';
-                 }
-                 if(clearGasBtn) {
-                     clearGasBtn.classList.remove('hidden');
-                     clearGasBtn.style.display = 'block';
-                 }
-            } else {
-                 if(rentalSection) rentalSection.classList.remove('hidden');
-                 if(gasSection) gasSection.classList.add('hidden');
-            }
+            const requestedTab = new URLSearchParams(location.search).get('tab');
+            const savedTab = requestedTab || localStorage.getItem('active_activity_tab') || 'rental';
 
             menuCards.forEach(card => {
                 card.onclick = () => {
@@ -308,6 +290,9 @@
                     }
                 };
             });
+
+            const initialCard = Array.from(menuCards).find(card => card.dataset.type === savedTab) || menuCards[0];
+            initialCard?.click();
 
             // Toggle Detail Dropdown Function
             const bindDetailToggles = () => {
@@ -496,6 +481,9 @@
 
             // Initial Bind
             bindDetailToggles();
+            if (new URLSearchParams(location.search).has('order')) {
+                document.querySelector('.activity-section:not(.hidden) .toggle-detail-btn')?.click();
+            }
             bindCancelButtons();
             bindDeleteButtons();
 
@@ -664,7 +652,7 @@
                     loadingIndicator.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Memuat lebih banyak...';
                     activeSection.appendChild(loadingIndicator);
 
-                    fetch(`?tab=${type}&page=${currentPages[type]}`, {
+                    fetch(`?tab=${type}&page=${currentPages[type]}` + (requestedTab === type && new URLSearchParams(location.search).has('order') ? '&order=' + encodeURIComponent(new URLSearchParams(location.search).get('order')) : ''), {
                         headers: {
                             'X-Requested-With': 'XMLHttpRequest'
                         }

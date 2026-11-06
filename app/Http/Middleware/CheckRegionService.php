@@ -63,9 +63,9 @@ class CheckRegionService
             $hasProducts = false;
             if (in_array('fasilitas-umum', $targetSlugs) || in_array('peminjaman-fasilitas-umum', $targetSlugs)) {
                 $hasProducts = \App\Models\FasilitasUmum::inCatalog()->whereIn('region_id', $relevantRegionIds)->where('status', '!=', 'Tidak Tersedia')->exists()
-                    || \App\Models\Mobil::whereIn('region_id', $relevantRegionIds)->where('kategori', 'kendaraan_operasional')->exists();
+                    || \App\Models\Mobil::inCatalog()->whereIn('region_id', $relevantRegionIds)->where('kategori', 'kendaraan_operasional')->exists();
             } elseif (in_array('penyewaan-mobil', $targetSlugs)) {
-                $hasProducts = \App\Models\Mobil::whereIn('region_id', $relevantRegionIds)->whereNotIn('kategori', ['ambulans', 'kendaraan_operasional'])->exists();
+                $hasProducts = \App\Models\Mobil::inCatalog()->whereIn('region_id', $relevantRegionIds)->forRental()->exists();
             } elseif (in_array('penyewaan-alat', $targetSlugs)) {
                 $hasProducts = \App\Models\Barang::whereIn('region_id', $relevantRegionIds)->exists();
             } elseif (in_array('penjualan-gas', $targetSlugs)) {

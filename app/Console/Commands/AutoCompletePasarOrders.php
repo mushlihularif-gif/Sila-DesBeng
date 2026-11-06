@@ -33,21 +33,20 @@ class AutoCompletePasarOrders extends Command
         // Cari pesanan yang statusnya 'delivered' dan delivered_at lebih dari 2 jam lalu
         $cutoffTime = Carbon::now()->subHours(2);
 
-        $orders = PasarOrder::where('status', 'delivered')
-            ->whereNotNull('delivered_at')
-            ->where('delivered_at', '<=', $cutoffTime)
-            ->get();
-
         $count = 0;
-        foreach ($orders as $order) {
-            // Ubah status jadi completed
-            $order->status = 'completed';
-            $order->completion_time = Carbon::now();
-            $order->save();
-
-            Log::info("PasarOrder ID {$order->id} otomatis selesai karena lebih dari 2 jam sejak delivered_at.");
-            $count++;
-        }
+        PasarOrder::where('status', 'delivered')->whereNotNull('delivered_at')
+            ->where('delivered_at', '<=', $cutoffTime)->select('id')->chunkById(100, function ($orders) use (&$count, $cutoffTime) {
+                foreach ($orders as $candidate) {
+                    $changed = \Illuminate\Support\Facades\DB::transaction(function () use ($candidate, $cutoffTime) {
+                        $order = PasarOrder::lockForUpdate()->find($candidate->id);
+                        if (!$order || $order->status !== 'delivered' || !$order->delivered_at
+                            || $order->delivered_at->gt($cutoffTime) || $order->complaint()->where('status', 'pending')->exists()) return false;
+                        $order->update(['status' => 'completed', 'completion_time' => now()]);
+                        return true;
+                    });
+                    if ($changed) $count++;
+                }
+            });
 
         $this->info("Berhasil memproses $count pesanan.");
     }

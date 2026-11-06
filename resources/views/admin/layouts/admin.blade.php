@@ -857,64 +857,7 @@
                     <!-- 2. ZONA KHUSUS PEMANTAUAN (Admin Kabupaten dan Admin Kecamatan)            -->
                     <!-- Mode View-Only: Monitoring wilayah, kependudukan, dan penerbitan berita    -->
                     <!-- ========================================================================= -->
-                    @if(in_array(auth()->user()->role, ['admin', 'admin_kecamatan']) && !auth()->user()->bolehAksesPlatform())
-                    <li class="menu-header small text-uppercase">
-                        <span class="menu-header-text">Pusat Informasi</span>
-                    </li>
-                    <li class="menu-item {{ request()->routeIs('admin.announcements.*') ? 'active' : '' }}">
-                        <a href="{{ route('admin.announcements.index') }}" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-news"></i>
-                            <div>Kabar dan Pengumuman</div>
-                        </a>
-                    </li>
 
-                    <li class="menu-header small text-uppercase">
-                        <span class="menu-header-text">Pemantauan dan Laporan</span>
-                    </li>
-                    <li class="menu-item {{ request()->routeIs('admin.laporan.wilayah') ? 'active' : '' }}">
-                        <a href="{{ route('admin.laporan.wilayah') }}" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-map-alt"></i>
-                            <div>Laporan Wilayah</div>
-                        </a>
-                    </li>
-                    <li class="menu-item {{ request()->routeIs('admin.laporan.transaksi') ? 'active' : '' }}">
-                        <a href="{{ route('admin.laporan.transaksi') }}" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-receipt"></i>
-                            <div>Laporan Transaksi</div>
-                        </a>
-                    </li>
-                    <li class="menu-item {{ request()->routeIs('admin.laporan.pendapatan') ? 'active' : '' }}">
-                        <a href="{{ route('admin.laporan.pendapatan') }}" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-line-chart"></i>
-                            <div>Laporan Pendapatan</div>
-                        </a>
-                    </li>
-                    
-
-                    <li class="menu-header small text-uppercase">
-                        <span class="menu-header-text">Data Kependudukan</span>
-                    </li>
-                    <li class="menu-item {{ request()->routeIs('admin.manajemen-pengguna.*') ? 'active' : '' }}">
-                        <a href="{{ route('admin.manajemen-pengguna.index') }}" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-group"></i>
-                            <div>Data Penduduk</div>
-                        </a>
-                    </li>
-                    @if(auth()->user()->role === 'admin_kecamatan')
-                    <li class="menu-item {{ request()->routeIs('admin.warga.mutasi.*') ? 'active' : '' }}">
-                        <a href="{{ route('admin.warga.mutasi.index') }}" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-transfer-alt"></i>
-                            <div>Mutasi Penduduk</div>
-                        </a>
-                    </li>
-                    <li class="menu-item {{ request()->routeIs('admin.kyc.*') ? 'active' : '' }}">
-                        <a href="{{ route('admin.kyc.index') }}" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-check-shield"></i>
-                            <div>Verifikasi Identitas</div>
-                        </a>
-                    </li>
-                    @endif
-                    @endif
 
                     <!-- ========================================================================= -->
                     <!-- 3. ZONA OPERASIONAL UNIT LAYANAN                                          -->
@@ -1117,6 +1060,9 @@
                     @endif
 
                     <!-- ========================================================================= -->
+                    @if(in_array(auth()->user()->role,['admin_desa','super_admin']) && auth()->user()->region_id)
+                    <li class="menu-item {{ request()->routeIs('market.review*') ? 'active' : '' }}"><a href="{{ route('market.review.index') }}" class="menu-link"><i class="menu-icon tf-icons bx bx-store"></i><div>Toko Warga & Komplain</div></a></li>
+                    @endif
                     <!-- 3. ZONA KHUSUS ADMIN DESA (4 Pilar Terpadu: Layanan, Tata Kelola, Sistem)  -->
                     <!-- ========================================================================= -->
                     @if(auth()->user()->role === 'admin_desa')
@@ -1281,13 +1227,6 @@
                         </ul>
                     </li>
 
-                    {{-- Kelola Staf Layanan --}}
-                    <li class="menu-item {{ request()->routeIs('admin.staff.*') ? 'active' : '' }}">
-                        <a href="{{ route('admin.staff.index') }}" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-user-voice text-success"></i>
-                            <div>Kelola Staf Layanan</div>
-                        </a>
-                    </li>
 
                     {{-- Keuangan Desa --}}
                     <li class="menu-item {{ request()->routeIs('admin.keuangan.*') ? 'active' : '' }}">
@@ -1454,7 +1393,7 @@
                                         $sidebarRegionLabel = 'Pemerintah Desa';
                                         if(auth()->user()->role === 'admin_kecamatan') {
                                             $sidebarRegionLabel = 'Pemerintah Kecamatan';
-                                        } elseif(in_array(auth()->user()->role, ['super_admin', 'admin'])) {
+                                        } elseif(in_array(auth()->user()->role, ['super_admin'])) {
                                             $sidebarRegionLabel = 'Pemerintah Kabupaten';
                                         }
                                     @endphp
@@ -1514,9 +1453,9 @@
                             </div>
                         </div>
                         {{-- Sama seperti blok Unit Layanan di sidebar: khusus admin wilayah. --}}
-                        @if(isset($hasActiveServices) && !$hasActiveServices && !auth()->user()->bolehAksesPlatform() && in_array(auth()->user()->role, ['admin', 'admin_kecamatan', 'admin_desa']))
+                        @if(isset($hasActiveServices) && !$hasActiveServices && !auth()->user()->bolehAksesPlatform() && in_array(auth()->user()->role, ['admin_desa']))
                             @php
-                                $settingsRoute = in_array(auth()->user()->role, ['super_admin', 'admin']) ? route('admin.system-settings.index') : route('admin.region-settings.index');
+                                $settingsRoute = in_array(auth()->user()->role, ['super_admin']) ? route('admin.system-settings.index') : route('admin.region-settings.index');
                             @endphp
                             <div class="ms-auto me-3 d-none d-md-block">
                                 <a href="{{ $settingsRoute }}" class="btn btn-sm btn-outline-warning d-flex align-items-center rounded-pill px-3 py-1 shadow-none" style="font-size: 0.78rem; font-weight: 600;">
@@ -1752,7 +1691,7 @@
 
                     {{-- Spanduk wilayah terkunci: khusus admin wilayah, sama seperti
                          blok Unit Layanan di sidebar dan tombol di topbar. --}}
-                    @if(isset($hasActiveServices) && !$hasActiveServices && !auth()->user()->bolehAksesPlatform() && in_array(auth()->user()->role, ['admin', 'admin_kecamatan', 'admin_desa']) && !request()->routeIs('admin.region-settings.*') && !request()->routeIs('admin.system-settings.*'))
+                    @if(isset($hasActiveServices) && !$hasActiveServices && !auth()->user()->bolehAksesPlatform() && in_array(auth()->user()->role, ['admin_desa']) && !request()->routeIs('admin.region-settings.*') && !request()->routeIs('admin.system-settings.*'))
                     <div class="container-xxl pt-3">
                         <div class="alert alert-warning alert-dismissible shadow-sm rounded-4 border-0 d-flex align-items-center mb-0" role="alert">
                             <i class="bx bx-lock-alt fs-3 me-3 text-warning flex-shrink-0"></i>
@@ -1760,7 +1699,7 @@
                                 <strong class="d-block">Unit Layanan Wilayah Sedang Terkunci</strong>
                                 <span class="small">Seluruh unit layanan wilayah Anda saat ini nonaktif. Warga tidak dapat melihat atau mengakses layanan di beranda.</span>
                                 @php
-                                    $settingsRoute = in_array(auth()->user()->role, ['super_admin', 'admin']) ? route('admin.system-settings.index') : route('admin.region-settings.index');
+                                    $settingsRoute = in_array(auth()->user()->role, ['super_admin']) ? route('admin.system-settings.index') : route('admin.region-settings.index');
                                 @endphp
                                 <a href="{{ $settingsRoute }}" class="btn btn-sm btn-warning rounded-pill px-3 ms-2 py-1 fw-bold shadow-none" style="font-size: 0.75rem;">
                                     Ayo Aktifkan Layanan Sekarang

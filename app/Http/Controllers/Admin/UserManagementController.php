@@ -3,13 +3,27 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use App\Models\{Region, User};
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
 class UserManagementController extends Controller
 {
+    private function managedUsers(): Builder
+    {
+        $admin = auth()->user();
+        abort_unless($admin && in_array($admin->role, ['super_admin', 'admin_desa', 'admin_rw', 'admin_rt'], true), 403);
+        $query = User::query();
+        if ($admin->role === 'super_admin') return $query;
+        abort_unless($admin->region_id, 403, 'Wilayah tugas belum ditetapkan.');
+        $query->whereIn('region_id', [$admin->region_id, ...Region::getDescendantIds($admin->region_id)]);
+        if (in_array($admin->role, ['admin_rt','admin_rw'], true)) $query->where('role', 'user');
+        return $query;
+    }
+
     public function index(Request $request)
     {
+        $usersQuery = $this->managedUsers()->with(['region', 'file']);
         $search = $request->get('search');
         $filter_kecamatan_id = $request->get('filter_kecamatan_id');
         $filter_desa_id = $request->get('filter_desa_id');
@@ -31,10 +45,9 @@ class UserManagementController extends Controller
         
         $user = auth()->user();
         
-        $usersQuery = User::with(['region', 'file']);
 
         // Jika admin memiliki region_id (bukan super_admin/admin pusat), filter berdasarkan wilayahnya
-        if ($user->region_id && in_array($user->role, ['admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt'])) {
+        if ($user->region_id && in_array($user->role, ['admin_desa', 'admin_rw', 'admin_rt'])) {
             $allowedRegionIds = \App\Models\Region::getDescendantIds($user->region_id);
             $allowedRegionIds[] = $user->region_id;
             
@@ -45,7 +58,7 @@ class UserManagementController extends Controller
             if (in_array($user->role, ['admin_rt', 'admin_rw'])) {
                 $usersQuery->where('role', 'user');
             }
-        } else if (in_array($user->role, ['super_admin', 'admin'])) {
+        } else if (in_array($user->role, ['super_admin'])) {
             // Super Admin / Admin Kabupaten tidak perlu melihat Staff Layanan (staff daerah) di Manajemen Pengguna
             // karena akan membuat daftar pengguna tercampur.
             $usersQuery->where(function($q) {
@@ -78,10 +91,8 @@ class UserManagementController extends Controller
         $kecamatanOptions = collect();
         $desaOptions = collect();
         
-        if (in_array($user->role, ['super_admin', 'admin'])) {
+        if (in_array($user->role, ['super_admin'])) {
             $kecamatanOptions = collect([$kecamatanFokus]);
-            $desaOptions = $desaFokus->sortBy('name')->values();
-        } elseif ($user->role === 'admin_kecamatan') {
             $desaOptions = $desaFokus->sortBy('name')->values();
         }
 
@@ -94,7 +105,7 @@ class UserManagementController extends Controller
 
     public function show($id)
     {
-        $user = User::with([
+        $user = $this->managedUsers()->with([
             'rentalTransactions' => function ($query) {
                 $query->withTrashed()->with('barang')->latest()->take(10);
             },
@@ -109,9 +120,6 @@ class UserManagementController extends Controller
             },
             'pasarTransactions' => function ($query) {
                 $query->with('items.produk')->latest()->take(10);
-            },
-            'laporans' => function ($query) {
-                $query->latest()->take(10);
             }
         ])->findOrFail($id);
 
@@ -120,17 +128,8 @@ class UserManagementController extends Controller
 
     public function toggleStatus(Request $request, $id)
     {
-        $user = User::findOrFail($id);
-        
-        // Verifikasi hak akses (Opsional tapi baik untuk keamanan)
-        $currentUser = auth()->user();
-        if ($currentUser->region_id && in_array($currentUser->role, ['admin_rt', 'admin_rw'])) {
-            $allowedRegionIds = \App\Models\Region::getDescendantIds($currentUser->region_id);
-            $allowedRegionIds[] = $currentUser->region_id;
-            if (!in_array($user->region_id, $allowedRegionIds)) {
-                return redirect()->back()->with('error', 'Anda tidak memiliki akses ke pengguna ini.');
-            }
-        }
+        $user = $this->managedUsers()->findOrFail($id);
+        abort_unless($user->role === 'user', 403, 'Kelola akun petugas melalui menu pengelolaan admin atau staf.');
 
         $user->status = $user->status === 'aktif' ? 'non_aktif' : 'aktif';
         $user->save();
@@ -140,17 +139,8 @@ class UserManagementController extends Controller
 
     public function kick(Request $request, $id)
     {
-        $user = User::findOrFail($id);
-        
-        // Verifikasi hak akses
-        $currentUser = auth()->user();
-        if ($currentUser->region_id && in_array($currentUser->role, ['admin_rt', 'admin_rw', 'admin_desa', 'admin_kecamatan'])) {
-            $allowedRegionIds = \App\Models\Region::getDescendantIds($currentUser->region_id);
-            $allowedRegionIds[] = $currentUser->region_id;
-            if (!in_array($user->region_id, $allowedRegionIds)) {
-                return redirect()->back()->with('error', 'Anda tidak memiliki akses ke pengguna ini.');
-            }
-        }
+        $user = $this->managedUsers()->findOrFail($id);
+        abort_unless($user->role === 'user', 403, 'Kelola akun petugas melalui menu pengelolaan admin atau staf.');
 
         // Keluarkan pengguna dengan mengosongkan region_id
         $user->region_id = null;

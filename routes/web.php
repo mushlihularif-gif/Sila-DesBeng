@@ -248,7 +248,22 @@ Route::post('/gas/payment/{id}/cancel', [App\Http\Controllers\User\GasBookingCon
     ->middleware('auth');
 
 // === PASAR DAERAH (User) ===
+Route::middleware(['auth','role:admin_desa,super_admin'])->group(function () {
+    Route::get('/admin/toko-warga',[\App\Http\Controllers\MarketStoreController::class,'reviewIndex'])->name('market.review.index');
+    Route::post('/admin/toko-warga/komplain/{id}',[\App\Http\Controllers\MarketStoreController::class,'reviewComplaint'])->name('market.review.complaint');
+    Route::get('/admin/toko-warga/pesanan/{id}',[\App\Http\Controllers\MarketStoreController::class,'reviewOrder'])->name('market.review.order');
+    Route::post('/admin/toko-warga/{id}',[\App\Http\Controllers\MarketStoreController::class,'review'])->name('market.review');
+});
 Route::middleware('auth')->prefix('pasar-daerah')->group(function () {
+    Route::post('/pesanan/{id}/bukti-pembayaran',[\App\Http\Controllers\MarketStoreController::class,'paymentProof'])->middleware('throttle:10,1')->name('pasar.payment.proof');
+    Route::get('/mulai-jualan',[\App\Http\Controllers\MarketStoreController::class,'home'])->name('market.seller.home');
+    Route::post('/toko-saya/profil',[\App\Http\Controllers\MarketStoreController::class,'saveProfile'])->middleware('throttle:10,1')->name('market.seller.profile');
+    Route::post('/toko-saya/pengaturan',[\App\Http\Controllers\MarketStoreController::class,'settings'])->name('market.seller.settings');
+    Route::match(['get','post'],'/toko-saya/produk/{id?}',[\App\Http\Controllers\MarketStoreController::class,'product'])->name('market.seller.product');
+    Route::get('/toko-saya/pesanan/{id}',[\App\Http\Controllers\MarketStoreController::class,'order'])->name('market.seller.order');
+    Route::post('/toko-saya/pesanan/{id}',[\App\Http\Controllers\MarketStoreController::class,'changeOrder'])->name('market.seller.order.change');
+    Route::get('/toko-warga/{id}',[\App\Http\Controllers\MarketStoreController::class,'show'])->withoutMiddleware('auth')->name('market.store');
+    Route::match(['get','post'],'/toko-warga/{id}/chat/{buyer?}',[\App\Http\Controllers\MarketStoreController::class,'chat'])->middleware('throttle:60,1')->name('market.chat');
     Route::get('/', [App\Http\Controllers\User\PasarDaerahController::class, 'index'])
         ->name('pasar.index')
         ->withoutMiddleware('auth')
@@ -259,6 +274,7 @@ Route::middleware('auth')->prefix('pasar-daerah')->group(function () {
     Route::patch('/cart/update', [App\Http\Controllers\User\PasarDaerahController::class, 'updateCart'])->name('pasar.cart.update');
     Route::delete('/cart/remove/{id}', [App\Http\Controllers\User\PasarDaerahController::class, 'removeFromCart'])->name('pasar.cart.remove');
     Route::get('/checkout', [App\Http\Controllers\User\PasarDaerahController::class, 'checkout'])->name('pasar.checkout');
+    Route::get('/ongkir', [App\Http\Controllers\MarketShippingController::class, 'quote'])->middleware('throttle:60,1')->name('pasar.shipping.quote');
     Route::post('/order', [App\Http\Controllers\User\PasarDaerahController::class, 'placeOrder'])->name('pasar.order.store');
     Route::get('/payment/{id}', [App\Http\Controllers\User\PasarDaerahController::class, 'payment'])->name('pasar.payment');
     if (app()->environment(['local', 'testing'])) {
@@ -523,6 +539,7 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
     Route::get('/warga/mutasi', [\App\Http\Controllers\Admin\MutasiAdminController::class, 'index'])->name('admin.warga.mutasi.index');
     Route::get('/warga/mutasi/search-global', [\App\Http\Controllers\Admin\MutasiAdminController::class, 'searchGlobal'])->name('admin.warga.mutasi.search-global');
     Route::get('/warga/mutasi/search-local', [\App\Http\Controllers\Admin\MutasiAdminController::class, 'searchLocal'])->name('admin.warga.mutasi.search-local');
+    Route::get('/warga/mutasi/{id}/ktp', [\App\Http\Controllers\Admin\MutasiAdminController::class, 'showKtp'])->whereNumber('id')->name('admin.warga.mutasi.ktp');
     Route::post('/warga/mutasi/tarik', [\App\Http\Controllers\Admin\MutasiAdminController::class, 'tarikWarga'])->name('admin.warga.mutasi.tarik');
     Route::post('/warga/mutasi/push', [\App\Http\Controllers\Admin\MutasiAdminController::class, 'pushWarga'])->name('admin.warga.mutasi.push');
     Route::post('/warga/mutasi/{id}/approve', [\App\Http\Controllers\Admin\MutasiAdminController::class, 'approve'])->name('admin.warga.mutasi.approve');
@@ -543,8 +560,6 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
     Route::put('/manajemen-pengguna/{user}/kick', [UserManagementController::class, 'kick'])->name('admin.manajemen-pengguna.kick');
 
     // Route untuk Manajemen Staf (RBAC)
-    Route::resource('staff', \App\Http\Controllers\Admin\StaffManagementController::class)->except(['show'])->names('admin.staff')->middleware('staff.permission:platform_staf');
-    Route::put('staff/{staff}/toggle-status', [\App\Http\Controllers\Admin\StaffManagementController::class, 'toggleStatus'])->name('admin.staff.toggle-status');
 
     // Route untuk Manajemen KYC
     Route::prefix('kyc')->group(function () {
@@ -648,7 +663,7 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
         });
 
         // Supir Desa
-        Route::resource('supir', \App\Http\Controllers\Admin\SupirController::class);
+        Route::resource('supir', \App\Http\Controllers\Admin\SupirController::class)->only(['index', 'store', 'update', 'destroy']);
 
         // Penjualan Gas
         Route::middleware('staff.permission:gas')->group(function () {
@@ -806,7 +821,6 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
             Route::post('/{id}/change-level', [\App\Http\Controllers\Admin\BumdesController::class, 'changeLevel'])->name('admin.SiladesBeng.bumdes.change-level');
             Route::post('/update-layout', [\App\Http\Controllers\Admin\BumdesController::class, 'updateLayout'])->name('admin.SiladesBeng.bumdes.update-layout');
         });
-        Route::post('/bumdes/update-whatsapp', [\App\Http\Controllers\Admin\BumdesController::class, 'updateWhatsapp'])->name('admin.SiladesBeng.bumdes.update.whatsapp');
     });
 
     // Route Kelola Wilayah (RT/RW)
@@ -820,7 +834,6 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
     });
 });
 
-Route::post('/kritik-saran', [\App\Http\Controllers\KritikSaranController::class, 'store'])->name('kritik-saran.store');
 
 Route::middleware(['auth', 'role:user'])->group(function () {
     Route::prefix('help-center')->name('help-center.')->group(function () {
@@ -903,3 +916,17 @@ Route::get('/{folder}/{subfolder}/{path}', function ($folder, $subfolder, $path)
   ->where('subfolder', 'img|vendor|css|js|fonts')
   ->where('path', '.*')
   ->name('assets.fallback');
+
+// Preview Route Halaman Error (Khusus Local Development)
+if (app()->environment(['local', 'testing'])) {
+    Route::get('/preview-error/{code}', function ($code) {
+        abort_unless(app()->environment(['local', 'testing']), 404);
+        $validCodes = ['403', '404', '419', '429', '500', '503'];
+        if (!in_array($code, $validCodes, true)) {
+            abort(404);
+        }
+        return response()->view("errors.{$code}", [
+            'exception' => new \Exception("Simulasi pratinjau halaman error {$code} SegiDaerah")
+        ], (int)$code);
+    })->name('errors.preview');
+}

@@ -64,7 +64,7 @@ public function index(Request $request)
         ->pluck('year')
         ->toArray();
 
-    $pasarYears = \App\Models\PasarOrder::withTrashed()
+    $pasarYears = \App\Models\PasarOrder::whereNull('store_id')->withTrashed()
         ->selectRaw('YEAR(created_at) as year')
         ->distinct()
         ->pluck('year')
@@ -77,7 +77,7 @@ public function index(Request $request)
     $baseGas = $this->applyRegionFilter(GasOrder::withTrashed());
     $baseMobil = $this->applyRegionFilter(\App\Models\MobilBooking::withTrashed());
     $baseFasilitas = $this->applyRegionFilter(\App\Models\FasilitasUmumBooking::withTrashed());
-    $basePasar = $this->applyRegionFilter(\App\Models\PasarOrder::withTrashed());
+    $basePasar = $this->applyRegionFilter(\App\Models\PasarOrder::whereNull('store_id')->withTrashed());
     $baseKyc = $this->applyRegionFilter(\App\Models\KycVerification::query(), 'user');
 
     // Dashboard operasional dibatasi ke desa-desa Kecamatan Bengkalis.
@@ -120,7 +120,7 @@ public function index(Request $request)
     $latestRequests = collect();
     $totalPending = 0;
 
-    if (in_array(auth()->user()->role, ['admin_desa', 'admin_rw', 'admin_rt', 'admin_kecamatan', 'admin', 'super_admin'])) {
+    if (in_array(auth()->user()->role, ['admin_desa', 'admin_rw', 'admin_rt', 'super_admin'])) {
         $rentalRequests = $baseRental->clone()->with(['user', 'barang'])->where(function($q) { $q->where('status', 'pending')->orWhere('cancellation_status', 'pending'); })->get()->map(function ($i) { $i->type = 'rental'; $i->item_name = $i->barang->nama_barang ?? 'Alat'; return $i; });
         $gasRequests = $baseGas->clone()->with('user')->where(function($q) { $q->where('status', 'pending')->orWhere('cancellation_status', 'pending'); })->get()->map(function ($i) { $i->type = 'gas'; $i->item_name = $i->item_name ?? 'Tabung Gas'; return $i; });
         
@@ -131,7 +131,7 @@ public function index(Request $request)
         $pasarRequests = $basePasar->clone()->with('user')->where(function($q) { $q->where('status', 'waiting')->orWhere('cancellation_status', 'pending'); })->get()->map(function ($i) { $i->type = 'pasar_daerah'; $i->item_name = 'Pesanan Pasar'; return $i; });
         
         $kycRequests = collect();
-        if (in_array(auth()->user()->role, ['admin_desa', 'admin_kecamatan'])) {
+        if (in_array(auth()->user()->role, ['admin_desa'])) {
             $kycRequests = $baseKyc->clone()->with('user')
                 ->where('status', 'pending')
                 ->where(function($q) {
@@ -142,7 +142,7 @@ public function index(Request $request)
 
         $baseMutasi = \App\Models\MutasiPenduduk::query();
         $adminUser = auth()->user();
-        if ($adminUser && in_array($adminUser->role, ['admin_desa', 'admin_rw', 'admin_rt', 'admin_kecamatan'])) {
+        if ($adminUser && in_array($adminUser->role, ['admin_desa', 'admin_rw', 'admin_rt'])) {
             $mutasiRegionIds = array_merge([(int)$adminUser->region_id], \App\Models\Region::getDescendantIds($adminUser->region_id));
             $baseMutasi->where(function($q) use ($mutasiRegionIds) {
                 $q->whereIn('from_region_id', $mutasiRegionIds)
@@ -354,9 +354,7 @@ public function index(Request $request)
         ->orderBy('name')
         ->get();
 
-    if (auth()->user()->role === 'admin_kecamatan') {
-        $desaList = $desaList->where('parent_id', auth()->user()->region_id)->values();
-    } elseif (in_array(auth()->user()->role, ['admin_desa'])) {
+    if (auth()->user()->role === 'admin_desa') {
         $desaList = \App\Models\Region::where('id', auth()->user()->region_id)->get();
     }
 
@@ -390,7 +388,7 @@ public function index(Request $request)
 
     $data['unitPenyewaan'] = Barang::count(); 
     $data['unitGas'] = Gas::count();
-    $data['unitMobil'] = Mobil::whereNotIn('kategori', ['ambulans', 'kendaraan_operasional'])
+    $data['unitMobil'] = Mobil::inCatalog()->forRental()
         ->when($adminRegionId, fn($q) => $q->where('region_id', $adminRegionId))
         ->count();
     $data['unitFasilitas'] = FasilitasUmum::inCatalog()->when($adminRegionId, fn($q) => $q->where(fn($sub) => $sub->where('region_id', $adminRegionId)->orWhereNull('region_id')))->count();
@@ -486,12 +484,12 @@ public function index(Request $request)
             ->count();
 
         // Pendapatan Pasar Daerah
-        $pasarRevenue = $this->applyRegionFilter(\App\Models\PasarOrder::withTrashed(), 'user', true)->whereYear('created_at', $year)
+        $pasarRevenue = $this->applyRegionFilter(\App\Models\PasarOrder::whereNull('store_id')->withTrashed(), 'user', true)->whereYear('created_at', $year)
             ->whereMonth('created_at', $month)
             ->whereNotIn('status', ['waiting', 'processing', 'cancelled', 'rejected'])
             ->sum('grand_total');
             
-        $pasarTransactions = $this->applyRegionFilter(\App\Models\PasarOrder::withTrashed(), 'user', true)->whereYear('created_at', $year)
+        $pasarTransactions = $this->applyRegionFilter(\App\Models\PasarOrder::whereNull('store_id')->withTrashed(), 'user', true)->whereYear('created_at', $year)
             ->whereMonth('created_at', $month)
             ->whereNotIn('status', ['waiting', 'processing', 'cancelled', 'rejected'])
             ->count();
@@ -896,7 +894,7 @@ public function index(Request $request)
      */
     public function maintenance()
     {
-        return view('maintenance');
+        return response()->view('errors.503', [], 503);
     }
 
     /**

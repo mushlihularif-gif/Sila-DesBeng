@@ -10,7 +10,7 @@
             <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3 mb-4">
                 <div>
                     <h4 class="text-primary fw-bold mb-1">Struktur <span class="text-info">
-                        @if(in_array(auth()->user()->role, ['admin', 'super_admin']))
+                        @if(in_array(auth()->user()->role, ['super_admin']))
                             Pemerintah Kabupaten Bengkalis
                         @elseif(auth()->user()->role == 'admin_kecamatan')
                             Pemerintah Kecamatan {{ str_ireplace('Kecamatan ', '', auth()->user()->region->name ?? 'Daerah') }}
@@ -84,7 +84,7 @@
                         'badge' => 'bg-primary text-white',
                         'border' => 'border-primary',
                         'icon' => 'bx-crown',
-                        'example' => in_array(auth()->user()->role, ['admin', 'super_admin']) ? 'Bupati' : (auth()->user()->role == 'admin_kecamatan' ? 'Camat' : 'Kepala Desa / Lurah')
+                        'example' => in_array(auth()->user()->role, ['super_admin']) ? 'Bupati' : (auth()->user()->role == 'admin_kecamatan' ? 'Camat' : 'Kepala Desa / Lurah')
                     ],
                     2 => [
                         'title' => 'Tingkat 2 - Pimpinan Kedua / Sekretaris',
@@ -92,7 +92,7 @@
                         'badge' => 'bg-info text-white',
                         'border' => 'border-info',
                         'icon' => 'bx-user-check',
-                        'example' => in_array(auth()->user()->role, ['admin', 'super_admin']) ? 'Wakil Bupati / Sekda' : (auth()->user()->role == 'admin_kecamatan' ? 'Sekretaris Camat (Sekcam)' : 'Sekretaris Desa (Sekdes)')
+                        'example' => in_array(auth()->user()->role, ['super_admin']) ? 'Wakil Bupati / Sekda' : (auth()->user()->role == 'admin_kecamatan' ? 'Sekretaris Camat (Sekcam)' : 'Sekretaris Desa (Sekdes)')
                     ],
                     3 => [
                         'title' => 'Tingkat 3 - Kepala Seksi / Kaur / Kepala Unit',
@@ -100,7 +100,7 @@
                         'badge' => 'bg-success text-white',
                         'border' => 'border-success',
                         'icon' => 'bx-briefcase-alt-2',
-                        'example' => in_array(auth()->user()->role, ['admin', 'super_admin']) ? 'Kepala Dinas / Bagian' : (auth()->user()->role == 'admin_kecamatan' ? 'Kasi / Kasubag' : 'Kasi Pem, Kaur Keuangan, Kepala Unit Usaha')
+                        'example' => in_array(auth()->user()->role, ['super_admin']) ? 'Kepala Dinas / Bagian' : (auth()->user()->role == 'admin_kecamatan' ? 'Kasi / Kasubag' : 'Kasi Pem, Kaur Keuangan, Kepala Unit Usaha')
                     ],
                     4 => [
                         'title' => 'Tingkat 4 - Staf Pelaksana / Aparatur Lainnya',
@@ -108,7 +108,7 @@
                         'badge' => 'bg-secondary text-white',
                         'border' => 'border-secondary',
                         'icon' => 'bx-group',
-                        'example' => in_array(auth()->user()->role, ['admin', 'super_admin']) ? 'Staf Teknis' : (auth()->user()->role == 'admin_kecamatan' ? 'Staf Kecamatan' : 'Kepala Dusun (Kadus), Staf Desa')
+                        'example' => in_array(auth()->user()->role, ['super_admin']) ? 'Staf Teknis' : (auth()->user()->role == 'admin_kecamatan' ? 'Staf Kecamatan' : 'Kepala Dusun (Kadus), Staf Desa')
                     ],
                 ];
 

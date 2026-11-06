@@ -21,6 +21,30 @@ use Illuminate\Support\Facades\Storage;
 
 class PasarDaerahApiController extends Controller
 {
+    public function getOrderPayment(Request $request, int $id)
+    {
+        abort_unless($request->user(), 401);
+        $order = PasarOrder::where('user_id', $request->user()->id)->with('region')->findOrFail($id);
+        $settings = $order->store_id ? ($order->payment_settings_snapshot ?? []) : ($order->region?->settings ?? []);
+        // Only expose the store's payment instructions, never its entire settings.
+        $payment = $order->status === 'pending' ? [
+            'bank_name' => $settings['rekening_bank'] ?? null,
+            'account_number' => $settings['rekening_nomor'] ?? null,
+            'account_name' => $settings['rekening_nama'] ?? null,
+            'ewallet_number' => $settings['qris_ewallet_number'] ?? null,
+            'qris_image_url' => !empty($settings['qris_image'])
+                ? Storage::disk('public')->url($settings['qris_image']) : null,
+        ] : null;
+
+        return response()->json(['status' => 'success', 'data' => [
+            'order_id' => $order->id, 'order_number' => $order->order_number, 'status' => $order->status,
+            'payment_method' => $order->payment_method, 'total_amount' => $order->total_amount,
+            'shipping_cost' => $order->shipping_cost, 'grand_total' => $order->grand_total,
+            'has_payment_proof' => filled($order->proof_of_payment), 'payment_instructions' => $payment,
+            'payment_url' => route('pasar.payment', $order->id),
+        ]])->header('Cache-Control', 'private, no-store');
+    }
+
     private function desaIdsKecamatanBengkalis(): array
     {
         $kecamatanId = Region::where('type', 'kecamatan')->where('name', 'Kecamatan Bengkalis')->value('id');
@@ -33,16 +57,9 @@ class PasarDaerahApiController extends Controller
             ->all();
     }
 
-    private function pembeliDalamKecamatanBengkalis(?User $user): bool
+    private function pembeliMemilikiWilayah(?User $user): bool
     {
-        if (! $user?->region_id) {
-            return false;
-        }
-
-        $kecamatanId = Region::where('type', 'kecamatan')->where('name', 'Kecamatan Bengkalis')->value('id');
-
-        return $kecamatanId
-            && in_array((int) $kecamatanId, Region::garisLayananUntukWarga((int) $user->region_id), true);
+        return app(\App\Services\MarketShippingService::class)->village($user?->region_id) !== null;
     }
 
     /**
@@ -50,7 +67,7 @@ class PasarDaerahApiController extends Controller
      */
     public function getProducts(Request $request)
     {
-        $query = PasarProduk::with('region')
+        $query = PasarProduk::visibleStore()->with(['region:id,name,type,parent_id','store:id,user_id,name,status,is_open,region_id'])
             ->withCount('reviews')
             ->withAvg('reviews', 'rating')
             ->where('status', 'tersedia')
@@ -102,9 +119,9 @@ class PasarDaerahApiController extends Controller
      */
     public function getProductDetail($id)
     {
-        $product = PasarProduk::with('region')
+        $product = PasarProduk::visibleStore()->with(['region:id,name,type,parent_id','store:id,user_id,name,status,is_open,region_id'])
             ->whereIn('region_id', $this->desaIdsKecamatanBengkalis())
-            ->find($id);
+            ->whereIn('status', ['tersedia', 'habis'])->find($id);
 
         if (!$product) {
             return response()->json([
@@ -124,7 +141,7 @@ class PasarDaerahApiController extends Controller
 
         // Seller / Admin Desa info
         $seller = User::where('region_id', $product->region_id)
-            ->whereIn('role', ['admin_desa', 'admin'])
+            ->whereIn('role', ['admin_desa'])
             ->first();
 
         $sellerData = null;
@@ -138,6 +155,14 @@ class PasarDaerahApiController extends Controller
                 'store_description' => $seller->store_description,
                 'region_name' => $product->region ? $product->region->name : null,
             ];
+        }
+
+        if ($product->store_id) {
+            $store = \App\Models\MarketStore::with('owner:id,name')->findOrFail($product->store_id);
+            $sellerData = ['id'=>$store->user_id,'store_id'=>$store->id,'name'=>$store->owner->name,
+                'store_name'=>$store->name,'avatar'=>$store->avatar?Storage::url($store->avatar):null,
+                'store_banner'=>$store->cover?Storage::url($store->cover):null,'store_description'=>$store->description,
+                'region_name'=>$product->region?->name,'is_open'=>$store->is_open,'store_url'=>route('market.store',$store->id)];
         }
 
         // Reviews
@@ -179,6 +204,8 @@ class PasarDaerahApiController extends Controller
      */
     public function getProductReviews($id)
     {
+        PasarProduk::visibleStore()->whereIn('region_id', $this->desaIdsKecamatanBengkalis())
+            ->whereIn('status', ['tersedia', 'habis'])->findOrFail($id);
         $reviews = PasarReview::where('pasar_produk_id', $id)
             ->with('user')
             ->latest()
@@ -212,15 +239,10 @@ class PasarDaerahApiController extends Controller
             'comment' => 'nullable|string|max:1000',
         ]);
 
-        $product = PasarProduk::whereIn('region_id', $this->desaIdsKecamatanBengkalis())->findOrFail($id);
+        $product = PasarProduk::visibleStore()->whereIn('region_id', $this->desaIdsKecamatanBengkalis())->findOrFail($id);
         $user = $request->user();
 
-        $review = PasarReview::create([
-            'pasar_produk_id' => $product->id,
-            'user_id' => $user->id,
-            'rating' => $request->rating,
-            'comment' => $request->comment,
-        ]);
+        $review = app(\App\Services\MarketAfterSalesService::class)->review($user, $product->id, ['rating' => $request->rating, 'comment' => $request->comment]);
 
         return response()->json([
             'status' => 'success',
@@ -236,11 +258,12 @@ class PasarDaerahApiController extends Controller
     {
         abort_unless(in_array((int) $region_id, $this->desaIdsKecamatanBengkalis(), true), 404);
         $region = Region::findOrFail($region_id);
+        $shipping = app(\App\Services\MarketShippingService::class)->configuration($region);
         $seller = User::where('region_id', $region_id)
-            ->whereIn('role', ['admin_desa', 'admin'])
+            ->whereIn('role', ['admin_desa'])
             ->first();
 
-        $products = PasarProduk::where('region_id', $region_id)
+        $products = PasarProduk::whereNull('store_id')->where('region_id', $region_id)
             ->where('status', 'tersedia')
             ->latest()
             ->get()
@@ -257,6 +280,7 @@ class PasarDaerahApiController extends Controller
                 'avatar' => ($seller && $seller->avatar) ? url('storage/' . $seller->avatar) : null,
                 'store_banner' => ($seller && $seller->store_banner) ? url('storage/' . $seller->store_banner) : null,
                 'store_description' => $seller ? $seller->store_description : null,
+                'delivery_options' => ['pickup' => $shipping['pickup'], 'delivery' => $shipping['delivery']],
                 'products' => $products,
                 'total_products' => $products->count(),
             ]
@@ -277,7 +301,7 @@ class PasarDaerahApiController extends Controller
             'Lainnya',
         ];
 
-        $dbCategories = PasarProduk::where('status', 'tersedia')
+        $dbCategories = PasarProduk::visibleStore()->where('status', 'tersedia')
             ->whereIn('region_id', $this->desaIdsKecamatanBengkalis())
             ->whereNotNull('kategori')
             ->where('kategori', '!=', '')
@@ -300,8 +324,8 @@ class PasarDaerahApiController extends Controller
     public function getCart(Request $request)
     {
         $user = $request->user();
-        if (! $this->pembeliDalamKecamatanBengkalis($user)) {
-            return response()->json(['status' => 'error', 'message' => 'Pasar Daerah hanya melayani warga Kecamatan Bengkalis.'], 403);
+        if (! $this->pembeliMemilikiWilayah($user)) {
+            return response()->json(['status' => 'error', 'message' => 'Lengkapi desa atau kelurahan pada akun sebelum berbelanja.'], 403);
         }
         
         $cartItems = PasarCart::with('produk')
@@ -314,6 +338,8 @@ class PasarDaerahApiController extends Controller
             return [
                 'id' => $item->id, // Cart item ID
                 'pasar_produk_id' => $item->pasar_produk_id,
+                'store_key' => $produk?->storeKey(),
+                'store_name' => $produk?->store?->name ?? $produk?->region?->name,
                 'quantity' => $item->quantity,
                 'name' => $produk ? $produk->nama_produk : 'Produk Tidak Ditemukan',
                 'price' => $produk ? $produk->harga : 0,
@@ -333,59 +359,57 @@ class PasarDaerahApiController extends Controller
      */
     public function addToCart(Request $request)
     {
-        $request->validate([
-            'pasar_produk_id' => 'required|exists:pasar_produks,id',
-            'quantity' => 'required|integer|min:1'
-        ]);
+        return \Illuminate\Support\Facades\DB::transaction(function () use ($request) {
+            \App\Models\User::whereKey($request->user()->id)->lockForUpdate()->firstOrFail();
+            $request->validate([
+                'pasar_produk_id' => 'required|exists:pasar_produks,id',
+                'quantity' => 'required|integer|min:1'
+            ]);
 
-        $user = $request->user();
-        if (! $this->pembeliDalamKecamatanBengkalis($user)) {
-            return response()->json(['status' => 'error', 'message' => 'Pasar Daerah hanya melayani warga Kecamatan Bengkalis.'], 403);
-        }
-        $produk = PasarProduk::whereIn('region_id', $this->desaIdsKecamatanBengkalis())->find($request->pasar_produk_id);
-        if (! $produk) {
-            return response()->json(['status' => 'error', 'message' => 'Produk hanya tersedia dari desa-desa di Kecamatan Bengkalis.'], 404);
-        }
+            $user = $request->user();
+            if (! $this->pembeliMemilikiWilayah($user)) {
+                return response()->json(['status' => 'error', 'message' => 'Lengkapi desa atau kelurahan pada akun sebelum berbelanja.'], 403);
+            }
+            $produk = PasarProduk::visibleStore()->whereIn('region_id', $this->desaIdsKecamatanBengkalis())->find($request->pasar_produk_id);
+            if (! $produk) {
+                return response()->json(['status' => 'error', 'message' => 'Produk hanya tersedia dari desa-desa di Kecamatan Bengkalis.'], 404);
+            }
 
-        $otherSellerInCart = PasarCart::where('user_id', $user->id)
-            ->whereHas('produk', fn ($query) => $query->where('region_id', '!=', $produk->region_id))
-            ->exists();
-        if ($otherSellerInCart) {
-            return response()->json(['status' => 'error', 'message' => 'Satu pesanan hanya dapat berisi produk dari satu toko.'], 422);
-        }
+            app(\App\Services\MarketBasket::class)->ensureAvailable($produk);
 
-        if ($produk->stok < $request->quantity) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Stok tidak mencukupi'
-            ], 400);
-        }
-
-        $cartItem = PasarCart::where('user_id', $user->id)
-            ->where('pasar_produk_id', $request->pasar_produk_id)
-            ->first();
-
-        if ($cartItem) {
-            $newQuantity = $cartItem->quantity + $request->quantity;
-            if ($produk->stok < $newQuantity) {
+            if ($produk->status !== 'tersedia' || $produk->stok < $request->quantity) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Stok tidak mencukupi untuk jumlah ini'
+                    'message' => 'Stok tidak mencukupi'
                 ], 400);
             }
-            $cartItem->update(['quantity' => $newQuantity]);
-        } else {
-            PasarCart::create([
-                'user_id' => $user->id,
-                'pasar_produk_id' => $request->pasar_produk_id,
-                'quantity' => $request->quantity
-            ]);
-        }
 
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Berhasil ditambahkan ke keranjang'
-        ]);
+            $cartItem = PasarCart::where('user_id', $user->id)
+                ->where('pasar_produk_id', $request->pasar_produk_id)
+                ->first();
+
+            if ($cartItem) {
+                $newQuantity = $cartItem->quantity + $request->quantity;
+                if ($produk->stok < $newQuantity) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Stok tidak mencukupi untuk jumlah ini'
+                    ], 400);
+                }
+                $cartItem->update(['quantity' => $newQuantity]);
+            } else {
+                PasarCart::create([
+                    'user_id' => $user->id,
+                    'pasar_produk_id' => $request->pasar_produk_id,
+                    'quantity' => $request->quantity
+                ]);
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Berhasil ditambahkan ke keranjang'
+            ]);
+        });
     }
 
     /**
@@ -393,32 +417,35 @@ class PasarDaerahApiController extends Controller
      */
     public function updateCart(Request $request)
     {
-        $request->validate([
-            'cart_item_id' => 'required|exists:pasar_carts,id',
-            'quantity' => 'required|integer|min:1'
-        ]);
+        return \Illuminate\Support\Facades\DB::transaction(function () use ($request) {
+            \App\Models\User::whereKey($request->user()->id)->lockForUpdate()->firstOrFail();
+            $request->validate([
+                'cart_item_id' => 'required|exists:pasar_carts,id',
+                'quantity' => 'required|integer|min:1'
+            ]);
 
-        $user = $request->user();
-        if (! $this->pembeliDalamKecamatanBengkalis($user)) {
-            return response()->json(['status' => 'error', 'message' => 'Pasar Daerah hanya melayani warga Kecamatan Bengkalis.'], 403);
-        }
-        $cartItem = PasarCart::where('id', $request->cart_item_id)
-            ->where('user_id', $user->id)
-            ->first();
+            $user = $request->user();
+            if (! $this->pembeliMemilikiWilayah($user)) {
+                return response()->json(['status' => 'error', 'message' => 'Lengkapi desa atau kelurahan pada akun sebelum berbelanja.'], 403);
+            }
+            $cartItem = PasarCart::where('id', $request->cart_item_id)
+                ->where('user_id', $user->id)
+                ->first();
 
-        if (!$cartItem) {
-            return response()->json(['status' => 'error', 'message' => 'Item not found in cart'], 404);
-        }
+            if (!$cartItem) {
+                return response()->json(['status' => 'error', 'message' => 'Item not found in cart'], 404);
+            }
 
-        $produk = $cartItem->produk;
-        abort_unless($produk && in_array((int) $produk->region_id, $this->desaIdsKecamatanBengkalis(), true), 404);
-        if ($produk->stok < $request->quantity) {
-            return response()->json(['status' => 'error', 'message' => 'Stok tidak mencukupi'], 400);
-        }
+            $produk = $cartItem->produk;
+            abort_unless($produk && in_array((int) $produk->region_id, $this->desaIdsKecamatanBengkalis(), true), 404);
+            if ($produk->status !== 'tersedia' || $produk->stok < $request->quantity) {
+                return response()->json(['status' => 'error', 'message' => 'Stok tidak mencukupi'], 400);
+            }
 
-        $cartItem->update(['quantity' => $request->quantity]);
+            $cartItem->update(['quantity' => $request->quantity]);
 
-        return response()->json(['status' => 'success', 'message' => 'Keranjang diperbarui']);
+            return response()->json(['status' => 'success', 'message' => 'Keranjang diperbarui']);
+        });
     }
 
     /**
@@ -426,16 +453,19 @@ class PasarDaerahApiController extends Controller
      */
     public function removeFromCart(Request $request)
     {
-        $request->validate([
-            'cart_item_id' => 'required|exists:pasar_carts,id'
-        ]);
+        return \Illuminate\Support\Facades\DB::transaction(function () use ($request) {
+            \App\Models\User::whereKey($request->user()->id)->lockForUpdate()->firstOrFail();
+            $request->validate([
+                'cart_item_id' => 'required|exists:pasar_carts,id'
+            ]);
 
-        $user = $request->user();
-        PasarCart::where('id', $request->cart_item_id)
-            ->where('user_id', $user->id)
-            ->delete();
+            $user = $request->user();
+            PasarCart::where('id', $request->cart_item_id)
+                ->where('user_id', $user->id)
+                ->delete();
 
-        return response()->json(['status' => 'success', 'message' => 'Barang dihapus dari keranjang']);
+            return response()->json(['status' => 'success', 'message' => 'Barang dihapus dari keranjang']);
+        });
     }
 
     /**
@@ -443,138 +473,23 @@ class PasarDaerahApiController extends Controller
      */
     public function checkout(Request $request)
     {
-        $user = $request->user();
-        if (! $this->pembeliDalamKecamatanBengkalis($user)) {
-            return response()->json(['status' => 'error', 'message' => 'Pasar Daerah hanya melayani warga Kecamatan Bengkalis.'], 403);
-        }
-
-        // KYC Validation Check
-        $status = strtolower(trim($user->verification_status ?? ''));
-        $kycStatus = strtolower(trim($user->kyc_status ?? ''));
-        $isVerified = in_array($status, ['verified', 'approved']) 
-                   || in_array($kycStatus, ['verified', 'approved'])
-                   || $user->is_verified == true;
-
-        if (!$isVerified) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Harap verifikasi identitas (KYC) terlebih dahulu sebelum melakukan pesanan.'
-            ], 403);
-        }
-
-        $request->validate([
-            'delivery_address' => 'nullable|string',
-            'notes' => 'nullable|string',
-            'delivery_method' => 'required|string|in:Ambil Sendiri,Diantar',
-            // Default to COD if not specified
-            'payment_method' => 'nullable|string|in:tunai,bank_transfer,transfer_manual,qris,COD',
-            'proof_of_payment' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
+        $data = $request->validate([
+            'delivery_method' => 'required|in:Ambil Sendiri,Diantar,antar,jemput',
+            'store_key' => 'nullable|string|max:50',
+            'payment_method' => 'nullable|in:tunai,bank_transfer,transfer_manual,qris,COD',
+            'delivery_address' => 'required_if:delivery_method,Diantar,antar|nullable|string|max:2000',
+            'delivery_region_id' => ['nullable', 'integer', \Illuminate\Validation\Rule::exists('regions','id')->whereIn('type',['desa','kelurahan'])],
+            'quoted_shipping_cost' => 'nullable|integer|min:0|max:10000000',
+            'delivery_latitude' => 'nullable|numeric|between:-90,90',
+            'delivery_longitude' => 'nullable|numeric|between:-180,180',
+            'notes' => 'nullable|string|max:2000', 'proof_of_payment' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
         ]);
-        $desaIds = $this->desaIdsKecamatanBengkalis();
-        $cartItems = PasarCart::with('produk')->where('user_id', $user->id)
-            ->whereHas('produk', fn ($query) => $query->whereIn('region_id', $desaIds))
-            ->get();
-
-        if ($cartItems->isEmpty()) {
-            return response()->json(['status' => 'error', 'message' => 'Keranjang kosong'], 400);
-        }
-
-        $sellerIds = $cartItems->pluck('produk.region_id')->unique();
-        if ($sellerIds->count() !== 1) {
-            return response()->json(['status' => 'error', 'message' => 'Satu pesanan hanya dapat berisi produk dari satu toko.'], 422);
-        }
-        $sellerRegionId = (int) $sellerIds->first();
-        $paymentMethod = $request->input('payment_method') ?: 'tunai';
-        $paymentProofPath = $request->hasFile('proof_of_payment')
-            ? $request->file('proof_of_payment')->store('payment_proofs/pasar', 'public')
-            : null;
-
-        DB::beginTransaction();
-        try {
-            $totalAmount = 0;
-            
-            // Validate stock and calculate total
-            foreach ($cartItems as $item) {
-                $produk = $item->produk;
-                if (!$produk || $produk->stok < $item->quantity) {
-                    throw new \Exception("Stok {$produk->nama_produk} tidak mencukupi.");
-                }
-                $totalAmount += ($produk->harga * $item->quantity);
-            }
-
-            // Create Order
-            $order = PasarOrder::create([
-                'user_id' => $user->id,
-                'region_id' => $sellerRegionId,
-                'total_amount' => $totalAmount,
-                'shipping_cost' => 0, // Simplified for now
-                'grand_total' => $totalAmount,
-                'delivery_method' => $request->delivery_method,
-                'payment_method' => $paymentMethod === 'transfer_manual' ? 'Transfer Manual' : ucfirst($paymentMethod),
-                'proof_of_payment' => $paymentProofPath,
-                'delivery_address' => $request->delivery_method == 'Diantar' ? $request->delivery_address : null,
-                'full_name' => $user->name,
-                'phone' => $user->phone ?? '00000000',
-                'notes' => $request->notes,
-                'status' => 'waiting',
-            ]);
-
-            // Create Order Items and decrease stock
-            foreach ($cartItems as $item) {
-                $produk = $item->produk;
-                
-                PasarOrderItem::create([
-                    'pasar_order_id' => $order->id,
-                    'pasar_produk_id' => $produk->id,
-                    'quantity' => $item->quantity,
-                    'price' => $produk->harga,
-                    'subtotal' => $produk->harga * $item->quantity
-                ]);
-
-                // Decrease stock
-                $produk->decrement('stok', $item->quantity);
-            }
-
-            // Clear Cart
-            PasarCart::where('user_id', $user->id)->delete();
-
-            // Admin Notification
-            \App\Models\AdminNotification::create([
-                'type' => 'pasar_order',
-                'reference_id' => $order->id,
-                'region_id' => $sellerRegionId,
-                'title' => 'Pesanan Pasar Daerah Baru (Via Mobile)',
-                'message' => 'Pesanan Rp ' . number_format($totalAmount, 0, ',', '.') . ' dari ' . $user->name,
-                'is_read' => false,
-            ]);
-
-            // User Notification
-            \App\Models\Notification::create([
-                'user_id' => $user->id,
-                'type' => 'status_berubah',
-                'title' => 'Pesanan Berhasil Dibuat',
-                'message' => 'Pesanan Pasar Daerah (Order ID: ' . $order->order_number . ') berhasil dibuat.',
-                'is_read' => false,
-                'link' => '/pasar-daerah/riwayat',
-                'icon' => 'fas fa-shopping-bag text-blue-500'
-            ]);
-
-            DB::commit();
-
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Pesanan berhasil dibuat',
-                'order' => $order
-            ]);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Checkout Error: ' . $e->getMessage());
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Gagal membuat pesanan: ' . $e->getMessage()
-            ], 500);
-        }
+        $data['delivery_method'] = in_array($data['delivery_method'], ['Diantar', 'antar'], true) ? 'antar' : 'jemput';
+        $data['payment_method'] = $data['payment_method'] ?? 'tunai';
+        $data['full_name'] = $request->user()->name;
+        $data['phone'] = $request->user()->phone;
+        $order = app(\App\Services\MarketCheckoutService::class)->place($request->user(), $data, $request->file('proof_of_payment'));
+        return response()->json(['status' => 'success', 'message' => 'Pesanan berhasil dibuat', 'order' => $order]);
     }
 
     /**
@@ -582,92 +497,8 @@ class PasarDaerahApiController extends Controller
      */
     public function submitComplaint(Request $request, $orderId)
     {
-        $user = $request->user();
-        
-        $order = PasarOrder::where('id', $orderId)
-            ->where('user_id', $user->id)
-            ->first();
-
-        if (!$order) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Pesanan tidak ditemukan'
-            ], 404);
-        }
-
-        if ($order->status === 'completed') {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Pesanan sudah selesai. Hak komplain telah hangus.'
-            ], 400);
-        }
-
-        if ($order->delivered_at) {
-            $hoursPassed = now()->diffInHours($order->delivered_at);
-            if ($hoursPassed >= 2) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Batas waktu pengajuan komplain (2 Jam setelah barang diterima) telah habis.'
-                ], 400);
-            }
-        }
-
-        $request->validate([
-            'reason' => 'required|string',
-            'solution_requested' => 'required|in:refund,replacement',
-            'description' => 'nullable|string|max:1000',
-            'bank_name' => 'nullable|string|max:100',
-            'bank_account_number' => 'nullable|string|max:50',
-            'bank_account_name' => 'nullable|string|max:100',
-            'evidence_1' => 'required|image|mimes:jpeg,png,jpg|max:10240',
-            'evidence_2' => 'required|image|mimes:jpeg,png,jpg|max:10240',
-            'evidence_3' => 'required|image|mimes:jpeg,png,jpg|max:10240',
-            'evidence_4' => 'required|image|mimes:jpeg,png,jpg|max:10240',
-            'evidence_5' => 'required|image|mimes:jpeg,png,jpg|max:10240',
-            'evidence_video' => 'required|mimes:mp4,mov,ogg,qt|max:30720',
-        ]);
-
-        // Cek jika sudah pernah komplain yang masih pending
-        $existing = PasarComplaint::where('pasar_order_id', $order->id)->first();
-        if ($existing && $existing->status === 'pending') {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Anda sudah mengajukan komplain untuk pesanan ini yang sedang diproses.'
-            ], 400);
-        }
-
-        $evidencePaths = [];
-        $evidenceKeys = ['evidence_1', 'evidence_2', 'evidence_3', 'evidence_4', 'evidence_5', 'evidence_video'];
-        foreach ($evidenceKeys as $evKey) {
-            if ($request->hasFile($evKey)) {
-                $evidencePaths[$evKey] = $request->file($evKey)->store('pasar_complaints', 'public');
-            }
-        }
-
-        $complaint = PasarComplaint::create([
-            'pasar_order_id' => $order->id,
-            'user_id' => $user->id,
-            'region_id' => $order->region_id,
-            'reason' => $request->reason,
-            'solution_requested' => $request->solution_requested,
-            'description' => $request->description,
-            'evidence_1' => $evidencePaths['evidence_1'] ?? null,
-            'evidence_2' => $evidencePaths['evidence_2'] ?? null,
-            'evidence_3' => $evidencePaths['evidence_3'] ?? null,
-            'evidence_4' => $evidencePaths['evidence_4'] ?? null,
-            'evidence_5' => $evidencePaths['evidence_5'] ?? null,
-            'evidence_video' => $evidencePaths['evidence_video'] ?? null,
-            'bank_name' => $request->bank_name,
-            'bank_account_number' => $request->bank_account_number,
-            'bank_account_name' => $request->bank_account_name,
-            'status' => 'pending',
-        ]);
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Komplain berhasil diajukan dan sedang ditinjau oleh Admin Desa.',
-            'data' => $complaint
-        ]);
+        $complaint = app(\App\Services\MarketAfterSalesService::class)->submit($request->user(), (int) $orderId, $request);
+        return response()->json(['status' => 'success', 'message' => 'Komplain sedang ditinjau pengelola toko.', 'data' => $complaint]);
     }
 
     /**
@@ -717,54 +548,17 @@ class PasarDaerahApiController extends Controller
      */
     public function confirmReceived(Request $request, $orderId)
     {
-        $user = $request->user();
-
-        $order = PasarOrder::where('id', $orderId)
-            ->where('user_id', $user->id)
-            ->first();
-
-        if (!$order) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Pesanan tidak ditemukan'
-            ], 404);
-        }
-
-        if ($order->status === 'completed') {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Pesanan ini sudah selesai.'
-            ], 400);
-        }
-
         $request->validate([
             'delivery_proof_image' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
             'proof_image' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
         ]);
-
-        // Support both field names
-        $photoField = $request->hasFile('delivery_proof_image') ? 'delivery_proof_image' : ($request->hasFile('proof_image') ? 'proof_image' : null);
-
-        if ($photoField) {
-            $path = $request->file($photoField)->store('pasar_orders/proofs', 'public');
-            $order->delivery_proof_image = $path;
-        }
-
-        $order->status = 'completed';
-        $order->completion_time = now();
-        $order->save();
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Pesanan berhasil dikonfirmasi selesai. Terima kasih!',
-            'data' => [
-                'id' => $order->id,
-                'order_number' => $order->order_number,
-                'status' => $order->status,
-                'delivery_proof_image' => $order->delivery_proof_image ? url('storage/' . $order->delivery_proof_image) : null,
-                'completion_time' => $order->completion_time ? $order->completion_time->format('Y-m-d H:i:s') : null,
-            ]
-        ]);
+        $order = app(\App\Services\MarketCheckoutService::class)->received($request->user(), (int) $orderId,
+            $request->file('delivery_proof_image') ?? $request->file('proof_image'));
+        return response()->json(['status' => 'success', 'message' => 'Pesanan dikonfirmasi diterima.', 'data' => [
+            'id' => $order->id, 'order_number' => $order->order_number, 'status' => $order->status,
+            'delivery_proof_image' => $order->delivery_proof_image ? url('storage/'.$order->delivery_proof_image) : null,
+            'completion_time' => $order->completion_time?->format('Y-m-d H:i:s'),
+        ]]);
     }
 
     /**
@@ -890,7 +684,7 @@ class PasarDaerahApiController extends Controller
                 }
 
                 if ($extractedName) {
-                    $targetProduct = PasarProduk::where('region_id', $region->id)
+                    $targetProduct = PasarProduk::whereNull('store_id')->where('region_id', $region->id)
                         ->where('nama_produk', 'like', "%{$extractedName}%")
                         ->first();
                 }
@@ -899,7 +693,7 @@ class PasarDaerahApiController extends Controller
                     $isHabis = ($targetProduct->stok <= 0 || strtolower($targetProduct->status) === 'habis');
                     if ($isHabis) {
                         // Cari produk sejenis yang ready di kategori yang sama
-                        $similarProducts = PasarProduk::where('region_id', $region->id)
+                        $similarProducts = PasarProduk::whereNull('store_id')->where('region_id', $region->id)
                             ->where('id', '!=', $targetProduct->id)
                             ->where('kategori', $targetProduct->kategori)
                             ->where('stok', '>', 0)
@@ -911,7 +705,7 @@ class PasarDaerahApiController extends Controller
 
                         // Jika tidak ada di kategori yang sama, cari produk lain yang ready di toko yang sama
                         if ($similarProducts->isEmpty()) {
-                            $similarProducts = PasarProduk::where('region_id', $region->id)
+                            $similarProducts = PasarProduk::whereNull('store_id')->where('region_id', $region->id)
                                 ->where('id', '!=', $targetProduct->id)
                                 ->where('stok', '>', 0)
                                 ->where(function($sq) {

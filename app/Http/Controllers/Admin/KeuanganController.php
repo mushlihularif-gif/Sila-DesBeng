@@ -29,7 +29,7 @@ class KeuanganController extends Controller
     private function pastikanAdminWilayah(): void
     {
         abort_unless(
-            in_array(auth()->user()?->role, ['admin', 'admin_kecamatan', 'admin_desa', 'super_admin'], true),
+            in_array(auth()->user()?->role, ['admin_desa', 'super_admin'], true),
             403,
             'Halaman keuangan wilayah khusus admin wilayah.'
         );

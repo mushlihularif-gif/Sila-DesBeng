@@ -21,7 +21,7 @@ class PartnerApplicationApiController extends Controller
         $kecamatans = Region::whereKey($kecamatanFokus->id)
             ->with(['children' => function($query) {
                 $query->whereIn('type', ['desa', 'kelurahan'])->with(['users' => function($u) {
-                    $u->whereIn('role', ['admin_desa', 'admin']);
+                    $u->whereIn('role', ['admin_desa']);
                 }]);
             }])
             ->get();
@@ -60,7 +60,7 @@ class PartnerApplicationApiController extends Controller
         $desa = Region::whereIn('type', ['desa', 'kelurahan'])
             ->where('parent_id', $kecamatanFokusId)
             ->with(['users' => function($u) {
-            $u->whereIn('role', ['admin_desa', 'admin']);
+            $u->whereIn('role', ['admin_desa']);
         }])->find($id);
 
         if (!$desa) {
@@ -91,7 +91,7 @@ class PartnerApplicationApiController extends Controller
         $validator = Validator::make($request->all(), [
             'applicant_name' => 'required|string|max:255',
             'position' => 'required|string|max:255',
-            'region_type' => 'required|in:kecamatan,desa,rw,rt',
+            'region_type' => 'required|in:desa,rw,rt',
             'region_name' => 'required|string|max:255',
             'parent_region_id' => 'required|exists:regions,id',
             'contact_email' => 'required|email|max:255',

@@ -135,7 +135,7 @@ class GasController extends Controller
         }
 
         // Broadcast produk gas baru ke warga
-        \App\Services\NotificationService::broadcastNewProduct('Gas LPG', $gas->jenis_gas, $gas->region_id, route('gas.index'));
+        \App\Services\NotificationService::broadcastNewProduct('Gas LPG', $gas->jenis_gas, $gas->region_id, route('gas.sales.show', $gas->id));
 
         return redirect()->route('admin.unit.penjualan_gas.index')->with('success', 'Gas berhasil ditambahkan.');
     }
@@ -258,7 +258,7 @@ class GasController extends Controller
                 $gas->stok,
                 $gas->satuan ?? 'tabung',
                 $gas->region_id,
-                route('gas.index')
+                route('gas.sales.show', $gas->id)
             );
         }
 

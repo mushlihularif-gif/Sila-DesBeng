@@ -23,11 +23,6 @@
                 <span class="badge bg-label-primary rounded-pill">
                     <i class="bx bx-shield-quarter me-1"></i>{{ auth()->user()->name }}
                 </span>
-                @if(Route::has('admin.staff.create'))
-                    <a href="{{ route('admin.staff.create') }}" class="btn btn-primary">
-                        <i class="bx bx-user-plus me-1"></i>Tambah Akun Staf
-                    </a>
-                @endif
             </div>
         </div>
 
@@ -306,16 +301,9 @@
                         {{-- Mendaftarkan akun staf: dibuatkan admin, orangnya
                              langsung bisa login memakai email & sandi itu. --}}
                         <div class="d-flex gap-2 mt-3">
-                            @if(Route::has('admin.staff.create'))
-                                <a href="{{ route('admin.staff.create') }}" class="btn btn-sm btn-primary flex-grow-1">
-                                    <i class="bx bx-user-plus me-1"></i>Tambah Akun Staf
-                                </a>
-                            @endif
                             {{-- Menuju Kelola Staf, bukan Manajemen Pengguna: yang terakhir
                                  itu data warga per wilayah dan tidak ada di sidebar super admin. --}}
-                            <a href="{{ route('admin.staff.index') }}" class="btn btn-sm btn-outline-secondary">
-                                Kelola Staf
-                            </a>
+                            <a href="{{ route('admin.kelola-wilayah.index') }}" class="btn btn-outline-primary">Kelola Wilayah dan Admin</a>
                         </div>
                     </div>
                 </div>
@@ -338,8 +326,6 @@
                                             ['Integrasi & API Key', 'admin.sistem-platform.gateway', 'bx-plug', 'platform_integrasi'],
                                             ['Log Keamanan', 'admin.sistem-platform.security-log', 'bx-shield', 'platform_keamanan'],
                                             ['Biaya Server & Domain', 'admin.sistem-platform.expenses', 'bx-server', 'platform_biaya'],
-                                            ['Kelola Staf', 'admin.staff.index', 'bx-user-voice', 'platform_staf'],
-                                            ['Tambah Akun Staf', 'admin.staff.create', 'bx-user-plus', 'platform_staf'],
                                             ['Banner', 'admin.banners.index', 'bx-image', 'platform_banner'],
                                             ['Log Aktivitas', 'admin.laporan.log', 'bx-history', 'platform_aktivitas'],
                                         ];

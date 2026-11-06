@@ -1123,16 +1123,14 @@
                                     <h4 class="text-base font-bold text-slate-800 mb-1">Belum Ada Ulasan Pembeli</h4>
                                     <p class="text-xs sm:text-sm text-slate-500 max-w-sm mx-auto mb-4">Jadilah pembeli pertama yang memberikan penilaian dan ulasan untuk produk ini!</p>
                                     
-                                    @auth
+                                    @if($canReview)
                                         <button @click="showReviewForm = !showReviewForm" type="button" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#115789] hover:bg-[#0c446c] text-white font-bold text-xs sm:text-sm shadow-md transition">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                             <span x-text="showReviewForm ? 'Tutup Form' : 'Tulis Ulasan'">Tulis Ulasan</span>
                                         </button>
                                     @else
-                                        <a href="{{ route('auth.login') }}" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#115789] text-white font-bold text-xs sm:text-sm shadow-md transition">
-                                            Login untuk Beri Ulasan
-                                        </a>
-                                    @endauth
+                                        <p class="text-sm text-slate-500">Ulasan tersedia setelah pesanan selesai, satu ulasan untuk setiap produk.</p>
+                                    @endif
                                 </div>
                             @else
                                 <!-- Ringkasan dan tombol tulis ulasan -->
@@ -1149,20 +1147,18 @@
                                         </div>
                                     </div>
 
-                                    @auth
+                                    @if($canReview)
                                         <button @click="showReviewForm = !showReviewForm" type="button" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#115789] hover:bg-[#0c446c] text-white font-bold text-xs sm:text-sm shadow-sm transition self-start sm:self-auto">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                             <span x-text="showReviewForm ? 'Tutup Form' : 'Tulis Ulasan'">Tulis Ulasan</span>
                                         </button>
                                     @else
-                                        <a href="{{ route('auth.login') }}" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#115789] text-white font-bold text-xs sm:text-sm shadow-sm transition">
-                                            Login untuk Beri Ulasan
-                                        </a>
-                                    @endauth
+                                        <p class="text-sm text-slate-500">Ulasan tersedia setelah pesanan selesai, satu ulasan untuk setiap produk.</p>
+                                    @endif
                                 </div>
                             @endif
 
-                            @auth
+                            @if($canReview)
                                 <!-- Form Tulis Ulasan -->
                                 <div x-show="showReviewForm" x-collapse x-cloak class="ps-info-card-blue mb-8 max-w-2xl">
                                     <h4 class="font-bold text-gray-800 text-sm mb-3">Bagikan Pengalaman Anda</h4>
@@ -1191,7 +1187,7 @@
                                         </button>
                                     </form>
                                 </div>
-                            @endauth
+                            @endif
 
                             @if($reviews->isNotEmpty())
                                 <!-- Daftar Ulasan -->
@@ -1683,7 +1679,7 @@
         .then(data => {
             if (data.success) {
                 if(isDirectBuy) {
-                    window.location.href = '{{ route("pasar.checkout") }}';
+                    window.location.href = data.checkout_url || '{{ route("pasar.cart") }}';
                 } else {
                     showSiladesBengToast('success', 'Tersimpan!', 'Produk ditambahkan ke keranjang.', 2000);
                 }

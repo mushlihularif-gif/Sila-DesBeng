@@ -16,6 +16,13 @@ class ActivityController extends Controller
     {
         // Get authenticated user
         $user = Auth::user();
+        $focusedTab = $request->query('tab', 'rental');
+        $focusedOrder = null;
+        if ($request->filled('order')) {
+            $request->validate(['order'=>'integer|min:1','tab'=>'required|in:rental,gas,mobil,fasilitas,pasar']);
+            $model = \App\Services\BookingAccess::TYPES[$focusedTab][0];
+            $focusedOrder = $model::where('user_id',$user->id)->findOrFail($request->integer('order'))->id;
+        }
         
         // Fetch system settings for location
         $setting = SystemSetting::first();
@@ -26,36 +33,36 @@ class ActivityController extends Controller
             $hasMore = false;
 
             if ($tab === 'rental') {
-                $items = RentalBooking::where('user_id', $user->id)
+                $items = RentalBooking::where('user_id', $user->id)->when($focusedOrder && $focusedTab === 'rental', fn ($q) => $q->whereKey($focusedOrder))
                     ->with('barang')
                     ->orderBy('created_at', 'desc')
                     ->paginate(5);
                 $html = view('users.partials.activity-rental', ['rentalBookings' => $items, 'setting' => $setting])->render();
                 $hasMore = $items->hasMorePages();
             } elseif ($tab === 'gas') {
-                $items = GasOrder::where('user_id', $user->id)
+                $items = GasOrder::where('user_id', $user->id)->when($focusedOrder && $focusedTab === 'gas', fn ($q) => $q->whereKey($focusedOrder))
                     ->with('gas')
                     ->orderBy('created_at', 'desc')
                     ->paginate(5);
                 $html = view('users.partials.activity-gas', ['gasOrders' => $items, 'setting' => $setting])->render();
                 $hasMore = $items->hasMorePages();
             } elseif ($tab === 'mobil') {
-                $items = \App\Models\MobilBooking::where('user_id', $user->id)
+                $items = \App\Models\MobilBooking::where('user_id', $user->id)->when($focusedOrder && $focusedTab === 'mobil', fn ($q) => $q->whereKey($focusedOrder))
                     ->with('mobil')
                     ->orderBy('created_at', 'desc')
                     ->paginate(5);
                 $html = view('users.partials.activity-mobil', ['mobilBookings' => $items, 'setting' => $setting])->render();
                 $hasMore = $items->hasMorePages();
             } elseif ($tab === 'fasilitas') {
-                $items = \App\Models\FasilitasUmumBooking::where('user_id', $user->id)
+                $items = \App\Models\FasilitasUmumBooking::where('user_id', $user->id)->when($focusedOrder && $focusedTab === 'fasilitas', fn ($q) => $q->whereKey($focusedOrder))
                     ->with('fasilitas')
                     ->orderBy('created_at', 'desc')
                     ->paginate(5);
                 $html = view('users.partials.activity-fasilitas', ['fasilitasBookings' => $items, 'setting' => $setting])->render();
                 $hasMore = $items->hasMorePages();
             } elseif ($tab === 'pasar') {
-                $items = \App\Models\PasarOrder::where('user_id', $user->id)
-                    ->with('items.produk')
+                $items = \App\Models\PasarOrder::where('user_id', $user->id)->when($focusedOrder && $focusedTab === 'pasar', fn ($q) => $q->whereKey($focusedOrder))
+                    ->with(['items.produk','store:id,name','marketPayment'])
                     ->orderBy('created_at', 'desc')
                     ->paginate(5);
                 $html = view('users.partials.activity-pasar', ['pasarOrders' => $items, 'setting' => $setting])->render();
@@ -69,11 +76,11 @@ class ActivityController extends Controller
         }
         
         // Initial Page Load (only 1st page to avoid heavy load)
-        $rentalBookings = RentalBooking::where('user_id', $user->id)->with('barang')->orderBy('created_at', 'desc')->paginate(5);
-        $gasOrders = GasOrder::where('user_id', $user->id)->with('gas')->orderBy('created_at', 'desc')->paginate(5);
-        $mobilBookings = \App\Models\MobilBooking::where('user_id', $user->id)->with('mobil')->orderBy('created_at', 'desc')->paginate(5);
-        $fasilitasBookings = \App\Models\FasilitasUmumBooking::where('user_id', $user->id)->with('fasilitas')->orderBy('created_at', 'desc')->paginate(5);
-        $pasarOrders = \App\Models\PasarOrder::where('user_id', $user->id)->with('items.produk')->orderBy('created_at', 'desc')->paginate(5);
+        $rentalBookings = RentalBooking::where('user_id', $user->id)->when($focusedOrder && $focusedTab === 'rental', fn ($q) => $q->whereKey($focusedOrder))->with('barang')->orderBy('created_at', 'desc')->paginate(5);
+        $gasOrders = GasOrder::where('user_id', $user->id)->when($focusedOrder && $focusedTab === 'gas', fn ($q) => $q->whereKey($focusedOrder))->with('gas')->orderBy('created_at', 'desc')->paginate(5);
+        $mobilBookings = \App\Models\MobilBooking::where('user_id', $user->id)->when($focusedOrder && $focusedTab === 'mobil', fn ($q) => $q->whereKey($focusedOrder))->with('mobil')->orderBy('created_at', 'desc')->paginate(5);
+        $fasilitasBookings = \App\Models\FasilitasUmumBooking::where('user_id', $user->id)->when($focusedOrder && $focusedTab === 'fasilitas', fn ($q) => $q->whereKey($focusedOrder))->with('fasilitas')->orderBy('created_at', 'desc')->paginate(5);
+        $pasarOrders = \App\Models\PasarOrder::where('user_id', $user->id)->when($focusedOrder && $focusedTab === 'pasar', fn ($q) => $q->whereKey($focusedOrder))->with(['items.produk','store:id,name','marketPayment'])->orderBy('created_at', 'desc')->paginate(5);
         
         return view('users.activity', compact(
             'rentalBookings', 
@@ -81,12 +88,17 @@ class ActivityController extends Controller
             'mobilBookings', 
             'fasilitasBookings',
 'pasarOrders',
-            'setting'
+            'setting', 'focusedOrder', 'focusedTab'
         ));
     }
 
     public function requestCancellation(Request $request, $type, $id)
     {
+        if($type==='pasar') {
+            $data=$request->validate(['reason'=>'required|string|max:1000']);
+            app(\App\Services\MarketStoreOrders::class)->requestCancellation($request->user(),(int)$id,$data['reason']);
+            return response()->json(['success'=>true,'message'=>'Permintaan pembatalan dikirim kepada penjual.']);
+        }
         $request->validate([
             'reason' => 'required|string|max:500',
         ]);

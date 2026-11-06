@@ -124,7 +124,7 @@ class RetiredAmbulanceTest extends TestCase
     {
         $controller = app(UnitKendaraanOperasionalController::class);
         $response = $controller->update(Request::create('/', 'PUT', ['nama_mobil' => 'Truk desa', 'supir_ids' => [1]]), 2);
-        $this->assertSame(route('admin.unit.fasilitas_umum.index', ['tab' => 'kendaraan']), $response->getTargetUrl());
+        $this->assertSame(route('admin.unit.kendaraan_operasional.index'), $response->getTargetUrl());
         $this->assertSame('Truk desa', Mobil::find(2)->nama_mobil);
         $this->assertSame('kendaraan_operasional', Mobil::find(2)->kategori);
         $this->assertSame([1], Mobil::find(2)->supirs->modelKeys());
@@ -168,6 +168,31 @@ class RetiredAmbulanceTest extends TestCase
         }
     }
 
+    public function test_retired_catalog_entries_and_pivots_remain_disabled(): void
+    {
+        $id=DB::table('services')->insertGetId(['name'=>'Pelaporan Warga','slug'=>'pelaporan-warga']);
+        foreach ([1,2,3,$id] as $service) DB::table('region_services')->insert(['region_id'=>12,'service_id'=>$service,'is_active'=>true]);
+        (require database_path('migrations/2026_10_29_140000_disable_retired_region_services.php'))->up();
+        $this->assertSame([3],DB::table('region_services')->where('is_active',true)->pluck('service_id')->all());
+        $this->assertSame(['fasilitas-umum'],Service::available()->pluck('slug')->all());
+        $this->assertSame(4,DB::table('region_services')->count());
+        DB::table('mobils')->insert(['id'=>5,'region_id'=>12,'nama_mobil'=>'Ambulance','kategori'=>'Layanan Medis']);
+        $this->assertFalse(Mobil::inCatalog()->whereKey(5)->exists());
+    }
+
+    public function test_every_admin_create_path_rejects_retired_ambulance_category(): void
+    {
+        foreach ([\App\Http\Controllers\Admin\UnitFasilitasUmumController::class,\App\Http\Controllers\Admin\UnitPenyewaanMobilController::class,UnitKendaraanOperasionalController::class] as $controller) {
+            try {
+                app($controller)->store(Request::create('/','POST',['nama_mobil'=>'Ambulance desa','nama_fasilitas'=>'Ambulans desa','kategori'=>'Ambulans']));
+                $this->fail('Retired vehicle was accepted.');
+            } catch (ValidationException $e) {
+                $this->assertTrue(isset($e->errors()['kategori']) || isset($e->errors()['nama_mobil']) || isset($e->errors()['nama_fasilitas']));
+            }
+        }
+        $this->assertSame(4,Mobil::count());
+    }
+
     public function test_user_fasilitas_umum_catalog_excludes_operational_vehicles_and_ambulances(): void
     {
         $response = app(FasilitasUmumUserController::class)->index(\Illuminate\Http\Request::create('/fasilitas-umum'));
@@ -175,6 +200,50 @@ class RetiredAmbulanceTest extends TestCase
         $this->assertArrayHasKey('items', $data);
         $this->assertArrayNotHasKey('kendaraans', $data);
         $this->assertSame([2], $data['items']->pluck('id')->all());
+    }
+
+    public function test_retirement_migration_preserves_bookings_with_cascading_foreign_keys(): void
+    {
+        foreach (['mobil_bookings'=>['mobil_id','mobils'],'fasilitas_umum_bookings'=>['fasilitas_id','fasilitas_umums']] as $table=>[$column,$parent]) {
+            Schema::create($table, function (Blueprint $t) use ($column,$parent) {
+                $t->id(); $t->foreignId($column)->constrained($parent)->cascadeOnDelete();
+            });
+            DB::table($table)->insert([$column=>1]);
+        }
+        (require database_path('migrations/2026_10_29_000001_remove_ambulance_from_fasilitas_umum.php'))->up();
+        $this->assertSame(1, DB::table('mobil_bookings')->count());
+        $this->assertSame(1, DB::table('fasilitas_umum_bookings')->count());
+        $this->assertFalse(Mobil::inCatalog()->whereKey(1)->exists());
+        $this->assertFalse(FasilitasUmum::inCatalog()->whereKey(1)->exists());
+    }
+
+    public function test_operational_inventory_has_its_own_scoped_list(): void
+    {
+        $view=app(UnitKendaraanOperasionalController::class)->index(Request::create('/'));
+        $this->assertSame('admin.unit.kendaraan_operasional.index',$view->name());
+        $this->assertSame([2],$view->getData()['kendaraans']->getCollection()->modelKeys());
+        $this->assertSame([4],Mobil::forRental()->pluck('id')->all());
+    }
+
+    public function test_rental_admin_rejects_foreign_vehicles_before_edit_or_delete(): void
+    {
+        DB::table('mobils')->where('id',3)->update(['kategori'=>'Mobil']);
+        $controller=app(\App\Http\Controllers\Admin\UnitPenyewaanMobilController::class);
+        foreach ([1,2,3] as $id) {
+            $this->assertMissing(fn ()=>$controller->show($id));
+            $this->assertMissing(fn ()=>$controller->update(Request::create('/','PUT'),$id));
+            $this->assertMissing(fn ()=>$controller->destroy($id));
+        }
+        $this->assertSame(4,Mobil::count());
+    }
+
+    public function test_rental_price_sort_uses_display_price_without_a_database_column(): void
+    {
+        DB::table('mobils')->where('id',4)->update(['harga_sewa'=>20000,'is_harian_active'=>true]);
+        DB::table('mobils')->insert(['id'=>5,'region_id'=>12,'nama_mobil'=>'Mobil murah','kategori'=>null,'harga_sewa'=>10000,'is_harian_active'=>true]);
+        $this->app->instance('request',Request::create('/unit-penyewaan-mobil?sort=termurah'));
+        $data=app(MobilRentalUserController::class)->index()->getData();
+        $this->assertSame([5,4],$data['items']->modelKeys());
     }
 
     public function test_admin_fasilitas_umum_index_defaults_to_gedung_and_has_no_operational_vehicles(): void

@@ -20,7 +20,7 @@ class BookingAuditRegressionTest extends TestCase
         // Isolated SQLite fixtures: no dependency on the local/production MySQL database.
         foreach (['barang' => 'nama_barang', 'mobils' => 'nama_mobil', 'fasilitas_umums' => 'nama_fasilitas'] as $table => $name) {
             Schema::create($table, function (Blueprint $t) use ($name) {
-                $t->id(); $t->string($name); $t->integer('stok')->nullable();
+                $t->id(); $t->string($name); $t->string('kategori')->nullable(); $t->integer('stok')->nullable();
                 $t->decimal('harga_sewa', 12, 2)->default(10000); $t->string('status_biaya')->default('gratis');
                 $t->unsignedBigInteger('region_id')->nullable(); $t->string('status')->default('tersedia'); $t->timestamps();
             });

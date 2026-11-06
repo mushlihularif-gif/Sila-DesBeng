@@ -199,11 +199,6 @@
                                         $descText = 'yang dapat memesan tabung gas.';
                                         $accentColor = '#ff3e1d';
                                     }
-                                    elseif (strpos($sName, 'lapor') !== false) {
-                                        $iconPath = 'User/img/elemen/lapor.png';
-                                        $descText = 'yang dapat membuat laporan pengaduan.';
-                                        $accentColor = '#696cff';
-                                    }
                                     elseif (strpos($sName, 'fasilitas') !== false) {
                                         $iconPath = 'User/img/elemen/fasilitas.png';
                                         $descText = 'yang dapat meminjam atau menggunakan fasilitas umum.';

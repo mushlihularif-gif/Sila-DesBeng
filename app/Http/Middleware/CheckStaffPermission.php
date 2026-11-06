@@ -7,27 +7,17 @@ use Illuminate\Http\Request;
 
 class CheckStaffPermission
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
-     * @param  string  $unitKey
-     * @return mixed
-     */
+    // Nama alias dipertahankan agar URL dan grup rute lama tetap kompatibel.
     public function handle(Request $request, Closure $next, $unitKey)
     {
-        $user = auth()->user();
-
-        // Jika user tidak terautentikasi atau merupakan staff yang tidak memiliki izin untuk unit ini
-        if ($user && $user->isStaff() && !$user->hasUnitPermission($unitKey)) {
-            // Cek jika request adalah AJAX
-            if ($request->ajax() || $request->wantsJson()) {
-                return response()->json(['error' => 'Akses ditolak. Anda tidak memiliki izin untuk mengelola unit ini.'], 403);
-            }
-            return redirect()->route('admin.dashboard')->with('error', 'Akses ditolak. Anda tidak memiliki izin untuk mengelola unit ini.');
-        }
-
+        $user = $request->user();
+        $shared = ['platform_banner', 'platform_aktivitas'];
+        $allowed = $user && $user->hasSupportedRole() && (
+            $user->hasUnitPermission($unitKey)
+            || $user->hasPlatformPermission($unitKey)
+            || ($user->role === 'admin_desa' && in_array($unitKey, $shared, true))
+        );
+        abort_unless($allowed, 403, 'Anda tidak memiliki izin mengelola layanan ini.');
         return $next($request);
     }
 }

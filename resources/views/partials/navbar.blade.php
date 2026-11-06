@@ -196,7 +196,7 @@
             
             <a href="{{ route('announcements.index') }}" class="sd-nav-link {{ request()->routeIs('announcements.*') ? 'active' : '' }}">Kabar dan Informasi Daerah</a>
             <a href="{{ route('SiladesBeng.profile') }}" class="sd-nav-link {{ request()->routeIs('SiladesBeng.profile') ? 'active' : '' }}">Profil SegiDaerah</a>
-            <a href="{{ route('kemitraan.create') }}" class="sd-nav-link {{ request()->routeIs('kemitraan.*') ? 'active' : '' }}">Gabung Kemitraan</a>
+            <a href="{{ route('kemitraan.create') }}" class="sd-nav-link {{ request()->routeIs('kemitraan.*') ? 'active' : '' }}">Daftar Pengelola Wilayah</a>
             @auth
                 @if(in_array(auth()->user()->role, ['admin_rt', 'admin_rw']))
                     <div class="relative group flex items-center">
@@ -283,10 +283,11 @@
                                     </span>
                                 </a>
                                 <div class="h-px bg-gray-100 mx-3 my-1"></div>
+                                <a href="{{ route('market.seller.home') }}" class="block px-4 py-2.5 text-blue-700">Jualan / Toko Saya</a>
                                 <a href="{{ route('profile') }}" class="block px-4 py-2.5 text-gray-800 hover:bg-blue-50 hover:border-l-[3px] hover:border-l-blue-500 transition-all duration-150 border-l-[3px] border-l-transparent">
                                     <span class="text-[15px] font-normal text-center block">Profil</span>
                                 </a>
-                                @if(in_array(auth()->user()->role, ['super_admin', 'admin_kecamatan', 'admin_desa', 'admin', 'staff']))
+                                @if(in_array(auth()->user()->role, ['super_admin', 'admin_desa']))
                                 <div class="h-px bg-gray-100 mx-3 my-1"></div>
                                 <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2.5 text-blue-700 hover:bg-blue-100 hover:border-l-[3px] hover:border-l-blue-600 transition-all duration-150 border-l-[3px] border-l-transparent bg-blue-50/50">
                                     <span class="text-[15px] font-bold text-center block flex justify-center items-center gap-1">
@@ -463,7 +464,7 @@
             Profil SegiDaerah
         </a>
         <a href="{{ route('kemitraan.create') }}" class="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium transition {{ request()->routeIs('kemitraan.*') ? 'text-blue-600 bg-blue-50 border-l-4 border-blue-500' : '' }}">
-            Gabung Kemitraan
+            Daftar Pengelola Wilayah
         </a>
     </nav>
 
@@ -514,7 +515,8 @@
                 <a href="{{ route('user.saldo.index') }}" class="block w-full text-center px-4 py-2.5 rounded-lg font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition">
                     Alamat Tersimpan
                 </a>
-                <a href="{{ route('profile') }}" class="block w-full text-center px-4 py-2.5 rounded-lg font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition">
+                <a href="{{ route('market.seller.home') }}" class="block px-4 py-2.5 text-blue-700">Jualan / Toko Saya</a>
+                                <a href="{{ route('profile') }}" class="block w-full text-center px-4 py-2.5 rounded-lg font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition">
                     Profil Saya
                 </a>
                 <a href="{{ route('user.activity') }}" class="block w-full text-center px-4 py-2.5 rounded-lg font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition">

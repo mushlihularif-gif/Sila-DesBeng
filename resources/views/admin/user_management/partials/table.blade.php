@@ -327,7 +327,7 @@
 
                     $roleLabel = $user->labelRole();
                     $roleBadgeClass = 'bg-label-info';
-                    if (in_array($user->role, ['super_admin', 'admin'])) {
+                    if (in_array($user->role, ['super_admin'])) {
                         $roleBadgeClass = 'bg-label-danger';
                     } elseif ($user->role === 'admin_kecamatan') {
                         $roleLabel = 'Kecamatan';
@@ -410,13 +410,15 @@
                             <a href="{{ route('admin.manajemen-pengguna.show', $user->id) }}" class="btn-icon-soft view" data-bs-toggle="tooltip" title="Lihat Detail">
                                 <i class="bx bx-show"></i>
                             </a>
-                            <form action="{{ route('admin.manajemen-pengguna.toggle-status', $user->id) }}" method="POST" onsubmit="return confirm('Yakin ingin mengubah status akun ini?')" class="d-inline m-0 p-0">
+                            @if($user->role === 'user')
+<form action="{{ route('admin.manajemen-pengguna.toggle-status', $user->id) }}" method="POST" onsubmit="return confirm('Yakin ingin mengubah status akun ini?')" class="d-inline m-0 p-0">
                                 @csrf
                                 @method('PUT')
                                 <button type="submit" class="btn-icon-soft {{ $user->status === 'aktif' ? 'suspend' : 'activate' }}" data-bs-toggle="tooltip" title="{{ $user->status === 'aktif' ? 'Nonaktifkan Akun' : 'Aktifkan Akun' }}">
                                     <i class="bx {{ $user->status === 'aktif' ? 'bx-block' : 'bx-check-circle' }}"></i>
                                 </button>
                             </form>
+@endif
                             @if($user->role === 'user')
                             <form action="{{ route('admin.manajemen-pengguna.kick', $user->id) }}" method="POST" onsubmit="return confirm('Yakin ingin mengeluarkan pengguna ini dari wilayah Anda?')" class="d-inline m-0 p-0">
                                 @csrf
@@ -451,7 +453,7 @@
 
             $roleLabel = $user->labelRole();
             $roleBadgeClass = 'bg-label-info';
-            if (in_array($user->role, ['super_admin', 'admin'])) {
+            if (in_array($user->role, ['super_admin'])) {
                 $roleBadgeClass = 'bg-label-danger';
             } elseif ($user->role === 'admin_kecamatan') {
                 $roleLabel = 'Kecamatan';
@@ -530,13 +532,15 @@
                     <a href="{{ route('admin.manajemen-pengguna.show', $user->id) }}" class="btn-icon-mobile view" data-bs-toggle="tooltip" title="Lihat Detail">
                         <i class="bx bx-show"></i>
                     </a>
-                    <form action="{{ route('admin.manajemen-pengguna.toggle-status', $user->id) }}" method="POST" onsubmit="return confirm('Yakin ingin mengubah status akun ini?')" class="d-inline m-0 p-0">
+                    @if($user->role === 'user')
+<form action="{{ route('admin.manajemen-pengguna.toggle-status', $user->id) }}" method="POST" onsubmit="return confirm('Yakin ingin mengubah status akun ini?')" class="d-inline m-0 p-0">
                         @csrf
                         @method('PUT')
                         <button type="submit" class="btn-icon-mobile {{ $user->status === 'aktif' ? 'suspend' : 'activate' }}" data-bs-toggle="tooltip" title="{{ $user->status === 'aktif' ? 'Nonaktifkan Akun' : 'Aktifkan Akun' }}">
                             <i class="bx {{ $user->status === 'aktif' ? 'bx-block' : 'bx-check-circle' }}"></i>
                         </button>
                     </form>
+@endif
                     @if($user->role === 'user')
                     <form action="{{ route('admin.manajemen-pengguna.kick', $user->id) }}" method="POST" onsubmit="return confirm('Yakin ingin mengeluarkan pengguna ini dari wilayah Anda?')" class="d-inline m-0 p-0">
                         @csrf

@@ -23,6 +23,8 @@ class RegionAdminManagementController extends Controller
     public function index()
     {
         $admin = auth()->user();
+        abort_unless($admin && $admin->role === 'admin_desa' && $admin->region_id
+            && in_array($admin->region?->type, ['desa', 'kelurahan'], true), 403);
         if ($admin->role !== 'admin_desa') {
             abort(403, 'Akses ditolak. Hanya Admin Desa yang dapat mengelola Admin RT/RW.');
         }
@@ -98,7 +100,7 @@ class RegionAdminManagementController extends Controller
         }
 
         // Daftar Warga untuk form promosi (Warga desa ini, RT/RW binaan, atau belum berwilayah)
-        $wargaList = User::whereIn('role', ['user', 'warga'])
+        $wargaList = User::where('role', 'user')
             ->where(function ($q) use ($desaId, $regionIds) {
                 $q->where('region_id', $desaId)
                   ->orWhereIn('region_id', $regionIds)
@@ -268,6 +270,8 @@ class RegionAdminManagementController extends Controller
     public function store(Request $request)
     {
         $admin = auth()->user();
+        abort_unless($admin && $admin->role === 'admin_desa' && $admin->region_id
+            && in_array($admin->region?->type, ['desa', 'kelurahan'], true), 403);
         if ($admin->role !== 'admin_desa') {
             abort(403, 'Akses ditolak. Hanya Admin Desa yang dapat mengelola Admin RT/RW.');
         }
@@ -322,6 +326,8 @@ class RegionAdminManagementController extends Controller
     public function approveApplication(Request $request, $id)
     {
         $admin = auth()->user();
+        abort_unless($admin && $admin->role === 'admin_desa' && $admin->region_id
+            && in_array($admin->region?->type, ['desa', 'kelurahan'], true), 403);
         $application = PartnerApplication::findOrFail($id);
         
         $desaId = $admin->region_id;
@@ -337,6 +343,11 @@ class RegionAdminManagementController extends Controller
         }
 
         $user = User::findOrFail($application->user_id);
+        abort_unless($user->role === 'user' && in_array((int) $user->region_id,
+            array_map('intval', array_merge([$desaId], $this->getValidRegionIds($admin))), true), 403);
+        $parent = Region::findOrFail($application->parent_region_id);
+        abort_unless(($application->region_type === 'rw' && (int) $parent->id === (int) $desaId)
+            || ($application->region_type === 'rt' && $parent->type === 'rw' && (int) $parent->parent_id === (int) $desaId), 422);
 
         $targetRegion = Region::firstOrCreate(
             ['name' => $application->region_name, 'type' => $application->region_type, 'parent_id' => $application->parent_region_id]
@@ -358,6 +369,8 @@ class RegionAdminManagementController extends Controller
     public function rejectApplication(Request $request, $id)
     {
         $admin = auth()->user();
+        abort_unless($admin && $admin->role === 'admin_desa' && $admin->region_id
+            && in_array($admin->region?->type, ['desa', 'kelurahan'], true), 403);
         $application = PartnerApplication::findOrFail($id);
 
         $desaId = $admin->region_id;
@@ -380,6 +393,8 @@ class RegionAdminManagementController extends Controller
     public function promote(Request $request)
     {
         $admin = auth()->user();
+        abort_unless($admin && $admin->role === 'admin_desa' && $admin->region_id
+            && in_array($admin->region?->type, ['desa', 'kelurahan'], true), 403);
         if ($admin->role !== 'admin_desa') {
             abort(403, 'Akses ditolak. Hanya Admin Desa yang dapat mengelola Admin RT/RW.');
         }
@@ -396,7 +411,7 @@ class RegionAdminManagementController extends Controller
             return back()->with('error', 'Akses ditolak: Anda hanya dapat mengangkat warga dari desa Anda sendiri.');
         }
 
-        if (in_array($user->role, ['admin', 'super_admin', 'admin_desa'])) {
+        if (!in_array($user->role, ['user', 'admin_rw', 'admin_rt'], true)) {
             return back()->with('error', 'Tidak dapat mengubah role akun ini (Akun Super/Desa).');
         }
 
@@ -424,6 +439,8 @@ class RegionAdminManagementController extends Controller
     public function revoke($id)
     {
         $admin = auth()->user();
+        abort_unless($admin && $admin->role === 'admin_desa' && $admin->region_id
+            && in_array($admin->region?->type, ['desa', 'kelurahan'], true), 403);
         $user = User::findOrFail($id);
         
         $validRegions = $this->getValidRegionIds($admin);
@@ -451,6 +468,8 @@ class RegionAdminManagementController extends Controller
     public function storeRegion(Request $request)
     {
         $admin = auth()->user();
+        abort_unless($admin && $admin->role === 'admin_desa' && $admin->region_id
+            && in_array($admin->region?->type, ['desa', 'kelurahan'], true), 403);
         if ($admin->role !== 'admin_desa') {
             abort(403, 'Akses ditolak. Hanya Admin Desa yang dapat mengelola wilayah.');
         }
@@ -502,6 +521,8 @@ class RegionAdminManagementController extends Controller
     public function updateRegion(Request $request, $id)
     {
         $admin = auth()->user();
+        abort_unless($admin && $admin->role === 'admin_desa' && $admin->region_id
+            && in_array($admin->region?->type, ['desa', 'kelurahan'], true), 403);
         if ($admin->role !== 'admin_desa') {
             abort(403, 'Akses ditolak.');
         }
@@ -529,6 +550,8 @@ class RegionAdminManagementController extends Controller
     public function destroyRegion($id)
     {
         $admin = auth()->user();
+        abort_unless($admin && $admin->role === 'admin_desa' && $admin->region_id
+            && in_array($admin->region?->type, ['desa', 'kelurahan'], true), 403);
         if ($admin->role !== 'admin_desa') {
             abort(403, 'Akses ditolak.');
         }

@@ -2,6 +2,7 @@
 
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
+        <a class="btn btn-outline-primary mb-3" href="{{ route('market.review.index') }}">Pendaftaran dan Komplain Toko Warga</a>
         <!-- Page Header -->
         <div class="row mb-4">
             <div class="col-12 d-flex flex-wrap justify-content-between align-items-center gap-2">
@@ -450,7 +451,7 @@
                                                 <span class="badge bg-label-info shadow-sm rounded-pill px-3">{{ str_replace('_', ' ', strtoupper($laporan->payment_method)) }}</span>
                                             @endif
                                         </td>
-                                        <td class="text-end">Rp {{ number_format($laporan->total_price, 0, ',', '.') }}</td>
+                                        <td class="text-end">Rp {{ number_format($laporan->total_amount, 0, ',', '.') }}</td>
                                         <td class="text-end">Rp {{ number_format($laporan->shipping_cost, 0, ',', '.') }}</td>
                                         <td class="text-end pe-4 fw-bold text-primary fs-6">Rp {{ number_format($laporan->grand_total, 0, ',', '.') }}</td>
                                     </tr>
@@ -484,114 +485,7 @@
                                 <div class="card-body p-4">
                                     <form action="{{ route('admin.unit.pasar_daerah.sop') }}" method="POST" enctype="multipart/form-data">
                                         @csrf
-                                        <div class="mb-3">
-                                            <label class="form-label text-dark fw-bold" for="ongkir_dalam_desa">Ongkir Dalam Desa (Satu Desa) <span class="text-danger">*</span></label>
-                                            <div class="input-group input-group-merge border-light-subtle shadow-sm rounded-3">
-                                                <span class="input-group-text">Rp</span>
-                                                <input type="number" class="form-control" id="ongkir_dalam_desa" name="ongkir_dalam_desa" 
-                                                    value="{{ $settings['ongkir_dalam_desa'] ?? 0 }}" required min="0">
-                                            </div>
-                                            <small class="text-muted mt-1 d-block">Ongkos kirim untuk pembeli yang beralamat di desa yang sama dengan toko.</small>
-                                        </div>
-
-                                        <div class="mb-3">
-                                            <label class="form-label text-dark fw-bold" for="ongkir_luar_desa">Ongkir Luar Desa (Beda Desa, Satu Kecamatan) <span class="text-danger">*</span></label>
-                                            <div class="input-group input-group-merge border-light-subtle shadow-sm rounded-3">
-                                                <span class="input-group-text">Rp</span>
-                                                <input type="number" class="form-control" id="ongkir_luar_desa" name="ongkir_luar_desa" 
-                                                    value="{{ $settings['ongkir_luar_desa'] ?? 10000 }}" required min="0">
-                                            </div>
-                                            <small class="text-muted mt-1 d-block">Ongkos kirim untuk pembeli dari desa tetangga di dalam 1 kecamatan.</small>
-                                        </div>
-
-                                        {{-- Ongkir lintas kecamatan tidak tersedia dalam cakupan ini.
-                                        <hr class="my-4 text-light">
-
-                                        <div class="mb-4">
-                                            <label class="form-label text-dark fw-bold mb-3">Pilih Metode Ongkos Kirim Luar Kecamatan (Tampilan Baru) <span class="text-danger">*</span></label>
-                                            
-                                            <div class="row g-3 mb-4">
-                                                <div class="col-md-6">
-                                                    <div class="d-flex align-items-center gap-3 p-3 border rounded-3 w-100" style="cursor: pointer; transition: all 0.2s;" id="label_pukul_rata" onclick="window.setOngkirType('pukul_rata')">
-                                                        <input type="radio" name="tipe_ongkir_luar_kecamatan" id="tipe_pukul_rata" value="pukul_rata" class="form-check-input mt-0" style="transform: scale(1.2);" {{ ($settings['tipe_ongkir_luar_kecamatan'] ?? 'pukul_rata') == 'pukul_rata' ? 'checked' : '' }} onclick="window.setOngkirType('pukul_rata')">
-                                                        <div>
-                                                            <div class="fw-bold text-dark mb-1">Pukul Rata</div>
-                                                            <div class="small text-muted" style="line-height: 1.2;">Satu harga untuk semua luar kecamatan</div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="d-flex align-items-center gap-3 p-3 border rounded-3 w-100" style="cursor: pointer; transition: all 0.2s;" id="label_per_kecamatan" onclick="window.setOngkirType('per_kecamatan')">
-                                                        <input type="radio" name="tipe_ongkir_luar_kecamatan" id="tipe_per_kecamatan" value="per_kecamatan" class="form-check-input mt-0" style="transform: scale(1.2);" {{ ($settings['tipe_ongkir_luar_kecamatan'] ?? 'pukul_rata') == 'per_kecamatan' ? 'checked' : '' }} onclick="window.setOngkirType('per_kecamatan')">
-                                                        <div>
-                                                            <div class="fw-bold text-dark mb-1">Per Kecamatan</div>
-                                                            <div class="small text-muted" style="line-height: 1.2;">Tentukan harga untuk masing-masing daerah</div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <!-- Opsi Pukul Rata -->
-                                            <div id="div_pukul_rata" class="mt-3 p-3 bg-light rounded-4 border" style="display: {{ ($settings['tipe_ongkir_luar_kecamatan'] ?? 'pukul_rata') == 'pukul_rata' ? 'block' : 'none' }};">
-                                                <label class="form-label fw-medium" for="ongkir_luar_kecamatan">Harga Ongkir Pukul Rata</label>
-                                                <div class="input-group input-group-merge border-light-subtle shadow-sm rounded-3">
-                                                    <span class="input-group-text bg-white">Rp</span>
-                                                    <input type="number" class="form-control border-start-0" id="ongkir_luar_kecamatan" name="ongkir_luar_kecamatan" 
-                                                        value="{{ $settings['ongkir_luar_kecamatan'] ?? 25000 }}" min="0">
-                                                </div>
-                                                <small class="text-muted mt-2 d-block">Ongkos kirim otomatis berlaku untuk semua pembeli dari kecamatan lain.</small>
-                                            </div>
-
-                                            <!-- Opsi Per Kecamatan -->
-                                            <div id="div_per_kecamatan" class="mt-3" style="display: {{ ($settings['tipe_ongkir_luar_kecamatan'] ?? 'pukul_rata') == 'per_kecamatan' ? 'block' : 'none' }};">
-                                                <div class="table-responsive text-nowrap border rounded-4 shadow-sm">
-                                                    <table class="table table-hover mb-0">
-                                                        <thead class="bg-light">
-                                                            <tr>
-                                                                <th class="py-3 text-secondary text-uppercase small fw-bold" style="width: 50px;">Layanan</th>
-                                                                <th class="py-3 text-secondary text-uppercase small fw-bold">Nama Kecamatan</th>
-                                                                <th class="py-3 text-secondary text-uppercase small fw-bold text-end pe-4">Tarif Ongkir (Rp)</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody class="table-border-bottom-0">
-                                                            @foreach($semuaKecamatan as $kec)
-                                                                @php 
-                                                                    $isActive = isset($settings['ongkir_kecamatan_khusus'][$kec->id]);
-                                                                    $hargaKec = $isActive ? $settings['ongkir_kecamatan_khusus'][$kec->id] : '';
-                                                                @endphp
-                                                                <tr>
-                                                                    <td class="text-center">
-                                                                        <div class="form-check form-switch d-flex justify-content-center mb-0">
-                                                                            <input class="form-check-input" type="checkbox" role="switch" id="switch_kec_{{ $kec->id }}" 
-                                                                                {{ $isActive ? 'checked' : '' }} onchange="toggleKecamatan({{ $kec->id }})">
-                                                                        </div>
-                                                                    </td>
-                                                                    <td>
-                                                                        <label class="form-check-label fw-medium {{ $isActive ? 'text-dark' : 'text-muted' }}" id="label_kec_{{ $kec->id }}" for="switch_kec_{{ $kec->id }}">
-                                                                            {{ $kec->name }}
-                                                                        </label>
-                                                                    </td>
-                                                                    <td class="pe-3">
-                                                                        <div class="input-group input-group-sm">
-                                                                            <span class="input-group-text bg-light text-muted">Rp</span>
-                                                                            <input type="number" class="form-control text-end" 
-                                                                                name="ongkir_kecamatan_khusus[{{ $kec->id }}]" id="input_kec_{{ $kec->id }}" 
-                                                                                value="{{ $hargaKec }}" min="0" placeholder="0" {{ $isActive ? '' : 'disabled' }}>
-                                                                        </div>
-                                                                    </td>
-                                                                </tr>
-                                                            @endforeach
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                                <small class="text-danger mt-2 d-block"><i class="bx bx-info-circle me-1"></i>Kecamatan yang dimatikan (switch abu-abu) berarti toko Anda TIDAK melayani pengiriman ke daerah tersebut.</small>
-                                            </div>
-                                        </div>
-                                        --}}
-                                        <div class="alert alert-info py-2 small">
-                                            Pengiriman Pasar Daerah dibatasi antardesa/kelurahan dalam Kecamatan Bengkalis.
-                                        </div>
-                                        
+                                        @include('admin.unit.pasar_daerah.shipping-settings')
                                         <hr class="my-4 text-light">
 
                                         <!-- Section: Metode Pembayaran Toko -->
@@ -1101,7 +995,7 @@
                                                                         @if($comp->order && $comp->order->items->isNotEmpty())
                                                                             <ul class="list-unstyled mb-0 text-xs">
                                                                                 @foreach($comp->order->items as $item)
-                                                                                    <li>• {{ $item->produk->nama_produk ?? 'Produk' }} ({{ $item->quantity }}x) - Rp {{ number_format($item->price, 0, ',', '.') }}</li>
+                                                                                    <li>• {{ $item->product_name }} ({{ $item->quantity }}x) - Rp {{ number_format($item->product_price, 0, ',', '.') }}</li>
                                                                                 @endforeach
                                                                             </ul>
                                                                             <div class="mt-1 fw-bold text-primary">Total: Rp {{ number_format($comp->order->grand_total, 0, ',', '.') }}</div>
@@ -1402,36 +1296,9 @@
 @endsection
 
 @section('scripts')
+<script src="{{ asset('js/market-shipping-editor.js') }}" defer></script>
 <script>
-    window.setOngkirType = function(type) {
-        try {
-            document.getElementById('tipe_' + type).checked = true;
-            
-            document.getElementById('div_pukul_rata').style.display = type === 'pukul_rata' ? 'block' : 'none';
-            document.getElementById('div_per_kecamatan').style.display = type === 'per_kecamatan' ? 'block' : 'none';
-            
-            const lblPukulRata = document.getElementById('label_pukul_rata');
-            const lblPerKecamatan = document.getElementById('label_per_kecamatan');
-            
-            if (lblPukulRata && lblPerKecamatan) {
-                if (type === 'pukul_rata') {
-                    lblPukulRata.classList.add('border-primary', 'bg-label-primary');
-                    lblPerKecamatan.classList.remove('border-primary', 'bg-label-primary');
-                } else {
-                    lblPerKecamatan.classList.add('border-primary', 'bg-label-primary');
-                    lblPukulRata.classList.remove('border-primary', 'bg-label-primary');
-                }
-            }
-        } catch (e) {
-            console.error("Error toggling ongkir:", e);
-        }
-    };
-
-    // Initialize on page load
     document.addEventListener('DOMContentLoaded', function() {
-        const initType = document.getElementById('tipe_per_kecamatan').checked ? 'per_kecamatan' : 'pukul_rata';
-        window.setOngkirType(initType);
-
         // Cek apakah ada hash di URL (misal: #navs-top-pengaturan)
         var hash = window.location.hash;
         if (hash) {
@@ -1444,23 +1311,6 @@
             }
         }
     });
-
-    function toggleKecamatan(id) {
-        const isChecked = document.getElementById('switch_kec_' + id).checked;
-        const input = document.getElementById('input_kec_' + id);
-        const label = document.getElementById('label_kec_' + id);
-        
-        if (isChecked) {
-            input.disabled = false;
-            label.classList.remove('text-muted');
-            label.classList.add('text-dark');
-        } else {
-            input.disabled = true;
-            input.value = '';
-            label.classList.add('text-muted');
-            label.classList.remove('text-dark');
-        }
-    }
 
     // =========================================================================
     // ADMIN CHAT PENGELOLA TOKO LOGIC

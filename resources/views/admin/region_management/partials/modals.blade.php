@@ -22,6 +22,7 @@
     </div>
 </div>
 
+@if(isset(\App\Models\User::REGION_ROLES[$region->type]))
 <!-- Modal Generate Admin -->
 <div class="modal fade" id="generateAdminModal{{ $region->id }}" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog" role="document">
@@ -60,5 +61,4 @@
         </div>
     </div>
 </div>
-
-
+@endif

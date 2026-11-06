@@ -10,10 +10,19 @@ use App\Models\Region;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Services\ImageCompressorService;
+use Illuminate\Validation\Rule;
 
 class UnitFasilitasUmumController extends Controller
 {
     use \App\Traits\ChecksStaffDelegation;
+
+    private function managedFacilities()
+    {
+        $user = auth()->user();
+        abort_unless($user && in_array($user->role, ['admin_desa', 'super_admin'], true), 403);
+        abort_if($user->role === 'admin_desa' && !$user->region_id, 403);
+        return FasilitasUmum::inCatalog()->when($user->role !== 'super_admin', fn ($q) => $q->where('region_id', $user->region_id));
+    }
 
     // Default SOP Texts
     private $defaultSopDitanggung = "1. Penyewa wajib menjaga fasilitas umum dengan baik.\n2. Jika terjadi KERUSAKAN fasilitas selama masa peminjaman/penyewaan, maka SEPENUHNYA menjadi tanggung jawab PENGGUNA (penyewa) untuk mengganti rugi atau memperbaiki fasilitas tersebut sesuai dengan kerusakan.\n3. Fasilitas harus dikembalikan dalam keadaan bersih dan rapi.";
@@ -21,6 +30,7 @@ class UnitFasilitasUmumController extends Controller
 
     public function index(Request $request)
     {
+        $this->managedFacilities();
         if ($splash = $this->checkDelegation($request, 'fasilitas_umum', 'Fasilitas Umum')) {
             return $splash;
         }
@@ -29,7 +39,7 @@ class UnitFasilitasUmumController extends Controller
         $search = $request->get('search');
         $tab = $request->get('tab', 'gedung'); // default tab
         
-        $fasilitas = FasilitasUmum::inCatalog()
+        $fasilitas = $this->managedFacilities()
             ->when($user->region_id, function($q, $regionId) {
                 return $q->where(function($query) use ($regionId) {
                     $query->where('region_id', $regionId)
@@ -69,6 +79,7 @@ class UnitFasilitasUmumController extends Controller
 
     public function sop()
     {
+        $this->managedFacilities();
         $user = auth()->user();
         $region = Region::find($user->region_id);
 
@@ -90,6 +101,7 @@ class UnitFasilitasUmumController extends Controller
 
     public function updateSop(Request $request)
     {
+        $this->managedFacilities();
         $user = auth()->user();
         $region = Region::find($user->region_id);
 
@@ -116,6 +128,7 @@ class UnitFasilitasUmumController extends Controller
 
     public function create()
     {
+        $this->managedFacilities();
         $user = auth()->user();
         $savedLocations = \App\Models\LokasiLayanan::untukWilayah($user ? $user->region_id : null);
             
@@ -140,12 +153,14 @@ class UnitFasilitasUmumController extends Controller
 
     public function store(Request $request)
     {
+        $this->managedFacilities();
+        abort_unless(auth()->user()->region_id, 403, 'Pilih wilayah pengelolaan terlebih dahulu.');
         $validated = $request->validate([
-            'nama_fasilitas' => 'required|string|max:255',
+            'nama_fasilitas' => ['required', 'string', 'max:255', 'not_regex:/ambulan/i'],
             'deskripsi' => 'required|string',
             'stok' => 'required|integer',
             'status' => 'required|in:Tersedia,Tidak Tersedia,Disewa',
-            'kategori' => 'required|string',
+            'kategori' => ['required', 'string', 'max:100', 'not_regex:/ambulan|kendaraan/i'],
             'lokasi' => 'required|string',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
@@ -156,7 +171,7 @@ class UnitFasilitasUmumController extends Controller
             'status_biaya' => 'required|in:gratis,berbayar',
             'harga_sewa' => 'nullable|string',
             'pengurus_ids' => 'nullable|array',
-            'pengurus_ids.*' => 'exists:supirs,id',
+            'pengurus_ids.*' => ['integer','distinct', Rule::exists('supirs','id')->where('region_id',auth()->user()->region_id)->where('tipe','pengurus_gedung')],
         ]);
 
         $hargaBersih = 0;
@@ -210,7 +225,7 @@ class UnitFasilitasUmumController extends Controller
 
         // Broadcast fasilitas umum baru ke warga
         $productUrl = \Illuminate\Support\Facades\Route::has('user.fasilitas-umum.equipment') 
-            ? route('user.fasilitas-umum.equipment') 
+            ? route('user.fasilitas-umum.show', $fasilitas->id)
             : url('/unit-peminjaman-fasilitas-umum');
         \App\Services\NotificationService::broadcastNewProduct('Fasilitas Umum', $fasilitas->nama_fasilitas, $fasilitas->region_id, $productUrl);
 
@@ -219,13 +234,13 @@ class UnitFasilitasUmumController extends Controller
 
     public function show($id)
     {
-        $fasilitas = FasilitasUmum::inCatalog()->with(['pengurus', 'region'])->findOrFail($id);
+        $fasilitas = $this->managedFacilities()->with(['pengurus', 'region'])->findOrFail($id);
         return view('admin.unit.fasilitas_umum.show', compact('fasilitas'));
     }
 
     public function edit($id)
     {
-        $fasilitas = FasilitasUmum::inCatalog()->with('pengurus')->findOrFail($id);
+        $fasilitas = $this->managedFacilities()->with('pengurus')->findOrFail($id);
         $user = auth()->user();
         $savedLocations = \App\Models\LokasiLayanan::untukWilayah($user ? $user->region_id : null);
             
@@ -250,7 +265,8 @@ class UnitFasilitasUmumController extends Controller
 
     public function destroy($id)
     {
-        $fasilitas = FasilitasUmum::inCatalog()->findOrFail($id);
+        $fasilitas = $this->managedFacilities()->findOrFail($id);
+        abort_if($fasilitas->bookings()->withTrashed()->exists(), 409, 'Fasilitas memiliki riwayat pesanan. Ubah status menjadi Tidak Tersedia untuk menghentikan layanan.');
 
         if ($fasilitas->foto) Storage::disk('public')->delete($fasilitas->foto);
         if ($fasilitas->foto_2) Storage::disk('public')->delete($fasilitas->foto_2);
@@ -263,12 +279,13 @@ class UnitFasilitasUmumController extends Controller
 
     public function update(Request $request, $id)
     {
+        $fasilitas = $this->managedFacilities()->findOrFail($id);
         $validated = $request->validate([
-            'nama_fasilitas' => 'required|string|max:255',
+            'nama_fasilitas' => ['required', 'string', 'max:255', 'not_regex:/ambulan/i'],
             'deskripsi' => 'required|string',
             'stok' => 'required|integer',
             'status' => 'required|in:Tersedia,Tidak Tersedia,Disewa',
-            'kategori' => 'required|string',
+            'kategori' => ['required', 'string', 'max:100', 'not_regex:/ambulan|kendaraan/i'],
             'lokasi' => 'required|string',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
@@ -279,10 +296,9 @@ class UnitFasilitasUmumController extends Controller
             'status_biaya' => 'required|in:gratis,berbayar',
             'harga_sewa' => 'nullable|string',
             'pengurus_ids' => 'nullable|array',
-            'pengurus_ids.*' => 'exists:supirs,id',
+            'pengurus_ids.*' => ['integer','distinct', Rule::exists('supirs','id')->where('region_id',$fasilitas->region_id)->where('tipe','pengurus_gedung')],
         ]);
 
-        $fasilitas = FasilitasUmum::inCatalog()->findOrFail($id);
 
         $hargaBersih = 0;
         if ($request->status_biaya === 'berbayar' && $request->harga_sewa) {

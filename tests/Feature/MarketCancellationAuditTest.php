@@ -16,12 +16,12 @@ class MarketCancellationAuditTest extends TestCase
     {
         parent::setUp();
         Schema::create('pasar_orders', function (Blueprint $t) {
-            $t->id(); $t->unsignedBigInteger('user_id'); $t->unsignedBigInteger('region_id');
+            $t->id(); $t->unsignedBigInteger('store_id')->nullable(); $t->unsignedBigInteger('user_id'); $t->unsignedBigInteger('region_id');
             $t->string('order_number'); $t->string('status'); $t->string('cancellation_status');
             $t->text('admin_cancellation_response')->nullable(); $t->timestamps(); $t->softDeletes();
         });
         Schema::create('pasar_produks', function (Blueprint $t) {
-            $t->id(); $t->integer('stok'); $t->string('status'); $t->timestamps();
+            $t->id(); $t->unsignedBigInteger('store_id')->nullable(); $t->integer('stok'); $t->string('status'); $t->timestamps();
         });
         Schema::create('pasar_order_items', function (Blueprint $t) {
             $t->id(); $t->unsignedBigInteger('pasar_order_id'); $t->unsignedBigInteger('pasar_produk_id'); $t->integer('quantity');

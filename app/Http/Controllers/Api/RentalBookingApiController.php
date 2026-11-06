@@ -138,7 +138,7 @@ class RentalBookingApiController extends Controller
                 'type' => 'status_berubah',
                 'title' => 'Pemesanan Berhasil',
                 'message' => 'Pemesanan Alat Sewa (Order ID: ' . $booking->order_number . ') berhasil dibuat.',
-                'link' => '/unit-penyewaan-alat',
+                'link' => \App\Services\NotificationService::orderLink($booking, 'rental'),
                 'icon' => 'fas fa-tools text-purple-500',
             ]);
 

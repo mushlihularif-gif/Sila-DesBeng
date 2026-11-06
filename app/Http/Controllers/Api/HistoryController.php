@@ -79,19 +79,21 @@ class HistoryController extends Controller
         }
 
         // 4. Fasilitas Umum Bookings
-        $fasilitas = FasilitasUmumBooking::where('user_id', $user->id)->with('fasilitasUmum')->get();
+        $fasilitas = FasilitasUmumBooking::where('user_id', $user->id)->with('fasilitas')->get();
         foreach ($fasilitas as $fas) {
             $history->push([
                 'id' => $fas->id,
                 'category' => 'Fasilitas', // MATCHES FLUTTER 'Fasilitas'
-                'title' => $fas->fasilitasUmum ? $fas->fasilitasUmum->nama_fasilitas : 'Sewa Fasilitas',
+                'title' => $fas->fasilitas ? $fas->fasilitas->nama_fasilitas : 'Sewa Fasilitas',
                 'price' => 'Rp ' . number_format((float)($fas->total_amount ?? $fas->total_price ?? 0), 0, ',', '.'),
                 'date' => Carbon::parse($fas->created_at)->isoFormat('dddd, D MMMM Y HH:mm') . ' WIB',
                 'status' => $this->mapStatus($fas->status),
                 'payment' => $fas->payment_method ?? 'Tunai',
                 'image' => url('User/img/elemen/fasilitas.png'),
                 'raw_date' => $fas->created_at,
-                'raw_data' => $fas
+                // Preserve the existing mobile response key while loading the
+                // relationship that actually exists on FasilitasUmumBooking.
+                'raw_data' => [...$fas->attributesToArray(), 'fasilitas_umum' => $fas->fasilitas?->toArray()]
             ]);
         }
 
@@ -99,7 +101,7 @@ class HistoryController extends Controller
 
         // 6. Pasar Daerah Orders (BUMDes)
         $pasarOrders = PasarOrder::where('user_id', $user->id)
-            ->with(['items.produk', 'region', 'complaint'])
+            ->with(['items.produk', 'region', 'complaint','store:id,name','marketPayment'])
             ->get();
         foreach ($pasarOrders as $order) {
             $firstItem = $order->items->first();
@@ -127,6 +129,7 @@ class HistoryController extends Controller
                 'raw_data' => [
                     'id' => $order->id,
                     'order_number' => $order->order_number,
+                    'store_id' => $order->store_id, 'store_name' => $order->store?->name, 'payment_status' => $order->marketPayment?->status,
                     'status' => $order->status,
                     'mapped_status' => $this->mapStatus($order->status),
                     'delivery_method' => $order->delivery_method,
@@ -141,10 +144,10 @@ class HistoryController extends Controller
                             'id' => $item->id,
                             'pasar_produk_id' => $item->pasar_produk_id,
                             'product_id' => $item->pasar_produk_id,
-                            'name' => $item->produk ? $item->produk->nama_produk : 'Produk',
+                            'name' => $item->product_name,
                             'quantity' => $item->quantity,
-                            'price' => $item->price,
-                            'subtotal' => $item->subtotal ?? ($item->quantity * $item->price),
+                            'price' => $item->product_price,
+                            'subtotal' => $item->subtotal ?? ($item->quantity * $item->product_price),
                             'image' => $item->produk && $item->produk->foto ? url('storage/' . $item->produk->foto) : null,
                             'satuan' => $item->produk ? $item->produk->satuan : 'pcs',
                         ];

@@ -12,6 +12,8 @@ class SensitiveUploadAccess
 
     public function authorize(string $path): void
     {
+        // Retiring the report feature must never make its historical evidence public.
+        abort_if(preg_match('~^laporan(/|$)~i', $path), 404);
         if (!collect(self::PREFIXES)->contains(fn ($prefix) => str_starts_with($path, $prefix))) return;
         $user = auth()->user() ?: auth('sanctum')->user();
         abort_unless($user, 401);
@@ -24,7 +26,7 @@ class SensitiveUploadAccess
         if (str_starts_with($path, 'partner_applications/')) {
             $application = PartnerApplication::where('document_path', $path)->firstOrFail();
             if ((int) $application->user_id === (int) $user->id || $user->role === 'super_admin') return;
-            abort_unless(in_array($user->role, ['admin', 'admin_kecamatan', 'admin_desa', 'admin_rw'], true)
+            abort_unless(in_array($user->role, ['admin_desa', 'admin_rw'], true)
                 && $user->region_id
                 && in_array($application->parent_region_id, array_merge([$user->region_id], Region::getDescendantIds($user->region_id))), 403);
             return;

@@ -21,7 +21,7 @@ class RegionSettingController extends Controller
     private function pastikanAdminWilayah(): void
     {
         abort_unless(
-            in_array(auth()->user()?->role, ['admin', 'admin_kecamatan', 'admin_desa', 'super_admin'], true),
+            in_array(auth()->user()?->role, ['admin_desa', 'super_admin'], true),
             403,
             'Halaman ini khusus admin wilayah.'
         );
@@ -51,7 +51,7 @@ class RegionSettingController extends Controller
                     ['profile_text' => 'Pemerintahan Desa Pematang Duku Timur, Kecamatan Bengkalis, Kabupaten Bengkalis.']
                 );
             }
-            if (in_array($user->role, ['super_admin', 'admin'])) {
+            if (in_array($user->role, ['super_admin'])) {
                 $user->region_id = $kabupaten->id;
             } else {
                 $user->region_id = $desa->id;
@@ -90,7 +90,7 @@ class RegionSettingController extends Controller
         $region = Region::find($user->region_id);
 
         // Fallback untuk admin kabupaten jika region_id belum diset
-        if (!$region && in_array($user->role, ['super_admin', 'admin'])) {
+        if (!$region && in_array($user->role, ['super_admin'])) {
             $region = Region::first();
         }
 
@@ -261,7 +261,7 @@ class RegionSettingController extends Controller
         $user = auth()->user();
         $region = Region::find($user->region_id);
         
-        if (!$region && in_array($user->role, ['super_admin', 'admin'])) {
+        if (!$region && in_array($user->role, ['super_admin'])) {
             $region = Region::first();
         }
 

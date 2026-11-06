@@ -123,7 +123,7 @@ class TransactionController extends Controller
             $q->whereIn('status', $activeStatuses);
         });
 
-        $pasarQuery = \App\Models\PasarOrder::where('region_id', $user->region_id)->withTrashed()->with(['user', 'items.produk'])->where(function($q) use ($activeStatuses) {
+        $pasarQuery = \App\Models\PasarOrder::whereNull('store_id')->where('region_id', $user->region_id)->withTrashed()->with(['user', 'items.produk'])->where(function($q) use ($activeStatuses) {
             $q->whereNotNull('proof_of_payment')
               ->orWhereIn('status', ['paid', 'confirmed', 'in_delivery', 'completed']);
         });
@@ -235,7 +235,7 @@ class TransactionController extends Controller
         });
         $fasilitasCount = (clone $baseFasilitas)->count();
 
-        $basePasar = \App\Models\PasarOrder::where('region_id', $user->region_id)->withTrashed()->where(function($q) use ($activeStatuses) {
+        $basePasar = \App\Models\PasarOrder::whereNull('store_id')->where('region_id', $user->region_id)->withTrashed()->where(function($q) use ($activeStatuses) {
             $q->whereNotNull('proof_of_payment')->orWhereIn('status', ['paid', 'confirmed', 'in_delivery', 'completed']);
         });
         $pasarCount = (clone $basePasar)->count();

@@ -16,10 +16,10 @@ class IdentityMediaService
             return;
         }
         $roles = $legacy
-            ? ['super_admin', 'admin', 'admin_kecamatan', 'admin_desa']
-            : ['admin_kecamatan', 'admin_desa'];
+            ? ['super_admin', 'admin_desa']
+            : ['admin_desa'];
         abort_unless(in_array($viewer->role, $roles, true), 403);
-        if ($legacy && ($viewer->role === 'super_admin' || ($viewer->role === 'admin' && !$viewer->region_id))) {
+        if ($legacy && ($viewer->role === 'super_admin')) {
             return;
         }
         abort_unless($viewer->region_id && $owner->region_id, 403);

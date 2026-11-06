@@ -75,7 +75,7 @@ class AdminNotification extends Model
         }
 
         // Akun Pemkab (super_admin, admin) tidak mengurus verifikasi identitas warga desa
-        if (in_array($pengguna->role, ['super_admin', 'admin'])) {
+        if (in_array($pengguna->role, ['super_admin'])) {
             $query->where('type', '!=', 'kyc');
         }
 

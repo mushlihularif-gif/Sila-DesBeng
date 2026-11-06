@@ -41,7 +41,7 @@ class BerandaController extends Controller
         $formatted = (function () {
             $announcements = Announcement::with(['region', 'admin', 'images'])
                 ->visibleTo(auth('sanctum')->user())
-                ->orderBy('created_at', 'desc')
+                ->orderBy('published_at', 'desc')
                 ->take(5)
                 ->get();
 
@@ -64,7 +64,10 @@ class BerandaController extends Controller
                     'id' => $item->id,
                     'title' => $item->title,
                     'category' => $item->type ?? 'Pengumuman',
-                    'date' => $item->event_date ? $item->event_date->format('Y-m-d') : $item->created_at->format('Y-m-d'),
+                    'date' => ($item->event_date ?? $item->published_at ?? $item->created_at)->format('Y-m-d'),
+                    'published_at' => $item->published_at?->toIso8601String(),
+                    'workflow_state' => $item->workflow_state,
+                    'views_count' => $item->views_count,
                     'desc' => $item->description,
                     'content' => $item->description,
                     'image' => count($images) > 0 ? $images[0] : null,
@@ -78,7 +81,7 @@ class BerandaController extends Controller
         return response()->json([
             'status' => 'success',
             'data' => $formatted
-        ]);
+        ])->header('Cache-Control', 'private, no-store')->header('Vary', 'Authorization, Cookie');
     }
 
     /**
@@ -186,7 +189,7 @@ class BerandaController extends Controller
             $limitPerCategory = 5;
 
             // Pasar Daerah - Most ordered
-            $pasarProducts = \App\Models\PasarProduk::where('status', 'tersedia')
+            $pasarProducts = \App\Models\PasarProduk::visibleStore()->where('status', 'tersedia')
                 ->withCount('orderItems')
                 ->orderBy('order_items_count', 'desc')
                 ->take($limitPerCategory)

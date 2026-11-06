@@ -69,7 +69,7 @@
                  data-index="1"
                  data-name="Layanan Daerah"
                  data-heading="&quot;Butuh bantuan layanan dari daerah?&quot;"
-                 data-body="Sewa perlengkapan atau transportasi, gunakan fasilitas umum, dari satu tempat."
+                 data-body="Sewa perlengkapan atau kendaraan operasional, serta gunakan fasilitas umum dari satu tempat."
                  data-badge="Layanan Daerah"
                  data-icon="bx-grid-alt"
                  data-box-bg="bg-blue-50/90"

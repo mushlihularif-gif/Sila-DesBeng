@@ -24,7 +24,7 @@ class PasarProduk extends Model
         'lokasi',
         'latitude',
         'longitude',
-        'region_id'
+        'region_id', 'store_id'
     ];
 
     protected $casts = [
@@ -37,6 +37,13 @@ class PasarProduk extends Model
     public function region()
     {
         return $this->belongsTo(Region::class, 'region_id');
+    }
+
+    public function store() { return $this->belongsTo(MarketStore::class, 'store_id'); }
+    public function storeKey(): string { return $this->store_id ? 'warga:'.$this->store_id : 'desa:'.$this->region_id; }
+    public function scopeVisibleStore($query)
+    {
+        return $query->where(fn ($q) => $q->whereNull('store_id')->orWhereHas('store', fn ($s) => $s->where('status','approved')));
     }
 
     public function carts()

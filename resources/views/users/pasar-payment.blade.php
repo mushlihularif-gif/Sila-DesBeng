@@ -15,6 +15,10 @@
             <p class="mt-2 text-sm text-slate-500">Nomor pesanan {{ $order->order_number }}</p>
         </header>
 
+        @if(session('success'))<p class="rounded-xl bg-green-50 p-4 mb-4" role="status">{{ session('success') }}</p>@endif
+        @if($errors->any())<div class="rounded-xl bg-red-50 p-4 mb-4" role="alert">@foreach($errors->all() as $error)<p>{{ $error }}</p>@endforeach</div>@endif
+        @if($order->store_id)<p class="mb-4">Penjual: <strong>{{ $order->store->name }}</strong>. Pembayaran diterima langsung oleh penjual.</p>@endif
+
         <div class="rounded-2xl bg-slate-50 p-5 space-y-3">
             <div class="flex justify-between gap-4 text-sm"><span class="text-slate-500">Metode</span><span class="font-semibold text-right">{{ ucfirst(str_replace('_', ' ', $order->payment_method)) }}</span></div>
             <div class="flex justify-between gap-4 border-t border-slate-200 pt-3"><span class="font-bold">Total</span><span class="font-black">Rp {{ number_format($order->grand_total, 0, ',', '.') }}</span></div>
@@ -55,6 +59,17 @@
                     Silakan hubungi pengelola toko untuk menyelesaikan pembayaran manual.
                 @endif
             </div>
+        @endif
+
+        @if($order->status==='pending' && !$order->isCashPayment() && auth()->id()===$order->user_id)
+        <form method="POST" action="{{ route('pasar.payment.proof',$order->id) }}" enctype="multipart/form-data" class="mt-6 border border-slate-200 rounded-xl p-5">
+            @csrf
+            <label for="proof_of_payment" class="block font-bold mb-2">{{ $order->proof_of_payment ? 'Ganti bukti pembayaran' : 'Kirim bukti pembayaran' }}</label>
+            @if($order->proof_of_payment)<p class="mb-3">Bukti sudah dikirim dan menunggu pemeriksaan penjual.</p>@endif
+            <input id="proof_of_payment" name="proof_of_payment" type="file" accept="image/jpeg,image/png,application/pdf" required class="block w-full mb-3">
+            <p class="text-sm text-slate-500 mb-3">JPG, PNG, atau PDF, maksimal 5 MB. Mengirim bukti belum berarti pembayaran sudah terverifikasi.</p>
+            <button class="rounded-xl bg-blue-600 px-5 py-3 text-white font-bold">Kirim Bukti ke Penjual</button>
+        </form>
         @endif
 
         <div class="mt-8 flex flex-col sm:flex-row gap-3 justify-center">

@@ -18,7 +18,7 @@ class BumdesController extends Controller
             ->when($user->role !== 'super_admin' && $user->role !== 'admin', function($q) use ($user) {
                 return $q->where('region_id', $user->region_id);
             })
-            ->when(in_array($user->role, ['super_admin', 'admin']), function($q) {
+            ->when(in_array($user->role, ['super_admin']), function($q) {
                 return $q->whereNull('region_id')->orWhere('region_id', 0);
             })
             ->when($search, function ($query, $search) {
@@ -34,7 +34,7 @@ class BumdesController extends Controller
         $whatsapp = env('BUMDES_WHATSAPP', '+6283846078693');
         
         $region = $user->region;
-        if (!$region && in_array($user->role, ['admin', 'super_admin'])) {
+        if (!$region && in_array($user->role, ['super_admin'])) {
             $region = \App\Models\Region::where('type', 'kabupaten')->first();
         }
         $strukturLayout = $region->settings['struktur_layout'] ?? 'hierarki';
@@ -50,7 +50,7 @@ class BumdesController extends Controller
 
         $user = auth()->user();
         $region = $user->region;
-        if (!$region && in_array($user->role, ['admin', 'super_admin'])) {
+        if (!$region && in_array($user->role, ['super_admin'])) {
             $region = \App\Models\Region::where('type', 'kabupaten')->first();
         }
 
@@ -84,7 +84,7 @@ class BumdesController extends Controller
         $member->name = $request->name;
         $member->position = $request->position;
         $member->level = (int)$request->level;
-        $member->region_id = in_array($user->role, ['super_admin', 'admin']) ? null : $user->region_id;
+        $member->region_id = in_array($user->role, ['super_admin']) ? null : $user->region_id;
         
         $maxOrder = BumdesMember::where('region_id', $member->region_id)
             ->where('level', $member->level)
@@ -250,7 +250,7 @@ class BumdesController extends Controller
         $user = auth()->user();
         $query = BumdesMember::where('id', $id);
         
-        if (!in_array($user->role, ['super_admin', 'admin'])) {
+        if (!in_array($user->role, ['super_admin'])) {
             $query->where('region_id', $user->region_id);
         } else {
             $query->where(function($q) {

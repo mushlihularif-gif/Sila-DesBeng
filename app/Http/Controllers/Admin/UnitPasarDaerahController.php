@@ -23,14 +23,16 @@ class UnitPasarDaerahController extends Controller
         }
 
         $admin = Auth::user();
-        $produks = PasarProduk::where('region_id', $admin->region_id)->latest()->get();
+        $produks = PasarProduk::whereNull('store_id')->where('region_id', $admin->region_id)->latest()->get();
         
         $region = Region::find($admin->region_id);
         $settings = $region ? $region->settings : [];
+        $shippingConfig = $region ? app(\App\Services\MarketShippingService::class)->configuration($region) : [];
+        $shippingRegions = Region::whereIn('type', ['desa', 'kelurahan', 'kecamatan'])->with('parent:id,name')->orderBy('name')->get(['id', 'name', 'type', 'parent_id']);
 
         // --- Data Pesanan ---
         $status = $request->get('status', 'all');
-        $queryPesanan = \App\Models\PasarOrder::where('region_id', $admin->region_id)->with('items.produk', 'user')->latest();
+        $queryPesanan = \App\Models\PasarOrder::whereNull('store_id')->where('region_id', $admin->region_id)->with('items.produk', 'user')->latest();
         if ($status !== 'all') {
             $queryPesanan->where('status', $status);
         }
@@ -39,8 +41,9 @@ class UnitPasarDaerahController extends Controller
         // --- Data Laporan ---
         $startDate = $request->get('start_date');
         $endDate = $request->get('end_date');
-        $queryLaporan = \App\Models\PasarOrder::where('region_id', $admin->region_id)
+        $queryLaporan = \App\Models\PasarOrder::whereNull('store_id')->where('region_id', $admin->region_id)
             ->whereIn('status', ['completed'])
+            ->whereHas('paymentTransactions', fn ($q) => $q->where('status', 'verified'))
             ->with('items.produk', 'user')
             ->latest();
             
@@ -55,14 +58,14 @@ class UnitPasarDaerahController extends Controller
 
         // Data Ulasan
         $reviews = \App\Models\PasarReview::whereHas('produk', function($query) use ($admin) {
-                $query->where('region_id', $admin->region_id);
+                $query->whereNull('store_id')->where('region_id', $admin->region_id);
             })
             ->with(['produk', 'user'])
             ->latest()
             ->get();
 
         // Data Komplain & Retur
-        $complaints = \App\Models\PasarComplaint::where('region_id', $admin->region_id)
+        $complaints = \App\Models\PasarComplaint::whereHas('order',fn($q)=>$q->whereNull('store_id'))->where('region_id', $admin->region_id)
             ->with(['order.items.produk', 'user', 'handler'])
             ->latest()
             ->get();
@@ -75,7 +78,7 @@ class UnitPasarDaerahController extends Controller
         $totalUnreadChats = $chats->sum('unread_admin_count');
 
         return view('admin.unit.pasar_daerah.index', compact(
-            'produks', 'settings', 'pesanans', 'status', 'laporans', 'startDate', 'endDate', 'totalPendapatan', 'tab', 'admin', 'reviews', 'complaints', 'chats', 'totalUnreadChats'
+            'produks', 'settings', 'shippingConfig', 'shippingRegions', 'pesanans', 'status', 'laporans', 'startDate', 'endDate', 'totalPendapatan', 'tab', 'admin', 'reviews', 'complaints', 'chats', 'totalUnreadChats'
         ));
     }
 
@@ -126,7 +129,10 @@ class UnitPasarDaerahController extends Controller
             }
         }
 
-        PasarProduk::create($validated);
+        $produk = PasarProduk::create($validated);
+        if ($produk->status === 'tersedia') {
+            \App\Services\NotificationService::broadcastNewProduct('Pasar Daerah', $produk->nama_produk, $produk->region_id, route('pasar.show', $produk->id));
+        }
 
         return redirect()->route('admin.unit.pasar_daerah.index')->with('success', 'Produk berhasil ditambahkan.');
     }
@@ -136,8 +142,8 @@ class UnitPasarDaerahController extends Controller
      */
     public function show($id)
     {
-        $produk = PasarProduk::where('id', $id)->where('region_id', Auth::user()->region_id)->firstOrFail();
-        return view('admin.unit.pasar_daerah.show', compact('produk')); // Optional if they have a show view
+        $produk = PasarProduk::whereNull('store_id')->where('id', $id)->where('region_id', Auth::user()->region_id)->firstOrFail();
+        return redirect()->route('admin.unit.pasar_daerah.edit', $produk->id);
     }
 
     /**
@@ -145,7 +151,7 @@ class UnitPasarDaerahController extends Controller
      */
     public function edit($id)
     {
-        $produk = PasarProduk::where('id', $id)->where('region_id', Auth::user()->region_id)->firstOrFail();
+        $produk = PasarProduk::whereNull('store_id')->where('id', $id)->where('region_id', Auth::user()->region_id)->firstOrFail();
         
         $kategoriList = [
             'Hasil Tani & Bumi',
@@ -163,7 +169,7 @@ class UnitPasarDaerahController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $produk = PasarProduk::where('id', $id)->where('region_id', Auth::user()->region_id)->firstOrFail();
+        $produk = PasarProduk::whereNull('store_id')->where('id', $id)->where('region_id', Auth::user()->region_id)->firstOrFail();
 
         $validated = $request->validate([
             'nama_produk' => 'required|string|max:255',
@@ -190,7 +196,11 @@ class UnitPasarDaerahController extends Controller
             }
         }
 
+        $previouslyAvailable = $produk->status === 'tersedia';
         $produk->update($validated);
+        if (!$previouslyAvailable && $produk->status === 'tersedia') {
+            \App\Services\NotificationService::broadcastNewProduct('Pasar Daerah', $produk->nama_produk, $produk->region_id, route('pasar.show', $produk->id));
+        }
 
         return redirect()->route('admin.unit.pasar_daerah.index')->with('success', 'Produk berhasil diubah.');
     }
@@ -200,8 +210,12 @@ class UnitPasarDaerahController extends Controller
      */
     public function destroy($id)
     {
-        $produk = PasarProduk::where('id', $id)->where('region_id', Auth::user()->region_id)->firstOrFail();
+        $produk = PasarProduk::whereNull('store_id')->where('id', $id)->where('region_id', Auth::user()->region_id)->firstOrFail();
         
+        if ($produk->orderItems()->exists()) {
+            return back()->with('error', 'Produk memiliki riwayat pesanan. Ubah status menjadi nonaktif agar riwayat tetap tersedia.');
+        }
+
         // Hapus file
         foreach (['foto', 'foto_2', 'foto_3'] as $fotoField) {
             if ($produk->$fotoField) {
@@ -219,10 +233,12 @@ class UnitPasarDaerahController extends Controller
      */
     public function updateSop(Request $request)
     {
+        abort_unless(Auth::user()?->hasUnitPermission('pasar_daerah') && Auth::user()->region_id, 403);
         $request->validate([
             'sop_pasar' => 'nullable|string',
-            'ongkir_dalam_desa' => 'required|numeric|min:0',
-            'ongkir_luar_desa' => 'required|numeric|min:0',
+            'shipping' => 'sometimes|array',
+            'ongkir_dalam_desa' => 'required_without:shipping|nullable|integer|min:0|max:10000000',
+            'ongkir_luar_desa' => 'required_without:shipping|nullable|integer|min:0|max:10000000',
             // Payment settings
             'enable_cod' => 'nullable',
             'enable_bank_transfer' => 'nullable',
@@ -240,8 +256,16 @@ class UnitPasarDaerahController extends Controller
         
         $settings = $region->settings ?? [];
         $settings['sop_pasar'] = $request->input('sop_pasar');
-        $settings['ongkir_dalam_desa'] = $request->input('ongkir_dalam_desa');
-        $settings['ongkir_luar_desa'] = $request->input('ongkir_luar_desa');
+        if ($request->has('shipping')) {
+            $settings['market_shipping'] = app(\App\Services\MarketShippingService::class)->validateSettings($request->input('shipping'));
+            if (!$settings['market_shipping']['delivery'] && !$request->has('shipping.overrides')) {
+                // Menutup layanan antar tidak menghapus tarif khusus yang disembunyikan formulir.
+                $settings['market_shipping']['overrides'] = app(\App\Services\MarketShippingService::class)->configuration($region)['overrides'];
+            }
+        } else {
+            $settings['ongkir_dalam_desa'] = $request->input('ongkir_dalam_desa');
+            $settings['ongkir_luar_desa'] = $request->input('ongkir_luar_desa');
+        }
         
         unset($settings['tipe_ongkir_luar_kecamatan'], $settings['ongkir_luar_kecamatan'], $settings['ongkir_kecamatan_khusus']);
 
@@ -274,17 +298,7 @@ class UnitPasarDaerahController extends Controller
      */
     public function pesanan(Request $request)
     {
-        $admin = Auth::user();
-        
-        $status = $request->get('status', 'all');
-        $query = \App\Models\PasarOrder::where('region_id', $admin->region_id)->with('items.produk', 'user')->latest();
-        
-        if ($status !== 'all') {
-            $query->where('status', $status);
-        }
-        
-        $pesanans = $query->get();
-        return view('admin.unit.pasar_daerah.pesanan', compact('pesanans', 'status'));
+        return redirect()->route('admin.unit.pasar_daerah.index', ['tab' => 'pesanan']);
     }
 
     /**
@@ -293,7 +307,7 @@ class UnitPasarDaerahController extends Controller
     public function pesananShow($id)
     {
         $admin = Auth::user();
-        $pesanan = \App\Models\PasarOrder::where('id', $id)
+        $pesanan = \App\Models\PasarOrder::whereNull('store_id')->where('id', $id)
             ->where('region_id', $admin->region_id)
             ->with(['items.produk', 'user', 'complaint'])
             ->firstOrFail();
@@ -314,7 +328,7 @@ class UnitPasarDaerahController extends Controller
         ]);
 
         return \Illuminate\Support\Facades\DB::transaction(function () use ($request, $id, $action, $admin, $data) {
-            $order = \App\Models\PasarOrder::where('region_id', $admin->region_id)->lockForUpdate()->findOrFail($id);
+            $order = \App\Models\PasarOrder::whereNull('store_id')->where('region_id', $admin->region_id)->lockForUpdate()->findOrFail($id);
             if ($order->cancellation_status !== 'pending' || in_array($order->status, ['cancelled', 'rejected', 'completed'])) {
                 return response()->json(['success' => false, 'message' => 'Permintaan pembatalan sudah diproses atau pesanan sudah selesai.'], 409);
             }
@@ -338,7 +352,7 @@ class UnitPasarDaerahController extends Controller
                 'type' => 'status_berubah',
                 'title' => $message,
                 'message' => 'Pesanan #' . $order->order_number . ': ' . $message . ' ' . ($data['admin_response'] ?? ''),
-                'link' => route('user.activity', [], false),
+                'link' => \App\Services\NotificationService::orderLink($order, 'pasar'),
             ]);
             \App\Models\ActivityLog::create([
                 'user_id' => $admin->id, 'action' => 'Cancellation Review',
@@ -352,19 +366,60 @@ class UnitPasarDaerahController extends Controller
     public function pesananUpdate(Request $request, $id)
     {
         $admin = Auth::user();
-        $pesanan = \App\Models\PasarOrder::where('id', $id)->where('region_id', $admin->region_id)->firstOrFail();
-        
         $validated = $request->validate([
-            'status' => 'required|in:pending,paid,confirmed,in_delivery,delivered,completed,cancelled,rejected',
+            'status' => 'required|in:pending,paid,confirmed,in_delivery,delivered,completed,cancelled,rejected,payment_received',
         ]);
-        
-        $pesanan->status = $validated['status'];
-        if ($validated['status'] === 'delivered' && empty($pesanan->delivered_at)) {
-            $pesanan->delivered_at = now();
-        }
-        $pesanan->handled_by = auth()->id();
-        $pesanan->save();
-        
+        \Illuminate\Support\Facades\DB::transaction(function () use ($id,$admin,$validated) {
+            $pesanan = \App\Models\PasarOrder::whereNull('store_id')->where('region_id',$admin->region_id)->lockForUpdate()->findOrFail($id);
+            if ($validated['status'] === 'payment_received') {
+                abort_unless($pesanan->isCashPayment() && in_array($pesanan->status, ['confirmed', 'in_delivery', 'delivered', 'completed'], true), 409,
+                    'Pembayaran tunai belum dapat dikonfirmasi untuk status pesanan ini.');
+                abort_if($pesanan->complaint()->where('status', 'pending')->exists(), 409, 'Tangani komplain pesanan terlebih dahulu.');
+                if ($pesanan->paymentIsVerified()) return;
+                abort_unless($pesanan->paymentTransactions()->where('source', 'manual')->where('status', 'pending')->exists(), 409,
+                    'Catatan pembayaran tidak tersedia untuk dikonfirmasi.');
+                \App\Models\WalletTransaction::tandaiPembayaranManualDiterima('pasar', $pesanan->id, $admin->id);
+                \App\Models\Notification::create([
+                    'user_id' => $pesanan->user_id, 'type' => 'status_berubah', 'title' => 'Pembayaran Tunai Diterima',
+                    'message' => 'Pembayaran pesanan #'.$pesanan->order_number.' telah dikonfirmasi pengelola.',
+                    'link' => \App\Services\NotificationService::orderLink($pesanan, 'pasar'), 'is_read' => false,
+                ]);
+                return;
+            }
+            if ($pesanan->status === $validated['status']) return;
+            $allowed = [
+                'pending'=>$pesanan->isCashPayment() ? ['paid','confirmed','cancelled','rejected'] : ['paid','cancelled','rejected'],
+                'paid'=>['confirmed','cancelled'],
+                'confirmed'=>['in_delivery','delivered','cancelled'], 'in_delivery'=>['delivered'], 'delivered'=>['completed'],
+            ];
+            abort_unless(in_array($validated['status'], $allowed[$pesanan->status] ?? [], true), 409,
+                'Status pesanan sudah berubah atau langkah ini tidak tersedia.');
+            abort_if($pesanan->complaint()->where('status','pending')->exists(), 409, 'Tangani komplain pesanan terlebih dahulu.');
+            if ($validated['status'] === 'paid') {
+                \App\Models\WalletTransaction::tandaiPembayaranManualDiterima('pasar', $pesanan->id, $admin->id);
+            }
+            if (in_array($validated['status'], ['cancelled','rejected'], true)) {
+                foreach ($pesanan->items()->orderBy('pasar_produk_id')->get() as $item) {
+                    $product = $item->produk()->lockForUpdate()->first();
+                    if ($product) $product->increaseStock($item->quantity);
+                }
+                \App\Models\WalletTransaction::batalkanDanRefund('pasar', $pesanan->id, 'Pesanan '.$validated['status'].' oleh pengelola.');
+            }
+            if ($validated['status'] === 'confirmed') $pesanan->confirmed_at = now();
+            if ($validated['status'] === 'completed') $pesanan->completion_time = now();
+            $pesanan->status = $validated['status'];
+            if ($validated['status'] === 'delivered' && !$pesanan->delivered_at) $pesanan->delivered_at = now();
+            $pesanan->handled_by = $admin->id;
+            $pesanan->save();
+            $labels = ['pending'=>'Menunggu pembayaran','paid'=>'Sudah dibayar','confirmed'=>'Dikonfirmasi',
+                'in_delivery'=>'Dalam pengiriman','delivered'=>'Telah diantar','completed'=>'Selesai','cancelled'=>'Dibatalkan','rejected'=>'Ditolak'];
+            \App\Models\Notification::create([
+                'user_id'=>$pesanan->user_id, 'type'=>'status_berubah', 'title'=>'Pembaruan Pesanan Pasar Daerah',
+                'message'=>'Pesanan #'.$pesanan->order_number.': '.$labels[$pesanan->status].'.',
+                'link'=>\App\Services\NotificationService::orderLink($pesanan,'pasar'), 'is_read'=>false, 'sent_at'=>now(),
+            ]);
+        }, 3);
+
         return redirect()->back()->with('success', 'Status pesanan berhasil diperbarui.');
     }
 
@@ -373,33 +428,14 @@ class UnitPasarDaerahController extends Controller
      */
     public function laporan(Request $request)
     {
-        $admin = Auth::user();
-        
-        $startDate = $request->get('start_date');
-        $endDate = $request->get('end_date');
-        
-        $query = \App\Models\PasarOrder::where('region_id', $admin->region_id)
-            ->whereIn('status', ['completed'])
-            ->with('items.produk', 'user')
-            ->latest();
-            
-        if ($startDate && $endDate) {
-            $query->whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
-        }
-        
-        $laporans = $query->get();
-        
-        $totalPendapatan = $laporans->sum('grand_total');
-        
-        return view('admin.unit.pasar_daerah.laporan', compact('laporans', 'startDate', 'endDate', 'totalPendapatan'));
+        return redirect()->route('admin.unit.pasar_daerah.index', ['tab' => 'laporan']);
     }
     /**
      * Tampilkan Halaman Profil Toko
      */
     public function profile()
     {
-        $user = Auth::user();
-        return view('admin.unit.pasar_daerah.profile', compact('user'));
+        return redirect()->route('admin.unit.pasar_daerah.index', ['tab' => 'profil']);
     }
 
     /**
@@ -440,16 +476,7 @@ class UnitPasarDaerahController extends Controller
      */
     public function reviews()
     {
-        $admin = Auth::user();
-        
-        $reviews = \App\Models\PasarReview::whereHas('produk', function($query) use ($admin) {
-                $query->where('region_id', $admin->region_id);
-            })
-            ->with(['produk', 'user'])
-            ->latest()
-            ->get();
-            
-        return view('admin.unit.pasar_daerah.reviews', compact('reviews'));
+        return redirect()->route('admin.unit.pasar_daerah.index', ['tab' => 'ulasan']);
     }
 
     /**
@@ -464,7 +491,7 @@ class UnitPasarDaerahController extends Controller
         ]);
 
         $review = \App\Models\PasarReview::whereHas('produk', function($query) use ($admin) {
-            $query->where('region_id', $admin->region_id);
+            $query->whereNull('store_id')->where('region_id', $admin->region_id);
         })->findOrFail($id);
 
         $review->reply = $request->reply;
@@ -479,33 +506,9 @@ class UnitPasarDaerahController extends Controller
      */
     public function handleComplaint(Request $request, $id)
     {
-        $admin = Auth::user();
-        
-        $request->validate([
-            'status' => 'required|in:approved_replacement,approved_refund,rejected',
-            'admin_response' => 'required|string|max:1000',
-        ]);
-
-        $complaint = \App\Models\PasarComplaint::where('region_id', $admin->region_id)->findOrFail($id);
-        
-        $complaint->status = $request->status;
-        $complaint->admin_response = $request->admin_response;
-        $complaint->handled_by = $admin->id;
-        $complaint->resolved_at = now();
-        $complaint->save();
-
-        // Update status order jika relevan
-        if ($complaint->order) {
-            if ($request->status === 'approved_refund') {
-                $complaint->order->status = 'cancelled';
-                $complaint->order->admin_cancellation_response = 'Komplain disetujui untuk pengembalian dana: ' . $request->admin_response;
-            } elseif ($request->status === 'approved_replacement') {
-                $complaint->order->status = 'processing';
-            }
-            $complaint->order->save();
-        }
-
-        return redirect()->back()->with('success', 'Tindakan komplain berhasil diproses dan dikirim ke pembeli.');
+        $data = $request->validate(['status' => 'required|in:approved_replacement,approved_refund,rejected', 'admin_response' => 'required|string|max:1000']);
+        app(\App\Services\MarketAfterSalesService::class)->decide(Auth::user(), (int) $id, $data);
+        return back()->with('success', 'Keputusan komplain berhasil dicatat.');
     }
 
     /**

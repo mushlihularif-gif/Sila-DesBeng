@@ -153,7 +153,7 @@ class FasilitasBookingApiController extends Controller
                 'type' => 'status_berubah',
                 'title' => 'Pemesanan Berhasil',
                 'message' => 'Pemesanan Fasilitas (Order ID: ' . $booking->order_number . ') berhasil dibuat.',
-                'link' => '/unit-peminjaman-fasilitas-umum',
+                'link' => \App\Services\NotificationService::orderLink($booking, 'fasilitas'),
                 'icon' => 'fas fa-calendar-check text-green-500',
             ]);
 

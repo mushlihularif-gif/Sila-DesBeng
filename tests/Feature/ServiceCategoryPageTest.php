@@ -64,7 +64,7 @@ class ServiceCategoryPageTest extends TestCase
         $this->get(route('service-category.show', ['category' => 'layanan-daerah', 'region_id' => 12]))
             ->assertOk()
             ->assertSee(route('rental.equipment', ['region_id' => 12]))
-            ->assertDontSee(route('pelaporan.landing', ['region_id' => 12]));
+            ->assertDontSee('Pelaporan Warga');
         $this->get(route('service-category.show', ['category' => 'layanan-daerah', 'region_id' => 999]))->assertNotFound();
     }
 
@@ -110,12 +110,27 @@ class ServiceCategoryPageTest extends TestCase
             ->assertSee('Penyewaan Alat')
             ->assertSee('Penyewaan Transportasi')
             ->assertSee('Fasilitas Umum')
-            ->assertSee('Pelaporan Warga');
+            ->assertDontSee('Pelaporan Warga');
     }
 
     public function test_unknown_service_category_returns_not_found(): void
     {
         $this->get('/kategori-layanan/tidak-ada')->assertNotFound();
+    }
+
+    public function test_portal_keeps_all_six_active_services_after_retiring_reports(): void
+    {
+        foreach (['portal/index.html','public/portal/index.html'] as $file) {
+            $html=file_get_contents(base_path($file));
+            preg_match_all('/<article class="kartu-layanan".*?<\/article>/s',$html,$cards);
+            $this->assertCount(6,$cards[0],$file);
+            $this->assertStringNotContainsString('Pelaporan Warga',$html);
+            foreach (['Penyewaan Alat','Pembelian Gas','Penyewaan Transportasi','Fasilitas Umum','Pasar Daerah','Kabar dan Informasi Daerah'] as $service) {
+                $this->assertStringContainsString('<h3>'.$service.'</h3>',implode('',$cards[0]));
+            }
+            preg_match_all('/src="(assets\/img\/unit\/[^\"]+)"/',implode('',$cards[0]),$images);
+            foreach ($images[1] as $image) $this->assertFileExists(dirname(base_path($file)).'/'.$image);
+        }
     }
 
     public function test_pelayanan_cards_link_to_their_actual_pages(): void
@@ -125,11 +140,10 @@ class ServiceCategoryPageTest extends TestCase
         $response->assertOk()
             ->assertSee('class="service-card-link', false)
             ->assertSee(route('bumdes.profil', ['redirect' => 'rental.equipment']), false)
-            ->assertSee(route('bumdes.laporan'), false)
             ->assertSee(route('bumdes.profil', ['redirect' => 'gas.sales']), false)
             ->assertSee(route('bumdes.profil', ['redirect' => 'mobil.rental.equipment']), false)
             ->assertSee(route('bumdes.profil', ['redirect' => 'user.fasilitas-umum.equipment']), false)
-            ->assertSee(route('bumdes.profil', ['redirect' => 'pelaporan.landing']), false)
+            ->assertDontSee('Pelaporan Warga')
             ->assertSee(route('announcements.index'), false)
             ->assertSee(route('pasar.index'), false);
     }

@@ -15,7 +15,7 @@
                     <p class="text-muted mb-0">Riwayat lengkap aktivitas pengguna dan sistem</p>
                 </div>
                 <div class="d-flex gap-2 position-relative" style="z-index: 1050;">
-                    @if(in_array(auth()->user()->role, ['admin', 'super_admin']))
+                    @if(in_array(auth()->user()->role, ['super_admin']))
                     <button type="button" class="btn btn-outline-danger shadow-sm rounded-pill px-4" onclick="confirmClearLogs()">
                         <i class="bx bx-trash me-2"></i>Bersihkan Log
                     </button>

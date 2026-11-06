@@ -24,6 +24,7 @@ Route::get('/popular', [BerandaController::class, 'popular']);
     Route::get('/news/{id}', [\App\Http\Controllers\Api\NewsApiController::class, 'show']);
 
     // Pasar Daerah (Toko BUMDes)
+    Route::get('/pasar-daerah/stores/{id}', [\App\Http\Controllers\MarketStoreController::class, 'show']);
     Route::get('/pasar-daerah/products', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'getProducts']);
     Route::get('/pasar-daerah/products/{id}', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'getProductDetail']);
     Route::get('/pasar-daerah/products/{id}/reviews', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'getProductReviews']);
@@ -54,6 +55,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/', [\App\Http\Controllers\ContentWorkspaceController::class, 'store'])->middleware('throttle:20,1');
         Route::post('/ai', [\App\Http\Controllers\ContentWorkspaceController::class, 'ai'])->middleware('throttle:10,1');
         Route::get('/{announcement}', [\App\Http\Controllers\ContentWorkspaceController::class, 'state']);
+        Route::get('/{announcement}/state', [\App\Http\Controllers\ContentWorkspaceController::class, 'state']);
         Route::get('/{announcement}/sources', [\App\Http\Controllers\ContentWorkspaceController::class, 'sources']);
         Route::post('/{announcement}/claim', [\App\Http\Controllers\ContentWorkspaceController::class, 'claim']);
         Route::post('/{announcement}/action', [\App\Http\Controllers\ContentWorkspaceController::class, 'action']);
@@ -106,6 +108,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/pasar-daerah/cart/update', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'updateCart']);
     Route::post('/pasar-daerah/cart/remove', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'removeFromCart']);
     Route::post('/pasar-daerah/checkout', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'checkout']);
+    Route::post('/pasar-daerah/orders/{id}/payment-proof',[\App\Http\Controllers\MarketStoreController::class,'paymentProof'])->middleware('throttle:10,1');
+    Route::post('/pasar-daerah/orders/{id}/cancel-request',[\App\Http\Controllers\MarketStoreController::class,'buyerCancel']);
+    Route::match(['get','post'],'/pasar-daerah/stores/{id}/chat/{buyer?}',[\App\Http\Controllers\MarketStoreController::class,'chat'])->middleware('throttle:60,1');
+    Route::get('/pasar-daerah/my-store',[\App\Http\Controllers\MarketStoreController::class,'home']);
+    Route::post('/pasar-daerah/my-store/profile',[\App\Http\Controllers\MarketStoreController::class,'saveProfile'])->middleware('throttle:10,1');
+    Route::post('/pasar-daerah/my-store/settings',[\App\Http\Controllers\MarketStoreController::class,'settings']);
+    Route::post('/pasar-daerah/my-store/products/{id?}',[\App\Http\Controllers\MarketStoreController::class,'product']);
+    Route::get('/pasar-daerah/my-store/orders/{id}',[\App\Http\Controllers\MarketStoreController::class,'order']);
+    Route::post('/pasar-daerah/my-store/orders/{id}',[\App\Http\Controllers\MarketStoreController::class,'changeOrder']);
+    Route::get('/pasar-daerah/shipping-quote', [\App\Http\Controllers\MarketShippingController::class, 'quote'])->middleware('throttle:60,1');
     Route::get('/pasar-daerah/orders/{id}/payment', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'getOrderPayment']);
     Route::post('/pasar-daerah/products/{id}/reviews', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'addReview']);
     Route::post('/pasar-daerah/orders/{id}/complaint', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'submitComplaint']);

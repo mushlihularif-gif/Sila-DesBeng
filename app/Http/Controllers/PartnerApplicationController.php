@@ -60,7 +60,7 @@ class PartnerApplicationController extends Controller
 
                     // Cek apakah desa ini sudah punya admin
                     $hasAdmin = $userDesa->users()
-                        ->whereIn('role', ['admin_desa', 'admin'])
+                        ->whereIn('role', ['admin_desa'])
                         ->exists();
 
                     if ($hasAdmin) {
@@ -139,6 +139,7 @@ class PartnerApplicationController extends Controller
 
     public function store(Request $request)
     {
+        $request->validate(['region_type' => 'required|in:desa,rw,rt']);
         $user = auth()->user();
         $userDesa = null;
 
@@ -311,7 +312,7 @@ class PartnerApplicationController extends Controller
             }
         } elseif ($userDesa && $request->region_type === 'desa') {
             // Cek apakah desa user sudah memiliki admin
-            $hasAdmin = $userDesa->users()->whereIn('role', ['admin_desa', 'admin'])->exists();
+            $hasAdmin = $userDesa->users()->whereIn('role', ['admin_desa'])->exists();
             if ($hasAdmin) {
                 return back()->withInput()->withErrors([
                     'region_type' => 'Desa Anda (' . $userDesa->name . ') sudah terdaftar dan memiliki Admin Desa. Silakan ajukan pendaftaran sebagai Pengurus RW atau RT.',
@@ -322,7 +323,7 @@ class PartnerApplicationController extends Controller
         $validated = $request->validate([
             'applicant_name' => 'required|string|max:255',
             'position' => 'required|string|max:255',
-            'region_type' => 'required|in:kecamatan,desa,rw,rt',
+            'region_type' => 'required|in:desa,rw,rt',
             'region_name' => 'required|string|max:255',
             'parent_region_id' => 'required|exists:regions,id',
             'contact_email' => 'required|email|max:255',

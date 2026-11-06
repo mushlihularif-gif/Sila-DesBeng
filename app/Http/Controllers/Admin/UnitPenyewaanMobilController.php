@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Mobil;
 use App\Models\Category;
+use App\Models\Region;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Services\ImageCompressorService;
@@ -12,6 +13,16 @@ use App\Services\ImageCompressorService;
 class UnitPenyewaanMobilController extends Controller
 {
     use \App\Traits\ChecksStaffDelegation;
+
+    private function managedVehicles()
+    {
+        $user = auth()->user();
+        abort_unless($user, 403);
+        $query = Mobil::forRental();
+        if ($user->role === 'super_admin') return $query;
+        abort_unless($user->region_id, 403);
+        return $query->where('region_id', $user->region_id);
+    }
 
     // Default SOP Texts
     private $defaultSopDitanggung = "1. Penyewa wajib menjaga mobil sewaan dengan baik.\n2. Jika terjadi KERUSAKAN atau KEHILANGAN mobil selama masa penyewaan, maka SEPENUHNYA menjadi tanggung jawab PENGGUNA (penyewa) untuk mengganti rugi atau memperbaiki mobil tersebut sesuai dengan kerusakan.\n3. Keterlambatan pengembalian dapat dikenakan denda sesuai ketentuan yang berlaku.";
@@ -26,8 +37,7 @@ class UnitPenyewaanMobilController extends Controller
         $search = $request->get('search');
         
         $user = auth()->user();
-        $mobils = Mobil::query()
-            ->whereNotIn('kategori', ['ambulans', 'kendaraan_operasional'])
+        $mobils = Mobil::forRental()
             ->when($user && $user->region_id, function ($q) use ($user) {
                 return $q->where('region_id', $user->region_id);
             })
@@ -125,12 +135,12 @@ class UnitPenyewaanMobilController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nama_mobil' => 'required|string|max:255',
+            'nama_mobil' => ['required', 'string', 'max:255', 'not_regex:/ambulan/i'],
             'deskripsi' => 'required|string',
             'harga_sewa' => 'required|string',
             'stok' => 'required|integer',
             'status' => 'required|in:tersedia,disewa,rusak',
-            'kategori' => 'required|string|not_in:ambulans,kendaraan_operasional',
+            'kategori' => ['required', 'string', 'max:100', 'not_regex:/ambulan|kendaraan_operasional/i'],
             'lokasi' => 'required|string',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
@@ -225,20 +235,20 @@ class UnitPenyewaanMobilController extends Controller
         }
 
         // Broadcast armada transportasi baru ke warga
-        \App\Services\NotificationService::broadcastNewProduct('Sewa Transportasi', $mobil->nama_mobil, $mobil->region_id, route('mobil.rental.equipment'));
+        \App\Services\NotificationService::broadcastNewProduct('Sewa Transportasi', $mobil->nama_mobil, $mobil->region_id, route('mobil.rental.show', $mobil->id));
 
         return redirect()->route('admin.unit.mobil.index')->with('success', 'Transportasi berhasil ditambahkan.');
     }
 
     public function show($id)
     {
-        $mobil = Mobil::inCatalog()->findOrFail($id);
+        $mobil = $this->managedVehicles()->findOrFail($id);
         return view('admin.unit.mobil.show', compact('mobil'));
     }
 
     public function edit($id)
     {
-        $mobil = Mobil::inCatalog()->findOrFail($id);
+        $mobil = $this->managedVehicles()->findOrFail($id);
         // Lokasi diambil dari daftar milik WILAYAH, bukan lagi SELECT DISTINCT
         // pada tabel produk unit ini. Query lama tidak menyaring region_id sama
         // sekali, sehingga admin satu desa ikut melihat nama lokasi desa lain;
@@ -256,7 +266,8 @@ class UnitPenyewaanMobilController extends Controller
 
     public function destroy($id)
     {
-        $mobil = Mobil::inCatalog()->findOrFail($id);
+        $mobil = $this->managedVehicles()->findOrFail($id);
+        abort_if(\App\Models\MobilBooking::withTrashed()->where('mobil_id', $mobil->id)->exists(), 409, 'Kendaraan memiliki riwayat pesanan dan tidak dapat dihapus.');
 
         if ($mobil->foto) Storage::disk('public')->delete($mobil->foto);
         if ($mobil->foto_2) Storage::disk('public')->delete($mobil->foto_2);
@@ -269,13 +280,14 @@ class UnitPenyewaanMobilController extends Controller
 
     public function update(Request $request, $id)
     {
+        $this->managedVehicles()->findOrFail($id);
         $validated = $request->validate([
-            'nama_mobil' => 'required|string|max:255',
+            'nama_mobil' => ['required', 'string', 'max:255', 'not_regex:/ambulan/i'],
             'deskripsi' => 'required|string',
             'harga_sewa' => 'required|string',
             'stok' => 'required|integer',
             'status' => 'required|in:tersedia,disewa,rusak',
-            'kategori' => 'required|string|not_in:ambulans,kendaraan_operasional',
+            'kategori' => ['required', 'string', 'max:100', 'not_regex:/ambulan|kendaraan_operasional/i'],
             'lokasi' => 'required|string',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
@@ -319,7 +331,7 @@ class UnitPenyewaanMobilController extends Controller
             return back()->withErrors(['is_harian_active' => 'Minimal salah satu layanan (Sewa Harian atau Sewa Borongan) harus diaktifkan.'])->withInput();
         }
 
-        $mobil = Mobil::inCatalog()->findOrFail($id);
+        $mobil = $this->managedVehicles()->findOrFail($id);
 
         
         

@@ -18,6 +18,7 @@ class BookingAccess
     {
         if (!$viewer) return false;
         if ((int) $booking->user_id === (int) $viewer->id) return true;
+        if ($type === 'pasar' && $booking->store_id && (int) $booking->store?->user_id === (int) $viewer->id) return true;
         if (!isset(self::TYPES[$type]) || !$viewer->isAdmin() || !$viewer->region_id) return false;
         [, $relation, $permission] = self::TYPES[$type];
         $region = $booking->region_id ?: ($relation ? $booking->$relation?->region_id : null);

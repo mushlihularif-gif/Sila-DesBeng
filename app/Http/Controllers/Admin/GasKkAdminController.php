@@ -18,7 +18,7 @@ class GasKkAdminController extends Controller
         // Admin desa hanya melihat warga desanya
         $query = FamilyCard::with('submitter')->where('status', 'pending');
         
-        if (!in_array($admin->role, ['super_admin', 'admin_kecamatan'])) {
+        if (!in_array($admin->role, ['super_admin'])) {
             $query->whereHas('submitter', function($q) use ($admin) {
                 $q->where('region_id', $admin->region_id);
             });

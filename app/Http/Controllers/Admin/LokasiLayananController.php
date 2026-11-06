@@ -31,7 +31,7 @@ class LokasiLayananController extends Controller
     private function pastikanAdminWilayah(): void
     {
         abort_unless(
-            in_array(auth()->user()?->role, ['super_admin', 'admin', 'admin_kecamatan', 'admin_desa', 'staff'], true),
+            in_array(auth()->user()?->role, ['super_admin', 'admin_desa'], true),
             403,
             'Halaman lokasi layanan hanya untuk pengelola wilayah.'
         );

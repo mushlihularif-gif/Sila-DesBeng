@@ -21,7 +21,7 @@ abstract class Controller
         
         // Dapatkan region_id. Jika admin/super_admin tidak punya region_id, fallback ke Region pertama (Kabupaten)
         $regionId = $currentUser->region_id;
-        if (!$regionId && in_array($currentUser->role, ['super_admin', 'admin'])) {
+        if (!$regionId && in_array($currentUser->role, ['super_admin'])) {
             $region = \App\Models\Region::first();
             if ($region) {
                 $regionId = $region->id;
@@ -41,10 +41,8 @@ abstract class Controller
                 });
             }
 
-            // 'staff' wajib ada di daftar ini. Tanpa itu query staf lolos tanpa
-            // filter sama sekali dan mereka melihat pesanan seluruh wilayah,
-            // bukan hanya wilayah tempat mereka ditugaskan.
-            if (in_array($currentUser->role, ['admin_kecamatan', 'admin_desa', 'admin_rw', 'admin_rt', 'admin', 'super_admin', 'staff'])) {
+                // Pengurus hanya melihat pengguna dalam wilayah tugasnya.
+            if (in_array($currentUser->role, ['admin_desa', 'admin_rw', 'admin_rt', 'super_admin'])) {
                 $allowedRegionIds = \App\Models\Region::getDescendantIds($regionId);
                 $allowedRegionIds[] = $regionId;
 
@@ -60,7 +58,7 @@ abstract class Controller
 
     /**
      * Mendapatkan daftar nama layanan yang aktif untuk region admin saat ini.
-     * Jika super_admin atau admin, kembalikan semua layanan.
+     * Super admin mengelola layanan platform; admin desa mengikuti wilayahnya.
      * 
      * @return array
      */
@@ -72,18 +70,14 @@ abstract class Controller
             return [];
         }
 
-        // 'staff' harus ikut di sini. Sebelumnya perannya tidak terdaftar
-        // sehingga daftarnya selalu kosong dan setiap tab layanan disembunyikan
-        // dengan pesan "Layanan Belum Di Aktifkan", padahal wilayahnya sudah
-        // mengaktifkan layanan itu.
-        $peranBerwilayah = ['super_admin', 'admin', 'admin_kecamatan', 'admin_desa', 'staff'];
+        $peranBerwilayah = ['super_admin', 'admin_desa'];
 
         if (! in_array($currentUser->role, $peranBerwilayah)) {
             return [];
         }
 
-        // Super Admin dan Admin Kabupaten mengelola seluruh layanan di sistem
-        if (in_array($currentUser->role, ['super_admin', 'admin'])) {
+        // Super Admin mengelola seluruh layanan di sistem
+        if (in_array($currentUser->role, ['super_admin'])) {
             return \App\Models\Service::pluck('name')->toArray();
         }
 
@@ -93,43 +87,6 @@ abstract class Controller
             return [];
         }
 
-        $namaLayanan = $region->services->pluck('name')->toArray();
-
-        if ($currentUser->role !== 'staff') {
-            return $namaLayanan;
-        }
-
-        // Staf hanya melihat layanan yang memang dipercayakan kepadanya.
-        // Kalau tidak dipersempit, staf gas ikut melihat tab sewa alat dan
-        // mobil yang bukan urusannya.
-        $petaIzin = [
-            'gas'            => 'gas',
-            'sewa_alat'      => 'alat',
-            'sewa_mobil'     => 'mobil',
-            'fasilitas_umum' => 'fasilitas',
-            'pasar_daerah'   => 'pasar',
-                    ];
-
-        $izinStaf = $currentUser->staffPermissions()->pluck('unit_key')->all();
-        $kataKunci = [];
-        foreach ($izinStaf as $izin) {
-            if (isset($petaIzin[$izin])) {
-                $kataKunci[] = $petaIzin[$izin];
-            }
-        }
-
-        if (! $kataKunci) {
-            return [];
-        }
-
-        return array_values(array_filter($namaLayanan, function ($nama) use ($kataKunci) {
-            foreach ($kataKunci as $kata) {
-                if (str_contains(strtolower($nama), $kata)) {
-                    return true;
-                }
-            }
-
-            return false;
-        }));
+        return $region->services->pluck('name')->toArray();
     }
 }

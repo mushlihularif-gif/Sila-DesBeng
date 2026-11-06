@@ -35,6 +35,8 @@
                     'nama'    => $al->nama_penerima,
                     'telepon' => $al->no_telepon,
                     'alamat'  => trim($al->satuBaris() . ($al->patokan ? ' (Patokan: ' . $al->patokan . ')' : '')),
+                    'region_id' => $al->region_id,
+                    'village_id' => ($pilihWilayahPasar ?? false) ? app(\App\Services\MarketShippingService::class)->village($al->region_id)?->id : null,
                     // Titik peta ikut terbawa. Warga menentukannya sekali di
                     // halaman Saldo dan Alamat, bukan menunjuk peta berulang kali
                     // di setiap formulir pemesanan.
@@ -89,7 +91,7 @@
             Isi alamat baru di kolom alamat, lalu tentukan titik di peta. Tekan “Simpan ke Alamat Saya” agar bisa dipakai lagi.
         </p>
     </div>
-    @else
+    @elseif(!($sembunyikanSimpan ?? false))
     <div class="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-blue-100 bg-blue-50/60 p-3">
         <p id="status-alamat-pesanan" class="text-xs text-gray-600">Pilih alamat tersimpan atau tentukan titik baru pada peta di bawah.</p>
         <button type="button" id="btn-simpan-alamat-pesanan"

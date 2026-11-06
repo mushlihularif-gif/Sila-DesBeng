@@ -169,7 +169,8 @@
                         </span>
                     </div>
 
-                    <form action="{{ route('admin.manajemen-pengguna.toggle-status', $user->id) }}" method="POST" data-konfirmasi="Yakin ingin mengubah status akun ini?">
+                    @if($user->role === 'user')
+<form action="{{ route('admin.manajemen-pengguna.toggle-status', $user->id) }}" method="POST" data-konfirmasi="Yakin ingin mengubah status akun ini?">
                         @csrf
                         @method('PUT')
                         @if($user->status === 'aktif')
@@ -182,6 +183,7 @@
                         </button>
                         @endif
                     </form>
+@endif
                 </div>
                 <div class="card-footer bg-light bg-opacity-50 border-top py-4">
                     <div class="d-flex justify-content-between text-start px-2">

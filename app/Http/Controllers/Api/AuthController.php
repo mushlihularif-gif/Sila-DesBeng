@@ -32,6 +32,7 @@ class AuthController extends Controller
             ]);
         }
 
+        abort_unless($user->hasSupportedRole(), 403, 'Peran akun tidak didukung.');
         abort_if($user->status !== 'aktif', 403, 'Akun tidak aktif.');
         $token = $user->createToken('flutter-mobile-app')->plainTextToken;
 
@@ -74,7 +75,8 @@ class AuthController extends Controller
 
         // Pengguna terdaftar: token Google sudah diverifikasi.
         if ($user) {
-            abort_if($user->status !== 'aktif', 403, 'Akun tidak aktif.');
+            abort_unless($user->hasSupportedRole(), 403, 'Peran akun tidak didukung.');
+        abort_if($user->status !== 'aktif', 403, 'Akun tidak aktif.');
             if ($user->role === 'user' && $request->region_id && !$user->region_id) {
                 $user->region_id = $request->region_id;
             }
@@ -144,6 +146,7 @@ class AuthController extends Controller
         ]);
 
         $user->forceFill(['role' => 'user', 'status' => 'aktif', 'email_verified_at' => now()])->save();
+        abort_unless($user->hasSupportedRole(), 403, 'Peran akun tidak didukung.');
         abort_if($user->status !== 'aktif', 403, 'Akun tidak aktif.');
         $token = $user->createToken('flutter-mobile-app')->plainTextToken;
         $user->load('region');
@@ -295,6 +298,7 @@ class AuthController extends Controller
         Cache::forget($cacheKey);
 
         $user->forceFill(['role' => 'user', 'status' => 'aktif', 'email_verified_at' => now()])->save();
+        abort_unless($user->hasSupportedRole(), 403, 'Peran akun tidak didukung.');
         abort_if($user->status !== 'aktif', 403, 'Akun tidak aktif.');
         $token = $user->createToken('flutter-mobile-app')->plainTextToken;
 
