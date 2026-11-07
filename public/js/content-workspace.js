@@ -22,13 +22,23 @@ if (typeof document !== 'undefined') {
     else if (document.querySelector('[data-content-list]')) startList();
 }
 
+function resumeTime(response) {
+    return Date.now() + 1000 * (Number(response.headers.get('Retry-After')) || 60);
+}
+
 function startList() {
-    let inFlight = false;
+    const root = document.querySelector('[data-content-list]');
+    let inFlight = false, resumeAt = 0;
     const update = async () => {
-        if (document.hidden || inFlight) return;
+        if (!root.isConnected || document.hidden || inFlight || Date.now() < resumeAt) return;
         inFlight = true;
         try {
             const response = await fetch(location.href, {headers:{Accept:'application/json'}, cache:'no-store'});
+            if (response.status === 429) {
+                resumeAt = resumeTime(response);
+                document.getElementById('list-sync').textContent = 'Pembaruan dijeda sebentar dan akan dilanjutkan otomatis.';
+                return;
+            }
             if (!response.ok) throw new Error();
             const data = await response.json();
             let newItems = 0;
@@ -66,6 +76,7 @@ function startWorkspace(root) {
     let dirty = false, changes = 0, busy = false, polling = false, connected = true, saveTimer, proposal, aiVersion, pendingIntent = null, reviewedText = null;
     let lastActivity = Date.now(), lastRenewed = 0, galleryKey = '', activityKey = '', sourcesKey = '', epoch = 0;
     const manager = root.dataset.manager === '1';
+    let resumeAt = 0;
     let sourceChoices = new Map(), sourcePage = 1, sourceLastPage = 1, sourceSearch = '';
     const fields = ['title','description','type','location','event_date','target_audience_id','scheduled_at','ends_at'];
     const text = (id,value) => { if ($(id)) $(id).textContent = value ?? ''; };
@@ -103,6 +114,7 @@ function startWorkspace(root) {
             let payload; try { payload = await result.json(); } catch { payload = {}; }
             if (!result.ok) {
                 const failure = new Error(Object.values(payload.errors || {}).flat().join(' ') || payload.message || 'Permintaan belum berhasil. Silakan coba lagi.');
+                if (result.status === 429) resumeAt = resumeTime(result);
                 failure.status = result.status; throw failure;
             }
             connected = true; return payload;
@@ -386,7 +398,7 @@ function startWorkspace(root) {
         });
     }
     async function poll() {
-        if (polling || busy || document.hidden) return;
+        if (!root.isConnected || polling || busy || document.hidden || Date.now() < resumeAt) return;
         polling = true;
         try {
             const capturedChanges = changes, capturedEpoch = epoch, result = await request('state');

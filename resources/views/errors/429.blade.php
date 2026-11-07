@@ -8,7 +8,7 @@
 @section('heading', 'Terlalu Banyak Permintaan')
 
 @section('message')
-    Sistem mendeteksi terlalu banyak permintaan dalam waktu singkat dari koneksi Anda. Mohon tunggu beberapa saat sebelum mencoba kembali demi kelancaran bersama.
+    {{ $limitMessage ?? 'Terlalu banyak permintaan dari koneksi ini. Tunggu sebentar sebelum mencoba lagi.' }}
 @endsection
 
 @section('actions')

@@ -44,4 +44,34 @@ class DdosProtectionTest extends TestCase
         $this->assertSame(200, $middleware->handle($request, $next)->getStatusCode());
         $this->assertSame(429, $middleware->handle($request, $next)->getStatusCode());
     }
+
+    public function test_one_burst_does_not_ban_a_reader_but_repeated_bursts_do(): void
+    {
+        config(['ddos.per_detik' => 1, 'ddos.strike' => 2, 'ddos.ban_menit' => 10, 'ddos.whitelist' => []]);
+        Cache::setDefaultDriver('array');
+        $middleware = new DDoSProtection();
+        $request = Request::create('/kelola-kabar', 'GET', [], [], [], [
+            'REMOTE_ADDR' => '203.0.113.11', 'HTTP_USER_AGENT' => 'Browser', 'HTTP_ACCEPT' => 'text/html',
+        ]);
+        $hit = fn () => $middleware->handle($request, fn () => response('ok'));
+        $this->assertSame(200, $hit()->getStatusCode());
+        for ($i = 0; $i < 8; $i++) {
+            $limited = $hit();
+            $this->assertSame(429, $limited->getStatusCode());
+            $this->assertSame('1', $limited->headers->get('Retry-After'));
+        }
+        $this->assertStringContainsString('<html', $limited->getContent());
+        $this->travel(2)->seconds();
+        $this->assertSame(200, $hit()->getStatusCode());
+        $this->travel(60)->seconds();
+        $this->assertSame(200, $hit()->getStatusCode());
+        $request->headers->set('Accept', 'application/json');
+        $this->assertSame('600', $hit()->headers->get('Retry-After'));
+        $this->travel(10)->seconds();
+        $banned = $hit();
+        $this->assertSame('590', $banned->headers->get('Retry-After'));
+        $this->assertSame('Too Many Requests', json_decode($banned->getContent(), true)['error']);
+        $this->travel(591)->seconds();
+        $this->assertSame(200, $hit()->getStatusCode());
+    }
 }
