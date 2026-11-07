@@ -449,13 +449,16 @@
                         @foreach($recentAnnouncements as $item)
                         <a href="{{ route('announcements.show', $item->id) }}" class="group bg-white rounded-xl sm:rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col h-full transform hover:-translate-y-1 {{ $loop->iteration == 4 ? 'flex md:hidden' : 'flex' }}">
                             <div class="kabar-img-wrapper">
-                                @if($item->image_path)
-                                    <img src="{{ Storage::url($item->image_path) }}" alt="{{ $item->title }}" class="w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-500" onerror="this.onerror=null; this.src='{{ asset('User/img/elemen/KabardanInformasiDaerah.png') }}';">
-                                @elseif($item->images && $item->images->count() > 0)
-                                    <img src="{{ Storage::url($item->images->first()->image_path) }}" alt="{{ $item->title }}" class="w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-500" onerror="this.onerror=null; this.src='{{ asset('User/img/elemen/KabardanInformasiDaerah.png') }}';">
+                                @php
+                                    $isNews = $item->post_category === 'Berita';
+                                    $photo = $isNews ? ($item->images->first()?->url ?? $item->cover_url) : $item->cover_url;
+                                @endphp
+                                @if($photo)
+                                    <img src="{{ $photo }}" alt="{{ $item->title }}" class="w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-500" onerror="this.onerror=null; this.src='{{ asset('User/img/elemen/KabardanInformasiDaerah.png') }}';">
                                 @else
                                     <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#115789]/10 to-blue-500/10">
-                                        @if($item->type == 'Pengumuman') <i class="bx bx-broadcast text-3xl sm:text-4xl text-blue-500"></i>
+                                        @if($isNews) <i class="bx bx-news text-3xl sm:text-4xl text-blue-500"></i>
+                                        @elseif($item->type == 'Pengumuman') <i class="bx bx-broadcast text-3xl sm:text-4xl text-blue-500"></i>
                                         @elseif($item->type == 'Event') <i class="bx bx-calendar-event text-3xl sm:text-4xl text-purple-500"></i>
                                         @else <i class="bx bx-group text-3xl sm:text-4xl text-emerald-500"></i>
                                         @endif
@@ -463,7 +466,9 @@
                                 @endif
                                 
                                 <div class="absolute top-2 left-2 sm:top-3 sm:left-3 flex gap-1 sm:gap-2">
-                                    @if($item->type == 'Gotong Royong')
+                                    @if($isNews)
+                                        <span class="px-2 py-0.5 sm:px-2.5 sm:py-1 bg-blue-500 text-white rounded-md text-[10px] sm:text-xs font-bold shadow-sm"><i class="bx bx-news"></i> Berita Daerah</span>
+                                    @elseif($item->type == 'Gotong Royong')
                                         <span class="px-2 py-0.5 sm:px-2.5 sm:py-1 bg-emerald-500 text-white rounded-md text-[10px] sm:text-xs font-bold shadow-sm">Gotong Royong</span>
                                     @elseif($item->type == 'Event')
                                         <span class="px-2 py-0.5 sm:px-2.5 sm:py-1 bg-purple-500 text-white rounded-md text-[10px] sm:text-xs font-bold shadow-sm">Event</span>

@@ -112,7 +112,7 @@ class BerandaController extends Controller
                                            ->get();
                                            
         // Get Recent Announcements
-        $announcementQuery = \App\Models\Announcement::with(['region'])->visibleTo(auth()->user())
+        $announcementQuery = \App\Models\Announcement::with(['region', 'images'])->visibleTo(auth()->user())
             ->where('is_active', true)
             ->orderBy('created_at', 'desc');
 

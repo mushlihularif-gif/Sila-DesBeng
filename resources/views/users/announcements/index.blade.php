@@ -22,9 +22,9 @@
                 </p>
             </div>
 
-            @auth
-            <div class="flex justify-center mb-6"><a href="{{ route('content.index') }}" class="rounded-xl bg-blue-600 text-white font-semibold px-6 py-3">{{ app(\App\Services\ContentAccess::class)->manager(auth()->user()) ? 'Kelola Kabar dan Pengumuman' : 'Buat Kabar / Kiriman Saya' }}</a></div>
-            @endauth
+            @php
+                $manager = app(\App\Services\ContentAccess::class)->manager(auth()->user());
+            @endphp
             {{-- Tabs (Cards Style) --}}
             <div class="grid grid-cols-2 gap-3 sm:gap-6 max-w-md sm:max-w-none mx-auto sm:flex sm:flex-row justify-center mb-8 sm:mb-12 items-center animate-section">
                 <!-- Berita Terbaru Card -->
@@ -54,6 +54,18 @@
                 {{-- TAB BERITA --}}
                 <div id="tab-content-berita" class="tab-content" style="display: {{ $activeTab === 'berita' ? 'block' : 'none' }};">
                     
+                    @auth
+                        <div class="flex flex-wrap items-center justify-center gap-4 mb-6">
+                            @if($manager || (auth()->user()->role === 'user' && auth()->user()->verification_status === 'verified' && auth()->user()->region_id))
+                                <form action="{{ route('content.store') }}" method="post">
+                                    @csrf
+                                    <input type="hidden" name="category" value="Berita">
+                                    <button type="submit" class="rounded-xl bg-blue-600 text-white font-semibold px-6 py-3">Tulis Berita Daerah</button>
+                                </form>
+                            @endif
+                            <a href="{{ route('content.index') }}" class="text-blue-700 font-semibold underline">{{ $manager ? 'Kelola Kiriman Berita' : 'Lihat Kiriman Saya' }}</a>
+                        </div>
+                    @endauth
                     {{-- Search Berita --}}
                     <div class="max-w-md mx-auto mb-10">
                         <form action="{{ route('announcements.index') }}" method="GET" class="relative group">
@@ -92,6 +104,8 @@
                                                     <i class='bx bx-images'></i> {{ $item->images->count() }} Foto
                                                 </div>
                                             @endif
+                                        @elseif($item->cover_url)
+                                            <img src="{{ $item->cover_url }}" alt="{{ $item->title }}" class="w-full h-full object-cover">
                                         @else
                                             <div class="w-full h-full flex items-center justify-center text-5xl bg-gradient-to-br from-blue-50 to-blue-100 text-blue-300"><i class="bx bx-news"></i></div>
                                         @endif
@@ -131,6 +145,15 @@
                 {{-- TAB PENGUMUMAN --}}
                 <div id="tab-content-pengumuman" class="tab-content" style="display: {{ $activeTab === 'pengumuman' ? 'block' : 'none' }};">
                     
+                    @if($manager)
+                        <div class="flex justify-center mb-6">
+                            <form action="{{ route('content.store') }}" method="post">
+                                @csrf
+                                <input type="hidden" name="category" value="Pengumuman">
+                                <button type="submit" class="rounded-xl bg-blue-600 text-white font-semibold px-6 py-3">Buat Pengumuman</button>
+                            </form>
+                        </div>
+                    @endif
                     {{-- Filter dan Pencarian Pengumuman --}}
                     <div class="max-w-4xl mx-auto mb-10">
                         <div class="backdrop-blur-md bg-white/60 rounded-2xl p-4 md:p-6 border border-gray-100 shadow-sm flex flex-col md:flex-row gap-6 justify-between items-center">
@@ -334,7 +357,7 @@
             // Tangkap submit pada form pencarian
             wrapper.addEventListener('submit', function(e) {
                 const form = e.target.closest('form');
-                if (form) {
+                if (form && form.method.toLowerCase() === 'get') {
                     e.preventDefault();
                     
                     // Bangun URL dengan query params dari form

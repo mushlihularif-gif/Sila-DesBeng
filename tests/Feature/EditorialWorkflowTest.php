@@ -13,6 +13,33 @@ class EditorialWorkflowTest extends TestCase
 {
     use \Tests\Support\EditorialDatabase;
 
+    public function test_home_news_uses_the_gallery_photo_even_with_a_legacy_cover(): void
+    {
+        $news = $this->content(1, 'Berita', 'published');
+        $news->update(['image_path' => 'announcements/old-cover.jpg', 'image_disk' => 'private']);
+        $photo = $news->images()->create(['image_path' => 'editorial/gallery.jpg', 'disk' => 'private']);
+
+        $this->view('beranda.index', [
+            'recentAnnouncements' => collect([$news]),
+            'activeServices' => [],
+            'errors' => new \Illuminate\Support\ViewErrorBag(),
+        ])
+            ->assertSee('src="'.$photo->url.'"', false)
+            ->assertDontSee('storage/announcements/old-cover.jpg');
+    }
+
+    public function test_citizen_submission_form_belongs_to_news_and_only_managers_can_compose_notices(): void
+    {
+        foreach ([1 => false, 4 => true] as $userId => $manager) {
+            $response = $this->actingAs($this->user($userId))->get('/kabar-daerah?tab=pengumuman')->assertOk();
+            $dom = new \DOMDocument();
+            @$dom->loadHTML($response->getContent());
+            $xpath = new \DOMXPath($dom);
+            $this->assertSame(1, $xpath->query('//*[@id="tab-content-berita"]//form[@method="post"]//input[@value="Berita"]')->length);
+            $this->assertSame($manager ? 1 : 0, $xpath->query('//*[@id="tab-content-pengumuman"]//form[@method="post"]')->length);
+        }
+    }
+
     public function test_only_agreed_roles_can_manage_content_and_receive_review_requests(): void
     {
         $item=$this->content(); $access=app(ContentAccess::class);
