@@ -14,7 +14,7 @@ class ServiceCategoryController extends Controller
         $definitions = [
             'belanja-kebutuhan' => [
                 'title' => 'Belanja dan Kebutuhan',
-                'description' => 'Pilih kebutuhan gas rumah tangga atau jelajahi produk lokal dari Pasar Daerah.',
+                'description' => 'Pesan kebutuhan gas rumah tangga dari unit penjualan resmi di wilayah Anda.',
                 'image' => 'Admin/img/menu3dberanda/belanja-kebutuhan.png',
                 'items' => [
                     [
@@ -24,14 +24,7 @@ class ServiceCategoryController extends Controller
                         'route' => 'gas.sales',
                         'services' => ['Penjualan Gas'],
                     ],
-                    [
-                        'title' => 'Pasar Daerah',
-                        'description' => 'Jelajahi dan beli produk unggulan dari pelaku usaha daerah.',
-                        'image' => 'Admin/img/menu3dberanda/pasar-daerah.webp',
-                        'route' => 'pasar.index',
-                        'public' => true,
-                    ],
-                ],
+],
             ],
             'layanan-daerah' => [
                 'title' => 'Layanan Daerah',

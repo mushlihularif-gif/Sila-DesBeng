@@ -66,16 +66,6 @@
                         <p class="font-bold text-xs sm:text-lg text-gray-800 leading-tight">Fasilitas Umum</p>
                     </div>
                 </div>
-                
-                <!-- Pasar Daerah Card -->
-                <div class="activity-menu-card cursor-pointer w-full sm:w-auto" data-type="pasar">
-                    <div class="bg-white rounded-xl sm:rounded-2xl p-2.5 sm:p-6 shadow-md sm:shadow-lg hover:shadow-xl transition-all duration-300 w-full sm:w-48 text-center border-2 sm:border-4 border-transparent flex flex-col justify-center items-center h-full">
-                        <div class="mb-1.5 sm:mb-3 flex justify-center">
-                            <img src="{{ asset('Admin/img/menu3dberanda/pasar-daerah.webp') }}" alt="Pasar Daerah" class="w-9 h-9 sm:w-16 sm:h-16 object-contain">
-                        </div>
-                        <p class="font-bold text-xs sm:text-lg text-gray-800 leading-tight">Pasar Daerah</p>
-                    </div>
-                </div>
 
                 
             </div>
@@ -107,12 +97,6 @@
                         data-type="fasilitas">
                     <i class="fas fa-trash-alt mr-2"></i>Bersihkan Riwayat Fasilitas Umum
                 </button>
-                <button type="button" 
-                        class="clear-history-btn bg-red-100 text-red-600 px-6 py-2 rounded-full font-semibold hover:bg-red-200 transition-colors hidden"
-                        id="clear-pasar-btn"
-                        data-type="pasar">
-                    <i class="fas fa-trash-alt mr-2"></i>Bersihkan Riwayat Pasar Daerah
-                </button>
                 
             </div>
 
@@ -142,11 +126,6 @@
             <!-- Fasilitas Umum Orders Section -->
             <div id="fasilitas-section" class="activity-section space-y-6 hidden">
                 @include("users.partials.activity-fasilitas")
-            </div>
-
-            <!-- Pasar Daerah Section -->
-            <div id="pasar-section" class="activity-section space-y-6 hidden">
-                @include("users.partials.activity-pasar")
             </div>
 
             

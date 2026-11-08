@@ -58,7 +58,7 @@ class ServiceCategoryPageTest extends TestCase
         $this->get(route('service-category.show', ['category' => 'belanja-kebutuhan', 'region_id' => 12, 'from' => 'region']))
             ->assertOk()
             ->assertSee(route('gas.sales', ['region_id' => 12]))
-            ->assertSee(route('pasar.index', ['region_id' => 12]))
+            ->assertDontSee(route('pasar.index', ['region_id' => 12]))
             ->assertSee('Kembali ke Desa Pilihan')
             ->assertSee(route('bumdes.detail', ['slug' => 'desa-pilihan', 'id' => 12]) . '#unit-carousel-container');
         $this->get(route('service-category.show', ['category' => 'layanan-daerah', 'region_id' => 12]))
@@ -98,7 +98,7 @@ class ServiceCategoryPageTest extends TestCase
         $response->assertOk()
             ->assertSee('Belanja dan Kebutuhan')
             ->assertSee('Gas Daerah')
-            ->assertSee('Pasar Daerah');
+            ->assertDontSee('Pasar Daerah');
     }
 
     public function test_guest_can_open_layanan_category_and_find_its_destinations(): void
@@ -123,9 +123,9 @@ class ServiceCategoryPageTest extends TestCase
         foreach (['portal/index.html','public/portal/index.html'] as $file) {
             $html=file_get_contents(base_path($file));
             preg_match_all('/<article class="kartu-layanan".*?<\/article>/s',$html,$cards);
-            $this->assertCount(6,$cards[0],$file);
+            $this->assertCount(5,$cards[0],$file);
             $this->assertStringNotContainsString('Pelaporan Warga',$html);
-            foreach (['Penyewaan Alat','Pembelian Gas','Penyewaan Transportasi','Fasilitas Umum','Pasar Daerah','Kabar dan Informasi Daerah'] as $service) {
+            foreach (['Penyewaan Alat','Pembelian Gas','Penyewaan Transportasi','Fasilitas Umum','Kabar dan Informasi Daerah'] as $service) {
                 $this->assertStringContainsString('<h3>'.$service.'</h3>',implode('',$cards[0]));
             }
             preg_match_all('/src="(assets\/img\/unit\/[^\"]+)"/',implode('',$cards[0]),$images);
@@ -145,6 +145,6 @@ class ServiceCategoryPageTest extends TestCase
             ->assertSee(route('bumdes.profil', ['redirect' => 'user.fasilitas-umum.equipment']), false)
             ->assertDontSee('Pelaporan Warga')
             ->assertSee(route('announcements.index'), false)
-            ->assertSee(route('pasar.index'), false);
+            ->assertDontSee(route('pasar.index'), false);
     }
 }

@@ -128,7 +128,6 @@
                         <button type="button" data-query="Mobil Pick Up" class="popular-search-chip px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full bg-white hover:bg-blue-50 text-gray-700 hover:text-[#115789] border border-gray-200 shadow-xs hover:border-blue-300 hover:shadow-sm transition-all text-[10px] sm:text-xs font-medium cursor-pointer">Mobil Pick Up</button>
                         <button type="button" data-query="Tenda" class="popular-search-chip px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full bg-white hover:bg-blue-50 text-gray-700 hover:text-[#115789] border border-gray-200 shadow-xs hover:border-blue-300 hover:shadow-sm transition-all text-[10px] sm:text-xs font-medium cursor-pointer">Tenda Acara</button>
                         <button type="button" data-query="Kursi" class="popular-search-chip px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full bg-white hover:bg-blue-50 text-gray-700 hover:text-[#115789] border border-gray-200 shadow-xs hover:border-blue-300 hover:shadow-sm transition-all text-[10px] sm:text-xs font-medium cursor-pointer">Kursi Lipat</button>
-                        <button type="button" data-query="Pasar" class="popular-search-chip px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full bg-white hover:bg-blue-50 text-gray-700 hover:text-[#115789] border border-gray-200 shadow-xs hover:border-blue-300 hover:shadow-sm transition-all text-[10px] sm:text-xs font-medium cursor-pointer">Pasar Daerah</button>
                     </div>
                 </div>
             </div>
@@ -274,8 +273,8 @@
                                             <span id="speech-badge-label">Belanja dan Kebutuhan</span>
                                         </span>
                                         <div class="min-w-0 w-full">
-                                            <p id="speech-heading" class="text-sm font-extrabold leading-snug text-slate-900 sm:text-base">Cari kebutuhan rumah atau produk lokal?</p>
-                                            <p id="speech-body" class="mt-1 text-xs font-medium leading-relaxed text-slate-600 sm:text-sm">Pesan gas atau jelajahi produk usaha daerah melalui Pasar Daerah.</p>
+                                            <p id="speech-heading" class="text-sm font-extrabold leading-snug text-slate-900 sm:text-base">Cari kebutuhan rumah atau gas LPG?</p>
+                                            <p id="speech-body" class="mt-1 text-xs font-medium leading-relaxed text-slate-600 sm:text-sm">Pesan kebutuhan gas rumah tangga dari unit penjualan resmi di wilayah Anda.</p>
                                         </div>
                                     </div>
                                 </div>
@@ -337,7 +336,6 @@
                             @if(!isset($isServiceActive) || $isServiceActive('Unit Penyewaan Transportasi') || $isServiceActive('Unit Penyewaan Mobil'))
                             <a href="{{ $isLoggedInWithRegion ? route('mobil.rental.equipment') . '?region_id=' . $userRegionId : route('bumdes.profil') . '?redirect=mobil.rental.equipment' }}" class="px-3 py-1.5 text-xs font-semibold rounded-full bg-white text-slate-700 hover:bg-blue-600 hover:text-white border border-slate-200 hover:border-blue-600 transition-all shadow-2xs hover:shadow-xs">Unit Penyewaan Kendaraan</a>
                             @endif
-                            <a href="{{ route('pasar.index') }}" class="px-3 py-1.5 text-xs font-semibold rounded-full bg-white text-slate-700 hover:bg-blue-600 hover:text-white border border-slate-200 hover:border-blue-600 transition-all shadow-2xs hover:shadow-xs">Pasar Daerah</a>
                         </div>
                     </div>
 
@@ -538,7 +536,7 @@
                     <div class="max-w-5xl mx-auto">
                         <div class="backdrop-blur-sm bg-white/70 rounded-2xl sm:rounded-3xl p-5 sm:p-8 md:p-12 border border-white/70 shadow-lg sm:shadow-xl">
                             <p class="text-sm sm:hidden text-gray-700 leading-relaxed">
-                                SegiDaerah memudahkan warga mengakses layanan desa, berbelanja produk lokal, dan mendapatkan informasi daerah dalam satu platform.
+                                SegiDaerah memudahkan warga mengakses layanan desa, kebutuhan rumah tangga, dan mendapatkan informasi daerah dalam satu platform.
                             </p>
                             <details class="sm:hidden mt-3 border-t border-slate-200/80 pt-3">
                                 <summary class="cursor-pointer list-none text-sm font-bold text-[#115789] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 rounded">
@@ -547,7 +545,7 @@
                                 </summary>
                                 <div class="mt-3 space-y-3 text-left text-sm leading-relaxed text-gray-600">
                                     <p>SegiDaerah (Sistem Sinergi Layanan dan Aspirasi Daerah Kecamatan Bengkalis) merupakan platform digital terpadu yang dirancang untuk mendukung tata kelola administrasi dan pelayanan publik secara modern, transparan, dan efisien.</p>
-                                    <p>Warga dapat mengakses penyewaan alat, penjualan gas, transportasi, fasilitas umum, Pasar Daerah, serta Kabar dan Informasi Daerah melalui satu platform.</p>
+                                    <p>Warga dapat mengakses penyewaan alat, penjualan gas, transportasi, fasilitas umum, serta Kabar dan Informasi Daerah melalui satu platform.</p>
                                 </div>
                             </details>
                             <div class="hidden sm:block space-y-4 text-left md:text-justify text-sm md:text-base text-gray-700 leading-relaxed">
@@ -555,7 +553,7 @@
                                     <span class="font-semibold text-gray-800">SegiDaerah</span> (Sistem Sinergi Layanan dan Aspirasi Daerah Kecamatan Bengkalis) merupakan platform digital terpadu yang dirancang khusus untuk memodernisasi tata kelola administrasi dan pelayanan publik di wilayah Kecamatan Bengkalis. Platform ini hadir sebagai solusi inovatif yang mengintegrasikan berbagai pilar layanan esensial masyarakat dan operasional layanan daerah ke dalam satu pintu yang modern, transparan, dan mudah dijangkau.
                                 </p>
                                 <p>
-                                    Melalui SegiDaerah, masyarakat Kecamatan Bengkalis dapat dengan mudah mengakses beragam unit layanan, mulai dari penyewaan alat, pendistribusian gas, sarana transportasi, pemanfaatan fasilitas umum, hingga Pasar Daerah untuk produk usaha lokal. Di samping itu, sistem ini juga mewadahi pusat informasi <span class="font-medium text-gray-800">Kabar dan Informasi Daerah</span> secara <i>real-time</i>. Kami percaya bahwa digitalisasi layanan daerah merupakan langkah penting menuju pelayanan publik yang prima, penguatan perekonomian daerah, dan kemandirian masyarakat yang berkelanjutan.
+                                    Melalui SegiDaerah, masyarakat Kecamatan Bengkalis dapat dengan mudah mengakses beragam unit layanan, mulai dari penyewaan alat, pendistribusian gas, sarana transportasi, hingga pemanfaatan fasilitas umum. Di samping itu, sistem ini juga mewadahi pusat informasi <span class="font-medium text-gray-800">Kabar dan Informasi Daerah</span> secara <i>real-time</i>. Kami percaya bahwa digitalisasi layanan daerah merupakan langkah penting menuju pelayanan publik yang prima, penguatan perekonomian daerah, dan kemandirian masyarakat yang berkelanjutan.
                                 </p>
                             </div>
                         </div>

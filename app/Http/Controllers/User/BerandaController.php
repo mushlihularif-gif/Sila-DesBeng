@@ -283,36 +283,7 @@ class BerandaController extends Controller
                 'link' => route('mobil.rental.show', $item->mobil->id)
             ];
         })->filter();
-
-        // 4. Get Pasar Daerah Scores
-        $pasarPopularity = \App\Models\PasarOrderItem::select('pasar_produk_id', DB::raw('SUM(quantity) as total_sold'))
-            ->whereHas('order', function($q) use ($year, $regionIds) {
-                $q->withTrashed()
-                  ->whereYear('created_at', $year)
-                  ->whereIn('region_id', $regionIds)
-                  ->whereNotIn('status', ['pending', 'cancelled', 'rejected']);
-            })
-            ->groupBy('pasar_produk_id')
-            ->with('produk')
-            ->get();
-
-        $pasarProducts = $pasarPopularity->map(function ($item) {
-            if (!$item->produk) return null;
-            return (object) [
-                'id' => $item->produk->id,
-                'name' => $item->produk->nama_produk,
-                'image' => $item->produk->foto,
-                'price' => $item->produk->harga,
-                'price_formatted' => 'Rp ' . number_format($item->produk->harga, 0, ',', '.'),
-                'stock' => $item->produk->stok,
-                'sold' => (int)$item->total_sold,
-                'type' => 'pasar',
-                'category' => 'Pasar Daerah',
-                'badge_color' => 'bg-amber-600 text-white',
-                'unit' => $item->produk->satuan ?? 'pcs',
-                'link' => route('pasar.show', $item->produk->id)
-            ];
-        })->filter();
+        $pasarProducts = collect();
 
         // Gabungkan produk berdasarkan penjualan terlaris
         $combined = $products->concat($gasProducts)->concat($mobilProducts)->concat($pasarProducts)->sortByDesc('sold');
@@ -427,34 +398,6 @@ class BerandaController extends Controller
                         'unit' => 'acara',
                         'link' => route('user.fasilitas-umum.show', $f->id)
                     ]);
-                }
-            }
-
-            // Fallback 5: Pasar Produk Daerah (Sentral se-Kabupaten)
-            if ($combined->count() < 4) {
-                $fallbackPasar = \App\Models\PasarProduk::visibleStore()->where('stok', '>', 0)
-                    ->latest()
-                    ->take(4)
-                    ->get();
-                foreach ($fallbackPasar as $p) {
-                    $key = 'pasar-' . $p->id;
-                    if (!in_array($key, $existingKeys) && $combined->count() < 4) {
-                        $existingKeys[] = $key;
-                        $combined->push((object) [
-                            'id' => $p->id,
-                            'name' => $p->nama_produk,
-                            'image' => $p->foto,
-                            'price' => $p->harga,
-                            'price_formatted' => 'Rp ' . number_format($p->harga, 0, ',', '.'),
-                            'stock' => $p->stok,
-                            'sold' => 0,
-                            'type' => 'pasar',
-                            'category' => 'Pasar Daerah',
-                            'badge_color' => 'bg-amber-600 text-white',
-                            'unit' => $p->satuan ?? 'pcs',
-                            'link' => route('pasar.show', $p->id)
-                        ]);
-                    }
                 }
             }
 
@@ -846,42 +789,6 @@ class BerandaController extends Controller
                 ];
             });
             $results = $results->concat($fasilitasResults);
-        }
-
-        // 5. Search Pasar Daerah Items (Only if pasar intent or general search)
-        if (!$hasSpecificIntent || $isPasarIntent) {
-            $pasarQuery = \App\Models\PasarProduk::visibleStore();
-            $pasarQuery->where(function ($q) use ($allTerms, $cleanSearch, $rawSearch) {
-                if (trim($rawSearch) === 'pasar' || trim($rawSearch) === 'produk') {
-                    $q->orWhereRaw('1 = 1');
-                } else {
-                    $q->where('nama_produk', 'LIKE', "%{$cleanSearch}%")
-                      ->orWhere('kategori', 'LIKE', "%{$cleanSearch}%");
-                    foreach ($allTerms as $term) {
-                        if (strlen($term) >= 2 && $term !== 'pasar') {
-                            $q->orWhere('nama_produk', 'LIKE', "%{$term}%")
-                              ->orWhere('kategori', 'LIKE', "%{$term}%");
-                        }
-                    }
-                }
-            });
-            $pasarResults = $pasarQuery->get()->map(function ($item) {
-                return (object) [
-                    'id' => $item->id,
-                    'name' => $item->nama_produk,
-                    'image' => $item->foto,
-                    'price' => $item->harga,
-                    'price_formatted' => 'Rp ' . number_format($item->harga, 0, ',', '.'),
-                    'stock' => $item->stok,
-                    'type' => 'pasar',
-                    'category' => 'Pasar Daerah',
-                    'badge_color' => 'bg-amber-600 text-white',
-                    'real_category' => $item->kategori,
-                    'unit' => $item->satuan ?? 'pcs',
-                    'link' => route('pasar.show', $item->id)
-                ];
-            });
-            $results = $results->concat($pasarResults);
         }
 
         return $results->values();

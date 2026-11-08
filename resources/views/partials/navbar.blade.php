@@ -184,11 +184,6 @@
                             <a href="{{ route('pelayanan') }}" class="block px-4 py-2.5 text-gray-800 hover:bg-blue-50 hover:border-l-[3px] hover:border-l-blue-500 transition-all duration-150 whitespace-nowrap {{ request()->routeIs('pelayanan') ? 'bg-blue-50 border-l-[3px] border-l-blue-500 font-medium' : 'border-l-[3px] border-l-transparent' }}">
                                 <span class="text-[15px] font-normal text-center block">Tentang Layanan</span>
                             </a>
-                            
-                            <div class="h-px bg-gray-100 mx-3 my-1"></div>
-                            <a href="{{ route('pasar.index') }}" class="block px-4 py-2.5 text-gray-800 hover:bg-blue-50 hover:border-l-[3px] hover:border-l-blue-500 transition-all duration-150 whitespace-nowrap {{ request()->routeIs('pasar.*') ? 'bg-blue-50 border-l-[3px] border-l-blue-500 font-medium' : 'border-l-[3px] border-l-transparent' }}">
-                                <span class="text-[15px] font-normal text-center block">Pasar Daerah</span>
-                            </a>
                         </div>
                     </div>
                 </div>
@@ -455,10 +450,6 @@
         </a>
         <a href="{{ route('pelayanan') }}" class="block pl-10 pr-6 py-2.5 text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition {{ request()->routeIs('pelayanan') ? 'text-blue-600 font-medium border-l-4 border-blue-500' : '' }}">
             Tentang Layanan
-        </a>
-        
-        <a href="{{ route('pasar.index') }}" class="block pl-10 pr-6 py-2.5 text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition {{ request()->routeIs('pasar.*') ? 'text-blue-600 font-medium border-l-4 border-blue-500' : '' }}">
-            Pasar Daerah
         </a>
         <a href="{{ route('SiladesBeng.profile') }}" class="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium transition {{ request()->routeIs('SiladesBeng.profile') ? 'text-blue-600 bg-blue-50 border-l-4 border-blue-500' : '' }}">
             Profil SegiDaerah
