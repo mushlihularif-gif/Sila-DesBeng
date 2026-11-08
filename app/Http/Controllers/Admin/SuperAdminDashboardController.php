@@ -111,8 +111,7 @@ class SuperAdminDashboardController extends Controller
             'Sewa Alat'      => 'rental_bookings',
             'Sewa Mobil'     => 'mobil_bookings',
             'Fasilitas Umum' => 'fasilitas_umum_bookings',
-            'Pasar Daerah'   => 'pasar_orders',
-        ];
+                    ];
 
         $hasil = [];
 

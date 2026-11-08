@@ -69,7 +69,7 @@
     $isGasActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'gas'));
     $isMobilActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'mobil') || str_contains(strtolower($name), 'transportasi'));
     $isFasilitasActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'fasilitas'));
-    $isPasarActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'pasar'));
+    $isPasarActive = false;
 @endphp
 
 <div class="container-xxl flex-grow-1 container-p-y animate-fade-up" style="max-width: 100%; overflow-x: hidden;">
@@ -80,7 +80,7 @@
             <h4 class="fw-bold mb-1">
                 <span class="text-muted fw-light">Laporan /</span> Kinerja Wilayah
             </h4>
-            <p class="text-muted small mb-0">Pemantauan tren aktivitas 5 sektor layanan daerah dan partisipasi warga di seluruh wilayah</p>
+            <p class="text-muted small mb-0">Pemantauan tren aktivitas 4 sektor layanan daerah dan partisipasi warga di seluruh wilayah</p>
         </div>
         <div class="d-flex flex-wrap gap-2 w-100 w-sm-auto justify-content-start justify-content-sm-end">
             <button class="btn btn-primary shadow-sm rounded-pill px-4 flex-grow-1 flex-sm-grow-0" onclick="window.print()">
@@ -100,7 +100,7 @@
             <div>
                 <h6 class="fw-bold mb-1 text-primary">Panduan Evaluasi Wilayah</h6>
                 <p class="mb-0 text-primary small" style="opacity: 0.9; line-height: 1.5;">
-                    Halaman ini merangkum indeks aktivitas dari <strong>5 sektor layanan daerah</strong> (Penyewaan Alat, Gas LPG, Transportasi, Fasilitas Umum, Pasar Daerah) dalam bentuk poin tren. Nilai nominal keuangan disamarkan demi menjaga privasi antar wilayah.
+                    Halaman ini merangkum indeks aktivitas dari <strong>4 sektor layanan daerah</strong> (Penyewaan Alat, Gas LPG, Transportasi, Fasilitas Umum, Pasar Daerah) dalam bentuk poin tren. Nilai nominal keuangan disamarkan demi menjaga privasi antar wilayah.
                 </p>
             </div>
         </div>
@@ -321,7 +321,7 @@
                     <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2">
                         <div>
                             <h5 class="card-title fw-bold text-dark mb-1">Tren Kinerja Layanan</h5>
-                            <small class="text-muted" id="chart-subtitle">Grafik akumulasi aktivitas 5 sektor layanan daerah tahun {{ $year }}</small>
+                            <small class="text-muted" id="chart-subtitle">Grafik akumulasi aktivitas 4 sektor layanan daerah tahun {{ $year }}</small>
                         </div>
                         <div class="d-flex align-items-center">
                             <span class="badge bg-label-primary rounded-pill px-3 py-2 fw-medium d-inline-flex align-items-center" style="font-size: 0.8rem; text-transform: none !important; letter-spacing: normal;">
@@ -538,7 +538,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Update subtitle tahun
             const subtitle = document.getElementById('chart-subtitle');
             if (subtitle && yearSelect) {
-                subtitle.textContent = 'Grafik akumulasi aktivitas 5 sektor layanan daerah tahun ' + yearSelect.value;
+                subtitle.textContent = 'Grafik akumulasi aktivitas 4 sektor layanan daerah tahun ' + yearSelect.value;
             }
         })
         .catch(function(err) { 

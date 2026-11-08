@@ -105,7 +105,7 @@
                         Perjalanan <span class="fw-bold text-dark">SegiDaerah</span> (Sistem Sinergi Layanan dan Aspirasi Daerah Kecamatan Bengkalis) bermula dari sebuah visi besar untuk mendorong percepatan digitalisasi pelayanan publik di wilayah Kecamatan Bengkalis. Gagasan ini lahir sebagai solusi inovatif untuk memutus kendala jarak dan mengoptimalkan potensi daerah melalui pemanfaatan teknologi. Mimpi utama kami adalah menghubungkan seluruh jaringan desa dan kelurahan ke dalam satu ekosistem digital yang canggih, terpadu, dan mudah diakses oleh seluruh lapisan masyarakat.
                     </p>
                     <p class="text-muted lh-lg mb-0 text-start text-md-justify" style="font-size: 0.9rem;">
-                        Sebagai wujud nyata dari visi tersebut, SegiDaerah hadir mengintegrasikan berbagai pilar layanan esensial daerah, mulai dari sarana mobilitas (kendaraan), pemanfaatan fasilitas umum, penyewaan alat, pendistribusian gas, hingga Pasar Daerah. Lebih jauh lagi, kami juga menghadirkan ruang interaksi inklusif melalui portal publik Kabar dan Informasi Pengumuman Daerah. Cerita SegiDaerah adalah cerita tentang inovasi dan kolaborasi bagaimana sentuhan teknologi mentransformasi cara aparatur dan masyarakat berinteraksi demi mewujudkan tata kelola Bengkalis yang mandiri, produktif, dan berkelanjutan.
+                        Sebagai wujud nyata dari visi tersebut, SegiDaerah hadir mengintegrasikan berbagai pilar layanan esensial daerah, mulai dari sarana mobilitas (kendaraan), pemanfaatan fasilitas umum, penyewaan alat, pendistribusian gas, hingga pendistribusian gas. Lebih jauh lagi, kami juga menghadirkan ruang interaksi inklusif melalui portal publik Kabar dan Informasi Pengumuman Daerah. Cerita SegiDaerah adalah cerita tentang inovasi dan kolaborasi bagaimana sentuhan teknologi mentransformasi cara aparatur dan masyarakat berinteraksi demi mewujudkan tata kelola Bengkalis yang mandiri, produktif, dan berkelanjutan.
                     </p>
                 </div>
                 <div class="col-lg-4 text-center d-none d-lg-block">
@@ -184,18 +184,6 @@
                         </div>
                         <h6 class="fw-bold text-dark mb-2">Sarana Mobilitas</h6>
                         <p class="text-muted small mb-0">Fasilitas transportasi untuk mendukung operasional instansi dan mobilitas masyarakat di Kecamatan Bengkalis.</p>
-                    </div>
-                </div>
-            </div>
-            <!-- Service 7: Pasar Daerah -->
-            <div class="col-md-4">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-body p-4">
-                        <div class="icon-box mb-3">
-                            <i class='bx bx-store fs-4'></i>
-                        </div>
-                        <h6 class="fw-bold text-dark mb-2">Pasar Daerah</h6>
-                        <p class="text-muted small mb-0">Wadah promosi dan transaksi digital untuk memasarkan produk usaha lokal masyarakat dan desa di Kecamatan Bengkalis.</p>
                     </div>
                 </div>
             </div>

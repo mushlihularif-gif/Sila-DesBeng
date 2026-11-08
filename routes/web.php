@@ -249,14 +249,14 @@ Route::post('/gas/payment/{id}/cancel', [App\Http\Controllers\User\GasBookingCon
 
 // === PASAR DAERAH (User) ===
 Route::middleware(['auth','role:admin_desa,super_admin'])->group(function () {
-    Route::get('/admin/toko-warga',[\App\Http\Controllers\MarketStoreController::class,'reviewIndex'])->name('market.review.index');
+    Route::redirect('/admin/toko-warga', '/admin/dashboard')->name('market.review.index');
     Route::post('/admin/toko-warga/komplain/{id}',[\App\Http\Controllers\MarketStoreController::class,'reviewComplaint'])->name('market.review.complaint');
     Route::get('/admin/toko-warga/pesanan/{id}',[\App\Http\Controllers\MarketStoreController::class,'reviewOrder'])->name('market.review.order');
     Route::post('/admin/toko-warga/{id}',[\App\Http\Controllers\MarketStoreController::class,'review'])->name('market.review');
 });
 Route::middleware('auth')->prefix('pasar-daerah')->group(function () {
     Route::post('/pesanan/{id}/bukti-pembayaran',[\App\Http\Controllers\MarketStoreController::class,'paymentProof'])->middleware('throttle:10,1')->name('pasar.payment.proof');
-    Route::get('/mulai-jualan',[\App\Http\Controllers\MarketStoreController::class,'home'])->name('market.seller.home');
+    Route::redirect('/mulai-jualan', '/beranda')->name('market.seller.home');
     Route::post('/toko-saya/profil',[\App\Http\Controllers\MarketStoreController::class,'saveProfile'])->middleware('throttle:10,1')->name('market.seller.profile');
     Route::post('/toko-saya/pengaturan',[\App\Http\Controllers\MarketStoreController::class,'settings'])->name('market.seller.settings');
     Route::match(['get','post'],'/toko-saya/produk/{id?}',[\App\Http\Controllers\MarketStoreController::class,'product'])->name('market.seller.product');
@@ -264,10 +264,9 @@ Route::middleware('auth')->prefix('pasar-daerah')->group(function () {
     Route::post('/toko-saya/pesanan/{id}',[\App\Http\Controllers\MarketStoreController::class,'changeOrder'])->name('market.seller.order.change');
     Route::get('/toko-warga/{id}',[\App\Http\Controllers\MarketStoreController::class,'show'])->withoutMiddleware('auth')->name('market.store');
     Route::match(['get','post'],'/toko-warga/{id}/chat/{buyer?}',[\App\Http\Controllers\MarketStoreController::class,'chat'])->middleware('throttle:60,1')->name('market.chat');
-    Route::get('/', [App\Http\Controllers\User\PasarDaerahController::class, 'index'])
-        ->name('pasar.index')
-        ->withoutMiddleware('auth')
-        ->middleware(['role:user,guest']);
+    Route::get('/', function () {
+        return redirect()->route('beranda');
+    })->name('pasar.index')->withoutMiddleware('auth');
     Route::get('/keranjang', [App\Http\Controllers\User\PasarDaerahController::class, 'cart'])->name('pasar.cart');
     Route::get('/cart/api', [App\Http\Controllers\User\PasarDaerahController::class, 'getCartItemsApi'])->name('pasar.cart.api');
     Route::post('/cart/add', [App\Http\Controllers\User\PasarDaerahController::class, 'addToCart'])->name('pasar.cart.add');
@@ -706,6 +705,7 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
         ]);
         
         // Pasar Daerah
+        Route::redirect('admin/unit/pasar-daerah', '/admin/dashboard');
         Route::middleware('staff.permission:pasar_daerah')->group(function () {
             Route::post('pasar-daerah/sop', [\App\Http\Controllers\Admin\UnitPasarDaerahController::class, 'updateSop'])->name('admin.unit.pasar_daerah.sop');
             Route::resource('pasar-daerah', \App\Http\Controllers\Admin\UnitPasarDaerahController::class)->names([

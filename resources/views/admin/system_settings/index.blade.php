@@ -161,8 +161,8 @@
                                 <div>
                                     <strong class="d-block mb-1 text-dark">Panduan Pengaturan Layanan</strong>
                                     <p class="mb-0 text-dark" style="font-size: 0.85rem; line-height: 1.45;">
-                                        <strong>Unit Layanan Desa:</strong> Layanan alat, gas, transportasi, fasilitas umum, dan pasar daerah dikelola sesuai wilayah desa yang terdaftar.<br>
-                                        <strong>Layanan Kecamatan Bengkalis:</strong> <em>Pasar Daerah</em> dan <em>Kabar dan Informasi Daerah</em> tersedia untuk warga desa-desa di Kecamatan Bengkalis.
+                                        <strong>Unit Layanan Desa:</strong> Layanan alat, gas, transportasi, dan fasilitas umum dikelola sesuai wilayah desa yang terdaftar.<br>
+                                        <strong>Layanan Kecamatan Bengkalis:</strong> <em>Kabar dan Informasi Daerah</em> tersedia untuk warga desa-desa di Kecamatan Bengkalis.
                                     </p>
                                 </div>
                             </div>
@@ -174,7 +174,7 @@
                                 });
                                 $publicServices = $allServices->filter(function($s) {
                                     $n = strtolower($s->name);
-                                    return strpos($n, 'pasar') !== false || strpos($n, 'pengumuman') !== false;
+                                    return strpos($n, 'pengumuman') !== false;
                                 });
                             @endphp
 
@@ -263,53 +263,10 @@
                                 @foreach($publicServices as $service)
                                     @php
                                         $sName = strtolower($service->name);
-                                        $isPasar = strpos($sName, 'pasar') !== false;
-                                        $isPengumuman = strpos($sName, 'pengumuman') !== false;
+                                                                                $isPengumuman = strpos($sName, 'pengumuman') !== false;
                                     @endphp
 
-                                    @if($isPasar)
-                                    <div class="col-md-6">
-                                        <input type="hidden" name="services[]" value="{{ $service->id }}">
-                                        <div class="card border border-success border-opacity-25 shadow-sm rounded-3 h-100" style="background: #ffffff; max-width: 100%; overflow: hidden;">
-                                            <div class="card-body p-3 d-flex flex-column justify-content-between">
-                                                <div>
-                                                    <div class="d-flex align-items-center mb-2">
-                                                        <div class="bg-label-success rounded p-2 me-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 46px; height: 46px;">
-                                                            <img src="{{ asset('Admin/img/menu3dberanda/pasar-daerah.webp') }}" alt="Pasar Daerah" class="w-100 h-100 object-contain" style="object-fit: contain;">
-                                                        </div>
-                                                        <div class="flex-grow-1 overflow-hidden">
-                                                            <div class="d-flex align-items-center justify-content-between gap-1">
-                                                                <span class="fw-bold d-block text-dark text-truncate" style="font-size: 0.95rem;">Pasar Daerah</span>
-                                                                <span class="badge bg-label-success rounded-pill px-2 py-1 flex-shrink-0" style="font-size: 0.7rem; text-transform: none !important;">
-                                                                    <i class="bx bx-check-circle me-1"></i>Selalu Aktif
-                                                                </span>
-                                                            </div>
-                                                            <small class="text-success fw-medium d-block text-truncate" style="font-size: 0.72rem;">
-                                                                 Marketplace Terpadu Kecamatan Bengkalis
-                                                            </small>
-                                                        </div>
-                                                    </div>
-                                                    <p class="text-muted mb-3 text-break" style="font-size: 0.78rem; line-height: 1.4;">
-                                                        Marketplace bersama seluruh desa. Warga dapat membeli produk dari mana pun di Kabupaten Bengkalis, dan UMKM desa dapat berjualan ke seluruh wilayah tanpa dibatasi.
-                                                    </p>
-                                                </div>
-
-                                                <div class="bg-light border rounded-3 p-2 px-3">
-                                                    <div class="d-flex align-items-center justify-content-between gap-2">
-                                                        <div class="d-flex align-items-center overflow-hidden">
-                                                            <i class="bx bx-globe text-success fs-5 me-2 flex-shrink-0"></i>
-                                                            <div class="overflow-hidden">
-                                                                 <span class="fw-bold d-block text-dark small text-truncate" style="font-size: 0.78rem;">Publik (Lintas Desa dan Kecamatan)</span>
-                                                                <small class="text-muted d-block text-truncate" style="font-size: 0.68rem;">Otomatis terbuka untuk seluruh warga masyarakat.</small>
-                                                            </div>
-                                                        </div>
-                                                        <i class="bx bxs-lock-alt text-secondary flex-shrink-0" title="Layanan publik kabupaten selalu aktif"></i>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    @elseif($isPengumuman)
+                                    @if($isPengumuman)
                                     <div class="col-md-6">
                                         <input type="hidden" name="services[]" value="{{ $service->id }}">
                                         <div class="card border border-info border-opacity-25 shadow-sm rounded-3 h-100" style="background: #ffffff; max-width: 100%; overflow: hidden;">
@@ -403,14 +360,6 @@
                                             <div>
                                                 <span class="fw-bold d-block">Fasilitas Umum</span>
                                                 <small class="text-muted" style="font-size: 0.75rem;">Metode Penggunaan / Serah Terima</small>
-                                            </div>
-                                        </button>
-
-                                        <button class="nav-link d-flex align-items-center text-start p-3 rounded-4" id="v-pills-pasar-tab" data-bs-toggle="pill" data-bs-target="#box_delivery_pasar" type="button" role="tab" aria-selected="false" style="display: none; transition: all 0.2s;">
-                                            <img src="{{ asset('Admin/img/menu3dberanda/pasar-daerah.webp') }}" class="me-3" style="width: 24px; height: 24px; object-fit: contain;">
-                                            <div>
-                                                <span class="fw-bold d-block">Pasar Daerah</span>
-                                                <small class="text-muted" style="font-size: 0.75rem;">Ambil Sendiri / Antar</small>
                                             </div>
                                         </button>
                                     </div>
@@ -621,64 +570,6 @@
                                                 </div>
                                             </div>
                                         </div>
-
-                                        <!-- Pasar Detail -->
-                                        <div class="tab-pane fade" id="box_delivery_pasar" role="tabpanel" aria-labelledby="v-pills-pasar-tab">
-                                            <div class="d-flex align-items-center mb-4">
-                                                <img src="{{ asset('Admin/img/menu3dberanda/pasar-daerah.webp') }}" class="me-3" style="width: 32px; height: 32px; object-fit: contain;">
-                                                <div>
-                                                    <h6 class="fw-bold mb-0 text-primary">Pengaturan Pasar Daerah</h6>
-                                                    <small class="text-muted">Metode pengiriman produk dari toko/penjual ke pembeli.</small>
-                                                </div>
-                                            </div>
-                                            <div class="d-flex flex-column gap-3">
-                                                <div class="bg-light p-3 rounded-4 border">
-                                                    <div class="d-flex justify-content-between align-items-center">
-                                                        <div class="flex-grow-1 pe-3">
-                                                            <div class="d-flex align-items-center mb-2">
-                                                                <img src="{{ asset('Admin/img/elements/antar.png') }}" alt="Layanan Antar (Kurir/Armada)" style="width: 45px; height: 45px; object-fit: contain;" class="me-3">
-                                                                <div>
-                                                                    <span class="text-dark fw-bold d-block" style="font-size: 1.05rem;">Layanan Antar (Kurir/Armada)</span>
-                                                                    <span class="text-muted small d-block mb-0">Produk diantar ke rumah warga (dengan ongkos kirim otomatis)</span>
-                                                                </div>
-                                                            </div>
-                                                            <div class="dynamic-keterangan mt-2" style="display: none;">
-                                                                <div class="d-flex align-items-start rounded-3 p-2 border" style="background-color: #e7f1ff; border-color: #b8daff; color: #004085;">
-                                                                    <i class="bx bx-check-circle me-2 mt-1"></i>
-                                                                    <span class="small fw-semibold">Aktif: Warga dapat memilih opsi ini saat melakukan pemesanan.</span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="form-check form-switch mb-0 d-flex flex-column align-items-center justify-content-center" style="min-width: 80px;">
-                                                            <input class="form-check-input toggle-status m-0" style="transform: scale(1.3); cursor: pointer; float: none;" type="checkbox" name="pasar_delivery_antar_active" {{ isset($region->payment_info['pasar_delivery_antar_active']) ? ($region->payment_info['pasar_delivery_antar_active'] ? 'checked' : '') : 'checked' }}>
-                                                            <span class="status-label mt-2 small fw-bold text-center"></span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="bg-light p-3 rounded-4 border">
-                                                    <div class="d-flex justify-content-between align-items-center">
-                                                        <div class="flex-grow-1 pe-3">
-                                                            <div class="d-flex align-items-center mb-2">
-                                                                <img src="{{ asset('Admin/img/elements/jemput.png') }}" alt="Jemput Sendiri / Pick-up (Gratis)" style="width: 45px; height: 45px; object-fit: contain;" class="me-3">
-                                                                <div>
-                                                                    <span class="text-dark fw-bold d-block" style="font-size: 1.05rem;">Jemput Sendiri / Pick-up (Gratis)</span>
-                                                                    <span class="text-muted small d-block mb-0">Warga dapat memilih untuk menjemput produk langsung di toko</span>
-                                                                </div>
-                                                            </div>
-                                                            <div class="dynamic-keterangan mt-2" style="display: none;">
-                                                                <div class="d-flex align-items-start rounded-3 p-2 border" style="background-color: #e7f1ff; border-color: #b8daff; color: #004085;">
-                                                                    <i class="bx bx-check-circle me-2 mt-1"></i>
-                                                                    <span class="small fw-semibold">Aktif: Warga dapat memilih opsi ini saat melakukan pemesanan.</span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="form-check form-switch mb-0 d-flex flex-column align-items-center justify-content-center" style="min-width: 80px;">
-                                                            <input class="form-check-input toggle-status m-0" style="transform: scale(1.3); cursor: pointer; float: none;" type="checkbox" name="pasar_delivery_jemput_active" {{ isset($region->payment_info['pasar_delivery_jemput_active']) ? ($region->payment_info['pasar_delivery_jemput_active'] ? 'checked' : '') : 'checked' }}>
-                                                            <span class="status-label mt-2 small fw-bold text-center"></span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
                                         </div>
                                         
                                         <!-- Fasilitas Umum Detail -->
@@ -822,7 +713,7 @@
     const checkboxes = document.querySelectorAll('input[name="services[]"]');
     
     function updateDeliveryBoxes() {
-        let showMobil = false, showAlat = false, showGas = false, showFasilitas = false, showPasar = true;
+        let showMobil = false, showAlat = false, showGas = false, showFasilitas = false;
         
         checkboxes.forEach(cb => {
             if(cb.checked) {
@@ -833,7 +724,7 @@
                     if(name.includes('Alat')) showAlat = true;
                     if(name.includes('Gas')) showGas = true;
                     if(name.includes('Fasilitas Umum')) showFasilitas = true;
-                    if(name.includes('Pasar Daerah')) showPasar = true;
+                    
                 }
             }
         });
@@ -842,25 +733,22 @@
         const tabAlat = document.getElementById('v-pills-alat-tab');
         const tabGas = document.getElementById('v-pills-gas-tab');
         const tabFasilitas = document.getElementById('v-pills-fasilitas-tab');
-        const tabPasar = document.getElementById('v-pills-pasar-tab');
-        const mainBox = document.getElementById('main_delivery_section');
+                const mainBox = document.getElementById('main_delivery_section');
         const emptyState = document.getElementById('empty_delivery_state');
         
         if(tabMobil) tabMobil.style.display = showMobil ? 'flex' : 'none';
         if(tabAlat) tabAlat.style.display = showAlat ? 'flex' : 'none';
         if(tabGas) tabGas.style.display = showGas ? 'flex' : 'none';
         if(tabFasilitas) tabFasilitas.style.display = showFasilitas ? 'flex' : 'none';
-        if(tabPasar) tabPasar.style.display = showPasar ? 'flex' : 'none';
-        
+                
         // Auto-select first visible tab
         let firstVisible = null;
         if(showMobil) firstVisible = tabMobil;
         else if(showAlat) firstVisible = tabAlat;
         else if(showGas) firstVisible = tabGas;
-        else if(showPasar) firstVisible = tabPasar;
-        else if(showFasilitas) firstVisible = tabFasilitas;
+                else if(showFasilitas) firstVisible = tabFasilitas;
         
-        const hasAnyDelivery = (showMobil || showAlat || showGas || showFasilitas || showPasar);
+        const hasAnyDelivery = (showMobil || showAlat || showGas || showFasilitas);
         
         if(mainBox) mainBox.style.display = hasAnyDelivery ? 'flex' : 'none';
         if(emptyState) emptyState.style.display = hasAnyDelivery ? 'none' : 'block';

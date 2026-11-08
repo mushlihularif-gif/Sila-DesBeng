@@ -289,8 +289,8 @@
                             $isServiceActive = function($unitName) use ($isLoggedInWithRegion, $activeServices) {
                                 if (!$isLoggedInWithRegion) return true;
 
-                                // Menu informasi dan Pasar Daerah tersedia untuk semua wilayah.
-                                if (in_array($unitName, ['Belanja dan Kebutuhan', 'Pasar Daerah', 'Kabar dan Informasi Daerah', 'Pengumuman dan Event'])) {
+                                // Menu informasi tersedia untuk semua wilayah.
+                                if (in_array($unitName, ['Belanja dan Kebutuhan', 'Kabar dan Informasi Daerah', 'Pengumuman dan Event'])) {
                                     return true;
                                 }
 

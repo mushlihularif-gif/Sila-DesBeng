@@ -25,8 +25,7 @@ class LokasiLayananController extends Controller
         'barang'          => 'Penyewaan Alat',
         'mobils'          => 'Penyewaan Transportasi',
         'fasilitas_umums' => 'Fasilitas Umum',
-        'pasar_produks'   => 'Pasar Daerah',
-    ];
+            ];
 
     private function pastikanAdminWilayah(): void
     {

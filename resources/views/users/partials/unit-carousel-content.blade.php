@@ -14,8 +14,8 @@
         $isServiceActive = function($unitName) use ($hasRegionContext, $activeServices) {
             if (!$hasRegionContext) return true;
 
-            // Menu informasi dan Pasar Daerah tersedia untuk semua wilayah.
-            if (in_array($unitName, ['Belanja dan Kebutuhan', 'Pasar Daerah', 'Kabar dan Informasi Daerah', 'Pengumuman dan Event'])) {
+            // Menu informasi tersedia untuk semua wilayah.
+            if (in_array($unitName, ['Belanja dan Kebutuhan', 'Kabar dan Informasi Daerah', 'Pengumuman dan Event'])) {
                 return true;
             }
 
@@ -60,7 +60,7 @@
                  data-box-border="border-amber-200"
                  data-badge-bg="bg-amber-100 text-amber-800 border-amber-300"
                  data-text-color="text-amber-950">
-                <img src="{{ asset('Admin/img/menu3dberanda/belanja-kebutuhan.png') }}" onerror="this.onerror=null; this.src='{{ asset('Admin/img/pasardaerah/PasarDaerah.png') }}';" alt="Belanja dan Kebutuhan" loading="lazy">
+                <img src="{{ asset('Admin/img/menu3dberanda/belanja-kebutuhan.png') }}" alt="Belanja dan Kebutuhan" loading="lazy">
             </a>
             @endif
 

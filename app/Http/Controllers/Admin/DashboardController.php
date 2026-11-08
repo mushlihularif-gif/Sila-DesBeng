@@ -64,20 +64,14 @@ public function index(Request $request)
         ->pluck('year')
         ->toArray();
 
-    $pasarYears = \App\Models\PasarOrder::whereNull('store_id')->withTrashed()
-        ->selectRaw('YEAR(created_at) as year')
-        ->distinct()
-        ->pluck('year')
-        ->toArray();
         
-    $availableYears = array_unique(array_merge($rentalYears, $gasYears, $mobilYears, $fasilitasYears, $pasarYears, [now()->year]));
+    $availableYears = array_unique(array_merge($rentalYears, $gasYears, $mobilYears, $fasilitasYears, [now()->year]));
     rsort($availableYears);
 
     $baseRental = $this->applyRegionFilter(RentalBooking::withTrashed());
     $baseGas = $this->applyRegionFilter(GasOrder::withTrashed());
     $baseMobil = $this->applyRegionFilter(\App\Models\MobilBooking::withTrashed());
     $baseFasilitas = $this->applyRegionFilter(\App\Models\FasilitasUmumBooking::withTrashed());
-    $basePasar = $this->applyRegionFilter(\App\Models\PasarOrder::whereNull('store_id')->withTrashed());
     $baseKyc = $this->applyRegionFilter(\App\Models\KycVerification::query(), 'user');
 
     // Dashboard operasional dibatasi ke desa-desa Kecamatan Bengkalis.
@@ -102,7 +96,6 @@ public function index(Request $request)
         $baseGas->whereHas('user', $userFilter);
         $baseMobil->whereHas('user', $userFilter);
         $baseFasilitas->whereHas('user', $userFilter);
-        $basePasar->whereHas('user', $userFilter);
         $baseKyc->whereHas('user', $userFilter);
     } elseif ($selectedKecamatanId && $selectedKecamatanId !== 'all') {
         $desaIdsUnderKecamatan = \App\Models\Region::where('parent_id', $selectedKecamatanId)->pluck('id')->toArray();
@@ -113,7 +106,6 @@ public function index(Request $request)
         $baseGas->whereHas('user', $userFilter);
         $baseMobil->whereHas('user', $userFilter);
         $baseFasilitas->whereHas('user', $userFilter);
-        $basePasar->whereHas('user', $userFilter);
         $baseKyc->whereHas('user', $userFilter);
     }
 
@@ -128,7 +120,7 @@ public function index(Request $request)
         
         $fasilitasRequests = $baseFasilitas->clone()->with(['user', 'fasilitas' => function($q) { $q->withTrashed(); }])->where(function($q) { $q->where('status', 'pending')->orWhere('cancellation_status', 'pending'); })->get()->map(function ($i) { $i->type = 'fasilitas_umum'; $i->item_name = $i->fasilitas->nama_fasilitas ?? 'Fasilitas'; return $i; });
         
-        $pasarRequests = $basePasar->clone()->with('user')->where(function($q) { $q->where('status', 'waiting')->orWhere('cancellation_status', 'pending'); })->get()->map(function ($i) { $i->type = 'pasar_daerah'; $i->item_name = 'Pesanan Pasar'; return $i; });
+        $pasarRequests = collect();
         
         $kycRequests = collect();
         if (in_array(auth()->user()->role, ['admin_desa'])) {
@@ -171,7 +163,6 @@ public function index(Request $request)
             ->concat($gasRequests)
             ->concat($mobilRequests)
             ->concat($fasilitasRequests)
-            ->concat($pasarRequests)
             ->concat($kycRequests)
             ->concat($mutasiRequests)
             ->sortByDesc('created_at')
@@ -181,7 +172,6 @@ public function index(Request $request)
             + $gasRequests->count() 
             + $mobilRequests->count() 
             + $fasilitasRequests->count() 
-            + $pasarRequests->count()
             + $kycRequests->count()
             + $mutasiRequests->count();
     }
@@ -191,15 +181,14 @@ public function index(Request $request)
         + $baseGas->clone()->count() 
         + $baseMobil->clone()->count() 
         + $baseFasilitas->clone()->count() 
-        + $basePasar->clone()->count();
+;
     
     // Hitung total order selesai/sukses
     $completedRentals = $baseRental->clone()->where('status', 'completed')->count();
     $completedGas = $baseGas->clone()->where('status', 'completed')->count();
     $completedMobil = $baseMobil->clone()->whereIn('status', ['completed', 'resolved'])->count();
     $completedFasilitas = $baseFasilitas->clone()->whereIn('status', ['completed', 'resolved'])->count();
-    $completedPasar = $basePasar->clone()->where('status', 'completed')->count();
-    $completedOrders = $completedRentals + $completedGas + $completedMobil + $completedFasilitas + $completedPasar;
+    $completedOrders = $completedRentals + $completedGas + $completedMobil + $completedFasilitas;
 
     // Hitung statistik untuk Donut Chart (Total Transaksi per Kategori) - Filter Tahun Ini & Tidak Cancel
     $rentalCount = $baseRental->clone()->whereYear('created_at', $selectedYear)
@@ -218,9 +207,7 @@ public function index(Request $request)
         ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
         ->count();
 
-    $pasarCount = $basePasar->clone()->whereYear('created_at', $selectedYear)
-        ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-        ->count();
+    $pasarCount = 0;
 
     // ========================================
     // PERHITUNGAN DATA NYATA UNTUK GRAFIK
@@ -257,19 +244,14 @@ public function index(Request $request)
         ->groupBy('month')
         ->pluck('count', 'month');
 
-    $pasarCounts = $basePasar->clone()
-        ->selectRaw('MONTH(created_at) as month, COUNT(*) as count')
-        ->whereYear('created_at', $selectedYear)
-        ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-        ->groupBy('month')
-        ->pluck('count', 'month');
+    $pasarCounts = collect();
 
     for ($month = 1; $month <= 12; $month++) {
         $monthlyPerformance[$month - 1] = ($rentalCounts[$month] ?? 0) 
             + ($gasCounts[$month] ?? 0) 
             + ($mobilCounts[$month] ?? 0) 
             + ($fasilitasCounts[$month] ?? 0) 
-            + ($pasarCounts[$month] ?? 0);
+;
     }
     
     // Hitung pendapatan dan pengeluaran bulanan (SAMA SEPERTI ReportController)
@@ -482,17 +464,8 @@ public function index(Request $request)
             ->whereMonth('created_at', $month)
             ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
             ->count();
-
-        // Pendapatan Pasar Daerah
-        $pasarRevenue = $this->applyRegionFilter(\App\Models\PasarOrder::whereNull('store_id')->withTrashed(), 'user', true)->whereYear('created_at', $year)
-            ->whereMonth('created_at', $month)
-            ->whereNotIn('status', ['waiting', 'processing', 'cancelled', 'rejected'])
-            ->sum('grand_total');
-            
-        $pasarTransactions = $this->applyRegionFilter(\App\Models\PasarOrder::whereNull('store_id')->withTrashed(), 'user', true)->whereYear('created_at', $year)
-            ->whereMonth('created_at', $month)
-            ->whereNotIn('status', ['waiting', 'processing', 'cancelled', 'rejected'])
-            ->count();
+        $pasarRevenue = 0;
+        $pasarTransactions = 0;
 
         // Pendapatan Laporan Manual
         $manualRevenue = $this->applyRegionFilter(ManualReport::query(), 'creator', true)->whereYear('transaction_date', $year)
@@ -503,8 +476,8 @@ public function index(Request $request)
             ->whereMonth('transaction_date', $month)
             ->count();
         
-        $totalRevenue = $rentalRevenue + $gasRevenue + $mobilRevenue + $fasilitasRevenue + $pasarRevenue + $manualRevenue;
-        $totalTransactions = $rentalTransactions + $gasTransactions + $mobilTransactions + $fasilitasTransactions + $pasarTransactions + $manualTransactions;
+        $totalRevenue = $rentalRevenue + $gasRevenue + $mobilRevenue + $fasilitasRevenue + $manualRevenue;
+        $totalTransactions = $rentalTransactions + $gasTransactions + $mobilTransactions + $fasilitasTransactions + $manualTransactions;
         
         return [
             'Penyewaan Alat' => [
@@ -531,13 +504,7 @@ public function index(Request $request)
                 'percentage' => $totalRevenue > 0 ? round(($fasilitasRevenue / $totalRevenue) * 100, 1) : 0,
                 'color' => 'success'
             ],
-            'Pasar Daerah' => [
-                'revenue' => $pasarRevenue,
-                'transactions' => $pasarTransactions,
-                'percentage' => $totalRevenue > 0 ? round(($pasarRevenue / $totalRevenue) * 100, 1) : 0,
-                'color' => 'primary'
-            ],
-            'total' => [
+'total' => [
                 'revenue' => $totalRevenue,
                 'transactions' => $totalTransactions
             ],

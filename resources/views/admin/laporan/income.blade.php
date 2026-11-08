@@ -57,7 +57,7 @@
     $isGasActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'gas'));
     $isMobilActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'mobil') || str_contains(strtolower($name), 'transportasi'));
     $isFasilitasActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'fasilitas'));
-    $isPasarActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'pasar'));
+    $isPasarActive = false;
     $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasilitasActive, $isPasarActive])->filter()->count();
     @endphp
 

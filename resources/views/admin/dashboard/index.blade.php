@@ -346,23 +346,14 @@
                             'image' => asset('User/img/elemen/KabardanInformasiDaerah.png'),
                             'color' => 'secondary'
                         ],
-                        'Pasar Daerah' => [
-                            'title' => 'Unit Pasar Daerah',
-                            'count' => (\App\Models\PasarProduk::count() ?? 0),
-                            'label' => 'Produk',
-                            'route' => route('admin.unit.pasar_daerah.index'),
-                            'image' => asset('Admin/img/menu3dberanda/pasar-daerah.webp'),
-                            'color' => 'warning'
-                        ]
                     ];
 
                     $activeServicesList = isset($activeServices) ? $activeServices : [];
                     if (auth()->user()->role === 'staff') {
-                        if (auth()->user()->hasUnitPermission('pasar_daerah')) $activeServicesList[] = 'Pasar Daerah';
-                        if (auth()->user()->hasUnitPermission('kabar_informasi')) $activeServicesList[] = 'Pengumuman';
+                                                if (auth()->user()->hasUnitPermission('kabar_informasi')) $activeServicesList[] = 'Pengumuman';
                     } else {
                         // Pasar dan portal kabar adalah menu publik sentral.
-                        $activeServicesList = array_merge($activeServicesList, ['Pasar Daerah', 'Pengumuman']);
+                        $activeServicesList = array_merge($activeServicesList, ['Pengumuman']);
                     }
                     $activeServicesList = array_values(array_unique($activeServicesList));
                     
@@ -391,7 +382,7 @@
                 $dashboardGroups = [
                     'Belanja dan Kebutuhan' => [
                         'image' => asset('Admin/img/pasardaerah/Belanja dan Kebutuhan.png'),
-                        'services' => ['Penjualan Gas', 'Pasar Daerah'],
+                        'services' => ['Penjualan Gas'],
                     ],
                     'Layanan Daerah' => [
                         'image' => asset('Admin/img/menu3dberanda/layanan-daerah.webp'),
@@ -482,9 +473,6 @@
                                             $icon = 'bx-car'; $bgClass = 'bg-label-info text-info'; $badgeClass = 'bg-label-info'; $serviceName = 'Penyewaan Transportasi';
                                         } elseif ($request->type == 'fasilitas_umum') {
                                             $icon = 'bx-building-house'; $bgClass = 'bg-label-success text-success'; $badgeClass = 'bg-label-success'; $serviceName = 'Fasilitas Umum';
-                                        } elseif ($request->type == 'pasar_daerah') {
-                                            $icon = 'bx-store-alt'; $bgClass = 'bg-label-primary text-primary'; $badgeClass = 'bg-label-primary'; $serviceName = 'Pasar Daerah';
-                                            $detailLink = Route::has('admin.unit.pasar_daerah.pesanan.show') ? route('admin.unit.pasar_daerah.pesanan.show', $request->id) : '#';
                                         } elseif ($request->type == 'kyc') {
                                             $icon = 'bx-id-card'; $bgClass = 'bg-label-info text-info'; $badgeClass = 'bg-label-info'; $serviceName = 'Verifikasi Identitas';
                                             $detailLink = route('admin.kyc.show', $request->id);
@@ -751,7 +739,7 @@
                             </div>
                             <div class="card-body">
                                 @php
-                                    $revenueServices = ['Penyewaan Alat', 'Penjualan Gas', 'Penyewaan Mobil', 'Fasilitas Umum', 'Pasar Daerah'];
+                                    $revenueServices = ['Penyewaan Alat', 'Penjualan Gas', 'Penyewaan Mobil', 'Fasilitas Umum'];
                                     $activeRevenueServices = array_intersect($activeServicesList, $revenueServices);
                                 @endphp
                                 @if(count($activeRevenueServices) > 0)
@@ -1171,7 +1159,6 @@
                             'Penjualan Gas' => ['count' => $gasCount ?? 0, 'color' => '#dc3545'],
                             'Penyewaan Mobil' => ['count' => $mobilCount ?? 0, 'color' => '#0dcaf0'],
                             'Fasilitas Umum' => ['count' => $fasilitasCount ?? 0, 'color' => '#198754'],
-                            'Pasar Daerah' => ['count' => $pasarCount ?? 0, 'color' => '#696cff']
                         ];
                         
                         foreach($activeRevenueServices as $serviceName) {

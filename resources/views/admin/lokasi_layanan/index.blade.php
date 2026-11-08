@@ -17,7 +17,7 @@
         <div>
             Titik layanan milik <strong>{{ $wilayah->name }}</strong> — gudang, kantor desa, pangkalan gas, balai.
             Satu daftar ini dipakai <strong>semua unit</strong>: Penjualan Gas, Penyewaan Alat, Penyewaan Transportasi,
-            Fasilitas Umum, dan Pasar Daerah. Titik peta yang Anda tentukan di sini akan terpakai ulang
+            dan Fasilitas Umum. Titik peta yang Anda tentukan di sini akan terpakai ulang
             setiap kali lokasinya dipilih, tanpa perlu diketik lagi.
         </div>
     </div>

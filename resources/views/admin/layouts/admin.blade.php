@@ -1002,43 +1002,6 @@
                     </li>
                     @endif
 
-                    {{-- Staf: Pasar Daerah --}}
-                    @if(in_array('Pasar Daerah', $activeServicesMenu ?? []) && auth()->user()->hasUnitPermission('pasar_daerah'))
-                    <li class="menu-item {{ (request()->is('admin/unit/pasar-daerah*') || request()->routeIs('admin.kemitraan.*') || (request()->is('admin/aktivitas/permintaan-pengajuan*') && request('tab') == 'pasar') || (request()->is('admin/aktivitas/bukti-transaksi*') && request('category') == 'pasar')) ? 'open active show' : '' }}">
-                        <a href="javascript:void(0);" class="menu-link menu-toggle">
-                            <img src="{{ asset('Admin/img/menu3dberanda/pasar-daerah.webp') }}" alt="" class="menu-icon me-2" style="width: 20px; height: 20px; object-fit: contain;">
-                            <div><small class="d-block text-muted" style="font-size:.65rem; line-height:1.1">Belanja dan Kebutuhan</small>Pasar Daerah</div>
-                        </a>
-                        <ul class="menu-sub">
-                            <li class="menu-item {{ request()->is('admin/unit/pasar-daerah*') ? 'active' : '' }}">
-                                <a href="{{ route('admin.unit.pasar_daerah.index') }}" class="menu-link">
-                                    <div>Katalog dan Toko</div>
-                                </a>
-                            </li>
-                            <li class="menu-item {{ (request()->is('admin/aktivitas/permintaan-pengajuan*') && request('tab') == 'pasar') ? 'active' : '' }}">
-                                <a href="{{ route('admin.aktivitas.permintaan-pengajuan.index', ['tab' => 'pasar']) }}" class="menu-link">
-                                    <div>Pesanan Masuk</div>
-                                </a>
-                            </li>
-                            <li class="menu-item {{ (request()->is('admin/aktivitas/bukti-transaksi*') && request('category') == 'pasar') ? 'active' : '' }}">
-                                <a href="{{ route('admin.aktivitas.bukti-transaksi.index', ['category' => 'pasar']) }}" class="menu-link">
-                                    <div>Bukti Transaksi</div>
-                                </a>
-                            </li>
-                            <li class="menu-item {{ request()->routeIs('admin.kemitraan.*') ? 'active' : '' }}">
-                                <a href="{{ route('admin.kemitraan.index') }}" class="menu-link">
-                                    <div>Persetujuan Mitra</div>
-                                </a>
-                            </li>
-                            <li class="menu-item {{ request()->routeIs('admin.laporan.pendapatan') ? 'active' : '' }}">
-                                <a href="{{ route('admin.laporan.pendapatan', ['service' => 'Pasar Daerah']) }}" class="menu-link">
-                                    <div>Laporan Unit</div>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                    @endif
-
                     
 
                     {{-- Staf: Kabar dan Pengumuman --}}
@@ -1104,14 +1067,6 @@
                             </li>
                             @endif
 
-                            @if(in_array('Pasar Daerah', $activeServicesMenu ?? []))
-                            <li class="menu-item {{ request()->is('admin/unit/pasar-daerah*') ? 'active' : '' }}">
-                                <a href="{{ route('admin.unit.pasar_daerah.index') }}" class="menu-link d-flex align-items-center">
-                                    <img src="{{ asset('Admin/img/menu3dberanda/pasar-daerah.webp') }}" alt="" class="me-2" style="width: 18px; height: 18px; object-fit: contain;">
-                                    <div>Pasar Daerah</div>
-                                </a>
-                            </li>
-                            @endif
 
                             <li class="menu-item px-2 pt-2 pb-1"><span class="small fw-bold text-uppercase text-muted">Layanan Daerah</span></li>
                             @if(in_array('Penyewaan Mobil', $activeServicesMenu ?? []) || in_array('Penyewaan Transportasi', $activeServicesMenu ?? []))
@@ -1177,7 +1132,7 @@
                                 </a>
                             </li>
                             @endif
-                            @if(in_array('Pasar Daerah', $activeServicesMenu ?? []))
+                            @if(in_array(auth()->user()->role, ['super_admin', 'admin_desa']))
                             <li class="menu-item {{ request()->routeIs('admin.kemitraan.*') ? 'active' : '' }}">
                                 <a href="{{ route('admin.kemitraan.index') }}" class="menu-link d-flex align-items-center">
                                     <i class="bx bx-badge-check me-2 text-muted"></i>
@@ -1504,8 +1459,7 @@
                                                     <button type="button" class="btn btn-sm notif-filter-btn" data-filter="mobil">Sewa Transportasi</button>
                                                     <button type="button" class="btn btn-sm notif-filter-btn" data-filter="fasilitas">Fasilitas Umum</button>
                                                     <button type="button" class="btn btn-sm notif-filter-btn" data-filter="gas">Gas LPG</button>
-                                                    <button type="button" class="btn btn-sm notif-filter-btn" data-filter="pasar">Pasar Desa</button>
-                                                    <button type="button" class="btn btn-sm notif-filter-btn" data-filter="kyc">Verifikasi Identitas</button>
+                                                                                                        <button type="button" class="btn btn-sm notif-filter-btn" data-filter="kyc">Verifikasi Identitas</button>
                                                     
                                                     <button type="button" class="btn btn-sm notif-filter-btn" data-filter="mutasi">Mutasi Penduduk</button>
                                                 </div>
