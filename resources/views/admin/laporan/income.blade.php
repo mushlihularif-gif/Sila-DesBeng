@@ -57,8 +57,7 @@
     $isGasActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'gas'));
     $isMobilActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'mobil') || str_contains(strtolower($name), 'transportasi'));
     $isFasilitasActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'fasilitas'));
-    $isPasarActive = false;
-    $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasilitasActive, $isPasarActive])->filter()->count();
+    $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasilitasActive])->filter()->count();
     @endphp
 
     <!-- Page Header -->
@@ -293,39 +292,7 @@
         </div>
         @endif
         
-        @if($isPasarActive ?? false)
-        <!-- Pasar Daerah -->
-        <div class="col-6 col-md-4 col-xl-2">
-            <div class="card border-0 shadow-sm h-100 rounded-4 stat-card overflow-hidden">
-                <div class="card-body p-2 p-md-3 d-flex flex-column justify-content-between">
-                    <div class="d-flex align-items-center mb-2">
-                        <div class="avatar avatar-sm bg-secondary-subtle text-secondary rounded-3 p-1 me-2 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; min-width: 32px;">
-                            <img src="{{ asset('Admin/img/menu3dberanda/pasar-daerah.webp') }}" style="width: 20px; height: 20px; object-fit: contain;">
-                        </div>
-                        <div class="overflow-hidden">
-                            <small class="text-muted text-uppercase fw-bold ls-1 d-block text-truncate" style="font-size: 0.65rem;">Pasar Daerah</small>
-                        </div>
-                    </div>
-                    <div>
-                        <h6 class="fw-bold mb-1 text-dark text-truncate" style="font-size: 0.92rem;">Rp <span class="count-up-rupiah" data-value="{{ $totalPasar ?? 0 }}">0</span></h6>
-                        <div class="small text-muted d-flex align-items-center text-truncate" style="font-size: 0.65rem;">
-                            @if(($growth['pasar'] ?? 0) > 0)
-                                <i class="bx bx-trending-up text-success me-1"></i>
-                                <span class="text-success fw-semibold me-1">+{{ number_format($growth['pasar'] ?? 0, 1) }}%</span>
-                            @elseif(($growth['pasar'] ?? 0) < 0)
-                                <i class="bx bx-trending-down text-danger me-1"></i>
-                                <span class="text-danger fw-semibold me-1">{{ number_format($growth['pasar'] ?? 0, 1) }}%</span>
-                            @else
-                                <i class="bx bx-minus text-secondary me-1"></i>
-                                <span class="text-secondary fw-semibold me-1">0%</span>
-                            @endif
-                            <span class="text-truncate">thn lalu</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        @endif
+
     </div>
     
     <!-- Kinerja Chart -->
@@ -451,27 +418,7 @@
                     </div>
                     @endif
                     
-                    @if($isPasarActive ?? false)
-                    <!-- Pasar Item -->
-                    <div class="d-flex align-items-center mb-4 p-3 rounded-3 hover-bg-light transition-all border border-dashed-hover">
-                          <div class="avatar avatar-md bg-secondary-subtle rounded-3 p-2 me-3 d-flex align-items-center justify-content-center">
-                              <img src="{{ asset('Admin/img/menu3dberanda/pasar-daerah.webp') }}" style="width: 24px; height: 24px; object-fit: contain;">
-                          </div>
-                          <div class="flex-grow-1">
-                              <div class="d-flex justify-content-between align-items-center mb-1">
-                                  <h6 class="fw-bold text-dark mb-0">Pasar Daerah</h6>
-                                  <span class="fw-bold text-dark">Rp <span class="count-up-rupiah" data-value="{{ $totalPendapatanData['pasar']['revenue'] ?? 0 }}">0</span></span>
-                              </div>
-                              <div class="progress mb-2" style="height: 6px;">
-                                  <div class="progress-bar bg-secondary" role="progressbar" style="width: {{ $totalPendapatanData['pasar']['percentage'] ?? 0 }}%"></div>
-                              </div>
-                              <div class="d-flex justify-content-between text-muted small">
-                                  <span><span class="count-up" data-value="{{ $totalPendapatanData['pasar']['transactions'] ?? 0 }}">0</span> Transaksi</span>
-                                  <span><span class="count-up" data-value="{{ $totalPendapatanData['pasar']['percentage'] ?? 0 }}">0</span>% dari Total</span>
-                              </div>
-                          </div>
-                    </div>
-                    @endif
+
                     
                     @if(($totalPendapatanData['lainnya']['revenue'] ?? 0) > 0)
                     <!-- Lainnya Item -->
@@ -673,9 +620,7 @@
                                             @if($isFasilitasActive || $totalActive === 0)
                                                 <option value="fasilitas">Fasilitas Umum</option>
                                             @endif
-                                            @if($isPasarActive || $totalActive === 0)
-                                                <option value="pasar">Pasar Daerah</option>
-                                            @endif
+
                                             <option value="lainnya">Pendapatan Lain-lain</option>
                                         </select>
                                     </div>
@@ -918,7 +863,7 @@
                 {{ $totalPendapatanData['pasar']['revenue'] ?? 0 }},
                 {{ $totalPendapatanData['lainnya']['revenue'] ?? 0 }}
             ];
-            const seriesLabels = ['Penyewaan', 'Gas', 'Sewa Transportasi', 'Fasilitas Umum', 'Pasar Daerah', 'Lainnya'];
+            const seriesLabels = ['Penyewaan', 'Gas', 'Sewa Transportasi', 'Fasilitas Umum', 'Arsip transaksi terdahulu', 'Lainnya'];
             const seriesColors = ['#ffab00', '#03c3ec', '#ff3e1d', '#696cff', '#71dd37', '#8592a3'];
 
             const totalPieRevenue = seriesData.reduce((a, b) => a + b, 0);

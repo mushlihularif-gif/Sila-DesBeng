@@ -23,16 +23,6 @@ Route::get('/popular', [BerandaController::class, 'popular']);
     Route::get('/news', [\App\Http\Controllers\Api\NewsApiController::class, 'index']);
     Route::get('/news/{id}', [\App\Http\Controllers\Api\NewsApiController::class, 'show']);
 
-    // Pasar Daerah (Toko BUMDes)
-    Route::get('/pasar-daerah/stores/{id}', [\App\Http\Controllers\MarketStoreController::class, 'show']);
-    Route::get('/pasar-daerah/products', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'getProducts']);
-    Route::get('/pasar-daerah/products/{id}', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'getProductDetail']);
-    Route::get('/pasar-daerah/products/{id}/reviews', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'getProductReviews']);
-    Route::get('/pasar-daerah/seller/{region_id}', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'getSellerProfile']);
-    Route::get('/pasar-daerah/categories', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'getCategories']);
-    Route::get('/pasar-daerah/seller/{region_id}/chat/history', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'getChatHistory']);
-    Route::post('/pasar-daerah/seller/{region_id}/chat/send', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'sendChatMessage'])->middleware('throttle:chat-write');
-    Route::post('/pasar-daerah/seller/{region_id}/chat/escalate', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'escalateToAdmin'])->middleware('throttle:chat-write');
 
     // Wilayah (Regions) - Public for registration
     Route::get('/kemitraan/regions', [\App\Http\Controllers\Api\PartnerApplicationApiController::class, 'getRegions']);
@@ -102,27 +92,6 @@ Route::middleware('auth:sanctum')->group(function () {
     // Chatbot (Gemini AI)
     Route::post('/chatbot', [\App\Http\Controllers\User\ChatbotController::class, 'ask'])->middleware('throttle:chat-write');
 
-    // Pasar Daerah (Cart & Checkout)
-    Route::get('/pasar-daerah/cart', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'getCart']);
-    Route::post('/pasar-daerah/cart/add', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'addToCart']);
-    Route::post('/pasar-daerah/cart/update', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'updateCart']);
-    Route::post('/pasar-daerah/cart/remove', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'removeFromCart']);
-    Route::post('/pasar-daerah/checkout', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'checkout']);
-    Route::post('/pasar-daerah/orders/{id}/payment-proof',[\App\Http\Controllers\MarketStoreController::class,'paymentProof'])->middleware('throttle:10,1');
-    Route::post('/pasar-daerah/orders/{id}/cancel-request',[\App\Http\Controllers\MarketStoreController::class,'buyerCancel']);
-    Route::match(['get','post'],'/pasar-daerah/stores/{id}/chat/{buyer?}',[\App\Http\Controllers\MarketStoreController::class,'chat'])->middleware('throttle:60,1');
-    Route::get('/pasar-daerah/my-store',[\App\Http\Controllers\MarketStoreController::class,'home']);
-    Route::post('/pasar-daerah/my-store/profile',[\App\Http\Controllers\MarketStoreController::class,'saveProfile'])->middleware('throttle:10,1');
-    Route::post('/pasar-daerah/my-store/settings',[\App\Http\Controllers\MarketStoreController::class,'settings']);
-    Route::post('/pasar-daerah/my-store/products/{id?}',[\App\Http\Controllers\MarketStoreController::class,'product']);
-    Route::get('/pasar-daerah/my-store/orders/{id}',[\App\Http\Controllers\MarketStoreController::class,'order']);
-    Route::post('/pasar-daerah/my-store/orders/{id}',[\App\Http\Controllers\MarketStoreController::class,'changeOrder']);
-    Route::get('/pasar-daerah/shipping-quote', [\App\Http\Controllers\MarketShippingController::class, 'quote'])->middleware('throttle:60,1');
-    Route::get('/pasar-daerah/orders/{id}/payment', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'getOrderPayment']);
-    Route::post('/pasar-daerah/products/{id}/reviews', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'addReview']);
-    Route::post('/pasar-daerah/orders/{id}/complaint', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'submitComplaint']);
-    Route::get('/pasar-daerah/orders/{id}/complaint', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'getComplaintDetail']);
-    Route::post('/pasar-daerah/orders/{id}/confirm-received', [\App\Http\Controllers\Api\PasarDaerahApiController::class, 'confirmReceived']);
 
     // Mutasi Domisili
     Route::get('/mutasi', [\App\Http\Controllers\Api\DomicileTransferApiController::class, 'index']);

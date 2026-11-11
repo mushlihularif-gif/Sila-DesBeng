@@ -32,23 +32,12 @@ class ReportController extends Controller
         // Query Fasilitas Umum
         $fasilitasQuery = $this->applyRegionFilter(\App\Models\FasilitasUmumBooking::withTrashed(), 'fasilitas', true)->with(['user', 'fasilitas'])->orderByDesc('created_at');
 
-        // Query Pasar Daerah
-        $pasarQuery = \App\Models\PasarOrder::whereNull('store_id')->withTrashed()->with('user')->orderByDesc('created_at');
         $user = auth()->user();
-        $regionId = $user->region_id;
-        if (!$regionId && in_array($user->role, ['super_admin'])) {
-            $firstRegion = \App\Models\Region::first();
-            if ($firstRegion) $regionId = $firstRegion->id;
-        }
-        if ($regionId) {
-            $pasarQuery->where('region_id', $regionId);
-        }
         if ($user->isStaff()) {
             if (!$user->hasUnitPermission('sewa_alat')) $rentalQuery->whereRaw('1 = 0');
             if (!$user->hasUnitPermission('gas')) $gasQuery->whereRaw('1 = 0');
             if (!$user->hasUnitPermission('sewa_mobil')) $mobilQuery->whereRaw('1 = 0');
             if (!$user->hasUnitPermission('fasilitas_umum')) $fasilitasQuery->whereRaw('1 = 0');
-            if (!$user->hasUnitPermission('pasar_daerah')) $pasarQuery->whereRaw('1 = 0');
         }
 
         // Terapkan Filter
@@ -57,8 +46,6 @@ class ReportController extends Controller
             $gasQuery->where('status', $status);
             $mobilQuery->where('status', $status);
             $fasilitasQuery->where('status', $status);
-            // Translate status for Pasar Daerah if necessary, or just use it directly
-            $pasarQuery->where('status', $status);
         }
 
         if ($startDate) {
@@ -66,7 +53,6 @@ class ReportController extends Controller
             $gasQuery->whereDate('created_at', '>=', $startDate);
             $mobilQuery->whereDate('created_at', '>=', $startDate);
             $fasilitasQuery->whereDate('created_at', '>=', $startDate);
-            $pasarQuery->whereDate('created_at', '>=', $startDate);
         }
 
         if ($endDate) {
@@ -74,21 +60,19 @@ class ReportController extends Controller
             $gasQuery->whereDate('created_at', '<=', $endDate);
             $mobilQuery->whereDate('created_at', '<=', $endDate);
             $fasilitasQuery->whereDate('created_at', '<=', $endDate);
-            $pasarQuery->whereDate('created_at', '<=', $endDate);
         }
 
         $rentalRequests = $rentalQuery->get();
         $gasOrders = $gasQuery->get();
         $mobilBookings = $mobilQuery->get();
         $fasilitasBookings = $fasilitasQuery->get();
-        $pasarOrders = $pasarQuery->get();
 
         $activeServices = $this->getActivatedServices();
         if ($request->ajax()) {
-            return view('admin.laporan.partials.transactions_content', compact('rentalRequests', 'gasOrders', 'mobilBookings', 'fasilitasBookings', 'pasarOrders', 'activeServices'))->render();
+            return view('admin.laporan.partials.transactions_content', compact('rentalRequests', 'gasOrders', 'mobilBookings', 'fasilitasBookings', 'activeServices'))->render();
         }
 
-        return view('admin.laporan.transactions', compact('rentalRequests', 'gasOrders', 'mobilBookings', 'fasilitasBookings', 'pasarOrders', 'status', 'startDate', 'endDate', 'activeServices'));
+        return view('admin.laporan.transactions', compact('rentalRequests', 'gasOrders', 'mobilBookings', 'fasilitasBookings', 'status', 'startDate', 'endDate', 'activeServices'));
     }
 
     public function income(Request $request)
@@ -446,30 +430,18 @@ class ReportController extends Controller
         $baseGas = $this->applyRegionFilter(\App\Models\GasOrder::withTrashed(), 'gas', false);
         $baseMobil = $this->applyRegionFilter(\App\Models\MobilBooking::withTrashed(), 'mobil', false);
         $baseFasilitas = $this->applyRegionFilter(\App\Models\FasilitasUmumBooking::withTrashed(), 'fasilitas', false);
-        $basePasar = \App\Models\PasarOrder::whereNull('store_id')->withTrashed();
 
         $baseRental->whereHas('barang', fn ($q) => $q->whereIn('region_id', $regionIdsDalamCakupan));
         $baseGas->whereHas('gas', fn ($q) => $q->whereIn('region_id', $regionIdsDalamCakupan));
         $baseMobil->whereHas('mobil', fn ($q) => $q->whereIn('region_id', $regionIdsDalamCakupan));
         $baseFasilitas->whereHas('fasilitas', fn ($q) => $q->whereIn('region_id', $regionIdsDalamCakupan));
-        $basePasar->whereIn('region_id', $regionIdsDalamCakupan);
 
         $user = auth()->user();
-        $regionId = $user->region_id;
-        if (!$regionId && in_array($user->role, ['super_admin'])) {
-            $firstRegion = \App\Models\Region::first();
-            if ($firstRegion) $regionId = $firstRegion->id;
-        }
-        if ($regionId && !in_array($user->role, ['super_admin'])) {
-            $basePasar->where('region_id', $regionId);
-        }
-
         if ($user->isStaff()) {
             if (!$user->hasUnitPermission('sewa_alat')) $baseRental->whereRaw('1 = 0');
             if (!$user->hasUnitPermission('gas')) $baseGas->whereRaw('1 = 0');
             if (!$user->hasUnitPermission('sewa_mobil')) $baseMobil->whereRaw('1 = 0');
             if (!$user->hasUnitPermission('fasilitas_umum')) $baseFasilitas->whereRaw('1 = 0');
-            if (!$user->hasUnitPermission('pasar_daerah')) $basePasar->whereRaw('1 = 0');
         }
 
         // Terapkan filter dropdown Kecamatan/Desa jika ada
@@ -478,7 +450,6 @@ class ReportController extends Controller
             $baseGas->whereHas('gas', function($q) use ($selectedDesaId) { $q->where('region_id', $selectedDesaId); });
             $baseMobil->whereHas('mobil', function($q) use ($selectedDesaId) { $q->where('region_id', $selectedDesaId); });
             $baseFasilitas->whereHas('fasilitas', function($q) use ($selectedDesaId) { $q->where('region_id', $selectedDesaId); });
-            $basePasar->where('region_id', $selectedDesaId);
         } elseif ($selectedKecamatanId && $selectedKecamatanId !== 'all') {
             $desaIds = \App\Models\Region::where('parent_id', $selectedKecamatanId)->pluck('id')->toArray();
             $desaIds[] = $selectedKecamatanId;
@@ -486,7 +457,6 @@ class ReportController extends Controller
             $baseGas->whereHas('gas', function($q) use ($desaIds) { $q->whereIn('region_id', $desaIds); });
             $baseMobil->whereHas('mobil', function($q) use ($desaIds) { $q->whereIn('region_id', $desaIds); });
             $baseFasilitas->whereHas('fasilitas', function($q) use ($desaIds) { $q->whereIn('region_id', $desaIds); });
-            $basePasar->whereIn('region_id', $desaIds);
         }
 
         // Kinerja Per Bulan (Januari - Desember)
@@ -501,13 +471,11 @@ class ReportController extends Controller
             ->whereYear('created_at', $year)->whereNotIn('status', ['pending', 'cancelled', 'rejected'])->groupBy('month')->pluck('total', 'month');
         $fasilitasMonthly = $baseFasilitas->clone()->selectRaw('COUNT(*) as total, MONTH(created_at) as month')
             ->whereYear('created_at', $year)->whereNotIn('status', ['pending', 'cancelled', 'rejected'])->groupBy('month')->pluck('total', 'month');
-        $pasarMonthly = $basePasar->clone()->selectRaw('COUNT(*) as total, MONTH(created_at) as month')
-            ->whereYear('created_at', $year)->whereNotIn('status', ['pending', 'cancelled', 'rejected'])->groupBy('month')->pluck('total', 'month');
         $laporanMonthly = collect();
 
         for ($i = 1; $i <= 12; $i++) {
             $monthName = $months[$i - 1];
-            $monthlyPerformance[$monthName] = ($rentalMonthly[$i] ?? 0) + ($gasMonthly[$i] ?? 0) + ($mobilMonthly[$i] ?? 0) + ($fasilitasMonthly[$i] ?? 0) + ($pasarMonthly[$i] ?? 0) + ($laporanMonthly[$i] ?? 0);
+            $monthlyPerformance[$monthName] = ($rentalMonthly[$i] ?? 0) + ($gasMonthly[$i] ?? 0) + ($mobilMonthly[$i] ?? 0) + ($fasilitasMonthly[$i] ?? 0) + ($laporanMonthly[$i] ?? 0);
         }
 
         // Kalkulasi Persentase Kinerja (Bulan ini vs Bulan lalu)
@@ -538,10 +506,9 @@ class ReportController extends Controller
         $gasYears = \App\Models\GasOrder::withTrashed()->selectRaw('YEAR(created_at) as year')->distinct()->pluck('year')->toArray();
         $mobilYears = \App\Models\MobilBooking::withTrashed()->selectRaw('YEAR(created_at) as year')->distinct()->pluck('year')->toArray();
         $fasilitasYears = \App\Models\FasilitasUmumBooking::withTrashed()->selectRaw('YEAR(created_at) as year')->distinct()->pluck('year')->toArray();
-        $pasarYears = \App\Models\PasarOrder::whereNull('store_id')->withTrashed()->selectRaw('YEAR(created_at) as year')->distinct()->pluck('year')->toArray();
         $laporanYears = [];
         
-        $availableYears = array_unique(array_merge($rentalYears, $gasYears, $mobilYears, $fasilitasYears, $pasarYears, $laporanYears, [now()->year]));
+        $availableYears = array_unique(array_merge($rentalYears, $gasYears, $mobilYears, $fasilitasYears, $laporanYears, [now()->year]));
         rsort($availableYears);
         $years = collect($availableYears);
         
@@ -551,7 +518,6 @@ class ReportController extends Controller
             'gas' => $gasMonthly->sum(),
             'mobil' => $mobilMonthly->sum(),
             'fasilitas' => $fasilitasMonthly->sum(),
-            'pasar' => $pasarMonthly->sum(),
             'laporan' => $laporanMonthly->sum(),
         ];
 
@@ -592,7 +558,6 @@ class ReportController extends Controller
         $gasData = [];
         $mobilData = [];
         $fasilitasData = [];
-        $pasarData = [];
         
         $user = auth()->user();
         $isStaff = $user->isStaff();
@@ -600,7 +565,6 @@ class ReportController extends Controller
         $canViewGas = !$isStaff || $user->hasUnitPermission('gas');
         $canViewMobil = !$isStaff || $user->hasUnitPermission('sewa_mobil');
         $canViewFasilitas = !$isStaff || $user->hasUnitPermission('fasilitas_umum');
-        $canViewPasar = !$isStaff || $user->hasUnitPermission('pasar_daerah');
         
         for ($month = 1; $month <= 12; $month++) {
             // Hitung pesanan penyewaan
@@ -627,17 +591,11 @@ class ReportController extends Controller
                 ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
                 ->count() : 0;
                 
-            // Hitung pesanan pasar daerah
-            $pasarCount = $canViewPasar ? $this->applyRegionFilter(\App\Models\PasarOrder::whereNull('store_id')->withTrashed(), 'user', true)->whereYear('created_at', $year)
-                ->whereMonth('created_at', $month)
-                ->whereNotIn('status', ['waiting', 'processing', 'cancelled', 'rejected'])
-                ->count() : 0;
             
             $rentalData[] = $rentalCount;
             $gasData[] = $gasCount;
             $mobilData[] = $mobilCount;
             $fasilitasData[] = $fasilitasCount;
-            $pasarData[] = $pasarCount;
         }
         
         return [
@@ -646,7 +604,6 @@ class ReportController extends Controller
             'gas' => $gasData,
             'mobil' => $mobilData,
             'fasilitas' => $fasilitasData,
-            'pasar' => $pasarData
         ];
     }
 
@@ -905,7 +862,7 @@ class ReportController extends Controller
     public function storeManualTransaction(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'category' => 'required|in:penyewaan,gas,mobil,fasilitas,pasar,lainnya',
+            'category' => 'required|in:penyewaan,gas,mobil,fasilitas,lainnya',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'amount' => 'required|numeric|min:0',
@@ -983,7 +940,7 @@ class ReportController extends Controller
     public function updateManualTransaction(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
-            'category' => 'required|in:penyewaan,gas,mobil,fasilitas,pasar,lainnya',
+            'category' => 'required|in:penyewaan,gas,mobil,fasilitas,lainnya',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'amount' => 'required|numeric|min:0',
@@ -1107,7 +1064,6 @@ class ReportController extends Controller
         $isGasActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'gas'));
         $isMobilActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'mobil'));
         $isFasilitasActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'fasilitas'));
-        $isPasarActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'pasar'));
 
         $queryStartDate = null;
         $queryEndDate = now();
@@ -1236,46 +1192,6 @@ class ReportController extends Controller
                 ];
             });
             $history = $history->merge($fasilitas);
-        }
-
-        if ($isPasarActive) {
-            $user = auth()->user();
-            $regionId = $user->region_id;
-            if (!$regionId && in_array($user->role, ['super_admin'])) {
-                $firstRegion = \App\Models\Region::first();
-                if ($firstRegion) $regionId = $firstRegion->id;
-            }
-
-            $pasarQuery = \App\Models\PasarOrder::whereNull('store_id')->withTrashed()
-                ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-                ->with(['user']);
-            
-            if ($regionId && !in_array($user->role, ['super_admin'])) {
-                $pasarQuery->where('region_id', $regionId);
-            }
-            
-            if ($queryStartDate) {
-                $pasarQuery->whereBetween('created_at', [$queryStartDate, $queryEndDate]);
-            }
-            
-            $pasar = $pasarQuery->get()->map(function($item) {
-                return (object)[
-                    'id' => $item->id,
-                    'type' => 'Pasar Daerah',
-                    'item_name' => 'Pesanan #' . ($item->order_number ?? $item->id),
-                    'date' => $item->created_at,
-                    'amount' => $item->grand_total,
-                    'payment_method' => $item->payment_method ?? 'Transfer',
-                    'status' => $item->status,
-                    'user_name' => $item->user->name ?? $item->full_name ?? 'User',
-                    'user_photo' => $item->user->profile_photo_url ?? null,
-                    'location' => $item->delivery_address ?? '-',
-                    'proof' => $item->proof_of_payment,
-                    'proof_route' => route('admin.unit.pasar_daerah.pesanan.show', $item->id),
-                    'proof_download' => null,
-                ];
-            });
-            $history = $history->merge($pasar);
         }
 
         // Laporan Manual

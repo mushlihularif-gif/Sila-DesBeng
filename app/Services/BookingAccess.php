@@ -22,6 +22,11 @@ class BookingAccess
         if (!isset(self::TYPES[$type]) || !$viewer->isAdmin() || !$viewer->region_id) return false;
         [, $relation, $permission] = self::TYPES[$type];
         $region = $booking->region_id ?: ($relation ? $booking->$relation?->region_id : null);
+        // Retired market receipts remain readable by the village responsible for the archive.
+        if ($type === 'pasar') {
+            return $region && (int) $region === (int) $viewer->region_id
+                && in_array($viewer->role, ['admin_desa', 'super_admin'], true);
+        }
         return $region && (int) $region === (int) $viewer->region_id && $viewer->hasUnitPermission($permission);
     }
 }

@@ -308,7 +308,7 @@ class User extends Authenticatable
     /** Kunci izin untuk staf UNIT LAYANAN, lawan dari IZIN_PLATFORM_GRUP. */
     public const IZIN_UNIT = [
         'gas', 'sewa_alat', 'sewa_mobil', 'fasilitas_umum',
-        'pasar_daerah', 'kabar_informasi',
+        'kabar_informasi',
     ];
 
     /** Nama layanan untuk masing-masing kunci izin unit. */
@@ -317,7 +317,6 @@ class User extends Authenticatable
         'sewa_alat'       => 'Penyewaan Alat',
         'sewa_mobil'      => 'Penyewaan Transportasi',
         'fasilitas_umum'  => 'Fasilitas Umum',
-        'pasar_daerah'    => 'Pasar Daerah',
         'kabar_informasi' => 'Kabar dan Informasi Daerah',
             ];
 

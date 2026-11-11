@@ -47,7 +47,6 @@ class CheckRegionService
             'penyewaan-mobil' => ['penyewaan-mobil'],
             'penyewaan-alat' => ['penyewaan-alat'],
             'penjualan-gas' => ['penjualan-gas'],
-            'pasar-daerah' => ['pasar-daerah'],
             default => [$serviceSlug]
         };
 

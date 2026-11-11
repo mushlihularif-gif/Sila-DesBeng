@@ -17,10 +17,6 @@ class RegionSeeder extends Seeder
         $serviceMobil = \App\Models\Service::firstOrCreate(['slug' => 'penyewaan-mobil'], ['name' => 'Penyewaan Mobil']);
         $serviceFasilitas = \App\Models\Service::firstOrCreate(['slug' => 'fasilitas-umum'], ['name' => 'Fasilitas Umum']);
         $serviceGas = \App\Models\Service::firstOrCreate(['slug' => 'penjualan-gas'], ['name' => 'Penjualan Gas']);
-        // Pasar Daerah sempat tertinggal di sini, sehingga menunya tidak pernah
-        // muncul di sidebar maupun tab Permintaan & Pengajuan: keduanya menyaring
-        // dengan daftar layanan aktif wilayah, dan layanannya sendiri belum ada.
-        $servicePasar = \App\Models\Service::firstOrCreate(['slug' => 'pasar-daerah'], ['name' => 'Pasar Daerah']);
 
         // 2. Create Kabupaten Bengkalis
         $kabupaten = \App\Models\Region::firstOrCreate(

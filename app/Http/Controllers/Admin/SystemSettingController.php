@@ -110,8 +110,6 @@ class SystemSettingController extends Controller
         $paymentInfo['gas_delivery_antar_active'] = $request->has('gas_delivery_antar_active');
         $paymentInfo['gas_delivery_jemput_active'] = $request->has('gas_delivery_jemput_active');
 
-        $paymentInfo['pasar_delivery_antar_active'] = $request->has('pasar_delivery_antar_active');
-        $paymentInfo['pasar_delivery_jemput_active'] = $request->has('pasar_delivery_jemput_active');
 
         $paymentInfo['fasilitas_delivery_antar_active'] = $request->has('fasilitas_delivery_antar_active');
         $paymentInfo['fasilitas_delivery_jemput_active'] = $request->has('fasilitas_delivery_jemput_active');
@@ -157,8 +155,8 @@ class SystemSettingController extends Controller
             }
         }
 
-        // Layanan Publik Kabupaten (Pasar Daerah & Kabar dan Informasi Daerah) selalu aktif dan terbuka umum
-        $publicServiceIds = \App\Models\Service::whereIn('slug', ['pasar-daerah', 'pengumuman'])->pluck('id')->toArray();
+        // Kabar dan Informasi Daerah selalu aktif dan terbuka umum
+        $publicServiceIds = \App\Models\Service::whereIn('slug', ['pengumuman'])->pluck('id')->toArray();
         foreach ($publicServiceIds as $pubId) {
             $syncData[$pubId] = [
                 'is_active' => true,

@@ -278,7 +278,6 @@
                                     </span>
                                 </a>
                                 <div class="h-px bg-gray-100 mx-3 my-1"></div>
-                                <a href="{{ route('market.seller.home') }}" class="block px-4 py-2.5 text-blue-700">Jualan / Toko Saya</a>
                                 <a href="{{ route('profile') }}" class="block px-4 py-2.5 text-gray-800 hover:bg-blue-50 hover:border-l-[3px] hover:border-l-blue-500 transition-all duration-150 border-l-[3px] border-l-transparent">
                                     <span class="text-[15px] font-normal text-center block">Profil</span>
                                 </a>
@@ -506,7 +505,6 @@
                 <a href="{{ route('user.saldo.index') }}" class="block w-full text-center px-4 py-2.5 rounded-lg font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition">
                     Alamat Tersimpan
                 </a>
-                <a href="{{ route('market.seller.home') }}" class="block px-4 py-2.5 text-blue-700">Jualan / Toko Saya</a>
                                 <a href="{{ route('profile') }}" class="block w-full text-center px-4 py-2.5 rounded-lg font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition">
                     Profil Saya
                 </a>

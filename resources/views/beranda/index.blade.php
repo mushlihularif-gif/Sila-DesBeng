@@ -734,7 +734,6 @@
         .btn-action-rental,
         .btn-action-mobil,
         .btn-action-fasilitas,
-        .btn-action-pasar,
         .btn-action-brand {
             background-color: #2563eb !important;
             color: #ffffff !important;
@@ -743,7 +742,6 @@
         .btn-action-rental:hover,
         .btn-action-mobil:hover,
         .btn-action-fasilitas:hover,
-        .btn-action-pasar:hover,
         .btn-action-brand:hover {
             background-color: #1d4ed8 !important;
             color: #ffffff !important;

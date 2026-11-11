@@ -19,13 +19,10 @@ class NotificationChannelsTest extends TestCase
         Schema::table('users',function (Blueprint $t) { $t->string('status')->default('aktif'); $t->string('fcm_token')->nullable(); });
         (require database_path('migrations/2026_10_28_130000_add_notification_delivery_channels.php'))->up();
         DB::table('users')->where('id',1)->update(['phone'=>'08123456789']);
-        Schema::create('pasar_produks', function (Blueprint $t) {
-            $t->unsignedBigInteger('store_id')->nullable();
-            $t->id(); $t->unsignedBigInteger('region_id'); $t->string('nama_produk'); $t->string('status'); $t->integer('stok'); $t->decimal('harga'); $t->timestamps();
+        Schema::create('gas', function (Blueprint $t) {
+            $t->id(); $t->unsignedBigInteger('region_id'); $t->string('jenis_gas'); $t->string('status'); $t->integer('stok'); $t->decimal('harga_satuan'); $t->timestamps();
         });
-        Schema::create('market_stores',function (Blueprint $t) { $t->id(); $t->string('name'); $t->string('status'); });
-        Schema::create('market_payments',function (Blueprint $t) { $t->id(); $t->unsignedBigInteger('pasar_order_id'); $t->string('status'); });
-        DB::table('pasar_produks')->insert(['id'=>1,'region_id'=>1,'nama_produk'=>'Kerupuk warga','status'=>'tersedia','stok'=>20,'harga'=>10000]);
+        DB::table('gas')->insert(['id'=>1,'region_id'=>1,'jenis_gas'=>'Gas LPG','status'=>'tersedia','stok'=>20,'harga_satuan'=>10000]);
         config(['fonnte.token'=>'test-token','fonnte.base_url'=>'https://api.fonnte.com','notification_channels.enabled'=>true]);
     }
 
@@ -40,7 +37,7 @@ class NotificationChannelsTest extends TestCase
 
     private function notice(string $type = 'order_created'): Notification
     {
-        return Notification::create(['user_id'=>1,'type'=>$type,'title'=>'Pesanan diperbarui','message'=>'Data pribadi 1234567890123456','link'=>$type === 'produk_baru' ? route('pasar.show',1) : route('user.activity'),'is_read'=>false]);
+        return Notification::create(['user_id'=>1,'type'=>$type,'title'=>'Pesanan diperbarui','message'=>'Data pribadi 1234567890123456','link'=>$type === 'produk_baru' ? url('/unit-penjualan-gas/1') : route('user.activity'),'is_read'=>false]);
     }
 
     public function test_citizen_cannot_open_an_admin_notification_link(): void
@@ -168,67 +165,43 @@ class NotificationChannelsTest extends TestCase
         $this->consent('instant','market'); $this->notice('produk_baru');
         $job=DB::table('notification_deliveries')->first(); $service=app(NotificationDeliveryService::class);
         $this->assertNotNull($service->source($job,$this->user(1)));
-        DB::table('pasar_produks')->where('id',1)->update(['harga'=>12000]);
+        DB::table('gas')->where('id',1)->update(['harga_satuan'=>12000]);
         $this->assertNull($service->source($job,$this->user(1)));
-        DB::table('pasar_produks')->where('id',1)->update(['harga'=>10000,'status'=>'nonaktif']);
+        DB::table('gas')->where('id',1)->update(['harga_satuan'=>10000,'status'=>'nonaktif']);
         $this->assertNull($service->source($job,$this->user(1)));
         $this->artisan('notifications:deliver')->assertSuccessful(); Http::assertNothingSent();
     }
 
     public function test_order_link_resolves_exact_owned_order_and_rejects_foreign_or_deleted_order(): void
     {
-        Schema::create('pasar_orders',function (Blueprint $t) { $t->unsignedBigInteger('store_id')->nullable(); $t->id(); $t->unsignedBigInteger('user_id'); $t->softDeletes(); });
-        DB::table('pasar_orders')->insert([['id'=>9,'user_id'=>1],['id'=>10,'user_id'=>6]]);
-        $order=\App\Models\PasarOrder::findOrFail(9);
+        Schema::create('gas_orders',function (Blueprint $t) { $t->unsignedBigInteger('store_id')->nullable(); $t->id(); $t->unsignedBigInteger('user_id'); $t->softDeletes(); });
+        DB::table('gas_orders')->insert([['id'=>9,'user_id'=>1],['id'=>10,'user_id'=>6]]);
+        $order=\App\Models\GasOrder::findOrFail(9);
         $link=\App\Services\NotificationService::orderLink($order);
-        $this->assertStringContainsString('tab=pasar&order=9',$link);
+        $this->assertStringContainsString('tab=gas&order=9',$link);
         $notice=Notification::create(['user_id'=>1,'type'=>'status_berubah','title'=>'Pembaruan pesanan','link'=>$link]);
         $url=route('notification-link.web',['kind'=>'user','notification'=>$notice->id]);
         $this->actingAs($this->user(1))->getJson($url)->assertOk()->assertJsonPath('destination',$link);
-        $notice->update(['link'=>\App\Services\NotificationService::orderLink(\App\Models\PasarOrder::findOrFail(10))]);
+        $notice->update(['link'=>\App\Services\NotificationService::orderLink(\App\Models\GasOrder::findOrFail(10))]);
         $this->getJson($url)->assertNotFound();
-        $notice->update(['link'=>$link]); DB::table('pasar_orders')->where('id',9)->delete();
+        $notice->update(['link'=>$link]); DB::table('gas_orders')->where('id',9)->delete();
         $this->getJson($url)->assertNotFound();
         $this->assertSame('orders',app(NotificationDeliveryService::class)->category('status_berubah'));
     }
 
-    public function test_market_status_update_notifies_once_and_keeps_foreign_village_out(): void
-    {
-        Schema::create('pasar_complaints', function (Blueprint $t) { $t->id(); $t->integer('pasar_order_id'); $t->string('status'); $t->softDeletes(); });
-        Schema::create('pasar_orders',function (Blueprint $t) { $t->unsignedBigInteger('store_id')->nullable();
-            $t->id(); $t->unsignedBigInteger('user_id'); $t->unsignedBigInteger('region_id'); $t->string('order_number');
-            $t->string('status'); $t->unsignedBigInteger('handled_by')->nullable(); $t->timestamp('delivered_at')->nullable(); $t->timestamp('confirmed_at')->nullable(); $t->timestamps(); $t->softDeletes();
-        });
-        DB::table('pasar_orders')->insert(['id'=>9,'user_id'=>1,'region_id'=>1,'order_number'=>'TEST-9','status'=>'paid']);
-        $this->consent(); $this->actingAs($this->user(4));
-        $controller=app(\App\Http\Controllers\Admin\UnitPasarDaerahController::class);
-        foreach ([1,2] as $attempt) $controller->pesananUpdate(\Illuminate\Http\Request::create('/','PUT',['status'=>'confirmed']),9);
-        $this->assertSame(1,Notification::count());
-        $this->assertSame(1,DB::table('notification_deliveries')->count());
-        $this->assertStringContainsString('tab=pasar&order=9',Notification::first()->link);
-        $this->actingAs($this->user(7));
-        try {
-            $controller->pesananUpdate(\Illuminate\Http\Request::create('/','PUT',['status'=>'cancelled']),9);
-            $this->fail('A different village must not update the order.');
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            $this->assertSame('confirmed',DB::table('pasar_orders')->value('status'));
-        }
-        $this->assertSame(1,Notification::count());
-    }
 
     public function test_activity_deep_link_can_open_an_older_order_beyond_the_first_page(): void
     {
         Schema::create('system_settings',fn (Blueprint $t)=>$t->id());
-        foreach (['rental_bookings','gas_orders','mobil_bookings','fasilitas_umum_bookings','pasar_orders'] as $table) {
+        foreach (['rental_bookings','gas_orders','mobil_bookings','fasilitas_umum_bookings'] as $table) {
             Schema::create($table,function (Blueprint $t) { $t->id(); $t->unsignedBigInteger('user_id'); $t->timestamps(); $t->softDeletes(); });
         }
-        Schema::create('pasar_order_items',function (Blueprint $t) { $t->id(); $t->unsignedBigInteger('pasar_order_id'); });
-        foreach (range(1,10) as $id) DB::table('pasar_orders')->insert(['id'=>$id,'user_id'=>$id === 10 ? 6 : 1,'created_at'=>now()->subDays(11-$id)]);
+        foreach (range(1,10) as $id) DB::table('gas_orders')->insert(['id'=>$id,'user_id'=>$id === 10 ? 6 : 1,'created_at'=>now()->subDays(11-$id)]);
         $this->actingAs($this->user(1));
-        $view=app(\App\Http\Controllers\User\ActivityController::class)->index(\Illuminate\Http\Request::create('/aktivitas?tab=pasar&order=1'));
-        $this->assertSame([1],$view->getData()['pasarOrders']->pluck('id')->all());
+        $view=app(\App\Http\Controllers\User\ActivityController::class)->index(\Illuminate\Http\Request::create('/aktivitas?tab=gas&order=1'));
+        $this->assertSame([1],$view->getData()['gasOrders']->pluck('id')->all());
         $this->assertSame(1,$view->getData()['focusedOrder']);
-        $this->getJson('/aktivitas?tab=pasar&order=10')->assertNotFound();
+        $this->getJson('/aktivitas?tab=gas&order=10')->assertNotFound();
     }
 
     public function test_missing_provider_token_is_a_failure_not_simulated_success(): void

@@ -89,7 +89,7 @@ class BerandaController extends Controller
      */
     public function services()
     {
-        $services = \Illuminate\Support\Facades\Cache::remember('api.beranda.services.v2', 300, function () {
+        $services = \Illuminate\Support\Facades\Cache::remember('api.beranda.services.v3', 300, function () {
             // Simple aggregation of services for mobile display
             $rentals = Barang::where('status', 'tersedia')->take(10)->get()->map(function($item) {
                 return [
@@ -147,7 +147,6 @@ class BerandaController extends Controller
     public function unitPelayanan(Request $request)
     {
         $menus = [
-            ['slug' => 'pasar-daerah', 'title' => 'Pasar Daerah', 'image' => 'PasarDaerah.png', 'color' => 'teal', 'action' => 'Toko Daerah'],
             ['slug' => 'penyewaan-mobil', 'title' => 'Penyewaan Transportasi', 'image' => 'mobil.png', 'color' => 'blue', 'action' => 'Sewa Transportasi'],
             ['slug' => 'penyewaan-alat', 'title' => 'Penyewaan Alat', 'image' => 'F1.png', 'color' => 'orange', 'action' => 'Sewa Alat'],
             ['slug' => 'penjualan-gas', 'title' => 'Pembelian Gas', 'image' => 'F2.png', 'color' => 'green', 'action' => 'Beli Gas'],
@@ -185,27 +184,8 @@ class BerandaController extends Controller
 
     public function popular(Request $request)
     {
-        $allPopular = \Illuminate\Support\Facades\Cache::remember('api.beranda.popular.v2', 300, function () {
+        $allPopular = \Illuminate\Support\Facades\Cache::remember('api.beranda.popular.v3', 300, function () {
             $limitPerCategory = 5;
-
-            // Pasar Daerah - Most ordered
-            $pasarProducts = \App\Models\PasarProduk::visibleStore()->where('status', 'tersedia')
-                ->withCount('orderItems')
-                ->orderBy('order_items_count', 'desc')
-                ->take($limitPerCategory)
-                ->get()
-                ->map(function ($item) {
-                    return [
-                        'id' => $item->id,
-                        'name' => $item->nama_produk,
-                        'price' => $item->harga,
-                        'type' => 'pasar',
-                        'category' => 'Pasar Daerah',
-                        'image_url' => $item->foto ? asset('storage/' . $item->foto) : null,
-                        'satuan' => $item->satuan,
-                        'order_count' => $item->order_items_count,
-                    ];
-                });
 
             // Gas - Most ordered
             $gasProducts = \App\Models\Gas::where('stok', '>', 0)
@@ -265,7 +245,7 @@ class BerandaController extends Controller
                 });
 
             // Merge all
-            return $pasarProducts->concat($gasProducts)
+            return $gasProducts
                 ->concat($alatProducts)
                 ->concat($mobilProducts)
                 ->sortByDesc('order_count')

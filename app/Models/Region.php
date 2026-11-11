@@ -31,6 +31,7 @@ class Region extends Model
     public function services()
     {
         return $this->belongsToMany(Service::class, 'region_services')
+                    ->available()
                     ->withPivot('is_active', 'is_exclusive')
                     ->withTimestamps();
     }

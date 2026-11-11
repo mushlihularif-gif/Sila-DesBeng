@@ -13,8 +13,6 @@ use App\Models\Mobil;
 use App\Models\MobilBooking;
 use App\Models\FasilitasUmum;
 use App\Models\FasilitasUmumBooking;
-use App\Models\PasarOrderItem;
-use App\Models\PasarProduk;
 use App\Models\Region;
 use App\Models\BumdesMember;
 use Illuminate\Support\Facades\DB;
@@ -283,10 +281,9 @@ class BerandaController extends Controller
                 'link' => route('mobil.rental.show', $item->mobil->id)
             ];
         })->filter();
-        $pasarProducts = collect();
 
         // Gabungkan produk berdasarkan penjualan terlaris
-        $combined = $products->concat($gasProducts)->concat($mobilProducts)->concat($pasarProducts)->sortByDesc('sold');
+        $combined = $products->concat($gasProducts)->concat($mobilProducts)->sortByDesc('sold');
 
         // SMART FALLBACK: Jika riwayat transaksi masih kurang dari 4 (Cold Start)
         // Isi slot produk dengan produk yang tersedia/ready stock di wilayah tersebut!
@@ -486,7 +483,6 @@ class BerandaController extends Controller
         $fasilitasData = [];
         $laporanData = [];
         $pengumumanData = [];
-        $pasarData = [];
         
         $regionIds = array_merge([$regionId], \App\Models\Region::getDescendantIds($regionId));
         
@@ -530,13 +526,6 @@ class BerandaController extends Controller
                 ->whereIn('region_id', $regionIds)
                 ->count();
                 
-            // Count pasar orders
-            $pasarCount = \App\Models\PasarOrder::withTrashed()
-                ->whereYear('created_at', $year)
-                ->whereMonth('created_at', $month)
-                ->whereIn('region_id', $regionIds)
-                ->whereNotIn('status', ['waiting', 'processing', 'cancelled', 'rejected'])
-                ->count();
             
             $rentalData[] = $rentalCount;
             $gasData[] = $gasCount;
@@ -544,7 +533,6 @@ class BerandaController extends Controller
             $fasilitasData[] = $fasilitasCount;
             $laporanData[] = $laporanCount;
             $pengumumanData[] = $pengumumanCount;
-            $pasarData[] = $pasarCount;
         }
         
         return [
@@ -555,7 +543,6 @@ class BerandaController extends Controller
             'fasilitas' => $fasilitasData,
             'laporan' => $laporanData,
             'pengumuman' => $pengumumanData,
-            'pasar' => $pasarData
         ];
     }
 
@@ -641,9 +628,8 @@ class BerandaController extends Controller
         $isMobilIntent = (bool) preg_match('/\b(mobil|pikap|pick|pickup|carry|armada|kendaraan|supir|transportasi)\b/i', $rawSearch);
         $isRentalIntent = (bool) preg_match('/\b(tenda|terop|kursi|meja|sound|genset|alat|piring|dekorasi)\b/i', $rawSearch);
         $isFasilitasIntent = (bool) preg_match('/\b(gedung|aula|lapangan|balai|serbaguna|fasilitas)\b/i', $rawSearch);
-        $isPasarIntent = (bool) preg_match('/\b(pasar|ikan|madu|lempuk|kerupuk|makanan|buah|sayur|produk)\b/i', $rawSearch);
 
-        $hasSpecificIntent = $isGasIntent || $isMobilIntent || $isRentalIntent || $isFasilitasIntent || $isPasarIntent;
+        $hasSpecificIntent = $isGasIntent || $isMobilIntent || $isRentalIntent || $isFasilitasIntent;
 
         $results = collect([]);
 

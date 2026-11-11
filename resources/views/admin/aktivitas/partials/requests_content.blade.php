@@ -4,8 +4,7 @@ $isRentalActive = collect($activeServices)->contains(fn($name) => str_contains(s
 $isGasActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'gas'));
 $isMobilActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'mobil') || str_contains(strtolower($name), 'transportasi'));
 $isFasilitasActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'fasilitas'));
-$isPasarActive = false;
-$totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasilitasActive, $isPasarActive])->filter()->count();
+$totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasilitasActive])->filter()->count();
 @endphp
 
 @if($totalActive === 0)
@@ -189,20 +188,7 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                     </button>
                 </li>
                 @endif
-                @if($isPasarActive)
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link {{ $activeTab == 'pasar' || (!$isRentalActive && !$isGasActive && !$isMobilActive && !$isFasilitasActive && $activeTab == 'rental') ? 'active' : '' }} rounded-pill px-3 py-2 fw-semibold" id="pasar-tab" data-bs-toggle="tab" data-bs-target="#pasar-pane" type="button" role="tab">
-                        <img src="{{ asset('Admin/img/menu3dberanda/pasar-daerah.webp') }}" class="me-2" style="width: 22px; height: 22px; object-fit: contain;">Pasar Daerah
-                        @php $pasarTotal = $notificationCounts['pasar']['total'] ?? 0; @endphp
-                        @php $pasarCount = $pasarTotal > 0 ? $pasarTotal : $pasarOrders->count(); @endphp
-                        <span id="pasar-badge" 
-                              class="badge {{ $pasarTotal > 0 ? 'bg-danger text-white' : 'bg-white text-primary' }} ms-2 shadow-sm"
-                              data-default-count="{{ $pasarOrders->count() }}">
-                            {{ $pasarCount }}
-                        </span>
-                    </button>
-                </li>
-                @endif
+
             </ul>
 
             {{-- Area Teks Notifikasi --}}
@@ -719,98 +705,7 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                 @endif
 
 
-                <!-- PASAR DAERAH TAB -->
-                @if($isPasarActive)
-                <div class="tab-pane fade {{ $activeTab == 'pasar' || (!$isRentalActive && !$isGasActive && !$isMobilActive && !$isFasilitasActive && $activeTab == 'rental') ? 'show active' : '' }}" id="pasar-pane" role="tabpanel">
-                    @if($pasarOrders->isEmpty())
-                        <div class="text-center py-5">
-                            <div class="mb-3"><i class="bx bx-store fs-1 text-muted opacity-25"></i></div>
-                            <h6 class="text-muted fw-bold">Belum ada pesanan pasar daerah</h6>
-                            <p class="text-muted small mb-0">Pesanan pasar daerah yang masuk akan muncul di sini.</p>
-                        </div>
-                    @else
-                        <div class="table-responsive">
-                            <table class="table table-modern align-middle w-100">
-                                <thead class="bg-light">
-                                    <tr>
-                                        <th class="ps-4 py-3 text-secondary text-uppercase small fw-bold">Pembeli</th>
-                                        <th class="py-3 text-secondary text-uppercase small fw-bold">Pesanan dan Produk</th>
-                                        <th class="py-3 text-secondary text-uppercase small fw-bold">Waktu Pesan</th>
-                                        <th class="py-3 text-secondary text-uppercase small fw-bold text-center">Status</th>
-                                        <th class="pe-4 py-3 text-secondary text-uppercase small fw-bold text-end">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($pasarOrders as $req)
-                                    <tr data-status="{{ $req->status }}" data-cancel-status="{{ $req->cancellation_status }}">
-                                        <td class="ps-4">
-                                            <div class="d-flex align-items-center">
-                                                <div class="avatar avatar-sm border rounded-circle p-1 me-3">
-                                                    <i class="bx bx-user text-secondary fs-4"></i>
-                                                </div>
-                                                <div>
-                                                    <h6 class="mb-0 fw-bold text-dark">{{ $req->user->name ?? $req->full_name }}</h6>
-                                                    <small class="text-muted">{{ $req->user->phone ?? $req->phone }}</small>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <div class="me-3">
-                                                    <div class="bg-primary-subtle text-primary rounded-3 p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                                                        <i class="bx bx-store fs-4"></i>
-                                                    </div>
-                                                </div>
-                                                <div>
-                                                    <h6 class="mb-0 fw-bold text-dark">Pesanan: {{ $req->order_number }}</h6>
-                                                    <small class="text-muted">{{ $req->items->count() }} jenis produk - Total: Rp {{ number_format($req->grand_total, 0, ',', '.') }}</small>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="d-flex align-items-center text-muted small">
-                                                <i class="bx bx-calendar me-1"></i>
-                                                {{ $req->created_at->format('d M Y') }} <br>
-                                                <i class="bx bx-time me-1 mt-1"></i>
-                                                {{ $req->created_at->format('H:i') }}
-                                            </div>
-                                        </td>
-                                        <td class="text-center">
-                                            @if($req->cancellation_status == 'pending')
-                                                <span class="badge bg-danger text-white py-1 px-3 rounded-pill fw-medium d-inline-flex align-items-center shadow-sm">
-                                                    <i class="bx bx-shield-x me-1"></i> Minta Batal
-                                                </span>
-                                            @elseif(in_array($req->status, ['pending', 'paid']))
-                                                <span class="badge bg-warning text-dark py-1 px-3 rounded-pill fw-medium d-inline-flex align-items-center shadow-sm">
-                                                    <i class="bx bx-time me-1"></i> Menunggu
-                                                </span>
-                                            @elseif(in_array($req->status, ['confirmed', 'in_delivery']))
-                                                <span class="badge bg-info text-white py-1 px-3 rounded-pill fw-medium d-inline-flex align-items-center shadow-sm">
-                                                    <i class="bx bx-loader-circle bx-spin me-1"></i> Diproses
-                                                </span>
-                                            @elseif($req->status == 'completed')
-                                                <span class="badge bg-success text-white py-1 px-3 rounded-pill fw-medium d-inline-flex align-items-center shadow-sm">
-                                                    <i class="bx bx-check-circle me-1"></i> Selesai
-                                                </span>
-                                            @else
-                                                <span class="badge bg-secondary text-white py-1 px-3 rounded-pill fw-medium d-inline-flex align-items-center shadow-sm">
-                                                    <i class="bx bx-x-circle me-1"></i> {{ ucfirst($req->status) }}
-                                                </span>
-                                            @endif
-                                        </td>
-                                        <td class="pe-4 text-end">
-                                            <a href="{{ route('admin.unit.pasar_daerah.pesanan.show', $req->id) }}" class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm" title="Kelola">
-                                                <i class="bx bx-cog me-1"></i> Kelola
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    @endif
-                </div>
-                @endif
+
             </div>
         </div>
     </div>

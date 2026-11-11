@@ -50,14 +50,14 @@ class NotificationDeliveryService
 
     public function enqueue(Notification $notification): void
     {
-        if (!$this->available() || !$notification->user_id) return;
+        if (!$this->available() || !$notification->user_id || $this->isRetiredMarketNotice($notification)) return;
         $user = User::find($notification->user_id);
         if ($user) $this->queue('user',$notification->id,$user,$this->category($notification->type ?? ''));
     }
 
     public function enqueueAdmin(AdminNotification $notification): void
     {
-        if (!$this->available()) return;
+        if (!$this->available() || $this->isRetiredMarketNotice($notification)) return;
         User::whereIn('role',['super_admin', 'admin_desa', 'admin_rw', 'admin_rt'])
             ->chunkById(100,function ($users) use ($notification) {
                 foreach ($users as $user) {
@@ -99,6 +99,7 @@ class NotificationDeliveryService
         if (isset($delivery->recipient_region_id) && $delivery->recipient_region_id != $user->region_id) return null;
         if ($delivery->source_kind === 'admin') {
             $notice = $user->isAdmin() ? AdminNotification::untukPengguna($user)->find($delivery->source_id) : null;
+            if ($notice && $this->isRetiredMarketNotice($notice)) return null;
             if ($notice && ($type = $this->adminOrderType($notice))) {
                 $order = BookingAccess::TYPES[$type][0]::find($notice->reference_id);
                 if (!$order || !app(BookingAccess::class)->canView($order, $type, $user)) return null;
@@ -106,7 +107,7 @@ class NotificationDeliveryService
             return $notice;
         }
         $notification = Notification::where('user_id',$user->id)->find($delivery->source_id);
-        if (!$notification) return null;
+        if (!$notification || $this->isRetiredMarketNotice($notification)) return null;
         if ($delivery->category === 'market') {
             $product = $this->product($notification->link);
             if (!$product || !in_array(strtolower($product->status ?? ''), ['tersedia','aktif','available'], true)
@@ -147,12 +148,10 @@ class NotificationDeliveryService
     {
         $path = parse_url($link ?? '', PHP_URL_PATH) ?: '';
         $models = ['unit-penjualan-gas'=>\App\Models\Gas::class, 'unit-penyewaan-alat'=>\App\Models\Barang::class,
-            'unit-penyewaan-mobil'=>\App\Models\Mobil::class, 'unit-peminjaman-fasilitas-umum'=>\App\Models\FasilitasUmum::class,
-            'pasar-daerah'=>\App\Models\PasarProduk::class];
+            'unit-penyewaan-mobil'=>\App\Models\Mobil::class, 'unit-peminjaman-fasilitas-umum'=>\App\Models\FasilitasUmum::class];
         foreach ($models as $prefix => $model) {
             if (preg_match('~^/'.$prefix.'/(\d+)$~', $path, $matches)) {
                 $query = in_array($model,[\App\Models\Mobil::class,\App\Models\FasilitasUmum::class],true) ? $model::inCatalog() : $model::query();
-                if($model === \App\Models\PasarProduk::class) $query->visibleStore();
                 return $query->find($matches[1]);
             }
         }
@@ -161,14 +160,14 @@ class NotificationDeliveryService
 
     private function productHash(\Illuminate\Database\Eloquent\Model $product): string
     {
-        return hash('sha256',json_encode($product->only(['region_id','status','stok','harga','harga_sewa','jenis_gas','nama_produk','nama_mobil','nama_barang','nama_fasilitas','deskripsi'])));
+        return hash('sha256',json_encode($product->only(['region_id','status','stok','harga','harga_satuan','harga_sewa','jenis_gas','nama_produk','nama_mobil','nama_barang','nama_fasilitas','deskripsi'])));
     }
 
     private function adminOrderType(AdminNotification $notice): ?string
     {
         return match ($notice->type) {
             'gas_order'=>'gas', 'rental_request'=>'rental', 'mobil_order'=>'mobil',
-            'fasilitas_order'=>'fasilitas', 'pasar_order'=>'pasar', default=>null,
+            'fasilitas_order'=>'fasilitas', default=>null,
         };
     }
 
@@ -189,9 +188,11 @@ class NotificationDeliveryService
 
     public function destination(Notification|AdminNotification $source): string
     {
+        if ($this->isRetiredMarketNotice($source)) {
+            return $source instanceof AdminNotification ? route('admin.notifications.index') : route('user.notifications');
+        }
         if ($source instanceof AdminNotification) {
             $type = $this->adminOrderType($source);
-            if ($type === 'pasar') return route('admin.unit.pasar_daerah.pesanan.show',$source->reference_id);
             if ($type) return route('admin.aktivitas.permintaan-pengajuan.show',['id'=>$source->reference_id,'type'=>$type]);
             return route('admin.notifications.index');
         }
@@ -202,5 +203,17 @@ class NotificationDeliveryService
             if (parse_url($link,PHP_URL_HOST) === $appHost && in_array(parse_url($link,PHP_URL_SCHEME),['http','https'])) return $link;
         }
         return route('user.notifications');
+    }
+
+    private function isRetiredMarketNotice(Notification|AdminNotification $notice): bool
+    {
+        if (preg_match('/pasar|market|toko_warga/', $notice->type ?? '')) return true;
+
+        $link = $notice->link ?? '';
+        $path = parse_url($link, PHP_URL_PATH) ?: '';
+        parse_str(parse_url($link, PHP_URL_QUERY) ?? '', $query);
+
+        return preg_match('~/(pasar-daerah|toko-warga)(/|$)~', $path) === 1
+            || in_array('pasar', [$query['tab'] ?? null, $query['category'] ?? null, $query['type'] ?? null], true);
     }
 }

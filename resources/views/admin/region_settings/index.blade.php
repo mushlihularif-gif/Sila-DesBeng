@@ -159,7 +159,7 @@
                             @php
                                 $operationalServices = $allServices->filter(function($s) {
                                     $n = strtolower($s->name);
-                                    return strpos($n, 'pasar') === false && strpos($n, 'pengumuman') === false;
+                                    return strpos($n, 'pengumuman') === false;
                                 });
                                 $publicServices = $allServices->filter(function($s) {
                                     $n = strtolower($s->name);

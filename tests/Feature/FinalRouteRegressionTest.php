@@ -15,8 +15,9 @@ class FinalRouteRegressionTest extends TestCase
     {
         foreach (['admin.unit.mobil.show', 'admin.layouts.admin', 'admin.region_management.index',
             'admin.region_management.partials.modals', 'admin.super_sistem.partials.simpul_wilayah',
-            'admin.unit.pasar_daerah.pesanan_show', 'users.pasar-checkout', 'users.pasar-detail', 'users.partials.activity-pasar',
-            'market.dispute', 'market.review', 'market.manage', 'market.product', 'market.cart', 'market.order', 'market.chat'] as $name) {
+            'users.activity', 'admin.aktivitas.transactions', 'admin.laporan.income',
+            'admin.laporan.partials.transactions_content', 'admin.aktivitas.partials.requests_content',
+            'admin.region_settings.index', 'admin.system_settings.index'] as $name) {
             $source = file_get_contents(app('view')->getFinder()->find($name));
             $compiled = app('blade.compiler')->compileString($source);
             try { $tokens = token_get_all($compiled, TOKEN_PARSE); }
@@ -60,23 +61,6 @@ class FinalRouteRegressionTest extends TestCase
         $this->postJson('/api/gas/payment/1',['payment_proof'=>UploadedFile::fake()->image('proof.jpg')])->assertStatus(409);
         $this->assertSame([],Storage::disk('public')->allFiles());
         $this->assertNull(DB::table('gas_orders')->value('proof_of_payment'));
-    }
-
-    public function test_market_payment_is_owned_and_does_not_expose_all_region_settings(): void
-    {
-        Schema::table('regions',fn (Blueprint $t)=>$t->text('settings')->nullable());
-        Schema::create('pasar_orders',function (Blueprint $t) {
-            $t->id(); $t->integer('user_id'); $t->integer('region_id'); $t->string('status');
-            $t->string('order_number'); $t->string('payment_method'); $t->decimal('total_amount');
-            $t->decimal('grand_total'); $t->decimal('shipping_cost'); $t->string('proof_of_payment')->nullable(); $t->softDeletes();
-        });
-        DB::table('regions')->where('id',1)->update(['settings'=>json_encode(['rekening_bank'=>'Bank Uji','rekening_nomor'=>'1234','internal_setting'=>'private'])]);
-        DB::table('pasar_orders')->insert(['id'=>1,'user_id'=>1,'region_id'=>1,'status'=>'pending','order_number'=>'PASAR-TEST','payment_method'=>'Transfer','total_amount'=>10000,'grand_total'=>10000,'shipping_cost'=>0]);
-        $this->actingAs($this->user(6),'sanctum')->getJson('/api/pasar-daerah/orders/1/payment')->assertNotFound();
-        $this->actingAs($this->user(1),'sanctum')->getJson('/api/pasar-daerah/orders/1/payment')->assertOk()
-            ->assertJsonPath('data.payment_instructions.account_number','1234')->assertDontSee('internal_setting');
-        DB::table('pasar_orders')->where('id',1)->update(['status'=>'completed']);
-        $this->getJson('/api/pasar-daerah/orders/1/payment')->assertOk()->assertJsonPath('data.payment_instructions',null);
     }
 
     public function test_mutasi_identity_image_is_private_and_scoped(): void

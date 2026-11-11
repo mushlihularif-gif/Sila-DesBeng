@@ -24,7 +24,7 @@ class ServiceCategoryController extends Controller
                         'route' => 'gas.sales',
                         'services' => ['Penjualan Gas'],
                     ],
-],
+                ],
             ],
             'layanan-daerah' => [
                 'title' => 'Layanan Daerah',

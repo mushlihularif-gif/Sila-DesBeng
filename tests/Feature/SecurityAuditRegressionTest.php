@@ -229,15 +229,6 @@ class SecurityAuditRegressionTest extends TestCase
         $this->assertSame($session->id, $next->getData()->data->session->id);
     }
 
-    public function test_market_chat_does_not_accept_another_accounts_token(): void
-    {
-        $token = str_repeat('c', 64);
-        DB::table('pasar_chat_sessions')->insert(['id' => 1, 'user_id' => 2, 'region_id' => 7, 'session_token' => $token]);
-        foreach ([\App\Http\Controllers\User\PasarDaerahController::class, \App\Http\Controllers\Api\PasarDaerahApiController::class] as $controller) {
-            $response = app($controller)->getChatHistory($this->request(['session_token' => $token]), 7);
-            $this->assertNull($response->getData()->data->session);
-        }
-    }
 
     public function test_retired_report_endpoints_are_unavailable_to_every_role(): void
     {

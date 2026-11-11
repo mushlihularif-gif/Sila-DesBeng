@@ -381,7 +381,7 @@
             @php
                 $dashboardGroups = [
                     'Belanja dan Kebutuhan' => [
-                        'image' => asset('Admin/img/pasardaerah/Belanja dan Kebutuhan.png'),
+                        'image' => asset('Admin/img/menu3dberanda/belanja-kebutuhan.png'),
                         'services' => ['Penjualan Gas'],
                     ],
                     'Layanan Daerah' => [

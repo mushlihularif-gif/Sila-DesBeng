@@ -20,8 +20,7 @@
     $isGasActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'gas'));
     $isMobilActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'mobil') || str_contains(strtolower($name), 'transportasi'));
     $isFasilitasActive = collect($activeServices)->contains(fn($name) => str_contains(strtolower($name), 'fasilitas'));
-    $isPasarActive = false;
-    $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasilitasActive, $isPasarActive])->filter()->count();
+    $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasilitasActive])->filter()->count();
     @endphp
 
     @if($totalActive === 0)
@@ -166,23 +165,7 @@
                     </div>
                 </div>
                 @endif
-                @if($isPasarActive)
-                <div class="col-6 col-md-4">
-                    <div class="card border-0 shadow-sm h-100 rounded-4 position-relative overflow-hidden">
-                        <div class="card-body p-3">
-                            <div class="d-flex align-items-center mb-2">
-                                <div class="avatar avatar-md bg-secondary-subtle rounded-3 p-2 me-3 d-flex align-items-center justify-content-center">
-                                    <img src="{{ asset('Admin/img/menu3dberanda/pasar-daerah.webp') }}" style="width: 44px; height: 44px; object-fit: contain;">
-                                </div>
-                                <div>
-                                    <small class="text-muted text-uppercase fw-bold ls-1" style="font-size: 0.7rem;">Pasar Daerah</small>
-                                    <h4 class="fw-bold mb-0 text-dark"><span class="count-up" data-value="{{ $stats['pasar_total'] }}">0</span></h4>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                @endif
+
             </div>
         </div>
 
@@ -275,14 +258,7 @@
                     </button>
                 </li>
                 @endif
-                @if($isPasarActive)
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link {{ $category == 'pasar' || (!$isRentalActive && !$isGasActive && !$isMobilActive && !$isFasilitasActive && ($category == 'rental' || $category == 'all')) ? 'active' : '' }} rounded-pill px-4 fw-semibold" id="pasar-tab" data-bs-toggle="tab" data-bs-target="#pasar-pane" type="button" role="tab">
-                        <img src="{{ asset('Admin/img/menu3dberanda/pasar-daerah.webp') }}" class="me-2" style="width: 28px; height: 28px; object-fit: contain;">Pasar Daerah
-                        <span class="badge {{ $category == 'pasar' ? 'bg-white text-primary' : 'bg-primary text-white' }} ms-2 shadow-sm">{{ $pasarPayments->count() }}</span>
-                    </button>
-                </li>
-                @endif
+
             </ul>
         </div>
         
@@ -642,94 +618,7 @@
                 </div>
                 @endif
 
-                <!-- PASAR DAERAH TAB -->
-                @if($isPasarActive)
-                <div class="tab-pane fade {{ $category == 'pasar' || (!$isRentalActive && !$isGasActive && !$isMobilActive && !$isFasilitasActive && ($category == 'rental' || $category == 'all')) ? 'show active' : '' }}" id="pasar-pane" role="tabpanel">
-                    @if($pasarPayments->isEmpty())
-                        <div class="text-center py-5">
-                            <div class="mb-3"><i class="bx bx-store fs-1 text-muted opacity-25"></i></div>
-                            <h6 class="text-muted fw-bold">Belum ada transaksi Pasar Daerah</h6>
-                            <p class="text-muted small mb-0">Transaksi pembayaran akan muncul di sini.</p>
-                        </div>
-                    @else
-                        <div class="table-responsive">
-                            <table class="table table-modern align-middle w-100">
-                                <thead class="bg-light">
-                                    <tr>
-                                        <th class="ps-4 py-3 text-secondary">Tanggal Pembayaran</th>
-                                        <th class="py-3 text-secondary">Pemesan</th>
-                                        <th class="py-3 text-secondary">No. Pesanan</th>
-                                        <th class="py-3 text-secondary">Total Tagihan</th>
-                                        <th class="py-3 text-secondary">Metode</th>
-                                        <th class="py-3 text-secondary">Status</th>
-                                        <th class="pe-4 py-3 text-secondary text-end">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($pasarPayments as $payment)
-                                    <tr>
-                                        <td class="ps-4">
-                                            <div class="fw-bold text-dark">{{ $payment->updated_at->format('d M Y') }}</div>
-                                            <small class="text-muted"><i class="bx bx-time me-1"></i>{{ $payment->updated_at->format('H:i') }} WIB</small>
-                                        </td>
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <div class="avatar avatar-sm border bg-light rounded-circle p-1 me-2 text-center">
-                                                    <i class="bx bx-user text-secondary"></i>
-                                                </div>
-                                                <div>
-                                                    <h6 class="mb-0 fw-bold text-dark">{{ $payment->user->name ?? $payment->full_name }}</h6>
-                                                    <small class="text-muted">{{ $payment->user->phone ?? $payment->phone }}</small>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="fw-medium text-dark">{{ $payment->order_number }}</div>
-                                        </td>
-                                        <td>
-                                            <span class="fw-bold text-dark">Rp {{ number_format($payment->grand_total ?? 0, 0, ',', '.') }}</span>
-                                        </td>
-                                        <td>
-                                            @php
-                                                $method = strtolower($payment->payment_method ?? 'tunai');
-                                                $methodStr = ucfirst($method);
-                                                $badgeClass = 'bg-secondary-subtle text-secondary border-secondary-subtle';
-                                                
-                                                if (str_contains($method, 'tunai') || str_contains($method, 'cash')) {
-                                                    $badgeClass = 'bg-success-subtle text-success border-success-subtle';
-                                                    $methodStr = 'Tunai';
-                                                } elseif (str_contains($method, 'transfer') || str_contains($method, 'bank')) {
-                                                    $badgeClass = 'bg-primary-subtle text-primary border-primary-subtle';
-                                                } elseif ($method != 'tunai') {
-                                                    $badgeClass = 'bg-info-subtle text-info border-info-subtle';
-                                                }
-                                            @endphp
-                                            <span class="badge {{ $badgeClass }} border rounded-pill px-3">{{ $methodStr }}</span>
-                                        </td>
-                                        <td>
-                                            @include('admin.partials.status-badge', ['status' => $payment->status])
-                                        </td>
-                                        <td class="text-end pe-4">
-                                            <div class="d-flex justify-content-end gap-2">
-                                                @if($payment->proof_of_payment)
-                                                    <a href="{{ Storage::url($payment->proof_of_payment) }}" 
-                                                       class="btn btn-sm btn-light border shadow-sm rounded-circle p-2 text-primary hover-primary" 
-                                                       title="Lihat Bukti" target="_blank">
-                                                        <i class="bx bx-image fs-5"></i>
-                                                    </a>
-                                                @else
-                                                    <span class="text-muted small"><em>Sistem</em></span>
-                                                @endif
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    @endif
-                </div>
-                @endif
+
             </div>
         </div>
     </div>

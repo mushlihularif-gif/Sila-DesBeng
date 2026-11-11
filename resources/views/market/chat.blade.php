@@ -1,5 +1,0 @@
-@extends('layouts.user')
-@section('title','Chat '.$store->name)
-@section('page')
-<main class="market">@include('market.ui')<a href="{{ auth()->id()===$store->user_id ? route('market.seller.home') : route('market.store',$store->id) }}">← {{ $store->name }}</a><h1>Percakapan Toko</h1><section class="mk-card"><div data-market-chat data-owner="{{ $store->user_id }}">@forelse($messages as $message)<div class="mk-message"><strong>{{ $message->sender_id===$store->user_id?'Penjual':'Pembeli' }}</strong><p>{{ $message->message }}</p></div>@empty<p>Belum ada pesan. Tanyakan produk atau pesanan Anda di sini.</p>@endforelse</div><form method="POST" action="{{ route('market.chat',[$store->id,$buyer]) }}">@csrf<label for="message">Pesan Anda</label><textarea id="message" name="message" required maxlength="2000" placeholder="Contoh: Kerupuknya bisa diantar besok pagi?"></textarea><button class="mk-btn">Kirim Pesan</button></form></section></main>@endsection
-@push('scripts')<script src="{{ asset('js/market-store.js') }}" defer></script>@endpush

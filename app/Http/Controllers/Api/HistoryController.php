@@ -8,7 +8,6 @@ use App\Models\GasOrder;
 use App\Models\RentalBooking;
 use App\Models\MobilBooking;
 use App\Models\FasilitasUmumBooking;
-use App\Models\PasarOrder;
 use Carbon\Carbon;
 
 class HistoryController extends Controller
@@ -98,78 +97,6 @@ class HistoryController extends Controller
         }
 
         
-
-        // 6. Pasar Daerah Orders (BUMDes)
-        $pasarOrders = PasarOrder::where('user_id', $user->id)
-            ->with(['items.produk', 'region', 'complaint','store:id,name','marketPayment'])
-            ->get();
-        foreach ($pasarOrders as $order) {
-            $firstItem = $order->items->first();
-            $firstProduct = $firstItem ? $firstItem->produk : null;
-            $title = $firstProduct ? $firstProduct->nama_produk : 'Pesanan Pasar Daerah';
-            if ($order->items->count() > 1) {
-                $title .= ' (+' . ($order->items->count() - 1) . ' produk)';
-            }
-            
-            $imageUrl = url('User/img/elemen/PasarDaerah.png');
-            if ($firstProduct && $firstProduct->foto) {
-                $imageUrl = url('storage/' . $firstProduct->foto);
-            }
-
-            $history->push([
-                'id' => $order->id,
-                'category' => 'Pasar Daerah',
-                'title' => $title,
-                'price' => 'Rp ' . number_format((float)($order->grand_total ?? 0), 0, ',', '.'),
-                'date' => Carbon::parse($order->created_at)->isoFormat('dddd, D MMMM Y HH:mm') . ' WIB',
-                'status' => $this->mapStatus($order->status),
-                'payment' => $order->payment_method ? strtoupper(str_replace('_', ' ', $order->payment_method)) : 'Tunai',
-                'image' => $imageUrl,
-                'raw_date' => $order->created_at,
-                'raw_data' => [
-                    'id' => $order->id,
-                    'order_number' => $order->order_number,
-                    'store_id' => $order->store_id, 'store_name' => $order->store?->name, 'payment_status' => $order->marketPayment?->status,
-                    'status' => $order->status,
-                    'mapped_status' => $this->mapStatus($order->status),
-                    'delivery_method' => $order->delivery_method,
-                    'delivery_address' => $order->delivery_address,
-                    'payment_method' => $order->payment_method,
-                    'total_amount' => $order->total_amount,
-                    'shipping_cost' => $order->shipping_cost,
-                    'grand_total' => $order->grand_total,
-                    'delivery_proof_image' => $order->delivery_proof_image ? url('storage/' . $order->delivery_proof_image) : null,
-                    'items' => $order->items->map(function ($item) {
-                        return [
-                            'id' => $item->id,
-                            'pasar_produk_id' => $item->pasar_produk_id,
-                            'product_id' => $item->pasar_produk_id,
-                            'name' => $item->product_name,
-                            'quantity' => $item->quantity,
-                            'price' => $item->product_price,
-                            'subtotal' => $item->subtotal ?? ($item->quantity * $item->product_price),
-                            'image' => $item->produk && $item->produk->foto ? url('storage/' . $item->produk->foto) : null,
-                            'satuan' => $item->produk ? $item->produk->satuan : 'pcs',
-                        ];
-                    }),
-                    'region' => $order->region ? [
-                        'id' => $order->region->id,
-                        'name' => $order->region->name,
-                    ] : null,
-                    'complaint' => $order->complaint ? [
-                        'id' => $order->complaint->id,
-                        'reason' => $order->complaint->reason,
-                        'solution_requested' => $order->complaint->solution_requested,
-                        'description' => $order->complaint->description,
-                        'status' => $order->complaint->status,
-                        'admin_response' => $order->complaint->admin_response,
-                    ] : null,
-                    'created_at' => $order->created_at ? $order->created_at->format('Y-m-d H:i:s') : null,
-                    'confirmed_at' => $order->confirmed_at ? $order->confirmed_at->format('Y-m-d H:i:s') : null,
-                    'completion_time' => $order->completion_time ? $order->completion_time->format('Y-m-d H:i:s') : null,
-                ]
-            ]);
-        }
 
         // Sort by raw_date descending
         $sortedHistory = $history->sortByDesc('raw_date')->values()->all();

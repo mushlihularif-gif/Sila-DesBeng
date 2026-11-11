@@ -4,7 +4,6 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Models\UnitChatSession;
-use App\Models\PasarChatSession;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
@@ -37,13 +36,11 @@ class CleanOldChats extends Command
         // Menghapus UnitChatSession
         $unitDeleted = UnitChatSession::where('updated_at', '<', $cutoffTime)->delete();
         
-        // Menghapus PasarChatSession
-        $pasarDeleted = PasarChatSession::where('updated_at', '<', $cutoffTime)->delete();
 
-        $total = $unitDeleted + $pasarDeleted;
+        $total = $unitDeleted;
 
         if ($total > 0) {
-            Log::info("CleanOldChats: Berhasil menghapus {$unitDeleted} UnitChatSession dan {$pasarDeleted} PasarChatSession yang usianya lebih dari {$days} hari.");
+            Log::info("CleanOldChats: Berhasil menghapus {$unitDeleted} UnitChatSession yang usianya lebih dari {$days} hari.");
             $this->info("Berhasil menghapus total {$total} sesi chat.");
         } else {
             $this->info("Tidak ada sesi chat lama yang perlu dihapus.");

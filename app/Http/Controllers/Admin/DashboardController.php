@@ -120,7 +120,6 @@ public function index(Request $request)
         
         $fasilitasRequests = $baseFasilitas->clone()->with(['user', 'fasilitas' => function($q) { $q->withTrashed(); }])->where(function($q) { $q->where('status', 'pending')->orWhere('cancellation_status', 'pending'); })->get()->map(function ($i) { $i->type = 'fasilitas_umum'; $i->item_name = $i->fasilitas->nama_fasilitas ?? 'Fasilitas'; return $i; });
         
-        $pasarRequests = collect();
         
         $kycRequests = collect();
         if (in_array(auth()->user()->role, ['admin_desa'])) {
@@ -207,7 +206,6 @@ public function index(Request $request)
         ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
         ->count();
 
-    $pasarCount = 0;
 
     // ========================================
     // PERHITUNGAN DATA NYATA UNTUK GRAFIK
@@ -244,7 +242,6 @@ public function index(Request $request)
         ->groupBy('month')
         ->pluck('count', 'month');
 
-    $pasarCounts = collect();
 
     for ($month = 1; $month <= 12; $month++) {
         $monthlyPerformance[$month - 1] = ($rentalCounts[$month] ?? 0) 
@@ -351,7 +348,6 @@ public function index(Request $request)
         'gasCount' => $gasCount,
         'mobilCount' => $mobilCount,
         'fasilitasCount' => $fasilitasCount ?? 0,
-        'pasarCount' => $pasarCount ?? 0,
         'selectedYear' => $selectedYear,
         'availableYears' => $availableYears,
         'desaList' => $desaList,

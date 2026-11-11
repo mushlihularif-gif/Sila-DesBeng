@@ -475,7 +475,6 @@
                     if(type === 'gas') typeText = 'Pesanan Gas';
                     else if(type === 'mobil') typeText = 'Transportasi';
                     else if(type === 'fasilitas') typeText = 'Fasilitas Umum';
-                    else if(type === 'pasar') typeText = 'Pasar Daerah';
 
                     const result = await Swal.fire({
                         title: `Bersihkan Riwayat ${typeText}?`,
@@ -557,16 +556,6 @@
                                             <i class="fas fa-calendar-plus"></i> Pinjam Fasilitas Sekarang
                                         </a>
                                     </div>`,
-                                    pasar: `<div class="bg-white rounded-2xl shadow-lg p-12 text-center border border-gray-100">
-                                        <div class="w-16 h-16 bg-sky-50 text-sky-500 rounded-full flex items-center justify-center mx-auto mb-3">
-                                            <i class="fas fa-shopping-bag text-2xl"></i>
-                                        </div>
-                                        <h4 class="text-lg font-bold text-gray-800 mb-1">Belum Ada Riwayat Belanja</h4>
-                                        <p class="text-sm text-gray-500 mb-4">Yuk jelajahi produk lokal segar dan berkualitas dari Pasar Daerah BUMDes!</p>
-                                        <a href="{{ route('pasar.index') }}" class="inline-flex items-center gap-2 px-6 py-2.5 bg-sky-500 text-white rounded-xl font-semibold hover:bg-sky-600 transition-colors shadow-sm">
-                                            <i class="fas fa-store"></i> Belanja di Pasar Daerah
-                                        </a>
-                                    </div>`,
                                     };
                                 const section = document.getElementById(`${type}-section`);
                                 if(section) {
@@ -599,14 +588,12 @@
                 gas: 1,
                 mobil: 1,
                 fasilitas: 1,
-                pasar: 1,
 };
             let hasMorePages = {
                 rental: true,
                 gas: true,
                 mobil: true,
                 fasilitas: true,
-                pasar: true,
 };
 
             function loadMoreActivity() {

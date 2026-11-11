@@ -36,7 +36,6 @@
                     'telepon' => $al->no_telepon,
                     'alamat'  => trim($al->satuBaris() . ($al->patokan ? ' (Patokan: ' . $al->patokan . ')' : '')),
                     'region_id' => $al->region_id,
-                    'village_id' => ($pilihWilayahPasar ?? false) ? app(\App\Services\MarketShippingService::class)->village($al->region_id)?->id : null,
                     // Titik peta ikut terbawa. Warga menentukannya sekali di
                     // halaman Saldo dan Alamat, bukan menunjuk peta berulang kali
                     // di setiap formulir pemesanan.

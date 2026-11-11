@@ -7,7 +7,7 @@ return [
     'android_fingerprints' => array_filter(explode(',', env('ANDROID_APP_SHA256_FINGERPRINTS', ''))),
     'categories' => [
         'account'=>'Akun dan verifikasi', 'announcements'=>'Pengumuman wilayah', 'news'=>'Kabar daerah',
-        'market'=>'Pasar dan produk daerah', 'orders'=>'Pesanan dan transaksi',
+        'market'=>'Produk layanan daerah', 'orders'=>'Pesanan dan transaksi',
         'review'=>'Peninjauan kiriman', 'other'=>'Pemberitahuan layanan lainnya',
     ],
 ];

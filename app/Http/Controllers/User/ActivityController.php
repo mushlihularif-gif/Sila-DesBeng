@@ -16,10 +16,11 @@ class ActivityController extends Controller
     {
         // Get authenticated user
         $user = Auth::user();
+        $request->validate(['tab' => 'sometimes|in:rental,gas,mobil,fasilitas']);
         $focusedTab = $request->query('tab', 'rental');
         $focusedOrder = null;
         if ($request->filled('order')) {
-            $request->validate(['order'=>'integer|min:1','tab'=>'required|in:rental,gas,mobil,fasilitas,pasar']);
+            $request->validate(['order'=>'integer|min:1','tab'=>'required|in:rental,gas,mobil,fasilitas']);
             $model = \App\Services\BookingAccess::TYPES[$focusedTab][0];
             $focusedOrder = $model::where('user_id',$user->id)->findOrFail($request->integer('order'))->id;
         }
@@ -60,13 +61,6 @@ class ActivityController extends Controller
                     ->paginate(5);
                 $html = view('users.partials.activity-fasilitas', ['fasilitasBookings' => $items, 'setting' => $setting])->render();
                 $hasMore = $items->hasMorePages();
-            } elseif ($tab === 'pasar') {
-                $items = \App\Models\PasarOrder::where('user_id', $user->id)->when($focusedOrder && $focusedTab === 'pasar', fn ($q) => $q->whereKey($focusedOrder))
-                    ->with(['items.produk','store:id,name','marketPayment'])
-                    ->orderBy('created_at', 'desc')
-                    ->paginate(5);
-                $html = view('users.partials.activity-pasar', ['pasarOrders' => $items, 'setting' => $setting])->render();
-                $hasMore = $items->hasMorePages();
 }
 
             return response()->json([
@@ -80,25 +74,18 @@ class ActivityController extends Controller
         $gasOrders = GasOrder::where('user_id', $user->id)->when($focusedOrder && $focusedTab === 'gas', fn ($q) => $q->whereKey($focusedOrder))->with('gas')->orderBy('created_at', 'desc')->paginate(5);
         $mobilBookings = \App\Models\MobilBooking::where('user_id', $user->id)->when($focusedOrder && $focusedTab === 'mobil', fn ($q) => $q->whereKey($focusedOrder))->with('mobil')->orderBy('created_at', 'desc')->paginate(5);
         $fasilitasBookings = \App\Models\FasilitasUmumBooking::where('user_id', $user->id)->when($focusedOrder && $focusedTab === 'fasilitas', fn ($q) => $q->whereKey($focusedOrder))->with('fasilitas')->orderBy('created_at', 'desc')->paginate(5);
-        $pasarOrders = \App\Models\PasarOrder::where('user_id', $user->id)->when($focusedOrder && $focusedTab === 'pasar', fn ($q) => $q->whereKey($focusedOrder))->with(['items.produk','store:id,name','marketPayment'])->orderBy('created_at', 'desc')->paginate(5);
         
         return view('users.activity', compact(
             'rentalBookings', 
             'gasOrders', 
             'mobilBookings', 
             'fasilitasBookings',
-'pasarOrders',
             'setting', 'focusedOrder', 'focusedTab'
         ));
     }
 
     public function requestCancellation(Request $request, $type, $id)
     {
-        if($type==='pasar') {
-            $data=$request->validate(['reason'=>'required|string|max:1000']);
-            app(\App\Services\MarketStoreOrders::class)->requestCancellation($request->user(),(int)$id,$data['reason']);
-            return response()->json(['success'=>true,'message'=>'Permintaan pembatalan dikirim kepada penjual.']);
-        }
         $request->validate([
             'reason' => 'required|string|max:500',
         ]);
@@ -114,9 +101,6 @@ class ActivityController extends Controller
             $reasonField = 'cancellation_reason';
         } elseif ($type === 'fasilitas') {
             $order = \App\Models\FasilitasUmumBooking::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
-            $reasonField = 'cancellation_reason';
-        } elseif ($type === 'pasar') {
-            $order = \App\Models\PasarOrder::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
             $reasonField = 'cancellation_reason';
         } else {
             return response()->json(['success' => false, 'message' => 'Tipe tidak valid'], 400);
@@ -172,8 +156,6 @@ class ActivityController extends Controller
             $order = \App\Models\MobilBooking::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
         } elseif ($type === 'fasilitas') {
             $order = \App\Models\FasilitasUmumBooking::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
-        } elseif ($type === 'pasar') {
-            $order = \App\Models\PasarOrder::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
 } else {
             return response()->json(['success' => false, 'message' => 'Tipe tidak valid'], 400);
         }
@@ -206,8 +188,7 @@ class ActivityController extends Controller
                 $query = \App\Models\MobilBooking::where('user_id', Auth::id());
             } elseif ($type === 'fasilitas') {
                 $query = \App\Models\FasilitasUmumBooking::where('user_id', Auth::id());
-            } elseif ($type === 'pasar') {
-                $query = \App\Models\PasarOrder::where('user_id', Auth::id());} else {
+            } else {
                 return response()->json(['success' => false, 'message' => 'Tipe tidak valid'], 400);
             }
 

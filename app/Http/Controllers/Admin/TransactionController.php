@@ -18,11 +18,7 @@ class TransactionController extends Controller
      * Jenis transaksi -> kunci izin unit staf.
      * Nilai $type datang dari route {type} di admin.aktivitas.bukti-transaksi.*
      *
-     * Pasar Daerah sengaja tidak ada di sini: pesanannya tidak punya kolom
-     * bukti bayar dan sudah punya modul peninjauannya sendiri di
-     * admin/unit/pasar-daerah. Dulu $type yang tidak dikenal - termasuk
-     * 'pasar' - diam-diam jatuh ke GasOrder lewat cabang else, sehingga
-     * tindakan atas pesanan pasar justru mengubah pesanan gas bernomor sama.
+     * Tipe di luar layanan aktif harus ditolak, bukan diteruskan ke GasOrder.
      */
     private const IZIN_PER_TIPE = [
         'rental'    => 'sewa_alat',
@@ -88,6 +84,7 @@ class TransactionController extends Controller
     public function index(Request $request)
     {
         // Get filter parameters
+        $request->validate(['category' => 'sometimes|in:all,latest,rental,gas,mobil,fasilitas']);
         $category = $request->get('category', 'all');
         $paymentMethod = $request->get('payment_method', 'all');
         $search = $request->get('search');
@@ -100,7 +97,6 @@ class TransactionController extends Controller
         $canViewGas = !$isStaff || $user->hasUnitPermission('gas');
         $canViewMobil = !$isStaff || $user->hasUnitPermission('sewa_mobil');
         $canViewFasilitas = !$isStaff || $user->hasUnitPermission('fasilitas_umum');
-        $canViewPasar = !$isStaff || $user->hasUnitPermission('pasar_daerah');
         // Include transactions with proof OR system generated (active/completed statuses)
         $activeStatuses = ['confirmed', 'approved', 'being_prepared', 'in_delivery', 'arrived', 'completed', 'returned'];
         
@@ -123,17 +119,12 @@ class TransactionController extends Controller
             $q->whereIn('status', $activeStatuses);
         });
 
-        $pasarQuery = \App\Models\PasarOrder::whereNull('store_id')->where('region_id', $user->region_id)->withTrashed()->with(['user', 'items.produk'])->where(function($q) use ($activeStatuses) {
-            $q->whereNotNull('proof_of_payment')
-              ->orWhereIn('status', ['paid', 'confirmed', 'in_delivery', 'completed']);
-        });
 
         // Apply staff permission filters
         if (!$canViewRental) $rentalQuery->whereRaw('1 = 0');
         if (!$canViewGas) $gasQuery->whereRaw('1 = 0');
         if (!$canViewMobil) $mobilQuery->whereRaw('1 = 0');
         if (!$canViewFasilitas) $fasilitasQuery->whereRaw('1 = 0');
-        if (!$canViewPasar) $pasarQuery->whereRaw('1 = 0');
 
         // Filter by search
         if ($search) {
@@ -180,37 +171,26 @@ class TransactionController extends Controller
             $gasPayments = collect();
             $mobilPayments = collect();
             $fasilitasPayments = collect();
-            $pasarPayments = collect();
         } elseif ($category === 'gas') {
             $rentalPayments = collect();
             $gasPayments = $gasQuery->orderByDesc('updated_at')->get();
             $mobilPayments = collect();
             $fasilitasPayments = collect();
-            $pasarPayments = collect();
         } elseif ($category === 'mobil') {
             $rentalPayments = collect();
             $gasPayments = collect();
             $mobilPayments = $mobilQuery->orderByDesc('updated_at')->get();
             $fasilitasPayments = collect();
-            $pasarPayments = collect();
         } elseif ($category === 'fasilitas') {
             $rentalPayments = collect();
             $gasPayments = collect();
             $mobilPayments = collect();
             $fasilitasPayments = $fasilitasQuery->orderByDesc('updated_at')->get();
-            $pasarPayments = collect();
-        } elseif ($category === 'pasar') {
-            $rentalPayments = collect();
-            $gasPayments = collect();
-            $mobilPayments = collect();
-            $fasilitasPayments = collect();
-            $pasarPayments = $pasarQuery->orderByDesc('updated_at')->get();
         } else {
             $rentalPayments = $rentalQuery->orderByDesc('updated_at')->get();
             $gasPayments = $gasQuery->orderByDesc('updated_at')->get();
             $mobilPayments = $mobilQuery->orderByDesc('updated_at')->get();
             $fasilitasPayments = $fasilitasQuery->orderByDesc('updated_at')->get();
-            $pasarPayments = $pasarQuery->orderByDesc('updated_at')->get();
         }
 
         // Count statistics (WITH region filter to match the table data)
@@ -235,10 +215,6 @@ class TransactionController extends Controller
         });
         $fasilitasCount = (clone $baseFasilitas)->count();
 
-        $basePasar = \App\Models\PasarOrder::whereNull('store_id')->where('region_id', $user->region_id)->withTrashed()->where(function($q) use ($activeStatuses) {
-            $q->whereNotNull('proof_of_payment')->orWhereIn('status', ['paid', 'confirmed', 'in_delivery', 'completed']);
-        });
-        $pasarCount = (clone $basePasar)->count();
 
         // Gabungkan semua metode pembayaran
         $allMethods = collect();
@@ -246,7 +222,6 @@ class TransactionController extends Controller
         $allMethods = $allMethods->concat((clone $baseGas)->pluck('payment_method'));
         $allMethods = $allMethods->concat((clone $baseMobil)->pluck('payment_method'));
         $allMethods = $allMethods->concat((clone $baseFasilitas)->pluck('payment_method'));
-        $allMethods = $allMethods->concat((clone $basePasar)->pluck('payment_method'));
 
         $transferCount = 0;
         $digitalCount = 0;
@@ -265,12 +240,11 @@ class TransactionController extends Controller
         }
 
         $stats = [
-            'total' => $rentalCount + $gasCount + $mobilCount + $fasilitasCount + $pasarCount,
+            'total' => $rentalCount + $gasCount + $mobilCount + $fasilitasCount,
             'rental_total' => $rentalCount,
             'gas_total' => $gasCount,
             'mobil_total' => $mobilCount,
             'fasilitas_total' => $fasilitasCount,
-            'pasar_total' => $pasarCount,
             'transfer_total' => $transferCount,
             'digital_total' => $digitalCount,
             'cash_total' => $tunaiCount,
@@ -278,7 +252,7 @@ class TransactionController extends Controller
 
         $activeServices = $this->getActivatedServices();
 
-        return view('admin.aktivitas.transactions', compact('rentalPayments', 'gasPayments', 'mobilPayments', 'fasilitasPayments', 'pasarPayments', 'stats', 'category', 'paymentMethod', 'search', 'activeServices'));
+        return view('admin.aktivitas.transactions', compact('rentalPayments', 'gasPayments', 'mobilPayments', 'fasilitasPayments', 'stats', 'category', 'paymentMethod', 'search', 'activeServices'));
     }
 
     public function verify(Request $request, $id, $type)

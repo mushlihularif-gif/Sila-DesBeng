@@ -86,6 +86,7 @@ class RequestController extends Controller
     {
         // Ambil parameter filter
         $status = $request->get('status', 'all');
+        $request->validate(['category' => 'sometimes|in:all,latest,rental,gas,mobil,fasilitas']);
         $category = $request->get('category', 'all');
 
         $user = auth()->user();
@@ -95,7 +96,6 @@ class RequestController extends Controller
         $canViewGas = !$isStaff || $user->hasUnitPermission('gas');
         $canViewMobil = !$isStaff || $user->hasUnitPermission('sewa_mobil');
         $canViewFasilitas = !$isStaff || $user->hasUnitPermission('fasilitas_umum');
-        $canViewPasar = !$isStaff || $user->hasUnitPermission('pasar_daerah');
 
         // Buat query untuk pemesanan penyewaan (Include deleted for history)
         $rentalQuery = $this->applyRegionFilter(RentalBooking::withTrashed(), 'barang', true)->with(['user', 'barang']);
@@ -161,26 +161,12 @@ class RequestController extends Controller
             }
         }
 
-        // Buat query untuk pasar daerah
-        $pasarQuery = \App\Models\PasarOrder::whereNull('store_id')->where('region_id', $user->region_id)->withTrashed()->with(['user', 'items.produk']);
-        if ($status !== 'all') {
-            if ($status === 'in_process') {
-                $pasarQuery->whereIn('status', ['paid', 'confirmed', 'in_delivery']);
-            } elseif ($status === 'completed') {
-                $pasarQuery->whereIn('status', ['completed']);
-            } elseif ($status === 'rejected') {
-                $pasarQuery->whereIn('status', ['cancelled', 'rejected']);
-            } else {
-                $pasarQuery->where('status', $status);
-            }
-        }
 
         // Apply staff permission filters
         if (!$canViewRental) $rentalQuery->whereRaw('1 = 0');
         if (!$canViewGas) $gasQuery->whereRaw('1 = 0');
         if (!$canViewMobil) $mobilQuery->whereRaw('1 = 0');
         if (!$canViewFasilitas) $fasilitasQuery->whereRaw('1 = 0');
-        if (!$canViewPasar) $pasarQuery->whereRaw('1 = 0');
 
         // Urutan prioritas status:
         // 1. Menunggu / Proses (pending, confirmed, approved, process, delivering, dll)
@@ -203,44 +189,32 @@ class RequestController extends Controller
             $gasOrders = collect();
             $mobilRequests = collect();
             $fasilitasRequests = collect();
-            $pasarOrders = collect();
         } elseif ($category === 'gas') {
             $rentalRequests = collect();
             $gasOrders = $gasQuery->orderByRaw($statusOrder)->get();
             $mobilRequests = collect();
             $fasilitasRequests = collect();
-            $pasarOrders = collect();
         } elseif ($category === 'mobil') {
             $rentalRequests = collect();
             $gasOrders = collect();
             $mobilRequests = $mobilQuery->orderByRaw($statusOrder)->get();
             $fasilitasRequests = collect();
-            $pasarOrders = collect();
         } elseif ($category === 'fasilitas') {
             $rentalRequests = collect();
             $gasOrders = collect();
             $mobilRequests = collect();
             $fasilitasRequests = $fasilitasQuery->orderByRaw($statusOrder)->get();
-            $pasarOrders = collect();
-        } elseif ($category === 'pasar') {
-            $rentalRequests = collect();
-            $gasOrders = collect();
-            $mobilRequests = collect();
-            $fasilitasRequests = collect();
-            $pasarOrders = $pasarQuery->orderByRaw($statusOrder)->get();
         } elseif ($category === 'latest') {
             // Filter terbaru (7 hari terakhir)
             $rentalRequests = $rentalQuery->where('created_at', '>=', now()->subDays(7))->orderByRaw($statusOrder)->get();
             $gasOrders = $gasQuery->where('created_at', '>=', now()->subDays(7))->orderByRaw($statusOrder)->get();
             $mobilRequests = $mobilQuery->where('created_at', '>=', now()->subDays(7))->orderByRaw($statusOrder)->get();
             $fasilitasRequests = $fasilitasQuery->where('created_at', '>=', now()->subDays(7))->orderByRaw($statusOrder)->get();
-            $pasarOrders = $pasarQuery->where('created_at', '>=', now()->subDays(7))->orderByRaw($statusOrder)->get();
         } else {
             $rentalRequests = $rentalQuery->orderByRaw($statusOrder)->get();
             $gasOrders = $gasQuery->orderByRaw($statusOrder)->get();
             $mobilRequests = $mobilQuery->orderByRaw($statusOrder)->get();
             $fasilitasRequests = $fasilitasQuery->orderByRaw($statusOrder)->get();
-            $pasarOrders = $pasarQuery->orderByRaw($statusOrder)->get();
         }
 
         // Helper untuk stats agar filter wilayah selalu diterapkan
@@ -253,20 +227,18 @@ class RequestController extends Controller
         $baseGT = $this->applyRegionFilter(GasOrder::withTrashed(), 'gas', true);
         $baseMT = $this->applyRegionFilter(MobilBooking::withTrashed(), 'mobil', true);
         $baseFT = $this->applyRegionFilter(FasilitasUmumBooking::withTrashed(), 'fasilitas', true);
-        $basePT = \App\Models\PasarOrder::whereNull('store_id')->where('region_id', $user->region_id)->withTrashed();
 
         // Hitung statistik (Include deleted for history functionality)
         $stats = [
-            'total' => $baseRT->clone()->count() + $baseGT->clone()->count() + $baseMT->clone()->count() + $baseFT->clone()->count() + $basePT->clone()->count(),
-            'pending' => $baseRT->clone()->where('status', 'pending')->count() + $baseGT->clone()->where('status', 'pending')->count() + $baseMT->clone()->where('status', 'pending')->count() + $baseFT->clone()->where('status', 'pending')->count() + $basePT->clone()->where('status', 'pending')->count(),
-            'approved' => $baseRT->clone()->where('status', 'approved')->count() + $baseGT->clone()->where('status', 'approved')->count() + $baseMT->clone()->where('status', 'approved')->count() + $baseFT->clone()->where('status', 'approved')->count() + $basePT->clone()->where('status', 'confirmed')->count(),
-            'rejected' => $baseRT->clone()->whereIn('status', ['cancelled', 'rejected'])->count() + $baseGT->clone()->whereIn('status', ['cancelled', 'rejected'])->count() + $baseMT->clone()->whereIn('status', ['cancelled', 'rejected'])->count() + $baseFT->clone()->whereIn('status', ['cancelled', 'rejected'])->count() + $basePT->clone()->whereIn('status', ['cancelled', 'rejected'])->count(),
+            'total' => $baseRT->clone()->count() + $baseGT->clone()->count() + $baseMT->clone()->count() + $baseFT->clone()->count(),
+            'pending' => $baseRT->clone()->where('status', 'pending')->count() + $baseGT->clone()->where('status', 'pending')->count() + $baseMT->clone()->where('status', 'pending')->count() + $baseFT->clone()->where('status', 'pending')->count(),
+            'approved' => $baseRT->clone()->where('status', 'approved')->count() + $baseGT->clone()->where('status', 'approved')->count() + $baseMT->clone()->where('status', 'approved')->count() + $baseFT->clone()->where('status', 'approved')->count(),
+            'rejected' => $baseRT->clone()->whereIn('status', ['cancelled', 'rejected'])->count() + $baseGT->clone()->whereIn('status', ['cancelled', 'rejected'])->count() + $baseMT->clone()->whereIn('status', ['cancelled', 'rejected'])->count() + $baseFT->clone()->whereIn('status', ['cancelled', 'rejected'])->count(),
             'cancellation_pending' => $baseRT->clone()->where('cancellation_status', 'pending')->count() + $baseGT->clone()->where('cancellation_status', 'pending')->count() + $baseMT->clone()->where('cancellation_status', 'pending')->count() + $baseFT->clone()->where('cancellation_status', 'pending')->count(),
             'rental_total' => $baseRT->clone()->count(),
             'gas_total' => $baseGT->clone()->count(),
             'mobil_total' => $baseMT->clone()->count(),
             'fasilitas_total' => $baseFT->clone()->count(),
-            'pasar_total' => $basePT->clone()->count(),
             'active_rental_count' => $baseRT->clone()->whereIn('status', ['confirmed', 'being_prepared', 'in_delivery', 'arrived'])->sum('quantity'),
         ];
 
@@ -298,7 +270,7 @@ class RequestController extends Controller
 
         if ($request->ajax()) {
             return response()
-                ->view('admin.aktivitas.partials.requests_content', compact('rentalRequests', 'gasOrders', 'mobilRequests', 'fasilitasRequests', 'pasarOrders', 'stats', 'status', 'category', 'notificationCounts', 'activeServices'))
+                ->view('admin.aktivitas.partials.requests_content', compact('rentalRequests', 'gasOrders', 'mobilRequests', 'fasilitasRequests', 'stats', 'status', 'category', 'notificationCounts', 'activeServices'))
                 ->withHeaders([
                     'Cache-Control' => 'no-cache, no-store, must-revalidate',
                     'Pragma' => 'no-cache',
@@ -307,7 +279,7 @@ class RequestController extends Controller
         }
 
         return response()
-            ->view('admin.aktivitas.requests', compact('rentalRequests', 'gasOrders', 'mobilRequests', 'fasilitasRequests', 'pasarOrders', 'stats', 'status', 'category', 'notificationCounts', 'activeServices'))
+            ->view('admin.aktivitas.requests', compact('rentalRequests', 'gasOrders', 'mobilRequests', 'fasilitasRequests', 'stats', 'status', 'category', 'notificationCounts', 'activeServices'))
             ->withHeaders([
                 'Cache-Control' => 'no-cache, no-store, must-revalidate',
                 'Pragma' => 'no-cache',

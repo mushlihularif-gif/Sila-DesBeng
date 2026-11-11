@@ -1023,9 +1023,6 @@
                     @endif
 
                     <!-- ========================================================================= -->
-                    @if(in_array(auth()->user()->role,['admin_desa','super_admin']) && auth()->user()->region_id)
-                    <li class="menu-item {{ request()->routeIs('market.review*') ? 'active' : '' }}"><a href="{{ route('market.review.index') }}" class="menu-link"><i class="menu-icon tf-icons bx bx-store"></i><div>Toko Warga & Komplain</div></a></li>
-                    @endif
                     <!-- 3. ZONA KHUSUS ADMIN DESA (4 Pilar Terpadu: Layanan, Tata Kelola, Sistem)  -->
                     <!-- ========================================================================= -->
                     @if(auth()->user()->role === 'admin_desa')
@@ -1495,7 +1492,7 @@
                                                     $targetUrl = route('admin.aktivitas.permintaan-pengajuan.index');
                                                 } elseif (in_array($notif->type, ['pasar_order', 'pasar', 'pasar_daerah'])) {
                                                     $cat = 'pasar'; $icon = 'bx-store-alt'; $color = 'primary';
-                                                    $targetUrl = Route::has('admin.unit.pasar_daerah.pesanan.index') ? route('admin.unit.pasar_daerah.pesanan.index') : route('admin.aktivitas.permintaan-pengajuan.index');
+                                                    $targetUrl = route('admin.notifications.index');
                                                 } elseif (in_array($notif->type, ['kyc', 'kyc_verification'])) {
                                                     $cat = 'kyc'; $icon = 'bx-id-card'; $color = 'info';
                                                     $targetUrl = ($notif->reference_id && Route::has('admin.kyc.show')) ? route('admin.kyc.show', $notif->reference_id) : route('admin.kyc.index');

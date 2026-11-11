@@ -15,7 +15,7 @@ class ServiceCategoryPageTest extends TestCase
             $table->id(); $table->string('name'); $table->string('type');
         });
         Schema::create('services', function (Blueprint $table) {
-            $table->id(); $table->string('name');
+            $table->id(); $table->string('name'); $table->string('slug');
         });
         Schema::create('region_services', function (Blueprint $table) {
             $table->id(); $table->unsignedBigInteger('region_id'); $table->unsignedBigInteger('service_id');
@@ -26,9 +26,9 @@ class ServiceCategoryPageTest extends TestCase
             ['id' => 13, 'name' => 'Desa Asal', 'type' => 'desa'],
         ]);
         DB::table('services')->insert([
-            ['id' => 1, 'name' => 'Penjualan Gas'],
-            ['id' => 2, 'name' => 'Penyewaan Alat'],
-            ['id' => 3, 'name' => 'Pelaporan Warga'],
+            ['id' => 1, 'name' => 'Penjualan Gas', 'slug' => 'penjualan-gas'],
+            ['id' => 2, 'name' => 'Penyewaan Alat', 'slug' => 'penyewaan-alat'],
+            ['id' => 3, 'name' => 'Pelaporan Warga', 'slug' => 'pelaporan-warga'],
         ]);
         DB::table('region_services')->insert([
             ['region_id' => 12, 'service_id' => 1, 'is_active' => true],
@@ -58,7 +58,7 @@ class ServiceCategoryPageTest extends TestCase
         $this->get(route('service-category.show', ['category' => 'belanja-kebutuhan', 'region_id' => 12, 'from' => 'region']))
             ->assertOk()
             ->assertSee(route('gas.sales', ['region_id' => 12]))
-            ->assertDontSee(route('pasar.index', ['region_id' => 12]))
+            ->assertDontSee('/pasar-daerah')
             ->assertSee('Kembali ke Desa Pilihan')
             ->assertSee(route('bumdes.detail', ['slug' => 'desa-pilihan', 'id' => 12]) . '#unit-carousel-container');
         $this->get(route('service-category.show', ['category' => 'layanan-daerah', 'region_id' => 12]))
@@ -118,7 +118,7 @@ class ServiceCategoryPageTest extends TestCase
         $this->get('/kategori-layanan/tidak-ada')->assertNotFound();
     }
 
-    public function test_portal_keeps_all_six_active_services_after_retiring_reports(): void
+    public function test_portal_keeps_five_services_after_retiring_reports_and_market(): void
     {
         foreach (['portal/index.html','public/portal/index.html'] as $file) {
             $html=file_get_contents(base_path($file));
@@ -145,6 +145,6 @@ class ServiceCategoryPageTest extends TestCase
             ->assertSee(route('bumdes.profil', ['redirect' => 'user.fasilitas-umum.equipment']), false)
             ->assertDontSee('Pelaporan Warga')
             ->assertSee(route('announcements.index'), false)
-            ->assertDontSee(route('pasar.index'), false);
+            ->assertDontSee('/pasar-daerah', false);
     }
 }

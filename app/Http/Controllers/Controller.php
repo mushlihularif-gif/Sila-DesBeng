@@ -78,7 +78,7 @@ abstract class Controller
 
         // Super Admin mengelola seluruh layanan di sistem
         if (in_array($currentUser->role, ['super_admin'])) {
-            return \App\Models\Service::pluck('name')->toArray();
+            return \App\Models\Service::available()->pluck('name')->toArray();
         }
 
         $region = \App\Models\Region::with('services')->find($currentUser->region_id);

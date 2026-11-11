@@ -9,7 +9,7 @@ class Service extends Model
 {
     use HasFactory;
 
-    public const RETIRED_SLUGS = ['ambulans', 'layanan-ambulans', 'pelaporan-warga'];
+    public const RETIRED_SLUGS = ['ambulans', 'layanan-ambulans', 'pelaporan-warga', 'pasar-daerah'];
 
     public function scopeAvailable($query)
     {
