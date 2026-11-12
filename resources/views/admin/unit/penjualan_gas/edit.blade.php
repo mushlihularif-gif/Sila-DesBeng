@@ -54,6 +54,7 @@
     <input type="hidden" id="latitude" name="latitude" value="{{ old('latitude', $gas->latitude) }}">
     <input type="hidden" id="longitude" name="longitude" value="{{ old('longitude', $gas->longitude) }}">
                             @method('PUT')
+                            <input type="hidden" name="original_stock" value="{{ old('original_stock', $gas->stok) }}">
                             
                             
                             <!-- STEPS NAVIGATION -->

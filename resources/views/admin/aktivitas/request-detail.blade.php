@@ -389,7 +389,7 @@
                             
                             <div class="mb-3">
                                 <small class="text-muted d-block uppercase ls-1 mb-1">NIK (KTP)</small>
-                                <span class="fw-medium text-dark">{{ $request->user->nik ?? '-' }}</span>
+                                <span class="fw-medium text-dark">{{ $request->user?->nik ? substr($request->user->nik, 0, 4).'********'.substr($request->user->nik, -4) : '-' }}</span>
                             </div>
                             
                             <div class="mb-3">
@@ -486,7 +486,9 @@
                                 </span>
                             </div>
 
-                            @if($request->cancellation_status === 'pending')
+                            @if($type === 'gas')
+                                @include('admin.aktivitas.partials.gas-actions')
+                            @elseif($request->cancellation_status === 'pending')
                                 <div class="d-grid gap-2">
                                     <button class="btn btn-danger rounded-pill py-2" onclick="handleCancellation({{ $request->id }}, '{{ $type }}', 'approve')">
                                         <i class="bx bx-check-double me-2"></i>Setujui Pembatalan
@@ -887,7 +889,7 @@ function updateStatus(newStatus) {
             })
             .then(response => {
                 if (!response.ok) {
-                    throw new Error('Network response was not ok');
+                    return response.json().then(data => { throw new Error(data.message || 'Perubahan belum dapat disimpan.'); });
                 }
                 return response.json();
             })
@@ -907,7 +909,7 @@ function updateStatus(newStatus) {
             })
             .catch(err => {
                 console.error(err);
-                Swal.fire('Error', 'Terjadi kesalahan sistem', 'error');
+                Swal.fire('Error', err.message || 'Terjadi kesalahan sistem', 'error');
             });
         }
     });
@@ -929,7 +931,8 @@ document.getElementById('uploadProofForm').addEventListener('submit', function(e
     fetch(url, {
         method: 'POST',
         headers: {
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Accept': 'application/json'
         },
         body: formData
     })
@@ -943,7 +946,7 @@ document.getElementById('uploadProofForm').addEventListener('submit', function(e
         }
     })
     .catch(err => {
-        Swal.fire('Error', 'Terjadi kesalahan sistem', 'error');
+        Swal.fire('Error', err.message || 'Terjadi kesalahan sistem', 'error');
     });
 });
 const returnForm = document.getElementById('returnForm');
@@ -993,7 +996,7 @@ if (returnForm) {
                     }
                 })
                 .catch(err => {
-                    Swal.fire('Error', 'Terjadi kesalahan sistem', 'error');
+                    Swal.fire('Error', err.message || 'Terjadi kesalahan sistem', 'error');
                 });
             }
         });

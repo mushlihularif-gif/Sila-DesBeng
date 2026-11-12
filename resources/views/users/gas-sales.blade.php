@@ -57,7 +57,7 @@
                                   class="product-image">
                             
                             <!-- Status Badge -->
-                            @if($item->stok > 0)
+                            @if($item->stok > 0 && $item->status === 'tersedia')
                                 <div class="absolute top-2 right-2 sm:top-4 sm:right-4 px-1.5 sm:px-3 py-0.5 sm:py-1.5 text-[8px] sm:text-[10px] font-bold rounded-full bg-green-500 text-white shadow-md flex items-center gap-0.5 sm:gap-1 tracking-wider uppercase">
                                     <svg class="w-2.5 h-2.5 sm:w-3 sm:h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
@@ -69,7 +69,7 @@
                                     <svg class="w-2.5 h-2.5 sm:w-3 sm:h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path>
                                     </svg>
-                                    <span class="hidden xs:inline sm:inline">Habis</span>
+                                    <span class="hidden xs:inline sm:inline">Tidak tersedia</span>
                                 </div>
                             @endif
                         </div>
@@ -131,7 +131,7 @@
         <h2 class="text-2xl font-bold text-gray-900 mb-2">Pembaruan KK Sedang Diproses</h2>
         <p class="text-gray-600 mb-4 text-sm md:text-base">
             Foto Kartu Keluarga (KK) yang Anda unggah sedang dalam proses verifikasi oleh Admin Desa. <br>
-            Silakan tunggu hingga proses ini disetujui untuk dapat memesan Gas Daerah.
+            Persetujuan KK diperlukan untuk memesan gas 3 kg selama mode krisis.
         </p>
     </div>
     @elseif(!$hasKk)
@@ -142,7 +142,7 @@
                 <i class='bx bx-error'></i>
             </div>
             <h2 class="text-2xl font-black text-gray-900 mb-1">STATUS DESA: KRISIS GAS</h2>
-            <p class="text-red-600 font-semibold mb-6">Pembelian dibatasi 1 Tabung per Keluarga.</p>
+            <p class="text-red-600 font-semibold mb-6">Pembelian gas 3 kg mengikuti kuota per KK yang ditetapkan pengelola wilayah.</p>
             
             <p class="text-gray-700 mb-6 max-w-lg">
                 Untuk melanjutkan pemesanan, kami perlu memverifikasi Kartu Keluarga (KK) Anda. 
@@ -156,7 +156,7 @@
             </div>
 
             <button type="button" onclick="openKkModal()" class="w-full max-w-xs bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition-all hover:scale-105 flex items-center justify-center gap-2">
-                <i class='bx bx-scan'></i> SCAN KARTU KELUARGA
+                <i class='bx bx-scan'></i> Kirim Foto KK
             </button>
         </div>
     </div>

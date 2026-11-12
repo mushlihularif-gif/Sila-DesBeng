@@ -13,6 +13,13 @@ class GasController extends Controller
 {
     use \App\Traits\ChecksStaffDelegation;
 
+    private function scopedGas()
+    {
+        $user = auth()->user();
+        abort_unless($user && $user->isAdmin() && $user->region_id && $user->hasUnitPermission('gas'), 403);
+        return Gas::where('region_id', $user->region_id);
+    }
+
     // ===========================
     // INDEX
     // ===========================
@@ -23,10 +30,9 @@ class GasController extends Controller
         }
 
         $search = $request->get('search');
-        $gases = Gas::query()
+        $gases = $this->scopedGas()
             ->when($search, function ($query, $search) {
-                return $query->where('jenis_gas', 'LIKE', "%{$search}%")
-                           ->orWhere('kategori', 'LIKE', "%{$search}%");
+                return $query->where(fn ($q) => $q->where('jenis_gas', 'LIKE', "%{$search}%")->orWhere('kategori', 'LIKE', "%{$search}%"));
             })
             ->orderBy('created_at', 'desc')
             ->paginate(9)
@@ -56,6 +62,7 @@ class GasController extends Controller
     // ===========================
     public function create()
     {
+        $this->scopedGas();
         // Lokasi diambil dari daftar milik WILAYAH, bukan lagi SELECT DISTINCT
         // pada tabel produk unit ini. Query lama tidak menyaring region_id sama
         // sekali, sehingga admin satu desa ikut melihat nama lokasi desa lain;
@@ -76,6 +83,7 @@ class GasController extends Controller
     // ===========================
     public function store(Request $request)
     {
+        $this->scopedGas();
         $validated = $request->validate([
             'jenis_gas' => 'required|string|max:255',
             'deskripsi' => 'required|string',
@@ -84,18 +92,18 @@ class GasController extends Controller
             'status' => 'required|in:tersedia,dipesan,rusak',
             'kategori' => 'required|string|max:255',
             'lokasi' => 'required|string|max:255',
-            'latitude' => 'nullable|numeric',
-            'longitude' => 'nullable|numeric',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
             'satuan' => 'required|string|max:255',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
-            'foto_2' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
-            'foto_3' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:8192',
+            'foto_2' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:8192',
+            'foto_3' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:8192',
         ]);
 
         // Bersihkan harga dari karakter non-angka
         $hargaBersih = (int) preg_replace('/[^0-9]/', '', $request->harga_satuan);
-        if ($hargaBersih <= 0) {
-            return back()->withErrors(['harga_satuan' => 'Harga satuan harus angka valid dan lebih dari 0.'])->withInput();
+        if ($hargaBersih <= 0 || $hargaBersih > 99999999) {
+            return back()->withErrors(['harga_satuan' => 'Harga satuan harus antara Rp 1 dan Rp 99.999.999.'])->withInput();
         }
 
         $gas = new Gas();
@@ -145,7 +153,7 @@ class GasController extends Controller
     // ===========================
     public function show($id)
     {
-        $gas = Gas::findOrFail($id);
+        $gas = $this->scopedGas()->findOrFail($id);
         return view('admin.unit.penjualan_gas.show', compact('gas'));
     }
 
@@ -154,7 +162,7 @@ class GasController extends Controller
     // ===========================
     public function edit($id)
     {
-        $gas = Gas::findOrFail($id);
+        $gas = $this->scopedGas()->findOrFail($id);
         // Lokasi diambil dari daftar milik WILAYAH, bukan lagi SELECT DISTINCT
         // pada tabel produk unit ini. Query lama tidak menyaring region_id sama
         // sekali, sehingga admin satu desa ikut melihat nama lokasi desa lain;
@@ -175,30 +183,32 @@ class GasController extends Controller
     // ===========================
     public function update(Request $request, $id)
     {
+        $this->scopedGas()->findOrFail($id);
         $validated = $request->validate([
             'jenis_gas' => 'required|string|max:255',
             'deskripsi' => 'required|string',
             'harga_satuan' => 'required|string|min:0',
             'stok' => 'required|integer|min:0',
+            'original_stock' => 'required|integer|min:0',
             'status' => 'required|in:tersedia,dipesan,rusak',
             'kategori' => 'required|string|max:255',
             'lokasi' => 'required|string|max:255',
-            'latitude' => 'nullable|numeric',
-            'longitude' => 'nullable|numeric',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
             'satuan' => 'required|string|max:255',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
-            'foto_2' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
-            'foto_3' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:8192',
+            'foto_2' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:8192',
+            'foto_3' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:8192',
         ]);
 
         // Bersihkan harga
         $hargaBersih = (int) preg_replace('/[^0-9]/', '', $request->harga_satuan);
-        if ($hargaBersih <= 0) {
-            return back()->withErrors(['harga_satuan' => 'Harga satuan harus angka valid dan lebih dari 0.'])->withInput();
+        if ($hargaBersih <= 0 || $hargaBersih > 99999999) {
+            return back()->withErrors(['harga_satuan' => 'Harga satuan harus antara Rp 1 dan Rp 99.999.999.'])->withInput();
         }
 
         // Cari data gas
-        $gas = Gas::findOrFail($id);
+        $gas = $this->scopedGas()->findOrFail($id);
         $oldStock = $gas->stok;
 
         // Siapkan data untuk update
@@ -215,41 +225,30 @@ class GasController extends Controller
             'satuan' => $validated['satuan'],
         ];
 
-        // Foto Utama
-        if ($request->hasFile('foto')) {
-            if ($gas->foto)
-                Storage::disk('public')->delete($gas->foto);
-            $dataUpdate['foto'] = ImageCompressorService::compressAndStore($request->file('foto'), 'gas');
-        } elseif ($request->input('delete_foto') == '1') {
-            if ($gas->foto)
-                Storage::disk('public')->delete($gas->foto);
-            $dataUpdate['foto'] = null;
+        $newPaths = [];
+        $oldPaths = [];
+        try {
+            foreach (['foto', 'foto_2', 'foto_3'] as $field) {
+                if ($request->hasFile($field)) {
+                    $newPaths[] = $dataUpdate[$field] = ImageCompressorService::compressAndStore($request->file($field), 'gas');
+                } elseif ($request->input('delete_'.$field) == '1') {
+                    $dataUpdate[$field] = null;
+                }
+            }
+            \Illuminate\Support\Facades\DB::transaction(function () use ($id, $dataUpdate, $validated, &$gas, &$oldStock, &$oldPaths) {
+                $gas = $this->scopedGas()->lockForUpdate()->findOrFail($id);
+                if ((int) $gas->stok !== (int) $validated['original_stock']) {
+                    throw \Illuminate\Validation\ValidationException::withMessages(['stok' => 'Stok berubah karena pesanan atau petugas lain. Muat ulang halaman sebelum menyimpan.']);
+                }
+                $oldStock = $gas->stok;
+                foreach (['foto', 'foto_2', 'foto_3'] as $field) if (array_key_exists($field, $dataUpdate) && $gas->$field) $oldPaths[] = $gas->$field;
+                $gas->update($dataUpdate);
+            });
+        } catch (\Throwable $e) {
+            foreach ($newPaths as $path) if ($path) Storage::disk('public')->delete($path);
+            throw $e;
         }
-
-        // Foto 2
-        if ($request->hasFile('foto_2')) {
-            if ($gas->foto_2)
-                Storage::disk('public')->delete($gas->foto_2);
-            $dataUpdate['foto_2'] = ImageCompressorService::compressAndStore($request->file('foto_2'), 'gas');
-        } elseif ($request->input('delete_foto_2') == '1') {
-            if ($gas->foto_2)
-                Storage::disk('public')->delete($gas->foto_2);
-            $dataUpdate['foto_2'] = null;
-        }
-
-        // Foto 3
-        if ($request->hasFile('foto_3')) {
-            if ($gas->foto_3)
-                Storage::disk('public')->delete($gas->foto_3);
-            $dataUpdate['foto_3'] = ImageCompressorService::compressAndStore($request->file('foto_3'), 'gas');
-        } elseif ($request->input('delete_foto_3') == '1') {
-            if ($gas->foto_3)
-                Storage::disk('public')->delete($gas->foto_3);
-            $dataUpdate['foto_3'] = null;
-        }
-
-        // Eksekusi Update Satu Kali
-        $gas->update($dataUpdate);
+        foreach ($oldPaths as $path) Storage::disk('public')->delete($path);
 
         // Jika stok bertambah (restock), broadcast notifikasi ke warga
         if ($validated['stok'] > $oldStock) {
@@ -270,22 +269,15 @@ class GasController extends Controller
     // ===========================
     public function destroy($id)
     {
-        try {
-            $gas = Gas::findOrFail($id);
-
-            if ($gas->foto)
-                Storage::disk('public')->delete($gas->foto);
-            if ($gas->foto_2)
-                Storage::disk('public')->delete($gas->foto_2);
-            if ($gas->foto_3)
-                Storage::disk('public')->delete($gas->foto_3);
-
+        \Illuminate\Support\Facades\DB::transaction(function () use ($id) {
+            $gas = $this->scopedGas()->lockForUpdate()->findOrFail($id);
+            abort_if($gas->gasOrders()->withTrashed()->exists(), 409, 'Produk memiliki riwayat pesanan. Ubah status menjadi Tidak Tersedia agar arsip tetap terjaga.');
             $gas->delete();
-
-            return redirect()->route('admin.unit.penjualan_gas.index')->with('success', 'Gas berhasil dihapus.');
-        } catch (\Exception $e) {
-            return redirect()->route('admin.unit.penjualan_gas.index')->with('error', 'Gagal menghapus gas: ' . $e->getMessage());
-        }
+            \Illuminate\Support\Facades\DB::afterCommit(function () use ($gas) {
+                foreach ([$gas->foto, $gas->foto_2, $gas->foto_3] as $path) if ($path) Storage::disk('public')->delete($path);
+            });
+        });
+        return redirect()->route('admin.unit.penjualan_gas.index')->with('success', 'Gas berhasil dihapus.');
     }
 
     // ===========================
@@ -293,10 +285,11 @@ class GasController extends Controller
     // ===========================
     public function updateCrisisSettings(Request $request)
     {
+        $this->scopedGas();
         $request->validate([
             'is_crisis_mode' => 'required|boolean',
-            'quota_limit' => 'required_if:is_crisis_mode,1|integer|min:1',
-            'quota_days' => 'required_if:is_crisis_mode,1|integer|min:1',
+            'quota_limit' => 'nullable|required_if:is_crisis_mode,1|integer|min:1|max:365',
+            'quota_days' => 'nullable|required_if:is_crisis_mode,1|integer|min:1|max:365',
         ]);
 
         $admin = auth()->user();
@@ -320,6 +313,7 @@ class GasController extends Controller
         }
         
         $region->settings = $settings;
+        $region->is_gas_crisis = $settings['crisis_mode_gas'];
         $region->save();
 
         return redirect()->back()->with('success', "Pengaturan Mode Krisis Elpiji berhasil diperbarui: $statusText.");

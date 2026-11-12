@@ -16,11 +16,7 @@ class GasController extends Controller
         $user = $request->user();
 
         // Get gas products that are available and belong to user's region
-        $query = Gas::where('status', '!=', 'rusak');
-
-        if ($user && $user->region_id) {
-            $query->where('region_id', $user->region_id);
-        }
+        $query = app(\App\Services\GasOrdering::class)->visibleQuery($user);
 
         $gasItems = $query->orderBy('created_at', 'desc')->get();
 
@@ -41,7 +37,7 @@ class GasController extends Controller
      */
     public function show($id)
     {
-        $gas = Gas::find($id);
+        $gas = app(\App\Services\GasOrdering::class)->visibleQuery(auth()->user())->find($id);
 
         if (!$gas) {
             return response()->json([
@@ -51,7 +47,7 @@ class GasController extends Controller
         }
 
         // Include region to get BUMDes info
-        $gas->load('region');
+        $gas->load('region:id,name,type');
         
         $gas->image_url = asset('storage/' . $gas->foto);
 

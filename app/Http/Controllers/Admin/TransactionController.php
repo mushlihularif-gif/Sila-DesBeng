@@ -105,7 +105,7 @@ class TransactionController extends Controller
               ->orWhereIn('status', $activeStatuses);
         });
 
-        $gasQuery = $this->applyRegionFilter(GasOrder::withTrashed(), 'gas', true)->with('user')->where(function($q) use ($activeStatuses) {
+        $gasQuery = $this->applyRegionFilter(GasOrder::withTrashed(), 'gas', true)->with(['user', 'walletEntries'])->where(function($q) use ($activeStatuses) {
             $q->whereNotNull('proof_of_payment')
               ->orWhereIn('status', $activeStatuses);
         });
@@ -257,6 +257,8 @@ class TransactionController extends Controller
 
     public function verify(Request $request, $id, $type)
     {
+        if ($type === 'gas') return app(\App\Services\GasOrderActions::class)->admin($request, (int) $id, 'verify');
+
         $this->pastikanBolehMenangani($type, $id);
 
         if ($type === 'rental') {
@@ -322,6 +324,8 @@ class TransactionController extends Controller
 
     public function reject(Request $request, $id, $type)
     {
+        if ($type === 'gas') return app(\App\Services\GasOrderActions::class)->admin($request, (int) $id, 'reject-payment');
+
         $this->pastikanBolehMenangani($type, $id);
 
         $request->validate([
@@ -375,6 +379,8 @@ class TransactionController extends Controller
 
     public function updateStatus(Request $request, $id, $type, $status)
     {
+        if ($type === 'gas') return app(\App\Services\GasOrderActions::class)->admin($request, (int) $id, $status);
+
         $this->pastikanBolehMenangani($type, $id);
 
         // Validasi status yang diperbolehkan

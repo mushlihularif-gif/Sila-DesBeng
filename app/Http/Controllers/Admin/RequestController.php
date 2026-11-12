@@ -338,6 +338,8 @@ class RequestController extends Controller
 
     public function approve(Request $request, $id, $type)
     {
+        if ($type === 'gas') return app(\App\Services\GasOrderActions::class)->admin($request, (int) $id, 'confirmed');
+
         $this->pastikanBolehMenangani($type, $id);
 
         $notificationService = new NotificationService();
@@ -514,6 +516,8 @@ class RequestController extends Controller
 
     public function reject(Request $request, $id, $type)
     {
+        if ($type === 'gas') return app(\App\Services\GasOrderActions::class)->admin($request, (int) $id, 'reject');
+
         $this->pastikanBolehMenangani($type, $id);
 
         $request->validate([
@@ -615,6 +619,8 @@ class RequestController extends Controller
 
     public function updateStatus(Request $request, $type, $id)
     {
+        if ($type === 'gas') return app(\App\Services\GasOrderActions::class)->admin($request, (int) $id, (string) $request->status);
+
         $this->pastikanBolehMenangani($type, $id);
 
         $request->validate([
@@ -829,6 +835,7 @@ class RequestController extends Controller
             'delivery_proof' => 'required|image|mimes:jpeg,png,jpg|max:5120',
         ]);
 
+        $path = null;
         try {
             DB::beginTransaction();
 
@@ -839,12 +846,14 @@ class RequestController extends Controller
                 return response()->json(['success' => false, 'message' => 'Pesanan belum aktif atau sudah selesai.'], 409);
             }
 
+            if ($type === 'gas') {
+                abort_unless(in_array($order->status, ['in_delivery', 'arrived'], true) && $order->delivery_method === 'antar' && $order->cancellation_status !== 'pending', 409, 'Pesanan harus dalam pengiriman dan tidak sedang dibatalkan.');
+            }
+
             // Simpan gambar
             if ($request->hasFile('delivery_proof')) {
                 // Hapus bukti lama jika ada
-                if ($order->delivery_proof_image) {
-                    Storage::disk('public')->delete($order->delivery_proof_image);
-                }
+                $oldPath = $order->delivery_proof_image;
 
                 $path = $request->file('delivery_proof')->store('delivery_proofs', 'public');
                 
@@ -882,6 +891,7 @@ class RequestController extends Controller
                     'ip_address' => $request->ip()
                 ]);
 
+                DB::afterCommit(function () use ($oldPath) { if ($oldPath) Storage::disk('public')->delete($oldPath); });
                 DB::commit();
 
                 return response()->json([
@@ -895,6 +905,8 @@ class RequestController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
+            if ($path) Storage::disk('public')->delete($path);
+            if ($e instanceof \Symfony\Component\HttpKernel\Exception\HttpExceptionInterface) throw $e;
             \Illuminate\Support\Facades\Log::error('Upload Proof Error: ' . $e->getMessage());
             
             return response()->json([

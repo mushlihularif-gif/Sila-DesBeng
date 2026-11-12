@@ -38,5 +38,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // $middleware->throttleWithRedis = false; // Use default cache
 
     })
-    ->withExceptions()
+    ->withExceptions(function (\Illuminate\Foundation\Configuration\Exceptions $exceptions) {
+        $exceptions->dontFlash(['no_kk', 'niks', 'kepala_keluarga']);
+    })
     ->create();

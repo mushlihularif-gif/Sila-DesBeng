@@ -6,7 +6,7 @@ use App\Models\GasOrder;
 use App\Services\ReceiptGeneratorService;
 use Illuminate\Support\Facades\Log;
 
-class GasOrderObserver
+class GasOrderObserver implements \Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit
 {
     protected $receiptGenerator;
 
@@ -29,7 +29,7 @@ class GasOrderObserver
     public function updated(GasOrder $order): void
     {
         // Regenerate receipt when important fields change
-        if ($order->isDirty(['status', 'confirmed_at', 'delivery_time', 'completion_time'])) {
+        if ($order->wasChanged(['status', 'confirmed_at', 'delivery_time', 'completion_time'])) {
             $this->generateReceipt($order);
         }
     }

@@ -20,6 +20,9 @@
                     <i class='bx {{ $isCrisisMode ? 'bx-error-circle' : 'bx-shield-quarter' }} me-1'></i> 
                     Mode Krisis
                 </button>
+                @if(in_array(auth()->user()->role, ['admin_desa', 'super_admin']))
+                <a href="{{ route('admin.gas.kk.index') }}" class="btn btn-outline-primary">Periksa KK Warga</a>
+                @endif
                 {{-- Lokasi layanan bisa didaftarkan langsung dari sini, tanpa
                      pindah halaman. Setelah tersimpan, lokasinya langsung muncul
                      sebagai pilihan "Lokasi Tersimpan" di formulir Tambah Gas —

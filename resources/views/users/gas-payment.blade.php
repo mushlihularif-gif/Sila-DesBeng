@@ -7,21 +7,12 @@
     <section class="max-w-2xl mx-auto">
         <div class="rounded-3xl bg-white shadow-lg border border-slate-100 p-6 sm:p-10">
             <div class="text-center mb-8">
-                @if($order->status === 'pending')
-                    <div class="mx-auto mb-4 grid h-16 w-16 place-items-center rounded-full bg-amber-50 text-amber-600">
-                        <i class="bx bx-time-five text-4xl"></i>
-                    </div>
-                    <h1 class="text-2xl sm:text-3xl font-black text-slate-900">Pesanan Menunggu Konfirmasi</h1>
-                    <p class="mt-2 text-sm text-slate-500">Nomor pesanan {{ $order->order_number }}</p>
-                @else
-                    <div class="mx-auto mb-4 grid h-16 w-16 place-items-center rounded-full bg-emerald-50 text-emerald-600">
-                        <i class="bx bx-check-circle text-4xl"></i>
-                    </div>
-                    <h1 class="text-2xl sm:text-3xl font-black text-slate-900">Status Pesanan Diperbarui</h1>
-                    <p class="mt-2 text-sm text-slate-500">Nomor pesanan {{ $order->order_number }}</p>
-                @endif
+                @php($statusLabel = ['pending'=>'Menunggu Konfirmasi', 'confirmed'=>'Pesanan Disetujui', 'approved'=>'Pesanan Disetujui', 'being_prepared'=>'Sedang Disiapkan', 'in_delivery'=>'Sedang Diantar', 'arrived'=>'Sudah Tiba / Siap Diambil', 'completed'=>'Pesanan Selesai', 'rejected'=>'Pesanan Ditolak', 'cancelled'=>'Pesanan Dibatalkan'][$order->status] ?? 'Status Pesanan')
+                <h1 class="text-2xl sm:text-3xl font-black text-slate-900">{{ $statusLabel }}</h1>
+                <p class="mt-2 text-sm text-slate-500">Nomor pesanan {{ $order->order_number }}</p>
             </div>
-
+            @if(session('success'))<p role="status" class="mb-4 p-4 bg-green-50 text-green-800 rounded-xl">{{ session('success') }}</p>@endif
+            @if($errors->any())<div role="alert" class="mb-4 p-4 bg-red-50 text-red-800 rounded-xl">{{ $errors->first() }}</div>@endif
             <div class="rounded-2xl bg-slate-50 p-5 space-y-3">
                 <div class="flex justify-between gap-4 text-sm">
                     <span class="text-slate-500">Produk</span>
@@ -42,15 +33,33 @@
             </div>
 
             <div class="mt-5 rounded-2xl border border-blue-100 bg-blue-50 p-5 text-sm text-blue-900">
-                @if(strtolower($order->payment_method) === 'tunai')
-                    Bayar langsung kepada petugas sesuai petunjuk pengelola layanan.
-                @else
-                    Pembayaran manual atau bukti pembayaran akan diperiksa oleh petugas sebelum pesanan diproses.
+                <p class="font-bold">Pembayaran: {{ $paid ? 'Sudah dikonfirmasi diterima' : (in_array($order->status, ['cancelled','rejected']) ? 'Pesanan tidak dilanjutkan' : 'Belum dikonfirmasi') }}</p>
+                @if(in_array($order->status, ['cancelled','rejected']))
+                    <p class="mt-2">{{ $order->rejection_reason }} Jika sudah membayar manual, hubungi pengelola untuk memastikan pengembalian dana.</p>
+                @elseif(strtolower($order->payment_method) === 'tunai')
+                    <p class="mt-2">Bayar kepada petugas saat {{ $order->delivery_method === 'jemput' ? 'mengambil gas' : 'gas diterima' }}. Petugas akan mencatat penerimaan pembayaran.</p>
+                @elseif(!$paid && !$order->proof_of_payment)
+                    @if(strtolower($order->payment_method) === 'transfer')
+                        <p class="mt-2">Transfer ke {{ $setting->bank_name }} — {{ $setting->bank_account_number }}, atas nama {{ $setting->bank_account_holder }}.</p>
+                    @else
+                        <p class="mt-2">Kirim ke {{ $setting->ewallet_name }} — {{ $setting->ewallet_number }}, atas nama {{ $setting->ewallet_account_holder }}.</p>
+                    @endif
+                    <p class="mt-2">Unggah bukti setelah membayar. Jika bukti sebelumnya tidak sesuai, periksa alasan pada notifikasi Anda lalu kirim bukti yang benar.</p>
+                @elseif(!$paid)
+                    <p class="mt-2">Bukti sudah dikirim dan menunggu pemeriksaan petugas.</p>
                 @endif
                 @if($order->proof_of_payment)
                     <p class="mt-3"><a class="font-bold underline" href="{{ Storage::url($order->proof_of_payment) }}" target="_blank" rel="noopener">Lihat bukti pembayaran yang dikirim</a></p>
                 @endif
             </div>
+            @if($order->status === 'pending' && $order->cancellation_status !== 'pending' && !$paid && !$order->proof_of_payment && strtolower($order->payment_method) !== 'tunai')
+                <form action="{{ route('user.gas.payment.proof', $order->id) }}" method="POST" enctype="multipart/form-data" class="mt-5 space-y-3">
+                    @csrf
+                    <label for="gas-proof" class="block font-semibold">Bukti pembayaran (JPG, PNG, atau PDF, maksimal 5 MB)</label>
+                    <input id="gas-proof" type="file" name="payment_proof" accept="image/jpeg,image/png,application/pdf" required class="block w-full">
+                    <button type="submit" class="rounded-xl bg-blue-600 text-white px-5 py-3 font-bold">Kirim Bukti Pembayaran</button>
+                </form>
+            @endif
 
             <div class="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
                 <a href="{{ route('user.activity') }}" class="rounded-xl bg-blue-600 px-6 py-3 text-center font-bold text-white hover:bg-blue-700">Riwayat Pesanan</a>
@@ -59,12 +68,7 @@
                 @endif
             </div>
 
-            @if($order->status === 'pending' && app()->environment(['local', 'testing']))
-                <form action="{{ route('user.gas.payment.simulate', $order->id) }}" method="POST" class="mt-5 text-center">
-                    @csrf
-                    <button class="text-sm font-semibold text-emerald-700 underline" type="submit">Simulasikan konfirmasi untuk pengujian lokal</button>
-                </form>
-            @endif
+
         </div>
     </section>
 </main>

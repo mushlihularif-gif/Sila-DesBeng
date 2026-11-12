@@ -70,6 +70,8 @@ class GasOrder extends Model
         'receipt_path',
     ];
 
+    protected $hidden = ['nomor_kk', 'nomor_kk_hash', 'idempotency_key', 'submission_hash'];
+
     protected $casts = [
         'order_date' => 'date',
         'delivery_time' => 'datetime',
@@ -102,6 +104,16 @@ class GasOrder extends Model
     /**
      * Ambil admin/staf yang memproses pesanan
      */
+    public function walletEntries()
+    {
+        return $this->hasMany(WalletTransaction::class, 'reference_id')->where('reference_type', 'gas');
+    }
+
+    public function paymentReceived(): bool
+    {
+        return $this->walletEntries->isNotEmpty() && $this->walletEntries->every(fn ($entry) => $entry->status === 'verified');
+    }
+
     public function handler()
     {
         return $this->belongsTo(User::class, 'handled_by');

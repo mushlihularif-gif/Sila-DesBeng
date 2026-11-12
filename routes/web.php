@@ -224,10 +224,13 @@ Route::get('/unit-penjualan-gas/{id}/booking', [App\Http\Controllers\User\GasSal
     ->middleware('auth');
 Route::post('/gas/booking', [App\Http\Controllers\User\GasBookingController::class, 'store'])
     ->name('gas.booking.store')
-    ->middleware('auth');
+    ->middleware(['auth', 'throttle:10,1']);
 Route::post('/gas/verify-kk', [App\Http\Controllers\User\GasKkVerificationController::class, 'store'])
     ->name('user.gas.verify-kk')
-    ->middleware('auth');
+    ->middleware(['auth', 'throttle:3,10']);
+
+Route::post('/gas/payment/{id}/proof', [\App\Http\Controllers\Api\GasBookingController::class, 'uploadPayment'])
+    ->middleware(['auth', 'throttle:10,1'])->name('user.gas.payment.proof');
 
 Route::get('/gas/payment/{id}', [App\Http\Controllers\User\GasBookingController::class, 'payment'])
     ->name('user.gas.payment')
@@ -607,6 +610,10 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
 
         // Penjualan Gas
         Route::middleware('staff.permission:gas')->group(function () {
+            Route::get('gas-kk', [\App\Http\Controllers\Admin\GasKkAdminController::class, 'index'])->name('admin.gas.kk.index');
+            Route::get('gas-kk/{id}/foto', [\App\Http\Controllers\Admin\GasKkAdminController::class, 'showImage'])->name('admin.gas.kk.image');
+            Route::post('gas-kk/{id}/setujui', [\App\Http\Controllers\Admin\GasKkAdminController::class, 'approve'])->name('admin.gas.kk.approve');
+            Route::post('gas-kk/{id}/tolak', [\App\Http\Controllers\Admin\GasKkAdminController::class, 'reject'])->name('admin.gas.kk.reject');
             Route::post('gas/crisis-mode', [GasController::class, 'updateCrisisSettings'])->name('admin.unit.penjualan_gas.crisis_mode');
             Route::resource('gas', GasController::class)->names([
                 'index' => 'admin.unit.penjualan_gas.index',

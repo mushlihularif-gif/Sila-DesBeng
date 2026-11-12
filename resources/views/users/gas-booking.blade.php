@@ -131,6 +131,7 @@
 
             <form id="gas-booking-form" action="#" method="POST" enctype="multipart/form-data" data-turbo="false">
                 @csrf
+                <input type="hidden" name="idempotency_key" value="{{ (string) \Illuminate\Support\Str::uuid() }}">
                 <input type="hidden" name="gas_id" value="{{ $item->id }}">
                 <input type="hidden" name="quantity" id="hidden-quantity" value="{{ $quantity }}">
 
@@ -291,15 +292,15 @@
                 @php
                     $antarActive = !isset($setting->payment_info['gas_delivery_antar_active']) || $setting->payment_info['gas_delivery_antar_active'];
                     $jemputActive = !isset($setting->payment_info['gas_delivery_jemput_active']) || $setting->payment_info['gas_delivery_jemput_active'];
-                    $defaultMethod = $antarActive ? 'antar' : 'jemput';
+                    $defaultDelivery = $antarActive ? 'antar' : 'jemput';
                 @endphp
-                <input type="hidden" name="delivery_method" id="delivery-method-input" value="{{ $defaultMethod }}">
+                <input type="hidden" name="delivery_method" id="delivery-method-input" value="{{ $defaultDelivery }}">
 
                 <!-- Pilihan Metode Pengiriman -->
                 <div class="flex flex-col sm:flex-row justify-center gap-6 mb-10 items-center">
                     @if($antarActive)
                     <!-- Antar Card -->
-                    <div class="delivery-method-card {{ $defaultMethod == 'antar' ? 'active' : '' }} cursor-pointer bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 w-48 text-center border-4 border-transparent" data-method="antar">
+                    <div class="delivery-method-card {{ $defaultDelivery == 'antar' ? 'active' : '' }} cursor-pointer bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 w-48 text-center border-4 border-transparent" data-method="antar">
                         <div class="mb-4 flex justify-center">
                             <img src="{{ asset('Admin/img/elements/antar.png') }}" alt="Antar" class="w-20 h-20 object-contain">
                         </div>
@@ -309,7 +310,7 @@
 
                     @if($jemputActive)
                     <!-- Jemput Card -->
-                    <div class="delivery-method-card {{ $defaultMethod == 'jemput' ? 'active' : '' }} cursor-pointer bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 w-48 text-center border-4 border-transparent" data-method="jemput">
+                    <div class="delivery-method-card {{ $defaultDelivery == 'jemput' ? 'active' : '' }} cursor-pointer bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 w-48 text-center border-4 border-transparent" data-method="jemput">
                         <div class="mb-4 flex justify-center">
                             <img src="{{ asset('Admin/img/elements/jemput.png') }}" alt="Jemput" class="w-20 h-20 object-contain">
                         </div>
@@ -1046,6 +1047,8 @@
         // Proceed with booking
         if (proceedGasConfirmation) {
             proceedGasConfirmation.addEventListener('click', function() {
+                if (proceedGasConfirmation.disabled) return;
+                proceedGasConfirmation.disabled = true;
                 gasConfirmationModal.style.display = 'none';
                 gasConfirmationModal.classList.add('hidden');
 
@@ -1076,30 +1079,12 @@
                 })
                 .then(data => {
                     if (data.success) {
-                        // Transfer dan e-wallet manual sudah selesai di halaman ini:
-                        // buktinya ikut terunggah bersama formulir. Melemparkannya ke
-                        // halaman instruksi gateway hanya menampilkan nomor VA yang
-                        // tidak pernah dibuat.
-                        const metodeDipakai = document.getElementById('payment-method-hidden').value;
-                        if (['tunai', 'transfer', 'ewallet'].includes(metodeDipakai)) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Pesanan Berhasil Dibuat',
-                                text: metodeDipakai === 'tunai'
-                                    ? 'Pesanan COD Anda sedang diproses. Mohon siapkan uang pas saat petugas tiba di alamat Anda.'
-                                    : 'Bukti pembayaran Anda sedang diperiksa petugas. Pesanan diproses setelah bukti disetujui.',
-                                confirmButtonColor: '#3b82f6',
-                            }).then(() => {
-                                window.location.href = '{{ route("user.activity") }}';
-                            });
-                        } else {
-                            window.location.href = '{{ route("user.activity") }}';
-                        }
+                        window.location.href = data.payment_url;
                     } else {
                         Swal.fire({
                             icon: 'error',
                             title: 'Gagal',
-                            text: data.message || 'Gagal memproses pesanan',
+                            text: Object.values(data.errors || {}).flat()[0] || data.message || 'Gagal memproses pesanan',
                             confirmButtonColor: '#d33',
                         });
                     }
@@ -1109,10 +1094,10 @@
                     Swal.fire({
                         icon: 'error',
                         title: 'Terjadi Kesalahan',
-                        text: 'Error detail: ' + error.message,
+                        text: 'Koneksi terputus. Periksa Riwayat Pesanan sebelum mencoba lagi. Data formulir tetap tersimpan di halaman ini.',
                         confirmButtonColor: '#d33',
                     });
-                });
+                }).finally(() => { proceedGasConfirmation.disabled = false; });
             });
         }
 

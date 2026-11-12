@@ -405,9 +405,9 @@
                                              <span class="fw-bold text-dark">Rp {{ number_format(($payment->price ?? 0) * ($payment->quantity ?? 1), 0, ',', '.') }}</span>
                                         </td>
                                         <td>
-                                            @if($payment->payment_method == 'tunai')
+                                            @if(strtolower($payment->payment_method) == 'tunai')
                                                 <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3">Tunai</span>
-                                            @elseif($payment->payment_method == 'transfer')
+                                            @elseif(strtolower($payment->payment_method) == 'transfer')
                                                 <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3">Transfer</span>
                                             @else
                                                 <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill px-3">{{ ucfirst($payment->payment_method) }}</span>
@@ -419,7 +419,28 @@
                                         <td class="text-end pe-4">
                                             <div class="d-flex justify-content-end gap-2">
                                                 {{-- Action Buttons --}}
-                                                {{-- Action Buttons Removed --}}
+                                                @if(!in_array($payment->status, ['completed', 'cancelled', 'rejected']) && $payment->cancellation_status !== 'pending')
+                                                    @if($payment->paymentReceived())
+                                                        <span class="badge bg-success">Pembayaran diterima</span>
+                                                    @elseif(strtolower($payment->payment_method) === 'tunai' || $payment->proof_of_payment)
+                                                        <form method="POST" action="{{ route('admin.aktivitas.bukti-transaksi.verify', [$payment->id, 'gas']) }}">
+                                                            @csrf
+                                                            <button class="btn btn-sm btn-success" type="submit" onclick="return confirm('Pastikan uang benar-benar sudah diterima. Konfirmasi pembayaran ini?')">Konfirmasi Uang Diterima</button>
+                                                        </form>
+                                                        @if($payment->proof_of_payment && $payment->status === 'pending')
+                                                            <details class="text-start"><summary class="btn btn-sm btn-outline-warning">Bukti Tidak Sesuai</summary>
+                                                                <form method="POST" action="{{ route('admin.aktivitas.bukti-transaksi.reject', [$payment->id, 'gas']) }}" class="mt-2">
+                                                                    @csrf
+                                                                    <label for="reason-gas-{{ $payment->id }}">Alasan dan petunjuk untuk warga</label>
+                                                                    <textarea id="reason-gas-{{ $payment->id }}" name="reason" class="form-control" required maxlength="500"></textarea>
+                                                                    <button class="btn btn-sm btn-warning mt-2" type="submit">Minta Ganti Bukti</button>
+                                                                </form>
+                                                            </details>
+                                                        @endif
+                                                    @else
+                                                        <span class="text-muted">Menunggu bukti pembayaran</span>
+                                                    @endif
+                                                @endif
 
                                                  @if($payment->proof_of_payment)
                                                     <a href="{{ route('admin.aktivitas.bukti-transaksi.download', [$payment->id, 'gas']) }}" 

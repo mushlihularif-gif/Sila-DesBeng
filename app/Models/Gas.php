@@ -32,6 +32,16 @@ class Gas extends Model
         'harga_satuan' => 'decimal:2',
     ];
 
+    public function region()
+    {
+        return $this->belongsTo(Region::class);
+    }
+
+    public function isSubsidized(): bool
+    {
+        return preg_match('/(?<![0-9])3\s*kg/i', $this->jenis_gas) === 1;
+    }
+
     public function gasOrders()
     {
         return $this->hasMany(GasOrder::class);

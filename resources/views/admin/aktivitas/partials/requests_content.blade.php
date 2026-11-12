@@ -413,15 +413,8 @@ $totalActive = collect([$isRentalActive, $isGasActive, $isMobilActive, $isFasili
                                         <td class="text-end pe-4">
                                             <div class="d-flex gap-2 justify-content-end">
                                                 {{-- Action Buttons --}}
-                                                @if($order->status === 'confirmed' && $order->cancellation_status != 'pending')
-                                                    {{-- Confirmed -> Selesaikan --}}
-                                                     <form action="{{ route('admin.aktivitas.update-status', ['id' => $order->id, 'type' => 'gas']) }}" method="POST" class="d-inline">
-                                                        @csrf
-                                                        <input type="hidden" name="status" value="completed">
-                                                        <button type="submit" class="btn btn-sm btn-outline-success shadow-sm rounded-pill px-3" data-konfirmasi="Apakah Anda yakin ingin menyelesaikan pesanan ini?">
-                                                            <i class="bx bx-check-circle me-1"></i>Selesaikan
-                                                        </button>
-                                                    </form>
+                                                @if(!in_array($order->status, ['completed', 'cancelled', 'rejected']))
+                                                    <a class="btn btn-sm btn-primary" href="{{ route('admin.aktivitas.permintaan-pengajuan.show', [$order->id, 'gas']) }}">Proses Pesanan</a>
                                                 @endif
 
                                                 <a href="{{ route('admin.aktivitas.permintaan-pengajuan.show', [$order->id, 'gas']) }}" 

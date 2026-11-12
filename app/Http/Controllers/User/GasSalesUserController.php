@@ -13,52 +13,18 @@ class GasSalesUserController extends Controller
         $kategori = request('kategori', '');
         $targetRegionId = request()->integer('region_id') ?: null;
         $filterRegionId = request()->integer('filter_region_id') ?: null;
-        $query = Gas::where('status', '!=', 'rusak');
-        $visibleRegionIds = null;
-        
-        $isGasCrisis = false;
-        $hasKk = false;
-        $familyCardNumber = null;
-        $pendingKk = false;
-
-        $targetRegion = null;
+        $ordering = app(\App\Services\GasOrdering::class);
+        $query = $ordering->visibleQuery(auth()->user());
+        $visibleRegionIds = (clone $query)->pluck('region_id')->unique()->all();
+        $targetRegion = $targetRegionId ? \App\Models\Region::find($targetRegionId) : null;
         if ($targetRegionId) {
-            $targetRegion = \App\Models\Region::find($targetRegionId);
-            $visibleRegionIds = array_merge([$targetRegionId], \App\Models\Region::getDescendantIds($targetRegionId));
-            $query->whereIn('region_id', $visibleRegionIds);
-
-            if ($targetRegion && $targetRegion->is_gas_crisis) {
-                $isGasCrisis = true;
-            }
-        } elseif (auth()->check() && auth()->user()->role === 'user' && auth()->user()->region_id) {
-            $user = auth()->user();
-            $allowed = \App\Models\Region::wilayahLayananTerlihat($user->region_id, 'Penjualan Gas');
-            $visibleRegionIds = array_values(array_unique(array_map('intval', $allowed)));
-            $query->where(function($sub) use ($allowed) {
-                $sub->whereIn('region_id', $allowed)
-                    ->orWhereNull('region_id');
-            });
-            
-            // Cek mode krisis gas
-            $region = \App\Models\Region::find($user->region_id);
-            if ($region && $region->is_gas_crisis) {
-                $isGasCrisis = true;
-            }
+            $query->whereIn('region_id', array_merge([$targetRegionId], \App\Models\Region::getDescendantIds($targetRegionId)));
         }
-
-        if (auth()->check() && $isGasCrisis) {
-            $user = auth()->user();
-            if ($user->familyMember && $user->familyMember->familyCard) {
-                $hasKk = true;
-                $familyCardNumber = $user->familyMember->familyCard->no_kk_masked;
-            } else {
-                $pending = \App\Models\FamilyCard::where('submitted_by', $user->id)
-                    ->where('status', 'pending')->first();
-                if ($pending) {
-                    $pendingKk = true;
-                }
-            }
-        }
+        $isGasCrisis = (clone $query)->with('region')->get()->contains(fn ($gas) => $ordering->crisis($gas));
+        $family = auth()->user() ? $ordering->household(auth()->user()) : null;
+        $hasKk = $family !== null;
+        $familyCardNumber = $family?->no_kk_masked;
+        $pendingKk = auth()->check() && \App\Models\FamilyCard::where('submitted_by', auth()->id())->where('status', 'pending')->exists();
 
         $availableRegionIds = (clone $query)->whereNotNull('region_id')->distinct()->pluck('region_id')->map(fn ($id) => (int) $id)->all();
 
@@ -100,7 +66,7 @@ class GasSalesUserController extends Controller
     public function show($id)
     {
         // Ambil data produk gas spesifik
-        $item = Gas::findOrFail($id);
+        $item = app(\App\Services\GasOrdering::class)->visibleQuery(auth()->user())->findOrFail($id);
         
         // Ambil pengaturan sistem untuk lokasi
         $setting = \App\Models\SystemSetting::first();
@@ -111,34 +77,17 @@ class GasSalesUserController extends Controller
     public function booking($id)
     {
         // Ambil data produk gas spesifik
-        $item = Gas::findOrFail($id);
+        $item = app(\App\Services\GasOrdering::class)->visibleQuery(auth()->user())->findOrFail($id);
         $user = auth()->user();
 
-        // Validasi: Warga hanya bisa memesan layanan di wilayahnya sendiri
-        if (! in_array($item->region_id, \App\Models\Region::wilayahLayananTerlihat($user->region_id, 'Penjualan Gas'))) {
-            return redirect()->back()->with('error', 'Layanan khusus warga lokal. Silakan sesuaikan wilayah Anda.');
+        $quantity = max(1, min(100, (int) request()->query('quantity', 1)));
+        $ordering = app(\App\Services\GasOrdering::class);
+        try {
+            $ordering->checkEligibility($user, $item, $quantity, $ordering->household($user));
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return redirect()->route('gas.sales', ['region_id' => $item->region_id])->with('error', collect($e->errors())->flatten()->first());
         }
 
-        // Validasi Mode Krisis Gas (hanya jika mode krisis diaktifkan oleh admin)
-        $region = \App\Models\Region::find($user->region_id);
-        if ($region && $region->is_gas_crisis) {
-            // Cek apakah punya KK terverifikasi
-            if (!$user->familyMember || !$user->familyMember->familyCard) {
-                return redirect()->route('gas.sales')->with('error', 'Desa sedang dalam mode krisis gas. Anda wajib memverifikasi Kartu Keluarga (KK) terlebih dahulu.');
-            }
-        }
-        
-        // Ambil jumlah dari parameter query, default ke 1
-        $quantity = request()->query('quantity', 1);
-        
-        // Validasi jumlah
-        if ($quantity < 1) {
-            $quantity = 1;
-        }
-        if ($quantity > $item->stok) {
-            $quantity = $item->stok;
-        }
-        
         // Rekening & metode pembayaran milik WILAYAH gas ini, bukan rekening pusat.
         // Pemasukan tiap daerah menjadi tanggung jawab daerahnya sendiri.
         $setting = \App\Support\ProfilPembayaranWilayah::untuk($item->region_id);

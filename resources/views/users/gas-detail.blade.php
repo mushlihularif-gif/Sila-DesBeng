@@ -111,6 +111,7 @@
 
                         <!-- Quantity Selector + Order Button -->
                         <div class="flex items-center gap-4 mt-auto">
+                            @if($item->status === 'tersedia' && $item->stok > 0)
                             <!-- Quantity Selector -->
                             <div class="flex items-center gap-3 border-2 border-gray-300 rounded-full px-4 py-2">
                                 <button type="button" 
@@ -125,7 +126,7 @@
                                        id="quantity" 
                                        value="1" 
                                        min="1" 
-                                       max="{{ $item->stok }}"
+                                       max="{{ min(100, $item->stok) }}"
                                        onchange="let max = {{ $item->stok ?? 0 }}; if(this.value < 1) this.value = 1; if(this.value > max) this.value = max; document.getElementById('rent-button').href = '{{ route('gas.booking', ['id' => $item->id]) }}?quantity=' + this.value;"
                                        class="w-12 text-center text-lg font-semibold border-0 focus:outline-none focus:ring-0 p-0 bg-transparent text-gray-900">
                                 
@@ -138,12 +139,14 @@
                                 </button>
                             </div>
 
+                            @endif
                             <!-- Chat Button -->
                             <button type="button" onclick="chatAboutCurrentItem()" class="flex-shrink-0 bg-white text-blue-500 border border-blue-500 hover:bg-blue-50 hover:text-blue-600 font-bold py-3 px-5 rounded-full transition-all duration-300 shadow-md flex items-center justify-center gap-2">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
                                 Chat
                             </button>
                             
+                            @if($item->status === 'tersedia' && $item->stok > 0)
                             <!-- Order Button -->
                             <a href="{{ route('gas.booking', ['id' => $item->id]) }}?quantity=1" 
                                id="rent-button"
@@ -151,6 +154,9 @@
                                class="catalog-detail-primary flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-xl transition-all duration-300 shadow-sm text-center">
                                 Pesan
                             </a>
+                            @else
+                                <span class="font-semibold text-gray-600">Gas sedang tidak tersedia</span>
+                            @endif
                         </div>
                     </div>
                 </div>
