@@ -174,6 +174,7 @@
                                     <div class="p-3 bg-success-subtle rounded-3 border border-success-subtle">
                                         <small class="text-success-emphasis d-block mb-1">Dikembalikan</small>
                                         <span class="fw-bold text-dark">{{ \Carbon\Carbon::parse($request->return_time)->isoFormat('D MMMM Y HH:mm') }}</span>
+                                        <p class="small mt-2 mb-0">Layak pakai: {{ $request->returned_quantity ?? $request->quantity }} unit. {{ $request->return_notes }}</p>
                                     </div>
                                 </div>
                                 @endif
@@ -182,160 +183,8 @@
                         </div>
                     </div>
 
-                    <!-- DELIVERY STATUS WORKFLOW (RENTAL ONLY) - MOVED HERE -->
-                    @if($type === 'rental' && in_array($request->status, ['confirmed', 'being_prepared', 'in_delivery', 'arrived', 'completed']))
-                    <div class="card shadow-sm border-0 rounded-4 mb-4 animate-fade-in-up">
-                        <div class="card-header bg-white border-bottom py-3">
-                            <h5 class="mb-0 fw-bold text-dark"><i class="bx bx-map-alt me-2 text-primary"></i>Status Pengiriman</h5>
-                        </div>
-                        <div class="card-body p-4">
-                            <div class="d-flex flex-column gap-0">
-                                <!-- Step 1: Confirmed -->
-                                <div class="d-flex gap-3 position-relative pb-4">
-                                    <div class="d-flex flex-column align-items-center" style="width: 40px; min-width: 40px;">
-                                        <div class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center shadow-sm" style="width: 32px; height: 32px; z-index: 2;">
-                                            <i class="bx bx-check fs-5"></i>
-                                        </div>
-                                        <div class="h-100 border-start border-2 border-primary-subtle position-absolute" style="left: 19px; top: 32px; bottom: 0;"></div>
-                                    </div>
-                                    <div class="flex-grow-1">
-                                        <div class="card border-0 bg-white shadow-sm rounded-3 hover-shadow transition-all">
-                                            <div class="card-body p-3">
-                                                <h6 class="fw-bold text-dark mb-1">Pesanan Dikonfirmasi</h6>
-                                                <small class="text-muted d-block">
-                                                    <i class="bx bx-time-five me-1"></i>{{ $request->confirmed_at ? \Carbon\Carbon::parse($request->confirmed_at)->format('d M Y, H:i') : '-' }} WIB
-                                                </small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                    <!-- Rental controls are grouped in the status card. -->
 
-                                @if($request->delivery_method == 'antar')
-                                    <!-- Step 2: Being Prepared (ANTAR ONLY) -->
-                                    <div class="d-flex gap-3 position-relative pb-4">
-                                        <div class="d-flex flex-column align-items-center" style="width: 40px; min-width: 40px;">
-                                            <div class="rounded-circle {{ in_array($request->status, ['being_prepared', 'in_delivery', 'arrived', 'completed']) ? 'bg-success text-white' : ($request->status == 'confirmed' ? 'bg-primary text-white animate-pulse' : 'bg-light text-secondary border') }} d-flex align-items-center justify-content-center shadow-sm" style="width: 32px; height: 32px; z-index: 2;">
-                                                <i class="bx bx-package fs-5"></i>
-                                            </div>
-                                            <div class="h-100 border-start border-2 border-primary-subtle position-absolute" style="left: 19px; top: 32px; bottom: 0;"></div>
-                                        </div>
-                                        <div class="flex-grow-1 pb-4">
-                                            <div class="card border-0 {{ in_array($request->status, ['being_prepared', 'in_delivery', 'arrived', 'completed']) ? 'bg-success-subtle bg-opacity-10' : ($request->status == 'confirmed' ? 'bg-white border border-primary border-2 shadow-sm' : 'bg-light') }} rounded-3">
-                                                <div class="card-body p-3 d-flex justify-content-between align-items-center flex-wrap gap-3">
-                                                    <div>
-                                                        <h6 class="fw-bold {{ in_array($request->status, ['being_prepared', 'in_delivery', 'arrived', 'completed']) ? 'text-success' : 'text-dark' }} mb-1">Sedang Dipersiapkan</h6>
-                                                        <small class="text-muted">Tim sedang menyiapkan barang pesanan</small>
-                                                    </div>
-                                                    @if($request->status == 'confirmed')
-                                                        <button class="btn btn-primary rounded-pill px-4" onclick="updateStatus('being_prepared')">
-                                                            <i class="bx bx-check me-2"></i>Update Status
-                                                        </button>
-                                                    @endif
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Step 3: In Delivery (ANTAR ONLY) -->
-                                    <div class="d-flex gap-3 position-relative pb-4">
-                                        <div class="d-flex flex-column align-items-center" style="width: 40px; min-width: 40px;">
-                                            <div class="rounded-circle {{ in_array($request->status, ['in_delivery', 'arrived', 'completed']) ? 'bg-success text-white' : ($request->status == 'being_prepared' ? 'bg-primary text-white animate-pulse' : 'bg-white border text-secondary') }} d-flex align-items-center justify-content-center shadow-sm" style="width: 32px; height: 32px; z-index: 2;">
-                                                <i class="bx bx-car fs-4"></i>
-                                            </div>
-                                            <div class="h-100 border-start border-2 border-primary-subtle position-absolute" style="left: 19px; top: 32px; bottom: 0;"></div>
-                                        </div>
-                                        <div class="flex-grow-1 pb-4">
-                                            <div class="card border-0 {{ in_array($request->status, ['in_delivery', 'arrived', 'completed']) ? 'bg-success-subtle bg-opacity-10' : ($request->status == 'being_prepared' ? 'bg-white border border-primary border-2 shadow-sm' : 'bg-light') }} rounded-3">
-                                                <div class="card-body p-3 d-flex justify-content-between align-items-center flex-wrap gap-3">
-                                                    <div>
-                                                        <h6 class="fw-bold {{ in_array($request->status, ['in_delivery', 'arrived', 'completed']) ? 'text-success' : 'text-dark' }} mb-1">Dalam Pengiriman</h6>
-                                                        @if($request->delivery_time)
-                                                            <small class="text-muted"><i class="bx bx-time me-1"></i>{{ \Carbon\Carbon::parse($request->delivery_time)->format('d M Y H:i') }}</small>
-                                                        @endif
-                                                    </div>
-                                                    @if($request->status == 'being_prepared')
-                                                        <button class="btn btn-primary rounded-pill px-4" onclick="updateStatus('in_delivery')">
-                                                            <i class="bx bx-navigation me-2"></i>Mulai Pengiriman
-                                                        </button>
-                                                    @endif
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endif
-
-                                <!-- Step 4/2: Arrived/Picked Up -->
-                                <div class="d-flex gap-3 position-relative pb-4">
-                                    <div class="d-flex flex-column align-items-center" style="width: 40px; min-width: 40px;">
-                                        <div class="rounded-circle {{ in_array($request->status, ['arrived', 'completed']) ? 'bg-success text-white' : ($request->status == 'in_delivery' || ($request->delivery_method != 'antar' && $request->status == 'confirmed') ? 'bg-primary text-white animate-pulse' : 'bg-white border text-secondary') }} d-flex align-items-center justify-content-center shadow-sm" style="width: 32px; height: 32px; z-index: 2;">
-                                            <i class="bx {{ $request->delivery_method == 'antar' ? 'bx-map-pin' : 'bx-package' }} fs-4"></i>
-                                        </div>
-                                        <div class="h-100 border-start border-2 border-primary-subtle position-absolute" style="left: 19px; top: 32px; bottom: 0;"></div>
-                                    </div>
-                                    <div class="flex-grow-1 pb-4">
-                                        <div class="card border-0 {{ in_array($request->status, ['arrived', 'completed']) ? 'bg-success-subtle bg-opacity-10' : ($request->status == 'in_delivery' || ($request->delivery_method != 'antar' && $request->status == 'confirmed') ? 'bg-white border border-primary border-2 shadow-sm' : 'bg-light') }} rounded-3">
-                                            <div class="card-body p-3 d-flex justify-content-between align-items-center flex-wrap gap-3">
-                                                <div>
-                                                    <h6 class="fw-bold {{ in_array($request->status, ['arrived', 'completed']) ? 'text-success' : 'text-dark' }} mb-1">
-                                                        {{ $request->delivery_method == 'antar' ? 'Tiba di Lokasi' : 'Pesanan sudah di ambil oleh penyewa' }}
-                                                    </h6>
-                                                    @if($request->arrival_time)
-                                                        <small class="text-muted"><i class="bx bx-time me-1"></i>{{ \Carbon\Carbon::parse($request->arrival_time)->format('d M Y H:i') }}</small>
-                                                    @endif
-                                                    @if($request->delivery_proof_image)
-                                                        <div class="mt-2">
-                                                            <a href="{{ asset('storage/' . $request->delivery_proof_image) }}" target="_blank" class="badge bg-primary-subtle text-primary border border-primary-subtle p-2 text-decoration-none">
-                                                                <i class="bx bx-image me-1"></i>{{ $request->delivery_method == 'antar' ? 'Lihat Bukti Pengiriman' : 'Lihat Bukti Penjemputan' }}
-                                                            </a>
-                                                        </div>
-                                                    @endif
-                                                </div>
-                                                @if($request->status == 'in_delivery' || ($request->delivery_method != 'antar' && $request->status == 'confirmed'))
-                                                    <button class="btn btn-primary rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#uploadProofModal">
-                                                        <i class="bx bx-camera me-2"></i>{{ $request->delivery_method == 'antar' ? 'Pesanan Tiba' : 'Konfirmasi Pengambilan' }}
-                                                    </button>
-                                                @endif
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Step 5/3: Completed -->
-                                <div class="d-flex gap-3 position-relative">
-                                    <div class="d-flex flex-column align-items-center" style="width: 40px; min-width: 40px;">
-                                        <div class="rounded-circle {{ $request->status == 'completed' ? 'bg-success text-white' : ($request->status == 'arrived' ? 'bg-primary text-white animate-pulse' : 'bg-white border text-secondary') }} d-flex align-items-center justify-content-center shadow-sm" style="width: 32px; height: 32px; z-index: 2;">
-                                            <i class="bx bx-check-double fs-4"></i>
-                                        </div>
-                                    </div>
-                                    <div class="flex-grow-1">
-                                        <div class="card border-0 {{ $request->status == 'completed' ? 'bg-success-subtle bg-opacity-10' : ($request->status == 'arrived' ? 'bg-white border border-primary border-2 shadow-sm' : 'bg-light') }} rounded-3">
-                                            <div class="card-body p-3 d-flex justify-content-between align-items-center flex-wrap gap-3">
-                                                <div>
-                                                    <h6 class="fw-bold {{ $request->status == 'completed' ? 'text-success' : 'text-dark' }} mb-1">Pesanan Selesai</h6>
-                                                    @if($request->completion_time)
-                                                        <small class="text-muted"><i class="bx bx-time me-1"></i>{{ \Carbon\Carbon::parse($request->completion_time)->format('d M Y H:i') }}</small>
-                                                    @endif
-                                                </div>
-                                                @if($request->status == 'arrived')
-                                                    @if($type === 'rental')
-                                                        <button class="btn btn-warning rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#returnModal">
-                                                            <i class="bx bx-time-five me-2"></i>Input Pengembalian
-                                                        </button>
-                                                    @else
-                                                        <button class="btn btn-success rounded-pill px-4" onclick="updateStatus('completed')">
-                                                            <i class="bx bx-trophy me-2"></i>Selesaikan
-                                                        </button>
-                                                    @endif
-                                                @endif
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>
-                    </div>
-                    @endif
 
                     <!-- PROOF OF PAYMENT -->
                     @if($request->proof_of_payment || $request->payment_proof)
@@ -488,6 +337,8 @@
 
                             @if($type === 'gas')
                                 @include('admin.aktivitas.partials.gas-actions')
+                            @elseif($type === 'rental')
+                                @include('admin.aktivitas.partials.rental-actions')
                             @elseif($request->cancellation_status === 'pending')
                                 <div class="d-grid gap-2">
                                     <button class="btn btn-danger rounded-pill py-2" onclick="handleCancellation({{ $request->id }}, '{{ $type }}', 'approve')">
@@ -618,11 +469,17 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="returnForm">
+                <div class="px-4 pt-3">
+                    <label class="form-label" for="returned-quantity">Jumlah kembali layak pakai (dari {{ $request->quantity }})</label>
+                    <input id="returned-quantity" type="number" name="returned_quantity" min="0" max="{{ $request->quantity }}" value="{{ $request->quantity }}" required class="form-control">
+                    <label class="form-label mt-3" for="return-notes">Keterangan alat rusak/hilang dan penyelesaiannya</label>
+                    <textarea id="return-notes" name="return_notes" maxlength="1000" class="form-control" placeholder="Wajib bila jumlah layak pakai lebih sedikit dari jumlah sewa"></textarea>
+                </div>
                 <div class="modal-body">
                     <div class="alert alert-info border-0 d-flex align-items-center mb-3">
                         <i class="bx bx-info-circle fs-4 me-2"></i>
                         <div>
-                            Stok akan otomatis <strong>bertambah</strong> setelah dikonfirmasi.
+                            Pastikan seluruh alat sudah diperiksa. Hanya jumlah yang kembali layak pakai akan ditambahkan ke stok. Alat rusak/hilang harus dicatat pada keterangan.
                         </div>
                     </div>
                     <div class="mb-3">
@@ -673,6 +530,7 @@ function confirmApprove(id, type) {
                 headers: {
                     'X-CSRF-TOKEN': '{{ csrf_token() }}',
                     'Content-Type': 'application/json',
+                        'Accept': 'application/json',
                     'Accept': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest'
                 },
@@ -740,6 +598,7 @@ document.getElementById('rejectForm').addEventListener('submit', function(e) {
         headers: {
             'X-CSRF-TOKEN': '{{ csrf_token() }}',
             'Content-Type': 'application/json',
+                        'Accept': 'application/json',
             'Accept': 'application/json',
             'X-Requested-With': 'XMLHttpRequest'
         },
@@ -834,7 +693,8 @@ function submitCancellation(id, type, action, reason = null) {
         method: 'POST',
         headers: {
             'X-CSRF-TOKEN': '{{ csrf_token() }}',
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+                        'Accept': 'application/json'
         },
         body: JSON.stringify({ admin_response: reason })
     })
@@ -882,6 +742,7 @@ function updateStatus(newStatus) {
                 headers: {
                     'X-CSRF-TOKEN': '{{ csrf_token() }}',
                     'Content-Type': 'application/json',
+                        'Accept': 'application/json',
                     'Accept': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest'
                 },
@@ -980,10 +841,13 @@ if (returnForm) {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
                     },
                     body: JSON.stringify({
-                        return_time: formData.get('return_time')
+                        return_time: formData.get('return_time'),
+                        returned_quantity: formData.get('returned_quantity'),
+                        return_notes: formData.get('return_notes')
                     })
                 })
                 .then(response => response.json())

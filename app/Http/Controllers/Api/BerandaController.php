@@ -134,10 +134,9 @@ class BerandaController extends Controller
             return $rentals->concat($gases)->concat($mobils)->concat($fasilitas);
         });
 
-        return response()->json([
-            'status' => 'success',
-            'data' => $services
-        ]);
+        $visible = app(\App\Services\RentalOrdering::class)->visibleQuery(auth('sanctum')->user())->pluck('id')->all();
+        $services = $services->filter(fn ($item) => $item['type'] !== 'rental' || in_array($item['id'], $visible))->values();
+        return response()->json(['status'=>'success','data'=>$services])->header('Cache-Control','private, no-store')->header('Vary','Authorization, Cookie');
     }
 
     /**
@@ -253,9 +252,8 @@ class BerandaController extends Controller
                 ->take(10); // Show top 10 overall
         });
 
-        return response()->json([
-            'status' => 'success',
-            'data' => $allPopular
-        ]);
+        $visible = app(\App\Services\RentalOrdering::class)->visibleQuery(auth('sanctum')->user())->pluck('id')->all();
+        $allPopular = $allPopular->filter(fn ($item) => $item['type'] !== 'alat' || in_array($item['id'], $visible))->values();
+        return response()->json(['status'=>'success','data'=>$allPopular])->header('Cache-Control','private, no-store')->header('Vary','Authorization, Cookie');
     }
 }

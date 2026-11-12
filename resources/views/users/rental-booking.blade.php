@@ -212,6 +212,7 @@
                     @endif
                 </div>
 
+                <p class="mb-6 rounded-xl bg-blue-50 p-4 text-blue-900">Harga dihitung sekali untuk satu kegiatan: harga alat × jumlah alat. Tanggal menunjukkan jadwal pemakaian, tidak menambah tarif harian. Pengelola akan memastikan ketersediaan sebelum menyetujui.</p>
                 <!-- Alamat digunakan untuk pengantaran maupun koordinasi penjemputan -->
                 <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
                     <div class="flex items-center gap-3 mb-4">
@@ -1118,7 +1119,7 @@
             form.dataset.initialized = 'true';
 
             const pricePerUnit = {{ number_format($item->harga_sewa, 0, '.', '') }};
-        const maxStock = {{ $item->stok }};
+        const maxStock = Math.min(50, {{ $item->stok }});
         
         // Helper to safely get element
         const getEl = (id) => document.getElementById(id);
@@ -1177,7 +1178,7 @@
             if (startDate && endDate && daysCount && startDate.value && endDate.value) {
                 const start = new Date(startDate.value);
                 const end = new Date(endDate.value);
-                const diffTime = Math.abs(end - start);
+                const diffTime = Math.max(0, end - start);
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
                 daysCount.textContent = diffDays;
                 updateTotals();
@@ -1188,7 +1189,7 @@
             if (startDateJemput && endDateJemput && daysCountJemput && startDateJemput.value && endDateJemput.value) {
                 const start = new Date(startDateJemput.value);
                 const end = new Date(endDateJemput.value);
-                const diffTime = Math.abs(end - start);
+                const diffTime = Math.max(0, end - start);
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
                 daysCountJemput.textContent = diffDays;
                 updateTotalsJemput();
@@ -1298,14 +1299,14 @@
             endDateJemput.addEventListener('change', calculateDaysJemput);
         }
 
-        // Payment Method Fixed to Tunai
+        // Preserve the selected payment method.
         const paymentMethodHidden = getEl('payment-method-hidden');
-        if(paymentMethodHidden) paymentMethodHidden.value = 'tunai';
+
 
         const cashPayment = getEl('cash-payment');
-        if(cashPayment) cashPayment.classList.remove('hidden');
 
-        // Removed Transfer Toggle and Logic
+
+
 
 
         // File Upload Preview
@@ -1356,6 +1357,8 @@
         const bookingForm = getEl('booking-form');
 
         let receiptId = null;
+        let submitting = false;
+        const submissionKey = '{{ (string) \Illuminate\Support\Str::uuid() }}';
 
         // Show confirmation modal on button click
         if (confirmBookingBtns.length > 0) {
@@ -1440,6 +1443,9 @@
         // Proceed with booking
         if (proceedConfirmation) {
             proceedConfirmation.addEventListener('click', function() {
+                if (submitting) return;
+                submitting = true;
+                proceedConfirmation.disabled = true;
                 // Hide confirmation modal
                 confirmationModal.style.display = 'none';
                 confirmationModal.classList.add('hidden');
@@ -1478,6 +1484,15 @@
 
                 // Submit form via AJAX
                 const formData = new FormData(bookingForm);
+                formData.set('quantity', deliveryMethod === 'jemput' ? qtyDisplayJemput.value : qtyDisplay.value);
+                formData.set('idempotency_key', submissionKey);
+                formData.set('sop_accepted', getEl('agree-sop-' + deliveryMethod)?.checked ? '1' : '0');
+                const selectedPayment = deliveryMethod === 'jemput' ? 'tunai' : paymentMethodHidden.value;
+                formData.set('payment_method', selectedPayment);
+                formData.delete('payment_proof');
+                const proofPanel = selectedPayment === 'transfer' ? 'transfer-payment-sewa' : 'ewallet-payment-sewa';
+                const selectedProof = selectedPayment === 'tunai' ? null : getEl(proofPanel)?.querySelector('input[type="file"]')?.files[0];
+                if (selectedProof) formData.set('payment_proof', selectedProof);
 
                 fetch('{{ route("rental.booking.store") }}', {
                     method: 'POST',
@@ -1529,12 +1544,10 @@
                             Swal.fire({
                                 icon: 'success',
                                 title: 'Pesanan Berhasil Dibuat',
-                                text: metodeDipakai === 'tunai'
-                                    ? 'Pesanan COD Anda sedang diproses.'
-                                    : 'Bukti pembayaran Anda sedang diperiksa petugas.',
+                                text: 'Pesanan tersimpan. Lihat rincian untuk pembayaran dan perkembangan sewa.',
                                 confirmButtonColor: '#3b82f6',
                             }).then(() => {
-                                window.location.href = '{{ route("user.activity") }}';
+                                window.location.href = data.payment_url || '{{ route("user.activity") }}';
                             });
                         } else {
                             Swal.fire({ icon: 'error', title: 'Metode pembayaran tidak tersedia', text: 'Pilih tunai atau pembayaran manual.' });
@@ -1543,7 +1556,7 @@
                         Swal.fire({
                             icon: 'error',
                             title: 'Gagal',
-                            text: data.message || 'Terjadi kesalahan saat memproses pesanan',
+                            text: Object.values(data.errors || {}).flat()[0] || data.message || 'Pesanan gagal disimpan.',
                             confirmButtonColor: '#d33',
                         });
                     }
@@ -1553,10 +1566,10 @@
                     Swal.fire({
                         icon: 'error',
                         title: 'Terjadi Kesalahan',
-                        text: 'Terjadi kesalahan sistem saat memproses pesanan',
+                        text: 'Koneksi terputus. Cek Riwayat Pesanan sebelum mencoba kembali.',
                         confirmButtonColor: '#d33',
                     });
-                });
+                }).finally(() => { submitting = false; proceedConfirmation.disabled = false; });
             });
         }
 

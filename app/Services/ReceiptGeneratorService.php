@@ -159,7 +159,7 @@ class ReceiptGeneratorService
         $y += 60;
         $itemName = $booking->barang->nama_barang;
         $quantity = (string)$booking->quantity;
-        $unitPrice = 'Rp. ' . number_format($booking->barang->harga_sewa, 0, ',', '.');
+        $unitPrice = 'Rp. ' . number_format($booking->booked_unit_price, 0, ',', '.');
         $total = 'Rp. ' . number_format($booking->total_amount, 0, ',', '.');
         
         $this->addText($image, $itemName, $col1, $y, $normalSize, $black, $fontPath);
@@ -176,11 +176,12 @@ class ReceiptGeneratorService
         $this->addText($image, 'Total Pemesanan', 530, $y, $normalSize, $black, $fontPath);
         $this->addText($image, 'Rp. ' . number_format($booking->total_amount, 0, ',', '.'), 980, $y, $normalSize, $black, $fontPath);
         
-        // Total Dibayar
+        // Evidence of an order is not evidence that money has been received.
         $y += $lineHeight;
-        $this->addText($image, 'Total Dibayar', 530, $y, $headerSize, $black, $fontPath, true);
-        $this->addText($image, 'Rp. ' . number_format($booking->total_amount, 0, ',', '.'), 980, $y, $headerSize, $black, $fontPath, true);
-        
+        $this->addText($image, 'Uang Diterima', 530, $y, $headerSize, $black, $fontPath, true);
+        $received = $booking->paymentReceived() ? (float)$booking->total_amount : 0;
+        $this->addText($image, 'Rp. ' . number_format($received, 0, ',', '.'), 980, $y, $headerSize, $black, $fontPath, true);
+
         // Tanda tangan footer
         // Jarak footer sebelum blok tanda tangan ditambahkan
         $y += 150;
@@ -198,13 +199,8 @@ class ReceiptGeneratorService
         $y += 420; // Ruang untuk QR dan teks
          
         // Simpan bukti transaksi
-        $filename = 'receipt_rental_' . $booking->order_number . '_' . time() . '.png';
+        $filename = 'receipt_rental_' . hash_hmac('sha256', (string)$booking->id, config('app.key')) . '.png';
         $path = 'receipts/rental/' . $filename;
-        
-        $fullPath = storage_path('app/public/' . dirname($path));
-        if (!file_exists($fullPath)) {
-            mkdir($fullPath, 0755, true);
-        }
         
         ob_start();
         imagepng($image);

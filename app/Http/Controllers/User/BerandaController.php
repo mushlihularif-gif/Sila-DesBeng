@@ -318,7 +318,7 @@ class BerandaController extends Controller
             }
 
             // Fallback 2: Alat Sewa Ready
-            $fallbackBarang = \App\Models\Barang::whereIn('region_id', $regionIds)
+            $fallbackBarang = app(\App\Services\RentalOrdering::class)->visibleQuery(auth()->user())->whereIn('region_id', $regionIds)
                 ->where('stok', '>', 0)
                 ->latest()
                 ->take(2)
@@ -400,7 +400,7 @@ class BerandaController extends Controller
 
             // Fallback 6: Master produk di desa-desa Kecamatan Bengkalis jika desa terpilih kosong
             if ($combined->count() < 4) {
-                $globalBarang = \App\Models\Barang::where('stok', '>', 0)->latest()->take(4)->get();
+                $globalBarang = app(\App\Services\RentalOrdering::class)->visibleQuery(auth()->user())->where('stok', '>', 0)->latest()->take(4)->get();
                 foreach ($globalBarang as $b) {
                     $key = 'rental-' . $b->id;
                     if (!in_array($key, $existingKeys) && $combined->count() < 4) {
@@ -707,7 +707,7 @@ class BerandaController extends Controller
 
         // 3. Search Rental Items (Barang) (Only if rental intent or general search)
         if (!$hasSpecificIntent || $isRentalIntent) {
-            $rentalQuery = \App\Models\Barang::query();
+            $rentalQuery = app(\App\Services\RentalOrdering::class)->visibleQuery(auth()->user());
             $rentalQuery->where(function ($q) use ($allTerms, $cleanSearch, $rawSearch) {
                 if (trim($rawSearch) === 'alat' || trim($rawSearch) === 'sewa alat') {
                     $q->orWhereRaw('1 = 1');

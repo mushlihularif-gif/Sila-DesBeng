@@ -11,7 +11,7 @@ class RentalUserController extends Controller
     {
         $targetRegionId = request()->integer('region_id') ?: null;
         $filterRegionId = request()->integer('filter_region_id') ?: null;
-        $query = Barang::where('status', '!=', 'rusak');
+        $query = app(\App\Services\RentalOrdering::class)->visibleQuery(auth()->user());
 
         $targetRegion = null;
         $visibleRegionIds = null;
@@ -22,13 +22,6 @@ class RentalUserController extends Controller
                 \App\Models\Region::getDescendantIds($targetRegionId)
             );
             $query->whereIn('region_id', $visibleRegionIds);
-        } elseif (auth()->check() && auth()->user()->role === 'user' && auth()->user()->region_id) {
-            $allowed = \App\Models\Region::wilayahLayananTerlihat(auth()->user()->region_id, 'Penyewaan Alat');
-            $visibleRegionIds = array_values(array_unique($allowed));
-            $query->where(function($sub) use ($visibleRegionIds) {
-                $sub->whereIn('region_id', $visibleRegionIds)
-                    ->orWhereNull('region_id');
-            });
         }
 
         $availableRegionIds = (clone $query)->whereNotNull('region_id')
@@ -66,7 +59,7 @@ class RentalUserController extends Controller
     public function show($id)
     {
         // Ambil item penyewaan spesifik
-        $item = Barang::findOrFail($id);
+        $item = app(\App\Services\RentalOrdering::class)->visibleQuery(auth()->user())->findOrFail($id);
         
         // Ambil pengaturan sistem untuk lokasi
         // Rekening & metode pembayaran milik WILAYAH layanan ini, bukan rekening

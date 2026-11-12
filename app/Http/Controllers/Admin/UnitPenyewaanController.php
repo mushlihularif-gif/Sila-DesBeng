@@ -14,6 +14,13 @@ class UnitPenyewaanController extends Controller
 {
     use \App\Traits\ChecksStaffDelegation;
 
+    private function scopedBarang()
+    {
+        $user = auth()->user();
+        abort_unless($user && $user->isAdmin() && $user->region_id && $user->hasUnitPermission('sewa_alat'), 403);
+        return Barang::where('region_id', $user->region_id);
+    }
+
     // Default SOP Texts
     private $defaultSopDitanggung = "1. Penyewa wajib menjaga barang sewaan dengan baik.\n2. Jika terjadi KERUSAKAN atau KEHILANGAN barang selama masa penyewaan, maka SEPENUHNYA menjadi tanggung jawab PENGGUNA (penyewa) untuk mengganti rugi atau memperbaiki alat tersebut sesuai dengan nilai barang.\n3. Keterlambatan pengembalian dapat dikenakan denda sesuai ketentuan yang berlaku.";
     private $defaultSopTidakDitanggung = "1. Penyewa wajib menjaga barang sewaan dengan baik.\n2. Jika terjadi kerusakan atau kehilangan barang selama masa penyewaan yang diakibatkan oleh faktor ketidaksengajaan/bencana, maka TIDAK DITANGGUNG oleh pengguna (penyewa) karena telah didukung oleh dana operasional.\n3. Namun pengguna tetap diwajibkan melaporkan kejadian tersebut secara transparan.";
@@ -36,7 +43,7 @@ class UnitPenyewaanController extends Controller
 
         $search = $request->get('search');
         
-        $barangs = Barang::query()
+        $barangs = $this->scopedBarang()
             ->when($search, function ($query, $search) {
                 return $query->searchWhereLike(['nama_barang', 'kategori'], $search);
             })
@@ -68,6 +75,7 @@ class UnitPenyewaanController extends Controller
      */
     public function sop()
     {
+        $this->scopedBarang();
         $user = auth()->user();
         $region = Region::find($user->region_id);
         
@@ -92,6 +100,7 @@ class UnitPenyewaanController extends Controller
      */
     public function updateSop(Request $request)
     {
+        $this->scopedBarang();
         $request->validate([
             'sop_penyewaan_active' => 'required|in:ditanggung,tidak_ditanggung',
             'sop_penyewaan_ditanggung' => 'nullable|string',
@@ -122,6 +131,7 @@ class UnitPenyewaanController extends Controller
      */
     public function create()
     {
+        $this->scopedBarang();
         // Lokasi diambil dari daftar milik WILAYAH, bukan lagi SELECT DISTINCT
         // pada tabel produk unit ini. Query lama tidak menyaring region_id sama
         // sekali, sehingga admin satu desa ikut melihat nama lokasi desa lain;
@@ -142,27 +152,28 @@ class UnitPenyewaanController extends Controller
      */
     public function store(Request $request)
     {
+        $this->scopedBarang();
         // Validasi input
         $validated = $request->validate([
             'nama_barang' => 'required|string|max:255',
             'deskripsi' => 'required|string',
-            'harga_sewa' => 'required|string', // string (agar titik/koma diperbolehkan)
-            'stok' => 'required|integer',
+            'harga_sewa' => ['required','string','regex:/^(?:[0-9]+|[0-9]{1,3}(?:\.[0-9]{3})+)$/'], // string (agar titik/koma diperbolehkan)
+            'stok' => 'required|integer|min:0|max:1000000',
             'status' => 'required|in:tersedia,disewa,rusak',
-            'kategori' => 'required|string',
-            'lokasi' => 'required|string',
-            'latitude' => 'nullable|numeric',
-            'longitude' => 'nullable|numeric',
-            'satuan' => 'required|string',
-            'foto_utama' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
-            'foto_2' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
-            'foto_3' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
+            'kategori' => 'required|string|max:255',
+            'lokasi' => 'required|string|max:255',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
+            'satuan' => 'required|string|max:255',
+            'foto_utama' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:8192',
+            'foto_2' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:8192',
+            'foto_3' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:8192',
         ]);
 
         //  Bersihkan semua karakter non-angka (titik, koma, spasi, dll), lalu ubah ke integer
         $hargaBersih = (int) preg_replace('/[^0-9]/', '', $request->harga_sewa);
-        if ($hargaBersih <= 0) {
-            return back()->withErrors(['harga_sewa' => 'Harga sewa harus angka valid dan lebih dari 0.'])->withInput();
+        if ($hargaBersih <= 0 || $hargaBersih > 99999999) {
+            return back()->withErrors(['harga_sewa' => 'Harga sewa harus antara Rp 1 dan Rp 99.999.999.'])->withInput();
         }
 
         $data = [
@@ -176,31 +187,25 @@ class UnitPenyewaanController extends Controller
             'latitude' => $request->latitude,
             'longitude' => $request->longitude,
             'satuan' => $request->satuan,
-            'region_id' => auth()->user()->region_id ?? $request->region_id,
+            'region_id' => auth()->user()->region_id,
         ];
 
-        // Upload gambar
-        if ($request->hasFile('foto_utama')) { 
-            $data['foto'] = ImageCompressorService::compressAndStore($request->file('foto_utama'), 'barang'); 
-        }
-        if ($request->hasFile('foto_2')) {
-            $data['foto_2'] = ImageCompressorService::compressAndStore($request->file('foto_2'), 'barang');
-        }
-        if ($request->hasFile('foto_3')) {
-            $data['foto_3'] = ImageCompressorService::compressAndStore($request->file('foto_3'), 'barang');
-        }
-
-        $barang = Barang::create($data);
-
-        // Auto-aktifkan layanan Penyewaan Alat untuk wilayah ini di region_services
-        if ($barang->region_id) {
-            $serviceAlat = \App\Models\Service::where('slug', 'penyewaan-alat')->first();
-            if ($serviceAlat) {
-                \App\Models\RegionService::updateOrInsert(
-                    ['region_id' => $barang->region_id, 'service_id' => $serviceAlat->id],
-                    ['is_active' => true, 'updated_at' => now()]
-                );
+        $newPaths = [];
+        try {
+            foreach (['foto'=>'foto_utama','foto_2'=>'foto_2','foto_3'=>'foto_3'] as $field=>$input) {
+                if ($request->hasFile($input)) $newPaths[] = $data[$field] = ImageCompressorService::compressAndStore($request->file($input), 'barang');
             }
+            $barang = \Illuminate\Support\Facades\DB::transaction(function () use ($data) {
+                $barang = Barang::create($data);
+                $serviceAlat = \App\Models\Service::where('slug', 'penyewaan-alat')->first();
+                if ($serviceAlat) \App\Models\RegionService::updateOrInsert(
+                    ['region_id'=>$barang->region_id,'service_id'=>$serviceAlat->id], ['is_active'=>true,'updated_at'=>now()]
+                );
+                return $barang;
+            });
+        } catch (\Throwable $e) {
+            foreach ($newPaths as $path) if ($path) Storage::disk('public')->delete($path);
+            throw $e;
         }
 
         // Broadcast produk baru ke warga
@@ -214,7 +219,7 @@ class UnitPenyewaanController extends Controller
      */
     public function show($id)
     {
-        $barang = Barang::findOrFail($id);
+        $barang = $this->scopedBarang()->findOrFail($id);
         return view('admin.unit.penyewaan.show', compact('barang'));
     }
 
@@ -223,7 +228,7 @@ class UnitPenyewaanController extends Controller
      */
     public function edit($id)
     {
-        $barang = Barang::findOrFail($id);
+        $barang = $this->scopedBarang()->findOrFail($id);
         // Lokasi diambil dari daftar milik WILAYAH, bukan lagi SELECT DISTINCT
         // pada tabel produk unit ini. Query lama tidak menyaring region_id sama
         // sekali, sehingga admin satu desa ikut melihat nama lokasi desa lain;
@@ -244,20 +249,16 @@ class UnitPenyewaanController extends Controller
      */
     public function destroy($id)
     {
-        $barang = Barang::findOrFail($id);
+        $barang = $this->scopedBarang()->findOrFail($id);
 
-        // Hapus file gambar
-        if ($barang->foto) {
-            Storage::disk('public')->delete($barang->foto);
-        }
-        if ($barang->foto_2) {
-            Storage::disk('public')->delete($barang->foto_2);
-        }
-        if ($barang->foto_3) {
-            Storage::disk('public')->delete($barang->foto_3);
-        }
-
-        $barang->delete();
+        \Illuminate\Support\Facades\DB::transaction(function () use ($id) {
+            $barang = $this->scopedBarang()->lockForUpdate()->findOrFail($id);
+            abort_if($barang->rentalBookings()->withTrashed()->exists(), 409, 'Alat memiliki riwayat sewa. Ubah status menjadi Tidak Tersedia agar bukti transaksi tetap terjaga.');
+            $barang->delete();
+            \Illuminate\Support\Facades\DB::afterCommit(function () use ($barang) {
+                foreach ([$barang->foto,$barang->foto_2,$barang->foto_3] as $path) if ($path) Storage::disk('public')->delete($path);
+            });
+        });
 
         return redirect()->route('admin.unit.penyewaan.index')->with('success', 'Barang berhasil dihapus.');
     }
@@ -267,31 +268,33 @@ class UnitPenyewaanController extends Controller
      */
     public function update(Request $request, $id)
     {
+        $this->scopedBarang();
         // Validasi input — SAMA seperti store()
         $validated = $request->validate([
             'nama_barang' => 'required|string|max:255',
             'deskripsi' => 'required|string',
-            'harga_sewa' => 'required|string', // Terima sebagai string (untuk format Rupiah)
-            'stok' => 'required|integer',
+            'harga_sewa' => ['required','string','regex:/^(?:[0-9]+|[0-9]{1,3}(?:\.[0-9]{3})+)$/'], // Terima sebagai string (untuk format Rupiah)
+            'stok' => 'required|integer|min:0|max:1000000',
+            'original_stock'=>'required|integer|min:0',
             'status' => 'required|in:tersedia,disewa,rusak',
-            'kategori' => 'required|string',
-            'lokasi' => 'required|string',
-            'latitude' => 'nullable|numeric',
-            'longitude' => 'nullable|numeric',
-            'satuan' => 'required|string',
-            'foto_utama' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'foto_2' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'foto_3' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'kategori' => 'required|string|max:255',
+            'lokasi' => 'required|string|max:255',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
+            'satuan' => 'required|string|max:255',
+            'foto_utama' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:8192',
+            'foto_2' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:8192',
+            'foto_3' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:8192',
         ]);
 
         // Bersihkan harga (sama seperti store)
         $hargaBersih = (int) preg_replace('/[^0-9]/', '', $request->harga_sewa);
-        if ($hargaBersih <= 0) {
-            return back()->withErrors(['harga_sewa' => 'Harga sewa harus angka valid dan lebih dari 0.'])->withInput();
+        if ($hargaBersih <= 0 || $hargaBersih > 99999999) {
+            return back()->withErrors(['harga_sewa' => 'Harga sewa harus antara Rp 1 dan Rp 99.999.999.'])->withInput();
         }
 
         // Cari barang
-        $barang = Barang::findOrFail($id);
+        $barang = $this->scopedBarang()->findOrFail($id);
 
         // Siapkan data update
         $data = [
@@ -308,34 +311,23 @@ class UnitPenyewaanController extends Controller
             'region_id' => $barang->region_id ?? (auth()->user()->region_id ?? null),
         ];
 
-        // Update gambar utama
-        if ($request->hasFile('foto_utama')) {
-            if ($barang->foto && Storage::disk('public')->exists($barang->foto)) {
-                Storage::disk('public')->delete($barang->foto);
+        $newPaths = []; $oldPaths = [];
+        try {
+            foreach (['foto'=>'foto_utama','foto_2'=>'foto_2','foto_3'=>'foto_3'] as $field=>$input) {
+                if ($request->hasFile($input)) $newPaths[] = $data[$field] = ImageCompressorService::compressAndStore($request->file($input), 'barang');
+                elseif ($request->input('delete_'.$field) == '1') $data[$field] = null;
             }
-            $data['foto'] = ImageCompressorService::compressAndStore($request->file('foto_utama'), 'barang');
+            \Illuminate\Support\Facades\DB::transaction(function () use ($id, $data, $request, &$oldPaths) {
+                $barang = $this->scopedBarang()->lockForUpdate()->findOrFail($id);
+                if ((int)$barang->stok !== $request->integer('original_stock')) throw \Illuminate\Validation\ValidationException::withMessages(['stok'=>'Stok telah berubah. Muat ulang halaman sebelum menyimpan.']);
+                foreach (['foto','foto_2','foto_3'] as $field) if (array_key_exists($field,$data) && $barang->$field) $oldPaths[] = $barang->$field;
+                $barang->update($data);
+            });
+        } catch (\Throwable $e) {
+            foreach ($newPaths as $path) if ($path) Storage::disk('public')->delete($path);
+            throw $e;
         }
-
-        // Update foto_2
-        if ($request->input('delete_foto_2') == '1') {
-            if ($barang->foto_2 && Storage::disk('public')->exists($barang->foto_2)) Storage::disk('public')->delete($barang->foto_2);
-            $data['foto_2'] = null;
-        } elseif ($request->hasFile('foto_2')) {
-            if ($barang->foto_2 && Storage::disk('public')->exists($barang->foto_2)) Storage::disk('public')->delete($barang->foto_2);
-            $data['foto_2'] = ImageCompressorService::compressAndStore($request->file('foto_2'), 'barang');
-        }
-
-        // Update foto_3
-        if ($request->input('delete_foto_3') == '1') {
-            if ($barang->foto_3 && Storage::disk('public')->exists($barang->foto_3)) Storage::disk('public')->delete($barang->foto_3);
-            $data['foto_3'] = null;
-        } elseif ($request->hasFile('foto_3')) {
-            if ($barang->foto_3 && Storage::disk('public')->exists($barang->foto_3)) Storage::disk('public')->delete($barang->foto_3);
-            $data['foto_3'] = ImageCompressorService::compressAndStore($request->file('foto_3'), 'barang');
-        }
-
-        // Simpan perubahan
-        $barang->update($data);
+        foreach ($oldPaths as $path) Storage::disk('public')->delete($path);
 
         return redirect()->route('admin.unit.penyewaan.index')
                          ->with('success', 'Barang berhasil diperbarui.');

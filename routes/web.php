@@ -172,6 +172,8 @@ Route::get('/unit-penyewaan-alat/{id}', [App\Http\Controllers\User\RentalUserCon
 Route::get('/unit-penyewaan-alat/{id}/booking', [App\Http\Controllers\User\RentalBookingController::class, 'create'])
     ->name('rental.booking')
     ->middleware('auth');
+Route::get('/rental/payment/{id}', [App\Http\Controllers\User\RentalBookingController::class, 'payment'])->middleware('auth')->name('rental.payment');
+Route::post('/rental/payment/{id}/proof', [App\Http\Controllers\User\RentalBookingController::class, 'uploadPayment'])->middleware('auth')->name('rental.payment.proof');
 Route::post('/rental/booking', [App\Http\Controllers\User\RentalBookingController::class, 'store'])
     ->name('rental.booking.store')
     ->middleware('auth');

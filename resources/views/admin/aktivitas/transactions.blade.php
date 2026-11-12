@@ -328,7 +328,8 @@
                                         <td class="text-end pe-4">
                                             <div class="d-flex justify-content-end gap-2">
                                                 {{-- Action Buttons --}}
-                                                {{-- Action Buttons Removed --}}
+                                                <a class="btn btn-sm btn-primary" href="{{ route('admin.aktivitas.permintaan-pengajuan.show', [$payment->id, 'rental']) }}">Periksa Pembayaran dan Sewa</a>
+                                                <span class="small">{{ $payment->paymentReceived() ? 'Uang diterima' : 'Uang belum dikonfirmasi' }}</span>
 
 
                                                 @if($payment->payment_proof)

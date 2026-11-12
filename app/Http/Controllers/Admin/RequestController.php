@@ -338,6 +338,7 @@ class RequestController extends Controller
 
     public function approve(Request $request, $id, $type)
     {
+        if ($type === 'rental') return app(\App\Services\RentalOrderActions::class)->admin($request, (int) $id, 'confirmed');
         if ($type === 'gas') return app(\App\Services\GasOrderActions::class)->admin($request, (int) $id, 'confirmed');
 
         $this->pastikanBolehMenangani($type, $id);
@@ -516,6 +517,7 @@ class RequestController extends Controller
 
     public function reject(Request $request, $id, $type)
     {
+        if ($type === 'rental') return app(\App\Services\RentalOrderActions::class)->admin($request, (int) $id, 'reject');
         if ($type === 'gas') return app(\App\Services\GasOrderActions::class)->admin($request, (int) $id, 'reject');
 
         $this->pastikanBolehMenangani($type, $id);
@@ -619,6 +621,10 @@ class RequestController extends Controller
 
     public function updateStatus(Request $request, $type, $id)
     {
+        if ($type === 'rental') {
+            $request->validate(['status'=>'required|string']);
+            return app(\App\Services\RentalOrderActions::class)->admin($request, (int) $id, $request->input('status'));
+        }
         if ($type === 'gas') return app(\App\Services\GasOrderActions::class)->admin($request, (int) $id, (string) $request->status);
 
         $this->pastikanBolehMenangani($type, $id);
@@ -846,7 +852,7 @@ class RequestController extends Controller
                 return response()->json(['success' => false, 'message' => 'Pesanan belum aktif atau sudah selesai.'], 409);
             }
 
-            if ($type === 'gas') {
+            if (in_array($type, ['gas', 'rental'], true)) {
                 abort_unless(in_array($order->status, ['in_delivery', 'arrived'], true) && $order->delivery_method === 'antar' && $order->cancellation_status !== 'pending', 409, 'Pesanan harus dalam pengiriman dan tidak sedang dibatalkan.');
             }
 
@@ -1021,63 +1027,6 @@ class RequestController extends Controller
     }
     public function returnRental(Request $request, $id)
     {
-        $this->pastikanBolehMenangani('rental', $id);
-        $request->validate([
-            'return_time' => 'required|date',
-        ]);
-
-        $notificationService = new NotificationService();
-        try {
-            DB::beginTransaction();
-            $order = RentalBooking::with('barang')->lockForUpdate()->findOrFail($id);
-            if (!in_array($order->status, ['confirmed', 'in_progress', 'being_prepared', 'in_delivery', 'arrived', 'delivered', 'picked_up'], true)) {
-                DB::rollBack();
-                return response()->json(['success' => false, 'message' => 'Pesanan belum aktif atau sudah selesai.'], 409);
-            }
-
-            // Perbarui waktu
-            $order->return_time = $request->return_time;
-            $order->completion_time = $request->return_time;
-            $order->status = 'completed';
-            $order->save();
-
-            // PENGEMBALIAN STOK 
-            $barang = $order->barang;
-            $quantity = $order->quantity;
-
-            // Tambah stok kembali
-            $barang->increment('stok', $quantity);
-
-            // Notifikasi
-            $notificationService->notifyRentalCompleted($order);
-
-            // Periksa stok rendah
-            if ($barang->stok < 5 && $barang->stok > 0) {
-                $notificationService->notifyLowStock($barang, 'barang', $barang->stok);
-            }
-
-            // Log Activity
-            \App\Models\ActivityLog::create([
-                'user_id' => auth()->id(),
-                'action' => 'Return Rental',
-                'description' => "Memproses pengembalian alat pesanan #{$order->order_number}",
-                'ip_address' => $request->ip()
-            ]);
-
-            DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Alat berhasil dikembalikan dan stok diperbarui',
-                'return_time' => $request->return_time
-            ]);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json([
-                'success' => false,
-                'message' => 'Pengembalian gagal diproses. Silakan coba kembali.'
-            ], 500);
-        }
+        return app(\App\Services\RentalOrderActions::class)->admin($request, (int) $id, 'returned');
     }
 }

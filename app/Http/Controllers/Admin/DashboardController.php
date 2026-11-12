@@ -521,7 +521,9 @@ public function index(Request $request)
         }
         
         // Cari di Produk Penyewaan (Barang)
-        $rentalProducts = Barang::searchWhereLike(['nama_barang', 'kategori'], $search)
+        $rentalProducts = Barang::where('region_id', $request->user()->region_id)
+            ->when(!$request->user()->hasUnitPermission('sewa_alat'), fn ($q) => $q->whereRaw('1 = 0'))
+            ->searchWhereLike(['nama_barang', 'kategori'], $search)
             ->get()
             ->map(function($item) {
                 return [

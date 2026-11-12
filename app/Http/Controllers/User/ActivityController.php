@@ -86,6 +86,7 @@ class ActivityController extends Controller
 
     public function requestCancellation(Request $request, $type, $id)
     {
+        if ($type === 'rental') return app(\App\Services\RentalOrderActions::class)->requestCancellation($request, (int) $id);
         if ($type === 'gas') return app(\App\Services\GasOrderActions::class)->requestCancellation($request, (int) $id);
         $request->validate([
             'reason' => 'required|string|max:500',

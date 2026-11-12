@@ -9,6 +9,8 @@ use App\Models\SystemSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
+use App\Models\AdminNotification;
 
 class RentalBookingController extends Controller
 {
@@ -18,25 +20,20 @@ class RentalBookingController extends Controller
     public function create($itemId)
     {
         // Ambil item penyewaan
-        $item = Barang::findOrFail($itemId);
+        $item = app(\App\Services\RentalOrdering::class)->visibleQuery(Auth::user())->findOrFail($itemId);
 
         // Validasi KYC: Pengguna harus sudah terverifikasi
         if (Auth::user()->verification_status !== 'verified') {
             return redirect()->back()->with('show_kyc_modal', true);
         }
 
-        // Validasi: Warga hanya bisa memesan layanan di wilayahnya sendiri
-        if ($item->region_id && Auth::user()->region_id && ! in_array($item->region_id, \App\Models\Region::wilayahLayananTerlihat(Auth::user()->region_id, 'Penyewaan Alat'))) {
-            return redirect()->back()->with('error', 'Layanan khusus warga lokal. Silakan sesuaikan wilayah Anda.');
-        }
-        
         // Rekening yang ditampilkan harus milik wilayah barangnya, bukan rekening
         // pusat. Sejak pemasukan dipegang tiap daerah, SystemSetting::first()
         // akan menampilkan rekening yang salah ke warga.
         $setting = \App\Support\ProfilPembayaranWilayah::untuk($item->region_id);
         
         // Ambil SOP Penyewaan Alat
-        $region = \App\Models\Region::find(Auth::user()->region_id);
+        $region = $item->region;
         $paymentInfo = $region ? ($region->payment_info ?? []) : [];
         
         $activeSop = $paymentInfo['sop_penyewaan_active'] ?? 'ditanggung';
@@ -47,7 +44,8 @@ class RentalBookingController extends Controller
         $sop_penyewaan_alat = $paymentInfo['sop_penyewaan_' . $activeSop] ?? ($activeSop == 'ditanggung' ? $defaultSopDitanggung : $defaultSopTidakDitanggung);
         
         // Ambil jumlah dari permintaan (dari halaman detail)
-        $quantity = request()->get('quantity', 1);
+        request()->validate(['quantity'=>'sometimes|integer|min:1|max:50']);
+        $quantity = request()->integer('quantity', 1);
         
 
         // Buku alamat warga, supaya alamat pengiriman tidak perlu diketik ulang
@@ -68,122 +66,58 @@ class RentalBookingController extends Controller
      */
     public function store(Request $request)
     {
-        // Validasi permintaan
-        $validated = $request->validate([
-            'barang_id' => 'required|exists:barang,id',
-            'delivery_method' => 'required|in:antar,jemput',
-            'quantity' => 'required|integer|min:1|max:50',
-            'start_date' => 'required|date|after_or_equal:today',
-            'end_date' => 'required|date|after_or_equal:start_date',
-            // 'transfer' = transfer manual ke rekening wilayah, dibuktikan lewat
-            // unggahan yang ditinjau petugas. Sebelumnya terkunci 'tunai' saja,
-            // sehingga rekening wilayah tidak pernah bisa dipakai di unit ini.
-            'payment_method' => 'required|in:tunai,transfer,ewallet',
-
-            // Penerima & Alamat (Wajib untuk Antar & Jemput)
-            'recipient_name' => 'required|string|max:255',
-            'delivery_address' => 'required|string',
-            'latitude' => 'nullable|numeric|between:-90,90',
-            'longitude' => 'nullable|numeric|between:-180,180',
-
-            // Bukti wajib kalau warga memilih transfer — tanpa itu petugas tidak
-            // punya dasar untuk memverifikasi pembayarannya.
-            'payment_proof' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
-            
-            // Bidang Tujuan Baru
-            'rental_purpose' => 'required|string|max:1000',
-        ]);
-
-        // Hitung jumlah hari
-        $startDate = \Carbon\Carbon::parse($validated['start_date']);
-        $endDate = \Carbon\Carbon::parse($validated['end_date']);
-        $daysCount = $startDate->diffInDays($endDate) + 1;
-
-        // Server-side price recalculation to prevent parameter tampering
-        $item = Barang::findOrFail($validated['barang_id']);
-
-        // Validate stock before proceeding
-        if (!$item->hasStock($validated['quantity'])) {
-            return response()->json([
-                'success' => false,
-                'message' => "Mohon maaf, stok tidak mencukupi. Sisa stok: {$item->stok}"
-            ], 400);
-        }
-
-        $totalAmount = $item->harga_sewa * $validated['quantity'] * $daysCount;
-
-        // Tangani unggahan bukti pembayaran
-        $paymentProofPath = null;
-        if ($request->hasFile('payment_proof')) {
-            $paymentProofPath = $request->file('payment_proof')->store('payment_proofs', 'public');
-        }
-
-        // Buat pemesanan
-        $booking = RentalBooking::create([
-            'user_id' => Auth::id(),
-            'order_number' => RentalBooking::generateOrderNumber(),
-            'barang_id' => $validated['barang_id'],
-            'delivery_method' => $validated['delivery_method'],
-            'rental_purpose' => $validated['rental_purpose'],
-            'quantity' => $validated['quantity'],
-            'start_date' => $validated['start_date'],
-            'end_date' => $validated['end_date'],
-            'days_count' => $daysCount,
-            'recipient_name' => $validated['recipient_name'] ?? null,
-            'delivery_address' => $validated['delivery_address'] ?? null,
-            'latitude' => $validated['latitude'] ?? null,
-            'longitude' => $validated['longitude'] ?? null,
-            'payment_method' => $validated['payment_method'],
-            'payment_proof' => $paymentProofPath,
-            'total_amount' => $totalAmount,
-            'status' => 'pending',
-            'region_id' => $item->region_id ?? Auth::user()->region_id,
-        ]);
-
-        // Catat pergerakan dana ke ledger wilayah
-        $lewatGatewayCheck = ! in_array($validated['payment_method'], ['tunai', 'transfer', 'ewallet'], true);
-        \App\Models\WalletTransaction::catatPemasukan(
-            regionId: $item->region_id,
-            referenceType: 'rental',
-            referenceId: $booking->id,
-            amount: $totalAmount,
-            paymentMethod: $validated['payment_method'],
-            proofPath: $paymentProofPath,
-        );
-
-        // Buat bukti transaksi
-        $receipt = \App\Models\TransactionReceipt::create([
-            'booking_type' => 'rental',
-            'booking_id' => $booking->id,
-            'receipt_number' => \App\Models\TransactionReceipt::generateReceiptNumber('rental'),
-            'user_id' => Auth::id(),
-            'item_name' => $item->nama_barang,
-            'quantity' => $validated['quantity'],
-            'total_amount' => $totalAmount,
-            'payment_method' => $validated['payment_method'],
-        ]);
-
-        // Buat notifikasi admin
-        \App\Models\AdminNotification::create([
-            'type' => 'rental_request',
-            'reference_id' => $booking->id,
-            'region_id' => $item->region_id,
-            'title' => 'Permintaan Penyewaan Baru',
-            'message' => 'Permintaan penyewaan ' . $item->nama_barang . ' dari ' . Auth::user()->name,
-            'is_read' => false,
-        ]);
-
-        // Notifikasi ke penyewa
-        \App\Services\NotificationService::notifyOrderCreated('rental', $booking, $item->nama_barang);
-
-        $response = [
-            'success' => true,
-            'message' => 'Pemesanan berhasil dibuat!',
-            'booking_id' => $booking->id,
-            'receipt_id' => $booking->id, // Gunakan ID pesanan untuk rute bukti transaksi
-            'receipt_number' => $receipt->receipt_number,
-        ];
-
-        return response()->json($response);
+        $booking = app(\App\Services\RentalOrdering::class)->store($request)[0];
+        return response()->json(['success'=>true, 'booking_id'=>$booking->id, 'receipt_id'=>$booking->id,
+            'receipt_number'=>$booking->order_number, 'payment_url'=>route('rental.payment', $booking->id)]);
     }
+
+    public function payment($id)
+    {
+        $order = RentalBooking::where('user_id', auth()->id())->findOrFail($id);
+        $setting = \App\Support\ProfilPembayaranWilayah::untuk($order->region_id ?? $order->barang?->region_id);
+        $paid = $order->paymentReceived();
+        return view('users.rental-payment', compact('order', 'setting', 'paid'));
+    }
+    public function uploadPayment(Request $request, int $id)
+    {
+        abort_unless($request->user(), 401);
+        // Check ownership before validating or storing an uploaded file.
+        RentalBooking::where('user_id', $request->user()->id)->findOrFail($id);
+        $request->validate(['payment_proof' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120']);
+        $storedPath = null;
+
+        try {
+            DB::transaction(function () use ($request, $id, &$storedPath) {
+                $order = RentalBooking::where('user_id', $request->user()->id)->lockForUpdate()->findOrFail($id);
+                abort_unless($order->status === 'pending' && $order->cancellation_status !== 'pending', 409,
+                    'Bukti hanya dapat dikirim untuk pesanan yang masih menunggu pembayaran.');
+                abort_unless(in_array(strtolower(trim($order->payment_method)), ['transfer', 'transfer_manual', 'transfer manual', 'bank_transfer', 'ewallet'], true), 422,
+                    'Pesanan ini tidak menggunakan pembayaran transfer atau e-wallet manual.');
+                abort_if($order->payment_proof, 409, 'Bukti sudah dikirim dan sedang menunggu pemeriksaan petugas.');
+                $ledger = \App\Models\WalletTransaction::where('reference_type', 'rental')
+                    ->where('reference_id', $order->id)->lockForUpdate()->get();
+                abort_if($ledger->isEmpty() || $ledger->contains(fn ($entry) => $entry->status !== 'pending'), 409,
+                    'Pembayaran sudah diproses petugas. Bukti tidak dapat diganti.');
+
+                $storedPath = $request->file('payment_proof')->store('payment_proofs/rental', 'public');
+                abort_unless($storedPath, 503, 'Bukti pembayaran belum berhasil disimpan.');
+                $order->update(['payment_proof' => $storedPath]);
+                // Uploading evidence never verifies payment or changes the amount/status.
+                \App\Models\WalletTransaction::whereKey($ledger->modelKeys())->update(['proof_path' => $storedPath]);
+                AdminNotification::create([
+                    'type' => 'rental_request', 'reference_id' => $order->id, 'region_id' => $order->barang?->region_id,
+                    'title' => 'Bukti Pembayaran Sewa Alat Dikirim',
+                    'message' => 'Bukti pembayaran pesanan '.$order->order_number.' perlu diperiksa.', 'is_read' => false,
+                ]);
+            });
+        } catch (\Throwable $e) {
+            if ($storedPath) Storage::disk('public')->delete($storedPath);
+            throw $e;
+        }
+
+        if (!$request->expectsJson() && !$request->is('api/*')) return back()->with('success', 'Bukti pembayaran dikirim. Petugas akan memeriksanya.');
+        return response()->json(['success' => true, 'message' => 'Bukti pembayaran dikirim. Petugas akan memeriksanya.', 'order_id' => $id])
+            ->header('Cache-Control', 'private, no-store');
+    }
+
 }

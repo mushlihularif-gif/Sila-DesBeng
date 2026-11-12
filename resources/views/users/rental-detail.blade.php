@@ -236,7 +236,7 @@
         const decreaseBtn = document.getElementById('decrease-qty');
         const increaseBtn = document.getElementById('increase-qty');
         const rentButton = document.getElementById('rent-button');
-        const maxStock = {{ $item->stok ?? 0 }};
+        const maxStock = Math.min(50, {{ $item->stok ?? 0 }});
         const itemId = {{ $item->id }};
 
         function updateRentButtonUrl() {

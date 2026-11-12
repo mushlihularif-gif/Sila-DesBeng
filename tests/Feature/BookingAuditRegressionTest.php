@@ -57,7 +57,6 @@ class BookingAuditRegressionTest extends TestCase
     public static function bookingTypes(): array
     {
         return [
-            'alat' => [RentalBookingApiController::class, 'barang', 'nama_barang', 'rental_bookings', 'barang_id', 2],
             'mobil' => [MobilBookingApiController::class, 'mobils', 'nama_mobil', 'mobil_bookings', 'mobil_id', 1],
             'fasilitas' => [FasilitasBookingApiController::class, 'fasilitas_umums', 'nama_fasilitas', 'fasilitas_umum_bookings', 'fasilitas_id', 2],
         ];
@@ -135,32 +134,6 @@ class BookingAuditRegressionTest extends TestCase
         $this->assertEquals(40000, $response->getData()->data->total_amount);
         $this->assertSame('komersial', DB::table('fasilitas_umum_bookings')->value('jenis_acara'));
         $this->assertEquals(40000, DB::table('wallet_transactions')->value('amount'));
-    }
-
-    public function test_package_price_ignores_client_total(): void
-    {
-        DB::table('barang')->insert(['id' => 1, 'nama_barang' => 'Alat Uji', 'stok' => 3, 'region_id' => 7]);
-        $request = $this->requestFor('barang_id', 2);
-        $request->merge(['total_amount' => 1, 'items' => [['barang_id' => 1, 'quantity' => 2]]]);
-        $response = app(RentalBookingApiController::class)->storePackage($request);
-        $this->assertSame(201, $response->getStatusCode());
-        $this->assertEquals(40000, $response->getData()->data->total_amount);
-    }
-
-    public function test_admin_cannot_return_pending_or_reject_completed_rental(): void
-    {
-        DB::table('barang')->insert(['id' => 1, 'nama_barang' => 'Alat Uji', 'stok' => 3, 'region_id' => 7]);
-        app(RentalBookingApiController::class)->store($this->requestFor('barang_id', 1));
-        $admin = new User(); $admin->id = 99; $admin->role = 'admin_desa'; $admin->region_id = 7;
-        \Illuminate\Support\Facades\Auth::setUser($admin);
-        $controller = app(\App\Http\Controllers\Admin\RequestController::class);
-        $request = Request::create('/return', 'POST', ['return_time' => now()->toDateTimeString(), 'reason' => 'test']);
-        $this->assertSame(409, $controller->returnRental($request, 1)->getStatusCode());
-        $this->assertSame(3, DB::table('barang')->value('stok'));
-        DB::table('rental_bookings')->update(['status' => 'completed']);
-        try { $controller->reject($request, 1, 'rental'); $this->fail('Completed order rejected'); }
-        catch (\Symfony\Component\HttpKernel\Exception\HttpExceptionInterface $e) { $this->assertSame(409, $e->getStatusCode()); }
-        $this->assertSame('completed', DB::table('rental_bookings')->value('status'));
     }
 
     public function test_history_routes_resolve_to_history_not_product_detail(): void

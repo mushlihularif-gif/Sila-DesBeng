@@ -116,6 +116,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Sewa Alat (Tenda, Kursi, Sound System, dll)
     Route::get('/rental/items', [\App\Http\Controllers\Api\RentalBookingApiController::class, 'index']);
     Route::get('/rental/items/{id}', [\App\Http\Controllers\Api\RentalBookingApiController::class, 'show']);
+    Route::post('/rental/payment/{id}/proof', [\App\Http\Controllers\User\RentalBookingController::class, 'uploadPayment']);
     Route::post('/rental/booking', [\App\Http\Controllers\Api\RentalBookingApiController::class, 'store']);
     Route::post('/rental/booking-package', [\App\Http\Controllers\Api\RentalBookingApiController::class, 'storePackage']);
     Route::get('/rental/my-bookings', [\App\Http\Controllers\Api\RentalBookingApiController::class, 'myBookings']);

@@ -1,5 +1,6 @@
 @forelse($rentalBookings as $booking)
                 <div class="transaction-card bg-white rounded-2xl shadow-lg overflow-hidden" data-status="{{ $booking->status }}">
+                    <div class="px-6 pt-4"><a class="font-bold text-blue-600 underline" href="{{ route('rental.payment', $booking->id) }}">Rincian Sewa dan Pembayaran</a></div>
                     <!-- Konten Kartu Utama -->
                     <div class="p-4 sm:p-6">
                         <div class="flex flex-col sm:flex-row gap-4 sm:gap-6">

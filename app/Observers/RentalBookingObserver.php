@@ -6,7 +6,7 @@ use App\Models\RentalBooking;
 use App\Services\ReceiptGeneratorService;
 use Illuminate\Support\Facades\Log;
 
-class RentalBookingObserver
+class RentalBookingObserver implements \Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit
 {
     protected $receiptGenerator;
 
@@ -29,7 +29,7 @@ class RentalBookingObserver
     public function updated(RentalBooking $booking): void
     {
         // Regenerate receipt when important fields change
-        if ($booking->isDirty(['status', 'confirmed_at', 'delivery_time', 'completion_time', 'return_time'])) {
+        if ($booking->wasChanged(['status', 'confirmed_at', 'delivery_time', 'completion_time', 'return_time'])) {
             $this->generateReceipt($booking);
         }
     }

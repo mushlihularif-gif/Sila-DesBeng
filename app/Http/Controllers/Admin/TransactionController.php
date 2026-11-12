@@ -100,7 +100,7 @@ class TransactionController extends Controller
         // Include transactions with proof OR system generated (active/completed statuses)
         $activeStatuses = ['confirmed', 'approved', 'being_prepared', 'in_delivery', 'arrived', 'completed', 'returned'];
         
-        $rentalQuery = $this->applyRegionFilter(RentalBooking::withTrashed(), 'barang', true)->with(['user', 'barang'])->where(function($q) use ($activeStatuses) {
+        $rentalQuery = $this->applyRegionFilter(RentalBooking::withTrashed(), 'barang', true)->with(['user', 'barang', 'walletEntries'])->where(function($q) use ($activeStatuses) {
             $q->whereNotNull('payment_proof')
               ->orWhereIn('status', $activeStatuses);
         });
@@ -257,6 +257,7 @@ class TransactionController extends Controller
 
     public function verify(Request $request, $id, $type)
     {
+        if ($type === 'rental') return app(\App\Services\RentalOrderActions::class)->admin($request, (int) $id, 'verify');
         if ($type === 'gas') return app(\App\Services\GasOrderActions::class)->admin($request, (int) $id, 'verify');
 
         $this->pastikanBolehMenangani($type, $id);
@@ -324,6 +325,7 @@ class TransactionController extends Controller
 
     public function reject(Request $request, $id, $type)
     {
+        if ($type === 'rental') return app(\App\Services\RentalOrderActions::class)->admin($request, (int) $id, 'reject-payment');
         if ($type === 'gas') return app(\App\Services\GasOrderActions::class)->admin($request, (int) $id, 'reject-payment');
 
         $this->pastikanBolehMenangani($type, $id);
@@ -379,6 +381,7 @@ class TransactionController extends Controller
 
     public function updateStatus(Request $request, $id, $type, $status)
     {
+        if ($type === 'rental') return app(\App\Services\RentalOrderActions::class)->admin($request, (int) $id, $status);
         if ($type === 'gas') return app(\App\Services\GasOrderActions::class)->admin($request, (int) $id, $status);
 
         $this->pastikanBolehMenangani($type, $id);
