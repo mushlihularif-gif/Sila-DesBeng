@@ -7,71 +7,11 @@
 
     <section class="relative z-10 min-h-screen pt-40 pb-16">
         <div class="max-w-7xl mx-auto px-6 relative z-10">
-            {{-- Header Section --}}
-            <div class="text-center mb-16 animate-section">
-                <h1 class="text-4xl md:text-5xl font-bold mb-4">
-                    <span class="bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">Pilih Layanan </span>
-                    <span class="bg-gradient-to-r from-[#115789] to-[#60a5fa] bg-clip-text text-transparent">Desa di {{ $kecamatan->name }}</span>
-                </h1>
-                <p class="text-gray-700 text-lg mt-2">
-                    Ayo Pilih Daerah mu, Dukung dan Gunakan Unit Layanannya!
-                </p>
+            <div class="text-center mb-12">
+                <h1 class="text-3xl md:text-4xl font-bold text-[#115789]">Layanan di {{ $kecamatan->name }}</h1>
+                <p class="text-gray-600 mt-3">Pilih jenis layanan yang Anda butuhkan. Katalog menampilkan layanan yang tersedia.</p>
+                <a href="{{ route('kemitraan.create') }}#direktori-wilayah" class="inline-flex mt-4 text-[#115789] font-semibold underline">Lihat desa yang sudah dan belum bergabung</a>
             </div>
-
-            {{-- Search Bar (dari beranda) --}}
-            <div class="max-w-2xl mx-auto mb-8 sm:mb-10 animate-section">
-                <div class="relative group">
-                    <div class="absolute -inset-0.5 bg-gradient-to-r from-blue-500 via-blue-400 to-amber-400 rounded-full opacity-80 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    <div class="relative flex items-center bg-white rounded-full overflow-hidden">
-                        <input type="text" id="searchInput" placeholder="Cari"
-                            class="flex-1 px-4 sm:px-8 py-2.5 sm:py-3.5 text-gray-700 text-sm sm:text-[15px] focus:outline-none bg-transparent text-center placeholder:text-center">
-                        <div class="flex-shrink-0 px-4 sm:px-6 py-2.5 sm:py-3.5 text-blue-600">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {{-- Desa Cards --}}
-            <div class="max-w-3xl mx-auto mb-8 animate-section" id="card-container">
-                @foreach($desas as $index => $desa)
-                <div class="desa-card mb-3 sm:mb-4 {{ $index >= 3 ? 'extra-card is-collapsed' : '' }}"
-                     data-name="{{ strtolower($desa->name) }}">
-                    <div class="backdrop-blur-sm bg-white/70 rounded-xl sm:rounded-2xl p-3.5 sm:p-6 border border-white/80 shadow-md sm:shadow-lg hover:shadow-xl transition-all duration-300">
-                        <div class="flex items-center justify-between">
-                            <h3 class="text-base sm:text-xl font-bold text-gray-800">{{ $desa->name }}</h3>
-                            <a href="{{ request()->has('redirect') && Route::has(request('redirect')) ? route(request('redirect')) . '?region_id=' . $desa->id : route('bumdes.detail', ['slug' => \Illuminate\Support\Str::slug($desa->name)]) . '?id=' . $desa->id }}"
-                               class="px-5 sm:px-8 py-1.5 sm:py-2.5 bg-white text-[#0099ff] font-semibold text-xs sm:text-base rounded-full border-2 border-gray-300 hover:bg-gray-50 hover:shadow-lg transition-all duration-300">
-                                Pilih
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                @endforeach
-
-                {{-- Empty state --}}
-                <div id="empty-state" class="hidden text-center py-10">
-                    <p class="text-gray-500 font-medium text-lg">Tidak tersedia atau desa belum bergabung dengan SegiDaerah.</p>
-                </div>
-            </div>
-
-            {{-- Tampilkan / Sembunyikan --}}
-            @if($desas->count() > 3)
-            <div class="text-center mb-16 animate-section">
-                <button id="toggleBtn" translate="no" class="inline-flex items-center gap-1.5 text-gray-600 font-semibold hover:text-blue-600 text-sm transition-colors">
-                    <span id="toggleText">Tampilkan</span>
-                    <svg id="toggleArrowDown" class="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                    </svg>
-                    <svg id="toggleArrowUp" class="w-4 h-4 text-blue-500 hidden" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd"></path>
-                    </svg>
-                </button>
-            </div>
-            @endif
 
             <!-- Unit Pelayanan Section -->
             @include('users.partials.unit-carousel')

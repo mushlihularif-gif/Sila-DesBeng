@@ -24,41 +24,36 @@ class DashboardController extends Controller
  */
 public function index(Request $request)
 {
-    // Super Admin Sistem (Diskominfotik) tidak mengelola operasional/keuangan
-    // per wilayah - dashboard "kinerja kabupaten" di bawah bukan untuk mereka.
-    // Mereka mendapat berandanya sendiri: rangkuman lintas modul tingkat platform.
-    // (Sebelumnya dialihkan ke Monitoring, sehingga tombol Dashboard di sidebar
-    // terasa rusak dan halaman dashboard tidak pernah bisa dibuka super admin.)
-    // Berlaku juga untuk akun staf platform (akun pendamping yang dibuat Super
-    // Admin lewat Kelola Staf): beranda mereka adalah dashboard Sistem Platform,
-    // bukan dashboard kinerja kabupaten.
+    // Super Admin memakai dashboard platform; staf memakai dashboard layanan yang ditugaskan.
+    if (auth()->user()->isStaff()) return view('admin.staff.dashboard');
     if (auth()->user()->bolehAksesPlatform()) {
         return app(SuperAdminDashboardController::class)->index();
     }
 
+    abort_unless(auth()->user()->role === 'admin_desa' && auth()->user()->region_id, 403);
     // Ambil pemesanan penyewaan yang tertunda atau minta batal
     $selectedYear = $request->input('year', now()->year);
     
     // Ambil daftar tahun yang tersedia dari database
-    $rentalYears = RentalBooking::withTrashed()
+    $rentalYears = $this->applyRegionFilter(RentalBooking::withTrashed(), 'barang', true)
         ->selectRaw('YEAR(created_at) as year')
         ->distinct()
         ->pluck('year')
         ->toArray();
         
-    $gasYears = GasOrder::withTrashed()
+    $gasYears = $this->applyRegionFilter(GasOrder::withTrashed(), 'gas', true)
         ->selectRaw('YEAR(created_at) as year')
         ->distinct()
         ->pluck('year')
         ->toArray();
 
-    $mobilYears = \App\Models\MobilBooking::withTrashed()
+    $mobilYears = $this->applyRegionFilter(\App\Models\MobilBooking::withTrashed(), 'mobil', true)
         ->selectRaw('YEAR(created_at) as year')
         ->distinct()
         ->pluck('year')
         ->toArray();
 
-    $fasilitasYears = \App\Models\FasilitasUmumBooking::withTrashed()
+    $fasilitasYears = $this->applyRegionFilter(\App\Models\FasilitasUmumBooking::withTrashed(), 'fasilitas', true)
         ->selectRaw('YEAR(created_at) as year')
         ->distinct()
         ->pluck('year')
@@ -68,10 +63,10 @@ public function index(Request $request)
     $availableYears = array_unique(array_merge($rentalYears, $gasYears, $mobilYears, $fasilitasYears, [now()->year]));
     rsort($availableYears);
 
-    $baseRental = $this->applyRegionFilter(RentalBooking::withTrashed());
-    $baseGas = $this->applyRegionFilter(GasOrder::withTrashed());
-    $baseMobil = $this->applyRegionFilter(\App\Models\MobilBooking::withTrashed());
-    $baseFasilitas = $this->applyRegionFilter(\App\Models\FasilitasUmumBooking::withTrashed());
+    $baseRental = $this->applyRegionFilter(RentalBooking::withTrashed(), 'barang', true);
+    $baseGas = $this->applyRegionFilter(GasOrder::withTrashed(), 'gas', true);
+    $baseMobil = $this->applyRegionFilter(\App\Models\MobilBooking::withTrashed(), 'mobil', true);
+    $baseFasilitas = $this->applyRegionFilter(\App\Models\FasilitasUmumBooking::withTrashed(), 'fasilitas', true);
     $baseKyc = $this->applyRegionFilter(\App\Models\KycVerification::query(), 'user');
 
     // Dashboard operasional dibatasi ke desa-desa Kecamatan Bengkalis.
@@ -79,35 +74,7 @@ public function index(Request $request)
         ->where('name', 'Kecamatan Bengkalis')
         ->value('id');
     abort_if(! $selectedKecamatanId, 404, 'Kecamatan Bengkalis belum terdaftar.');
-    $selectedDesaId = request('desa_id');
-
-    $desaFokusIds = \App\Models\Region::where('parent_id', $selectedKecamatanId)
-        ->whereIn('type', ['desa', 'kelurahan'])
-        ->pluck('id')
-        ->map(fn ($id) => (string) $id)
-        ->all();
-    if ($selectedDesaId && $selectedDesaId !== 'all' && ! in_array((string) $selectedDesaId, $desaFokusIds, true)) {
-        $selectedDesaId = 'all';
-    }
-    
-    if ($selectedDesaId && $selectedDesaId !== 'all') {
-        $userFilter = function($q) use ($selectedDesaId) { $q->where('region_id', $selectedDesaId); };
-        $baseRental->whereHas('user', $userFilter);
-        $baseGas->whereHas('user', $userFilter);
-        $baseMobil->whereHas('user', $userFilter);
-        $baseFasilitas->whereHas('user', $userFilter);
-        $baseKyc->whereHas('user', $userFilter);
-    } elseif ($selectedKecamatanId && $selectedKecamatanId !== 'all') {
-        $desaIdsUnderKecamatan = \App\Models\Region::where('parent_id', $selectedKecamatanId)->pluck('id')->toArray();
-        $desaIdsUnderKecamatan[] = $selectedKecamatanId;
-        $userFilter = function($q) use ($desaIdsUnderKecamatan) { $q->whereIn('region_id', $desaIdsUnderKecamatan); };
-        
-        $baseRental->whereHas('user', $userFilter);
-        $baseGas->whereHas('user', $userFilter);
-        $baseMobil->whereHas('user', $userFilter);
-        $baseFasilitas->whereHas('user', $userFilter);
-        $baseKyc->whereHas('user', $userFilter);
-    }
+    $selectedDesaId = auth()->user()->region_id;
 
     $latestRequests = collect();
     $totalPending = 0;
@@ -138,17 +105,6 @@ public function index(Request $request)
             $baseMutasi->where(function($q) use ($mutasiRegionIds) {
                 $q->whereIn('from_region_id', $mutasiRegionIds)
                   ->orWhereIn('to_region_id', $mutasiRegionIds);
-            });
-        }
-        if ($selectedDesaId && $selectedDesaId !== 'all') {
-            $baseMutasi->where(function($q) use ($selectedDesaId) {
-                $q->where('from_region_id', $selectedDesaId)
-                  ->orWhere('to_region_id', $selectedDesaId);
-            });
-        } elseif ($selectedKecamatanId && $selectedKecamatanId !== 'all') {
-            $baseMutasi->where(function($q) use ($desaIdsUnderKecamatan) {
-                $q->whereIn('from_region_id', $desaIdsUnderKecamatan)
-                  ->orWhereIn('to_region_id', $desaIdsUnderKecamatan);
             });
         }
         $mutasiRequests = $baseMutasi->clone()->with('user')->where('status', 'pending')->get()->map(function ($i) {
@@ -267,26 +223,14 @@ public function index(Request $request)
         'Desember' => 0,
     ];
     
-    // Pendapatan dari sistem (RentalBooking)
-    $strictRental = $this->applyRegionFilter(RentalBooking::withTrashed(), 'user', true);
-    foreach ($strictRental->clone()->selectRaw('SUM(total_amount) as total, MONTH(created_at) as month')
-        ->whereYear('created_at', $selectedYear)
-        ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-        ->groupBy('month')
-        ->pluck('total', 'month') as $month => $amount) {
-        $monthlyIncome[self::getMonthName($month)] += $amount;
+    // Hanya pembayaran yang sudah diperiksa; persetujuan pesanan belum berarti lunas.
+    foreach (['rental', 'gas', 'mobil', 'fasilitas'] as $type) {
+        foreach ($this->receivedPayments($type)->whereYear('created_at', $selectedYear)
+            ->selectRaw('SUM(amount) as total, MONTH(created_at) as month')->groupBy('month')->pluck('total', 'month') as $month => $amount) {
+            $monthlyIncome[self::getMonthName($month)] += $amount;
+        }
     }
 
-    // Pendapatan dari pesanan gas
-    $strictGas = $this->applyRegionFilter(GasOrder::withTrashed(), 'user', true);
-    foreach ($strictGas->clone()->selectRaw('SUM(price * quantity) as total, MONTH(created_at) as month')
-        ->whereYear('created_at', $selectedYear)
-        ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-        ->groupBy('month')
-        ->pluck('total', 'month') as $month => $amount) {
-        $monthlyIncome[self::getMonthName($month)] += $amount;
-    }
-    
     // Pendapatan dari laporan manual
     $strictManual = $this->applyRegionFilter(ManualReport::query(), 'creator', true);
     foreach ($strictManual->clone()->selectRaw('SUM(amount * quantity) as total, MONTH(transaction_date) as month')
@@ -314,18 +258,7 @@ public function index(Request $request)
             })->count(),
     ];
 
-    // Filter wilayah untuk User
-    $baseUser = User::query();
-    $currentUser = auth()->user();
-    if ($currentUser && $currentUser->region_id && in_array($currentUser->role, ['admin_rt', 'admin_rw'])) {
-        $allowedRegionIds = \App\Models\Region::getDescendantIds($currentUser->region_id);
-        $allowedRegionIds[] = $currentUser->region_id;
-        $baseUser->whereIn('region_id', $allowedRegionIds);
-    }
-    
-    if ($selectedDesaId && $selectedDesaId !== 'all') {
-        $baseUser->where('region_id', $selectedDesaId);
-    }
+    $baseUser = $this->managedUsers();
 
     // Dropdown hanya memuat desa di Kecamatan Bengkalis.
     $desaList = \App\Models\Region::where('parent_id', $selectedKecamatanId)
@@ -364,12 +297,12 @@ public function index(Request $request)
     $adminUser = auth()->user();
     $adminRegionId = $adminUser ? $adminUser->region_id : null;
 
-    $data['unitPenyewaan'] = Barang::count(); 
-    $data['unitGas'] = Gas::count();
+    $data['unitPenyewaan'] = Barang::where('region_id', $adminRegionId)->count();
+    $data['unitGas'] = Gas::where('region_id', $adminRegionId)->count();
     $data['unitMobil'] = Mobil::inCatalog()->forRental()
         ->when($adminRegionId, fn($q) => $q->where('region_id', $adminRegionId))
         ->count();
-    $data['unitFasilitas'] = FasilitasUmum::inCatalog()->when($adminRegionId, fn($q) => $q->where(fn($sub) => $sub->where('region_id', $adminRegionId)->orWhereNull('region_id')))->count();
+    $data['unitFasilitas'] = FasilitasUmum::inCatalog()->where('region_id', $adminRegionId)->count();
 
     // Ambil data Total Pendapatan untuk grafik baru (Pastikan pass selectedYear)
     // Override request year jika diperlukan agar konsisten
@@ -410,6 +343,23 @@ public function index(Request $request)
 /**
  * Ambil data Total Pendapatan - Rincian pendapatan berdasarkan unit
  */
+    private function managedUsers()
+    {
+        $user = auth()->user();
+        abort_unless($user && in_array($user->role, ['admin_desa', 'super_admin'], true), 403);
+        if ($user->role === 'super_admin') return User::query();
+        abort_unless($user->region_id, 403);
+        return User::whereIn('region_id', array_merge([$user->region_id], \App\Models\Region::getDescendantIds($user->region_id)));
+    }
+
+    private function receivedPayments(string $type)
+    {
+        $query = \App\Models\WalletTransaction::where('reference_type', $type)->where('status', 'verified')->where('type', 'masuk');
+        $user = auth()->user();
+        if (!$user?->region_id || !$user->isAdmin()) return $query->whereRaw('1 = 0');
+        return $query->where('region_id', $user->region_id);
+    }
+
     private function getTotalPendapatanData($selectedYear = null)
     {
         // Ambil bulan/tahun saat ini atau dari permintaan
@@ -418,50 +368,11 @@ public function index(Request $request)
         // Gunakan tahun yang dipilih jika ada, jika tidak ambil dari request, jika tidak tahun ini
         $year = $selectedYear ?? request('year', date('Y'));
         
-        // Pendapatan Penyewaan Alat
-        $rentalRevenue = $this->applyRegionFilter(RentalBooking::withTrashed(), 'user', true)->whereYear('created_at', $year)
-            ->whereMonth('created_at', $month)
-            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-            ->sum('total_amount');
-        
-        $rentalTransactions = $this->applyRegionFilter(RentalBooking::withTrashed(), 'user', true)->whereYear('created_at', $year)
-            ->whereMonth('created_at', $month)
-            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-            ->count();
-        
-        // Pendapatan Penjualan Gas
-        $gasRevenue = $this->applyRegionFilter(GasOrder::withTrashed(), 'user', true)->whereYear('created_at', $year)
-            ->whereMonth('created_at', $month)
-            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-            ->sum(\DB::raw('price * quantity'));
-        
-        $gasTransactions = $this->applyRegionFilter(GasOrder::withTrashed(), 'user', true)->whereYear('created_at', $year)
-            ->whereMonth('created_at', $month)
-            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-            ->count();
-        // Pendapatan Penyewaan Mobil
-        $mobilRevenue = $this->applyRegionFilter(\App\Models\MobilBooking::withTrashed(), 'user', true)->whereYear('created_at', $year)
-            ->whereMonth('created_at', $month)
-            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-            ->sum('total_amount');
-        
-        $mobilTransactions = $this->applyRegionFilter(\App\Models\MobilBooking::withTrashed(), 'user', true)->whereYear('created_at', $year)
-            ->whereMonth('created_at', $month)
-            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-            ->count();
-    
-        // Pendapatan Fasilitas Umum
-        $fasilitasRevenue = $this->applyRegionFilter(\App\Models\FasilitasUmumBooking::withTrashed(), 'user', true)->whereYear('created_at', $year)
-            ->whereMonth('created_at', $month)
-            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-            ->sum('total_amount');
-            
-        $fasilitasTransactions = $this->applyRegionFilter(\App\Models\FasilitasUmumBooking::withTrashed(), 'user', true)->whereYear('created_at', $year)
-            ->whereMonth('created_at', $month)
-            ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
-            ->count();
-        $pasarRevenue = 0;
-        $pasarTransactions = 0;
+        foreach (['rental', 'gas', 'mobil', 'fasilitas'] as $type) {
+            $paid = $this->receivedPayments($type)->whereYear('created_at', $year)->whereMonth('created_at', $month);
+            ${$type.'Revenue'} = (float) (clone $paid)->sum('amount');
+            ${$type.'Transactions'} = (clone $paid)->distinct()->count('reference_id');
+        }
 
         // Pendapatan Laporan Manual
         $manualRevenue = $this->applyRegionFilter(ManualReport::query(), 'creator', true)->whereYear('transaction_date', $year)
@@ -539,7 +450,7 @@ public function index(Request $request)
             });
         
         // Cari di Produk Gas
-        $gasProducts = Gas::searchWhereLike(['jenis_gas', 'kategori'], $search)
+        $gasProducts = Gas::where('region_id', $request->user()->region_id)->searchWhereLike(['jenis_gas', 'kategori'], $search)
             ->get()
             ->map(function($item) {
                 return [
@@ -555,14 +466,14 @@ public function index(Request $request)
             });
         
         // Cari di Pengguna
-        $users = User::searchWhereLike(['name', 'email'], $search)
+        $users = $this->managedUsers()->searchWhereLike(['name', 'email'], $search)
             ->get()
             ->map(function($item) {
                 return [
                     'type' => 'user',
                     'title' => $item->name,
                     'subtitle' => $item->email,
-                    'description' => 'Bergabung: ' . $item->created_at->format('d M Y'),
+                    'description' => 'Bergabung: ' . ($item->created_at?->format('d M Y') ?? '-'),
                     'image' => $item->avatar,
                     'link' => route('admin.manajemen-pengguna.index'),
                     'badge' => 'Pengguna',
@@ -571,7 +482,7 @@ public function index(Request $request)
             });
         
         // Cari di Anggota BUMDes
-        $bumdesMembers = \App\Models\BumdesMember::searchWhereLike(['name', 'position'], $search)
+        $bumdesMembers = \App\Models\BumdesMember::where('region_id', $request->user()->region_id)->searchWhereLike(['name', 'position'], $search)
             ->get()
             ->map(function($item) {
                 return [
@@ -587,7 +498,7 @@ public function index(Request $request)
             });
         
         // Cari di Transaksi (Penyewaan)
-        $rentalTransactions = RentalBooking::with('user')
+        $rentalTransactions = $this->applyRegionFilter(RentalBooking::with('user'), 'barang', true)
             ->where(function($q) use ($search) {
                 $q->searchWhereLike('status', $search)
                   ->orWhereHas('user', function($q2) use ($search) {
@@ -600,7 +511,7 @@ public function index(Request $request)
                     'type' => 'rental_transaction',
                     'title' => 'Transaksi Penyewaan #' . $item->id,
                     'subtitle' => 'User: ' . ($item->user->name ?? 'N/A'),
-                    'description' => 'Status: ' . ucfirst($item->status) . ' | Tanggal: ' . $item->created_at->format('d M Y'),
+                    'description' => 'Status: ' . ucfirst($item->status) . ' | Tanggal: ' . ($item->created_at?->format('d M Y') ?? '-'),
                     'image' => null,
                     'link' => route('admin.aktivitas.permintaan-pengajuan.index'),
                     'badge' => 'Transaksi',
@@ -610,7 +521,7 @@ public function index(Request $request)
         
         
         // Cari di Transaksi (Gas)
-        $gasTransactions = GasOrder::with('user')
+        $gasTransactions = $this->applyRegionFilter(GasOrder::with('user'), 'gas', true)
             ->where(function($q) use ($search) {
                 $q->searchWhereLike('status', $search)
                   ->orWhereHas('user', function($q2) use ($search) {
@@ -870,7 +781,7 @@ public function index(Request $request)
         $year = $year ?? date('Y');
 
         // 1. Ambil Skor Penyewaan
-        $rentalPopularity = RentalBooking::withTrashed()->select('barang_id', DB::raw('SUM(quantity) as total_sold'))
+        $rentalPopularity = $this->applyRegionFilter(RentalBooking::withTrashed(), 'barang', true)->select('barang_id', DB::raw('SUM(quantity) as total_sold'))
             ->whereYear('created_at', $year)
             ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
             ->whereNotNull('barang_id')
@@ -897,7 +808,7 @@ public function index(Request $request)
         })->filter();
 
         // 3. Ambil Skor Gas
-        $gasPopularity = GasOrder::withTrashed()->select('gas_id', DB::raw('SUM(quantity) as total_sold'))
+        $gasPopularity = $this->applyRegionFilter(GasOrder::withTrashed(), 'gas', true)->select('gas_id', DB::raw('SUM(quantity) as total_sold'))
             ->whereYear('created_at', $year)
             ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
             ->whereNotNull('gas_id')
@@ -924,7 +835,7 @@ public function index(Request $request)
         })->filter();
 
         // 5. Ambil Skor Mobil
-        $mobilPopularity = \App\Models\MobilBooking::withTrashed()->select('mobil_id', DB::raw('SUM(quantity) as total_sold'))
+        $mobilPopularity = $this->applyRegionFilter(\App\Models\MobilBooking::withTrashed(), 'mobil', true)->select('mobil_id', DB::raw('SUM(quantity) as total_sold'))
             ->whereYear('created_at', $year)
             ->whereNotIn('status', ['pending', 'cancelled', 'rejected'])
             ->whereNotNull('mobil_id')

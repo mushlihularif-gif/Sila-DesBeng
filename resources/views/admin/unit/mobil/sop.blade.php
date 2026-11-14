@@ -15,6 +15,8 @@
                         </div>
                         
                         <form action="{{ route('admin.unit.mobil.sop.update') }}" method="POST">
+@if(auth()->user()->isStaff())<p class="alert alert-info">Ketentuan layanan ditetapkan admin desa. Staf dapat membacanya di sini.</p>@endif
+<fieldset @disabled(auth()->user()->isStaff())>
                             @csrf
                             
                             <style>
@@ -90,7 +92,8 @@
                                 <button type="submit" class="btn btn-primary me-2">Simpan Ketentuan</button>
                                 <a href="{{ route('admin.unit.mobil.index') }}" class="btn btn-outline-secondary">Kembali</a>
                             </div>
-                        </form>
+                        </fieldset>
+</form>
                     </div>
                 </div>
             </div>

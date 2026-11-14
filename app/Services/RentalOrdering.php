@@ -72,7 +72,8 @@ class RentalOrdering
                     $profile = ProfilPembayaranWilayah::untuk($provider);
                     if (!in_array($data['payment_method'], $profile->metodeTersedia(), true)) throw ValidationException::withMessages(['payment_method' => 'Metode pembayaran tidak tersedia di wilayah penyedia.']);
                     if (!($barang->region->payment_info['alat_delivery_'.$data['delivery_method'].'_active'] ?? true)) throw ValidationException::withMessages(['delivery_method' => 'Metode pengambilan/pengiriman dinonaktifkan pengelola.']);
-                    $total = round((float) $barang->harga_sewa * $item['quantity'], 2);
+                    abort_unless(in_array($barang->billing_basis, ['per_activity','per_day'], true), 422, 'Pengelola belum menentukan cara perhitungan tarif alat ini.');
+                    $total = round((float) $barang->harga_sewa * $item['quantity'] * ($barang->billing_basis === 'per_day' ? $days : 1), 2);
                     abort_unless($total > 0 && $total <= 9999999999.99, 422, 'Nilai pesanan di luar batas. Hubungi pengelola.');
                     // Separate file per booking so replacing one proof cannot delete another booking's proof.
                     $path = null;
@@ -85,7 +86,7 @@ class RentalOrdering
                         'order_number' => 'RNT-'.Str::ulid(), 'quantity' => $item['quantity'], 'days_count' => $days,
                         'total_amount' => $total, 'payment_proof' => $path, 'status' => 'pending',
                     ]);
-                    $order->unit_price = $barang->harga_sewa; $order->idempotency_key = $key; $order->submission_hash = $hash; $order->save();
+                    $order->billing_basis = $barang->billing_basis; $order->unit_price = $barang->harga_sewa; $order->idempotency_key = $key; $order->submission_hash = $hash; $order->save();
                     TransactionReceipt::create(['booking_type'=>'rental','booking_id'=>$order->id,'receipt_number'=>$order->order_number,
                         'user_id'=>$user->id,'region_id'=>$provider,'item_name'=>$barang->nama_barang,'quantity'=>$order->quantity,
                         'total_amount'=>$total,'payment_method'=>$data['payment_method']]);

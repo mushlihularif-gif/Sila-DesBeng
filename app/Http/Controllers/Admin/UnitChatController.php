@@ -65,7 +65,7 @@ class UnitChatController extends Controller
 
         $productInfo = null;
         if (!empty($session->item_reference)) {
-            $productInfo = $this->resolveProductInfo($service, $session->item_reference);
+            $productInfo = $this->resolveProductInfo($service, $session->item_label, $session->region_id);
         }
 
         $userPhoto = null;
@@ -91,7 +91,7 @@ class UnitChatController extends Controller
     /**
      * Resolusi metadata produk berdasarkan nama item reference dan unit layanan
      */
-    private function resolveProductInfo($service, $reference)
+    private function resolveProductInfo($service, $reference, $regionId)
     {
         $refClean = trim($reference);
         if (empty($refClean)) {
@@ -109,7 +109,7 @@ class UnitChatController extends Controller
 
         try {
             if ($service === 'mobil') {
-                $item = \App\Models\Mobil::where('nama_mobil', 'like', "%{$refClean}%")->first();
+                $item = \App\Models\Mobil::where('region_id', $regionId)->where('nama_mobil', $refClean)->first();
                 if ($item) {
                     $info['title'] = $item->nama_mobil;
                     $info['image'] = $item->foto ? asset('storage/' . $item->foto) : asset('User/img/elemen/mobil.png');
@@ -123,7 +123,7 @@ class UnitChatController extends Controller
                     $info['image'] = asset('User/img/elemen/mobil.png');
                 }
             } elseif ($service === 'gas') {
-                $item = \App\Models\Gas::where('jenis_gas', 'like', "%{$refClean}%")->first();
+                $item = \App\Models\Gas::where('region_id', $regionId)->where('jenis_gas', $refClean)->first();
                 if ($item) {
                     $info['title'] = $item->jenis_gas;
                     $info['image'] = $item->foto ? asset('storage/' . $item->foto) : asset('User/img/elemen/F2.png');
@@ -137,11 +137,11 @@ class UnitChatController extends Controller
                     $info['image'] = asset('User/img/elemen/F2.png');
                 }
             } elseif ($service === 'penyewaan' || $service === 'alat') {
-                $item = \App\Models\Barang::where('nama_barang', 'like', "%{$refClean}%")->first();
+                $item = \App\Models\Barang::where('region_id', $regionId)->where('nama_barang', $refClean)->first();
                 if ($item) {
                     $info['title'] = $item->nama_barang;
                     $info['image'] = $item->foto ? asset('storage/' . $item->foto) : asset('User/img/elemen/F1.png');
-                    $info['price'] = 'Rp ' . number_format($item->harga_sewa ?? 0, 0, ',', '.') . ' / hari';
+                    $info['price'] = 'Rp ' . number_format($item->harga_sewa ?? 0, 0, ',', '.') . ($item->billing_basis === 'per_day' ? ' / hari' : ' / kegiatan');
                     $info['category'] = ucfirst($item->kategori ?? 'Alat & Mesin');
                     $info['status'] = $item->status ?? 'Tersedia';
                     if (\Route::has('admin.unit.penyewaan.edit')) {
@@ -151,7 +151,7 @@ class UnitChatController extends Controller
                     $info['image'] = asset('User/img/elemen/F1.png');
                 }
             } elseif ($service === 'fasilitas' || $service === 'fasilitas_umum') {
-                $item = \App\Models\FasilitasUmum::where('nama_fasilitas', 'like', "%{$refClean}%")->first();
+                $item = \App\Models\FasilitasUmum::where('region_id', $regionId)->where('nama_fasilitas', $refClean)->first();
                 if ($item) {
                     $info['title'] = $item->nama_fasilitas;
                     $info['image'] = $item->foto ? asset('storage/' . $item->foto) : asset('User/img/elemen/fasilitas.png');

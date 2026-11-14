@@ -137,7 +137,8 @@ class ReceiptGeneratorService
         
         // Header: Detail Pembayaran
         $y += 70;
-        $this->addText($image, 'Detail Pembayaran', $labelX, $y, $headerSize, $black, $fontPath, true);
+        $billingLabel = $booking->billing_basis === 'per_day' ? 'Tarif Harian ('.$booking->days_count.' hari)' : ($booking->billing_basis === 'per_activity' ? 'Tarif Sekali Pakai' : 'Sesuai Transaksi Lama');
+        $this->addText($image, $billingLabel, $labelX, $y, $headerSize, $black, $fontPath, true);
         
         // Header Tabel - Spasi disesuaikan
         $y += 85;

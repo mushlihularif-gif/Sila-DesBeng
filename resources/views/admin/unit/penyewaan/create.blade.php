@@ -203,8 +203,16 @@
                                 </h6>
                                 <div class="row g-2 g-sm-3">
                                     <div class="col-12 col-md-4">
+                                        <label class="form-label fw-semibold" for="billing_basis">Perhitungan Tarif <span class="text-danger">*</span></label>
+                                        <select id="billing_basis" name="billing_basis" class="form-select mb-2" required>
+                                            <option value="" @selected(!old('billing_basis'))>Silakan pilih</option>
+                                            <option value="per_activity" @selected(old('billing_basis') === 'per_activity')>Sekali Pakai — per kegiatan</option>
+                                            <option value="per_day" @selected(old('billing_basis') === 'per_day')>Harian — per hari</option>
+                                        </select>
+                                        @error('billing_basis')<small class="text-danger d-block">{{ $message }}</small>@enderror
+                                        <small class="text-muted d-block mb-3">Sekali pakai: harga × jumlah alat. Harian: harga × jumlah alat × hari (tanggal mulai dan akhir dihitung).</small>
                                         <label class="form-label fw-semibold" for="harga_sewa">
-                                            Harga Sewa (per pakai) <span class="text-danger">*</span>
+                                            Harga Sewa per Unit <span class="text-danger">*</span>
                                         </label>
                                         <div class="input-group">
                                             <span class="input-group-text modern-input-addon">Rp</span>

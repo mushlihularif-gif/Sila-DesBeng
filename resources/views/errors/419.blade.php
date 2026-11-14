@@ -16,8 +16,5 @@
         <i class="bx bx-log-in"></i>
         <span>Buka Halaman Masuk</span>
     </a>
-    <a href="{{ route('beranda') }}" class="btn btn-secondary">
-        <i class="bx bx-home-circle"></i>
-        <span>Kembali ke Beranda</span>
-    </a>
+    <x-home-link href="{{ route('beranda') }}" />
 @endsection

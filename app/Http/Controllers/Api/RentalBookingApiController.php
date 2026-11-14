@@ -30,7 +30,7 @@ class RentalBookingApiController extends Controller
                     'image' => $item->foto ? asset('storage/' . $item->foto) : null,
                     'image_2' => $item->foto_2 ? asset('storage/' . $item->foto_2) : null,
                     'image_3' => $item->foto_3 ? asset('storage/' . $item->foto_3) : null,
-                    'type' => 'rental', 'billing_basis' => 'per_activity',
+                    'type' => 'rental', 'billing_basis' => $item->billing_basis,
                 ];
             });
 
@@ -68,7 +68,7 @@ class RentalBookingApiController extends Controller
                 'image' => $item->foto ? asset('storage/' . $item->foto) : null,
                 'image_2' => $item->foto_2 ? asset('storage/' . $item->foto_2) : null,
                 'image_3' => $item->foto_3 ? asset('storage/' . $item->foto_3) : null,
-                'type' => 'rental', 'billing_basis' => 'per_activity',
+                'type' => 'rental', 'billing_basis' => $item->billing_basis,
             ],
         ]);
     }
@@ -93,7 +93,7 @@ class RentalBookingApiController extends Controller
     private function bookingData(RentalBooking $booking): array
     {
         return ['id'=>$booking->id, 'order_number'=>$booking->order_number, 'item_name'=>$booking->barang?->nama_barang,
-            'quantity'=>$booking->quantity, 'days_count'=>$booking->days_count, 'total_amount'=>(float)$booking->total_amount,
+            'billing_basis'=>$booking->billing_basis, 'unit_price'=>$booking->booked_unit_price, 'quantity'=>$booking->quantity, 'days_count'=>$booking->days_count, 'total_amount'=>(float)$booking->total_amount,
             'status'=>$booking->status, 'start_date'=>$booking->start_date->format('Y-m-d'), 'end_date'=>$booking->end_date->format('Y-m-d'),
             'payment_url'=>route('rental.payment', $booking->id)];
     }

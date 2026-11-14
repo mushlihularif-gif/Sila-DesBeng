@@ -1,6 +1,6 @@
 @php
     $unitKey = $unitKey ?? '';
-    $officers = \App\Models\User::getStaffForUnit($unitKey);
+    $officers = \App\Models\User::getStaffForUnit($unitKey, auth()->user()->region_id);
 @endphp
 
 @if($officers->isNotEmpty())

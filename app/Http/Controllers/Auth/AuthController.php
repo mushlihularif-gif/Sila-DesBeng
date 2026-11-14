@@ -286,7 +286,7 @@ class AuthController extends Controller
             $request->session()->regenerate();
 
             // Redirect based on user role
-            $adminRoles = ['super_admin', 'admin_desa'];
+            $adminRoles = ['super_admin', 'admin_desa', 'staff'];
             if (in_array($user->role, $adminRoles)) {
                 $redirectUrl = route('admin.dashboard');
             } else {

@@ -160,8 +160,8 @@ class LokasiLayananController extends Controller
                     ->ignore($abaikanId),
             ],
             'alamat'    => 'nullable|string|max:1000',
-            'latitude'  => 'nullable|numeric|between:-90,90',
-            'longitude' => 'nullable|numeric|between:-180,180',
+            'latitude'  => 'nullable|required_with:longitude|numeric|between:-90,90',
+            'longitude' => 'nullable|required_with:latitude|numeric|between:-180,180',
             'catatan'   => 'nullable|string|max:1000',
             'is_aktif'  => 'nullable|boolean',
         ], [

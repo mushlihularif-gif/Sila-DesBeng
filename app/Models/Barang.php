@@ -15,6 +15,7 @@ class Barang extends Model
         'nama_barang',
         'deskripsi',
         'harga_sewa',
+        'billing_basis',
         'stok',
         'status',
         'kategori',

@@ -42,7 +42,7 @@ class GasKkAdminController extends Controller
     {
         $this->scoped()->findOrFail($id);
         if (is_string($request->niks)) $request->merge(['niks' => preg_split('/[\s,;]+/', trim($request->niks), -1, PREG_SPLIT_NO_EMPTY)]);
-        $data = $request->validate(['no_kk' => 'required|digits:16', 'kepala_keluarga' => 'required|string|max:255',
+        $data = $request->validate(['no_kk' => 'required|digits:16|confirmed', 'kepala_keluarga' => 'required|string|max:255',
             'niks' => 'required|array|min:1|max:30', 'niks.*' => 'required|digits:16|distinct']);
         return $this->decide($request, $id, function ($kk) use ($data) {
             $hash = hash_hmac('sha256', $data['no_kk'], config('app.key'));

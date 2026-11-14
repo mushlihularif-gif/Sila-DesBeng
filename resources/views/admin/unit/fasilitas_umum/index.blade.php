@@ -339,6 +339,8 @@
                 <!-- TAB 3: PENGATURAN SOP -->
                 <div class="tab-pane fade" id="navs-top-pengaturan" role="tabpanel">
                     <form action="{{ route('admin.unit.fasilitas_umum.sop.update') }}" method="POST">
+@if(auth()->user()->isStaff())<p class="alert alert-info">Ketentuan layanan ditetapkan admin desa. Staf dapat membacanya di sini.</p>@endif
+<fieldset @disabled(auth()->user()->isStaff())>
                         @csrf
                         
                         <div class="row">
@@ -450,7 +452,8 @@
                                 </div>
                             </div>
                         </div>
-                    </form>
+                    </fieldset>
+</form>
                 </div>
 
                 <!-- TAB 4: CHAT WARGA FASILITAS -->

@@ -840,6 +840,11 @@
                 </div>
                 <div class="menu-inner-shadow"></div>
                 <ul class="menu-inner py-1" style="padding-bottom: 320px !important;">
+                    @if(auth()->user()->isStaff())
+                    @include('admin.staff.menu')
+                    @else
+                    @if(auth()->user()->role === 'admin_desa')<li class="menu-item"><a class="menu-link" href="{{ route('admin.staff.index') }}"><i class="menu-icon bx bx-group"></i>Staf Layanan</a></li>@endif
+
                     <!-- ========================================================================= -->
                     <!-- 1. ZONA UTAMA                                                             -->
                     <!-- ========================================================================= -->
@@ -1355,6 +1360,7 @@
                         </ul>
                     </li>
                     @endif
+                    @endif
                 </ul>
             </aside>
             <!-- Layout page -->
@@ -1383,7 +1389,8 @@
                                     'admin.banners.*',
                                     'admin.announcements.*'
                                 ))
-                                <form action="{{ route('admin.search') }}" method="GET" class="d-flex align-items-center w-100" id="headerSearchForm">
+                                @unless(auth()->user()->isStaff())
+<form action="{{ route('admin.search') }}" method="GET" class="d-flex align-items-center w-100" id="headerSearchForm">
                                     <i class="bx bx-search fs-4 lh-0"></i>
                                     <input type="text" 
                                            name="search" 
@@ -1401,6 +1408,7 @@
                                         </a>
                                     @endif
                                 </form>
+@endunless
                                 @endif
                             </div>
                         </div>

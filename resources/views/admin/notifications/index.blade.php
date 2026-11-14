@@ -10,12 +10,14 @@
         <div class="card-header bg-white border-bottom p-4 d-flex justify-content-between align-items-end flex-wrap gap-3">
             <div>
                 <h4 class="fw-bold fs-3 mb-1 text-primary">Notifikasi</h4>
-                <p class="text-muted mb-0">Kelola dan kirim notifikasi ke pengguna</p>
+                <p class="text-muted mb-0">Pemberitahuan untuk wilayah dan layanan Anda</p>
             </div>
             <div class="d-flex gap-2">
-                <a href="{{ route('admin.notifications.create') }}" class="btn btn-primary rounded-pill px-4 shadow-sm">
+                @unless(auth()->user()->isStaff())
+<a href="{{ route('admin.notifications.create') }}" class="btn btn-primary rounded-pill px-4 shadow-sm">
                     <i class="bx bx-plus me-1"></i> Buat Notifikasi Baru
                 </a>
+@endunless
                 <form action="{{ route('admin.notifications.mark-all-read') }}" method="POST" class="d-inline" data-konfirmasi="Tandai semua sebagai dibaca?">
                     @csrf
                     @method('PUT')
@@ -101,13 +103,15 @@
                                         <i class="bx bx-check-double text-success fs-4 me-2" title="Sudah Dibaca"></i>
                                     @endif
                                     
-                                    <form action="{{ route('admin.notifications.destroy', $notification->id) }}" method="POST" class="d-inline delete-form">
+                                    @unless(auth()->user()->isStaff())
+<form action="{{ route('admin.notifications.destroy', $notification->id) }}" method="POST" class="d-inline delete-form">
                                         @csrf
                                         @method('DELETE')
                                         <button type="button" class="btn btn-sm btn-icon btn-light text-danger rounded-circle border shadow-sm hover-danger delete-btn" title="Hapus Notifikasi">
                                             <i class="bx bx-trash fs-5"></i>
                                         </button>
                                     </form>
+@endunless
                                 </td>
                             </tr>
                             @endforeach
@@ -123,13 +127,15 @@
                         <div class="d-flex gap-2">
                             <!-- Hapus Semua Button -->
                             @if($notifications->count() > 0)
-                                <form action="{{ route('admin.notifications.deleteAll') }}" method="POST" class="delete-all-form">
+                                @unless(auth()->user()->isStaff())
+<form action="{{ route('admin.notifications.deleteAll') }}" method="POST" class="delete-all-form">
                                     @csrf
                                     @method('DELETE')
                                     <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-4 delete-all-btn">
                                         <i class="bx bx-trash me-1"></i> Hapus Semua
                                     </button>
                                 </form>
+@endunless
                             @endif
 
                             @if($notifications->onFirstPage())

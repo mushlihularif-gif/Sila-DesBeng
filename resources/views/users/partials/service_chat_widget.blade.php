@@ -12,7 +12,7 @@
         ],
         'penyewaan' => [
             'Apakah alat siap pakai?',
-            'Berapa tarif sewa per hari?',
+            'Bagaimana perhitungan tarif sewanya?',
             'Ketentuan SOP tanggung jawab alat?',
         ],
         'mobil' => [

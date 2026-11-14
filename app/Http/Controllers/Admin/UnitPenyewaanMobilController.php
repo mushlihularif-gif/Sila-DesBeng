@@ -17,7 +17,7 @@ class UnitPenyewaanMobilController extends Controller
     private function managedVehicles()
     {
         $user = auth()->user();
-        abort_unless($user, 403);
+        abort_unless($user && $user->isAdmin() && $user->hasUnitPermission('sewa_mobil'), 403);
         $query = Mobil::forRental();
         if ($user->role === 'super_admin') return $query;
         abort_unless($user->region_id, 403);
@@ -37,10 +37,7 @@ class UnitPenyewaanMobilController extends Controller
         $search = $request->get('search');
         
         $user = auth()->user();
-        $mobils = Mobil::forRental()
-            ->when($user && $user->region_id, function ($q) use ($user) {
-                return $q->where('region_id', $user->region_id);
-            })
+        $mobils = $this->managedVehicles()
             ->when($search, function ($query, $search) {
                 return $query->searchWhereLike(['nama_mobil', 'kategori'], $search);
             })
@@ -142,8 +139,8 @@ class UnitPenyewaanMobilController extends Controller
             'status' => 'required|in:tersedia,disewa,rusak',
             'kategori' => ['required', 'string', 'max:100', 'not_regex:/ambulan|kendaraan_operasional/i'],
             'lokasi' => 'required|string',
-            'latitude' => 'nullable|numeric',
-            'longitude' => 'nullable|numeric',
+            'latitude' => 'nullable|required_with:longitude|numeric|between:-90,90',
+            'longitude' => 'nullable|required_with:latitude|numeric|between:-180,180',
             'satuan' => 'required|string',
             'foto_utama' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
             'foto_2' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
@@ -289,8 +286,8 @@ class UnitPenyewaanMobilController extends Controller
             'status' => 'required|in:tersedia,disewa,rusak',
             'kategori' => ['required', 'string', 'max:100', 'not_regex:/ambulan|kendaraan_operasional/i'],
             'lokasi' => 'required|string',
-            'latitude' => 'nullable|numeric',
-            'longitude' => 'nullable|numeric',
+            'latitude' => 'nullable|required_with:longitude|numeric|between:-90,90',
+            'longitude' => 'nullable|required_with:latitude|numeric|between:-180,180',
             'satuan' => 'required|string',
             'foto_utama' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'foto_2' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',

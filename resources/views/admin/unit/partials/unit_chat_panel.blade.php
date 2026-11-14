@@ -72,7 +72,7 @@
                                 
                                 @if($chat->item_reference)
                                     <div class="badge bg-label-info py-0 px-2 mb-1 text-truncate" style="font-size: 10px; max-width: 175px;">
-                                        <i class="bx bx-bookmark me-1"></i>{{ $chat->item_reference }}
+                                        <i class="bx bx-bookmark me-1"></i>{{ $chat->item_label }}
                                     </div>
                                 @endif
                                 

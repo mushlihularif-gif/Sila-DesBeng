@@ -16,10 +16,12 @@
                     $quotaLimit = $settings['gas_quota_limit'] ?? 1;
                     $quotaDays = $settings['gas_quota_days'] ?? 7;
                 @endphp
-                <button type="button" class="btn {{ $isCrisisMode ? 'btn-danger' : 'btn-outline-danger' }} flex-grow-1 flex-sm-grow-0 text-nowrap" data-bs-toggle="modal" data-bs-target="#crisisModeModal">
+                @unless(auth()->user()->isStaff())
+<button type="button" class="btn {{ $isCrisisMode ? 'btn-danger' : 'btn-outline-danger' }} flex-grow-1 flex-sm-grow-0 text-nowrap" data-bs-toggle="modal" data-bs-target="#crisisModeModal">
                     <i class='bx {{ $isCrisisMode ? 'bx-error-circle' : 'bx-shield-quarter' }} me-1'></i> 
                     Mode Krisis
                 </button>
+@endunless
                 @if(in_array(auth()->user()->role, ['admin_desa', 'super_admin']))
                 <a href="{{ route('admin.gas.kk.index') }}" class="btn btn-outline-primary">Periksa KK Warga</a>
                 @endif
@@ -27,13 +29,15 @@
                      pindah halaman. Setelah tersimpan, lokasinya langsung muncul
                      sebagai pilihan "Lokasi Tersimpan" di formulir Tambah Gas —
                      dan di unit lain juga, karena daftarnya milik wilayah. --}}
-                <button type="button" class="btn btn-outline-primary flex-grow-1 flex-sm-grow-0 text-nowrap"
+                @unless(auth()->user()->isStaff())
+<button type="button" class="btn btn-outline-primary flex-grow-1 flex-sm-grow-0 text-nowrap"
                         data-bs-toggle="modal" data-bs-target="#modalLokasi" onclick="siapkanFormulir()">
                     <i class="bx bx-map-pin me-1"></i> Lokasi Layanan
                     @if(isset($lokasiLayanan) && $lokasiLayanan->count())
                         <span class="badge bg-primary rounded-pill ms-1">{{ $lokasiLayanan->count() }}</span>
                     @endif
                 </button>
+@endunless
                 <a href="{{ route('admin.unit.penjualan_gas.create') }}" class="btn btn-primary flex-grow-1 flex-sm-grow-0 text-nowrap">
                     <i class="bx bx-plus me-1"></i> Tambah Gas
                 </a>
@@ -78,9 +82,11 @@
                     @endif
                 </div>
 
-                <a href="{{ route('admin.lokasi-layanan.index') }}" class="btn btn-sm btn-label-primary rounded-pill text-nowrap">
+                @unless(auth()->user()->isStaff())
+<a href="{{ route('admin.lokasi-layanan.index') }}" class="btn btn-sm btn-label-primary rounded-pill text-nowrap">
                     Kelola
                 </a>
+@endunless
             </div>
         </div>
         @endisset

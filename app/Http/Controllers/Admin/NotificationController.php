@@ -9,6 +9,18 @@ use Illuminate\Http\Request;
 
 class NotificationController extends Controller
 {
+    private function recipients()
+    {
+        $user = auth()->user();
+        abort_unless($user && in_array($user->role, ['admin_desa', 'super_admin'], true), 403);
+        $query = User::where('role', 'user');
+        if ($user->role === 'admin_desa') {
+            abort_unless($user->region_id, 403);
+            $query->whereIn('region_id', array_merge([$user->region_id], \App\Models\Region::getDescendantIds($user->region_id)));
+        }
+        return $query;
+    }
+
     public function index(Request $request)
     {
         $search = $request->get('search');
@@ -30,7 +42,7 @@ class NotificationController extends Controller
     public function create()
     {
         // Ambil semua user untuk dituju notifikasi (jika mengirim ke user)
-        $users = User::all();
+        $users = $this->recipients()->orderBy('name')->get();
         return view('admin.notifications.create', compact('users'));
     }
 
@@ -39,10 +51,11 @@ class NotificationController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'message' => 'required|string',
-            'user_id' => 'nullable|exists:users,id', // Bisa kosong jika broadcast
+            'user_id' => 'required|integer',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Optional image
         ]);
 
+        $this->recipients()->findOrFail($request->integer('user_id'));
         $data = [
             'title' => $request->title,
             'message' => $request->message,

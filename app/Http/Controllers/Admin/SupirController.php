@@ -15,8 +15,8 @@ class SupirController extends Controller
     private function manager()
     {
         $user = Auth::user();
-        abort_unless($user && in_array($user->role, ['admin_desa', 'super_admin'], true), 403);
-        abort_if($user->role === 'admin_desa' && !$user->region_id, 403);
+        abort_unless($user && $user->isAdmin() && $user->hasUnitPermission('sewa_mobil'), 403);
+        abort_if($user->role !== 'super_admin' && !$user->region_id, 403);
         return $user;
     }
 
@@ -35,7 +35,7 @@ class SupirController extends Controller
         }
 
         $query = $this->scopedSupirs()->with(['user', 'kendaraanOperasional', 'fasilitas']);
-        if ($user && $user->role === 'admin_desa' && $user->region_id) {
+        if ($user && $user->role !== 'super_admin' && $user->region_id) {
             $query->where('region_id', $user->region_id);
             $users = \App\Models\User::whereIn('region_id', [$user->region_id, ...\App\Models\Region::getDescendantIds($user->region_id)])->get();
         } else {

@@ -54,6 +54,7 @@ class RentalAuditTest extends TestCase
         Schema::create('saldo_warga', function (Blueprint $t) { $t->id(); $t->string('type'); $t->string('reference_type'); $t->integer('reference_id'); });
         Barang::create(['id'=>1,'region_id'=>1,'nama_barang'=>'Sound System','stok'=>10,'harga_sewa'=>700000,'status'=>'tersedia']);
         Barang::create(['id'=>2,'region_id'=>5,'nama_barang'=>'Alat Wilayah B','stok'=>10,'harga_sewa'=>100000,'status'=>'tersedia']);
+        (require database_path('migrations/2026_11_13_000001_add_rental_billing_basis.php'))->up();
         $this->actingAs($this->user(1));
     }
 
@@ -239,7 +240,7 @@ class RentalAuditTest extends TestCase
     {
         $order=$this->order(); $this->act($order,'confirmed');
         $request=$this->req(['nama_barang'=>'Alat','deskripsi'=>'Uji','harga_sewa'=>'700.000','stok'=>20,'original_stock'=>10,
-            'status'=>'tersedia','kategori'=>'Alat','lokasi'=>'Desa','satuan'=>'unit'],4);
+            'status'=>'tersedia','billing_basis'=>'per_activity','kategori'=>'Alat','lokasi'=>'Desa','satuan'=>'unit'],4);
         $this->blocked(fn()=>app(\App\Http\Controllers\Admin\UnitPenyewaanController::class)->update($request,1),422);
         $this->assertSame(9,Barang::first()->stok);
     }
@@ -299,4 +300,93 @@ class RentalAuditTest extends TestCase
         $this->assertFalse($order->fresh()->paymentReceived());
         $this->assertSame('pending',$order->fresh()->status);
     }
+
+    public function test_daily_tariff_is_snapshotted_and_catalog_changes_do_not_change_a_receipt(): void
+    {
+        Barang::find(1)->update(['billing_basis'=>'per_day']);
+        $order=$this->order(['quantity'=>2,'billing_basis'=>'per_activity']);
+        $this->assertEquals(4200000,$order->total_amount);
+        $this->assertSame('per_day',$order->billing_basis);
+        $this->assertEquals(4200000,WalletTransaction::first()->amount);
+        Barang::find(1)->update(['billing_basis'=>'per_activity','harga_sewa'=>1]);
+        $this->assertSame('per_day',$order->fresh()->billing_basis);
+        $this->assertEquals(700000,$order->fresh()->booked_unit_price);
+    }
+    public function test_missing_tariff_blocks_booking_and_admin_must_choose_a_valid_tariff(): void
+    {
+        Barang::find(1)->update(['billing_basis'=>null]);
+        $this->blocked(fn()=>$this->order(),422);
+        $this->actingAs($this->user(4));
+        foreach (['', 'invalid'] as $basis) {
+            $req=$this->req(['nama_barang'=>'Alat','deskripsi'=>'Uji','harga_sewa'=>'700.000','stok'=>10,'original_stock'=>10,
+                'status'=>'tersedia','billing_basis'=>$basis,'kategori'=>'Alat','lokasi'=>'Desa','satuan'=>'unit'],4);
+            $this->blocked(fn()=>app(\App\Http\Controllers\Admin\UnitPenyewaanController::class)->update($req,1),422);
+        }
+        $this->assertNull(Barang::find(1)->billing_basis);
+    }
+    public function test_assigned_staff_can_process_own_rental_but_not_foreign_orders_or_unassigned_units(): void
+    {
+        Schema::table('users', function (Blueprint $t) { $t->boolean('staff_enabled')->default(false); $t->integer('created_by')->nullable(); $t->string('status')->default('aktif'); });
+        Schema::create('staff_permissions', function (Blueprint $t) { $t->id(); $t->integer('user_id'); $t->string('unit_key'); $t->timestamps(); });
+        DB::table('users')->where('id',8)->update(['role'=>'staff','staff_enabled'=>true,'created_by'=>4,'region_id'=>1]);
+        DB::table('staff_permissions')->insert(['user_id'=>8,'unit_key'=>'sewa_alat']);
+        $own = $this->order(); $foreign = $this->order(['barang_id'=>2],6);
+        $this->act($own,'confirmed',[],8);
+        $this->assertSame('confirmed',$own->fresh()->status);
+        $this->assertEquals(8,$own->fresh()->handled_by);
+        $this->assertSame(9,Barang::find(1)->stok);
+        $this->blocked(fn () => $this->act($foreign,'confirmed',[],8),404);
+        $this->assertSame('pending',$foreign->fresh()->status);
+        $this->assertSame(10,Barang::find(2)->stok);
+        DB::table('staff_permissions')->where('user_id',8)->update(['unit_key'=>'gas']);
+        $this->blocked(fn () => $this->act($own,'verify',[],8),403);
+        $this->assertSame('pending',WalletTransaction::where('reference_id',$own->id)->value('status'));
+    }
+
+    public function test_admin_tariff_choice_is_saved_and_coordinate_pairs_are_validated(): void
+    {
+        $this->actingAs($this->user(4));
+        $data = ['nama_barang'=>'Sound System','deskripsi'=>'Keterangan alat','harga_sewa'=>'700.000','stok'=>10,'original_stock'=>10,'status'=>'tersedia','kategori'=>'Audio','lokasi'=>'Desa A','satuan'=>'unit','billing_basis'=>'per_day'];
+        $controller = app(\App\Http\Controllers\Admin\UnitPenyewaanController::class);
+        $this->blocked(fn () => $controller->update($this->req($data + ['latitude'=>100,'longitude'=>102],4),1),422);
+        $this->blocked(fn () => $controller->update($this->req($data + ['latitude'=>1],4),1),422);
+        $controller->update($this->req($data + ['latitude'=>0,'longitude'=>102],4),1);
+        $this->assertSame('per_day',Barang::find(1)->billing_basis);
+        $this->assertEquals(0,Barang::find(1)->latitude);
+    }
+
+    public function test_dashboard_revenue_counts_only_verified_payments_of_the_service_village(): void
+    {
+        Schema::create('manual_reports', function (Blueprint $t) { $t->id(); $t->integer('created_by'); $t->date('transaction_date'); $t->decimal('amount',12,2); $t->integer('quantity'); });
+        $own = $this->order(); $foreign = $this->order(['barang_id'=>2],6);
+        $this->act($foreign,'verify',[],7);
+        $this->act($own,'confirmed');
+        $controller = app(\App\Http\Controllers\Admin\DashboardController::class);
+        $method = new \ReflectionMethod($controller,'getTotalPendapatanData');
+        $data = $method->invoke($controller,now()->year);
+        $this->assertEquals(0,$data['Penyewaan Alat']['revenue']);
+        $this->act($own,'verify');
+        $data = $method->invoke($controller,now()->year);
+        $this->assertEquals(700000,$data['Penyewaan Alat']['revenue']);
+        $this->assertSame(1,$data['Penyewaan Alat']['transactions']);
+    }
+
+    public function test_dashboard_search_cannot_reveal_foreign_customers_or_orders(): void
+    {
+        Schema::create('gas', function (Blueprint $t) { $t->id(); $t->integer('region_id'); $t->string('jenis_gas'); $t->string('kategori'); });
+        Schema::create('gas_orders', function (Blueprint $t) { $t->id(); $t->integer('gas_id'); $t->integer('user_id'); $t->string('status'); $t->softDeletes(); });
+        Schema::create('bumdes_members', function (Blueprint $t) { $t->id(); $t->integer('region_id'); $t->string('name'); $t->string('position'); });
+        $own = $this->order(); $foreign = $this->order(['barang_id'=>2],6);
+        $this->actingAs($this->user(4));
+        $controller = app(\App\Http\Controllers\Admin\DashboardController::class);
+        $view = $controller->globalSearch($this->req(['search'=>'pending'],4));
+        $results = $view->getData()['results'];
+        $this->assertSame(['Transaksi Penyewaan #'.$own->id],$results->pluck('title')->all());
+        $view = $controller->globalSearch($this->req(['search'=>'uji@example.test'],4));
+        $names = $view->getData()['results']->where('type','user')->pluck('title')->all();
+        $this->assertContains('Akun 1',$names);
+        $this->assertNotContains('Akun 6',$names);
+        $this->assertNotContains('Akun 7',$names);
+    }
+
 }

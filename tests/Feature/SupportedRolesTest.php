@@ -34,14 +34,14 @@ class SupportedRolesTest extends TestCase
         catch (HttpException $e) { $this->assertSame($status, $e->getStatusCode()); }
     }
 
-    public function test_exact_five_role_permission_matrix_and_old_sessions_fail_closed(): void
+    public function test_region_role_matrix_and_unauthorized_legacy_staff_fail_closed(): void
     {
         $request = Request::create('/private', 'GET', server: ['HTTP_ACCEPT' => 'application/json']);
         foreach (array_merge(User::ROLES, ['admin', 'admin_kecamatan', 'admin_kabupaten', 'staff', 'warga']) as $role) {
             $user = $this->user(1); $user->role = $role;
             $user->region_id = ['admin_desa' => 1, 'admin_rw' => 2, 'admin_rt' => 3][$role] ?? 3;
             $this->actingAs($user);
-            $supported = in_array($role, User::ROLES, true);
+            $supported = in_array($role, User::ROLES, true) && $role !== 'staff';
             $this->assertSame($supported, $user->hasSupportedRole());
             $this->assertSame($role === 'super_admin', $user->isSuperAdmin());
             $this->assertSame($role === 'super_admin', $user->hasPlatformPermission('platform_keamanan'));
@@ -101,13 +101,12 @@ class SupportedRolesTest extends TestCase
         $this->assertDatabaseMissing('users', ['email' => 'forbidden@example.test']);
     }
 
-    public function test_unassigned_village_admin_cannot_reach_management_and_staff_routes_are_retired(): void
+    public function test_unassigned_village_admin_cannot_reach_management_or_create_staff(): void
     {
         $user = $this->user(4); $user->region_id = null; $this->actingAs($user);
         $this->denied(fn () => app(RegionManagementController::class)->index());
         $this->denied(fn () => app(RegionAdminManagementController::class)->index());
-        $this->assertEmpty(collect(Route::getRoutes()->getRoutes())->filter(
-            fn ($route) => str_starts_with($route->getName() ?? '', 'admin.staff.')
-        ));
+        $this->denied(fn () => app(\App\Http\Controllers\Admin\ServiceStaffController::class)->index());
+        $this->assertTrue(Route::has('admin.staff.store'));
     }
 }

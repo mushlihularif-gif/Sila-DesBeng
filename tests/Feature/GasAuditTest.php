@@ -197,7 +197,7 @@ class GasAuditTest extends TestCase
         $this->blocked(fn()=>app(GasKkVerificationController::class)->store($request),409);
         $this->actingAs($this->user(7)); $this->blocked(fn()=>app(GasKkAdminController::class)->showImage($family->id),404);
         $this->actingAs($this->user(4));
-        app(GasKkAdminController::class)->approve($this->req(['no_kk'=>'1234567890123456','kepala_keluarga'=>'Nama Uji','niks'=>str_repeat('1',16)],4),$family->id);
+        app(GasKkAdminController::class)->approve($this->req(['no_kk'=>'1234567890123456','no_kk_confirmation'=>'1234567890123456','kepala_keluarga'=>'Nama Uji','niks'=>str_repeat('1',16)],4),$family->id);
         $this->assertSame('approved',$family->fresh()->status); $this->assertNotNull(app(GasOrdering::class)->household($this->user(1)));
         Storage::disk('private')->assertMissing($path); $this->assertNull($family->fresh()->kk_image_path);
         $this->blocked(fn()=>app(GasKkAdminController::class)->showImage($family->id),404);
@@ -206,7 +206,7 @@ class GasAuditTest extends TestCase
     {
         $existing=$this->family(); $pending=FamilyCard::create(['submitted_by'=>1,'status'=>'pending']);
         $this->actingAs($this->user(4));
-        foreach ([str_repeat('6',16),str_repeat('1',16)] as $nik) $this->blocked(fn()=>app(GasKkAdminController::class)->approve($this->req(['no_kk'=>'1234567890123456','kepala_keluarga'=>'Uji','niks'=>$nik],4),$pending->id),422);
+        foreach ([str_repeat('6',16),str_repeat('1',16)] as $nik) $this->blocked(fn()=>app(GasKkAdminController::class)->approve($this->req(['no_kk'=>'1234567890123456','no_kk_confirmation'=>'1234567890123456','kepala_keluarga'=>'Uji','niks'=>$nik],4),$pending->id),422);
         $this->assertSame('pending',$pending->fresh()->status); $this->assertSame(2,$existing->members()->count());
     }
 
@@ -269,4 +269,16 @@ class GasAuditTest extends TestCase
         $order->update(['status'=>'cancelled']);
         $this->view('users.gas-payment',['order'=>$order,'setting'=>\App\Support\ProfilPembayaranWilayah::untuk(1),'paid'=>false])->assertSee('Pesanan Dibatalkan')->assertDontSee('Kirim Bukti Pembayaran');
     }
+    public function test_mistyped_kk_confirmation_cannot_approve_or_attach_any_nik(): void
+    {
+        $pending = FamilyCard::create(['submitted_by'=>1,'status'=>'pending']);
+        $this->actingAs($this->user(4));
+        $this->blocked(fn () => app(GasKkAdminController::class)->approve($this->req([
+            'no_kk'=>'1234567890123456','no_kk_confirmation'=>'1234567890123457',
+            'kepala_keluarga'=>'Uji','niks'=>str_repeat('1',16),
+        ],4),$pending->id),422);
+        $this->assertSame('pending',$pending->fresh()->status);
+        $this->assertSame(0,$pending->members()->count());
+    }
+
 }

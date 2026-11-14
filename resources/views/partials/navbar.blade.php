@@ -281,6 +281,7 @@
                                 <a href="{{ route('profile') }}" class="block px-4 py-2.5 text-gray-800 hover:bg-blue-50 hover:border-l-[3px] hover:border-l-blue-500 transition-all duration-150 border-l-[3px] border-l-transparent">
                                     <span class="text-[15px] font-normal text-center block">Profil</span>
                                 </a>
+                                <a href="{{ route('user.settings') }}" class="block px-4 py-2.5 text-center text-gray-800 hover:bg-blue-50">Pengaturan Akun</a>
                                 @if(in_array(auth()->user()->role, ['super_admin', 'admin_desa']))
                                 <div class="h-px bg-gray-100 mx-3 my-1"></div>
                                 <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2.5 text-blue-700 hover:bg-blue-100 hover:border-l-[3px] hover:border-l-blue-600 transition-all duration-150 border-l-[3px] border-l-transparent bg-blue-50/50">
@@ -508,6 +509,7 @@
                                 <a href="{{ route('profile') }}" class="block w-full text-center px-4 py-2.5 rounded-lg font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition">
                     Profil Saya
                 </a>
+                <a href="{{ route('user.settings') }}" class="block text-center px-4 py-2.5 rounded-lg font-medium bg-gray-100 text-gray-700">Pengaturan Akun</a>
                 <a href="{{ route('user.activity') }}" class="block w-full text-center px-4 py-2.5 rounded-lg font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition">
                     Aktivitas
                 </a>

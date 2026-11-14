@@ -19,14 +19,14 @@ class UnitFasilitasUmumController extends Controller
     private function managedFacilities()
     {
         $user = auth()->user();
-        abort_unless($user && in_array($user->role, ['admin_desa', 'super_admin'], true), 403);
-        abort_if($user->role === 'admin_desa' && !$user->region_id, 403);
+        abort_unless($user && $user->isAdmin() && $user->hasUnitPermission('fasilitas_umum'), 403);
+        abort_if($user->role !== 'super_admin' && !$user->region_id, 403);
         return FasilitasUmum::inCatalog()->when($user->role !== 'super_admin', fn ($q) => $q->where('region_id', $user->region_id));
     }
 
     // Default SOP Texts
-    private $defaultSopDitanggung = "1. Penyewa wajib menjaga fasilitas umum dengan baik.\n2. Jika terjadi KERUSAKAN fasilitas selama masa peminjaman/penyewaan, maka SEPENUHNYA menjadi tanggung jawab PENGGUNA (penyewa) untuk mengganti rugi atau memperbaiki fasilitas tersebut sesuai dengan kerusakan.\n3. Fasilitas harus dikembalikan dalam keadaan bersih dan rapi.";
-    private $defaultSopTidakDitanggung = "1. Penyewa wajib menjaga fasilitas umum dengan baik.\n2. Jika terjadi kerusakan fasilitas selama masa peminjaman/penyewaan yang diakibatkan oleh faktor ketidaksengajaan/bencana, maka TIDAK DITANGGUNG oleh pengguna karena telah didukung oleh dana operasional.\n3. Namun pengguna tetap diwajibkan melaporkan kejadian tersebut secara transparan dan menjaga kebersihan.";
+    private $defaultSopDitanggung = \App\Support\ServiceTerms::FACILITY_LIABILITY;
+    private $defaultSopTidakDitanggung = \App\Support\ServiceTerms::FACILITY_NO_LIABILITY;
 
     public function index(Request $request)
     {
@@ -40,12 +40,6 @@ class UnitFasilitasUmumController extends Controller
         $tab = $request->get('tab', 'gedung'); // default tab
         
         $fasilitas = $this->managedFacilities()
-            ->when($user->region_id, function($q, $regionId) {
-                return $q->where(function($query) use ($regionId) {
-                    $query->where('region_id', $regionId)
-                          ->orWhereNull('region_id');
-                });
-            })
             ->with('pengurus')
             ->when($search, function ($query, $search) {
                 return $query->searchWhereLike(['nama_fasilitas', 'kategori'], $search);
@@ -162,8 +156,8 @@ class UnitFasilitasUmumController extends Controller
             'status' => 'required|in:Tersedia,Tidak Tersedia,Disewa',
             'kategori' => ['required', 'string', 'max:100', 'not_regex:/ambulan|kendaraan/i'],
             'lokasi' => 'required|string',
-            'latitude' => 'nullable|numeric',
-            'longitude' => 'nullable|numeric',
+            'latitude' => 'nullable|required_with:longitude|numeric|between:-90,90',
+            'longitude' => 'nullable|required_with:latitude|numeric|between:-180,180',
             'foto_utama' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
             'foto_2' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
             'foto_3' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
@@ -287,8 +281,8 @@ class UnitFasilitasUmumController extends Controller
             'status' => 'required|in:Tersedia,Tidak Tersedia,Disewa',
             'kategori' => ['required', 'string', 'max:100', 'not_regex:/ambulan|kendaraan/i'],
             'lokasi' => 'required|string',
-            'latitude' => 'nullable|numeric',
-            'longitude' => 'nullable|numeric',
+            'latitude' => 'nullable|required_with:longitude|numeric|between:-90,90',
+            'longitude' => 'nullable|required_with:latitude|numeric|between:-180,180',
             'foto_utama' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
             'foto_2' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',
             'foto_3' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192',

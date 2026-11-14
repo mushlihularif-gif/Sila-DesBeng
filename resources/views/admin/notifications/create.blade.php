@@ -34,7 +34,7 @@
                         <div class="mb-4">
                             <label for="user_id" class="form-label fw-semibold">Penerima Pesan <span class="text-danger">*</span></label>
                             <select class="form-select select2 @error('user_id') is-invalid @enderror" id="user_id" name="user_id" style="width: 100%;">
-                                <option value="" selected class="fw-bold" data-icon="bx-broadcast">Kirim ke Semua Pengguna (Broadcast)</option>
+                                <option value="">Pilih warga penerima pesan</option>
                                 <optgroup label="Pengguna Spesifik">
                                     @foreach($users as $user)
                                         <option value="{{ $user->id }}" {{ old('user_id') == $user->id ? 'selected' : '' }} data-icon="bx-user" data-subtext="{{ $user->email }}">
@@ -44,7 +44,7 @@
                                 </optgroup>
                             </select>
                             <div class="form-text text-muted small mt-1">
-                                <i class='bx bx-info-circle me-1'></i>Pilih "Semua Pengguna" untuk mengirim pengumuman umum.
+                                <i class='bx bx-info-circle me-1'></i>Untuk informasi kepada banyak warga, gunakan menu Pengumuman.
                             </div>
                             @error('user_id')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -264,53 +264,8 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
     $(document).ready(function() {
-        // Initialize Select2
-        function formatUser (option) {
-            if (!option.id && !option.element) {
-                return option.text;
-            }
-            
-            var el = option.element;
-            if (!el) return option.text;
+        $('#user_id').select2({width: '100%'});
 
-            var icon = el.getAttribute('data-icon');
-            var subtext = el.getAttribute('data-subtext');
-            var color = icon === 'bx-broadcast' ? 'text-primary' : 'text-secondary';
-            
-            if (icon) {
-                return '<div class="d-flex align-items-center">' +
-                       '<i class="bx ' + icon + ' ' + color + ' me-2 fs-5"></i>' +
-                       '<div>' +
-                       '<div class="fw-medium text-dark">' + option.text + '</div>' +
-                       (subtext ? '<small class="text-muted">' + subtext + '</small>' : '') +
-                       '</div></div>';
-            }
-            return option.text;
-        }
-
-        function formatUserSelection (option) {
-            if (!option.id && !option.element) {
-                return option.text;
-            }
-            
-            var el = option.element;
-            if (!el) return option.text;
-
-            var icon = el.getAttribute('data-icon');
-            var color = icon === 'bx-broadcast' ? 'text-primary' : 'text-secondary';
-            
-            if (icon) {
-                return '<i class="bx ' + icon + ' ' + color + ' me-2"></i><span class="fw-medium">' + option.text + '</span>';
-            }
-            return option.text;
-        }
-
-        $('#user_id').select2({
-            templateResult: formatUser,
-            templateSelection: formatUserSelection,
-            escapeMarkup: function(m) { return m; },
-            width: '100%'
-        });
     });
 
     // Character Counter

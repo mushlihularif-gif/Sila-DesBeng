@@ -2,6 +2,7 @@
 
 @section('page')
 <main class="flex-grow relative w-full">
+    @include('partials.abstract-bg')
     <section class="catalog-detail-section relative z-10 min-h-screen pt-32 pb-16">
 
         <div class="max-w-6xl mx-auto px-6 relative z-10">
@@ -39,35 +40,7 @@
                         </div>
 
                         <!-- Location - Below Image -->
-                        @if($item->latitude && $item->longitude)
-                        {{-- Produk punya koordinat sendiri: tampilkan sebagai link ke Google Maps --}}
-                        <a href="https://www.google.com/maps?q={{ $item->latitude }},{{ $item->longitude }}" 
-                           target="_blank"
-                           class="flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-colors">
-                            <svg class="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
-                            </svg>
-                            <span class="font-medium text-base">{{ $item->lokasi ?? 'Lihat di Peta' }}</span>
-                        </a>
-                        @elseif($item->lokasi)
-                        {{-- Produk punya teks lokasi tapi tanpa koordinat: tampilkan teks biasa (tidak bisa diklik) --}}
-                        <div class="flex items-center gap-2 text-gray-600">
-                            <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
-                            </svg>
-                            <span class="font-medium text-base">{{ $item->lokasi }}</span>
-                        </div>
-                        @elseif($setting && $setting->latitude && $setting->longitude)
-                        {{-- Fallback: gunakan lokasi pusat BUMDes dari SystemSetting --}}
-                        <a href="https://www.google.com/maps?q={{ $setting->latitude }},{{ $setting->longitude }}" 
-                           target="_blank"
-                           class="flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-colors">
-                            <svg class="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
-                            </svg>
-                            <span class="font-medium text-base">{{ $setting->location_name ?? 'Lokasi BUMDes' }}</span>
-                        </a>
-                        @endif
+                        <x-service-location :item="$item" />
                     </div>
 
                     <!-- Right Side: Product Information -->
@@ -81,6 +54,8 @@
                         </p>
 
 
+
+                        <details class="mb-6 rounded-xl border border-blue-100 bg-blue-50 p-4"><summary class="font-bold text-[#115789] cursor-pointer">Informasi Penting dan Ketentuan Pemakaian</summary><p class="mt-3 text-sm text-gray-700 whitespace-pre-line">{{ \App\Support\ServiceTerms::forRegion($item->region, 'facility') }}</p><p class="mt-3 text-sm text-gray-600">Pastikan jadwal dan ketersediaan melalui Chat Pengelola sebelum menggunakan layanan.</p></details>
 
                         <!-- Product Details Grid -->
                         <div class="space-y-2 mb-6">

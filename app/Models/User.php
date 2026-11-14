@@ -12,11 +12,16 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-    public const ROLES = ['user', 'admin_rt', 'admin_rw', 'admin_desa', 'super_admin'];
+    public const ROLES = ['user', 'admin_rt', 'admin_rw', 'admin_desa', 'super_admin', 'staff'];
     public const REGION_ROLES = ['desa' => 'admin_desa', 'kelurahan' => 'admin_desa', 'rw' => 'admin_rw', 'rt' => 'admin_rt'];
 
     public function hasSupportedRole(): bool
     {
+        if ($this->role === 'staff') {
+            return (bool) $this->staff_enabled && $this->status === 'aktif' && $this->region_id
+                && $this->creator?->role === 'admin_desa' && $this->creator->status === 'aktif'
+                && (int) $this->creator->region_id === (int) $this->region_id;
+        }
         return in_array($this->role, self::ROLES, true);
     }
 
@@ -209,12 +214,12 @@ class User extends Authenticatable
 
     public function isAdmin()
     {
-        return in_array($this->role, ['super_admin', 'admin_desa', 'admin_rw', 'admin_rt'], true);
+        return in_array($this->role, ['super_admin', 'admin_desa', 'admin_rw', 'admin_rt'], true) || ($this->isStaff() && $this->hasSupportedRole());
     }
 
     public function isStaff()
     {
-        return false; // Akun staf lama tidak lagi memiliki akses.
+        return $this->role === 'staff';
     }
 
     public function isSuperAdmin()
@@ -229,14 +234,15 @@ class User extends Authenticatable
 
     public function hasUnitPermission($unitKey)
     {
-        return in_array($this->role, ['super_admin', 'admin_desa'], true)
-            && in_array($unitKey, self::IZIN_UNIT, true);
+        if ($this->isStaff()) return $this->hasSupportedRole() && array_key_exists($unitKey, \App\Support\StaffAccess::UNITS) && $this->staffPermissions()->where('unit_key', $unitKey)->exists();
+        return in_array($this->role, ['super_admin', 'admin_desa'], true) && in_array($unitKey, self::IZIN_UNIT, true);
     }
 
-    /** Kompatibilitas pemanggil lama; akun staf tidak lagi diaktifkan. */
+    /** Petugas aktif untuk layanan dan desa yang disebutkan secara eksplisit. */
     public static function getStaffForUnit($unitKey, $regionId = null)
     {
-        return collect();
+        if (!$regionId || !array_key_exists($unitKey, \App\Support\StaffAccess::UNITS)) return collect();
+        return self::where('role', 'staff')->where('region_id', $regionId)->where('staff_enabled', true)->where('status', 'aktif')->whereHas('staffPermissions', fn ($q) => $q->where('unit_key', $unitKey))->get()->filter(fn ($user) => $user->hasSupportedRole());
     }
 
     /** Daftar modul Sistem Platform, dikelompokkan mengikuti sidebar. */
@@ -299,7 +305,7 @@ class User extends Authenticatable
         return $this->isSuperAdmin();
     }
 
-    /** Kompatibilitas pemanggil lama; akun staf tidak lagi diaktifkan. */
+    /** Akun staf hanya membantu layanan desa, bukan administrasi platform. */
     public function hanyaPlatform(): bool
     {
         return false;
@@ -320,16 +326,16 @@ class User extends Authenticatable
         'kabar_informasi' => 'Kabar dan Informasi Daerah',
             ];
 
-    /** Kompatibilitas pemanggil lama; akun staf tidak lagi diaktifkan. */
+    /** Nama layanan yang boleh ditampilkan pada menu petugas. */
     public function layananDipegang(): array
     {
-        return [];
+        return $this->getUnitPermissions()->map(fn ($key) => self::NAMA_UNIT[$key] ?? $key)->all();
     }
 
-    /** Kompatibilitas pemanggil lama; akun staf tidak lagi diaktifkan. */
+    /** Apakah akun mempunyai izin unit layanan. */
     public function punyaIzinUnit(): bool
     {
-        return false;
+        return $this->getUnitPermissions()->isNotEmpty();
     }
 
     /**
@@ -359,11 +365,12 @@ class User extends Authenticatable
     public function labelRole(): string
     {
         return ['user' => 'Warga', 'admin_rt' => 'Admin RT', 'admin_rw' => 'Admin RW',
-            'admin_desa' => 'Admin Desa', 'super_admin' => 'Super Admin'][$this->role] ?? 'Peran tidak didukung';
+            'admin_desa' => 'Admin Desa', 'super_admin' => 'Super Admin', 'staff' => 'Staf Layanan'][$this->role] ?? 'Peran tidak didukung';
     }
 
     public function getUnitPermissions()
     {
+        if ($this->isStaff()) return collect(array_keys(\App\Support\StaffAccess::UNITS))->filter(fn ($key) => $this->hasUnitPermission($key))->values();
         return in_array($this->role, ['super_admin', 'admin_desa'], true) ? collect(self::IZIN_UNIT) : collect();
     }
 

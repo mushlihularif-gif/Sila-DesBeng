@@ -48,42 +48,34 @@ class AdminNotification extends Model
     }
 
     /**
-     * Batasi notifikasi pada yang berhak dilihat satu pengguna.
-     *
-     * Aturannya ditaruh di sini, bukan di tiap pemanggil, karena sebelumnya
-     * bilah lonceng di layout dan halaman "Lihat Semua" punya versi sendiri:
-     * yang satu menyaring wilayah, yang satu tidak menyaring sama sekali —
-     * sehingga admin desa bisa membaca notifikasi desa lain lewat halaman itu.
-     *
-     * - Akun platform (Diskominfotik & staf platform) hanya melihat notifikasi
-     *   tanpa wilayah, yaitu urusan tingkat platform. Pesanan dan laporan milik
-     *   desa bukan wewenangnya, dan jumlahnya menenggelamkan yang penting.
-     * - Admin wilayah melihat wilayahnya sendiri beserta seluruh turunannya
-     *   (camat ikut melihat desa di bawahnya), ditambah notifikasi tanpa wilayah.
-     * - Pengguna tanpa wilayah hanya melihat notifikasi tanpa wilayah.
+     * Notifikasi platform untuk super admin; notifikasi wilayah untuk pengelola
+     * wilayah tersebut. Staf hanya melihat jenis layanan yang ditugaskan.
      */
     public function scopeUntukPengguna($query, ?User $pengguna)
     {
-        if (! $pengguna || $pengguna->bolehAksesPlatform()) {
+        if (!$pengguna) return $query->whereRaw('1 = 0');
+        if ($pengguna->bolehAksesPlatform()) {
             return $query->whereNull('region_id');
         }
 
+        if ($pengguna->isStaff()) {
+            $types = [];
+            foreach (['gas'=>['gas_order'], 'sewa_alat'=>['rental_request'], 'sewa_mobil'=>['mobil_order'], 'fasilitas_umum'=>['fasilitas_order']] as $unit=>$list) {
+                if ($pengguna->hasUnitPermission($unit)) $types = array_merge($types, $list);
+            }
+            return $query->where('region_id', $pengguna->region_id)->whereIn('type', $types);
+        }
         $regionId = $pengguna->region_id;
 
         if (! $regionId) {
-            return $query->whereNull('region_id');
-        }
-
-        // Akun Pemkab (super_admin, admin) tidak mengurus verifikasi identitas warga desa
-        if (in_array($pengguna->role, ['super_admin'])) {
-            $query->where('type', '!=', 'kyc');
+            return $query->whereRaw('1 = 0');
         }
 
         $wilayah = Region::getDescendantIds($regionId);
         $wilayah[] = $regionId;
 
         return $query->where(function ($q) use ($wilayah) {
-            $q->whereIn('region_id', $wilayah)->orWhereNull('region_id');
+            $q->whereIn('region_id', $wilayah);
         });
     }
 }

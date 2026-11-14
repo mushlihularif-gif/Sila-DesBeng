@@ -22,8 +22,8 @@ class UnitPenyewaanController extends Controller
     }
 
     // Default SOP Texts
-    private $defaultSopDitanggung = "1. Penyewa wajib menjaga barang sewaan dengan baik.\n2. Jika terjadi KERUSAKAN atau KEHILANGAN barang selama masa penyewaan, maka SEPENUHNYA menjadi tanggung jawab PENGGUNA (penyewa) untuk mengganti rugi atau memperbaiki alat tersebut sesuai dengan nilai barang.\n3. Keterlambatan pengembalian dapat dikenakan denda sesuai ketentuan yang berlaku.";
-    private $defaultSopTidakDitanggung = "1. Penyewa wajib menjaga barang sewaan dengan baik.\n2. Jika terjadi kerusakan atau kehilangan barang selama masa penyewaan yang diakibatkan oleh faktor ketidaksengajaan/bencana, maka TIDAK DITANGGUNG oleh pengguna (penyewa) karena telah didukung oleh dana operasional.\n3. Namun pengguna tetap diwajibkan melaporkan kejadian tersebut secara transparan.";
+    private $defaultSopDitanggung = \App\Support\ServiceTerms::RENTAL_LIABILITY;
+    private $defaultSopTidakDitanggung = \App\Support\ServiceTerms::RENTAL_NO_LIABILITY;
 
     /**
      * Menampilkan daftar barang.
@@ -158,12 +158,13 @@ class UnitPenyewaanController extends Controller
             'nama_barang' => 'required|string|max:255',
             'deskripsi' => 'required|string',
             'harga_sewa' => ['required','string','regex:/^(?:[0-9]+|[0-9]{1,3}(?:\.[0-9]{3})+)$/'], // string (agar titik/koma diperbolehkan)
+            'billing_basis'=>'required|in:per_activity,per_day',
             'stok' => 'required|integer|min:0|max:1000000',
             'status' => 'required|in:tersedia,disewa,rusak',
             'kategori' => 'required|string|max:255',
             'lokasi' => 'required|string|max:255',
-            'latitude' => 'nullable|numeric|between:-90,90',
-            'longitude' => 'nullable|numeric|between:-180,180',
+            'latitude' => 'nullable|required_with:longitude|numeric|between:-90,90',
+            'longitude' => 'nullable|required_with:latitude|numeric|between:-180,180',
             'satuan' => 'required|string|max:255',
             'foto_utama' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:8192',
             'foto_2' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:8192',
@@ -180,6 +181,7 @@ class UnitPenyewaanController extends Controller
             'nama_barang' => $request->nama_barang,
             'deskripsi' => $request->deskripsi,
             'harga_sewa' => $hargaBersih,
+            'billing_basis' => $validated['billing_basis'],
             'stok' => $request->stok,
             'status' => $request->status,
             'kategori' => $request->kategori,
@@ -274,13 +276,14 @@ class UnitPenyewaanController extends Controller
             'nama_barang' => 'required|string|max:255',
             'deskripsi' => 'required|string',
             'harga_sewa' => ['required','string','regex:/^(?:[0-9]+|[0-9]{1,3}(?:\.[0-9]{3})+)$/'], // Terima sebagai string (untuk format Rupiah)
+            'billing_basis'=>'required|in:per_activity,per_day',
             'stok' => 'required|integer|min:0|max:1000000',
             'original_stock'=>'required|integer|min:0',
             'status' => 'required|in:tersedia,disewa,rusak',
             'kategori' => 'required|string|max:255',
             'lokasi' => 'required|string|max:255',
-            'latitude' => 'nullable|numeric|between:-90,90',
-            'longitude' => 'nullable|numeric|between:-180,180',
+            'latitude' => 'nullable|required_with:longitude|numeric|between:-90,90',
+            'longitude' => 'nullable|required_with:latitude|numeric|between:-180,180',
             'satuan' => 'required|string|max:255',
             'foto_utama' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:8192',
             'foto_2' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:8192',
@@ -301,6 +304,7 @@ class UnitPenyewaanController extends Controller
             'nama_barang' => $request->nama_barang,
             'deskripsi' => $request->deskripsi,
             'harga_sewa' => $hargaBersih,
+            'billing_basis' => $validated['billing_basis'],
             'stok' => $request->stok,
             'status' => $request->status,
             'kategori' => $request->kategori,

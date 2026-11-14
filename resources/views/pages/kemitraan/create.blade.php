@@ -1,6 +1,6 @@
 @extends('layouts.user')
 
-@section('title', 'Gabung Kemitraan - SegiDaerah')
+@section('title', 'Daftar Pengelola Wilayah - SegiDaerah')
 
 @push('styles')
 <style>
@@ -201,7 +201,7 @@
     </script>
 
     {{-- Direktori Section --}}
-    <section class="relative z-10 pt-4 sm:pt-10 pb-16 sm:pb-32 mt-2 sm:mt-4 mb-8 sm:mb-20">
+    <section id="direktori-wilayah" class="relative z-10 pt-4 sm:pt-10 pb-16 sm:pb-32 mt-2 sm:mt-4 mb-8 sm:mb-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6">
             @php
                 $totalJoined = 0;
@@ -218,7 +218,7 @@
             <div class="mb-6 sm:mb-8 bg-white/60 backdrop-blur-md rounded-2xl border border-gray-100 p-4 sm:p-6 flex flex-row items-center justify-between animate-section shadow-sm gap-4">
                 <div class="flex flex-col justify-center min-w-0 flex-1">
                     <h2 class="text-lg sm:text-2xl font-bold text-black mb-1 sm:mb-2 truncate" style="font-family: 'Poppins', sans-serif;">
-                        Kabupaten Bengkalis
+                        Kecamatan Bengkalis
                     </h2>
                     <p class="text-gray-600 text-xs sm:text-sm font-semibold">
                         Total Desa / Kelurahan Bergabung
@@ -266,15 +266,17 @@
                                 })->count();
                             @endphp
                             <div id="kecamatan-content-{{ $kecamatan->id }}" class="kecamatan-panel transition-opacity duration-300 {{ $index === 0 ? 'block opacity-100' : 'hidden opacity-0' }}" data-joined="{{ $joinedCount }}">
-                        @if($joinedCount > 0)
+                        @if($kecamatan->children->isNotEmpty())
                             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
                                 @foreach($kecamatan->children as $desa)
-                                @if($desa->users->filter(function($user) { return in_array($user->role, ['admin_desa']); })->count() > 0)
+                                @php
+    $villageJoined = $desa->users->where('role', 'admin_desa')->isNotEmpty();
+@endphp
                                 <div class="bg-white/40 backdrop-blur-sm border border-gray-100 shadow-sm rounded-xl p-5 hover:shadow-md transition-all animate-section">
                                     <div class="flex justify-between items-start mb-4">
                                         <h3 class="font-bold text-gray-800">{{ $desa->name }}</h3>
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                            Bergabung
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $villageJoined ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600' }}">
+                                            {{ $villageJoined ? 'Sudah Bergabung' : 'Belum Bergabung' }}
                                         </span>
                                     </div>
                                     
@@ -343,7 +345,6 @@
                                         @endif
                                     </div>
                                 </div>
-                                @endif
                                 @endforeach
                             </div>
                         @else
@@ -351,7 +352,7 @@
                                 <div class="mx-auto w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
                                     <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
                                 </div>
-                                <p class="text-gray-500 font-medium">Belum ada desa yang bergabung di kecamatan ini.</p>
+                                <p class="text-gray-500 font-medium">Data desa belum tersedia.</p>
                             </div>
                         @endif
                             </div>

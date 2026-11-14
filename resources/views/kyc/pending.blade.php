@@ -83,9 +83,7 @@
 
             {{-- Tombol Aksi --}}
             <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
-                <a href="{{ route('beranda') }}" class="w-full sm:w-auto inline-flex justify-center items-center py-3 px-8 border border-transparent rounded-full shadow-md text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 transition transform hover:-translate-y-0.5">
-                    Kembali ke Beranda
-                </a>
+                <x-home-link href="{{ route('beranda') }}" />
                 <a href="{{ route('profile') }}" class="w-full sm:w-auto inline-flex justify-center items-center py-3 px-6 border border-gray-300 rounded-full shadow-xs text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 transition">
                     Lihat Profil Saya
                 </a>

@@ -219,7 +219,7 @@ class RentalBooking extends Model
 
     public function getBookedUnitPriceAttribute(): float
     {
-        return (float) ($this->unit_price ?? ((float)$this->total_amount / max(1, (int)$this->quantity)));
+        return (float) ($this->unit_price ?? ((float)$this->total_amount / max(1, (int)$this->quantity * ($this->billing_basis === 'per_day' ? (int)$this->days_count : 1))));
     }
 
 }

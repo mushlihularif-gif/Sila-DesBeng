@@ -212,7 +212,7 @@
                     @endif
                 </div>
 
-                <p class="mb-6 rounded-xl bg-blue-50 p-4 text-blue-900">Harga dihitung sekali untuk satu kegiatan: harga alat � jumlah alat. Tanggal menunjukkan jadwal pemakaian, tidak menambah tarif harian. Pengelola akan memastikan ketersediaan sebelum menyetujui.</p>
+                <p class="mb-6 rounded-xl bg-blue-50 p-4 text-blue-900">{{ $item->billing_basis === 'per_day' ? 'Tarif harian: harga alat × jumlah alat × jumlah hari. Tanggal mulai dan akhir ikut dihitung; 12–14 berarti 3 hari.' : 'Tarif sekali pakai: harga alat × jumlah alat. Tanggal menunjukkan jadwal pemakaian, tidak menambah tarif harian.' }} Pengelola akan memastikan ketersediaan sebelum menyetujui.</p>
                 <!-- Alamat digunakan untuk pengantaran maupun koordinasi penjemputan -->
                 <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
                     <div class="flex items-center gap-3 mb-4">
@@ -427,6 +427,7 @@
                         <div id="transfer-payment-sewa" class="payment-content {{ $defaultPaymentMethod === 'transfer' ? '' : 'hidden' }}">
                             <div class="bg-white border-2 border-blue-50 rounded-2xl shadow-sm p-6 sm:p-8 mb-6">
                                 <h4 class="font-bold text-gray-800 mb-4">Transfer ke Rekening Berikut</h4>
+                                <p class="font-bold text-blue-600 mb-4" id="total-amount-transfer"></p>
 
                                 <div class="flex items-center gap-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-5 mb-4">
                                     @if(!empty($bankLogoPath))
@@ -468,6 +469,7 @@
                         <div id="ewallet-payment-sewa" class="payment-content {{ $defaultPaymentMethod === 'ewallet' ? '' : 'hidden' }}">
                             <div class="bg-white border-2 border-blue-50 rounded-2xl shadow-sm p-6 sm:p-8 mb-6">
                                 <h4 class="font-bold text-gray-800 mb-4">Kirim ke E-Wallet Berikut</h4>
+                                <p class="font-bold text-blue-600 mb-4" id="total-amount-ewallet"></p>
 
                                 <div class="flex items-center gap-4 bg-gradient-to-br from-sky-50 to-cyan-50 rounded-2xl p-5 mb-4">
                                     @if($adaLogoEwallet)
@@ -1118,7 +1120,8 @@
             if (!form || form.dataset.initialized === 'true') return;
             form.dataset.initialized = 'true';
 
-            const pricePerUnit = {{ number_format($item->harga_sewa, 0, '.', '') }};
+        const billingBasis = '{{ $item->billing_basis }}';
+        const pricePerUnit = {{ number_format($item->harga_sewa, 0, '.', '') }};
         const maxStock = Math.min(50, {{ $item->stok }});
         
         // Helper to safely get element
@@ -1143,11 +1146,16 @@
         const endDateJemput = getEl('end-date-jemput');
         const daysCountJemput = getEl('days-count-jemput');
 
+        function rentalDays(start, end) {
+            if (billingBasis !== 'per_day') return 1;
+            const duration = (Date.parse(end?.value) - Date.parse(start?.value)) / 86400000;
+            return Number.isFinite(duration) && duration >= 0 ? Math.floor(duration) + 1 : 1;
+        }
         // Define update functions FIRST before using them
         function updateTotals() {
             if (!qtyDisplay) return;
             const qty = parseInt(qtyDisplay.value) || 1;
-            const subtotal = pricePerUnit * qty;
+            const subtotal = pricePerUnit * qty * rentalDays(startDate, endDate);
             const total = subtotal;
             
             const subtotalEl = getEl('subtotal');
@@ -1157,12 +1165,14 @@
             if (subtotalEl) subtotalEl.textContent = 'Rp. ' + subtotal.toLocaleString('id-ID');
             if (totalTransferEl) totalTransferEl.textContent = 'Rp. ' + total.toLocaleString('id-ID');
             if (totalCashEl) totalCashEl.textContent = 'Rp. ' + total.toLocaleString('id-ID');
+            const walletTotal = getEl('total-amount-ewallet');
+            if (walletTotal) walletTotal.textContent = 'Rp. ' + total.toLocaleString('id-ID');
         }
 
         function updateTotalsJemput() {
             if (!qtyDisplayJemput) return;
             const qty = parseInt(qtyDisplayJemput.value) || 1;
-            const subtotal = pricePerUnit * qty;
+            const subtotal = pricePerUnit * qty * rentalDays(startDateJemput, endDateJemput);
             const total = subtotal;
             
             const subtotalEl = getEl('subtotal-jemput');

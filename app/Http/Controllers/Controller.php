@@ -19,14 +19,7 @@ abstract class Controller
             return $query->whereRaw('1 = 0');
         }
         
-        // Dapatkan region_id. Jika admin/super_admin tidak punya region_id, fallback ke Region pertama (Kabupaten)
         $regionId = $currentUser->region_id;
-        if (!$regionId && in_array($currentUser->role, ['super_admin'])) {
-            $region = \App\Models\Region::first();
-            if ($region) {
-                $regionId = $region->id;
-            }
-        }
 
         // Jika super_admin dan TIDAK strict, mungkin bisa melihat semua data (opsional, tapi karena user minta privasi ketat, kita berlakukan ketat jika strict = true)
         if ($currentUser->role === 'super_admin' && !$strict) {
@@ -42,7 +35,7 @@ abstract class Controller
             }
 
                 // Pengurus hanya melihat pengguna dalam wilayah tugasnya.
-            if (in_array($currentUser->role, ['admin_desa', 'admin_rw', 'admin_rt', 'super_admin'])) {
+            if (in_array($currentUser->role, ['admin_desa', 'admin_rw', 'admin_rt', 'super_admin', 'staff'])) {
                 $allowedRegionIds = \App\Models\Region::getDescendantIds($regionId);
                 $allowedRegionIds[] = $regionId;
 
@@ -70,7 +63,7 @@ abstract class Controller
             return [];
         }
 
-        $peranBerwilayah = ['super_admin', 'admin_desa'];
+        $peranBerwilayah = ['super_admin', 'admin_desa', 'staff'];
 
         if (! in_array($currentUser->role, $peranBerwilayah)) {
             return [];
@@ -87,6 +80,11 @@ abstract class Controller
             return [];
         }
 
-        return $region->services->pluck('name')->toArray();
+        $services = $region->services;
+        if ($currentUser->isStaff()) {
+            $units = ['penjualan-gas'=>'gas', 'penyewaan-alat'=>'sewa_alat', 'penyewaan-mobil'=>'sewa_mobil', 'fasilitas-umum'=>'fasilitas_umum'];
+            $services = $services->filter(fn ($service) => isset($units[$service->slug]) && $currentUser->hasUnitPermission($units[$service->slug]));
+        }
+        return $services->pluck('name')->values()->all();
     }
 }

@@ -2,24 +2,11 @@
 
 @section('page')
 <section class="relative z-10 min-h-screen pt-40 pb-16">
-    {{-- Background profil sebelumnya --}}
-    <div class="absolute inset-0 overflow-hidden pointer-events-none">
-        <img src="{{ asset('User/img/backgrounds/3.webp') }}" alt="Background"
-             class="absolute inset-0 w-full h-full object-cover opacity-60">
-    </div>
-
-    <div class="absolute top-0 left-0 w-[700px] h-[550px] pointer-events-none">
-        <div class="absolute inset-0 bg-gradient-to-br from-blue-400/50 via-blue-500/30 to-transparent rounded-br-[40%]"></div>
-    </div>
-
-    <div class="absolute bottom-0 right-0 w-[650px] h-[450px] pointer-events-none">
-        <div class="absolute inset-0 bg-gradient-to-tl from-yellow-300/40 via-yellow-400/25 to-transparent rounded-tl-[40%]"></div>
-    </div>
-
+    @include('partials.abstract-bg')
     <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6">
         <div class="mb-8">
-            <h1 class="text-3xl md:text-4xl font-bold text-white drop-shadow-[0_4px_12px_rgba(0,0,0,0.3)] flex items-center gap-3">
-                Profil Saya
+            <h1 class="text-3xl md:text-4xl font-bold text-[#115789] flex items-center gap-3">
+                {{ $isSettings ? 'Pengaturan Akun' : 'Profil Saya' }}
                 @if($user->verification_status === 'verified')
                 <img src="{{ asset('images/verified-badge.png?v=2') }}" class="w-8 h-8 md:w-9 md:h-9 object-contain drop-shadow-md select-none inline-block" alt="Warga Terverifikasi" title="Warga Terverifikasi">
                 @endif
@@ -28,10 +15,12 @@
 
         {{-- Peringatan Sukses ditangani secara global oleh AlpineJS Toast di app.blade.php --}}
 
-        <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data" data-turbo="false">
+        <nav class="flex gap-4 mb-6" aria-label="Menu akun"><a href="{{ route('profile') }}" class="text-[#115789] font-semibold underline">Profil Saya</a><a href="{{ route('user.settings') }}" class="text-[#115789] font-semibold underline">Pengaturan Akun</a></nav>
+        <form action="{{ route($isSettings ? 'user.settings.update' : 'profile.update') }}" method="POST" enctype="multipart/form-data" data-turbo="false">
             @csrf
             @method('PUT')
 
+            @if(!$isSettings)
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
                 {{-- KOLOM KIRI: Kartu Avatar (span 4 kolom) --}}
                 <div class="lg:col-span-4">
@@ -203,6 +192,8 @@
             </div> {{-- Menutup grid utama (kiri dan kanan) --}}
         </div>
 
+            @endif
+            @if($isSettings)
             {{-- KOLOM BAWAH: Detail Tambahan (Di luar grid utama agar otomatis 100% lebar) --}}
             <div class="mt-5 w-full">
                 <div class="glass-card rounded-3xl p-6 border border-white/50 shadow-lg">
@@ -245,7 +236,7 @@
                         <div>
                             <label class="block text-sm font-bold text-gray-800 mb-2">RW</label>
                             <input type="text" name="rw" value="{{ old('rw', $user->rw) }}"
-                                   placeholder="Contoh: 005" maxlength="10"
+                                   placeholder="Contoh: 005" maxlength="3" inputmode="numeric" pattern="[0-9]{1,3}"
                                    class="w-full px-4 py-2.5 bg-white/80 border border-white/60 rounded-xl focus:border-blue-400 focus:ring-2 focus:ring-blue-200/50 outline-none transition glass-input text-gray-800 text-sm">
                             @error('rw')
                             <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
@@ -255,7 +246,7 @@
                         <div>
                             <label class="block text-sm font-bold text-gray-800 mb-2">RT</label>
                             <input type="text" name="rt" value="{{ old('rt', $user->rt) }}"
-                                   placeholder="Contoh: 013" maxlength="10"
+                                   placeholder="Contoh: 013" maxlength="3" inputmode="numeric" pattern="[0-9]{1,3}"
                                    class="w-full px-4 py-2.5 bg-white/80 border border-white/60 rounded-xl focus:border-blue-400 focus:ring-2 focus:ring-blue-200/50 outline-none transition glass-input text-gray-800 text-sm">
                             @error('rt')
                             <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
@@ -270,15 +261,18 @@
                                class="w-full px-4 py-2.5 bg-white/60 border border-white/40 rounded-xl text-gray-700 cursor-not-allowed glass-input text-sm">
                     </div>
 
+                    @endif
                     {{-- 3 Tombol Aksi - Tata Letak Horizontal --}}
                     <div class="pt-4 mt-2 border-t border-white/30">
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            @if($isSettings)
                             {{-- Ubah Sandi - Button Border Putih --}}
                             <button type="button" id="btn-open-change-password"
                                     class="button-interactive py-3.5 bg-white/70 backdrop-blur-sm text-blue-500 rounded-full font-semibold text-base transition-all duration-300 shadow-md border border-white/80 hover:bg-white/90 hover:shadow-lg hover:scale-105 active:scale-95">
                                 Ubah Sandi
                             </button>
                             
+                            @endif
                             {{-- Simpan - Button Border Putih --}}
                             <button type="submit" 
                                     class="button-interactive py-3.5 bg-white/70 backdrop-blur-sm text-blue-500 rounded-full font-semibold text-base transition-all duration-300 shadow-md border border-white/80 hover:bg-white/90 hover:shadow-lg hover:scale-105 active:scale-95">
@@ -292,12 +286,14 @@
                             </button>
                         </div>
                     </div>
+                @if($isSettings)
                 </div>
             </div>
+                @endif
         </form>
 
         {{-- Pengajuan Mutasi / Pindah Desa --}}
-        @if($user->verification_status === 'verified')
+        @if($isSettings && $user->verification_status === 'verified')
         @php
             $pendingMutasi = \App\Models\MutasiPenduduk::with(['toRegion.parent', 'fromRegion'])
                 ->where('user_id', $user->id)

@@ -25,7 +25,7 @@ class PartnerApplicationController extends Controller
                 $query->whereIn('type', ['desa', 'kelurahan'])
                       ->with(['services' => function($q) {
                           $q->wherePivot('is_active', true);
-                      }, 'users']);
+                      }, 'users' => fn ($q) => $q->where('role', 'admin_desa')->where('status', 'aktif')->select('id', 'region_id', 'role')])->orderBy('name');
             }])
             ->get();
 
@@ -60,7 +60,7 @@ class PartnerApplicationController extends Controller
 
                     // Cek apakah desa ini sudah punya admin
                     $hasAdmin = $userDesa->users()
-                        ->whereIn('role', ['admin_desa'])
+                        ->whereIn('role', ['admin_desa'])->where('status', 'aktif')
                         ->exists();
 
                     if ($hasAdmin) {
@@ -312,7 +312,7 @@ class PartnerApplicationController extends Controller
             }
         } elseif ($userDesa && $request->region_type === 'desa') {
             // Cek apakah desa user sudah memiliki admin
-            $hasAdmin = $userDesa->users()->whereIn('role', ['admin_desa'])->exists();
+            $hasAdmin = $userDesa->users()->whereIn('role', ['admin_desa'])->where('status', 'aktif')->exists();
             if ($hasAdmin) {
                 return back()->withInput()->withErrors([
                     'region_type' => 'Desa Anda (' . $userDesa->name . ') sudah terdaftar dan memiliki Admin Desa. Silakan ajukan pendaftaran sebagai Pengurus RW atau RT.',

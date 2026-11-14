@@ -3,7 +3,8 @@
 @section('title', 'Rincian Sewa Alat')
 
 @section('page')
-<main class="flex-grow w-full bg-slate-50 py-28 px-4">
+@include('partials.abstract-bg')
+<main class="relative z-10 flex-grow w-full py-28 px-4">
     <section class="max-w-2xl mx-auto">
         <div class="rounded-3xl bg-white shadow-lg border border-slate-100 p-6 sm:p-10">
             <div class="text-center mb-8">
@@ -32,7 +33,7 @@
                 </div>
             </div>
 
-            <p class="mt-4 text-sm">Jadwal: {{ $order->start_date->format('d/m/Y') }} – {{ $order->end_date->format('d/m/Y') }}. Total mengikuti nilai pesanan saat dibuat.</p>
+            <p class="mt-4 text-sm">Jadwal: {{ $order->start_date->format('d/m/Y') }} â€“ {{ $order->end_date->format('d/m/Y') }}. Tarif pesanan: {{ $order->billing_basis === 'per_day' ? 'Harian ('.$order->days_count.' hari)' : ($order->billing_basis === 'per_activity' ? 'Sekali pakai' : 'Sesuai transaksi lama') }}. Total mengikuti nilai pesanan saat dibuat.</p>
             @if($order->return_time)
                 <p class="mt-3 text-sm">Dikembalikan: {{ $order->return_time->format('d/m/Y H:i') }}. Layak pakai: {{ $order->returned_quantity ?? $order->quantity }} unit. {{ $order->return_notes }}</p>
             @endif
@@ -44,9 +45,9 @@
                     <p class="mt-2">Bayar kepada petugas saat {{ $order->delivery_method === 'jemput' ? 'mengambil alat' : 'alat diterima' }}. Petugas akan mencatat penerimaan pembayaran.</p>
                 @elseif(!$paid && !$order->payment_proof)
                     @if(strtolower($order->payment_method) === 'transfer')
-                        <p class="mt-2">Transfer ke {{ $setting->bank_name }} — {{ $setting->bank_account_number }}, atas nama {{ $setting->bank_account_holder }}.</p>
+                        <p class="mt-2">Transfer ke {{ $setting->bank_name }} â€” {{ $setting->bank_account_number }}, atas nama {{ $setting->bank_account_holder }}.</p>
                     @else
-                        <p class="mt-2">Kirim ke {{ $setting->ewallet_name }} — {{ $setting->ewallet_number }}, atas nama {{ $setting->ewallet_account_holder }}.</p>
+                        <p class="mt-2">Kirim ke {{ $setting->ewallet_name }} â€” {{ $setting->ewallet_number }}, atas nama {{ $setting->ewallet_account_holder }}.</p>
                     @endif
                     <p class="mt-2">Unggah bukti setelah membayar. Jika bukti sebelumnya tidak sesuai, periksa alasan pada notifikasi Anda lalu kirim bukti yang benar.</p>
                 @elseif(!$paid)

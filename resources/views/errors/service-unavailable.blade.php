@@ -25,9 +25,7 @@
             </p>
 
             <div class="flex flex-col sm:flex-row justify-center gap-4">
-                <a href="{{ route('beranda') }}" class="px-8 py-3 bg-[#0099ff] text-white rounded-full font-semibold hover:bg-blue-600 transition shadow-lg hover:shadow-xl hover:-translate-y-0.5">
-                    Kembali ke Beranda
-                </a>
+                <x-home-link href="{{ route('beranda') }}" />
                 <a href="{{ route('bumdes.profil') }}" class="px-8 py-3 bg-white text-[#0099ff] border-2 border-gray-200 rounded-full font-semibold hover:bg-gray-50 transition shadow-sm hover:shadow-md hover:-translate-y-0.5">
                     Pilih Daerah Lain
                 </a>

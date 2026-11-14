@@ -228,6 +228,10 @@ class RequestController extends Controller
         $baseMT = $this->applyRegionFilter(MobilBooking::withTrashed(), 'mobil', true);
         $baseFT = $this->applyRegionFilter(FasilitasUmumBooking::withTrashed(), 'fasilitas', true);
 
+        foreach ([[$baseRT, $canViewRental], [$baseGT, $canViewGas], [$baseMT, $canViewMobil], [$baseFT, $canViewFasilitas]] as [$query, $allowed]) {
+            if (!$allowed) $query->whereRaw('1 = 0');
+        }
+
         // Hitung statistik (Include deleted for history functionality)
         $stats = [
             'total' => $baseRT->clone()->count() + $baseGT->clone()->count() + $baseMT->clone()->count() + $baseFT->clone()->count(),
@@ -289,28 +293,16 @@ class RequestController extends Controller
 
     public function getCounts()
     {
-        $counts = [
-            'rental' => [
-                'pending' => RentalBooking::where('status', 'pending')->count(),
-                'cancellation' => RentalBooking::where('cancellation_status', 'pending')->count(),
-                'total' => RentalBooking::where('status', 'pending')->orWhere('cancellation_status', 'pending')->count()
-            ],
-            'gas' => [
-                'pending' => GasOrder::where('status', 'pending')->count(),
-                'cancellation' => GasOrder::where('cancellation_status', 'pending')->count(),
-                'total' => GasOrder::where('status', 'pending')->orWhere('cancellation_status', 'pending')->count()
-            ],
-            'mobil' => [
-                'pending' => MobilBooking::where('status', 'pending')->count(),
-                'cancellation' => MobilBooking::where('cancellation_status', 'pending')->count(),
-                'total' => MobilBooking::where('status', 'pending')->orWhere('cancellation_status', 'pending')->count()
-            ],
-            'fasilitas' => [
-                'pending' => FasilitasUmumBooking::where('status', 'pending')->count(),
-                'cancellation' => FasilitasUmumBooking::where('cancellation_status', 'pending')->count(),
-                'total' => FasilitasUmumBooking::where('status', 'pending')->orWhere('cancellation_status', 'pending')->count()
-            ],
-        ];
+        $counts = [];
+        foreach (self::WILAYAH_PER_TIPE as $type => [$model, $relation]) {
+            $query = $this->applyRegionFilter($model::query(), $relation, true);
+            if (!auth()->user()->hasUnitPermission(self::IZIN_PER_TIPE[$type])) $query->whereRaw('1 = 0');
+            $counts[$type] = [
+                'pending' => (clone $query)->where('status', 'pending')->count(),
+                'cancellation' => (clone $query)->where('cancellation_status', 'pending')->count(),
+                'total' => (clone $query)->where(fn ($q) => $q->where('status', 'pending')->orWhere('cancellation_status', 'pending'))->count(),
+            ];
+        }
 
         return response()->json($counts);
     }

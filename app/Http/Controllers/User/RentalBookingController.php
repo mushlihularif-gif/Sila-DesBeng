@@ -36,12 +36,7 @@ class RentalBookingController extends Controller
         $region = $item->region;
         $paymentInfo = $region ? ($region->payment_info ?? []) : [];
         
-        $activeSop = $paymentInfo['sop_penyewaan_active'] ?? 'ditanggung';
-        
-        $defaultSopDitanggung = "1. Penyewa wajib menjaga barang sewaan dengan baik.\n2. Jika terjadi KERUSAKAN atau KEHILANGAN barang selama masa penyewaan, maka SEPENUHNYA menjadi tanggung jawab PENGGUNA (penyewa) untuk mengganti rugi atau memperbaiki alat tersebut sesuai dengan nilai barang.\n3. Keterlambatan pengembalian dapat dikenakan denda sesuai ketentuan yang berlaku.";
-        $defaultSopTidakDitanggung = "1. Penyewa wajib menjaga barang sewaan dengan baik.\n2. Jika terjadi kerusakan atau kehilangan barang selama masa penyewaan yang diakibatkan oleh faktor ketidaksengajaan/bencana, maka TIDAK DITANGGUNG oleh pengguna (penyewa) karena telah didukung oleh dana operasional/APBD.\n3. Namun pengguna tetap diwajibkan melaporkan kejadian tersebut secara transparan.";
-        
-        $sop_penyewaan_alat = $paymentInfo['sop_penyewaan_' . $activeSop] ?? ($activeSop == 'ditanggung' ? $defaultSopDitanggung : $defaultSopTidakDitanggung);
+        $sop_penyewaan_alat = \App\Support\ServiceTerms::forRegion($item->region, 'rental');
         
         // Ambil jumlah dari permintaan (dari halaman detail)
         request()->validate(['quantity'=>'sometimes|integer|min:1|max:50']);

@@ -36,12 +36,7 @@ class FasilitasUmumBookingController extends Controller
         $region = \App\Models\Region::find(Auth::user()->region_id);
         $paymentInfo = $region ? ($region->payment_info ?? []) : [];
         
-        $activeSop = $paymentInfo['sop_fasilitas_active'] ?? 'ditanggung';
-        
-        $defaultSopDitanggung = "1. Penyewa wajib menjaga fasilitas umum dengan baik.\n2. Jika terjadi KERUSAKAN fasilitas selama masa peminjaman/penyewaan, maka SEPENUHNYA menjadi tanggung jawab PENGGUNA (penyewa) untuk mengganti rugi atau memperbaiki fasilitas tersebut sesuai dengan kerusakan.\n3. Fasilitas harus dikembalikan dalam keadaan bersih dan rapi.";
-        $defaultSopTidakDitanggung = "1. Penyewa wajib menjaga fasilitas umum dengan baik.\n2. Jika terjadi kerusakan fasilitas selama masa peminjaman/penyewaan yang diakibatkan oleh faktor ketidaksengajaan/bencana, maka TIDAK DITANGGUNG oleh pengguna karena telah didukung oleh dana operasional/APBD.\n3. Namun pengguna tetap diwajibkan melaporkan kejadian tersebut secara transparan dan menjaga kebersihan.";
-        
-        $sop_fasilitas = $paymentInfo['sop_fasilitas_' . $activeSop] ?? ($activeSop == 'ditanggung' ? $defaultSopDitanggung : $defaultSopTidakDitanggung);
+        $sop_fasilitas = \App\Support\ServiceTerms::forRegion($item->region, 'facility');
         
         $quantity = request()->get('quantity', 1);
         

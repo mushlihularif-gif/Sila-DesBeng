@@ -366,6 +366,9 @@ Route::middleware(['auth', 'role:user'])->group(function () {
     Route::post('/kyc/submit', [\App\Http\Controllers\KycController::class, 'submit'])->name('kyc.submit');
 });
 
+Route::get('/pengaturan', [App\Http\Controllers\User\ProfileController::class, 'index'])->middleware('role:user')->name('user.settings');
+Route::put('/pengaturan', [App\Http\Controllers\User\ProfileController::class, 'updateSettings'])->middleware('role:user')->name('user.settings.update');
+
 Route::get('/profile', [App\Http\Controllers\User\ProfileController::class, 'index'])
     ->name('profile')
     ->middleware('role:user');
@@ -405,6 +408,10 @@ Route::get('/maintenance', [DashboardController::class, 'maintenance'])->name('m
 
 // Route Admin
 Route::prefix('admin')->middleware('role:admin')->group(function () {
+    Route::get('/staf-layanan', [\App\Http\Controllers\Admin\ServiceStaffController::class, 'index'])->name('admin.staff.index');
+    Route::post('/staf-layanan', [\App\Http\Controllers\Admin\ServiceStaffController::class, 'store'])->name('admin.staff.store');
+    Route::put('/staf-layanan/{id}', [\App\Http\Controllers\Admin\ServiceStaffController::class, 'update'])->name('admin.staff.update');
+
     // Dashboard (Papan Kontrol)
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
 
@@ -532,11 +539,11 @@ Route::prefix('admin')->middleware('role:admin')->group(function () {
     ]);
 
     // Route untuk Pengaturan Sistem
-    Route::get('/pengaturan-sistem', [SystemSettingController::class, 'index'])->name('admin.system-settings.index');
-    Route::put('/pengaturan-sistem', [SystemSettingController::class, 'update'])->name('admin.system-settings.update');
-    Route::delete('/pengaturan-sistem/reset', [SystemSettingController::class, 'reset'])->name('admin.system-settings.reset');
-    Route::get('/pengaturan-pembayaran-pusat', [SystemSettingController::class, 'paymentIndex'])->name('admin.system-settings.payment');
-    Route::put('/pengaturan-pembayaran-pusat', [SystemSettingController::class, 'paymentUpdate'])->name('admin.system-settings.payment.update');
+    Route::get('/pengaturan-sistem', [SystemSettingController::class, 'index'])->name('admin.system-settings.index')->middleware('role:super_admin');
+    Route::put('/pengaturan-sistem', [SystemSettingController::class, 'update'])->name('admin.system-settings.update')->middleware('role:super_admin');
+    Route::delete('/pengaturan-sistem/reset', [SystemSettingController::class, 'reset'])->name('admin.system-settings.reset')->middleware('role:super_admin');
+    Route::get('/pengaturan-pembayaran-pusat', [SystemSettingController::class, 'paymentIndex'])->name('admin.system-settings.payment')->middleware('role:super_admin');
+    Route::put('/pengaturan-pembayaran-pusat', [SystemSettingController::class, 'paymentUpdate'])->name('admin.system-settings.payment.update')->middleware('role:super_admin');
 
     // Kotak masuk Gmail untuk panel kanan dashboard (baca-saja, JSON).
     // Dibatasi super_admin karena yang dibaca adalah kotak surat resmi platform.

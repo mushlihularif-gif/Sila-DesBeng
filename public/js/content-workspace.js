@@ -1,3 +1,4 @@
+import { mountPhotoPicker } from './content-photo-picker.js';
 export const states = {draft:'Draf — belum dikirim',pending:'Menunggu admin',review:'Sedang diperiksa',published:'Terbit',scheduled:'Dijadwalkan',merged:'Digabungkan',rejected:'Tidak diterbitkan',cancelled:'Dibatalkan',expired:'Sudah dibersihkan',archived:'Arsip'};
 export function acceptSnapshot(current, incoming) { return Number(incoming.revision) >= Number(current.revision); }
 export function acceptPoll(startedEpoch, currentEpoch, startedChanges, currentChanges) {
@@ -249,7 +250,7 @@ function startWorkspace(root) {
     function checkPendingPhotos() {
         if (!$('photos').files.length) return;
         $('photos').scrollIntoView({behavior:'smooth',block:'center'});
-        throw new Error('Foto yang dipilih belum ditambahkan. Tekan Tambahkan Foto terlebih dahulu, atau kosongkan pilihan foto.');
+        throw new Error('Foto yang dipilih belum ditambahkan. Tekan Simpan Foto ke Draf terlebih dahulu, atau kosongkan pilihan foto.');
     }
     $('release').onclick = () => run(async () => { checkPendingPhotos(); await save(); const result = await mutate('release'); token = null; revision = result.revision; render(result,true); });
     const currentText = () => JSON.stringify([$('title').value,$('description').value]);
@@ -295,13 +296,14 @@ function startWorkspace(root) {
     });
     if ($('reject')) $('reject').onclick = () => decision('reject');
     if ($('cancel')) $('cancel').onclick = () => decision('cancel');
+    const photoPicker = mountPhotoPicker($('photos'), $('photo-slots'), $('photo-status'), controls);
     $('upload').onclick = () => run(async () => {
         await save(); const body = new FormData(); body.set('token',token); body.set('revision',revision);
         for (const file of $('photos').files) body.append('images[]',file);
-        const result = await request('images',body,true); revision = result.revision; render(result,false); $('photos').value = '';
+        const result = await request('images',body,true); revision = result.revision; render(result,false); photoPicker.clear();
         text('photo-status','Foto berhasil ditambahkan ke draf.');
     });
-    $('photos').onchange = () => { text('photo-status',$('photos').files.length ? `${$('photos').files.length} foto dipilih, belum disimpan. Tekan Tambahkan Foto.` : ''); controls(); };
+    $('photos').onchange = () => { text('photo-status',$('photos').files.length ? `${$('photos').files.length} foto dipilih, belum disimpan. Tekan Simpan Foto ke Draf.` : ''); controls(); };
     $('write-mode').onchange = () => { const assisted = $('write-mode').value === 'assisted'; $('facts-panel').hidden = !assisted; text('write-help',assisted ? 'Tulis poin pentingnya saja. AI menyusun judul dan cerita, lalu Anda memilih hasil yang ingin digunakan.' : 'Tulis dengan bahasa Anda sendiri. Sebelum dikirim, Anda bisa membandingkannya dengan hasil koreksi AI.'); };
     async function fetchHelp(mode) {
         aiVersion = changes;

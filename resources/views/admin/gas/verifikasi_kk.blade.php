@@ -14,6 +14,9 @@
             @csrf
             <label class="form-label" for="kk-{{ $kk->id }}">Nomor KK (16 angka)</label>
             <input id="kk-{{ $kk->id }}" name="no_kk" class="form-control mb-3" inputmode="numeric" pattern="[0-9]{16}" maxlength="16" required autocomplete="off">
+            <label class="form-label" for="confirm-kk-{{ $kk->id }}">Ketik ulang nomor KK dari bagian atas dokumen (bukan NIK)</label>
+            <input id="confirm-kk-{{ $kk->id }}" name="no_kk_confirmation" class="form-control mb-3" inputmode="numeric" pattern="[0-9]{16}" maxlength="16" required autocomplete="off">
+            <p class="text-muted small">Nomor KK mengidentifikasi keluarga. NIK di bawah adalah milik setiap anggota. Sistem menolak NIK yang sudah terhubung ke KK lain dan mewajibkan NIK pemohon ada di daftar.</p>
             <label class="form-label" for="head-{{ $kk->id }}">Nama kepala keluarga</label>
             <input id="head-{{ $kk->id }}" name="kepala_keluarga" class="form-control mb-3" maxlength="255" required autocomplete="off">
             <label class="form-label" for="niks-{{ $kk->id }}">NIK anggota keluarga — satu NIK per baris, termasuk pemohon</label>

@@ -12,10 +12,7 @@
 @endsection
 
 @section('actions')
-    <a href="{{ route('beranda') }}" class="btn btn-primary">
-        <i class="bx bx-home-circle"></i>
-        <span>Kembali ke Beranda</span>
-    </a>
+    <x-home-link href="{{ route('beranda') }}" />
     <a href="{{ route('login') }}" class="btn btn-secondary">
         <i class="bx bx-log-in"></i>
         <span>Masuk ke Akun</span>

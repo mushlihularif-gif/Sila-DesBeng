@@ -82,6 +82,7 @@ class CheckRole
         $user = Auth::guard($guard)->user();
         abort_unless($user->hasSupportedRole(), 403, 'Peran akun tidak didukung. Hubungi pengelola.');
         abort_if($user->status === 'non_aktif', 403, 'Akun tidak aktif.');
+        if ($user->isStaff()) abort_unless(\App\Support\StaffAccess::allows($user, $request), 403, 'Halaman ini bukan bagian dari tugas layanan Anda.');
         if (in_array($user->role, ['admin_desa', 'admin_rw', 'admin_rt'], true)) {
             abort_unless($user->region_id && (\App\Models\User::REGION_ROLES[$user->region?->type] ?? null) === $user->role,
                 403, 'Penempatan wilayah akun belum sesuai. Hubungi pengelola.');
@@ -103,7 +104,7 @@ class CheckRole
         foreach ($requiredRoles as $role) {
             if ($role === 'admin') {
                 // 'admin' pseudo-role matches any of the new admin hierarchy
-                if (in_array($user->role, ['super_admin', 'admin_desa'])) {
+                if (in_array($user->role, ['super_admin', 'admin_desa', 'staff'])) {
                     return $next($request);
                 }
             } else if ($role === 'user') {

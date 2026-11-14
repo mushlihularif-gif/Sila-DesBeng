@@ -79,7 +79,8 @@ class ProfileController extends Controller
             }])])
             : collect();
 
-        return view('users.profile', compact('user', 'kecamatan_name', 'desa_name', 'rw_name', 'rt_name', 'kecamatans', 'currentDesaId'));
+        $isSettings = request()->routeIs('user.settings');
+        return view('users.profile', compact('isSettings', 'user', 'kecamatan_name', 'desa_name', 'rw_name', 'rt_name', 'kecamatans', 'currentDesaId'));
     }
 
     /**
@@ -97,13 +98,6 @@ class ProfileController extends Controller
             'username' => 'required|string|max:255|unique:users,username,' . $user->id,
             'name' => 'required|string|max:255',
             'phone' => 'nullable|string|max:20',
-            'address' => 'nullable|string',
-            // RT & RW diketik bebas, bukan dipilih dari pohon wilayah.
-            // updateRtRw() menuntut keduanya ada sebagai baris `regions`,
-            // padahal pohon wilayah belum memuat satu pun RW atau RT — jadi
-            // lewat jalur itu warga tidak akan pernah bisa mengisinya.
-            'rt' => 'nullable|string|max:10',
-            'rw' => 'nullable|string|max:10',
             'gender' => 'nullable|in:laki-laki,perempuan',
             'profile' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:8192',
         ], [
@@ -126,11 +120,8 @@ class ProfileController extends Controller
         $user->update([
             'username' => $validated['username'],
             'name' => $validated['name'],
-            'phone' => $validated['phone'],
-            'address' => $validated['address'],
-            'rt' => $validated['rt'] ?? $user->rt,
-            'rw' => $validated['rw'] ?? $user->rw,
-            'gender' => $validated['gender'],
+            'phone' => $validated['phone'] ?? $user->phone,
+            'gender' => $validated['gender'] ?? $user->gender,
         ]);
 
         // Tangani unggahan atau penghapusan avatar
@@ -172,6 +163,17 @@ class ProfileController extends Controller
         return back()->with('success', 'Profil berhasil diperbarui');
     }
 
+    public function updateSettings(Request $request)
+    {
+        $data = $request->validate([
+            'address' => 'nullable|string|max:1000',
+            'rt' => ['nullable', 'regex:/^[0-9]{1,3}$/'],
+            'rw' => ['nullable', 'regex:/^[0-9]{1,3}$/'],
+        ]);
+        $request->user()->update($data);
+        return back()->with('success', 'Pengaturan alamat berhasil disimpan.');
+    }
+
     /**
      * Perbarui data RT dan RW (dari Modal Laporan)
      */
@@ -195,6 +197,8 @@ class ProfileController extends Controller
             $rw = \App\Models\Region::find($validated['rw_id']);
             $rt = \App\Models\Region::find($validated['region_id']);
 
+            $line = \App\Models\Region::garisLayananUntukWarga($user->region_id);
+            abort_unless($rw->type === 'rw' && $rt->type === 'rt' && (int) $rt->parent_id === (int) $rw->id && in_array((int) $rw->parent_id, array_map('intval', $line), true), 403, 'RT/RW harus berada di desa akun Anda.');
             if ($rw && $rt) {
                 // Ambil angkanya saja, misal 'RW 01' jadi '01'
                 $rwNumber = str_ireplace('rw ', '', $rw->name);
@@ -222,6 +226,8 @@ class ProfileController extends Controller
                 'message' => 'Validasi gagal.',
                 'errors' => $e->errors()
             ], 422);
+        } catch (\Symfony\Component\HttpKernel\Exception\HttpExceptionInterface $e) {
+            throw $e;
         } catch (\Exception $e) {
             Log::error('Update RT/RW error: ' . $e->getMessage());
             return response()->json([

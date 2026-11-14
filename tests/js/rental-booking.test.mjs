@@ -5,9 +5,9 @@ import vm from 'node:vm';
 
 const blade = fs.readFileSync(new URL('../../resources/views/users/rental-booking.blade.php', import.meta.url), 'utf8');
 const source = [...blade.matchAll(/<script>([\s\S]*?)<\/script>/g)].at(-1)[1]
-    .replace(/{{[\s\S]*?}}/g, '10');
+    .replace('{{ $item->billing_basis }}', 'TEST_BILLING_BASIS').replace(/{{[\s\S]*?}}/g, '10');
 
-function page(delivery, payment) {
+function page(delivery, payment, basis = 'per_activity') {
     const nodes = new Map();
     const element = (id, value = '') => {
         const node = { value, dataset: {}, style: {}, checked: true, disabled: false, handlers: {},
@@ -33,7 +33,7 @@ function page(delivery, payment) {
         Swal: {fire() {}, close() {}},
         fetch: (url, options) => { requests.push(options); return new Promise(() => {}); }
     };
-    vm.runInNewContext(source, context);
+    vm.runInNewContext(source.replace('TEST_BILLING_BASIS', basis), context);
     return {nodes, requests, bankFile, walletFile};
 }
 
@@ -62,4 +62,12 @@ test('collection uses its own quantity and dates, cash, and no hidden transfer p
     assert.equal(p.nodes.get('start-date').value, '2026-11-15');
     assert.equal(p.nodes.get('end-date').value, '2026-11-16');
     assert.equal(p.nodes.get('rental-purpose').value, 'Acara Jemput');
+});
+
+test('daily totals include both dates; single use ignores duration', () => {
+    const daily = page('antar', 'tunai', 'per_day');
+    assert.equal(daily.nodes.get('subtotal').textContent, 'Rp. 60');
+    assert.equal(daily.nodes.get('subtotal-jemput').textContent, 'Rp. 60');
+    const once = page('antar', 'tunai');
+    assert.equal(once.nodes.get('subtotal').textContent, 'Rp. 20');
 });

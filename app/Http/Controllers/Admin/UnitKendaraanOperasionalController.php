@@ -12,7 +12,7 @@ class UnitKendaraanOperasionalController extends Controller
 {
     private function regionId(): int
     {
-        abort_unless(auth()->user()?->region_id, 403);
+        abort_unless(auth()->user()?->region_id && auth()->user()->isAdmin() && auth()->user()->hasUnitPermission('fasilitas_umum'), 403);
         return (int) auth()->user()->region_id;
     }
 

@@ -14,7 +14,7 @@ class SettingController extends Controller
     {
         // Ganti 'settings.index' dengan view yang benar-benar Anda miliki untuk pengaturan umum
         // Misalnya: return view('admin.settings.general');
-        return view('settings.index'); // Sesuaikan dengan view Anda
+        return redirect()->route(auth()->user()->isSuperAdmin() ? 'admin.system-settings.index' : 'admin.region-settings.index'); // Sesuaikan dengan view Anda
     }
 
     /**
@@ -27,7 +27,7 @@ class SettingController extends Controller
         // $request->validate([...]);
         // Simpan ke database atau config...
 
-        return back()->with('success', 'Pengaturan berhasil disimpan.');
+        abort(405, 'Gunakan formulir pengaturan wilayah atau sistem untuk menyimpan perubahan.');
     }
 
     /**

@@ -79,7 +79,7 @@ class GoogleController extends Controller
                     'ip_address' => request()->ip()
                 ]);
 
-                return redirect()->intended(in_array($findUser->role, ['super_admin', 'admin_desa'], true) ? route('admin.dashboard') : route('beranda'));
+                return redirect()->intended(in_array($findUser->role, ['super_admin', 'admin_desa', 'staff'], true) ? route('admin.dashboard') : route('beranda'));
 
             } else {
                 // User Baru - Tampilkan Form Lengkapi Profil Google

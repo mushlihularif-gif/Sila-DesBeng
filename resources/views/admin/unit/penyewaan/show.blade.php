@@ -75,7 +75,7 @@
                                             <tr>
                                                 <td class="fw-bold text-uppercase text-muted">Harga Sewa</td>
                                                 <td>
-                                                    <h3 class="text-primary fw-bold mb-0">Rp. {{ number_format($barang->harga_sewa, 0, ',', '.') }} <span class="fs-6 text-muted fw-normal">/ {{ $barang->satuan }}</span></h3>
+                                                    <h3 class="text-primary fw-bold mb-0">Rp. {{ number_format($barang->harga_sewa, 0, ',', '.') }} <span class="fs-6 text-muted fw-normal">/ {{ $barang->satuan }} · {{ $barang->billing_basis === 'per_day' ? 'per hari' : 'sekali pakai' }}</span></h3>
                                                 </td>
                                             </tr>
                                             <tr>

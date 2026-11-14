@@ -29,6 +29,16 @@ class UnitChatSession extends Model
         'last_message_at' => 'datetime',
     ];
 
+    public function getItemLabelAttribute(): string
+    {
+        $reference = trim((string) $this->item_reference);
+        if (str_starts_with($reference, '{') || str_starts_with($reference, '[')) {
+            $data = json_decode($reference, true);
+            return is_array($data) && is_string($data['name'] ?? null) ? $data['name'] : 'Produk layanan';
+        }
+        return $reference;
+    }
+
     public function region()
     {
         return $this->belongsTo(Region::class);
