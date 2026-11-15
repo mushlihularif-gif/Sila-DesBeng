@@ -23,8 +23,9 @@ class StaffAccess
             'admin.profile.change-password', 'admin.profile.verify-otp', 'admin.profile.resend-otp'], true)) {
             return true;
         }
+        if (str_starts_with($name, 'supir.')) return $user->hasUnitPermission('sewa_mobil') || $user->hasUnitPermission('fasilitas_umum');
         foreach (['admin.unit.penjualan_gas.' => 'gas', 'admin.unit.penyewaan.' => 'sewa_alat',
-            'admin.unit.mobil.' => 'sewa_mobil', 'supir.' => 'sewa_mobil', 'admin.unit.fasilitas_umum.' => 'fasilitas_umum',
+            'admin.unit.mobil.' => 'sewa_mobil', 'admin.unit.fasilitas_umum.' => 'fasilitas_umum',
             'admin.unit.kendaraan_operasional.' => 'fasilitas_umum'] as $prefix => $unit) {
             if (str_starts_with($name, $prefix)) {
                 return $user->hasUnitPermission($unit);
@@ -37,7 +38,8 @@ class StaffAccess
         }
 
         // These controllers additionally check the order type, ownership and granted unit.
-        return str_starts_with($name, 'admin.aktivitas.permintaan-pengajuan.')
+        return in_array($name, ['admin.aktivitas.update-status', 'admin.aktivitas.delivery-proof', 'admin.aktivitas.cancellation'], true)
+            || str_starts_with($name, 'admin.aktivitas.permintaan-pengajuan.')
             || str_starts_with($name, 'admin.aktivitas.bukti-transaksi.');
     }
 }

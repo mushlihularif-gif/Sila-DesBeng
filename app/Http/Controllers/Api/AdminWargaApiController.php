@@ -16,8 +16,8 @@ class AdminWargaApiController extends Controller
             ->get()
             ->map(function ($user) {
                 $kyc = KycVerification::where('user_id', $user->id)->latest()->first();
-                $rtStr = $user->rt ? 'RT ' . str_pad($user->rt, 2, '0', STR_PAD_LEFT) : 'RT 02';
-                $rwStr = $user->rw ? 'RW ' . str_pad($user->rw, 2, '0', STR_PAD_LEFT) : 'RW 01';
+                $rtStr = $user->rt ? 'RT ' . str_pad($user->rt, 2, '0', STR_PAD_LEFT) : 'RT belum terdata';
+                $rwStr = $user->rw ? 'RW ' . str_pad($user->rw, 2, '0', STR_PAD_LEFT) : 'RW belum terdata';
                 
                 return [
                     'id' => $user->id,
@@ -46,8 +46,8 @@ class AdminWargaApiController extends Controller
     {
         $user = $this->scopedCitizens()->findOrFail($id);
         $kyc = KycVerification::where('user_id', $id)->latest()->first();
-        $rtStr = $user->rt ? 'RT ' . str_pad($user->rt, 2, '0', STR_PAD_LEFT) : 'RT 02';
-        $rwStr = $user->rw ? 'RW ' . str_pad($user->rw, 2, '0', STR_PAD_LEFT) : 'RW 01';
+        $rtStr = $user->rt ? 'RT ' . str_pad($user->rt, 2, '0', STR_PAD_LEFT) : 'RT belum terdata';
+        $rwStr = $user->rw ? 'RW ' . str_pad($user->rw, 2, '0', STR_PAD_LEFT) : 'RW belum terdata';
 
         return response()->json([
             'success' => true,
@@ -80,16 +80,7 @@ class AdminWargaApiController extends Controller
 
     private function scopedCitizens(): \Illuminate\Database\Eloquent\Builder
     {
-        $admin = auth()->user();
-        abort_unless($admin && in_array($admin->role, ['admin_rt', 'admin_rw'], true), 403);
-        $query = User::query()->where('role', 'user');
-        if (!$admin->region_id || !$admin->rw || ($admin->role === 'admin_rt' && !$admin->rt)) {
-            return $query->whereRaw('1 = 0');
-        }
-        $query->whereIn('region_id', array_merge([$admin->region_id], \App\Models\Region::getDescendantIds($admin->region_id)))
-            ->where('rw', $admin->rw);
-        if ($admin->role === 'admin_rt') $query->where('rt', $admin->rt);
-        return $query;
+        return \App\Support\RegionalCitizens::query(auth()->user());
     }
 
     private function maskedNik(?string $nik): ?string
@@ -100,11 +91,11 @@ class AdminWargaApiController extends Controller
     public function approveKyc(Request $request, $id)
     {
         // RT/RW melihat warga wilayahnya; keputusan KYC mengikuti kewenangan dashboard.
-        abort(403, 'Verifikasi identitas harus ditinjau admin desa/kecamatan melalui dashboard KYC.');
+        abort(403, 'Verifikasi identitas harus ditinjau admin desa melalui dashboard KYC.');
     }
 
     public function rejectKyc(Request $request, $id)
     {
-        abort(403, 'Verifikasi identitas harus ditinjau admin desa/kecamatan melalui dashboard KYC.');
+        abort(403, 'Verifikasi identitas harus ditinjau admin desa melalui dashboard KYC.');
     }
 }

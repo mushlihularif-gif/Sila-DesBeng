@@ -13,9 +13,11 @@
             <button type="button" class="btn btn-primary btn-sm shadow-sm rounded-pill px-2 px-sm-3 py-1.5 flex-fill text-nowrap d-flex align-items-center justify-content-center" data-bs-toggle="modal" data-bs-target="#addSupirModal" style="font-size: 0.78rem;">
                 <i class="bx bx-plus-circle me-1"></i> <span class="d-none d-sm-inline">Tambah </span><span>Supir</span>
             </button>
-            <button type="button" class="btn btn-success btn-sm shadow-sm rounded-pill px-2 px-sm-3 py-1.5 flex-fill text-nowrap d-flex align-items-center justify-content-center" data-bs-toggle="modal" data-bs-target="#addPengurusModal" style="font-size: 0.78rem;">
+            @if(auth()->user()->hasUnitPermission('fasilitas_umum'))
+<button type="button" class="btn btn-success btn-sm shadow-sm rounded-pill px-2 px-sm-3 py-1.5 flex-fill text-nowrap d-flex align-items-center justify-content-center" data-bs-toggle="modal" data-bs-target="#addPengurusModal" style="font-size: 0.78rem;">
                 <i class="bx bx-building-house me-1"></i> <span class="d-none d-sm-inline">Tambah </span><span>Pengurus</span>
             </button>
+@endif
         </div>
     </div>
 
@@ -173,14 +175,18 @@
                             <div class="border rounded-4 p-3 h-100 border-gray-200">
                                 <label class="form-label text-uppercase text-muted fw-bold mb-3" style="font-size: 0.75rem;">Layanan Aktif <span class="text-danger">*</span></label>
                                 <div class="d-flex flex-column gap-3">
-                                    <div class="form-check form-switch d-flex align-items-center">
+                                    @if(auth()->user()->hasUnitPermission('sewa_mobil'))
+<div class="form-check form-switch d-flex align-items-center">
                                         <input class="form-check-input mt-0 me-3 cursor-pointer" type="checkbox" name="is_sewa_mobil" value="1" id="is_rental_add" style="width: 2.5em; height: 1.25em;" checked>
                                         <label class="form-check-label cursor-pointer fw-bold text-dark" for="is_rental_add">Penyewaan Transportasi</label>
                                     </div>
-                                    <div class="form-check form-switch d-flex align-items-center">
+@endif
+                                    @if(auth()->user()->hasUnitPermission('fasilitas_umum'))
+<div class="form-check form-switch d-flex align-items-center">
                                         <input class="form-check-input mt-0 me-3 cursor-pointer bg-danger border-danger" type="checkbox" name="is_fasilitas_umum" value="1" id="is_fasilitas_add" style="width: 2.5em; height: 1.25em;" checked>
                                         <label class="form-check-label cursor-pointer fw-bold text-danger" for="is_fasilitas_add">Kendaraan Operasional Darurat</label>
                                     </div>
+@endif
                                 </div>
                             </div>
                         </div>

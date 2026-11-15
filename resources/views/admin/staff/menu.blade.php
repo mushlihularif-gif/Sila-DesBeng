@@ -7,3 +7,7 @@
 <li class="menu-item"><a class="menu-link" href="{{ route('admin.aktivitas.permintaan-pengajuan.index') }}"><i class="menu-icon bx bx-receipt"></i>Pesanan Saya</a></li>
 <li class="menu-item"><a class="menu-link" href="{{ route('admin.aktivitas.bukti-transaksi.index') }}"><i class="menu-icon bx bx-wallet"></i>Bukti Pembayaran</a></li>
 <li class="menu-item"><a class="menu-link" href="{{ route('admin.profile') }}"><i class="menu-icon bx bx-user"></i>Profil Saya</a></li>
+
+@if(auth()->user()->hasUnitPermission('sewa_mobil') || auth()->user()->hasUnitPermission('fasilitas_umum'))
+<li class="menu-item"><a class="menu-link" href="{{ route('supir.index') }}"><i class="menu-icon bx bx-user-check"></i>Sopir dan Pengurus</a></li>
+@endif

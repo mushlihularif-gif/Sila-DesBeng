@@ -885,7 +885,7 @@ if (returnForm) {
                     <select id="assigned_supir_id" class="form-select form-select-lg">
                         <option value="">-- Pilih Supir --</option>
                         @php
-                            $allSupirs = \App\Models\Supir::where('region_id', auth()->user()->region_id)->get();
+                            $allSupirs = \App\Services\ServiceAssignment::eligible($type, (int) auth()->user()->region_id)->get();
                             $tersedia = $allSupirs->where('status', 'Tersedia');
                             $bertugas = $allSupirs->where('status', 'Sedang Bertugas');
                             $tidakAktif = $allSupirs->where('status', 'Tidak Aktif');

@@ -232,7 +232,7 @@ public function index(Request $request)
     }
 
     // Pendapatan dari laporan manual
-    $strictManual = $this->applyRegionFilter(ManualReport::query(), 'creator', true);
+    $strictManual = \App\Support\FinanceRecords::manual();
     foreach ($strictManual->clone()->selectRaw('SUM(amount * quantity) as total, MONTH(transaction_date) as month')
         ->whereYear('transaction_date', $selectedYear)
         ->groupBy('month')
@@ -354,70 +354,22 @@ public function index(Request $request)
 
     private function receivedPayments(string $type)
     {
-        $query = \App\Models\WalletTransaction::where('reference_type', $type)->where('status', 'verified')->where('type', 'masuk');
-        $user = auth()->user();
-        if (!$user?->region_id || !$user->isAdmin()) return $query->whereRaw('1 = 0');
-        return $query->where('region_id', $user->region_id);
+        return \App\Support\FinanceRecords::payments($type);
     }
 
     private function getTotalPendapatanData($selectedYear = null)
     {
-        // Ambil bulan/tahun saat ini atau dari permintaan
-        $month = request('month', date('m'));
-        
-        // Gunakan tahun yang dipilih jika ada, jika tidak ambil dari request, jika tidak tahun ini
-        $year = $selectedYear ?? request('year', date('Y'));
-        
-        foreach (['rental', 'gas', 'mobil', 'fasilitas'] as $type) {
-            $paid = $this->receivedPayments($type)->whereYear('created_at', $year)->whereMonth('created_at', $month);
-            ${$type.'Revenue'} = (float) (clone $paid)->sum('amount');
-            ${$type.'Transactions'} = (clone $paid)->distinct()->count('reference_id');
+        $year = (int) ($selectedYear ?? request('year', date('Y')));
+        $month = max(1, min(12, (int) request('month', date('m'))));
+        $summary = \App\Support\FinanceRecords::summary($year, $month);
+        $result = [];
+        foreach (['rental'=>['Penyewaan Alat','warning'], 'gas'=>['Penjualan Gas','danger'],
+            'mobil'=>['Penyewaan Mobil','info'], 'fasilitas'=>['Fasilitas Umum','success'],
+            'pasar'=>['Riwayat Pasar Daerah','secondary'], 'lainnya'=>['Transaksi Lainnya','secondary']] as $type => [$label, $color]) {
+            if (in_array($type, ['pasar','lainnya'], true) && !$summary[$type]['transactions']) continue;
+            $result[$label] = $summary[$type] + ['color'=>$color];
         }
-
-        // Pendapatan Laporan Manual
-        $manualRevenue = $this->applyRegionFilter(ManualReport::query(), 'creator', true)->whereYear('transaction_date', $year)
-            ->whereMonth('transaction_date', $month)
-            ->sum(\DB::raw('amount * quantity'));
-        
-        $manualTransactions = $this->applyRegionFilter(ManualReport::query(), 'creator', true)->whereYear('transaction_date', $year)
-            ->whereMonth('transaction_date', $month)
-            ->count();
-        
-        $totalRevenue = $rentalRevenue + $gasRevenue + $mobilRevenue + $fasilitasRevenue + $manualRevenue;
-        $totalTransactions = $rentalTransactions + $gasTransactions + $mobilTransactions + $fasilitasTransactions + $manualTransactions;
-        
-        return [
-            'Penyewaan Alat' => [
-                'revenue' => $rentalRevenue,
-                'transactions' => $rentalTransactions,
-                'percentage' => $totalRevenue > 0 ? round(($rentalRevenue / $totalRevenue) * 100, 1) : 0,
-                'color' => 'warning'
-            ],
-            'Penjualan Gas' => [
-                'revenue' => $gasRevenue,
-                'transactions' => $gasTransactions,
-                'percentage' => $totalRevenue > 0 ? round(($gasRevenue / $totalRevenue) * 100, 1) : 0,
-                'color' => 'danger'
-            ],
-            'Penyewaan Mobil' => [
-                'revenue' => $mobilRevenue,
-                'transactions' => $mobilTransactions,
-                'percentage' => $totalRevenue > 0 ? round(($mobilRevenue / $totalRevenue) * 100, 1) : 0,
-                'color' => 'info'
-            ],
-            'Fasilitas Umum' => [
-                'revenue' => $fasilitasRevenue,
-                'transactions' => $fasilitasTransactions,
-                'percentage' => $totalRevenue > 0 ? round(($fasilitasRevenue / $totalRevenue) * 100, 1) : 0,
-                'color' => 'success'
-            ],
-'total' => [
-                'revenue' => $totalRevenue,
-                'transactions' => $totalTransactions
-            ],
-            'month' => $month,
-            'year' => $year
-        ];
+        return $result + ['total'=>$summary['total'], 'month'=>$month, 'year'=>$year];
     }
 
     /**

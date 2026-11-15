@@ -3,11 +3,17 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\FasilitasUmumBooking;
+use App\Models\MobilBooking;
+use App\Models\Region;
 use App\Models\Supir;
+use App\Models\User;
+use App\Services\ImageCompressorService;
+use App\Services\ServiceAssignment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use App\Services\ImageCompressorService;
 use Illuminate\Validation\Rule;
 
 class SupirController extends Controller
@@ -15,31 +21,50 @@ class SupirController extends Controller
     private function manager()
     {
         $user = Auth::user();
-        abort_unless($user && $user->isAdmin() && $user->hasUnitPermission('sewa_mobil'), 403);
-        abort_if($user->role !== 'super_admin' && !$user->region_id, 403);
+        abort_unless($user && $user->isAdmin() && ($user->hasUnitPermission('sewa_mobil') || $user->hasUnitPermission('fasilitas_umum')), 403);
+        abort_if($user->role !== 'super_admin' && ! $user->region_id, 403);
+
         return $user;
     }
 
     private function scopedSupirs()
     {
         $user = $this->manager();
-        return Supir::query()->when($user->role !== 'super_admin', fn ($q) => $q->where('region_id', $user->region_id));
+
+        return Supir::query()->when($user->role !== 'super_admin', fn ($q) => $q->where('region_id', $user->region_id))
+            ->when($user->isStaff(), fn ($q) => $q->where(function ($q) use ($user) {
+                $q->whereRaw('1 = 0');
+                if ($user->hasUnitPermission('sewa_mobil')) {
+                    $q->orWhere('is_sewa_mobil', true);
+                }
+                if ($user->hasUnitPermission('fasilitas_umum')) {
+                    $q->orWhere('is_fasilitas_umum', true);
+                }
+            }));
+    }
+
+    private function validateAssignedUnits(array $data): void
+    {
+        $user = $this->manager();
+        foreach (['is_sewa_mobil' => 'sewa_mobil', 'is_fasilitas_umum' => 'fasilitas_umum'] as $field => $unit) {
+            abort_if(! empty($data[$field]) && ! $user->hasUnitPermission($unit), 403, 'Pengelolaan petugas lintas layanan hanya dapat dilakukan oleh admin desa atau staf yang memiliki kedua izin.');
+        }
     }
 
     public function index(Request $request)
     {
         $user = $this->manager();
         $tab = $request->get('tab', 'supir');
-        if (!in_array($tab, ['supir', 'pengurus_gedung'])) {
+        if (! in_array($tab, ['supir', 'pengurus_gedung'])) {
             $tab = 'supir';
         }
 
         $query = $this->scopedSupirs()->with(['user', 'kendaraanOperasional', 'fasilitas']);
         if ($user && $user->role !== 'super_admin' && $user->region_id) {
             $query->where('region_id', $user->region_id);
-            $users = \App\Models\User::whereIn('region_id', [$user->region_id, ...\App\Models\Region::getDescendantIds($user->region_id)])->get();
+            $users = User::whereIn('region_id', [$user->region_id, ...Region::getDescendantIds($user->region_id)])->get();
         } else {
-            $users = \App\Models\User::all();
+            $users = User::all();
         }
 
         // Hitung total untuk badge tab
@@ -74,9 +99,9 @@ class SupirController extends Controller
     {
         $admin = $this->manager();
         $regionId = $admin->region_id ?: $request->input('region_id');
-        validator(['region_id'=>$regionId], ['region_id'=>['required',Rule::exists('regions','id')->whereIn('type',['desa','kelurahan'])]])->validate();
+        validator(['region_id' => $regionId], ['region_id' => ['required', Rule::exists('regions', 'id')->whereIn('type', ['desa', 'kelurahan'])]])->validate();
         // Default tipe ke 'supir' jika tidak dikirim dari form
-        if (!$request->filled('tipe')) {
+        if (! $request->filled('tipe')) {
             $request->merge(['tipe' => 'supir']);
         }
 
@@ -85,8 +110,8 @@ class SupirController extends Controller
             'tipe' => 'required|in:supir,pengurus_gedung',
             'kontak' => 'nullable|string|max:50',
             'status' => 'required|in:Tersedia,Sedang Bertugas,Tidak Aktif',
-            'user_id' => ['nullable', Rule::exists('users','id')->whereIn('region_id', [$regionId, ...\App\Models\Region::getDescendantIds($regionId)])],
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192'
+            'user_id' => ['nullable', Rule::exists('users', 'id')->whereIn('region_id', [$regionId, ...Region::getDescendantIds($regionId)])],
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:8192',
         ]);
 
         $user = Auth::user();
@@ -105,6 +130,8 @@ class SupirController extends Controller
             'layanan' => null,
         ];
 
+        $this->validateAssignedUnits($data);
+
         if ($request->hasFile('foto')) {
             $data['foto'] = ImageCompressorService::compressAndStore($request->file('foto'), 'supirs');
         }
@@ -117,64 +144,87 @@ class SupirController extends Controller
                 'success' => true,
                 'message' => $tipe === 'pengurus_gedung' ? 'Pengurus gedung berhasil ditambahkan' : 'Supir berhasil ditambahkan',
                 'supir' => $newSupir,
-                'avatar_url' => $newSupir->foto ? asset('storage/' . $newSupir->foto) : asset('Admin/img/avatars/pria.png'),
+                'avatar_url' => $newSupir->foto ? asset('storage/'.$newSupir->foto) : asset('Admin/img/avatars/pria.png'),
             ]);
         }
 
         $pesan = $tipe === 'pengurus_gedung' ? 'Data pengurus gedung berhasil ditambahkan!' : 'Data supir berhasil ditambahkan!';
+
         return redirect()->route('supir.index', ['tab' => $tipe])->with('success', $pesan);
     }
 
     public function update(Request $request, Supir $supir)
     {
-        $supir = $this->scopedSupirs()->findOrFail($supir->id);
-        if (!$request->filled('tipe')) {
-            $request->merge(['tipe' => $supir->tipe ?? 'supir']);
-        }
+        return DB::transaction(function () use ($request, $supir) {
+            $supir = $this->scopedSupirs()->lockForUpdate()->findOrFail($supir->id);
+            $this->validateAssignedUnits($supir->toArray());
+            abort_if(ServiceAssignment::hasOtherBooking($supir->id), 409, 'Petugas masih menangani pesanan. Selesaikan atau alihkan tugasnya sebelum mengubah data penugasan.');
+            if (! $request->filled('tipe')) {
+                $request->merge(['tipe' => $supir->tipe ?? 'supir']);
+            }
 
-        $request->validate([
-            'nama' => 'required|string|max:255',
-            'tipe' => 'required|in:supir,pengurus_gedung',
-            'kontak' => 'nullable|string|max:50',
-            'status' => 'required|in:Tersedia,Sedang Bertugas,Tidak Aktif',
-            'user_id' => ['nullable', Rule::exists('users','id')->whereIn('region_id', [$supir->region_id, ...\App\Models\Region::getDescendantIds($supir->region_id)])],
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:8192'
-        ]);
+            $request->validate([
+                'nama' => 'required|string|max:255',
+                'tipe' => 'required|in:supir,pengurus_gedung',
+                'kontak' => 'nullable|string|max:50',
+                'status' => 'required|in:Tersedia,Sedang Bertugas,Tidak Aktif',
+                'user_id' => ['nullable', Rule::exists('users', 'id')->whereIn('region_id', [$supir->region_id, ...Region::getDescendantIds($supir->region_id)])],
+                'foto' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:8192',
+            ]);
 
-        $tipe = $request->input('tipe', $supir->tipe ?? 'supir');
+            $tipe = $request->input('tipe', $supir->tipe ?? 'supir');
 
-        $data = [
-            'tipe' => $tipe,
-            'nama' => $request->nama,
-            'kontak' => $request->kontak,
-            'status' => $request->status,
-            'user_id' => $request->user_id,
-            'is_sewa_mobil' => ($tipe === 'supir' && $request->has('is_sewa_mobil')) ? 1 : 0,
-            'is_fasilitas_umum' => ($tipe === 'pengurus_gedung' || $request->has('is_fasilitas_umum')) ? 1 : 0,
-        ];
+            $data = [
+                'tipe' => $tipe,
+                'nama' => $request->nama,
+                'kontak' => $request->kontak,
+                'status' => $request->status,
+                'user_id' => $request->user_id,
+                'is_sewa_mobil' => ($tipe === 'supir' && $request->has('is_sewa_mobil')) ? 1 : 0,
+                'is_fasilitas_umum' => ($tipe === 'pengurus_gedung' || $request->has('is_fasilitas_umum')) ? 1 : 0,
+            ];
 
-        if ($request->hasFile('foto')) {
-            if ($supir->foto) Storage::disk('public')->delete($supir->foto);
-            $data['foto'] = ImageCompressorService::compressAndStore($request->file('foto'), 'supirs');
-        } elseif ($request->input('delete_foto') == '1') {
-            if ($supir->foto) Storage::disk('public')->delete($supir->foto);
-            $data['foto'] = null;
-        }
+            $this->validateAssignedUnits($data);
 
-        $supir->update($data);
+            if ($request->hasFile('foto')) {
+                if ($supir->foto) {
+                    $oldPhoto = $supir->foto;
+                    DB::afterCommit(fn () => Storage::disk('public')->delete($oldPhoto));
+                }
+                $data['foto'] = ImageCompressorService::compressAndStore($request->file('foto'), 'supirs');
+            } elseif ($request->input('delete_foto') == '1') {
+                if ($supir->foto) {
+                    $oldPhoto = $supir->foto;
+                    DB::afterCommit(fn () => Storage::disk('public')->delete($oldPhoto));
+                }
+                $data['foto'] = null;
+            }
 
-        $pesan = $tipe === 'pengurus_gedung' ? 'Data pengurus gedung berhasil diperbarui!' : 'Data supir berhasil diperbarui!';
-        return redirect()->route('supir.index', ['tab' => $tipe])->with('success', $pesan);
+            $supir->update($data);
+
+            $pesan = $tipe === 'pengurus_gedung' ? 'Data pengurus gedung berhasil diperbarui!' : 'Data supir berhasil diperbarui!';
+
+            return redirect()->route('supir.index', ['tab' => $tipe])->with('success', $pesan);
+        });
     }
 
     public function destroy(Supir $supir)
     {
-        $supir = $this->scopedSupirs()->findOrFail($supir->id);
-        $tab = $supir->tipe ?? 'supir';
-        if ($supir->foto) Storage::disk('public')->delete($supir->foto);
-        $supir->delete();
+        return DB::transaction(function () use ($supir) {
+            $supir = $this->scopedSupirs()->lockForUpdate()->findOrFail($supir->id);
+            $this->validateAssignedUnits($supir->toArray());
+            abort_if(ServiceAssignment::hasOtherBooking($supir->id), 409, 'Petugas masih menangani pesanan. Selesaikan atau alihkan tugasnya terlebih dahulu.');
+            abort_if(MobilBooking::withTrashed()->where('assigned_supir_id', $supir->id)->exists() || FasilitasUmumBooking::withTrashed()->where('assigned_supir_id', $supir->id)->exists(), 409, 'Petugas memiliki riwayat pesanan. Gunakan status Tidak Aktif agar riwayat tetap utuh.');
+            $tab = $supir->tipe ?? 'supir';
+            if ($supir->foto) {
+                $oldPhoto = $supir->foto;
+                DB::afterCommit(fn () => Storage::disk('public')->delete($oldPhoto));
+            }
+            $supir->delete();
 
-        $pesan = $tab === 'pengurus_gedung' ? 'Data pengurus gedung berhasil dihapus!' : 'Data supir berhasil dihapus!';
-        return redirect()->route('supir.index', ['tab' => $tab])->with('success', $pesan);
+            $pesan = $tab === 'pengurus_gedung' ? 'Data pengurus gedung berhasil dihapus!' : 'Data supir berhasil dihapus!';
+
+            return redirect()->route('supir.index', ['tab' => $tab])->with('success', $pesan);
+        });
     }
 }

@@ -28,8 +28,9 @@ class ServiceRegionAccessTest extends TestCase
             $t->id(); $t->integer('region_id'); $t->string('nama_fasilitas'); $t->string('kategori')->nullable();
         });
         Schema::create('fasilitas_umum_bookings',function (Blueprint $t) {
-            $t->id(); $t->integer('fasilitas_id'); $t->softDeletes();
+            $t->id(); $t->integer('fasilitas_id'); $t->integer('assigned_supir_id')->nullable(); $t->string('status')->default('pending'); $t->softDeletes();
         });
+        Schema::create('mobil_bookings', function (Blueprint $t) { $t->id(); $t->integer('assigned_supir_id')->nullable(); $t->string('status')->default('pending'); $t->softDeletes(); });
         DB::table('supirs')->insert([
             ['id'=>1,'region_id'=>1,'nama'=>'Pengurus lokal','tipe'=>'pengurus_gedung'],
             ['id'=>2,'region_id'=>5,'nama'=>'Pengurus luar','tipe'=>'pengurus_gedung'],

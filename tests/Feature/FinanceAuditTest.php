@@ -127,6 +127,10 @@ class FinanceAuditTest extends TestCase
         $this->manual(['amount' => 99999])->delete();
         $data = FinanceRecords::summary(now()->year, now()->month);
         $this->assertEquals(42000, $data['total']['revenue']);
+        $dashboard = app(\App\Http\Controllers\Admin\DashboardController::class);
+        $monthly = (new \ReflectionMethod($dashboard, 'getTotalPendapatanData'))->invoke($dashboard,now()->year);
+        $this->assertEquals($data['total'],$monthly['total']);
+        $this->assertEquals(42000,$monthly['Penjualan Gas']['revenue']);
         $this->assertEquals(2, $data['total']['transactions']);
         $this->assertEquals(42000, array_sum(array_column(array_intersect_key($data, array_flip(['gas', 'rental', 'mobil', 'fasilitas', 'pasar', 'lainnya'])), 'revenue')));
         DB::table('users')->where('id', 4)->update(['region_id' => 5]);

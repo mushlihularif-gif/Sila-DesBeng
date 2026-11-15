@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
+use App\Mail\OtpMail;
 use App\Models\User;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use App\Mail\OtpMail;
 
 class ProfileController extends Controller
 {
@@ -19,7 +19,7 @@ class ProfileController extends Controller
     {
         // Get the authenticated admin user
         $user = Auth::user();
-        
+
         // Pass real admin data to view
         return view('admin.profile.index', compact('user'));
     }
@@ -27,15 +27,15 @@ class ProfileController extends Controller
     public function update(Request $request)
     {
         $user = Auth::user();
-        
+
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $user->id,
+            'email' => 'required|email|unique:users,email,'.$user->id,
             'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string',
             'position' => 'nullable|string|max:255',
             'gender' => 'nullable|in:laki-laki,perempuan',
-            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif|max:8192',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:8192',
         ]);
 
         // Handle avatar upload or deletion
@@ -55,14 +55,14 @@ class ProfileController extends Controller
             // Store new avatar in private storage (local disk)
             $file = $request->file('avatar');
             $extension = strtolower($file->getClientOriginalExtension() ?: $file->extension() ?: 'jpg');
-            
+
             // Strict whitelist extension
             $allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
-            if (!in_array($extension, $allowedExtensions)) {
+            if (! in_array($extension, $allowedExtensions)) {
                 return back()->with('error', 'Format file avatar tidak valid.')->withInput();
             }
 
-            $filename = $user->id . '_' . time() . '_' . Str::random(10) . '.' . $extension;
+            $filename = $user->id.'_'.time().'_'.Str::random(10).'.'.$extension;
             $path = $file->storeAs('profiles', $filename, ['disk' => 'local']);
 
             // Create new file record
@@ -91,114 +91,99 @@ class ProfileController extends Controller
     public function changePassword(Request $request)
     {
         $user = Auth::user();
-        
-        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
-            'current_password' => 'required',
-            'new_password' => 'required|min:8|confirmed',
+        $data = $request->validate([
+            'current_password' => 'required|string',
+            'new_password' => 'required|string|min:12|confirmed',
         ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => $validator->errors()->first()
-            ]);
+        if (! Hash::check($data['current_password'], $user->password)) {
+            return response()->json(['success' => false, 'message' => 'Kata sandi lama tidak sesuai.'], 422);
         }
 
-        // Verify current password
-        if (!Hash::check($request->current_password, $user->password)) {
-            return response()->json(['success' => false, 'message' => 'Kata sandi lama tidak sesuai.']);
-        }
-
-        // Generate OTP
-        $otp = rand(1000, 9999);
-        
-        // Save OTP to Database
-        $user->otp_code = $otp;
-        $user->otp_expires_at = now()->addMinutes(5);
-        $user->save();
-
-        // Store hashed new password in session for security
-        session(['new_password_hash' => Hash::make($request->new_password)]);
-
-        // Send OTP via Email
+        $otp = (string) random_int(1000, 9999);
+        session(['admin_password_change' => [
+            'user_id' => $user->id,
+            'original_hash' => $user->password,
+            'new_hash' => Hash::make($data['new_password']),
+            'otp_hash' => Hash::make($otp),
+            'expires_at' => now()->addMinutes(5)->timestamp,
+            'attempts' => 0,
+            'resends' => 0,
+        ]]);
         Mail::to($user->email)->send(new OtpMail($otp));
 
-        return response()->json([
-            'success' => true, 
-            'message' => 'OTP telah dikirim ke email Anda.',
-        ]);
+        return response()->json(['success' => true, 'message' => 'OTP telah dikirim ke email Anda.']);
+    }
+
+    private function pendingPasswordChange(): array
+    {
+        $pending = session('admin_password_change');
+        $user = Auth::user();
+        if (! is_array($pending) || (int) ($pending['user_id'] ?? 0) !== $user->id
+            || ($pending['expires_at'] ?? 0) <= now()->timestamp
+            || ($pending['attempts'] ?? 5) >= 5
+            || ! hash_equals($user->password, $pending['original_hash'] ?? '')) {
+            session()->forget('admin_password_change');
+            abort(422, 'Permintaan perubahan kata sandi telah berakhir. Masukkan kembali kata sandi lama.');
+        }
+
+        return $pending;
     }
 
     public function verifyOtp(Request $request)
     {
-        $user = Auth::user();
-        
-        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
-            'otp' => 'required|digits:4',
-        ]);
+        $request->validate(['otp' => 'required|digits:4']);
+        $pending = $this->pendingPasswordChange();
+        if (! Hash::check((string) $request->otp, $pending['otp_hash'])) {
+            $pending['attempts']++;
+            session(['admin_password_change' => $pending]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => $validator->errors()->first()
-            ]);
+            return response()->json(['success' => false, 'message' => 'Kode OTP tidak valid.'], 422);
         }
 
-        // Check OTP from Database
-        if (!$user->otp_code || !$user->otp_expires_at || now()->gt($user->otp_expires_at)) {
-            return response()->json(['success' => false, 'message' => 'Kode OTP telah kedaluwarsa.']);
-        }
-
-        if ($request->otp != $user->otp_code) {
-            return response()->json(['success' => false, 'message' => 'Kode OTP tidak valid.']);
-        }
-
-        // Update password
-        $user->password = session('new_password_hash');
-        
-        // Clear OTP in Database
-        $user->otp_code = null;
-        $user->otp_expires_at = null;
-        $user->save();
-
-        // Clear session
-        session()->forget(['new_password_hash']);
+        DB::transaction(function () use ($pending, $request) {
+            $user = User::lockForUpdate()->findOrFail(Auth::id());
+            abort_unless(hash_equals($user->password, $pending['original_hash']), 409, 'Kata sandi telah berubah. Ulangi permintaan.');
+            $user->password = $pending['new_hash'];
+            $user->remember_token = Str::random(60);
+            $user->save();
+            // Sesi lain dan token aplikasi tidak lagi boleh memakai kredensial lama.
+            if (config('session.driver') === 'database') {
+                DB::table(config('session.table', 'sessions'))
+                    ->where('user_id', $user->id)->where('id', '!=', $request->session()->getId())->delete();
+            }
+            $user->tokens()->delete();
+        });
+        session()->forget(['admin_password_change', 'new_password_hash']);
+        $request->session()->regenerate();
 
         return response()->json(['success' => true, 'message' => 'Kata sandi berhasil diperbarui.']);
     }
 
     public function resendOtp()
     {
-        $user = Auth::user();
+        $pending = $this->pendingPasswordChange();
+        abort_if(($pending['resends'] ?? 0) >= 3, 429, 'Batas kirim ulang tercapai. Ulangi perubahan kata sandi.');
+        $otp = (string) random_int(1000, 9999);
+        $pending['otp_hash'] = Hash::make($otp);
+        $pending['resends']++;
+        // Kirim ulang tidak menghapus percobaan gagal atau memperpanjang batas waktu.
+        session(['admin_password_change' => $pending]);
+        Mail::to(Auth::user()->email)->send(new OtpMail($otp));
 
-        // Generate New OTP
-        $otp = rand(1000, 9999);
-        
-        // Update to Database
-        $user->otp_code = $otp;
-        $user->otp_expires_at = now()->addMinutes(5);
-        $user->save();
-
-        // Send OTP via Email
-        Mail::to($user->email)->send(new OtpMail($otp));
-
-        return response()->json([
-            'success' => true, 
-            'message' => 'Kode OTP baru telah dikirim ke email Anda.',
-        ]);
+        return response()->json(['success' => true, 'message' => 'Kode OTP baru telah dikirim ke email Anda.']);
     }
 
     public function deleteAvatar()
     {
         $user = Auth::user();
-        
+
         if ($user->file) {
             if (Storage::disk('local')->exists($user->file->path)) {
                 Storage::disk('local')->delete($user->file->path);
             }
             $user->file()->delete();
         }
-        
+
         return response()->json(['success' => true, 'message' => 'Avatar berhasil dihapus.']);
     }
 

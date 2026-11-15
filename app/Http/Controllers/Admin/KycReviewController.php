@@ -25,7 +25,7 @@ class KycReviewController extends Controller
         abort_unless(
             in_array(auth()->user()?->role, ['admin_desa'], true),
             403,
-            'Peninjauan verifikasi identitas hanya untuk admin desa dan admin kecamatan.'
+            'Peninjauan verifikasi identitas hanya untuk admin desa.'
         );
     }
 

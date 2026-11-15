@@ -89,9 +89,14 @@ class SecurityAuditRegressionTest extends TestCase
 
     public function test_warga_api_is_scoped_to_rt_and_cannot_review_kyc(): void
     {
-        DB::table('users')->where('id', 1)->update(['rt' => '01', 'rw' => '02']);
+        DB::table('regions')->insert([
+            ['id'=>9,'name'=>'RW 02','type'=>'rw','parent_id'=>7],
+            ['id'=>10,'name'=>'RT 01','type'=>'rt','parent_id'=>9],
+            ['id'=>11,'name'=>'RT 03','type'=>'rt','parent_id'=>9],
+        ]);
+        DB::table('users')->where('id', 1)->update(['region_id'=>10,'rt' => '01', 'rw' => '02']);
         DB::table('users')->where('id', 2)->update(['rt' => '01', 'rw' => '02']);
-        $admin = new User(); $admin->id = 99; $admin->role = 'admin_rt'; $admin->region_id = 7; $admin->rt = '01'; $admin->rw = '02';
+        $admin = new User(); $admin->id = 99; $admin->role = 'admin_rt'; $admin->region_id = 10; $admin->rt = '01'; $admin->rw = '02';
         Auth::setUser($admin);
         $controller = app(\App\Http\Controllers\Api\AdminWargaApiController::class);
         $this->assertSame([1], array_column($controller->index($this->request())->getData()->data, 'id'));
@@ -99,7 +104,7 @@ class SecurityAuditRegressionTest extends TestCase
         catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) { $this->assertTrue(true); }
         $this->assertDenied(fn () => $controller->approveKyc($this->request(), 1), 403);
         $this->assertDenied(fn () => $controller->rejectKyc($this->request(), 1), 403);
-        $admin->rt = '03';
+        $admin->region_id = 11; $admin->unsetRelation('region');
         $this->assertCount(0, $controller->index($this->request())->getData()->data);
     }
 

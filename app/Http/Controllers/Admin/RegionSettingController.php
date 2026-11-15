@@ -21,7 +21,7 @@ class RegionSettingController extends Controller
     private function pastikanAdminWilayah(): void
     {
         abort_unless(
-            in_array(auth()->user()?->role, ['admin_desa', 'super_admin'], true),
+            auth()->user()?->role === 'admin_desa' && auth()->user()->region_id && in_array(auth()->user()->region?->type, ['desa', 'kelurahan'], true),
             403,
             'Halaman ini khusus admin wilayah.'
         );
@@ -31,40 +31,8 @@ class RegionSettingController extends Controller
     {
         $user = auth()->user();
 
-        // Bootstrapping initial admin region if not connected
-        if (empty($user->region_id)) {
-            $kabupaten = Region::firstOrCreate(
-                ['name' => 'Kabupaten Bengkalis', 'type' => 'kabupaten'],
-                ['profile_text' => 'Kabupaten Bengkalis']
-            );
-            $kecamatan = Region::firstOrCreate(
-                ['name' => 'Kecamatan Bengkalis', 'type' => 'kecamatan', 'parent_id' => $kabupaten->id],
-                ['profile_text' => 'Kecamatan Bengkalis']
-            );
-            $desa = Region::where('type', 'desa')
-                ->where('parent_id', $kecamatan->id)
-                ->whereIn('name', ['Pematang Duku Timur', 'Desa Pematang Duku Timur'])
-                ->first();
-            if (! $desa) {
-                $desa = Region::firstOrCreate(
-                    ['name' => 'Desa Pematang Duku Timur', 'type' => 'desa', 'parent_id' => $kecamatan->id],
-                    ['profile_text' => 'Pemerintahan Desa Pematang Duku Timur, Kecamatan Bengkalis, Kabupaten Bengkalis.']
-                );
-            }
-            if (in_array($user->role, ['super_admin'])) {
-                $user->region_id = $kabupaten->id;
-            } else {
-                $user->region_id = $desa->id;
-            }
-            $user->save();
-        }
-
-        if ($user->role === 'super_admin') {
-            // Super Admin can select a region to manage, for now just show their own or top-level.
-            $region = Region::with(['services', 'parent.parent'])->find($user->region_id);
-        } else {
-            $region = Region::with(['services', 'parent.parent'])->find($user->region_id);
-        }
+        $this->pastikanAdminWilayah();
+        $region = Region::with(['services', 'parent.parent'])->find($user->region_id);
 
         if (!$region) {
             return redirect()->route('admin.dashboard')->with('error', 'Anda tidak terhubung dengan wilayah mana pun.');
@@ -86,13 +54,9 @@ class RegionSettingController extends Controller
 
     public function update(Request $request)
     {
+        $this->pastikanAdminWilayah();
         $user = auth()->user();
         $region = Region::find($user->region_id);
-
-        // Fallback untuk admin kabupaten jika region_id belum diset
-        if (!$region && in_array($user->role, ['super_admin'])) {
-            $region = Region::first();
-        }
 
         if (!$region) {
             return redirect()->back()->with('error', 'Region tidak ditemukan.');
@@ -251,32 +215,24 @@ class RegionSettingController extends Controller
 
     public function toggleDelivery(Request $request)
     {
-        $request->validate([
-            'field' => 'required|string',
-            'value' => 'required|boolean'
-        ]);
-
-        $user = auth()->user();
-        $region = Region::find($user->region_id);
-        
-        if (!$region && in_array($user->role, ['super_admin'])) {
-            $region = Region::first();
-        }
-
-        if (!$region) {
-            return response()->json(['success' => false, 'message' => 'Region tidak ditemukan.'], 404);
-        }
-
-        $paymentInfo = $region->payment_info ?? [];
-        $paymentInfo[$request->field] = $request->value;
-        
-        $region->update(['payment_info' => $paymentInfo]);
-
-        return response()->json([
-            'success' => true, 
-            'message' => 'Pengaturan berhasil disinkronkan.',
-            'field' => $request->field,
-            'value' => $request->value
-        ]);
+        $this->pastikanAdminWilayah();
+        $fields = ['mobil_delivery_antar_active', 'mobil_delivery_jemput_active', 'mobil_lepas_kunci_antar_active',
+            'mobil_sewa_delivery_antar_active', 'mobil_sewa_delivery_jemput_active',
+            'mobil_rental_delivery_antar_active', 'mobil_rental_delivery_jemput_active',
+            'alat_delivery_antar_active', 'alat_delivery_jemput_active', 'gas_delivery_antar_active',
+            'gas_delivery_jemput_active', 'fasilitas_delivery_antar_active', 'fasilitas_delivery_jemput_active'];
+        $request->validate(['field'=>['required', \Illuminate\Validation\Rule::in($fields)], 'value'=>'required|boolean']);
+        \Illuminate\Support\Facades\DB::transaction(function () use ($request) {
+            $region = Region::lockForUpdate()->findOrFail(auth()->user()->region_id);
+            $info = $region->payment_info ?? [];
+            $info[$request->field] = $request->boolean('value');
+            // Dua nama formulir lama/baru menunjuk pilihan yang sama.
+            foreach (['antar', 'jemput'] as $method) {
+                $aliases = ["mobil_delivery_{$method}_active", "mobil_sewa_delivery_{$method}_active"];
+                if (in_array($request->field, $aliases, true)) foreach ($aliases as $key) $info[$key] = $request->boolean('value');
+            }
+            $region->update(['payment_info'=>$info]);
+        });
+        return response()->json(['success'=>true, 'message'=>'Pengaturan berhasil disinkronkan.', 'field'=>$request->field, 'value'=>$request->boolean('value')]);
     }
 }

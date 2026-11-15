@@ -358,7 +358,7 @@ class RentalAuditTest extends TestCase
 
     public function test_dashboard_revenue_counts_only_verified_payments_of_the_service_village(): void
     {
-        Schema::create('manual_reports', function (Blueprint $t) { $t->id(); $t->softDeletes(); $t->integer('created_by'); $t->date('transaction_date'); $t->decimal('amount',12,2); $t->integer('quantity'); });
+        Schema::create('manual_reports', function (Blueprint $t) { $t->id(); $t->softDeletes(); $t->string('category')->default('lainnya'); $t->integer('region_id')->nullable(); $t->integer('created_by'); $t->date('transaction_date'); $t->decimal('amount',12,2); $t->integer('quantity'); });
         $own = $this->order(); $foreign = $this->order(['barang_id'=>2],6);
         $this->act($foreign,'verify',[],7);
         $this->act($own,'confirmed');

@@ -500,21 +500,27 @@ class NotificationService
      */
     public function notifyOrderStatusUpdate($order, $status)
     {
+        $layanan = match (true) {
+            $order instanceof \App\Models\MobilBooking => 'transportasi',
+            $order instanceof \App\Models\FasilitasUmumBooking => 'fasilitas umum',
+            $order instanceof \App\Models\GasOrder => 'gas',
+            default => 'alat sewa',
+        };
         $message = "";
         $title = "Update Status Pesanan";
         
         switch ($status) {
             case 'being_prepared':
-                $message = "Pesanan alat sewa dipersiapkan.";
+                $message = "Pesanan {$layanan} dipersiapkan.";
                 break;
             case 'in_delivery':
-                $message = "Pesanan alat sewa dalam perjalanan menuju lokasi mu.";
+                $message = "Pesanan {$layanan} dalam perjalanan menuju lokasi mu.";
                 break;
             case 'arrived':
-                $message = "Pesanan alat sewa sudah tiba dilokasimu.";
+                $message = "Pesanan {$layanan} sudah tiba dilokasimu.";
                 break;
             case 'completed':
-                $message = "Waktu penyewaan alat telah selesai.";
+                $message = "Layanan {$layanan} telah selesai.";
                 $title = "Penyewaan Selesai";
                 break;
             default:

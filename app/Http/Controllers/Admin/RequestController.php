@@ -388,11 +388,12 @@ class RequestController extends Controller
 
             } elseif ($type === 'mobil') {
                 $model = MobilBooking::with('mobil')->lockForUpdate()->findOrFail($id);
-                if ($model->status !== 'pending') throw new \Exception("Permintaan sudah diproses sebelumnya.");
+                abort_if($model->cancellation_status === 'pending', 409, 'Tanggapi permintaan pembatalan terlebih dahulu.');
+                abort_unless($model->status === 'pending', 409, 'Permintaan sudah diproses sebelumnya.');
 
                 // PESSIMISTIC LOCK
                 $mobil = \App\Models\Mobil::where('id', $model->mobil_id)->lockForUpdate()->firstOrFail();
-                if ($mobil->status !== 'tersedia') throw new \Exception("Mobil sedang tidak tersedia.");
+                abort_unless($mobil->status === 'tersedia', 409, 'Mobil sedang tidak tersedia.');
                 
                 $mobil->update(['status' => 'disewa']);
 
@@ -402,11 +403,12 @@ class RequestController extends Controller
 
             } elseif ($type === 'fasilitas') {
                 $model = FasilitasUmumBooking::with('fasilitas')->lockForUpdate()->findOrFail($id);
-                if ($model->status !== 'pending') throw new \Exception("Permintaan sudah diproses sebelumnya.");
+                abort_if($model->cancellation_status === 'pending', 409, 'Tanggapi permintaan pembatalan terlebih dahulu.');
+                abort_unless($model->status === 'pending', 409, 'Permintaan sudah diproses sebelumnya.');
 
                 // PESSIMISTIC LOCK
                 $fasilitas = \App\Models\FasilitasUmum::where('id', $model->fasilitas_id)->lockForUpdate()->firstOrFail();
-                if ($fasilitas->stok < $model->quantity) throw new \Exception("Fasilitas sedang tidak tersedia.");
+                abort_if($model->quantity < 1 || $fasilitas->status !== 'tersedia' || $fasilitas->stok < $model->quantity, 409, 'Fasilitas sedang tidak tersedia.');
                 
                 $fasilitas->decrement('stok', $model->quantity);
                 if ($fasilitas->stok == 0) {
@@ -493,7 +495,9 @@ class RequestController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
-            $errorMessage = $e->getMessage();
+            if ($e instanceof \Symfony\Component\HttpKernel\Exception\HttpExceptionInterface) throw $e;
+            \Illuminate\Support\Facades\Log::error('Persetujuan pesanan gagal', ['exception'=>$e]);
+            $errorMessage = 'Pesanan belum dapat disetujui. Silakan coba lagi atau hubungi pengelola.';
 
             if ($request->wantsJson() || $request->ajax()) {
                 return response()->json([
@@ -578,11 +582,7 @@ class RequestController extends Controller
 
             // Otomatis bebaskan Supir jika order ditolak
             if (in_array($type, ['mobil', 'fasilitas']) && isset($model->assigned_supir_id)) {
-                $supirToFree = \App\Models\Supir::find($model->assigned_supir_id);
-                if ($supirToFree) {
-                    $supirToFree->status = 'Tersedia';
-                    $supirToFree->save();
-                }
+                \App\Services\ServiceAssignment::release($model);
             }
 
             // Kirim notifikasi penolakan ke pengguna
@@ -655,6 +655,13 @@ class RequestController extends Controller
                 DB::rollBack();
                 return response()->json(['success' => false, 'message' => 'Status pesanan tidak dapat diubah dari keadaan ini.'], 409);
             }
+            abort_if($order->cancellation_status === 'pending', 409, 'Tanggapi permintaan pembatalan terlebih dahulu.');
+            $progress = ['confirmed'=>1, 'approved'=>1, 'being_prepared'=>2, 'process'=>2, 'in_delivery'=>3, 'delivering'=>3, 'arrived'=>4, 'ongoing'=>4, 'completed'=>5];
+            abort_unless(isset($progress[$oldStatus]) && $progress[$newStatus] >= $progress[$oldStatus], 409, 'Status pesanan tidak dapat dimundurkan.');
+            if ($newStatus === $oldStatus && (!$request->filled('assigned_supir_id') || (int)$request->assigned_supir_id === (int)$order->assigned_supir_id)) {
+                DB::commit();
+                return $request->expectsJson() ? response()->json(['success'=>true, 'message'=>'Status sudah tersimpan.']) : back()->with('success', 'Status sudah tersimpan.');
+            }
             $order->handled_by = auth()->id();
 
             // Buat stempel waktu otomatis berdasarkan status
@@ -674,7 +681,7 @@ class RequestController extends Controller
                     // Tidak ada kolom khusus, hanya pembaruan status
                     break;
                 case 'in_delivery':
-                    if (!$order->delivery_time) {
+                    if ($type === 'mobil' && !$order->delivery_time) {
                         $order->delivery_time = now();
                     }
                     break;
@@ -700,7 +707,7 @@ class RequestController extends Controller
                          // throw new \Exception("Bukti pengiriman wajib diupload sebelum mengubah status ke Tiba.");
                     }
 
-                    if (!$order->arrival_time) {
+                    if ($type === 'mobil' && !$order->arrival_time) {
                         $order->arrival_time = now();
                     }
                     break;
@@ -745,34 +752,13 @@ class RequestController extends Controller
                     
                     // Otomatis bebaskan Supir (kembali Tersedia) saat pesanan selesai
                     if (in_array($type, ['mobil', 'fasilitas']) && $order->assigned_supir_id && $oldStatus !== 'completed') {
-                        $supirToFree = \App\Models\Supir::find($order->assigned_supir_id);
-                        if ($supirToFree) {
-                            $supirToFree->status = 'Tersedia';
-                            $supirToFree->save();
-                        }
+                        \App\Services\ServiceAssignment::release($order);
                     }
                     break;
             }
 
-            // PROSES OTOMATISASI PENUGASAN SUPIR
-            $assignedSupirId = $request->input('assigned_supir_id');
-            if (in_array($type, ['mobil', 'fasilitas']) && $assignedSupirId !== null && $assignedSupirId != $order->assigned_supir_id) {
-                // Bebaskan supir lama jika ada
-                if ($order->assigned_supir_id) {
-                    $oldSupir = \App\Models\Supir::find($order->assigned_supir_id);
-                    if ($oldSupir) {
-                        $oldSupir->status = 'Tersedia';
-                        $oldSupir->save();
-                    }
-                }
-                
-                // Tugaskan supir baru
-                $order->assigned_supir_id = $assignedSupirId;
-                $newSupir = \App\Models\Supir::find($assignedSupirId);
-                if ($newSupir && $newStatus !== 'completed' && $newStatus !== 'cancelled' && $newStatus !== 'rejected') {
-                    $newSupir->status = 'Sedang Bertugas';
-                    $newSupir->save();
-                }
+            if ($request->filled('assigned_supir_id') && $newStatus !== 'completed') {
+                \App\Services\ServiceAssignment::assign($order, $type, (int)$request->assigned_supir_id);
             }
 
             // Perbarui status utama order
@@ -807,16 +793,17 @@ class RequestController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
+            if ($e instanceof \Symfony\Component\HttpKernel\Exception\HttpExceptionInterface) throw $e;
             \Illuminate\Support\Facades\Log::error('Error updating status: ' . $e->getMessage());
 
             if ($request->wantsJson() || $request->ajax()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Terjadi kesalahan sistem: ' . $e->getMessage()
+                    'message' => 'Status belum tersimpan. Silakan coba lagi atau hubungi pengelola.'
                 ], 500);
             }
 
-            return redirect()->back()->with('error', 'Terjadi kesalahan sistem: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Status belum tersimpan. Silakan coba lagi atau hubungi pengelola.');
         }
     }
 
@@ -962,11 +949,7 @@ class RequestController extends Controller
                 }
                 // Otomatis bebaskan Supir jika batal
                 if (in_array($type, ['mobil', 'fasilitas']) && $order->assigned_supir_id) {
-                    $supirToFree = \App\Models\Supir::find($order->assigned_supir_id);
-                    if ($supirToFree) {
-                        $supirToFree->status = 'Tersedia';
-                        $supirToFree->save();
-                    }
+                    \App\Services\ServiceAssignment::release($order);
                 }
             
                 \App\Models\WalletTransaction::batalkanDanRefund($type, $order->id, 'Pembatalan disetujui');

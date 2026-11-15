@@ -14,27 +14,10 @@ class WilayahAdminApiController extends Controller
     {
         $user = $request->user();
 
-        // 1. Dapatkan Region Id (Kita bisa mengambil descendant Ids jika diperlukan, tapi untuk API mobile kita asumsikan berdasarkan rt dan rw)
-        $regionId = $user->region_id;
-        $rt = $user->rt;
-        $rw = $user->rw;
-
-        // Base Query untuk Laporan
+        $wargaQuery = \App\Support\RegionalCitizens::query($user);
+        // Compatibility fields remain empty for clients predating retirement of reports.
         $totalLaporan = 0; $laporanPending = 0; $laporanSelesai = 0; $oldestPending = null; $laporanTerbaru = collect();
         $slaStatus = 'nonaktif'; $oldestPendingMinutes = 0;
-        
-        // Base Query untuk Warga
-        $wargaQuery = User::where('region_id', $regionId)->where('role', 'user');
-
-        if ($user->role === 'admin_rt') {
-            
-            $wargaQuery->where('rt', $rt)->where('rw', $rw);
-        } elseif ($user->role === 'admin_rw') {
-            
-            $wargaQuery->where('rw', $rw);
-        }
-
-        
 
         // Ambil Data Warga
         $totalWarga = (clone $wargaQuery)->count();
@@ -59,7 +42,9 @@ class WilayahAdminApiController extends Controller
             $avatarUrl = route('media.profile', ['filename' => $user->file->filename]);
         }
 
-        $desaName = $user->region ? $user->region->name : 'Desa Pematang';
+        $desa = $user->region;
+        while ($desa && !in_array($desa->type, ['desa', 'kelurahan'], true)) $desa = $desa->parent;
+        $desaName = $desa?->name;
 
         return response()->json([
             'status' => 'success',
@@ -67,8 +52,8 @@ class WilayahAdminApiController extends Controller
                 'pengurus' => [
                     'name' => $user->name,
                     'role' => $user->role,
-                    'rt' => $user->rt ? sprintf('%02d', (int)$user->rt) : '02',
-                    'rw' => $user->rw ? sprintf('%02d', (int)$user->rw) : '01',
+                    'rt' => $user->rt ? sprintf('%02d', (int)$user->rt) : null,
+                    'rw' => $user->rw ? sprintf('%02d', (int)$user->rw) : null,
                     'avatar_url' => $avatarUrl,
                     'desa' => $desaName,
                 ],

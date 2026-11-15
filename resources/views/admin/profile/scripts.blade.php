@@ -65,8 +65,8 @@
                 return;
             }
 
-            if (newPassword.length < 8) {
-                showSiladesBengToast('warning', 'Perhatian', 'Kata sandi baru minimal 8 karakter');
+            if (newPassword.length < 12) {
+                showSiladesBengToast('warning', 'Perhatian', 'Kata sandi baru minimal 12 karakter');
                 return;
             }
 
